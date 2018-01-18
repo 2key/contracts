@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>2Key DApp</title>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+  <link href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css' rel='stylesheet' type='text/css'>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    .margin-top-3 {
+      margin-top: 3em;
+    }
+  </style>
+</head>
+<body class="container">
+  <a href="help.html">help</a>
+  <!--<div class="col-sm-5 margin-top-3 logout">-->
+    <!--<h1>Business</h1>-->
+    <!--<br/>-->
+    <!--<br/>-->
+    <!--<h1>Influencer</h1>-->
+    <!--<div class="container-fluid">-->
+      <!--<h2>Distribute 2Key Contract</h2>-->
+      <!--<input type="text" id="influence-address" placeholder="2Key Contract address" class="form-control"/>-->
+      <!--<input type="text" id="target-address" placeholder="target user" class="form-control"/>-->
+      <!--<span class="help-block">Give 1 ARC in the 2Key contract to the target user</span>-->
+      <!--<br>-->
+      <!--<br>-->
+      <!--<a href="#" onclick="giveARCs()" class="btn btn-primary">Give</a>-->
+    <!--</div>-->
+    <!--<br/>-->
+    <!--<br/>-->
+    <!--<h1>Customer</h1>-->
+    <!--<div class="container-fluid">-->
+      <!--<h2>buy product from 2Key Contract</h2>-->
+      <!--<input type="text" id="buy-address" placeholder="2Key Contract address" class="form-control"/>-->
+      <!--<br>-->
+      <!--<br>-->
+      <!--<a href="#" onclick="buyContract()" class="btn btn-primary">Buy</a>-->
+      <!--&lt;!&ndash;<a href="#" onclick="receivedContract()" class="btn btn-primary">Take</a>&ndash;&gt;-->
+    <!--</div>-->
+  <!--</div>-->
+  <div class="margin-top-3">
+  <!--<div class="col-sm-offset-1 col-sm-5 margin-top-3">-->
+    <div id="metamask-login" class="container-fluid">
+    </div>
+    <div class="container-fluid login">
+      <h1>Welcome to 2Key</h1>
+      <h3>please login</h3>
+      <input type="text" id="login-user-name" placeholder="user name" class="form-control"
+        data-toggle="tooltip" title="user name, address, 'coinbase'" />
+      <!--<div class="checkbox">-->
+          <!--<label>-->
+            <!--<input type="checkbox" checked="checked">remember-->
+          <!--</label>-->
+      <!--</div>-->
+      <br/>
+      <a href="#" onclick="login()" class="btn btn-primary">Login</a>
+    </div>
+    <div class="container-fluid logout">
+      <h2>Who am I</h2>
+    <!--<div class="row margin-top-3">-->
+      <!--<div class="col-sm-12">-->
+      <div class="table-responsive">
+        <table class="table table-bordered">
+          <tr>
+            <td>Name</td>
+            <td id="user-name"></td>
+          </tr>
+          <tr>
+            <td>Address</td>
+            <td><div class='lnk' msg='address was copied to clipboard' id="user-address" data-toggle="tooltip" title="copy to clipboard"></div></td>
+          </tr>
+          <tr>
+            <td>Balance</td>
+            <td id="user-balance"></td>
+          </tr>
+          <!--<tr>-->
+            <!--<td>Reputation</td>-->
+            <!--<td id="user-reputation">42</td>-->
+          <!--</tr>-->
+          <!--<tr>-->
+            <!--<td>Admin Balance</td>-->
+            <!--<td id="admin-balance"></td>-->
+          <!--</tr>-->
+          <!--<tr>-->
+            <!--<td>Admin Address</td>-->
+            <!--<td id="admin-address"></td>-->
+          <!--</tr>-->
+        </table>
+        <a href="#" onclick="logout()" class="btn btn-primary" id="logout-button">Logout</a>
+        <!--<a href="#" onclick="getETH()" class="btn btn-primary">get 1 ETH from 2Key</a>-->
+        <!--<a href="#" onclick="giveETH()" class="btn btn-primary">donate 1 ETH to 2Key</a>-->
+      </div>
+      <br/>
+      <br/>
+      <h2>My Contracts</h2>
+      <div class="loader" id="my-2key-contracts-spinner" style="display:none;"></div>
+      <div class="table-responsive">
+        <table class="table table-bordered">
+          <tbody id="my-2key-contracts">
+          </tbody>
+        </table>
+      </div>
+      <div class="table-responsive" id="add-contract">
+        <a href="#" onclick="addContract()" class="btn btn-primary">Create contract</a>
+      </div>
+      <div class="container-fluid" style="border:1px solid #cecece;" id="create-contract">
+        <br/>
+        <h2>Create 2Key contract</h2>
+        <div id="msg"></div>
+        <!--<div class="form-group">-->
+        <input type="text" id="product-name" placeholder="name" class="form-control"/>
+        <input type="text" id="product-symbol" placeholder="symbol" class="form-control"/>
+        <input type="text" id="total-supply" placeholder="total supply of ARCs" class="form-control"/>
+        <input type="text" id="quota" placeholder="Number of ARCs an influencer will receive for every 1 ARC s/he take" class="form-control"/>
+        <input type="text" id="cost" placeholder="cost of product including bounty (ETH)" class="form-control"/>
+        <!--<input type="text" id="units" placeholder="units to be sold"/>-->
+        <input type="text" id="bounty" placeholder="bounty (total sum for all influencers) (ETH)" class="form-control"/>
+        <!--<input type="text" id="expiration" placeholder="expiration date"/>-->
+        <!--<input type="text" id="reporting" placeholder="customer confirms purchase in 30days"/>-->
+        <!--<input type="text" id="arbitration" placeholder="Arbitration will be done by 2Key Ltd."/>-->
+        <!--</div>-->
+        <br/>
+        <a href="#" onclick="createContract()" class="btn btn-primary">Create</a>
+        <a href="#" onclick="cancelContract()" class="btn btn-primary">Cancel</a>
+        <br/>
+        <br/>
+      </div>
+      <br/>
+      <br/>
+
+      <h2>My ARCs</h2>
+        <div class="loader" id="my-2key-arcs-spinner" style="display:none;"></div>
+      <div class="table-responsive">
+        <table class="table table-bordered">
+          <tbody id="my-2key-arcs">
+          </tbody>
+        </table>
+      </div>
+
+
+      <!--</div>-->
+    </div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
