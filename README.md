@@ -1,5 +1,3 @@
-select a project you want to run. For example `cd stage0.5/`
-all operations below should be done in this directory
 ## Install
 
 on osx:
@@ -26,7 +24,6 @@ make sure your anti-virus software is turned off before running `npm install...`
 ```
 npm install
 npm install -g truffle
-# npm install web3@0.20.2 solc  # do we need this step?
 npm install ganache-cli
 ```
 
@@ -94,9 +91,8 @@ ssh -i udi1.pem -L 8080:0.0.0.0:8080 -L 8545:0.0.0.0:8545 ubuntu@34.207.63.53
 # yes
 # inside AWS EC2 instance
 git config --global credential.helper 'cache --timeout=3600'  # run this only once on the machine
-git clone https://gitlab.com/blockchain.2key/2key-blockchain-alpha.git 
-# enter user name/password for gitlab
-cd 2key-blockchain-alpha/stage0.5
+git clone https://github.com/2keynet/web3-alpha.git 
+# enter user name/password for github
 
 sudo apt-get update
 curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
