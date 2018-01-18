@@ -327,25 +327,25 @@ function contract_table(tbl, contracts, min_arcs) {
                     }
                     $(tbl).append("<tr><td>" +
                         arcs + "</td><td>" +
-                        "<a  onclick='redeem(\"" + twoKeyContractAddress + "\")'" +
+                        "<div class='action' onclick='redeem(\"" + twoKeyContractAddress + "\")'" +
                         "='tooltip' title='redeem'" +
                         "\">" + xbalance +
-                        "</a></td><td>" +
+                        "</div></td><td>" +
                         name + "</td><td>" +
                         symbol + "</td><td>" +
-                        "<div class='lnk0' " +
+                        "<div class='lnk0 action' " +
                         "data-toggle='tooltip' title='copy to clipboard a 2Key link for this contract'" +
                         "msg='2Key link was copied to clipboard. Someone else opening it will take one ARC from you'" +
                         "data-clipboard-text=\"" + take_link + "\">" + quota +
                         "</div></td><td>" +
-                        "<a  onclick='buy(\"" + twoKeyContractAddress + "\",\"" + name + "\"," + cost + ")'" +
+                        "<div class='action' onclick='buy(\"" + twoKeyContractAddress + "\",\"" + name + "\"," + cost + ")'" +
                         "='tooltip' title='buy'" +
                         "\">" + cost +
-                        "</a></td><td>" +
+                        "</div></td><td>" +
                         bounty + "</td><td>" +
                         balance + "</td><td>" +
                         totalSupply + "</td><td>" +
-                        "<div class='lnk' " +
+                        "<div class='lnk action' " +
                         "data-toggle='tooltip' title='copy to clipboard' " +
                         "msg='contract address was copied to clipboard'>" +
                         twoKeyContractAddress + "</div>" +
