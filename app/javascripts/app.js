@@ -221,38 +221,13 @@ window.copy_link = function(twoKeyContractAddress, myaddress) {
     alert(link);
 }
 
-
-window.paste_contract = function(elm) {
-  let twoKeyContractAddress = elm.innerHTML;
-  TwoKeyContract.at(twoKeyContractAddress).then(function(TwoKeyContract_instance) {
-      TwoKeyContract_instance.name().then(function (name) {
-        $("#product-name").val(name);
-      });
-      TwoKeyContract_instance.symbol().then(function (symbol) {
-        $("#product-symbol").val(symbol);
-      });
-      TwoKeyContract_instance.totalSupply().then(function (totalSupply) {
-        $("#total-supply").val(totalSupply);
-      });
-      TwoKeyContract_instance.quota().then(function (quota) {
-        $("#quota").val(quota);
-      });
-      TwoKeyContract_instance.cost().then(function (cost) {
-        $("#cost").val(parseFloat(web3.fromWei(cost.toString())));
-      });
-      TwoKeyContract_instance.bounty().then(function (bounty) {
-        $("#bounty").val(parseFloat(web3.fromWei(bounty.toString())));
-      });
-  });
-}
-
 function product_cleanup() {
   $("#product-name").val("");
   $("#product-symbol").val("");
-  $("#total-supply").val("");
+  $("#total-arcs").val("");
   $("#quota").val("");
   $("#cost").val("");
-  // $("#units").val("");
+  $("#total-units").val("");
   $("#bounty").val("");
   // $("#expiration").val("");
     $("#add-contract").show();
@@ -302,23 +277,25 @@ function contract_table(tbl, contracts, min_arcs) {
         var take_link = location.origin + "/?c=" + twoKeyContractAddress + "&f=" + myaddress;
         TwoKeyContract.at(twoKeyContractAddress).then(function (TwoKeyContract_instance) {
             TwoKeyContract_instance.getInfo(myaddress).then(function (info) {
-                var arcs, xbalance, name, symbol, totalSupply, quota, cost, bounty, balance;
-                [arcs, xbalance, name, symbol, cost, bounty, quota, totalSupply, balance] = info;
+                var arcs, units, xbalance, name, symbol, total_arcs, quota, cost, bounty, total_units, balance;
+                [arcs, units, xbalance, name, symbol, cost, bounty, quota, total_arcs, total_units, balance] = info;
                 if ((arcs >= min_arcs) || (xbalance > 0)) {
                     balance = web3.fromWei(balance);
                     xbalance = web3.fromWei(xbalance);
                     cost = web3.fromWei(cost.toString());
                     bounty = web3.fromWei(bounty.toString());
                     if (first_row) {
-                        $(tbl).append("<tr><td colspan=\"2\" data-toggle='tooltip' title='what I have in the contract'>Me</td><td colspan=\"8\" data-toggle='tooltip' title='contract properties'>Contract</td></tr>");
+                        $(tbl).append("<tr><td colspan=\"3\" data-toggle='tooltip' title='what I have in the contract'>Me</td><td colspan=\"9\" data-toggle='tooltip' title='contract properties'>Contract</td></tr>");
                         $(tbl).append("<tr>" +
                             "<td data-toggle='tooltip' title='number of ARCs I have in the contract'>ARCs</td>" +
+                            "<td data-toggle='tooltip' title='Number of units I bought'>units</td>" +
                             "<td data-toggle='tooltip' title='ETH I have in the contract. click to redeem'>ETH</td>" +
                             "<td data-toggle='tooltip' title='contract/product name'>name</td>" +
                             "<td data-toggle='tooltip' title='contract symbol'>symbol</td>" +
                             "<td data-toggle='tooltip' title='how many ARCs an influencer or a customer will receive when opening the 2Key link of this contract'>take</td>" +
                             "<td data-toggle='tooltip' title='cost of buying the product sold in the contract. click to buy'>cost</td>" +
                             "<td data-toggle='tooltip' title='total amount that will be taken from the cost and be distributed between influencers'>bounty</td>" +
+                            "<td data-toggle='tooltip' title='number of units being sold'>units</td>" +
                             "<td data-toggle='tooltip' title='total balance of ETH deposited in contract'>ETH</td>" +
                             "<td data-toggle='tooltip' title='total number of ARCs in the contract'>ARCs</td>" +
                             "<td data-toggle='tooltip' title='the address of the contract'>address</td>" +
@@ -327,6 +304,7 @@ function contract_table(tbl, contracts, min_arcs) {
                     }
                     $(tbl).append("<tr><td>" +
                         arcs + "</td><td>" +
+                        units + "</td><td>" +
                         "<div class='action' onclick='redeem(\"" + twoKeyContractAddress + "\")'" +
                         "='tooltip' title='redeem'" +
                         "\">" + xbalance +
@@ -343,8 +321,9 @@ function contract_table(tbl, contracts, min_arcs) {
                         "\">" + cost +
                         "</div></td><td>" +
                         bounty + "</td><td>" +
+                        total_units + "</td><td>" +
                         balance + "</td><td>" +
-                        totalSupply + "</td><td>" +
+                        total_arcs + "</td><td>" +
                         "<div class='lnk action' " +
                         "data-toggle='tooltip' title='copy to clipboard' " +
                         "msg='contract address was copied to clipboard'>" +
@@ -448,10 +427,10 @@ window.cancelContract = function() {
 window.createContract = function() {
   let name = $("#product-name").val();
   let symbol = $("#product-symbol").val();
-  let totalSupply = $("#total-supply").val();
+  let total_arcs = $("#total-arcs").val();
   let quota = $("#quota").val();
   let cost = $("#cost").val();
-  let productUnits = $("#product-units").val();
+  let total_units = $("#total-units").val();
   let bounty = $("#bounty").val();
   let productExpiration = $("#product-expiration").val();
 
@@ -464,8 +443,8 @@ window.createContract = function() {
   TwoKeyAdmin.deployed().then(function(contractInstance) {
     let address = whoAmI();
     // value: web3.toWei(0.001, 'ether'),
-    contractInstance.createTwoKeyContract(name, symbol, parseInt(totalSupply),
-        parseInt(quota), web3.toWei(parseFloat(cost), 'ether'), web3.toWei(parseFloat(bounty), 'ether'),
+    contractInstance.createTwoKeyContract(name, symbol, parseInt(total_arcs),
+        parseInt(quota), web3.toWei(parseFloat(cost), 'ether'), web3.toWei(parseFloat(bounty), 'ether'), parseInt(total_units),
         {gas: 3000000, from: address}).then(function() {
       // return contractInstance.totalVotesFor.call(candidateName).then(function(v) {
       //   $("#" + div_id).html(v.toString());

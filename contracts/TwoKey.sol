@@ -19,13 +19,15 @@ contract TwoKeyContract is StandardToken {
   uint256 public cost; // Cost of product in wei
   uint256 public bounty; // Cost of product in wei
   uint256 public quota;  // maximal tokens that can be passed in transferFrom
+  uint256 public total_units; // total number of units on offer
 
   // Private variables of the token
   mapping (address => address) internal received_from;
   mapping(address => uint256) internal xbalances; // balance of external currency (ETH or 2Key coin)
+  mapping(address => uint256) internal units; // number of units bought
 
   // Initialize all the constants
-  function TwoKeyContract(address _owner, string _name, string _symbol, uint256 _totalSupply, uint256 _quota, uint256 _cost, uint256 _bounty) public {
+  function TwoKeyContract(address _owner, string _name, string _symbol, uint256 _totalSupply, uint256 _quota, uint256 _cost, uint256 _bounty, uint256 _units) public {
     require(_bounty <= _cost);
     owner = _owner;
     name = _name;
@@ -35,6 +37,7 @@ contract TwoKeyContract is StandardToken {
     cost = _cost;
     bounty = _bounty;
     quota = _quota;
+    total_units = _units;
 
     received_from[owner] = owner;  // allow owner to buy from himself
   }
@@ -111,8 +114,8 @@ contract TwoKeyContract is StandardToken {
   }
 
   // New 2Key method
-  function getInfo(address me) public constant returns (uint256,uint256,string,string,uint256,uint256,uint256,uint256,uint256) {
-    return (this.balanceOf(me),xbalances[me],name,symbol,cost,bounty,quota,totalSupply,this.balance);
+  function getInfo(address me) public constant returns (uint256,uint256,uint256,string,string,uint256,uint256,uint256,uint256,uint256,uint256) {
+    return (this.balanceOf(me),units[me],xbalances[me],name,symbol,cost,bounty,quota,totalSupply,total_units,this.balance);
   }
 
   function () external payable {
@@ -122,24 +125,21 @@ contract TwoKeyContract is StandardToken {
   event Log(uint index);
   // low level token purchase function
   function buyProduct() public payable {
-    Log(0);
     address customer = msg.sender;
     require(this.balanceOf(customer) > 0);
     require(msg.value == cost);
-    Log(1);
+    require(total_units > 0);
+
     // distribute bounty to influencers
     uint n_influencers = 0;
     address influencer = customer;
     while (true) {
         influencer = received_from[influencer];
-        Log(2);
         if (influencer == owner) {
-          Log(3);
             break;
         }
         n_influencers = n_influencers + 1;
     }
-    Log(4);
     uint256 total_bounty = 0;
     if (n_influencers > 0) {
         uint256 b = bounty.div(n_influencers);
@@ -156,6 +156,8 @@ contract TwoKeyContract is StandardToken {
 
     // all that is left from the cost is given to the owner for selling the product
     xbalances[owner] = xbalances[owner].add(cost).sub(total_bounty);
+    total_units = total_units.sub(1);
+    units[customer] = units[customer].add(1);
   }
 
   function redeem() public {
@@ -181,9 +183,9 @@ contract TwoKeyAdmin {
   address[] public contracts;
   uint public ncontracts;
 
-  function createTwoKeyContract(string _name, string _symbol, uint256 _totalSupply, uint256 _quota, uint256 _cost, uint256 _bounty) public {
+  function createTwoKeyContract(string _name, string _symbol, uint256 _totalSupply, uint256 _quota, uint256 _cost, uint256 _bounty, uint256 _units) public {
     address _owner = msg.sender;
-    address c = (new TwoKeyContract(_owner, _name, _symbol, _totalSupply, _quota, _cost, _bounty));
+    address c = (new TwoKeyContract(_owner, _name, _symbol, _totalSupply, _quota, _cost, _bounty, _units));
     if (ownerNContracts[_owner] == 0) {
       owners.push(_owner);
       nowners += 1;
