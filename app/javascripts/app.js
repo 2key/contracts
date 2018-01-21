@@ -305,29 +305,29 @@ function contract_table(tbl, contracts, min_arcs) {
                     $(tbl).append("<tr><td>" +
                         arcs + "</td><td>" +
                         units + "</td><td>" +
-                        "<div class='action' onclick='redeem(\"" + twoKeyContractAddress + "\")'" +
+                        "<button onclick='redeem(\"" + twoKeyContractAddress + "\")'" +
                         "='tooltip' title='redeem'" +
                         "\">" + xbalance +
-                        "</div></td><td>" +
+                        "</button></td><td>" +
                         name + "</td><td>" +
                         symbol + "</td><td>" +
-                        "<div class='lnk0 action' " +
+                        "<button class='lnk0' " +
                         "data-toggle='tooltip' title='copy to clipboard a 2Key link for this contract'" +
                         "msg='2Key link was copied to clipboard. Someone else opening it will take one ARC from you'" +
                         "data-clipboard-text=\"" + take_link + "\">" + quota +
-                        "</div></td><td>" +
-                        "<div class='action' onclick='buy(\"" + twoKeyContractAddress + "\",\"" + name + "\"," + cost + ")'" +
+                        "</button></td><td>" +
+                        "<button onclick='buy(\"" + twoKeyContractAddress + "\",\"" + name + "\"," + cost + ")'" +
                         "='tooltip' title='buy'" +
                         "\">" + cost +
-                        "</div></td><td>" +
+                        "</button></td><td>" +
                         bounty + "</td><td>" +
                         total_units + "</td><td>" +
                         balance + "</td><td>" +
                         total_arcs + "</td><td>" +
-                        "<div class='lnk action' " +
+                        "<button class='lnk' " +
                         "data-toggle='tooltip' title='copy to clipboard' " +
                         "msg='contract address was copied to clipboard'>" +
-                        twoKeyContractAddress + "</div>" +
+                        twoKeyContractAddress + "</button>" +
                         "</td></tr>");
                 }
                 report();
@@ -562,7 +562,36 @@ function init() {
   TwoKeyAdmin.setProvider(web3.currentProvider);
   TwoKeyContract.setProvider(web3.currentProvider);
 
-  // https://clipboardjs.com/
+
+  var username = localStorage.username;
+  if(((typeof username != "undefined") &&
+     (typeof username.valueOf() == "string")) &&
+    (username.length > 0)) {
+      $("#user-name").html(username);
+      setTimeout(lookupUserInfo(),0);
+  } else {
+      window.logout();
+  }
+
+  product_cleanup();
+
+  var params = getAllUrlParams();
+  if (params.c && params.f) {
+      var myaddress = whoAmI();
+      if (params.f == myaddress) {
+          alert("You can't take your own ARCs. Switch to a different user and try again.");
+          location.assign(location.protocol + "//" + location.host);
+      } else {
+          function myTimer() {
+              takeARCs(params.c, params.f);
+          }
+          setTimeout(myTimer, 0);
+      }
+  }
+}
+
+$( document ).ready(function() {
+    // https://clipboardjs.com/
     var clipboard_lnk0 = new Clipboard('.lnk0');
 
     clipboard_lnk0.on('success', function(e) {
@@ -599,35 +628,6 @@ function init() {
         console.error('Trigger:', e.trigger);
     });
 
-
-  var username = localStorage.username;
-  if(((typeof username != "undefined") &&
-     (typeof username.valueOf() == "string")) &&
-    (username.length > 0)) {
-      $("#user-name").html(username);
-      setTimeout(lookupUserInfo(),0);
-  } else {
-      window.logout();
-  }
-
-  product_cleanup();
-
-  var params = getAllUrlParams();
-  if (params.c && params.f) {
-      var myaddress = whoAmI();
-      if (params.f == myaddress) {
-          alert("You can't take your own ARCs. Switch to a different user and try again.");
-          location.assign(location.protocol + "//" + location.host);
-      } else {
-          function myTimer() {
-              takeARCs(params.c, params.f);
-          }
-          setTimeout(myTimer, 0);
-      }
-  }
-}
-
-$( document ).ready(function() {
   var url = "http://"+window.document.location.hostname+":8545";
   if (typeof web3 !== 'undefined') {
     $(".login").hide();
