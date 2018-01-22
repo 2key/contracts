@@ -305,18 +305,18 @@ function contract_table(tbl, contracts, min_arcs) {
                     $(tbl).append("<tr><td>" +
                         arcs + "</td><td>" +
                         units + "</td><td>" +
-                        "<button onclick='redeem(\"" + twoKeyContractAddress + "\")'" +
+                        "<button class='bt' onclick='redeem(\"" + twoKeyContractAddress + "\")'" +
                         "='tooltip' title='redeem'" +
                         "\">" + xbalance +
                         "</button></td><td>" +
                         name + "</td><td>" +
                         symbol + "</td><td>" +
-                        "<button class='lnk0' " +
+                        "<button class='lnk0 bt' " +
                         "data-toggle='tooltip' title='copy to clipboard a 2Key link for this contract'" +
                         "msg='2Key link was copied to clipboard. Someone else opening it will take one ARC from you'" +
                         "data-clipboard-text=\"" + take_link + "\">" + quota +
                         "</button></td><td>" +
-                        "<button onclick='buy(\"" + twoKeyContractAddress + "\",\"" + name + "\"," + cost + ")'" +
+                        "<button class='bt' onclick='buy(\"" + twoKeyContractAddress + "\",\"" + name + "\"," + cost + ")'" +
                         "='tooltip' title='buy'" +
                         "\">" + cost +
                         "</button></td><td>" +
@@ -324,7 +324,7 @@ function contract_table(tbl, contracts, min_arcs) {
                         total_units + "</td><td>" +
                         balance + "</td><td>" +
                         total_arcs + "</td><td>" +
-                        "<button class='lnk' " +
+                        "<button class='lnk bt' " +
                         "data-toggle='tooltip' title='copy to clipboard' " +
                         "msg='contract address was copied to clipboard'>" +
                         twoKeyContractAddress + "</button>" +
