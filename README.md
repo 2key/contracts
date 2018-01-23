@@ -2,7 +2,7 @@
 
 on osx:
 ```bash
-brew install node
+latest version 9.4 from https://nodejs.org/en/
 ```
 
 ### cleaning up
@@ -95,4 +95,39 @@ Now install and run firefox on the remote machine:
 ```
 sudo apt install -y firefox
 firefox http://localhost:8080
+```
+
+# IPS
+https://github.com/ipfs/js-ipfs-api/tree/master/examples/bundle-webpack
+## Install
+### OSX
+```angularjs
+wget https://dist.ipfs.io/go-ipfs/v0.4.13/go-ipfs_v0.4.13_darwin-amd64.tar.gz
+tar xvfz go-ipfs_v0.4.13_darwin-amd64.tar.gz
+cd go-ipfs
+sudo ./install.sh
+```
+### AWS
+```angularjs
+sudo apt-get update
+sudo apt-get install golang-go -y
+wget https://dist.ipfs.io/go-ipfs/v0.4.13/go-ipfs_v0.4.13_linux-386.tar.gz
+tar xvfz go-ipfs_v0.4.13_linux-386.tar.gz
+sudo mv go-ipfs/ipfs /usr/local/bin/ipfs
+```
+Allow access to port `5001`
+
+### Run
+TODO the following has zero security
+```angularjs
+ipfs init
+ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin "[\"*\"]"
+ipfs config --json API.HTTPHeaders.Access-Control-Allow-Credentials "[\"true\"]"
+ipfs config Addresses.API /ip4/0.0.0.0/tcp/5001
+ipfs config Addresses.Gateway /ip4/127.0.0.1/tcp/8082
+ipfs daemon
+```
+make sure your in the project root
+```angularjs
+npm i ipfs-api
 ```

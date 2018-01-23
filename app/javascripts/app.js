@@ -5,8 +5,12 @@ import 'bootstrap'
 import {default as bootbox} from 'bootbox'
 import {default as Clipboard} from 'clipboard'
 
+const ipfsAPI = require('ipfs-api')
+
 import "../stylesheets/app.css";  // Import the page's CSS. Webpack will know what to do with it.
 require("../help.md");
+const crypto = require('crypto');
+const buf = crypto.randomBytes(256).toString('hex');
 
 // Import libraries we need.
 import { default as Web3} from 'web3';
@@ -28,6 +32,10 @@ import twoKeyContract_artifacts from '../../build/contracts/TwoKeyContract.json'
 
 var TwoKeyAdmin = contract(twoKeyAdmin_artifacts);
 var TwoKeyContract = contract(twoKeyContract_artifacts);
+
+// We are using IPFS to store content for each product.
+// The web site also contains an IPFS node and this App connects to it
+var ipfs = ipfsAPI(window.document.location.hostname, '5001');
 
 var coinbase = '0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1';
 
@@ -230,6 +238,7 @@ function product_cleanup() {
   $("#total-units").val("");
   $("#bounty").val("");
   // $("#expiration").val("");
+  $("#description").val("");
     $("#add-contract").show();
     $("#create-contract").hide();
 }
@@ -433,6 +442,7 @@ window.createContract = function() {
   let total_units = $("#total-units").val();
   let bounty = $("#bounty").val();
   let productExpiration = $("#product-expiration").val();
+  let description = $("#description").val();
 
   product_cleanup();
 
@@ -446,8 +456,6 @@ window.createContract = function() {
     contractInstance.createTwoKeyContract(name, symbol, parseInt(total_arcs),
         parseInt(quota), web3.toWei(parseFloat(cost), 'ether'), web3.toWei(parseFloat(bounty), 'ether'), parseInt(total_units),
         {gas: 3000000, from: address}).then(function() {
-      // return contractInstance.totalVotesFor.call(candidateName).then(function(v) {
-      //   $("#" + div_id).html(v.toString());
         populateMy2KeyContracts();
     }).catch(function (e) {
         alert(e);
@@ -558,6 +566,15 @@ function populateTokenData() {
 }
 */
 
+function ipfs_init() {
+    ipfs.id((err, res) => {
+          if (err) throw err;
+          console.log(res.id);
+          console.log(res.agentVersion);
+          console.log(res.protocolVersion);
+        });
+}
+
 function init() {
   TwoKeyAdmin.setProvider(web3.currentProvider);
   TwoKeyContract.setProvider(web3.currentProvider);
@@ -588,6 +605,8 @@ function init() {
           setTimeout(myTimer, 0);
       }
   }
+
+  setTimeout(ipfs_init, 0);
 }
 
 $( document ).ready(function() {
@@ -629,6 +648,7 @@ $( document ).ready(function() {
     });
 
   var url = "http://"+window.document.location.hostname+":8545";
+
   if (typeof web3 !== 'undefined') {
     $(".login").hide();
     $(".logout").hide();

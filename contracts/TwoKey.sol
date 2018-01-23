@@ -183,7 +183,7 @@ contract TwoKeyAdmin {
   address[] public contracts;
   uint public ncontracts;
 
-  function createTwoKeyContract(string _name, string _symbol, uint256 _totalSupply, uint256 _quota, uint256 _cost, uint256 _bounty, uint256 _units) public {
+  function createTwoKeyContract(string _name, string _symbol, uint256 _totalSupply, uint256 _quota, uint256 _cost, uint256 _bounty, uint256 _units) public returns (address) {
     address _owner = msg.sender;
     address c = (new TwoKeyContract(_owner, _name, _symbol, _totalSupply, _quota, _cost, _bounty, _units));
     if (ownerNContracts[_owner] == 0) {
@@ -194,6 +194,8 @@ contract TwoKeyAdmin {
     ownerNContracts[_owner] += 1;
     contracts.push(c);
     ncontracts += 1;
+
+    return c;
   }
 
   function getContract(address owner, uint idx) public constant returns (address) {
