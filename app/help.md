@@ -72,5 +72,4 @@ paste one of the following private keys and refresh the 2Key Dapp page to show t
   * refresh the 2Key Dapp page to show the new address selection
 
 ## Known problems
-* Copy to clipboard of address or 2Key link does not work on iOS
 * In order to open a `2Key link` you need to first login in the home address and only then attempt to open the `2Key link`
