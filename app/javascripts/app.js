@@ -5,7 +5,7 @@ import 'bootstrap'
 import {default as bootbox} from 'bootbox'
 import {default as Clipboard} from 'clipboard'
 
-const ipfsAPI = require('ipfs-api')
+// const ipfsAPI = require('ipfs-api')
 
 import "../stylesheets/app.css";  // Import the page's CSS. Webpack will know what to do with it.
 require("../help.md");
@@ -35,7 +35,7 @@ var TwoKeyContract = contract(twoKeyContract_artifacts);
 
 // We are using IPFS to store content for each product.
 // The web site also contains an IPFS node and this App connects to it
-var ipfs = ipfsAPI(window.document.location.hostname, '5001');
+// var ipfs = ipfsAPI(window.document.location.hostname, '5001');
 
 var coinbase = '0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1';
 
@@ -606,7 +606,7 @@ function init() {
       }
   }
 
-  setTimeout(ipfs_init, 0);
+  // setTimeout(ipfs_init, 0);
 }
 
 $( document ).ready(function() {
