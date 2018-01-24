@@ -169,7 +169,7 @@ contract TwoKeyContract is StandardToken {
     }
     xbalances[influencer] = xbalances[influencer].sub(b);
     if(!influencer.send(b)){
-       throw;
+       revert();
     }
   }
 }
@@ -214,12 +214,11 @@ contract TwoKeyAdmin {
     return owners;
   }
 
-  function fundtransfer(address etherreceiver, uint256 amount){
-      if(!etherreceiver.send(amount)){
-         throw;
-      }
-  }
+  // function fundtransfer(address etherreceiver, uint256 amount) public {
+  //     if(!etherreceiver.send(amount)){
+  //        revert();
+  //     }
+  // }
   // faulback for receiving ETH
-  function() public payable { }
-
+  // function() public payable { }
 }

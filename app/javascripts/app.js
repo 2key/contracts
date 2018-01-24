@@ -5,7 +5,23 @@ import 'bootstrap'
 import {default as bootbox} from 'bootbox'
 import {default as Clipboard} from 'clipboard'
 
-// const ipfsAPI = require('ipfs-api')
+function short_url(url,eid) {
+    fetch("https://www.googleapis.com/urlshortener/v1/url?key=AIzaSyBqmohu0JE5CRhQYq9YgbeV9ApvWFR4pA0",
+        {method: 'POST',body: JSON.stringify({longUrl: url}),
+            headers: new Headers({'Content-Type': 'application/json'}),
+            // mode: 'cors'
+        }).then(x => {
+                return x.json();
+            }).catch(e => {
+                console.log(e);
+            }).then(x => {
+                var surl = x.id;
+                $(eid).text(surl.slice(8));
+                $(eid).attr("data-clipboard-text",surl);
+            });
+}
+
+var unique_id = 0;
 
 import "../stylesheets/app.css";  // Import the page's CSS. Webpack will know what to do with it.
 require("../help.md");
@@ -284,6 +300,7 @@ function contract_table(tbl, contracts, min_arcs) {
     var first_row = true;
     function iterator(twoKeyContractAddress, report) {
         var take_link = location.origin + "/?c=" + twoKeyContractAddress + "&f=" + myaddress;
+        // shortUrl.short(take_link, function(err, take_short_url){
         TwoKeyContract.at(twoKeyContractAddress).then(function (TwoKeyContract_instance) {
             TwoKeyContract_instance.getInfo(myaddress).then(function (info) {
                 var arcs, units, xbalance, name, symbol, total_arcs, quota, cost, bounty, total_units, balance;
@@ -294,14 +311,15 @@ function contract_table(tbl, contracts, min_arcs) {
                     cost = web3.fromWei(cost.toString());
                     bounty = web3.fromWei(bounty.toString());
                     if (first_row) {
-                        $(tbl).append("<tr><td colspan=\"3\" data-toggle='tooltip' title='what I have in the contract'>Me</td><td colspan=\"9\" data-toggle='tooltip' title='contract properties'>Contract</td></tr>");
+                        $(tbl).append("<tr><td colspan=\"4\" data-toggle='tooltip' title='what I have in the contract'>Me</td><td colspan=\"9\" data-toggle='tooltip' title='contract properties'>Contract</td></tr>");
                         $(tbl).append("<tr>" +
-                            "<td data-toggle='tooltip' title='number of ARCs I have in the contract'>ARCs</td>" +
+                            "<td data-toggle='tooltip' title='number of ARCs I have in the contracts'>ARCs</td>" +
+                            "<td data-toggle='tooltip' title='key link'>2key link</td>" +
                             "<td data-toggle='tooltip' title='Number of units I bought'>units</td>" +
                             "<td data-toggle='tooltip' title='ETH I have in the contract. click to redeem'>ETH</td>" +
                             "<td data-toggle='tooltip' title='contract/product name'>name</td>" +
                             "<td data-toggle='tooltip' title='contract symbol'>symbol</td>" +
-                            "<td data-toggle='tooltip' title='how many ARCs an influencer or a customer will receive when opening the 2Key link of this contract'>take</td>" +
+                            "<td data-toggle='tooltip' title='how many ARCs an influencer or a customer will receive when opening a 2Key link of this contract'>take</td>" +
                             "<td data-toggle='tooltip' title='cost of buying the product sold in the contract. click to buy'>cost</td>" +
                             "<td data-toggle='tooltip' title='total amount that will be taken from the cost and be distributed between influencers'>bounty</td>" +
                             "<td data-toggle='tooltip' title='number of units being sold'>units</td>" +
@@ -311,8 +329,15 @@ function contract_table(tbl, contracts, min_arcs) {
                             "</tr>");
                         first_row = false;
                     }
+                    unique_id = unique_id + 1;
+                    short_url(take_link, "#id" + unique_id);
                     $(tbl).append("<tr><td>" +
                         arcs + "</td><td>" +
+                        "<button class='lnk0 bt' id=\"id" + unique_id + "\" " +
+                        "data-toggle='tooltip' title='copy to clipboard a 2Key link for this contract'" +
+                        "msg='2Key link was copied to clipboard. Someone else opening it will take one ARC from you'" +
+                        "data-clipboard-text=\"" + take_link + "\">" + take_link +
+                        "</button></td><td>" +
                         units + "</td><td>" +
                         "<button class='bt' onclick='redeem(\"" + twoKeyContractAddress + "\")'" +
                         "='tooltip' title='redeem'" +
@@ -320,11 +345,7 @@ function contract_table(tbl, contracts, min_arcs) {
                         "</button></td><td>" +
                         name + "</td><td>" +
                         symbol + "</td><td>" +
-                        "<button class='lnk0 bt' " +
-                        "data-toggle='tooltip' title='copy to clipboard a 2Key link for this contract'" +
-                        "msg='2Key link was copied to clipboard. Someone else opening it will take one ARC from you'" +
-                        "data-clipboard-text=\"" + take_link + "\">" + quota +
-                        "</button></td><td>" +
+                        quota + "</td><td>" +
                         "<button class='bt' onclick='buy(\"" + twoKeyContractAddress + "\",\"" + name + "\"," + cost + ")'" +
                         "='tooltip' title='buy'" +
                         "\">" + cost +
@@ -341,6 +362,7 @@ function contract_table(tbl, contracts, min_arcs) {
                 }
                 report();
             });
+        // });
         });
     }
 
