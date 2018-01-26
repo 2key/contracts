@@ -73,7 +73,10 @@ sudo apt-get update
 curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
 sudo apt install -y nodejs
 sudo npm install -g ganache-cli
-ganache-cli 2>1 > /dev/null & # blockchain simulator in the background
+# run ganache a blockchain simulator in the background
+# -d run ganache determinsticly so we will have the same accounts each time
+# -a 1000 generate 1K accounts
+ganache-cli -d -a 1000 2>1 > /dev/null &
 
 sudo npm install
 sudo npm install -g truffle
