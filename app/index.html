@@ -12,35 +12,9 @@
   </style>
 </head>
 <body class="container">
-  <a href="help.html">help</a>
-  <!--<div class="col-sm-5 margin-top-3 logout">-->
-    <!--<h1>Business</h1>-->
-    <!--<br/>-->
-    <!--<br/>-->
-    <!--<h1>Influencer</h1>-->
-    <!--<div class="container-fluid">-->
-      <!--<h2>Distribute 2Key Contract</h2>-->
-      <!--<input type="text" id="influence-address" placeholder="2Key Contract address" class="form-control"/>-->
-      <!--<input type="text" id="target-address" placeholder="target user" class="form-control"/>-->
-      <!--<span class="help-block">Give 1 ARC in the 2Key contract to the target user</span>-->
-      <!--<br>-->
-      <!--<br>-->
-      <!--<a href="#" onclick="giveARCs()" class="btn btn-primary">Give</a>-->
-    <!--</div>-->
-    <!--<br/>-->
-    <!--<br/>-->
-    <!--<h1>Customer</h1>-->
-    <!--<div class="container-fluid">-->
-      <!--<h2>buy product from 2Key Contract</h2>-->
-      <!--<input type="text" id="buy-address" placeholder="2Key Contract address" class="form-control"/>-->
-      <!--<br>-->
-      <!--<br>-->
-      <!--<a href="#" onclick="buyContract()" class="btn btn-primary">Buy</a>-->
-      <!--&lt;!&ndash;<a href="#" onclick="receivedContract()" class="btn btn-primary">Take</a>&ndash;&gt;-->
-    <!--</div>-->
-  <!--</div>-->
+<div class="pull-left"><a href=".">home</a></div>
+  <div class="pull-right"><a href="help.html">help</a></div>
   <div class="margin-top-3">
-  <!--<div class="col-sm-offset-1 col-sm-5 margin-top-3">-->
     <div id="metamask-login" class="container-fluid">
     </div>
     <div class="container-fluid login">
@@ -61,6 +35,9 @@
     <!--<div class="row margin-top-3">-->
       <!--<div class="col-sm-12">-->
       <div class="table-responsive">
+        <a href="#" onclick="logout()" class="btn btn-primary" id="logout-button">Logout</a>
+        <!--<a href="#" onclick="getETH()" class="btn btn-primary">get 1 ETH from 2Key</a>-->
+        <!--<a href="#" onclick="giveETH()" class="btn btn-primary">donate 1 ETH to 2Key</a>-->
         <table class="table table-bordered">
           <tr>
             <td>Name</td>
@@ -87,20 +64,11 @@
             <!--<td id="admin-address"></td>-->
           <!--</tr>-->
         </table>
-        <a href="#" onclick="logout()" class="btn btn-primary" id="logout-button">Logout</a>
-        <!--<a href="#" onclick="getETH()" class="btn btn-primary">get 1 ETH from 2Key</a>-->
-        <!--<a href="#" onclick="giveETH()" class="btn btn-primary">donate 1 ETH to 2Key</a>-->
       </div>
       <br/>
       <br/>
+      <div id="contracts">
       <h2>My Contracts</h2>
-      <div class="loader" id="my-2key-contracts-spinner" style="display:none;"></div>
-      <div class="table-responsive">
-        <table class="table table-bordered">
-          <tbody id="my-2key-contracts">
-          </tbody>
-        </table>
-      </div>
       <div class="table-responsive" id="add-contract">
         <a href="#" onclick="addContract()" class="btn btn-primary">Create contract</a>
       </div>
@@ -127,6 +95,13 @@
         <br/>
         <br/>
       </div>
+      <div class="loader" id="my-2key-contracts-spinner" style="display:none;"></div>
+      <div class="table-responsive">
+        <table class="table table-bordered">
+          <tbody id="my-2key-contracts">
+          </tbody>
+        </table>
+      </div>
       <br/>
       <br/>
 
@@ -138,12 +113,27 @@
           </tbody>
         </table>
       </div>
+      </div>
 
+      <div id="contract">
+      <h2>Contract</h2>
+      <div class="table-responsive">
+        <a href="#" class="btn btn-primary" onclick="contract_take()">Take</a>
+        <a href="#" class="btn btn-primary" id="buy">Buy</a>
+        <a href="#" class="btn btn-primary" id="redeem">Redeem</a>
+        <div class="loader" id="contract-spinner" style="display:none;"></div>
+        <table class="table table-bordered">
+          <tbody id="contract-table">
+          </tbody>
+        </table>
+      </div>
+
+      </div>
 
       <!--</div>-->
     </div>
   </div>
-  <script src="https://apis.google.com/js/api.js"></script>
+  <!--<script src="https://apis.google.com/js/api.js"></script>-->
   <script src="app.js"></script>
 </body>
 </html>

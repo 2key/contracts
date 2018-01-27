@@ -22,6 +22,7 @@ function short_url(url,eid) {
 }
 
 var unique_id = 0;
+var params;
 
 import "../stylesheets/app.css";  // Import the page's CSS. Webpack will know what to do with it.
 require("../help.md");
@@ -286,6 +287,80 @@ function IterateOver(list, iterator, callback) {
     }
 }
 
+function contact_header() {
+    var items = [];
+    items.push("<td data-toggle='tooltip' title='number of ARCs I have in the contracts'>my ARCs</td>");
+    items.push("<td data-toggle='tooltip' title='key link'>my 2key link</td>");
+    items.push("<td data-toggle='tooltip' title='Number of units I bought'>my units</td>");
+    items.push("<td data-toggle='tooltip' title='ETH I have in the contract. click to redeem'>my ETH</td>");
+    items.push("<td data-toggle='tooltip' title='contract/product name'>name</td>");
+    items.push("<td data-toggle='tooltip' title='contract symbol'>symbol</td>");
+    items.push("<td data-toggle='tooltip' title='how many ARCs an influencer or a customer will receive when opening a 2Key link of this contract'>take</td>");
+    items.push("<td data-toggle='tooltip' title='cost of buying the product sold in the contract. click to buy'>cost</td>");
+    items.push("<td data-toggle='tooltip' title='total amount that will be taken from the cost and be distributed between influencers'>bounty</td>");
+    items.push("<td data-toggle='tooltip' title='number of units being sold'>units</td>");
+    items.push("<td data-toggle='tooltip' title='total balance of ETH deposited in contract'>ETH</td>");
+    items.push("<td data-toggle='tooltip' title='total number of ARCs in the contract'>ARCs</td>");
+    items.push("<td data-toggle='tooltip' title='the address of the contract'>address</td>");
+
+    return items;
+}
+
+function contract_info(twoKeyContractAddress, min_arcs, callback) {
+    var items = [];
+    var myaddress = whoAmI();
+    var take_link = location.origin + "/?c=" + twoKeyContractAddress + "&f=" + myaddress;
+    TwoKeyContract.at(twoKeyContractAddress).then(function (TwoKeyContract_instance) {
+        TwoKeyContract_instance.getInfo(myaddress).then(function (info) {
+            var arcs, units, xbalance, name, symbol, total_arcs, quota, cost, bounty, total_units, balance;
+            [arcs, units, xbalance, name, symbol, cost, bounty, quota, total_arcs, total_units, balance] = info;
+            var onclick_buy = "buy('" + twoKeyContractAddress + "','" + name + "'," + cost + ")";
+            var onclick_redeem = "redeem('" + twoKeyContractAddress + "')";
+            $("#buy").attr("onclick", onclick_buy);
+            $("#redeem").attr("onclick", onclick_redeem);
+            if ((arcs >= min_arcs) || (xbalance > 0)) {
+                balance = web3.fromWei(balance);
+                xbalance = web3.fromWei(xbalance);
+                cost = web3.fromWei(cost.toString());
+                bounty = web3.fromWei(bounty.toString());
+                unique_id = unique_id + 1;
+                short_url(take_link, "#id" + unique_id);
+                items.push("<td>" + arcs + "</td>");
+                items.push("<td>" +
+                    "<button class='lnk0 bt' id=\"id" + unique_id + "\" " +
+                    "data-toggle='tooltip' title='copy to clipboard a 2Key link for this contract'" +
+                    "msg='2Key link was copied to clipboard. Someone else opening it will take one ARC from you'" +
+                    "data-clipboard-text=\"" + take_link + "\">" + take_link +
+                    "</button></td>");
+                items.push("<td>" + units + "</td>");
+                items.push("<td>" +
+                    "<button class='bt' onclick=" + onclick_redeem +
+                    "='tooltip' title='redeem'" +
+                    "\">" + xbalance +
+                    "</button></td>");
+                items.push("<td>" + name + "</td>");
+                items.push("<td>" + symbol + "</td>");
+                items.push("<td>" + quota + "</td>");
+                items.push("<td>" +
+                    "<button class='bt' onclick=" +
+                    "='tooltip' title='buy'" + onclick_buy +
+                    "\">" + cost +
+                    "</button></td>");
+                items.push("<td>" + bounty + "</td>");
+                items.push("<td>" + total_units + "</td>");
+                items.push("<td>" + balance + "</td>");
+                items.push("<td>" + total_arcs + "</td>");
+                items.push("<td>" +
+                    "<button class='lnk bt' " +
+                    "data-toggle='tooltip' title='copy to clipboard' " +
+                    "msg='contract address was copied to clipboard'>" +
+                    twoKeyContractAddress + "</button>" +
+                    "</td>");
+            }
+            callback(items);
+        });
+    });
+}
 
 function contract_table(tbl, contracts, min_arcs) {
     $(tbl).empty();
@@ -295,75 +370,29 @@ function contract_table(tbl, contracts, min_arcs) {
     $(tbl + "-spinner").addClass('spin');
     $(tbl + "-spinner").show();
 
-    var myaddress = whoAmI();
+    function add_row(h) {
+        var header_row = "<tr>" + h.join() + "</tr>";
+        // for(var i = 0; i < h.length; i++) {
+        //     header_row += h[i];
+        // }
+        // header_row += "</tr>";
+        $(tbl).append(header_row);
+    }
 
     var first_row = true;
     function iterator(twoKeyContractAddress, report) {
-        var take_link = location.origin + "/?c=" + twoKeyContractAddress + "&f=" + myaddress;
-        // shortUrl.short(take_link, function(err, take_short_url){
-        TwoKeyContract.at(twoKeyContractAddress).then(function (TwoKeyContract_instance) {
-            TwoKeyContract_instance.getInfo(myaddress).then(function (info) {
-                var arcs, units, xbalance, name, symbol, total_arcs, quota, cost, bounty, total_units, balance;
-                [arcs, units, xbalance, name, symbol, cost, bounty, quota, total_arcs, total_units, balance] = info;
-                if ((arcs >= min_arcs) || (xbalance > 0)) {
-                    balance = web3.fromWei(balance);
-                    xbalance = web3.fromWei(xbalance);
-                    cost = web3.fromWei(cost.toString());
-                    bounty = web3.fromWei(bounty.toString());
-                    if (first_row) {
-                        $(tbl).append("<tr><td colspan=\"4\" data-toggle='tooltip' title='what I have in the contract'>Me</td><td colspan=\"9\" data-toggle='tooltip' title='contract properties'>Contract</td></tr>");
-                        $(tbl).append("<tr>" +
-                            "<td data-toggle='tooltip' title='number of ARCs I have in the contracts'>ARCs</td>" +
-                            "<td data-toggle='tooltip' title='key link'>2key link</td>" +
-                            "<td data-toggle='tooltip' title='Number of units I bought'>units</td>" +
-                            "<td data-toggle='tooltip' title='ETH I have in the contract. click to redeem'>ETH</td>" +
-                            "<td data-toggle='tooltip' title='contract/product name'>name</td>" +
-                            "<td data-toggle='tooltip' title='contract symbol'>symbol</td>" +
-                            "<td data-toggle='tooltip' title='how many ARCs an influencer or a customer will receive when opening a 2Key link of this contract'>take</td>" +
-                            "<td data-toggle='tooltip' title='cost of buying the product sold in the contract. click to buy'>cost</td>" +
-                            "<td data-toggle='tooltip' title='total amount that will be taken from the cost and be distributed between influencers'>bounty</td>" +
-                            "<td data-toggle='tooltip' title='number of units being sold'>units</td>" +
-                            "<td data-toggle='tooltip' title='total balance of ETH deposited in contract'>ETH</td>" +
-                            "<td data-toggle='tooltip' title='total number of ARCs in the contract'>ARCs</td>" +
-                            "<td data-toggle='tooltip' title='the address of the contract'>address</td>" +
-                            "</tr>");
-                        first_row = false;
-                    }
-                    unique_id = unique_id + 1;
-                    short_url(take_link, "#id" + unique_id);
-                    $(tbl).append("<tr><td>" +
-                        arcs + "</td><td>" +
-                        "<button class='lnk0 bt' id=\"id" + unique_id + "\" " +
-                        "data-toggle='tooltip' title='copy to clipboard a 2Key link for this contract'" +
-                        "msg='2Key link was copied to clipboard. Someone else opening it will take one ARC from you'" +
-                        "data-clipboard-text=\"" + take_link + "\">" + take_link +
-                        "</button></td><td>" +
-                        units + "</td><td>" +
-                        "<button class='bt' onclick='redeem(\"" + twoKeyContractAddress + "\")'" +
-                        "='tooltip' title='redeem'" +
-                        "\">" + xbalance +
-                        "</button></td><td>" +
-                        name + "</td><td>" +
-                        symbol + "</td><td>" +
-                        quota + "</td><td>" +
-                        "<button class='bt' onclick='buy(\"" + twoKeyContractAddress + "\",\"" + name + "\"," + cost + ")'" +
-                        "='tooltip' title='buy'" +
-                        "\">" + cost +
-                        "</button></td><td>" +
-                        bounty + "</td><td>" +
-                        total_units + "</td><td>" +
-                        balance + "</td><td>" +
-                        total_arcs + "</td><td>" +
-                        "<button class='lnk bt' " +
-                        "data-toggle='tooltip' title='copy to clipboard' " +
-                        "msg='contract address was copied to clipboard'>" +
-                        twoKeyContractAddress + "</button>" +
-                        "</td></tr>");
-                }
-                report();
-            });
-        // });
-        });
+        if (first_row) {
+            first_row = false;
+            $(tbl).append("<tr><td colspan=\"4\" data-toggle='tooltip' title='what I have in the contract'>Me</td><td colspan=\"9\" data-toggle='tooltip' title='contract properties'>Contract</td></tr>");
+            add_row(contact_header());
+        }
+
+        function row_callback(items) {
+            add_row(items)
+            report();
+        }
+
+        contract_info(twoKeyContractAddress, min_arcs, row_callback);
     }
 
     function callback() {
@@ -386,6 +415,29 @@ function populateMy2KeyContracts() {
     });
 }
 
+function populateContract() {
+    $("#contract-spinner").addClass('spin');
+    $("#contract-spinner").show();
+    var h = contact_header();
+    function contract_callback(c) {
+        for (var i = 0; i < h.length; i++) {
+            var row = "<tr>" + h[i] + c[i] + "</tr>";
+            $("#contract-table").append(row);
+        }
+        $("#contract-spinner").removeClass('spin');
+        $("#contract-spinner").hide();
+    }
+    contract_info(params.c, -1, contract_callback);
+}
+
+function populate() {
+  if (params.c) {
+      populateContract();
+  } else {
+      populateMy2KeyContracts();
+  }
+}
+
 window.giveARCs = function() {
   let twoKeyContractAddress = $("#influence-address").val();
   let target = $("#target-address").val();
@@ -402,14 +454,21 @@ window.giveARCs = function() {
               console.log(tx);
               $("#target-address").val("");
               $("#influence-address").val("");
-              populateMy2KeyContracts();
+              populate();
           }).catch(function(e){
               alert(e);
       });
   });
 }
 
-function takeARCs(twoKeyContractAddress, target) {
+window.contract_take = function() {
+    var twoKeyContractAddress = params.c;
+    var target = params.f;
+    var myaddress = whoAmI();
+    if (target == myaddress) {
+        alert("You can't take your own ARCs. Switch to a different user and try again.");
+        return;
+    }
 
   TwoKeyContract.at(twoKeyContractAddress).then(function(TwoKeyContract_instance) {
       TwoKeyContract_instance.quota().then(function (quota) {
@@ -427,7 +486,7 @@ function takeARCs(twoKeyContractAddress, target) {
                       console.log(tx);
                       $("#target-address").val("");
                       $("#influence-address").val("");
-                      populateMy2KeyContracts();
+                      populate();
                       location.assign(location.protocol + "//" + location.host);
                   }
               ).catch(function (e) {
@@ -478,7 +537,7 @@ window.createContract = function() {
     contractInstance.createTwoKeyContract(name, symbol, parseInt(total_arcs),
         parseInt(quota), web3.toWei(parseFloat(cost), 'ether'), web3.toWei(parseFloat(bounty), 'ether'), parseInt(total_units),
         {gas: 3000000, from: address}).then(function() {
-        populateMy2KeyContracts();
+        populate();
     }).catch(function (e) {
         alert(e);
     });
@@ -487,28 +546,6 @@ window.createContract = function() {
     });
   AdminInfo();
 }
-
-/* The user enters the total no. of tokens to buy. We calculate the total cost and send it in
- * the request. We have to send the value in Wei. So, we use the toWei helper method to convert
- * from Ether to Wei.
- */
-
-/*
-window.buyTokens = function() {
-  let tokensToBuy = $("#buy").val();
-  let price = tokensToBuy * tokenPrice;
-  $("#buy-msg").html("Purchase order has been submitted. Please wait.");
-  Voting.deployed().then(function(contractInstance) {
-    contractInstance.buy({value: web3.toWei(price, 'ether'), from: web3.eth.accounts[0]}).then(function(v) {
-      $("#buy-msg").html("");
-      web3.eth.getBalance(contractInstance.address, function(error, result) {
-        $("#contract-balance").html(web3.fromWei(result.toString()) + " Ether");
-      });
-    })
-  });
-  populateTokenData();
-}
-*/
 
 function lookupUserInfo() {
   let address = whoAmI(); // $("#voter-info").val();
@@ -519,74 +556,10 @@ function lookupUserInfo() {
     web3.eth.getBalance(address, function(error, result) {
       $("#user-balance").html(web3.fromWei(result.toString()) + " ETH");
     });
-  populateMy2KeyContracts();
+  populate();
   $(".login").hide();
   $(".logout").show();
 }
-
-/* Instead of hardcoding the candidates hash, we now fetch the candidate list from
- * the blockchain and populate the array. Once we fetch the candidates, we setup the
- * table in the UI with all the candidates and the votes they have received.
- */
-
-// function populateCandidates() {
-//   Voting.deployed().then(function(contractInstance) {
-//     contractInstance.allCandidates.call().then(function(candidateArray) {
-//       for(let i=0; i < candidateArray.length; i++) {
-//         /* We store the candidate names as bytes32 on the blockchain. We use the
-//          * handy toUtf8 method to convert from bytes32 to string
-//          */
-//         candidates[web3.toUtf8(candidateArray[i])] = "candidate-" + i;
-//       }
-//       setupCandidateRows();
-//       populateCandidateVotes();
-//       populateTokenData();
-//     });
-//   });
-// }
-
-/*
-function populateCandidateVotes() {
-  let candidateNames = Object.keys(candidates);
-  for (var i = 0; i < candidateNames.length; i++) {
-    let name = candidateNames[i];
-    Voting.deployed().then(function(contractInstance) {
-      contractInstance.totalVotesFor.call(name).then(function(v) {
-        $("#" + candidates[name]).html(v.toString());
-      });
-    });
-  }
-}
-
-function setupCandidateRows() {
-  Object.keys(candidates).forEach(function (candidate) { 
-    $("#candidate-rows").append("<tr><td>" + candidate + "</td><td id='" + candidates[candidate] + "'></td></tr>");
-  });
-}
-*/
-
-/* Fetch the total tokens, tokens available for sale and the price of
- * each token and display in the UI
- */
-/*
-function populateTokenData() {
-  Voting.deployed().then(function(contractInstance) {
-    contractInstance.totalTokens().then(function(v) {
-      $("#tokens-total").html(v.toString());
-    });
-    contractInstance.tokensSold.call().then(function(v) {
-      $("#tokens-sold").html(v.toString());
-    });
-    contractInstance.tokenPrice().then(function(v) {
-      tokenPrice = parseFloat(web3.fromWei(v.toString()));
-      $("#token-cost").html(tokenPrice + " Ether");
-    });
-    web3.eth.getBalance(contractInstance.address, function(error, result) {
-      $("#contract-balance").html(web3.fromWei(result.toString()) + " Ether");
-    });
-  });
-}
-*/
 
 function ipfs_init() {
     ipfs.id((err, res) => {
@@ -598,6 +571,18 @@ function ipfs_init() {
 }
 
 function init() {
+  params = getAllUrlParams();
+  if (params.c) {
+    $("#contract").show();
+    $("#contracts").hide();
+  } else {
+    $("#contracts").show();
+    $("#create-contract").hide();
+    $("#contract").hide();
+    $("#buy").removeAttr("onclick");
+    $("#redeme").removeAttr("onclick");
+  }
+
   TwoKeyAdmin.setProvider(web3.currentProvider);
   TwoKeyContract.setProvider(web3.currentProvider);
 
@@ -610,22 +595,6 @@ function init() {
       setTimeout(lookupUserInfo(),0);
   } else {
       window.logout();
-  }
-
-  product_cleanup();
-
-  var params = getAllUrlParams();
-  if (params.c && params.f) {
-      var myaddress = whoAmI();
-      if (params.f == myaddress) {
-          alert("You can't take your own ARCs. Switch to a different user and try again.");
-          location.assign(location.protocol + "//" + location.host);
-      } else {
-          function myTimer() {
-              takeARCs(params.c, params.f);
-          }
-          setTimeout(myTimer, 0);
-      }
   }
 
   // setTimeout(ipfs_init, 0);
