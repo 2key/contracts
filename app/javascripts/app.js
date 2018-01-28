@@ -341,7 +341,7 @@ function contract_info(twoKeyContractAddress, min_arcs, callback) {
             var onclick_redeem = "redeem('" + twoKeyContractAddress + "')";
             $("#buy").attr("onclick", onclick_buy);
             $("#redeem").attr("onclick", onclick_redeem);
-            
+
             if ((arcs >= min_arcs) || (xbalance > 0)) {
                 unique_id = unique_id + 1;
                 short_url(take_link, "#id" + unique_id);
@@ -436,6 +436,7 @@ function populateMy2KeyContracts() {
 }
 
 function populateContract() {
+    $("#contract-table").empty();
     $("#contract-spinner").addClass('spin');
     $("#contract-spinner").show();
     var h = contact_header();
@@ -519,10 +520,6 @@ window.contract_take = function() {
         alert(e);
         location.assign(location.protocol + "//" + location.host);
     });
-}
-
-window.buyContract = function() {
-    alert("not implemented")
 }
 
 window.addContract = function() {
