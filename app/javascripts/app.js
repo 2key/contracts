@@ -5,6 +5,23 @@ import 'bootstrap'
 import {default as bootbox} from 'bootbox'
 import {default as Clipboard} from 'clipboard'
 
+var entityMap = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#39;',
+  '/': '&#x2F;',
+  '`': '&#x60;',
+  '=': '&#x3D;'
+};
+
+function escapeHtml (string) {
+  return String(string).replace(/[&<>"'`=\/]/g, function (s) {
+    return entityMap[s];
+  });
+}
+
 function short_url(url,eid) {
     fetch("https://www.googleapis.com/urlshortener/v1/url?key=AIzaSyBqmohu0JE5CRhQYq9YgbeV9ApvWFR4pA0",
         {method: 'POST',body: JSON.stringify({longUrl: url}),
@@ -334,16 +351,16 @@ function contract_info(twoKeyContractAddress, min_arcs, callback) {
                     "</button></td>");
                 items.push("<td>" + units + "</td>");
                 items.push("<td>" +
-                    "<button class='bt' onclick=" + onclick_redeem +
-                    "='tooltip' title='redeem'" +
+                    "<button class='bt' onclick=\"" + onclick_redeem + "\"" +
+                    "data-toggle='tooltip' title='redeem'" +
                     "\">" + xbalance +
                     "</button></td>");
                 items.push("<td>" + name + "</td>");
                 items.push("<td>" + symbol + "</td>");
                 items.push("<td>" + quota + "</td>");
                 items.push("<td>" +
-                    "<button class='bt' onclick=" +
-                    "='tooltip' title='buy'" + onclick_buy +
+                    "<button class='bt' onclick=\"" + onclick_buy + "\"" +
+                    "data-toggle='tooltip' title='buy'" +
                     "\">" + cost +
                     "</button></td>");
                 items.push("<td>" + bounty + "</td>");
