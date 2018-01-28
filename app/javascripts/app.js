@@ -331,15 +331,18 @@ function contract_info(twoKeyContractAddress, min_arcs, callback) {
         TwoKeyContract_instance.getInfo(myaddress).then(function (info) {
             var arcs, units, xbalance, name, symbol, total_arcs, quota, cost, bounty, total_units, balance;
             [arcs, units, xbalance, name, symbol, cost, bounty, quota, total_arcs, total_units, balance] = info;
+
+            balance = web3.fromWei(balance);
+            xbalance = web3.fromWei(xbalance);
+            cost = web3.fromWei(cost.toString());
+            bounty = web3.fromWei(bounty.toString());
+
             var onclick_buy = "buy('" + twoKeyContractAddress + "','" + name + "'," + cost + ")";
             var onclick_redeem = "redeem('" + twoKeyContractAddress + "')";
             $("#buy").attr("onclick", onclick_buy);
             $("#redeem").attr("onclick", onclick_redeem);
+            
             if ((arcs >= min_arcs) || (xbalance > 0)) {
-                balance = web3.fromWei(balance);
-                xbalance = web3.fromWei(xbalance);
-                cost = web3.fromWei(cost.toString());
-                bounty = web3.fromWei(bounty.toString());
                 unique_id = unique_id + 1;
                 short_url(take_link, "#id" + unique_id);
                 items.push("<td>" + arcs + "</td>");
