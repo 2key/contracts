@@ -5,6 +5,8 @@ import 'bootstrap'
 import {default as bootbox} from 'bootbox'
 import {default as Clipboard} from 'clipboard'
 
+var BIG_INT = 100000000000;
+
 var entityMap = {
   '&': '&amp;',
   '<': '&lt;',
@@ -342,9 +344,21 @@ function contract_info(twoKeyContractAddress, min_arcs, callback) {
             $("#buy").attr("onclick", onclick_buy);
             $("#redeem").attr("onclick", onclick_redeem);
 
+
             if ((arcs >= min_arcs) || (xbalance > 0)) {
                 unique_id = unique_id + 1;
+
                 short_url(take_link, "#id" + unique_id);
+                if (arcs >= BIG_INT) {
+                    arcs = "&infin;";
+                }
+                if (total_arcs >= BIG_INT) {
+                    total_arcs = "&infin;";
+                }
+                if (quota >= BIG_INT) {
+                    quota = "&infin;";
+                }
+
                 items.push("<td>" + arcs + "</td>");
                 items.push("<td>" +
                     "<button class='lnk0 bt' id=\"id" + unique_id + "\" " +
@@ -535,7 +549,17 @@ window.createContract = function() {
   let name = $("#product-name").val();
   let symbol = $("#product-symbol").val();
   let total_arcs = $("#total-arcs").val();
+  if (total_arcs) {
+      total_arcs = parseInt(total_arcs);
+  } else {
+      total_arcs = BIG_INT;
+  }
   let quota = $("#quota").val();
+  if (quota) {
+      quota = parseInt(quota);
+  } else {
+      quota = BIG_INT;
+  }
   let cost = $("#cost").val();
   let total_units = $("#total-units").val();
   let bounty = $("#bounty").val();
@@ -551,8 +575,8 @@ window.createContract = function() {
   TwoKeyAdmin.deployed().then(function(contractInstance) {
     let address = whoAmI();
     // value: web3.toWei(0.001, 'ether'),
-    contractInstance.createTwoKeyContract(name, symbol, parseInt(total_arcs),
-        parseInt(quota), web3.toWei(parseFloat(cost), 'ether'), web3.toWei(parseFloat(bounty), 'ether'), parseInt(total_units),
+    contractInstance.createTwoKeyContract(name, symbol, total_arcs,
+        quota, web3.toWei(parseFloat(cost), 'ether'), web3.toWei(parseFloat(bounty), 'ether'), parseInt(total_units),
         {gas: 3000000, from: address}).then(function() {
         populate();
     }).catch(function (e) {
