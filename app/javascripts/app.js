@@ -71,7 +71,8 @@ var TwoKeyContract = contract(twoKeyContract_artifacts);
 
 // We are using IPFS to store content for each product.
 // The web site also contains an IPFS node and this App connects to it
-// var ipfs = ipfsAPI(window.document.location.hostname, '5001');
+const ipfsAPI = require('ipfs-api')
+var ipfs = ipfsAPI(window.document.location.hostname, '5001');
 
 var coinbase = '0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1';
 
@@ -170,15 +171,6 @@ window.redeem = function(twoKeyContractAddress) {
             });
         });
     }
-}
-
-function AdminInfo() {
- // TwoKeyAdmin.deployed().then(function(contractInstance) {
- //   $("#admin-address").html(contractInstance.address.toString());
- //   web3.eth.getBalance(contractInstance.address, function(error, result) {
- //     $("#admin-balance").html(web3.fromWei(result.toString()) + " ETH");
- //   });
- // });
 }
 
 function tempAlert(msg,duration)
@@ -320,6 +312,7 @@ function contact_header() {
     items.push("<td data-toggle='tooltip' title='number of units being sold'>units</td>");
     items.push("<td data-toggle='tooltip' title='total balance of ETH deposited in contract'>ETH</td>");
     items.push("<td data-toggle='tooltip' title='total number of ARCs in the contract'>ARCs</td>");
+    items.push("<td data-toggle='tooltip' title='product description'>description</td>");
     items.push("<td data-toggle='tooltip' title='the address of the contract'>address</td>");
 
     return items;
@@ -346,9 +339,7 @@ function contract_info(twoKeyContractAddress, min_arcs, callback) {
 
 
             if ((arcs >= min_arcs) || (xbalance > 0)) {
-                unique_id = unique_id + 1;
 
-                short_url(take_link, "#id" + unique_id);
                 if (arcs >= BIG_INT) {
                     arcs = "&infin;";
                 }
@@ -360,6 +351,8 @@ function contract_info(twoKeyContractAddress, min_arcs, callback) {
                 }
 
                 items.push("<td>" + arcs + "</td>");
+                unique_id = unique_id + 1;
+                short_url(take_link, "#id" + unique_id);
                 items.push("<td>" +
                     "<button class='lnk0 bt' id=\"id" + unique_id + "\" " +
                     "data-toggle='tooltip' title='copy to clipboard a 2Key link for this contract'" +
@@ -384,6 +377,16 @@ function contract_info(twoKeyContractAddress, min_arcs, callback) {
                 items.push("<td>" + total_units + "</td>");
                 items.push("<td>" + balance + "</td>");
                 items.push("<td>" + total_arcs + "</td>");
+                unique_id = unique_id + 1;
+                items.push("<td id=\"id" + unique_id + "\" ></td>");
+                TwoKeyContract_instance.ipfs_hash().then(ipfs_hash => {
+                    $("#id" + unique_id).text(ipfs_hash);
+                    ipfs.cat(ipfs_hash, (err, res) => {
+                    if (err) throw err;
+                    $("#id" + unique_id).text(res.toString());
+                  })
+                });
+
                 items.push("<td>" +
                     "<button class='lnk bt' " +
                     "data-toggle='tooltip' title='copy to clipboard' " +
@@ -417,7 +420,7 @@ function contract_table(tbl, contracts, min_arcs) {
     function iterator(twoKeyContractAddress, report) {
         if (first_row) {
             first_row = false;
-            $(tbl).append("<tr><td colspan=\"4\" data-toggle='tooltip' title='what I have in the contract'>Me</td><td colspan=\"9\" data-toggle='tooltip' title='contract properties'>Contract</td></tr>");
+            $(tbl).append("<tr><td colspan=\"4\" data-toggle='tooltip' title='what I have in the contract'>Me</td><td colspan=\"10\" data-toggle='tooltip' title='contract properties'>Contract</td></tr>");
             add_row(contact_header());
         }
 
@@ -568,24 +571,48 @@ window.createContract = function() {
 
   product_cleanup();
 
-  /* TwoKeyAdmin.deployed() returns an instance of the contract. Every call
-   * in Truffle returns a promise which is why we have used then()
-   * everywhere we have a transaction call
-   */
-  TwoKeyAdmin.deployed().then(function(contractInstance) {
-    let address = whoAmI();
-    // value: web3.toWei(0.001, 'ether'),
-    contractInstance.createTwoKeyContract(name, symbol, total_arcs,
-        quota, web3.toWei(parseFloat(cost), 'ether'), web3.toWei(parseFloat(bounty), 'ether'), parseInt(total_units),
-        {gas: 3000000, from: address}).then(function() {
-        populate();
-    }).catch(function (e) {
-        alert(e);
+  if (description) {
+    ipfs.add([Buffer.from(description)], (err, res) => {
+      if (err) {
+          alert(err);
+          throw err
+      }
+      const ipfs_hash = res[0].hash;
+      TwoKeyAdmin.deployed().then(function (contractInstance) {
+          let address = whoAmI();
+          // value: web3.toWei(0.001, 'ether'),
+          contractInstance.createTwoKeyContract(name, symbol, total_arcs, quota,
+              web3.toWei(parseFloat(cost), 'ether'), web3.toWei(parseFloat(bounty), 'ether'),
+              parseInt(total_units), ipfs_hash,
+              {gas: 3000000, from: address}).then(function () {
+              populate();
+          }).catch(function (e) {
+              alert(e);
+          });
+      }).catch(function (e) {
+          alert(e);
+      });
     });
-  }).catch(function (e) {
-        alert(e);
-    });
-  AdminInfo();
+  } else {
+      /* TwoKeyAdmin.deployed() returns an instance of the contract. Every call
+       * in Truffle returns a promise which is why we have used then()
+       * everywhere we have a transaction call
+       */
+      TwoKeyAdmin.deployed().then(function (contractInstance) {
+          let address = whoAmI();
+          // value: web3.toWei(0.001, 'ether'),
+          contractInstance.createTwoKeyContract(name, symbol, total_arcs, quota,
+              web3.toWei(parseFloat(cost), 'ether'), web3.toWei(parseFloat(bounty), 'ether'),
+              parseInt(total_units), "",
+              {gas: 3000000, from: address}).then(function () {
+              populate();
+          }).catch(function (e) {
+              alert(e);
+          });
+      }).catch(function (e) {
+          alert(e);
+      });
+  }
 }
 
 function lookupUserInfo() {
@@ -638,7 +665,7 @@ function init() {
       window.logout();
   }
 
-  // setTimeout(ipfs_init, 0);
+  setTimeout(ipfs_init, 0);
 }
 
 $( document ).ready(function() {

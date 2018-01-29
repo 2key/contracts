@@ -14,6 +14,7 @@ contract TwoKeyContract is StandardToken {
   // Public variables of the token
   address public owner;  // Who created the contract (business)
   string public name;
+  string public ipfs_hash;
   string public symbol;
   uint8 public decimals = 18;
   uint256 public cost; // Cost of product in wei
@@ -27,7 +28,7 @@ contract TwoKeyContract is StandardToken {
   mapping(address => uint256) internal units; // number of units bought
 
   // Initialize all the constants
-  function TwoKeyContract(address _owner, string _name, string _symbol, uint256 _totalSupply, uint256 _quota, uint256 _cost, uint256 _bounty, uint256 _units) public {
+  function TwoKeyContract(address _owner, string _name, string _symbol, uint256 _totalSupply, uint256 _quota, uint256 _cost, uint256 _bounty, uint256 _units, string _ipfs_hash) public {
     require(_bounty <= _cost);
     owner = _owner;
     name = _name;
@@ -38,6 +39,7 @@ contract TwoKeyContract is StandardToken {
     bounty = _bounty;
     quota = _quota;
     total_units = _units;
+    ipfs_hash = _ipfs_hash;
 
     received_from[owner] = owner;  // allow owner to buy from himself
   }
@@ -183,9 +185,9 @@ contract TwoKeyAdmin {
   address[] public contracts;
   uint public ncontracts;
 
-  function createTwoKeyContract(string _name, string _symbol, uint256 _totalSupply, uint256 _quota, uint256 _cost, uint256 _bounty, uint256 _units) public returns (address) {
+  function createTwoKeyContract(string _name, string _symbol, uint256 _totalSupply, uint256 _quota, uint256 _cost, uint256 _bounty, uint256 _units, string _ipfs_hash) public returns (address) {
     address _owner = msg.sender;
-    address c = (new TwoKeyContract(_owner, _name, _symbol, _totalSupply, _quota, _cost, _bounty, _units));
+    address c = (new TwoKeyContract(_owner, _name, _symbol, _totalSupply, _quota, _cost, _bounty, _units, _ipfs_hash));
     if (ownerNContracts[_owner] == 0) {
       owners.push(_owner);
       nowners += 1;
