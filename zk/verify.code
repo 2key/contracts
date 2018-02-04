@@ -1,0 +1,29 @@
+def validateInput(x):
+return (x-1)*(x-2)*(x-3)*(x-4)
+
+def hash(x):
+// https://en.wikipedia.org/wiki/Elliptic_curve_only_hash
+// TODO check this!!!
+a = x**283
+b = x**12
+c = x**7
+d = x**5
+return a + b + c + d + 1
+
+def hashN(x,N):
+y1 = hash(x)
+// TODO: why cant we use a loop or switch instead of precomputing everything (which caused an error when doing generate-proof
+y2 = hash(y1)
+y3 = hash(y2)
+y4 = hash(y3)
+y = y1
+y = if N == 2 then y2 else y fi
+y = if N == 3 then y3 else y fi
+y = if N == 4 then y4 else y fi
+return y
+
+def main(H,N,HI,I):
+0 == validateInput(N)
+HI == hash(h + I)  // h is the secret
+H == hashN(h, N)
+return 1
