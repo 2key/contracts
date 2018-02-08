@@ -180,10 +180,34 @@ contract TwoKeyAdmin {
   // mapping from TwoKeyContract creator (business) to all its contracts
   mapping(address => uint) public ownerNContracts;
   mapping(address => address[]) public owner2Contracts;
+  mapping(address => string) public owner2name;
+  mapping(bytes32 => address) public name2owner;
   address[] public owners;
   uint public nowners;
   address[] public contracts;
   uint public ncontracts;
+
+  function addName(string _name) public {
+    address _owner = msg.sender;
+    // check if name is taken
+    if (name2owner[keccak256(_name)] != 0) {
+      revert();
+    }
+    // remove previous name
+    bytes memory last_name = bytes(owner2name[_owner]);
+    if (last_name.length != 0) {
+      name2owner[keccak256(owner2name[_owner])] = 0;
+    }
+    owner2name[_owner] = _name;
+    name2owner[keccak256(_name)] = _owner;
+  }
+
+  function getName2Owner(string _name) public constant returns (address) {
+    return name2owner[keccak256(_name)];
+  }
+  function getOwner2Name(address _owner) public constant returns (string) {
+    return owner2name[_owner];
+  }
 
   function createTwoKeyContract(string _name, string _symbol, uint256 _totalSupply, uint256 _quota, uint256 _cost, uint256 _bounty, uint256 _units, string _ipfs_hash) public returns (address) {
     address _owner = msg.sender;

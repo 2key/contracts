@@ -40,6 +40,12 @@ function short_url(url,eid) {
             });
 }
 
+function owner2name(owner,eid) {
+    TwoKeyAdmin_contractInstance.getOwner2Name(owner).then(function (_name) {
+        $(eid).text(_name);
+    });
+}
+
 var unique_id = 0;
 var params;
 
@@ -67,6 +73,7 @@ import twoKeyAdmin_artifacts from '../../build/contracts/TwoKeyAdmin.json'
 import twoKeyContract_artifacts from '../../build/contracts/TwoKeyContract.json'
 
 var TwoKeyAdmin = contract(twoKeyAdmin_artifacts);
+var TwoKeyAdmin_contractInstance;
 var TwoKeyContract = contract(twoKeyContract_artifacts);
 
 // We are using IPFS to store content for each product.
@@ -88,7 +95,8 @@ String.prototype.hashCode = function() {
 };
 
 function whoAmI() {
-    var whoami = $("#user-name").html();
+    var username = localStorage.username;
+    var whoami = username;
     if (whoami === 'coinbase') {
         return coinbase;
     }
@@ -106,10 +114,27 @@ window.login = function() {
         tempAlert('Name to short',2000);
         return;
     }
-    $("#user-name").html(username);
+    // $("#user-name").html(username);
     $("#login-user-name").val("");
     localStorage.username = username;
-    lookupUserInfo();
+
+        var myaddress = whoAmI();
+        TwoKeyAdmin_contractInstance.getOwner2Name(myaddress).then(function (_name) {
+            // "0x0000000000000000000000000000000000000000"
+
+            if(_name) {
+                if (_name != username) {
+                    alert("Sorry, demo name already in use, try a different one");
+                    window.logout();
+                } else {
+                    lookupUserInfo();
+                }
+            } else {
+                TwoKeyAdmin_contractInstance.addName(username,{gas: 3000000, from: myaddress}).then(function () {
+                    lookupUserInfo();
+                });
+            }
+        });
 }
 window.logout = function() {
     delete localStorage.username;
@@ -121,12 +146,8 @@ window.logout = function() {
 
 window.getETH = function() {
     var myaddress = whoAmI();
-    TwoKeyAdmin.deployed().then(function(contractInstance) {
-        contractInstance.fundtransfer(myaddress, web3.toWei(1.0, 'ether'),
-            {gas: 3000000, from: myaddress}).then(function() {
-        }).catch(function (e) {
-            alert(e);
-        });
+    TwoKeyAdmin_contractInstance.fundtransfer(myaddress, web3.toWei(1.0, 'ether'),
+        {gas: 3000000, from: myaddress}).then(function() {
     }).catch(function (e) {
         alert(e);
     });
@@ -313,6 +334,7 @@ function contact_header() {
     items.push("<td data-toggle='tooltip' title='total balance of ETH deposited in contract'>ETH</td>");
     items.push("<td data-toggle='tooltip' title='total number of ARCs in the contract'>ARCs</td>");
     items.push("<td data-toggle='tooltip' title='product description'>description</td>");
+    items.push("<td data-toggle='tooltip' title='who created the contract'>owner</td>");
     items.push("<td data-toggle='tooltip' title='the address of the contract'>address</td>");
 
     return items;
@@ -324,8 +346,8 @@ function contract_info(twoKeyContractAddress, min_arcs, callback) {
     var take_link = location.origin + "/?c=" + twoKeyContractAddress + "&f=" + myaddress;
     TwoKeyContract.at(twoKeyContractAddress).then(function (TwoKeyContract_instance) {
         TwoKeyContract_instance.getInfo(myaddress).then(function (info) {
-            var arcs, units, xbalance, name, symbol, total_arcs, quota, cost, bounty, total_units, balance;
-            [arcs, units, xbalance, name, symbol, cost, bounty, quota, total_arcs, total_units, balance] = info;
+            var arcs, units, xbalance, name, symbol, total_arcs, quota, cost, bounty, total_units, balance, owner;
+            [arcs, units, xbalance, name, symbol, cost, bounty, quota, total_arcs, total_units, balance, owner] = info;
 
             balance = web3.fromWei(balance);
             xbalance = web3.fromWei(xbalance);
@@ -387,6 +409,13 @@ function contract_info(twoKeyContractAddress, min_arcs, callback) {
                   })
                 });
 
+                unique_id = unique_id + 1;
+                items.push("<td id=\"id" + unique_id + "\" ></td>");
+                TwoKeyContract_instance.owner().then(owner => {
+                    $("#id" + unique_id).text(owner);
+                    owner2name(owner, "#id" + unique_id);
+                });
+
                 items.push("<td>" +
                     "<button class='lnk bt' " +
                     "data-toggle='tooltip' title='copy to clipboard' " +
@@ -420,7 +449,7 @@ function contract_table(tbl, contracts, min_arcs) {
     function iterator(twoKeyContractAddress, report) {
         if (first_row) {
             first_row = false;
-            $(tbl).append("<tr><td colspan=\"4\" data-toggle='tooltip' title='what I have in the contract'>Me</td><td colspan=\"10\" data-toggle='tooltip' title='contract properties'>Contract</td></tr>");
+            $(tbl).append("<tr><td colspan=\"4\" data-toggle='tooltip' title='what I have in the contract'>Me</td><td colspan=\"11\" data-toggle='tooltip' title='contract properties'>Contract</td></tr>");
             add_row(contact_header());
         }
 
@@ -441,13 +470,11 @@ function contract_table(tbl, contracts, min_arcs) {
 }
 
 function populateMy2KeyContracts() {
-    TwoKeyAdmin.deployed().then(function (contractInstance) {
-        contractInstance.getOwner2Contracts(whoAmI()).then(function (my_contracts) {
-            contract_table("#my-2key-contracts", my_contracts, 0);
-            contractInstance.getContracts().then(function (all_contracts) {
-                all_contracts = all_contracts.filter(contract => ! my_contracts.includes(contract));
-                contract_table("#my-2key-arcs", all_contracts, 1);
-            });
+    TwoKeyAdmin_contractInstance.getOwner2Contracts(whoAmI()).then(function (my_contracts) {
+        contract_table("#my-2key-contracts", my_contracts, 0);
+        TwoKeyAdmin_contractInstance.getContracts().then(function (all_contracts) {
+            all_contracts = all_contracts.filter(contract => ! my_contracts.includes(contract));
+            contract_table("#my-2key-arcs", all_contracts, 1);
         });
     });
 }
@@ -578,37 +605,25 @@ window.createContract = function() {
           throw err
       }
       const ipfs_hash = res[0].hash;
-      TwoKeyAdmin.deployed().then(function (contractInstance) {
-          let address = whoAmI();
-          // value: web3.toWei(0.001, 'ether'),
-          contractInstance.createTwoKeyContract(name, symbol, total_arcs, quota,
-              web3.toWei(parseFloat(cost), 'ether'), web3.toWei(parseFloat(bounty), 'ether'),
-              parseInt(total_units), ipfs_hash,
-              {gas: 3000000, from: address}).then(function () {
-              populate();
-          }).catch(function (e) {
-              alert(e);
-          });
+      let address = whoAmI();
+      // value: web3.toWei(0.001, 'ether'),
+      TwoKeyAdmin_contractInstance.createTwoKeyContract(name, symbol, total_arcs, quota,
+          web3.toWei(parseFloat(cost), 'ether'), web3.toWei(parseFloat(bounty), 'ether'),
+          parseInt(total_units), ipfs_hash,
+          {gas: 3000000, from: address}).then(function () {
+          populate();
       }).catch(function (e) {
           alert(e);
       });
     });
   } else {
-      /* TwoKeyAdmin.deployed() returns an instance of the contract. Every call
-       * in Truffle returns a promise which is why we have used then()
-       * everywhere we have a transaction call
-       */
-      TwoKeyAdmin.deployed().then(function (contractInstance) {
-          let address = whoAmI();
-          // value: web3.toWei(0.001, 'ether'),
-          contractInstance.createTwoKeyContract(name, symbol, total_arcs, quota,
-              web3.toWei(parseFloat(cost), 'ether'), web3.toWei(parseFloat(bounty), 'ether'),
-              parseInt(total_units), "",
-              {gas: 3000000, from: address}).then(function () {
-              populate();
-          }).catch(function (e) {
-              alert(e);
-          });
+      let address = whoAmI();
+      // value: web3.toWei(0.001, 'ether'),
+      TwoKeyAdmin_contractInstance.createTwoKeyContract(name, symbol, total_arcs, quota,
+          web3.toWei(parseFloat(cost), 'ether'), web3.toWei(parseFloat(bounty), 'ether'),
+          parseInt(total_units), "",
+          {gas: 3000000, from: address}).then(function () {
+          populate();
       }).catch(function (e) {
           alert(e);
       });
@@ -616,6 +631,8 @@ window.createContract = function() {
 }
 
 function lookupUserInfo() {
+  var username = localStorage.username;
+  $("#user-name").html(username);
   let address = whoAmI(); // $("#voter-info").val();
     if (!address) {
         alert("Unlock MetaMask and reload page");
@@ -638,7 +655,7 @@ function ipfs_init() {
         });
 }
 
-function init() {
+function init(cb) {
   params = getAllUrlParams();
   if (params.c) {
     $("#contract").show();
@@ -652,6 +669,7 @@ function init() {
   }
 
   TwoKeyAdmin.setProvider(web3.currentProvider);
+
   TwoKeyContract.setProvider(web3.currentProvider);
 
 
@@ -659,13 +677,20 @@ function init() {
   if(((typeof username != "undefined") &&
      (typeof username.valueOf() == "string")) &&
     (username.length > 0)) {
-      $("#user-name").html(username);
-      setTimeout(lookupUserInfo(),0);
+      /* TwoKeyAdmin.deployed() returns an instance of the contract. Every call
+       * in Truffle returns a promise which is why we have used then()
+       * everywhere we have a transaction call
+       */
+      TwoKeyAdmin.deployed().then(function (contractInstance) {
+          TwoKeyAdmin_contractInstance = contractInstance;
+          cb();
+      }).catch(function (e) {
+          alert(e);
+      });
   } else {
       window.logout();
   }
 
-  setTimeout(ipfs_init, 0);
 }
 
 $( document ).ready(function() {
@@ -709,6 +734,7 @@ $( document ).ready(function() {
   var url = "http://"+window.document.location.hostname+":8545";
 
   if (typeof web3 !== 'undefined') {
+    // Use Mist/MetaMask's provider
     $(".login").hide();
     $(".logout").hide();
     $("#metamask-login").text("Make sure MetaMask is configured to use the test network " + url);
@@ -718,7 +744,6 @@ $( document ).ready(function() {
     localStorage.username = "MetaMask";
 
     console.warn("Using web3 detected from external source like Metamask")
-    // Use Mist/MetaMask's provider
     window.web3 = new Web3(web3.currentProvider);
     web3.version.getNetwork((err, netId) => {
         var ok = false;
@@ -744,12 +769,27 @@ $( document ).ready(function() {
         }
         if (ok) {
             $("#metamask-login").hide();
-            init();
+
+            function cb() {
+                // Check if we have a name and if not, show login screen
+                    var myaddress = whoAmI();
+                    TwoKeyAdmin_contractInstance.getOwner2Name(myaddress).then(function (_name) {
+                        if (_name) {
+                            localStorage.username = _name;
+                            setTimeout(lookupUserInfo(),0);
+                        } else {
+                            window.logout();
+                        }
+                    });
+            }
+            
+            init(cb);
         } else {
             alert("Configure MetaMask to work on the following network "+url);
         }
     });
   } else {
+      // not using MetaMask
       if (localStorage.username == "MetaMask") {
           delete localStorage.username;
       }
@@ -760,6 +800,20 @@ $( document ).ready(function() {
         "as it's inherently insecure. Consider switching to Metamask for development. More info here: http://truffleframework.com/tutorials/truffle-and-metamask");
     // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
     window.web3 = new Web3(new Web3.providers.HttpProvider(url));
-    init();
+
+    function cb() {
+        if (localStorage.username) {
+            TwoKeyAdmin_contractInstance.getName2Owner(localStorage.username).then(function (_owner) {
+                var myaddress = whoAmI();
+                if (myaddress == _owner) {
+                    setTimeout(lookupUserInfo(), 0);
+                } else {
+                    window.logout();
+                }
+            });
+        }
+    }
+    init(cb);
   }
+  setTimeout(ipfs_init, 0);
 });
