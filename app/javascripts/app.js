@@ -400,20 +400,22 @@ function contract_info(twoKeyContractAddress, min_arcs, callback) {
                 items.push("<td>" + balance + "</td>");
                 items.push("<td>" + total_arcs + "</td>");
                 unique_id = unique_id + 1;
-                items.push("<td id=\"id" + unique_id + "\" ></td>");
+                var tag_description = "id" + unique_id;
+                items.push("<td id=\"" + tag_description + "\" ></td>");
                 TwoKeyContract_instance.ipfs_hash().then(ipfs_hash => {
-                    $("#id" + unique_id).text(ipfs_hash);
+                    $("#" + tag_description).text(ipfs_hash);
                     ipfs.cat(ipfs_hash, (err, res) => {
                     if (err) throw err;
-                    $("#id" + unique_id).text(res.toString());
+                    $("#" + tag_description).text(res.toString());
                   })
                 });
 
                 unique_id = unique_id + 1;
-                items.push("<td id=\"id" + unique_id + "\" ></td>");
+                var tag_owner = "id" + unique_id;
+                items.push("<td id=\"" + tag_owner + "\" ></td>");
                 TwoKeyContract_instance.owner().then(owner => {
-                    $("#id" + unique_id).text(owner);
-                    owner2name(owner, "#id" + unique_id);
+                    $("#" + tag_owner).text(owner);
+                    owner2name(owner, "#" + tag_owner);
                 });
 
                 items.push("<td>" +
