@@ -24,6 +24,7 @@ contract TwoKeyContract is StandardToken {
 
   // Private variables of the token
   mapping (address => address) internal received_from;
+  mapping (address => address[]) internal given_to;
   mapping(address => uint256) internal xbalances; // balance of external currency (ETH or 2Key coin)
   mapping(address => uint256) internal units; // number of units bought
 
@@ -94,6 +95,7 @@ contract TwoKeyContract is StandardToken {
     allowed[_from][_to] = 1;
     if (transferFromQuota(_from, _to, _value)) {
       received_from[_to] = _from;
+      given_to[_from].push(_to);
       return true;
     } else {
       return false;
@@ -109,6 +111,7 @@ contract TwoKeyContract is StandardToken {
     require(received_from[_to] == 0);
     if (transferQuota(_to, _value)) {
       received_from[_to] = msg.sender;
+      given_to[msg.sender].push(_to);
       return true;
     } else {
       return false;
@@ -173,6 +176,10 @@ contract TwoKeyContract is StandardToken {
     if(!influencer.send(b)){
        revert();
     }
+  }
+
+  function getGivenTo(address _owner) public constant returns (address[]) {
+    return given_to[_owner];
   }
 }
 
