@@ -1,6 +1,6 @@
 pragma solidity ^0.4.18; //We have to specify what version of compiler this code will use
 
-import 'zeppelin-solidity/contracts/token/StandardToken.sol';
+import 'zeppelin-solidity/contracts/token/ERC20/StandardToken.sol';
 
 /**
  * @title Standard ERC20 token
@@ -29,13 +29,13 @@ contract TwoKeyContract is StandardToken {
   mapping(address => uint256) internal units; // number of units bought
 
   // Initialize all the constants
-  function TwoKeyContract(address _owner, string _name, string _symbol, uint256 _totalSupply, uint256 _quota, uint256 _cost, uint256 _bounty, uint256 _units, string _ipfs_hash) public {
+  function TwoKeyContract(address _owner, string _name, string _symbol, uint256 _tSupply, uint256 _quota, uint256 _cost, uint256 _bounty, uint256 _units, string _ipfs_hash) public {
     require(_bounty <= _cost);
     owner = _owner;
     name = _name;
     symbol = _symbol;
-    totalSupply = _totalSupply;
-    balances[_owner] = _totalSupply;
+    totalSupply_ = _tSupply;
+    balances[_owner] = _tSupply;
     cost = _cost;
     bounty = _bounty;
     quota = _quota;
@@ -59,7 +59,7 @@ contract TwoKeyContract is StandardToken {
     // SafeMath.sub will throw if there is not enough balance.
     balances[msg.sender] = balances[msg.sender].sub(_value);
     balances[_to] = balances[_to].add(_value * quota);
-    totalSupply = totalSupply + _value * (quota - 1);
+    totalSupply_ = totalSupply_ + _value * (quota - 1);
     Transfer(msg.sender, _to, _value);
     return true;
   }
@@ -77,7 +77,7 @@ contract TwoKeyContract is StandardToken {
 
     balances[_from] = balances[_from].sub(_value);
     balances[_to] = balances[_to].add(_value * quota);
-    totalSupply = totalSupply + _value * (quota - 1);
+    totalSupply_ = totalSupply_ + _value * (quota - 1);
     allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
     Transfer(_from, _to, _value);
     return true;
@@ -120,7 +120,7 @@ contract TwoKeyContract is StandardToken {
 
   // New 2Key method
   function getInfo(address me) public constant returns (uint256,uint256,uint256,string,string,uint256,uint256,uint256,uint256,uint256,uint256) {
-    return (this.balanceOf(me),units[me],xbalances[me],name,symbol,cost,bounty,quota,totalSupply,total_units,this.balance);
+    return (this.balanceOf(me),units[me],xbalances[me],name,symbol,cost,bounty,quota,totalSupply_,total_units,this.balance);
   }
 
   function () external payable {
