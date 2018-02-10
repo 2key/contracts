@@ -846,6 +846,8 @@ $( document ).ready(function() {
                     window.logout();
                 }
             });
+        } else {
+            $(".login").show();
         }
     }
     init(cb);
