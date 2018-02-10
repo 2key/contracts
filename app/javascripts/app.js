@@ -161,8 +161,8 @@ window.logout = function() {
     delete localStorage.username;
     $("#user-name").html("");
 
+    new_user();
     $(".login").show();
-    $(".logout").hide();
 }
 
 window.getETH = function() {
@@ -659,7 +659,7 @@ function lookupUserInfo() {
       $("#user-balance").html(web3.fromWei(result.toString()) + " ETH");
     });
   populate();
-  $(".login").hide();
+  new_user();
   $(".logout").show();
 }
 
@@ -692,41 +692,45 @@ function init(cb) {
   TwoKeyContract.setProvider(web3.currentProvider);
 
 
-  var username = localStorage.username;
-  if(((typeof username != "undefined") &&
-     (typeof username.valueOf() == "string")) &&
-    (username.length > 0)) {
-      /* TwoKeyAdmin.deployed() returns an instance of the contract. Every call
-       * in Truffle returns a promise which is why we have used then()
-       * everywhere we have a transaction call
-       */
+  /* TwoKeyAdmin.deployed() returns an instance of the contract. Every call
+   * in Truffle returns a promise which is why we have used then()
+   * everywhere we have a transaction call
+   */
 
-      var twoKeyContractAddress = params.c;
-      if (twoKeyContractAddress) {
-          var p1 = TwoKeyContract.at(twoKeyContractAddress);
-          var p2 = TwoKeyAdmin.deployed();
-          Promise.all([p1, p2]).then(function (instances) {
-              TwoKeyContract_instance = instances[0];
-              TwoKeyAdmin_contractInstance = instances[1];
-              cb();
-          }).catch(function (e) {
-              alert(e);
-          });
-      } else {
-          TwoKeyAdmin.deployed().then(function (contractInstance) {
-              TwoKeyAdmin_contractInstance = contractInstance;
-              cb();
-          }).catch(function (e) {
-              alert(e);
-          });
-      }
+  var twoKeyContractAddress = params.c;
+  if (twoKeyContractAddress) {
+      var p1 = TwoKeyContract.at(twoKeyContractAddress);
+      var p2 = TwoKeyAdmin.deployed();
+      Promise.all([p1, p2]).then(function (instances) {
+          TwoKeyContract_instance = instances[0];
+          TwoKeyAdmin_contractInstance = instances[1];
+          $("#loading").hide();
+          cb();
+      }).catch(function (e) {
+          alert(e);
+      });
   } else {
-      window.logout();
+      TwoKeyAdmin.deployed().then(function (contractInstance) {
+          TwoKeyAdmin_contractInstance = contractInstance;
+          $("#loading").hide();
+          cb();
+      }).catch(function (e) {
+          alert(e);
+      });
   }
+}
 
+function new_user() {
+    $("#influencers-graph-wrapper").hide();
+    $(".login").hide();
+    $(".logout").hide();
+    $("#metamask-login").hide()
 }
 
 $( document ).ready(function() {
+    $("#loading").show();
+    new_user();
+
     // https://clipboardjs.com/
     var clipboard_lnk0 = new Clipboard('.lnk0');
 
@@ -768,8 +772,6 @@ $( document ).ready(function() {
 
   if (typeof web3 !== 'undefined') {
     // Use Mist/MetaMask's provider
-    $(".login").hide();
-    $(".logout").hide();
     $("#metamask-login").text("Make sure MetaMask is configured to use the test network " + url);
 
     $("#metamask-login").show();
@@ -855,16 +857,16 @@ $( document ).ready(function() {
 // ************** Generate the tree diagram	 *****************
 //http://bl.ocks.org/d3noob/8375092
 // for d3.v4 see https://bl.ocks.org/mbostock/4339184
-var margin = {top: 20, right: 120, bottom: 20, left: 120},
+var margin = {top: 0, right: 0, bottom: 0, left: 50},
 	width = 960 - margin.right - margin.left,
-	height = 500 - margin.top - margin.bottom;
+	height = 400 - margin.top - margin.bottom;
+
+var tree = d3.layout.tree()
+    .size([height, width]);    // Compute the new tree layout.
 
 var d3_i = 0,
 	duration = 750,
 	d3_root;
-
-var tree = d3.layout.tree()
-	.size([height, width]);
 
 var diagonal = d3.svg.diagonal()
 	.projection(function(d) { return [d.y, d.x]; });
@@ -893,116 +895,113 @@ function d3_init() {
 }
 
 function d3_update(source) {
-    setTimeout(() => {
-        // Compute the new tree layout.
-        var nodes = tree.nodes(d3_root).reverse(),
-            links = tree.links(nodes);
+    var nodes = tree.nodes(d3_root).reverse(),
+        links = tree.links(nodes);
 
-        // Normalize for fixed-depth.
-        nodes.forEach(function (d) {
-            d.y = d.depth * 180;
+    // Normalize for fixed-depth.
+    nodes.forEach(function (d) {
+        d.y = d.depth * 180;
+    });
+
+    // Update the nodes…
+    var node = svg.selectAll("g.node")
+        .data(nodes, function (d) {
+            return d.id || (d.id = ++d3_i);
         });
 
-        // Update the nodes…
-        var node = svg.selectAll("g.node")
-            .data(nodes, function (d) {
-                return d.id || (d.id = ++d3_i);
-            });
+    // Enter any new nodes at the parent's previous position.
+    var nodeEnter = node.enter().append("g")
+        .attr("class", "node")
+        .attr("transform", function (d) {
+            return "translate(" + source.y0 + "," + source.x0 + ")";
+        })
+        .on("click", d3_click);
 
-        // Enter any new nodes at the parent's previous position.
-        var nodeEnter = node.enter().append("g")
-            .attr("class", "node")
-            .attr("transform", function (d) {
-                return "translate(" + source.y0 + "," + source.x0 + ")";
-            })
-            .on("click", d3_click);
-
-        nodeEnter.append("circle")
-            .attr("r", 1e-6)
-            .style("fill", function (d) {
-                return d._children ? "lightsteelblue" : "#fff";
-            });
-
-        nodeEnter.append("text")
-            .attr("x", function (d) {
-                return d.children || d._children ? -13 : 13;
-            })
-            .attr("dy", ".35em")
-            .attr("text-anchor", function (d) {
-                return d.children || d._children ? "end" : "start";
-            })
-            .text(function (d) {
-                return d.name || d.address;
-            })
-            .attr("id", function (d) {
-                return d.d3_id;
-            })
-            .style("fill-opacity", 1e-6);
-
-        // Transition nodes to their new position.
-        var nodeUpdate = node.transition()
-            .duration(duration)
-            .attr("transform", function (d) {
-                return "translate(" + d.y + "," + d.x + ")";
-            });
-
-        nodeUpdate.select("circle")
-            .attr("r", 10)
-            .style("fill", function (d) {
-                return d.load_children ? (d.load_children_in_progress ? "#0f0" : "#f00") : (d._children ? "lightsteelblue" : "#fff");
-            });
-
-        nodeUpdate.select("text")
-            .style("fill-opacity", 1);
-
-        // Transition exiting nodes to the parent's new position.
-        var nodeExit = node.exit().transition()
-            .duration(duration)
-            .attr("transform", function (d) {
-                return "translate(" + source.y + "," + source.x + ")";
-            })
-            .remove();
-
-        nodeExit.select("circle")
-            .attr("r", 1e-6);
-
-        nodeExit.select("text")
-            .style("fill-opacity", 1e-6);
-
-        // Update the links…
-        var link = svg.selectAll("path.link")
-            .data(links, function (d) {
-                return d.target.id;
-            });
-
-        // Enter any new links at the parent's previous position.
-        link.enter().insert("path", "g")
-            .attr("class", "link")
-            .attr("d", function (d) {
-                var o = {x: source.x0, y: source.y0};
-                return diagonal({source: o, target: o});
-            });
-
-        // Transition links to their new position.
-        link.transition()
-            .duration(duration)
-            .attr("d", diagonal);
-
-        // Transition exiting nodes to the parent's new position.
-        link.exit().transition()
-            .duration(duration)
-            .attr("d", function (d) {
-                var o = {x: source.x, y: source.y};
-                return diagonal({source: o, target: o});
-            })
-            .remove();
-
-        // Stash the old positions for transition.
-        nodes.forEach(function (d) {
-            d.x0 = d.x;
-            d.y0 = d.y;
+    nodeEnter.append("circle")
+        .attr("r", 1e-6)
+        .style("fill", function (d) {
+            return d._children ? "lightsteelblue" : "#fff";
         });
-    }, 100);
+
+    nodeEnter.append("text")
+        .attr("x", function (d) {
+            return d.children || d._children ? -13 : 13;
+        })
+        .attr("dy", ".35em")
+        .attr("text-anchor", function (d) {
+            return d.children || d._children ? "end" : "start";
+        })
+        .text(function (d) {
+            return d.name || d.address;
+        })
+        .attr("id", function (d) {
+            return 'd3-' + d.d3_id;
+        })
+        .style("fill-opacity", 1e-6);
+
+    // Transition nodes to their new position.
+    var nodeUpdate = node.transition()
+        .duration(duration)
+        .attr("transform", function (d) {
+            return "translate(" + d.y + "," + d.x + ")";
+        });
+
+    nodeUpdate.select("circle")
+        .attr("r", 10)
+        .style("fill", function (d) {
+            return d.load_children ? (d.load_children_in_progress ? "#0f0" : "#f00") : (d._children ? "lightsteelblue" : "#fff");
+        });
+
+    nodeUpdate.select("text")
+        .style("fill-opacity", 1);
+
+    // Transition exiting nodes to the parent's new position.
+    var nodeExit = node.exit().transition()
+        .duration(duration)
+        .attr("transform", function (d) {
+            return "translate(" + source.y + "," + source.x + ")";
+        })
+        .remove();
+
+    nodeExit.select("circle")
+        .attr("r", 1e-6);
+
+    nodeExit.select("text")
+        .style("fill-opacity", 1e-6);
+
+    // Update the links…
+    var link = svg.selectAll("path.link")
+        .data(links, function (d) {
+            return d.target.id;
+        });
+
+    // Enter any new links at the parent's previous position.
+    link.enter().insert("path", "g")
+        .attr("class", "link")
+        .attr("d", function (d) {
+            var o = {x: source.x0, y: source.y0};
+            return diagonal({source: o, target: o});
+        });
+
+    // Transition links to their new position.
+    link.transition()
+        .duration(duration)
+        .attr("d", diagonal);
+
+    // Transition exiting nodes to the parent's new position.
+    link.exit().transition()
+        .duration(duration)
+        .attr("d", function (d) {
+            var o = {x: source.x, y: source.y};
+            return diagonal({source: o, target: o});
+        })
+        .remove();
+
+    // Stash the old positions for transition.
+    nodes.forEach(function (d) {
+        d.x0 = d.x;
+        d.y0 = d.y;
+    });
 }
 
 // Toggle children on click.
@@ -1023,10 +1022,13 @@ function d3_click(d) {
         d3_update(d);
     }
 }
+var childrens;
 
 function d3_add_children(root) {
     root._children = null;
-    root.children = [];
+    // root.children = tree.nodes(childrens).reverse();
+    childrens = [];
+
     // d3_update(root);
     root.load_children_in_progress = true;
     d3_update(root);
@@ -1043,15 +1045,26 @@ function d3_add_children(root) {
                 "_children": [],
                 "load_children": true
             };
-            root.children.push(node);
+            childrens.push(node);
+            function d3_wrapper(node,root,i) {
+                return function d3_cb(_name) {
+                    node.name = _name;
+                    console.log(root);
+                    console.log(i);
+                    // d3.select("#d3-" + node.d3_id).text(function (d) {
+                    //     return _name;
+                    // });
+                }
+            }
 
-            owner2name(name, "#" + unique_id, (_name) => {
-                node.name = _name;
-            });
+            owner2name(name, "#d3-" + node.d3_id, d3_wrapper(node,root,i));
 
         }
-        if (root.children.length == 0) {
+        if (childrens.length == 0) {
             root.children = null;
+        } else {
+            $("#influencers-graph-wrapper").show();
+            root.children = tree.nodes(childrens).reverse()[0];
         }
         root.load_children = null;
         root.load_children_in_progress = null;

@@ -15,6 +15,7 @@
 <div class="pull-left"><a href=".">home</a></div>
   <div class="pull-right"><a href="help.html">help</a></div>
   <div class="margin-top-3">
+    <div id="loading"><h1>Loading...</h1></div>
     <div id="metamask-login" class="container-fluid">
     </div>
     <div class="container-fluid login">
@@ -117,7 +118,9 @@
 
       <div id="contract">
       <h2>Contract</h2>
-        <div id="influencers-graph"></div>
+        <div id="influencers-graph-wrapper">
+          <div id="influencers-graph"></div>
+        </div>
       <div class="table-responsive">
         <a href="#" class="btn btn-primary" onclick="contract_take()">Join</a>
         <a href="#" class="btn btn-primary" id="buy">Fulfill</a>
