@@ -119,7 +119,7 @@ contract TwoKeyContract is StandardToken {
   }
 
   // New 2Key method
-  function getInfo(address me) public constant returns (uint256,uint256,uint256,string,string,uint256,uint256,uint256,uint256,uint256,uint256) {
+  function getInfo(address me) public view returns (uint256,uint256,uint256,string,string,uint256,uint256,uint256,uint256,uint256,uint256) {
     return (this.balanceOf(me),units[me],xbalances[me],name,symbol,cost,bounty,quota,totalSupply_,total_units,this.balance);
   }
 
@@ -178,7 +178,7 @@ contract TwoKeyContract is StandardToken {
     }
   }
 
-  function getGivenTo(address _owner) public constant returns (address[]) {
+  function getGivenTo(address _owner) public view returns (address[]) {
     return given_to[_owner];
   }
 }
@@ -209,10 +209,10 @@ contract TwoKeyAdmin {
     name2owner[keccak256(_name)] = _owner;
   }
 
-  function getName2Owner(string _name) public constant returns (address) {
+  function getName2Owner(string _name) public view returns (address) {
     return name2owner[keccak256(_name)];
   }
-  function getOwner2Name(address _owner) public constant returns (string) {
+  function getOwner2Name(address _owner) public view returns (string) {
     return owner2name[_owner];
   }
 
@@ -231,19 +231,19 @@ contract TwoKeyAdmin {
     return c;
   }
 
-  function getContract(address owner, uint idx) public constant returns (address) {
+  function getContract(address owner, uint idx) public view returns (address) {
     return owner2Contracts[owner][idx];
   }
 
-  function getOwner2Contracts(address owner) public constant returns (address[]) {
+  function getOwner2Contracts(address owner) public view returns (address[]) {
     return owner2Contracts[owner];
   }
 
-  function getContracts() public constant returns (address[]) {
+  function getContracts() public view returns (address[]) {
     return contracts;
   }
 
-  function getOwners() public constant returns (address[]) {
+  function getOwners() public view returns (address[]) {
     return owners;
   }
 
