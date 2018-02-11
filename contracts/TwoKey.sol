@@ -29,7 +29,9 @@ contract TwoKeyContract is StandardToken {
   mapping(address => uint256) internal units; // number of units bought
 
   // Initialize all the constants
-  function TwoKeyContract(address _owner, string _name, string _symbol, uint256 _tSupply, uint256 _quota, uint256 _cost, uint256 _bounty, uint256 _units, string _ipfs_hash) public {
+  function TwoKeyContract(address _owner, string _name, string _symbol,
+        uint256 _tSupply, uint256 _quota, uint256 _cost, uint256 _bounty,
+        uint256 _units, string _ipfs_hash) public {
     require(_bounty <= _cost);
     owner = _owner;
     name = _name;
@@ -123,11 +125,14 @@ contract TwoKeyContract is StandardToken {
     return (this.balanceOf(me),units[me],xbalances[me],name,symbol,cost,bounty,quota,totalSupply_,total_units,this.balance);
   }
 
+  function getUnits(address customer) public view returns (uint256) {
+    return (units[customer]);
+  }
+
   function () external payable {
     buyProduct();
   }
 
-  event Log(uint index);
   // low level token purchase function
   function buyProduct() public payable {
     address customer = msg.sender;

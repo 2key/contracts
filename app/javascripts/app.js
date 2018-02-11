@@ -94,8 +94,10 @@ import twoKeyContract_artifacts from '../../build/contracts/TwoKeyContract.json'
 
 var TwoKeyAdmin = contract(twoKeyAdmin_artifacts);
 var TwoKeyAdmin_contractInstance;
+
 var TwoKeyContract = contract(twoKeyContract_artifacts);
 var TwoKeyContract_instance;
+var twoKeyContractAddress;
 
 // We are using IPFS to store content for each product.
 // The web site also contains an IPFS node and this App connects to it
@@ -181,14 +183,18 @@ window.giveETH = function() {
 
 window.buy = function(twoKeyContractAddress, name, cost) {
     var myaddress = whoAmI();
-    var ok = confirm("your about to buy the product \"" + name + "\" from contract \n" + twoKeyContractAddress +
+    var ok = confirm("your about to fulfill (buy) the product \"" + name + "\" from contract \n" + twoKeyContractAddress +
       "\nfor " + cost + " ETH");
     if (ok) {
+        TwoKeyContract.at(twoKeyContractAddress).then( (TwoKeyContract_instance) => {
         TwoKeyContract_instance.buyProduct({gas: 1400000, from: myaddress, value: web3.toWei(cost, "ether")}).then(function () {
             console.log('buy');
             lookupUserInfo();
         }).catch(function (e) {
             alert(e);
+        });
+        }).catch(function(e){
+          alert(e);
         });
     }
 }
@@ -197,9 +203,15 @@ window.redeem = function(twoKeyContractAddress) {
     var ok = confirm("your about to redeem the balance of 2Key contract \n" + twoKeyContractAddress);
     if (ok) {
         var myaddress = whoAmI();
+        TwoKeyContract.at(twoKeyContractAddress).then( (TwoKeyContract_instance) => {
         TwoKeyContract_instance.redeem({gas: 1400000, from: myaddress}).then(function () {
             console.log('redeem')
             lookupUserInfo();
+        }).catch(function (e) {
+            alert(e);
+        });
+        }).catch(function(e){
+          alert(e);
         });
     }
 }
@@ -538,11 +550,15 @@ window.giveARCs = function() {
   }
 
   var myaddress = whoAmI();
+  TwoKeyContract.at(twoKeyContractAddress).then( (TwoKeyContract_instance) => {
   TwoKeyContract_instance.transfer(target, 1, {gas: 1400000, from: myaddress}).then((tx) => {
       console.log(tx);
       $("#target-address").val("");
       $("#influence-address").val("");
       populate();
+  }).catch(function(e){
+          alert(e);
+  });
   }).catch(function(e){
           alert(e);
   });
@@ -556,30 +572,36 @@ window.contract_take = function() {
         alert("You can't take your own ARCs. Switch to a different user and try again.");
         return;
     }
+  TwoKeyContract.at(twoKeyContractAddress).then( (TwoKeyContract_instance) => {
 
-    TwoKeyContract_instance.quota().then(function (quota) {
+      TwoKeyContract_instance.quota().then(function (quota) {
 
-    var ok = confirm("your about to take 1 ARC from user\n" + target +
-      "\nin contract\n" + twoKeyContractAddress +
-      "\nand this will turn into " + quota + " ARCs in your account");
-    if (ok) {
-      var myaddress = whoAmI();
-      TwoKeyContract_instance.transferFrom(target, myaddress, 1, {
-          gas: 1400000,
-          from: myaddress
-      }).then(
-          function (tx) {
-              console.log(tx);
-              $("#target-address").val("");
-              $("#influence-address").val("");
-              populate();
-              location.assign(location.protocol + "//" + location.host);
+          var ok = confirm("your about to take 1 ARC from user\n" + target +
+              "\nin contract\n" + twoKeyContractAddress +
+              "\nand this will turn into " + quota + " ARCs in your account");
+          if (ok) {
+              var myaddress = whoAmI();
+              TwoKeyContract_instance.transferFrom(target, myaddress, 1, {
+                  gas: 1400000,
+                  from: myaddress
+              }).then(
+                  function (tx) {
+                      console.log(tx);
+                      $("#target-address").val("");
+                      $("#influence-address").val("");
+                      populate();
+                      location.assign(location.protocol + "//" + location.host);
+                  }
+              ).catch(function (e) {
+                  alert("you can't take more than once\n\n" + e);
+                  location.assign(location.protocol + "//" + location.host);
+              });
           }
-      ).catch(function (e) {
-          alert("you can't take more than once\n\n" + e);
-          location.assign(location.protocol + "//" + location.host);
-     });
-    }
+      }).catch(function (e) {
+          alert(e);
+      });
+  }).catch(function(e){
+          alert(e);
   });
 }
 
@@ -879,12 +901,19 @@ var svg = d3.select("#influencers-graph").append("svg")
   .append("g")
 	.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+// Define the div for the tooltip
+// http://bl.ocks.org/d3noob/a22c42db65eb00d4e369
+var tooltip_div = d3.select("body").append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
+
 function d3_init() {
     d3_root = {
         "name": "Me",
-        "parent": "null",
+        "parent": null,
         "children": [],
-        "load_children": true
+        "load_children": true,
+        "units": 0
     };
 
     d3_root.x0 = height / 2;
@@ -917,7 +946,20 @@ function d3_update(source) {
         .attr("transform", function (d) {
             return "translate(" + source.y0 + "," + source.x0 + ")";
         })
-        .on("click", d3_click);
+        .on("click", d3_click)
+        .on("mouseover", function(d) {
+            tooltip_div.transition()
+                .duration(200)
+                .style("opacity", .9);
+            tooltip_div	.html("units "+d.units + "<br/>")
+                .style("left", (d3.event.pageX) + "px")
+                .style("top", (d3.event.pageY - 28) + "px");
+            })
+        .on("mouseout", function(d) {
+            tooltip_div.transition()
+                .duration(500)
+                .style("opacity", 0);
+        });;
 
     nodeEnter.append("circle")
         .attr("r", 1e-6)
@@ -952,6 +994,8 @@ function d3_update(source) {
         .attr("r", 10)
         .style("fill", function (d) {
             return d.load_children ? (d.load_children_in_progress ? "#0f0" : "#f00") : (d._children ? "lightsteelblue" : "#fff");
+        }).style("stroke", (d) => {
+            return d.units ? "#0f0" : "steelblue";
         });
 
     nodeUpdate.select("text")
@@ -977,6 +1021,10 @@ function d3_update(source) {
             return d.target.id;
         });
 
+    link.style("stroke", (d) => {
+            return d.target.units ? "#0f0" : "#ccc";
+        });
+
     // Enter any new links at the parent's previous position.
     link.enter().insert("path", "g")
         .attr("class", "link")
@@ -986,9 +1034,13 @@ function d3_update(source) {
         });
 
     // Transition links to their new position.
-    link.transition()
+    var linkUpdate = link.transition()
         .duration(duration)
         .attr("d", diagonal);
+
+    linkUpdate.style("stroke", (d) => {
+            return d.target.units ? "#0f0" : "#ccc";
+        });
 
     // Transition exiting nodes to the parent's new position.
     link.exit().transition()
@@ -1045,21 +1097,33 @@ function d3_add_children(root) {
                 "d3_id": ++unique_id,
                 "parent": parent,
                 "_children": [],
-                "load_children": true
+                "load_children": true,
+                "units": 0
             };
             childrens.push(node);
-            function d3_wrapper(node,root,i) {
+            function d3_wrapper(node) {
+                // freeze node
                 return function d3_cb(_name) {
                     node.name = _name;
-                    console.log(root);
-                    console.log(i);
-                    // d3.select("#d3-" + node.d3_id).text(function (d) {
-                    //     return _name;
-                    // });
                 }
             }
 
-            owner2name(name, "#d3-" + node.d3_id, d3_wrapper(node,root,i));
+            owner2name(name, "#d3-" + node.d3_id, d3_wrapper(node));
+
+            function d3_units_wrapper(node, root) {
+                // freeze node
+                return function d3_cb(_units) {
+                    do {
+                        node.units += parseInt(""+_units);
+                        node = node.parent;
+                    } while(node);
+                    d3_update(root);
+                }
+            }
+            var d3_units_cb = d3_units_wrapper(node, root);
+            TwoKeyContract_instance.getUnits(name).then(function (_units) {
+                d3_units_cb(_units);
+            });
 
         }
         if (childrens.length == 0) {
