@@ -913,7 +913,8 @@ function d3_init() {
         "parent": null,
         "children": [],
         "load_children": true,
-        "units": 0
+        "units": 0,
+        "rewards": 0
     };
 
     d3_root.x0 = height / 2;
@@ -951,7 +952,7 @@ function d3_update(source) {
             tooltip_div.transition()
                 .duration(200)
                 .style("opacity", .9);
-            tooltip_div	.html("units "+d.units + "<br/>")
+            tooltip_div	.html("units "+d.units + "<br/>" + "rewards "+d.rewards + "<br/>")
                 .style("left", (d3.event.pageX) + "px")
                 .style("top", (d3.event.pageY - 28) + "px");
             })
@@ -1098,7 +1099,8 @@ function d3_add_children(root) {
                 "parent": parent,
                 "_children": [],
                 "load_children": true,
-                "units": 0
+                "units": 0,
+                "rewards": 0
             };
             childrens.push(node);
             function d3_wrapper(node) {
@@ -1113,10 +1115,12 @@ function d3_add_children(root) {
             function d3_units_wrapper(node, root) {
                 // freeze node
                 return function d3_cb(_units) {
-                    do {
-                        node.units += parseInt(""+_units);
+                    node.units += parseInt(""+_units);
+                    node = node.parent;
+                    while(node) {
+                        node.rewards += parseInt(""+_units);
                         node = node.parent;
-                    } while(node);
+                    };
                     d3_update(root);
                 }
             }
