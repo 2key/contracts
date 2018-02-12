@@ -1023,7 +1023,7 @@ function d3_update(source) {
         });
 
     link.style("stroke", (d) => {
-            return d.target.units ? "#0f0" : "#ccc";
+            return (d.target.rewards || d.target.units) ? "#0f0" : "#ccc";
         });
 
     // Enter any new links at the parent's previous position.
@@ -1040,7 +1040,7 @@ function d3_update(source) {
         .attr("d", diagonal);
 
     linkUpdate.style("stroke", (d) => {
-            return d.target.units ? "#0f0" : "#ccc";
+            return (d.target.rewards || d.target.units) ? "#0f0" : "#ccc";
         });
 
     // Transition exiting nodes to the parent's new position.
