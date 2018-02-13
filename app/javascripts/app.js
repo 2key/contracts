@@ -79,15 +79,6 @@ import { default as Web3} from 'web3';
 import { default as contract } from 'truffle-contract';
 // import { default as clipboard } from 'clipboard';
 // import clippy_img from '!!file!../images/clippy.svg'
-/*
- * When you compile and deploy your Voting contract,
- * truffle stores the abi and deployed address in a json
- * file in the build directory. We will use this information
- * to setup a Voting abstraction. We will use this abstraction
- * later to create an instance of the Voting contract.
- * Compare this against the index.js from our previous tutorial to see the difference
- * https://gist.github.com/maheshmurthy/f6e96d6b3fff4cd4fa7f892de8a1a1b4#file-index-js
- */
 
 import twoKeyAdmin_artifacts from '../../build/contracts/TwoKeyAdmin.json'
 import twoKeyContract_artifacts from '../../build/contracts/TwoKeyContract.json'
@@ -367,6 +358,7 @@ function contract_info(TwoKeyContract_instance, min_arcs, callback) {
     var myaddress = whoAmI();
     var twoKeyContractAddress = TwoKeyContract_instance.address;
     var take_link = location.origin + "/?c=" + twoKeyContractAddress + "&f=" + myaddress;
+    var contract_link = "./?c=" + twoKeyContractAddress;
     TwoKeyContract_instance.getInfo(myaddress).then(function (info) {
         var arcs, units, xbalance, name, symbol, total_arcs, quota, cost, bounty, total_units, balance, owner;
         [arcs, units, xbalance, name, symbol, cost, bounty, quota, total_arcs, total_units, balance, owner] = info;
@@ -409,7 +401,7 @@ function contract_info(TwoKeyContract_instance, min_arcs, callback) {
                 "data-toggle='tooltip' title='redeem'" +
                 "\">" + xbalance +
                 "</button></td>");
-            items.push("<td>" + name + "</td>");
+            items.push("<td><a href='" + contract_link + "'>"+ name + "</a></td>");
             items.push("<td>" + symbol + "</td>");
             items.push("<td>" + quota + "</td>");
             items.push("<td>" +

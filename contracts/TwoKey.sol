@@ -28,6 +28,8 @@ contract TwoKeyContract is StandardToken {
   mapping(address => uint256) internal xbalances; // balance of external currency (ETH or 2Key coin)
   mapping(address => uint256) internal units; // number of units bought
 
+  event Fulfilled(address indexed to);
+
   // Initialize all the constants
   function TwoKeyContract(address _owner, string _name, string _symbol,
         uint256 _tSupply, uint256 _quota, uint256 _cost, uint256 _bounty,
@@ -168,6 +170,8 @@ contract TwoKeyContract is StandardToken {
     xbalances[owner] = xbalances[owner].add(cost).sub(total_bounty);
     total_units = total_units.sub(1);
     units[customer] = units[customer].add(1);
+
+    Fulfilled(msg.sender);
   }
 
   function redeem() public {
