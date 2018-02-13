@@ -1111,90 +1111,18 @@ function d3_update(source) {
 
 // Toggle children on click.
 function d3_click(d) {
-    if (d.load_children_in_progress) {
-        return;
-    }
-    if(d.load_children) {
-        d3_add_children(d);
+    if (d.children) {
+        d._children = d.children;
+        d.children = null;
     } else {
-        if (d.children) {
-            d._children = d.children;
-            d.children = null;
-        } else {
-            d.children = d._children;
-            d._children = null;
-        }
-        d3_update(d);
+        d.children = d._children;
+        d._children = null;
     }
-}
-var childrens;
-
-function d3_add_children(root) {
-    root._children = null;
-    // root.children = tree.nodes(childrens).reverse();
-    childrens = [];
-
-    // d3_update(root);
-    root.load_children_in_progress = true;
-    d3_update(root);
-
-    var parent = root.name;
-    TwoKeyContract_instance.getGivenTo(root.address).then(function (info) {
-        for (var i = 0; i < info.length; i++) {
-            var name = info[i];
-
-            var node = {
-                "address": name,
-                "d3_id": ++unique_id,
-                "parent": parent,
-                "_children": [],
-                "load_children": true,
-                "units": 0,
-                "rewards": 0
-            };
-            childrens.push(node);
-            function d3_wrapper(node) {
-                // freeze node
-                return function d3_cb(_name) {
-                    node.name = _name;
-                }
-            }
-
-            owner2name(name, "#d3-" + node.d3_id, d3_wrapper(node));
-
-            function d3_units_wrapper(node, root) {
-                // freeze node
-                return function d3_cb(_units) {
-                    node.units += parseInt(""+_units);
-                    node = node.parent;
-                    while(node) {
-                        node.rewards += parseInt(""+_units);
-                        node = node.parent;
-                    };
-                    d3_update(root);
-                }
-            }
-            var d3_units_cb = d3_units_wrapper(node, root);
-            TwoKeyContract_instance.getUnits(name).then(function (_units) {
-                d3_units_cb(_units);
-            });
-
-        }
-        if (childrens.length == 0) {
-            root.children = null;
-        } else {
-            $("#influencers-graph-wrapper").show();
-            root.children = tree.nodes(childrens).reverse()[0];
-        }
-        root.load_children = null;
-        root.load_children_in_progress = null;
-        d3_update(root);
-    });
+    d3_update(d);
 }
 
 function d3_add_event_children(addresses, parent, depth) {
     var childrens = [];
-    var count = 0;
 
     if (addresses) {
         for (var i = 0; i < addresses.length; i++) {
