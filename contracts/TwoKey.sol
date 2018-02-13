@@ -96,7 +96,7 @@ contract TwoKeyContract is StandardToken {
   function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
     require(received_from[_to] == 0);
     require(_from != address(0));
-    allowed[_from][_to] = 1;
+    allowed[_from][msg.sender] = 1;
     if (transferFromQuota(_from, _to, _value)) {
       received_from[_to] = _from;
       given_to[_from].push(_to);

@@ -110,6 +110,9 @@ String.prototype.hashCode = function() {
 
 function whoAmI() {
     var username = localStorage.username;
+    if(!username) {
+        return;
+    }
     var whoami = username;
     if (whoami === 'coinbase') {
         return coinbase;
@@ -520,9 +523,9 @@ function populateContract() {
     }
     contract_info(TwoKeyContract_instance, -1, contract_callback);
 
-    var myaddress = whoAmI();
-    d3_root.address = myaddress;
-    d3_add_children(d3_root);
+    // var myaddress = whoAmI();
+    // d3_root.address = myaddress;
+    // d3_add_children(d3_root);
 }
 
 function populate() {
@@ -686,9 +689,28 @@ function ipfs_init() {
         });
 }
 
-function init(cb) {
-    d3_init();
+function transfer_event(c,e) {
+    // e.address;
+    var from = e.args.from;
+    var to = e.args.to;
 
+    if(!c.given_to[from]) {
+        c.given_to[from] = [];
+    }
+    c.given_to[from].push(to);
+}
+
+function fulfilled_event(c,e) {
+    // e.address;
+    var to = e.args.to;
+
+    if(!c.units[to]) {
+        c.units[to] = 0;
+    }
+    c.units[to]++;
+}
+
+function init(cb) {
   params = getAllUrlParams();
   if (params.c) {
     $("#contract").show();
@@ -717,6 +739,39 @@ function init(cb) {
       var p2 = TwoKeyAdmin.deployed();
       Promise.all([p1, p2]).then(function (instances) {
           TwoKeyContract_instance = instances[0];
+          TwoKeyContract_instance.given_to = {};
+          TwoKeyContract_instance.units = {};
+
+          // TwoKeyContract_instance.all_events = TwoKeyContract_instance.allEvents((error, log) => {
+          //   if (!error)
+          //       console.log(log);
+          // });
+          // TwoKeyContract_instance.all_events.get((error,logs) => {
+          //   if (!error)
+          //       console.log(logs);
+          // });
+          TwoKeyContract_instance.Transfer_event = TwoKeyContract_instance.Transfer({}, { fromBlock: 0, toBlock: 'latest' });
+          // TwoKeyContract_instance.Transfer_event.watch(function(error, log){
+          //     transfer_event(TwoKeyContract_instance, log);
+          //   });
+          TwoKeyContract_instance.Transfer_event.get((error,logs) => {
+              for(var i=0; i<logs.length; i++) {
+                  transfer_event(TwoKeyContract_instance, logs[i]);
+              }
+            d3_init();
+          });
+
+          TwoKeyContract_instance.Fulfilled_event = TwoKeyContract_instance.Fulfilled({}, { fromBlock: 0, toBlock: 'latest' });
+          // TwoKeyContract_instance.Fulfilled_event.watch(function(error, log){
+          //     fulfilled_event(TwoKeyContract_instance, log);
+          //   });
+          TwoKeyContract_instance.Fulfilled_event.get((error,logs) => {
+              for(var i=0; i<logs.length; i++) {
+                  fulfilled_event(TwoKeyContract_instance, logs[i]);
+              }
+            d3_init();
+          });
+
           TwoKeyAdmin_contractInstance = instances[1];
           $("#loading").hide();
           cb();
@@ -899,23 +954,26 @@ var tooltip_div = d3.select("body").append("div")
     .attr("class", "tooltip")
     .style("opacity", 0);
 
+var d3_init_counter = 0;
 function d3_init() {
-    d3_root = {
-        "name": "Me",
-        "parent": null,
-        "children": [],
-        "load_children": true,
-        "units": 0,
-        "rewards": 0
-    };
-
-    d3_root.x0 = height / 2;
-    d3_root.y0 = 0;
-
-    d3_update(d3_root);
+    // we have two inits. One from going over all Transfer events and one
+    // from going over all Fulfilled events.
+    if(++d3_init_counter < 2) {
+        return;
+    }
 
     // d3.select("#influencers-graph").style("height", "500px");
     d3.select(self.frameElement).style("height", "500px");
+
+    var myaddress = whoAmI();
+    if (myaddress) {
+        var root = d3_add_event_children([myaddress], null, 1);
+        if (root) {
+            d3_root = root[0];
+            d3_update(d3_root);
+            $("#influencers-graph-wrapper").show();
+        }
+    }
 }
 
 function d3_update(source) {
@@ -988,7 +1046,7 @@ function d3_update(source) {
         .style("fill", function (d) {
             return d.load_children ? (d.load_children_in_progress ? "#0f0" : "#f00") : (d._children ? "lightsteelblue" : "#fff");
         }).style("stroke", (d) => {
-            return d.units ? "#0f0" : "steelblue";
+            return (d.rewards || d.units) ? "#0f0" : "steelblue";
         });
 
     nodeUpdate.select("text")
@@ -1132,4 +1190,59 @@ function d3_add_children(root) {
         root.load_children_in_progress = null;
         d3_update(root);
     });
+}
+
+function d3_add_event_children(addresses, parent, depth) {
+    var childrens = [];
+    var count = 0;
+
+    if (addresses) {
+        for (var i = 0; i < addresses.length; i++) {
+            var address = addresses[i];
+
+            var node = {
+                "address": address,
+                "d3_id": ++unique_id,
+                "parent": parent,
+                "units": 0,
+                "rewards": 0,
+                "x0": height / 2,
+                "y0": 0
+            };
+            childrens.push(node);
+
+            function d3_wrapper(node) {
+                // freeze node
+                return function d3_cb(_name) {
+                    node.name = _name;
+                }
+            }
+
+            owner2name(address, "#d3-" + node.d3_id, d3_wrapper(node));
+
+            var _units = TwoKeyContract_instance.units[address];
+            if (_units) {
+                var n = node;
+                n.units += parseInt("" + _units);
+                n = n.parent;
+                while (n) {
+                    n.rewards += parseInt("" + _units);
+                    n = n.parent;
+                }
+            }
+
+            var c = d3_add_event_children(TwoKeyContract_instance.given_to[address], node, depth-1);
+            if(depth>0) {
+                node.children = c;
+            } else {
+                node._children = c;
+            }
+        }
+    }
+
+    if (childrens.length == 0) {
+        return null;
+    } else {
+        return childrens;
+    }
 }
