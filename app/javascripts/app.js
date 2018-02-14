@@ -967,9 +967,9 @@ function d3_init() {
 
     var myaddress = whoAmI();
     if (myaddress) {
-        var root = d3_add_event_children([myaddress], null, 1);
-        if (root) {
-            d3_root = root[0];
+        var root = d3_add_event_children([myaddress], null, 1)[0];
+        if (root.children) {
+            d3_root = root;
             d3_update(d3_root);
             $("#influencers-graph-wrapper").show();
         }
