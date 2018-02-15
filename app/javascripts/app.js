@@ -88,6 +88,7 @@ var TwoKeyAdmin_contractInstance;
 
 var TwoKeyContract = contract(twoKeyContract_artifacts);
 var twoKeyContractAddress;
+var from_twoKeyContractAddress;
 
 function cache(fn){
     var NO_RESULT = {}; // unique, would use Symbol if ES2015-able
@@ -193,13 +194,17 @@ window.login = function() {
 }
 
 window.logout = function() {
+    twoKeyContractAddress = null;
+    from_twoKeyContractAddress = null;
     delete localStorage.username;
     $("#user-name").html("");
     $("#influencers-graph-wrapper").hide()
-    $("#influencers-graph").empty();
+    // $("#influencers-graph").empty();
     $("#contract-table").empty();
     $("#my-2key-contracts").empty();
     $("#my-2key-contracts").empty();
+    $("#buy").removeAttr("onclick");
+    $("#redeme").removeAttr("onclick");
 
     new_user();
     $(".login").show();
@@ -240,7 +245,8 @@ window.buy = function(twoKeyContractAddress, name, cost) {
         getTwoKeyContract(twoKeyContractAddress, (TwoKeyContract_instance) => {
             TwoKeyContract_instance.buyProduct({gas: 1400000, from: myaddress, value: web3.toWei(cost, "ether")}).then(function () {
                 console.log('buy');
-                lookupUserInfo();
+                updateUserInfo();
+                populate();
             }).catch(function (e) {
                 alert(e);
             });
@@ -255,7 +261,8 @@ window.redeem = function(twoKeyContractAddress) {
         getTwoKeyContract(twoKeyContractAddress, (TwoKeyContract_instance) => {
             TwoKeyContract_instance.redeem({gas: 1400000, from: myaddress}).then(function () {
                 console.log('redeem')
-                lookupUserInfo();
+                updateUserInfo();
+                populate();
             }).catch(function (e) {
                 alert(e);
             });
@@ -405,6 +412,8 @@ function contact_header() {
     items.push("<td data-toggle='tooltip' title='product description'>description</td>");
     items.push("<td data-toggle='tooltip' title='who created the contract'>owner</td>");
     items.push("<td data-toggle='tooltip' title='the address of the contract'>address</td>");
+    items.push("<td data-toggle='tooltip' title='cost of joining'>join cost</td>");
+    items.push("<td data-toggle='tooltip' title='estimated reward'>est. reward</td>");
 
     return items;
 }
@@ -508,8 +517,12 @@ function contract_info(TwoKeyContract_instance, min_arcs, callback) {
                 "msg='contract address was copied to clipboard'>" +
                 twoKeyContractAddress + "</button>" +
                 "</td>");
+            var join_cost = 0;
+            items.push("<td>" + join_cost + "</td>");
+            var est_reward = 0;
+            items.push("<td>" + est_reward + "</td>");
         }
-        callback(items);
+        callback(items, info);
     });
 }
 
@@ -534,7 +547,7 @@ function contract_table(tbl, contracts, min_arcs) {
     function iterator(twoKeyContractAddress, report) {
         if (first_row) {
             first_row = false;
-            $(tbl).append("<tr><td colspan=\"4\" data-toggle='tooltip' title='what I have in the contract'>Me</td><td colspan=\"11\" data-toggle='tooltip' title='contract properties'>Contract</td></tr>");
+            $(tbl).append("<tr><td colspan=\"4\" data-toggle='tooltip' title='what I have in the contract'>Me</td><td colspan=\"13\" data-toggle='tooltip' title='contract properties'>Contract</td></tr>");
             add_row(contact_header());
         }
 
@@ -566,17 +579,39 @@ function populateMy2KeyContracts() {
 }
 
 function populateContract() {
+    if (from_twoKeyContractAddress) {
+        $("#join-btn").show();
+    } else {
+        $("#join-btn").hide();
+    }
     $("#contract-table").empty();
     $("#contract-spinner").addClass('spin');
     $("#contract-spinner").show();
     var h = contact_header();
-    function contract_callback(c) {
+    function contract_callback(c, info) {
         for (var i = 0; i < h.length; i++) {
             var row = "<tr>" + h[i] + c[i] + "</tr>";
             $("#contract-table").append(row);
         }
         $("#contract-spinner").removeClass('spin');
         $("#contract-spinner").hide();
+
+        var arcs, units, xbalance, name, symbol, total_arcs, quota, cost, bounty, total_units, balance, owner;
+        [arcs, units, xbalance, name, symbol, cost, bounty, quota, total_arcs, total_units, balance, owner] = info;
+        bounty = web3.fromWei(bounty.toString());
+        $("#summary-quota").text(quota);
+        $("#summary-reward").text(bounty);
+
+        if (arcs.toNumber()) {
+            $("#buy").show();
+        } else {
+            $("#buy").hide();
+        }
+        if (xbalance.toNumber()) {
+            $("#redeem").show();
+        } else {
+            $("#redeem").hide();
+        }
     }
     getTwoKeyContract(twoKeyContractAddress, (TwoKeyContract_instance) => {
         contract_info(TwoKeyContract_instance, -1, contract_callback);
@@ -605,6 +640,7 @@ function populateContract() {
                 d3_init();
             });
         } else {
+            d3_init_counter = 2;
             d3_init();
         }
     });
@@ -647,21 +683,24 @@ window.giveARCs = function() {
 }
 
 window.contract_take = function() {
-    var target = params.f;
+    if(!from_twoKeyContractAddress) {
+        return;
+    }
+
     var myaddress = whoAmI();
-    if (target == myaddress) {
+    if (from_twoKeyContractAddress == myaddress) {
         alert("You can't take your own ARCs. Switch to a different user and try again.");
         return;
     }
   getTwoKeyContract(twoKeyContractAddress, (TwoKeyContract_instance) => {
       TwoKeyContract_instance.quota().then(function (quota) {
 
-          var ok = confirm("your about to take 1 ARC from user\n" + target +
+          var ok = confirm("your about to take 1 ARC from user\n" + from_twoKeyContractAddress +
               "\nin contract\n" + twoKeyContractAddress +
               "\nand this will turn into " + quota + " ARCs in your account");
           if (ok) {
               var myaddress = whoAmI();
-              TwoKeyContract_instance.transferFrom(target, myaddress, 1, {
+              TwoKeyContract_instance.transferFrom(from_twoKeyContractAddress, myaddress, 1, {
                   gas: 1400000,
                   from: myaddress
               }).then(
@@ -747,20 +786,24 @@ window.createContract = function() {
   }
 }
 
-function lookupUserInfo() {
-  var username = localStorage.username;
-  $("#user-name").html(username);
-  let address = whoAmI(); // $("#voter-info").val();
+function updateUserInfo() {
+    var username = localStorage.username;
+    $("#user-name").html(username);
+    let address = whoAmI(); // $("#voter-info").val();
     if (!address) {
         alert("Unlock MetaMask and reload page");
     }
     $("#user-address").html(address.toString());
-    web3.eth.getBalance(address, function(error, result) {
-      $("#user-balance").html(web3.fromWei(result.toString()) + " ETH");
+    web3.eth.getBalance(address, function (error, result) {
+        $("#user-balance").html(web3.fromWei(result.toString()) + " ETH");
     });
-  populate();
-  new_user();
-  $(".logout").show();
+}
+
+function lookupUserInfo() {
+    updateUserInfo();
+    populate();
+    new_user();
+    $(".logout").show();
 }
 
 function ipfs_init() {
@@ -796,6 +839,7 @@ function fulfilled_event(c,e) {
 function init(cb) {
   params = getAllUrlParams();
   twoKeyContractAddress = params.c;
+  from_twoKeyContractAddress = params.f;
   if (twoKeyContractAddress) {
     $("#contract").show();
     $("#contracts").hide();
@@ -966,7 +1010,7 @@ $( document ).ready(function() {
 // for d3.v4 see https://bl.ocks.org/mbostock/4339184
 var margin = {top: 0, right: 0, bottom: 0, left: 50},
 	width = 960 - margin.right - margin.left,
-	height = 400 - margin.top - margin.bottom;
+	height = 300 - margin.top - margin.bottom;
 
 var tree = d3.layout.tree()
     .size([height, width]);    // Compute the new tree layout.
@@ -999,7 +1043,7 @@ function d3_init() {
     }
 
     // d3.select("#influencers-graph").style("height", "500px");
-    d3.select(self.frameElement).style("height", "500px");
+    d3.select(self.frameElement).style("height", height + "px");
 
     var myaddress = whoAmI();
     if (myaddress) {

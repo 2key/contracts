@@ -118,21 +118,22 @@
       </div>
 
       <div id="contract">
-      <h2>Contract</h2>
-        <div id="influencers-graph-wrapper">
-          <div id="influencers-graph"></div>
+        <h2>Contract</h2>
+        <div class="table-responsive">
+          <a href="#" class="btn btn-primary" onclick="contract_take()" id="join-btn">Join</a>
+          <a href="#" class="btn btn-primary" id="buy">Fulfill</a>
+          <a href="#" class="btn btn-primary" id="redeem">Redeem</a>
         </div>
-      <div class="table-responsive">
-        <a href="#" class="btn btn-primary" onclick="contract_take()">Join</a>
-        <a href="#" class="btn btn-primary" id="buy">Fulfill</a>
-        <a href="#" class="btn btn-primary" id="redeem">Redeem</a>
-        <div class="loader" id="contract-spinner" style="display:none;"></div>
-        <table class="table table-bordered">
-          <tbody id="contract-table">
-          </tbody>
-        </table>
-      </div>
-
+          <div id="influencers-graph-wrapper">
+            <div id="influencers-graph"></div>
+          </div>
+        <div class="table-responsive">
+          <div class="loader" id="contract-spinner" style="display:none;"></div>
+          <table class="table table-bordered">
+            <tbody id="contract-table">
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <!--</div>-->
