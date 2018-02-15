@@ -87,8 +87,46 @@ var TwoKeyAdmin = contract(twoKeyAdmin_artifacts);
 var TwoKeyAdmin_contractInstance;
 
 var TwoKeyContract = contract(twoKeyContract_artifacts);
-var TwoKeyContract_instance;
 var twoKeyContractAddress;
+
+function cache(fn){
+    var NO_RESULT = {}; // unique, would use Symbol if ES2015-able
+    var res = NO_RESULT;
+    return function () { // if ES2015, name the function the same as fn
+        if(res === NO_RESULT) return (res = fn.apply(this, arguments));
+        return res;
+    };
+}
+
+
+
+// cash all contracts
+var contract_cache = {};
+var contract_cache_cb = {};
+
+function getTwoKeyContract(address, cb) {
+    var contract = contract_cache[address];
+    if (contract) {
+        cb(contract)
+    } else {
+        if (contract_cache_cb[address]) {
+            contract_cache_cb[address].push(cb);
+        } else {
+            contract_cache_cb[address] = [cb];
+            TwoKeyContract.at(address).then((contract) => {
+                contract_cache[address] = contract;
+                var cbs = contract_cache_cb[address];
+                for(var i=0; i < cbs.length; i++) {
+                    cbs[i](contract);
+                }
+                contract_cache_cb[address] = null;
+            }).catch(function(e){
+                alert(e);
+            });
+        }
+    }
+}
+
 
 // We are using IPFS to store content for each product.
 // The web site also contains an IPFS node and this App connects to it
@@ -153,12 +191,31 @@ window.login = function() {
             }
         });
 }
+
 window.logout = function() {
     delete localStorage.username;
     $("#user-name").html("");
+    $("#influencers-graph-wrapper").hide()
+    $("#influencers-graph").empty();
+    $("#contract-table").empty();
+    $("#my-2key-contracts").empty();
+    $("#my-2key-contracts").empty();
 
     new_user();
     $(".login").show();
+    history.pushState(null, "", location.href.split("?")[0]);
+}
+
+window.home = function() {
+    twoKeyContractAddress = null;
+    history.pushState(null, "", location.href.split("?")[0]);
+    populate();
+}
+
+window.jump_to_contract_page = function(address) {
+    twoKeyContractAddress = address;
+    history.pushState(null, "", location.href.split("?")[0]);
+    populate();
 }
 
 window.getETH = function() {
@@ -180,16 +237,14 @@ window.buy = function(twoKeyContractAddress, name, cost) {
     var ok = confirm("your about to fulfill (buy) the product \"" + name + "\" from contract \n" + twoKeyContractAddress +
       "\nfor " + cost + " ETH");
     if (ok) {
-        TwoKeyContract.at(twoKeyContractAddress).then( (TwoKeyContract_instance) => {
-        TwoKeyContract_instance.buyProduct({gas: 1400000, from: myaddress, value: web3.toWei(cost, "ether")}).then(function () {
-            console.log('buy');
-            lookupUserInfo();
-        }).catch(function (e) {
-            alert(e);
-        });
-        }).catch(function(e){
-          alert(e);
-        });
+        getTwoKeyContract(twoKeyContractAddress, (TwoKeyContract_instance) => {
+            TwoKeyContract_instance.buyProduct({gas: 1400000, from: myaddress, value: web3.toWei(cost, "ether")}).then(function () {
+                console.log('buy');
+                lookupUserInfo();
+            }).catch(function (e) {
+                alert(e);
+            });
+        })
     }
 }
 
@@ -197,15 +252,13 @@ window.redeem = function(twoKeyContractAddress) {
     var ok = confirm("your about to redeem the balance of 2Key contract \n" + twoKeyContractAddress);
     if (ok) {
         var myaddress = whoAmI();
-        TwoKeyContract.at(twoKeyContractAddress).then( (TwoKeyContract_instance) => {
-        TwoKeyContract_instance.redeem({gas: 1400000, from: myaddress}).then(function () {
-            console.log('redeem')
-            lookupUserInfo();
-        }).catch(function (e) {
-            alert(e);
-        });
-        }).catch(function(e){
-          alert(e);
+        getTwoKeyContract(twoKeyContractAddress, (TwoKeyContract_instance) => {
+            TwoKeyContract_instance.redeem({gas: 1400000, from: myaddress}).then(function () {
+                console.log('redeem')
+                lookupUserInfo();
+            }).catch(function (e) {
+                alert(e);
+            });
         });
     }
 }
@@ -343,7 +396,7 @@ function contact_header() {
     items.push("<td data-toggle='tooltip' title='ETH I have in the contract. click to redeem'>my ETH</td>");
     items.push("<td data-toggle='tooltip' title='contract/product name'>name</td>");
     items.push("<td data-toggle='tooltip' title='contract symbol'>symbol</td>");
-    items.push("<td data-toggle='tooltip' title='how many ARCs an influencer or a customer will receive when opening a 2Key link of this contract'>take</td>");
+    items.push("<td data-toggle='tooltip' title='how many ARCs an influencer or a customer will receive when opening a 2Key link of this contract'>share quota</td>");
     items.push("<td data-toggle='tooltip' title='cost of buying the product sold in the contract. click to buy'>cost</td>");
     items.push("<td data-toggle='tooltip' title='total amount that will be taken from the cost and be distributed between influencers'>bounty</td>");
     items.push("<td data-toggle='tooltip' title='number of units being sold'>units</td>");
@@ -361,7 +414,8 @@ function contract_info(TwoKeyContract_instance, min_arcs, callback) {
     var myaddress = whoAmI();
     var twoKeyContractAddress = TwoKeyContract_instance.address;
     var take_link = location.origin + "/?c=" + twoKeyContractAddress + "&f=" + myaddress;
-    var contract_link = "./?c=" + twoKeyContractAddress;
+    // var contract_link = "./?c=" + twoKeyContractAddress;
+    var onclick_name = "jump_to_contract_page('" + twoKeyContractAddress + "')";
     TwoKeyContract_instance.getInfo(myaddress).then(function (info) {
         var arcs, units, xbalance, name, symbol, total_arcs, quota, cost, bounty, total_units, balance, owner;
         [arcs, units, xbalance, name, symbol, cost, bounty, quota, total_arcs, total_units, balance, owner] = info;
@@ -404,7 +458,12 @@ function contract_info(TwoKeyContract_instance, min_arcs, callback) {
                 "data-toggle='tooltip' title='redeem'" +
                 "\">" + xbalance +
                 "</button></td>");
-            items.push("<td><a href='" + contract_link + "'>"+ name + "</a></td>");
+            items.push("<td>" +
+                "<button class='bt' onclick=\"" + onclick_name + "\"" +
+                "data-toggle='tooltip' title='jump to contract page'" +
+                "\">" + name  +
+                "</button></td>");
+            // items.push("<td><a href='" + contract_link + "'>"+ name + "</a></td>");
             items.push("<td>" + symbol + "</td>");
             items.push("<td>" + quota + "</td>");
             items.push("<td>" +
@@ -483,10 +542,8 @@ function contract_table(tbl, contracts, min_arcs) {
             add_row(items)
             report();
         }
-        TwoKeyContract.at(twoKeyContractAddress).then( (TwoKeyContract_instance) => {
+        getTwoKeyContract(twoKeyContractAddress, (TwoKeyContract_instance) => {
             contract_info(TwoKeyContract_instance, min_arcs, row_callback);
-        }).catch(function(e){
-          alert(e);
         });
     }
 
@@ -521,18 +578,50 @@ function populateContract() {
         $("#contract-spinner").removeClass('spin');
         $("#contract-spinner").hide();
     }
-    contract_info(TwoKeyContract_instance, -1, contract_callback);
+    getTwoKeyContract(twoKeyContractAddress, (TwoKeyContract_instance) => {
+        contract_info(TwoKeyContract_instance, -1, contract_callback);
+        if (!TwoKeyContract_instance.units) {
+            TwoKeyContract_instance.given_to = {};
+            TwoKeyContract_instance.units = {};
 
-    // var myaddress = whoAmI();
-    // d3_root.address = myaddress;
-    // d3_add_children(d3_root);
+            TwoKeyContract_instance.Transfer_event = TwoKeyContract_instance.Transfer({}, {
+                fromBlock: 0,
+                toBlock: 'latest'
+            });
+            TwoKeyContract_instance.Transfer_event.get((error, logs) => {
+                for (var i = 0; i < logs.length; i++) {
+                    transfer_event(TwoKeyContract_instance, logs[i]);
+                }
+                d3_init();
+            });
+            TwoKeyContract_instance.Fulfilled_event = TwoKeyContract_instance.Fulfilled({}, {
+                fromBlock: 0,
+                toBlock: 'latest'
+            });
+            TwoKeyContract_instance.Fulfilled_event.get((error, logs) => {
+                for (var i = 0; i < logs.length; i++) {
+                    fulfilled_event(TwoKeyContract_instance, logs[i]);
+                }
+                d3_init();
+            });
+        } else {
+            d3_init();
+        }
+    });
 }
 
 function populate() {
-  if (params.c) {
-      populateContract();
+  if (twoKeyContractAddress) {
+    $("#contract").show();
+    $("#contracts").hide();
+    populateContract();
   } else {
-      populateMy2KeyContracts();
+    $("#contracts").show();
+    $("#create-contract").hide();
+    $("#contract").hide();
+    $("#buy").removeAttr("onclick");
+    $("#redeme").removeAttr("onclick");
+    populateMy2KeyContracts();
   }
 }
 
@@ -545,30 +634,26 @@ window.giveARCs = function() {
   }
 
   var myaddress = whoAmI();
-  TwoKeyContract.at(twoKeyContractAddress).then( (TwoKeyContract_instance) => {
-  TwoKeyContract_instance.transfer(target, 1, {gas: 1400000, from: myaddress}).then((tx) => {
-      console.log(tx);
-      $("#target-address").val("");
-      $("#influence-address").val("");
-      populate();
-  }).catch(function(e){
-          alert(e);
-  });
-  }).catch(function(e){
-          alert(e);
+  getTwoKeyContract(twoKeyContractAddress, (TwoKeyContract_instance) => {
+      TwoKeyContract_instance.transfer(target, 1, {gas: 1400000, from: myaddress}).then((tx) => {
+          console.log(tx);
+          $("#target-address").val("");
+          $("#influence-address").val("");
+          populate();
+      }).catch(function(e){
+              alert(e);
+      });
   });
 }
 
 window.contract_take = function() {
-    var twoKeyContractAddress = params.c;
     var target = params.f;
     var myaddress = whoAmI();
     if (target == myaddress) {
         alert("You can't take your own ARCs. Switch to a different user and try again.");
         return;
     }
-  TwoKeyContract.at(twoKeyContractAddress).then( (TwoKeyContract_instance) => {
-
+  getTwoKeyContract(twoKeyContractAddress, (TwoKeyContract_instance) => {
       TwoKeyContract_instance.quota().then(function (quota) {
 
           var ok = confirm("your about to take 1 ARC from user\n" + target +
@@ -595,8 +680,6 @@ window.contract_take = function() {
       }).catch(function (e) {
           alert(e);
       });
-  }).catch(function(e){
-          alert(e);
   });
 }
 
@@ -712,7 +795,8 @@ function fulfilled_event(c,e) {
 
 function init(cb) {
   params = getAllUrlParams();
-  if (params.c) {
+  twoKeyContractAddress = params.c;
+  if (twoKeyContractAddress) {
     $("#contract").show();
     $("#contracts").hide();
   } else {
@@ -732,61 +816,13 @@ function init(cb) {
    * in Truffle returns a promise which is why we have used then()
    * everywhere we have a transaction call
    */
-
-  var twoKeyContractAddress = params.c;
-  if (twoKeyContractAddress) {
-      var p1 = TwoKeyContract.at(twoKeyContractAddress);
-      var p2 = TwoKeyAdmin.deployed();
-      Promise.all([p1, p2]).then(function (instances) {
-          TwoKeyContract_instance = instances[0];
-          TwoKeyContract_instance.given_to = {};
-          TwoKeyContract_instance.units = {};
-
-          // TwoKeyContract_instance.all_events = TwoKeyContract_instance.allEvents((error, log) => {
-          //   if (!error)
-          //       console.log(log);
-          // });
-          // TwoKeyContract_instance.all_events.get((error,logs) => {
-          //   if (!error)
-          //       console.log(logs);
-          // });
-          TwoKeyContract_instance.Transfer_event = TwoKeyContract_instance.Transfer({}, { fromBlock: 0, toBlock: 'latest' });
-          // TwoKeyContract_instance.Transfer_event.watch(function(error, log){
-          //     transfer_event(TwoKeyContract_instance, log);
-          //   });
-          TwoKeyContract_instance.Transfer_event.get((error,logs) => {
-              for(var i=0; i<logs.length; i++) {
-                  transfer_event(TwoKeyContract_instance, logs[i]);
-              }
-            d3_init();
-          });
-
-          TwoKeyContract_instance.Fulfilled_event = TwoKeyContract_instance.Fulfilled({}, { fromBlock: 0, toBlock: 'latest' });
-          // TwoKeyContract_instance.Fulfilled_event.watch(function(error, log){
-          //     fulfilled_event(TwoKeyContract_instance, log);
-          //   });
-          TwoKeyContract_instance.Fulfilled_event.get((error,logs) => {
-              for(var i=0; i<logs.length; i++) {
-                  fulfilled_event(TwoKeyContract_instance, logs[i]);
-              }
-            d3_init();
-          });
-
-          TwoKeyAdmin_contractInstance = instances[1];
-          $("#loading").hide();
-          cb();
-      }).catch(function (e) {
-          alert(e);
-      });
-  } else {
-      TwoKeyAdmin.deployed().then(function (contractInstance) {
-          TwoKeyAdmin_contractInstance = contractInstance;
-          $("#loading").hide();
-          cb();
-      }).catch(function (e) {
-          alert(e);
-      });
-  }
+  TwoKeyAdmin.deployed().then(function (contractInstance) {
+      TwoKeyAdmin_contractInstance = contractInstance;
+      $("#loading").hide();
+      cb();
+  }).catch(function (e) {
+      alert(e);
+  });
 }
 
 function new_user() {
@@ -1148,23 +1184,25 @@ function d3_add_event_children(addresses, parent, depth) {
 
             owner2name(address, "#d3-" + node.d3_id, d3_wrapper(node));
 
-            var _units = TwoKeyContract_instance.units[address];
-            if (_units) {
-                var n = node;
-                n.units += parseInt("" + _units);
-                n = n.parent;
-                while (n) {
-                    n.rewards += parseInt("" + _units);
+            getTwoKeyContract(twoKeyContractAddress, (TwoKeyContract_instance) => {
+                var _units = TwoKeyContract_instance.units[address];
+                if (_units) {
+                    var n = node;
+                    n.units += parseInt("" + _units);
                     n = n.parent;
+                    while (n) {
+                        n.rewards += parseInt("" + _units);
+                        n = n.parent;
+                    }
                 }
-            }
 
-            var c = d3_add_event_children(TwoKeyContract_instance.given_to[address], node, depth-1);
-            if(depth>0) {
-                node.children = c;
-            } else {
-                node._children = c;
-            }
+                var c = d3_add_event_children(TwoKeyContract_instance.given_to[address], node, depth - 1);
+                if (depth > 0) {
+                    node.children = c;
+                } else {
+                    node._children = c;
+                }
+            });
         }
     }
 
