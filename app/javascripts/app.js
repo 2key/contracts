@@ -195,6 +195,8 @@ window.login = function() {
 
 window.logout = function() {
     twoKeyContractAddress = null;
+    d3_reset();
+
     from_twoKeyContractAddress = null;
     delete localStorage.username;
     $("#user-name").html("");
@@ -213,6 +215,7 @@ window.logout = function() {
 
 window.home = function() {
     twoKeyContractAddress = null;
+    d3_reset();
     history.pushState(null, "", location.href.split("?")[0]);
     populate();
 }
@@ -401,6 +404,7 @@ function contact_header() {
     items.push("<td data-toggle='tooltip' title='key link'>my 2key link</td>");
     items.push("<td data-toggle='tooltip' title='Number of units I bought'>my units</td>");
     items.push("<td data-toggle='tooltip' title='ETH I have in the contract. click to redeem'>my ETH</td>");
+    items.push("<td data-toggle='tooltip' title='estimated reward'>est. reward</td>");
     items.push("<td data-toggle='tooltip' title='contract/product name'>name</td>");
     items.push("<td data-toggle='tooltip' title='contract symbol'>symbol</td>");
     items.push("<td data-toggle='tooltip' title='how many ARCs an influencer or a customer will receive when opening a 2Key link of this contract'>share quota</td>");
@@ -413,7 +417,6 @@ function contact_header() {
     items.push("<td data-toggle='tooltip' title='who created the contract'>owner</td>");
     items.push("<td data-toggle='tooltip' title='the address of the contract'>address</td>");
     items.push("<td data-toggle='tooltip' title='cost of joining'>join cost</td>");
-    items.push("<td data-toggle='tooltip' title='estimated reward'>est. reward</td>");
 
     return items;
 }
@@ -467,6 +470,8 @@ function contract_info(TwoKeyContract_instance, min_arcs, callback) {
                 "data-toggle='tooltip' title='redeem'" +
                 "\">" + xbalance +
                 "</button></td>");
+            var est_reward = 0;
+            items.push("<td>" + est_reward + "</td>");
             items.push("<td>" +
                 "<button class='bt' onclick=\"" + onclick_name + "\"" +
                 "data-toggle='tooltip' title='jump to contract page'" +
@@ -519,8 +524,6 @@ function contract_info(TwoKeyContract_instance, min_arcs, callback) {
                 "</td>");
             var join_cost = 0;
             items.push("<td>" + join_cost + "</td>");
-            var est_reward = 0;
-            items.push("<td>" + est_reward + "</td>");
         }
         callback(items, info);
     });
@@ -547,7 +550,7 @@ function contract_table(tbl, contracts, min_arcs) {
     function iterator(twoKeyContractAddress, report) {
         if (first_row) {
             first_row = false;
-            $(tbl).append("<tr><td colspan=\"4\" data-toggle='tooltip' title='what I have in the contract'>Me</td><td colspan=\"13\" data-toggle='tooltip' title='contract properties'>Contract</td></tr>");
+            $(tbl).append("<tr><td colspan=\"5\" data-toggle='tooltip' title='what I have in the contract'>Me</td><td colspan=\"12\" data-toggle='tooltip' title='contract properties'>Contract</td></tr>");
             add_row(contact_header());
         }
 
@@ -1065,6 +1068,17 @@ var tooltip_div = d3.select("body").append("div")
     .style("opacity", 0);
 
 var d3_init_counter = 0;
+var d3_source;
+
+function d3_reset() {
+    d3_root = null;
+    d3_source = null;
+    d3_init_counter = 0;
+    d3_i = 0;
+    svg.selectAll('*').remove();
+    $("#influencers-graph-wrapper").hide();
+}
+
 function d3_init() {
     // we have two inits. One from going over all Transfer events and one
     // from going over all Fulfilled events.
@@ -1087,6 +1101,17 @@ function d3_init() {
 }
 
 function d3_update(source) {
+    if (!d3_root) return;
+
+    if (!source) {
+        if (d3_source) {
+            source = d3_source;
+        } else {
+            source = d3_root;
+        }
+    }
+    d3_source = source;
+
     var nodes = tree.nodes(d3_root).reverse(),
         links = tree.links(nodes);
 
@@ -1259,7 +1284,9 @@ function d3_add_event_children(addresses, parent, depth) {
             owner2name(address, "#d3-" + node.d3_id, d3_wrapper(node));
 
             getTwoKeyContract(twoKeyContractAddress, (TwoKeyContract_instance) => {
-                var _units = TwoKeyContract_instance.units[address];
+                var _units = TwoKeyContract_instance.units;
+                if (_units) _units = _units[address];
+
                 if (_units) {
                     var n = node;
                     n.units += parseInt("" + _units);
@@ -1270,7 +1297,10 @@ function d3_add_event_children(addresses, parent, depth) {
                     }
                 }
 
-                var c = d3_add_event_children(TwoKeyContract_instance.given_to[address], node, depth - 1);
+                var next_addresses = TwoKeyContract_instance.given_to;
+                if (next_addresses) next_addresses = next_addresses[address];
+
+                var c = d3_add_event_children(next_addresses, node, depth - 1);
                 if (depth > 0) {
                     node.children = c;
                 } else {
