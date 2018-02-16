@@ -13,11 +13,10 @@
 </head>
 <body class="container">
 <div class="pull-left">
-  <button class='bt' onclick="home()" data-toggle='tooltip' title='jump to home page'>home</button>
-  <div class="pull-right"><a href="help.html">help</a></div>
   <div class="margin-top-3">
     <div id="loading"><h1>Loading...</h1></div>
     <div id="metamask-login" class="container-fluid">
+      <div class="pull-right"><a href="help.html">help</a></div>
     </div>
     <div class="container-fluid login">
       <h1>Welcome to 2Key</h1>
@@ -31,8 +30,15 @@
       <!--</div>-->
       <br/>
       <a href="#" onclick="login()" class="btn btn-primary">Login</a>
+      <div class="pull-right"><a href="help.html">help</a></div>
     </div>
     <div class="container-fluid logout">
+      <p>
+        <div class="contract">
+            <button class='bt' onclick="home()" data-toggle='tooltip' title='go back to contracts/2key-links page'>&lt; Contracts</button>
+        </div>
+        <div class="pull-right"><a href="help.html">help</a></div>
+      </p>
       <h2>Who am I</h2>
     <!--<div class="row margin-top-3">-->
       <!--<div class="col-sm-12">-->
@@ -69,7 +75,7 @@
       </div>
       <br/>
       <br/>
-      <div id="contracts">
+      <div class="contracts">
       <h2>My Contracts</h2>
       <div class="table-responsive" id="add-contract">
         <a href="#" onclick="addContract()" class="btn btn-primary">Create contract</a>
@@ -117,7 +123,7 @@
       </div>
       </div>
 
-      <div id="contract">
+      <div class="contract">
         <h2>Contract</h2>
         <div class="table-responsive">
           <a href="#" class="btn btn-primary" onclick="contract_take()" id="join-btn">Join</a>

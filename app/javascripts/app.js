@@ -620,24 +620,36 @@ function populateContract() {
             TwoKeyContract_instance.units = {};
 
             TwoKeyContract_instance.Transfer_event = TwoKeyContract_instance.Transfer({}, {
-                fromBlock: 0,
+                fromBlock: "earliest",
                 toBlock: 'latest'
+            }, (error,log) => {
+                if (!error) {
+                    transfer_event(TwoKeyContract_instance, log);
+                }
             });
             TwoKeyContract_instance.Transfer_event.get((error, logs) => {
-                for (var i = 0; i < logs.length; i++) {
-                    transfer_event(TwoKeyContract_instance, logs[i]);
+                if (!error) {
+                    for (var i = 0; i < logs.length; i++) {
+                        transfer_event(TwoKeyContract_instance, logs[i]);
+                    }
+                    d3_init();
                 }
-                d3_init();
             });
             TwoKeyContract_instance.Fulfilled_event = TwoKeyContract_instance.Fulfilled({}, {
-                fromBlock: 0,
+                fromBlock: "earliest",
                 toBlock: 'latest'
+            }, (error,log) => {
+                if (!error) {
+                    fulfilled_event(TwoKeyContract_instance, log);
+                }
             });
             TwoKeyContract_instance.Fulfilled_event.get((error, logs) => {
-                for (var i = 0; i < logs.length; i++) {
-                    fulfilled_event(TwoKeyContract_instance, logs[i]);
+                if (!error) {
+                    for (var i = 0; i < logs.length; i++) {
+                        fulfilled_event(TwoKeyContract_instance, logs[i]);
+                    }
+                    d3_init();
                 }
-                d3_init();
             });
         } else {
             d3_init_counter = 2;
@@ -648,13 +660,13 @@ function populateContract() {
 
 function populate() {
   if (twoKeyContractAddress) {
-    $("#contract").show();
-    $("#contracts").hide();
+    $(".contract").show();
+    $(".contracts").hide();
     populateContract();
   } else {
-    $("#contracts").show();
+    $(".contracts").show();
     $("#create-contract").hide();
-    $("#contract").hide();
+    $(".contract").hide();
     $("#buy").removeAttr("onclick");
     $("#redeme").removeAttr("onclick");
     populateMy2KeyContracts();
@@ -815,7 +827,22 @@ function ipfs_init() {
         });
 }
 
+function check_event(c,e) {
+    // allow events from a transactionHash to be used only once
+    if(!c.transactionHash) {
+        c.transactionHash = {};
+    }
+    if (c.transactionHash[e.transactionHash]) {
+        return false;
+    }
+    c.transactionHash[e.transactionHash] = true;
+    return true;
+}
+
 function transfer_event(c,e) {
+    if(!check_event(c,e)) {
+        return;
+    }
     // e.address;
     var from = e.args.from;
     var to = e.args.to;
@@ -827,6 +854,9 @@ function transfer_event(c,e) {
 }
 
 function fulfilled_event(c,e) {
+    if(!check_event(c,e)) {
+        return;
+    }
     // e.address;
     var to = e.args.to;
 
@@ -841,12 +871,12 @@ function init(cb) {
   twoKeyContractAddress = params.c;
   from_twoKeyContractAddress = params.f;
   if (twoKeyContractAddress) {
-    $("#contract").show();
-    $("#contracts").hide();
+    $(".contract").show();
+    $(".contracts").hide();
   } else {
-    $("#contracts").show();
+    $(".contracts").show();
     $("#create-contract").hide();
-    $("#contract").hide();
+    $(".contract").hide();
     $("#buy").removeAttr("onclick");
     $("#redeme").removeAttr("onclick");
   }
