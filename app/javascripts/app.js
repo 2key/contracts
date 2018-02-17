@@ -105,6 +105,45 @@ function cache(fn){
 var contract_cache = {};
 var contract_cache_cb = {};
 
+function init_TwoKeyContract(TwoKeyContract_instance) {
+    if (TwoKeyContract_instance.units)
+        return;
+
+    TwoKeyContract_instance.given_to = {};
+    TwoKeyContract_instance.units = {};
+
+    TwoKeyContract_instance.Transfer_event = TwoKeyContract_instance.Transfer({}, {
+        fromBlock: "earliest",
+        toBlock: 'latest'
+    }, (error,log) => {
+        if (!error) {
+            transfer_event(TwoKeyContract_instance, log);
+        }
+    });
+    TwoKeyContract_instance.Transfer_event.get((error, logs) => {
+        if (!error) {
+            for (var i = 0; i < logs.length; i++) {
+                transfer_event(TwoKeyContract_instance, logs[i]);
+            }
+        }
+    });
+
+    TwoKeyContract_instance.Fulfilled_event = TwoKeyContract_instance.Fulfilled({}, {
+        fromBlock: "earliest",
+        toBlock: 'latest'
+    }, (error,log) => {
+        if (!error) {
+            fulfilled_event(TwoKeyContract_instance, log);
+        }
+    });
+    TwoKeyContract_instance.Fulfilled_event.get((error, logs) => {
+        if (!error) {
+            for (var i = 0; i < logs.length; i++) {
+                fulfilled_event(TwoKeyContract_instance, logs[i]);
+            }
+        }
+    });
+}
 function getTwoKeyContract(address, cb) {
     var contract = contract_cache[address];
     if (contract) {
@@ -115,6 +154,7 @@ function getTwoKeyContract(address, cb) {
         } else {
             contract_cache_cb[address] = [cb];
             TwoKeyContract.at(address).then((contract) => {
+                init_TwoKeyContract(contract);
                 contract_cache[address] = contract;
                 var cbs = contract_cache_cb[address];
                 for(var i=0; i < cbs.length; i++) {
@@ -398,6 +438,32 @@ function IterateOver(list, iterator, callback) {
     }
 }
 
+var MAX_DEPTH = 1000;
+function my_depth(TwoKeyContract_instance, owner, myaddress) {
+    var nodes = [owner];
+    var depth = 0;
+    while (nodes.length && depth < MAX_DEPTH) {
+        var new_nodes = [];
+        for(var i=0; i<nodes.length; i++) {
+            var address = nodes[i];
+            if (address == myaddress) {
+                return depth;
+            }
+            var given_to = TwoKeyContract_instance.given_to;
+            if (given_to)
+                given_to = given_to[address];
+            if (given_to)
+                new_nodes = new_nodes.concat(given_to);
+        }
+        if (!new_nodes) {
+            break;
+        }
+        nodes = new_nodes;
+        depth++;
+    }
+    return MAX_DEPTH;
+}
+
 function contact_header() {
     var items = [];
     items.push("<td data-toggle='tooltip' title='number of ARCs I have in the contracts'>my ARCs</td>");
@@ -470,8 +536,11 @@ function contract_info(TwoKeyContract_instance, min_arcs, callback) {
                 "data-toggle='tooltip' title='redeem'" +
                 "\">" + xbalance +
                 "</button></td>");
-            var est_reward = 0;
-            items.push("<td>" + est_reward + "</td>");
+
+            unique_id = unique_id + 1;
+            var tag_est_reward = "id" + unique_id;
+            items.push("<td id=\"" + tag_est_reward + "\" ></td>");
+
             items.push("<td>" +
                 "<button class='bt' onclick=\"" + onclick_name + "\"" +
                 "data-toggle='tooltip' title='jump to contract page'" +
@@ -513,6 +582,17 @@ function contract_info(TwoKeyContract_instance, min_arcs, callback) {
                 safe_cb("#" + tag_owner, () => {
                     $("#" + tag_owner).text(owner);
                     owner2name(owner, "#" + tag_owner);
+                });
+
+                safe_cb("#" + tag_est_reward, () => {
+                    var depth = my_depth(TwoKeyContract_instance, owner, myaddress);
+                    var est_reward = "";
+                    if (depth == MAX_DEPTH || depth == 0) {
+                        est_reward = "NA";
+                    } else {
+                        est_reward = "" + parseFloat(bounty)/depth;
+                    }
+                    $("#" + tag_est_reward).text(est_reward);
                 });
             });
 
@@ -618,46 +698,7 @@ function populateContract() {
     }
     getTwoKeyContract(twoKeyContractAddress, (TwoKeyContract_instance) => {
         contract_info(TwoKeyContract_instance, -1, contract_callback);
-        if (!TwoKeyContract_instance.units) {
-            TwoKeyContract_instance.given_to = {};
-            TwoKeyContract_instance.units = {};
-
-            TwoKeyContract_instance.Transfer_event = TwoKeyContract_instance.Transfer({}, {
-                fromBlock: "earliest",
-                toBlock: 'latest'
-            }, (error,log) => {
-                if (!error) {
-                    transfer_event(TwoKeyContract_instance, log);
-                }
-            });
-            TwoKeyContract_instance.Transfer_event.get((error, logs) => {
-                if (!error) {
-                    for (var i = 0; i < logs.length; i++) {
-                        transfer_event(TwoKeyContract_instance, logs[i]);
-                    }
-                    d3_init();
-                }
-            });
-            TwoKeyContract_instance.Fulfilled_event = TwoKeyContract_instance.Fulfilled({}, {
-                fromBlock: "earliest",
-                toBlock: 'latest'
-            }, (error,log) => {
-                if (!error) {
-                    fulfilled_event(TwoKeyContract_instance, log);
-                }
-            });
-            TwoKeyContract_instance.Fulfilled_event.get((error, logs) => {
-                if (!error) {
-                    for (var i = 0; i < logs.length; i++) {
-                        fulfilled_event(TwoKeyContract_instance, logs[i]);
-                    }
-                    d3_init();
-                }
-            });
-        } else {
-            d3_init_counter = 2;
-            d3_init();
-        }
+        d3_init();
     });
 }
 
@@ -1080,9 +1121,7 @@ function d3_reset() {
 }
 
 function d3_init() {
-    // we have two inits. One from going over all Transfer events and one
-    // from going over all Fulfilled events.
-    if(++d3_init_counter < 2) {
+    if(++d3_init_counter < 1) {
         return;
     }
 
