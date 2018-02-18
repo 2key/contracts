@@ -200,15 +200,8 @@ contract TwoKeyContract is StandardToken {
 }
 
 contract TwoKeyAdmin {
-  // mapping from TwoKeyContract creator (business) to all its contracts
-  mapping(address => uint) public ownerNContracts;
-  mapping(address => address[]) public owner2Contracts;
   mapping(address => string) public owner2name;
   mapping(bytes32 => address) public name2owner;
-  address[] public owners;
-  uint public nowners;
-  address[] public contracts;
-  uint public ncontracts;
 
   function addName(string _name) public {
     address _owner = msg.sender;
@@ -233,18 +226,9 @@ contract TwoKeyAdmin {
   }
 
   event Created(address indexed owner, address c);
-
   function createTwoKeyContract(string _name, string _symbol, uint256 _totalSupply, uint256 _quota, uint256 _cost, uint256 _bounty, uint256 _units, string _ipfs_hash) public returns (address) {
     address _owner = msg.sender;
     address c = (new TwoKeyContract(_owner, _name, _symbol, _totalSupply, _quota, _cost, _bounty, _units, _ipfs_hash));
-    if (ownerNContracts[_owner] == 0) {
-      owners.push(_owner);
-      nowners += 1;
-    }
-    owner2Contracts[_owner].push(c);
-    ownerNContracts[_owner] += 1;
-    contracts.push(c);
-    ncontracts += 1;
 
     Created(_owner, c);
 
@@ -252,25 +236,8 @@ contract TwoKeyAdmin {
   }
 
   event Joined(address indexed influencer, address c);
-
   function joinedContract(address influencer, address c) {
     Joined(influencer, c);
-  }
-
-  function getContract(address owner, uint idx) public view returns (address) {
-    return owner2Contracts[owner][idx];
-  }
-
-  function getOwner2Contracts(address owner) public view returns (address[]) {
-    return owner2Contracts[owner];
-  }
-
-  function getContracts() public view returns (address[]) {
-    return contracts;
-  }
-
-  function getOwners() public view returns (address[]) {
-    return owners;
   }
 
   // function fundtransfer(address etherreceiver, uint256 amount) public {

@@ -86,6 +86,68 @@ import twoKeyContract_artifacts from '../../build/contracts/TwoKeyContract.json'
 var TwoKeyAdmin = contract(twoKeyAdmin_artifacts);
 var TwoKeyAdmin_contractInstance;
 
+
+function tbl_add_row(tbl, h) {
+    var header_row = "<tr>" + h.join() + "</tr>";
+    $(tbl).append(header_row);
+}
+
+var tbl_add_contract_active = false;
+function tbl_add_contract(tbl, twoKeyContractAddress) {
+    if (! $(tbl).children().length) {
+        $(tbl).append("<tr><td colspan=\"5\" data-toggle='tooltip' title='what I have in the contract'>Me</td><td colspan=\"12\" data-toggle='tooltip' title='contract properties'>Contract</td></tr>");
+        tbl_add_row(tbl, contact_header());
+
+        $(tbl + "-spinner").addClass('spin');
+        $(tbl + "-spinner").show();
+    }
+
+    function row_callback(items) {
+        tbl_add_row(tbl, items)
+
+        $(tbl + "-spinner").removeClass('spin');
+        $(tbl + "-spinner").hide();
+    }
+    getTwoKeyContract(twoKeyContractAddress, (TwoKeyContract_instance) => {
+        contract_info(TwoKeyContract_instance, 0, row_callback);
+    });
+}
+
+function init_TwoKeyAdmin() {
+    if (TwoKeyAdmin_contractInstance.created)
+        return;
+
+    TwoKeyAdmin_contractInstance.created = {};
+    TwoKeyAdmin_contractInstance.joined = {};
+
+    var myaddress = whoAmI();
+    TwoKeyAdmin_contractInstance.Created_event = TwoKeyAdmin_contractInstance.Created({owner: myaddress}, {
+        fromBlock: "earliest",
+        toBlock: 'latest'
+    }, (error,log) => {
+        if (!error) {
+            var twoKeyContractAddress = log.args.c;
+            TwoKeyAdmin_contractInstance.created[twoKeyContractAddress] = true;
+
+            if (tbl_add_contract_active)
+                tbl_add_contract("#my-2key-contracts", twoKeyContractAddress);
+        }
+    });
+
+    TwoKeyAdmin_contractInstance.Joined_event = TwoKeyAdmin_contractInstance.Joined({influencer: myaddress}, {
+        fromBlock: "earliest",
+        toBlock: 'latest'
+    }, (error,log) => {
+        if (!error) {
+            var twoKeyContractAddress = log.args.c;
+            TwoKeyAdmin_contractInstance.joined[twoKeyContractAddress] = true;
+
+            if (tbl_add_contract_active)
+                tbl_add_contract("#my-2key-arcs", twoKeyContractAddress);
+        }
+    });
+}
+
 var TwoKeyContract = contract(twoKeyContract_artifacts);
 var twoKeyContractAddress;
 var from_twoKeyContractAddress;
@@ -245,9 +307,13 @@ window.logout = function() {
     // $("#influencers-graph").empty();
     $("#contract-table").empty();
     $("#my-2key-contracts").empty();
-    $("#my-2key-contracts").empty();
+    $("#my-2key-arcs").empty();
     $("#buy").removeAttr("onclick");
     $("#redeme").removeAttr("onclick");
+
+    TwoKeyAdmin_contractInstance.created = null;
+    TwoKeyAdmin_contractInstance.joined = null;
+    tbl_add_contract_active = false;
 
     new_user();
     $(".login").show();
@@ -654,13 +720,34 @@ function contract_table(tbl, contracts, min_arcs) {
 }
 
 function populateMy2KeyContracts() {
-    TwoKeyAdmin_contractInstance.getOwner2Contracts(whoAmI()).then(function (my_contracts) {
-        contract_table("#my-2key-contracts", my_contracts, 0);
-        TwoKeyAdmin_contractInstance.getContracts().then(function (all_contracts) {
-            all_contracts = all_contracts.filter(contract => ! my_contracts.includes(contract));
-            contract_table("#my-2key-arcs", all_contracts, 1);
-        });
-    });
+    if (!TwoKeyAdmin_contractInstance.created) {
+        tbl_add_contract_active = true;
+        return;
+    }
+
+    tbl_add_contract_active = false;
+    $("#my-2key-contracts").empty();
+    $("#my-2key-arcs").empty();
+
+    var tbl ="#my-2key-contracts";
+    for(var c in TwoKeyAdmin_contractInstance.created) {
+        tbl_add_contract(tbl,c);
+    }
+
+    tbl ="#my-2key-arcs";
+    for(var c in TwoKeyAdmin_contractInstance.joined) {
+        tbl_add_contract(tbl,c);
+    }
+
+    tbl_add_contract_active = true;
+
+    // TwoKeyAdmin_contractInstance.getOwner2Contracts(whoAmI()).then(function (my_contracts) {
+    //     contract_table("#my-2key-contracts", my_contracts, 0);
+    //     TwoKeyAdmin_contractInstance.getContracts().then(function (all_contracts) {
+    //         all_contracts = all_contracts.filter(contract => ! my_contracts.includes(contract));
+    //         contract_table("#my-2key-arcs", all_contracts, 1);
+    //     });
+    // });
 }
 
 function populateContract() {
@@ -859,6 +946,7 @@ function updateUserInfo() {
 
 function lookupUserInfo() {
     updateUserInfo();
+    init_TwoKeyAdmin();
     populate();
     new_user();
     $(".logout").show();
@@ -938,6 +1026,7 @@ function init(cb) {
    */
   TwoKeyAdmin.deployed().then(function (contractInstance) {
       TwoKeyAdmin_contractInstance = contractInstance;
+      // init_TwoKeyAdmin();
       $("#loading").hide();
       cb();
   }).catch(function (e) {
