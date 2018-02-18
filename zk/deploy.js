@@ -12,4 +12,4 @@ console.log(compiledCode.contracts[':Verifier'].interface);
 abiDefinition = JSON.parse(compiledCode.contracts[':Verifier'].interface);
 VerifierContract = web3.eth.contract(abiDefinition);
 byteCode = compiledCode.contracts[':Verifier'].bytecode;
-VerifierContract.new({data: byteCode, from: web3.eth.accounts[0], gas: 4700000});
+VerifierContract.new({data: byteCode, from: web3.eth.accounts[0], gas: 5000000});

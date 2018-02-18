@@ -120,13 +120,13 @@ function init_TwoKeyContract(TwoKeyContract_instance) {
             transfer_event(TwoKeyContract_instance, log);
         }
     });
-    TwoKeyContract_instance.Transfer_event.get((error, logs) => {
-        if (!error) {
-            for (var i = 0; i < logs.length; i++) {
-                transfer_event(TwoKeyContract_instance, logs[i]);
-            }
-        }
-    });
+    // TwoKeyContract_instance.Transfer_event.get((error, logs) => {
+    //     if (!error) {
+    //         for (var i = 0; i < logs.length; i++) {
+    //             transfer_event(TwoKeyContract_instance, logs[i]);
+    //         }
+    //     }
+    // });
 
     TwoKeyContract_instance.Fulfilled_event = TwoKeyContract_instance.Fulfilled({}, {
         fromBlock: "earliest",
@@ -136,13 +136,13 @@ function init_TwoKeyContract(TwoKeyContract_instance) {
             fulfilled_event(TwoKeyContract_instance, log);
         }
     });
-    TwoKeyContract_instance.Fulfilled_event.get((error, logs) => {
-        if (!error) {
-            for (var i = 0; i < logs.length; i++) {
-                fulfilled_event(TwoKeyContract_instance, logs[i]);
-            }
-        }
-    });
+    // TwoKeyContract_instance.Fulfilled_event.get((error, logs) => {
+    //     if (!error) {
+    //         for (var i = 0; i < logs.length; i++) {
+    //             fulfilled_event(TwoKeyContract_instance, logs[i]);
+    //         }
+    //     }
+    // });
 }
 function getTwoKeyContract(address, cb) {
     var contract = contract_cache[address];
@@ -157,9 +157,10 @@ function getTwoKeyContract(address, cb) {
                 init_TwoKeyContract(contract);
                 contract_cache[address] = contract;
                 var cbs = contract_cache_cb[address];
-                for(var i=0; i < cbs.length; i++) {
-                    cbs[i](contract);
-                }
+                cbs.forEach(cb=>cb(contract));
+                // for(var i=0; i < cbs.length; i++) {
+                //     cbs[i](contract);
+                // }
                 contract_cache_cb[address] = null;
             }).catch(function(e){
                 alert(e);
@@ -432,10 +433,11 @@ function IterateOver(list, iterator, callback) {
     }
 
     // here we give each iteration its job
-    for(var i = 0; i < list.length; i++) {
-        // iterator takes 2 arguments, an item to work on and report function
-        iterator(list[i], report)
-    }
+    list.forEach(item=>iterator(item,report));
+    // for(var i = 0; i < list.length; i++) {
+    //     // iterator takes 2 arguments, an item to work on and report function
+    //     iterator(list[i], report)
+    // }
 }
 
 var MAX_DEPTH = 1000;

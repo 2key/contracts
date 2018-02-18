@@ -12,6 +12,7 @@ import 'zeppelin-solidity/contracts/token/ERC20/StandardToken.sol';
 contract TwoKeyContract is StandardToken {
   using SafeMath for uint256;
   // Public variables of the token
+  TwoKeyAdmin creator;  // 2key admin contract that created this
   address public owner;  // Who created the contract (business)
   string public name;
   string public ipfs_hash;
@@ -34,6 +35,11 @@ contract TwoKeyContract is StandardToken {
         uint256 _tSupply, uint256 _quota, uint256 _cost, uint256 _bounty,
         uint256 _units, string _ipfs_hash) public {
     require(_bounty <= _cost);
+    // We do an explicit type conversion from `address`
+    // to `TwoKeyAdmin` and assume that the type of
+    // the calling contract is TwoKeyAdmin, there is
+    // no real way to check that.
+    creator = TwoKeyAdmin(msg.sender);
     owner = _owner;
     name = _name;
     symbol = _symbol;
@@ -97,6 +103,10 @@ contract TwoKeyContract is StandardToken {
     require(_from != address(0));
     allowed[_from][msg.sender] = 1;
     if (transferFromQuota(_from, _to, _value)) {
+      if (received_from[_to] == 0) {
+        // inform the 2key admin contract, once, that an influencer has joined
+        creator.joinedContract(_to, this);
+      }
       received_from[_to] = _from;
       return true;
     } else {
@@ -112,6 +122,10 @@ contract TwoKeyContract is StandardToken {
   function transfer(address _to, uint256 _value) public returns (bool) {
     require(received_from[_to] == 0);
     if (transferQuota(_to, _value)) {
+      if (received_from[_to] == 0) {
+        // inform the 2key admin contract, once, that an influencer has joined
+        creator.joinedContract(_to, this);
+      }
       received_from[_to] = msg.sender;
       return true;
     } else {
@@ -218,6 +232,8 @@ contract TwoKeyAdmin {
     return owner2name[_owner];
   }
 
+  event Created(address indexed owner, address c);
+
   function createTwoKeyContract(string _name, string _symbol, uint256 _totalSupply, uint256 _quota, uint256 _cost, uint256 _bounty, uint256 _units, string _ipfs_hash) public returns (address) {
     address _owner = msg.sender;
     address c = (new TwoKeyContract(_owner, _name, _symbol, _totalSupply, _quota, _cost, _bounty, _units, _ipfs_hash));
@@ -230,7 +246,15 @@ contract TwoKeyAdmin {
     contracts.push(c);
     ncontracts += 1;
 
+    Created(_owner, c);
+
     return c;
+  }
+
+  event Joined(address indexed influencer, address c);
+
+  function joinedContract(address influencer, address c) {
+    Joined(influencer, c);
   }
 
   function getContract(address owner, uint idx) public view returns (address) {
