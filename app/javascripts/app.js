@@ -95,7 +95,7 @@ function tbl_add_row(tbl, h) {
 var tbl_add_contract_active = false;
 function tbl_add_contract(tbl, twoKeyContractAddress) {
     if (! $(tbl).children().length) {
-        $(tbl).append("<tr><td colspan=\"5\" data-toggle='tooltip' title='what I have in the contract'>Me</td><td></td><td colspan=\"12\" data-toggle='tooltip' title='contract properties'>Contract</td></tr>");
+        $(tbl).append("<tr><td colspan=\"6\" data-toggle='tooltip' title='what I have in the contract'>Me</td><td></td><td colspan=\"12\" data-toggle='tooltip' title='contract properties'>Contract</td></tr>");
         tbl_add_row(tbl, contact_header());
 
         $(tbl + "-spinner").addClass('spin');
