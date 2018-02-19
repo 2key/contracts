@@ -95,7 +95,7 @@ function tbl_add_row(tbl, h) {
 var tbl_add_contract_active = false;
 function tbl_add_contract(tbl, twoKeyContractAddress) {
     if (! $(tbl).children().length) {
-        $(tbl).append("<tr><td colspan=\"5\" data-toggle='tooltip' title='what I have in the contract'>Me</td><td colspan=\"12\" data-toggle='tooltip' title='contract properties'>Contract</td></tr>");
+        $(tbl).append("<tr><td colspan=\"5\" data-toggle='tooltip' title='what I have in the contract'>Me</td><td></td><td colspan=\"12\" data-toggle='tooltip' title='contract properties'>Contract</td></tr>");
         tbl_add_row(tbl, contact_header());
 
         $(tbl + "-spinner").addClass('spin');
@@ -536,23 +536,27 @@ function my_depth(TwoKeyContract_instance, owner, myaddress) {
 
 function contact_header() {
     var items = [];
-    items.push("<td data-toggle='tooltip' title='number of ARCs I have in the contracts'>my ARCs</td>");
+    items.push("<td data-toggle='tooltip' title='the roll I am having in this contract'>Roll</td>");
+    items.push("<td data-toggle='tooltip' title='number of ARCs I have in the contracts'>my ARCs balance</td>");
     items.push("<td data-toggle='tooltip' title='key link'>my 2key link</td>");
-    items.push("<td data-toggle='tooltip' title='Number of units I bought'>my units</td>");
-    items.push("<td data-toggle='tooltip' title='ETH I have in the contract. click to redeem'>my ETH</td>");
-    items.push("<td data-toggle='tooltip' title='estimated reward'>est. reward</td>");
+    items.push("<td data-toggle='tooltip' title='Number of units I bought'>&#35;units bought</td>");
+    items.push("<td data-toggle='tooltip' title='ETH I have in the contract. click to redeem'>total earning (ETH)</td>");
+    items.push("<td data-toggle='tooltip' title='estimated reward'>est. reward per conversion</td>");
+
+    items.push("<td></td>");
+
     items.push("<td data-toggle='tooltip' title='contract/product name'>name</td>");
-    items.push("<td data-toggle='tooltip' title='contract symbol'>symbol</td>");
-    items.push("<td data-toggle='tooltip' title='how many ARCs an influencer or a customer will receive when opening a 2Key link of this contract'>share quota</td>");
-    items.push("<td data-toggle='tooltip' title='cost of buying the product sold in the contract. click to buy'>cost</td>");
-    items.push("<td data-toggle='tooltip' title='total amount that will be taken from the cost and be distributed between influencers'>bounty</td>");
-    items.push("<td data-toggle='tooltip' title='number of units being sold'>units</td>");
-    items.push("<td data-toggle='tooltip' title='total balance of ETH deposited in contract'>ETH</td>");
-    items.push("<td data-toggle='tooltip' title='total number of ARCs in the contract'>ARCs</td>");
-    items.push("<td data-toggle='tooltip' title='product description'>description</td>");
+    items.push("<td data-toggle='tooltip' title='contract symbol'>ARC symbol</td>");
     items.push("<td data-toggle='tooltip' title='who created the contract'>owner</td>");
+    items.push("<td data-toggle='tooltip' title='how many ARCs an influencer or a customer will receive when opening a 2Key link of this contract'>default share quota per influencer</td>");
+    items.push("<td data-toggle='tooltip' title='cost of joining'>price to join</td>");
+    items.push("<td data-toggle='tooltip' title='number of units being sold'>units offered</td>");
+    items.push("<td data-toggle='tooltip' title='product description'>unit description</td>");
+    items.push("<td data-toggle='tooltip' title='cost of buying the product sold in the contract. click to buy'>price per unit</td>");
+    items.push("<td data-toggle='tooltip' title='total amount that will be taken from the cost and be distributed between influencers'>max reward per unit (ETH)</td>");
+    items.push("<td data-toggle='tooltip' title='total balance of ETH deposited in contract'>gross income (ETH)</td>");
+    items.push("<td data-toggle='tooltip' title='total number of ARCs in the contract'>total ARCs generated</td>");
     items.push("<td data-toggle='tooltip' title='the address of the contract'>address</td>");
-    items.push("<td data-toggle='tooltip' title='cost of joining'>join cost</td>");
 
     return items;
 }
@@ -575,6 +579,7 @@ function contract_info(TwoKeyContract_instance, min_arcs, callback) {
         xbalance = web3.fromWei(xbalance);
         cost = web3.fromWei(cost.toString());
         bounty = web3.fromWei(bounty.toString());
+        units = units.toNumber();
 
         var onclick_buy = "buy('" + twoKeyContractAddress + "','" + name + "'," + cost + ")";
         var onclick_redeem = "redeem('" + twoKeyContractAddress + "')";
@@ -592,6 +597,20 @@ function contract_info(TwoKeyContract_instance, min_arcs, callback) {
             }
             if (quota >= BIG_INT) {
                 quota = "&infin;";
+            }
+
+            {
+                var roll;
+                if (owner == myaddress) {
+                    roll = "Contractor";
+                } else if (units) {
+                    roll = "Customer";
+                } else if (TwoKeyAdmin_contractInstance.joined[twoKeyContractAddress]) {
+                    roll = "Influencer";
+                } else {
+                    roll = "";
+                }
+                items.push("<td>" + roll + "</td>");
             }
 
             items.push("<td>" + arcs + "</td>");
@@ -624,6 +643,9 @@ function contract_info(TwoKeyContract_instance, min_arcs, callback) {
                 $("#" + tag_est_reward).text(est_reward);
             });
 
+            // separator between my part and contract part
+            items.push("<td></td>")
+
             items.push("<td>" +
                 "<button class='bt' onclick=\"" + onclick_name + "\"" +
                 "data-toggle='tooltip' title='jump to contract page'" +
@@ -631,32 +653,43 @@ function contract_info(TwoKeyContract_instance, min_arcs, callback) {
                 "</button></td>");
             // items.push("<td><a href='" + contract_link + "'>"+ name + "</a></td>");
             items.push("<td>" + symbol + "</td>");
+            {
+                unique_id = unique_id + 1;
+                var tag_owner = "id" + unique_id;
+                items.push("<td id=\"" + tag_owner + "\" >" + owner + "</td>");
+                owner2name(owner, "#" + tag_owner);
+            }
+
             items.push("<td>" + quota + "</td>");
+            var join_cost = 0;
+            items.push("<td>" + join_cost + "</td>");
+
+            items.push("<td>" + total_units + "</td>");
+            {
+                unique_id = unique_id + 1;
+                var tag_description = "id" + unique_id;
+                items.push("<td id=\"" + tag_description + "\" >" + ipfs_hash + "</td>");
+                if (ipfs_hash) {
+                    ipfs.cat(ipfs_hash, (err, res) => {
+                        if (err) throw err;
+                        safe_cb("#" + tag_description, () => {
+                            $("#" + tag_description).text(res.toString());
+                        });
+                    });
+                }
+            }
+
             items.push("<td>" +
                 "<button class='bt' onclick=\"" + onclick_buy + "\"" +
                 "data-toggle='tooltip' title='buy'" +
                 "\">" + cost +
                 "</button></td>");
+
+
             items.push("<td>" + bounty + "</td>");
-            items.push("<td>" + total_units + "</td>");
+
             items.push("<td>" + balance + "</td>");
             items.push("<td>" + total_arcs + "</td>");
-            unique_id = unique_id + 1;
-            var tag_description = "id" + unique_id;
-            items.push("<td id=\"" + tag_description + "\" >" + ipfs_hash + "</td>");
-            if (ipfs_hash) {
-                ipfs.cat(ipfs_hash, (err, res) => {
-                    if (err) throw err;
-                    safe_cb("#" + tag_description, () => {
-                        $("#" + tag_description).text(res.toString());
-                    });
-                });
-            }
-
-            unique_id = unique_id + 1;
-            var tag_owner = "id" + unique_id;
-            items.push("<td id=\"" + tag_owner + "\" >" + owner + "</td>");
-            owner2name(owner, "#" + tag_owner);
 
             items.push("<td>" +
                 "<button class='lnk bt' " +
@@ -664,54 +697,10 @@ function contract_info(TwoKeyContract_instance, min_arcs, callback) {
                 "msg='contract address was copied to clipboard'>" +
                 twoKeyContractAddress + "</button>" +
                 "</td>");
-            var join_cost = 0;
-            items.push("<td>" + join_cost + "</td>");
         }
         callback(items, constant_info, info);
     });
     });
-}
-
-function contract_table(tbl, contracts, min_arcs) {
-    $(tbl).empty();
-    if (contracts.length == 0) {
-        return;
-    }
-    $(tbl + "-spinner").addClass('spin');
-    $(tbl + "-spinner").show();
-
-    function add_row(h) {
-        var header_row = "<tr>" + h.join() + "</tr>";
-        // for(var i = 0; i < h.length; i++) {
-        //     header_row += h[i];
-        // }
-        // header_row += "</tr>";
-        $(tbl).append(header_row);
-    }
-
-    var first_row = true;
-    function iterator(twoKeyContractAddress, report) {
-        if (first_row) {
-            first_row = false;
-            $(tbl).append("<tr><td colspan=\"5\" data-toggle='tooltip' title='what I have in the contract'>Me</td><td colspan=\"12\" data-toggle='tooltip' title='contract properties'>Contract</td></tr>");
-            add_row(contact_header());
-        }
-
-        function row_callback(items) {
-            add_row(items)
-            report();
-        }
-        getTwoKeyContract(twoKeyContractAddress, (TwoKeyContract_instance) => {
-            contract_info(TwoKeyContract_instance, min_arcs, row_callback);
-        });
-    }
-
-    function callback() {
-        $(tbl + "-spinner").removeClass('spin');
-        $(tbl + "-spinner").hide();
-    }
-
-    IterateOver(contracts, iterator, callback);
 }
 
 function populateMy2KeyContracts() {
