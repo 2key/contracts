@@ -593,7 +593,7 @@ function get_kpis(TwoKeyContract_instance, myaddress, owner) {
     // remove contract creator as influencer
     if (influencers && myaddress == owner)
         influencers--;
-    return [avg_depth, conversions, influencers, avg_span];
+    return [conversions, avg_depth, influencers, avg_span];
 }
 
 
@@ -619,7 +619,7 @@ function contact_header() {
     items.push("<td data-toggle='tooltip' title='total amount that will be taken from the cost and be distributed between influencers'>max reward per unit (ETH)</td>");
     items.push("<td data-toggle='tooltip' title='total balance of ETH deposited in contract'>gross income (ETH)</td>");
     items.push("<td data-toggle='tooltip' title='total number of ARCs in the contract'>total ARCs generated</td>");
-    items.push("<td data-toggle='tooltip' title='KPIs'>&#35;converters, avg. depth to converter, &#35;influencers, avg. child &#35;influencers</td>");
+    items.push("<td data-toggle='tooltip' title='KPIs'>&#35;converters, avg. depth to converter, &#35;influencers, avg. &#35;child-influencers</td>");
     items.push("<td data-toggle='tooltip' title='the address of the contract'>address</td>");
 
     return items;
