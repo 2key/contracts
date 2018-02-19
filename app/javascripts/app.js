@@ -206,18 +206,18 @@ function init_TwoKeyContract(TwoKeyContract_instance) {
     //     }
     // });
     TwoKeyContract_instance.constantInfo = TwoKeyContract_instance.getConstantInfo();
-    // TwoKeyContract_instance.getConstantInfo().then(info => {
-    //     TwoKeyContract_instance.info = {
-    //         name: info[0],
-    //         symbol: info[1],
-    //         cost: info[2],
-    //         bounty: info[3],
-    //         quota: info[4],
-    //         total_units: info[5],
-    //         owner: info[6],
-    //         ipfs_hash: info[7]
-    //     };
-    // });
+    TwoKeyContract_instance.getConstantInfo().then(info => {
+        TwoKeyContract_instance.info = {
+            name: info[0],
+            symbol: info[1],
+            cost: info[2],
+            bounty: info[3],
+            quota: info[4],
+            total_units: info[5],
+            owner: info[6],
+            ipfs_hash: info[7]
+        };
+    });
 }
 
 function getTwoKeyContract(address, cb) {
@@ -1362,13 +1362,16 @@ function d3_update(source) {
             return "translate(" + d.y + "," + d.x + ")";
         });
 
-    nodeUpdate.select("circle")
+    var circles = nodeUpdate.select("circle")
         .attr("r", 10)
         .style("fill", function (d) {
-            return d.load_children ? (d.load_children_in_progress ? "#0f0" : "#f00") : (d._children ? "lightsteelblue" : "#fff");
-        }).style("stroke", (d) => {
-            return (d.rewards || d.units) ? "#0f0" : "steelblue";
+            return (d._children ? "lightsteelblue" : "#fff");
         });
+    getTwoKeyContract(twoKeyContractAddress,
+            TwoKeyContract_instance =>
+                circles.style("stroke",
+                        d => (TwoKeyContract_instance.info.owner == d.address) ?
+                            "#f00" : (d.units) ? "#0f0" : "steelblue"));
 
     nodeUpdate.select("text")
         .style("fill-opacity", 1);
