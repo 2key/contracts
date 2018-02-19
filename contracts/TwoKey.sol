@@ -134,12 +134,16 @@ contract TwoKeyContract is StandardToken {
   }
 
   // New 2Key method
-  function getInfo(address me) public view returns (uint256,uint256,uint256,string,string,uint256,uint256,uint256,uint256,uint256,uint256) {
-    return (this.balanceOf(me),units[me],xbalances[me],name,symbol,cost,bounty,quota,totalSupply_,total_units,this.balance);
+  // function getInfo(address me) public view returns (uint256,uint256,uint256,string,string,uint256,uint256,uint256,uint256,uint256,uint256,address) {
+  //   return (this.balanceOf(me),units[me],xbalances[me],name,symbol,cost,bounty,quota,totalSupply_,total_units,this.balance,owner);
+  // }
+  //
+  function getConstantInfo() public view returns (string,string,uint256,uint256,uint256,uint256,address,string) {
+    return (name,symbol,cost,bounty,quota,total_units,owner,ipfs_hash);
   }
 
-  function getUnits(address customer) public view returns (uint256) {
-    return (units[customer]);
+  function getDynamicInfo(address me) public view returns (uint256,uint256,uint256,uint256,uint256) {
+    return (this.balanceOf(me),units[me],xbalances[me],totalSupply_,this.balance);
   }
 
   function () external payable {

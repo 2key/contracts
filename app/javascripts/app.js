@@ -205,7 +205,9 @@ function init_TwoKeyContract(TwoKeyContract_instance) {
     //         }
     //     }
     // });
+    TwoKeyContract_instance.constantInfo = TwoKeyContract_instance.getConstantInfo();
 }
+
 function getTwoKeyContract(address, cb) {
     var contract = contract_cache[address];
     if (contract) {
@@ -562,9 +564,12 @@ function contract_info(TwoKeyContract_instance, min_arcs, callback) {
     var take_link = location.origin + "/?c=" + twoKeyContractAddress + "&f=" + myaddress;
     // var contract_link = "./?c=" + twoKeyContractAddress;
     var onclick_name = "jump_to_contract_page('" + twoKeyContractAddress + "')";
-    TwoKeyContract_instance.getInfo(myaddress).then(function (info) {
-        var arcs, units, xbalance, name, symbol, total_arcs, quota, cost, bounty, total_units, balance, owner;
-        [arcs, units, xbalance, name, symbol, cost, bounty, quota, total_arcs, total_units, balance, owner] = info;
+    TwoKeyContract_instance.constantInfo.then(function (constant_info) {
+        var name, symbol, cost, bounty, quota, total_units, owner, ipfs_hash;
+        [name, symbol, cost, bounty, quota, total_units, owner, ipfs_hash] = constant_info;
+    TwoKeyContract_instance.getDynamicInfo(myaddress).then(function (info) {
+        var arcs, units, xbalance, total_arcs, balance;
+        [arcs, units, xbalance, total_arcs, balance] = info;
 
         balance = web3.fromWei(balance);
         xbalance = web3.fromWei(xbalance);
@@ -608,6 +613,16 @@ function contract_info(TwoKeyContract_instance, min_arcs, callback) {
             unique_id = unique_id + 1;
             var tag_est_reward = "id" + unique_id;
             items.push("<td id=\"" + tag_est_reward + "\" ></td>");
+            var depth = my_depth(TwoKeyContract_instance, owner, myaddress);
+            var est_reward = "";
+            if (depth == MAX_DEPTH || depth == 0) {
+                est_reward = "NA";
+            } else {
+                est_reward = "" + parseFloat(bounty)/depth;
+            }
+            safe_cb("#" + tag_est_reward, () => {
+                $("#" + tag_est_reward).text(est_reward);
+            });
 
             items.push("<td>" +
                 "<button class='bt' onclick=\"" + onclick_name + "\"" +
@@ -628,41 +643,20 @@ function contract_info(TwoKeyContract_instance, min_arcs, callback) {
             items.push("<td>" + total_arcs + "</td>");
             unique_id = unique_id + 1;
             var tag_description = "id" + unique_id;
-            items.push("<td id=\"" + tag_description + "\" ></td>");
-            TwoKeyContract_instance.ipfs_hash().then(ipfs_hash => {
-                safe_cb("#" + tag_description, () => {
-                    $("#" + tag_description).text(ipfs_hash);
-                });
-                if (ipfs_hash) {
-                    ipfs.cat(ipfs_hash, (err, res) => {
-                        if (err) throw err;
-                        safe_cb("#" + tag_description, () => {
-                            $("#" + tag_description).text(res.toString());
-                        });
+            items.push("<td id=\"" + tag_description + "\" >" + ipfs_hash + "</td>");
+            if (ipfs_hash) {
+                ipfs.cat(ipfs_hash, (err, res) => {
+                    if (err) throw err;
+                    safe_cb("#" + tag_description, () => {
+                        $("#" + tag_description).text(res.toString());
                     });
-                }
-            });
+                });
+            }
 
             unique_id = unique_id + 1;
             var tag_owner = "id" + unique_id;
-            items.push("<td id=\"" + tag_owner + "\" ></td>");
-            TwoKeyContract_instance.owner().then(owner => {
-                safe_cb("#" + tag_owner, () => {
-                    $("#" + tag_owner).text(owner);
-                    owner2name(owner, "#" + tag_owner);
-                });
-
-                safe_cb("#" + tag_est_reward, () => {
-                    var depth = my_depth(TwoKeyContract_instance, owner, myaddress);
-                    var est_reward = "";
-                    if (depth == MAX_DEPTH || depth == 0) {
-                        est_reward = "NA";
-                    } else {
-                        est_reward = "" + parseFloat(bounty)/depth;
-                    }
-                    $("#" + tag_est_reward).text(est_reward);
-                });
-            });
+            items.push("<td id=\"" + tag_owner + "\" >" + owner + "</td>");
+            owner2name(owner, "#" + tag_owner);
 
             items.push("<td>" +
                 "<button class='lnk bt' " +
@@ -673,7 +667,8 @@ function contract_info(TwoKeyContract_instance, min_arcs, callback) {
             var join_cost = 0;
             items.push("<td>" + join_cost + "</td>");
         }
-        callback(items, info);
+        callback(items, constant_info, info);
+    });
     });
 }
 
@@ -760,7 +755,7 @@ function populateContract() {
     $("#contract-spinner").addClass('spin');
     $("#contract-spinner").show();
     var h = contact_header();
-    function contract_callback(c, info) {
+    function contract_callback(c, constant_info, info) {
         for (var i = 0; i < h.length; i++) {
             var row = "<tr>" + h[i] + c[i] + "</tr>";
             $("#contract-table").append(row);
@@ -768,8 +763,11 @@ function populateContract() {
         $("#contract-spinner").removeClass('spin');
         $("#contract-spinner").hide();
 
-        var arcs, units, xbalance, name, symbol, total_arcs, quota, cost, bounty, total_units, balance, owner;
-        [arcs, units, xbalance, name, symbol, cost, bounty, quota, total_arcs, total_units, balance, owner] = info;
+        var name, symbol, cost, bounty, quota, total_units, owner, ipfs_hash;
+        [name, symbol, cost, bounty, quota, total_units, owner, ipfs_hash] = constant_info;
+        var arcs, units, xbalance, total_arcs, balance;
+        [arcs, units, xbalance, total_arcs, balance] = info;
+
         bounty = web3.fromWei(bounty.toString());
         $("#summary-quota").text(quota);
         $("#summary-reward").text(bounty);
