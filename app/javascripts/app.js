@@ -852,11 +852,13 @@ window.contract_take = function() {
                       $("#target-address").val("");
                       $("#influence-address").val("");
                       populate();
-                      location.assign(location.protocol + "//" + location.host);
+                      // location.assign(location.protocol + "//" + location.host);
+                      history.pushState(null, "", location.href.split("?")[0]);
                   }
               ).catch(function (e) {
                   alert("you can't take more than once\n\n" + e);
-                  location.assign(location.protocol + "//" + location.host);
+                  // location.assign(location.protocol + "//" + location.host);
+                  history.pushState(null, "", location.href.split("?")[0]);
               });
           }
       }).catch(function (e) {
