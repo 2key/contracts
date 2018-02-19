@@ -95,7 +95,7 @@ function tbl_add_row(tbl, h) {
 var tbl_add_contract_active = false;
 function tbl_add_contract(tbl, twoKeyContractAddress) {
     if (! $(tbl).children().length) {
-        $(tbl).append("<tr><td colspan=\"6\" data-toggle='tooltip' title='what I have in the contract'>Me</td><td></td><td colspan=\"12\" data-toggle='tooltip' title='contract properties'>Contract</td></tr>");
+        $(tbl).append("<tr><td colspan=\"6\" data-toggle='tooltip' title='what I have in the contract'>Me</td><td></td><td colspan=\"13\" data-toggle='tooltip' title='contract properties'>Contract</td></tr>");
         tbl_add_row(tbl, contact_header());
 
         $(tbl + "-spinner").addClass('spin');
@@ -206,6 +206,18 @@ function init_TwoKeyContract(TwoKeyContract_instance) {
     //     }
     // });
     TwoKeyContract_instance.constantInfo = TwoKeyContract_instance.getConstantInfo();
+    // TwoKeyContract_instance.getConstantInfo().then(info => {
+    //     TwoKeyContract_instance.info = {
+    //         name: info[0],
+    //         symbol: info[1],
+    //         cost: info[2],
+    //         bounty: info[3],
+    //         quota: info[4],
+    //         total_units: info[5],
+    //         owner: info[6],
+    //         ipfs_hash: info[7]
+    //     };
+    // });
 }
 
 function getTwoKeyContract(address, cb) {
@@ -507,17 +519,17 @@ function IterateOver(list, iterator, callback) {
     //     iterator(list[i], report)
     // }
 }
-
 var MAX_DEPTH = 1000;
-function my_depth(TwoKeyContract_instance, owner, myaddress) {
-    var nodes = [owner];
+
+function bdfs(TwoKeyContract_instance, start_address, cb) {
+    var nodes = [start_address];
     var depth = 0;
     while (nodes.length && depth < MAX_DEPTH) {
         var new_nodes = [];
         for(var i=0; i<nodes.length; i++) {
             var address = nodes[i];
-            if (address == myaddress) {
-                return depth;
+            if(cb(address, depth)) {
+                return;
             }
             var given_to = TwoKeyContract_instance.given_to;
             if (given_to)
@@ -531,8 +543,59 @@ function my_depth(TwoKeyContract_instance, owner, myaddress) {
         nodes = new_nodes;
         depth++;
     }
-    return MAX_DEPTH;
+    cb(0, depth);
 }
+
+
+function my_depth(TwoKeyContract_instance, owner, myaddress) {
+    var final_depth;
+    function cb(address, depth) {
+        if(address == myaddress) {
+            final_depth = depth;
+            return true; // break
+        } else if(address == 0) {
+            final_depth = MAX_DEPTH;
+            return true; // break
+        } else {
+            return false; // dont break
+        }
+    }
+    bdfs(TwoKeyContract_instance, owner, cb);
+    return final_depth;
+}
+
+function get_kpis(TwoKeyContract_instance, myaddress, owner) {
+    var depth_sum = 0;
+    var conversions = 0;
+    var influencers = 0;
+    var span = 0;
+    function cb(address, depth) {
+        if (TwoKeyContract_instance.units[address]) {
+            conversions++;
+            depth_sum += depth;
+        }
+        var to = TwoKeyContract_instance.given_to[address];
+        if (to && to.length) {
+            influencers++;
+            span += to.length;
+        }
+        return false; // dont break
+    }
+    bdfs(TwoKeyContract_instance, myaddress, cb);
+    var avg_depth = "NA"
+    if (conversions) {
+        avg_depth = depth_sum/conversions;
+    }
+    var avg_span = "NA";
+    if (influencers) {
+        avg_span = span / influencers;
+    }
+    // remove contract creator as influencer
+    if (influencers && myaddress == owner)
+        influencers--;
+    return [avg_depth, conversions, influencers, avg_span];
+}
+
 
 function contact_header() {
     var items = [];
@@ -556,6 +619,7 @@ function contact_header() {
     items.push("<td data-toggle='tooltip' title='total amount that will be taken from the cost and be distributed between influencers'>max reward per unit (ETH)</td>");
     items.push("<td data-toggle='tooltip' title='total balance of ETH deposited in contract'>gross income (ETH)</td>");
     items.push("<td data-toggle='tooltip' title='total number of ARCs in the contract'>total ARCs generated</td>");
+    items.push("<td data-toggle='tooltip' title='KPIs'>&#35;converters, avg. depth to converter, &#35;influencers, avg. child &#35;influencers</td>");
     items.push("<td data-toggle='tooltip' title='the address of the contract'>address</td>");
 
     return items;
@@ -604,7 +668,7 @@ function contract_info(TwoKeyContract_instance, min_arcs, callback) {
                 if (owner == myaddress) {
                     roll = "Contractor";
                 } else if (units) {
-                    roll = "Customer";
+                    roll = "Converter";
                 } else if (TwoKeyAdmin_contractInstance.joined[twoKeyContractAddress]) {
                     roll = "Influencer";
                 } else {
@@ -690,6 +754,9 @@ function contract_info(TwoKeyContract_instance, min_arcs, callback) {
 
             items.push("<td>" + balance + "</td>");
             items.push("<td>" + total_arcs + "</td>");
+
+            var kpis = get_kpis(TwoKeyContract_instance, owner, owner);
+            items.push("<td>" + kpis.join("/") + "</td>");
 
             items.push("<td>" +
                 "<button class='lnk bt' " +
