@@ -2,42 +2,24 @@
 ## Usage
 * login by either entering your name or using MetaMask (see below.)
 Entering user name is for demo purposes and there is no password.
-It may happen that different names will result in the same demo user. 
-* Click on any address of contract or user to copy it to the clipboard
+It may happen that different names will result in the same demo user.
 
-### Business
-* If you are a business, click on the `Create Contract` button to create a contract.
-Each `2Key Contract` is like a seperate ICO to sell your product.
-This contract has `ARC` coins. Note that coins from different contracts do not mix.
-Each influencer or customer can take, for free, one coin from you, so the number of
-`ARC` coins you have determine how much influencers or customers you can have.
-Supply all the necessary information:
-  * `name` the product you are selling. It's a unique name to your `ARC` coins
-  * `symbol` is a short code to identify the product and your `ARC` coins
-  * Determine the total number of `ARCs` you want to start with.
-  * When an influencer or customer take a coin from you they receive an amount of coins that you determine.
-This multiplication factor is called `take`.
-  * Define the `cost` in Ether of your product
-  * Define how much Ether will be taken from this cost as `bounty`
-which will be distributed eqally between the influencers
-* All contracts you created will appear in a table. Each row describes a different contract.
-You can click on some of the values in a row:
-  * `take` will copy to the clipboard a `2Key link` (see below)
-  * If someone else buys your product, your earning (`cost - bounty`) will appear in your `ME/ETH` column.
-If you click on this value you can `redeeme` it to your own Ether wallet.
-
-### Influencer
-* If you are an influencer you need to login to the site and then get a `2Key link` and open the web page with it.
-* contracts which you took will appear in `My ARCs` table
-* you can now create your own `2Key links` by clicking on the take value and pass it to other influencers or customers
-
-### Customer
-* If you are a customer follow the same steps as an influencer and click on the `cost` to buy the product
-* When you complete your purchase an amount of `bounty` Ether will be taken from
-the `cost` and will be distributed equally in the chain of influencers from the business to you,
-these amounts will appear in the `Me/ETH` column of the influencers
-The amount leftover in the cost will be given to the business who created the 2Key contract.
-This amount will appear in the `Me/ETH` column of the business  
+* The application starts by displaying all contracts you either created or joined to.
+* Information appears in tables, each row describes a different contract. Use the tooltips of the column names to understand each one of them.
+* Some of the values displayed in the tables appear as buttons. Use their tooltips to understand what action will happen if you click on them.
+For example, the buttons in the values for the following columns:
+  * `name` - switch you into a single view for that contract.
+  * `my 2key link` - copy to clipboard a shortened 2key link for the contract.
+  If you paste the link in a browser you will also move into the single view display.
+  You can use the link as a shortcut to your contract and the link can also 
+  be used by other users to join the contract, in this case you will want to
+  first logout before opening the link.
+* Single contract view displayes a visual graph of the influencers and customers
+ that used your 2key link directly or indirectly. If non exist then the graph will not be displayed.
+ The contractor (root node, the creator of the contract) appears as a red circle.
+ Converters (customers) appear as green circles and the path from them to the root is also colored green.
+ For every node you can collapse/expand the nodes below it by clicking on it. When collapsed the node appears with gray interior.
+ Each node has a tooltip with how much units it bought and how many customers it converted.
 
 
 ## Using MetaMask
@@ -70,6 +52,3 @@ paste one of the following private keys and refresh the 2Key Dapp page to show t
   * Use the Send button to transfer Ether from that account to the account address you just copied.
   * switch back to the account to which you just sent Ether
   * refresh the 2Key Dapp page to show the new address selection
-
-## Known problems
-* In order to open a `2Key link` you need to first login in the home address and only then attempt to open the `2Key link`
