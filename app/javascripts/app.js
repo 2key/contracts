@@ -1011,6 +1011,7 @@ function check_event (c, e) {
   var h = e.transactionHash + '_nonce_' + e.args.nonce;
   if (c.transactionHash[h]) {
     console.log('Collision on transactionHash ' + h)
+    alert('Collision on transactionHash ' + h)
     return false
   }
   c.transactionHash[h] = true
