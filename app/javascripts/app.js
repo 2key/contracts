@@ -1006,11 +1006,14 @@ function check_event (c, e) {
   if (!c.transactionHash) {
     c.transactionHash = {}
   }
-  if (c.transactionHash[e.transactionHash]) {
-    console.log('Collision on transactionHash ' + e.transactionHash)
+
+  // add event nonce because ganache bug sometimes reuse transactionHash
+  var h = e.transactionHash + '_nonce_' + e.args.nonce;
+  if (c.transactionHash[h]) {
+    console.log('Collision on transactionHash ' + h)
     return false
   }
-  c.transactionHash[e.transactionHash] = true
+  c.transactionHash[h] = true
   return true
 }
 

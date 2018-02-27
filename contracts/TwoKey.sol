@@ -22,13 +22,14 @@ contract TwoKeyContract is StandardToken {
   uint256 public bounty; // Cost of product in wei
   uint256 public quota;  // maximal tokens that can be passed in transferFrom
   uint256 public total_units; // total number of units on offer
+  uint256 private nonce;
 
   // Private variables of the token
   mapping (address => address) internal received_from;
   mapping(address => uint256) internal xbalances; // balance of external currency (ETH or 2Key coin)
   mapping(address => uint256) internal units; // number of units bought
 
-  event Fulfilled(address indexed to);
+  event Fulfilled(address indexed to, uint256 nonce);
 
   // Initialize all the constants
   function TwoKeyContract(address _owner, string _name, string _symbol,
@@ -186,7 +187,8 @@ contract TwoKeyContract is StandardToken {
     total_units = total_units.sub(1);
     units[customer] = units[customer].add(1);
 
-    Fulfilled(msg.sender);
+    Fulfilled(msg.sender, nonce);
+    nonce = nonce + 1;
   }
 
   function redeem() public {
@@ -206,6 +208,7 @@ contract TwoKeyContract is StandardToken {
 contract TwoKeyAdmin {
   mapping(address => string) public owner2name;
   mapping(bytes32 => address) public name2owner;
+  uint256 public nonce;
 
   function addName(string _name) public {
     address _owner = msg.sender;
@@ -229,19 +232,20 @@ contract TwoKeyAdmin {
     return owner2name[_owner];
   }
 
-  event Created(address indexed owner, address c);
+  event Created(address indexed owner, address c, uint256 nonce);
   function createTwoKeyContract(string _name, string _symbol, uint256 _totalSupply, uint256 _quota, uint256 _cost, uint256 _bounty, uint256 _units, string _ipfs_hash) public returns (address) {
     address _owner = msg.sender;
     address c = (new TwoKeyContract(_owner, _name, _symbol, _totalSupply, _quota, _cost, _bounty, _units, _ipfs_hash));
 
-    Created(_owner, c);
-
+    Created(_owner, c, nonce);
+    nonce = nonce + 1;
     return c;
   }
 
-  event Joined(address indexed influencer, address c);
+  event Joined(address indexed influencer, address c, uint256 nonce);
   function joinedContract(address influencer, address c) {
-    Joined(influencer, c);
+    Joined(influencer, c, nonce);
+    nonce = nonce + 1;
   }
 
   // function fundtransfer(address etherreceiver, uint256 amount) public {
