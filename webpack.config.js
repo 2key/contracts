@@ -1,7 +1,7 @@
-const path = require('path');
-const webpack = require('webpack');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
-const CleanWebpackPlugin = require('clean-webpack-plugin');
+const path = require('path')
+const webpack = require('webpack')
+const CopyWebpackPlugin = require('copy-webpack-plugin')
+const CleanWebpackPlugin = require('clean-webpack-plugin')
 // const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
@@ -15,21 +15,21 @@ module.exports = {
     //             template: 'app/index.html'
     //         }),
     new webpack.ProvidePlugin({
-        $: 'jquery',
-        jQuery: 'jquery'
+      $: 'jquery',
+      jQuery: 'jquery'
     }),
     // Copy our app's index.html to the dist folder.
     new CopyWebpackPlugin([
-      { from: './app/index.html', to: "index.html" },
-      { from: './app/images/clippy.svg', to: "clippy.svg" },
+      { from: './app/index.html', to: 'index.html' },
+      { from: './app/images/clippy.svg', to: 'clippy.svg' }
     ]),
     new CleanWebpackPlugin(['dist'])
   ],
   module: {
     rules: [
       {
-       test: /\.css$/,
-       use: [ 'style-loader', 'css-loader' ]
+        test: /\.css$/,
+        use: [ 'style-loader', 'css-loader' ]
       },
       // {
       //   test: /\.md$/,
@@ -42,37 +42,36 @@ module.exports = {
       //           loader: 'html-loader',
       //       }
       //   },
-        {
-            test: /\.(html)$/,
-            use: [{
-                loader: 'file-loader',
-                options: {
-                  name: '[name].html'
-                }
-            }],
-            exclude: path.resolve(__dirname, 'index.html')
-        },
-        {
-            test: /\.(md)$/,
-            use: [
-                {
-                    loader: 'file-loader',
-                    options: {
-                      name: '[name].html'
-                    }
-                },
-                {
-                    loader: 'markdown-loader',
-                },
+      {
+        test: /\.(html)$/,
+        use: [{
+          loader: 'file-loader',
+          options: {
+            name: '[name].html'
+          }
+        }],
+        exclude: path.resolve(__dirname, 'index.html')
+      },
+      {
+        test: /\.(md)$/,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              name: '[name].html'
+            }
+          },
+          {
+            loader: 'markdown-loader'
+          }
         //         {
         //             loader: 'html-loader!markdown-loader!file-loader',
         //             options: {
         //               name: '[name].html'
         //             }
         //         }
-            ],
-        },
-
+        ]
+      }
 
     ],
     loaders: [
@@ -84,12 +83,12 @@ module.exports = {
         query: {
           presets: ['es2015'],
           plugins: ['transform-runtime']
-        },
-      },
+        }
+      }
     ]
   },
   devServer: {
     host: '0.0.0.0',
     disableHostCheck: true
-  },
+  }
 }
