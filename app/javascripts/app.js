@@ -310,8 +310,6 @@ window.logout = function () {
   from_twoKeyContractAddress = null
   delete localStorage.username
   $('#user-name').html('')
-  $('#influencers-graph-wrapper').hide()
-  // $("#influencers-graph").empty();
   $('#contract-table').empty()
   $('#my-2key-contracts').empty()
   $('#my-2key-arcs').empty()
@@ -818,6 +816,9 @@ function populateContract () {
       $('#buy').show()
     } else {
       $('#buy').hide()
+      if (from_twoKeyContractAddress) {
+        window.contract_take()
+      }
     }
     if (xbalance.toNumber()) {
       $('#redeem').show()
@@ -1051,6 +1052,9 @@ function init (cb) {
   twoKeyContractAddress = params.c
   from_twoKeyContractAddress = params.f
   if (twoKeyContractAddress) {
+    $('#join-btn').hide()
+    $('#buy').hide()
+    $('#redeem').hide()
     $('.contract').show()
     $('.contracts').hide()
   } else {
@@ -1080,7 +1084,7 @@ function init (cb) {
 }
 
 function new_user () {
-  $('#influencers-graph-wrapper').hide()
+  d3_reset()
   $('.login').hide()
   $('.logout').hide()
   $('#metamask-login').hide()
@@ -1253,6 +1257,7 @@ function d3_reset () {
   d3_i = 0
   svg.selectAll('*').remove()
   $('#influencers-graph-wrapper').hide()
+  // $("#influencers-graph").empty();
 }
 
 function d3_init () {
