@@ -149,14 +149,14 @@ var TwoKeyContract = contract(twoKeyContract_artifacts)
 var twoKeyContractAddress
 var from_twoKeyContractAddress
 
-function cache (fn) {
-  var NO_RESULT = {} // unique, would use Symbol if ES2015-able
-  var res = NO_RESULT
-  return function () { // if ES2015, name the function the same as fn
-    if (res === NO_RESULT) return (res = fn.apply(this, arguments))
-    return res
-  }
-}
+// function cache (fn) {
+//   var NO_RESULT = {} // unique, would use Symbol if ES2015-able
+//   var res = NO_RESULT
+//   return function () { // if ES2015, name the function the same as fn
+//     if (res === NO_RESULT) return (res = fn.apply(this, arguments))
+//     return res
+//   }
+// }
 
 // cash all contracts
 var contract_cache = {}
@@ -340,19 +340,19 @@ window.jump_to_contract_page = function (address) {
   populate()
 }
 
-window.getETH = function () {
-  var myaddress = whoAmI()
-  TwoKeyAdmin_contractInstance.fundtransfer(myaddress, web3.toWei(1.0, 'ether'),
-    {gas: 3000000, from: myaddress}).then(function () {
-  }).catch(function (e) {
-    alert(e)
-  })
-}
-
-window.giveETH = function () {
-  var myaddress = whoAmI()
-  web3.eth.sendTransaction({from: myaddress, to: TwoKeyAdmin.address, value: web3.toWei(1, 'ether')})
-}
+// window.getETH = function () {
+//   var myaddress = whoAmI()
+//   TwoKeyAdmin_contractInstance.fundtransfer(myaddress, web3.toWei(1.0, 'ether'),
+//     {gas: 3000000, from: myaddress}).then(function () {
+//   }).catch(function (e) {
+//     alert(e)
+//   })
+// }
+//
+// window.giveETH = function () {
+//   var myaddress = whoAmI()
+//   web3.eth.sendTransaction({from: myaddress, to: TwoKeyAdmin.address, value: web3.toWei(1, 'ether')})
+// }
 
 window.buy = function (twoKeyContractAddress, name, cost) {
   var myaddress = whoAmI()
@@ -461,16 +461,16 @@ function getAllUrlParams (url) {
   return obj
 }
 
-window.paste_address = function (elm) {
-  let t = elm.innerHTML
-  $('#influence-address').val(t)
-  $('#buy-address').val(t)
-}
+// window.paste_address = function (elm) {
+//   let t = elm.innerHTML
+//   $('#influence-address').val(t)
+//   $('#buy-address').val(t)
+// }
 
-window.copy_link = function (twoKeyContractAddress, myaddress) {
-  var link = location.origin + '/?c=' + twoKeyContractAddress + '&f=' + myaddress
-  alert(link)
-}
+// window.copy_link = function (twoKeyContractAddress, myaddress) {
+//   var link = location.origin + '/?c=' + twoKeyContractAddress + '&f=' + myaddress
+//   alert(link)
+// }
 
 function product_cleanup () {
   $('#product-name').val('')
@@ -486,32 +486,33 @@ function product_cleanup () {
   $('#create-contract').hide()
 }
 
-// https://mostafa-samir.github.io/async-iterative-patterns-pt1/
-function IterateOver (list, iterator, callback) {
-  // this is the function that will start all the jobs
-  // list is the collections of item we want to iterate over
-  // iterator is a function representing the job when want done on each item
-  // callback is the function we want to call when all iterations are over
+// // https://mostafa-samir.github.io/async-iterative-patterns-pt1/
+// function IterateOver (list, iterator, callback) {
+//   // this is the function that will start all the jobs
+//   // list is the collections of item we want to iterate over
+//   // iterator is a function representing the job when want done on each item
+//   // callback is the function we want to call when all iterations are over
+//
+//   var doneCount = 0 // here we'll keep track of how many reports we've got
+//
+//   function report () {
+//     // this function resembles the phone number in the analogy above
+//     // given to each call of the iterator so it can report its completion
+//
+//     doneCount++
+//
+//     // if doneCount equals the number of items in list, then we're done
+//     if (doneCount === list.length) { callback() }
+//   }
+//
+//   // here we give each iteration its job
+//   list.forEach(item => iterator(item, report))
+//   // for(var i = 0; i < list.length; i++) {
+//   //     // iterator takes 2 arguments, an item to work on and report function
+//   //     iterator(list[i], report)
+//   // }
+// }
 
-  var doneCount = 0 // here we'll keep track of how many reports we've got
-
-  function report () {
-    // this function resembles the phone number in the analogy above
-    // given to each call of the iterator so it can report its completion
-
-    doneCount++
-
-    // if doneCount equals the number of items in list, then we're done
-    if (doneCount === list.length) { callback() }
-  }
-
-  // here we give each iteration its job
-  list.forEach(item => iterator(item, report))
-  // for(var i = 0; i < list.length; i++) {
-  //     // iterator takes 2 arguments, an item to work on and report function
-  //     iterator(list[i], report)
-  // }
-}
 var MAX_DEPTH = 1000
 
 function bdfs (TwoKeyContract_instance, start_address, cb) {
@@ -845,26 +846,26 @@ function populate () {
   }
 }
 
-window.giveARCs = function () {
-  let twoKeyContractAddress = $('#influence-address').val()
-  let target = $('#target-address').val()
-  if (!target || !twoKeyContractAddress) {
-    alert('specify contract and target user')
-    return
-  }
-
-  var myaddress = whoAmI()
-  getTwoKeyContract(twoKeyContractAddress, (TwoKeyContract_instance) => {
-    TwoKeyContract_instance.transfer(target, 1, {gas: 1400000, from: myaddress}).then((tx) => {
-      console.log(tx)
-      $('#target-address').val('')
-      $('#influence-address').val('')
-      populate()
-    }).catch(function (e) {
-      alert(e)
-    })
-  })
-}
+// window.giveARCs = function () {
+//   let twoKeyContractAddress = $('#influence-address').val()
+//   let target = $('#target-address').val()
+//   if (!target || !twoKeyContractAddress) {
+//     alert('specify contract and target user')
+//     return
+//   }
+//
+//   var myaddress = whoAmI()
+//   getTwoKeyContract(twoKeyContractAddress, (TwoKeyContract_instance) => {
+//     TwoKeyContract_instance.transfer(target, 1, {gas: 1400000, from: myaddress}).then((tx) => {
+//       console.log(tx)
+//       $('#target-address').val('')
+//       $('#influence-address').val('')
+//       populate()
+//     }).catch(function (e) {
+//       alert(e)
+//     })
+//   })
+// }
 
 window.contract_take = function () {
   if (!from_twoKeyContractAddress) {
