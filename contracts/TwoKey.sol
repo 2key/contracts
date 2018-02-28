@@ -151,6 +151,7 @@ contract TwoKeyContract is StandardToken {
     buyProduct();
   }
 
+  // buy product. if you dont have ARCs then first take them (join) from _from
   function buyFrom(address _from) public payable {
     require(_from != address(0));
     address _to = msg.sender;
@@ -160,7 +161,7 @@ contract TwoKeyContract is StandardToken {
     buyProduct();
   }
 
-  // low level token purchase function
+  // low level product purchase function
   function buyProduct() public payable {
     address customer = msg.sender;
     require(this.balanceOf(customer) > 0);

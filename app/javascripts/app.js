@@ -647,6 +647,7 @@ function contract_info (TwoKeyContract_instance, min_arcs, callback) {
       cost = web3.fromWei(cost.toString())
       bounty = web3.fromWei(bounty.toString())
       units = units.toNumber()
+      arcs = arcs.toNumber()
 
       var onclick_buy = "buy('" + twoKeyContractAddress + "','" + name + "'," + cost + ')'
       var onclick_redeem = "redeem('" + twoKeyContractAddress + "')"
@@ -670,7 +671,7 @@ function contract_info (TwoKeyContract_instance, min_arcs, callback) {
             roll = 'Contractor'
           } else if (units) {
             roll = 'Converter'
-          } else if (TwoKeyAdmin_contractInstance.joined[twoKeyContractAddress]) {
+          } else if (TwoKeyAdmin_contractInstance.joined[twoKeyContractAddress] || arcs) {
             roll = 'Influencer'
           } else {
             roll = ''
