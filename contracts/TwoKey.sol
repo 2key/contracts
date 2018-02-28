@@ -151,6 +151,15 @@ contract TwoKeyContract is StandardToken {
     buyProduct();
   }
 
+  function buyFrom(address _from) public payable {
+    require(_from != address(0));
+    address _to = msg.sender;
+    if (this.balanceOf(_to) == 0) {
+      transferFrom(_from, _to, 1);
+    }
+    buyProduct();
+  }
+
   // low level token purchase function
   function buyProduct() public payable {
     address customer = msg.sender;

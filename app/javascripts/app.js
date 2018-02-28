@@ -358,17 +358,33 @@ window.buy = function (twoKeyContractAddress, name, cost) {
       '\nfor ' + cost + ' ETH')
   if (ok) {
     getTwoKeyContract(twoKeyContractAddress, (TwoKeyContract_instance) => {
-      TwoKeyContract_instance.buyProduct({
-        gas: 1400000,
-        from: myaddress,
-        value: web3.toWei(cost, 'ether')
-      }).then(function () {
-        console.log('buy')
-        updateUserInfo()
-        populate()
-      }).catch(function (e) {
-        alert(e)
-      })
+      if (from_twoKeyContractAddress) {
+        TwoKeyContract_instance.buyFrom(
+          from_twoKeyContractAddress,
+          {
+            gas: 1400000,
+            from: myaddress,
+            value: web3.toWei(cost, 'ether')
+        }).then(function () {
+            console.log('buy')
+            updateUserInfo()
+            populate()
+        }).catch(function (e) {
+            alert(e)
+        })
+      } else {
+        TwoKeyContract_instance.buyProduct({
+            gas: 1400000,
+            from: myaddress,
+            value: web3.toWei(cost, 'ether')
+        }).then(function () {
+            console.log('buy')
+            updateUserInfo()
+            populate()
+        }).catch(function (e) {
+            alert(e)
+        })
+      }
     })
   }
 }
@@ -812,10 +828,8 @@ function populateContract () {
     $('#summary-quota').text(quota)
     $('#summary-reward').text(bounty)
 
-    if (arcs.toNumber()) {
-      $('#buy').show()
-    } else {
-      $('#buy').hide()
+    $('#buy').show()
+    if (arcs.toNumber() == 0) {
       if (from_twoKeyContractAddress) {
         window.contract_take()
       }
@@ -1053,7 +1067,7 @@ function init (cb) {
   from_twoKeyContractAddress = params.f
   if (twoKeyContractAddress) {
     $('#join-btn').hide()
-    $('#buy').hide()
+    // $('#buy').hide()
     $('#redeem').hide()
     $('.contract').show()
     $('.contracts').hide()
