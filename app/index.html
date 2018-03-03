@@ -20,6 +20,16 @@
     </div>
     <div class="container-fluid login">
       <h1>Welcome to 2Key</h1>
+      <table class="table table-bordered" id="login-user-data">
+        <tr>
+          <td>Address</td>
+          <td><button class='lnk bt' msg='address was copied to clipboard' id="login-user-address" data-toggle="tooltip" title="copy to clipboard"></button></td>
+        </tr>
+        <tr>
+          <td>Balance</td>
+          <td id="login-user-balance"></td>
+        </tr>
+      </table>
       <h3>please login</h3>
       <input type="text" id="login-user-name" placeholder="user name" class="form-control"
         data-toggle="tooltip" title="user name, address, 'coinbase'" />

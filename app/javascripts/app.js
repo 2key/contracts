@@ -21,6 +21,12 @@ var entityMap = {
   '=': '&#x3D;'
 }
 
+function gastimate(gas) {
+  if (localStorage.meta_mask)
+    return
+  return gas
+}
+
 function escapeHtml (string) {
   return String(string).replace(/[&<>"'`=\/]/g, function (s) {
     return entityMap[s]
@@ -244,8 +250,6 @@ function getTwoKeyContract (address, cb) {
 const ipfsAPI = require('ipfs-api')
 var ipfs = ipfsAPI(window.document.location.hostname, '5001')
 
-var coinbase = '0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1'
-
 String.prototype.hashCode = function () {
   var hash = 0, i, chr
   if (this.length === 0) return hash
@@ -257,21 +261,94 @@ String.prototype.hashCode = function () {
   return hash
 }
 
+var last_address
+var no_warning
+
 function whoAmI () {
-  var username = localStorage.username
-  if (!username) {
+  var accounts = web3.eth.accounts
+  if (!accounts || accounts.length == 0) {
+    if (!no_warning) {
+      no_warning = true
+      if (localStorage.meta_mask) {
+        alert("it looks as if your MetaMask account is locked. Please unlock it and select an account")
+      } else {
+        alert("Something is wrong in testrpc/ganauche configuration.")
+      }
+    }
+    if (last_address) {
+      window.logout()
+      if (localStorage.meta_mask) {
+        $('#metamask-login').show()
+      }
+      $('.login').hide()
+      last_address = null
+    }
     return
   }
-  var whoami = username
-  if (whoami === 'coinbase') {
-    return coinbase
+
+  var my_address
+  var username = localStorage.username
+  if (username) {
+    if (username === 'coinbase') {
+      my_address = web3.eth.coinbase
+    } else if (username.startsWith('0x')) {
+      my_address = username
+    } else {
+      var n = accounts.length
+      my_address = accounts[username.hashCode() % n]
+    }
+  } else {
+    // can happen when using metamask
+    if (accounts.length == 1) {
+      my_address = accounts[0]
+    }
   }
-  if (whoami.startsWith('0x')) {
-    return whoami
+  var last = last_address
+  last_address = my_address
+  if (!my_address) {
+    window.logout()
+    return
   }
-  var accounts = web3.eth.accounts
-  var n = accounts.length
-  return accounts[whoami.hashCode() % n]
+
+  if (last && last != my_address) {
+    // for example user changed his account on MetaMask
+    alert('User account has changed.')
+    delete localStorage.username
+    username = null
+  }
+
+  if (my_address && last != my_address) {
+    // check consistancy
+    TwoKeyAdmin_contractInstance.getOwner2Name(my_address).then(function (_name) {
+      localStorage.username = _name
+      if (_name) {
+        if (!username || (username === _name)) {
+          lookupUserInfo()
+        } else {
+          alert('Sorry, demo name already in use, try a different one')
+          window.logout()
+        }
+      } else {
+        if (username) {
+          TwoKeyAdmin_contractInstance.addName(username, {
+            gas: gastimate(80000),
+            from: myaddress
+          }).then(function () {
+            lookupUserInfo()
+          })
+        } else {
+          window.logout()
+          $("#login-user-data").show()
+          $('#login-user-address').html(my_address.toString())
+          web3.eth.getBalance(my_address, function (error, result) {
+            $('#login-user-balance').html(web3.fromWei(result.toString()) + ' ETH')
+          })
+        }
+      }
+    })
+  }
+
+  return my_address
 }
 
 window.login = function () {
@@ -284,23 +361,7 @@ window.login = function () {
   $('#login-user-name').val('')
   localStorage.username = username
 
-  var myaddress = whoAmI()
-  TwoKeyAdmin_contractInstance.getOwner2Name(myaddress).then(function (_name) {
-    // "0x0000000000000000000000000000000000000000"
-
-    if (_name) {
-      if (_name != username) {
-        alert('Sorry, demo name already in use, try a different one')
-        window.logout()
-      } else {
-        lookupUserInfo()
-      }
-    } else {
-      TwoKeyAdmin_contractInstance.addName(username, {gas: 3000000, from: myaddress}).then(function () {
-        lookupUserInfo()
-      })
-    }
-  })
+  whoAmI()
 }
 
 window.logout = function () {
@@ -309,6 +370,7 @@ window.logout = function () {
 
   from_twoKeyContractAddress = null
   delete localStorage.username
+  $("#login-user-data").hide()
   $('#user-name').html('')
   $('#contract-table').empty()
   $('#my-2key-contracts').empty()
@@ -362,7 +424,7 @@ window.buy = function (twoKeyContractAddress, name, cost) {
         TwoKeyContract_instance.buyFrom(
           from_twoKeyContractAddress,
           {
-            gas: 1400000,
+            gas: gastimate(140000),
             from: myaddress,
             value: web3.toWei(cost, 'ether')
         }).then(function () {
@@ -374,7 +436,7 @@ window.buy = function (twoKeyContractAddress, name, cost) {
         })
       } else {
         TwoKeyContract_instance.buyProduct({
-            gas: 1400000,
+            gas: gastimate(140000),
             from: myaddress,
             value: web3.toWei(cost, 'ether')
         }).then(function () {
@@ -394,7 +456,7 @@ window.redeem = function (twoKeyContractAddress) {
   if (ok) {
     var myaddress = whoAmI()
     getTwoKeyContract(twoKeyContractAddress, (TwoKeyContract_instance) => {
-      TwoKeyContract_instance.redeem({gas: 1400000, from: myaddress}).then(function () {
+      TwoKeyContract_instance.redeem({gas: gastimate(140000), from: myaddress}).then(function () {
         console.log('redeem')
         updateUserInfo()
         populate()
@@ -901,7 +963,7 @@ window.contract_take = function () {
       if (ok) {
         var myaddress = whoAmI()
         TwoKeyContract_instance.transferFrom(from_twoKeyContractAddress, myaddress, 1, {
-          gas: 1400000,
+          gas: gastimate(140000),
           from: myaddress
         }).then(
           function (tx) {
@@ -925,6 +987,7 @@ window.contract_take = function () {
 }
 
 window.addContract = function () {
+  whoAmI()  // check the address did not change
   $('#add-contract').hide()
   $('#create-contract').show()
 }
@@ -968,7 +1031,7 @@ window.createContract = function () {
       TwoKeyAdmin_contractInstance.createTwoKeyContract(name, symbol, total_arcs, quota,
         web3.toWei(parseFloat(cost), 'ether'), web3.toWei(parseFloat(bounty), 'ether'),
         parseInt(total_units), ipfs_hash,
-        {gas: 3000000, from: address}).then(function () {
+        {gas: gastimate(3000000), from: address}).then(function () {
         populate()
       }).catch(function (e) {
         alert(e)
@@ -980,7 +1043,7 @@ window.createContract = function () {
     TwoKeyAdmin_contractInstance.createTwoKeyContract(name, symbol, total_arcs, quota,
       web3.toWei(parseFloat(cost), 'ether'), web3.toWei(parseFloat(bounty), 'ether'),
       parseInt(total_units), '',
-      {gas: 3000000, from: address}).then(function () {
+      {gas: gastimate(3000000), from: address}).then(function () {
       populate()
     }).catch(function (e) {
       alert(e)
@@ -1062,7 +1125,7 @@ function fulfilled_event (c, e) {
   c.units[to]++
 }
 
-function init (cb) {
+function init () {
   params = getAllUrlParams()
   twoKeyContractAddress = params.c
   from_twoKeyContractAddress = params.f
@@ -1084,6 +1147,8 @@ function init (cb) {
 
   TwoKeyContract.setProvider(web3.currentProvider)
 
+  setTimeout(ipfs_init, 0)
+
   /* TwoKeyAdmin.deployed() returns an instance of the contract. Every call
    * in Truffle returns a promise which is why we have used then()
    * everywhere we have a transaction call
@@ -1092,7 +1157,7 @@ function init (cb) {
     TwoKeyAdmin_contractInstance = contractInstance
     // init_TwoKeyAdmin();
     $('#loading').hide()
-    cb()
+    whoAmI()
   }).catch(function (e) {
     alert(e)
   })
@@ -1154,7 +1219,11 @@ $(document).ready(function () {
 
     $('#metamask-login').show()
     $('#logout-button').hide()
-    localStorage.username = 'MetaMask'
+    if (!localStorage.meta_mask) {
+      // could happen if previous time we run the MetaMask extension was not installed/disabled
+      delete localStorage.username
+    }
+    localStorage.meta_mask = true
 
     console.warn('Using web3 detected from external source like Metamask')
     window.web3 = new Web3(web3.currentProvider)
@@ -1180,57 +1249,32 @@ $(document).ready(function () {
           console.log('This is an unknown network.')
           ok = true
       }
-      if (ok) {
-        $('#metamask-login').hide()
-
-        function cb () {
-          // Check if we have a name and if not, show login screen
-          var myaddress = whoAmI()
-          TwoKeyAdmin_contractInstance.getOwner2Name(myaddress).then(function (_name) {
-            if (_name) {
-              localStorage.username = _name
-              setTimeout(lookupUserInfo(), 0)
-            } else {
-              window.logout()
-            }
-          })
-        }
-
-        init(cb)
-      } else {
+      if (!ok) {
         alert('Configure MetaMask to work on the following network ' + url)
+        return
       }
+
+      // with meta-mask it is possible for the user to switch account without
+      // us knowing about it
+      setInterval(whoAmI, 500)
     })
   } else {
     // not using MetaMask
-    if (localStorage.username == 'MetaMask') {
+
+    if (localStorage.meta_mask) {
+      // the MetaMask extension was used in last session and then uninstalled/disabled
       delete localStorage.username
+      delete localStorage.meta_mask
     }
-    $('#logout-button').show()
-    $('#metamask-login').hide()
     console.warn('No web3 detected. Falling back to ' + url +
         '. You should remove this fallback when you deploy live, ' +
         "as it's inherently insecure. Consider switching to Metamask for development. More info here: http://truffleframework.com/tutorials/truffle-and-metamask")
     // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
     window.web3 = new Web3(new Web3.providers.HttpProvider(url))
 
-    function cb () {
-      if (localStorage.username) {
-        TwoKeyAdmin_contractInstance.getName2Owner(localStorage.username).then(function (_owner) {
-          var myaddress = whoAmI()
-          if (myaddress == _owner) {
-            setTimeout(lookupUserInfo(), 0)
-          } else {
-            window.logout()
-          }
-        })
-      } else {
-        $('.login').show()
-      }
-    }
-    init(cb)
   }
-  setTimeout(ipfs_init, 0)
+
+  init()
 })
 
 // ************** Generate the tree diagram	 *****************

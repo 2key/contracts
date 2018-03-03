@@ -21,6 +21,12 @@ For example, the buttons in the values for the following columns:
  For every node you can collapse/expand the nodes below it by clicking on it. When collapsed the node appears with gray interior.
  Each node has a tooltip with how much units it bought and how many customers it converted.
 
+* Some actions will require you to spend some gas. The account you are using
+ will be required to have a balance to cover the cost of the gas:
+  * login for the first time
+  * create a contract
+  * join a contract
+  * fulfill a contract (the gas is in addition to the cost of the unit)
 
 ## Using MetaMask
 * install [MetaMask](https://metamask.io/) Chrome extension
@@ -28,9 +34,9 @@ For example, the buttons in the values for the following columns:
   * to the right of the address bar, click on the fox icon of the chrome extension
   * in the extension panel select the network on the top left.
   * Click on Custom RPC.
-  * Copy the name of this site (for example `ec2-52-23-248-220.compute-1.amazonaws.com`) and enter it to
-`New RPC URL` with port `8545` (for example `http://ec2-52-23-248-220.compute-1.amazonaws.com:8545`) 
-* create an account that has some Ether to work with
+  * Copy the name of this site (for example `http://poc.2key.network`) and enter it to
+`New RPC URL` with port `8545` (for example `http://poc.2key.network:8545`) 
+* create an account that has some Ether to work with:
   * click on the switch user icon on the top right,
 scroll down and click on `Import Account`,
 paste one of the following private keys and refresh the 2Key Dapp page to show the new address selection:
@@ -46,9 +52,15 @@ paste one of the following private keys and refresh the 2Key Dapp page to show t
 (8) 829e924fdf021ba3dbbc4225edfece9aca04b929d6e75613329ca6f1d31c0bb4
 (9) b0057716d5917badaf911b193b12b910811c1497b5bada8d7711f758981c3773
 ```
-* using account that does not have Ether:
-  * In MetaMask switch to the account and copy its address
+* With MetaMask you can also create and use account that does not have Ether:
+  * In MetaMask switch to the new account and copy its address
   * switch to an another account which has Ether (see previous step)
   * Use the Send button to transfer Ether from that account to the account address you just copied.
   * switch back to the account to which you just sent Ether
   * refresh the 2Key Dapp page to show the new address selection
+  
+* Whenever you perform an action that require gas, a metamask dialog will pop.
+You should confirm the transaction.
+The dialog will show you an estimate of how much the transaction will cost.
+Note that you will need to manually control the gas price and set it to 2 to get a realistice value.
+  
