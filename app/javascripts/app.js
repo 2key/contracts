@@ -332,7 +332,7 @@ function whoAmI () {
         if (username) {
           TwoKeyAdmin_contractInstance.addName(username, {
             gas: gastimate(80000),
-            from: myaddress
+            from: my_address
           }).then(function () {
             lookupUserInfo()
           })
