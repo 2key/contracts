@@ -125,8 +125,8 @@ function init_TwoKeyAdmin () {
   TwoKeyAdmin_contractInstance.created = {}
   TwoKeyAdmin_contractInstance.joined = {}
 
-  var myaddress = whoAmI()
-  TwoKeyAdmin_contractInstance.Created_event = TwoKeyAdmin_contractInstance.Created({owner: myaddress}, {
+  var my_address = whoAmI()
+  TwoKeyAdmin_contractInstance.Created_event = TwoKeyAdmin_contractInstance.Created({owner: my_address}, {
     fromBlock: 'earliest',
     toBlock: 'latest'
   }, (error, log) => {
@@ -138,7 +138,7 @@ function init_TwoKeyAdmin () {
     }
   })
 
-  TwoKeyAdmin_contractInstance.Joined_event = TwoKeyAdmin_contractInstance.Joined({influencer: myaddress}, {
+  TwoKeyAdmin_contractInstance.Joined_event = TwoKeyAdmin_contractInstance.Joined({influencer: my_address}, {
     fromBlock: 'earliest',
     toBlock: 'latest'
   }, (error, log) => {
@@ -401,21 +401,21 @@ window.jump_to_contract_page = function (address) {
 }
 
 // window.getETH = function () {
-//   var myaddress = whoAmI()
-//   TwoKeyAdmin_contractInstance.fundtransfer(myaddress, web3.toWei(1.0, 'ether'),
-//     {gas: 3000000, from: myaddress}).then(function () {
+//   var my_address = whoAmI()
+//   TwoKeyAdmin_contractInstance.fundtransfer(my_address, web3.toWei(1.0, 'ether'),
+//     {gas: 3000000, from: my_address}).then(function () {
 //   }).catch(function (e) {
 //     alert(e)
 //   })
 // }
 //
 // window.giveETH = function () {
-//   var myaddress = whoAmI()
-//   web3.eth.sendTransaction({from: myaddress, to: TwoKeyAdmin.address, value: web3.toWei(1, 'ether')})
+//   var my_address = whoAmI()
+//   web3.eth.sendTransaction({from: my_address, to: TwoKeyAdmin.address, value: web3.toWei(1, 'ether')})
 // }
 
 window.buy = function (twoKeyContractAddress, name, cost) {
-  var myaddress = whoAmI()
+  var my_address = whoAmI()
   var ok = confirm('your about to fulfill (buy) the product "' + name + '" from contract \n' + twoKeyContractAddress +
       '\nfor ' + cost + ' ETH')
   if (ok) {
@@ -425,7 +425,7 @@ window.buy = function (twoKeyContractAddress, name, cost) {
           from_twoKeyContractAddress,
           {
             gas: gastimate(140000),
-            from: myaddress,
+            from: my_address,
             value: web3.toWei(cost, 'ether')
         }).then(function () {
             console.log('buy')
@@ -437,7 +437,7 @@ window.buy = function (twoKeyContractAddress, name, cost) {
       } else {
         TwoKeyContract_instance.buyProduct({
             gas: gastimate(140000),
-            from: myaddress,
+            from: my_address,
             value: web3.toWei(cost, 'ether')
         }).then(function () {
             console.log('buy')
@@ -454,9 +454,9 @@ window.buy = function (twoKeyContractAddress, name, cost) {
 window.redeem = function (twoKeyContractAddress) {
   var ok = confirm('your about to redeem the balance of 2Key contract \n' + twoKeyContractAddress)
   if (ok) {
-    var myaddress = whoAmI()
+    var my_address = whoAmI()
     getTwoKeyContract(twoKeyContractAddress, (TwoKeyContract_instance) => {
-      TwoKeyContract_instance.redeem({gas: gastimate(140000), from: myaddress}).then(function () {
+      TwoKeyContract_instance.redeem({gas: gastimate(140000), from: my_address}).then(function () {
         console.log('redeem')
         updateUserInfo()
         populate()
@@ -543,8 +543,8 @@ function getAllUrlParams (url) {
 //   $('#buy-address').val(t)
 // }
 
-// window.copy_link = function (twoKeyContractAddress, myaddress) {
-//   var link = location.origin + '/?c=' + twoKeyContractAddress + '&f=' + myaddress
+// window.copy_link = function (twoKeyContractAddress, my_address) {
+//   var link = location.origin + '/?c=' + twoKeyContractAddress + '&f=' + my_address
 //   alert(link)
 // }
 
@@ -614,10 +614,10 @@ function bdfs (TwoKeyContract_instance, start_address, cb) {
   cb(0, depth)
 }
 
-function my_depth (TwoKeyContract_instance, owner, myaddress) {
+function my_depth (TwoKeyContract_instance, owner, my_address) {
   var final_depth
   function cb (address, depth) {
-    if (address == myaddress) {
+    if (address == my_address) {
       final_depth = depth
       return true // break
     } else if (address == 0) {
@@ -631,7 +631,7 @@ function my_depth (TwoKeyContract_instance, owner, myaddress) {
   return final_depth
 }
 
-function get_kpis (TwoKeyContract_instance, myaddress, owner) {
+function get_kpis (TwoKeyContract_instance, my_address, owner) {
   var depth_sum = 0
   var conversions = 0
   var influencers = 0
@@ -648,7 +648,7 @@ function get_kpis (TwoKeyContract_instance, myaddress, owner) {
     }
     return false // dont break
   }
-  bdfs(TwoKeyContract_instance, myaddress, cb)
+  bdfs(TwoKeyContract_instance, my_address, cb)
   var avg_depth = 'NA'
   if (conversions) {
     avg_depth = depth_sum / conversions
@@ -658,7 +658,7 @@ function get_kpis (TwoKeyContract_instance, myaddress, owner) {
     avg_span = span / influencers
   }
   // remove contract creator as influencer
-  if (influencers && myaddress == owner) { influencers-- }
+  if (influencers && my_address == owner) { influencers-- }
   return [conversions, avg_depth, influencers, avg_span]
 }
 
@@ -692,15 +692,15 @@ function contact_header () {
 
 function contract_info (TwoKeyContract_instance, min_arcs, callback) {
   var items = []
-  var myaddress = whoAmI()
+  var my_address = whoAmI()
   var twoKeyContractAddress = TwoKeyContract_instance.address
-  var take_link = location.origin + '/?c=' + twoKeyContractAddress + '&f=' + myaddress
+  var take_link = location.origin + '/?c=' + twoKeyContractAddress + '&f=' + my_address
   // var contract_link = "./?c=" + twoKeyContractAddress;
   var onclick_name = "jump_to_contract_page('" + twoKeyContractAddress + "')"
   TwoKeyContract_instance.constantInfo.then(function (constant_info) {
     var name, symbol, cost, bounty, quota, total_units, owner, ipfs_hash;
     [name, symbol, cost, bounty, quota, total_units, owner, ipfs_hash] = constant_info
-    TwoKeyContract_instance.getDynamicInfo(myaddress).then(function (info) {
+    TwoKeyContract_instance.getDynamicInfo(my_address).then(function (info) {
       var arcs, units, xbalance, total_arcs, balance;
       [arcs, units, xbalance, total_arcs, balance] = info
 
@@ -729,7 +729,7 @@ function contract_info (TwoKeyContract_instance, min_arcs, callback) {
 
         {
           var roll
-          if (owner == myaddress) {
+          if (owner == my_address) {
             roll = 'Contractor'
           } else if (units) {
             roll = 'Converter'
@@ -760,7 +760,7 @@ function contract_info (TwoKeyContract_instance, min_arcs, callback) {
         unique_id = unique_id + 1
         var tag_est_reward = 'id' + unique_id
         items.push('<td id="' + tag_est_reward + '" ></td>')
-        var depth = my_depth(TwoKeyContract_instance, owner, myaddress)
+        var depth = my_depth(TwoKeyContract_instance, owner, my_address)
         var est_reward = ''
         if (depth == MAX_DEPTH || depth == 0) {
           est_reward = 'NA'
@@ -932,9 +932,9 @@ function populate () {
 //     return
 //   }
 //
-//   var myaddress = whoAmI()
+//   var my_address = whoAmI()
 //   getTwoKeyContract(twoKeyContractAddress, (TwoKeyContract_instance) => {
-//     TwoKeyContract_instance.transfer(target, 1, {gas: 1400000, from: myaddress}).then((tx) => {
+//     TwoKeyContract_instance.transfer(target, 1, {gas: 1400000, from: my_address}).then((tx) => {
 //       console.log(tx)
 //       $('#target-address').val('')
 //       $('#influence-address').val('')
@@ -950,8 +950,8 @@ window.contract_take = function () {
     return
   }
 
-  var myaddress = whoAmI()
-  if (from_twoKeyContractAddress == myaddress) {
+  var my_address = whoAmI()
+  if (from_twoKeyContractAddress == my_address) {
     alert("You can't take your own ARCs. Switch to a different user and try again.")
     return
   }
@@ -961,10 +961,10 @@ window.contract_take = function () {
               '\nin contract\n' + twoKeyContractAddress +
               '\nand this will turn into ' + quota + ' ARCs in your account')
       if (ok) {
-        var myaddress = whoAmI()
-        TwoKeyContract_instance.transferFrom(from_twoKeyContractAddress, myaddress, 1, {
+        var my_address = whoAmI()
+        TwoKeyContract_instance.transferFrom(from_twoKeyContractAddress, my_address, 1, {
           gas: gastimate(140000),
-          from: myaddress
+          from: my_address
         }).then(
           function (tx) {
             console.log(tx)
@@ -1327,9 +1327,9 @@ function d3_init () {
   // d3.select("#influencers-graph").style("height", "500px");
   d3.select(self.frameElement).style('height', height + 'px')
 
-  var myaddress = whoAmI()
-  if (myaddress) {
-    var root = d3_add_event_children([myaddress], null, 1)[0]
+  var my_address = whoAmI()
+  if (my_address) {
+    var root = d3_add_event_children([my_address], null, 1)[0]
     if (root.children) {
       d3_root = root
       d3_update(d3_root)
