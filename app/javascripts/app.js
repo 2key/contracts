@@ -360,7 +360,7 @@ window.login = function () {
   // $("#user-name").html(username);
   $('#login-user-name').val('')
   localStorage.username = username
-
+  last_address = null
   whoAmI()
 }
 
