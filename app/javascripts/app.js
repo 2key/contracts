@@ -959,10 +959,10 @@ function populate_tx(tx) {
   if ((typeof tx) == 'string') {
     web3.eth.getTransactionReceipt(tx, r => {
       console.log(r)
-      $('#msg').text('gas=' + r.receipt.gasUsed + ' status=' + r.receipt.status)
+      $('#msg').text('last transaction gas=' + r.receipt.gasUsed + ' status=' + r.receipt.status)
     })
   } else {
-    $('#msg').text('gas=' + tx.receipt.gasUsed + ' status=' + tx.receipt.status)
+    $('#msg').text('last transaction gas=' + tx.receipt.gasUsed + ' status=' + tx.receipt.status)
   }
 }
 
@@ -1220,7 +1220,7 @@ function init () {
     }
     timer_cbs_delayed = timer_cbs
     timer_cbs = []
-  }, 100)
+  }, 300)
 
 
   /* TwoKeyAdmin.deployed() returns an instance of the contract. Every call
