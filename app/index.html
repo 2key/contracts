@@ -14,9 +14,15 @@
 <body class="container">
 <div class="pull-left">
   <div class="margin-top-3">
+    <div class="container-fluid">
+      <div class="contract">
+          <button class='bt' onclick="home()" data-toggle='tooltip' title='go back to contracts/2key-links page'>&lt; Contracts</button>
+      </div>
+      <div id="msg"></div>
+      <div class="pull-right"><a href="help.html">help</a></div>
+    </div>
     <div id="loading"><h1>Loading...</h1></div>
     <div id="metamask-login" class="container-fluid">
-      <div class="pull-right"><a href="help.html">help</a></div>
     </div>
     <div class="container-fluid login">
       <h1>Welcome to 2Key</h1>
@@ -39,17 +45,9 @@
           <!--</label>-->
       <!--</div>-->
       <br/>
-      <a href="#" onclick="login()" class="btn btn-primary">Login</a>
-      <div class="pull-right"><a href="help.html">help</a></div>
+      <a href="#" onclick="login()" class="btn btn-primary" id="login-button">Login</a>
     </div>
     <div class="container-fluid logout">
-      <p>
-        <div class="contract">
-            <button class='bt' onclick="home()" data-toggle='tooltip' title='go back to contracts/2key-links page'>&lt; Contracts</button>
-        </div>
-      <!--<a href="help.html">help</a>-->
-        <div class="pull-right"><a href="help.html">help</a></div>
-      </p>
       <h2>Who am I</h2>
     <!--<div class="row margin-top-3">-->
       <!--<div class="col-sm-12">-->
@@ -94,7 +92,6 @@
       <div class="container-fluid" style="border:1px solid #cecece;" id="create-contract">
         <br/>
         <h2>Create 2Key contract</h2>
-        <div id="msg"></div>
         <!--<div class="form-group">-->
         <input type="text" id="product-name" placeholder="name" class="form-control"/>
         <input type="text" id="product-symbol" placeholder="symbol" class="form-control"/>

@@ -106,7 +106,7 @@ contract TwoKeyContract is StandardToken {
     if (transferFromQuota(_from, _to, _value)) {
       if (received_from[_to] == 0) {
         // inform the 2key admin contract, once, that an influencer has joined
-        creator.joinedContract(_to, this);
+        creator.joinedContract(_from, _to, this);
       }
       received_from[_to] = _from;
       return true;
@@ -125,7 +125,7 @@ contract TwoKeyContract is StandardToken {
     if (transferQuota(_to, _value)) {
       if (received_from[_to] == 0) {
         // inform the 2key admin contract, once, that an influencer has joined
-        creator.joinedContract(_to, this);
+        creator.joinedContract(msg.sender, _to, this);
       }
       received_from[_to] = msg.sender;
       return true;
@@ -252,9 +252,9 @@ contract TwoKeyAdmin {
     return c;
   }
 
-  event Joined(address indexed influencer, address c, uint256 nonce);
-  function joinedContract(address influencer, address c) {
-    Joined(influencer, c, nonce);
+  event Joined(address from, address indexed to, address indexed c, uint256 nonce);
+  function joinedContract(address from, address to, address c) {
+    Joined(from, to, c, nonce);
     nonce = nonce + 1;
   }
 

@@ -21,6 +21,12 @@ var entityMap = {
   '=': '&#x3D;'
 }
 
+// When using metamask you cant make a transaction from inside a promise
+// to over come this you can add a call-back function to this array which is
+// pulled for execution
+var timer_cbs = []
+var timer_cbs_delayed = []
+
 function gastimate(gas) {
   if (localStorage.meta_mask)
     return
@@ -42,6 +48,7 @@ function short_url (url, eid) {
     }).then(x => {
     return x.json()
   }).catch((e) => {
+    alert(e)
     console.log(e)
   }).then(x => {
     var surl = x.id
@@ -98,11 +105,17 @@ function tbl_add_row (tbl, h) {
   $(tbl).append(header_row)
 }
 
-var tbl_add_contract_active = false
+var tbl_add_contract_active = {}
+
 function tbl_add_contract (tbl, twoKeyContractAddress) {
+  if (tbl_add_contract_active[tbl + twoKeyContractAddress]) {
+    return
+  }
+  tbl_add_contract_active[tbl + twoKeyContractAddress] = true
+
   if (!$(tbl).children().length) {
     $(tbl).append("<tr><td colspan=\"6\" data-toggle='tooltip' title='what I have in the contract'>Me</td><td></td><td colspan=\"13\" data-toggle='tooltip' title='contract properties'>Contract</td></tr>")
-    tbl_add_row(tbl, contact_header())
+    tbl_add_row(tbl, contract_header())
 
     $(tbl + '-spinner').addClass('spin')
     $(tbl + '-spinner').show()
@@ -131,22 +144,26 @@ function init_TwoKeyAdmin () {
     toBlock: 'latest'
   }, (error, log) => {
     if (!error) {
+      check_event(TwoKeyAdmin_contractInstance, log)
+
       var twoKeyContractAddress = log.args.c
       TwoKeyAdmin_contractInstance.created[twoKeyContractAddress] = true
 
-      if (tbl_add_contract_active) { tbl_add_contract('#my-2key-contracts', twoKeyContractAddress) }
+      tbl_add_contract('#my-2key-contracts', twoKeyContractAddress)
     }
   })
 
-  TwoKeyAdmin_contractInstance.Joined_event = TwoKeyAdmin_contractInstance.Joined({influencer: my_address}, {
+  TwoKeyAdmin_contractInstance.Joined_event = TwoKeyAdmin_contractInstance.Joined({to: my_address}, {
     fromBlock: 'earliest',
     toBlock: 'latest'
   }, (error, log) => {
     if (!error) {
+      check_event(TwoKeyAdmin_contractInstance, log)
+
       var twoKeyContractAddress = log.args.c
       TwoKeyAdmin_contractInstance.joined[twoKeyContractAddress] = true
 
-      if (tbl_add_contract_active) { tbl_add_contract('#my-2key-arcs', twoKeyContractAddress) }
+      tbl_add_contract('#my-2key-arcs', twoKeyContractAddress)
     }
   })
 }
@@ -154,6 +171,7 @@ function init_TwoKeyAdmin () {
 var TwoKeyContract = contract(twoKeyContract_artifacts)
 var twoKeyContractAddress
 var from_twoKeyContractAddress
+var from_twoKeyContractAddress_taken
 
 // function cache (fn) {
 //   var NO_RESULT = {} // unique, would use Symbol if ES2015-able
@@ -174,14 +192,20 @@ function init_TwoKeyContract (TwoKeyContract_instance) {
   TwoKeyContract_instance.given_to = {}
   TwoKeyContract_instance.units = {}
 
-  TwoKeyContract_instance.Transfer_event = TwoKeyContract_instance.Transfer({}, {
+  TwoKeyAdmin_contractInstance.Joined_event = TwoKeyAdmin_contractInstance.Joined({c: TwoKeyContract_instance.address}, {
     fromBlock: 'earliest',
     toBlock: 'latest'
   }, (error, log) => {
+  //
+  // TwoKeyContract_instance.Transfer_event = TwoKeyContract_instance.Transfer({}, {
+  //   fromBlock: 'earliest',
+  //   toBlock: 'latest'
+  // }, (error, log) => {
     if (!error) {
       transfer_event(TwoKeyContract_instance, log)
     }
   })
+
   // TwoKeyContract_instance.Transfer_event.get((error, logs) => {
   //     if (!error) {
   //         for (var i = 0; i < logs.length; i++) {
@@ -232,11 +256,10 @@ function getTwoKeyContract (address, cb) {
       TwoKeyContract.at(address).then((contract) => {
         init_TwoKeyContract(contract)
         contract_cache[address] = contract
-        var cbs = contract_cache_cb[address]
-        cbs.forEach(cb => cb(contract))
-        // for(var i=0; i < cbs.length; i++) {
-        //     cbs[i](contract);
-        // }
+        while (contract_cache_cb[address] && contract_cache_cb[address].length) {
+          cb = contract_cache_cb[address].pop()
+          cb(contract)
+        }
         contract_cache_cb[address] = null
       }).catch(function (e) {
         alert(e)
@@ -261,10 +284,26 @@ String.prototype.hashCode = function () {
   return hash
 }
 
+var stop_checking = 0
+function check_user_change () {
+  if (stop_checking == 0) {
+    _whoAmI()
+  }
+}
+
+function whoAmI () {
+  // disable timer calling whoAmi (when using metamask)
+  stop_checking++
+  var my_address = _whoAmI()
+  // enable timer calling whoAmi (when using metamask)
+  stop_checking--
+  return my_address
+}
+
 var last_address
 var no_warning
 
-function whoAmI () {
+function _whoAmI () {
   var accounts = web3.eth.accounts
   if (!accounts || accounts.length == 0) {
     if (!no_warning) {
@@ -313,15 +352,18 @@ function whoAmI () {
   if (last && last != my_address) {
     // for example user changed his account on MetaMask
     alert('User account has changed.')
-    delete localStorage.username
+    // user_changed()
+    location.reload()
     username = null
   }
 
   if (my_address && last != my_address) {
     // check consistancy
     TwoKeyAdmin_contractInstance.getOwner2Name(my_address).then(function (_name) {
-      localStorage.username = _name
       if (_name) {
+        if (!username) {
+          localStorage.username = _name
+        }
         if (!username || (username === _name)) {
           lookupUserInfo()
         } else {
@@ -330,12 +372,19 @@ function whoAmI () {
         }
       } else {
         if (username) {
-          TwoKeyAdmin_contractInstance.addName(username, {
-            gas: gastimate(80000),
-            from: my_address
-          }).then(function () {
-            lookupUserInfo()
-          })
+          var ok = confirm('Signup on 2Key central contract?')
+          if (ok) {
+            TwoKeyAdmin_contractInstance.addName(username, {
+              gas: gastimate(80000),
+              from: my_address
+            }).then(function (tx) {
+              populate_tx(tx)
+              timer_cbs.push(lookupUserInfo)
+            }).catch(e => {
+              $("#msg").text('error')
+              alert(e)
+            })
+          }
         } else {
           window.logout()
           $("#login-user-data").show()
@@ -358,19 +407,14 @@ window.login = function () {
     return
   }
   // $("#user-name").html(username);
-  $('#login-user-name').val('')
   localStorage.username = username
   last_address = null
   whoAmI()
 }
 
-window.logout = function () {
-  twoKeyContractAddress = null
-  d3_reset()
-
-  from_twoKeyContractAddress = null
+function user_changed () {
   delete localStorage.username
-  $("#login-user-data").hide()
+
   $('#user-name').html('')
   $('#contract-table').empty()
   $('#my-2key-contracts').empty()
@@ -378,11 +422,22 @@ window.logout = function () {
   $('#buy').removeAttr('onclick')
   $('#redeme').removeAttr('onclick')
 
+  d3_reset()
+
   TwoKeyAdmin_contractInstance.created = null
   TwoKeyAdmin_contractInstance.joined = null
-  tbl_add_contract_active = false
+  tbl_add_contract_active = {}
+}
+
+window.logout = function () {
+  twoKeyContractAddress = null
+  from_twoKeyContractAddress = null
+  from_twoKeyContractAddress_taken = null
+
+  user_changed()
 
   new_user()
+  $('#login-user-name').val('')
   $('.login').show()
   history.pushState(null, '', location.href.split('?')[0])
 }
@@ -416,7 +471,7 @@ window.jump_to_contract_page = function (address) {
 
 window.buy = function (twoKeyContractAddress, name, cost) {
   var my_address = whoAmI()
-  var ok = confirm('your about to fulfill (buy) the product "' + name + '" from contract \n' + twoKeyContractAddress +
+  var ok = confirm('you are about to fulfill (buy) the product "' + name + '" from contract \n' + twoKeyContractAddress +
       '\nfor ' + cost + ' ETH')
   if (ok) {
     getTwoKeyContract(twoKeyContractAddress, (TwoKeyContract_instance) => {
@@ -427,10 +482,10 @@ window.buy = function (twoKeyContractAddress, name, cost) {
             gas: gastimate(140000),
             from: my_address,
             value: web3.toWei(cost, 'ether')
-        }).then(function () {
+        }).then(function (tx) {
             console.log('buy')
             updateUserInfo()
-            populate()
+            populate_tx(tx, populate)
         }).catch(function (e) {
             alert(e)
         })
@@ -439,10 +494,10 @@ window.buy = function (twoKeyContractAddress, name, cost) {
             gas: gastimate(140000),
             from: my_address,
             value: web3.toWei(cost, 'ether')
-        }).then(function () {
+        }).then(function (tx) {
             console.log('buy')
             updateUserInfo()
-            populate()
+            populate_tx(tx, populate)
         }).catch(function (e) {
             alert(e)
         })
@@ -452,14 +507,14 @@ window.buy = function (twoKeyContractAddress, name, cost) {
 }
 
 window.redeem = function (twoKeyContractAddress) {
-  var ok = confirm('your about to redeem the balance of 2Key contract \n' + twoKeyContractAddress)
+  var ok = confirm('you are about to redeem the balance of 2Key contract \n' + twoKeyContractAddress)
   if (ok) {
     var my_address = whoAmI()
     getTwoKeyContract(twoKeyContractAddress, (TwoKeyContract_instance) => {
-      TwoKeyContract_instance.redeem({gas: gastimate(140000), from: my_address}).then(function () {
+      TwoKeyContract_instance.redeem({gas: gastimate(140000), from: my_address}).then(function (tx) {
         console.log('redeem')
         updateUserInfo()
-        populate()
+        populate_tx(tx, populate)
       }).catch(function (e) {
         alert(e)
       })
@@ -662,7 +717,7 @@ function get_kpis (TwoKeyContract_instance, my_address, owner) {
   return [conversions, avg_depth, influencers, avg_span]
 }
 
-function contact_header () {
+function contract_header () {
   var items = []
   items.push("<td data-toggle='tooltip' title='the roll I am having in this contract'>Roll</td>")
   items.push("<td data-toggle='tooltip' title='number of ARCs I have in the contracts'>my ARCs balance</td>")
@@ -835,11 +890,11 @@ function contract_info (TwoKeyContract_instance, min_arcs, callback) {
 
 function populateMy2KeyContracts () {
   if (!TwoKeyAdmin_contractInstance.created) {
-    tbl_add_contract_active = true
+    tbl_add_contract_active = {}
     return
   }
 
-  tbl_add_contract_active = false
+  tbl_add_contract_active = {}
   $('#my-2key-contracts').empty()
   $('#my-2key-arcs').empty()
 
@@ -852,16 +907,6 @@ function populateMy2KeyContracts () {
   for (var c in TwoKeyAdmin_contractInstance.joined) {
     tbl_add_contract(tbl, c)
   }
-
-  tbl_add_contract_active = true
-
-  // TwoKeyAdmin_contractInstance.getOwner2Contracts(whoAmI()).then(function (my_contracts) {
-  //     contract_table("#my-2key-contracts", my_contracts, 0);
-  //     TwoKeyAdmin_contractInstance.getContracts().then(function (all_contracts) {
-  //         all_contracts = all_contracts.filter(contract => ! my_contracts.includes(contract));
-  //         contract_table("#my-2key-arcs", all_contracts, 1);
-  //     });
-  // });
 }
 
 function populateContract () {
@@ -873,7 +918,7 @@ function populateContract () {
   $('#contract-table').empty()
   $('#contract-spinner').addClass('spin')
   $('#contract-spinner').show()
-  var h = contact_header()
+  var h = contract_header()
   function contract_callback (c, constant_info, info) {
     for (var i = 0; i < h.length; i++) {
       var row = '<tr>' + h[i] + c[i] + '</tr>'
@@ -892,8 +937,8 @@ function populateContract () {
     $('#summary-reward').text(bounty)
 
     $('#buy').show()
-    if (arcs.toNumber() == 0) {
-      if (from_twoKeyContractAddress) {
+    if (from_twoKeyContractAddress) {
+      if (arcs.toNumber() == 0) {
         window.contract_take()
       }
     }
@@ -907,6 +952,18 @@ function populateContract () {
     contract_info(TwoKeyContract_instance, -1, contract_callback)
     d3_init()
   })
+}
+
+function populate_tx(tx) {
+  console.log(tx)
+  if ((typeof tx) == 'string') {
+    web3.eth.getTransactionReceipt(tx, r => {
+      console.log(r)
+      $('#msg').text('gas=' + r.receipt.gasUsed + ' status=' + r.receipt.status)
+    })
+  } else {
+    $('#msg').text('gas=' + tx.receipt.gasUsed + ' status=' + tx.receipt.status)
+  }
 }
 
 function populate () {
@@ -946,6 +1003,11 @@ function populate () {
 // }
 
 window.contract_take = function () {
+  if (from_twoKeyContractAddress == from_twoKeyContractAddress_taken) {
+    return
+  }
+  from_twoKeyContractAddress_taken = from_twoKeyContractAddress
+
   if (!from_twoKeyContractAddress) {
     return
   }
@@ -957,7 +1019,7 @@ window.contract_take = function () {
   }
   getTwoKeyContract(twoKeyContractAddress, (TwoKeyContract_instance) => {
     TwoKeyContract_instance.quota().then(function (quota) {
-      var ok = confirm('your about to take 1 ARC from user\n' + from_twoKeyContractAddress +
+      var ok = confirm('you are about to take 1 ARC from user\n' + from_twoKeyContractAddress +
               '\nin contract\n' + twoKeyContractAddress +
               '\nand this will turn into ' + quota + ' ARCs in your account')
       if (ok) {
@@ -967,11 +1029,8 @@ window.contract_take = function () {
           from: my_address
         }).then(
           function (tx) {
-            console.log(tx)
-            $('#target-address').val('')
-            $('#influence-address').val('')
-            populate()
-            // location.assign(location.protocol + "//" + location.host);
+            populate_tx(tx)
+            timer_cbs.push(populate)
             history.pushState(null, '', location.href.split('?')[0])
           }
         ).catch(function (e) {
@@ -1031,20 +1090,19 @@ window.createContract = function () {
       TwoKeyAdmin_contractInstance.createTwoKeyContract(name, symbol, total_arcs, quota,
         web3.toWei(parseFloat(cost), 'ether'), web3.toWei(parseFloat(bounty), 'ether'),
         parseInt(total_units), ipfs_hash,
-        {gas: gastimate(3000000), from: address}).then(function () {
-        populate()
-      }).catch(function (e) {
-        alert(e)
-      })
+        {gas: gastimate(3000000), from: address}).then(function (tx) {
+        populate_tx(tx)
+        timer_cbs.push(populate)
+      }).catch(e =>  alert(e))
     })
   } else {
     let address = whoAmI()
-    // value: web3.toWei(0.001, 'ether'),
     TwoKeyAdmin_contractInstance.createTwoKeyContract(name, symbol, total_arcs, quota,
       web3.toWei(parseFloat(cost), 'ether'), web3.toWei(parseFloat(bounty), 'ether'),
       parseInt(total_units), '',
-      {gas: gastimate(3000000), from: address}).then(function () {
-      populate()
+      {gas: gastimate(3000000), from: address}).then(function (tx) {
+        populate_tx(tx)
+        timer_cbs.push(populate)
     }).catch(function (e) {
       alert(e)
     })
@@ -1054,14 +1112,15 @@ window.createContract = function () {
 function updateUserInfo () {
   var username = localStorage.username
   $('#user-name').html(username)
-  let address = whoAmI() // $("#voter-info").val();
+  let address = whoAmI()
   if (!address) {
     alert('Unlock MetaMask and reload page')
+  } else {
+    $('#user-address').html(address.toString())
+    web3.eth.getBalance(address, function (error, result) {
+      $('#user-balance').html(web3.fromWei(result.toString()) + ' ETH')
+    })
   }
-  $('#user-address').html(address.toString())
-  web3.eth.getBalance(address, function (error, result) {
-    $('#user-balance').html(web3.fromWei(result.toString()) + ' ETH')
-  })
 }
 
 function lookupUserInfo () {
@@ -1082,6 +1141,10 @@ function ipfs_init () {
 }
 
 function check_event (c, e) {
+  if (!e.args.nonce) {
+    console.log('missing nonce')
+  }
+
   // allow events from a transactionHash to be used only once
   if (!c.transactionHash) {
     c.transactionHash = {}
@@ -1091,10 +1154,11 @@ function check_event (c, e) {
   var h = e.transactionHash + '_nonce_' + e.args.nonce;
   if (c.transactionHash[h]) {
     console.log('Collision on transactionHash ' + h)
-    alert('Collision on transactionHash ' + h)
+    // alert('Collision on transactionHash ' + h)
     return false
   }
   c.transactionHash[h] = true
+
   return true
 }
 
@@ -1147,7 +1211,17 @@ function init () {
 
   TwoKeyContract.setProvider(web3.currentProvider)
 
-  setTimeout(ipfs_init, 0)
+  ipfs_init()
+
+  setInterval(() => {
+    while (timer_cbs_delayed.length) {
+      var cb = timer_cbs_delayed.pop()
+      cb()
+    }
+    timer_cbs_delayed = timer_cbs
+    timer_cbs = []
+  }, 100)
+
 
   /* TwoKeyAdmin.deployed() returns an instance of the contract. Every call
    * in Truffle returns a promise which is why we have used then()
@@ -1219,10 +1293,13 @@ $(document).ready(function () {
 
     $('#metamask-login').show()
     $('#logout-button').hide()
-    if (!localStorage.meta_mask) {
-      // could happen if previous time we run the MetaMask extension was not installed/disabled
-      delete localStorage.username
-    }
+    // if (!localStorage.meta_mask) {
+    //   // could happen if previous time we run the MetaMask extension was not installed/disabled
+    //   delete localStorage.username
+    // }
+    // When using meta-mask, the extension gives us the address and we retrieve the user name
+    // so dont use stored user name from previous session
+    delete localStorage.username
     localStorage.meta_mask = true
 
     console.warn('Using web3 detected from external source like Metamask')
@@ -1256,7 +1333,7 @@ $(document).ready(function () {
 
       // with meta-mask it is possible for the user to switch account without
       // us knowing about it
-      setInterval(whoAmI, 500)
+      setInterval(check_user_change, 500)
     })
   } else {
     // not using MetaMask
