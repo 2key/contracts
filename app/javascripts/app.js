@@ -149,7 +149,8 @@ function init_TwoKeyAdmin () {
       var twoKeyContractAddress = log.args.c
       TwoKeyAdmin_contractInstance.created[twoKeyContractAddress] = true
 
-      tbl_add_contract('#my-2key-contracts', twoKeyContractAddress)
+      // tbl_add_contract('#my-2key-contracts', twoKeyContractAddress)
+      timer_cbs.push(populate)
     }
   })
 
@@ -163,7 +164,8 @@ function init_TwoKeyAdmin () {
       var twoKeyContractAddress = log.args.c
       TwoKeyAdmin_contractInstance.joined[twoKeyContractAddress] = true
 
-      tbl_add_contract('#my-2key-arcs', twoKeyContractAddress)
+      // tbl_add_contract('#my-2key-arcs', twoKeyContractAddress)
+      timer_cbs.push(populate)
     }
   })
 }
@@ -192,17 +194,18 @@ function init_TwoKeyContract (TwoKeyContract_instance) {
   TwoKeyContract_instance.given_to = {}
   TwoKeyContract_instance.units = {}
 
-  TwoKeyAdmin_contractInstance.Joined_event = TwoKeyAdmin_contractInstance.Joined({c: TwoKeyContract_instance.address}, {
-    fromBlock: 'earliest',
-    toBlock: 'latest'
-  }, (error, log) => {
-  //
-  // TwoKeyContract_instance.Transfer_event = TwoKeyContract_instance.Transfer({}, {
+  // TwoKeyAdmin_contractInstance.Joined_event = TwoKeyAdmin_contractInstance.Joined({c: TwoKeyContract_instance.address}, {
   //   fromBlock: 'earliest',
   //   toBlock: 'latest'
   // }, (error, log) => {
+  //
+  TwoKeyContract_instance.Transfer_event = TwoKeyContract_instance.Transfer({}, {
+    fromBlock: 'earliest',
+    toBlock: 'latest'
+  }, (error, log) => {
     if (!error) {
       transfer_event(TwoKeyContract_instance, log)
+      timer_cbs.push(populate)
     }
   })
 
@@ -220,6 +223,7 @@ function init_TwoKeyContract (TwoKeyContract_instance) {
   }, (error, log) => {
     if (!error) {
       fulfilled_event(TwoKeyContract_instance, log)
+      timer_cbs.push(populate)
     }
   })
   // TwoKeyContract_instance.Fulfilled_event.get((error, logs) => {
@@ -485,7 +489,7 @@ window.buy = function (twoKeyContractAddress, name, cost) {
         }).then(function (tx) {
             console.log('buy')
             updateUserInfo()
-            populate_tx(tx, populate)
+            populate_tx(tx)
         }).catch(function (e) {
             alert(e)
         })
@@ -497,7 +501,7 @@ window.buy = function (twoKeyContractAddress, name, cost) {
         }).then(function (tx) {
             console.log('buy')
             updateUserInfo()
-            populate_tx(tx, populate)
+            populate_tx(tx)
         }).catch(function (e) {
             alert(e)
         })
@@ -514,7 +518,8 @@ window.redeem = function (twoKeyContractAddress) {
       TwoKeyContract_instance.redeem({gas: gastimate(140000), from: my_address}).then(function (tx) {
         console.log('redeem')
         updateUserInfo()
-        populate_tx(tx, populate)
+        populate_tx(tx)
+        timer_cbs.push(populate)
       }).catch(function (e) {
         alert(e)
       })
@@ -1030,7 +1035,7 @@ window.contract_take = function () {
         }).then(
           function (tx) {
             populate_tx(tx)
-            timer_cbs.push(populate)
+            // timer_cbs.push(populate)
             history.pushState(null, '', location.href.split('?')[0])
           }
         ).catch(function (e) {
@@ -1092,7 +1097,7 @@ window.createContract = function () {
         parseInt(total_units), ipfs_hash,
         {gas: gastimate(3000000), from: address}).then(function (tx) {
         populate_tx(tx)
-        timer_cbs.push(populate)
+        // timer_cbs.push(populate)
       }).catch(e =>  alert(e))
     })
   } else {
@@ -1102,7 +1107,7 @@ window.createContract = function () {
       parseInt(total_units), '',
       {gas: gastimate(3000000), from: address}).then(function (tx) {
         populate_tx(tx)
-        timer_cbs.push(populate)
+        // timer_cbs.push(populate)
     }).catch(function (e) {
       alert(e)
     })
@@ -1141,21 +1146,17 @@ function ipfs_init () {
 }
 
 function check_event (c, e) {
-  if (!e.args.nonce) {
-    console.log('missing nonce')
-  }
-
   // allow events from a transactionHash to be used only once
   if (!c.transactionHash) {
     c.transactionHash = {}
   }
 
   // add event nonce because ganache bug sometimes reuse transactionHash
-  var h = e.transactionHash + '_nonce_' + e.args.nonce;
+  var h = e.transactionHash
   if (c.transactionHash[h]) {
     console.log('Collision on transactionHash ' + h)
     // alert('Collision on transactionHash ' + h)
-    return false
+    // return false
   }
   c.transactionHash[h] = true
 
@@ -1182,11 +1183,9 @@ function fulfilled_event (c, e) {
   }
   // e.address;
   var to = e.args.to
+  var units = e.args.units
 
-  if (!c.units[to]) {
-    c.units[to] = 0
-  }
-  c.units[to]++
+  c.units[to] = units
 }
 
 function init () {
@@ -1218,7 +1217,13 @@ function init () {
       var cb = timer_cbs_delayed.pop()
       cb()
     }
-    timer_cbs_delayed = timer_cbs
+
+    // remove dups
+    timer_cbs_delayed = [];
+    $.each(timer_cbs, function(i, el){
+        if($.inArray(el, timer_cbs_delayed) === -1) timer_cbs_delayed.push(el);
+    });
+
     timer_cbs = []
   }, 300)
 

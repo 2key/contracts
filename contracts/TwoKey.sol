@@ -22,14 +22,13 @@ contract TwoKeyContract is StandardToken {
   uint256 public bounty; // Cost of product in wei
   uint256 public quota;  // maximal tokens that can be passed in transferFrom
   uint256 public total_units; // total number of units on offer
-  uint256 private nonce;
 
   // Private variables of the token
   mapping (address => address) internal received_from;
   mapping(address => uint256) internal xbalances; // balance of external currency (ETH or 2Key coin)
   mapping(address => uint256) internal units; // number of units bought
 
-  event Fulfilled(address indexed to, uint256 nonce);
+  event Fulfilled(address indexed to, uint256 units);
 
   // Initialize all the constants
   function TwoKeyContract(address _owner, string _name, string _symbol,
@@ -106,7 +105,7 @@ contract TwoKeyContract is StandardToken {
     if (transferFromQuota(_from, _to, _value)) {
       if (received_from[_to] == 0) {
         // inform the 2key admin contract, once, that an influencer has joined
-        creator.joinedContract(_from, _to, this);
+        creator.joinedContract(_to, this);
       }
       received_from[_to] = _from;
       return true;
@@ -125,7 +124,7 @@ contract TwoKeyContract is StandardToken {
     if (transferQuota(_to, _value)) {
       if (received_from[_to] == 0) {
         // inform the 2key admin contract, once, that an influencer has joined
-        creator.joinedContract(msg.sender, _to, this);
+        creator.joinedContract(_to, this);
       }
       received_from[_to] = msg.sender;
       return true;
@@ -197,8 +196,7 @@ contract TwoKeyContract is StandardToken {
     total_units = total_units.sub(1);
     units[customer] = units[customer].add(1);
 
-    Fulfilled(msg.sender, nonce);
-    nonce = nonce + 1;
+    Fulfilled(msg.sender, units[customer]);
   }
 
   function redeem() public {
@@ -218,7 +216,6 @@ contract TwoKeyContract is StandardToken {
 contract TwoKeyAdmin {
   mapping(address => string) public owner2name;
   mapping(bytes32 => address) public name2owner;
-  uint256 public nonce;
 
   function addName(string _name) public {
     address _owner = msg.sender;
@@ -242,27 +239,17 @@ contract TwoKeyAdmin {
     return owner2name[_owner];
   }
 
-  event Created(address indexed owner, address c, uint256 nonce);
+  event Created(address indexed owner, address c);
   function createTwoKeyContract(string _name, string _symbol, uint256 _totalSupply, uint256 _quota, uint256 _cost, uint256 _bounty, uint256 _units, string _ipfs_hash) public returns (address) {
     address _owner = msg.sender;
     address c = (new TwoKeyContract(_owner, _name, _symbol, _totalSupply, _quota, _cost, _bounty, _units, _ipfs_hash));
 
-    Created(_owner, c, nonce);
-    nonce = nonce + 1;
+    Created(_owner, c);
     return c;
   }
 
-  event Joined(address from, address indexed to, address indexed c, uint256 nonce);
-  function joinedContract(address from, address to, address c) {
-    Joined(from, to, c, nonce);
-    nonce = nonce + 1;
+  event Joined(address indexed to, address c);
+  function joinedContract(address to, address c) {
+    Joined(to, c);
   }
-
-  // function fundtransfer(address etherreceiver, uint256 amount) public {
-  //     if(!etherreceiver.send(amount)){
-  //        revert();
-  //     }
-  // }
-  // faulback for receiving ETH
-  // function() public payable { }
 }
