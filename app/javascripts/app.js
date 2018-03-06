@@ -45,18 +45,18 @@ var total_gas = 0
 var total_success = 0
 
 var active_transactions = 0
-function transaction_msg (started) {
-  if (started) {
-    active_transactions++
-  } else {
-    active_transactions--
-  }
+var active_views = 0
+var active_created = 0
+var active_joined = 0
+var active_fulfilled = 0
 
-  if (active_transactions == 1) {
+function transaction_msg () {
+  var active = active_transactions + active_views + active_created + active_joined + active_fulfilled
+  if (active == 1) {
     $('#loader-circle').addClass('spin')
     $('.loader').show()
   }
-  if (active_transactions == 0) {
+  if (active == 0) {
     $('#loader-circle').removeClass('spin')
     $('.loader').hide()
   }
@@ -68,7 +68,8 @@ function transaction_start (tx_promise, cb_end, cb_error) {
     function te(tx) {
       total_gas += tx.receipt.gasUsed
       total_success += tx.receipt.status
-      transaction_msg(false)
+      active_transactions--
+      transaction_msg()
 
       console.log(tx)
       if (cb_end) cb_end()
@@ -83,33 +84,37 @@ function transaction_start (tx_promise, cb_end, cb_error) {
   }
 
   function transaction_error(e) {
-    transaction_msg(false)
+    active_transactions--
+    transaction_msg()
     alert(e)
     if (cb_error) cb_error()
   }
 
   transaction_count++
-
-  transaction_msg(true)
+  active_transactions++
+  transaction_msg(true, "transaction")
 
   tx_promise.then(transaction_end).catch(transaction_error)
 }
 
 function view (view_promise, cb_end, cb_error) {
   function view_end(val) {
-    transaction_msg(false)
+    active_views--
+    transaction_msg()
 
     console.log(val)
     if (cb_end) cb_end(val)
   }
 
   function view_error(e) {
-    transaction_msg(false)
+    active_views--
+    transaction_msg()
     alert(e)
     if (cb_error) cb_error()
   }
 
-  transaction_msg(true)
+  active_views++
+  transaction_msg()
 
   view_promise.then(view_end).catch(view_error)
 }
@@ -200,16 +205,10 @@ function tbl_add_contract (tbl, twoKeyContractAddress) {
   if (!$(tbl).children().length) {
     $(tbl).append("<tr><td colspan=\"6\" data-toggle='tooltip' title='what I have in the contract'>Me</td><td></td><td colspan=\"13\" data-toggle='tooltip' title='contract properties'>Contract</td></tr>")
     tbl_add_row(tbl, contract_header())
-
-    $(tbl + '-spinner').addClass('spin')
-    $(tbl + '-spinner').show()
   }
 
   function row_callback (items) {
     tbl_add_row(tbl, items)
-
-    $(tbl + '-spinner').removeClass('spin')
-    $(tbl + '-spinner').hide()
   }
   getTwoKeyContract(twoKeyContractAddress, (TwoKeyContract_instance) => {
     contract_info(TwoKeyContract_instance, 0, row_callback)
@@ -227,6 +226,10 @@ function init_TwoKeyAdmin () {
     fromBlock: 'earliest',
     toBlock: 'latest'
   }, (error, log) => {
+    if (active_created) {
+      active_created--
+      transaction_msg()
+    }
     if (!error) {
       check_event(TwoKeyAdmin_contractInstance, log)
 
@@ -242,6 +245,10 @@ function init_TwoKeyAdmin () {
     fromBlock: 'earliest',
     toBlock: 'latest'
   }, (error, log) => {
+    if (active_joined) {
+      active_joined--
+      transaction_msg()
+    }
     if (!error) {
       check_event(TwoKeyAdmin_contractInstance, log)
 
@@ -305,6 +312,10 @@ function init_TwoKeyContract (TwoKeyContract_instance) {
     fromBlock: 'earliest',
     toBlock: 'latest'
   }, (error, log) => {
+    if (active_fulfilled) {
+      active_fulfilled--
+      transaction_msg()
+    }
     if (!error) {
       fulfilled_event(TwoKeyContract_instance, log)
       timer_cbs.push(populate)
@@ -575,7 +586,11 @@ window.buy = function (twoKeyContractAddress, name, cost) {
               from: my_address,
               value: web3.toWei(cost, 'ether')
           }),
-          updateUserInfo
+          () => {
+            active_fulfilled++
+            transaction_msg()
+            updateUserInfo
+          }
         )
       } else {
         // if the transaction will end succussefully then call updateUserInfo
@@ -585,7 +600,11 @@ window.buy = function (twoKeyContractAddress, name, cost) {
               from: my_address,
               value: web3.toWei(cost, 'ether')
           }),
-          updateUserInfo
+          () => {
+            active_fulfilled++
+            transaction_msg()
+            updateUserInfo
+          }
         )
       }
     })
@@ -1007,16 +1026,12 @@ function populateContract () {
     $('#join-btn').hide()
   }
   $('#contract-table').empty()
-  $('#contract-spinner').addClass('spin')
-  $('#contract-spinner').show()
   var h = contract_header()
   function contract_callback (c, constant_info, info) {
     for (var i = 0; i < h.length; i++) {
       var row = '<tr>' + h[i] + c[i] + '</tr>'
       $('#contract-table').append(row)
     }
-    $('#contract-spinner').removeClass('spin')
-    $('#contract-spinner').hide()
 
     var name, symbol, cost, bounty, quota, total_units, owner, ipfs_hash;
     [name, symbol, cost, bounty, quota, total_units, owner, ipfs_hash] = constant_info
@@ -1112,6 +1127,8 @@ window.contract_take = function () {
               from: my_address
             }),
             () => {
+              active_joined++
+              transaction_msg()
               history.pushState(null, '', location.href.split('?')[0])
             },
             () => {
@@ -1173,7 +1190,11 @@ window.createContract = function () {
         TwoKeyAdmin_contractInstance.createTwoKeyContract(name, symbol, total_arcs, quota,
           web3.toWei(parseFloat(cost), 'ether'), web3.toWei(parseFloat(bounty), 'ether'),
           parseInt(total_units), ipfs_hash,
-          {gas: gastimate(3000000), from: address})
+          {gas: gastimate(3000000), from: address}),
+        () => {
+          active_created++
+          transaction_msg()
+        }
       )
     })
   } else {
@@ -1182,7 +1203,11 @@ window.createContract = function () {
       TwoKeyAdmin_contractInstance.createTwoKeyContract(name, symbol, total_arcs, quota,
         web3.toWei(parseFloat(cost), 'ether'), web3.toWei(parseFloat(bounty), 'ether'),
         parseInt(total_units), '',
-        {gas: gastimate(3000000), from: address})
+        {gas: gastimate(3000000), from: address}),
+      () => {
+        active_created++
+        transaction_msg()
+      }
     )
   }
 }
