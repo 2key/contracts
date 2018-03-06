@@ -59,13 +59,32 @@ h3 {
   color: #666;
 }
 
+/*.loader {*/
+    /*overflow:hidden;*/
+    /*display: block;*/
+  /*width: 20px !important;*/
+  /*height: 20px !important;*/
+    /*padding-left: 10px;*/
+    /*position:absolute;*/
+  /*background: linear-gradient( 0deg, blue, blue 49%, white 49%, white 51%, red 51% );*/
+  /*border-radius: 50%;*/
+/*}*/
+
 .loader {
-  width: 16px;
-  height: 16px;
+    position:relative;
+    overflow:hidden;
+    /*padding-left:100%;*/
+    min-height: 20px !important;
+    padding:0px;
+}
+.loader img{
+    min-width: 20px !important;
+    min-height: 20px !important;
+    position:absolute;
   background: linear-gradient( 0deg, blue, blue 49%, white 49%, white 51%, red 51% );
   border-radius: 50%;
+    padding:0px;
 }
-
 .spin {
   animation: spinner 1.5s linear infinite;
 }

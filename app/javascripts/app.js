@@ -53,12 +53,12 @@ function transaction_msg (started) {
   }
 
   if (active_transactions == 1) {
-    $('#msg-spinner').addClass('spin')
-    $('#msg-spinner').show()
+    $('#loader-circle').addClass('spin')
+    $('.loader').show()
   }
   if (active_transactions == 0) {
-    $('#msg-spinner').removeClass('spin')
-    $('#msg-spinner').hide()
+    $('#loader-circle').removeClass('spin')
+    $('.loader').hide()
   }
   $('#msg').text('active=' + active_transactions + ' gas=' + total_gas + ' status=' + total_success)
 }
