@@ -27,6 +27,16 @@ var entityMap = {
 var timer_cbs = []
 var timer_cbs_delayed = []
 
+function safe_alert (e) {
+  // when alert is called from within a promise it does not alwys so up
+  // so instead push it to becalled later from the main timer
+  function my_alert () {
+    // freeze the error message
+    return () => alert(e)
+  }
+  timer_cbs.push(my_alert())
+}
+
 function gastimate(gas) {
   if (localStorage.meta_mask)
     return
@@ -60,7 +70,12 @@ function transaction_msg () {
     $('#loader-circle').removeClass('spin')
     $('.loader').hide()
   }
-  $('#msg').text('active=' + active_transactions + ' gas=' + total_gas + ' status=' + total_success)
+  $('#msg').text(
+    'transactions-pending=' + active_transactions +
+    ' total-gas=' + total_gas +
+    ' successful=' + total_success + '/' + transaction_count +
+    ' views-pending=' + active_views
+  )
 }
 
 function transaction_start (tx_promise, cb_end, cb_error) {
@@ -86,7 +101,8 @@ function transaction_start (tx_promise, cb_end, cb_error) {
   function transaction_error(e) {
     active_transactions--
     transaction_msg()
-    alert(e)
+    console.log(e)
+    safe_alert(e.toString().split('\n')[0])
     if (cb_error) cb_error()
   }
 
@@ -109,7 +125,7 @@ function view (view_promise, cb_end, cb_error) {
   function view_error(e) {
     active_views--
     transaction_msg()
-    alert(e)
+    safe_alert(e)
     if (cb_error) cb_error()
   }
 
@@ -136,7 +152,7 @@ function short_url (url, eid) {
     }).then(x => {
     return x.json()
   }).catch((e) => {
-    alert(e)
+    safe_alert(e)
     console.log(e)
   }).then(x => {
     var surl = x.id
@@ -1020,11 +1036,10 @@ function populateMy2KeyContracts () {
 }
 
 function populateContract () {
-  if (from_twoKeyContractAddress) {
-    $('#join-btn').show()
-  } else {
-    $('#join-btn').hide()
-  }
+  $('#join-btn').hide()
+  $('#buy').hide()
+  $('#redeem').hide()
+
   $('#contract-table').empty()
   var h = contract_header()
   function contract_callback (c, constant_info, info) {
@@ -1042,16 +1057,28 @@ function populateContract () {
     $('#summary-quota').text(quota)
     $('#summary-reward').text(bounty)
 
-    $('#buy').show()
     if (from_twoKeyContractAddress) {
-      if (arcs.toNumber() == 0) {
-        window.contract_take()
+      // show buttons only if contract info is ready
+
+      $('#buy').show()
+      // show redeem button only if there is balance
+      if (xbalance.toNumber()) {
+        $('#redeem').show()
+      } else {
+        $('#redeem').hide()
       }
-    }
-    if (xbalance.toNumber()) {
-      $('#redeem').show()
-    } else {
-      $('#redeem').hide()
+
+      // show join button only if the user does not already have ARCs (units)
+      if (arcs.toNumber() == 0) {
+        // on first time contract_take is called a pop up will ask you
+        // if you want to take
+        if (from_twoKeyContractAddress != from_twoKeyContractAddress_taken) {
+          from_twoKeyContractAddress_taken = from_twoKeyContractAddress
+          window.contract_take()
+        }
+        // the pop up is modal so is it ok to show buttons
+        $('#join-btn').show()
+      }
     }
   }
   getTwoKeyContract(twoKeyContractAddress, (TwoKeyContract_instance) => {
@@ -1097,18 +1124,13 @@ function populate () {
 // }
 
 window.contract_take = function () {
-  if (from_twoKeyContractAddress == from_twoKeyContractAddress_taken) {
-    return
-  }
-  from_twoKeyContractAddress_taken = from_twoKeyContractAddress
-
   if (!from_twoKeyContractAddress) {
     return
   }
 
   var my_address = whoAmI()
   if (from_twoKeyContractAddress == my_address) {
-    alert("You can't take your own ARCs. Switch to a different user and try again.")
+    safe_alert("You can't take your own ARCs. Switch to a different user and try again.")
     return
   }
   getTwoKeyContract(twoKeyContractAddress, (TwoKeyContract_instance) => {
@@ -1132,7 +1154,6 @@ window.contract_take = function () {
               history.pushState(null, '', location.href.split('?')[0])
             },
             () => {
-              alert("you can't take more than once\n\n" + e)
               // clean the URL appearing in the address bar
               history.pushState(null, '', location.href.split('?')[0])
 
@@ -1292,7 +1313,7 @@ function init () {
   from_twoKeyContractAddress = params.f
   if (twoKeyContractAddress) {
     $('#join-btn').hide()
-    // $('#buy').hide()
+    $('#buy').hide()
     $('#redeem').hide()
     $('.contract').show()
     $('.contracts').hide()
