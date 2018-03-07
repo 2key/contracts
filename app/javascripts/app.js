@@ -210,7 +210,14 @@ function tbl_add_row (tbl, h) {
   $(tbl).append(header_row)
 }
 
-var tbl_add_contract_active = {}
+var tbl_add_contract_active = {} // reset to {} every time we start a new table population
+var population_count = 0  // increases every time we start a new table
+function tbl_cleanup () {
+  tbl_add_contract_active = {}
+  population_count++
+  $('#my-2key-contracts').empty()
+  $('#my-2key-arcs').empty()
+}
 
 function tbl_add_contract (tbl, twoKeyContractAddress) {
   if (tbl_add_contract_active[tbl + twoKeyContractAddress]) {
@@ -223,9 +230,14 @@ function tbl_add_contract (tbl, twoKeyContractAddress) {
     tbl_add_row(tbl, contract_header())
   }
 
-  function row_callback (items) {
-    tbl_add_row(tbl, items)
-  }
+  var row_callback = ((tbl, p) => {
+    return (items) => {
+      if (p == population_count) {
+        tbl_add_row(tbl, items)
+      }
+    }
+  })(tbl, population_count)
+
   getTwoKeyContract(twoKeyContractAddress, (TwoKeyContract_instance) => {
     contract_info(TwoKeyContract_instance, 0, row_callback)
   })
@@ -534,8 +546,6 @@ function user_changed () {
 
   $('#user-name').html('')
   $('#contract-table').empty()
-  $('#my-2key-contracts').empty()
-  $('#my-2key-arcs').empty()
   $('#buy').removeAttr('onclick')
   $('#redeme').removeAttr('onclick')
 
@@ -543,7 +553,8 @@ function user_changed () {
 
   TwoKeyAdmin_contractInstance.created = null
   TwoKeyAdmin_contractInstance.joined = null
-  tbl_add_contract_active = {}
+
+  tbl_cleanup()
 }
 
 window.logout = function () {
@@ -563,6 +574,7 @@ window.home = function () {
   twoKeyContractAddress = null
   d3_reset()
   history.pushState(null, '', location.href.split('?')[0])
+  product_cleanup()
   populate()
 }
 
@@ -1016,14 +1028,10 @@ function contract_info (TwoKeyContract_instance, min_arcs, callback) {
 }
 
 function populateMy2KeyContracts () {
+  tbl_cleanup()
   if (!TwoKeyAdmin_contractInstance.created) {
-    tbl_add_contract_active = {}
     return
   }
-
-  tbl_add_contract_active = {}
-  $('#my-2key-contracts').empty()
-  $('#my-2key-arcs').empty()
 
   var tbl = '#my-2key-contracts'
   for (var c in TwoKeyAdmin_contractInstance.created) {
