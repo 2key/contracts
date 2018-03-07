@@ -726,6 +726,7 @@ function getAllUrlParams (url) {
 // }
 
 function product_cleanup () {
+  // hide the product create-contract box
   $('#product-name').val('')
   $('#product-symbol').val('')
   $('#total-arcs').val('')
@@ -1099,7 +1100,6 @@ function populate () {
     populateContract()
   } else {
     $('.contracts').show()
-    $('#create-contract').hide()
     $('.contract').hide()
     $('#buy').removeAttr('onclick')
     $('#redeme').removeAttr('onclick')
@@ -1326,7 +1326,7 @@ function init () {
     $('.contracts').hide()
   } else {
     $('.contracts').show()
-    $('#create-contract').hide()
+    product_cleanup()
     $('.contract').hide()
     $('#buy').removeAttr('onclick')
     $('#redeme').removeAttr('onclick')
