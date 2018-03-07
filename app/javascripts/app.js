@@ -1057,17 +1057,14 @@ function populateContract () {
     $('#summary-quota').text(quota)
     $('#summary-reward').text(bounty)
 
+    // show buttons only if contract info is ready
+    $('#buy').show()
+    // show redeem button only if there is balance
+    if (xbalance.toNumber()) {
+      $('#redeem').show()
+    }
+
     if (from_twoKeyContractAddress) {
-      // show buttons only if contract info is ready
-
-      $('#buy').show()
-      // show redeem button only if there is balance
-      if (xbalance.toNumber()) {
-        $('#redeem').show()
-      } else {
-        $('#redeem').hide()
-      }
-
       // show join button only if the user does not already have ARCs (units)
       if (arcs.toNumber() == 0) {
         // on first time contract_take is called a pop up will ask you
