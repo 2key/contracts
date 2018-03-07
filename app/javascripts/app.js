@@ -1084,7 +1084,15 @@ function populateContract () {
   })
 }
 
+var populate_running = false
 function populate () {
+  // guard againset reentrance
+  if (populate_running) {
+    console.log('reentrant')
+    return
+  }
+  populate_running = true
+
   if (twoKeyContractAddress) {
     $('.contract').show()
     $('.contracts').hide()
@@ -1097,6 +1105,8 @@ function populate () {
     $('#redeme').removeAttr('onclick')
     populateMy2KeyContracts()
   }
+
+  populate_running = false
 }
 
 // window.giveARCs = function () {
