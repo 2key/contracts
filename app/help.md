@@ -63,4 +63,14 @@ paste one of the following private keys and refresh the 2Key Dapp page to show t
 You should confirm the transaction.
 The dialog will show you an estimate of how much the transaction will cost.
 Note that you will need to manually control the gas price and set it to 2 to get a realistice value.
+
+## 2key Tokens
+* Each user can own 2key tokens.
+* At first the only account that has 2key tokens is `coinbase`.
+* You can login to this account and transfer some of your tokens to another user
+* or you can approve another user to later take some of the tokens himself
+* you can know how much someone allowed you to transfer
+* and then you can transfer from that someone some or all of the allowed tokens
+for now there is no campaign contract that uses these tokens
+
   
