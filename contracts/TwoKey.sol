@@ -1,6 +1,7 @@
 pragma solidity ^0.4.18; //We have to specify what version of compiler this code will use
 
 import 'zeppelin-solidity/contracts/token/ERC20/StandardToken.sol';
+import 'zeppelin-solidity/contracts/token/ERC20/MintableToken.sol';
 
 /**
  * @title Standard ERC20 token
@@ -249,7 +250,19 @@ contract TwoKeyAdmin {
   }
 
   event Joined(address indexed to, address c);
-  function joinedContract(address to, address c) {
+  function joinedContract(address to, address c) public {
     Joined(to, c);
+  }
+}
+
+contract TwoKeyEconomy is MintableToken {
+  string public name = 'TwoKeyEconomy';
+  string public symbol = '2KE';
+  uint8 public decimals = 18;
+  uint public INITIAL_SUPPLY = 1000000000000000000000000000;
+
+  function TwoKeyEconomy() public {
+    totalSupply_ = INITIAL_SUPPLY;
+    balances[msg.sender] = INITIAL_SUPPLY;
   }
 }

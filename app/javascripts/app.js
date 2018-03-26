@@ -199,8 +199,12 @@ import { default as contract } from 'truffle-contract'
 // import { default as clipboard } from 'clipboard';
 // import clippy_img from '!!file!../images/clippy.svg'
 
+import twoKeyEconomy_artifacts from '../../build/contracts/TwoKeyEconomy.json'
 import twoKeyAdmin_artifacts from '../../build/contracts/TwoKeyAdmin.json'
 import twoKeyContract_artifacts from '../../build/contracts/TwoKeyContract.json'
+
+var TwoKeyEconomy = contract(twoKeyEconomy_artifacts)
+var TwoKeyEconomy_contractInstance
 
 var TwoKeyAdmin = contract(twoKeyAdmin_artifacts)
 var TwoKeyAdmin_contractInstance
@@ -432,6 +436,27 @@ function whoAmI () {
 var last_address
 var no_warning
 
+function username2address (username, cb, cberror) {
+  if (username === 'coinbase') {
+    cb(web3.eth.coinbase)
+  } else if (username.startsWith('0x')) {
+    cb(username)
+  } else {
+    view(TwoKeyAdmin_contractInstance.getName2Owner(username),
+      address => {
+        if (address && address != '0x0000000000000000000000000000000000000000') {
+          cb(address)
+        } else {
+          alert('user ' + username + ' is not signed-up')
+          if (cberror) {
+            cberror()
+          }
+        }
+      }
+    )
+  }
+}
+
 function _whoAmI () {
   var accounts = web3.eth.accounts
   if (!accounts || accounts.length == 0) {
@@ -541,10 +566,19 @@ window.login = function () {
   whoAmI()
 }
 
+function clean_user () {
+  $('#admin-alert').hide()
+  $('#user-name').html('')
+  $('#user-balance').html('')
+  $('#token-balance').html('')
+  $('#token-destination').val('')
+  $('#token-amount').val('')
+}
+
 function user_changed () {
   delete localStorage.username
 
-  $('#user-name').html('')
+  clean_user()
   $('#contract-table').empty()
   $('#buy').removeAttr('onclick')
   $('#redeme').removeAttr('onclick')
@@ -1249,6 +1283,7 @@ window.createContract = function () {
 }
 
 function updateUserInfo () {
+  clean_user()
   var username = localStorage.username
   $('#user-name').html(username)
   let address = whoAmI()
@@ -1259,7 +1294,101 @@ function updateUserInfo () {
     web3.eth.getBalance(address, function (error, result) {
       $('#user-balance').html(web3.fromWei(result.toString()) + ' ETH')
     })
+    view(TwoKeyEconomy_contractInstance.owner(),
+      (_owner) => {
+        if (_owner == address) {
+          $('#admin-alert').show()
+        }
+      }
+    )
+    view(TwoKeyEconomy_contractInstance.totalSupply(address),
+      (result) => {
+        var totalSupply
+        totalSupply = web3.fromWei(result.toString())
+
+        view(TwoKeyEconomy_contractInstance.balanceOf(address),
+          (result) => {
+            $('#token-balance').html(web3.fromWei(result.toString()) + ' out of ' + totalSupply + ' tokens')
+          }
+        )
+      }
+    )
   }
+}
+
+window.transferTokens = function () {
+  var destination = $('#token-destination').val()
+  username2address(destination, (_destination) => {
+    var myaddress = whoAmI()
+    var amount = parseFloat($('#token-amount').val())
+
+    transaction_start(
+      TwoKeyEconomy_contractInstance.transfer(
+        _destination, web3.toWei(amount, 'ether'),
+        {
+          gas: gastimate(140000),
+          from: myaddress,
+      }),
+      () => {
+        tempAlert('OK', 1000)
+        updateUserInfo()
+      }
+    )
+  })
+}
+
+window.transferFromTokens = function () {
+  var destination = $('#token-destination').val()
+  username2address(destination, (_destination) => {
+    var myaddress = whoAmI()
+    var amount = parseFloat($('#token-amount').val())
+
+    transaction_start(
+      TwoKeyEconomy_contractInstance.transferFrom(
+        _destination, myaddress, web3.toWei(amount, 'ether'),
+        {
+          gas: gastimate(140000),
+          from: myaddress,
+      }),
+      () => {
+        tempAlert('OK', 1000)
+        updateUserInfo()
+      }
+    )
+  })
+}
+
+window.approveTokens = function () {
+  var destination = $('#token-destination').val()
+  username2address(destination, (_destination) => {
+    var myaddress = whoAmI()
+    var amount = parseFloat($('#token-amount').val())
+
+    transaction_start(
+      TwoKeyEconomy_contractInstance.approve(
+        _destination, web3.toWei(amount, 'ether'),
+        {
+          gas: gastimate(140000),
+          from: myaddress,
+      }),
+      () => {
+        tempAlert('OK', 1000)
+      }
+    )
+  })
+}
+
+window.allowanceTokens = function () {
+  var destination = $('#token-destination').val()
+  username2address(destination, (_destination) => {
+    var myaddress = whoAmI()
+
+    view(TwoKeyEconomy_contractInstance.allowance(_destination,myaddress),
+      (result) => {
+        $('#token-amount').val(web3.fromWei(result.toString()))
+      }
+    )
+  })
 }
 
 function lookupUserInfo () {
@@ -1340,6 +1469,7 @@ function init () {
     $('#redeme').removeAttr('onclick')
   }
 
+  TwoKeyEconomy.setProvider(web3.currentProvider)
   TwoKeyAdmin.setProvider(web3.currentProvider)
 
   TwoKeyContract.setProvider(web3.currentProvider)
@@ -1366,11 +1496,14 @@ function init () {
    * in Truffle returns a promise which is why we have used then()
    * everywhere we have a transaction call
    */
-  view(TwoKeyAdmin.deployed(), contractInstance => {
-    TwoKeyAdmin_contractInstance = contractInstance
-    // init_TwoKeyAdmin();
-    $('#loading').hide()
-    whoAmI()
+  view(TwoKeyEconomy.deployed(), contractInstance => {
+    TwoKeyEconomy_contractInstance = contractInstance
+    view(TwoKeyAdmin.deployed(), contractInstance => {
+      TwoKeyAdmin_contractInstance = contractInstance
+      // init_TwoKeyAdmin();
+      $('#loading').hide()
+      whoAmI()
+    })
   })
 }
 

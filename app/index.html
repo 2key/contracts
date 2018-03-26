@@ -60,6 +60,9 @@
     </div>
     <div class="container-fluid logout">
       <h2>Who am I</h2>
+      <div class="alert alert-danger" id="admin-alert">
+        <strong>You</strong> are the Admin. Be careful
+      </div>
     <!--<div class="row margin-top-3">-->
       <!--<div class="col-sm-12">-->
       <div class="table-responsive">
@@ -79,6 +82,10 @@
             <td>Balance</td>
             <td id="user-balance"></td>
           </tr>
+          <tr>
+            <td>2Key tokens</td>
+            <td id="token-balance"></td>
+          </tr>
           <!--<tr>-->
             <!--<td>Reputation</td>-->
             <!--<td id="user-reputation">42</td>-->
@@ -92,6 +99,19 @@
             <!--<td id="admin-address"></td>-->
           <!--</tr>-->
         </table>
+      </div>
+      <div class="container-fluid" style="border:1px solid #cecece;" id="token-operation">
+        <h3>Token operations</h3>
+        <!--<div class="form-group">-->
+        <input type="text" id="token-destination" placeholder="destination address" class="form-control"/>
+        <input type="text" id="token-amount" placeholder="amount of tokens" class="form-control"/>
+        <br/>
+        <a href="#" onclick="transferTokens()" class="btn btn-primary">Transfer To</a>
+        <a href="#" onclick="transferFromTokens()" class="btn btn-primary">Transfer From</a>
+        <a href="#" onclick="approveTokens()" class="btn btn-primary">Approve To</a>
+        <a href="#" onclick="allowanceTokens()" class="btn btn-primary">Allowance from</a>
+        <br/>
+        <br/>
       </div>
       <br/>
       <br/>
