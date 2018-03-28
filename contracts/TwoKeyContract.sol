@@ -1,7 +1,8 @@
 pragma solidity ^0.4.18; //We have to specify what version of compiler this code will use
 
 import 'zeppelin-solidity/contracts/token/ERC20/StandardToken.sol';
-import 'zeppelin-solidity/contracts/token/ERC20/MintableToken.sol';
+import './ERC20full.sol';
+import './TwoKeyReg.sol';
 
 /**
  * @title Standard ERC20 token
@@ -11,49 +12,24 @@ import 'zeppelin-solidity/contracts/token/ERC20/MintableToken.sol';
  * @dev Based on code by FirstBlood: https://github.com/Firstbloodio/token/blob/master/smart_contract/FirstBloodToken.sol
  */
 contract TwoKeyContract is StandardToken {
+  event Fulfilled(address indexed to, uint256 units);
+
   using SafeMath for uint256;
   // Public variables of the token
-  TwoKeyAdmin creator;  // 2key admin contract that created this
+  TwoKeyReg registry;  // 2key admin contract that created this
   address public owner;  // Who created the contract (business)
   string public name;
   string public ipfs_hash;
   string public symbol;
-  uint8 public decimals = 18;
+  uint8 public decimals = 0;  // ARCs are not divisable
   uint256 public cost; // Cost of product in wei
   uint256 public bounty; // Cost of product in wei
   uint256 public quota;  // maximal tokens that can be passed in transferFrom
-  uint256 public total_units; // total number of units on offer
 
   // Private variables of the token
   mapping (address => address) internal received_from;
   mapping(address => uint256) internal xbalances; // balance of external currency (ETH or 2Key coin)
   mapping(address => uint256) internal units; // number of units bought
-
-  event Fulfilled(address indexed to, uint256 units);
-
-  // Initialize all the constants
-  function TwoKeyContract(address _owner, string _name, string _symbol,
-        uint256 _tSupply, uint256 _quota, uint256 _cost, uint256 _bounty,
-        uint256 _units, string _ipfs_hash) public {
-    require(_bounty <= _cost);
-    // We do an explicit type conversion from `address`
-    // to `TwoKeyAdmin` and assume that the type of
-    // the calling contract is TwoKeyAdmin, there is
-    // no real way to check that.
-    creator = TwoKeyAdmin(msg.sender);
-    owner = _owner;
-    name = _name;
-    symbol = _symbol;
-    totalSupply_ = _tSupply;
-    balances[_owner] = _tSupply;
-    cost = _cost;
-    bounty = _bounty;
-    quota = _quota;
-    total_units = _units;
-    ipfs_hash = _ipfs_hash;
-
-    received_from[owner] = owner;  // allow owner to buy from himself
-  }
 
   // Modified 2Key method
 
@@ -106,7 +82,7 @@ contract TwoKeyContract is StandardToken {
     if (transferFromQuota(_from, _to, _value)) {
       if (received_from[_to] == 0) {
         // inform the 2key admin contract, once, that an influencer has joined
-        creator.joinedContract(_to, this);
+        registry.joinedContract(_to);
       }
       received_from[_to] = _from;
       return true;
@@ -125,7 +101,7 @@ contract TwoKeyContract is StandardToken {
     if (transferQuota(_to, _value)) {
       if (received_from[_to] == 0) {
         // inform the 2key admin contract, once, that an influencer has joined
-        creator.joinedContract(_to, this);
+        registry.joinedContract(_to);
       }
       received_from[_to] = msg.sender;
       return true;
@@ -139,9 +115,7 @@ contract TwoKeyContract is StandardToken {
   //   return (this.balanceOf(me),units[me],xbalances[me],name,symbol,cost,bounty,quota,totalSupply_,total_units,this.balance,owner);
   // }
   //
-  function getConstantInfo() public view returns (string,string,uint256,uint256,uint256,uint256,address,string) {
-    return (name,symbol,cost,bounty,quota,total_units,owner,ipfs_hash);
-  }
+  function getConstantInfo() public view returns (string,string,uint256,uint256,uint256,uint256,address,string);
 
   function getDynamicInfo(address me) public view returns (uint256,uint256,uint256,uint256,uint256) {
     return (this.balanceOf(me),units[me],xbalances[me],totalSupply_,this.balance);
@@ -159,6 +133,57 @@ contract TwoKeyContract is StandardToken {
       transferFrom(_from, _to, 1);
     }
     buyProduct();
+  }
+
+  // low level product purchase function
+  function buyProduct() public payable;
+
+  function redeem() public {
+    address influencer = msg.sender;
+    uint256 b = xbalances[influencer];
+    require(b > 0);
+    if (b > this.balance) {
+      b = this.balance;
+    }
+    xbalances[influencer] = xbalances[influencer].sub(b);
+    if(!influencer.send(b)){
+       revert();
+    }
+  }
+}
+
+contract TwoKeyAcquisitionContract is TwoKeyContract
+{
+  uint256 public total_units; // total number of units on offer
+
+  // Initialize all the constants
+  function TwoKeyAcquisitionContract(address _registry, string _name, string _symbol,
+        uint256 _tSupply, uint256 _quota, uint256 _cost, uint256 _bounty,
+        uint256 _units, string _ipfs_hash) public {
+    require(_bounty <= _cost);
+    owner = msg.sender;
+    // We do an explicit type conversion from `address`
+    // to `TwoKeyReg` and assume that the type of
+    // the calling contract is TwoKeyReg, there is
+    // no real way to check that.
+    registry = TwoKeyReg(_registry);
+    name = _name;
+    symbol = _symbol;
+    totalSupply_ = _tSupply;
+    balances[owner] = _tSupply;
+    cost = _cost;
+    bounty = _bounty;
+    quota = _quota;
+    total_units = _units;
+    ipfs_hash = _ipfs_hash;
+
+    received_from[owner] = owner;  // allow owner to buy from himself
+
+    registry.createdContract(owner);
+  }
+
+  function getConstantInfo() public view returns (string,string,uint256,uint256,uint256,uint256,address,string) {
+    return (name,symbol,cost,bounty,quota,total_units,owner,ipfs_hash);
   }
 
   // low level product purchase function
@@ -199,70 +224,96 @@ contract TwoKeyContract is StandardToken {
 
     Fulfilled(msg.sender, units[customer]);
   }
-
-  function redeem() public {
-    address influencer = msg.sender;
-    uint256 b = xbalances[influencer];
-    require(b > 0);
-    if (b > this.balance) {
-      b = this.balance;
-    }
-    xbalances[influencer] = xbalances[influencer].sub(b);
-    if(!influencer.send(b)){
-       revert();
-    }
-  }
 }
 
-contract TwoKeyAdmin {
-  mapping(address => string) public owner2name;
-  mapping(bytes32 => address) public name2owner;
+contract TwoKeyPresellContract is TwoKeyContract {
+  ERC20full public erc20;
+  uint256 erc20_decimals;
 
-  function addName(string _name) public {
-    address _owner = msg.sender;
-    // check if name is taken
-    if (name2owner[keccak256(_name)] != 0) {
-      revert();
+  // Initialize all the constants
+  function TwoKeyPresellContract(address _registry, string _name, string _symbol,
+        uint256 _tSupply, uint256 _quota, uint256 _cost, uint256 _bounty,
+        string _ipfs_hash, address _erc20) public {
+    require(_bounty <= _cost);
+    owner = msg.sender;
+    // We do an explicit type conversion from `address`
+    // to `TwoKeyReg` and assume that the type of
+    // the calling contract is TwoKeyReg, there is
+    // no real way to check that.
+    registry = TwoKeyReg(_registry);
+    name = _name;
+    symbol = _symbol;
+    totalSupply_ = _tSupply;
+    balances[owner] = _tSupply;
+    cost = _cost;
+    bounty = _bounty;
+    quota = _quota;
+    ipfs_hash = _ipfs_hash;
+    received_from[owner] = owner;  // allow owner to buy from himself
+    registry.createdContract(owner);
+
+    erc20 = ERC20full(_erc20);
+    erc20_decimals = uint256(erc20.decimals());  // TODO is this safe?
+    require(erc20_decimals >= 0);
+    require(erc20_decimals <= 18);
+  }
+
+  function total_units() public view returns (uint256) {
+    uint256 _total_units;
+    _total_units = erc20.balanceOf(address(this));
+    _total_units = _total_units / (10 ** erc20_decimals);
+    return _total_units;
+  }
+
+  function getConstantInfo() public view returns (string,string,uint256,uint256,uint256,uint256,address,string) {
+    uint256 _total_units = total_units();
+    return (name,symbol,cost,bounty,quota,_total_units,owner,ipfs_hash);
+  }
+
+  // low level product purchase function
+  function buyProduct() public payable {
+    address customer = msg.sender;
+    require(this.balanceOf(customer) > 0);
+    uint256 _total_units;
+    _total_units = erc20.balanceOf(address(this));
+
+    // cost is the cost of a single token. Each token has 10**decimals units
+    uint256 _units = msg.value.mul(10**erc20_decimals).div(cost);
+    require(_total_units >= _units);
+    // bounty is the cost of a single token. Compute the bounty for the units
+    // we are buying
+    uint256 _bounty = bounty.mul(_units).div(10**erc20_decimals);
+
+    // distribute bounty to influencers
+    uint n_influencers = 0;
+    address influencer = customer;
+    while (true) {
+        influencer = received_from[influencer];
+        if (influencer == owner) {
+            break;
+        }
+        n_influencers = n_influencers + 1;
     }
-    // remove previous name
-    bytes memory last_name = bytes(owner2name[_owner]);
-    if (last_name.length != 0) {
-      name2owner[keccak256(owner2name[_owner])] = 0;
+    uint256 total_bounty = 0;
+    if (n_influencers > 0) {
+        uint256 b = _bounty.div(n_influencers);
+        influencer = customer;
+        while (true) {
+          influencer = received_from[influencer];
+          if (influencer == owner) {
+            break;
+          }
+          xbalances[influencer] = xbalances[influencer].add(b);
+          total_bounty = total_bounty.add(b);
+        }
     }
-    owner2name[_owner] = _name;
-    name2owner[keccak256(_name)] = _owner;
-  }
 
-  function getName2Owner(string _name) public view returns (address) {
-    return name2owner[keccak256(_name)];
-  }
-  function getOwner2Name(address _owner) public view returns (string) {
-    return owner2name[_owner];
-  }
+    // all that is left from the cost is given to the owner for selling the product
+    xbalances[owner] = xbalances[owner].add(cost).sub(total_bounty);
+    units[customer] = units[customer].add(_units);
 
-  event Created(address indexed owner, address c);
-  function createTwoKeyContract(string _name, string _symbol, uint256 _totalSupply, uint256 _quota, uint256 _cost, uint256 _bounty, uint256 _units, string _ipfs_hash) public returns (address) {
-    address _owner = msg.sender;
-    address c = (new TwoKeyContract(_owner, _name, _symbol, _totalSupply, _quota, _cost, _bounty, _units, _ipfs_hash));
+    Fulfilled(msg.sender, units[customer]);
 
-    Created(_owner, c);
-    return c;
-  }
-
-  event Joined(address indexed to, address c);
-  function joinedContract(address to, address c) public {
-    Joined(to, c);
-  }
-}
-
-contract TwoKeyEconomy is MintableToken {
-  string public name = 'TwoKeyEconomy';
-  string public symbol = '2KE';
-  uint8 public decimals = 18;
-  uint public INITIAL_SUPPLY = 1000000000000000000000000000;
-
-  function TwoKeyEconomy() public {
-    totalSupply_ = INITIAL_SUPPLY;
-    balances[msg.sender] = INITIAL_SUPPLY;
+    erc20.transfer(customer,_units);  // TODO is this dangerous!?
   }
 }

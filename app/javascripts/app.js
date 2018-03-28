@@ -81,8 +81,15 @@ function transaction_msg () {
 function transaction_start (tx_promise, cb_end, cb_error) {
   function transaction_end(tx) {
     function te(tx) {
-      total_gas += tx.receipt.gasUsed
-      total_success += tx.receipt.status
+      if (tx.receipt) {
+        total_gas += tx.receipt.gasUsed
+        total_success += tx.receipt.status
+      } else {
+        // this happens when creating new contract
+        var receipt = web3.eth.getTransactionReceipt(tx.transactionHash)
+        total_gas += receipt.gasUsed
+        total_success += receipt.status
+      }
       active_transactions--
       transaction_msg()
 
@@ -176,7 +183,7 @@ function safe_cb (eid, cb) {
 }
 
 function owner2name (owner, eid, cb) {
-  view(TwoKeyAdmin_contractInstance.getOwner2Name(owner),
+  view(TwoKeyReg_contractInstance.getOwner2Name(owner),
     _name => {
     safe_cb(eid, () => { $(eid).text(_name) })
     if (cb) {
@@ -199,15 +206,27 @@ import { default as contract } from 'truffle-contract'
 // import { default as clipboard } from 'clipboard';
 // import clippy_img from '!!file!../images/clippy.svg'
 
-import twoKeyEconomy_artifacts from '../../build/contracts/TwoKeyEconomy.json'
-import twoKeyAdmin_artifacts from '../../build/contracts/TwoKeyAdmin.json'
-import twoKeyContract_artifacts from '../../build/contracts/TwoKeyContract.json'
+import ERC20_artifacts from '../../build/contracts/ERC20.json'
+var ERC20Contract = contract(ERC20_artifacts)
 
+import twoKeyEconomy_artifacts from '../../build/contracts/TwoKeyEconomy.json'
 var TwoKeyEconomy = contract(twoKeyEconomy_artifacts)
 var TwoKeyEconomy_contractInstance
 
-var TwoKeyAdmin = contract(twoKeyAdmin_artifacts)
-var TwoKeyAdmin_contractInstance
+import TwoKeyReg_artifacts from '../../build/contracts/TwoKeyReg.json'
+var TwoKeyReg = contract(TwoKeyReg_artifacts)
+var TwoKeyReg_contractInstance
+
+import TwoKeyContract_artifacts from '../../build/contracts/TwoKeyContract.json'
+var TwoKeyContract = contract(TwoKeyContract_artifacts)
+import TwoKeyAcquisitionContract_artifacts from '../../build/contracts/TwoKeyAcquisitionContract.json'
+var TwoKeyAcquisitionContract = contract(TwoKeyAcquisitionContract_artifacts)
+import TwoKeyPresellContract_artifacts from '../../build/contracts/TwoKeyPresellContract.json'
+var TwoKeyPresellContract = contract(TwoKeyPresellContract_artifacts)
+
+var twoKeyContractAddress
+var from_twoKeyContractAddress
+var from_twoKeyContractAddress_taken
 
 function tbl_add_row (tbl, h) {
   var header_row = '<tr>' + h.join() + '</tr>'
@@ -247,14 +266,14 @@ function tbl_add_contract (tbl, twoKeyContractAddress) {
   })
 }
 
-function init_TwoKeyAdmin () {
-  if (TwoKeyAdmin_contractInstance.created) { return }
+function init_TwoKeyReg () {
+  if (TwoKeyReg_contractInstance.created) { return }
 
-  TwoKeyAdmin_contractInstance.created = {}
-  TwoKeyAdmin_contractInstance.joined = {}
+  TwoKeyReg_contractInstance.created = {}
+  TwoKeyReg_contractInstance.joined = {}
 
   var my_address = whoAmI()
-  TwoKeyAdmin_contractInstance.Created_event = TwoKeyAdmin_contractInstance.Created({owner: my_address}, {
+  TwoKeyReg_contractInstance.Created_event = TwoKeyReg_contractInstance.Created({owner: my_address}, {
     fromBlock: 'earliest',
     toBlock: 'latest'
   }, (error, log) => {
@@ -263,17 +282,17 @@ function init_TwoKeyAdmin () {
       transaction_msg()
     }
     if (!error) {
-      check_event(TwoKeyAdmin_contractInstance, log)
+      check_event(TwoKeyReg_contractInstance, log)
 
       var twoKeyContractAddress = log.args.c
-      TwoKeyAdmin_contractInstance.created[twoKeyContractAddress] = true
+      TwoKeyReg_contractInstance.created[twoKeyContractAddress] = true
 
       // tbl_add_contract('#my-2key-contracts', twoKeyContractAddress)
       timer_cbs.push(populate)
     }
   })
 
-  TwoKeyAdmin_contractInstance.Joined_event = TwoKeyAdmin_contractInstance.Joined({to: my_address}, {
+  TwoKeyReg_contractInstance.Joined_event = TwoKeyReg_contractInstance.Joined({to: my_address}, {
     fromBlock: 'earliest',
     toBlock: 'latest'
   }, (error, log) => {
@@ -282,10 +301,10 @@ function init_TwoKeyAdmin () {
       transaction_msg()
     }
     if (!error) {
-      check_event(TwoKeyAdmin_contractInstance, log)
+      check_event(TwoKeyReg_contractInstance, log)
 
       var twoKeyContractAddress = log.args.c
-      TwoKeyAdmin_contractInstance.joined[twoKeyContractAddress] = true
+      TwoKeyReg_contractInstance.joined[twoKeyContractAddress] = true
 
       // tbl_add_contract('#my-2key-arcs', twoKeyContractAddress)
       timer_cbs.push(populate)
@@ -293,10 +312,6 @@ function init_TwoKeyAdmin () {
   })
 }
 
-var TwoKeyContract = contract(twoKeyContract_artifacts)
-var twoKeyContractAddress
-var from_twoKeyContractAddress
-var from_twoKeyContractAddress_taken
 
 // function cache (fn) {
 //   var NO_RESULT = {} // unique, would use Symbol if ES2015-able
@@ -317,7 +332,7 @@ function init_TwoKeyContract (TwoKeyContract_instance) {
   TwoKeyContract_instance.given_to = {}
   TwoKeyContract_instance.units = {}
 
-  // TwoKeyAdmin_contractInstance.Joined_event = TwoKeyAdmin_contractInstance.Joined({c: TwoKeyContract_instance.address}, {
+  // TwoKeyReg_contractInstance.Joined_event = TwoKeyReg_contractInstance.Joined({c: TwoKeyContract_instance.address}, {
   //   fromBlock: 'earliest',
   //   toBlock: 'latest'
   // }, (error, log) => {
@@ -442,7 +457,7 @@ function username2address (username, cb, cberror) {
   } else if (username.startsWith('0x')) {
     cb(username)
   } else {
-    view(TwoKeyAdmin_contractInstance.getName2Owner(username),
+    view(TwoKeyReg_contractInstance.getName2Owner(username),
       address => {
         if (address && address != '0x0000000000000000000000000000000000000000') {
           cb(address)
@@ -513,7 +528,7 @@ function _whoAmI () {
 
   if (my_address && last != my_address) {
     // check consistancy
-    view(TwoKeyAdmin_contractInstance.getOwner2Name(my_address),
+    view(TwoKeyReg_contractInstance.getOwner2Name(my_address),
       _name => {
         if (_name) {
           if (!username) {
@@ -531,7 +546,7 @@ function _whoAmI () {
             if (ok) {
               // if addName will end succussefully then call lookupUserInfo
               transaction_start(
-                TwoKeyAdmin_contractInstance.addName(username, {
+                TwoKeyReg_contractInstance.addName(username, {
                   gas: gastimate(80000),
                   from: my_address
                 }),
@@ -585,8 +600,8 @@ function user_changed () {
 
   d3_reset()
 
-  TwoKeyAdmin_contractInstance.created = null
-  TwoKeyAdmin_contractInstance.joined = null
+  TwoKeyReg_contractInstance.created = null
+  TwoKeyReg_contractInstance.joined = null
 
   tbl_cleanup()
 }
@@ -620,7 +635,7 @@ window.jump_to_contract_page = function (address) {
 
 // window.getETH = function () {
 //   var my_address = whoAmI()
-//   TwoKeyAdmin_contractInstance.fundtransfer(my_address, web3.toWei(1.0, 'ether'),
+//   TwoKeyReg_contractInstance.fundtransfer(my_address, web3.toWei(1.0, 'ether'),
 //     {gas: 3000000, from: my_address}).then(function () {
 //   }).catch(function (e) {
 //     alert(e)
@@ -629,7 +644,7 @@ window.jump_to_contract_page = function (address) {
 //
 // window.giveETH = function () {
 //   var my_address = whoAmI()
-//   web3.eth.sendTransaction({from: my_address, to: TwoKeyAdmin.address, value: web3.toWei(1, 'ether')})
+//   web3.eth.sendTransaction({from: my_address, to: TwoKeyReg.address, value: web3.toWei(1, 'ether')})
 // }
 
 window.buy = function (twoKeyContractAddress, name, cost) {
@@ -773,6 +788,7 @@ function getAllUrlParams (url) {
 
 function product_cleanup () {
   // hide the product create-contract box
+  $('#erc20-address').val('')
   $('#product-name').val('')
   $('#product-symbol').val('')
   $('#total-arcs').val('')
@@ -780,7 +796,8 @@ function product_cleanup () {
   $('#cost').val('')
   $('#total-units').val('')
   $('#bounty').val('')
-  // $("#expiration").val("");
+  $('#bounty-tokens').val('')
+  $("#expiration").val("");
   $('#description').val('')
   $('#add-contract').show()
   $('#create-contract').hide()
@@ -959,7 +976,7 @@ function contract_info (TwoKeyContract_instance, min_arcs, callback) {
                 roll = 'Contractor'
               } else if (units) {
                 roll = 'Converter'
-              } else if (TwoKeyAdmin_contractInstance.joined[twoKeyContractAddress] || arcs) {
+              } else if (TwoKeyReg_contractInstance.joined[twoKeyContractAddress] || arcs) {
                 roll = 'Influencer'
               } else {
                 roll = ''
@@ -1063,17 +1080,17 @@ function contract_info (TwoKeyContract_instance, min_arcs, callback) {
 
 function populateMy2KeyContracts () {
   tbl_cleanup()
-  if (!TwoKeyAdmin_contractInstance.created) {
+  if (!TwoKeyReg_contractInstance.created) {
     return
   }
 
   var tbl = '#my-2key-contracts'
-  for (var c in TwoKeyAdmin_contractInstance.created) {
+  for (var c in TwoKeyReg_contractInstance.created) {
     tbl_add_contract(tbl, c)
   }
 
   tbl = '#my-2key-arcs'
-  for (var c in TwoKeyAdmin_contractInstance.joined) {
+  for (var c in TwoKeyReg_contractInstance.joined) {
     tbl_add_contract(tbl, c)
   }
 }
@@ -1214,19 +1231,47 @@ window.contract_take = function () {
   })
 }
 
-window.addContract = function () {
+function addContract () {
   whoAmI()  // check the address did not change
   $('#add-contract').hide()
   $('#create-contract').show()
 }
+
+window.addAquistionContract = function () {
+  $('.aquistion').show()
+  $('.presell').hide()
+  addContract()
+}
+
+window.addPresellContract = function () {
+  $('.aquistion').hide()
+  $('.presell').show()
+  addContract()
+}
+
 
 window.cancelContract = function () {
   product_cleanup()
 }
 
 window.createContract = function () {
-  let name = $('#product-name').val()
-  let symbol = $('#product-symbol').val()
+  var erc20_address = $('#erc20-address').val()
+  var name = $('#product-name').val()
+  var symbol = $('#product-symbol').val()
+  if ($('#erc20-address').is(":visible")) { // TODO better way to decide which type of contract we are creating
+    if (!erc20_address) {
+      erc20_address = TwoKeyEconomy_contractInstance.address
+    }
+    createContract(name, symbol, erc20_address)
+  } else {
+    createContract(name, symbol)
+  }
+}
+
+function createContract (name, symbol, erc20_address) {
+  if (!erc20_address) {
+    erc20_address = 0
+  }
   let total_arcs = $('#total-arcs').val()
   if (total_arcs) {
     total_arcs = parseInt(total_arcs)
@@ -1240,12 +1285,47 @@ window.createContract = function () {
     quota = BIG_INT
   }
   let cost = $('#cost').val()
+  if (!cost) {
+    cost = 0
+  }
   let total_units = $('#total-units').val()
+  if (!total_units) {
+    total_units = 0
+  }
   let bounty = $('#bounty').val()
+  if (!bounty) {
+    bounty = 0
+  }
+  let bounty_tokens = $('#bounty-tokens').val()
+  if (!bounty_tokens) {
+    bounty_tokens = 0
+  }
   let productExpiration = $('#product-expiration').val()
   let description = $('#description').val()
 
   product_cleanup()
+
+  function cb(ipfs_hash) {
+    var address = whoAmI()
+    // value: web3.toWei(0.001, 'ether'),
+    var trn
+    if (erc20_address) {
+      trn = TwoKeyPresellContract.new(TwoKeyReg_contractInstance.address, name, symbol, total_arcs, quota,
+        web3.toWei(parseFloat(cost), 'ether'), web3.toWei(parseFloat(bounty), 'ether'),
+        ipfs_hash, erc20_address,
+        {gas: gastimate(4000000), from: address})
+    } else {
+      trn = TwoKeyAcquisitionContract.new(TwoKeyReg_contractInstance.address,
+        name, symbol, total_arcs, quota,
+        web3.toWei(parseFloat(cost), 'ether'), web3.toWei(parseFloat(bounty), 'ether'),
+        parseInt(total_units), ipfs_hash,
+        {gas: gastimate(4000000), from: address})
+    }
+    transaction_start(trn, () => {
+      active_created++
+      transaction_msg()
+    })
+  }
 
   if (description) {
     ipfs.add([Buffer.from(description)], (err, res) => {
@@ -1254,31 +1334,10 @@ window.createContract = function () {
         throw err
       }
       const ipfs_hash = res[0].hash
-      let address = whoAmI()
-      // value: web3.toWei(0.001, 'ether'),
-      transaction_start(
-        TwoKeyAdmin_contractInstance.createTwoKeyContract(name, symbol, total_arcs, quota,
-          web3.toWei(parseFloat(cost), 'ether'), web3.toWei(parseFloat(bounty), 'ether'),
-          parseInt(total_units), ipfs_hash,
-          {gas: gastimate(3000000), from: address}),
-        () => {
-          active_created++
-          transaction_msg()
-        }
-      )
+      cb(ipfs_hash)
     })
   } else {
-    let address = whoAmI()
-    transaction_start(
-      TwoKeyAdmin_contractInstance.createTwoKeyContract(name, symbol, total_arcs, quota,
-        web3.toWei(parseFloat(cost), 'ether'), web3.toWei(parseFloat(bounty), 'ether'),
-        parseInt(total_units), '',
-        {gas: gastimate(3000000), from: address}),
-      () => {
-        active_created++
-        transaction_msg()
-      }
-    )
+    cb('')
   }
 }
 
@@ -1321,10 +1380,11 @@ window.transferTokens = function () {
   username2address(destination, (_destination) => {
     var myaddress = whoAmI()
     var amount = parseFloat($('#token-amount').val())
+    amount = web3.toWei(amount, 'ether') // TODO use the decimals value of the TwoKeyEconomy contract
 
     transaction_start(
       TwoKeyEconomy_contractInstance.transfer(
-        _destination, web3.toWei(amount, 'ether'),
+        _destination, amount,
         {
           gas: gastimate(140000),
           from: myaddress,
@@ -1342,10 +1402,11 @@ window.transferFromTokens = function () {
   username2address(destination, (_destination) => {
     var myaddress = whoAmI()
     var amount = parseFloat($('#token-amount').val())
+    amount = web3.toWei(amount, 'ether') // TODO use the decimals value of the TwoKeyEconomy contract
 
     transaction_start(
       TwoKeyEconomy_contractInstance.transferFrom(
-        _destination, myaddress, web3.toWei(amount, 'ether'),
+        _destination, myaddress, amount,
         {
           gas: gastimate(140000),
           from: myaddress,
@@ -1363,10 +1424,11 @@ window.approveTokens = function () {
   username2address(destination, (_destination) => {
     var myaddress = whoAmI()
     var amount = parseFloat($('#token-amount').val())
+    amount = web3.toWei(amount, 'ether') // TODO use the decimals value of the TwoKeyEconomy contract
 
     transaction_start(
       TwoKeyEconomy_contractInstance.approve(
-        _destination, web3.toWei(amount, 'ether'),
+        _destination, amount,
         {
           gas: gastimate(140000),
           from: myaddress,
@@ -1385,7 +1447,8 @@ window.allowanceTokens = function () {
 
     view(TwoKeyEconomy_contractInstance.allowance(_destination,myaddress),
       (result) => {
-        $('#token-amount').val(web3.fromWei(result.toString()))
+        var amount = web3.fromWei(result.toString()) // TODO use the decimals value of the TwoKeyEconomy contract
+        $('#token-amount').val(amount)
       }
     )
   })
@@ -1393,7 +1456,7 @@ window.allowanceTokens = function () {
 
 function lookupUserInfo () {
   updateUserInfo()
-  init_TwoKeyAdmin()
+  init_TwoKeyReg()
   populate()
   new_user()
   $('.logout').show()
@@ -1470,9 +1533,12 @@ function init () {
   }
 
   TwoKeyEconomy.setProvider(web3.currentProvider)
-  TwoKeyAdmin.setProvider(web3.currentProvider)
+  TwoKeyReg.setProvider(web3.currentProvider)
 
   TwoKeyContract.setProvider(web3.currentProvider)
+  TwoKeyAcquisitionContract.setProvider(web3.currentProvider)
+  TwoKeyPresellContract.setProvider(web3.currentProvider)
+  ERC20Contract.setProvider(web3.currentProvider)
 
   ipfs_init()
 
@@ -1492,15 +1558,15 @@ function init () {
   }, 300)
 
 
-  /* TwoKeyAdmin.deployed() returns an instance of the contract. Every call
+  /* TwoKeyReg.deployed() returns an instance of the contract. Every call
    * in Truffle returns a promise which is why we have used then()
    * everywhere we have a transaction call
    */
   view(TwoKeyEconomy.deployed(), contractInstance => {
     TwoKeyEconomy_contractInstance = contractInstance
-    view(TwoKeyAdmin.deployed(), contractInstance => {
-      TwoKeyAdmin_contractInstance = contractInstance
-      // init_TwoKeyAdmin();
+    view(TwoKeyReg.deployed(), contractInstance => {
+      TwoKeyReg_contractInstance = contractInstance
+      // init_TwoKeyReg();
       $('#loading').hide()
       whoAmI()
     })

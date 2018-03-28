@@ -111,32 +111,37 @@
       <br/>
       <br/>
       <div class="contracts">
+      <h2>Create Contract</h2>
+      <div class="container-fluid" style="border:1px solid #cecece;">
+        <div id="add-contract">
+          <a href="#" onclick="addAquistionContract()" class="btn btn-primary">Aquistion</a>
+          <a href="#" onclick="addPresellContract()" class="btn btn-primary">Presell</a>
+        </div>
+        <div id="create-contract">
+          <h2>Create 2Key Contract</h2>
+          <!--<div class="form-group">-->
+          <input type="text" id="erc20-address" placeholder="Address of ERC20 in presell (leave empty for 2key tokens presell)" class="presell form-control"/>
+          <input type="text" id="product-name" placeholder="name" class="form-control"/>
+          <input type="text" id="product-symbol" placeholder="symbol" class="form-control"/>
+          <input type="text" id="total-units" placeholder="units to be sold" class="aquistion form-control"/>
+          <input type="text" id="total-arcs" placeholder="total supply of ARCs. Leave empty for unlimited" class="form-control"/>
+          <input type="text" id="cost" placeholder="cost of product including ETH bounty" class="form-control"/>
+          <input type="text" id="bounty" placeholder="ETH bounty (total sum for all influencers in a path)" class="form-control"/>
+          <!--<input type="text" id="bounty-tokens" placeholder="2key token bounty (total sum for all influencers in a path)" class="form-control"/>-->
+          <input type="text" id="quota" placeholder="Number of ARCs an influencer will receive for every 1 ARC s/he take. Leave empty for unlimited" class="form-control"/>
+          <!--<input type="text" id="expiration" placeholder="expiration date" class="form-control"/>-->
+          <!--<input type="text" id="reporting" placeholder="customer confirms purchase in 30days" class="form-control"/>-->
+          <!--<input type="text" id="arbitration" placeholder="Arbitration will be done by 2Key Ltd." class="form-control"/>-->
+          <!--</div>-->
+          <textarea class="form-control" id="description" rows="3" placeholder="Description of the product. Can be as long as you like. Can be edited later"></textarea>
+          <br/>
+          <a href="#" onclick="createContract()" class="btn btn-primary">Create</a>
+          <a href="#" onclick="cancelContract()" class="btn btn-primary">Cancel</a>
+          <br/>
+          <br/>
+        </div>
+      </div>
       <h2>Contracts I created</h2>
-      <div class="table-responsive" id="add-contract">
-        <a href="#" onclick="addContract()" class="btn btn-primary">Create contract</a>
-      </div>
-      <div class="container-fluid" style="border:1px solid #cecece;" id="create-contract">
-        <br/>
-        <h2>Create 2Key contract</h2>
-        <!--<div class="form-group">-->
-        <input type="text" id="product-name" placeholder="name" class="form-control"/>
-        <input type="text" id="product-symbol" placeholder="symbol" class="form-control"/>
-        <input type="text" id="total-units" placeholder="units to be sold" class="form-control"/>
-        <input type="text" id="total-arcs" placeholder="total supply of ARCs. Leave empty for unlimited" class="form-control"/>
-        <input type="text" id="cost" placeholder="cost of product including bounty (ETH)" class="form-control"/>
-        <input type="text" id="bounty" placeholder="bounty (total sum for all influencers) (ETH)" class="form-control"/>
-        <input type="text" id="quota" placeholder="Number of ARCs an influencer will receive for every 1 ARC s/he take. Leave empty for unlimited" class="form-control"/>
-        <!--<input type="text" id="expiration" placeholder="expiration date"/>-->
-        <!--<input type="text" id="reporting" placeholder="customer confirms purchase in 30days"/>-->
-        <!--<input type="text" id="arbitration" placeholder="Arbitration will be done by 2Key Ltd."/>-->
-        <!--</div>-->
-        <textarea class="form-control" id="description" rows="3" placeholder="Description of the product. Can be as long as you like. Can be edited later"></textarea>
-        <br/>
-        <a href="#" onclick="createContract()" class="btn btn-primary">Create</a>
-        <a href="#" onclick="cancelContract()" class="btn btn-primary">Cancel</a>
-        <br/>
-        <br/>
-      </div>
       <div class="table-responsive">
         <h3>acquisition contracts</h3>
         <table class="table table-bordered">
