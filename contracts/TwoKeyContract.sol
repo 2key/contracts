@@ -227,13 +227,13 @@ contract TwoKeyAcquisitionContract is TwoKeyContract
 }
 
 contract TwoKeyPresellContract is TwoKeyContract {
-  ERC20full public erc20;
-  uint256 erc20_decimals;
+  ERC20full public erc20_token_sell_contract;
+  uint256 erc20_token_sell_contract_decimals;
 
   // Initialize all the constants
   function TwoKeyPresellContract(address _registry, string _name, string _symbol,
         uint256 _tSupply, uint256 _quota, uint256 _cost, uint256 _bounty,
-        string _ipfs_hash, address _erc20) public {
+        string _ipfs_hash, address _erc20_token_sell_contract) public {
     require(_bounty <= _cost);
     owner = msg.sender;
     // We do an explicit type conversion from `address`
@@ -252,16 +252,16 @@ contract TwoKeyPresellContract is TwoKeyContract {
     received_from[owner] = owner;  // allow owner to buy from himself
     registry.createdContract(owner);
 
-    erc20 = ERC20full(_erc20);
-    erc20_decimals = uint256(erc20.decimals());  // TODO is this safe?
-    require(erc20_decimals >= 0);
-    require(erc20_decimals <= 18);
+    erc20_token_sell_contract = ERC20full(_erc20_token_sell_contract);
+    erc20_token_sell_contract_decimals = uint256(erc20_token_sell_contract.decimals());  // TODO is this safe?
+    require(erc20_token_sell_contract_decimals >= 0);
+    require(erc20_token_sell_contract_decimals <= 18);
   }
 
   function total_units() public view returns (uint256) {
     uint256 _total_units;
-    _total_units = erc20.balanceOf(address(this));
-    _total_units = _total_units / (10 ** erc20_decimals);
+    _total_units = erc20_token_sell_contract.balanceOf(address(this));
+    _total_units = _total_units / (10 ** erc20_token_sell_contract_decimals);
     return _total_units;
   }
 
@@ -275,14 +275,14 @@ contract TwoKeyPresellContract is TwoKeyContract {
     address customer = msg.sender;
     require(this.balanceOf(customer) > 0);
     uint256 _total_units;
-    _total_units = erc20.balanceOf(address(this));
+    _total_units = erc20_token_sell_contract.balanceOf(address(this));
 
     // cost is the cost of a single token. Each token has 10**decimals units
-    uint256 _units = msg.value.mul(10**erc20_decimals).div(cost);
+    uint256 _units = msg.value.mul(10**erc20_token_sell_contract_decimals).div(cost);
     require(_total_units >= _units);
     // bounty is the cost of a single token. Compute the bounty for the units
     // we are buying
-    uint256 _bounty = bounty.mul(_units).div(10**erc20_decimals);
+    uint256 _bounty = bounty.mul(_units).div(10**erc20_token_sell_contract_decimals);
 
     // distribute bounty to influencers
     uint n_influencers = 0;
@@ -309,11 +309,11 @@ contract TwoKeyPresellContract is TwoKeyContract {
     }
 
     // all that is left from the cost is given to the owner for selling the product
-    xbalances[owner] = xbalances[owner].add(cost).sub(total_bounty);
+    xbalances[owner] = xbalances[owner].add(cost).sub(total_bounty); // TODO we want the cost of a token to be fixed
     units[customer] = units[customer].add(_units);
 
     Fulfilled(msg.sender, units[customer]);
 
-    erc20.transfer(customer,_units);  // TODO is this dangerous!?
+    erc20_token_sell_contract.transfer(customer,_units);  // TODO is this dangerous!?
   }
 }

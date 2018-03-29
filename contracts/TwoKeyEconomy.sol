@@ -4,7 +4,7 @@ import 'zeppelin-solidity/contracts/token/ERC20/MintableToken.sol';
 
 contract TwoKeyEconomy is MintableToken {
   string public name = 'TwoKeyEconomy';
-  string public symbol = '2KE';
+  string public symbol = '2Key';
   uint8 public decimals = 18;
   uint public INITIAL_SUPPLY = 1000000000000000000000000000;
 
