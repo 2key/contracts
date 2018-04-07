@@ -527,7 +527,7 @@ function _whoAmI (doing_login) {
   if (!doing_login) {
     $("#login-user-data").hide()
   }
-  
+
   var accounts = web3.eth.accounts
   if (!accounts || accounts.length == 0) {
     if (!no_warning) {
@@ -718,7 +718,7 @@ window.buy = function (twoKeyContractAddress, name, cost) {
           TwoKeyContract_instance.buyFrom(
             from_twoKeyContractAddress,
             {
-              gas: gastimate(140000),
+              gas: gastimate(240000),
               from: my_address,
               value: web3.toWei(cost, 'ether')
           }),
@@ -732,7 +732,7 @@ window.buy = function (twoKeyContractAddress, name, cost) {
         // if the transaction will end succussefully then call updateUserInfo
         transaction_start(
           TwoKeyContract_instance.buyProduct({
-              gas: gastimate(140000),
+              gas: gastimate(240000),
               from: my_address,
               value: web3.toWei(cost, 'ether')
           }),
