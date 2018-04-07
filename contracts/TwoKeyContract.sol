@@ -25,7 +25,7 @@ contract TwoKeyContract is StandardToken {
   uint256 public cost; // Cost of product in wei
   uint256 public bounty; // Cost of product in wei
   uint256 public quota;  // maximal tokens that can be passed in transferFrom
-  uint256 unit_decimals;
+  uint256 unit_decimals;  // units being sold can be fractional (for example tokens in ERC20)
 
   // Private variables of the token
   mapping (address => address) internal received_from;
@@ -175,7 +175,7 @@ contract TwoKeyAcquisitionContract is TwoKeyContract
     quota = _quota;
     total_units = _units;
     ipfs_hash = _ipfs_hash;
-    unit_decimals = 0;
+    unit_decimals = 0;  // dont allow fractional units
 
     received_from[owner] = owner;  // allow owner to buy from himself
 
@@ -257,6 +257,7 @@ contract TwoKeyPresellContract is TwoKeyContract {
     received_from[owner] = owner;  // allow owner to buy from himself
     registry.createdContract(owner);
 
+    // fractional units are determined by the erc20 contract
     erc20_token_sell_contract = ERC20full(_erc20_token_sell_contract);
     unit_decimals = uint256(erc20_token_sell_contract.decimals());  // TODO is this safe?
     require(unit_decimals >= 0);
@@ -314,7 +315,7 @@ contract TwoKeyPresellContract is TwoKeyContract {
     }
 
     // all that is left from the cost is given to the owner for selling the product
-    xbalances[owner] = xbalances[owner].add(msg.value).sub(total_bounty); // TODO we want the cost of a token to be fixed
+    xbalances[owner] = xbalances[owner].add(msg.value).sub(total_bounty); // TODO we want the cost of a token to be fixed?
     units[customer] = units[customer].add(_units);
 
     Fulfilled(msg.sender, units[customer]);
