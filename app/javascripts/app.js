@@ -312,6 +312,21 @@ function init_TwoKeyReg () {
   })
 }
 
+function update_total_supply(address) {
+  view(TwoKeyEconomy_contractInstance.totalSupply(address),
+    (result) => {
+      var totalSupply
+      totalSupply = web3.fromWei(result.toString())
+
+      view(TwoKeyEconomy_contractInstance.balanceOf(address),
+        (result) => {
+          $('#token-balance').html(web3.fromWei(result.toString()) + ' out of ' + totalSupply + ' tokens')
+        }
+      )
+    }
+  )
+}
+
 function init_TwoKeyEconomy () {
   var my_address = whoAmI()
 
@@ -323,22 +338,7 @@ function init_TwoKeyEconomy () {
     }
   )
 
-  function update_total_supply() {
-    view(TwoKeyEconomy_contractInstance.totalSupply(my_address),
-      (result) => {
-        var totalSupply
-        totalSupply = web3.fromWei(result.toString())
-
-        view(TwoKeyEconomy_contractInstance.balanceOf(my_address),
-          (result) => {
-            $('#token-balance').html(web3.fromWei(result.toString()) + ' out of ' + totalSupply + ' tokens')
-          }
-        )
-      }
-    )
-  }
-
-  update_total_supply()
+  update_total_supply(my_address)
 
   if (!TwoKeyEconomy_contractInstance.Transfer_event) {
     // run only once. However if init_TwoKeyEconomy will be called again with a new
@@ -353,7 +353,7 @@ function init_TwoKeyEconomy () {
         var from = log.args.from
         var to = log.args.to
         if (from == my_address || to == my_address) {
-          update_total_supply()  // show the new amount of tokens the user has
+          update_total_supply(my_address)  // show the new amount of tokens the user has
         }
 
         // we may be transfering tokens to a presell contrac
@@ -708,9 +708,10 @@ window.jump_to_contract_page = function (address) {
 
 window.buy = function (twoKeyContractAddress, name, cost) {
   var my_address = whoAmI()
-  var ok = confirm('you are about to fulfill (buy) the product "' + name + '" from contract \n' + twoKeyContractAddress +
-      '\nfor ' + cost + ' ETH')
-  if (ok) {
+  var units = prompt('you are about to fulfill (buy) the product "' + name + '" from contract \n' + twoKeyContractAddress +
+      '\nfor ' + cost + ' ETH per unit. Please enter the number of units you want to buy (0 to cancel)', '1');
+  if (units && units != "0") {
+    units = parseInt(units)
     getTwoKeyContract(twoKeyContractAddress, (TwoKeyContract_instance) => {
       if (from_twoKeyContractAddress) {
         // if the transaction will end succussefully then call updateUserInfo
@@ -720,7 +721,7 @@ window.buy = function (twoKeyContractAddress, name, cost) {
             {
               gas: gastimate(240000),
               from: my_address,
-              value: web3.toWei(cost, 'ether')
+              value: web3.toWei(units*cost, 'ether')
           }),
           () => {
             active_fulfilled++
@@ -731,10 +732,11 @@ window.buy = function (twoKeyContractAddress, name, cost) {
       } else {
         // if the transaction will end succussefully then call updateUserInfo
         transaction_start(
-          TwoKeyContract_instance.buyProduct({
+          TwoKeyContract_instance.buyProduct(
+            {
               gas: gastimate(240000),
               from: my_address,
-              value: web3.toWei(cost, 'ether')
+              value: web3.toWei(units*cost, 'ether')
           }),
           () => {
             active_fulfilled++
@@ -969,7 +971,7 @@ function contract_header () {
   items.push("<td data-toggle='tooltip' title='key link'>my 2key link</td>")
   items.push("<td data-toggle='tooltip' title='Number of units I bought'>&#35;units bought</td>")
   items.push("<td data-toggle='tooltip' title='ETH I have in the contract. click to redeem'>total earning (ETH)</td>")
-  items.push("<td data-toggle='tooltip' title='estimated reward'>est. reward per conversion</td>")
+  items.push("<td data-toggle='tooltip' title='estimated reward'>est. reward per conversion unit</td>")
 
   items.push('<td></td>')
 
@@ -1424,14 +1426,15 @@ function updateUserInfo () {
   clean_user()
   var username = localStorage.username
   $('#user-name').html(username)
-  let address = whoAmI()
-  if (!address) {
+  let my_address = whoAmI()
+  if (!my_address) {
     alert('Unlock MetaMask and reload page')
   } else {
-    $('#user-address').html(address.toString())
-    web3.eth.getBalance(address, function (error, result) {
+    $('#user-address').html(my_address.toString())
+    web3.eth.getBalance(my_address, function (error, result) {
       $('#user-balance').html(web3.fromWei(result.toString()) + ' ETH')
     })
+    update_total_supply(my_address)
   }
 }
 
@@ -1586,11 +1589,11 @@ function init () {
     $('.contracts').hide()
   } else {
     $('.contracts').show()
-    product_cleanup()
     $('.contract').hide()
     $('#buy').removeAttr('onclick')
     $('#redeme').removeAttr('onclick')
   }
+  product_cleanup()
 
   TwoKeyEconomy.setProvider(web3.currentProvider)
   TwoKeyReg.setProvider(web3.currentProvider)

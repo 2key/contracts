@@ -188,8 +188,11 @@ contract TwoKeyAcquisitionContract is TwoKeyContract
   function buyProduct() public payable {
     address customer = msg.sender;
     require(this.balanceOf(customer) > 0);
-    require(msg.value == cost);
-    require(total_units > 0);
+    // caluclate the number of units being purchased
+    uint _units = msg.value.div(cost);
+    require(_units > 0);
+    require(msg.value == cost * _units);
+    require(total_units >= _units);
 
     // distribute bounty to influencers
     uint n_influencers = 0;
@@ -201,9 +204,12 @@ contract TwoKeyAcquisitionContract is TwoKeyContract
         }
         n_influencers = n_influencers + 1;
     }
+    // bounty is the cost of a single token. Compute the bounty for the units
+    // we are buying
+    uint256 _bounty = bounty.mul(_units);
     uint256 total_bounty = 0;
     if (n_influencers > 0) {
-        uint256 b = bounty.div(n_influencers);
+        uint256 b = _bounty.div(n_influencers);
         influencer = customer;
         while (true) {
           influencer = received_from[influencer];
@@ -216,9 +222,9 @@ contract TwoKeyAcquisitionContract is TwoKeyContract
     }
 
     // all that is left from the cost is given to the owner for selling the product
-    xbalances[owner] = xbalances[owner].add(cost).sub(total_bounty);
-    total_units = total_units.sub(1);
-    units[customer] = units[customer].add(1);
+    xbalances[owner] = xbalances[owner].add(msg.value).sub(total_bounty);
+    total_units = total_units.sub(_units);
+    units[customer] = units[customer].add(_units);
 
     Fulfilled(msg.sender, units[customer]);
   }
@@ -307,7 +313,7 @@ contract TwoKeyPresellContract is TwoKeyContract {
     }
 
     // all that is left from the cost is given to the owner for selling the product
-    xbalances[owner] = xbalances[owner].add(cost).sub(total_bounty); // TODO we want the cost of a token to be fixed
+    xbalances[owner] = xbalances[owner].add(msg.value).sub(total_bounty); // TODO we want the cost of a token to be fixed
     units[customer] = units[customer].add(_units);
 
     Fulfilled(msg.sender, units[customer]);
