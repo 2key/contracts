@@ -721,6 +721,7 @@ window.buy = function (twoKeyContractAddress, name, cost) {
     getTwoKeyContract(twoKeyContractAddress, (TwoKeyContract_instance) => {
       if (from_twoKeyContractAddress) {
         // if the transaction will end succussefully then call updateUserInfo
+        active_fulfilled++
         transaction_start(
           TwoKeyContract_instance.buyFrom(
             from_twoKeyContractAddress,
@@ -730,13 +731,16 @@ window.buy = function (twoKeyContractAddress, name, cost) {
               value: web3.toWei(units*cost, 'ether')
           }),
           () => {
-            active_fulfilled++
             transaction_msg()
             updateUserInfo
+          },
+          () => {
+            active_fulfilled--
           }
         )
       } else {
         // if the transaction will end succussefully then call updateUserInfo
+        active_fulfilled++
         transaction_start(
           TwoKeyContract_instance.buyProduct(
             {
@@ -745,9 +749,11 @@ window.buy = function (twoKeyContractAddress, name, cost) {
               value: web3.toWei(units*cost, 'ether')
           }),
           () => {
-            active_fulfilled++
             transaction_msg()
             updateUserInfo
+          },
+          () => {
+            active_fulfilled--
           }
         )
       }
@@ -1299,17 +1305,18 @@ window.contract_take = function () {
           var my_address = whoAmI()
           // if transaction end successfully clean url
           // if it fails clean url and send an alert
+          active_joined++
           transaction_start(
             TwoKeyContract_instance.transferFrom(from_twoKeyContractAddress, my_address, 1, {
               gas: gastimate(140000),
               from: my_address
             }),
             () => {
-              active_joined++
               transaction_msg()
               history.pushState(null, '', location.href.split('?')[0])
             },
             () => {
+              active_joined--
               // clean the URL appearing in the address bar
               history.pushState(null, '', location.href.split('?')[0])
 
