@@ -62,19 +62,17 @@ var active_fulfilled = 0
 
 function transaction_msg () {
   var active = active_transactions + active_views + active_created + active_joined + active_fulfilled
-  if (active == 1) {
+  if (active) {
     $('#loader-circle').addClass('spin')
     $('.loader').show()
-  }
-  if (active == 0) {
+  } else {
     $('#loader-circle').removeClass('spin')
     $('.loader').hide()
   }
   $('#msg').text(
-    'transactions-pending=' + active_transactions +
-    ' total-gas=' + total_gas +
-    ' successful=' + total_success + '/' + transaction_count +
-    ' views-pending=' + active_views
+    'pending-transactions/views/created/joined/fulfilled=' + active_transactions + '/' + active_views + '/' +
+    active_created + '/' + active_joined + '/' + active_fulfilled +
+    ' total-gas/successful/transactions=' + total_gas + '/' + total_success + '/' + transaction_count
   )
 }
 
@@ -83,12 +81,16 @@ function transaction_start (tx_promise, cb_end, cb_error) {
     function te(tx) {
       if (tx.receipt) {
         total_gas += tx.receipt.gasUsed
-        total_success += tx.receipt.status
+        if (tx.receipt.status) {
+          total_success += 1
+        }
       } else {
         // this happens when creating new contract
         var receipt = web3.eth.getTransactionReceipt(tx.transactionHash)
         total_gas += receipt.gasUsed
-        total_success += receipt.status
+        if (receipt.status) {
+          total_success += 1
+        }
       }
       active_transactions--
       transaction_msg()
@@ -275,11 +277,14 @@ function init_TwoKeyReg () {
   var my_address = whoAmI()
   TwoKeyReg_contractInstance.Created_event = TwoKeyReg_contractInstance.Created({owner: my_address}, {
     fromBlock: 'earliest',
-    toBlock: 'latest'
+    toBlock: 'pending'
   }, (error, log) => {
     if (active_created) {
       active_created--
       transaction_msg()
+    } else {
+      // old contracts I created in previous sessions will generate Created events
+      // alert('unmatched create event')
     }
     if (!error) {
       check_event(TwoKeyReg_contractInstance, log)
@@ -294,7 +299,7 @@ function init_TwoKeyReg () {
 
   TwoKeyReg_contractInstance.Joined_event = TwoKeyReg_contractInstance.Joined({to: my_address}, {
     fromBlock: 'earliest',
-    toBlock: 'latest'
+    toBlock: 'pending'
   }, (error, log) => {
     if (active_joined) {
       active_joined--
@@ -345,7 +350,7 @@ function init_TwoKeyEconomy () {
     // my_address then the code below will be affected. which is what we want
     TwoKeyEconomy_contractInstance.Transfer_event = TwoKeyEconomy_contractInstance.Transfer({}, {
       // fromBlock: 'earliest',
-      toBlock: 'latest'
+      toBlock: 'pending'
     }, (error, log) => {
       if (!error) {
         check_event(TwoKeyEconomy_contractInstance, log)
@@ -391,7 +396,7 @@ function init_TwoKeyContract (TwoKeyContract_instance) {
   //
   TwoKeyContract_instance.Transfer_event = TwoKeyContract_instance.Transfer({}, {
     fromBlock: 'earliest',
-    toBlock: 'latest'
+    toBlock: 'pending'
   }, (error, log) => {
     if (!error) {
       transfer_event(TwoKeyContract_instance, log)
@@ -409,7 +414,7 @@ function init_TwoKeyContract (TwoKeyContract_instance) {
 
   TwoKeyContract_instance.Fulfilled_event = TwoKeyContract_instance.Fulfilled({}, {
     fromBlock: 'earliest',
-    toBlock: 'latest'
+    toBlock: 'pending'
   }, (error, log) => {
     if (active_fulfilled) {
       active_fulfilled--
@@ -1406,9 +1411,11 @@ function createContract (name, symbol, erc20_address) {
         parseInt(total_units), ipfs_hash,
         {gas: gastimate(4000000), from: address})
     }
+    active_created++
     transaction_start(trn, () => {
-      active_created++
       transaction_msg()
+    }, () => {
+      active_created--
     })
   }
 
