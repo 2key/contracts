@@ -736,6 +736,7 @@ window.buy = function (twoKeyContractAddress, name, cost) {
           },
           () => {
             active_fulfilled--
+            transaction_msg()
           }
         )
       } else {
@@ -754,6 +755,7 @@ window.buy = function (twoKeyContractAddress, name, cost) {
           },
           () => {
             active_fulfilled--
+            transaction_msg()
           }
         )
       }
@@ -1319,7 +1321,7 @@ window.contract_take = function () {
               active_joined--
               // clean the URL appearing in the address bar
               history.pushState(null, '', location.href.split('?')[0])
-
+              transaction_msg()
             }
           )
         }
@@ -1423,6 +1425,7 @@ function createContract (name, symbol, erc20_address) {
       transaction_msg()
     }, () => {
       active_created--
+      transaction_msg()
     })
   }
 
