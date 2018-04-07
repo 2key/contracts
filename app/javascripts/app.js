@@ -717,7 +717,7 @@ window.buy = function (twoKeyContractAddress, name, cost) {
   var units = prompt('you are about to fulfill (buy) the product "' + name + '" from contract \n' + twoKeyContractAddress +
       '\nfor ' + cost + ' ETH per unit. Please enter the number of units you want to buy (0 to cancel)', '1');
   if (units && units != "0") {
-    units = parseInt(units)
+    units = parseFloat(units)
     getTwoKeyContract(twoKeyContractAddress, (TwoKeyContract_instance) => {
       if (from_twoKeyContractAddress) {
         // if the transaction will end succussefully then call updateUserInfo
