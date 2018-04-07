@@ -490,10 +490,10 @@ function check_user_change () {
   }
 }
 
-function whoAmI () {
+function whoAmI (doing_login) {
   // disable timer calling whoAmi (when using metamask)
   stop_checking++
-  var my_address = _whoAmI()
+  var my_address = _whoAmI(doing_login)
   // enable timer calling whoAmi (when using metamask)
   stop_checking--
   return my_address
@@ -523,7 +523,11 @@ function username2address (username, cb, cberror) {
   }
 }
 
-function _whoAmI () {
+function _whoAmI (doing_login) {
+  if (!doing_login) {
+    $("#login-user-data").hide()
+  }
+  
   var accounts = web3.eth.accounts
   if (!accounts || accounts.length == 0) {
     if (!no_warning) {
@@ -593,16 +597,20 @@ function _whoAmI () {
           }
         } else {
           if (username) {
-            var ok = confirm('Signup on 2Key central contract?')
-            if (ok) {
-              // if addName will end succussefully then call lookupUserInfo
-              transaction_start(
-                TwoKeyReg_contractInstance.addName(username, {
-                  gas: gastimate(80000),
-                  from: my_address
-                }),
-                () => timer_cbs.push(lookupUserInfo)
-              )
+            if (doing_login) {
+              var ok = confirm('Signup on 2Key central contract?')
+              if (ok) {
+                // if addName will end succussefully then call lookupUserInfo
+                transaction_start(
+                  TwoKeyReg_contractInstance.addName(username, {
+                    gas: gastimate(80000),
+                    from: my_address
+                  }),
+                  () => timer_cbs.push(lookupUserInfo)
+                )
+              }
+            } else {
+              window.logout()
             }
           } else {
             window.logout()
@@ -629,7 +637,7 @@ window.login = function () {
   // $("#user-name").html(username);
   localStorage.username = username
   last_address = null
-  whoAmI()
+  whoAmI(true)
 }
 
 function clean_user () {
