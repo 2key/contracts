@@ -437,7 +437,8 @@ function init_TwoKeyContract (TwoKeyContract_instance) {
         bounty: info[3],
         quota: info[4],
         owner: info[5],
-        ipfs_hash: info[6]
+        ipfs_hash: info[6],
+        unit_decimals: info[7]
       }
     }
   )
@@ -1001,8 +1002,8 @@ function contract_info (TwoKeyContract_instance, min_arcs, callback) {
   var onclick_name = "jump_to_contract_page('" + twoKeyContractAddress + "')"
   view(TwoKeyContract_instance.constantInfo,
     constant_info => {
-      var name, symbol, cost, bounty, quota, owner, ipfs_hash;
-      [name, symbol, cost, bounty, quota, owner, ipfs_hash] = constant_info
+      var name, symbol, cost, bounty, quota, owner, ipfs_hash, unit_decimals;
+      [name, symbol, cost, bounty, quota, owner, ipfs_hash, unit_decimals] = constant_info
       view(TwoKeyContract_instance.getDynamicInfo(my_address),
         info => {
           var arcs, units, xbalance, total_arcs, balance, total_units;
@@ -1014,6 +1015,7 @@ function contract_info (TwoKeyContract_instance, min_arcs, callback) {
           bounty = web3.fromWei(bounty.toString())
           units = units.toNumber()
           arcs = arcs.toNumber()
+          unit_decimals = unit_decimals.toNumber()
 
           var onclick_buy = "buy('" + twoKeyContractAddress + "','" + name + "'," + cost + ')'
           var onclick_redeem = "redeem('" + twoKeyContractAddress + "')"
@@ -1054,6 +1056,7 @@ function contract_info (TwoKeyContract_instance, min_arcs, callback) {
                     "msg='2Key link was copied to clipboard. Someone else opening it will take one ARC from you'" +
                     'data-clipboard-text="' + take_link + '">' + take_link +
                     '</button></td>')
+            units = units / 10.**unit_decimals
             items.push('<td>' + units + '</td>')
             items.push('<td>' +
                     "<button class='bt' onclick=\"" + onclick_redeem + '"' +
@@ -1096,6 +1099,7 @@ function contract_info (TwoKeyContract_instance, min_arcs, callback) {
             var join_cost = 0
             items.push('<td>' + join_cost + '</td>')
 
+            total_units = total_units / 10.**unit_decimals
             items.push('<td>' + total_units + '</td>')
             {
               unique_id = unique_id + 1
