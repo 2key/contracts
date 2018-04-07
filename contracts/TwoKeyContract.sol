@@ -111,15 +111,13 @@ contract TwoKeyContract is StandardToken {
   }
 
   // New 2Key method
-  // function getInfo(address me) public view returns (uint256,uint256,uint256,string,string,uint256,uint256,uint256,uint256,uint256,uint256,address) {
-  //   return (this.balanceOf(me),units[me],xbalances[me],name,symbol,cost,bounty,quota,totalSupply_,total_units,this.balance,owner);
-  // }
-  //
-  function getConstantInfo() public view returns (string,string,uint256,uint256,uint256,uint256,address,string);
 
-  function getDynamicInfo(address me) public view returns (uint256,uint256,uint256,uint256,uint256) {
-    return (this.balanceOf(me),units[me],xbalances[me],totalSupply_,this.balance);
+  // name,symbol,cost,bounty,quota,total_units,owner,ipfs_hash
+  function getConstantInfo() public view returns (string,string,uint256,uint256,uint256,address,string) {
+    return (name,symbol,cost,bounty,quota,owner,ipfs_hash);
   }
+
+  function getDynamicInfo(address me) public view returns (uint256,uint256,uint256,uint256,uint256,uint256);
 
   function () external payable {
     buyProduct();
@@ -182,8 +180,8 @@ contract TwoKeyAcquisitionContract is TwoKeyContract
     registry.createdContract(owner);
   }
 
-  function getConstantInfo() public view returns (string,string,uint256,uint256,uint256,uint256,address,string) {
-    return (name,symbol,cost,bounty,quota,total_units,owner,ipfs_hash);
+  function getDynamicInfo(address me) public view returns (uint256,uint256,uint256,uint256,uint256,uint256) {
+    return (this.balanceOf(me),units[me],xbalances[me],totalSupply_,this.balance,total_units);
   }
 
   // low level product purchase function
@@ -265,9 +263,9 @@ contract TwoKeyPresellContract is TwoKeyContract {
     return _total_units;
   }
 
-  function getConstantInfo() public view returns (string,string,uint256,uint256,uint256,uint256,address,string) {
+  function getDynamicInfo(address me) public view returns (uint256,uint256,uint256,uint256,uint256,uint256) {
     uint256 _total_units = total_units();
-    return (name,symbol,cost,bounty,quota,_total_units,owner,ipfs_hash);
+    return (this.balanceOf(me),units[me],xbalances[me],totalSupply_,this.balance,_total_units);
   }
 
   // low level product purchase function

@@ -312,6 +312,58 @@ function init_TwoKeyReg () {
   })
 }
 
+function init_TwoKeyEconomy () {
+  var my_address = whoAmI()
+
+  view(TwoKeyEconomy_contractInstance.owner(),
+    (_owner) => {
+      if (_owner == my_address) {
+        $('#admin-alert').show()
+      }
+    }
+  )
+
+  function update_total_supply() {
+    view(TwoKeyEconomy_contractInstance.totalSupply(my_address),
+      (result) => {
+        var totalSupply
+        totalSupply = web3.fromWei(result.toString())
+
+        view(TwoKeyEconomy_contractInstance.balanceOf(my_address),
+          (result) => {
+            $('#token-balance').html(web3.fromWei(result.toString()) + ' out of ' + totalSupply + ' tokens')
+          }
+        )
+      }
+    )
+  }
+
+  update_total_supply()
+
+  if (!TwoKeyEconomy_contractInstance.Transfer_event) {
+    // run only once. However if init_TwoKeyEconomy will be called again with a new
+    // my_address then the code below will be affected. which is what we want
+    TwoKeyEconomy_contractInstance.Transfer_event = TwoKeyEconomy_contractInstance.Transfer({}, {
+      // fromBlock: 'earliest',
+      toBlock: 'latest'
+    }, (error, log) => {
+      if (!error) {
+        check_event(TwoKeyEconomy_contractInstance, log)
+
+        var from = log.args.from
+        var to = log.args.to
+        if (from == my_address || to == my_address) {
+          update_total_supply()  // show the new amount of tokens the user has
+        }
+
+        // we may be transfering tokens to a presell contrac
+        if (is_contract_displayed(from) || is_contract_displayed(to)) {
+          populate()
+        }
+      }
+    })
+  }
+}
 
 // function cache (fn) {
 //   var NO_RESULT = {} // unique, would use Symbol if ES2015-able
@@ -384,9 +436,8 @@ function init_TwoKeyContract (TwoKeyContract_instance) {
         cost: info[2],
         bounty: info[3],
         quota: info[4],
-        total_units: info[5],
-        owner: info[6],
-        ipfs_hash: info[7]
+        owner: info[5],
+        ipfs_hash: info[6]
       }
     }
   )
@@ -940,12 +991,12 @@ function contract_info (TwoKeyContract_instance, min_arcs, callback) {
   var onclick_name = "jump_to_contract_page('" + twoKeyContractAddress + "')"
   view(TwoKeyContract_instance.constantInfo,
     constant_info => {
-      var name, symbol, cost, bounty, quota, total_units, owner, ipfs_hash;
-      [name, symbol, cost, bounty, quota, total_units, owner, ipfs_hash] = constant_info
+      var name, symbol, cost, bounty, quota, owner, ipfs_hash;
+      [name, symbol, cost, bounty, quota, owner, ipfs_hash] = constant_info
       view(TwoKeyContract_instance.getDynamicInfo(my_address),
         info => {
-          var arcs, units, xbalance, total_arcs, balance;
-          [arcs, units, xbalance, total_arcs, balance] = info
+          var arcs, units, xbalance, total_arcs, balance, total_units;
+          [arcs, units, xbalance, total_arcs, balance, total_units] = info
 
           balance = web3.fromWei(balance)
           xbalance = web3.fromWei(xbalance)
@@ -1168,6 +1219,26 @@ function populate () {
   populate_running = false
 }
 
+function is_contract_displayed(contract) {
+  if (twoKeyContractAddress) {
+    return twoKeyContractAddress == contract
+  }
+
+  for (var c in TwoKeyReg_contractInstance.created) {
+    if (c == contract) {
+      return true
+    }
+  }
+
+  for (var c in TwoKeyReg_contractInstance.joined) {
+    if (c == contract) {
+      return true
+    }
+  }
+
+  return false
+}
+
 // window.giveARCs = function () {
 //   let twoKeyContractAddress = $('#influence-address').val()
 //   let target = $('#target-address').val()
@@ -1353,25 +1424,6 @@ function updateUserInfo () {
     web3.eth.getBalance(address, function (error, result) {
       $('#user-balance').html(web3.fromWei(result.toString()) + ' ETH')
     })
-    view(TwoKeyEconomy_contractInstance.owner(),
-      (_owner) => {
-        if (_owner == address) {
-          $('#admin-alert').show()
-        }
-      }
-    )
-    view(TwoKeyEconomy_contractInstance.totalSupply(address),
-      (result) => {
-        var totalSupply
-        totalSupply = web3.fromWei(result.toString())
-
-        view(TwoKeyEconomy_contractInstance.balanceOf(address),
-          (result) => {
-            $('#token-balance').html(web3.fromWei(result.toString()) + ' out of ' + totalSupply + ' tokens')
-          }
-        )
-      }
-    )
   }
 }
 
@@ -1391,7 +1443,6 @@ window.transferTokens = function () {
       }),
       () => {
         tempAlert('OK', 1000)
-        updateUserInfo()
       }
     )
   })
@@ -1457,6 +1508,7 @@ window.allowanceTokens = function () {
 function lookupUserInfo () {
   updateUserInfo()
   init_TwoKeyReg()
+  init_TwoKeyEconomy()
   populate()
   new_user()
   $('.logout').show()
