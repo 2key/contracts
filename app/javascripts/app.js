@@ -1205,12 +1205,12 @@ function populateContract () {
     if (from_twoKeyContractAddress) {
       // show join button only if the user does not already have ARCs (units)
       if (arcs.toNumber() == 0) {
-        // on first time contract_take is called a pop up will ask you
-        // if you want to take
-        if (from_twoKeyContractAddress != from_twoKeyContractAddress_taken) {
-          from_twoKeyContractAddress_taken = from_twoKeyContractAddress
-          window.contract_take()
-        }
+        // // on first time contract_take is called a pop up will ask you
+        // // if you want to take
+        // if (from_twoKeyContractAddress != from_twoKeyContractAddress_taken) {
+        //   from_twoKeyContractAddress_taken = from_twoKeyContractAddress
+        //   window.contract_take()
+        // }
         // the pop up is modal so is it ok to show buttons
         $('#join-btn').show()
       }
