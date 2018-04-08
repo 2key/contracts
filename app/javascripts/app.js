@@ -2026,13 +2026,22 @@ function d3_add_event_children (addresses, parent, depth) {
         if (_units) _units = _units[address]
 
         if (_units) {
-          var n = node
-          n.units += parseInt('' + _units)
-          n = n.parent
-          while (n) {
-            n.rewards += parseInt('' + _units)
-            n = n.parent
-          }
+          view(TwoKeyContract_instance.constantInfo,
+            constant_info => {
+              var name, symbol, cost, bounty, quota, owner, ipfs_hash,
+                unit_decimals;
+              [name, symbol, cost, bounty, quota, owner, ipfs_hash, unit_decimals] = constant_info
+              unit_decimals = unit_decimals.toNumber()
+              
+              _units = parseFloat('' + _units) / 10. ** unit_decimals
+              var n = node
+              n.units += _units
+              n = n.parent
+              while (n) {
+                n.rewards += _units
+                n = n.parent
+              }
+            })
         }
 
         var next_addresses = TwoKeyContract_instance.given_to
