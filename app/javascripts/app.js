@@ -96,6 +96,10 @@ function transaction_start (tx_promise, cb_end, cb_error) {
       transaction_msg()
 
       console.log(tx)
+
+      // Every time a transaction ends there is a good chance that the user ETH balance has changed
+      update_user_balance()
+
       if (cb_end) cb_end()
     }
 
@@ -1443,6 +1447,20 @@ function createContract (name, symbol, erc20_address) {
   }
 }
 
+function update_user_balance(my_address) {
+  if (!my_address) {
+    my_address = whoAmI()
+  }
+
+  if (my_address) {
+    web3.eth.getBalance(my_address, function (error, result) {
+      if (!error) {
+        $('#user-balance').html(web3.fromWei(result.toString()) + ' ETH')
+      }
+    })
+  }
+}
+
 function updateUserInfo () {
   clean_user()
   var username = localStorage.username
@@ -1452,9 +1470,7 @@ function updateUserInfo () {
     alert('Unlock MetaMask and reload page')
   } else {
     $('#user-address').html(my_address.toString())
-    web3.eth.getBalance(my_address, function (error, result) {
-      $('#user-balance').html(web3.fromWei(result.toString()) + ' ETH')
-    })
+    update_user_balance(my_address)
     update_total_supply(my_address)
   }
 }
