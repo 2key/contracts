@@ -1774,6 +1774,15 @@ $(document).ready(function () {
   init()
 })
 
+// If you want an ENTER in a text input field to do a click on a button then
+// add the class "input-enter" to the input field and "btn-enter" to the button
+// put both input field and button inside the same div with class="input-group"
+$(document).on("keypress", ".input-enter", function(e){
+    if (e.which == 13){
+        $(this).closest(".input-group").find(".btn-enter").click();
+    }
+});
+
 // ************** Generate the tree diagram	 *****************
 // http://bl.ocks.org/d3noob/8375092
 // for d3.v4 see https://bl.ocks.org/mbostock/4339184
@@ -2032,7 +2041,7 @@ function d3_add_event_children (addresses, parent, depth) {
                 unit_decimals;
               [name, symbol, cost, bounty, quota, owner, ipfs_hash, unit_decimals] = constant_info
               unit_decimals = unit_decimals.toNumber()
-              
+
               _units = parseFloat('' + _units) / 10. ** unit_decimals
               var n = node
               n.units += _units
