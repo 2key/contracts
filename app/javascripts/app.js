@@ -169,10 +169,12 @@ function short_url (url, eid) {
     console.log(e)
   }).then(x => {
     let surl = x.id
-    safe_cb(eid, () => {
-      $(eid).text(surl.slice(8))
-      $(eid).attr('data-clipboard-text', surl)
-    })
+    if (surl) { // google does not shorten urls that have an IP address instead of a qualified domain name
+      safe_cb(eid, () => {
+        $(eid).text(surl.slice(8))
+        $(eid).attr('data-clipboard-text', surl)
+      })
+    }
   })
 }
 
