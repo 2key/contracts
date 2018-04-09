@@ -392,6 +392,7 @@ function init_TwoKeyContract (TwoKeyContract_instance) {
 
   TwoKeyContract_instance.given_to = {}
   TwoKeyContract_instance.units = {}
+  TwoKeyContract_instance.rewards = {}
 
   // TwoKeyReg_contractInstance.Joined_event = TwoKeyReg_contractInstance.Joined({c: TwoKeyContract_instance.address}, {
   //   fromBlock: 'earliest',
@@ -429,6 +430,7 @@ function init_TwoKeyContract (TwoKeyContract_instance) {
       timer_cbs.push(populate)
     }
   })
+
   // TwoKeyContract_instance.Fulfilled_event.get((error, logs) => {
   //     if (!error) {
   //         for (let i = 0; i < logs.length; i++) {
@@ -436,6 +438,16 @@ function init_TwoKeyContract (TwoKeyContract_instance) {
   //         }
   //     }
   // });
+
+  TwoKeyContract_instance.Rewarded_event = TwoKeyContract_instance.Rewarded({}, {
+    fromBlock: 'earliest',
+    toBlock: 'pending'
+  }, (error, log) => {
+    if (!error) {
+      rewarded_event(TwoKeyContract_instance, log)
+    }
+  })
+
   TwoKeyContract_instance.constantInfo = TwoKeyContract_instance.getConstantInfo()
   view(TwoKeyContract_instance.constantInfo,
       info => {
@@ -1618,6 +1630,23 @@ function fulfilled_event (c, e) {
   c.units[to] = units
 }
 
+function rewarded_event (c, e) {
+  if (!check_event(c, e)) {
+    return
+  }
+  // e.address;
+  let to = e.args.to
+  let amount = e.args.amount
+
+  if (c.rewards[to]) {
+    c.rewards[to] = c.rewards[to] + amount.toNumber()
+  } else {
+    c.rewards[to] = amount.toNumber()
+  }
+}
+
+
+
 function init () {
   params = getAllUrlParams()
   twoKeyContractAddress = params.c
@@ -2053,7 +2082,6 @@ function d3_add_event_children (addresses, parent, depth) {
       getTwoKeyContract(twoKeyContractAddress, (TwoKeyContract_instance) => {
         let _units = TwoKeyContract_instance.units
         if (_units) _units = _units[address]
-
         if (_units) {
           view(TwoKeyContract_instance.constantInfo,
             constant_info => {
@@ -2062,15 +2090,14 @@ function d3_add_event_children (addresses, parent, depth) {
               [name, symbol, cost, bounty, quota, owner, ipfs_hash, unit_decimals] = constant_info
               unit_decimals = unit_decimals.toNumber()
 
-              _units = parseFloat('' + _units) / 10. ** unit_decimals
-              let n = node
-              n.units += _units
-              n = n.parent
-              while (n) {
-                n.rewards += _units
-                n = n.parent
-              }
+              node.units = parseFloat('' + _units) / 10. ** unit_decimals
             })
+        }
+
+        let _rewards = TwoKeyContract_instance.rewards
+        if (_rewards) _rewards = _rewards[address]
+        if (_rewards) {
+          node.rewards = web3.fromWei(_rewards) + ' ETH'
         }
 
         let next_addresses = TwoKeyContract_instance.given_to
