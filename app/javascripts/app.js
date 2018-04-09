@@ -502,7 +502,7 @@ String.prototype.hashCode = function () {
     hash = ((hash << 5) - hash) + chr
     hash |= 0 // Convert to 32bit integer
   }
-  return hash
+  return Math.abs(hash)
 }
 
 let stop_checking = 0
