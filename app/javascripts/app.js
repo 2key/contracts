@@ -549,7 +549,7 @@ function _whoAmI (doing_login) {
       }
     }
     if (last_address) {
-      window.logout()
+      logout()
       if (localStorage.meta_mask) {
         $('#metamask-login').show()
       }
@@ -579,7 +579,7 @@ function _whoAmI (doing_login) {
   var last = last_address
   last_address = my_address
   if (!my_address) {
-    window.logout()
+    logout()
     return
   }
 
@@ -603,7 +603,7 @@ function _whoAmI (doing_login) {
             lookupUserInfo()
           } else {
             alert('Sorry, demo name already in use, try a different one')
-            window.logout()
+            logout()
           }
         } else {
           if (username) {
@@ -620,10 +620,10 @@ function _whoAmI (doing_login) {
                 )
               }
             } else {
-              window.logout()
+              logout()
             }
           } else {
-            window.logout()
+            logout()
             $("#login-user-data").show()
             $('#login-user-address').html(my_address.toString())
             web3.eth.getBalance(my_address, function (error, result) {
@@ -675,16 +675,20 @@ function user_changed () {
   tbl_cleanup()
 }
 
-window.logout = function () {
-  twoKeyContractAddress = null
-  from_twoKeyContractAddress = null
-  from_twoKeyContractAddress_taken = null
-
+function logout () {
   user_changed()
 
   new_user()
   $('#login-user-name').val('')
   $('.login').show()
+
+}
+
+window.logout = function () {
+  twoKeyContractAddress = null
+  from_twoKeyContractAddress = null
+  from_twoKeyContractAddress_taken = null
+  logout()
   history.pushState(null, '', location.href.split('?')[0])
 }
 
