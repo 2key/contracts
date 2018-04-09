@@ -8,9 +8,9 @@ import {default as Clipboard} from 'clipboard'
 // http://bl.ocks.org/d3noob/8375092
 // const d3 = require("d3");
 
-var BIG_INT = 100000000000
+let BIG_INT = 100000000000
 
-var entityMap = {
+let entityMap = {
   '&': '&amp;',
   '<': '&lt;',
   '>': '&gt;',
@@ -24,8 +24,8 @@ var entityMap = {
 // When using metamask you cant make a transaction from inside a promise
 // to over come this you can add a call-back function to this array which is
 // pulled for execution
-var timer_cbs = []
-var timer_cbs_delayed = []
+let timer_cbs = []
+let timer_cbs_delayed = []
 
 function safe_alert (e) {
   // when alert is called from within a promise it does not alwys so up
@@ -50,18 +50,18 @@ function gastimate(gas) {
 // they could be nested
 //
 // we want the top part of the page to show whats happening
-var transaction_count = 0
-var total_gas = 0
-var total_success = 0
+let transaction_count = 0
+let total_gas = 0
+let total_success = 0
 
-var active_transactions = 0
-var active_views = 0
-var active_created = 0
-var active_joined = 0
-var active_fulfilled = 0
+let active_transactions = 0
+let active_views = 0
+let active_created = 0
+let active_joined = 0
+let active_fulfilled = 0
 
 function transaction_msg () {
-  var active = active_transactions + active_views + active_created + active_joined + active_fulfilled
+  let active = active_transactions + active_views + active_created + active_joined + active_fulfilled
   if (active) {
     $('#loader-circle').addClass('spin')
     $('.loader').show()
@@ -86,7 +86,7 @@ function transaction_start (tx_promise, cb_end, cb_error) {
         }
       } else {
         // this happens when creating new contract
-        var receipt = web3.eth.getTransactionReceipt(tx.transactionHash)
+        let receipt = web3.eth.getTransactionReceipt(tx.transactionHash)
         total_gas += receipt.gasUsed
         if (receipt.status) {
           total_success += 1
@@ -168,7 +168,7 @@ function short_url (url, eid) {
     safe_alert(e)
     console.log(e)
   }).then(x => {
-    var surl = x.id
+    let surl = x.id
     safe_cb(eid, () => {
       $(eid).text(surl.slice(8))
       $(eid).attr('data-clipboard-text', surl)
@@ -178,7 +178,7 @@ function short_url (url, eid) {
 
 function safe_cb (eid, cb) {
   // call cb() only when $(eid) exists in the window
-  var id = setInterval(frame, 300)
+  let id = setInterval(frame, 300)
   function frame () {
     if ($(eid).length) {
       cb()
@@ -198,8 +198,8 @@ function owner2name (owner, eid, cb) {
   })
 }
 
-var unique_id = 0
-var params
+let unique_id = 0
+let params
 
 import '../stylesheets/app.css' // Import the page's CSS. Webpack will know what to do with it.
 require('../help.md')
@@ -213,34 +213,34 @@ import { default as contract } from 'truffle-contract'
 // import clippy_img from '!!file!../images/clippy.svg'
 
 import ERC20_artifacts from '../../build/contracts/ERC20.json'
-var ERC20Contract = contract(ERC20_artifacts)
+let ERC20Contract = contract(ERC20_artifacts)
 
 import twoKeyEconomy_artifacts from '../../build/contracts/TwoKeyEconomy.json'
-var TwoKeyEconomy = contract(twoKeyEconomy_artifacts)
-var TwoKeyEconomy_contractInstance
+let TwoKeyEconomy = contract(twoKeyEconomy_artifacts)
+let TwoKeyEconomy_contractInstance
 
 import TwoKeyReg_artifacts from '../../build/contracts/TwoKeyReg.json'
-var TwoKeyReg = contract(TwoKeyReg_artifacts)
-var TwoKeyReg_contractInstance
+let TwoKeyReg = contract(TwoKeyReg_artifacts)
+let TwoKeyReg_contractInstance
 
 import TwoKeyContract_artifacts from '../../build/contracts/TwoKeyContract.json'
-var TwoKeyContract = contract(TwoKeyContract_artifacts)
+let TwoKeyContract = contract(TwoKeyContract_artifacts)
 import TwoKeyAcquisitionContract_artifacts from '../../build/contracts/TwoKeyAcquisitionContract.json'
-var TwoKeyAcquisitionContract = contract(TwoKeyAcquisitionContract_artifacts)
+let TwoKeyAcquisitionContract = contract(TwoKeyAcquisitionContract_artifacts)
 import TwoKeyPresellContract_artifacts from '../../build/contracts/TwoKeyPresellContract.json'
-var TwoKeyPresellContract = contract(TwoKeyPresellContract_artifacts)
+let TwoKeyPresellContract = contract(TwoKeyPresellContract_artifacts)
 
-var twoKeyContractAddress
-var from_twoKeyContractAddress
-var from_twoKeyContractAddress_taken
+let twoKeyContractAddress
+let from_twoKeyContractAddress
+let from_twoKeyContractAddress_taken
 
 function tbl_add_row (tbl, h) {
-  var header_row = '<tr>' + h.join() + '</tr>'
+  let header_row = '<tr>' + h.join() + '</tr>'
   $(tbl).append(header_row)
 }
 
-var tbl_add_contract_active = {} // reset to {} every time we start a new table population
-var population_count = 0  // increases every time we start a new table
+let tbl_add_contract_active = {} // reset to {} every time we start a new table population
+let population_count = 0  // increases every time we start a new table
 function tbl_cleanup () {
   tbl_add_contract_active = {}
   population_count++
@@ -259,7 +259,7 @@ function tbl_add_contract (tbl, twoKeyContractAddress) {
     tbl_add_row(tbl, contract_header())
   }
 
-  var row_callback = ((tbl, p) => {
+  let row_callback = ((tbl, p) => {
     return (items) => {
       if (p == population_count) {
         tbl_add_row(tbl, items)
@@ -278,7 +278,7 @@ function init_TwoKeyReg () {
   TwoKeyReg_contractInstance.created = {}
   TwoKeyReg_contractInstance.joined = {}
 
-  var my_address = whoAmI()
+  let my_address = whoAmI()
   TwoKeyReg_contractInstance.Created_event = TwoKeyReg_contractInstance.Created({owner: my_address}, {
     fromBlock: 'earliest',
     toBlock: 'pending'
@@ -293,7 +293,7 @@ function init_TwoKeyReg () {
     if (!error) {
       check_event(TwoKeyReg_contractInstance, log)
 
-      var twoKeyContractAddress = log.args.c
+      let twoKeyContractAddress = log.args.c
       TwoKeyReg_contractInstance.created[twoKeyContractAddress] = true
 
       // tbl_add_contract('#my-2key-contracts', twoKeyContractAddress)
@@ -312,7 +312,7 @@ function init_TwoKeyReg () {
     if (!error) {
       check_event(TwoKeyReg_contractInstance, log)
 
-      var twoKeyContractAddress = log.args.c
+      let twoKeyContractAddress = log.args.c
       TwoKeyReg_contractInstance.joined[twoKeyContractAddress] = true
 
       // tbl_add_contract('#my-2key-arcs', twoKeyContractAddress)
@@ -324,7 +324,7 @@ function init_TwoKeyReg () {
 function update_total_supply(address) {
   view(TwoKeyEconomy_contractInstance.totalSupply(address),
     (result) => {
-      var totalSupply
+      let totalSupply
       totalSupply = web3.fromWei(result.toString())
 
       view(TwoKeyEconomy_contractInstance.balanceOf(address),
@@ -337,7 +337,7 @@ function update_total_supply(address) {
 }
 
 function init_TwoKeyEconomy () {
-  var my_address = whoAmI()
+  let my_address = whoAmI()
 
   view(TwoKeyEconomy_contractInstance.owner(),
     (_owner) => {
@@ -359,8 +359,8 @@ function init_TwoKeyEconomy () {
       if (!error) {
         check_event(TwoKeyEconomy_contractInstance, log)
 
-        var from = log.args.from
-        var to = log.args.to
+        let from = log.args.from
+        let to = log.args.to
         if (from == my_address || to == my_address) {
           update_total_supply(my_address)  // show the new amount of tokens the user has
         }
@@ -375,8 +375,8 @@ function init_TwoKeyEconomy () {
 }
 
 // function cache (fn) {
-//   var NO_RESULT = {} // unique, would use Symbol if ES2015-able
-//   var res = NO_RESULT
+//   let NO_RESULT = {} // unique, would use Symbol if ES2015-able
+//   let res = NO_RESULT
 //   return function () { // if ES2015, name the function the same as fn
 //     if (res === NO_RESULT) return (res = fn.apply(this, arguments))
 //     return res
@@ -384,8 +384,8 @@ function init_TwoKeyEconomy () {
 // }
 
 // cash all contracts
-var contract_cache = {}
-var contract_cache_cb = {}
+let contract_cache = {}
+let contract_cache_cb = {}
 
 function init_TwoKeyContract (TwoKeyContract_instance) {
   if (TwoKeyContract_instance.units) { return }
@@ -410,7 +410,7 @@ function init_TwoKeyContract (TwoKeyContract_instance) {
 
   // TwoKeyContract_instance.Transfer_event.get((error, logs) => {
   //     if (!error) {
-  //         for (var i = 0; i < logs.length; i++) {
+  //         for (let i = 0; i < logs.length; i++) {
   //             transfer_event(TwoKeyContract_instance, logs[i]);
   //         }
   //     }
@@ -431,7 +431,7 @@ function init_TwoKeyContract (TwoKeyContract_instance) {
   })
   // TwoKeyContract_instance.Fulfilled_event.get((error, logs) => {
   //     if (!error) {
-  //         for (var i = 0; i < logs.length; i++) {
+  //         for (let i = 0; i < logs.length; i++) {
   //             fulfilled_event(TwoKeyContract_instance, logs[i]);
   //         }
   //     }
@@ -454,7 +454,7 @@ function init_TwoKeyContract (TwoKeyContract_instance) {
 }
 
 function getTwoKeyContract (address, cb) {
-  var contract = contract_cache[address]
+  let contract = contract_cache[address]
   if (contract) {
     cb(contract)
   } else {
@@ -480,10 +480,10 @@ function getTwoKeyContract (address, cb) {
 // We are using IPFS to store content for each product.
 // The web site also contains an IPFS node and this App connects to it
 const ipfsAPI = require('ipfs-api')
-var ipfs = ipfsAPI(window.document.location.hostname, '5001')
+let ipfs = ipfsAPI(window.document.location.hostname, '5001')
 
 String.prototype.hashCode = function () {
-  var hash = 0, i, chr
+  let hash = 0, i, chr
   if (this.length === 0) return hash
   for (i = 0; i < this.length; i++) {
     chr = this.charCodeAt(i)
@@ -493,7 +493,7 @@ String.prototype.hashCode = function () {
   return hash
 }
 
-var stop_checking = 0
+let stop_checking = 0
 function check_user_change () {
   if (stop_checking == 0) {
     _whoAmI()
@@ -503,14 +503,14 @@ function check_user_change () {
 function whoAmI (doing_login) {
   // disable timer calling whoAmi (when using metamask)
   stop_checking++
-  var my_address = _whoAmI(doing_login)
+  let my_address = _whoAmI(doing_login)
   // enable timer calling whoAmi (when using metamask)
   stop_checking--
   return my_address
 }
 
-var last_address
-var no_warning
+let last_address
+let no_warning
 
 function username2address (username, cb, cberror) {
   if (username === 'coinbase') {
@@ -538,7 +538,7 @@ function _whoAmI (doing_login) {
     $("#login-user-data").hide()
   }
 
-  var accounts = web3.eth.accounts
+  let accounts = web3.eth.accounts
   if (!accounts || accounts.length == 0) {
     if (!no_warning) {
       no_warning = true
@@ -559,15 +559,15 @@ function _whoAmI (doing_login) {
     return
   }
 
-  var my_address
-  var username = localStorage.username
+  let my_address
+  let username = localStorage.username
   if (username) {
     if (username === 'coinbase') {
       my_address = web3.eth.coinbase
     } else if (username.startsWith('0x')) {
       my_address = username
     } else {
-      var n = accounts.length
+      let n = accounts.length
       my_address = accounts[username.hashCode() % n]
     }
   } else {
@@ -576,7 +576,7 @@ function _whoAmI (doing_login) {
       my_address = accounts[0]
     }
   }
-  var last = last_address
+  let last = last_address
   last_address = my_address
   if (!my_address) {
     logout()
@@ -608,7 +608,7 @@ function _whoAmI (doing_login) {
         } else {
           if (username) {
             if (doing_login) {
-              var ok = confirm('Signup on 2Key central contract?')
+              let ok = confirm('Signup on 2Key central contract?')
               if (ok) {
                 // if addName will end succussefully then call lookupUserInfo
                 transaction_start(
@@ -639,7 +639,7 @@ function _whoAmI (doing_login) {
 }
 
 window.login = function () {
-  var username = $('#login-user-name').val()
+  let username = $('#login-user-name').val()
   if (username.length < 3) {
     tempAlert('Name to short', 2000)
     return
@@ -707,7 +707,7 @@ window.jump_to_contract_page = function (address) {
 }
 
 // window.getETH = function () {
-//   var my_address = whoAmI()
+//   let my_address = whoAmI()
 //   TwoKeyReg_contractInstance.fundtransfer(my_address, web3.toWei(1.0, 'ether'),
 //     {gas: 3000000, from: my_address}).then(function () {
 //   }).catch(function (e) {
@@ -716,13 +716,13 @@ window.jump_to_contract_page = function (address) {
 // }
 //
 // window.giveETH = function () {
-//   var my_address = whoAmI()
+//   let my_address = whoAmI()
 //   web3.eth.sendTransaction({from: my_address, to: TwoKeyReg.address, value: web3.toWei(1, 'ether')})
 // }
 
 window.buy = function (twoKeyContractAddress, name, cost) {
-  var my_address = whoAmI()
-  var units = prompt('you are about to fulfill (buy) the product "' + name + '" from contract \n' + twoKeyContractAddress +
+  let my_address = whoAmI()
+  let units = prompt('you are about to fulfill (buy) the product "' + name + '" from contract \n' + twoKeyContractAddress +
       '\nfor ' + cost + ' ETH per unit. Please enter the number of units you want to buy (0 to cancel)', '1');
   if (units && units != "0") {
     units = parseFloat(units)
@@ -772,9 +772,9 @@ window.buy = function (twoKeyContractAddress, name, cost) {
 }
 
 window.redeem = function (twoKeyContractAddress) {
-  var ok = confirm('you are about to redeem the balance of 2Key contract \n' + twoKeyContractAddress)
+  let ok = confirm('you are about to redeem the balance of 2Key contract \n' + twoKeyContractAddress)
   if (ok) {
-    var my_address = whoAmI()
+    let my_address = whoAmI()
     getTwoKeyContract(twoKeyContractAddress, (TwoKeyContract_instance) => {
       // if the transaction will end succussefully then call updateUserInfo and populate
       transaction_start(
@@ -800,10 +800,10 @@ function tempAlert (msg, duration) {
 // https://www.sitepoint.com/get-url-parameters-with-javascript/
 function getAllUrlParams (url) {
   // get query string from url (optional) or window
-  var queryString = url ? url.split('?')[1] : window.location.search.slice(1)
+  let queryString = url ? url.split('?')[1] : window.location.search.slice(1)
 
   // we'll store the parameters here
-  var obj = {}
+  let obj = {}
 
   // if query string exists
   if (queryString) {
@@ -811,21 +811,21 @@ function getAllUrlParams (url) {
     queryString = queryString.split('#')[0]
 
     // split our query string into its component parts
-    var arr = queryString.split('&')
+    let arr = queryString.split('&')
 
-    for (var i = 0; i < arr.length; i++) {
+    for (let i = 0; i < arr.length; i++) {
       // separate the keys and the values
-      var a = arr[i].split('=')
+      let a = arr[i].split('=')
 
       // in case params look like: list[]=thing1&list[]=thing2
-      var paramNum = undefined
-      var paramName = a[0].replace(/\[\d*\]/, function (v) {
+      let paramNum = undefined
+      let paramName = a[0].replace(/\[\d*\]/, function (v) {
         paramNum = v.slice(1, -1)
         return ''
       })
 
       // set parameter value (use 'true' if empty)
-      var paramValue = typeof (a[1]) === 'undefined' ? true : a[1]
+      let paramValue = typeof (a[1]) === 'undefined' ? true : a[1]
 
       // (optional) keep case consistent
       paramName = paramName.toLowerCase()
@@ -865,7 +865,7 @@ function getAllUrlParams (url) {
 // }
 
 // window.copy_link = function (twoKeyContractAddress, my_address) {
-//   var link = location.origin + '/?c=' + twoKeyContractAddress + '&f=' + my_address
+//   let link = location.origin + '/?c=' + twoKeyContractAddress + '&f=' + my_address
 //   alert(link)
 // }
 
@@ -893,7 +893,7 @@ function product_cleanup () {
 //   // iterator is a function representing the job when want done on each item
 //   // callback is the function we want to call when all iterations are over
 //
-//   var doneCount = 0 // here we'll keep track of how many reports we've got
+//   let doneCount = 0 // here we'll keep track of how many reports we've got
 //
 //   function report () {
 //     // this function resembles the phone number in the analogy above
@@ -907,25 +907,25 @@ function product_cleanup () {
 //
 //   // here we give each iteration its job
 //   list.forEach(item => iterator(item, report))
-//   // for(var i = 0; i < list.length; i++) {
+//   // for(let i = 0; i < list.length; i++) {
 //   //     // iterator takes 2 arguments, an item to work on and report function
 //   //     iterator(list[i], report)
 //   // }
 // }
 
-var MAX_DEPTH = 1000
+let MAX_DEPTH = 1000
 
 function bdfs (TwoKeyContract_instance, start_address, cb) {
-  var nodes = [start_address]
-  var depth = 0
+  let nodes = [start_address]
+  let depth = 0
   while (nodes.length && depth < MAX_DEPTH) {
-    var new_nodes = []
-    for (var i = 0; i < nodes.length; i++) {
-      var address = nodes[i]
+    let new_nodes = []
+    for (let i = 0; i < nodes.length; i++) {
+      let address = nodes[i]
       if (cb(address, depth)) {
         return
       }
-      var given_to = TwoKeyContract_instance.given_to
+      let given_to = TwoKeyContract_instance.given_to
       if (given_to) { given_to = given_to[address] }
       if (given_to) { new_nodes = new_nodes.concat(given_to) }
     }
@@ -939,7 +939,7 @@ function bdfs (TwoKeyContract_instance, start_address, cb) {
 }
 
 function my_depth (TwoKeyContract_instance, owner, my_address) {
-  var final_depth
+  let final_depth
   function cb (address, depth) {
     if (address == my_address) {
       final_depth = depth
@@ -956,16 +956,16 @@ function my_depth (TwoKeyContract_instance, owner, my_address) {
 }
 
 function get_kpis (TwoKeyContract_instance, my_address, owner) {
-  var depth_sum = 0
-  var conversions = 0
-  var influencers = 0
-  var span = 0
+  let depth_sum = 0
+  let conversions = 0
+  let influencers = 0
+  let span = 0
   function cb (address, depth) {
     if (TwoKeyContract_instance.units[address]) {
       conversions++
       depth_sum += depth
     }
-    var to = TwoKeyContract_instance.given_to[address]
+    let to = TwoKeyContract_instance.given_to[address]
     if (to && to.length) {
       influencers++
       span += to.length
@@ -973,11 +973,11 @@ function get_kpis (TwoKeyContract_instance, my_address, owner) {
     return false // dont break
   }
   bdfs(TwoKeyContract_instance, my_address, cb)
-  var avg_depth = 'NA'
+  let avg_depth = 'NA'
   if (conversions) {
     avg_depth = depth_sum / conversions
   }
-  var avg_span = 'NA'
+  let avg_span = 'NA'
   if (influencers) {
     avg_span = span / influencers
   }
@@ -987,7 +987,7 @@ function get_kpis (TwoKeyContract_instance, my_address, owner) {
 }
 
 function contract_header () {
-  var items = []
+  let items = []
   items.push("<td data-toggle='tooltip' title='the roll I am having in this contract'>Roll</td>")
   items.push("<td data-toggle='tooltip' title='number of ARCs I have in the contracts'>my ARCs balance</td>")
   items.push("<td data-toggle='tooltip' title='key link'>my 2key link</td>")
@@ -1015,19 +1015,19 @@ function contract_header () {
 }
 
 function contract_info (TwoKeyContract_instance, min_arcs, callback) {
-  var items = []
-  var my_address = whoAmI()
-  var twoKeyContractAddress = TwoKeyContract_instance.address
-  var take_link = location.origin + '/?c=' + twoKeyContractAddress + '&f=' + my_address
-  // var contract_link = "./?c=" + twoKeyContractAddress;
-  var onclick_name = "jump_to_contract_page('" + twoKeyContractAddress + "')"
+  let items = []
+  let my_address = whoAmI()
+  let twoKeyContractAddress = TwoKeyContract_instance.address
+  let take_link = location.origin + '/?c=' + twoKeyContractAddress + '&f=' + my_address
+  // let contract_link = "./?c=" + twoKeyContractAddress;
+  let onclick_name = "jump_to_contract_page('" + twoKeyContractAddress + "')"
   view(TwoKeyContract_instance.constantInfo,
     constant_info => {
-      var name, symbol, cost, bounty, quota, owner, ipfs_hash, unit_decimals;
+      let name, symbol, cost, bounty, quota, owner, ipfs_hash, unit_decimals;
       [name, symbol, cost, bounty, quota, owner, ipfs_hash, unit_decimals] = constant_info
       view(TwoKeyContract_instance.getDynamicInfo(my_address),
         info => {
-          var arcs, units, xbalance, total_arcs, balance, total_units;
+          let arcs, units, xbalance, total_arcs, balance, total_units;
           [arcs, units, xbalance, total_arcs, balance, total_units] = info
 
           balance = web3.fromWei(balance)
@@ -1038,8 +1038,8 @@ function contract_info (TwoKeyContract_instance, min_arcs, callback) {
           arcs = arcs.toNumber()
           unit_decimals = unit_decimals.toNumber()
 
-          var onclick_buy = "buy('" + twoKeyContractAddress + "','" + name + "'," + cost + ')'
-          var onclick_redeem = "redeem('" + twoKeyContractAddress + "')"
+          let onclick_buy = "buy('" + twoKeyContractAddress + "','" + name + "'," + cost + ')'
+          let onclick_redeem = "redeem('" + twoKeyContractAddress + "')"
           $('#buy').attr('onclick', onclick_buy)
           $('#redeem').attr('onclick', onclick_redeem)
 
@@ -1055,7 +1055,7 @@ function contract_info (TwoKeyContract_instance, min_arcs, callback) {
             }
 
             {
-              var roll
+              let roll
               if (owner == my_address) {
                 roll = 'Contractor'
               } else if (units) {
@@ -1086,10 +1086,10 @@ function contract_info (TwoKeyContract_instance, min_arcs, callback) {
                     '</button></td>')
 
             unique_id = unique_id + 1
-            var tag_est_reward = 'id' + unique_id
+            let tag_est_reward = 'id' + unique_id
             items.push('<td id="' + tag_est_reward + '" ></td>')
-            var depth = my_depth(TwoKeyContract_instance, owner, my_address)
-            var est_reward = ''
+            let depth = my_depth(TwoKeyContract_instance, owner, my_address)
+            let est_reward = ''
             if (depth == MAX_DEPTH || depth == 0) {
               est_reward = 'NA'
             } else {
@@ -1111,20 +1111,20 @@ function contract_info (TwoKeyContract_instance, min_arcs, callback) {
             items.push('<td>' + symbol + '</td>')
             {
               unique_id = unique_id + 1
-              var tag_owner = 'id' + unique_id
+              let tag_owner = 'id' + unique_id
               items.push('<td id="' + tag_owner + '" >' + owner + '</td>')
               owner2name(owner, '#' + tag_owner)
             }
 
             items.push('<td>' + quota + '</td>')
-            var join_cost = 0
+            let join_cost = 0
             items.push('<td>' + join_cost + '</td>')
 
             total_units = total_units / 10.**unit_decimals
             items.push('<td>' + total_units + '</td>')
             {
               unique_id = unique_id + 1
-              var tag_description = 'id' + unique_id
+              let tag_description = 'id' + unique_id
               items.push('<td id="' + tag_description + '" >' + ipfs_hash + '</td>')
               if (ipfs_hash) {
                 ipfs.cat(ipfs_hash, (err, res) => {
@@ -1147,7 +1147,7 @@ function contract_info (TwoKeyContract_instance, min_arcs, callback) {
             items.push('<td>' + balance + '</td>')
             items.push('<td>' + total_arcs + '</td>')
 
-            var kpis = get_kpis(TwoKeyContract_instance, owner, owner)
+            let kpis = get_kpis(TwoKeyContract_instance, owner, owner)
             items.push('<td>' + kpis.join('/') + '</td>')
 
             items.push('<td>' +
@@ -1170,13 +1170,13 @@ function populateMy2KeyContracts () {
     return
   }
 
-  var tbl = '#my-2key-contracts'
-  for (var c in TwoKeyReg_contractInstance.created) {
+  let tbl = '#my-2key-contracts'
+  for (let c in TwoKeyReg_contractInstance.created) {
     tbl_add_contract(tbl, c)
   }
 
   tbl = '#my-2key-arcs'
-  for (var c in TwoKeyReg_contractInstance.joined) {
+  for (let c in TwoKeyReg_contractInstance.joined) {
     tbl_add_contract(tbl, c)
   }
 }
@@ -1187,16 +1187,16 @@ function populateContract () {
   $('#redeem').hide()
 
   $('#contract-table').empty()
-  var h = contract_header()
+  let h = contract_header()
   function contract_callback (c, constant_info, info) {
-    for (var i = 0; i < h.length; i++) {
-      var row = '<tr>' + h[i] + c[i] + '</tr>'
+    for (let i = 0; i < h.length; i++) {
+      let row = '<tr>' + h[i] + c[i] + '</tr>'
       $('#contract-table').append(row)
     }
 
-    var name, symbol, cost, bounty, quota, total_units, owner, ipfs_hash;
+    let name, symbol, cost, bounty, quota, total_units, owner, ipfs_hash;
     [name, symbol, cost, bounty, quota, total_units, owner, ipfs_hash] = constant_info
-    var arcs, units, xbalance, total_arcs, balance;
+    let arcs, units, xbalance, total_arcs, balance;
     [arcs, units, xbalance, total_arcs, balance] = info
 
     bounty = web3.fromWei(bounty.toString())
@@ -1230,7 +1230,7 @@ function populateContract () {
   })
 }
 
-var populate_running = false
+let populate_running = false
 function populate () {
   // guard againset reentrance
   if (populate_running) {
@@ -1259,13 +1259,13 @@ function is_contract_displayed(contract) {
     return twoKeyContractAddress == contract
   }
 
-  for (var c in TwoKeyReg_contractInstance.created) {
+  for (let c in TwoKeyReg_contractInstance.created) {
     if (c == contract) {
       return true
     }
   }
 
-  for (var c in TwoKeyReg_contractInstance.joined) {
+  for (let c in TwoKeyReg_contractInstance.joined) {
     if (c == contract) {
       return true
     }
@@ -1282,7 +1282,7 @@ function is_contract_displayed(contract) {
 //     return
 //   }
 //
-//   var my_address = whoAmI()
+//   let my_address = whoAmI()
 //   getTwoKeyContract(twoKeyContractAddress, (TwoKeyContract_instance) => {
 //     TwoKeyContract_instance.transfer(target, 1, {gas: 1400000, from: my_address}).then((tx) => {
 //       console.log(tx)
@@ -1300,7 +1300,7 @@ window.contract_take = function () {
     return
   }
 
-  var my_address = whoAmI()
+  let my_address = whoAmI()
   if (from_twoKeyContractAddress == my_address) {
     safe_alert("You can't take your own ARCs. Switch to a different user and try again.")
     return
@@ -1308,11 +1308,11 @@ window.contract_take = function () {
   getTwoKeyContract(twoKeyContractAddress, (TwoKeyContract_instance) => {
     view(TwoKeyContract_instance.quota(),
       quota => {
-        var ok = confirm('you are about to take 1 ARC from user\n' + from_twoKeyContractAddress +
+        let ok = confirm('you are about to take 1 ARC from user\n' + from_twoKeyContractAddress +
                 '\nin contract\n' + twoKeyContractAddress +
                 '\nand this will turn into ' + quota + ' ARCs in your account')
         if (ok) {
-          var my_address = whoAmI()
+          let my_address = whoAmI()
           // if transaction end successfully clean url
           // if it fails clean url and send an alert
           active_joined++
@@ -1362,9 +1362,9 @@ window.cancelContract = function () {
 }
 
 window.createContract = function () {
-  var erc20_address = $('#erc20-address').val()
-  var name = $('#product-name').val()
-  var symbol = $('#product-symbol').val()
+  let erc20_address = $('#erc20-address').val()
+  let name = $('#product-name').val()
+  let symbol = $('#product-symbol').val()
   if ($('#erc20-address').is(":visible")) { // TODO better way to decide which type of contract we are creating
     if (!erc20_address) {
       erc20_address = TwoKeyEconomy_contractInstance.address
@@ -1413,9 +1413,9 @@ function createContract (name, symbol, erc20_address) {
   product_cleanup()
 
   function cb(ipfs_hash) {
-    var address = whoAmI()
+    let address = whoAmI()
     // value: web3.toWei(0.001, 'ether'),
-    var trn
+    let trn
     if (erc20_address) {
       trn = TwoKeyPresellContract.new(TwoKeyReg_contractInstance.address, name, symbol, total_arcs, quota,
         web3.toWei(parseFloat(cost), 'ether'), web3.toWei(parseFloat(bounty), 'ether'),
@@ -1467,7 +1467,7 @@ function update_user_balance(my_address) {
 
 function updateUserInfo () {
   clean_user()
-  var username = localStorage.username
+  let username = localStorage.username
   $('#user-name').html(username)
   let my_address = whoAmI()
   if (!my_address) {
@@ -1480,10 +1480,10 @@ function updateUserInfo () {
 }
 
 window.transferTokens = function () {
-  var destination = $('#token-destination').val()
+  let destination = $('#token-destination').val()
   username2address(destination, (_destination) => {
-    var myaddress = whoAmI()
-    var amount = parseFloat($('#token-amount').val())
+    let myaddress = whoAmI()
+    let amount = parseFloat($('#token-amount').val())
     amount = web3.toWei(amount, 'ether') // TODO use the decimals value of the TwoKeyEconomy contract
 
     transaction_start(
@@ -1501,10 +1501,10 @@ window.transferTokens = function () {
 }
 
 window.transferFromTokens = function () {
-  var destination = $('#token-destination').val()
+  let destination = $('#token-destination').val()
   username2address(destination, (_destination) => {
-    var myaddress = whoAmI()
-    var amount = parseFloat($('#token-amount').val())
+    let myaddress = whoAmI()
+    let amount = parseFloat($('#token-amount').val())
     amount = web3.toWei(amount, 'ether') // TODO use the decimals value of the TwoKeyEconomy contract
 
     transaction_start(
@@ -1523,10 +1523,10 @@ window.transferFromTokens = function () {
 }
 
 window.approveTokens = function () {
-  var destination = $('#token-destination').val()
+  let destination = $('#token-destination').val()
   username2address(destination, (_destination) => {
-    var myaddress = whoAmI()
-    var amount = parseFloat($('#token-amount').val())
+    let myaddress = whoAmI()
+    let amount = parseFloat($('#token-amount').val())
     amount = web3.toWei(amount, 'ether') // TODO use the decimals value of the TwoKeyEconomy contract
 
     transaction_start(
@@ -1544,13 +1544,13 @@ window.approveTokens = function () {
 }
 
 window.allowanceTokens = function () {
-  var destination = $('#token-destination').val()
+  let destination = $('#token-destination').val()
   username2address(destination, (_destination) => {
-    var myaddress = whoAmI()
+    let myaddress = whoAmI()
 
     view(TwoKeyEconomy_contractInstance.allowance(_destination,myaddress),
       (result) => {
-        var amount = web3.fromWei(result.toString()) // TODO use the decimals value of the TwoKeyEconomy contract
+        let amount = web3.fromWei(result.toString()) // TODO use the decimals value of the TwoKeyEconomy contract
         $('#token-amount').val(amount)
       }
     )
@@ -1582,7 +1582,7 @@ function check_event (c, e) {
   }
 
   // add event nonce because ganache bug sometimes reuse transactionHash
-  var h = e.transactionHash
+  let h = e.transactionHash
   if (c.transactionHash[h]) {
     console.log('Collision on transactionHash ' + h)
     // alert('Collision on transactionHash ' + h)
@@ -1598,8 +1598,8 @@ function transfer_event (c, e) {
     return
   }
   // e.address;
-  var from = e.args.from
-  var to = e.args.to
+  let from = e.args.from
+  let to = e.args.to
 
   if (!c.given_to[from]) {
     c.given_to[from] = []
@@ -1612,8 +1612,8 @@ function fulfilled_event (c, e) {
     return
   }
   // e.address;
-  var to = e.args.to
-  var units = e.args.units
+  let to = e.args.to
+  let units = e.args.units
 
   c.units[to] = units
 }
@@ -1648,7 +1648,7 @@ function init () {
 
   setInterval(() => {
     while (timer_cbs_delayed.length) {
-      var cb = timer_cbs_delayed.pop()
+      let cb = timer_cbs_delayed.pop()
       cb()
     }
 
@@ -1689,13 +1689,13 @@ $(document).ready(function () {
   new_user()
 
   // https://clipboardjs.com/
-  var clipboard_lnk0 = new Clipboard('.lnk0')
+  let clipboard_lnk0 = new Clipboard('.lnk0')
 
   clipboard_lnk0.on('success', function (e) {
     console.info('Action:', e.action)
     console.info('Text:', e.text)
     console.info('Trigger:', e.trigger)
-    var msg = e.trigger.getAttribute('msg')
+    let msg = e.trigger.getAttribute('msg')
     tempAlert(msg, 3000)
     e.clearSelection()
   })
@@ -1704,7 +1704,7 @@ $(document).ready(function () {
     console.error('Action:', e.action)
     console.error('Trigger:', e.trigger)
   })
-  var clipboard_lnk = new Clipboard('.lnk',
+  let clipboard_lnk = new Clipboard('.lnk',
     {
       text: function (trigger) {
         return trigger.innerHTML
@@ -1715,7 +1715,7 @@ $(document).ready(function () {
     console.info('Action:', e.action)
     console.info('Text:', e.text)
     console.info('Trigger:', e.trigger)
-    var msg = e.trigger.getAttribute('msg')
+    let msg = e.trigger.getAttribute('msg')
     tempAlert(msg, 2200)
     e.clearSelection()
   })
@@ -1725,7 +1725,7 @@ $(document).ready(function () {
     console.error('Trigger:', e.trigger)
   })
 
-  var url = 'http://' + window.document.location.hostname + ':8545'
+  let url = 'http://' + window.document.location.hostname + ':8545'
 
   if (typeof web3 !== 'undefined') {
     // Use Mist/MetaMask's provider
@@ -1745,7 +1745,7 @@ $(document).ready(function () {
     console.warn('Using web3 detected from external source like Metamask')
     window.web3 = new Web3(web3.currentProvider)
     web3.version.getNetwork((err, netId) => {
-      var ok = false
+      let ok = false
       switch (netId) {
         case '1':
           console.log('This is mainnet')
@@ -1806,21 +1806,21 @@ $(document).on("keypress", ".input-enter", function(e){
 // ************** Generate the tree diagram	 *****************
 // http://bl.ocks.org/d3noob/8375092
 // for d3.v4 see https://bl.ocks.org/mbostock/4339184
-var margin = {top: 0, right: 0, bottom: 0, left: 50},
+let margin = {top: 0, right: 0, bottom: 0, left: 50},
   width = 960 - margin.right - margin.left,
   height = 300 - margin.top - margin.bottom
 
-var tree = d3.layout.tree()
+let tree = d3.layout.tree()
   .size([height, width]) // Compute the new tree layout.
 
-var d3_i = 0,
+let d3_i = 0,
   duration = 750,
   d3_root
 
-var diagonal = d3.svg.diagonal()
+let diagonal = d3.svg.diagonal()
   .projection(function (d) { return [d.y, d.x] })
 
-var svg = d3.select('#influencers-graph').append('svg')
+let svg = d3.select('#influencers-graph').append('svg')
   .attr('width', width + margin.right + margin.left)
   .attr('height', height + margin.top + margin.bottom)
   .append('g')
@@ -1828,12 +1828,12 @@ var svg = d3.select('#influencers-graph').append('svg')
 
 // Define the div for the tooltip
 // http://bl.ocks.org/d3noob/a22c42db65eb00d4e369
-var tooltip_div = d3.select('body').append('div')
+let tooltip_div = d3.select('body').append('div')
   .attr('class', 'tooltip')
   .style('opacity', 0)
 
-var d3_init_counter = 0
-var d3_source
+let d3_init_counter = 0
+let d3_source
 
 function d3_reset () {
   d3_root = null
@@ -1853,9 +1853,9 @@ function d3_init () {
   // d3.select("#influencers-graph").style("height", "500px");
   d3.select(self.frameElement).style('height', height + 'px')
 
-  var my_address = whoAmI()
+  let my_address = whoAmI()
   if (my_address) {
-    var root = d3_add_event_children([my_address], null, 1)[0]
+    let root = d3_add_event_children([my_address], null, 1)[0]
     if (root.children) {
       d3_root = root
       d3_update(d3_root)
@@ -1876,7 +1876,7 @@ function d3_update (source) {
   }
   d3_source = source
 
-  var nodes = tree.nodes(d3_root).reverse(),
+  let nodes = tree.nodes(d3_root).reverse(),
     links = tree.links(nodes)
 
     // Normalize for fixed-depth.
@@ -1885,13 +1885,13 @@ function d3_update (source) {
   })
 
   // Update the nodes…
-  var node = svg.selectAll('g.node')
+  let node = svg.selectAll('g.node')
     .data(nodes, function (d) {
       return d.id || (d.id = ++d3_i)
     })
 
     // Enter any new nodes at the parent's previous position.
-  var nodeEnter = node.enter().append('g')
+  let nodeEnter = node.enter().append('g')
     .attr('class', 'node')
     .attr('transform', function (d) {
       return 'translate(' + source.y0 + ',' + source.x0 + ')'
@@ -1934,13 +1934,13 @@ function d3_update (source) {
     .style('fill-opacity', 1e-6)
 
     // Transition nodes to their new position.
-  var nodeUpdate = node.transition()
+  let nodeUpdate = node.transition()
     .duration(duration)
     .attr('transform', function (d) {
       return 'translate(' + d.y + ',' + d.x + ')'
     })
 
-  var circles = nodeUpdate.select('circle')
+  let circles = nodeUpdate.select('circle')
     .attr('r', 10)
     .style('fill', function (d) {
       return (d._children ? 'lightsteelblue' : '#fff')
@@ -1955,7 +1955,7 @@ function d3_update (source) {
     .style('fill-opacity', 1)
 
     // Transition exiting nodes to the parent's new position.
-  var nodeExit = node.exit().transition()
+  let nodeExit = node.exit().transition()
     .duration(duration)
     .attr('transform', function (d) {
       return 'translate(' + source.y + ',' + source.x + ')'
@@ -1969,7 +1969,7 @@ function d3_update (source) {
     .style('fill-opacity', 1e-6)
 
     // Update the links…
-  var link = svg.selectAll('path.link')
+  let link = svg.selectAll('path.link')
     .data(links, function (d) {
       return d.target.id
     })
@@ -1982,12 +1982,12 @@ function d3_update (source) {
   link.enter().insert('path', 'g')
     .attr('class', 'link')
     .attr('d', function (d) {
-      var o = {x: source.x0, y: source.y0}
+      let o = {x: source.x0, y: source.y0}
       return diagonal({source: o, target: o})
     })
 
   // Transition links to their new position.
-  var linkUpdate = link.transition()
+  let linkUpdate = link.transition()
     .duration(duration)
     .attr('d', diagonal)
 
@@ -1999,7 +1999,7 @@ function d3_update (source) {
   link.exit().transition()
     .duration(duration)
     .attr('d', function (d) {
-      var o = {x: source.x, y: source.y}
+      let o = {x: source.x, y: source.y}
       return diagonal({source: o, target: o})
     })
     .remove()
@@ -2024,13 +2024,13 @@ function d3_click (d) {
 }
 
 function d3_add_event_children (addresses, parent, depth) {
-  var childrens = []
+  let childrens = []
 
   if (addresses) {
-    for (var i = 0; i < addresses.length; i++) {
-      var address = addresses[i]
+    for (let i = 0; i < addresses.length; i++) {
+      let address = addresses[i]
 
-      var node = {
+      let node = {
         'address': address,
         'd3_id': ++unique_id,
         'parent': parent,
@@ -2051,19 +2051,19 @@ function d3_add_event_children (addresses, parent, depth) {
       owner2name(address, '#d3-' + node.d3_id, d3_wrapper(node))
 
       getTwoKeyContract(twoKeyContractAddress, (TwoKeyContract_instance) => {
-        var _units = TwoKeyContract_instance.units
+        let _units = TwoKeyContract_instance.units
         if (_units) _units = _units[address]
 
         if (_units) {
           view(TwoKeyContract_instance.constantInfo,
             constant_info => {
-              var name, symbol, cost, bounty, quota, owner, ipfs_hash,
+              let name, symbol, cost, bounty, quota, owner, ipfs_hash,
                 unit_decimals;
               [name, symbol, cost, bounty, quota, owner, ipfs_hash, unit_decimals] = constant_info
               unit_decimals = unit_decimals.toNumber()
 
               _units = parseFloat('' + _units) / 10. ** unit_decimals
-              var n = node
+              let n = node
               n.units += _units
               n = n.parent
               while (n) {
@@ -2073,10 +2073,10 @@ function d3_add_event_children (addresses, parent, depth) {
             })
         }
 
-        var next_addresses = TwoKeyContract_instance.given_to
+        let next_addresses = TwoKeyContract_instance.given_to
         if (next_addresses) next_addresses = next_addresses[address]
 
-        var c = d3_add_event_children(next_addresses, node, depth - 1)
+        let c = d3_add_event_children(next_addresses, node, depth - 1)
         if (depth > 0) {
           node.children = c
         } else {
