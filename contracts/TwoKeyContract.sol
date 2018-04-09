@@ -120,9 +120,9 @@ contract TwoKeyContract is StandardToken {
 
   function getDynamicInfo(address me) public view returns (uint256,uint256,uint256,uint256,uint256,uint256);
 
-  function () external payable {
-    buyProduct();
-  }
+  // function () external payable {
+  //   buyProduct();
+  // }
 
   // buy product. if you dont have ARCs then first take them (join) from _from
   function buyFrom(address _from) public payable {
