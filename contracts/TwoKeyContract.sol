@@ -13,6 +13,7 @@ import './TwoKeyReg.sol';
  */
 contract TwoKeyContract is StandardToken {
   event Fulfilled(address indexed to, uint256 units);
+  event Rewarded(address indexed to, uint256 amount);
 
   using SafeMath for uint256;
   // Public variables of the token
@@ -120,9 +121,9 @@ contract TwoKeyContract is StandardToken {
 
   function getDynamicInfo(address me) public view returns (uint256,uint256,uint256,uint256,uint256,uint256);
 
-  function () external payable {
-    buyProduct();
-  }
+  // function () external payable {
+  //   buyProduct();
+  // }
 
   // buy product. if you dont have ARCs then first take them (join) from _from
   function buyFrom(address _from) public payable {
@@ -219,6 +220,7 @@ contract TwoKeyAcquisitionContract is TwoKeyContract
             break;
           }
           xbalances[influencer] = xbalances[influencer].add(b);
+          Rewarded(influencer, b);
           total_bounty = total_bounty.add(b);
         }
     }
@@ -310,6 +312,7 @@ contract TwoKeyPresellContract is TwoKeyContract {
             break;
           }
           xbalances[influencer] = xbalances[influencer].add(b);
+          Rewarded(influencer, b);
           total_bounty = total_bounty.add(b);
         }
     }
