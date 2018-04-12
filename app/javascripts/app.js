@@ -156,6 +156,11 @@ function escapeHtml (string) {
   })
 }
 
+function set_url (surl, eid) {
+        $(eid).text(surl.slice(8))
+        $(eid).attr('data-clipboard-text', surl)
+}
+
 function short_url (url, eid) {
   fetch('https://www.googleapis.com/urlshortener/v1/url?key=AIzaSyBqmohu0JE5CRhQYq9YgbeV9ApvWFR4pA0',
     {method: 'POST',
@@ -171,8 +176,7 @@ function short_url (url, eid) {
     let surl = x.id
     if (surl) { // google does not shorten urls that have an IP address instead of a qualified domain name
       safe_cb(eid, () => {
-        $(eid).text(surl.slice(8))
-        $(eid).attr('data-clipboard-text', surl)
+        set_url(surl, eid)
       })
     }
   })
@@ -206,7 +210,7 @@ let params
 import '../stylesheets/app.css' // Import the page's CSS. Webpack will know what to do with it.
 require('../help.md')
 const crypto = require('crypto')
-const buf = crypto.randomBytes(256).toString('hex')
+// const buf = crypto.randomBytes(256).toString('hex')
 
 // Import libraries we need.
 import { default as Web3} from 'web3'
@@ -232,9 +236,9 @@ let TwoKeyAcquisitionContract = contract(TwoKeyAcquisitionContract_artifacts)
 import TwoKeyPresellContract_artifacts from '../../build/contracts/TwoKeyPresellContract.json'
 let TwoKeyPresellContract = contract(TwoKeyPresellContract_artifacts)
 
-let twoKeyContractAddress
-let from_twoKeyContractAddress
-let from_twoKeyContractAddress_taken
+let current_twoKeyContractAddress  // current contract handled
+let from_twoKeyContractAddress  // 2key link was from this address
+// let from_twoKeyContractAddress_taken
 
 function tbl_add_row (tbl, h) {
   let header_row = '<tr>' + h.join() + '</tr>'
@@ -698,24 +702,28 @@ function logout () {
 
 }
 
-window.logout = function () {
-  twoKeyContractAddress = null
+function clean_link() {
+  current_twoKeyContractAddress = null
   from_twoKeyContractAddress = null
-  from_twoKeyContractAddress_taken = null
-  logout()
+  // from_twoKeyContractAddress_taken = null
+
   history.pushState(null, '', location.href.split('?')[0])
 }
 
+window.logout = function () {
+  clean_link()
+  logout()
+}
+
 window.home = function () {
-  twoKeyContractAddress = null
+  clean_link()
   d3_reset()
-  history.pushState(null, '', location.href.split('?')[0])
   product_cleanup()
   populate()
 }
 
 window.jump_to_contract_page = function (address) {
-  twoKeyContractAddress = address
+  current_twoKeyContractAddress = address
   history.pushState(null, '', location.href.split('?')[0])
   populate()
 }
@@ -1208,10 +1216,10 @@ function populateContract () {
       $('#contract-table').append(row)
     }
 
-    let name, symbol, cost, bounty, quota, total_units, owner, ipfs_hash;
-    [name, symbol, cost, bounty, quota, total_units, owner, ipfs_hash] = constant_info
-    let arcs, units, xbalance, total_arcs, balance;
-    [arcs, units, xbalance, total_arcs, balance] = info
+    let name, symbol, cost, bounty, quota, owner, ipfs_hash, unit_decimals;
+    [name, symbol, cost, bounty, quota, owner, ipfs_hash, unit_decimals] = constant_info
+    let arcs, units, xbalance, total_arcs, balance, total_units;
+    [arcs, units, xbalance, total_arcs, balance, total_units] = info
 
     bounty = web3.fromWei(bounty.toString())
     $('#summary-quota').text(quota)
@@ -1238,7 +1246,7 @@ function populateContract () {
       }
     }
   }
-  getTwoKeyContract(twoKeyContractAddress, (TwoKeyContract_instance) => {
+  getTwoKeyContract(current_twoKeyContractAddress, (TwoKeyContract_instance) => {
     contract_info(TwoKeyContract_instance, -1, contract_callback)
     d3_init()
   })
@@ -1253,7 +1261,7 @@ function populate () {
   }
   populate_running = true
 
-  if (twoKeyContractAddress) {
+  if (current_twoKeyContractAddress) {
     $('.contract').show()
     $('.contracts').hide()
     populateContract()
@@ -1269,8 +1277,8 @@ function populate () {
 }
 
 function is_contract_displayed(contract) {
-  if (twoKeyContractAddress) {
-    return twoKeyContractAddress == contract
+  if (current_twoKeyContractAddress) {
+    return current_twoKeyContractAddress == contract
   }
 
   for (let c in TwoKeyReg_contractInstance.created) {
@@ -1319,11 +1327,11 @@ window.contract_take = function () {
     safe_alert("You can't take your own ARCs. Switch to a different user and try again.")
     return
   }
-  getTwoKeyContract(twoKeyContractAddress, (TwoKeyContract_instance) => {
+  getTwoKeyContract(current_twoKeyContractAddress, (TwoKeyContract_instance) => {
     view(TwoKeyContract_instance.quota(),
       quota => {
         let ok = confirm('you are about to take 1 ARC from user\n' + from_twoKeyContractAddress +
-                '\nin contract\n' + twoKeyContractAddress +
+                '\nin contract\n' + current_twoKeyContractAddress +
                 '\nand this will turn into ' + quota + ' ARCs in your account')
         if (ok) {
           let my_address = whoAmI()
@@ -1651,20 +1659,20 @@ function rewarded_event (c, e) {
 
 function init () {
   params = getAllUrlParams()
-  twoKeyContractAddress = params.c
+  current_twoKeyContractAddress = params.c
   from_twoKeyContractAddress = params.f
-  if (twoKeyContractAddress) {
+  // if (twoKeyContractAddress) {
     $('#join-btn').hide()
     $('#buy').hide()
     $('#redeem').hide()
     $('.contract').show()
     $('.contracts').hide()
-  } else {
+  // } else {
     $('.contracts').show()
     $('.contract').hide()
     $('#buy').removeAttr('onclick')
     $('#redeme').removeAttr('onclick')
-  }
+  // }
   product_cleanup()
 
   TwoKeyEconomy.setProvider(web3.currentProvider)
@@ -1976,7 +1984,7 @@ function d3_update (source) {
     .style('fill', function (d) {
       return (d._children ? 'lightsteelblue' : '#fff')
     })
-  getTwoKeyContract(twoKeyContractAddress,
+  getTwoKeyContract(current_twoKeyContractAddress,
     TwoKeyContract_instance =>
       circles.style('stroke',
         d => (TwoKeyContract_instance.info.owner == d.address)
@@ -2081,7 +2089,7 @@ function d3_add_event_children (addresses, parent, depth) {
 
       owner2name(address, '#d3-' + node.d3_id, d3_wrapper(node))
 
-      getTwoKeyContract(twoKeyContractAddress, (TwoKeyContract_instance) => {
+      getTwoKeyContract(current_twoKeyContractAddress, (TwoKeyContract_instance) => {
         let _units = TwoKeyContract_instance.units
         if (_units) _units = _units[address]
         if (_units) {
