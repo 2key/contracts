@@ -1,6 +1,7 @@
 pragma solidity ^0.4.18; //We have to specify what version of compiler this code will use
 
 import 'zeppelin-solidity/contracts/token/ERC20/StandardToken.sol';
+import "zeppelin-solidity/contracts/ownership/Ownable.sol";
 import './ERC20full.sol';
 import './TwoKeyReg.sol';
 
@@ -11,14 +12,14 @@ import './TwoKeyReg.sol';
  * @dev https://github.com/ethereum/EIPs/issues/20
  * @dev Based on code by FirstBlood: https://github.com/Firstbloodio/token/blob/master/smart_contract/FirstBloodToken.sol
  */
-contract TwoKeyContract is StandardToken {
+contract TwoKeyContract is StandardToken, Ownable {
   event Fulfilled(address indexed to, uint256 units);
   event Rewarded(address indexed to, uint256 amount);
 
   using SafeMath for uint256;
   // Public variables of the token
   TwoKeyReg registry;  // 2key admin contract that created this
-  address public owner;  // Who created the contract (business)
+  // address public owner;  // Who created the contract (business) // contained in Ownable.sol
   string public name;
   string public ipfs_hash;
   string public symbol;
@@ -161,7 +162,7 @@ contract TwoKeyAcquisitionContract is TwoKeyContract
         uint256 _tSupply, uint256 _quota, uint256 _cost, uint256 _bounty,
         uint256 _units, string _ipfs_hash) public {
     require(_bounty <= _cost);
-    owner = msg.sender;
+    // owner = msg.sender;  // done in Ownable()
     // We do an explicit type conversion from `address`
     // to `TwoKeyReg` and assume that the type of
     // the calling contract is TwoKeyReg, there is
@@ -242,7 +243,7 @@ contract TwoKeyPresellContract is TwoKeyContract {
         uint256 _tSupply, uint256 _quota, uint256 _cost, uint256 _bounty,
         string _ipfs_hash, address _erc20_token_sell_contract) public {
     require(_bounty <= _cost);
-    owner = msg.sender;
+    // owner = msg.sender;  // done in Ownable()
     // We do an explicit type conversion from `address`
     // to `TwoKeyReg` and assume that the type of
     // the calling contract is TwoKeyReg, there is
