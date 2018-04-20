@@ -77,31 +77,36 @@ function transaction_msg () {
 }
 
 function transaction_start (tx_promise, cb_end, cb_error) {
-  function transaction_end(tx) {
-    function te(tx) {
-      if (tx.receipt) {
-        total_gas += tx.receipt.gasUsed
-        if (tx.receipt.status) {
-          total_success += 1
-        }
-      } else {
-        // this happens when creating new contract
-        let receipt = web3.eth.getTransactionReceipt(tx.transactionHash)
-        total_gas += receipt.gasUsed
-        if (receipt.status) {
-          total_success += 1
-        }
+  function te(tx) {
+    if (tx.receipt) {
+      total_gas += tx.receipt.gasUsed
+      if (tx.receipt.status) {
+        total_success += 1
       }
-      active_transactions--
-      transaction_msg()
-
-      console.log(tx)
-
-      // Every time a transaction ends there is a good chance that the user ETH balance has changed
-      update_user_balance()
-
-      if (cb_end) cb_end()
+    } else {
+      // this happens when creating new contract or when doint sendTransaction
+      let transactionHash = tx.transactionHash
+      if (!transactionHash) {
+        transactionHash = tx
+      }
+      let receipt = web3.eth.getTransactionReceipt(transactionHash)
+      total_gas += receipt.gasUsed
+      if (receipt.status) {
+        total_success += 1
+      }
     }
+    active_transactions--
+    transaction_msg()
+
+    console.log(tx)
+
+    // Every time a transaction ends there is a good chance that the user ETH balance has changed
+    update_user_balance()
+
+    if (cb_end) cb_end()
+  }
+
+  function transaction_end(tx) {
 
     if ((typeof tx) == 'string') {
       console.log(tx)
@@ -123,7 +128,17 @@ function transaction_start (tx_promise, cb_end, cb_error) {
   active_transactions++
   transaction_msg(true, "transaction")
 
-  tx_promise.then(transaction_end).catch(transaction_error)
+  if (tx_promise) {
+    tx_promise.then(transaction_end).catch(transaction_error)
+  } else {
+    return (err, transactionHash) => {
+      if (err) {
+        transaction_error(err)
+      } else {
+        te(transactionHash)
+      }
+    }
+  }
 }
 
 function view (view_promise, cb_end, cb_error) {
@@ -728,19 +743,25 @@ window.jump_to_contract_page = function (address) {
   populate()
 }
 
-// window.getETH = function () {
-//   let my_address = whoAmI()
-//   TwoKeyReg_contractInstance.fundtransfer(my_address, web3.toWei(1.0, 'ether'),
-//     {gas: 3000000, from: my_address}).then(function () {
-//   }).catch(function (e) {
-//     alert(e)
-//   })
-// }
-//
-// window.giveETH = function () {
-//   let my_address = whoAmI()
-//   web3.eth.sendTransaction({from: my_address, to: TwoKeyReg.address, value: web3.toWei(1, 'ether')})
-// }
+window.getETH = function () {
+  let my_address = whoAmI()
+  let coinbase = web3.eth.coinbase
+  if (my_address === coinbase) {
+    return
+  }
+  let units = prompt('you are about to transfer ETH from coinbase. Please enter the amount you want to transfer (0 to cancel)', '1');
+  if (units && units != "0") {
+    units = parseFloat(units)
+  }
+  if (units <= 0) {
+    return
+  }
+
+  web3.eth.sendTransaction(
+    {from: coinbase, to: my_address, value: web3.toWei(units, 'ether'), gas: gastimate(30000)},
+    transaction_start()  // this generats a CB function
+    )
+}
 
 window.buy = function (twoKeyContractAddress, name, cost) {
   let my_address = whoAmI()
