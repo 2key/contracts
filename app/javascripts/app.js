@@ -744,23 +744,21 @@ window.jump_to_contract_page = function (address) {
 }
 
 window.getETH = function () {
-  let my_address = whoAmI()
-  let coinbase = web3.eth.coinbase
-  if (my_address === coinbase) {
-    return
-  }
-  let units = prompt('you are about to transfer ETH from coinbase. Please enter the amount you want to transfer (0 to cancel)', '1');
-  if (units && units != "0") {
-    units = parseFloat(units)
-  }
-  if (units <= 0) {
-    return
-  }
+  let destination = $('#token-destination').val()
+  $('#token-destination').val('')
 
-  web3.eth.sendTransaction(
-    {from: coinbase, to: my_address, value: web3.toWei(units, 'ether'), gas: gastimate(30000)},
-    transaction_start()  // this generats a CB function
-    )
+  username2address(destination, (_destination) => {
+    let my_address = whoAmI()
+    let amount = parseFloat($('#token-amount').val())
+    $('#token-amount').val('')
+    if (amount > 0 && _destination != my_address) {
+      amount = web3.toWei(amount, 'ether') // TODO use the decimals value of the TwoKeyEconomy contract
+      web3.eth.sendTransaction(
+        {from: _destination, to: my_address, value: amount, gas: gastimate(30000)},
+        transaction_start()  // this generats a CB function
+        )
+    }
+  })
 }
 
 window.buy = function (twoKeyContractAddress, name, cost) {
@@ -1527,19 +1525,21 @@ window.transferTokens = function () {
   username2address(destination, (_destination) => {
     let myaddress = whoAmI()
     let amount = parseFloat($('#token-amount').val())
-    amount = web3.toWei(amount, 'ether') // TODO use the decimals value of the TwoKeyEconomy contract
+    if (amount > 0) {
+      amount = web3.toWei(amount, 'ether') // TODO use the decimals value of the TwoKeyEconomy contract
 
-    transaction_start(
-      TwoKeyEconomy_contractInstance.transfer(
-        _destination, amount,
-        {
-          gas: gastimate(140000),
-          from: myaddress,
-      }),
-      () => {
-        tempAlert('OK', 1000)
-      }
-    )
+      transaction_start(
+        TwoKeyEconomy_contractInstance.transfer(
+          _destination, amount,
+          {
+            gas: gastimate(140000),
+            from: myaddress,
+          }),
+        () => {
+          tempAlert('OK', 1000)
+        }
+      )
+    }
   })
 }
 

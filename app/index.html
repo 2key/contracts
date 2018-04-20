@@ -69,7 +69,6 @@
       <!--<div class="col-sm-12">-->
       <div class="table-responsive">
         <a href="#" onclick="logout()" class="btn btn-primary" id="logout-button">Logout</a>
-        <a href="#" onclick="getETH()" class="btn btn-primary" data-toggle="tooltip" title="transfer ETH to me">get ETH</a>
         <table class="table table-bordered">
           <tr>
             <td>Name</td>
@@ -102,12 +101,13 @@
         </table>
       </div>
       <div class="container-fluid" style="border:1px solid #cecece;" id="token-operation">
-        <input type="text" id="token-destination" placeholder="token transfer destination (name/address/coinbase)" class="form-control"/>
-        <input type="text" id="token-amount" placeholder="amount of tokens (overwritten by Allowance From)" class="form-control"/>
+        <input type="text" id="token-destination" placeholder="other side of the transfer (name/address/coinbase)" class="form-control"/>
+        <input type="text" id="token-amount" placeholder="amount  (overwritten by Allowance From)" class="form-control"/>
         <a href="#" onclick="transferTokens()" class="btn btn-primary" data-toggle="tooltip" title="transfer amount of tokens from me to destination">Transfer To</a>
         <a href="#" onclick="approveTokens()" class="btn btn-primary" data-toggle="tooltip" title="approve destination to transfer-from me an amount of tokens">Approve To</a>
         <a href="#" onclick="allowanceTokens()" class="btn btn-primary" data-toggle="tooltip" title="write in the amount field the maximal amount of tokens approved for me to transfer-from destination">Allowance From</a>
         <a href="#" onclick="transferFromTokens()" class="btn btn-primary" data-toggle="tooltip" title="transfer amount of tokens from destination to me">Transfer From</a>
+        <a href="#" onclick="getETH()" class="btn btn-primary" data-toggle="tooltip" title="transfer ETH to me">get ETH</a>
       </div>
       <br/>
       <br/>
