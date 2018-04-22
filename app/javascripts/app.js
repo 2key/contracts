@@ -23,7 +23,7 @@ const WalletSubprovider = require('ethereumjs-wallet/provider-engine')
 let local_accounts
 let local_address
 let coinbase = '0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1'
-
+let node_url
 // http://bl.ocks.org/d3noob/8375092
 // const d3 = require("d3");
 
@@ -79,14 +79,22 @@ let active_created = 0
 let active_joined = 0
 let active_fulfilled = 0
 
+function start_spin () {
+  $('#loader-circle').addClass('spin')
+  $('.loader').show()
+}
+
+function stop_spin () {
+  $('#loader-circle').removeClass('spin')
+  $('.loader').hide()
+}
+
 function transaction_msg () {
   let active = active_transactions + active_views + active_created + active_joined + active_fulfilled
   if (active) {
-    $('#loader-circle').addClass('spin')
-    $('.loader').show()
+    start_spin()
   } else {
-    $('#loader-circle').removeClass('spin')
-    $('.loader').hide()
+    stop_spin()
   }
   $('#msg').text(
     'pending-transactions/views/created/joined/fulfilled=' + active_transactions + '/' + active_views + '/' +
@@ -801,6 +809,7 @@ window.logout = function () {
   clean_link()
   logout()
   delete localStorage.login
+  $('.login').hide()
   location.reload()
 }
 
@@ -1790,6 +1799,126 @@ function rewarded_event (c, e) {
   }
 }
 
+window.openWallet = function () {
+  let walletname = $('#login-wallet-name').val()
+  let walletpassword = $('#login-wallet-password').val()
+  if (!walletname || !walletpassword) {
+    return
+  }
+
+  var engine = new ProviderEngine()
+  window.web3 = new Web3(engine)
+
+  localStorage.walletname = walletname
+  $('#login-user-name').val(walletname)
+  let wallets = localStorage.wallets
+  let wallet
+  if (wallets) {
+    try {
+      wallets = JSON.parse(wallets)
+      wallet = wallets[walletname]
+    } catch (e) {
+      wallets = null
+    }
+  }
+
+  $('#loading').show()
+  start_spin()
+
+  // start the following with a timer so we will have a chance for the jQuery commands we just did to take effects
+  setTimeout(() => {
+    if (wallet) {
+      try {
+        wallet = eth_wallet.fromV3(wallet, walletpassword) // slow
+      } catch (e) {
+        alert("Bad password")
+        window.logout()
+        return
+      }
+    } else {
+      wallet = eth_wallet.generate()
+      if (!wallets) {
+        wallets = {}
+      }
+      wallets[walletname] = wallet.toV3(walletpassword) // slow
+      localStorage.wallets = JSON.stringify(wallets)
+    }
+
+    local_address = '0x' + wallet.getAddress().toString('hex')
+    console.log(local_address)
+    wallet.getAddressesString = () => {
+      return local_address
+    }
+    engine.addProvider(new WalletSubprovider(wallet, {}))
+
+
+    // // static results
+    // engine.addProvider(new FixtureSubprovider({
+    //   web3_clientVersion: 'ProviderEngine/v0.0.0/javascript',
+    //   net_listening: true,
+    //   eth_hashrate: '0x00',
+    //   eth_mining: false,
+    //   eth_syncing: true,
+    // }))
+    //
+    // // cache layer
+    // engine.addProvider(new CacheSubprovider())
+    //
+    // // filters
+    // engine.addProvider(new FilterSubprovider())
+    //
+    // // pending nonce
+    // engine.addProvider(new NonceSubprovider())
+    //
+    // // vm
+    // engine.addProvider(new VmSubprovider())
+    //
+    // // id mgmt
+    // engine.addProvider(new HookedWalletSubprovider({
+    //   getAccounts: function(cb){ console.log(cb) },
+    //   approveTransaction: function(cb){ console.log(cb) },
+    //   signTransaction: function(cb){ console.log(cb) },
+    // }))
+
+    // data source
+    engine.addProvider(new RpcSubprovider({
+      rpcUrl: node_url,
+    }))
+
+    // log new blocks
+    engine.on('block', function (block) {
+      console.log('================================')
+      console.log('BLOCK CHANGED:', '#' + block.number.toString('hex'), '0x' + block.hash.toString('hex'))
+      console.log('================================')
+    })
+
+    // network connectivity error
+    engine.on('error', function (err) {
+      // report connectivity errors
+      console.error(err.stack)
+    })
+
+    // start polling for blocks
+    engine.start()
+
+    // accounts is null when using local wallet
+    // web3.eth.getAccounts((err,data) => {
+    //   local_accounts = data
+    // })
+
+    // when using local wallet, coinbase is the local wallet
+    // web3.eth.getCoinbase((err,data) => {
+    //   coinbase = data
+    //   console.log('coinbase ' + coinbase)
+    //   web3.eth.getBalance(coinbase, function (error, result) {
+    //     console.log(web3.fromWei(result.toString()))
+    //   })
+    // })
+
+    $('#open-wallet').hide()
+    init()
+  },50)
+}
 
 
 function init () {
@@ -1846,6 +1975,7 @@ function init () {
       TwoKeyReg_contractInstance = contractInstance
       // init_TwoKeyReg();
       $('#loading').hide()
+      stop_spin()
       whoAmI()
     })
   })
@@ -1868,17 +1998,11 @@ $(document).ready(function () {
   }
   if (!(login_method == 'local' || login_method == 'remote' || login_method == 'metamask')) {
     delete localStorage.login
-    $('#loading').hide()
-    $('.contract').hide()
-    $('.contracts').hide()
-    $('.loader').hide()
     $('#login-method').show()
     return
   }
   $('#login-method').hide()
   localStorage.login = login_method
-
-  $('#loading').show()
 
   // https://clipboardjs.com/
   let clipboard_lnk0 = new Clipboard('.lnk0')
@@ -1917,16 +2041,18 @@ $(document).ready(function () {
     console.error('Trigger:', e.trigger)
   })
 
-  let url = 'http://' + window.document.location.hostname + ':8545'
+  node_url = 'http://' + window.document.location.hostname + ':8545'
 
   if (localStorage.login == 'metamask') {
     if (typeof web3 == 'undefined') {
-      alert("MetaMask extension is not installed and/or enabled")
       window.logout()
+      alert("MetaMask extension is not installed and/or enabled")
       return
     }
+    $('#loading').show()
+    start_spin()
     // Use Mist/MetaMask's provider
-    $('#metamask-login').text('Make sure MetaMask is configured to use the test network ' + url)
+    $('#metamask-login').text('Make sure MetaMask is configured to use the test network ' + node_url)
 
     $('#metamask-login').show()
     $('#logout-button').hide()
@@ -1959,7 +2085,7 @@ $(document).ready(function () {
           ok = true
       }
       if (!ok) {
-        alert('Configure MetaMask to work on the following network ' + url)
+        alert('Configure MetaMask to work on the following network ' + node_url)
         return
       }
 
@@ -1968,116 +2094,18 @@ $(document).ready(function () {
       setInterval(check_user_change, 500)
     })
   } else if (localStorage.login == 'remote') {
-    let provider = new Web3.providers.HttpProvider(url)
+    $('#loading').show()
+    start_spin()
+    let provider = new Web3.providers.HttpProvider(node_url)
     window.web3 = new Web3(provider)
     local_accounts = web3.eth.accounts
   } else if (localStorage.login == 'local') {
-    var engine = new ProviderEngine()
-    window.web3 = new Web3(engine)
-
+    $('#open-wallet').show()
     let walletname = localStorage.walletname
-    if (!walletname) {
-      walletname = prompt('Enter wallet name')
+    if (walletname) {
+      $('#login-wallet-name').val(walletname)
     }
-    if (!walletname) {
-      window.logout()
-      return
-    }
-    localStorage.walletname = walletname
-    $('#login-user-name').val(walletname)
-    let wallets = localStorage.wallets
-    let wallet
-    if (wallets) {
-      try {
-        wallets = JSON.parse(wallets)
-        wallet = wallets[walletname]
-      } catch (e) {
-        wallets = null
-      }
-    }
-
-    let password = prompt('Enter wallet password')
-    if (wallet) {
-      wallet = eth_wallet.fromV3(wallet, password)
-    } else {
-      wallet = eth_wallet.generate()
-      if (!wallets) {
-        wallets = {}
-      }
-      wallets[walletname] = wallet.toV3(password)
-      localStorage.wallets = JSON.stringify(wallets)
-    }
-
-    local_address = '0x' + wallet.getAddress().toString('hex')
-    console.log(local_address)
-    wallet.getAddressesString = () => {
-      return local_address
-    }
-    engine.addProvider(new WalletSubprovider(wallet, {}))
-
-
-    // // static results
-    // engine.addProvider(new FixtureSubprovider({
-    //   web3_clientVersion: 'ProviderEngine/v0.0.0/javascript',
-    //   net_listening: true,
-    //   eth_hashrate: '0x00',
-    //   eth_mining: false,
-    //   eth_syncing: true,
-    // }))
-    //
-    // // cache layer
-    // engine.addProvider(new CacheSubprovider())
-    //
-    // // filters
-    // engine.addProvider(new FilterSubprovider())
-    //
-    // // pending nonce
-    // engine.addProvider(new NonceSubprovider())
-    //
-    // // vm
-    // engine.addProvider(new VmSubprovider())
-    //
-    // // id mgmt
-    // engine.addProvider(new HookedWalletSubprovider({
-    //   getAccounts: function(cb){ console.log(cb) },
-    //   approveTransaction: function(cb){ console.log(cb) },
-    //   signTransaction: function(cb){ console.log(cb) },
-    // }))
-
-    // data source
-    engine.addProvider(new RpcSubprovider({
-      rpcUrl: url,
-    }))
-
-    // log new blocks
-    engine.on('block', function (block) {
-      console.log('================================')
-      console.log('BLOCK CHANGED:', '#' + block.number.toString('hex'), '0x' + block.hash.toString('hex'))
-      console.log('================================')
-    })
-
-    // network connectivity error
-    engine.on('error', function (err) {
-      // report connectivity errors
-      console.error(err.stack)
-    })
-
-    // start polling for blocks
-    engine.start()
-
-    // accounts is null when using local wallet
-    // web3.eth.getAccounts((err,data) => {
-    //   local_accounts = data
-    // })
-
-    // when using local wallet, coinbase is the local wallet
-    // web3.eth.getCoinbase((err,data) => {
-    //   coinbase = data
-    //   console.log('coinbase ' + coinbase)
-    //   web3.eth.getBalance(coinbase, function (error, result) {
-    //     console.log(web3.fromWei(result.toString()))
-    //   })
-    // })
+    return
   } else {
     alert("Unknown login method")
     window.logout()
