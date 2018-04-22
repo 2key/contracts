@@ -30,8 +30,18 @@
     <!--</div>-->
 </div>
 
+<div id="login-method">
+  <h1>Welcom to 2Key blockchain POC</h1>
+  <ul class="list-group">
+    <li class="list-group-item"><a href="./?login=remote">Login with remote open wallet</a></li>
+    <li class="list-group-item"><a href="./?login=local">Login with local wallet</a></li>
+    <li class="list-group-item"><a href="./?login=metamask">Login using MetaMask</a></li>
+  </ul>
+</div>
+
 <div class="pull-left">
   <div class="margin-top-3">
+    <div id="iframe"></div>
     <div id="loading"><h1>Loading...</h1></div>
     <div id="metamask-login" class="container-fluid">
     </div>
@@ -49,8 +59,8 @@
       </table>
       <h3>please login</h3>
       <div class="input-group">
-        <input type="text" id="login-user-name" placeholder="user name" class="form-control input-enter"
-          data-toggle="tooltip" title="user name, address, 'coinbase'" />
+        <input type="text" id="login-user-name" placeholder="2key user name" class="form-control input-enter"
+          data-toggle="tooltip" title="2key user name, address, 'coinbase'" />
         <!--<div class="checkbox">-->
             <!--<label>-->
               <!--<input type="checkbox" checked="checked">remember-->
@@ -58,6 +68,8 @@
         <!--</div>-->
         <br/>
         <a href="#" onclick="login()" class="btn btn-primary btn-enter" id="login-button">Login</a>
+        <!--<a href="#" onclick="loginCoinbase()" class="btn btn-primary btn-enter" id="login-coinbase-button">Login as Coinbase</a>-->
+        <a href="#" onclick="logout()" class="btn btn-primary" id="login-logout-button">Logout</a>
       </div>
     </div>
     <div class="container-fluid logout">
@@ -107,7 +119,7 @@
         <a href="#" onclick="approveTokens()" class="btn btn-primary" data-toggle="tooltip" title="approve destination to transfer-from me an amount of tokens">Approve To</a>
         <a href="#" onclick="allowanceTokens()" class="btn btn-primary" data-toggle="tooltip" title="write in the amount field the maximal amount of tokens approved for me to transfer-from destination">Allowance From</a>
         <a href="#" onclick="transferFromTokens()" class="btn btn-primary" data-toggle="tooltip" title="transfer amount of tokens from destination to me">Transfer From</a>
-        <a href="#" onclick="getETH()" class="btn btn-primary" data-toggle="tooltip" title="transfer ETH to me">get ETH</a>
+        <a href="#" onclick="sendETH()" class="btn btn-primary" data-toggle="tooltip" title="send ETH to other">send ETH</a>
       </div>
       <br/>
       <br/>
