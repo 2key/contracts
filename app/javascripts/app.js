@@ -1927,7 +1927,6 @@ window.openWallet = function (import_key) {
     return
   }
 
-  localStorage.walletname = walletname
   $('#login-user-name').val(walletname)
   let wallets = localStorage.wallets
   let wallet
@@ -1940,9 +1939,6 @@ window.openWallet = function (import_key) {
     }
   }
 
-  $('#loading').show()
-  start_spin()
-
   // start the following with a timer so we will have a chance for the jQuery commands we just did to take effects
   if (import_key) {
     wallet = null
@@ -1950,9 +1946,26 @@ window.openWallet = function (import_key) {
 
   let mnemonic
   if (!wallet) {
-      mnemonic = bip39.generateMnemonic()
-      mnemonic =  prompt('Save your paper wallet or enter your own', mnemonic);
+    mnemonic = bip39.generateMnemonic()
+    let inp =  prompt('write on a piece of paper your new wallet\'s mnemonic:\n\n' + mnemonic +
+      '\n\nor type the mnemonic of a wallet you want to restore:')
+    if (inp === null) {
+      return
+    }
+    if (inp) {
+      if (bip39.validateMnemonic(inp)) {
+        mnemonic = inp
+      } else {
+        alert('bad mnemonic, try again')
+        return
+      }
+    }
   }
+
+  localStorage.walletname = walletname
+
+  $('#loading').show()
+  start_spin()
 
   setTimeout(() => {
     if (wallet) {
