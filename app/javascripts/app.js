@@ -1,5 +1,5 @@
 /* jshint esversion: 6 */
-
+let PORT = 8877  // port used by ethereum node RPC. not the standard 8545.
 import 'jquery'
 import 'bootstrap'
 import {default as bootbox} from 'bootbox'
@@ -22,7 +22,7 @@ import * as HookedWalletSubprovider from 'web3-provider-engine/subproviders/hook
 const WalletSubprovider = require('ethereumjs-wallet/provider-engine')
 let local_accounts
 let local_address
-let coinbase = '0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1'
+let coinbase
 let node_url
 // http://bl.ocks.org/d3noob/8375092
 // const d3 = require("d3");
@@ -154,7 +154,7 @@ function transaction_start (tx_promise, cb_end, cb_error) {
       e = e.message
     }
     console.log(e)
-    safe_alert(e.toString().split('\n')[0])
+    safe_alert('Failed to send transaction to Ethereum\n' + e.toString().split('\n')[0])
     if (cb_error) cb_error()
   }
 
@@ -187,7 +187,7 @@ function view (view_promise, cb_end, cb_error) {
   function view_error(e) {
     active_views--
     transaction_msg()
-    safe_alert(e)
+    safe_alert('Failed to read infromation from Ethereum\n' + e)
     if (cb_error) cb_error()
   }
 
@@ -205,12 +205,14 @@ function escapeHtml (string) {
   })
 }
 
-function set_url (surl, eid) {
-        $(eid).text(surl.slice(8))
-        $(eid).attr('data-clipboard-text', surl)
+function set_url (surl, eid,text) {
+  if (!text) {
+    $(eid).text(surl.slice(8))
+  }
+  $(eid).attr('data-clipboard-text', surl)
 }
 
-function short_url (url, eid) {
+function short_url (url, eid, text) {
   fetch('https://www.googleapis.com/urlshortener/v1/url?key=AIzaSyBqmohu0JE5CRhQYq9YgbeV9ApvWFR4pA0',
     {method: 'POST',
       body: JSON.stringify({longUrl: url}),
@@ -225,7 +227,7 @@ function short_url (url, eid) {
     let surl = x.id
     if (surl) { // google does not shorten urls that have an IP address instead of a qualified domain name
       safe_cb(eid, () => {
-        set_url(surl, eid)
+        set_url(surl, eid, text)
       })
     }
   })
@@ -636,11 +638,7 @@ function _whoAmI (doing_login) {
   let username = localStorage.username
   if (username) {
     if (username === 'coinbase') {
-      if (coinbase) {
-        my_address = coinbase
-      } else {
-        my_address = web3.eth.coinbase
-      }
+      my_address = coinbase
     } else if (username.startsWith('0x')) {
       my_address = username
     } else {
@@ -753,7 +751,14 @@ window.login = function () {
     tempAlert('Name to short', 2000)
     return
   }
-  // $("#user-name").html(username);
+  if (username == 'coinbase' && localStorage.login != 'remote') {
+    tempAlert('coinbase can only be used in remote', 2000)
+    return
+  }
+  if (username.startsWith('0x') && localStorage.login != 'remote') {
+    tempAlert('hex address can only be used in remote', 2000)
+    return
+  }
   localStorage.username = username
   last_address = null
   whoAmI(true)
@@ -813,6 +818,7 @@ window.logout = function () {
   clean_link()
   logout()
   delete localStorage.login
+  delete localStorage.privateKey
   $('.login').hide()
   location.reload()
 }
@@ -1588,7 +1594,7 @@ function createContract (name, symbol, erc20_address) {
       trn = TwoKeyPresellContract.new(TwoKeyReg_contractInstance.address, name, symbol, total_arcs, quota,
         web3.toWei(parseFloat(cost), 'ether'), web3.toWei(parseFloat(bounty), 'ether'),
         ipfs_hash, erc20_address,
-        {gas: gastimate(4000000), from: address})
+        {gas: gastimate(5000000), from: address})
     } else {
       trn = TwoKeyAcquisitionContract.new(TwoKeyReg_contractInstance.address,
         name, symbol, total_arcs, quota,
@@ -1786,6 +1792,7 @@ function fulfilled_event (c, e) {
   let units = e.args.units
 
   c.units[to] = units
+  d3_update()
 }
 
 function rewarded_event (c, e) {
@@ -1801,6 +1808,100 @@ function rewarded_event (c, e) {
   } else {
     c.rewards[to] = amount.toNumber()
   }
+  d3_update()
+}
+
+function loadWallet() {
+  let private_key = localStorage.privateKey
+  if (!private_key) {
+    return false
+  }
+  private_key = Buffer.from(private_key, 'hex')
+  let wallet
+  try {
+    wallet = eth_wallet.fromPrivateKey(private_key)
+  } catch (e) {
+    return false
+  }
+
+  local_address = '0x' + wallet.getAddress().toString('hex')
+  console.log(local_address)
+
+  wallet.getAddressesString = () => {
+    return local_address
+  }
+
+  // start engine as described in https://github.com/MetaMask/provider-engine/blob/master/README.md
+  var engine = new ProviderEngine()
+  window.web3 = new Web3(engine)
+
+  engine.addProvider(new WalletSubprovider(wallet, {}))
+
+
+  // // static results
+  // engine.addProvider(new FixtureSubprovider({
+  //   web3_clientVersion: 'ProviderEngine/v0.0.0/javascript',
+  //   net_listening: true,
+  //   eth_hashrate: '0x00',
+  //   eth_mining: false,
+  //   eth_syncing: true,
+  // }))
+  //
+  // // cache layer
+  // engine.addProvider(new CacheSubprovider())
+  //
+  // // filters
+  // engine.addProvider(new FilterSubprovider())
+  //
+  // // pending nonce
+  // engine.addProvider(new NonceSubprovider())
+  //
+  // // vm
+  // engine.addProvider(new VmSubprovider())
+  //
+  // // id mgmt
+  // engine.addProvider(new HookedWalletSubprovider({
+  //   getAccounts: function(cb){ console.log(cb) },
+  //   approveTransaction: function(cb){ console.log(cb) },
+  //   signTransaction: function(cb){ console.log(cb) },
+  // }))
+
+  // data source
+  engine.addProvider(new RpcSubprovider({
+    rpcUrl: node_url,
+  }))
+
+  // log new blocks
+  engine.on('block', function (block) {
+    console.log('================================')
+    console.log('BLOCK CHANGED:', '#' + block.number.toString('hex'), '0x' + block.hash.toString('hex'))
+    console.log('================================')
+  })
+
+  // network connectivity error
+  engine.on('error', function (err) {
+    // report connectivity errors
+    console.error(err.stack)
+  })
+
+  // start polling for blocks
+  engine.start()
+
+  // accounts is null when using local wallet
+  // web3.eth.getAccounts((err,data) => {
+  //   local_accounts = data
+  // })
+
+  // when using local wallet, coinbase is the local wallet
+  // web3.eth.getCoinbase((err,data) => {
+  //   coinbase = data
+  //   console.log('coinbase ' + coinbase)
+  //   web3.eth.getBalance(coinbase, function (error, result) {
+  //     console.log(web3.fromWei(result.toString()))
+  //   })
+  // })
+
+  return true
 }
 
 window.openWallet = function () {
@@ -1809,9 +1910,6 @@ window.openWallet = function () {
   if (!walletname || !walletpassword) {
     return
   }
-
-  var engine = new ProviderEngine()
-  window.web3 = new Web3(engine)
 
   localStorage.walletname = walletname
   $('#login-user-name').val(walletname)
@@ -1847,77 +1945,9 @@ window.openWallet = function () {
       wallets[walletname] = wallet.toV3(walletpassword) // slow
       localStorage.wallets = JSON.stringify(wallets)
     }
+    localStorage.privateKey = wallet.getPrivateKey().toString('hex')
 
-    local_address = '0x' + wallet.getAddress().toString('hex')
-    console.log(local_address)
-    wallet.getAddressesString = () => {
-      return local_address
-    }
-    engine.addProvider(new WalletSubprovider(wallet, {}))
-
-
-    // // static results
-    // engine.addProvider(new FixtureSubprovider({
-    //   web3_clientVersion: 'ProviderEngine/v0.0.0/javascript',
-    //   net_listening: true,
-    //   eth_hashrate: '0x00',
-    //   eth_mining: false,
-    //   eth_syncing: true,
-    // }))
-    //
-    // // cache layer
-    // engine.addProvider(new CacheSubprovider())
-    //
-    // // filters
-    // engine.addProvider(new FilterSubprovider())
-    //
-    // // pending nonce
-    // engine.addProvider(new NonceSubprovider())
-    //
-    // // vm
-    // engine.addProvider(new VmSubprovider())
-    //
-    // // id mgmt
-    // engine.addProvider(new HookedWalletSubprovider({
-    //   getAccounts: function(cb){ console.log(cb) },
-    //   approveTransaction: function(cb){ console.log(cb) },
-    //   signTransaction: function(cb){ console.log(cb) },
-    // }))
-
-    // data source
-    engine.addProvider(new RpcSubprovider({
-      rpcUrl: node_url,
-    }))
-
-    // log new blocks
-    engine.on('block', function (block) {
-      console.log('================================')
-      console.log('BLOCK CHANGED:', '#' + block.number.toString('hex'), '0x' + block.hash.toString('hex'))
-      console.log('================================')
-    })
-
-    // network connectivity error
-    engine.on('error', function (err) {
-      // report connectivity errors
-      console.error(err.stack)
-    })
-
-    // start polling for blocks
-    engine.start()
-
-    // accounts is null when using local wallet
-    // web3.eth.getAccounts((err,data) => {
-    //   local_accounts = data
-    // })
-
-    // when using local wallet, coinbase is the local wallet
-    // web3.eth.getCoinbase((err,data) => {
-    //   coinbase = data
-    //   console.log('coinbase ' + coinbase)
-    //   web3.eth.getBalance(coinbase, function (error, result) {
-    //     console.log(web3.fromWei(result.toString()))
-    //   })
-    // })
+    loadWallet()
 
     $('#open-wallet').hide()
     init()
@@ -2045,7 +2075,7 @@ $(document).ready(function () {
     console.error('Trigger:', e.trigger)
   })
 
-  node_url = 'http://' + window.document.location.hostname + ':8545'
+  node_url = 'http://' + window.document.location.hostname + ':' + PORT
 
   if (localStorage.login == 'metamask') {
     if (typeof web3 == 'undefined') {
@@ -2103,13 +2133,16 @@ $(document).ready(function () {
     let provider = new Web3.providers.HttpProvider(node_url)
     window.web3 = new Web3(provider)
     local_accounts = web3.eth.accounts
+    coinbase = web3.eth.coinbase
   } else if (localStorage.login == 'local') {
-    $('#open-wallet').show()
-    let walletname = localStorage.walletname
-    if (walletname) {
-      $('#login-wallet-name').val(walletname)
+    if (!loadWallet()) {
+      $('#open-wallet').show()
+      let walletname = localStorage.walletname
+      if (walletname) {
+        $('#login-wallet-name').val(walletname)
+      }
+      return
     }
-    return
   } else {
     alert("Unknown login method")
     window.logout()
@@ -2190,6 +2223,9 @@ function d3_init () {
 }
 
 function d3_update (source) {
+  if (!current_twoKeyContractAddress) {
+    return
+  }
   if (!d3_root) return
 
   if (!source) {
@@ -2387,6 +2423,7 @@ function d3_add_event_children (addresses, parent, depth) {
               unit_decimals = unit_decimals.toNumber()
 
               node.units = parseFloat('' + _units) / 10. ** unit_decimals
+              d3_update()  // no need to add another update after changing rewards because this will always come later
             })
         }
 
