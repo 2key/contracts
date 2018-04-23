@@ -7,6 +7,9 @@ import {default as Clipboard} from 'clipboard'
 
 const eth_wallet = require("ethereumjs-wallet");
 const eth_util = require("ethereumjs-util");
+const bip39 = require('bip39')
+const hdkey = require('ethereumjs-wallet/hdkey')
+
 
 // const ProviderEngine = require('web3-provider-engine')
 // const CacheSubprovider = require('web3-provider-engine/subproviders/cache.js')
@@ -1917,7 +1920,7 @@ function loadWallet() {
   return true
 }
 
-window.openWallet = function () {
+window.openWallet = function (import_key) {
   let walletname = $('#login-wallet-name').val()
   let walletpassword = $('#login-wallet-password').val()
   if (!walletname || !walletpassword) {
@@ -1941,6 +1944,16 @@ window.openWallet = function () {
   start_spin()
 
   // start the following with a timer so we will have a chance for the jQuery commands we just did to take effects
+  if (import_key) {
+    wallet = null
+  }
+
+  let mnemonic
+  if (!wallet) {
+      mnemonic = bip39.generateMnemonic()
+      mnemonic =  prompt('Save your paper wallet or enter your own', mnemonic);
+  }
+
   setTimeout(() => {
     if (wallet) {
       try {
@@ -1951,7 +1964,11 @@ window.openWallet = function () {
         return
       }
     } else {
-      wallet = eth_wallet.generate()
+      let seed = bip39.mnemonicToSeed(mnemonic)
+      let hdwallet = hdkey.fromMasterSeed(seed)
+      wallet = hdwallet.getWallet()
+
+      // wallet = eth_wallet.generate()
       if (!wallets) {
         wallets = {}
       }
@@ -2033,6 +2050,7 @@ function new_user () {
   $('.login').hide()
   $('.logout').hide()
   $('#metamask-login').hide()
+  $('#metamask-login').text('') // remove any secret held in this field
 }
 
 $(document).ready(function () {
