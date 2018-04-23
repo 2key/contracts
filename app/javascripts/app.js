@@ -116,11 +116,15 @@ function transaction_start (tx_promise, cb_end, cb_error) {
       if (!transactionHash) {
         transactionHash = tx
       }
-      let receipt = web3.eth.getTransactionReceipt(transactionHash)
-      total_gas += receipt.gasUsed
-      if (receipt.status) {
-        total_success += 1
-      }
+      web3.eth.getTransactionReceipt(transactionHash, (err, receipt) => {
+        if (receipt) {
+          total_gas += receipt.gasUsed
+          if (receipt.status) {
+            total_success += 1
+          }
+          transaction_msg()
+        }
+      })
     }
     active_transactions--
     transaction_msg()
