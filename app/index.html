@@ -15,7 +15,7 @@
 
 <div class="container-fluid">
   <div class="row">
-    <div class="contract col-xs-2 col-sm-2 col-md-2 pull-left">
+    <div class="contract col-xs-2 col-sm-2 col-md-2 pull-left" style="display:none">
         <button class='bt' onclick="home()" data-toggle='tooltip' title='go back to contracts/2key-links page'>&lt; Contracts</button>
     </div>
     <div class=" col-xs-6 col-sm-6 col-md-6" id="msg"></div>
@@ -24,18 +24,42 @@
     <!--<div class="col-xs-1 col-sm-1 col-md-1">-->
       <!--<div class="loader">-->
       <!--</div>-->
-        <div class="loader">
+        <div class="loader" style="display:none">
             <img src="" class="img img-responsive full-width" id="loader-circle"/>
         </div>
     <!--</div>-->
 </div>
 
+<div id="login-method">
+  <h1>Welcom to 2Key blockchain POC</h1>
+  <ul class="list-group">
+    <li class="list-group-item"><a href="./?login=remote">Login with remote open wallet (demo only)</a></li>
+    <li class="list-group-item"><a href="./?login=local">Login with local wallet (weak)</a></li>
+    <li class="list-group-item"><a href="./?login=metamask">Login using MetaMask (strong)</a></li>
+  </ul>
+</div>
+
 <div class="pull-left">
   <div class="margin-top-3">
-    <div id="loading"><h1>Loading...</h1></div>
-    <div id="metamask-login" class="container-fluid">
+    <div id="iframe"></div>
+    <div id="loading" style="display:none"><h1>Loading...</h1></div>
+    <div id="metamask-login" class="container-fluid"></div>
+    <div id="open-wallet" class="container-fluid" style="display:none">
+      <h1>Welcome to 2Key</h1>
+      <br/>
+      <h2>please open your wallet</h2>
+      <div class="input-group">
+        <input type="text" id="login-wallet-name" placeholder="wallet name" class="form-control input-enter"
+          data-toggle="tooltip" title="existing or new wallet name" />
+        <input type="password" id="login-wallet-password" placeholder="wallet password" class="form-control input-enter"
+          data-toggle="tooltip" title="password to open existing wallet or to encrypt new wallet" />
+        <br/>
+        <a href="#" onclick="openWallet()" class="btn btn-primary btn-enter" id="login-wallet-button">Open/Create wallet</a>
+        <!--<a href="#" onclick="loginCoinbase()" class="btn btn-primary btn-enter" id="login-coinbase-button">Login as Coinbase</a>-->
+        <a href="#" onclick="logout()" class="btn btn-primary" id="wallet-logout-button">Logout</a>
+      </div>
     </div>
-    <div class="container-fluid login">
+    <div class="container-fluid login" style="display:none">
       <h1>Welcome to 2Key</h1>
       <table class="table table-bordered" id="login-user-data">
         <tr>
@@ -47,10 +71,11 @@
           <td id="login-user-balance"></td>
         </tr>
       </table>
-      <h3>please login</h3>
+      <br/>
+      <h2>please login to 2Key</h2>
       <div class="input-group">
-        <input type="text" id="login-user-name" placeholder="user name" class="form-control input-enter"
-          data-toggle="tooltip" title="user name, address, 'coinbase'" />
+        <input type="text" id="login-user-name" placeholder="2key user name" class="form-control input-enter"
+          data-toggle="tooltip" title="2key user name, address, 'coinbase'" />
         <!--<div class="checkbox">-->
             <!--<label>-->
               <!--<input type="checkbox" checked="checked">remember-->
@@ -58,9 +83,11 @@
         <!--</div>-->
         <br/>
         <a href="#" onclick="login()" class="btn btn-primary btn-enter" id="login-button">Login</a>
+        <!--<a href="#" onclick="loginCoinbase()" class="btn btn-primary btn-enter" id="login-coinbase-button">Login as Coinbase</a>-->
+        <a href="#" onclick="logout()" class="btn btn-primary" id="login-logout-button">Logout</a>
       </div>
     </div>
-    <div class="container-fluid logout">
+    <div class="container-fluid logout" style="display:none">
       <h2>Who am I</h2>
       <div class="alert alert-danger" id="admin-alert">
         <strong>You</strong> are the Admin. Be careful
@@ -69,8 +96,6 @@
       <!--<div class="col-sm-12">-->
       <div class="table-responsive">
         <a href="#" onclick="logout()" class="btn btn-primary" id="logout-button">Logout</a>
-        <!--<a href="#" onclick="getETH()" class="btn btn-primary">get 1 ETH from 2Key</a>-->
-        <!--<a href="#" onclick="giveETH()" class="btn btn-primary">donate 1 ETH to 2Key</a>-->
         <table class="table table-bordered">
           <tr>
             <td>Name</td>
@@ -103,12 +128,13 @@
         </table>
       </div>
       <div class="container-fluid" style="border:1px solid #cecece;" id="token-operation">
-        <input type="text" id="token-destination" placeholder="token transfer destination (name/address/coinbase)" class="form-control"/>
-        <input type="text" id="token-amount" placeholder="amount of tokens (overwritten by Allowance From)" class="form-control"/>
+        <input type="text" id="token-destination" placeholder="other side of the transfer (name/address/coinbase)" class="form-control"/>
+        <input type="text" id="token-amount" placeholder="amount  (overwritten by Allowance From)" class="form-control"/>
         <a href="#" onclick="transferTokens()" class="btn btn-primary" data-toggle="tooltip" title="transfer amount of tokens from me to destination">Transfer To</a>
         <a href="#" onclick="approveTokens()" class="btn btn-primary" data-toggle="tooltip" title="approve destination to transfer-from me an amount of tokens">Approve To</a>
         <a href="#" onclick="allowanceTokens()" class="btn btn-primary" data-toggle="tooltip" title="write in the amount field the maximal amount of tokens approved for me to transfer-from destination">Allowance From</a>
         <a href="#" onclick="transferFromTokens()" class="btn btn-primary" data-toggle="tooltip" title="transfer amount of tokens from destination to me">Transfer From</a>
+        <a href="#" onclick="sendETH()" class="btn btn-primary" data-toggle="tooltip" title="send ETH to other">send ETH</a>
       </div>
       <br/>
       <br/>

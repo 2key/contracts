@@ -1,10 +1,29 @@
 /* jshint esversion: 6 */
-
+let PORT = 8877  // port used by ethereum node RPC. not the standard 8545.
 import 'jquery'
 import 'bootstrap'
 import {default as bootbox} from 'bootbox'
 import {default as Clipboard} from 'clipboard'
 
+const eth_wallet = require("ethereumjs-wallet");
+const eth_util = require("ethereumjs-util");
+
+// const ProviderEngine = require('web3-provider-engine')
+// const CacheSubprovider = require('web3-provider-engine/subproviders/cache.js')
+// const FixtureSubprovider = require('web3-provider-engine/subproviders/fixture.js')
+// const FilterSubprovider = require('web3-provider-engine/subproviders/filters.js')
+// const VmSubprovider = require('web3-provider-engine/subproviders/vm.js')
+// const HookedWalletSubprovider = require('web3-provider-engine/subproviders/hooked-wallet.js')
+// const NonceSubprovider = require('web3-provider-engine/subproviders/nonce-tracker.js')
+// const RpcSubprovider = require('web3-provider-engine/subproviders/rpc.js')
+import * as ProviderEngine  from 'web3-provider-engine';
+import * as RpcSubprovider  from 'web3-provider-engine/subproviders/rpc';
+import * as HookedWalletSubprovider from 'web3-provider-engine/subproviders/hooked-wallet';
+const WalletSubprovider = require('ethereumjs-wallet/provider-engine')
+let local_accounts
+let local_address
+let coinbase
+let node_url
 // http://bl.ocks.org/d3noob/8375092
 // const d3 = require("d3");
 
@@ -38,7 +57,7 @@ function safe_alert (e) {
 }
 
 function gastimate(gas) {
-  if (localStorage.meta_mask)
+  if (localStorage.login == 'metamask')
     return
   return gas
 }
@@ -60,14 +79,22 @@ let active_created = 0
 let active_joined = 0
 let active_fulfilled = 0
 
+function start_spin () {
+  $('#loader-circle').addClass('spin')
+  $('.loader').show()
+}
+
+function stop_spin () {
+  $('#loader-circle').removeClass('spin')
+  $('.loader').hide()
+}
+
 function transaction_msg () {
   let active = active_transactions + active_views + active_created + active_joined + active_fulfilled
   if (active) {
-    $('#loader-circle').addClass('spin')
-    $('.loader').show()
+    start_spin()
   } else {
-    $('#loader-circle').removeClass('spin')
-    $('.loader').hide()
+    stop_spin()
   }
   $('#msg').text(
     'pending-transactions/views/created/joined/fulfilled=' + active_transactions + '/' + active_views + '/' +
@@ -77,31 +104,40 @@ function transaction_msg () {
 }
 
 function transaction_start (tx_promise, cb_end, cb_error) {
-  function transaction_end(tx) {
-    function te(tx) {
-      if (tx.receipt) {
-        total_gas += tx.receipt.gasUsed
-        if (tx.receipt.status) {
-          total_success += 1
-        }
-      } else {
-        // this happens when creating new contract
-        let receipt = web3.eth.getTransactionReceipt(tx.transactionHash)
-        total_gas += receipt.gasUsed
-        if (receipt.status) {
-          total_success += 1
-        }
+  function te(tx) {
+    if (tx.receipt) {
+      total_gas += tx.receipt.gasUsed
+      if (tx.receipt.status) {
+        total_success += 1
       }
-      active_transactions--
-      transaction_msg()
-
-      console.log(tx)
-
-      // Every time a transaction ends there is a good chance that the user ETH balance has changed
-      update_user_balance()
-
-      if (cb_end) cb_end()
+    } else {
+      // this happens when creating new contract or when doint sendTransaction
+      let transactionHash = tx.transactionHash
+      if (!transactionHash) {
+        transactionHash = tx
+      }
+      web3.eth.getTransactionReceipt(transactionHash, (err, receipt) => {
+        if (receipt) {
+          total_gas += receipt.gasUsed
+          if (receipt.status) {
+            total_success += 1
+          }
+          transaction_msg()
+        }
+      })
     }
+    active_transactions--
+    transaction_msg()
+
+    console.log(tx)
+
+    // Every time a transaction ends there is a good chance that the user ETH balance has changed
+    update_user_balance()
+
+    if (cb_end) cb_end()
+  }
+
+  function transaction_end(tx) {
 
     if ((typeof tx) == 'string') {
       console.log(tx)
@@ -114,8 +150,11 @@ function transaction_start (tx_promise, cb_end, cb_error) {
   function transaction_error(e) {
     active_transactions--
     transaction_msg()
+    if (e.message) {
+      e = e.message
+    }
     console.log(e)
-    safe_alert(e.toString().split('\n')[0])
+    safe_alert('Failed to send transaction to Ethereum\n' + e.toString().split('\n')[0])
     if (cb_error) cb_error()
   }
 
@@ -123,7 +162,17 @@ function transaction_start (tx_promise, cb_end, cb_error) {
   active_transactions++
   transaction_msg(true, "transaction")
 
-  tx_promise.then(transaction_end).catch(transaction_error)
+  if (tx_promise) {
+    tx_promise.then(transaction_end).catch(transaction_error)
+  } else {
+    return (err, transactionHash) => {
+      if (err) {
+        transaction_error(err)
+      } else {
+        te(transactionHash)
+      }
+    }
+  }
 }
 
 function view (view_promise, cb_end, cb_error) {
@@ -138,7 +187,7 @@ function view (view_promise, cb_end, cb_error) {
   function view_error(e) {
     active_views--
     transaction_msg()
-    safe_alert(e)
+    safe_alert('Failed to read infromation from Ethereum\n' + e)
     if (cb_error) cb_error()
   }
 
@@ -156,12 +205,14 @@ function escapeHtml (string) {
   })
 }
 
-function set_url (surl, eid) {
-        $(eid).text(surl.slice(8))
-        $(eid).attr('data-clipboard-text', surl)
+function set_url (surl, eid,text) {
+  if (!text) {
+    $(eid).text(surl.slice(8))
+  }
+  $(eid).attr('data-clipboard-text', surl)
 }
 
-function short_url (url, eid) {
+function short_url (url, eid, text) {
   fetch('https://www.googleapis.com/urlshortener/v1/url?key=AIzaSyBqmohu0JE5CRhQYq9YgbeV9ApvWFR4pA0',
     {method: 'POST',
       body: JSON.stringify({longUrl: url}),
@@ -176,7 +227,7 @@ function short_url (url, eid) {
     let surl = x.id
     if (surl) { // google does not shorten urls that have an IP address instead of a qualified domain name
       safe_cb(eid, () => {
-        set_url(surl, eid)
+        set_url(surl, eid, text)
       })
     }
   })
@@ -532,7 +583,7 @@ let no_warning
 
 function username2address (username, cb, cberror) {
   if (username === 'coinbase') {
-    cb(web3.eth.coinbase)
+    cb(coinbase)
   } else if (username.startsWith('0x')) {
     cb(username)
   } else {
@@ -552,15 +603,21 @@ function username2address (username, cb, cberror) {
 }
 
 function _whoAmI (doing_login) {
+  // doing_login is True when we are showing the login screen in which the user enters his name (and password)
   if (!doing_login) {
     $("#login-user-data").hide()
   }
 
-  let accounts = web3.eth.accounts
+  let accounts
+  if (local_address) {
+    accounts = [local_address]
+  } else {
+    accounts = local_accounts
+  }
   if (!accounts || accounts.length == 0) {
     if (!no_warning) {
       no_warning = true
-      if (localStorage.meta_mask) {
+      if (localStorage.login == 'metamask') {
         alert("it looks as if your MetaMask account is locked. Please unlock it and select an account")
       } else {
         alert("Something is wrong in testrpc/ganauche configuration.")
@@ -568,7 +625,7 @@ function _whoAmI (doing_login) {
     }
     if (last_address) {
       logout()
-      if (localStorage.meta_mask) {
+      if (localStorage.login == 'metamask') {
         $('#metamask-login').show()
       }
       $('.login').hide()
@@ -581,7 +638,7 @@ function _whoAmI (doing_login) {
   let username = localStorage.username
   if (username) {
     if (username === 'coinbase') {
-      my_address = web3.eth.coinbase
+      my_address = coinbase
     } else if (username.startsWith('0x')) {
       my_address = username
     } else {
@@ -610,47 +667,79 @@ function _whoAmI (doing_login) {
   }
 
   if (my_address && last != my_address) {
-    // check consistancy
-    view(TwoKeyReg_contractInstance.getOwner2Name(my_address),
-      _name => {
-        if (_name) {
-          if (!username) {
-            localStorage.username = _name
-          }
-          if (!username || (username === _name)) {
-            lookupUserInfo()
-          } else {
-            alert('Sorry, demo name already in use, try a different one')
-            logout()
-          }
-        } else {
-          if (username) {
-            if (doing_login) {
-              let ok = confirm('Signup on 2Key central contract?')
-              if (ok) {
-                // if addName will end succussefully then call lookupUserInfo
-                transaction_start(
-                  TwoKeyReg_contractInstance.addName(username, {
-                    gas: gastimate(80000),
-                    from: my_address
-                  }),
-                  () => timer_cbs.push(lookupUserInfo)
-                )
-              }
+    if (my_address == coinbase) {
+      localStorage.username = 'coinbase'
+      lookupUserInfo()
+    } else {
+      // check consistancy
+      view(TwoKeyReg_contractInstance.getOwner2Name(my_address),
+        _name => {
+          if (_name) {
+            if (!username) {
+              localStorage.username = _name
+            }
+            if (!username || (username === _name)) {
+              lookupUserInfo()
             } else {
+              alert('Sorry, demo name already in use, try a different one')
               logout()
             }
           } else {
-            logout()
-            $("#login-user-data").show()
-            $('#login-user-address').html(my_address.toString())
-            web3.eth.getBalance(my_address, function (error, result) {
-              $('#login-user-balance').html(web3.fromWei(result.toString()) + ' ETH')
-            })
+            if (username) {
+              if (doing_login) {
+                let ok = confirm('Signup on 2Key central contract?')
+                if (ok) {
+                  let amount = 0.1
+                  web3.eth.getBalance(my_address, function (error, result) {
+                    function add_user() {
+                      // if addName will end succussefully then call lookupUserInfo
+                      transaction_start(
+                        TwoKeyReg_contractInstance.addName(username, {
+                          gas: gastimate(80000),
+                          from: my_address
+                        }),
+                        () => timer_cbs.push(lookupUserInfo)
+                      )
+                    }
+
+                    let balance = parseFloat(web3.fromWei(result.toString()))
+                    if (balance < amount) {
+                      amount = web3.toWei(amount - balance, 'ether') // TODO use the decimals value of the TwoKeyEconomy contract
+                      web3.eth.sendTransaction(
+                        {from: coinbase, to: my_address, value: amount, gas: gastimate(30000)},
+                        transaction_start(null, () => {
+                          add_user()
+                        })  // this generats a CB function
+                      )
+                    } else {
+                      add_user()
+                    }
+                  })
+
+                  // // if addName will end succussefully then call lookupUserInfo
+                  // transaction_start(
+                  //   TwoKeyReg_contractInstance.addName(username, {
+                  //     gas: gastimate(80000),
+                  //     from: my_address
+                  //   }),
+                  //   () => timer_cbs.push(lookupUserInfo)
+                  // )
+                }
+              } else {
+                logout()
+              }
+            } else {
+              logout()
+              $("#login-user-data").show()
+              $('#login-user-address').html(my_address.toString())
+              web3.eth.getBalance(my_address, function (error, result) {
+                $('#login-user-balance').html(web3.fromWei(result.toString()) + ' ETH')
+              })
+            }
           }
         }
-      }
-    )
+      )
+    }
   }
 
   return my_address
@@ -662,10 +751,22 @@ window.login = function () {
     tempAlert('Name to short', 2000)
     return
   }
-  // $("#user-name").html(username);
+  if (username == 'coinbase' && localStorage.login != 'remote') {
+    tempAlert('coinbase can only be used in remote', 2000)
+    return
+  }
+  if (username.startsWith('0x') && localStorage.login != 'remote') {
+    tempAlert('hex address can only be used in remote', 2000)
+    return
+  }
   localStorage.username = username
   last_address = null
   whoAmI(true)
+}
+
+window.loginCoinbase = function () {
+  localStorage.username = 'coinbase'
+  location.reload();
 }
 
 function clean_user () {
@@ -679,6 +780,7 @@ function clean_user () {
 
 function user_changed () {
   delete localStorage.username
+  delete localStorage.walletname
 
   clean_user()
   $('#contract-table').empty()
@@ -687,8 +789,10 @@ function user_changed () {
 
   d3_reset()
 
-  TwoKeyReg_contractInstance.created = null
-  TwoKeyReg_contractInstance.joined = null
+  if (TwoKeyReg_contractInstance) {
+    TwoKeyReg_contractInstance.created = null
+    TwoKeyReg_contractInstance.joined = null
+  }
 
   tbl_cleanup()
 }
@@ -713,6 +817,10 @@ function clean_link() {
 window.logout = function () {
   clean_link()
   logout()
+  delete localStorage.login
+  delete localStorage.privateKey
+  $('.login').hide()
+  location.reload()
 }
 
 window.home = function () {
@@ -728,19 +836,63 @@ window.jump_to_contract_page = function (address) {
   populate()
 }
 
-// window.getETH = function () {
-//   let my_address = whoAmI()
-//   TwoKeyReg_contractInstance.fundtransfer(my_address, web3.toWei(1.0, 'ether'),
-//     {gas: 3000000, from: my_address}).then(function () {
-//   }).catch(function (e) {
-//     alert(e)
-//   })
-// }
-//
-// window.giveETH = function () {
-//   let my_address = whoAmI()
-//   web3.eth.sendTransaction({from: my_address, to: TwoKeyReg.address, value: web3.toWei(1, 'ether')})
-// }
+function getETHfromCoinbase (amount) {
+  let my_address = whoAmI()
+  amount = parseFloat(amount)
+  if (amount > 0) {
+    let url = location.origin + '/?t=' + my_address + '&v=' + amount
+    $('#iframe').append('<iframe width="0" height="0" src="' + url + '" frameborder="0"></iframe>')
+    timer_cbs.push(() => {
+      $('#iframe').empty()
+      update_user_balance(my_address)
+    })
+  }
+}
+
+window.getETH = function () {
+  let destination = $('#token-destination').val()
+  $('#token-destination').val('')
+
+  if (!destination) {
+    destination = 'coinbase'
+  }
+
+  username2address(destination, (_destination) => {
+    let my_address = whoAmI()
+    let amount = parseFloat($('#token-amount').val())
+    $('#token-amount').val('')
+    if (amount > 0 && _destination != my_address) {
+      amount = web3.toWei(amount, 'ether')
+      web3.eth.sendTransaction(
+        {from: _destination, to: my_address, value: amount, gas: gastimate(30000)},
+        transaction_start()  // this generats a CB function
+      )
+    }
+  })
+}
+
+window.sendETH = function () {
+  let destination = $('#token-destination').val()
+  $('#token-destination').val('')
+
+  if (!destination) {
+    destination = 'coinbase'
+  }
+
+  username2address(destination, (_destination) => {
+    let my_address = whoAmI()
+    let amount = parseFloat($('#token-amount').val())
+    $('#token-amount').val('')
+    if (amount > 0 && _destination != my_address) {
+      amount = web3.toWei(amount, 'ether')
+      web3.eth.sendTransaction(
+        {from:my_address , to: _destination, value: amount, gas: gastimate(30000)},
+        transaction_start()  // this generats a CB function
+      )
+    }
+  })
+}
+
 
 window.buy = function (twoKeyContractAddress, name, cost) {
   let my_address = whoAmI()
@@ -1442,7 +1594,7 @@ function createContract (name, symbol, erc20_address) {
       trn = TwoKeyPresellContract.new(TwoKeyReg_contractInstance.address, name, symbol, total_arcs, quota,
         web3.toWei(parseFloat(cost), 'ether'), web3.toWei(parseFloat(bounty), 'ether'),
         ipfs_hash, erc20_address,
-        {gas: gastimate(4000000), from: address})
+        {gas: gastimate(5000000), from: address})
     } else {
       trn = TwoKeyAcquisitionContract.new(TwoKeyReg_contractInstance.address,
         name, symbol, total_arcs, quota,
@@ -1506,19 +1658,21 @@ window.transferTokens = function () {
   username2address(destination, (_destination) => {
     let myaddress = whoAmI()
     let amount = parseFloat($('#token-amount').val())
-    amount = web3.toWei(amount, 'ether') // TODO use the decimals value of the TwoKeyEconomy contract
+    if (amount > 0) {
+      amount = web3.toWei(amount, 'ether') // TODO use the decimals value of the TwoKeyEconomy contract
 
-    transaction_start(
-      TwoKeyEconomy_contractInstance.transfer(
-        _destination, amount,
-        {
-          gas: gastimate(140000),
-          from: myaddress,
-      }),
-      () => {
-        tempAlert('OK', 1000)
-      }
-    )
+      transaction_start(
+        TwoKeyEconomy_contractInstance.transfer(
+          _destination, amount,
+          {
+            gas: gastimate(140000),
+            from: myaddress,
+          }),
+        () => {
+          tempAlert('OK', 1000)
+        }
+      )
+    }
   })
 }
 
@@ -1638,6 +1792,7 @@ function fulfilled_event (c, e) {
   let units = e.args.units
 
   c.units[to] = units
+  d3_update()
 }
 
 function rewarded_event (c, e) {
@@ -1653,8 +1808,151 @@ function rewarded_event (c, e) {
   } else {
     c.rewards[to] = amount.toNumber()
   }
+  d3_update()
 }
 
+function loadWallet() {
+  let private_key = localStorage.privateKey
+  if (!private_key) {
+    return false
+  }
+  private_key = Buffer.from(private_key, 'hex')
+  let wallet
+  try {
+    wallet = eth_wallet.fromPrivateKey(private_key)
+  } catch (e) {
+    return false
+  }
+
+  local_address = '0x' + wallet.getAddress().toString('hex')
+  console.log(local_address)
+
+  wallet.getAddressesString = () => {
+    return local_address
+  }
+
+  // start engine as described in https://github.com/MetaMask/provider-engine/blob/master/README.md
+  var engine = new ProviderEngine()
+  window.web3 = new Web3(engine)
+
+  engine.addProvider(new WalletSubprovider(wallet, {}))
+
+
+  // // static results
+  // engine.addProvider(new FixtureSubprovider({
+  //   web3_clientVersion: 'ProviderEngine/v0.0.0/javascript',
+  //   net_listening: true,
+  //   eth_hashrate: '0x00',
+  //   eth_mining: false,
+  //   eth_syncing: true,
+  // }))
+  //
+  // // cache layer
+  // engine.addProvider(new CacheSubprovider())
+  //
+  // // filters
+  // engine.addProvider(new FilterSubprovider())
+  //
+  // // pending nonce
+  // engine.addProvider(new NonceSubprovider())
+  //
+  // // vm
+  // engine.addProvider(new VmSubprovider())
+  //
+  // // id mgmt
+  // engine.addProvider(new HookedWalletSubprovider({
+  //   getAccounts: function(cb){ console.log(cb) },
+  //   approveTransaction: function(cb){ console.log(cb) },
+  //   signTransaction: function(cb){ console.log(cb) },
+  // }))
+
+  // data source
+  engine.addProvider(new RpcSubprovider({
+    rpcUrl: node_url,
+  }))
+
+  // log new blocks
+  engine.on('block', function (block) {
+    console.log('================================')
+    console.log('BLOCK CHANGED:', '#' + block.number.toString('hex'), '0x' + block.hash.toString('hex'))
+    console.log('================================')
+  })
+
+  // network connectivity error
+  engine.on('error', function (err) {
+    // report connectivity errors
+    console.error(err.stack)
+  })
+
+  // start polling for blocks
+  engine.start()
+
+  // accounts is null when using local wallet
+  // web3.eth.getAccounts((err,data) => {
+  //   local_accounts = data
+  // })
+
+  // when using local wallet, coinbase is the local wallet
+  // web3.eth.getCoinbase((err,data) => {
+  //   coinbase = data
+  //   console.log('coinbase ' + coinbase)
+  //   web3.eth.getBalance(coinbase, function (error, result) {
+  //     console.log(web3.fromWei(result.toString()))
+  //   })
+  // })
+
+  return true
+}
+
+window.openWallet = function () {
+  let walletname = $('#login-wallet-name').val()
+  let walletpassword = $('#login-wallet-password').val()
+  if (!walletname || !walletpassword) {
+    return
+  }
+
+  localStorage.walletname = walletname
+  $('#login-user-name').val(walletname)
+  let wallets = localStorage.wallets
+  let wallet
+  if (wallets) {
+    try {
+      wallets = JSON.parse(wallets)
+      wallet = wallets[walletname]
+    } catch (e) {
+      wallets = null
+    }
+  }
+
+  $('#loading').show()
+  start_spin()
+
+  // start the following with a timer so we will have a chance for the jQuery commands we just did to take effects
+  setTimeout(() => {
+    if (wallet) {
+      try {
+        wallet = eth_wallet.fromV3(wallet, walletpassword) // slow
+      } catch (e) {
+        alert("Bad password")
+        window.logout()
+        return
+      }
+    } else {
+      wallet = eth_wallet.generate()
+      if (!wallets) {
+        wallets = {}
+      }
+      wallets[walletname] = wallet.toV3(walletpassword) // slow
+      localStorage.wallets = JSON.stringify(wallets)
+    }
+    localStorage.privateKey = wallet.getPrivateKey().toString('hex')
+
+    loadWallet()
+
+    $('#open-wallet').hide()
+    init()
+  },50)
+}
 
 
 function init () {
@@ -1711,6 +2009,7 @@ function init () {
       TwoKeyReg_contractInstance = contractInstance
       // init_TwoKeyReg();
       $('#loading').hide()
+      stop_spin()
       whoAmI()
     })
   })
@@ -1724,8 +2023,20 @@ function new_user () {
 }
 
 $(document).ready(function () {
-  $('#loading').show()
   new_user()
+
+  let params = getAllUrlParams()
+  let login_method = params.login
+  if (!login_method) {
+    login_method = localStorage.login
+  }
+  if (!(login_method == 'local' || login_method == 'remote' || login_method == 'metamask')) {
+    delete localStorage.login
+    $('#login-method').show()
+    return
+  }
+  $('#login-method').hide()
+  localStorage.login = login_method
 
   // https://clipboardjs.com/
   let clipboard_lnk0 = new Clipboard('.lnk0')
@@ -1764,22 +2075,24 @@ $(document).ready(function () {
     console.error('Trigger:', e.trigger)
   })
 
-  let url = 'http://' + window.document.location.hostname + ':8545'
+  node_url = 'http://' + window.document.location.hostname + ':' + PORT
 
-  if (typeof web3 !== 'undefined') {
+  if (localStorage.login == 'metamask') {
+    if (typeof web3 == 'undefined') {
+      window.logout()
+      alert("MetaMask extension is not installed and/or enabled")
+      return
+    }
+    $('#loading').show()
+    start_spin()
     // Use Mist/MetaMask's provider
-    $('#metamask-login').text('Make sure MetaMask is configured to use the test network ' + url)
+    $('#metamask-login').text('Make sure MetaMask is configured to use the test network ' + node_url)
 
     $('#metamask-login').show()
     $('#logout-button').hide()
-    // if (!localStorage.meta_mask) {
-    //   // could happen if previous time we run the MetaMask extension was not installed/disabled
-    //   delete localStorage.username
-    // }
     // When using meta-mask, the extension gives us the address and we retrieve the user name
     // so dont use stored user name from previous session
     delete localStorage.username
-    localStorage.meta_mask = true
 
     console.warn('Using web3 detected from external source like Metamask')
     window.web3 = new Web3(web3.currentProvider)
@@ -1806,7 +2119,7 @@ $(document).ready(function () {
           ok = true
       }
       if (!ok) {
-        alert('Configure MetaMask to work on the following network ' + url)
+        alert('Configure MetaMask to work on the following network ' + node_url)
         return
       }
 
@@ -1814,20 +2127,26 @@ $(document).ready(function () {
       // us knowing about it
       setInterval(check_user_change, 500)
     })
-  } else {
-    // not using MetaMask
-
-    if (localStorage.meta_mask) {
-      // the MetaMask extension was used in last session and then uninstalled/disabled
-      delete localStorage.username
-      delete localStorage.meta_mask
+  } else if (localStorage.login == 'remote') {
+    $('#loading').show()
+    start_spin()
+    let provider = new Web3.providers.HttpProvider(node_url)
+    window.web3 = new Web3(provider)
+    local_accounts = web3.eth.accounts
+    coinbase = web3.eth.coinbase
+  } else if (localStorage.login == 'local') {
+    if (!loadWallet()) {
+      $('#open-wallet').show()
+      let walletname = localStorage.walletname
+      if (walletname) {
+        $('#login-wallet-name').val(walletname)
+      }
+      return
     }
-    console.warn('No web3 detected. Falling back to ' + url +
-        '. You should remove this fallback when you deploy live, ' +
-        "as it's inherently insecure. Consider switching to Metamask for development. More info here: http://truffleframework.com/tutorials/truffle-and-metamask")
-    // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
-    window.web3 = new Web3(new Web3.providers.HttpProvider(url))
-
+  } else {
+    alert("Unknown login method")
+    window.logout()
+    return
   }
 
   init()
@@ -1904,6 +2223,9 @@ function d3_init () {
 }
 
 function d3_update (source) {
+  if (!current_twoKeyContractAddress) {
+    return
+  }
   if (!d3_root) return
 
   if (!source) {
@@ -2101,6 +2423,7 @@ function d3_add_event_children (addresses, parent, depth) {
               unit_decimals = unit_decimals.toNumber()
 
               node.units = parseFloat('' + _units) / 10. ** unit_decimals
+              d3_update()  // no need to add another update after changing rewards because this will always come later
             })
         }
 
