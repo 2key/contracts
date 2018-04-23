@@ -565,6 +565,9 @@ String.prototype.hashCode = function () {
 let stop_checking = 0
 function check_user_change () {
   if (stop_checking == 0) {
+    if (localStorage.login == 'metamask') {
+      local_accounts = web3.eth.accounts
+    }
     _whoAmI()
   }
 }
@@ -604,10 +607,6 @@ function username2address (username, cb, cberror) {
 
 function _whoAmI (doing_login) {
   // doing_login is True when we are showing the login screen in which the user enters his name (and password)
-  if (!doing_login) {
-    $("#login-user-data").hide()
-  }
-
   let accounts
   if (local_address) {
     accounts = [local_address]
@@ -620,7 +619,7 @@ function _whoAmI (doing_login) {
       if (localStorage.login == 'metamask') {
         alert("it looks as if your MetaMask account is locked. Please unlock it and select an account")
       } else {
-        alert("Something is wrong in testrpc/ganauche configuration.")
+        alert("Something is wrong in remote node configuration.")
       }
     }
     if (last_address) {
@@ -655,6 +654,10 @@ function _whoAmI (doing_login) {
   last_address = my_address
   if (!my_address) {
     logout()
+  // if (localStorage.login == 'remote') {
+    // when using a remote wallet we dont know the address until we know the user name
+    $("#login-user-data").hide()
+  // }
     return
   }
 
@@ -687,9 +690,9 @@ function _whoAmI (doing_login) {
           } else {
             if (username) {
               if (doing_login) {
-                let ok = confirm('Signup on 2Key central contract?')
+                let ok = confirm('Signup on 2Key registry contract?')
                 if (ok) {
-                  let amount = 0.1
+                  let amount = 0.006
                   web3.eth.getBalance(my_address, function (error, result) {
                     function add_user() {
                       // if addName will end succussefully then call lookupUserInfo
@@ -704,12 +707,18 @@ function _whoAmI (doing_login) {
 
                     let balance = parseFloat(web3.fromWei(result.toString()))
                     if (balance < amount) {
-                      amount = web3.toWei(amount - balance, 'ether') // TODO use the decimals value of the TwoKeyEconomy contract
-                      web3.eth.sendTransaction(
-                        {from: coinbase, to: my_address, value: amount, gas: gastimate(30000)},
-                        transaction_start(null, () => {
-                          add_user()
-                        })  // this generats a CB function
+                      alert(
+                        'You dont have enough ETH to complete the signup.\n' +
+                        'Here is how you can get some for demo purposes only:\n' +
+                        '* copy your address by clicking on it\n' +
+                        '* logout\n'+
+                        '* login to a remote wallet e.g. coinbase\n' +
+                        '* paste your address in the box "other side of the transfer"\n' +
+                        '* enter ETH "amount"\n' +
+                        '* press send ETH\n' +
+                        '* logout\n' +
+                        '* login again to your wallet\n' +
+                        '* good luck!'
                       )
                     } else {
                       add_user()
@@ -729,6 +738,7 @@ function _whoAmI (doing_login) {
                 logout()
               }
             } else {
+              // we dont have a user name
               logout()
               $("#login-user-data").show()
               $('#login-user-address').html(my_address.toString())
@@ -803,7 +813,6 @@ function logout () {
   new_user()
   $('#login-user-name').val('')
   $('.login').show()
-
 }
 
 function clean_link() {
@@ -818,7 +827,7 @@ window.logout = function () {
   clean_link()
   logout()
   delete localStorage.login
-  delete localStorage.privateKey
+  delete sessionStorage.privateKey
   $('.login').hide()
   location.reload()
 }
@@ -1812,7 +1821,7 @@ function rewarded_event (c, e) {
 }
 
 function loadWallet() {
-  let private_key = localStorage.privateKey
+  let private_key = sessionStorage.privateKey
   if (!private_key) {
     return false
   }
@@ -1945,7 +1954,7 @@ window.openWallet = function () {
       wallets[walletname] = wallet.toV3(walletpassword) // slow
       localStorage.wallets = JSON.stringify(wallets)
     }
-    localStorage.privateKey = wallet.getPrivateKey().toString('hex')
+    sessionStorage.privateKey = wallet.getPrivateKey().toString('hex')
 
     loadWallet()
 
@@ -2089,13 +2098,14 @@ $(document).ready(function () {
     $('#metamask-login').text('Make sure MetaMask is configured to use the test network ' + node_url)
 
     $('#metamask-login').show()
-    $('#logout-button').hide()
+    // $('#logout-button').hide()
     // When using meta-mask, the extension gives us the address and we retrieve the user name
     // so dont use stored user name from previous session
     delete localStorage.username
 
     console.warn('Using web3 detected from external source like Metamask')
     window.web3 = new Web3(web3.currentProvider)
+    local_accounts = web3.eth.accounts
     web3.version.getNetwork((err, netId) => {
       let ok = false
       switch (netId) {
