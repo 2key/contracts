@@ -690,49 +690,53 @@ function _whoAmI (doing_login) {
           } else {
             if (username) {
               if (doing_login) {
-                let ok = confirm('Signup on 2Key registry contract?')
-                if (ok) {
-                  let amount = 0.006
-                  web3.eth.getBalance(my_address, function (error, result) {
-                    function add_user() {
-                      // if addName will end succussefully then call lookupUserInfo
-                      transaction_start(
-                        TwoKeyReg_contractInstance.addName(username, {
-                          gas: gastimate(80000),
-                          from: my_address
-                        }),
-                        () => timer_cbs.push(lookupUserInfo)
-                      )
-                    }
+                if (username.startsWith('0x')) {
+                  timer_cbs.push(lookupUserInfo)
+                } else {
+                  let ok = confirm('Signup on 2Key registry contract?')
+                  if (ok) {
+                    let amount = 0.006
+                    web3.eth.getBalance(my_address, function (error, result) {
+                      function add_user() {
+                        // if addName will end succussefully then call lookupUserInfo
+                        transaction_start(
+                          TwoKeyReg_contractInstance.addName(username, {
+                            gas: gastimate(80000),
+                            from: my_address
+                          }),
+                          () => timer_cbs.push(lookupUserInfo)
+                        )
+                      }
 
-                    let balance = parseFloat(web3.fromWei(result.toString()))
-                    if (balance < amount) {
-                      alert(
-                        'You dont have enough ETH to complete the signup.\n' +
-                        'Here is how you can get some for demo purposes only:\n' +
-                        '* copy your address by clicking on it\n' +
-                        '* logout\n'+
-                        '* login to a remote wallet e.g. coinbase\n' +
-                        '* paste your address in the box "other side of the transfer"\n' +
-                        '* enter ETH "amount"\n' +
-                        '* press send ETH\n' +
-                        '* logout\n' +
-                        '* login again to your wallet\n' +
-                        '* good luck!'
-                      )
-                    } else {
-                      add_user()
-                    }
-                  })
+                      let balance = parseFloat(web3.fromWei(result.toString()))
+                      if (balance < amount) {
+                        alert(
+                          'You dont have enough ETH to complete the signup.\n' +
+                          'Here is how you can get some for demo purposes only:\n' +
+                          '* copy your address by clicking on it\n' +
+                          '* logout\n' +
+                          '* login to a remote wallet e.g. coinbase\n' +
+                          '* paste your address in the box "other side of the transfer"\n' +
+                          '* enter ETH "amount"\n' +
+                          '* press send ETH\n' +
+                          '* logout\n' +
+                          '* login again to your wallet\n' +
+                          '* good luck!'
+                        )
+                      } else {
+                        add_user()
+                      }
+                    })
 
-                  // // if addName will end succussefully then call lookupUserInfo
-                  // transaction_start(
-                  //   TwoKeyReg_contractInstance.addName(username, {
-                  //     gas: gastimate(80000),
-                  //     from: my_address
-                  //   }),
-                  //   () => timer_cbs.push(lookupUserInfo)
-                  // )
+                    // // if addName will end succussefully then call lookupUserInfo
+                    // transaction_start(
+                    //   TwoKeyReg_contractInstance.addName(username, {
+                    //     gas: gastimate(80000),
+                    //     from: my_address
+                    //   }),
+                    //   () => timer_cbs.push(lookupUserInfo)
+                    // )
+                  }
                 }
               } else {
                 logout()
