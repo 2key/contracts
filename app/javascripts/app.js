@@ -216,24 +216,49 @@ function set_url (surl, eid,text) {
 }
 
 function short_url (url, eid, text) {
-  fetch('https://www.googleapis.com/urlshortener/v1/url?key=AIzaSyBqmohu0JE5CRhQYq9YgbeV9ApvWFR4pA0',
-    {method: 'POST',
-      body: JSON.stringify({longUrl: url}),
-      headers: new Headers({'Content-Type': 'application/json'})
-      // mode: 'cors'
-    }).then(x => {
-    return x.json()
-  }).catch((e) => {
-    safe_alert(e)
-    console.log(e)
-  }).then(x => {
-    let surl = x.id
-    if (surl) { // google does not shorten urls that have an IP address instead of a qualified domain name
+  let loc = new URL(url)
+  if (!loc.search) {
+    return
+  }
+  if (loc.pathname != "/") {
+    return
+  }
+  if (loc.origin != location.origin) {
+    return
+  }
+
+  ipfs.add([Buffer.from(loc.toString())], (e, res) => {
+    if (e) {
+      safe_alert(e)
+      console.log(e)
+    } else {
+      const ipfs_hash = res[0].hash
       safe_cb(eid, () => {
+
+        let surl = location.origin + '/?h=' + ipfs_hash
         set_url(surl, eid, text)
       })
     }
   })
+
+  // fetch('https://www.googleapis.com/urlshortener/v1/url?key=AIzaSyBqmohu0JE5CRhQYq9YgbeV9ApvWFR4pA0',
+  //   {method: 'POST',
+  //     body: JSON.stringify({longUrl: url}),
+  //     headers: new Headers({'Content-Type': 'application/json'})
+  //     // mode: 'cors'
+  //   }).then(x => {
+  //   return x.json()
+  // }).catch((e) => {
+  //   safe_alert(e)
+  //   console.log(e)
+  // }).then(x => {
+  //   let surl = x.id
+  //   if (surl) { // google does not shorten urls that have an IP address instead of a qualified domain name
+  //     safe_cb(eid, () => {
+  //       set_url(surl, eid, text)
+  //     })
+  //   }
+  // })
 }
 
 function safe_cb (eid, cb) {
@@ -1018,8 +1043,8 @@ function getAllUrlParams (url) {
       let paramValue = typeof (a[1]) === 'undefined' ? true : a[1]
 
       // (optional) keep case consistent
-      paramName = paramName.toLowerCase()
-      paramValue = paramValue.toLowerCase()
+      // paramName = paramName.toLowerCase()
+      // paramValue = paramValue.toLowerCase()
 
       // if parameter name already exists
       if (obj[paramName]) {
@@ -1260,12 +1285,12 @@ function contract_info (TwoKeyContract_instance, min_arcs, callback) {
 
             items.push('<td>' + arcs + '</td>')
             unique_id = unique_id + 1
-            short_url(take_link, '#id' + unique_id)
+            short_url(take_link, '#id' + unique_id, true)
             items.push('<td>' +
                     "<button class='lnk0 bt' id=\"id" + unique_id + '" ' +
                     "data-toggle='tooltip' title='copy to clipboard a 2Key link for this contract'" +
                     "msg='2Key link was copied to clipboard. Someone else opening it will take one ARC from you'" +
-                    'data-clipboard-text="' + take_link + '">' + take_link +
+                    'data-clipboard-text="' + take_link + '">' + 'on-chain 2key link' +
                     '</button></td>')
             units = units / 10.**unit_decimals
             items.push('<td>' + units + '</td>')
@@ -1999,10 +2024,12 @@ window.openWallet = function (import_key) {
 
 
 function init () {
-  params = getAllUrlParams()
   current_twoKeyContractAddress = params.c
   from_twoKeyContractAddress = params.f
-  // if (twoKeyContractAddress) {
+  from_secret = params.s
+  path_message = params.m
+
+  // if (current_twoKeyContractAddress) {
     $('#join-btn').hide()
     $('#buy').hide()
     $('#redeem').hide()
@@ -2066,10 +2093,7 @@ function new_user () {
   $('#metamask-login').text('') // remove any secret held in this field
 }
 
-$(document).ready(function () {
-  new_user()
-
-  let params = getAllUrlParams()
+function ready () {
   let login_method = params.login
   if (!login_method) {
     login_method = localStorage.login
@@ -2195,6 +2219,25 @@ $(document).ready(function () {
   }
 
   init()
+}
+
+$(document).ready(function () {
+  new_user()
+
+  params = getAllUrlParams()
+
+  if (params.h) {
+    ipfs.cat(params.h, (err, res) => {
+      if (err) {
+        alert("failed to open link from IPFS")
+      } else {
+        params = getAllUrlParams(res.toString())
+        ready()
+      }
+    })
+  } else {
+    ready()
+  }
 })
 
 // If you want an ENTER in a text input field to do a click on a button then
