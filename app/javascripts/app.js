@@ -7,6 +7,9 @@ import {default as Clipboard} from 'clipboard'
 
 const eth_wallet = require("ethereumjs-wallet");
 const eth_util = require("ethereumjs-util");
+const bip39 = require('bip39')
+const hdkey = require('ethereumjs-wallet/hdkey')
+
 
 // const ProviderEngine = require('web3-provider-engine')
 // const CacheSubprovider = require('web3-provider-engine/subproviders/cache.js')
@@ -18,7 +21,7 @@ const eth_util = require("ethereumjs-util");
 // const RpcSubprovider = require('web3-provider-engine/subproviders/rpc.js')
 import * as ProviderEngine  from 'web3-provider-engine';
 import * as RpcSubprovider  from 'web3-provider-engine/subproviders/rpc';
-import * as HookedWalletSubprovider from 'web3-provider-engine/subproviders/hooked-wallet';
+// import * as HookedWalletSubprovider from 'web3-provider-engine/subproviders/hooked-wallet';
 const WalletSubprovider = require('ethereumjs-wallet/provider-engine')
 let local_accounts
 let local_address
@@ -30,7 +33,7 @@ let node_url
 let BIG_INT = 100000000000
 
 let entityMap = {
-  '&': '&amp;',
+  // '&': '&amp;',
   '<': '&lt;',
   '>': '&gt;',
   '"': '&quot;',
@@ -200,7 +203,7 @@ function view (view_promise, cb_end, cb_error) {
 
 
 function escapeHtml (string) {
-  return String(string).replace(/[&<>"'`=\/]/g, function (s) {
+  return String(string).replace(/[<>"'`=\/]/g, function (s) {
     return entityMap[s]
   })
 }
@@ -213,24 +216,49 @@ function set_url (surl, eid,text) {
 }
 
 function short_url (url, eid, text) {
-  fetch('https://www.googleapis.com/urlshortener/v1/url?key=AIzaSyBqmohu0JE5CRhQYq9YgbeV9ApvWFR4pA0',
-    {method: 'POST',
-      body: JSON.stringify({longUrl: url}),
-      headers: new Headers({'Content-Type': 'application/json'})
-      // mode: 'cors'
-    }).then(x => {
-    return x.json()
-  }).catch((e) => {
-    safe_alert(e)
-    console.log(e)
-  }).then(x => {
-    let surl = x.id
-    if (surl) { // google does not shorten urls that have an IP address instead of a qualified domain name
+  let loc = new URL(url)
+  if (!loc.search) {
+    return
+  }
+  if (loc.pathname != "/") {
+    return
+  }
+  if (loc.origin != location.origin) {
+    return
+  }
+
+  ipfs.add([Buffer.from(loc.toString())], (e, res) => {
+    if (e) {
+      safe_alert(e)
+      console.log(e)
+    } else {
+      const ipfs_hash = res[0].hash
       safe_cb(eid, () => {
+
+        let surl = location.origin + '/?h=' + ipfs_hash
         set_url(surl, eid, text)
       })
     }
   })
+
+  // fetch('https://www.googleapis.com/urlshortener/v1/url?key=AIzaSyBqmohu0JE5CRhQYq9YgbeV9ApvWFR4pA0',
+  //   {method: 'POST',
+  //     body: JSON.stringify({longUrl: url}),
+  //     headers: new Headers({'Content-Type': 'application/json'})
+  //     // mode: 'cors'
+  //   }).then(x => {
+  //   return x.json()
+  // }).catch((e) => {
+  //   safe_alert(e)
+  //   console.log(e)
+  // }).then(x => {
+  //   let surl = x.id
+  //   if (surl) { // google does not shorten urls that have an IP address instead of a qualified domain name
+  //     safe_cb(eid, () => {
+  //       set_url(surl, eid, text)
+  //     })
+  //   }
+  // })
 }
 
 function safe_cb (eid, cb) {
@@ -269,9 +297,6 @@ import { default as contract } from 'truffle-contract'
 // import { default as clipboard } from 'clipboard';
 // import clippy_img from '!!file!../images/clippy.svg'
 
-import ERC20_artifacts from '../../build/contracts/ERC20.json'
-let ERC20Contract = contract(ERC20_artifacts)
-
 import twoKeyEconomy_artifacts from '../../build/contracts/TwoKeyEconomy.json'
 let TwoKeyEconomy = contract(twoKeyEconomy_artifacts)
 let TwoKeyEconomy_contractInstance
@@ -280,12 +305,14 @@ import TwoKeyReg_artifacts from '../../build/contracts/TwoKeyReg.json'
 let TwoKeyReg = contract(TwoKeyReg_artifacts)
 let TwoKeyReg_contractInstance
 
-import TwoKeyContract_artifacts from '../../build/contracts/TwoKeyContract.json'
-let TwoKeyContract = contract(TwoKeyContract_artifacts)
 import TwoKeyAcquisitionContract_artifacts from '../../build/contracts/TwoKeyAcquisitionContract.json'
 let TwoKeyAcquisitionContract = contract(TwoKeyAcquisitionContract_artifacts)
 import TwoKeyPresellContract_artifacts from '../../build/contracts/TwoKeyPresellContract.json'
 let TwoKeyPresellContract = contract(TwoKeyPresellContract_artifacts)
+
+// load example of each contract so we can get their code and compare it to other instances of the same class of contracts
+let TwoKeyAcquisitionContract_contractInstance
+let TwoKeyPresellContract_contractInstance
 
 let current_twoKeyContractAddress  // current contract handled
 let from_twoKeyContractAddress  // 2key link was from this address
@@ -312,7 +339,7 @@ function tbl_add_contract (tbl, twoKeyContractAddress) {
   tbl_add_contract_active[tbl + twoKeyContractAddress] = true
 
   if (!$(tbl).children().length) {
-    $(tbl).append("<tr><td colspan=\"6\" data-toggle='tooltip' title='what I have in the contract'>Me</td><td></td><td colspan=\"13\" data-toggle='tooltip' title='contract properties'>Contract</td></tr>")
+    $(tbl).append("<tr><td colspan=\"6\" data-toggle='tooltip' title='what I have in the contract'>Me</td><td></td><td colspan=\"14\" data-toggle='tooltip' title='contract properties'>Contract</td></tr>")
     tbl_add_row(tbl, contract_header())
   }
 
@@ -379,7 +406,7 @@ function init_TwoKeyReg () {
 }
 
 function update_total_supply(address) {
-  view(TwoKeyEconomy_contractInstance.totalSupply(address),
+  view(TwoKeyEconomy_contractInstance.totalSupply(),
     (result) => {
       let totalSupply
       totalSupply = web3.fromWei(result.toString())
@@ -520,30 +547,57 @@ function init_TwoKeyContract (TwoKeyContract_instance) {
       }
     }
   )
+
+  if (TwoKeyContract_instance.campaign_type == 'presell') {
+    TwoKeyContract_instance.erc20 = TwoKeyContract_instance.erc20_token_sell_contract()
+  }
 }
 
 function getTwoKeyContract (address, cb) {
-  let contract = contract_cache[address]
-  if (contract) {
-    cb(contract)
-  } else {
-    if (contract_cache_cb[address]) {
-      contract_cache_cb[address].push(cb)
+  web3.eth.getCode(address,(err,code) => {
+    if (err) {
+      alert("Cant read contract " + address + " " + err)
     } else {
-      contract_cache_cb[address] = [cb]
-      view(TwoKeyContract.at(address),
-        contract => {
-          init_TwoKeyContract(contract)
-          contract_cache[address] = contract
-          while (contract_cache_cb[address] && contract_cache_cb[address].length) {
-            cb = contract_cache_cb[address].pop()
-            cb(contract)
+      let campaign_type
+      if (code === TwoKeyAcquisitionContract_contractInstance.code) {
+        campaign_type = 'acquistion'
+      } else if (code === TwoKeyPresellContract_contractInstance.code) {
+        campaign_type = 'presell'
+      } else {
+        alert('Invalid campaign contract ' + address)
+        return
+      }
+
+      let contract = contract_cache[address]
+      if (contract) {
+        cb(contract)
+      } else {
+        if (contract_cache_cb[address]) {
+          contract_cache_cb[address].push(cb)
+        } else {
+          contract_cache_cb[address] = [cb]
+          let contract_interface
+          if (campaign_type == 'presell') {
+            contract_interface = TwoKeyPresellContract
+          } else {
+            contract_interface = TwoKeyAcquisitionContract
           }
-          contract_cache_cb[address] = null
+          view(contract_interface.at(address),
+            contract => {
+              contract.campaign_type = campaign_type
+              init_TwoKeyContract(contract)
+              contract_cache[address] = contract
+              while (contract_cache_cb[address] && contract_cache_cb[address].length) {
+                cb = contract_cache_cb[address].pop()
+                cb(contract)
+              }
+              contract_cache_cb[address] = null
+            }
+          )
         }
-      )
+      }
     }
-  }
+  })
 }
 
 // We are using IPFS to store content for each product.
@@ -565,6 +619,9 @@ String.prototype.hashCode = function () {
 let stop_checking = 0
 function check_user_change () {
   if (stop_checking == 0) {
+    if (localStorage.login == 'metamask') {
+      local_accounts = web3.eth.accounts
+    }
     _whoAmI()
   }
 }
@@ -592,7 +649,7 @@ function username2address (username, cb, cberror) {
         if (address && address != '0x0000000000000000000000000000000000000000') {
           cb(address)
         } else {
-          alert('user ' + username + ' is not signed-up')
+          alert('user ' + escapeHtml(username) + ' is not signed-up')
           if (cberror) {
             cberror()
           }
@@ -604,10 +661,6 @@ function username2address (username, cb, cberror) {
 
 function _whoAmI (doing_login) {
   // doing_login is True when we are showing the login screen in which the user enters his name (and password)
-  if (!doing_login) {
-    $("#login-user-data").hide()
-  }
-
   let accounts
   if (local_address) {
     accounts = [local_address]
@@ -620,7 +673,7 @@ function _whoAmI (doing_login) {
       if (localStorage.login == 'metamask') {
         alert("it looks as if your MetaMask account is locked. Please unlock it and select an account")
       } else {
-        alert("Something is wrong in testrpc/ganauche configuration.")
+        alert("Something is wrong in remote node configuration.")
       }
     }
     if (last_address) {
@@ -655,6 +708,10 @@ function _whoAmI (doing_login) {
   last_address = my_address
   if (!my_address) {
     logout()
+  // if (localStorage.login == 'remote') {
+    // when using a remote wallet we dont know the address until we know the user name
+    $("#login-user-data").hide()
+  // }
     return
   }
 
@@ -687,48 +744,59 @@ function _whoAmI (doing_login) {
           } else {
             if (username) {
               if (doing_login) {
-                let ok = confirm('Signup on 2Key central contract?')
-                if (ok) {
-                  let amount = 0.1
-                  web3.eth.getBalance(my_address, function (error, result) {
-                    function add_user() {
-                      // if addName will end succussefully then call lookupUserInfo
-                      transaction_start(
-                        TwoKeyReg_contractInstance.addName(username, {
-                          gas: gastimate(80000),
-                          from: my_address
-                        }),
-                        () => timer_cbs.push(lookupUserInfo)
-                      )
-                    }
+                if (username.startsWith('0x')) {
+                  timer_cbs.push(lookupUserInfo)
+                } else {
+                  let ok = confirm('Signup on 2Key registry contract?')
+                  if (ok) {
+                    let amount = 0.006
+                    web3.eth.getBalance(my_address, function (error, result) {
+                      function add_user() {
+                        // if addName will end succussefully then call lookupUserInfo
+                        transaction_start(
+                          TwoKeyReg_contractInstance.addName(username, {
+                            gas: gastimate(80000),
+                            from: my_address
+                          }),
+                          () => timer_cbs.push(lookupUserInfo)
+                        )
+                      }
 
-                    let balance = parseFloat(web3.fromWei(result.toString()))
-                    if (balance < amount) {
-                      amount = web3.toWei(amount - balance, 'ether') // TODO use the decimals value of the TwoKeyEconomy contract
-                      web3.eth.sendTransaction(
-                        {from: coinbase, to: my_address, value: amount, gas: gastimate(30000)},
-                        transaction_start(null, () => {
-                          add_user()
-                        })  // this generats a CB function
-                      )
-                    } else {
-                      add_user()
-                    }
-                  })
+                      let balance = parseFloat(web3.fromWei(result.toString()))
+                      if (balance < amount) {
+                        alert(
+                          'You dont have enough ETH to complete the signup.\n' +
+                          'Here is how you can get some for demo purposes only:\n' +
+                          '* copy your address by clicking on it\n' +
+                          '* logout\n' +
+                          '* login to a remote wallet e.g. coinbase\n' +
+                          '* paste your address in the box "other side of the transfer"\n' +
+                          '* enter ETH "amount"\n' +
+                          '* press send ETH\n' +
+                          '* logout\n' +
+                          '* login again to your wallet\n' +
+                          '* good luck!'
+                        )
+                      } else {
+                        add_user()
+                      }
+                    })
 
-                  // // if addName will end succussefully then call lookupUserInfo
-                  // transaction_start(
-                  //   TwoKeyReg_contractInstance.addName(username, {
-                  //     gas: gastimate(80000),
-                  //     from: my_address
-                  //   }),
-                  //   () => timer_cbs.push(lookupUserInfo)
-                  // )
+                    // // if addName will end succussefully then call lookupUserInfo
+                    // transaction_start(
+                    //   TwoKeyReg_contractInstance.addName(username, {
+                    //     gas: gastimate(80000),
+                    //     from: my_address
+                    //   }),
+                    //   () => timer_cbs.push(lookupUserInfo)
+                    // )
+                  }
                 }
               } else {
                 logout()
               }
             } else {
+              // we dont have a user name
               logout()
               $("#login-user-data").show()
               $('#login-user-address').html(my_address.toString())
@@ -803,7 +871,6 @@ function logout () {
   new_user()
   $('#login-user-name').val('')
   $('.login').show()
-
 }
 
 function clean_link() {
@@ -818,7 +885,7 @@ window.logout = function () {
   clean_link()
   logout()
   delete localStorage.login
-  delete localStorage.privateKey
+  delete sessionStorage.privateKey
   $('.login').hide()
   location.reload()
 }
@@ -1002,8 +1069,8 @@ function getAllUrlParams (url) {
       let paramValue = typeof (a[1]) === 'undefined' ? true : a[1]
 
       // (optional) keep case consistent
-      paramName = paramName.toLowerCase()
-      paramValue = paramValue.toLowerCase()
+      // paramName = paramName.toLowerCase()
+      // paramValue = paramValue.toLowerCase()
 
       // if parameter name already exists
       if (obj[paramName]) {
@@ -1174,6 +1241,7 @@ function contract_header () {
   items.push("<td data-toggle='tooltip' title='contract/product name'>name</td>")
   items.push("<td data-toggle='tooltip' title='contract symbol'>ARC symbol</td>")
   items.push("<td data-toggle='tooltip' title='who created the contract'>owner</td>")
+  items.push("<td data-toggle='tooltip' title='type of campaign'>campaign</td>")
   items.push("<td data-toggle='tooltip' title='how many ARCs an influencer or a customer will receive when opening a 2Key link of this contract'>default share quota per influencer</td>")
   items.push("<td data-toggle='tooltip' title='cost of joining'>price to join</td>")
   items.push("<td data-toggle='tooltip' title='number of units being sold'>units offered</td>")
@@ -1212,7 +1280,7 @@ function contract_info (TwoKeyContract_instance, min_arcs, callback) {
           arcs = arcs.toNumber()
           unit_decimals = unit_decimals.toNumber()
 
-          let onclick_buy = "buy('" + twoKeyContractAddress + "','" + name + "'," + cost + ')'
+          let onclick_buy = "buy('" + twoKeyContractAddress + "','" + escapeHtml(name) + "'," + cost + ')'
           let onclick_redeem = "redeem('" + twoKeyContractAddress + "')"
           $('#buy').attr('onclick', onclick_buy)
           $('#redeem').attr('onclick', onclick_redeem)
@@ -1244,12 +1312,12 @@ function contract_info (TwoKeyContract_instance, min_arcs, callback) {
 
             items.push('<td>' + arcs + '</td>')
             unique_id = unique_id + 1
-            short_url(take_link, '#id' + unique_id)
+            short_url(take_link, '#id' + unique_id, true)
             items.push('<td>' +
                     "<button class='lnk0 bt' id=\"id" + unique_id + '" ' +
                     "data-toggle='tooltip' title='copy to clipboard a 2Key link for this contract'" +
                     "msg='2Key link was copied to clipboard. Someone else opening it will take one ARC from you'" +
-                    'data-clipboard-text="' + take_link + '">' + take_link +
+                    'data-clipboard-text="' + take_link + '">' + 'on-chain 2key link' +
                     '</button></td>')
             units = units / 10.**unit_decimals
             items.push('<td>' + units + '</td>')
@@ -1279,16 +1347,17 @@ function contract_info (TwoKeyContract_instance, min_arcs, callback) {
             items.push('<td>' +
                     "<button class='bt' onclick=\"" + onclick_name + '"' +
                     "data-toggle='tooltip' title='jump to contract page'" +
-                    '">' + name +
+                    '">' + escapeHtml(name) +
                     '</button></td>')
             // items.push("<td><a href='" + contract_link + "'>"+ name + "</a></td>");
-            items.push('<td>' + symbol + '</td>')
+            items.push('<td>' + escapeHtml(symbol) + '</td>')
             {
               unique_id = unique_id + 1
               let tag_owner = 'id' + unique_id
               items.push('<td id="' + tag_owner + '" >' + owner + '</td>')
               owner2name(owner, '#' + tag_owner)
             }
+            items.push('<td>' + TwoKeyContract_instance.campaign_type + '</td>')
 
             items.push('<td>' + quota + '</td>')
             let join_cost = 0
@@ -1304,7 +1373,7 @@ function contract_info (TwoKeyContract_instance, min_arcs, callback) {
                 ipfs.cat(ipfs_hash, (err, res) => {
                   if (err) throw err
                   safe_cb('#' + tag_description, () => {
-                    $('#' + tag_description).text(res.toString())
+                    $('#' + tag_description).text(res.toString())  // using text protects you from code injection
                   })
                 })
               }
@@ -1324,12 +1393,30 @@ function contract_info (TwoKeyContract_instance, min_arcs, callback) {
             let kpis = get_kpis(TwoKeyContract_instance, owner, owner)
             items.push('<td>' + kpis.join('/') + '</td>')
 
-            items.push('<td>' +
+            let address_cell = '<td>' +
                     "<button class='lnk bt' " +
-                    "data-toggle='tooltip' title='copy to clipboard' " +
+                    "data-toggle='tooltip' title='contract address, click to copy to clipboard' " +
                     "msg='contract address was copied to clipboard'>" +
-                    twoKeyContractAddress + '</button>' +
-                    '</td>')
+                    twoKeyContractAddress + '</button> '
+
+
+            if (TwoKeyContract_instance.campaign_type == 'presell') {
+              unique_id = unique_id + 1
+              let tag_description = 'id' + unique_id
+              address_cell += "<button class='lnk bt' id=\"" + tag_description + "\" " +
+                      "data-toggle='tooltip' title='erc20 address, click to copy to clipboard' " +
+                      "msg='erc20 contract address was copied to clipboard'>" +
+                       + '</button>'
+              view(TwoKeyContract_instance.erc20,
+                erc20_address => {
+                  safe_cb('#' + tag_description, () => {
+                  $('#' + tag_description).text(erc20_address)  // using text protects you from code injection
+                  })
+                }
+              )
+            }
+            address_cell += '</td>'
+            items.push(address_cell)
           }
           callback(items, constant_info, info)
         }
@@ -1642,7 +1729,7 @@ function update_user_balance(my_address) {
 function updateUserInfo () {
   clean_user()
   let username = localStorage.username
-  $('#user-name').html(username)
+  $('#user-name').text(username)  // using text protects you from code injection
   let my_address = whoAmI()
   if (!my_address) {
     alert('Unlock MetaMask and reload page')
@@ -1812,7 +1899,7 @@ function rewarded_event (c, e) {
 }
 
 function loadWallet() {
-  let private_key = localStorage.privateKey
+  let private_key = sessionStorage.privateKey
   if (!private_key) {
     return false
   }
@@ -1904,14 +1991,13 @@ function loadWallet() {
   return true
 }
 
-window.openWallet = function () {
+window.openWallet = function (import_key) {
   let walletname = $('#login-wallet-name').val()
   let walletpassword = $('#login-wallet-password').val()
   if (!walletname || !walletpassword) {
     return
   }
 
-  localStorage.walletname = walletname
   $('#login-user-name').val(walletname)
   let wallets = localStorage.wallets
   let wallet
@@ -1924,10 +2010,34 @@ window.openWallet = function () {
     }
   }
 
+  // start the following with a timer so we will have a chance for the jQuery commands we just did to take effects
+  if (import_key) {
+    wallet = null
+  }
+
+  let mnemonic
+  if (!wallet) {
+    mnemonic = bip39.generateMnemonic()
+    let inp =  prompt('write on a piece of paper your new wallet\'s mnemonic:\n\n' + mnemonic +
+      '\n\nor type the mnemonic of a wallet you want to restore:')
+    if (inp === null) {
+      return
+    }
+    if (inp) {
+      if (bip39.validateMnemonic(inp)) {
+        mnemonic = inp
+      } else {
+        alert('bad mnemonic, try again')
+        return
+      }
+    }
+  }
+
+  localStorage.walletname = walletname
+
   $('#loading').show()
   start_spin()
 
-  // start the following with a timer so we will have a chance for the jQuery commands we just did to take effects
   setTimeout(() => {
     if (wallet) {
       try {
@@ -1938,14 +2048,18 @@ window.openWallet = function () {
         return
       }
     } else {
-      wallet = eth_wallet.generate()
+      let seed = bip39.mnemonicToSeed(mnemonic)
+      let hdwallet = hdkey.fromMasterSeed(seed)
+      wallet = hdwallet.getWallet()
+
+      // wallet = eth_wallet.generate()
       if (!wallets) {
         wallets = {}
       }
       wallets[walletname] = wallet.toV3(walletpassword) // slow
       localStorage.wallets = JSON.stringify(wallets)
     }
-    localStorage.privateKey = wallet.getPrivateKey().toString('hex')
+    sessionStorage.privateKey = wallet.getPrivateKey().toString('hex')
 
     loadWallet()
 
@@ -1956,10 +2070,12 @@ window.openWallet = function () {
 
 
 function init () {
-  params = getAllUrlParams()
   current_twoKeyContractAddress = params.c
   from_twoKeyContractAddress = params.f
-  // if (twoKeyContractAddress) {
+  from_secret = params.s
+  path_message = params.m
+
+  // if (current_twoKeyContractAddress) {
     $('#join-btn').hide()
     $('#buy').hide()
     $('#redeem').hide()
@@ -1976,10 +2092,8 @@ function init () {
   TwoKeyEconomy.setProvider(web3.currentProvider)
   TwoKeyReg.setProvider(web3.currentProvider)
 
-  TwoKeyContract.setProvider(web3.currentProvider)
   TwoKeyAcquisitionContract.setProvider(web3.currentProvider)
   TwoKeyPresellContract.setProvider(web3.currentProvider)
-  ERC20Contract.setProvider(web3.currentProvider)
 
   ipfs_init()
 
@@ -2007,10 +2121,29 @@ function init () {
     TwoKeyEconomy_contractInstance = contractInstance
     view(TwoKeyReg.deployed(), contractInstance => {
       TwoKeyReg_contractInstance = contractInstance
-      // init_TwoKeyReg();
-      $('#loading').hide()
-      stop_spin()
-      whoAmI()
+
+      view(TwoKeyAcquisitionContract.deployed(), contractInstance => {
+        TwoKeyAcquisitionContract_contractInstance = contractInstance
+        web3.eth.getCode(TwoKeyAcquisitionContract_contractInstance.address,(err,res) => {
+          if (!err) {
+            TwoKeyAcquisitionContract_contractInstance.code = res
+          }
+        })
+
+        view(TwoKeyPresellContract.deployed(), contractInstance => {
+          TwoKeyPresellContract_contractInstance = contractInstance
+          web3.eth.getCode(TwoKeyPresellContract_contractInstance.address,(err,res) => {
+            if (!err) {
+              TwoKeyPresellContract_contractInstance.code = res
+            }
+          })
+
+          // init_TwoKeyReg();
+          $('#loading').hide()
+          stop_spin()
+          whoAmI()
+        })
+      })
     })
   })
 }
@@ -2020,12 +2153,10 @@ function new_user () {
   $('.login').hide()
   $('.logout').hide()
   $('#metamask-login').hide()
+  $('#metamask-login').text('') // remove any secret held in this field
 }
 
-$(document).ready(function () {
-  new_user()
-
-  let params = getAllUrlParams()
+function ready () {
   let login_method = params.login
   if (!login_method) {
     login_method = localStorage.login
@@ -2089,13 +2220,14 @@ $(document).ready(function () {
     $('#metamask-login').text('Make sure MetaMask is configured to use the test network ' + node_url)
 
     $('#metamask-login').show()
-    $('#logout-button').hide()
+    // $('#logout-button').hide()
     // When using meta-mask, the extension gives us the address and we retrieve the user name
     // so dont use stored user name from previous session
     delete localStorage.username
 
     console.warn('Using web3 detected from external source like Metamask')
     window.web3 = new Web3(web3.currentProvider)
+    local_accounts = web3.eth.accounts
     web3.version.getNetwork((err, netId) => {
       let ok = false
       switch (netId) {
@@ -2150,6 +2282,25 @@ $(document).ready(function () {
   }
 
   init()
+}
+
+$(document).ready(function () {
+  new_user()
+
+  params = getAllUrlParams()
+
+  if (params.h) {
+    ipfs.cat(params.h, (err, res) => {
+      if (err) {
+        alert("failed to open link from IPFS")
+      } else {
+        params = getAllUrlParams(res.toString())
+        ready()
+      }
+    })
+  } else {
+    ready()
+  }
 })
 
 // If you want an ENTER in a text input field to do a click on a button then

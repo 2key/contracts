@@ -115,7 +115,6 @@ contract TwoKeyContract is StandardToken, Ownable {
 
   // New 2Key method
 
-  // name,symbol,cost,bounty,quota,total_units,owner,ipfs_hash
   function getConstantInfo() public view returns (string,string,uint256,uint256,uint256,address,string,uint256) {
     return (name,symbol,cost,bounty,quota,owner,ipfs_hash,unit_decimals);
   }
@@ -167,7 +166,6 @@ contract TwoKeyAcquisitionContract is TwoKeyContract
     // to `TwoKeyReg` and assume that the type of
     // the calling contract is TwoKeyReg, there is
     // no real way to check that.
-    registry = TwoKeyReg(_registry);
     name = _name;
     symbol = _symbol;
     totalSupply_ = _tSupply;
@@ -181,7 +179,10 @@ contract TwoKeyAcquisitionContract is TwoKeyContract
 
     received_from[owner] = owner;  // allow owner to buy from himself
 
-    registry.createdContract(owner);
+    if (_registry != address(0)) {
+      registry = TwoKeyReg(_registry);
+      registry.createdContract(owner);
+    }
   }
 
   function getDynamicInfo(address me) public view returns (uint256,uint256,uint256,uint256,uint256,uint256) {
@@ -248,7 +249,6 @@ contract TwoKeyPresellContract is TwoKeyContract {
     // to `TwoKeyReg` and assume that the type of
     // the calling contract is TwoKeyReg, there is
     // no real way to check that.
-    registry = TwoKeyReg(_registry);
     name = _name;
     symbol = _symbol;
     totalSupply_ = _tSupply;
@@ -258,13 +258,18 @@ contract TwoKeyPresellContract is TwoKeyContract {
     quota = _quota;
     ipfs_hash = _ipfs_hash;
     received_from[owner] = owner;  // allow owner to buy from himself
-    registry.createdContract(owner);
+    if (_registry != address(0)) {
+      registry = TwoKeyReg(_registry);
+      registry.createdContract(owner);
+    }
 
-    // fractional units are determined by the erc20 contract
-    erc20_token_sell_contract = ERC20full(_erc20_token_sell_contract);
-    unit_decimals = uint256(erc20_token_sell_contract.decimals());  // TODO is this safe?
-    require(unit_decimals >= 0);
-    require(unit_decimals <= 18);
+    if (_erc20_token_sell_contract != address(0)) {
+      // fractional units are determined by the erc20 contract
+      erc20_token_sell_contract = ERC20full(_erc20_token_sell_contract);
+      unit_decimals = uint256(erc20_token_sell_contract.decimals());  // TODO is this safe?
+      require(unit_decimals >= 0);
+      require(unit_decimals <= 18);
+    }
   }
 
   function total_units() public view returns (uint256) {

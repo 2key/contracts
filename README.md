@@ -57,19 +57,24 @@ open browser at [http://localhost:8080](http://localhost:8080)
 # EC2
 # Lunch
 # select Ubuntu Server 16.04 LTS (HVM), SSD Volume Type - ami-da05a4a0
-# select t2-medium and press Review and Lunch
-# select ssh key you have (e.g. udi1) click "I accept..."
+# select t2-large
+# select secure policy to allow inbound TCP connection from anywhere on ports 8080,8545, 5001
+# and press Review and Lunch
+# select ssh key you have (e.g. 2k2.pem) click "I accept..."
 # View Instance (bottom right)
-# notice Public IP of your instance (e.g. 34.207.63.53)
+# notice Public IP of your instance (e.g. ec2-18-218-88-210.us-east-2.compute.amazonaws.com)
 # wait
-ssh -i udi1.pem -L 8080:0.0.0.0:8080 -L 8545:0.0.0.0:8545 ubuntu@34.207.63.53
+ssh -a ~/amazon/keys/2k2.pem ubuntu@ec2-18-218-88-210.us-east-2.compute.amazonaws.com
 # yes
 # inside AWS EC2 instance
-git config --global credential.helper 'cache --timeout=3600'  # run this only once on the machine
-git clone https://github.com/2keynet/web3-alpha.git 
-# enter user name/password for github
-
 sudo apt-get update
+sudo apt-get upgrade
+
+git config --global credential.helper 'cache --timeout=3600'  # run this only once on the machine
+git clone https://github.com/2keynet/web3-alpha.git
+# enter user name/password for github
+git checkout <branch>
+
 curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
 sudo apt install -y nodejs
 sudo npm install -g ganache-cli
