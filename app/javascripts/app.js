@@ -21,7 +21,7 @@ const hdkey = require('ethereumjs-wallet/hdkey')
 // const RpcSubprovider = require('web3-provider-engine/subproviders/rpc.js')
 import * as ProviderEngine  from 'web3-provider-engine';
 import * as RpcSubprovider  from 'web3-provider-engine/subproviders/rpc';
-import * as HookedWalletSubprovider from 'web3-provider-engine/subproviders/hooked-wallet';
+// import * as HookedWalletSubprovider from 'web3-provider-engine/subproviders/hooked-wallet';
 const WalletSubprovider = require('ethereumjs-wallet/provider-engine')
 let local_accounts
 let local_address
@@ -33,7 +33,7 @@ let node_url
 let BIG_INT = 100000000000
 
 let entityMap = {
-  '&': '&amp;',
+  // '&': '&amp;',
   '<': '&lt;',
   '>': '&gt;',
   '"': '&quot;',
@@ -203,7 +203,7 @@ function view (view_promise, cb_end, cb_error) {
 
 
 function escapeHtml (string) {
-  return String(string).replace(/[&<>"'`=\/]/g, function (s) {
+  return String(string).replace(/[<>"'`=\/]/g, function (s) {
     return entityMap[s]
   })
 }
@@ -297,9 +297,6 @@ import { default as contract } from 'truffle-contract'
 // import { default as clipboard } from 'clipboard';
 // import clippy_img from '!!file!../images/clippy.svg'
 
-import ERC20_artifacts from '../../build/contracts/ERC20.json'
-let ERC20Contract = contract(ERC20_artifacts)
-
 import twoKeyEconomy_artifacts from '../../build/contracts/TwoKeyEconomy.json'
 let TwoKeyEconomy = contract(twoKeyEconomy_artifacts)
 let TwoKeyEconomy_contractInstance
@@ -308,12 +305,14 @@ import TwoKeyReg_artifacts from '../../build/contracts/TwoKeyReg.json'
 let TwoKeyReg = contract(TwoKeyReg_artifacts)
 let TwoKeyReg_contractInstance
 
-import TwoKeyContract_artifacts from '../../build/contracts/TwoKeyContract.json'
-let TwoKeyContract = contract(TwoKeyContract_artifacts)
 import TwoKeyAcquisitionContract_artifacts from '../../build/contracts/TwoKeyAcquisitionContract.json'
 let TwoKeyAcquisitionContract = contract(TwoKeyAcquisitionContract_artifacts)
 import TwoKeyPresellContract_artifacts from '../../build/contracts/TwoKeyPresellContract.json'
 let TwoKeyPresellContract = contract(TwoKeyPresellContract_artifacts)
+
+// load example of each contract so we can get their code and compare it to other instances of the same class of contracts
+let TwoKeyAcquisitionContract_contractInstance
+let TwoKeyPresellContract_contractInstance
 
 let current_twoKeyContractAddress  // current contract handled
 let from_twoKeyContractAddress  // 2key link was from this address
@@ -340,7 +339,7 @@ function tbl_add_contract (tbl, twoKeyContractAddress) {
   tbl_add_contract_active[tbl + twoKeyContractAddress] = true
 
   if (!$(tbl).children().length) {
-    $(tbl).append("<tr><td colspan=\"6\" data-toggle='tooltip' title='what I have in the contract'>Me</td><td></td><td colspan=\"13\" data-toggle='tooltip' title='contract properties'>Contract</td></tr>")
+    $(tbl).append("<tr><td colspan=\"6\" data-toggle='tooltip' title='what I have in the contract'>Me</td><td></td><td colspan=\"14\" data-toggle='tooltip' title='contract properties'>Contract</td></tr>")
     tbl_add_row(tbl, contract_header())
   }
 
@@ -407,7 +406,7 @@ function init_TwoKeyReg () {
 }
 
 function update_total_supply(address) {
-  view(TwoKeyEconomy_contractInstance.totalSupply(address),
+  view(TwoKeyEconomy_contractInstance.totalSupply(),
     (result) => {
       let totalSupply
       totalSupply = web3.fromWei(result.toString())
@@ -548,30 +547,57 @@ function init_TwoKeyContract (TwoKeyContract_instance) {
       }
     }
   )
+
+  if (TwoKeyContract_instance.campaign_type == 'presell') {
+    TwoKeyContract_instance.erc20 = TwoKeyContract_instance.erc20_token_sell_contract()
+  }
 }
 
 function getTwoKeyContract (address, cb) {
-  let contract = contract_cache[address]
-  if (contract) {
-    cb(contract)
-  } else {
-    if (contract_cache_cb[address]) {
-      contract_cache_cb[address].push(cb)
+  web3.eth.getCode(address,(err,code) => {
+    if (err) {
+      alert("Cant read contract " + address + " " + err)
     } else {
-      contract_cache_cb[address] = [cb]
-      view(TwoKeyContract.at(address),
-        contract => {
-          init_TwoKeyContract(contract)
-          contract_cache[address] = contract
-          while (contract_cache_cb[address] && contract_cache_cb[address].length) {
-            cb = contract_cache_cb[address].pop()
-            cb(contract)
+      let campaign_type
+      if (code === TwoKeyAcquisitionContract_contractInstance.code) {
+        campaign_type = 'acquistion'
+      } else if (code === TwoKeyPresellContract_contractInstance.code) {
+        campaign_type = 'presell'
+      } else {
+        alert('Invalid campaign contract ' + address)
+        return
+      }
+
+      let contract = contract_cache[address]
+      if (contract) {
+        cb(contract)
+      } else {
+        if (contract_cache_cb[address]) {
+          contract_cache_cb[address].push(cb)
+        } else {
+          contract_cache_cb[address] = [cb]
+          let contract_interface
+          if (campaign_type == 'presell') {
+            contract_interface = TwoKeyPresellContract
+          } else {
+            contract_interface = TwoKeyAcquisitionContract
           }
-          contract_cache_cb[address] = null
+          view(contract_interface.at(address),
+            contract => {
+              contract.campaign_type = campaign_type
+              init_TwoKeyContract(contract)
+              contract_cache[address] = contract
+              while (contract_cache_cb[address] && contract_cache_cb[address].length) {
+                cb = contract_cache_cb[address].pop()
+                cb(contract)
+              }
+              contract_cache_cb[address] = null
+            }
+          )
         }
-      )
+      }
     }
-  }
+  })
 }
 
 // We are using IPFS to store content for each product.
@@ -623,7 +649,7 @@ function username2address (username, cb, cberror) {
         if (address && address != '0x0000000000000000000000000000000000000000') {
           cb(address)
         } else {
-          alert('user ' + username + ' is not signed-up')
+          alert('user ' + escapeHtml(username) + ' is not signed-up')
           if (cberror) {
             cberror()
           }
@@ -1215,6 +1241,7 @@ function contract_header () {
   items.push("<td data-toggle='tooltip' title='contract/product name'>name</td>")
   items.push("<td data-toggle='tooltip' title='contract symbol'>ARC symbol</td>")
   items.push("<td data-toggle='tooltip' title='who created the contract'>owner</td>")
+  items.push("<td data-toggle='tooltip' title='type of campaign'>campaign</td>")
   items.push("<td data-toggle='tooltip' title='how many ARCs an influencer or a customer will receive when opening a 2Key link of this contract'>default share quota per influencer</td>")
   items.push("<td data-toggle='tooltip' title='cost of joining'>price to join</td>")
   items.push("<td data-toggle='tooltip' title='number of units being sold'>units offered</td>")
@@ -1253,7 +1280,7 @@ function contract_info (TwoKeyContract_instance, min_arcs, callback) {
           arcs = arcs.toNumber()
           unit_decimals = unit_decimals.toNumber()
 
-          let onclick_buy = "buy('" + twoKeyContractAddress + "','" + name + "'," + cost + ')'
+          let onclick_buy = "buy('" + twoKeyContractAddress + "','" + escapeHtml(name) + "'," + cost + ')'
           let onclick_redeem = "redeem('" + twoKeyContractAddress + "')"
           $('#buy').attr('onclick', onclick_buy)
           $('#redeem').attr('onclick', onclick_redeem)
@@ -1320,16 +1347,17 @@ function contract_info (TwoKeyContract_instance, min_arcs, callback) {
             items.push('<td>' +
                     "<button class='bt' onclick=\"" + onclick_name + '"' +
                     "data-toggle='tooltip' title='jump to contract page'" +
-                    '">' + name +
+                    '">' + escapeHtml(name) +
                     '</button></td>')
             // items.push("<td><a href='" + contract_link + "'>"+ name + "</a></td>");
-            items.push('<td>' + symbol + '</td>')
+            items.push('<td>' + escapeHtml(symbol) + '</td>')
             {
               unique_id = unique_id + 1
               let tag_owner = 'id' + unique_id
               items.push('<td id="' + tag_owner + '" >' + owner + '</td>')
               owner2name(owner, '#' + tag_owner)
             }
+            items.push('<td>' + TwoKeyContract_instance.campaign_type + '</td>')
 
             items.push('<td>' + quota + '</td>')
             let join_cost = 0
@@ -1345,7 +1373,7 @@ function contract_info (TwoKeyContract_instance, min_arcs, callback) {
                 ipfs.cat(ipfs_hash, (err, res) => {
                   if (err) throw err
                   safe_cb('#' + tag_description, () => {
-                    $('#' + tag_description).text(res.toString())
+                    $('#' + tag_description).text(res.toString())  // using text protects you from code injection
                   })
                 })
               }
@@ -1365,12 +1393,30 @@ function contract_info (TwoKeyContract_instance, min_arcs, callback) {
             let kpis = get_kpis(TwoKeyContract_instance, owner, owner)
             items.push('<td>' + kpis.join('/') + '</td>')
 
-            items.push('<td>' +
+            let address_cell = '<td>' +
                     "<button class='lnk bt' " +
-                    "data-toggle='tooltip' title='copy to clipboard' " +
+                    "data-toggle='tooltip' title='contract address, click to copy to clipboard' " +
                     "msg='contract address was copied to clipboard'>" +
-                    twoKeyContractAddress + '</button>' +
-                    '</td>')
+                    twoKeyContractAddress + '</button> '
+
+
+            if (TwoKeyContract_instance.campaign_type == 'presell') {
+              unique_id = unique_id + 1
+              let tag_description = 'id' + unique_id
+              address_cell += "<button class='lnk bt' id=\"" + tag_description + "\" " +
+                      "data-toggle='tooltip' title='erc20 address, click to copy to clipboard' " +
+                      "msg='erc20 contract address was copied to clipboard'>" +
+                       + '</button>'
+              view(TwoKeyContract_instance.erc20,
+                erc20_address => {
+                  safe_cb('#' + tag_description, () => {
+                  $('#' + tag_description).text(erc20_address)  // using text protects you from code injection
+                  })
+                }
+              )
+            }
+            address_cell += '</td>'
+            items.push(address_cell)
           }
           callback(items, constant_info, info)
         }
@@ -1683,7 +1729,7 @@ function update_user_balance(my_address) {
 function updateUserInfo () {
   clean_user()
   let username = localStorage.username
-  $('#user-name').html(username)
+  $('#user-name').text(username)  // using text protects you from code injection
   let my_address = whoAmI()
   if (!my_address) {
     alert('Unlock MetaMask and reload page')
@@ -2046,10 +2092,8 @@ function init () {
   TwoKeyEconomy.setProvider(web3.currentProvider)
   TwoKeyReg.setProvider(web3.currentProvider)
 
-  TwoKeyContract.setProvider(web3.currentProvider)
   TwoKeyAcquisitionContract.setProvider(web3.currentProvider)
   TwoKeyPresellContract.setProvider(web3.currentProvider)
-  ERC20Contract.setProvider(web3.currentProvider)
 
   ipfs_init()
 
@@ -2077,10 +2121,29 @@ function init () {
     TwoKeyEconomy_contractInstance = contractInstance
     view(TwoKeyReg.deployed(), contractInstance => {
       TwoKeyReg_contractInstance = contractInstance
-      // init_TwoKeyReg();
-      $('#loading').hide()
-      stop_spin()
-      whoAmI()
+
+      view(TwoKeyAcquisitionContract.deployed(), contractInstance => {
+        TwoKeyAcquisitionContract_contractInstance = contractInstance
+        web3.eth.getCode(TwoKeyAcquisitionContract_contractInstance.address,(err,res) => {
+          if (!err) {
+            TwoKeyAcquisitionContract_contractInstance.code = res
+          }
+        })
+
+        view(TwoKeyPresellContract.deployed(), contractInstance => {
+          TwoKeyPresellContract_contractInstance = contractInstance
+          web3.eth.getCode(TwoKeyPresellContract_contractInstance.address,(err,res) => {
+            if (!err) {
+              TwoKeyPresellContract_contractInstance.code = res
+            }
+          })
+
+          // init_TwoKeyReg();
+          $('#loading').hide()
+          stop_spin()
+          whoAmI()
+        })
+      })
     })
   })
 }
