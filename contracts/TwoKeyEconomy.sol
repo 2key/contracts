@@ -1,15 +1,17 @@
-pragma solidity ^0.4.18; //We have to specify what version of compiler this code will use
+pragma solidity ^0.4.24;
 
-import 'zeppelin-solidity/contracts/token/ERC20/MintableToken.sol';
+import 'openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol';
+import 'openzeppelin-solidity/contracts/token/ERC20/ERC20.sol';
+import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
 
-contract TwoKeyEconomy is MintableToken {
+
+contract TwoKeyEconomy is StandardToken, Ownable {
   string public name = 'TwoKeyEconomy';
   string public symbol = '2Key';
   uint8 public decimals = 18;
-  uint public INITIAL_SUPPLY = 1000000000000000000000000000;
 
-  function TwoKeyEconomy() public {
-    totalSupply_ = INITIAL_SUPPLY;
-    balances[msg.sender] = INITIAL_SUPPLY;
+  constructor() Ownable() public {
+    totalSupply_ = 1000000000000000000000000000;
+    balances[msg.sender] = totalSupply_;
   }
 }
