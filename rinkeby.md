@@ -9,3 +9,12 @@ In order to deploy contracts on [rinkeby](https://www.rinkeby.io) do the followi
 truffle migrate --network rinkeby-infura --reset > rinkeby.log
 ```
 * see whats happening on [etherscan](https://rinkeby.etherscan.io/address/0xb3fa520368f2df7bed4df5185101f303f6c7decc)
+
+* finally add changes to this repo and tag it
+```bash
+git add -f build/contracts/*
+git commit -am "deployed to rinkeby"
+git tag -a rinkeby<date> -m "installed on rinkeby on <date> <time>"
+git push origin rinkeby<date>
+```
+
