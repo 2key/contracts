@@ -6,6 +6,6 @@ In order to deploy contracts on [rinkeby](https://www.rinkeby.io) do the followi
 * go through each of the files in `migrations/` folder and make sure that only the contracts you want to be deployed are inside an `if(... deployer.network == "rinkeby-infura")` condition
 * type:
 ```bash
-truffle migrate --network rinkeby-infura --reset
+truffle migrate --network rinkeby-infura --reset > rinkeby.log
 ```
 * see whats happening on [etherscan](https://rinkeby.etherscan.io/address/0xb3fa520368f2df7bed4df5185101f303f6c7decc)
