@@ -6,7 +6,7 @@ const compressor = require('node-minify');
 const readdir = util.promisify(fs.readdir);
 
 const buildPath = path.join(__dirname, 'build', 'contracts');
-const abiPath = path.join(__dirname, 'build', 'interfaces');
+const abiPath = path.join(__dirname, 'build', 'sol-interface');
 
 if (fs.existsSync(buildPath)) {
   const contracts = {
