@@ -4,4 +4,5 @@
 geth --datadir=./datadir --nodiscover --rpc --rpcapi "db,personal,eth,net,web3,debug" --rpccorsdomain='*' --rpcaddr="localhost" --rpcport 8545 --networkid=17 --unlock '0,1'
 ipfs daemon 2>&1 1>/dev/null &
 truffle migrate
+npm run generate &> /dev/null
 npm run dev 2>&1 1>/dev/null &
