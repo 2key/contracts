@@ -13,7 +13,7 @@ const abiPath = path.join(__dirname, 'build', 'sol-interface');
 const mainGit = simpleGit();
 const solGit = simpleGit(abiPath);
 
-const generateSOLInterface = () => {
+const generateSOLInterface = () => new Promise((resolve, reject) => {
   if (fs.existsSync(buildPath)) {
     const contracts = {
       version: Date.now(),
@@ -35,50 +35,19 @@ const generateSOLInterface = () => {
         input: path.join(abiPath, 'index.js'),
         output: path.join(abiPath, 'index.js')
       }).then(() => {
-        console.log('Done')
-      });
+        console.log('Done');
+        resolve();
+      })
+      .catch(reject);
     });
   }
-}
-
-const commitSOLInterface = () => {
-  gitHelpers.status()
-    .then(changes => {
-      if (changes.files && changes.files.length) {
-        console.log(changes);
-        const mainCommitMsg = fs.readFileSync(path.join(__dirname, '.git/COMMIT_EDITMSG'), { encoding: 'utf-8' });
-        console.log('Message', mainCommitMsg);
-        git.add(changes.files.map(file => path.join(abiPath, file.path)), (err, result) => {
-          if (err) {
-            console.warn('Add failed:', err);
-            process.exit(1);
-          } else {
-            console.log(result);
-            git.commit(mainCommitMsg, (commitErr, commitResult) => {
-              if (commitErr) {
-                console.warn('Commit failed:', commitErr);
-                process.exit(1);
-              } else {
-                console.log(`${mainCommitMsg}commited`);
-              }
-            });
-          }
-        });
-      } else {
-        console.log('Nothing changed');
-      }
-    })
-    .catch(err => {
-      console.warn('GIT STATUS ERROR:', err);
-      process.exit(1);
-    });
-}
+});
 
 async function main() {
   try {
     await mainGit.fetch();
-    const mainStatus = await mainGit.status();
-    const solStatus = await solGit.status();
+    let mainStatus = await mainGit.status();
+    let solStatus = await solGit.status();
     if (solStatus.current !== mainStatus.current) {
       const solBranches = await solGit.branch();
       if (solBranches.all.find(item => item.includes(mainStatus.current))) {
@@ -97,9 +66,44 @@ async function main() {
       process.exit(1);
     }
     console.log(process.argv);
-    console.log('Running:', process.argv[2]);
-    const truffleStatus = childProcess.execSync(process.argv[2]);
-    console.log(truffleStatus.toString('utf8'));
+    // const migrate = `truffle ${process.argv.slice(2).join(' ').trim()}`;
+    // console.log('Running:', migrate);
+    console.time('truffle migrate');
+    const truffle = childProcess.spawn('truffle', process.argv.slice(2));
+    truffle.stdout.on('data', data => {
+      console.log(data.toString('utf8'));
+    });
+    truffle.stderr.on('data', data => {
+      console.log(data.toString('utf8'));
+      throw new Error('truffle error');
+    });
+    truffle.on('close', async code => {
+      console.timeEnd('truffle migrate');
+      console.log('truffle exit with code', code);
+      if (code === 0) {
+        await generateSOLInterface();
+        mainStatus = await mainGit.status();
+        solStatus = await solGit.status();
+        const network = process.argv[process.argv.indexOf('--network') + 1];
+        const now = new Date();
+        const commit = `SOL Deployed to ${network} ${Date.now()}`
+        const tag = `${network}-${now.getFullYear()}${now.getMonth()}${now.getDate()}`;
+        console.log(commit, tag);
+        await solGit.add(solStatus.files.map(item => item.path));
+        await solGit.commit(commit);
+        await mainGit.add(mainStatus.files.map(item => item.path));
+        await mainGit.commit(commit);
+        await solGit.addAnnotatedTag(tag, commit);
+        await mainGit.addAnnotatedTag(tag, commit);
+        await solGit.push();
+        await mainGit.push();
+        // solGit.add()
+      } else {
+        await mainGit.reset('hard');
+        process.exit(1);
+      }
+    });
+    // console.log(truffleStatus.toString('utf8'));
   } catch (e) {
     if (e.output) {
       e.output.forEach(buff => {
@@ -110,7 +114,7 @@ async function main() {
     } else {
       console.warn('Error', e);
     }
-    mainGit.reset('hard');
+    await mainGit.reset('hard');
   }
 }
 
