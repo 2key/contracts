@@ -1,0 +1,85 @@
+{
+  "name": "truffle-init-webpack",
+  "version": "0.0.1",
+  "description": "Frontend example using truffle v3",
+  "scripts": {
+    "lint": "eslint ./",
+    "build": "webpack",
+    "dev": "webpack-dev-server",
+    "sol": "node SOLInterfaceHelpers.js",
+    "generate": "npm run sol -- generate",
+    "!!precommit": "GIT_INDEX_FILE=$PWD/build/sol-interface/.git/index&&npm run sol -- commit",
+    "!!!precommit": "GIT_INDEX_FILE='index'&&npm run sol -- commit",
+    "!precommit": "npm run sol -- commit"
+  },
+  "author": "Douglas von Kohorn",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-cli": "^6.22.2",
+    "babel-core": "^6.26.3",
+    "babel-eslint": "^6.1.2",
+    "babel-loader": "^6.2.10",
+    "babel-plugin-transform-runtime": "^6.22.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-es2015": "^6.22.0",
+    "babel-register": "^6.22.0",
+    "clean-webpack-plugin": "^0.1.17",
+    "copy-webpack-plugin": "^4.5.2",
+    "css-loader": "^0.26.1",
+    "eslint": "^3.14.0",
+    "eslint-config-standard": "^6.0.0",
+    "eslint-plugin-babel": "^4.0.0",
+    "eslint-plugin-mocha": "^4.8.0",
+    "eslint-plugin-promise": "^3.8.0",
+    "eslint-plugin-standard": "^2.0.0",
+    "file-loader": "^1.1.6",
+    "html-loader": "^0.5.5",
+    "html-webpack-plugin": "^2.28.0",
+    "husky": "^0.14.3",
+    "json-loader": "^0.5.4",
+    "markdown-loader": "^2.0.1",
+    "node-minify": "^3.1.0",
+    "style-loader": "^0.13.1",
+    "svg-inline-loader": "^0.8.0",
+    "truffle-test-utils": "^0.1.0",
+    "webpack": "^2.2.1",
+    "webpack-dev-server": "^2.11.1"
+  },
+  "dependencies": {
+    "assert": "^1.4.1",
+    "bignumber.js": "^6.0.0",
+    "bip39": "^2.5.0",
+    "bootstrap": "^4.1.1",
+    "clipboard": "^1.7.1",
+    "d3": "^3.5.17",
+    "ethereumjs-abi": "^0.6.5",
+    "ethereumjs-util": "^5.2.0",
+    "ethereumjs-wallet": "^0.6.0",
+    "ipfs-api": "^17.3.0",
+    "ipfs-pubsub-room": "^1.3.0",
+    "jquery": "^3.2.1",
+    "openzeppelin-solidity": "^1.10.0",
+    "popper.js": "^1.14.3",
+    "simple-git": "^1.96.0",
+    "truffle-contract": "^3.0.6",
+    "truffle-hdwallet-provider": "0.0.5",
+    "web3": "^0.20.6",
+    "web3-provider-engine": "^14.0.6"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "echo HUSKY $HUSKY_GIT_PARAMS",
+      "!pre-commit": "npm run sol -- commit",
+      "pre-push": "npm run sol -- push"
+    }
+  },
+  "main": "truffle.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/2keynet/web3-alpha.git"
+  },
+  "bugs": {
+    "url": "https://github.com/2keynet/web3-alpha/issues"
+  },
+  "homepage": "https://github.com/2keynet/web3-alpha#readme"
+}
