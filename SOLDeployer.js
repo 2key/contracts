@@ -6,6 +6,7 @@ const simpleGit = require('simple-git/promise');
 const childProcess = require('child_process');
 
 const readdir = util.promisify(fs.readdir);
+const exec = util.promisify(childProcess.exec);
 const buildPath = path.join(__dirname, 'build', 'contracts');
 const abiPath = path.join(__dirname, 'build', 'sol-interface');
 
@@ -90,7 +91,7 @@ async function main() {
     console.log(mainStatus);
     const localChanges = mainStatus.files
       .filter(item => !(item.path.includes('build/sol-interface')
-        || (process.env.NODE_ENV === 'development' && item.path.includes('SOLInterfaceHelpers.js'))));
+        || (process.env.NODE_ENV === 'development' && item.path.includes(process.argv[1].split('/').pop()))));
     if (mainStatus.behind || localChanges.length) {
       console.log('You have unsynced changes!', localChanges);
       process.exit(1);
