@@ -10,7 +10,7 @@ const exec = util.promisify(childProcess.exec);
 const buildPath = path.join(__dirname, 'build', 'contracts');
 const abiPath = path.join(__dirname, 'build', 'sol-interface');
 
-const mainGit = simpleGit();
+const contractsGit = simpleGit();
 const solGit = simpleGit(abiPath);
 
 const generateSOLInterface = () => new Promise((resolve, reject) => {
@@ -45,23 +45,29 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
 
 async function main() {
   try {
-    await mainGit.fetch();
-    let mainStatus = await mainGit.status();
+    await contractsGit.fetch();
+    await contractsGit.submoduleUpdate();
+    let contractsStatus = await contractsGit.status();
     let solStatus = await solGit.status();
-    if (solStatus.current !== mainStatus.current) {
+    console.log('CONTRACTS', contractsStatus);
+    console.log('SOL-INTERFACE', solStatus);
+    if (solStatus.current !== contractsStatus.current) {
       const solBranches = await solGit.branch();
-      if (solBranches.all.find(item => item.includes(mainStatus.current))) {
-        await solGit.checkout(mainStatus.current);
+      console.log('Checkout to', contractsStatus.current);
+      if (solBranches.all.find(item => item.includes(contractsStatus.current))) {
+        await solGit.checkout(contractsStatus.current);
       } else {
-        await solGit.checkoutBranch(mainStatus.current, solStatus.current);
+        await solGit.checkoutLocalBranch(contractsStatus.current);
       }
     }
-    await mainGit.submoduleUpdate();
-    console.log(mainStatus);
-    const localChanges = mainStatus.files
+    await contractsGit.submoduleUpdate();
+    await solGit.reset('hard');
+    solStatus = await solGit.status();
+    console.log('SOL-INTERFACE', solStatus);
+    const localChanges = contractsStatus.files
       .filter(item => !(item.path.includes('build/sol-interface')
         || (process.env.NODE_ENV === 'development' && item.path.includes(process.argv[1].split('/').pop()))));
-    if (mainStatus.behind || localChanges.length) {
+    if (contractsStatus.behind || localChanges.length) {
       console.log('You have unsynced changes!', localChanges);
       process.exit(1);
     }
@@ -82,24 +88,26 @@ async function main() {
       console.log('truffle exit with code', code);
       if (code === 0) {
         await generateSOLInterface();
-        mainStatus = await mainGit.status();
+        contractsStatus = await contractsGit.status();
         solStatus = await solGit.status();
         const network = process.argv[process.argv.indexOf('--network') + 1];
         const now = new Date();
         const commit = `SOL Deployed to ${network} ${Date.now()}`
-        const tag = `${network}-${now.getFullYear()}${now.getMonth()}${now.getDate()}`;
+        const tag = `${network}-${now.getFullYear()}${now.getMonth()}${now.getDate()}${now.getHours()}${now.getMinutes()}${now.getSeconds()}`;
         console.log(commit, tag);
         await solGit.add(solStatus.files.map(item => item.path));
         await solGit.commit(commit);
-        await mainGit.add(mainStatus.files.map(item => item.path));
-        await mainGit.commit(commit);
-        await solGit.addAnnotatedTag(tag, commit);
-        await mainGit.addAnnotatedTag(tag, commit);
-        await solGit.push();
-        await mainGit.push();
+        await solGit.push('origin', contractsStatus.current);
+        await contractsGit.add(contractsStatus.files.map(item => item.path));
+        await contractsGit.commit(commit);
+        await contractsGit.push('origin', contractsStatus.current);
+        // await solGit.addAnnotatedTag(tag, commit);
+        // await contractsGit.addAnnotatedTag(tag, commit);
+        // await solGit.push();
+        // await contractsGit.push();
         // solGit.add()
       } else {
-        await mainGit.reset('hard');
+        await contractsGit.reset('hard');
         process.exit(1);
       }
     });
@@ -114,7 +122,7 @@ async function main() {
     } else {
       console.warn('Error', e);
     }
-    await mainGit.reset('hard');
+    await contractsGit.reset('hard');
   }
 }
 
