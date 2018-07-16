@@ -6,7 +6,8 @@
     "lint": "eslint ./",
     "build": "webpack",
     "dev": "webpack-dev-server",
-    "generate": "node generateInterfaces.js"
+    "sol": "node SOLInterfaceHelpers.js",
+    "generate": "npm run sol -- generate"
   },
   "author": "Douglas von Kohorn",
   "license": "MIT",
@@ -29,9 +30,9 @@
     "eslint-plugin-promise": "^3.8.0",
     "eslint-plugin-standard": "^2.0.0",
     "file-loader": "^1.1.6",
-    "git-hooks": "^1.1.10",
     "html-loader": "^0.5.5",
     "html-webpack-plugin": "^2.28.0",
+    "husky": "^1.0.0-rc.13",
     "json-loader": "^0.5.4",
     "markdown-loader": "^2.0.1",
     "node-minify": "^3.1.0",
@@ -56,10 +57,18 @@
     "jquery": "^3.2.1",
     "openzeppelin-solidity": "^1.10.0",
     "popper.js": "^1.14.3",
+    "simple-git": "^1.96.0",
     "truffle-contract": "^3.0.6",
     "truffle-hdwallet-provider": "0.0.5",
     "web3": "^0.20.6",
     "web3-provider-engine": "^14.0.6"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "echo HUSKY $HUSKY_GIT_PARAMS",
+      "!pre-commit": "npm run sol -- commit",
+      "pre-push": "npm run sol -- push"
+    }
   },
   "main": "truffle.js",
   "repository": {
