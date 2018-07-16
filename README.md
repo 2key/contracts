@@ -141,3 +141,9 @@ npm i ipfs-api
 ```
 
 # CI/CD flow
+```node SOLDeployer.js migrate --network development --reset
+```
+
+if you create a new branch make sure that you set-origin to be able push
+if you have HEAD detached error you can reset sol-interface current branch
+
