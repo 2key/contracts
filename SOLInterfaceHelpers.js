@@ -99,14 +99,16 @@ async function main() {
     const truffleStatus = childProcess.execSync(`truffle ${process.argv.slice(2).join(' ')}`);
     console.log(truffleStatus);
   } catch (e) {
-    console.warn('Error', e);
     if (e.output) {
       e.output.forEach(buff => {
         if (buff && buff.toString) {
           console.log(buff.toString('utf8'));
         }
-      })
+      });
+    } else {
+      console.warn('Error', e);
     }
+    mainGit.reset('hard');
   }
 }
 
