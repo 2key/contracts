@@ -2,12 +2,12 @@ const fs = require('fs');
 const path = require('path');
 const util = require('util');
 const compressor = require('node-minify');
-const simpleGit = require('simple-git/promise')
+const simpleGit = require('simple-git/promise');
+const childProcess = require('child_process');
 
 const readdir = util.promisify(fs.readdir);
 const buildPath = path.join(__dirname, 'build', 'contracts');
 const abiPath = path.join(__dirname, 'build', 'sol-interface');
-const actions = {};
 
 const mainGit = simpleGit();
 const solGit = simpleGit(abiPath);
@@ -75,26 +75,38 @@ const commitSOLInterface = () => {
 
 async function main() {
   try {
-  await mainGit.fetch();
-  const mainStatus = await mainGit.status();
-  const solStatus = await solGit.status();
-  if (solStatus.current !== mainStatus.current) {
-    const solBranches = await solGit.branch();
-    console.log(solBranches.all);
-    if (solBranches.all.find(item => item.includes(mainStatus.current))) {
-      await solGit.checkout(mainStatus.current);
-    } else {
-      await solGit.checkoutBranch(mainStatus.current, solStatus.current);
+    await mainGit.fetch();
+    const mainStatus = await mainGit.status();
+    const solStatus = await solGit.status();
+    if (solStatus.current !== mainStatus.current) {
+      const solBranches = await solGit.branch();
+      if (solBranches.all.find(item => item.includes(mainStatus.current))) {
+        await solGit.checkout(mainStatus.current);
+      } else {
+        await solGit.checkoutBranch(mainStatus.current, solStatus.current);
+      }
     }
-  }
-  await mainGit.submoduleUpdate();
-  console.log(mainStatus);
-  if (mainStatus.behind || mainStatus.files.length) {
-    console.log('You have unsynced changes!');
-    process.exit(1);
-  }
+    await mainGit.submoduleUpdate();
+    console.log(mainStatus);
+    const localChanges = mainStatus.files
+      .filter(item => !(item.path.includes('build/sol-interface')
+        || (process.env.NODE_ENV === 'development' && item.path.includes('SOLInterfaceHelpers.js'))));
+    if (mainStatus.behind || localChanges.length) {
+      console.log('You have unsynced changes!', localChanges);
+      process.exit(1);
+    }
+    console.log(process.argv);
+    const truffleStatus = childProcess.execSync(`truffle ${process.argv.slice(2).join(' ')}`);
+    console.log(truffleStatus);
   } catch (e) {
-    console.warn(e);
+    console.warn('Error', e);
+    if (e.output) {
+      e.output.forEach(buff => {
+        if (buff && buff.toString) {
+          console.log(buff.toString('utf8'));
+        }
+      })
+    }
   }
 }
 
