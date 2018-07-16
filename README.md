@@ -139,3 +139,5 @@ make sure your in the project root
 ```angularjs
 npm i ipfs-api
 ```
+
+# CI/CD flow
