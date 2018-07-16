@@ -10,7 +10,7 @@
     "generate": "npm run sol -- generate",
     "!!precommit": "GIT_INDEX_FILE=$PWD/build/sol-interface/.git/index&&npm run sol -- commit",
     "!!!precommit": "GIT_INDEX_FILE='index'&&npm run sol -- commit",
-    "!precommit": "npm run sol -- commit"
+    "precommit": "npm run sol -- commit"
   },
   "author": "Douglas von Kohorn",
   "license": "MIT",
@@ -35,12 +35,12 @@
     "file-loader": "^1.1.6",
     "html-loader": "^0.5.5",
     "html-webpack-plugin": "^2.28.0",
-    "husky": "^0.14.3",
     "json-loader": "^0.5.4",
     "markdown-loader": "^2.0.1",
     "node-minify": "^3.1.0",
     "style-loader": "^0.13.1",
     "svg-inline-loader": "^0.8.0",
+    "truffle": "^4.1.13",
     "truffle-test-utils": "^0.1.0",
     "webpack": "^2.2.1",
     "webpack-dev-server": "^2.11.1"
