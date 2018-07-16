@@ -9,7 +9,7 @@
     "sol": "node SOLInterfaceHelpers.js",
     "generate": "npm run sol -- generate",
     "!!precommit": "GIT_INDEX_FILE=$PWD/build/sol-interface/.git/index&&npm run sol -- commit",
-    "precommit": "GIT_INDEX_FILE='index'&&npm run sol -- commit",
+    "!!!precommit": "GIT_INDEX_FILE='index'&&npm run sol -- commit",
     "!precommit": "npm run sol -- commit"
   },
   "author": "Douglas von Kohorn",
