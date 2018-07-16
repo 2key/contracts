@@ -97,14 +97,14 @@ async function main() {
         console.log(commit, tag);
         await solGit.add(solStatus.files.map(item => item.path));
         await solGit.commit(commit);
-        await solGit.push('origin', contractsStatus.current);
         await contractsGit.add(contractsStatus.files.map(item => item.path));
         await contractsGit.commit(commit);
-        await contractsGit.push('origin', contractsStatus.current);
         await solGit.addTag(tag);
         await contractsGit.addTag(tag);
-        // await solGit.push('origin', contractsStatus.current);
-        // await contractsGit.push('origin', contractsStatus.current);
+        await solGit.push('origin', contractsStatus.current);
+        await contractsGit.push('origin', contractsStatus.current);
+        await solGit.pushTags('origin');
+        await contractsGit.pushTags('origin');
       } else {
         await contractsGit.reset('hard');
         await solGit.reset('hard');
