@@ -7,7 +7,10 @@
     "build": "webpack",
     "dev": "webpack-dev-server",
     "sol": "node SOLInterfaceHelpers.js",
-    "generate": "npm run sol -- generate"
+    "generate": "npm run sol -- generate",
+    "!!precommit": "GIT_INDEX_FILE=$PWD/build/sol-interface/.git/index&&npm run sol -- commit",
+    "precommit": "GIT_INDEX_FILE='index'&&npm run sol -- commit",
+    "!precommit": "npm run sol -- commit"
   },
   "author": "Douglas von Kohorn",
   "license": "MIT",
@@ -32,7 +35,7 @@
     "file-loader": "^1.1.6",
     "html-loader": "^0.5.5",
     "html-webpack-plugin": "^2.28.0",
-    "husky": "^1.0.0-rc.13",
+    "husky": "^0.14.3",
     "json-loader": "^0.5.4",
     "markdown-loader": "^2.0.1",
     "node-minify": "^3.1.0",
@@ -62,6 +65,13 @@
     "truffle-hdwallet-provider": "0.0.5",
     "web3": "^0.20.6",
     "web3-provider-engine": "^14.0.6"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "echo HUSKY $HUSKY_GIT_PARAMS",
+      "!pre-commit": "npm run sol -- commit",
+      "pre-push": "npm run sol -- push"
+    }
   },
   "main": "truffle.js",
   "repository": {
