@@ -101,12 +101,13 @@ async function main() {
         await contractsGit.add(contractsStatus.files.map(item => item.path));
         await contractsGit.commit(commit);
         await contractsGit.push('origin', contractsStatus.current);
-        await solGit.addAnnotatedTag(tag, commit);
-        await contractsGit.addAnnotatedTag(tag, commit);
+        await solGit.addTag(tag);
+        await contractsGit.addTag(tag);
         await solGit.push('origin', contractsStatus.current);
         await contractsGit.push('origin', contractsStatus.current);
       } else {
         await contractsGit.reset('hard');
+        await solGit.reset('hard');
         process.exit(1);
       }
     });
