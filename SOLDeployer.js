@@ -96,9 +96,11 @@ async function main() {
       console.log('You have unsynced changes!', localChanges);
       process.exit(1);
     }
-    console.log(process.argv);
-    const truffleStatus = childProcess.execSync(`truffle ${process.argv.slice(2).join(' ')}`);
-    console.log(truffleStatus);
+    // console.log(process.argv);
+    const migrate = `truffle ${process.argv.slice(2).join(' ')}`;
+    console.log('Running truffle:', migrate);
+    const truffleStatus = childProcess.execSync(migrate);
+    console.log(truffleStatus.toString('utf8'));
   } catch (e) {
     if (e.output) {
       e.output.forEach(buff => {
