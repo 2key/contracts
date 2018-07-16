@@ -13,6 +13,8 @@ const abiPath = path.join(__dirname, 'build', 'sol-interface');
 const contractsGit = simpleGit();
 const solGit = simpleGit(abiPath);
 
+console.log(childProcess.execSync('node_modules/.bin/truffle version').toString('utf8'));
+
 const generateSOLInterface = () => new Promise((resolve, reject) => {
   if (fs.existsSync(buildPath)) {
     const contracts = {
@@ -75,7 +77,7 @@ async function main() {
     // const migrate = `truffle ${process.argv.slice(2).join(' ').trim()}`;
     // console.log('Running:', migrate);
     console.time('truffle migrate');
-    const truffle = childProcess.spawn('truffle', process.argv.slice(2));
+    const truffle = childProcess.spawn('node_modules/.bin/truffle', process.argv.slice(2));
     truffle.stdout.on('data', data => {
       console.log(data.toString('utf8'));
     });
