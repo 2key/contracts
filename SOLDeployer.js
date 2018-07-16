@@ -103,8 +103,8 @@ async function main() {
         await contractsGit.push('origin', contractsStatus.current);
         await solGit.addTag(tag);
         await contractsGit.addTag(tag);
-        await solGit.push('origin', contractsStatus.current);
-        await contractsGit.push('origin', contractsStatus.current);
+        // await solGit.push('origin', contractsStatus.current);
+        // await contractsGit.push('origin', contractsStatus.current);
       } else {
         await contractsGit.reset('hard');
         await solGit.reset('hard');
