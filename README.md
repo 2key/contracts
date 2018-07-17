@@ -149,13 +149,16 @@ Hack -> Commit&Push -> Deploy -> Generate JS solInterface for client -> Commit&A
 * Before runing mke sure that you are in HEAD of current branch and don't have uncommited changes (or incomming)
 * To setup truffle change truffle-template.js it will be copied to truffle.js on deploy process run
 * Run deployment with code:
-```node SOLDeployer.js migrate --network development --reset
+```
+node SOLDeployer.js migrate --network development --reset
 ```
 All params that you pass to script will pass them to truffle command ex:
-```node SOLDeployer.js migrate --network rinkeby-infura
+```
+node SOLDeployer.js migrate --network rinkeby-infura
 ```
 equal
-```truffle migrate --network rinkeby-infure
+```
+truffle migrate --network rinkeby-infure
 ```
 
 ### Troubleshooting
