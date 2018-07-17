@@ -114,6 +114,11 @@ async function main() {
       console.log('truffle exit with code', code);
       unlinkTruffleConfig();
       if (code === 0) {
+        const solConfigJSON = JSON.parse(fs.readFileSync(path.join(abiPath, 'package.json')));
+        const version = solConfigJSON.version.split('.');
+        version[version.length - 1] = parseInt(version.pop(), 10) + 1
+        solConfigJSON.version = version;
+        fs.writeFileSync(JSON.stringify(solConfigJSON));
         await generateSOLInterface();
         contractsStatus = await contractsGit.status();
         solStatus = await solGit.status();
