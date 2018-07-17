@@ -4,14 +4,22 @@ const util = require('util');
 const compressor = require('node-minify');
 const simpleGit = require('simple-git/promise');
 const childProcess = require('child_process');
+const moment = require('moment');
 
 const readdir = util.promisify(fs.readdir);
 const exec = util.promisify(childProcess.exec);
 const buildPath = path.join(__dirname, 'build', 'contracts');
 const abiPath = path.join(__dirname, 'build', 'sol-interface');
+const truffleTemplatePath = path.join(__dirname, 'truffle-template.js');
+const truffleConfigPath = path.join(__dirname, 'truffle.js');
 
 const contractsGit = simpleGit();
 const solGit = simpleGit(abiPath);
+
+if (fs.existsSync(truffleConfigPath)) {
+  fs.unlinkSync(truffleConfigPath);
+}
+
 
 console.log(childProcess.execSync('node_modules/.bin/truffle version').toString('utf8'));
 
@@ -74,8 +82,8 @@ async function main() {
       process.exit(1);
     }
     console.log(process.argv);
-    // const migrate = `truffle ${process.argv.slice(2).join(' ').trim()}`;
-    // console.log('Running:', migrate);
+    const truffleConfig = fs.readFileSync(truffleTemplatePath);
+    fs.writeFileSync(truffleConfigPath, truffleConfig);
     console.time('truffle migrate');
     const truffle = childProcess.spawn('node_modules/.bin/truffle', process.argv.slice(2));
     truffle.stdout.on('data', data => {
@@ -93,9 +101,9 @@ async function main() {
         contractsStatus = await contractsGit.status();
         solStatus = await solGit.status();
         const network = process.argv[process.argv.indexOf('--network') + 1];
-        const now = new Date();
-        const commit = `SOL Deployed to ${network} ${Date.now()}`
-        const tag = `${network}-${now.getFullYear()}${now.getMonth()}${now.getDate()}${now.getHours()}${now.getMinutes()}${now.getSeconds()}`;
+        const now = moment();
+        const commit = `SOL Deployed to ${network} ${now.format('lll')}`
+        const tag = `${network}-${now.format('YYYYMMDDHHmmss')}`;
         console.log(commit, tag);
         await solGit.add(solStatus.files.map(item => item.path));
         await solGit.commit(commit);
