@@ -50,7 +50,6 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
         const { abi, networks, contractName } = JSON.parse(fs.readFileSync(path.join(buildPath, file)))
         if (abi.length && Object.keys(networks).length) {
           const key = Math.max.apply(null, Object.keys(networks));
-          console.log('LAST DEPLOY', key);
           contracts[contractName] = { abi, address: networks[key].address }
         }
       });
