@@ -22,6 +22,20 @@ const unlinkTruffleConfig = () => {
   }
 }
 
+async function handleExit(p) {
+  console.log(p);
+  unlinkTruffleConfig();
+  await contractsGit.reset('hard');
+  await solGit.reset('hard');
+  process.exit();
+}
+
+process.on('exit', handleExit);
+process.on('SIGINT', handleExit);
+process.on('SIGUSR1', handleExit);
+process.on('SIGUSR2', handleExit);
+process.on('uncaughtException', handleExit);
+
 console.log(childProcess.execSync('node_modules/.bin/truffle version').toString('utf8'));
 
 const generateSOLInterface = () => new Promise((resolve, reject) => {
