@@ -117,7 +117,7 @@ async function main() {
         const solConfigJSON = JSON.parse(fs.readFileSync(path.join(abiPath, 'package.json')));
         const version = solConfigJSON.version.split('.');
         version[version.length - 1] = parseInt(version.pop(), 10) + 1
-        solConfigJSON.version = version;
+        solConfigJSON.version = version.join('.');
         fs.writeFileSync(JSON.stringify(solConfigJSON));
         await generateSOLInterface();
         contractsStatus = await contractsGit.status();
