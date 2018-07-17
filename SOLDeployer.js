@@ -5,6 +5,7 @@ const compressor = require('node-minify');
 const simpleGit = require('simple-git/promise');
 const childProcess = require('child_process');
 const moment = require('moment');
+const rimraf = require('rimraf');
 
 const readdir = util.promisify(fs.readdir);
 const exec = util.promisify(childProcess.exec);
@@ -100,6 +101,7 @@ async function main() {
     unlinkTruffleConfig();
     console.log(process.argv);
     const truffleConfig = fs.readFileSync(truffleTemplatePath);
+    rimraf.sync(buildPath);
     fs.writeFileSync(truffleConfigPath, truffleConfig);
     console.time('truffle migrate');
     const truffle = childProcess.spawn('node_modules/.bin/truffle', process.argv.slice(2));
