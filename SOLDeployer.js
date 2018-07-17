@@ -16,10 +16,11 @@ const truffleConfigPath = path.join(__dirname, 'truffle.js');
 const contractsGit = simpleGit();
 const solGit = simpleGit(abiPath);
 
-if (fs.existsSync(truffleConfigPath)) {
-  fs.unlinkSync(truffleConfigPath);
+const unlinkTruffleConfig = () => {
+  if (fs.existsSync(truffleConfigPath)) {
+    fs.unlinkSync(truffleConfigPath);
+  }
 }
-
 
 console.log(childProcess.execSync('node_modules/.bin/truffle version').toString('utf8'));
 
@@ -81,6 +82,7 @@ async function main() {
       console.log('You have unsynced changes!', localChanges);
       process.exit(1);
     }
+    unlinkTruffleConfig();
     console.log(process.argv);
     const truffleConfig = fs.readFileSync(truffleTemplatePath);
     fs.writeFileSync(truffleConfigPath, truffleConfig);
@@ -96,6 +98,7 @@ async function main() {
     truffle.on('close', async code => {
       console.timeEnd('truffle migrate');
       console.log('truffle exit with code', code);
+      unlinkTruffleConfig();
       if (code === 0) {
         await generateSOLInterface();
         contractsStatus = await contractsGit.status();
