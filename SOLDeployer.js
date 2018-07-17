@@ -48,7 +48,8 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
       files.forEach(file => {
         const { abi, networks, contractName } = JSON.parse(fs.readFileSync(path.join(buildPath, file)))
         if (abi.length && Object.keys(networks).length) {
-          contracts[contractName] = { abi, address: Object.values(networks)[0].address }
+          const key = Math.max(Object.keys(networks)).
+          contracts[contractName] = { abi, address: networks[key].address }
         }
       });
       if (!fs.existsSync(abiPath)) {
