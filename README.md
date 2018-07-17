@@ -140,9 +140,27 @@ make sure your in the project root
 npm i ipfs-api
 ```
 
-# CI/CD flow
+# DEPLOYING SOL CONTRACTS
+
+### Flow:
+Hack -> Commit&Push -> Deploy -> Generate JS solInterface for client -> Commit&Add tag -> Push everywhere
+
+*Make sure that you have submodule in ./build/sol-interface
+*Before runing mke sure that you are in HEAD of current branch and don't have uncommited changes (or incomming)
+*To setup truffle change truffle-template.js it will be copied to truffle.js on deploy process run
+*Run deployment with code:
 ```node SOLDeployer.js migrate --network development --reset
 ```
+All params that you pass to script will pass them to truffle command ex:
+```node SOLDeployer.js migrate --network rinkeby-infura
+```
+equal
+```truffle migrate --network rinkeby-infure
+```
+
+### Troubleshooting
+*Script determinate branch checkout and creat new but better to handle this process by hand. Don't forget to --set-origin for branch to avoid push issues
+*If you have submodule HEAD detached (branch HEAD or random hash). Goto build/sol-interface -> checkout to master or other working branch -> remove local broken branch -> run again
 
 if you create a new branch make sure that you set-origin to be able push
 if you have HEAD detached error you can reset sol-interface current branch
