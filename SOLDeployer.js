@@ -51,7 +51,7 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
         // if (abi.length && Object.keys(networks).length) {
         if (abi.length) {
           const key = Math.max.apply(null, Object.keys(networks));
-          contracts[contractName] = { abi, address: key && networks[key].address, networkId: key }
+          contracts[contractName] = { abi, address: key && networks[key] && networks[key].address, networkId: key }
         }
       });
       if (!fs.existsSync(abiPath)) {
