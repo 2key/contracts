@@ -16,6 +16,11 @@ module.exports = {
       gas: 7000000,
       gasPrice: 2000000000
     },
+    "test-prv": {
+      provider: new HDWalletProvider(mnemonic, "http://internal-Ether-LoadB-8AGIFHBVTXVF-130067041.us-east-1.elb.amazonaws.com"),
+      port: 8545,
+      network_id: '*'
+    },
     "rinkeby-infura": {
       provider: new HDWalletProvider(mnemonic, "https://rinkeby.infura.io/6rAARDbMXpJlwODa2kbk"),
       network_id: '*',
