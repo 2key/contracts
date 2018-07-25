@@ -111,7 +111,7 @@ async function main() {
     });
     truffle.stderr.on('data', data => {
       console.log(data.toString('utf8'));
-      throw new Error('truffle error');
+      // throw new Error('truffle error');
     });
     truffle.on('close', async code => {
       console.timeEnd('truffle migrate');
