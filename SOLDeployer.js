@@ -38,7 +38,7 @@ process.on('SIGUSR1', handleExit);
 process.on('SIGUSR2', handleExit);
 process.on('uncaughtException', handleExit);
 
-console.log(childProcess.execSync('node_modules/.bin/truffle version').toString('utf8'));
+// console.log(childProcess.execSync('node_modules/.bin/truffle version').toString('utf8'));
 
 const generateSOLInterface = () => new Promise((resolve, reject) => {
   if (fs.existsSync(buildPath)) {
@@ -79,11 +79,8 @@ async function main() {
     await contractsGit.submoduleUpdate();
     let contractsStatus = await contractsGit.status();
     let solStatus = await solGit.status();
-    console.log('CONTRACTS', contractsStatus);
-    console.log('SOL-INTERFACE', solStatus);
     if (solStatus.current !== contractsStatus.current) {
       const solBranches = await solGit.branch();
-      console.log('Checkout to', contractsStatus.current);
       if (solBranches.all.find(item => item.includes(contractsStatus.current))) {
         await solGit.checkout(contractsStatus.current);
       } else {
@@ -93,7 +90,6 @@ async function main() {
     await contractsGit.submoduleUpdate();
     await solGit.reset('hard');
     solStatus = await solGit.status();
-    console.log('SOL-INTERFACE', solStatus);
     const localChanges = contractsStatus.files
       .filter(item => !(item.path.includes('build/sol-interface')
         || (process.env.NODE_ENV === 'development' && item.path.includes(process.argv[1].split('/').pop()))));
@@ -108,7 +104,7 @@ async function main() {
     // rimraf.sync(buildPath);
     fs.writeFileSync(truffleConfigPath, truffleConfig);
     console.time('truffle migrate');
-    const truffle = childProcess.spawn('node_modules/.bin/truffle', process.argv.slice(3));
+    const truffle = childProcess.spawn(path.join(__dirname, 'node_modules/.bin/truffle'), process.argv.slice(3));
     truffle.stdout.on('data', data => {
       console.log(data.toString('utf8'));
     });
