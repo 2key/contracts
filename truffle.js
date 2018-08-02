@@ -3,7 +3,6 @@ require('babel-register')
 // https://github.com/trufflesuite/truffle-hdwallet-provider
 var HDWalletProvider = require("truffle-hdwallet-provider");
 var mnemonic = "laundry version question endless august scatter desert crew memory toy attract cruel";
-const pk = 'd718529bf9e0a5365e3a3545b66a612ff29be12aba366b6e6e919bef1d3b83e2';
 // make sure you have Ether on rinkeby address 0xb3fa520368f2df7bed4df5185101f303f6c7decc
 
 
@@ -17,8 +16,16 @@ module.exports = {
       gas: 7000000,
       gasPrice: 2000000000
     },
-    "geth-local": {
+    localhost: {
+      // host: 'localhost',
+      // port: 8545,
       provider: new HDWalletProvider(mnemonic, "http://localhost:8545"),
+      network_id: '*',
+      gas: 7000000,
+      gasPrice: 2000000000
+    },
+    "geth-dev": {
+      provider: new HDWalletProvider(mnemonic, "http://18.233.2.70:8500"),
       network_id: '*',
       gas: 7000000,
       gasPrice: 2000000000
