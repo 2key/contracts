@@ -1,4 +1,5 @@
 const Registry = artifacts.require('TwoKeyReg');
+const TwoKeySignedPresellContract = artifacts.require('TwoKeySignedPresellContract');
 
 module.exports = function(deployer, network, accounts) {
   if (deployer.network == "development" || deployer.network == "rinkeby-infura") {
