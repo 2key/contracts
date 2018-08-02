@@ -53,7 +53,6 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
         if (abi.length) {
           // const key = Math.max.apply(null, Object.keys(networks));
           const key = process.argv[2];
-          console.log(key)
           contracts[contractName] = { abi, address: key && networks[key] && networks[key].address, networkId: key }
         }
       });
