@@ -16,6 +16,12 @@ module.exports = {
       gas: 7000000,
       gasPrice: 2000000000
     },
+    "poc-dev": {
+      provider: new HDWalletProvider(mnemonic, "http://poc-dev.2key.network:3000"),
+      network_id: '*',
+      gas: 7000000,
+      gasPrice: 2000000000
+    },
     "rinkeby-infura": {
       provider: new HDWalletProvider(mnemonic, "https://rinkeby.infura.io/6rAARDbMXpJlwODa2kbk"),
       network_id: '*',
