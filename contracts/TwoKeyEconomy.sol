@@ -1,8 +1,8 @@
 pragma solidity ^0.4.24;
 
-import './ERC20/StandardToken.sol';
-import './ERC20/ERC20.sol';
-import './ownership/Ownable.sol';
+import 'github.com/OpenZeppelin/openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol';
+import 'github.com/OpenZeppelin/openzeppelin-solidity/contracts/token/ERC20/ERC20.sol';
+import 'github.com/OpenZeppelin/openzeppelin-solidity/contracts/ownership/Ownable.sol';
 
 
 contract TwoKeyEconomy is StandardToken, Ownable {

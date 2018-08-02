@@ -22,12 +22,6 @@ module.exports = {
       gas: 7000000,
       gasPrice: 2000000000
     },
-    "poc-dev": {
-      provider: new HDWalletProvider(mnemonic, "http://poc-dev.2key.network:3000"),
-      network_id: '*',
-      gas: 7000000,
-      gasPrice: 2000000000
-    },
     plasma: {
       host: 'localhost',
       port: 8888,

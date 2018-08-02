@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-import './math/SafeMath.sol';
+import 'github.com/OpenZeppelin/openzeppelin-solidity/contracts/math/SafeMath.sol';
 
 import './ComposableAssetFactory.sol';
 import './TwoKeyWhitelisted.sol';
