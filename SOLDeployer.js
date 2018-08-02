@@ -23,6 +23,7 @@ const unlinkTruffleConfig = () => {
   }
 }
 
+
 async function handleExit(p) {
   console.log(p);
   unlinkTruffleConfig();
@@ -50,7 +51,9 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
         const { abi, networks, contractName } = JSON.parse(fs.readFileSync(path.join(buildPath, file)))
         // if (abi.length && Object.keys(networks).length) {
         if (abi.length) {
-          const key = Math.max.apply(null, Object.keys(networks));
+          // const key = Math.max.apply(null, Object.keys(networks));
+          const key = process.argv[2];
+          console.log(key)
           contracts[contractName] = { abi, address: key && networks[key] && networks[key].address, networkId: key }
         }
       });
@@ -106,7 +109,7 @@ async function main() {
     // rimraf.sync(buildPath);
     fs.writeFileSync(truffleConfigPath, truffleConfig);
     console.time('truffle migrate');
-    const truffle = childProcess.spawn('node_modules/.bin/truffle', process.argv.slice(2));
+    const truffle = childProcess.spawn('node_modules/.bin/truffle', process.argv.slice(3));
     truffle.stdout.on('data', data => {
       console.log(data.toString('utf8'));
     });
