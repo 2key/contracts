@@ -154,7 +154,7 @@ node SOLDeployer.js migrate --network development --reset
 ```
 All params that you pass to script will pass them to truffle command ex:
 ```
-node SOLDeployer.js migrate --network rinkeby-infura
+node SOLDeployer.js {network_state} migrate --network rinkeby-infura
 ```
 equal
 ```
