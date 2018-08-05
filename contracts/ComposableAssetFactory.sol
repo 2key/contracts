@@ -2,32 +2,28 @@ pragma solidity ^0.4.24;
 
 // based on https://medium.com/coinmonks/introducing-crypto-composables-ee5701fde217
 
-import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
-import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
+import 'github.com/OpenZeppelin/openzeppelin-solidity/contracts/ownership/Ownable.sol';
+import 'github.com/OpenZeppelin/openzeppelin-solidity/contracts/math/SafeMath.sol';
 
-import './TwoKeyTypes.sol';
-
-contract ComposableAssetFactory is Ownable, TwoKeyTypes {  
+contract ComposableAssetFactory is Ownable {  
 
   event Expired(address indexed _contract);
 
   using SafeMath for uint256;
+  
 
-  uint256 private startTime;
-  uint256 private duration;
+  uint256 private openingTime;
+  uint256 private closingTime;
 
-  // now is less than duration after start time - so we are still live
   modifier isOngoing() {
-    require(startTime + duration > now);
+    require(now >= openingTime && now <= closingTime);
     _;
   }
 
-  // now is more than duration after start time - so we are dead
   modifier isClosed() {
-    require(startTime + duration <= now);
+    require(now > closingTime);
     _;
   }
-
 
 
   /*
@@ -64,65 +60,14 @@ contract ComposableAssetFactory is Ownable, TwoKeyTypes {
   //
   mapping(uint256 => mapping(address => uint256)) children;
 
-  
-  // for each asset in store, we hold its capaign type
-  struct Item {
-    uint256 tokenID;
-    address childContractID;
-    CampaignType campaignType;
+  constructor(uint256 _openingTime, uint256 _closingTime) Ownable() public {
+    openingTime = _openingTime;
+    closingTime = _closingTime;
   }
-
-  // list of items in store
-  Item[] inventory;
-
-
-  constructor(uint256 _start, uint256 _duration) Ownable() public {
-    startTime = _start;
-    duration = _duration;
-  }
-
-  // add asset to inventory list
-  function addToInventory(uint256 _tokenID, address _childContract, CampaignType _type) internal {
-  // _tokenID: shop keeping unit,  
-    bool found; 
-    for(uint256 i = 0; i < inventory.length; i++) { 
-      if (inventory[i].tokenID == _tokenID) {
-        found = true;
-        break;
-      }
-    }
-    if (!found) {
-      inventory.push(Item(_tokenID, _childContract, _type));      
-    }
-  }
-
-  // remove asset from inventory list
-  function removeFromInventory(uint256 _tokenID) internal {
-    for(uint256 i = 0; i < inventory.length; i++) { 
-      if (inventory[i].tokenID == _tokenID) {
-        uint256 currentLength = inventory.length;
-        inventory[i] = inventory[currentLength - 1];
-        delete inventory[currentLength - 1];
-        inventory.length--;
-        break;
-      }
-    }
-  }
-
-  // get type of item in inventory
-  function getType(uint256 _tokenID) internal view returns (CampaignType)  {
-    for(uint256 i = 0; i < inventory.length; i++) { 
-      if (inventory[i].tokenID == _tokenID) {
-        return inventory[i].campaignType;
-      }
-    }
-    return CampaignType.None;
-  }
-
 
   
   // add erc20 asset amount to the store, which adds an amount of that erc20 to our catalogue
-  function addFungibleChild(uint256 _tokenID, address _childContract, uint256 _amount) public returns (bool) {
+  function addFungibleChild(uint256 _tokenID, address _childContract, uint256 _amount) isOngoing public returns (bool) {
     require(
       _childContract.call(
         bytes4(keccak256("transferFrom(address,address,uint256)")),
@@ -134,12 +79,11 @@ contract ComposableAssetFactory is Ownable, TwoKeyTypes {
 
     // set as child
     children[_tokenID][_childContract] += _amount;
-    addToInventory(_tokenID, _childContract, CampaignType.Fungible);
     return true;
   }
 
   // add erc721 asset to the store, which adds a particular unique item from that erc721 to our catalogue
-  function addNonFungibleChild(uint256 _tokenID, address _childContract, uint256 _index) public returns (bool) {
+  function addNonFungibleChild(uint256 _tokenID, address _childContract, uint256 _index) isOngoing public returns (bool) {
     require(
       _childContract.call(
         bytes4(keccak256("transferFrom(address,address,uint256)")),
@@ -150,19 +94,18 @@ contract ComposableAssetFactory is Ownable, TwoKeyTypes {
     address childToken = address(
       keccak256(abi.encodePacked(_childContract, _index))
     );
+
     // set as child
     children[_tokenID][childToken] = 1;
-    addToInventory(_tokenID, _childContract, CampaignType.NonFungible);
     return true;
   }
 
-
-  // transfer an amount of erc20 from our catalogue to someone
-  function transferFungibleChild(
+  // move an amount of erc20 from our catalogue to someone
+  function moveFungibleChild(
     address _to,
     uint256 _tokenID,
     address _childContract,
-    uint256 _amount) onlyOwner public returns (bool) {
+    uint256 _amount) internal returns (bool) {
     require(children[_tokenID][_childContract] >= _amount);
     require(
       _childContract.call(
@@ -172,16 +115,15 @@ contract ComposableAssetFactory is Ownable, TwoKeyTypes {
     );
 
     children[_tokenID][_childContract] -= _amount;
-
     return true;
   }
 
   // transfer a unique item from a erc721 in our catalogue to someone
-  function transferNonFungibleChild(
+  function moveNonFungibleChild(
     address _to,
     uint256 _tokenID,
     address _childContract,
-    uint256 _childTokenID) public onlyOwner returns (bool) {
+    uint256 _childTokenID) internal returns (bool) {
     address childToken = address(
       keccak256(abi.encodePacked(_childContract, _childTokenID))
     );
@@ -194,29 +136,43 @@ contract ComposableAssetFactory is Ownable, TwoKeyTypes {
     );
 
     children[_tokenID][childToken] = 0;
-
     return true;
   }
 
-
-  function expire(address _to) onlyOwner isClosed public {
-    for(uint256 i = 0; i < inventory.length; i++) {
-      Item memory item = inventory[i]; 
-      if (item.campaignType == CampaignType.Fungible && children[item.tokenID][item.childContractID] == 1) {
-        transferFungibleChild(_to, item.tokenID, item.childContractID, children[item.tokenID][item.childContractID]);
-      } else  if (item.campaignType == CampaignType.NonFungible && children[item.tokenID][item.childContractID] > 0) {
-        transferNonFungibleChild(_to, item.tokenID, item.childContractID, children[item.tokenID][item.childContractID]);
-      }
-    }
-    selfdestruct(this);
-    emit Expired(this);
+  // transfer an amount of erc20 from our catalogue to someone
+  function transferFungibleChild(
+    address _to,
+    uint256 _tokenID,
+    address _childContract,
+    uint256 _amount) isOngoing onlyOwner public returns (bool) {
+    return moveFungibleChild(_to, _tokenID, _childContract, _amount);
   }
 
-  // kill the contract, transfering everyting to the owner
-  // Since the ERC721 and ERC20 store ownership by owner of this contract
-  // that ownership need not be transferred
-  function kill() public onlyOwner {        
-      selfdestruct(owner);
+  // transfer a unique item from a erc721 in our catalogue to someone
+  function transferNonFungibleChild(
+    address _to,
+    uint256 _tokenID,
+    address _childContract,
+    uint256 _childTokenID) public isOngoing onlyOwner returns (bool) {
+    return moveNonFungibleChild(_to, _tokenID, _childContract, _childTokenID);
+  }
+
+  function expireFungible(address _to,
+    uint256 _tokenID,
+    address _childContract,
+    uint256 _amount) onlyOwner isClosed public returns (bool) {
+    moveFungibleChild(_to, _tokenID, _childContract, _amount);
+    emit Expired(address(this));
+    return true;
+  }
+
+  function expireNonFungible(address _to,
+    uint256 _tokenID,
+    address _childContract,
+    uint256 _childTokenID) onlyOwner isClosed public returns (bool){   
+    moveNonFungibleChild(_to, _tokenID, _childContract, _childTokenID);
+    emit Expired(address(this));
+    return true;
   }
 
 }
