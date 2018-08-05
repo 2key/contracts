@@ -2,8 +2,8 @@ pragma solidity ^0.4.24;
 
 // based on https://medium.com/coinmonks/introducing-crypto-composables-ee5701fde217
 
-import 'github.com/OpenZeppelin/openzeppelin-solidity/contracts/ownership/Ownable.sol';
-import 'github.com/OpenZeppelin/openzeppelin-solidity/contracts/math/SafeMath.sol';
+import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
+import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
 
 contract ComposableAssetFactory is Ownable {  
 
