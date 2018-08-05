@@ -2,10 +2,13 @@ pragma solidity ^0.4.24;
 
 // based on https://medium.com/coinmonks/introducing-crypto-composables-ee5701fde217
 
-import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
 
-contract ComposableAssetFactory is Ownable {  
+import './RBACWithAdmin.sol';
+
+contract ComposableAssetFactory is RBACWithAdmin { 
+
+
 
   event Expired(address indexed _contract);
 
@@ -60,7 +63,7 @@ contract ComposableAssetFactory is Ownable {
   //
   mapping(uint256 => mapping(address => uint256)) children;
 
-  constructor(uint256 _openingTime, uint256 _closingTime) Ownable() public {
+  constructor(uint256 _openingTime, uint256 _closingTime) RBACWithAdmin() public {
     openingTime = _openingTime;
     closingTime = _closingTime;
   }
@@ -144,7 +147,7 @@ contract ComposableAssetFactory is Ownable {
     address _to,
     uint256 _tokenID,
     address _childContract,
-    uint256 _amount) isOngoing onlyOwner public returns (bool) {
+    uint256 _amount) isOngoing onlyRole(ROLE_CONTROLLER) public returns (bool) {
     return moveFungibleChild(_to, _tokenID, _childContract, _amount);
   }
 
@@ -153,23 +156,25 @@ contract ComposableAssetFactory is Ownable {
     address _to,
     uint256 _tokenID,
     address _childContract,
-    uint256 _childTokenID) public isOngoing onlyOwner returns (bool) {
+    uint256 _childTokenID) public isOngoing onlyRole(ROLE_CONTROLLER) returns (bool) {
     return moveNonFungibleChild(_to, _tokenID, _childContract, _childTokenID);
   }
 
-  function expireFungible(address _to,
+  function expireFungible(
+    address _to,
     uint256 _tokenID,
     address _childContract,
-    uint256 _amount) onlyOwner isClosed public returns (bool) {
+    uint256 _amount) onlyRole(ROLE_CONTROLLER) isClosed public returns (bool) {
     moveFungibleChild(_to, _tokenID, _childContract, _amount);
     emit Expired(address(this));
     return true;
   }
 
-  function expireNonFungible(address _to,
+  function expireNonFungible(
+    address _to,
     uint256 _tokenID,
     address _childContract,
-    uint256 _childTokenID) onlyOwner isClosed public returns (bool){   
+    uint256 _childTokenID) onlyRole(ROLE_CONTROLLER) isClosed public returns (bool){   
     moveNonFungibleChild(_to, _tokenID, _childContract, _childTokenID);
     emit Expired(address(this));
     return true;
