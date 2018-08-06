@@ -25,7 +25,7 @@ contract TwoKeyEscrow is ComposableAssetFactory, TwoKeyTypes {
     TwoKeyWhitelisted whitelistConverter;
 
     // is the converter eligible for participation in conversion
-    modifier isWhiteListedConverter() {
+    modifier onlyApprovedConverter() {
         require(whitelistConverter.isWhitelisted(buyer));
         _;
     }
@@ -61,8 +61,8 @@ contract TwoKeyEscrow is ComposableAssetFactory, TwoKeyTypes {
     function transferNonFungibleChildTwoKeyToken(
         uint256 _tokenID,
         address _childContract,
-        uint256 _childTokenID) isWhiteListedConverter public {
-        require(super.transferNonFungibleChild(buyer, _tokenID, _childContract, _childTokenID));                 
+        uint256 _childTokenID) onlyApprovedConverter public {
+        require(transferNonFungibleChild(buyer, _tokenID, _childContract, _childTokenID));                 
     }
 
     /**
@@ -76,8 +76,8 @@ contract TwoKeyEscrow is ComposableAssetFactory, TwoKeyTypes {
     function transferFungibleChildTwoKeyToken(
         uint256 _tokenID,
         address _childContract,
-        uint256 _amount) isWhiteListedConverter public { 
-        require(super.transferFungibleChild(buyer, _tokenID, _childContract, _amount));                  
+        uint256 _amount) onlyApprovedConverter public { 
+        require(transferFungibleChild(buyer, _tokenID, _childContract, _amount));                  
     }
 
     /**
