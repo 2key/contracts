@@ -9,12 +9,7 @@ import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
 
 contract TwoKeyWhitelisted is Ownable {
 
-
   mapping(address => bool) public whitelist;
-
-  constructor() Ownable() public {
-    
-  }
 
   function isWhitelisted(address _beneficiary) public view returns(bool) {
     return(whitelist[_beneficiary]);

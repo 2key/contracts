@@ -3,7 +3,7 @@ pragma solidity ^0.4.24; //We have to specify what version of compiler this code
 import 'openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol';
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import './ERC20full.sol';
-import './TwoKeyEventSourceAlpha.sol';
+import './TwoKeyEventSource.sol';
 
 /**
  * @title Standard ERC20 token
