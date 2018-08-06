@@ -7,16 +7,13 @@ import './TwoKeyWhitelisted.sol';
 import './TwoKeyEventSource.sol';
 import './TwoKeyTypes.sol';
 
-contract TwoKeyEscrow is ComposableAssetFactory {
+contract TwoKeyEscrow is ComposableAssetFactory, TwoKeyTypes {
 
     using SafeMath for uint256;
 
     // emit through it events for backend to listen to
     TwoKeyEventSource eventSource;
 
-
-    address internal contractor;
-    address internal moderator;
     address internal buyer;
 
 
@@ -33,24 +30,20 @@ contract TwoKeyEscrow is ComposableAssetFactory {
         _;
     }
 
-    modifier onlyContractorOrModerator() {
-        require(msg.sender == contractor || msg.sender == moderator);
-        _;
-    }
-
     constructor(
         TwoKeyEventSource _eventSource, 
         address _contractor, 
         address _moderator, 
         address _buyer, 
-        uint256 _start, 
-        uint256 _duration, 
+        uint256 _openingTime, 
+        uint256 _closingTime, 
         TwoKeyWhitelisted _whitelistConverter
         ) 
-        ComposableAssetFactory(_start, _duration) public {
+        ComposableAssetFactory(_openingTime, _closingTime) public {
+
         eventSource = _eventSource;
-        contractor = _contractor;
-        moderator = _moderator;
+        adminAddRole(_contractor, ROLE_CONTROLLER);
+        adminAddRole(_moderator, ROLE_CONTROLLER);
         buyer = _buyer;
         whitelistConverter = _whitelistConverter;
     }
@@ -68,7 +61,7 @@ contract TwoKeyEscrow is ComposableAssetFactory {
     function transferNonFungibleChildTwoKeyToken(
         uint256 _tokenID,
         address _childContract,
-        uint256 _childTokenID) isWhiteListedConverter onlyContractorOrModerator public {
+        uint256 _childTokenID) isWhiteListedConverter public {
         require(super.transferNonFungibleChild(buyer, _tokenID, _childContract, _childTokenID));                 
     }
 
@@ -83,7 +76,7 @@ contract TwoKeyEscrow is ComposableAssetFactory {
     function transferFungibleChildTwoKeyToken(
         uint256 _tokenID,
         address _childContract,
-        uint256 _amount) isWhiteListedConverter onlyContractorOrModerator public { 
+        uint256 _amount) isWhiteListedConverter public { 
         require(super.transferFungibleChild(buyer, _tokenID, _childContract, _amount));                  
     }
 
@@ -97,11 +90,11 @@ contract TwoKeyEscrow is ComposableAssetFactory {
      * 
      */
     function cancelNonFungibleChildTwoKey(
+        address _to,
         uint256 _tokenID,
         address _childContract,
-        uint256 _childTokenID) onlyContractorOrModerator public {
-        super.transferNonFungibleChild(owner, _tokenID, _childContract, _childTokenID);
-
+        uint256 _childTokenID) onlyRole(ROLE_CONTROLLER) public {
+        moveNonFungibleChild(_to, _tokenID, _childContract, _childTokenID);
         eventSource.cancelled(address(this), buyer, _tokenID, _childContract, _childTokenID, CampaignType.NonFungible);
     }
 
@@ -115,11 +108,11 @@ contract TwoKeyEscrow is ComposableAssetFactory {
      * 
      */
     function cancelFungibleChildTwoKey(
+        address _to,
         uint256 _tokenID,
         address _childContract,
-        uint256 _amount) onlyContractorOrModerator public {
-        super.transferFungibleChild(owner, _tokenID, _childContract, _amount);
-        
+        uint256 _amount) onlyRole(ROLE_CONTROLLER) public {
+        moveFungibleChild(_to, _tokenID, _childContract, _amount);
         eventSource.cancelled(address(this), buyer, _tokenID, _childContract, _amount, CampaignType.Fungible);
     }
 
