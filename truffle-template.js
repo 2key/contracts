@@ -25,6 +25,14 @@ module.exports = {
       gas: 7000000,
       gasPrice: 2000000000
     },
+    "dev-shlomi": {
+      // host: 'localhost',
+      // port: 8545,
+      provider: new HDWalletProvider(mnemonic, "http://18.233.2.70:8500"),
+      network_id: '*', // Match any network id
+      gas: 7000000,
+      gasPrice: 2000000000
+    },
     "geth-local": {
       provider: new HDWalletProvider(mnemonic, "http://localhost:8545"),
       network_id: '*',
