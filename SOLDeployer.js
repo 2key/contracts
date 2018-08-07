@@ -5,7 +5,7 @@ const compressor = require('node-minify');
 const simpleGit = require('simple-git/promise');
 const childProcess = require('child_process');
 const moment = require('moment');
-const rimraf = require('rimraf');
+// const rimraf = require('rimraf');
 
 const readdir = util.promisify(fs.readdir);
 const exec = util.promisify(childProcess.exec);
@@ -23,6 +23,7 @@ const unlinkTruffleConfig = () => {
   }
 }
 
+
 async function handleExit(p) {
   console.log(p);
   unlinkTruffleConfig();
@@ -37,7 +38,7 @@ process.on('SIGUSR1', handleExit);
 process.on('SIGUSR2', handleExit);
 process.on('uncaughtException', handleExit);
 
-console.log(childProcess.execSync('node_modules/.bin/truffle version').toString('utf8'));
+// console.log(childProcess.execSync('node_modules/.bin/truffle version').toString('utf8'));
 
 const generateSOLInterface = () => new Promise((resolve, reject) => {
   if (fs.existsSync(buildPath)) {
@@ -50,7 +51,8 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
         const { abi, networks, contractName } = JSON.parse(fs.readFileSync(path.join(buildPath, file)))
         // if (abi.length && Object.keys(networks).length) {
         if (abi.length) {
-          const key = Math.max.apply(null, Object.keys(networks));
+          // const key = Math.max.apply(null, Object.keys(networks));
+          const key = process.argv[2];
           contracts[contractName] = { abi, address: key && networks[key] && networks[key].address, networkId: key }
         }
       });
@@ -77,11 +79,8 @@ async function main() {
     await contractsGit.submoduleUpdate();
     let contractsStatus = await contractsGit.status();
     let solStatus = await solGit.status();
-    console.log('CONTRACTS', contractsStatus);
-    console.log('SOL-INTERFACE', solStatus);
     if (solStatus.current !== contractsStatus.current) {
       const solBranches = await solGit.branch();
-      console.log('Checkout to', contractsStatus.current);
       if (solBranches.all.find(item => item.includes(contractsStatus.current))) {
         await solGit.checkout(contractsStatus.current);
       } else {
@@ -91,7 +90,6 @@ async function main() {
     await contractsGit.submoduleUpdate();
     await solGit.reset('hard');
     solStatus = await solGit.status();
-    console.log('SOL-INTERFACE', solStatus);
     const localChanges = contractsStatus.files
       .filter(item => !(item.path.includes('build/sol-interface')
         || (process.env.NODE_ENV === 'development' && item.path.includes(process.argv[1].split('/').pop()))));
@@ -102,10 +100,11 @@ async function main() {
     unlinkTruffleConfig();
     console.log(process.argv);
     const truffleConfig = fs.readFileSync(truffleTemplatePath);
-    rimraf.sync(buildPath);
+    // Need review this
+    // rimraf.sync(buildPath);
     fs.writeFileSync(truffleConfigPath, truffleConfig);
     console.time('truffle migrate');
-    const truffle = childProcess.spawn('node_modules/.bin/truffle', process.argv.slice(2));
+    const truffle = childProcess.spawn(path.join(__dirname, 'node_modules/.bin/truffle'), process.argv.slice(3));
     truffle.stdout.on('data', data => {
       console.log(data.toString('utf8'));
     });
