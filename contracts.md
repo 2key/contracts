@@ -25,17 +25,12 @@ We first add assets to it, where each addition of an asset involves a call to tr
 
 Then, the owner of the contract can transfer assets to whoever it wishes.
 
-## Timed
+The contract is timed. There is a duration of active life defined when it is created. Constructed with an opening time and closing time.  
 
-A class for setting a duration for a contract. Modifiers to enable limited lifetime for 2key campaigns.
+The timing aspect is derived from [Open Zeppelin TimedCrowdsale](https://openzeppelin.org/api/docs/crowdsale_validation_TimedCrowdsale.html)
 
-Derived from [Open Zeppelin TimedCrowdsale](https://openzeppelin.org/api/docs/crowdsale_validation_TimedCrowdsale.html)
+After the closing time, one can ask to return the asset to the campaign.
 
-Constructed with a start time and duration. 
-
-## TimedCompsableAssetFactory
-
-A ComposableAssetFactory which is Timed, with a start date and end date, beyond which one cannot add assets or transfer assets from it. At its expiry, the owner of the contract, can transfer all assets to itself.
 
 ## TwoKeyTypes
 
@@ -68,11 +63,13 @@ Rewards are in TwoKeyToken
 
 In the case, of crowdsales, there are sub classes (see below) that do not require a transfer of assets to us. 
 
-Influencers and converters are to be whitelisted
+Influencers and converters are to be whitelisted.
+
+Upon being notified on conversion, the payout is transferred to the contractor, the moderator receives its fee, and the campaign assigns rewards.
 
 ### Assets Promoted in Campaign
 
-A campaign is a TimedComposableAssetFactory. As such, we first add assets to it, either Fungible or NonFungible.
+A campaign is a ComposableAssetFactory. As such, we first add assets to it, either Fungible or NonFungible.
 
 We add functions for pricing:
 
@@ -81,7 +78,7 @@ We add functions for pricing:
 
 ### Referrals
 
-To manage the referral process, a camapign is a StandardToken that has a supply of ARCs that are used to implement the incentive model.
+To manage the referral process, a camapign is a TwoKeyARC. A TwoKeyARC is a StandardToken that has a supply of tokens, called ARCs, that are used to implement the incentive model.
 
 This is implemented by the functions: 
 
@@ -126,12 +123,13 @@ This is implemented by the functions:
 
 ## Escrow
 
-Upon a buy, we create an Escrow for the purchase.
+Upon a buy, we create an Escrow for the purchase. An escrow is a ComposableAsseetFactory.
 
-Holds the purchased assets, till the moderator approves the purchase. 
-Upon conversion, the payout is transferred to the contractor, the moderator receives its fee, and the campaign assigns rewards.
+Holds the purchased assets, till the converter is approved. At which point, we can transfer the assets to the converter. 
 
-An escrow has an expiratin period, after which the asset is returned to the campaign.
+An escrow can be cancelled by the moderator or contractor.
+
+Being a ComposableAssetFactory, an Escrow can expire. 
 
 ## EscrowETH
 
