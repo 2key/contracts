@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
+import 'github.com/OpenZeppelin/openzeppelin-solidity/contracts/ownership/Ownable.sol';
 
 contract TwoKeyReg is Ownable {
   mapping(address => string) public owner2name;

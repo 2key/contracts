@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
+import 'github.com/OpenZeppelin/openzeppelin-solidity/contracts/math/SafeMath.sol';
 
 import './ComposableAssetFactory.sol';
 import './TwoKeyWhitelisted.sol';
@@ -15,6 +15,8 @@ contract TwoKeyEscrow is ComposableAssetFactory, TwoKeyTypes {
     TwoKeyEventSource eventSource;
 
     address internal buyer;
+    
+    bool internal buyerWhitelisted;
 
 
     /*
@@ -26,7 +28,8 @@ contract TwoKeyEscrow is ComposableAssetFactory, TwoKeyTypes {
 
     // is the converter eligible for participation in conversion
     modifier onlyApprovedConverter() {
-        require(whitelistConverter.isWhitelisted(buyer));
+        // require(whitelistConverter.isWhitelisted(buyer));
+        require(buyerWhitelisted);
         _;
     }
 
@@ -46,9 +49,19 @@ contract TwoKeyEscrow is ComposableAssetFactory, TwoKeyTypes {
         adminAddRole(_moderator, ROLE_CONTROLLER);
         buyer = _buyer;
         whitelistConverter = _whitelistConverter;
+     }
+
+    
+    /**
+     * 
+     * 
+     */
+    function approveBuyer(
+        ) onlyRole(ROLE_CONTROLLER) {
+        
+        buyerWhitelisted = true;
     }
-
-
+    
 
     /**
      * transferNonFungibleChildTwoKeyToken 

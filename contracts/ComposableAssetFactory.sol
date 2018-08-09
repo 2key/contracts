@@ -2,7 +2,7 @@ pragma solidity ^0.4.24;
 
 // based on https://medium.com/coinmonks/introducing-crypto-composables-ee5701fde217
 
-import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
+import 'github.com/OpenZeppelin/openzeppelin-solidity/contracts/math/SafeMath.sol';
 
 import './RBACWithAdmin.sol';
 
@@ -147,7 +147,7 @@ contract ComposableAssetFactory is RBACWithAdmin {
     address _to,
     uint256 _tokenID,
     address _childContract,
-    uint256 _amount) isOngoing onlyRole(ROLE_CONTROLLER) public returns (bool) {
+    uint256 _amount) isOngoing onlyRole(ROLE_CONTROLLER) internal returns (bool) {
     return moveFungibleChild(_to, _tokenID, _childContract, _amount);
   }
 
@@ -156,7 +156,7 @@ contract ComposableAssetFactory is RBACWithAdmin {
     address _to,
     uint256 _tokenID,
     address _childContract,
-    uint256 _childTokenID) public isOngoing onlyRole(ROLE_CONTROLLER) returns (bool) {
+    uint256 _childTokenID) isOngoing onlyRole(ROLE_CONTROLLER) internal returns (bool) {
     return moveNonFungibleChild(_to, _tokenID, _childContract, _childTokenID);
   }
 
