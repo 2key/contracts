@@ -2,7 +2,7 @@
 
 on osx:
 ```bash
-latest version 9.4 from https://nodejs.org/en/
+latest version 9.11.1 from https://nodejs.org/en/
 ```
 
 ### cleaning up
@@ -106,8 +106,8 @@ firefox http://localhost:8080
 ```
 
 # IPS
-https://github.com/ipfs/js-ipfs-api/tree/master/examples/bundle-webpack
 ## Install
+https://ipfs.io/docs/install/
 ### OSX
 ```angularjs
 wget https://dist.ipfs.io/go-ipfs/v0.4.13/go-ipfs_v0.4.13_darwin-amd64.tar.gz
@@ -140,31 +140,179 @@ make sure your in the project root
 npm i ipfs-api
 ```
 
-# DEPLOYING SOL CONTRACTS
-
-### Flow:
-Hack -> Commit&Push -> Deploy -> Generate JS solInterface for client -> Commit&Add tag -> Push everywhere
-
-* Make sure that you have submodule in ./build/sol-interface
-* Before runing mke sure that you are in HEAD of current branch and don't have uncommited changes (or incomming)
-* To setup truffle change truffle-template.js it will be copied to truffle.js on deploy process run
-* Run deployment with code:
 ```
-node SOLDeployer.js migrate --network development --reset
-```
-All params that you pass to script will pass them to truffle command ex:
-```
-node SOLDeployer.js {network_state} migrate --network rinkeby-infura
-```
-equal
-```
-truffle migrate --network rinkeby-infure
+npm ls -gp --depth=0 | awk -F/ '/node_modules/ && !/\/npm$/ {print $NF}' | sudo xargs npm -g rm
+sudo npm i -g ganache-cli@6.0.3
+npm show truffle@* version
+sudo npm i -g truffle@4.0.6
 ```
 
-### Troubleshooting
-* Script determinate branch checkout and creat new but better to handle this process by hand. Don't forget to --set-origin for branch to avoid push issues
-* If you have submodule HEAD detached (branch HEAD or random hash). Goto build/sol-interface -> checkout to master or other working branch -> remove local broken branch -> run again
 
-if you create a new branch make sure that you set-origin to be able push
-if you have HEAD detached error you can reset sol-interface current branch
+# Free Join Link example
+### Limitations
+* Only the path leading to conversrion will reach the contract and be KNOWN.
+* Limit on 8 steps (can be solved with IPFS)
+* Delayed update on contract and only on converstion: the first CONVERTER to convert is the first to take ARCs
+all the way for all influencers.
+The record of influencers is written into the contract only on the moment of conversion and not when the influencers
+JOINED a link.
+* Converter has to pay a small gas fee (about $0.25)
+
+## link created by the owner of the contract
+For example `coinbase` is the owner.
+```
+http://poc.2key.network:8080/?c=0x14979e992ba175db78ca3363c38d4d1a95588ecc&f=0xe1ab544ca8c217acbbc82199ff64b840ddfd6d86&s=a49ace02fedb0c441476ad7d8d1cdbeae507c64f43ae6d84dbc73bb6ae097828
+```
+* c - contract address
+* f - who created this link - contractor
+* s - NEW secret - available ONLY on this link. s is also a NEW private key
+
+
+In addition the contractor writes in the contract (using method `setOwnerPublicLinkKey` the public key of **s**)
+THIS REQUIRES AN OPEN WALLET AND GAS.
+
+
+## Conversion from link received from contractor
+* generate signature:
+  * sign(hash(the address of the influencer + public key of **new s**), using **previous s** which is a private key)
+* call `transferSig` method of contract (sub class of `TwoKeySignedContract`)
+  * THIS REQUIRES AN OPEN WALLET AND GAS
+  * the contract reads the signature:
+    * check it is valid
+  * Move all the ARCs for all the influencers along the path if they didnt had ARCs up to now.
+
+## link created by influencer from link received from contractor
+NO WALLET NO GAS
+Influencer is `moshe3`
+
+```
+http://poc.2key.network:8080/?c=0x14979e992ba175db78ca3363c38d4d1a95588ecc&f=0x63a421dd47e1c1e3066ffee4b22c43b76e732837&s=e00a444be6b01277774c0043ee2640b4501ef0d0ca50c90185053d03f7c50a0f&m=689302cf91abe32becb674aaa2e37b012b8108e6fad139722e8cb2df3798c2975c31e5cbdd2051ec86889cf8a5353b83191c61476fe0a23c5f5a168859c0d3a61b
+```
+* c - contract address
+* f - who created this link - current influencer
+* s - NEW secret - available ONLY on this link. s is also a NEW private key
+* m - message:
+  * sign(hash(the address of the influencer + public key of **new s**), using **previous s** which is a private key)
+
+## link created by influencer from upstream influencer
+NO WALLET NO GAS
+Influencer is `jack`
+
+```
+http://poc.2key.network:8080/?c=0x14979e992ba175db78ca3363c38d4d1a95588ecc&f=0x4ac2296246806db88c3e80d8129b7514fe9031ff&s=a9be43165d33305dccf87def1e7299c29b828fca7144fa2881c8597516f25cbf&m=689302cf91abe32becb674aaa2e37b012b8108e6fad139722e8cb2df3798c2975c31e5cbdd2051ec86889cf8a5353b83191c61476fe0a23c5f5a168859c0d3a61b63a421dd47e1c1e3066ffee4b22c43b76e7328379062055f56e0aa394874932b43b7ffa517df4bd89fc32452d6e100d8419a570936eccc8544ab41872effac73a4fa516c4459b7e402173ab5c025db8e1e9fcc1c92291ad88724ae04d1cb49c793b341b2c24708561b
+```
+
+* c - contract address
+* f - who created this link - current influencer
+* s - NEW secret - available ONLY on this link. s is also a NEW private key
+* m - message:
+  * all the previous m
+  * public key of the previous secret **s** (of `moseh3`.
+  I can not put public key of someone else because I dont know the secret of the previous s, `coinbase` and
+  I need to have it because it was used to sign `moshe3` inside `m`)
+  * address of the previous influencer
+  * sign(hash(the address of the influencer + public key of **new s**), using **previous s** which is a private key)
+
+## Conversion from link received from jack
+
+THIS REQUIRES AN OPEN WALLET AND GAS.
+Gas used 405K = $0.23 (ETH=$585)
+
+
+# SSH
+in file `/etc/ssh/sshd_config` set `PasswordAuthentication` to `yes`
+```bash
+ssh ubuntu@poc.2key.network
+```
+enter password
+
+# Local Development Environment
+
+Use Node.js v9.11.1 to be compatible with truffle that we used so far. 
+
+## Geth 
+
+Run in folder containing `web3-alpha`.
+
+Run with:
+
+    geth --datadir=./datadir --nodiscover --rpc --rpcapi "db,personal,eth,net,web3,debug" --rpccorsdomain='*' --rpcaddr="localhost" --rpcport 8545 --unlock 0,1,2,3,4 --password password.geth.remix.txt  --jspath . --preload web3-alpha/mine-only-when-transactions.js  console
+
+Assuming we previously created 5 acounts. The password file should have a line with the password for each account to be unlocked.
+
+## Remix 
+
+Browser-based IDE - works in Safari and Chrome on MacOSX
+
+    http://remix.ethereum.org
+
+Use the the `http`  to work with Geth.
+
+In the **Run** tab, select Provider to be *Web3 Provider*. 
+
+## ABI and Bytecode
+
+After compiling contract, click on **Details** to copy them manually
+
+## Remixd 
+
+Connect Remix to local files.
+
+[Remixd](https://github.com/ethereum/remixd)
+
+    npm install -g remixd
+
+Run with:
+
+    remixd -s web3-alpha/contracts
+
+## Open Local Files in Remix 
+
+In Remix, in the top left corner, click the link icon to connect to Remixd. 
+
+In the left sidebar, all your files appear under `localhost`. Editing can be done either in IDE or in Remix. There is no `save` action in Remix, so files are updated immediately in the file system.
+
+## Compiler
+
+[Solidity Compiler (solc)][http://solidity.readthedocs.io/en/v0.4.24/installing-solidity.html]
+
+### MacOSX
+
+Install with `brew`
+
+    brew update
+    brew upgrade
+    brew tap ethereum/ethereum
+    brew install solidity
+
+## Compiling Files
+
+    solc --bin --abi -o ./solcoutput github.com/OpenZeppelin/openzeppelin-solidity/contracts=/absolute/path/to/node_modules/openzeppelin-solidity/contracts  ./web3-alpha/contracts/name/of/our/sol/file/with/extension
+
+ABI and Bytecode will be generate in target folder `solcoutput`
+
+## Contracts for Local Environment and SOLC Compiler
+
+Import from Zeppelin should be prefixed by:
+
+    github.com/OpenZeppelin/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
