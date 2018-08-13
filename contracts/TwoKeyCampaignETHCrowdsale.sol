@@ -17,6 +17,7 @@ contract TwoKeyCampaignETHCrowdsale is TwoKeyCampaignETH {
 
 	uint256 bonus;
 
+
 	constructor(
 		uint256 _bonus,
 		CrowdsaleWithTwoKey _crowdsale,
@@ -53,10 +54,10 @@ contract TwoKeyCampaignETHCrowdsale is TwoKeyCampaignETH {
 	}
 
 	// buy product with ETH 
-	function buyFromWithETH(address _from, uint256 _tokenID, address _childContract, uint256 _amountOrIndex) public payable {
+	function buyFromWithETH(address _from, uint256 _tokenID, address _assetContract, uint256 _amountOrIndex) public payable {
 	    crowdsale.buyTokens.value(msg.value)(address(this));
-	    require(addFungibleChild(_tokenID, _childContract, _amountOrIndex.mul(bonus)));	    
-	    super.buyProductETH(_from, _tokenID, _childContract, _amountOrIndex); 
+	    require(addFungibleAsset(_tokenID, _assetContract, _amountOrIndex.mul(bonus)));	    
+	    buyFromWithETH(_from, _tokenID, _assetContract, _amountOrIndex); 
 	}	
 
 }

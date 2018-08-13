@@ -239,20 +239,20 @@
   "deployedBytecode": "0x",
   "sourceMap": "",
   "deployedSourceMap": "",
-  "source": "pragma solidity ^0.4.24;\n\nimport 'openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol';\n\ncontract ERC20full is StandardToken {\n  // https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20.md\n  function decimals() public view returns (uint8);\n}\n",
-  "sourcePath": "/Users/aydnep/2key/contracts/contracts/ERC20full.sol",
+  "source": "pragma solidity ^0.4.24;\n\nimport './openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol';\n\ncontract ERC20full is StandardToken {\n  // https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20.md\n  function decimals() public view returns (uint8);\n}\n",
+  "sourcePath": "/Users/kornatzky/2key/contracts/contracts/ERC20full.sol",
   "ast": {
-    "absolutePath": "/Users/aydnep/2key/contracts/contracts/ERC20full.sol",
+    "absolutePath": "/Users/kornatzky/2key/contracts/contracts/ERC20full.sol",
     "exportedSymbols": {
       "ERC20full": [
-        10
+        507
       ]
     },
-    "id": 11,
+    "id": 508,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 1,
+        "id": 498,
         "literals": [
           "solidity",
           "^",
@@ -260,16 +260,16 @@
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:24:0"
+        "src": "0:24:4"
       },
       {
-        "absolutePath": "openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol",
-        "file": "openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol",
-        "id": 2,
+        "absolutePath": "/Users/kornatzky/2key/contracts/contracts/openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol",
+        "file": "./openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol",
+        "id": 499,
         "nodeType": "ImportDirective",
-        "scope": 11,
-        "sourceUnit": 2455,
-        "src": "26:71:0",
+        "scope": 508,
+        "sourceUnit": 9298,
+        "src": "26:73:4",
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -279,37 +279,37 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 3,
+              "id": 500,
               "name": "StandardToken",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 2454,
-              "src": "121:13:0",
+              "referencedDeclaration": 9297,
+              "src": "123:13:4",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_StandardToken_$2454",
+                "typeIdentifier": "t_contract$_StandardToken_$9297",
                 "typeString": "contract StandardToken"
               }
             },
-            "id": 4,
+            "id": 501,
             "nodeType": "InheritanceSpecifier",
-            "src": "121:13:0"
+            "src": "123:13:4"
           }
         ],
         "contractDependencies": [
-          2132,
-          2175,
-          2207,
-          2454
+          8453,
+          8650,
+          8682,
+          9297
         ],
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 10,
+        "id": 507,
         "linearizedBaseContracts": [
-          10,
-          2454,
-          2132,
-          2175,
-          2207
+          507,
+          9297,
+          8453,
+          8650,
+          8682
         ],
         "name": "ERC20full",
         "nodeType": "ContractDefinition",
@@ -317,7 +317,7 @@
           {
             "body": null,
             "documentation": null,
-            "id": 9,
+            "id": 506,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -325,23 +325,23 @@
             "name": "decimals",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 5,
+              "id": 502,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "221:2:0"
+              "src": "223:2:4"
             },
             "payable": false,
             "returnParameters": {
-              "id": 8,
+              "id": 505,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7,
+                  "id": 504,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9,
-                  "src": "245:5:0",
+                  "scope": 506,
+                  "src": "247:5:4",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -349,10 +349,10 @@
                     "typeString": "uint8"
                   },
                   "typeName": {
-                    "id": 6,
+                    "id": 503,
                     "name": "uint8",
                     "nodeType": "ElementaryTypeName",
-                    "src": "245:5:0",
+                    "src": "247:5:4",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint8",
                       "typeString": "uint8"
@@ -362,33 +362,33 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "244:7:0"
+              "src": "246:7:4"
             },
-            "scope": 10,
-            "src": "204:48:0",
+            "scope": 507,
+            "src": "206:48:4",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 11,
-        "src": "99:155:0"
+        "scope": 508,
+        "src": "101:155:4"
       }
     ],
-    "src": "0:255:0"
+    "src": "0:257:4"
   },
   "legacyAST": {
-    "absolutePath": "/Users/aydnep/2key/contracts/contracts/ERC20full.sol",
+    "absolutePath": "/Users/kornatzky/2key/contracts/contracts/ERC20full.sol",
     "exportedSymbols": {
       "ERC20full": [
-        10
+        507
       ]
     },
-    "id": 11,
+    "id": 508,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 1,
+        "id": 498,
         "literals": [
           "solidity",
           "^",
@@ -396,16 +396,16 @@
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:24:0"
+        "src": "0:24:4"
       },
       {
-        "absolutePath": "openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol",
-        "file": "openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol",
-        "id": 2,
+        "absolutePath": "/Users/kornatzky/2key/contracts/contracts/openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol",
+        "file": "./openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol",
+        "id": 499,
         "nodeType": "ImportDirective",
-        "scope": 11,
-        "sourceUnit": 2455,
-        "src": "26:71:0",
+        "scope": 508,
+        "sourceUnit": 9298,
+        "src": "26:73:4",
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -415,37 +415,37 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 3,
+              "id": 500,
               "name": "StandardToken",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 2454,
-              "src": "121:13:0",
+              "referencedDeclaration": 9297,
+              "src": "123:13:4",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_StandardToken_$2454",
+                "typeIdentifier": "t_contract$_StandardToken_$9297",
                 "typeString": "contract StandardToken"
               }
             },
-            "id": 4,
+            "id": 501,
             "nodeType": "InheritanceSpecifier",
-            "src": "121:13:0"
+            "src": "123:13:4"
           }
         ],
         "contractDependencies": [
-          2132,
-          2175,
-          2207,
-          2454
+          8453,
+          8650,
+          8682,
+          9297
         ],
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 10,
+        "id": 507,
         "linearizedBaseContracts": [
-          10,
-          2454,
-          2132,
-          2175,
-          2207
+          507,
+          9297,
+          8453,
+          8650,
+          8682
         ],
         "name": "ERC20full",
         "nodeType": "ContractDefinition",
@@ -453,7 +453,7 @@
           {
             "body": null,
             "documentation": null,
-            "id": 9,
+            "id": 506,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -461,23 +461,23 @@
             "name": "decimals",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 5,
+              "id": 502,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "221:2:0"
+              "src": "223:2:4"
             },
             "payable": false,
             "returnParameters": {
-              "id": 8,
+              "id": 505,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7,
+                  "id": 504,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9,
-                  "src": "245:5:0",
+                  "scope": 506,
+                  "src": "247:5:4",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -485,10 +485,10 @@
                     "typeString": "uint8"
                   },
                   "typeName": {
-                    "id": 6,
+                    "id": 503,
                     "name": "uint8",
                     "nodeType": "ElementaryTypeName",
-                    "src": "245:5:0",
+                    "src": "247:5:4",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint8",
                       "typeString": "uint8"
@@ -498,20 +498,20 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "244:7:0"
+              "src": "246:7:4"
             },
-            "scope": 10,
-            "src": "204:48:0",
+            "scope": 507,
+            "src": "206:48:4",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 11,
-        "src": "99:155:0"
+        "scope": 508,
+        "src": "101:155:4"
       }
     ],
-    "src": "0:255:0"
+    "src": "0:257:4"
   },
   "compiler": {
     "name": "solc",
@@ -519,5 +519,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
-  "updatedAt": "2018-08-02T17:53:03.972Z"
+  "updatedAt": "2018-08-13T15:35:36.962Z"
 }

@@ -31,7 +31,7 @@ contract ComposableAssetFactory is RBACWithAdmin {
 
   /*
   
-    The contract acts as a store. The assetren data structure is the catalogue of the store.
+    The contract acts as a store. The assets data structure is the catalogue of the store.
     
     Each asset is identified by a uint256 tokenID that acts as a SKU (shop keeping unit)
 
@@ -61,9 +61,11 @@ contract ComposableAssetFactory is RBACWithAdmin {
   //    it in a subclass. Anyway I dont think we need ETC721 and even if we support ERC721 we dont need to keep track of which tokenID (NFT)
   //    is used.
   //
-  mapping(uint256 => mapping(address => uint256)) assetren;
+  mapping(uint256 => mapping(address => uint256)) assets;
 
   constructor(uint256 _openingTime, uint256 _closingTime) RBACWithAdmin() public {
+    require(_openingTime >= block.timestamp);
+    require(_closingTime >= _openingTime);    
     openingTime = _openingTime;
     closingTime = _closingTime;
   }
@@ -81,7 +83,7 @@ contract ComposableAssetFactory is RBACWithAdmin {
     );
 
     // set as asset
-    assetren[_tokenID][_assetContract] += _amount;
+    assets[_tokenID][_assetContract] += _amount;
     return true;
   }
 
@@ -99,7 +101,7 @@ contract ComposableAssetFactory is RBACWithAdmin {
     );
 
     // set as asset
-    assetren[_tokenID][assetToken] = 1;
+    assets[_tokenID][assetToken] = 1;
     return true;
   }
 
@@ -109,7 +111,7 @@ contract ComposableAssetFactory is RBACWithAdmin {
     uint256 _tokenID,
     address _assetContract,
     uint256 _amount) internal returns (bool) {
-    require(assetren[_tokenID][_assetContract] >= _amount);
+    require(assets[_tokenID][_assetContract] >= _amount);
     require(
       _assetContract.call(
         bytes4(keccak256(abi.encodePacked("transfer(address,uint256)"))),
@@ -117,7 +119,7 @@ contract ComposableAssetFactory is RBACWithAdmin {
       )
     );
 
-    assetren[_tokenID][_assetContract] -= _amount;
+    assets[_tokenID][_assetContract] -= _amount;
     return true;
   }
 
@@ -130,7 +132,7 @@ contract ComposableAssetFactory is RBACWithAdmin {
     address assetToken = address(
       keccak256(abi.encodePacked(_assetContract, _assetTokenID))
     );
-    require(assetren[_tokenID][assetToken] == 1);
+    require(assets[_tokenID][assetToken] == 1);
     require(
       _assetContract.call(
         bytes4(keccak256(abi.encodePacked("transfer(address,uint256)"))),
@@ -138,7 +140,7 @@ contract ComposableAssetFactory is RBACWithAdmin {
       )
     );
 
-    assetren[_tokenID][assetToken] = 0;
+    assets[_tokenID][assetToken] = 0;
     return true;
   }
 

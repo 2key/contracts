@@ -264,7 +264,7 @@ Connect Remix to local files.
 
 Run with:
 
-    remixd -s contracts/contracts
+    remixd -s contracts
 
 ## Open Local Files in Remix 
 
