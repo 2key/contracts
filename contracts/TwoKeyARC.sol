@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
-import 'github.com/OpenZeppelin/openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol';
-import 'github.com/OpenZeppelin/openzeppelin-solidity/contracts/math/SafeMath.sol';
+import './openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol';
+import './openzeppelin-solidity/contracts/math/SafeMath.sol';
 
 import './TwoKeyEventSource.sol';
 

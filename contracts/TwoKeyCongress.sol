@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
-import 'github.com/OpenZeppelin/openzeppelin-solidity/contracts/ownership/Ownable.sol';
-import 'github.com/OpenZeppelin/openzeppelin-solidity/contracts/math/SafeMath.sol';
+import './openzeppelin-solidity/contracts/ownership/Ownable.sol';
+import './openzeppelin-solidity/contracts/math/SafeMath.sol';
 
 interface Token {
     function transferFrom(address _from, address _to, uint256 _value) external returns (bool success);

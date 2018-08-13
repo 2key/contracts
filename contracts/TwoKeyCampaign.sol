@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24; 
 
-import 'github.com/OpenZeppelin/openzeppelin-solidity/contracts/math/SafeMath.sol';
+import './openzeppelin-solidity/contracts/math/SafeMath.sol';
 
 import './ERC20full.sol';
 import './TwoKeyEconomy.sol';

@@ -232,11 +232,11 @@ Use Node.js v9.11.1 to be compatible with truffle that we used so far.
 
 ## Geth 
 
-Run in folder containing `web3-alpha`.
+Run in folder containing `contracts`.
 
 Run with:
 
-    geth --datadir=./datadir --nodiscover --rpc --rpcapi "db,personal,eth,net,web3,debug" --rpccorsdomain='*' --rpcaddr="localhost" --rpcport 8545 --unlock 0,1,2,3,4,5,6 --password password.geth.remix.txt  --jspath . --preload web3-alpha/mine-only-when-transactions.js  console
+    geth --datadir=./datadir --nodiscover --rpc --rpcapi "db,personal,eth,net,web3,debug" --rpccorsdomain='*' --rpcaddr="localhost" --rpcport 8545 --unlock 0,1,2,3,4,5,6 --password password.geth.remix.txt  --jspath . --preload contracts/mine-only-when-transactions.js  console
 
 Assuming we previously created 5 acounts. The password file should have a line with the password for each account to be unlocked.
 
@@ -264,7 +264,7 @@ Connect Remix to local files.
 
 Run with:
 
-    remixd -s web3-alpha/contracts
+    remixd -s contracts/contracts
 
 ## Open Local Files in Remix 
 
@@ -287,15 +287,10 @@ Install with `brew`
 
 ## Compiling Files
 
-    solc --bin --abi -o ./solcoutput github.com/OpenZeppelin/openzeppelin-solidity/contracts=/absolute/path/to/node_modules/openzeppelin-solidity/contracts  ./web3-alpha/contracts/name/of/our/sol/file/with/extension
+    ./compile-with-solc.bash
 
 ABI and Bytecode will be generate in target folder `solcoutput`
 
-## Contracts for Local Environment and SOLC Compiler
-
-Import from Zeppelin should be prefixed by:
-
-    github.com/OpenZeppelin/
 
 
 

@@ -1,9 +1,9 @@
 pragma solidity ^0.4.24;
 
-import 'github.com/OpenZeppelin/openzeppelin-solidity/contracts/crowdsale/validation/TimedCrowdsale.sol';
-import 'github.com/OpenZeppelin/openzeppelin-solidity/contracts/crowdsale/validation/CappedCrowdsale.sol';
-import 'github.com/OpenZeppelin/openzeppelin-solidity/contracts/crowdsale/validation/WhitelistedCrowdsale.sol';
-import 'github.com/OpenZeppelin/openzeppelin-solidity/contracts/token/ERC20/TokenVesting.sol';
+import './openzeppelin-solidity/contracts/crowdsale/validation/TimedCrowdsale.sol';
+import './openzeppelin-solidity/contracts/crowdsale/validation/CappedCrowdsale.sol';
+import './openzeppelin-solidity/contracts/crowdsale/validation/WhitelistedCrowdsale.sol';
+import './openzeppelin-solidity/contracts/token/ERC20/TokenVesting.sol';
 import './TwoKeyUpgradableExchange.sol';
 
 
