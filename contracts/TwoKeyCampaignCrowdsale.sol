@@ -53,10 +53,10 @@ contract TwoKeyCampaignCrowdsale is TwoKeyCampaign {
 	}
 
   	// buy product with twokey token
-	function buyFromWithTwoKey(address _from, uint256 _tokenID, address _childContract, uint256 _amountOrIndex) public payable {
+	function buyFromWithTwoKey(address _from, uint256 _tokenID, address _assetContract, uint256 _amountOrIndex) public payable {
 	    crowdsale.buyTokens.value(msg.value)(address(this));
-	    require(addFungibleAsset(_tokenID, _childContract, _amountOrIndex.mul(bonus)));
-	    super.buyFromWithTwoKey(_from, _tokenID, _childContract, _amountOrIndex, CampaignType.Fungible);
+	    require(addFungibleAsset(_tokenID, _assetContract, _amountOrIndex.mul(bonus)));
+	    super.buyFromWithTwoKey(_from, _tokenID, _assetContract, _amountOrIndex, CampaignType.Fungible);
 	}	
 
 }
