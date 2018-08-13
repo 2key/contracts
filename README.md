@@ -291,7 +291,23 @@ Install with `brew`
 
 ABI and Bytecode will be generate in target folder `solcoutput`
 
+## Deploying
 
+Enter into geth console:
+
+    var byteCode = "606060405234...";
+    // You get the byte code from the bin file in solcoutput
+    personal.unlockAccount(eth.accounts[0], "yourpassword")
+    eth.sendTransaction(
+       {
+         from: eth.accounts[0],
+         data: "0x" + counterCode,
+         gas: 1000000
+       },
+       function(err, tx) {
+         console.log(err, tx);
+       }
+    );
 
 
 
