@@ -169,7 +169,7 @@ contract TwoKeyCampaign is TwoKeyARC, ComposableAssetFactory, TwoKeyTypes {
 		require(_amount > 0 && prices[_tokenID][_assetContract] > 0);
 		uint256 payout = prices[_tokenID][_assetContract].mul(_amount).mul(rate);
 		require(economy.transferFrom(msg.sender, this, payout));	
-		Conversion memory c = Conversion(_from, payout, msg.sender, false, false, _tokenID, _assetContract, _amount, CampaignType.Fungible, now, now + expiryConversion * 1 days);
+		Conversion memory c = Conversion(_from, payout, msg.sender, false, false, _tokenID, _assetContract, _amount, CampaignType.Fungible, now, now + expiryConversion * 1 minutes);
 		// move funds
 		assets[_tokenID][_assetContract] -= _amount;
 		eventSource.escrow(address(this), msg.sender, _tokenID, _assetContract, _amount, CampaignType.Fungible);	
@@ -190,7 +190,7 @@ contract TwoKeyCampaign is TwoKeyARC, ComposableAssetFactory, TwoKeyTypes {
 		require(_index != 0 && prices[_tokenID][assetToken] > 0);
 		uint256 payout = prices[_tokenID][assetToken].mul(rate);
 		require(economy.transferFrom(msg.sender, this, payout));	
-		Conversion memory c = Conversion(_from, payout, msg.sender, false, false, _tokenID, _assetContract, _index, CampaignType.NonFungible, now, now + expiryConversion * 1 days);
+		Conversion memory c = Conversion(_from, payout, msg.sender, false, false, _tokenID, _assetContract, _index, CampaignType.NonFungible, now, now + expiryConversion * 1 minutes);
 		// move funds
 		assets[_tokenID][assetToken] = 0;
 		eventSource.escrow(address(this), msg.sender, _tokenID, _assetContract, _index, CampaignType.NonFungible);
