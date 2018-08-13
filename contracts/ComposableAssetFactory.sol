@@ -31,7 +31,7 @@ contract ComposableAssetFactory is RBACWithAdmin {
 
   /*
   
-    The contract acts as a store. The children data structure is the catalogue of the store.
+    The contract acts as a store. The assetren data structure is the catalogue of the store.
     
     Each asset is identified by a uint256 tokenID that acts as a SKU (shop keeping unit)
 
@@ -61,7 +61,7 @@ contract ComposableAssetFactory is RBACWithAdmin {
   //    it in a subclass. Anyway I dont think we need ETC721 and even if we support ERC721 we dont need to keep track of which tokenID (NFT)
   //    is used.
   //
-  mapping(uint256 => mapping(address => uint256)) children;
+  mapping(uint256 => mapping(address => uint256)) assetren;
 
   constructor(uint256 _openingTime, uint256 _closingTime) RBACWithAdmin() public {
     openingTime = _openingTime;
@@ -70,9 +70,9 @@ contract ComposableAssetFactory is RBACWithAdmin {
 
   
   // add erc20 asset amount to the store, which adds an amount of that erc20 to our catalogue
-  function addFungibleChild(uint256 _tokenID, address _childContract, uint256 _amount) isOngoing public returns (bool) {
+  function addFungibleAsset(uint256 _tokenID, address _assetContract, uint256 _amount) isOngoing public returns (bool) {
     require(
-      _childContract.call(
+      _assetContract.call(
         bytes4(keccak256("transferFrom(address,address,uint256)")),
         msg.sender,
         address(this),
@@ -80,92 +80,92 @@ contract ComposableAssetFactory is RBACWithAdmin {
       )
     );
 
-    // set as child
-    children[_tokenID][_childContract] += _amount;
+    // set as asset
+    assetren[_tokenID][_assetContract] += _amount;
     return true;
   }
 
   // add erc721 asset to the store, which adds a particular unique item from that erc721 to our catalogue
-  function addNonFungibleChild(uint256 _tokenID, address _childContract, uint256 _index) isOngoing public returns (bool) {
+  function addNonFungibleAsset(uint256 _tokenID, address _assetContract, uint256 _index) isOngoing public returns (bool) {
     require(
-      _childContract.call(
+      _assetContract.call(
         bytes4(keccak256("transferFrom(address,address,uint256)")),
         msg.sender,
         _index
       )
     );
-    address childToken = address(
-      keccak256(abi.encodePacked(_childContract, _index))
+    address assetToken = address(
+      keccak256(abi.encodePacked(_assetContract, _index))
     );
 
-    // set as child
-    children[_tokenID][childToken] = 1;
+    // set as asset
+    assetren[_tokenID][assetToken] = 1;
     return true;
   }
 
   // move an amount of erc20 from our catalogue to someone
-  function moveFungibleChild(
+  function moveFungibleAsset(
     address _to,
     uint256 _tokenID,
-    address _childContract,
+    address _assetContract,
     uint256 _amount) internal returns (bool) {
-    require(children[_tokenID][_childContract] >= _amount);
+    require(assetren[_tokenID][_assetContract] >= _amount);
     require(
-      _childContract.call(
+      _assetContract.call(
         bytes4(keccak256(abi.encodePacked("transfer(address,uint256)"))),
         _to, _amount
       )
     );
 
-    children[_tokenID][_childContract] -= _amount;
+    assetren[_tokenID][_assetContract] -= _amount;
     return true;
   }
 
   // transfer a unique item from a erc721 in our catalogue to someone
-  function moveNonFungibleChild(
+  function moveNonFungibleAsset(
     address _to,
     uint256 _tokenID,
-    address _childContract,
-    uint256 _childTokenID) internal returns (bool) {
-    address childToken = address(
-      keccak256(abi.encodePacked(_childContract, _childTokenID))
+    address _assetContract,
+    uint256 _assetTokenID) internal returns (bool) {
+    address assetToken = address(
+      keccak256(abi.encodePacked(_assetContract, _assetTokenID))
     );
-    require(children[_tokenID][childToken] == 1);
+    require(assetren[_tokenID][assetToken] == 1);
     require(
-      _childContract.call(
+      _assetContract.call(
         bytes4(keccak256(abi.encodePacked("transfer(address,uint256)"))),
-        _to, _childTokenID
+        _to, _assetTokenID
       )
     );
 
-    children[_tokenID][childToken] = 0;
+    assetren[_tokenID][assetToken] = 0;
     return true;
   }
 
   // transfer an amount of erc20 from our catalogue to someone
-  function transferFungibleChild(
+  function transferFungibleAsset(
     address _to,
     uint256 _tokenID,
-    address _childContract,
+    address _assetContract,
     uint256 _amount) isOngoing onlyRole(ROLE_CONTROLLER) internal returns (bool) {
-    return moveFungibleChild(_to, _tokenID, _childContract, _amount);
+    return moveFungibleAsset(_to, _tokenID, _assetContract, _amount);
   }
 
   // transfer a unique item from a erc721 in our catalogue to someone
-  function transferNonFungibleChild(
+  function transferNonFungibleAsset(
     address _to,
     uint256 _tokenID,
-    address _childContract,
-    uint256 _childTokenID) isOngoing onlyRole(ROLE_CONTROLLER) internal returns (bool) {
-    return moveNonFungibleChild(_to, _tokenID, _childContract, _childTokenID);
+    address _assetContract,
+    uint256 _assetTokenID) isOngoing onlyRole(ROLE_CONTROLLER) internal returns (bool) {
+    return moveNonFungibleAsset(_to, _tokenID, _assetContract, _assetTokenID);
   }
 
   function expireFungible(
     address _to,
     uint256 _tokenID,
-    address _childContract,
+    address _assetContract,
     uint256 _amount) onlyRole(ROLE_CONTROLLER) isClosed public returns (bool) {
-    moveFungibleChild(_to, _tokenID, _childContract, _amount);
+    moveFungibleAsset(_to, _tokenID, _assetContract, _amount);
     emit Expired(address(this));
     return true;
   }
@@ -173,9 +173,9 @@ contract ComposableAssetFactory is RBACWithAdmin {
   function expireNonFungible(
     address _to,
     uint256 _tokenID,
-    address _childContract,
-    uint256 _childTokenID) onlyRole(ROLE_CONTROLLER) isClosed public returns (bool){   
-    moveNonFungibleChild(_to, _tokenID, _childContract, _childTokenID);
+    address _assetContract,
+    uint256 _assetTokenID) onlyRole(ROLE_CONTROLLER) isClosed public returns (bool){   
+    moveNonFungibleAsset(_to, _tokenID, _assetContract, _assetTokenID);
     emit Expired(address(this));
     return true;
   }

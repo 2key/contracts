@@ -22,7 +22,7 @@ contract TwoKeyCampaign is TwoKeyARC, ComposableAssetFactory {
 		bool isFulfilled;
 		bool isCancelled;
 		uint256 tokenID;
-		address childContract;
+		address assetContract;
 		uint256 indexOrAmount;
 		CampaignType campaignType;
 		uint256 openingTime;
@@ -162,14 +162,14 @@ contract TwoKeyCampaign is TwoKeyARC, ComposableAssetFactory {
 	    computes the payout 
 	    transfers to the escrow the asset purchased
     */ 
-	function fulfillFungibleTwoKeyToken(address _from, uint256 _tokenID, address _childContract, uint256 _amount) isOngoing internal {	
-		require(_amount > 0 && prices[_tokenID][_childContract] > 0);
-		uint256 payout = prices[_tokenID][_childContract].mul(_amount).mul(rate);
+	function fulfillFungibleTwoKeyToken(address _from, uint256 _tokenID, address _assetContract, uint256 _amount) isOngoing internal {	
+		require(_amount > 0 && prices[_tokenID][_assetContract] > 0);
+		uint256 payout = prices[_tokenID][_assetContract].mul(_amount).mul(rate);
 		require(economy.transferFrom(msg.sender, this, payout));	
-		Conversion memory c = Conversion(_from, payout, msg.sender, false, false, _tokenID, _childContract, _amount, CampaignType.Fungible, now, now + expiryConversion days);
+		Conversion memory c = Conversion(_from, payout, msg.sender, false, false, _tokenID, _assetContract, _amount, CampaignType.Fungible, now, now + expiryConversion days);
 		// move funds
-		children[_tokenID][_childContract] = 0;
-		eventSource.escrow(address(this), msg.sender, _tokenID, _childContract, _amount, CampaignType.Fungible);	
+		assetren[_tokenID][_assetContract] = 0;
+		eventSource.escrow(address(this), msg.sender, _tokenID, _assetContract, _amount, CampaignType.Fungible);	
 		conversions[msg.sender] = c;
 	}
 
@@ -180,20 +180,20 @@ contract TwoKeyCampaign is TwoKeyARC, ComposableAssetFactory {
 	    computes the payout 
 	    transfers to the escrow the asset purchased
     */ 
-	function fulfillNonFungibleTwoKeyToken(address _from, uint256 _tokenID, address _childContract, uint256 _index) isOngoing internal {	
-		address childToken = address(
-	      keccak256(abi.encodePacked(_childContract, _index))
+	function fulfillNonFungibleTwoKeyToken(address _from, uint256 _tokenID, address _assetContract, uint256 _index) isOngoing internal {	
+		address assetToken = address(
+	      keccak256(abi.encodePacked(_assetContract, _index))
 	    );
-		require(_index != 0 && prices[_tokenID][childToken] > 0);
-		uint256 payout = prices[_tokenID][childToken].mul(rate);
+		require(_index != 0 && prices[_tokenID][assetToken] > 0);
+		uint256 payout = prices[_tokenID][assetToken].mul(rate);
 		require(economy.transferFrom(msg.sender, this, payout));	
-		Conversion memory c = Conversion(_from, payout, msg.sender, false, false, _tokenID, _childContract, _index, CampaignType.NonFungible, now, now + expiryConversion days);
+		Conversion memory c = Conversion(_from, payout, msg.sender, false, false, _tokenID, _assetContract, _index, CampaignType.NonFungible, now, now + expiryConversion days);
 		// move funds
-		address childToken = address(
-	      keccak256(abi.encodePacked(_childContract, _childTokenID))
+		address assetToken = address(
+	      keccak256(abi.encodePacked(_assetContract, _assetTokenID))
 	    );
-		children[_tokenID][childToken] = 0;
-		eventSource.escrow(esc, msg.sender, _tokenID, _childContract, _index, CampaignType.NonFungible);
+		assetren[_tokenID][assetToken] = 0;
+		eventSource.escrow(esc, msg.sender, _tokenID, _assetContract, _index, CampaignType.NonFungible);
 		conversions[msg.sender] = c;
 	}
 
@@ -211,50 +211,50 @@ contract TwoKeyCampaign is TwoKeyARC, ComposableAssetFactory {
     }
 
     /**
-     * transferNonFungibleChildTwoKeyToken 
+     * transferNonFungibleAssetTwoKeyToken 
      * @param  _tokenID  sku of asset
-     * @param  _childContract erc721 representing the asset class
-     * @param  _childTokenID  unique index of asset
+     * @param  _assetContract erc721 representing the asset class
+     * @param  _assetTokenID  unique index of asset
      * 
      * transfer the asset to the converter,
      */
-    function transferNonFungibleChildTwoKeyToken(
+    function transferNonFungibleAssetTwoKeyToken(
         uint256 _tokenID,
-        address _childContract,
-        uint256 _childTokenID) onlyApprovedConverter didConverterConvert public {
+        address _assetContract,
+        uint256 _assetTokenID) onlyApprovedConverter didConverterConvert public {
         c.isFulfilled = true; 
-        require(transferNonFungibleChild(msg.sender, _tokenID, _childContract, _childTokenID)); 
+        require(transferNonFungibleAsset(msg.sender, _tokenID, _assetContract, _assetTokenID)); 
         actuallyFulfilledTwoKeyToken();               
     }
 
     /**
-     * transferFungibleChildTwoKeyToken 
+     * transferFungibleAssetTwoKeyToken 
      * @param  _tokenID  sku of asset
-     * @param  _childContract erc20 representing the asset class
+     * @param  _assetContract erc20 representing the asset class
      * @param  _amount amount of asset bought
      * 
      * transfer the asset to the converter,
      */
-    function transferFungibleChildTwoKeyToken(
+    function transferFungibleAssetTwoKeyToken(
         uint256 _tokenID,
-        address _childContract,
+        address _assetContract,
         uint256 _amount) onlyApprovedConverter didConverterConvert public {
         c.isFulfilled = true; 
-        require(transferFungibleChild(msg.sender, _tokenID, _childContract, _amount));  
+        require(transferFungibleAsset(msg.sender, _tokenID, _assetContract, _amount));  
         actuallyFulfilledTwoKeyToken();                
     }
 
     function cancelledNonFungibleEscrow(address _converter,
         uint256 _tokenID,
-        address _childContract,
-        uint256 _childTokenID) internal {
+        address _assetContract,
+        uint256 _assetTokenID) internal {
         Conversion memory c = conversions[_converter];
         c.isCancelled = true;
         conversions[_converter] = c;
-        address childToken = address(
-	      keccak256(abi.encodePacked(_childContract, _childTokenID))
+        address assetToken = address(
+	      keccak256(abi.encodePacked(_assetContract, _assetTokenID))
 	    );
-        children[c.tokenID][childToken] = 1;  
+        assetren[c.tokenID][assetToken] = 1;  
         require(economy.transfer(_converter, (c.payout).mul(rate)));	
     }
 
@@ -262,61 +262,61 @@ contract TwoKeyCampaign is TwoKeyARC, ComposableAssetFactory {
         Conversion memory c = conversions[_converter];
         c.isCancelled = true;
         conversions[_converter] = c;
-        children[c.tokenID][_childContract] += amount;  
+        assetren[c.tokenID][_assetContract] += amount;  
         require(economy.transfer(_converter, (c.payout).mul(rate)));	
     }
 
     /**
-     * cancelNonFungibleChildTwoKey 
+     * cancelNonFungibleAssetTwoKey 
      * cancels the purchase buy transfering the assets back to the campaign
      * and refunding the converter
      * @param  _tokenID  sku of asset
-     * @param  _childContract erc721 representing the asset class
-     * @param  _childTokenID unique index of asset
+     * @param  _assetContract erc721 representing the asset class
+     * @param  _assetTokenID unique index of asset
      * 
      */
-    function cancelNonFungibleChildTwoKey(
+    function cancelNonFungibleAssetTwoKey(
         address _converter,
         uint256 _tokenID,
-        address _childContract,
-        uint256 _childTokenID) onlyRole(ROLE_CONTROLLER) public returns (bool) {
+        address _assetContract,
+        uint256 _assetTokenID) onlyRole(ROLE_CONTROLLER) public returns (bool) {
     	Conversion memory c = conversions[_converter];
 	    require(c.tokenID != 0 && !c.isCancelled && !c.isFulfilled);
-    	cancelledNonFungibleEscrow(_converter, _tokenID, _childContract, _childTokenID);
-        eventSource.cancelled(address(this), _converter, _tokenID, _childContract, _childTokenID, CampaignType.NonFungible);
+    	cancelledNonFungibleEscrow(_converter, _tokenID, _assetContract, _assetTokenID);
+        eventSource.cancelled(address(this), _converter, _tokenID, _assetContract, _assetTokenID, CampaignType.NonFungible);
         return true;
     }
 
     /**
-     * cancelFungibleChildTwoKey 
+     * cancelFungibleAssetTwoKey 
      * cancels the purchase buy transfering the assets back to the campaign
      * and refunding the converter
      * @param  _tokenID  sku of asset
-     * @param  _childContract erc20 representing the asset class
+     * @param  _assetContract erc20 representing the asset class
      * @param  _amount amount of asset bought
      * 
      */
-    function cancelFungibleChildTwoKey(
+    function cancelFungibleAssetTwoKey(
         address _converter,
         uint256 _tokenID,
-        address _childContract,
+        address _assetContract,
         uint256 _amount) onlyRole(ROLE_CONTROLLER) public returns (bool) {
 	    Conversion memory c = conversions[_converter];
 	    require(c.tokenID != 0 && !c.isCancelled && !c.isFulfilled);
-    	cancelledFungibleEscrow(_converter, _tokenID, _childContract, _amount);
-        eventSource.cancelled(address(this), _converter, _tokenID, _childContract, _amount, CampaignType.Fungible);
+    	cancelledFungibleEscrow(_converter, _tokenID, _assetContract, _amount);
+        eventSource.cancelled(address(this), _converter, _tokenID, _assetContract, _amount, CampaignType.Fungible);
         return true;
     }
 
     function expireEscrowNonFungible(
 		address _converter,
 		uint256 _tokenID,
-		address _childContract,
-		uint256 _childTokenID) onlyRole(ROLE_CONTROLLER) public returns (bool){   
+		address _assetContract,
+		uint256 _assetTokenID) onlyRole(ROLE_CONTROLLER) public returns (bool){   
 	    Conversion memory c = conversions[_converter];
 	    require(c.tokenID != 0 && !c.isCancelled && !c.isFulfilled);
     	require(now > c.closingTime);
-		cancelledNonFungibleEscrow(_converter, _tokenID, _childContract, _childTokenID);
+		cancelledNonFungibleEscrow(_converter, _tokenID, _assetContract, _assetTokenID);
 		emit Expired(address(this));
 		return true;
 	}
@@ -324,12 +324,12 @@ contract TwoKeyCampaign is TwoKeyARC, ComposableAssetFactory {
 	function expireEscrowFungible(
 		address _to,
 		uint256 _tokenID,
-		address _childContract,
+		address _assetContract,
 		uint256 _amount) onlyRole(ROLE_CONTROLLER) public returns (bool) {
 	    Conversion memory c = conversions[_converter];
 	    require(c.tokenID != 0 && !c.isCancelled && !c.isFulfilled);
     	require(now > c.closingTime);
-		cancelledFungibleEscrow(_converter, _tokenID, _childContract, _amount);
+		cancelledFungibleEscrow(_converter, _tokenID, _assetContract, _amount);
 		emit Expired(address(this));
 		return true;
 	}
@@ -355,20 +355,20 @@ contract TwoKeyCampaign is TwoKeyARC, ComposableAssetFactory {
         require(economy.transfer(contractor, (payout.sub(fee).sub(maxReward)).mul(rate)));
         
         transferRewardsTwoKeyToken(c.from, maxReward.mul(rate));
-        eventSource.fulfilled(address(this), c.converter, c.tokenID, c.childContract, c.indexOrAmount, c.campaignType);
+        eventSource.fulfilled(address(this), c.converter, c.tokenID, c.assetContract, c.indexOrAmount, c.campaignType);
 	}
 
 	// set price for fungible asset held by the campaign
-	function setPriceFungible(uint256 _tokenID, address _childContract, uint256 _pricePerUnit) onlyOwner public {
-		prices[_tokenID][_childContract] = _pricePerUnit;
+	function setPriceFungible(uint256 _tokenID, address _assetContract, uint256 _pricePerUnit) onlyOwner public {
+		prices[_tokenID][_assetContract] = _pricePerUnit;
 	}
 
 	// set price for a non fungible asset held by the campaign
-	function setPriceNonFungible(uint256 _tokenID, address _childContract, uint256 _index, uint256 _pricePerUnit) onlyOwner public {
-		address childToken = address(
-	      keccak256(abi.encodePacked(_childContract, _index))
+	function setPriceNonFungible(uint256 _tokenID, address _assetContract, uint256 _index, uint256 _pricePerUnit) onlyOwner public {
+		address assetToken = address(
+	      keccak256(abi.encodePacked(_assetContract, _index))
 	    );
-		prices[_tokenID][childToken] = _pricePerUnit;
+		prices[_tokenID][assetToken] = _pricePerUnit;
 	}
 
 	// an influencer that wishes to cash an _amount of 2key from the campaign
@@ -382,20 +382,20 @@ contract TwoKeyCampaign is TwoKeyARC, ComposableAssetFactory {
   	 * buy product with twokey token,
   	 * _from is the influencer from which you received the referral
   	 * _tokenID is the asset sku
-  	 * _childContract - erc20 (fungible) or erc721 (non fungible) which represents the class of the asset
+  	 * _assetContract - erc20 (fungible) or erc721 (non fungible) which represents the class of the asset
   	 * _amountOrIndex - for erc20 amount in asset class, for erc21 index within asset class
   	 */
-	function buyFromWithTwoKey(address _from, uint256 _tokenID, address _childContract, uint256 _amountOrIndex) public payable {
-	    buyProductTwoKey(_from, _tokenID, _childContract, _amountOrIndex); 
+	function buyFromWithTwoKey(address _from, uint256 _tokenID, address _assetContract, uint256 _amountOrIndex) public payable {
+	    buyProductTwoKey(_from, _tokenID, _assetContract, _amountOrIndex); 
 	}
 
 	// internal function that splits the treatment for fungible or non fungible
-	function buyProductTwoKey(address _from, uint256 _tokenID, address _childContract, uint256 _amountOrIndex) internal {
+	function buyProductTwoKey(address _from, uint256 _tokenID, address _assetContract, uint256 _amountOrIndex) internal {
 		CampaignType campaignType = getType(_tokenID);
 		if (campaignType == CampaignType.Fungible) {
-			fulfillFungibleTwoKeyToken(_from, _tokenID, _childContract, _amountOrIndex);
+			fulfillFungibleTwoKeyToken(_from, _tokenID, _assetContract, _amountOrIndex);
 		} else if (campaignType == CampaignType.NonFungible) {
-			fulfillNonFungibleTwoKeyToken(_from, _tokenID, _childContract, _amountOrIndex);
+			fulfillNonFungibleTwoKeyToken(_from, _tokenID, _assetContract, _amountOrIndex);
 		} 
 	}
 
