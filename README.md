@@ -236,7 +236,7 @@ Run in folder containing `web3-alpha`.
 
 Run with:
 
-    geth --datadir=./datadir --nodiscover --rpc --rpcapi "db,personal,eth,net,web3,debug" --rpccorsdomain='*' --rpcaddr="localhost" --rpcport 8545 --unlock 0,1,2,3,4 --password password.geth.remix.txt  --jspath . --preload web3-alpha/mine-only-when-transactions.js  console
+    geth --datadir=./datadir --nodiscover --rpc --rpcapi "db,personal,eth,net,web3,debug" --rpccorsdomain='*' --rpcaddr="localhost" --rpcport 8545 --unlock 0,1,2,3,4,5,6 --password password.geth.remix.txt  --jspath . --preload web3-alpha/mine-only-when-transactions.js  console
 
 Assuming we previously created 5 acounts. The password file should have a line with the password for each account to be unlocked.
 
