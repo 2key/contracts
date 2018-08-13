@@ -2,6 +2,8 @@ pragma solidity ^0.4.24;
 
 import './TwoKeyTypes.sol';
 import "./TwoKeyAdmin.sol";
+import "./GetCode.sol";
+
 
 contract TwoKeyEventSource is TwoKeyTypes {
 
@@ -18,7 +20,7 @@ contract TwoKeyEventSource is TwoKeyTypes {
     TwoKeyAdmin twoKeyAdmin;
 
     ///Mapping contract bytecode to boolean if is allowed to emit an event
-    mapping(bytes32 => bool) canEmit;
+    mapping(bytes => bool) canEmit;
 
     ///Mapping an address to boolean if allowed to modify
     mapping(address => bool) allowedModifiers;
@@ -31,14 +33,15 @@ contract TwoKeyEventSource is TwoKeyTypes {
 
     ///@notice Modifier which allows all modifiers to update canEmit mapping - ever
     modifier onlyAllowedModifiers {
-        require(allowedModifiers(msg.sender) == true || msg.sender == address(twoKeyAdmin));
+        require(allowedModifiers[msg.sender] == true || msg.sender == address(twoKeyAdmin));
         _;
     }
 
     ///@notice Modifier which will only allow allowed contracts to emit an event
     modifier onlyAllowedContracts {
         //just to use contract code instead of msg.sender address
-        require(canEmit(msg.sender) == true);
+        bytes memory code = GetCode.at(msg.sender);
+        require(canEmit[code] == true);
         _;
     }
 
@@ -47,7 +50,8 @@ contract TwoKeyEventSource is TwoKeyTypes {
     /// @dev We first fetch bytes32 contract code and then update our mapping
     /// @dev only admin can call this or an authorized person
     function addContract(address _contractAddress) public onlyAllowedModifiers {
-        bytes32 _contractCode;
+        require(_contractAddress != address(0));
+        bytes memory _contractCode = GetCode.at(_contractAddress);
         canEmit[_contractCode] = true;
     }
 
@@ -56,7 +60,8 @@ contract TwoKeyEventSource is TwoKeyTypes {
     /// @dev We first fetch bytes32 contract code and then update our mapping
     /// @dev only admin can call this or an authorized person
     function removeContract(address _contractAddress) public onlyAllowedModifiers {
-        bytes32 _contractCode;
+        require(_contractAddress != address(0));
+        bytes memory _contractCode = GetCode.at(_contractAddress);
         canEmit[_contractCode] = false;
     }
 
