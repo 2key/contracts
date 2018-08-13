@@ -6,12 +6,11 @@ import './ERC20full.sol';
 import './TwoKeyEconomy.sol';
 import './TwoKeyWhitelisted.sol';
 import './ComposableAssetFactory.sol';
-import './TwoKeyEscrow.sol';
 import './TwoKeyTypes.sol';
 import './TwoKeyEventSource.sol';
 import './TwoKeyARC.sol';
 
-contract TwoKeyCampaign is TwoKeyARC, ComposableAssetFactory {
+contract TwoKeyCampaign is TwoKeyARC, ComposableAssetFactory, TwoKeyTypes {
 
 	using SafeMath for uint256;
 
@@ -166,7 +165,7 @@ contract TwoKeyCampaign is TwoKeyARC, ComposableAssetFactory {
 		require(_amount > 0 && prices[_tokenID][_assetContract] > 0);
 		uint256 payout = prices[_tokenID][_assetContract].mul(_amount).mul(rate);
 		require(economy.transferFrom(msg.sender, this, payout));	
-		Conversion memory c = Conversion(_from, payout, msg.sender, false, false, _tokenID, _assetContract, _amount, CampaignType.Fungible, now, now + expiryConversion days);
+		Conversion memory c = Conversion(_from, payout, msg.sender, false, false, _tokenID, _assetContract, _amount, CampaignType.Fungible, now, now + expiryConversion * 1 days);
 		// move funds
 		assetren[_tokenID][_assetContract] = 0;
 		eventSource.escrow(address(this), msg.sender, _tokenID, _assetContract, _amount, CampaignType.Fungible);	
@@ -187,11 +186,8 @@ contract TwoKeyCampaign is TwoKeyARC, ComposableAssetFactory {
 		require(_index != 0 && prices[_tokenID][assetToken] > 0);
 		uint256 payout = prices[_tokenID][assetToken].mul(rate);
 		require(economy.transferFrom(msg.sender, this, payout));	
-		Conversion memory c = Conversion(_from, payout, msg.sender, false, false, _tokenID, _assetContract, _index, CampaignType.NonFungible, now, now + expiryConversion days);
+		Conversion memory c = Conversion(_from, payout, msg.sender, false, false, _tokenID, _assetContract, _index, CampaignType.NonFungible, now, now + expiryConversion * 1 days);
 		// move funds
-		address assetToken = address(
-	      keccak256(abi.encodePacked(_assetContract, _assetTokenID))
-	    );
 		assetren[_tokenID][assetToken] = 0;
 		eventSource.escrow(esc, msg.sender, _tokenID, _assetContract, _index, CampaignType.NonFungible);
 		conversions[msg.sender] = c;
@@ -221,7 +217,7 @@ contract TwoKeyCampaign is TwoKeyARC, ComposableAssetFactory {
     function transferNonFungibleAssetTwoKeyToken(
         uint256 _tokenID,
         address _assetContract,
-        uint256 _assetTokenID) onlyApprovedConverter didConverterConvert public {
+        uint256 _assetTokenID) isWhitelistedConverter didConverterConvert public {
         c.isFulfilled = true; 
         require(transferNonFungibleAsset(msg.sender, _tokenID, _assetContract, _assetTokenID)); 
         actuallyFulfilledTwoKeyToken();               
@@ -238,7 +234,7 @@ contract TwoKeyCampaign is TwoKeyARC, ComposableAssetFactory {
     function transferFungibleAssetTwoKeyToken(
         uint256 _tokenID,
         address _assetContract,
-        uint256 _amount) onlyApprovedConverter didConverterConvert public {
+        uint256 _amount) isWhitelistedConverter didConverterConvert public {
         c.isFulfilled = true; 
         require(transferFungibleAsset(msg.sender, _tokenID, _assetContract, _amount));  
         actuallyFulfilledTwoKeyToken();                
@@ -359,12 +355,12 @@ contract TwoKeyCampaign is TwoKeyARC, ComposableAssetFactory {
 	}
 
 	// set price for fungible asset held by the campaign
-	function setPriceFungible(uint256 _tokenID, address _assetContract, uint256 _pricePerUnit) onlyOwner public {
+	function setPriceFungible(uint256 _tokenID, address _assetContract, uint256 _pricePerUnit) hasRole(ROLE_CONTROLLER) public {
 		prices[_tokenID][_assetContract] = _pricePerUnit;
 	}
 
 	// set price for a non fungible asset held by the campaign
-	function setPriceNonFungible(uint256 _tokenID, address _assetContract, uint256 _index, uint256 _pricePerUnit) onlyOwner public {
+	function setPriceNonFungible(uint256 _tokenID, address _assetContract, uint256 _index, uint256 _pricePerUnit) hasRole(ROLE_CONTROLLER) public {
 		address assetToken = address(
 	      keccak256(abi.encodePacked(_assetContract, _index))
 	    );
