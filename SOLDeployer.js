@@ -58,15 +58,17 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
         fs.mkdirSync(abiPath);
       }
       fs.writeFileSync(path.join(abiPath, 'index.js'), `module.exports = ${util.inspect(contracts, { depth: 10 })}`);
-      compressor.minify({
-        compressor: 'gcc',
-        input: path.join(abiPath, 'index.js'),
-        output: path.join(abiPath, 'index.js')
-      }).then(() => {
-        console.log('Done');
-        resolve();
-      })
-      .catch(reject);
+      // compressor.minify({
+      //   compressor: 'gcc',
+      //   input: path.join(abiPath, 'index.js'),
+      //   output: path.join(abiPath, 'index.js')
+      // }).then(() => {
+      //   console.log('Done');
+      //   resolve();
+      // })
+      // .catch(reject);
+      console.log('Done');
+      resolve();
     });
   }
 });
