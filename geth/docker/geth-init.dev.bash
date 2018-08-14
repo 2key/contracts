@@ -14,5 +14,6 @@ done
 
 
 geth --datadir=$HOME/geth/localdev --nodiscover --rpc --rpcapi "db,personal,eth,net,web3,debug" --rpccorsdomain='*' --rpcaddr="0.0.0.0" --rpcport 8545 --networkid=17 --ws --wsaddr="0.0.0.0" --wsport=8546 --wsorigins="*" --mine --minerthreads 1 --gasprice 0 --targetgaslimit 9000000 --unlock '0,1,2' --password passwords.dev
+# geth --datadir=$HOME/geth/localdev --nodiscover --rpc --rpcapi "db,personal,eth,net,web3,debug" --rpccorsdomain='*' --rpcaddr="0.0.0.0" --rpcport 8545 --networkid=17 --ws --wsaddr="0.0.0.0" --wsport=8546 --wsorigins="*" --mine --minerthreads 1 --gasprice 0 --targetgaslimit 9000000 --unlock '0,1,2' --password passwords.dev
 
 # geth --rinkeby --ws --wsaddr="0.0.0.0" --wsport=8546 --wsorigins="*" --datadir=$HOME/.rinkeby --cache 2048 --rpc --rpcapi="db,personal,eth,net,web3,debug" --rpcaddr="0.0.0.0" --rpcport=8545 --syncmode fast --rpccorsdomain="*"
