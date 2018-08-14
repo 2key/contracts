@@ -67,21 +67,21 @@ contract TwoKeyEventSource is TwoKeyTypes {
     }
 
     /// @notice Function where an admin can authorize any other person to modify allowed contracts
-    /// @param _newModifier is the address of new modifier contract / account
+    /// @param _newAddress is the address of new modifier contract / account
     /// @dev if only contract can be modifier then we'll add one more validation step
     function addAuthorizedAddress(address _newAddress) public onlyAdmin {
         require(_newAddress != address(0));
-        authorizedAddresses[_newModifier] = true;
+        authorizedAddresses[_newAddress] = true;
     }
 
     /// @notice Function to remove authorization from an modifier
-    /// @param _oldModifier is the address of modifier
+    /// @param _authorizedAddress is the address of modifier
     /// @dev checking if that address is set to true before since we'll spend 21k gas if it's already false to override that value
     function removeAuthorizedAddress(address _authorizedAddress) public onlyAdmin {
         require(_authorizedAddress != address(0));
-        require(authorizedAddresses[_oldModifier] == true);
+        require(authorizedAddresses[_authorizedAddress] == true);
 
-        authorizedAddresses[_oldModifier] = false;
+        authorizedAddresses[_authorizedAddress] = false;
     }
 
     /// @notice Function where admin can be changed
