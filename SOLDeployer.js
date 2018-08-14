@@ -5,10 +5,8 @@ const compressor = require('node-minify');
 const simpleGit = require('simple-git/promise');
 const childProcess = require('child_process');
 const moment = require('moment');
-// const rimraf = require('rimraf');
 
 const readdir = util.promisify(fs.readdir);
-const exec = util.promisify(childProcess.exec);
 const buildPath = path.join(__dirname, 'build', 'contracts');
 const abiPath = path.join(__dirname, 'build', 'sol-interface');
 const truffleTemplatePath = path.join(__dirname, 'truffle-template.js');
@@ -38,8 +36,6 @@ process.on('SIGUSR1', handleExit);
 process.on('SIGUSR2', handleExit);
 process.on('uncaughtException', handleExit);
 
-// console.log(childProcess.execSync('node_modules/.bin/truffle version').toString('utf8'));
-
 const generateSOLInterface = () => new Promise((resolve, reject) => {
   if (fs.existsSync(buildPath)) {
     const contracts = {
@@ -49,11 +45,8 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
     readdir(buildPath).then(files => {
       files.forEach(file => {
         const { abi, networks, contractName, bytecode } = JSON.parse(fs.readFileSync(path.join(buildPath, file)))
-        // if (abi.length && Object.keys(networks).length) {
         if (abi.length) {
-          // const key = Math.max.apply(null, Object.keys(networks));
-          const key = process.argv[2];
-          contracts[contractName] = { abi, address: key && networks[key] && networks[key].address, networkId: key, bytecode }
+          contracts[contractName] = { abi, networks, bytecode }
         }
       });
       if (!fs.existsSync(abiPath)) {
@@ -104,7 +97,7 @@ async function main() {
     // rimraf.sync(buildPath);
     fs.writeFileSync(truffleConfigPath, truffleConfig);
     console.time('truffle migrate');
-    const truffle = childProcess.spawn(path.join(__dirname, 'node_modules/.bin/truffle'), process.argv.slice(3));
+    const truffle = childProcess.spawn(path.join(__dirname, 'node_modules/.bin/truffle'), process.argv.slice(2));
     truffle.stdout.on('data', data => {
       console.log(data.toString('utf8'));
     });
