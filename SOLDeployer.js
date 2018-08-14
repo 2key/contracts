@@ -8,7 +8,6 @@ const moment = require('moment');
 // const rimraf = require('rimraf');
 
 const readdir = util.promisify(fs.readdir);
-const exec = util.promisify(childProcess.exec);
 const buildPath = path.join(__dirname, 'build', 'contracts');
 const abiPath = path.join(__dirname, 'build', 'sol-interface');
 const truffleTemplatePath = path.join(__dirname, 'truffle-template.js');
@@ -48,12 +47,12 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
     };
     readdir(buildPath).then(files => {
       files.forEach(file => {
-        const { abi, networks, contractName } = JSON.parse(fs.readFileSync(path.join(buildPath, file)))
+        const { abi, networks, contractName, bytecode } = JSON.parse(fs.readFileSync(path.join(buildPath, file)))
         // if (abi.length && Object.keys(networks).length) {
         if (abi.length) {
           // const key = Math.max.apply(null, Object.keys(networks));
           const key = process.argv[2];
-          contracts[contractName] = { abi, address: key && networks[key] && networks[key].address, networkId: key }
+          contracts[contractName] = { abi, address: key && networks[key] && networks[key].address, networkId: key, bytecode }
         }
       });
       if (!fs.existsSync(abiPath)) {
@@ -68,7 +67,7 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
         console.log('Done');
         resolve();
       })
-      .catch(reject);
+        .catch(reject);
     });
   }
 });
@@ -110,7 +109,7 @@ async function main() {
     });
     truffle.stderr.on('data', data => {
       console.log(data.toString('utf8'));
-      // throw new Error('truffle error');
+      throw new Error('truffle error');
     });
     truffle.on('close', async code => {
       console.timeEnd('truffle migrate');
