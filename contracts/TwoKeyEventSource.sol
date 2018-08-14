@@ -4,7 +4,6 @@ import './TwoKeyTypes.sol';
 import "./TwoKeyAdmin.sol";
 import "./GetCode.sol";
 
-
 contract TwoKeyEventSource is TwoKeyTypes {
 
     /// Events
@@ -23,7 +22,9 @@ contract TwoKeyEventSource is TwoKeyTypes {
     mapping(bytes => bool) canEmit;
 
     ///Mapping an address to boolean if allowed to modify
-    mapping(address => bool) allowedModifiers;
+    mapping(address => bool) authorizedAddresses;
+
+
 
     ///@notice Modifier which allows only admin to call a function - can be easily modified if there is going to be more admins
     modifier onlyAdmin {
@@ -32,8 +33,8 @@ contract TwoKeyEventSource is TwoKeyTypes {
     }
 
     ///@notice Modifier which allows all modifiers to update canEmit mapping - ever
-    modifier onlyAllowedModifiers {
-        require(allowedModifiers[msg.sender] == true || msg.sender == address(twoKeyAdmin));
+    modifier onlyAuthorizedAddresses {
+        require(authorizedAddresses[msg.sender] == true || msg.sender == address(twoKeyAdmin));
         _;
     }
 
@@ -49,7 +50,7 @@ contract TwoKeyEventSource is TwoKeyTypes {
     /// @param _contractAddress is actually the address of contract we'd like to allow
     /// @dev We first fetch bytes32 contract code and then update our mapping
     /// @dev only admin can call this or an authorized person
-    function addContract(address _contractAddress) public onlyAllowedModifiers {
+    function addContract(address _contractAddress) public onlyAuthorizedAddresses {
         require(_contractAddress != address(0));
         bytes memory _contractCode = GetCode.at(_contractAddress);
         canEmit[_contractCode] = true;
@@ -59,7 +60,7 @@ contract TwoKeyEventSource is TwoKeyTypes {
     /// @param _contractAddress is actually the address of contract we'd like to disable
     /// @dev We first fetch bytes32 contract code and then update our mapping
     /// @dev only admin can call this or an authorized person
-    function removeContract(address _contractAddress) public onlyAllowedModifiers {
+    function removeContract(address _contractAddress) public onlyAuthorizedAddresses {
         require(_contractAddress != address(0));
         bytes memory _contractCode = GetCode.at(_contractAddress);
         canEmit[_contractCode] = false;
@@ -68,20 +69,28 @@ contract TwoKeyEventSource is TwoKeyTypes {
     /// @notice Function where an admin can authorize any other person to modify allowed contracts
     /// @param _newModifier is the address of new modifier contract / account
     /// @dev if only contract can be modifier then we'll add one more validation step
-    function addModifier(address _newModifier) public onlyAdmin {
-        require(_newModifier != address(0));
-        allowedModifiers[_newModifier] = true;
+    function addAuthorizedAddress(address _newAddress) public onlyAdmin {
+        require(_newAddress != address(0));
+        authorizedAddresses[_newModifier] = true;
     }
 
     /// @notice Function to remove authorization from an modifier
     /// @param _oldModifier is the address of modifier
     /// @dev checking if that address is set to true before since we'll spend 21k gas if it's already false to override that value
-    function removeModifier(address _oldModifier) public onlyAdmin {
-        require(_oldModifier != address(0));
-        require(allowedModifiers[_oldModifier] == true);
+    function removeAuthorizedAddress(address _authorizedAddress) public onlyAdmin {
+        require(_authorizedAddress != address(0));
+        require(authorizedAddresses[_oldModifier] == true);
 
-        allowedModifiers[_oldModifier] = false;
+        authorizedAddresses[_oldModifier] = false;
     }
+
+    /// @notice Function where admin can be changed
+    /// @param _newAdminAddress is the address of new admin
+    /// @dev think about some security layer here
+    function changeAdmin(address _newAdminAddress) public onlyAdmin {
+        twoKeyAdmin = TwoKeyAdmin(_newAdminAddress);
+    }
+
     /// @notice Constructor during deployment of contract we need to set an admin address (means TwoKeyAdmin needs to be previously deployed)
     /// @param _twoKeyAdminAddress is the address of TwoKeyAdmin contract previously deployed
     constructor(address _twoKeyAdminAddress) public {

@@ -1,5 +1,11 @@
 pragma solidity ^0.4.24;
 
+/// The following example provides library code to access the code of another contract and load it into a bytes variable.
+/// This is not possible at all with “plain Solidity" and the idea is that assembly libraries will be used to enhance the
+/// language in such ways.
+
+/// Took from Solidity official documentation
+/// https://solidity.readthedocs.io/en/latest/assembly.html?highlight=getCode
 library GetCode {
     function at(address _addr) internal returns (bytes o_code) {
         assembly {
