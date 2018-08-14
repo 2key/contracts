@@ -108,8 +108,8 @@ contract TwoKeyEventSource is TwoKeyTypes {
     }
 
     /// @dev Only allowed contracts can call this function ---> means can emit events
-    function escrow(address _campaign, address _escrow, address _sender, uint256 _tokenID, address _childContractID, uint256 _indexOrAmount, CampaignType _type) public onlyAllowedContracts{
-    	emit Escrow(_campaign, _escrow, _sender, _tokenID, _childContractID, _indexOrAmount, _type);
+    function escrow(address _campaign, address _sender, uint256 _tokenID, address _childContractID, uint256 _indexOrAmount, CampaignType _type) public onlyAllowedContracts{
+    	emit Escrow(_campaign, _sender, _tokenID, _childContractID, _indexOrAmount, _type);
     }
 
     /// @dev Only allowed contracts can call this function ---> means can emit events
