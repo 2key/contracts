@@ -9,7 +9,7 @@ contract TwoKeyEventSource is TwoKeyTypes {
     /// Events
     event Created(address indexed _campaign, address indexed _owner);
     event Joined(address indexed _campaign, address indexed _from, address indexed _to);
-    event Escrow(address indexed _campaign, address indexed _escrow, address indexed _sender, uint256 _tokenID, address _childContractID, uint256 _indexOrAmount, CampaignType _type);
+    event Escrow(address indexed _campaign, address indexed _sender, uint256 _tokenID, address _childContractID, uint256 _indexOrAmount, CampaignType _type);
     event Rewarded(address indexed _campaign, address indexed _to, uint256 _amount);
     event Fulfilled(address indexed _campaign, address indexed _converter, uint256 indexed _tokenID, address _childContractID, uint256 _indexOrAmount, CampaignType _type);
     event Cancelled(address indexed _escrow, address indexed _converter, uint256 indexed _tokenID, address _childContractID, uint256 _indexOrAmount, CampaignType _type);
