@@ -13,7 +13,7 @@ tokenIndex - 3
 1. Deploy ERC20TokenMock - it will be the asset we play with, deployed 
 by coinbase
 2. Transfer to inventoryOwner 100000 tokens by calling transfer in ERC20TokenMock by coinbase
-3. Deploy ComposableAssetFactory by factoryCreator, set the openingTime to web3.eth.getBlock('latest').timestamp and the closing time to 30 minutes after that
+3. Deploy ComposableAssetFactory by factoryCreator, set the openingTime to web3.eth.getBlock('latest').timestamp and the closing time to 30 minutes after that, web3.eth.getBlock('latest').timestamp + 30 * 60
 
 # Test
 
