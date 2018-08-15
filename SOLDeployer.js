@@ -137,7 +137,7 @@ async function main() {
     console.timeEnd('Truffle compile');
 
     Promise.all(truffleJobs)
-      .then(() => {
+      .then(async () => {
         const solConfigJSON = JSON.parse(fs.readFileSync(path.join(abiPath, 'package.json')));
         const version = solConfigJSON.version.split('.');
         version[version.length - 1] = parseInt(version.pop(), 10) + 1
