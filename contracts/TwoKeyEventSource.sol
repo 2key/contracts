@@ -21,8 +21,12 @@ contract TwoKeyEventSource is TwoKeyTypes {
     ///Mapping contract bytecode to boolean if is allowed to emit an event
     mapping(bytes => bool) canEmit;
 
+    /// Mapping contract bytecode to enumerator CampaignType.
+    mapping(bytes => CampaignType) codeToType;
+
+
     ///Mapping an address to boolean if allowed to modify
-    mapping(address => bool) authorizedAddresses;
+    mapping(address => bool) authorizedSubadmins;
 
 
 
@@ -33,8 +37,8 @@ contract TwoKeyEventSource is TwoKeyTypes {
     }
 
     ///@notice Modifier which allows all modifiers to update canEmit mapping - ever
-    modifier onlyAuthorizedAddresses {
-        require(authorizedAddresses[msg.sender] == true || msg.sender == address(twoKeyAdmin));
+    modifier onlyAuthorizedSubadmins {
+        require(authorizedSubadmins[msg.sender] == true || msg.sender == address(twoKeyAdmin));
         _;
     }
 
@@ -50,7 +54,7 @@ contract TwoKeyEventSource is TwoKeyTypes {
     /// @param _contractAddress is actually the address of contract we'd like to allow
     /// @dev We first fetch bytes32 contract code and then update our mapping
     /// @dev only admin can call this or an authorized person
-    function addContract(address _contractAddress) public onlyAuthorizedAddresses {
+    function onlyAuthorizedSubadmins(address _contractAddress) public onlyAuthorizedSubadmins {
         require(_contractAddress != address(0));
         bytes memory _contractCode = GetCode.at(_contractAddress);
         canEmit[_contractCode] = true;
@@ -60,7 +64,7 @@ contract TwoKeyEventSource is TwoKeyTypes {
     /// @param _contractAddress is actually the address of contract we'd like to disable
     /// @dev We first fetch bytes32 contract code and then update our mapping
     /// @dev only admin can call this or an authorized person
-    function removeContract(address _contractAddress) public onlyAuthorizedAddresses {
+    function onlyAuthorizedSubadmins(address _contractAddress) public onlyAuthorizedSubadmins {
         require(_contractAddress != address(0));
         bytes memory _contractCode = GetCode.at(_contractAddress);
         canEmit[_contractCode] = false;
@@ -71,7 +75,7 @@ contract TwoKeyEventSource is TwoKeyTypes {
     /// @dev if only contract can be modifier then we'll add one more validation step
     function addAuthorizedAddress(address _newAddress) public onlyAdmin {
         require(_newAddress != address(0));
-        authorizedAddresses[_newAddress] = true;
+        authorizedSubadmins[_newAddress] = true;
     }
 
     /// @notice Function to remove authorization from an modifier
@@ -79,9 +83,18 @@ contract TwoKeyEventSource is TwoKeyTypes {
     /// @dev checking if that address is set to true before since we'll spend 21k gas if it's already false to override that value
     function removeAuthorizedAddress(address _authorizedAddress) public onlyAdmin {
         require(_authorizedAddress != address(0));
-        require(authorizedAddresses[_authorizedAddress] == true);
+        require(authorizedSubadmins[_authorizedAddress] == true);
 
-        authorizedAddresses[_authorizedAddress] = false;
+        authorizedSubadmins[_authorizedAddress] = false;
+    }
+
+    /// @notice Function to map contract code to type of campaign
+    /// @dev is contract required to be allowed to emit to even exist in mapping codeToType
+    /// @param _contractCode is code od contract
+    /// @oaram _campaignType is enumerator representing type of campaign
+    function addCampaignType(bytes _contractCode, CampaignType _campaignType) {
+        require(canEmit[_contractCode] == true); //Check if this validation is needed
+        codeToType[_contractCode] = _campaignType;
     }
 
     /// @notice Function where admin can be changed
