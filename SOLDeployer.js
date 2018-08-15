@@ -125,14 +125,17 @@ async function main() {
     fs.writeFileSync(truffleConfigPath, truffleConfig);
     const networks = process.argv[2].split(',')
     const truffleJobs = [];
-    console.log('Compiling contracts');
-    console.time('Truffle compile');
-    await runTruffle(['compile']);
-    console.timeEnd('Truffle compile');
+    const compileJobs = [];
 
     networks.forEach(network => {
+      compileJobs.push(runTruffle('compile', '--network', network].concat(process.argv.slice(3))))
       truffleJobs.push(runTruffle(['migrate', '--network', network].concat(process.argv.slice(3))))
     });
+    console.log('Compiling contracts');
+    console.time('Truffle compile');
+    await Promise.all(compileJobs);
+    console.timeEnd('Truffle compile');
+
     Promise.all(truffleJobs)
       .then(() => {
         const solConfigJSON = JSON.parse(fs.readFileSync(path.join(abiPath, 'package.json')));
