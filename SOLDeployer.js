@@ -106,7 +106,7 @@ async function main() {
   try {
     await contractsGit.fetch();
     await contractsGit.submoduleUpdate();
-    const contractsStatus = await contractsGit.status();
+    let contractsStatus = await contractsGit.status();
     let solStatus = await solGit.status();
     if (solStatus.current !== contractsStatus.current) {
       const solBranches = await solGit.branch();
@@ -136,7 +136,8 @@ async function main() {
     // const truffleJobs = [];
 
     // networks.forEach((network) => {
-    //   truffleJobs.push(runTruffle(['migrate', '--network', network].concat(process.argv.slice(3))));
+    //   truffleJobs.push(
+    //  runTruffle(['migrate', '--network', network].concat(process.argv.slice(3))));
     // });
     const l = networks.length;
     for (let i = 0; i < l; i += 1) {
@@ -144,44 +145,31 @@ async function main() {
       await runTruffle(['migrate', '--network', networks[i]].concat(process.argv.slice(3)));
       /* eslint-enable no-await-in-loop */
     }
-
-    /*     Promise.all(truffleJobs)
-      .then(async () => {
-        const solConfigJSON = JSON.parse(fs.readFileSync(path.join(abiPath, 'package.json')));
-        const version = solConfigJSON.version.split('.');
-        version[version.length - 1] = parseInt(version.pop(), 10) + 1;
-        solConfigJSON.version = version.join('.');
-        console.log('sol-interface version:', solConfigJSON.version);
-        fs.writeFileSync(path.join(abiPath, 'package.json'), JSON.stringify(solConfigJSON));
-        await generateSOLInterface();
-        contractsStatus = await contractsGit.status();
-        solStatus = await solGit.status();
-        const network = networks.join('/');
-        const now = moment();
-        const commit = `SOL Deployed to ${network} ${now.format('lll')}`;
-        const tag = `${network}-${now.format('YYYYMMDDHHmmss')}`;
-        console.log(commit, tag);
-        await solGit.add(solStatus.files.map(item => item.path));
-        await solGit.commit(commit);
-        await contractsGit.add(contractsStatus.files.map(item => item.path));
-        await contractsGit.commit(commit);
-        await solGit.addTag(tag);
-        await contractsGit.addTag(tag);
-        await solGit.push('origin', contractsStatus.current);
-        await contractsGit.push('origin', contractsStatus.current);
-        await solGit.pushTags('origin');
-        await contractsGit.pushTags('origin');
-      })
-      .catch(async (err) => {
-        console.log('Truffle Error', err);
-        await contractsGit.reset('hard');
-        await solGit.reset('hard');
-        process.exit(1);
-      })
-      .finally(() => {
-        unlinkTruffleConfig();
-      });
-    */
+    unlinkTruffleConfig();
+    const solConfigJSON = JSON.parse(fs.readFileSync(path.join(abiPath, 'package.json')));
+    const version = solConfigJSON.version.split('.');
+    version[version.length - 1] = parseInt(version.pop(), 10) + 1;
+    solConfigJSON.version = version.join('.');
+    console.log('sol-interface version:', solConfigJSON.version);
+    fs.writeFileSync(path.join(abiPath, 'package.json'), JSON.stringify(solConfigJSON));
+    await generateSOLInterface();
+    contractsStatus = await contractsGit.status();
+    solStatus = await solGit.status();
+    const network = networks.join('/');
+    const now = moment();
+    const commit = `SOL Deployed to ${network} ${now.format('lll')}`;
+    const tag = `${network}-${now.format('YYYYMMDDHHmmss')}`;
+    console.log(commit, tag);
+    await solGit.add(solStatus.files.map(item => item.path));
+    await solGit.commit(commit);
+    await contractsGit.add(contractsStatus.files.map(item => item.path));
+    await contractsGit.commit(commit);
+    await solGit.addTag(tag);
+    await contractsGit.addTag(tag);
+    await solGit.push('origin', contractsStatus.current);
+    await contractsGit.push('origin', contractsStatus.current);
+    await solGit.pushTags('origin');
+    await contractsGit.pushTags('origin');
   } catch (e) {
     if (e.output) {
       e.output.forEach((buff) => {
