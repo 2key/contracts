@@ -5,9 +5,9 @@
 var TwoKeyEconomy = artifacts.require('TwoKeyEconomy');
 
 module.exports = function (deployer) {
-  if (deployer.network.includes('dev') || deployer.network == "rinkeby-infura") {
+  if (deployer.network.startsWith('dev') || deployer.network == "rinkeby-infura") {
     deployer.deploy(TwoKeyEconomy)
-  } else if (deployer.network == "plasma") {
+  } else if (deployer.network.startsWith('plasma')) {
     var TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents')
     deployer.deploy(TwoKeyPlasmaEvents)
   }

@@ -9,7 +9,7 @@ var TwoKeyCampaign = artifacts.require('TwoKeyCampaign')
 const TwoKeyEventSource = artifacts.require('TwoKeyEventSource');
 
 module.exports = function (deployer) {
-  if (deployer.network.includes('dev')) {
+  if (deployer.network.startsWith('dev')) {
     // deploy sample contracts for type of campaign. We will use registry=0 and erc20=0 to indicate that its only a sample
     deployer.deploy(TwoKeySignedAcquisitionContract, 0, 0, 0, 0, 0, 0, 0, 0, 0, {gas: 5000000})
     deployer.deploy(TwoKeySignedPresellContract, 0, '', '', 0, 0, 0, 0, '', 0, {gas: 5000000})
