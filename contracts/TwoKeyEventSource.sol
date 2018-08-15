@@ -9,10 +9,10 @@ contract TwoKeyEventSource is TwoKeyTypes {
     /// Events
     event Created(address indexed _campaign, address indexed _owner);
     event Joined(address indexed _campaign, address indexed _from, address indexed _to);
-    event Escrow(address indexed _campaign, address indexed _sender, uint256 _tokenID, address _childContractID, uint256 _indexOrAmount, CampaignType _type);
+    event Escrow(address indexed _campaign, address indexed _converter, uint256 _tokenID, address _childContractID, uint256 _indexOrAmount, CampaignType _type);
     event Rewarded(address indexed _campaign, address indexed _to, uint256 _amount);
     event Fulfilled(address indexed _campaign, address indexed _converter, uint256 indexed _tokenID, address _childContractID, uint256 _indexOrAmount, CampaignType _type);
-    event Cancelled(address indexed _escrow, address indexed _converter, uint256 indexed _tokenID, address _childContractID, uint256 _indexOrAmount, CampaignType _type);
+    event Cancelled(address indexed _campaign, address indexed _converter, uint256 indexed _tokenID, address _childContractID, uint256 _indexOrAmount, CampaignType _type);
 
 
     ///Address of the contract admin
@@ -108,8 +108,8 @@ contract TwoKeyEventSource is TwoKeyTypes {
     }
 
     /// @dev Only allowed contracts can call this function ---> means can emit events
-    function escrow(address _campaign, address _sender, uint256 _tokenID, address _childContractID, uint256 _indexOrAmount, CampaignType _type) public onlyAllowedContracts{
-    	emit Escrow(_campaign, _sender, _tokenID, _childContractID, _indexOrAmount, _type);
+    function escrow(address _campaign, address _converter, uint256 _tokenID, address _childContractID, uint256 _indexOrAmount, CampaignType _type) public onlyAllowedContracts{
+    	emit Escrow(_campaign, _converter, _tokenID, _childContractID, _indexOrAmount, _type);
     }
 
     /// @dev Only allowed contracts can call this function ---> means can emit events
@@ -123,8 +123,8 @@ contract TwoKeyEventSource is TwoKeyTypes {
 	}
 
     /// @dev Only allowed contracts can call this function ---> means can emit events
-	function cancelled(address  _escrow, address _converter, uint256 _tokenID, address _childContractID, uint256 _indexOrAmount, CampaignType _type) public onlyAllowedContracts{
-		emit Cancelled(_escrow, _converter, _tokenID, _childContractID, _indexOrAmount, _type);
+	function cancelled(address  _campaign, address _converter, uint256 _tokenID, address _childContractID, uint256 _indexOrAmount, CampaignType _type) public onlyAllowedContracts{
+		emit Cancelled(_campaign, _converter, _tokenID, _childContractID, _indexOrAmount, _type);
 	}
 
 }
