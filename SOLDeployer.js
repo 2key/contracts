@@ -106,7 +106,7 @@ async function main() {
   try {
     await contractsGit.fetch();
     await contractsGit.submoduleUpdate();
-    let contractsStatus = await contractsGit.status();
+    const contractsStatus = await contractsGit.status();
     let solStatus = await solGit.status();
     if (solStatus.current !== contractsStatus.current) {
       const solBranches = await solGit.branch();
@@ -138,8 +138,14 @@ async function main() {
     networks.forEach((network) => {
       truffleJobs.push(runTruffle(['migrate', '--network', network].concat(process.argv.slice(3))));
     });
+    const l = networks.length;
+    for (let i = 0; i < l; i += 1) {
+      /* eslint-disable no-await-in-loop */
+      await runTruffle(['migrate', '--network', networks[i]].concat(process.argv.slice(3)));
+      /* eslint-enable no-await-in-loop */
+    }
 
-    Promise.all(truffleJobs)
+    /*     Promise.all(truffleJobs)
       .then(async () => {
         const solConfigJSON = JSON.parse(fs.readFileSync(path.join(abiPath, 'package.json')));
         const version = solConfigJSON.version.split('.');
@@ -175,6 +181,7 @@ async function main() {
       .finally(() => {
         unlinkTruffleConfig();
       });
+    */
   } catch (e) {
     if (e.output) {
       e.output.forEach((buff) => {
