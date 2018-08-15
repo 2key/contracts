@@ -81,7 +81,7 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
 });
 
 const runTruffle = args => new Promise((resolve, reject) => {
-  console.log('Run truffle migrate --network', args.join(' '));
+  console.log('Run truffle', args.join(' '));
   console.time('truffle migrate');
   const truffle = childProcess.spawn(path.join(__dirname, 'node_modules/.bin/truffle'), args);
   truffle.stdout.on('data', (data) => {
