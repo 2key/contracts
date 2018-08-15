@@ -133,11 +133,11 @@ async function main() {
     // rimraf.sync(buildPath);
     fs.writeFileSync(truffleConfigPath, truffleConfig);
     const networks = process.argv[2].split(',');
-    const truffleJobs = [];
+    // const truffleJobs = [];
 
-    networks.forEach((network) => {
-      truffleJobs.push(runTruffle(['migrate', '--network', network].concat(process.argv.slice(3))));
-    });
+    // networks.forEach((network) => {
+    //   truffleJobs.push(runTruffle(['migrate', '--network', network].concat(process.argv.slice(3))));
+    // });
     const l = networks.length;
     for (let i = 0; i < l; i += 1) {
       /* eslint-disable no-await-in-loop */
