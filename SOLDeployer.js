@@ -5,6 +5,7 @@ const compressor = require('node-minify');
 const simpleGit = require('simple-git/promise');
 const childProcess = require('child_process');
 const moment = require('moment');
+const whitelist = require('./whitelist.json');
 
 const readdir = util.promisify(fs.readdir);
 const buildPath = path.join(__dirname, 'build', 'contracts');
@@ -45,24 +46,29 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
     readdir(buildPath).then(files => {
       files.forEach(file => {
         const { abi, networks, contractName, bytecode } = JSON.parse(fs.readFileSync(path.join(buildPath, file)))
-        if (abi.length) {
-          // contracts[contractName] = { abi, networks, bytecode: Object.keys(networks).length ? undefined : bytecode }
-          contracts[contractName] = { abi, networks, bytecode }
+        if (whitelist[contractName]) {
+          contracts[contractName] = whitelist[contractName].deployed ? { abi, networks } : { abi, networks, bytecode }
         }
+        // if (abi.length) {
+          // contracts[contractName] = { abi, networks, bytecode: Object.keys(networks).length ? undefined : bytecode }
+          // contracts[contractName] = { abi, networks, bytecode }
+        // }
       });
       if (!fs.existsSync(abiPath)) {
         fs.mkdirSync(abiPath);
       }
       fs.writeFileSync(path.join(abiPath, 'index.js'), `module.exports = ${util.inspect(contracts, { depth: 10 })}`);
-      compressor.minify({
-        compressor: 'gcc',
-        input: path.join(abiPath, 'index.js'),
-        output: path.join(abiPath, 'index.js')
-      }).then(() => {
-        console.log('Done');
-        resolve();
-      })
-      .catch(reject);
+      // compressor.minify({
+      //   compressor: 'gcc',
+      //   input: path.join(abiPath, 'index.js'),
+      //   output: path.join(abiPath, 'index.js')
+      // }).then(() => {
+      //   console.log('Done');
+      //   resolve();
+      // })
+      // .catch(reject);
+      console.log('Done');
+      resolve();
     });
   }
 });
