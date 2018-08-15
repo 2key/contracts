@@ -163,7 +163,7 @@ async function main() {
         await solGit.pushTags('origin');
         await contractsGit.pushTags('origin');
       })
-      .catch(err => {
+      .catch(async err => {
         console.log('Truffle Error', err);
         await contractsGit.reset('hard');
         await solGit.reset('hard');
