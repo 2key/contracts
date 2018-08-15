@@ -73,6 +73,26 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
   }
 });
 
+const runTruffle = args => new Promise((resolve, reject) => {
+  console.time('truffle migrate');
+  const truffle = childProcess.spawn(path.join(__dirname, 'node_modules/.bin/truffle'), args);
+  truffle.stdout.on('data', data => {
+    console.log(data.toString('utf8'));
+  });
+  truffle.stderr.on('data', data => {
+    console.log(data.toString('utf8'));
+    reject('truffle error');
+  });
+  truffle.on('close', async code => {
+    console.timeEnd('truffle migrate');
+    console.log('truffle exit with code', code);
+    if (code === 0) {
+      resolve(code);
+    } else {
+      reject(code);
+    }
+});
+
 async function main() {
   try {
     await contractsGit.fetch();
@@ -103,20 +123,13 @@ async function main() {
     // Need review this
     // rimraf.sync(buildPath);
     fs.writeFileSync(truffleConfigPath, truffleConfig);
-    console.time('truffle migrate');
-    const truffle = childProcess.spawn(path.join(__dirname, 'node_modules/.bin/truffle'), process.argv.slice(2));
-    truffle.stdout.on('data', data => {
-      console.log(data.toString('utf8'));
+    const networks = process.argv[2].split(',')
+    const truffleJobs = [];
+    networks.forEach(network => {
+      truffleJobs.push(runTruffle([network].concat(process.argv.slice(3))))
     });
-    truffle.stderr.on('data', data => {
-      console.log(data.toString('utf8'));
-      throw new Error('truffle error');
-    });
-    truffle.on('close', async code => {
-      console.timeEnd('truffle migrate');
-      console.log('truffle exit with code', code);
-      unlinkTruffleConfig();
-      if (code === 0) {
+    Promise.all(truffleJobs)
+      .then(() => {
         const solConfigJSON = JSON.parse(fs.readFileSync(path.join(abiPath, 'package.json')));
         const version = solConfigJSON.version.split('.');
         version[version.length - 1] = parseInt(version.pop(), 10) + 1
@@ -126,7 +139,7 @@ async function main() {
         await generateSOLInterface();
         contractsStatus = await contractsGit.status();
         solStatus = await solGit.status();
-        const network = process.argv[process.argv.indexOf('--network') + 1];
+        const network = networks.join('/');
         const now = moment();
         const commit = `SOL Deployed to ${network} ${now.format('lll')}`
         const tag = `${network}-${now.format('YYYYMMDDHHmmss')}`;
@@ -141,13 +154,16 @@ async function main() {
         await contractsGit.push('origin', contractsStatus.current);
         await solGit.pushTags('origin');
         await contractsGit.pushTags('origin');
-      } else {
+      })
+      .catch(err => {
+        console.log('Truffle Error', err);
         await contractsGit.reset('hard');
         await solGit.reset('hard');
         process.exit(1);
-      }
-    });
-    // console.log(truffleStatus.toString('utf8'));
+      })
+      .finally(() => {
+        unlinkTruffleConfig();
+      });
   } catch (e) {
     if (e.output) {
       e.output.forEach(buff => {
