@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const util = require('util');
-const compressor = require('node-minify');
+// const compressor = require('node-minify');
 const simpleGit = require('simple-git/promise');
 const childProcess = require('child_process');
 const moment = require('moment');
@@ -20,8 +20,7 @@ const unlinkTruffleConfig = () => {
   if (fs.existsSync(truffleConfigPath)) {
     fs.unlinkSync(truffleConfigPath);
   }
-}
-
+};
 
 async function handleExit(p) {
   console.log(p);
@@ -43,32 +42,40 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
       version: Date.now(),
       date: new Date().toDateString(),
     };
-    readdir(buildPath).then(files => {
-      files.forEach(file => {
-        const { abi, networks, contractName, bytecode } = JSON.parse(fs.readFileSync(path.join(buildPath, file)))
-        if (whitelist[contractName]) {
-          contracts[contractName] = whitelist[contractName].deployed ? { abi, networks } : { abi, networks, bytecode }
-        }
-        // if (abi.length) {
-          // contracts[contractName] = { abi, networks, bytecode: Object.keys(networks).length ? undefined : bytecode }
+    readdir(buildPath).then((files) => {
+      try {
+        files.forEach((file) => {
+          const {
+            abi, networks, contractName, bytecode,
+          } = JSON.parse(fs.readFileSync(path.join(buildPath, file)));
+          if (whitelist[contractName]) {
+            contracts[contractName] = whitelist[contractName].deployed
+              ? { abi, networks } : { abi, networks, bytecode };
+          }
+          // if (abi.length) {
+          // contracts[contractName] =
+          //  { abi, networks, bytecode: Object.keys(networks).length ? undefined : bytecode }
           // contracts[contractName] = { abi, networks, bytecode }
-        // }
-      });
-      if (!fs.existsSync(abiPath)) {
-        fs.mkdirSync(abiPath);
+          // }
+        });
+        if (!fs.existsSync(abiPath)) {
+          fs.mkdirSync(abiPath);
+        }
+        fs.writeFileSync(path.join(abiPath, 'index.js'), `module.exports = ${util.inspect(contracts, { depth: 10 })}`);
+        // compressor.minify({
+        //   compressor: 'gcc',
+        //   input: path.join(abiPath, 'index.js'),
+        //   output: path.join(abiPath, 'index.js')
+        // }).then(() => {
+        //   console.log('Done');
+        //   resolve();
+        // })
+        // .catch(reject);
+        console.log('Done');
+        resolve();
+      } catch (err) {
+        reject(err);
       }
-      fs.writeFileSync(path.join(abiPath, 'index.js'), `module.exports = ${util.inspect(contracts, { depth: 10 })}`);
-      // compressor.minify({
-      //   compressor: 'gcc',
-      //   input: path.join(abiPath, 'index.js'),
-      //   output: path.join(abiPath, 'index.js')
-      // }).then(() => {
-      //   console.log('Done');
-      //   resolve();
-      // })
-      // .catch(reject);
-      console.log('Done');
-      resolve();
     });
   }
 });
@@ -76,14 +83,14 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
 const runTruffle = args => new Promise((resolve, reject) => {
   console.time('truffle migrate');
   const truffle = childProcess.spawn(path.join(__dirname, 'node_modules/.bin/truffle'), args);
-  truffle.stdout.on('data', data => {
+  truffle.stdout.on('data', (data) => {
     console.log(data.toString('utf8'));
   });
-  truffle.stderr.on('data', data => {
+  truffle.stderr.on('data', (data) => {
     console.log(data.toString('utf8'));
-    reject('truffle error');
+    reject(new Error('truffle error'));
   });
-  truffle.on('close', async code => {
+  truffle.on('close', async (code) => {
     console.timeEnd('truffle migrate');
     console.log('truffle exit with code', code);
     if (code === 0) {
@@ -91,6 +98,7 @@ const runTruffle = args => new Promise((resolve, reject) => {
     } else {
       reject(code);
     }
+  });
 });
 
 async function main() {
@@ -123,13 +131,13 @@ async function main() {
     // Need review this
     // rimraf.sync(buildPath);
     fs.writeFileSync(truffleConfigPath, truffleConfig);
-    const networks = process.argv[2].split(',')
+    const networks = process.argv[2].split(',');
     const truffleJobs = [];
     const compileJobs = [];
 
-    networks.forEach(network => {
-      compileJobs.push(runTruffle(['compile', '--network', network].concat(process.argv.slice(3))))
-      truffleJobs.push(runTruffle(['migrate', '--network', network].concat(process.argv.slice(3))))
+    networks.forEach((network) => {
+      compileJobs.push(runTruffle(['compile', '--network', network].concat(process.argv.slice(3))));
+      truffleJobs.push(runTruffle(['migrate', '--network', network].concat(process.argv.slice(3))));
     });
     console.log('Compiling contracts');
     console.time('Truffle compile');
@@ -140,7 +148,7 @@ async function main() {
       .then(async () => {
         const solConfigJSON = JSON.parse(fs.readFileSync(path.join(abiPath, 'package.json')));
         const version = solConfigJSON.version.split('.');
-        version[version.length - 1] = parseInt(version.pop(), 10) + 1
+        version[version.length - 1] = parseInt(version.pop(), 10) + 1;
         solConfigJSON.version = version.join('.');
         console.log('sol-interface version:', solConfigJSON.version);
         fs.writeFileSync(path.join(abiPath, 'package.json'), JSON.stringify(solConfigJSON));
@@ -149,7 +157,7 @@ async function main() {
         solStatus = await solGit.status();
         const network = networks.join('/');
         const now = moment();
-        const commit = `SOL Deployed to ${network} ${now.format('lll')}`
+        const commit = `SOL Deployed to ${network} ${now.format('lll')}`;
         const tag = `${network}-${now.format('YYYYMMDDHHmmss')}`;
         console.log(commit, tag);
         await solGit.add(solStatus.files.map(item => item.path));
@@ -163,7 +171,7 @@ async function main() {
         await solGit.pushTags('origin');
         await contractsGit.pushTags('origin');
       })
-      .catch(async err => {
+      .catch(async (err) => {
         console.log('Truffle Error', err);
         await contractsGit.reset('hard');
         await solGit.reset('hard');
@@ -174,7 +182,7 @@ async function main() {
       });
   } catch (e) {
     if (e.output) {
-      e.output.forEach(buff => {
+      e.output.forEach((buff) => {
         if (buff && buff.toString) {
           console.log(buff.toString('utf8'));
         }
