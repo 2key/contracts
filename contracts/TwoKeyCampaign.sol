@@ -211,132 +211,92 @@ contract TwoKeyCampaign is TwoKeyARC, ComposableAssetFactory, TwoKeyTypes {
     }
 
     /**
-     * transferNonFungibleAssetTwoKeyToken 
+     * transferAssetTwoKeyToken 
      * @param  _tokenID  sku of asset
      * @param  _assetContract erc721 representing the asset class
-     * @param  _assetTokenID  unique index of asset
+     * @param  _assetTokenIDOrAmount  unique index of asset or amount of asset
+     * @param  _type Fungible or NonFungible
      * 
      * transfer the asset to the converter,
      */
-    function transferNonFungibleAssetTwoKeyToken(
+    function transferAssetTwoKeyToken(
         uint256 _tokenID,
         address _assetContract,
-        uint256 _assetTokenID) isWhitelistedConverter didConverterConvert public {    
+        uint256 _assetTokenIDOrAmount,
+        CampaignType _type) isWhitelistedConverter didConverterConvert public {    
         actuallyFulfilledTwoKeyToken();  
-        require(transferNonFungibleAsset(msg.sender, _tokenID, _assetContract, _assetTokenID));              
+        if (_type == CampaignType.NonFungible) {
+			require(transferNonFungibleAsset(msg.sender, _tokenID, _assetContract, _assetTokenIDOrAmount));  
+        } else if (_type == CampaignType.Fungible) {
+			require(transferFungibleAsset(msg.sender, _tokenID, _assetContract, _assetTokenIDOrAmount));  
+        }
+                    
     }
 
-    /**
-     * transferFungibleAssetTwoKeyToken 
-     * @param  _tokenID  sku of asset
-     * @param  _assetContract erc20 representing the asset class
-     * @param  _amount amount of asset bought
-     * 
-     * transfer the asset to the converter,
-     */
-    function transferFungibleAssetTwoKeyToken(
-        uint256 _tokenID,
-        address _assetContract,
-        uint256 _amount) isWhitelistedConverter didConverterConvert public {
-        actuallyFulfilledTwoKeyToken(); 
-        require(transferFungibleAsset(msg.sender, _tokenID, _assetContract, _amount));                
-    }
-
-    function cancelledNonFungibleEscrow(
+    function cancelledEscrow(
     	address _converter,
         uint256 _tokenID,
         address _assetContract,
-        uint256 _assetTokenID) internal {
+        uint256 _assetTokenIDOrAmount,
+        CampaignType _type) internal {
         Conversion memory c = conversions[_converter];
         c.isCancelled = true;
         conversions[_converter] = c;
-        address assetToken = address(
-	      keccak256(abi.encodePacked(_assetContract, _assetTokenID))
-	    );
-        assets[_tokenID][assetToken] = 1;  
+        if (_type == CampaignType.NonFungible) {
+	        address assetToken = address(
+		      keccak256(abi.encodePacked(_assetContract, _assetTokenIDOrAmount))
+		    );
+	        assets[_tokenID][assetToken] = 1;          	
+        } else if (_type == CampaignType.Fungible) {
+	        assets[_tokenID][_assetContract] += _assetTokenIDOrAmount;  
+        }
+
         require(economy.transfer(_converter, (c.payout).mul(rate)));	
     }
 
-    function cancelledFungibleEscrow(
-    	address _converter,
-    	uint256 _tokenID,
-        address _assetContract,
-        uint256 _amount) internal {
-        Conversion memory c = conversions[_converter];
-        c.isCancelled = true;
-        conversions[_converter] = c;
-        assets[_tokenID][_assetContract] += _amount;  
-        require(economy.transfer(_converter, (c.payout).mul(rate)));	
-    }
 
     /**
-     * cancelNonFungibleAssetTwoKey 
+     * cancelAssetTwoKey 
      * cancels the purchase buy transfering the assets back to the campaign
      * and refunding the converter
      * @param  _tokenID  sku of asset
      * @param  _assetContract erc721 representing the asset class
-     * @param  _assetTokenID unique index of asset
+     * @param  _assetTokenIDOrAmount unique index of asset or amount of asset
+     * @param  _type NonFungible or Fungible
      * 
      */
-    function cancelNonFungibleAssetTwoKey(
+    function cancelAssetTwoKey(
         address _converter,
         uint256 _tokenID,
         address _assetContract,
-        uint256 _assetTokenID) onlyRole(ROLE_CONTROLLER) public returns (bool) {
+        uint256 _assetTokenIDOrAmount,
+        CampaignType _type) onlyRole(ROLE_CONTROLLER) public returns (bool) {
     	Conversion memory c = conversions[_converter];
 	    require(c.tokenID != 0 && !c.isCancelled && !c.isFulfilled);
-    	cancelledNonFungibleEscrow(_converter, _tokenID, _assetContract, _assetTokenID);
-        eventSource.cancelled(address(this), _converter, _tokenID, _assetContract, _assetTokenID, CampaignType.NonFungible);
+	    if (_type == CampaignType.NonFungible) {
+	    	cancelledEscrow(_converter, _tokenID, _assetContract, _assetTokenIDOrAmount, CampaignType.NonFungible);
+	        eventSource.cancelled(address(this), _converter, _tokenID, _assetContract, _assetTokenIDOrAmount, CampaignType.NonFungible);
+	    } else if (_type == CampaignType.Fungible) {
+	    	cancelledEscrow(_converter, _tokenID, _assetContract, _assetTokenIDOrAmount, CampaignType.Fungible);
+        	eventSource.cancelled(address(this), _converter, _tokenID, _assetContract, _assetTokenIDOrAmount, CampaignType.Fungible);
+	    }
         return true;
     }
 
-    /**
-     * cancelFungibleAssetTwoKey 
-     * cancels the purchase buy transfering the assets back to the campaign
-     * and refunding the converter
-     * @param  _tokenID  sku of asset
-     * @param  _assetContract erc20 representing the asset class
-     * @param  _amount amount of asset bought
-     * 
-     */
-    function cancelFungibleAssetTwoKey(
-        address _converter,
-        uint256 _tokenID,
-        address _assetContract,
-        uint256 _amount) onlyRole(ROLE_CONTROLLER) public returns (bool) {
-	    Conversion memory c = conversions[_converter];
-	    require(c.tokenID != 0 && !c.isCancelled && !c.isFulfilled);
-    	cancelledFungibleEscrow(_converter, _tokenID, _assetContract, _amount);
-        eventSource.cancelled(address(this), _converter, _tokenID, _assetContract, _amount, CampaignType.Fungible);
-        return true;
-    }
 
-    function expireEscrowNonFungible(
+    function expireEscrow(
 		address _converter,
 		uint256 _tokenID,
 		address _assetContract,
-		uint256 _assetTokenID) onlyRole(ROLE_CONTROLLER) public returns (bool){   
+		uint256 _assetTokenIDOrAmount,
+		CampaignType _type) onlyRole(ROLE_CONTROLLER) public returns (bool){   
 	    Conversion memory c = conversions[_converter];
 	    require(c.tokenID != 0 && !c.isCancelled && !c.isFulfilled);
     	require(now > c.closingTime);
-		cancelledNonFungibleEscrow(_converter, _tokenID, _assetContract, _assetTokenID);
+		cancelledEscrow(_converter, _tokenID, _assetContract, _assetTokenIDOrAmount, _type);
 		emit Expired(address(this));
 		return true;
 	}
-
-	function expireEscrowFungible(
-		address _converter,
-		uint256 _tokenID,
-		address _assetContract,
-		uint256 _amount) onlyRole(ROLE_CONTROLLER) public returns (bool) {
-	    Conversion memory c = conversions[_converter];
-	    require(c.tokenID != 0 && !c.isCancelled && !c.isFulfilled);
-    	require(now > c.closingTime);
-		cancelledFungibleEscrow(_converter, _tokenID, _assetContract, _amount);
-		emit Expired(address(this));
-		return true;
-	}
-
 
 
     /**
