@@ -128,7 +128,7 @@ async function main() {
     const compileJobs = [];
 
     networks.forEach(network => {
-      compileJobs.push(runTruffle('compile', '--network', network].concat(process.argv.slice(3))))
+      compileJobs.push(runTruffle(['compile', '--network', network].concat(process.argv.slice(3))))
       truffleJobs.push(runTruffle(['migrate', '--network', network].concat(process.argv.slice(3))))
     });
     console.log('Compiling contracts');
