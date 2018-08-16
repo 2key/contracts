@@ -7,8 +7,8 @@
     "build": "webpack",
     "dev": "webpack-dev-server",
     "deploy": "node SOLDeployer.js",
-    "geth": "cd geth && ./geth.bash",
-    "geth:stop": "./geth/stop.geth.bash"
+    "geth": "node geth/geth.js start",
+    "geth:stop": "node geth/geth.js stop"
   },
   "author": "Douglas von Kohorn",
   "license": "MIT",
@@ -53,6 +53,7 @@
     "bootstrap": "^4.1.1",
     "clipboard": "^1.7.1",
     "d3": "^3.5.17",
+    "dockerode": "^2.5.5",
     "ethereumjs-abi": "^0.6.5",
     "ethereumjs-util": "^5.2.0",
     "ethereumjs-wallet": "^0.6.0",
