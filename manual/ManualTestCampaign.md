@@ -20,11 +20,11 @@ tokenIndex - 3
 5. coinbase transfers to inventoryOwner 100000 tokens by calling transfer in ERC20TokenMock
 6. campaignCreator deploys TwoKeyCampaign, set:
   * the openingTime to web3.eth.getBlock('latest').timestamp 
-  * closing time to 2 hours after that (2 * 60)
+  * closing time to 2 hours after that, web3.eth.getBlock('latest').timestamp + 2 * 60 * 60
   * escrowPrecentage to 10
   * maxPi 30
   * rate 2 
-  * expireConversion to 20
+  * expireConversion to 20 (20 minutes)
 
 # Test
 

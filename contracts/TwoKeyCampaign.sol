@@ -151,7 +151,7 @@ contract TwoKeyCampaign is TwoKeyARC, ComposableAssetFactory, TwoKeyTypes {
 	    maxPi = _maxPi;
 
 		
-		eventSource.created(address(this), contractor);
+		// eventSource.created(address(this), contractor);
 
 	}
 
