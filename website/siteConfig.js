@@ -21,6 +21,7 @@ const users = [
 ];
 
 const siteConfig = {
+  noIndex: true,
   title: 'TwoKey documentation' /* title for your website */,
   tagline: 'Smart Contracts API Docs',
   url: 'https://2key.github.io' /* your website url */,
@@ -54,6 +55,9 @@ const siteConfig = {
     primaryColor: '#2E8555',
     secondaryColor: '#205C3B',
   },
+
+
+
 
   /* custom fonts for website */
   /*fonts: {
