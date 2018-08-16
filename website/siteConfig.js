@@ -24,7 +24,7 @@ const siteConfig = {
   title: 'TwoKey documentation' /* title for your website */,
   tagline: 'A website for testing',
   url: 'https://your-docusaurus-test-site.com' /* your website url */,
-  baseUrl: '/' /* base url for your project */,
+  baseUrl: '' /* base url for your project */,
   // For github.io type URLs, you would set the url and baseUrl like:
   //   url: 'https://facebook.github.io',
   //   baseUrl: '/test-site/',
