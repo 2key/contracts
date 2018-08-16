@@ -54,7 +54,7 @@ contract TwoKeyEventSource is TwoKeyTypes {
     /// @param _contractAddress is actually the address of contract we'd like to allow
     /// @dev We first fetch bytes32 contract code and then update our mapping
     /// @dev only admin can call this or an authorized person
-    function onlyAuthorizedSubadmins(address _contractAddress) public onlyAuthorizedSubadmins {
+    function addContract(address _contractAddress) public onlyAuthorizedSubadmins {
         require(_contractAddress != address(0));
         bytes memory _contractCode = GetCode.at(_contractAddress);
         canEmit[_contractCode] = true;
@@ -64,7 +64,7 @@ contract TwoKeyEventSource is TwoKeyTypes {
     /// @param _contractAddress is actually the address of contract we'd like to disable
     /// @dev We first fetch bytes32 contract code and then update our mapping
     /// @dev only admin can call this or an authorized person
-    function onlyAuthorizedSubadmins(address _contractAddress) public onlyAuthorizedSubadmins {
+    function removeContract(address _contractAddress) public onlyAuthorizedSubadmins {
         require(_contractAddress != address(0));
         bytes memory _contractCode = GetCode.at(_contractAddress);
         canEmit[_contractCode] = false;
@@ -91,7 +91,7 @@ contract TwoKeyEventSource is TwoKeyTypes {
     /// @notice Function to map contract code to type of campaign
     /// @dev is contract required to be allowed to emit to even exist in mapping codeToType
     /// @param _contractCode is code od contract
-    /// @oaram _campaignType is enumerator representing type of campaign
+    /// @param _campaignType is enumerator representing type of campaign
     function addCampaignType(bytes _contractCode, CampaignType _campaignType) {
         require(canEmit[_contractCode] == true); //Check if this validation is needed
         codeToType[_contractCode] = _campaignType;
@@ -102,6 +102,10 @@ contract TwoKeyEventSource is TwoKeyTypes {
     /// @dev think about some security layer here
     function changeAdmin(address _newAdminAddress) public onlyAdmin {
         twoKeyAdmin = TwoKeyAdmin(_newAdminAddress);
+    }
+
+    function checkCanEmit(bytes _contractCode) public view returns (bool) {
+        return canEmit[_contractCode];
     }
 
     /// @notice Constructor during deployment of contract we need to set an admin address (means TwoKeyAdmin needs to be previously deployed)
