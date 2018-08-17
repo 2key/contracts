@@ -18,7 +18,7 @@
 I'd suggest to make every contract in separated .sol file, not to have few contracts in same .sol file,
 because it's much easier to find and organize code structure.
 
-###Example
+### Example
 ```
 pragma solidity ^0.4.19;
 
