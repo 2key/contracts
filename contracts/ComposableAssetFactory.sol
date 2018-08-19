@@ -64,7 +64,7 @@ contract ComposableAssetFactory is RBACWithAdmin {
   mapping(uint256 => mapping(address => uint256)) assets;
 
   constructor(uint256 _openingTime, uint256 _closingTime) RBACWithAdmin() public {
-    require(_openingTime >= block.timestamp);
+    require(_openingTime >= now);
     require(_closingTime >= _openingTime);    
     openingTime = _openingTime;
     closingTime = _closingTime;
