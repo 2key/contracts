@@ -1,4 +1,4 @@
-const { increaseTime, latestTime, duration } = require("./utils");
+const { latestTime, duration } = require("./utils");
 require('truffle-test-utils').init();
 
 const HOUR = 3600;
@@ -24,16 +24,19 @@ contract('ComposableAssetFactory', async (accounts) => {
 
 
     before(async () => {
-
+        console.log("Hello1");
         erc721 = await ERC721Mock.new("NFT", "NFT");
+        console.log("Hello2");
         erc20 = await ERC20Mock.new();
 
+        // New constructor needs only opening and closing time, duration is sufficient
         const openingTime = latestTime() + duration.minutes(1);
-        const durationCampaign = duration.minutes(30);
+        const closingTime = openingTime + duration.minutes(30);
 
-        factory = await ComposableAssetFactory.new(openingTime, durationCampaign, {
+        factory = await ComposableAssetFactory.new(openingTime, closingTime, {
             from: factoryCreator
         });
+
     });
 
     it("add fungible asset", async () => {
@@ -43,7 +46,7 @@ contract('ComposableAssetFactory', async (accounts) => {
             from: coinbase
         });
 
-        let bal = await erc20.balanceOf(inventoryOwner);
+        let bal = await erc20.balanceOf(inventoryOwner, {from: coinbase});
         assert.equal(bal.toNumber(), 200, 'nothing tranferred to inventoryOwner');
 
         await erc20.approve(factory.address, 8, {
@@ -53,8 +56,10 @@ contract('ComposableAssetFactory', async (accounts) => {
         let allow = await erc20.allowance(inventoryOwner, factory.address);
         assert.equal(allow.toNumber(), 8, 'allowance factory not set properly');
 
+        console.log("TOKEN IDFT: " + tokenIDFT);
+        console.log("ADDRESS" + erc20.address);
 
-        await factory.addFungibleChild(tokenIDFT, erc20.address, 5, {
+        await factory.addFungibleAsset(tokenIDNFT, erc20.address, 5, {
             from:  inventoryOwner
         });
 
@@ -75,7 +80,7 @@ contract('ComposableAssetFactory', async (accounts) => {
         assert.equal(initialBalanceTarget.toNumber(), 0, 'target has some balance');
 
 
-        await factory.transferFungibleChild(target, tokenIDFT, erc20.address, 3, {
+        await factory.transferFungibleAsset(target, tokenIDFT, erc20.address, 3, {
             from: factoryCreator
         });
 

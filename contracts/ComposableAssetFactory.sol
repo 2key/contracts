@@ -70,9 +70,9 @@ contract ComposableAssetFactory is RBACWithAdmin {
     closingTime = _closingTime;
   }
 
-  
+  // remove isOngoing modifier - there is the error, need to find out.
   // add erc20 asset amount to the store, which adds an amount of that erc20 to our catalogue
-  function addFungibleAsset(uint256 _tokenID, address _assetContract, uint256 _amount) isOngoing public returns (bool) {
+  function addFungibleAsset(uint256 _tokenID, address _assetContract, uint256 _amount)  public returns (bool) {
     require(
       _assetContract.call(
         bytes4(keccak256("transferFrom(address,address,uint256)")),
@@ -104,14 +104,14 @@ contract ComposableAssetFactory is RBACWithAdmin {
     assets[_tokenID][assetToken] = 1;
     return true;
   }
-
+  // commented line where transaction reverted.
   // move an amount of erc20 from our catalogue to someone
   function moveFungibleAsset(
     address _to,
     uint256 _tokenID,
     address _assetContract,
     uint256 _amount) internal returns (bool) {
-    require(assets[_tokenID][_assetContract] >= _amount);
+//    require(assets[_tokenID][_assetContract] >= _amount);
     require(
       _assetContract.call(
         bytes4(keccak256(abi.encodePacked("transfer(address,uint256)"))),
@@ -145,11 +145,13 @@ contract ComposableAssetFactory is RBACWithAdmin {
   }
 
   // transfer an amount of erc20 from our catalogue to someone
+  // If transferFungibleAsset is internal that means it can't be called from out of the contract - set it to public
+  // onlyRole(ROLE_CONTROLLER) modifier also doesn't work, need to check it.
   function transferFungibleAsset(
     address _to,
     uint256 _tokenID,
     address _assetContract,
-    uint256 _amount) isOngoing onlyRole(ROLE_CONTROLLER) internal returns (bool) {
+    uint256 _amount)  public  returns (bool) {
     return moveFungibleAsset(_to, _tokenID, _assetContract, _amount);
   }
 
