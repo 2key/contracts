@@ -9,4 +9,7 @@ contract('TestTwoKeyEconomy', async (accounts) => {
         let initialBalance = await economy.balanceOf(accounts[0]);
         assert.equal(initialBalance, expected, 'Owner should have 1000000000000000000000000000 Coin initially');
     });
+
+
+
 });

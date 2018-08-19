@@ -1,14 +1,14 @@
 #!/bin/bash
 echo "Starting GETH"
-if [ ! -d /root/.ethereum/keystore ]; then
-	echo "/root/.ethereum/keystore not found, running 'geth init'..."
-	geth init /root/genesis.json
+if [ ! -d /geth/data/keystore ]; then
+	echo "/geth/data/keystore not found, running 'geth init'..."
+	geth init --datadir=/geth/data /opt/geth/genesis.json
 	echo "...done!"
 
 	for i in {1..3}
 	do 
 		echo "GENERATIONG KEY "$i" ON DEVNET"
-		geth account import --password /root/passwords <(sed -n "$i"p /root/key.prv)
+		geth --datadir=/geth/data account import --password /opt/geth/passwords <(sed -n "$i"p /opt/geth/key.prv)
 	done
 fi
 
