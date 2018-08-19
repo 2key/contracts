@@ -46,7 +46,10 @@ contract TwoKeyCampaignCrowdsale is TwoKeyCampaign, Crowdsale {
 
   	// buy product with twokey token
 	function buyFromWithTwoKey(address _from, uint256 _tokenID, address _assetContract, uint256 _amountOrIndex) public payable {
-	    buyTokens.value(msg.value)(address(this));
+	    // requires an exchange to work because the buyer pays with TwoKey and we 
+	    // need to transfer ETH to campaign
+	    // so this function is not usable in the present form
+	    buyTokens(address(this));
 	    require(addFungibleAsset(_tokenID, _assetContract, _amountOrIndex));
 	    super.buyFromWithTwoKey(_from, _tokenID, _assetContract, _amountOrIndex, CampaignType.Fungible);
 	}	

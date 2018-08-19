@@ -45,7 +45,7 @@ contract TwoKeyCampaignETHCrowdsale is TwoKeyCampaignETH, Crowdsale {
 
 	// buy product with ETH 
 	function buyFromWithETH(address _from, uint256 _tokenID, address _assetContract, uint256 _amountOrIndex) public payable {
-	    buyTokens.value(msg.value)(address(this));
+	    buyTokens(address(this));
 	    require(addFungibleAsset(_tokenID, _assetContract, _amountOrIndex));	    
 	    buyFromWithETH(_from, _tokenID, _assetContract, _amountOrIndex, CampaignType.Fungible); 
 	}	
