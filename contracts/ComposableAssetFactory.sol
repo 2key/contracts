@@ -19,7 +19,7 @@ contract ComposableAssetFactory is RBACWithAdmin {
   uint256 private closingTime;
 
   modifier isOngoing() {
-    require(now >= openingTime && now <= closingTime);
+    require(block.timestamp >= openingTime && block.timestamp <= closingTime);
     _;
   }
 
@@ -70,9 +70,10 @@ contract ComposableAssetFactory is RBACWithAdmin {
     closingTime = _closingTime;
   }
 
+
   // remove isOngoing modifier - there is the error, need to find out.
   // add erc20 asset amount to the store, which adds an amount of that erc20 to our catalogue
-  function addFungibleAsset(uint256 _tokenID, address _assetContract, uint256 _amount)  public returns (bool) {
+  function addFungibleAsset(uint256 _tokenID, address _assetContract, uint256 _amount) isOngoing public returns (bool) {
     require(
       _assetContract.call(
         bytes4(keccak256("transferFrom(address,address,uint256)")),

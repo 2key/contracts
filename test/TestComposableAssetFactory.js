@@ -24,14 +24,15 @@ contract('ComposableAssetFactory', async (accounts) => {
 
 
     before(async () => {
-        console.log("Hello1");
         erc721 = await ERC721Mock.new("NFT", "NFT");
-        console.log("Hello2");
         erc20 = await ERC20Mock.new();
 
         // New constructor needs only opening and closing time, duration is sufficient
-        const openingTime = latestTime() + duration.minutes(1);
+        const openingTime = latestTime();
         const closingTime = openingTime + duration.minutes(30);
+
+        console.log("Opening time : " + openingTime);
+        console.log("Closing time : " + closingTime);
 
         factory = await ComposableAssetFactory.new(openingTime, closingTime, {
             from: factoryCreator
@@ -56,8 +57,6 @@ contract('ComposableAssetFactory', async (accounts) => {
         let allow = await erc20.allowance(inventoryOwner, factory.address);
         assert.equal(allow.toNumber(), 8, 'allowance factory not set properly');
 
-        console.log("TOKEN IDFT: " + tokenIDFT);
-        console.log("ADDRESS" + erc20.address);
 
         await factory.addFungibleAsset(tokenIDNFT, erc20.address, 5, {
             from:  inventoryOwner
@@ -70,7 +69,15 @@ contract('ComposableAssetFactory', async (accounts) => {
         let balinventoryOwner = await erc20.balanceOf(inventoryOwner);
         assert.equal(balinventoryOwner.toNumber(), 195, 'balance inventoryOwner not really changed by factoryCreator');
 
+    });
 
+    it("should return role of the address" , async() => {
+        try {
+            let isAdmin = await factory.checkRole(factoryCreator, "admin");
+            let isController = await factory.checkRole(factoryCreator, "controller");
+        } catch (error) {
+            console.log("Transaction reverts because this address : ["+factoryCreator+"] doesn't have any role.");
+        }
     });
 
     it("transfer fungible asset", async () => {
