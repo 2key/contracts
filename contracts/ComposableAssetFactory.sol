@@ -8,8 +8,6 @@ import './RBACWithAdmin.sol';
 
 contract ComposableAssetFactory is RBACWithAdmin { 
 
-
-
   event Expired(address indexed _contract);
 
   using SafeMath for uint256;
@@ -63,7 +61,7 @@ contract ComposableAssetFactory is RBACWithAdmin {
   //
   mapping(uint256 => mapping(address => uint256)) assets;
 
-  constructor(uint256 _openingTime, uint256 _closingTime) public {
+  constructor(uint256 _openingTime, uint256 _closingTime) RBACWithAdmin() public {
     require(_openingTime >= now);
     require(_closingTime >= _openingTime);    
     openingTime = _openingTime;
@@ -152,7 +150,7 @@ contract ComposableAssetFactory is RBACWithAdmin {
     address _to,
     uint256 _tokenID,
     address _assetContract,
-    uint256 _amount)  public  returns (bool) {
+    uint256 _amount)  public returns (bool) {
     return moveFungibleAsset(_to, _tokenID, _assetContract, _amount);
   }
 

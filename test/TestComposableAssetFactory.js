@@ -74,10 +74,12 @@ contract('ComposableAssetFactory', async (accounts) => {
     it("should return role of the address" , async() => {
         try {
             let isAdmin = await factory.checkRole(factoryCreator, "admin");
-            let isController = await factory.checkRole(factoryCreator, "controller");
         } catch (error) {
-            console.log("Transaction reverts because this address : ["+factoryCreator+"] doesn't have any role.");
+            console.log("Transaction reverts because this address : ["+factoryCreator+"] doesn't have admin role.");
         }
+
+        let isAdmin = await factory.hasRole(factoryCreator, "admin");
+        assert.equal(isAdmin, true, "should be the admin");
     });
 
     it("transfer fungible asset", async () => {
