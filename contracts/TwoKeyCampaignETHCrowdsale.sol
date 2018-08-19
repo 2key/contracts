@@ -1,27 +1,19 @@
 pragma solidity ^0.4.24; 
 
 import './openzeppelin-solidity/contracts/math/SafeMath.sol';
+import './openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol';
 
-import './CrowdsaleWithTwoKey.sol';
 import './TwoKeyCampaignETH.sol';
 import './TwoKeyReg.sol';
 import './TwoKeyEconomy.sol';
 import './TwoKeyWhitelisted.sol';
 import './TwoKeyEventSource.sol';
 
-contract TwoKeyCampaignETHCrowdsale is TwoKeyCampaignETH {
+contract TwoKeyCampaignETHCrowdsale is TwoKeyCampaignETH, Crowdsale {
 
 	using SafeMath for uint256;
 
-	CrowdsaleWithTwoKey crowdsale;
-
-	uint256 bonus;
-
-
 	constructor(
-		uint256 _bonus,
-		CrowdsaleWithTwoKey _crowdsale,
-
 		TwoKeyEventSource _eventSource,
 		TwoKeyEconomy _economy,
 		TwoKeyWhitelisted _whitelistInfluencer,
@@ -49,15 +41,13 @@ contract TwoKeyCampaignETHCrowdsale is TwoKeyCampaignETH {
 		_escrowPrecentage,
 		_rate,
 		_maxPi) public {
-		bonus = _bonus;
-		crowdsale = _crowdsale;
 	}
 
 	// buy product with ETH 
 	function buyFromWithETH(address _from, uint256 _tokenID, address _assetContract, uint256 _amountOrIndex) public payable {
-	    crowdsale.buyTokens.value(msg.value)(address(this));
-	    require(addFungibleAsset(_tokenID, _assetContract, _amountOrIndex.mul(bonus)));	    
-	    buyFromWithETH(_from, _tokenID, _assetContract, _amountOrIndex); 
+	    buyTokens.value(msg.value)(address(this));
+	    require(addFungibleAsset(_tokenID, _assetContract, _amountOrIndex));	    
+	    buyFromWithETH(_from, _tokenID, _assetContract, _amountOrIndex, CampaignType.Fungible); 
 	}	
 
 }
