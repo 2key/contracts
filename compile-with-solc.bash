@@ -1,3 +1,3 @@
 #!/bin/bash
 
-solc --bin --abi -o ./solcoutput ./contracts/*.sol
+solc --overwrite --bin --abi -o ./solcoutput ./contracts/*.sol

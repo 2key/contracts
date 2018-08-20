@@ -9,12 +9,12 @@ const whitelist = require('./whitelist.json');
 
 const readdir = util.promisify(fs.readdir);
 const buildPath = path.join(__dirname, 'build', 'contracts');
-const abiPath = path.join(__dirname, 'build', 'sol-interface');
+const twoKeyProtocolDir = path.join(__dirname, 'build', '2key-protocol');
 const truffleTemplatePath = path.join(__dirname, 'truffle-template.js');
 const truffleConfigPath = path.join(__dirname, 'truffle.js');
 
 const contractsGit = simpleGit();
-const solGit = simpleGit(abiPath);
+const twoKeyProtocolGit = simpleGit(twoKeyProtocolDir);
 
 const unlinkTruffleConfig = () => {
   if (fs.existsSync(truffleConfigPath)) {
@@ -26,7 +26,7 @@ async function handleExit(p) {
   console.log(p);
   unlinkTruffleConfig();
   await contractsGit.reset('hard');
-  await solGit.reset('hard');
+  await twoKeyProtocolGit.reset('hard');
   process.exit();
 }
 
@@ -58,15 +58,19 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
           // contracts[contractName] = { abi, networks, bytecode }
           // }
         });
-        if (!fs.existsSync(abiPath)) {
-          fs.mkdirSync(abiPath);
+        if (!fs.existsSync(twoKeyProtocolDir)) {
+          fs.mkdirSync(twoKeyProtocolDir);
         }
-        fs.writeFileSync(path.join(abiPath, 'index.js'), `module.exports = ${util.inspect(contracts, { depth: 10 })}`);
-        fs.writeFileSync(path.join(abiPath, 'abi.json'), JSON.stringify(contracts));
+        const twoKeyProtocolSrcDir = path.join(twoKeyProtocolDir, 'src');
+        if (!fs.existsSync(twoKeyProtocolSrcDir)) {
+          fs.mkdirSync(twoKeyProtocolSrcDir);
+        }
+        fs.writeFileSync(path.join(twoKeyProtocolSrcDir, 'contracts.ts'), `export default ${util.inspect(contracts, { depth: 10 })}`);
+        fs.writeFileSync(path.join(twoKeyProtocolSrcDir, 'abi.json'), JSON.stringify(contracts));
         // compressor.minify({
         //   compressor: 'gcc',
-        //   input: path.join(abiPath, 'index.js'),
-        //   output: path.join(abiPath, 'index.js')
+        //   input: path.join(twoKeyProtocolDir, 'index.js'),
+        //   output: path.join(twoKeyProtocolDir, 'index.js')
         // }).then(() => {
         //   console.log('Done');
         //   resolve();
@@ -108,20 +112,20 @@ async function main() {
     await contractsGit.fetch();
     await contractsGit.submoduleUpdate();
     let contractsStatus = await contractsGit.status();
-    let solStatus = await solGit.status();
-    if (solStatus.current !== contractsStatus.current) {
-      const solBranches = await solGit.branch();
-      if (solBranches.all.find(item => item.includes(contractsStatus.current))) {
-        await solGit.checkout(contractsStatus.current);
+    let twoKeyProtocolStatus = await twoKeyProtocolGit.status();
+    if (twoKeyProtocolStatus.current !== contractsStatus.current) {
+      const twoKeyProtocolBranches = await twoKeyProtocolGit.branch();
+      if (twoKeyProtocolBranches.all.find(item => item.includes(contractsStatus.current))) {
+        await twoKeyProtocolGit.checkout(contractsStatus.current);
       } else {
-        await solGit.checkoutLocalBranch(contractsStatus.current);
+        await twoKeyProtocolGit.checkoutLocalBranch(contractsStatus.current);
       }
     }
     await contractsGit.submoduleUpdate();
-    await solGit.reset('hard');
-    solStatus = await solGit.status();
+    await twoKeyProtocolGit.reset('hard');
+    twoKeyProtocolStatus = await twoKeyProtocolGit.status();
     const localChanges = contractsStatus.files
-      .filter(item => !(item.path.includes('build/sol-interface')
+      .filter(item => !(item.path.includes('build/2key-protocol')
         || (process.env.NODE_ENV === 'development' && item.path.includes(process.argv[1].split('/').pop()))));
     if (contractsStatus.behind || localChanges.length) {
       console.log('You have unsynced changes!', localChanges);
@@ -147,29 +151,29 @@ async function main() {
       /* eslint-enable no-await-in-loop */
     }
     unlinkTruffleConfig();
-    const solConfigJSON = JSON.parse(fs.readFileSync(path.join(abiPath, 'package.json')));
-    const version = solConfigJSON.version.split('.');
+    const twoKeyProtocolPackageJson = JSON.parse(fs.readFileSync(path.join(twoKeyProtocolDir, 'package.json')));
+    const version = twoKeyProtocolPackageJson.version.split('.');
     version[version.length - 1] = parseInt(version.pop(), 10) + 1;
-    solConfigJSON.version = version.join('.');
-    console.log('sol-interface version:', solConfigJSON.version);
-    fs.writeFileSync(path.join(abiPath, 'package.json'), JSON.stringify(solConfigJSON));
+    twoKeyProtocolPackageJson.version = version.join('.');
+    console.log('2key-protocol version:', twoKeyProtocolPackageJson.version);
+    fs.writeFileSync(path.join(twoKeyProtocolDir, 'package.json'), JSON.stringify(twoKeyProtocolPackageJson));
     await generateSOLInterface();
     contractsStatus = await contractsGit.status();
-    solStatus = await solGit.status();
+    twoKeyProtocolStatus = await twoKeyProtocolGit.status();
     const network = networks.join('/');
     const now = moment();
     const commit = `SOL Deployed to ${network} ${now.format('lll')}`;
     const tag = `${network}-${now.format('YYYYMMDDHHmmss')}`;
     console.log(commit, tag);
-    await solGit.add(solStatus.files.map(item => item.path));
-    await solGit.commit(commit);
+    await twoKeyProtocolGit.add(twoKeyProtocolStatus.files.map(item => item.path));
+    await twoKeyProtocolGit.commit(commit);
     await contractsGit.add(contractsStatus.files.map(item => item.path));
     await contractsGit.commit(commit);
-    await solGit.addTag(tag);
+    await twoKeyProtocolGit.addTag(tag);
     await contractsGit.addTag(tag);
-    await solGit.push('origin', contractsStatus.current);
+    await twoKeyProtocolGit.push('origin', contractsStatus.current);
     await contractsGit.push('origin', contractsStatus.current);
-    await solGit.pushTags('origin');
+    await twoKeyProtocolGit.pushTags('origin');
     await contractsGit.pushTags('origin');
   } catch (e) {
     if (e.output) {
