@@ -10,6 +10,7 @@ const React = require('react');
 const Metadata = require('../../core/Metadata.js');
 const CompLibrary = require('../../core/CompLibrary.js');
 const DocsSidebar = require('../../core/DocsSidebar.js');
+const DocsLayout = require('../../core/DocsLayout.js');
 const MarkdownBlock = CompLibrary.MarkdownBlock; /* Used to read markdown */
 const Container = CompLibrary.Container;
 const GridBlock = CompLibrary.GridBlock;
@@ -27,6 +28,8 @@ function docUrl(doc, language) {
 function pageUrl(page, language) {
   return siteConfig.baseUrl + (language ? language + '/' : '') + page;
 }
+
+console.log(Metadata['BasicStorage']);
 
 class Button extends React.Component {
   render() {
@@ -197,10 +200,7 @@ class Index extends React.Component {
     let language = this.props.language || '';
     return (
       <div>
-        <HomeSplash language={language} />
-        <div className="mainContainer">
-          {/* <DocsSidebar /> */}
-        </div>
+        <DocsSidebar metadata={Metadata['BasicStorage']} />
       </div>
     );
   }
