@@ -7,7 +7,9 @@
 
 const React = require('react');
 
+const Metadata = require('../../core/Metadata.js');
 const CompLibrary = require('../../core/CompLibrary.js');
+const DocsSidebar = require('../../core/DocsSidebar.js');
 const MarkdownBlock = CompLibrary.MarkdownBlock; /* Used to read markdown */
 const Container = CompLibrary.Container;
 const GridBlock = CompLibrary.GridBlock;
@@ -76,14 +78,8 @@ class HomeSplash extends React.Component {
     let language = this.props.language || '';
     return (
       <SplashContainer>
-        <Logo img_src={imgUrl('2key_logo.png')} />
         <div className="inner">
           <ProjectTitle />
-          <PromoSection>
-            <Button href="#try">Try It Out</Button>
-            <Button href={docUrl('doc1.html', language)}>Example Link</Button>
-            <Button href={docUrl('doc2.html', language)}>Example Link 2</Button>
-          </PromoSection>
         </div>
       </SplashContainer>
     );
@@ -199,17 +195,11 @@ const Showcase = props => {
 class Index extends React.Component {
   render() {
     let language = this.props.language || '';
-
     return (
       <div>
         <HomeSplash language={language} />
         <div className="mainContainer">
-          <Features />
-          <FeatureCallout />
-          <LearnHow />
-          <TryOut />
-          <Description />
-          <Showcase language={language} />
+          {/* <DocsSidebar /> */}
         </div>
       </div>
     );
