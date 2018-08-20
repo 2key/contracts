@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24; 
 
-import './openzeppelin-solidity/contracts/math/SafeMath.sol';
-import './openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol';
+import '../openzeppelin-solidity/contracts/math/SafeMath.sol';
+import '../openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol';
 
 import './TwoKeyCampaignETH.sol';
 import './TwoKeyReg.sol';
