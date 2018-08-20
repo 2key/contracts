@@ -62,6 +62,7 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
           fs.mkdirSync(abiPath);
         }
         fs.writeFileSync(path.join(abiPath, 'index.js'), `module.exports = ${util.inspect(contracts, { depth: 10 })}`);
+        fs.writeFileSync(path.join(abiPath, 'abi.json'), JSON.stringify(contracts));
         // compressor.minify({
         //   compressor: 'gcc',
         //   input: path.join(abiPath, 'index.js'),
