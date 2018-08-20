@@ -13,8 +13,8 @@ const users = [
   {
     caption: 'User1',
     // You will need to prepend the image path with your baseUrl
-    // if it is not '/', like: '/test-site/img/docusaurus.svg'.
-    image: '/img/docusaurus.svg',
+    // if it is not '/', like: '/test-site/img/2key_logo.png'.
+    image: '/img/2key_logo.png',
     infoLink: 'https://www.facebook.com',
     pinned: true,
   },
@@ -46,8 +46,8 @@ const siteConfig = {
   users,
 
   /* path to images for header/footer */
-  headerIcon: 'img/docusaurus.svg',
-  footerIcon: 'img/docusaurus.svg',
+  headerIcon: 'img/2key_logo.png',
+  footerIcon: 'img/2key_logo.png',
   favicon: 'img/favicon.png',
 
   /* colors for website */
