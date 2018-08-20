@@ -9,23 +9,21 @@
 // site configuration options.
 
 /* List of projects/orgs using your project for the users page */
-const users = [
-  {
-    caption: 'User1',
-    // You will need to prepend the image path with your baseUrl
-    // if it is not '/', like: '/test-site/img/2key_logo.png'.
-    image: '/img/2key_logo.png',
-    infoLink: 'https://www.facebook.com',
-    pinned: true,
-  },
-];
+const users = [{
+  caption: 'User1',
+  // You will need to prepend the image path with your baseUrl
+  // if it is not '/', like: '/test-site/img/2key_logo.png'.
+  image: '/img/2key_logo.png',
+  infoLink: 'https://www.facebook.com',
+  pinned: true,
+}, ];
 
 const siteConfig = {
   noIndex: true,
-  title: 'TwoKey documentation' /* title for your website */,
+  title: 'TwoKey documentation' /* title for your website */ ,
   tagline: 'Smart Contracts API Docs',
-  url: 'https://2key.github.io' /* your website url */,
-  baseUrl: '/contracts/' /* base url for your project */,
+  url: 'https://2key.github.io' /* your website url */ ,
+  baseUrl: '/contracts/' /* base url for your project */ ,
   // For github.io type URLs, you would set the url and baseUrl like:
   //   url: 'https://facebook.github.io',
   //   baseUrl: '/test-site/',
@@ -38,9 +36,10 @@ const siteConfig = {
   //   organizationName: 'JoelMarcey'
 
   // For no header links in the top nav bar -> headerLinks: [],
-  headerLinks: [
-      {doc: 'BasicStorage', label: 'Docs'}
-  ],
+  headerLinks: [{
+    doc: 'BasicStorage',
+    label: 'Docs'
+  }],
 
   // If you have users set above, you add it here:
   users,
@@ -72,8 +71,7 @@ const siteConfig = {
   },*/
 
   // This copyright info is used in /core/Footer.js and blog rss/atom feeds.
-  copyright:
-    'Copyright © ' +
+  copyright: 'Copyright © ' +
     new Date().getFullYear() +
     ' 2key',
 
@@ -94,7 +92,7 @@ const siteConfig = {
 
   // You may provide arbitrary config keys to be used as needed by your
   // template. For example, if you need your repo's URL...
-  //   repoUrl: 'https://github.com/facebook/test-site',
+  repoUrl: 'https://github.com/2key/contracts',
 };
 
 module.exports = siteConfig;
