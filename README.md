@@ -1,3 +1,9 @@
+#### Github Pages Site
+https://2key.github.io/contracts/docs/BasicStorage.html
+
+__very important__ this site is a public, do not pass it to anyone outside of twokey.
+
+
 ## Install
 
 on osx:
