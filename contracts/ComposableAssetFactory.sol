@@ -72,9 +72,6 @@ contract ComposableAssetFactory is RBACWithAdmin {
   // remove isOngoing modifier - there is the error, need to find out.
   // add erc20 asset amount to the store, which adds an amount of that erc20 to our catalogue
   function addFungibleAsset(uint256 _tokenID, address _assetContract, uint256 _amount) isOngoing public returns (bool) {
-    // set as asset
-    assets[_tokenID][_assetContract] += _amount;
-
     require(
       _assetContract.call(
         bytes4(keccak256("transferFrom(address,address,uint256)")),
@@ -83,17 +80,15 @@ contract ComposableAssetFactory is RBACWithAdmin {
         _amount
       )
     );
+
+    // set as asset
+    assets[_tokenID][_assetContract] += _amount;
+
     return true;
   }
 
   // add erc721 asset to the store, which adds a particular unique item from that erc721 to our catalogue
   function addNonFungibleAsset(uint256 _tokenID, address _assetContract, uint256 _index) isOngoing public returns (bool) {
-    address assetToken = address(
-      keccak256(abi.encodePacked(_assetContract, _index))
-    );
-
-    // set as asset
-    assets[_tokenID][assetToken] = 1;
     require(
       _assetContract.call(
         bytes4(keccak256("transferFrom(address,address,uint256)")),
@@ -101,6 +96,13 @@ contract ComposableAssetFactory is RBACWithAdmin {
         _index
       )
     );
+
+    // set as asset
+    address assetToken = address(
+      keccak256(abi.encodePacked(_assetContract, _index))
+    );
+    assets[_tokenID][assetToken] = 1;
+
     return true;
   }
   // commented line where transaction reverted.
