@@ -1,5 +1,18 @@
 #### Github Pages Site
-https://2key.github.io/contracts/docs/BasicStorage.html
+https://2key.github.io/contracts/
+
+in order to run the docs site locally, run the following command (cwd = project folder):
+```
+(cd ./docs/website && npm install && npm start)
+```
+
+in order to update the docs manually, run the following command (cwd = project folder):
+
+```
+solidity-docgen ./ ./contracts ./docs
+```
+
+all docusaurus related files are under the docs subfolder.
 
 __very important__ this site is a public, do not pass it to anyone outside of twokey.
 
