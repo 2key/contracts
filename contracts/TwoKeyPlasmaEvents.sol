@@ -1,5 +1,5 @@
 pragma solidity ^0.4.24; //We have to specify what version of compiler this code will use
-import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "./openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 contract TwoKeyPlasmaEvents is Ownable {
 
