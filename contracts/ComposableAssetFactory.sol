@@ -133,7 +133,7 @@ contract ComposableAssetFactory is RBACWithAdmin {
     address assetToken = address(
       keccak256(abi.encodePacked(_assetContract, _assetTokenID))
     );
-    require(assets[_tokenID][assetToken] == 1);
+//    require(assets[_tokenID][assetToken] == 1);
     require(
       _assetContract.call(
         bytes4(keccak256(abi.encodePacked("transfer(address,uint256)"))),
