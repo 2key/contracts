@@ -119,13 +119,19 @@ contract TwoKeyCampaign is TwoKeyARC, ComposableAssetFactory, TwoKeyTypes {
 		uint256 _rate,
 		uint256 _maxPi) TwoKeyARC(_eventSource, _contractor) ComposableAssetFactory(_openingTime, _closingTime) StandardToken() public {
 
+
+		/// requires that all contracts from constructor are already deployed
 		require(_eventSource != address(0));
 		require(_economy != address(0));
 		require(_whitelistInfluencer != address(0));
 		require(_whitelistConverter != address(0));
+
+		/// uint values
 		require(_rate > 0);
 		require(_maxPi > 0);
 
+		/// adminAddRole can only be called from the address which is already admin, meaning address of this contract need to be an admin
+		/// This can revert transaction
 		adminAddRole(msg.sender, ROLE_CONTROLLER);
 		adminAddRole(_contractor, ROLE_CONTROLLER);
 		adminAddRole(_moderator, ROLE_CONTROLLER);
