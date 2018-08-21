@@ -15,8 +15,12 @@ contract TwoKeyEventSource is TwoKeyTypes {
     event Cancelled(address indexed _campaign, address indexed _converter, uint256 indexed _tokenID, address _childContractID, uint256 _indexOrAmount, CampaignType _type);
 
 
+
+
     ///Address of the contract admin
     TwoKeyAdmin twoKeyAdmin;
+
+
 
     ///Mapping contract bytecode to boolean if is allowed to emit an event
     mapping(bytes => bool) canEmit;
@@ -48,6 +52,12 @@ contract TwoKeyEventSource is TwoKeyTypes {
         bytes memory code = GetCode.at(msg.sender);
         require(canEmit[code] == true);
         _;
+    }
+
+    /// @notice Constructor during deployment of contract we need to set an admin address (means TwoKeyAdmin needs to be previously deployed)
+    /// @param _twoKeyAdminAddress is the address of TwoKeyAdmin contract previously deployed
+    constructor(address _twoKeyAdminAddress) public {
+        twoKeyAdmin = TwoKeyAdmin(_twoKeyAdminAddress);
     }
 
     /// @notice function where admin or any authorized person (will be added if needed) can add more contracts to allow them call methods
@@ -108,12 +118,6 @@ contract TwoKeyEventSource is TwoKeyTypes {
         return canEmit[_contractCode];
     }
 
-    /// @notice Constructor during deployment of contract we need to set an admin address (means TwoKeyAdmin needs to be previously deployed)
-    /// @param _twoKeyAdminAddress is the address of TwoKeyAdmin contract previously deployed
-    constructor(address _twoKeyAdminAddress) public {
-        twoKeyAdmin = TwoKeyAdmin(_twoKeyAdminAddress);
-    }
-
     /// @dev Only allowed contracts can call this function ---> means can emit events
     function created(address _campaign, address _owner) public onlyAllowedContracts{
     	emit Created(_campaign, _owner);
@@ -144,4 +148,12 @@ contract TwoKeyEventSource is TwoKeyTypes {
 		emit Cancelled(_campaign, _converter, _tokenID, _childContractID, _indexOrAmount, _type);
 	}
 
+
+    function getAdmin() public view returns (address) {
+        return address(twoKeyAdmin);
+    }
+
+    function checkIsAuthorized(address _subAdmin) public view returns (bool) {
+        return authorizedSubadmins[_subAdmin];
+    }
 }

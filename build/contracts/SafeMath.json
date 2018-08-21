@@ -1,42 +1,24 @@
 {
   "contractName": "SafeMath",
   "abi": [],
-<<<<<<< Updated upstream
-  "bytecode": "0x604c602c600b82828239805160001a60731460008114601c57601e565bfe5b5030600052607381538281f30073000000000000000000000000000000000000000030146080604052600080fd00a165627a7a72305820711689401e51b23bac681e1a7a1ad9df8ac8f22fca93549dffb1525e08b04f5d0029",
-  "deployedBytecode": "0x73000000000000000000000000000000000000000030146080604052600080fd00a165627a7a72305820711689401e51b23bac681e1a7a1ad9df8ac8f22fca93549dffb1525e08b04f5d0029",
-  "sourceMap": "117:1251:52:-;;132:2:-1;166:7;155:9;146:7;137:37;252:7;246:14;243:1;238:23;232:4;229:33;270:1;265:20;;;;222:63;;265:20;274:9;222:63;;298:9;295:1;288:20;328:4;319:7;311:22;352:7;343;336:24",
-  "deployedSourceMap": "117:1251:52:-;;;;;;;;",
-=======
   "bytecode": "0x604c602c600b82828239805160001a60731460008114601c57601e565bfe5b5030600052607381538281f30073000000000000000000000000000000000000000030146080604052600080fd00a165627a7a7230582056dab765e2be300ade13534fbf7b1ee905cc2e8007f80d28e41ab1dc9a361ae50029",
   "deployedBytecode": "0x73000000000000000000000000000000000000000030146080604052600080fd00a165627a7a7230582056dab765e2be300ade13534fbf7b1ee905cc2e8007f80d28e41ab1dc9a361ae50029",
-  "sourceMap": "117:1251:54:-;;132:2:-1;166:7;155:9;146:7;137:37;252:7;246:14;243:1;238:23;232:4;229:33;270:1;265:20;;;;222:63;;265:20;274:9;222:63;;298:9;295:1;288:20;328:4;319:7;311:22;352:7;343;336:24",
-  "deployedSourceMap": "117:1251:54:-;;;;;;;;",
->>>>>>> Stashed changes
+  "sourceMap": "117:1251:20:-;;132:2:-1;166:7;155:9;146:7;137:37;252:7;246:14;243:1;238:23;232:4;229:33;270:1;265:20;;;;222:63;;265:20;274:9;222:63;;298:9;295:1;288:20;328:4;319:7;311:22;352:7;343;336:24",
+  "deployedSourceMap": "117:1251:20:-;;;;;;;;",
   "source": "pragma solidity ^0.4.24;\n\n\n/**\n * @title SafeMath\n * @dev Math operations with safety checks that throw on error\n */\nlibrary SafeMath {\n\n  /**\n  * @dev Multiplies two numbers, throws on overflow.\n  */\n  function mul(uint256 _a, uint256 _b) internal pure returns (uint256 c) {\n    // Gas optimization: this is cheaper than asserting 'a' not being zero, but the\n    // benefit is lost if 'b' is also tested.\n    // See: https://github.com/OpenZeppelin/openzeppelin-solidity/pull/522\n    if (_a == 0) {\n      return 0;\n    }\n\n    c = _a * _b;\n    assert(c / _a == _b);\n    return c;\n  }\n\n  /**\n  * @dev Integer division of two numbers, truncating the quotient.\n  */\n  function div(uint256 _a, uint256 _b) internal pure returns (uint256) {\n    // assert(_b > 0); // Solidity automatically throws when dividing by 0\n    // uint256 c = _a / _b;\n    // assert(_a == _b * c + _a % _b); // There is no case in which this doesn't hold\n    return _a / _b;\n  }\n\n  /**\n  * @dev Subtracts two numbers, throws on overflow (i.e. if subtrahend is greater than minuend).\n  */\n  function sub(uint256 _a, uint256 _b) internal pure returns (uint256) {\n    assert(_b <= _a);\n    return _a - _b;\n  }\n\n  /**\n  * @dev Adds two numbers, throws on overflow.\n  */\n  function add(uint256 _a, uint256 _b) internal pure returns (uint256 c) {\n    c = _a + _b;\n    assert(c >= _a);\n    return c;\n  }\n}\n",
   "sourcePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/math/SafeMath.sol",
   "ast": {
     "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/math/SafeMath.sol",
     "exportedSymbols": {
       "SafeMath": [
-<<<<<<< Updated upstream
-        7049
+        4072
       ]
     },
-    "id": 7050,
+    "id": 4073,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 6957,
-=======
-        7146
-      ]
-    },
-    "id": 7147,
-    "nodeType": "SourceUnit",
-    "nodes": [
-      {
-        "id": 7054,
->>>>>>> Stashed changes
+        "id": 3980,
         "literals": [
           "solidity",
           "^",
@@ -44,7 +26,7 @@
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:24:52"
+        "src": "0:24:20"
       },
       {
         "baseContracts": [],
@@ -52,28 +34,18 @@
         "contractKind": "library",
         "documentation": "@title SafeMath\n@dev Math operations with safety checks that throw on error",
         "fullyImplemented": true,
-<<<<<<< Updated upstream
-        "id": 7049,
+        "id": 4072,
         "linearizedBaseContracts": [
-          7049
-=======
-        "id": 7146,
-        "linearizedBaseContracts": [
-          7146
->>>>>>> Stashed changes
+          4072
         ],
         "name": "SafeMath",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
-<<<<<<< Updated upstream
-              "id": 6989,
-=======
-              "id": 7086,
->>>>>>> Stashed changes
+              "id": 4012,
               "nodeType": "Block",
-              "src": "274:309:52",
+              "src": "274:309:20",
               "statements": [
                 {
                   "condition": {
@@ -82,32 +54,19 @@
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     },
-<<<<<<< Updated upstream
-                    "id": 6968,
-=======
-                    "id": 7065,
->>>>>>> Stashed changes
+                    "id": 3991,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
                       "argumentTypes": null,
-<<<<<<< Updated upstream
-                      "id": 6966,
+                      "id": 3989,
                       "name": "_a",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 6959,
-                      "src": "489:2:52",
-=======
-                      "id": 7063,
-                      "name": "_a",
-                      "nodeType": "Identifier",
-                      "overloadedDeclarations": [],
-                      "referencedDeclaration": 7056,
-                      "src": "489:2:54",
->>>>>>> Stashed changes
+                      "referencedDeclaration": 3982,
+                      "src": "489:2:20",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -118,18 +77,14 @@
                     "rightExpression": {
                       "argumentTypes": null,
                       "hexValue": "30",
-<<<<<<< Updated upstream
-                      "id": 6967,
-=======
-                      "id": 7064,
->>>>>>> Stashed changes
+                      "id": 3990,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
                       "kind": "number",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "495:1:52",
+                      "src": "495:1:20",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": "t_rational_0_by_1",
@@ -137,45 +92,33 @@
                       },
                       "value": "0"
                     },
-                    "src": "489:7:52",
+                    "src": "489:7:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
                     }
                   },
                   "falseBody": null,
-<<<<<<< Updated upstream
-                  "id": 6972,
-=======
-                  "id": 7069,
->>>>>>> Stashed changes
+                  "id": 3995,
                   "nodeType": "IfStatement",
-                  "src": "485:36:52",
+                  "src": "485:36:20",
                   "trueBody": {
-<<<<<<< Updated upstream
-                    "id": 6971,
-=======
-                    "id": 7068,
->>>>>>> Stashed changes
+                    "id": 3994,
                     "nodeType": "Block",
-                    "src": "498:23:52",
+                    "src": "498:23:20",
                     "statements": [
                       {
                         "expression": {
                           "argumentTypes": null,
                           "hexValue": "30",
-<<<<<<< Updated upstream
-                          "id": 6969,
-=======
-                          "id": 7066,
->>>>>>> Stashed changes
+                          "id": 3992,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "kind": "number",
                           "lValueRequested": false,
                           "nodeType": "Literal",
-                          "src": "513:1:52",
+                          "src": "513:1:20",
                           "subdenomination": null,
                           "typeDescriptions": {
                             "typeIdentifier": "t_rational_0_by_1",
@@ -183,15 +126,10 @@
                           },
                           "value": "0"
                         },
-<<<<<<< Updated upstream
-                        "functionReturnParameters": 6965,
-                        "id": 6970,
-=======
-                        "functionReturnParameters": 7062,
-                        "id": 7067,
->>>>>>> Stashed changes
+                        "functionReturnParameters": 3988,
+                        "id": 3993,
                         "nodeType": "Return",
-                        "src": "506:8:52"
+                        "src": "506:8:20"
                       }
                     ]
                   }
@@ -199,32 +137,19 @@
                 {
                   "expression": {
                     "argumentTypes": null,
-<<<<<<< Updated upstream
-                    "id": 6977,
-=======
-                    "id": 7074,
->>>>>>> Stashed changes
+                    "id": 4000,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-<<<<<<< Updated upstream
-                      "id": 6973,
+                      "id": 3996,
                       "name": "c",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 6964,
-                      "src": "527:1:52",
-=======
-                      "id": 7070,
-                      "name": "c",
-                      "nodeType": "Identifier",
-                      "overloadedDeclarations": [],
-                      "referencedDeclaration": 7061,
-                      "src": "527:1:54",
->>>>>>> Stashed changes
+                      "referencedDeclaration": 3987,
+                      "src": "527:1:20",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -238,32 +163,19 @@
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       },
-<<<<<<< Updated upstream
-                      "id": 6976,
-=======
-                      "id": 7073,
->>>>>>> Stashed changes
+                      "id": 3999,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "leftExpression": {
                         "argumentTypes": null,
-<<<<<<< Updated upstream
-                        "id": 6974,
+                        "id": 3997,
                         "name": "_a",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 6959,
-                        "src": "531:2:52",
-=======
-                        "id": 7071,
-                        "name": "_a",
-                        "nodeType": "Identifier",
-                        "overloadedDeclarations": [],
-                        "referencedDeclaration": 7056,
-                        "src": "531:2:54",
->>>>>>> Stashed changes
+                        "referencedDeclaration": 3982,
+                        "src": "531:2:20",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -273,45 +185,32 @@
                       "operator": "*",
                       "rightExpression": {
                         "argumentTypes": null,
-<<<<<<< Updated upstream
-                        "id": 6975,
+                        "id": 3998,
                         "name": "_b",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 6961,
-                        "src": "536:2:52",
-=======
-                        "id": 7072,
-                        "name": "_b",
-                        "nodeType": "Identifier",
-                        "overloadedDeclarations": [],
-                        "referencedDeclaration": 7058,
-                        "src": "536:2:54",
->>>>>>> Stashed changes
+                        "referencedDeclaration": 3984,
+                        "src": "536:2:20",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         }
                       },
-                      "src": "531:7:52",
+                      "src": "531:7:20",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "527:11:52",
+                    "src": "527:11:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-<<<<<<< Updated upstream
-                  "id": 6978,
-=======
-                  "id": 7075,
->>>>>>> Stashed changes
+                  "id": 4001,
                   "nodeType": "ExpressionStatement",
-                  "src": "527:11:52"
+                  "src": "527:11:20"
                 },
                 {
                   "expression": {
@@ -323,11 +222,7 @@
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
-<<<<<<< Updated upstream
-                        "id": 6984,
-=======
-                        "id": 7081,
->>>>>>> Stashed changes
+                        "id": 4007,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -338,32 +233,19 @@
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           },
-<<<<<<< Updated upstream
-                          "id": 6982,
-=======
-                          "id": 7079,
->>>>>>> Stashed changes
+                          "id": 4005,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "leftExpression": {
                             "argumentTypes": null,
-<<<<<<< Updated upstream
-                            "id": 6980,
+                            "id": 4003,
                             "name": "c",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 6964,
-                            "src": "551:1:52",
-=======
-                            "id": 7077,
-                            "name": "c",
-                            "nodeType": "Identifier",
-                            "overloadedDeclarations": [],
-                            "referencedDeclaration": 7061,
-                            "src": "551:1:54",
->>>>>>> Stashed changes
+                            "referencedDeclaration": 3987,
+                            "src": "551:1:20",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -373,27 +255,18 @@
                           "operator": "/",
                           "rightExpression": {
                             "argumentTypes": null,
-<<<<<<< Updated upstream
-                            "id": 6981,
+                            "id": 4004,
                             "name": "_a",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 6959,
-                            "src": "555:2:52",
-=======
-                            "id": 7078,
-                            "name": "_a",
-                            "nodeType": "Identifier",
-                            "overloadedDeclarations": [],
-                            "referencedDeclaration": 7056,
-                            "src": "555:2:54",
->>>>>>> Stashed changes
+                            "referencedDeclaration": 3982,
+                            "src": "555:2:20",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
                             }
                           },
-                          "src": "551:6:52",
+                          "src": "551:6:20",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -403,27 +276,18 @@
                         "operator": "==",
                         "rightExpression": {
                           "argumentTypes": null,
-<<<<<<< Updated upstream
-                          "id": 6983,
+                          "id": 4006,
                           "name": "_b",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 6961,
-                          "src": "561:2:52",
-=======
-                          "id": 7080,
-                          "name": "_b",
-                          "nodeType": "Identifier",
-                          "overloadedDeclarations": [],
-                          "referencedDeclaration": 7058,
-                          "src": "561:2:54",
->>>>>>> Stashed changes
+                          "referencedDeclaration": 3984,
+                          "src": "561:2:20",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "src": "551:12:52",
+                        "src": "551:12:20",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -437,31 +301,18 @@
                           "typeString": "bool"
                         }
                       ],
-<<<<<<< Updated upstream
-                      "id": 6979,
+                      "id": 4002,
                       "name": "assert",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 10758,
-                      "src": "544:6:52",
-=======
-                      "id": 7076,
-                      "name": "assert",
-                      "nodeType": "Identifier",
-                      "overloadedDeclarations": [],
-                      "referencedDeclaration": 10855,
-                      "src": "544:6:54",
->>>>>>> Stashed changes
+                      "referencedDeclaration": 4642,
+                      "src": "544:6:20",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_assert_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-<<<<<<< Updated upstream
-                    "id": 6985,
-=======
-                    "id": 7082,
->>>>>>> Stashed changes
+                    "id": 4008,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -469,61 +320,39 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "544:20:52",
+                    "src": "544:20:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-<<<<<<< Updated upstream
-                  "id": 6986,
-=======
-                  "id": 7083,
->>>>>>> Stashed changes
+                  "id": 4009,
                   "nodeType": "ExpressionStatement",
-                  "src": "544:20:52"
+                  "src": "544:20:20"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-<<<<<<< Updated upstream
-                    "id": 6987,
+                    "id": 4010,
                     "name": "c",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 6964,
-                    "src": "577:1:52",
-=======
-                    "id": 7084,
-                    "name": "c",
-                    "nodeType": "Identifier",
-                    "overloadedDeclarations": [],
-                    "referencedDeclaration": 7061,
-                    "src": "577:1:54",
->>>>>>> Stashed changes
+                    "referencedDeclaration": 3987,
+                    "src": "577:1:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-<<<<<<< Updated upstream
-                  "functionReturnParameters": 6965,
-                  "id": 6988,
-=======
-                  "functionReturnParameters": 7062,
-                  "id": 7085,
->>>>>>> Stashed changes
+                  "functionReturnParameters": 3988,
+                  "id": 4011,
                   "nodeType": "Return",
-                  "src": "570:8:52"
+                  "src": "570:8:20"
                 }
               ]
             },
             "documentation": "@dev Multiplies two numbers, throws on overflow.",
-<<<<<<< Updated upstream
-            "id": 6990,
-=======
-            "id": 7087,
->>>>>>> Stashed changes
+            "id": 4013,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -531,28 +360,16 @@
             "name": "mul",
             "nodeType": "FunctionDefinition",
             "parameters": {
-<<<<<<< Updated upstream
-              "id": 6962,
-=======
-              "id": 7059,
->>>>>>> Stashed changes
+              "id": 3985,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-<<<<<<< Updated upstream
-                  "id": 6959,
+                  "id": 3982,
                   "name": "_a",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6990,
-                  "src": "216:10:52",
-=======
-                  "id": 7056,
-                  "name": "_a",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 7087,
-                  "src": "216:10:54",
->>>>>>> Stashed changes
+                  "scope": 4013,
+                  "src": "216:10:20",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -560,14 +377,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-<<<<<<< Updated upstream
-                    "id": 6958,
-=======
-                    "id": 7055,
->>>>>>> Stashed changes
+                    "id": 3981,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "216:7:52",
+                    "src": "216:7:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -578,19 +391,11 @@
                 },
                 {
                   "constant": false,
-<<<<<<< Updated upstream
-                  "id": 6961,
+                  "id": 3984,
                   "name": "_b",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6990,
-                  "src": "228:10:52",
-=======
-                  "id": 7058,
-                  "name": "_b",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 7087,
-                  "src": "228:10:54",
->>>>>>> Stashed changes
+                  "scope": 4013,
+                  "src": "228:10:20",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -598,14 +403,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-<<<<<<< Updated upstream
-                    "id": 6960,
-=======
-                    "id": 7057,
->>>>>>> Stashed changes
+                    "id": 3983,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "228:7:52",
+                    "src": "228:7:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -615,32 +416,20 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "215:24:52"
+              "src": "215:24:20"
             },
             "payable": false,
             "returnParameters": {
-<<<<<<< Updated upstream
-              "id": 6965,
-=======
-              "id": 7062,
->>>>>>> Stashed changes
+              "id": 3988,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-<<<<<<< Updated upstream
-                  "id": 6964,
+                  "id": 3987,
                   "name": "c",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6990,
-                  "src": "263:9:52",
-=======
-                  "id": 7061,
-                  "name": "c",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 7087,
-                  "src": "263:9:54",
->>>>>>> Stashed changes
+                  "scope": 4013,
+                  "src": "263:9:20",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -648,14 +437,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-<<<<<<< Updated upstream
-                    "id": 6963,
-=======
-                    "id": 7060,
->>>>>>> Stashed changes
+                    "id": 3986,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "263:7:52",
+                    "src": "263:7:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -665,28 +450,19 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "262:11:52"
+              "src": "262:11:20"
             },
-<<<<<<< Updated upstream
-            "scope": 7049,
-            "src": "203:380:52",
-=======
-            "scope": 7146,
-            "src": "203:380:54",
->>>>>>> Stashed changes
+            "scope": 4072,
+            "src": "203:380:20",
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "internal"
           },
           {
             "body": {
-<<<<<<< Updated upstream
-              "id": 7003,
-=======
-              "id": 7100,
->>>>>>> Stashed changes
+              "id": 4026,
               "nodeType": "Block",
-              "src": "734:214:52",
+              "src": "734:214:20",
               "statements": [
                 {
                   "expression": {
@@ -695,32 +471,19 @@
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     },
-<<<<<<< Updated upstream
-                    "id": 7001,
-=======
-                    "id": 7098,
->>>>>>> Stashed changes
+                    "id": 4024,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
                       "argumentTypes": null,
-<<<<<<< Updated upstream
-                      "id": 6999,
+                      "id": 4022,
                       "name": "_a",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 6992,
-                      "src": "936:2:52",
-=======
-                      "id": 7096,
-                      "name": "_a",
-                      "nodeType": "Identifier",
-                      "overloadedDeclarations": [],
-                      "referencedDeclaration": 7089,
-                      "src": "936:2:54",
->>>>>>> Stashed changes
+                      "referencedDeclaration": 4015,
+                      "src": "936:2:20",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -730,50 +493,32 @@
                     "operator": "/",
                     "rightExpression": {
                       "argumentTypes": null,
-<<<<<<< Updated upstream
-                      "id": 7000,
+                      "id": 4023,
                       "name": "_b",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 6994,
-                      "src": "941:2:52",
-=======
-                      "id": 7097,
-                      "name": "_b",
-                      "nodeType": "Identifier",
-                      "overloadedDeclarations": [],
-                      "referencedDeclaration": 7091,
-                      "src": "941:2:54",
->>>>>>> Stashed changes
+                      "referencedDeclaration": 4017,
+                      "src": "941:2:20",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "936:7:52",
+                    "src": "936:7:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-<<<<<<< Updated upstream
-                  "functionReturnParameters": 6998,
-                  "id": 7002,
-=======
-                  "functionReturnParameters": 7095,
-                  "id": 7099,
->>>>>>> Stashed changes
+                  "functionReturnParameters": 4021,
+                  "id": 4025,
                   "nodeType": "Return",
-                  "src": "929:14:52"
+                  "src": "929:14:20"
                 }
               ]
             },
             "documentation": "@dev Integer division of two numbers, truncating the quotient.",
-<<<<<<< Updated upstream
-            "id": 7004,
-=======
-            "id": 7101,
->>>>>>> Stashed changes
+            "id": 4027,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -781,28 +526,16 @@
             "name": "div",
             "nodeType": "FunctionDefinition",
             "parameters": {
-<<<<<<< Updated upstream
-              "id": 6995,
-=======
-              "id": 7092,
->>>>>>> Stashed changes
+              "id": 4018,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-<<<<<<< Updated upstream
-                  "id": 6992,
+                  "id": 4015,
                   "name": "_a",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7004,
-                  "src": "678:10:52",
-=======
-                  "id": 7089,
-                  "name": "_a",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 7101,
-                  "src": "678:10:54",
->>>>>>> Stashed changes
+                  "scope": 4027,
+                  "src": "678:10:20",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -810,14 +543,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-<<<<<<< Updated upstream
-                    "id": 6991,
-=======
-                    "id": 7088,
->>>>>>> Stashed changes
+                    "id": 4014,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "678:7:52",
+                    "src": "678:7:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -828,19 +557,11 @@
                 },
                 {
                   "constant": false,
-<<<<<<< Updated upstream
-                  "id": 6994,
+                  "id": 4017,
                   "name": "_b",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7004,
-                  "src": "690:10:52",
-=======
-                  "id": 7091,
-                  "name": "_b",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 7101,
-                  "src": "690:10:54",
->>>>>>> Stashed changes
+                  "scope": 4027,
+                  "src": "690:10:20",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -848,14 +569,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-<<<<<<< Updated upstream
-                    "id": 6993,
-=======
-                    "id": 7090,
->>>>>>> Stashed changes
+                    "id": 4016,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "690:7:52",
+                    "src": "690:7:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -865,32 +582,20 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "677:24:52"
+              "src": "677:24:20"
             },
             "payable": false,
             "returnParameters": {
-<<<<<<< Updated upstream
-              "id": 6998,
-=======
-              "id": 7095,
->>>>>>> Stashed changes
+              "id": 4021,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-<<<<<<< Updated upstream
-                  "id": 6997,
+                  "id": 4020,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7004,
-                  "src": "725:7:52",
-=======
-                  "id": 7094,
-                  "name": "",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 7101,
-                  "src": "725:7:54",
->>>>>>> Stashed changes
+                  "scope": 4027,
+                  "src": "725:7:20",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -898,14 +603,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-<<<<<<< Updated upstream
-                    "id": 6996,
-=======
-                    "id": 7093,
->>>>>>> Stashed changes
+                    "id": 4019,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "725:7:52",
+                    "src": "725:7:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -915,28 +616,19 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "724:9:52"
+              "src": "724:9:20"
             },
-<<<<<<< Updated upstream
-            "scope": 7049,
-            "src": "665:283:52",
-=======
-            "scope": 7146,
-            "src": "665:283:54",
->>>>>>> Stashed changes
+            "scope": 4072,
+            "src": "665:283:20",
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "internal"
           },
           {
             "body": {
-<<<<<<< Updated upstream
-              "id": 7023,
-=======
-              "id": 7120,
->>>>>>> Stashed changes
+              "id": 4046,
               "nodeType": "Block",
-              "src": "1129:47:52",
+              "src": "1129:47:20",
               "statements": [
                 {
                   "expression": {
@@ -948,32 +640,19 @@
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
-<<<<<<< Updated upstream
-                        "id": 7016,
-=======
-                        "id": 7113,
->>>>>>> Stashed changes
+                        "id": 4039,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
                           "argumentTypes": null,
-<<<<<<< Updated upstream
-                          "id": 7014,
+                          "id": 4037,
                           "name": "_b",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 7008,
-                          "src": "1142:2:52",
-=======
-                          "id": 7111,
-                          "name": "_b",
-                          "nodeType": "Identifier",
-                          "overloadedDeclarations": [],
-                          "referencedDeclaration": 7105,
-                          "src": "1142:2:54",
->>>>>>> Stashed changes
+                          "referencedDeclaration": 4031,
+                          "src": "1142:2:20",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -983,27 +662,18 @@
                         "operator": "<=",
                         "rightExpression": {
                           "argumentTypes": null,
-<<<<<<< Updated upstream
-                          "id": 7015,
+                          "id": 4038,
                           "name": "_a",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 7006,
-                          "src": "1148:2:52",
-=======
-                          "id": 7112,
-                          "name": "_a",
-                          "nodeType": "Identifier",
-                          "overloadedDeclarations": [],
-                          "referencedDeclaration": 7103,
-                          "src": "1148:2:54",
->>>>>>> Stashed changes
+                          "referencedDeclaration": 4029,
+                          "src": "1148:2:20",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "src": "1142:8:52",
+                        "src": "1142:8:20",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -1017,31 +687,18 @@
                           "typeString": "bool"
                         }
                       ],
-<<<<<<< Updated upstream
-                      "id": 7013,
+                      "id": 4036,
                       "name": "assert",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 10758,
-                      "src": "1135:6:52",
-=======
-                      "id": 7110,
-                      "name": "assert",
-                      "nodeType": "Identifier",
-                      "overloadedDeclarations": [],
-                      "referencedDeclaration": 10855,
-                      "src": "1135:6:54",
->>>>>>> Stashed changes
+                      "referencedDeclaration": 4642,
+                      "src": "1135:6:20",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_assert_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-<<<<<<< Updated upstream
-                    "id": 7017,
-=======
-                    "id": 7114,
->>>>>>> Stashed changes
+                    "id": 4040,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1049,19 +706,15 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "1135:16:52",
+                    "src": "1135:16:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-<<<<<<< Updated upstream
-                  "id": 7018,
-=======
-                  "id": 7115,
->>>>>>> Stashed changes
+                  "id": 4041,
                   "nodeType": "ExpressionStatement",
-                  "src": "1135:16:52"
+                  "src": "1135:16:20"
                 },
                 {
                   "expression": {
@@ -1070,32 +723,19 @@
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     },
-<<<<<<< Updated upstream
-                    "id": 7021,
-=======
-                    "id": 7118,
->>>>>>> Stashed changes
+                    "id": 4044,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
                       "argumentTypes": null,
-<<<<<<< Updated upstream
-                      "id": 7019,
+                      "id": 4042,
                       "name": "_a",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 7006,
-                      "src": "1164:2:52",
-=======
-                      "id": 7116,
-                      "name": "_a",
-                      "nodeType": "Identifier",
-                      "overloadedDeclarations": [],
-                      "referencedDeclaration": 7103,
-                      "src": "1164:2:54",
->>>>>>> Stashed changes
+                      "referencedDeclaration": 4029,
+                      "src": "1164:2:20",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -1105,50 +745,32 @@
                     "operator": "-",
                     "rightExpression": {
                       "argumentTypes": null,
-<<<<<<< Updated upstream
-                      "id": 7020,
+                      "id": 4043,
                       "name": "_b",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 7008,
-                      "src": "1169:2:52",
-=======
-                      "id": 7117,
-                      "name": "_b",
-                      "nodeType": "Identifier",
-                      "overloadedDeclarations": [],
-                      "referencedDeclaration": 7105,
-                      "src": "1169:2:54",
->>>>>>> Stashed changes
+                      "referencedDeclaration": 4031,
+                      "src": "1169:2:20",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "1164:7:52",
+                    "src": "1164:7:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-<<<<<<< Updated upstream
-                  "functionReturnParameters": 7012,
-                  "id": 7022,
-=======
-                  "functionReturnParameters": 7109,
-                  "id": 7119,
->>>>>>> Stashed changes
+                  "functionReturnParameters": 4035,
+                  "id": 4045,
                   "nodeType": "Return",
-                  "src": "1157:14:52"
+                  "src": "1157:14:20"
                 }
               ]
             },
             "documentation": "@dev Subtracts two numbers, throws on overflow (i.e. if subtrahend is greater than minuend).",
-<<<<<<< Updated upstream
-            "id": 7024,
-=======
-            "id": 7121,
->>>>>>> Stashed changes
+            "id": 4047,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -1156,28 +778,16 @@
             "name": "sub",
             "nodeType": "FunctionDefinition",
             "parameters": {
-<<<<<<< Updated upstream
-              "id": 7009,
-=======
-              "id": 7106,
->>>>>>> Stashed changes
+              "id": 4032,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-<<<<<<< Updated upstream
-                  "id": 7006,
+                  "id": 4029,
                   "name": "_a",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7024,
-                  "src": "1073:10:52",
-=======
-                  "id": 7103,
-                  "name": "_a",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 7121,
-                  "src": "1073:10:54",
->>>>>>> Stashed changes
+                  "scope": 4047,
+                  "src": "1073:10:20",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1185,14 +795,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-<<<<<<< Updated upstream
-                    "id": 7005,
-=======
-                    "id": 7102,
->>>>>>> Stashed changes
+                    "id": 4028,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1073:7:52",
+                    "src": "1073:7:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1203,19 +809,11 @@
                 },
                 {
                   "constant": false,
-<<<<<<< Updated upstream
-                  "id": 7008,
+                  "id": 4031,
                   "name": "_b",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7024,
-                  "src": "1085:10:52",
-=======
-                  "id": 7105,
-                  "name": "_b",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 7121,
-                  "src": "1085:10:54",
->>>>>>> Stashed changes
+                  "scope": 4047,
+                  "src": "1085:10:20",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1223,14 +821,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-<<<<<<< Updated upstream
-                    "id": 7007,
-=======
-                    "id": 7104,
->>>>>>> Stashed changes
+                    "id": 4030,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1085:7:52",
+                    "src": "1085:7:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1240,32 +834,20 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1072:24:52"
+              "src": "1072:24:20"
             },
             "payable": false,
             "returnParameters": {
-<<<<<<< Updated upstream
-              "id": 7012,
-=======
-              "id": 7109,
->>>>>>> Stashed changes
+              "id": 4035,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-<<<<<<< Updated upstream
-                  "id": 7011,
+                  "id": 4034,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7024,
-                  "src": "1120:7:52",
-=======
-                  "id": 7108,
-                  "name": "",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 7121,
-                  "src": "1120:7:54",
->>>>>>> Stashed changes
+                  "scope": 4047,
+                  "src": "1120:7:20",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1273,14 +855,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-<<<<<<< Updated upstream
-                    "id": 7010,
-=======
-                    "id": 7107,
->>>>>>> Stashed changes
+                    "id": 4033,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1120:7:52",
+                    "src": "1120:7:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1290,58 +868,36 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1119:9:52"
+              "src": "1119:9:20"
             },
-<<<<<<< Updated upstream
-            "scope": 7049,
-            "src": "1060:116:52",
-=======
-            "scope": 7146,
-            "src": "1060:116:54",
->>>>>>> Stashed changes
+            "scope": 4072,
+            "src": "1060:116:20",
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "internal"
           },
           {
             "body": {
-<<<<<<< Updated upstream
-              "id": 7047,
-=======
-              "id": 7144,
->>>>>>> Stashed changes
+              "id": 4070,
               "nodeType": "Block",
-              "src": "1309:57:52",
+              "src": "1309:57:20",
               "statements": [
                 {
                   "expression": {
                     "argumentTypes": null,
-<<<<<<< Updated upstream
-                    "id": 7037,
-=======
-                    "id": 7134,
->>>>>>> Stashed changes
+                    "id": 4060,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-<<<<<<< Updated upstream
-                      "id": 7033,
+                      "id": 4056,
                       "name": "c",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 7031,
-                      "src": "1315:1:52",
-=======
-                      "id": 7130,
-                      "name": "c",
-                      "nodeType": "Identifier",
-                      "overloadedDeclarations": [],
-                      "referencedDeclaration": 7128,
-                      "src": "1315:1:54",
->>>>>>> Stashed changes
+                      "referencedDeclaration": 4054,
+                      "src": "1315:1:20",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -1355,32 +911,19 @@
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       },
-<<<<<<< Updated upstream
-                      "id": 7036,
-=======
-                      "id": 7133,
->>>>>>> Stashed changes
+                      "id": 4059,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "leftExpression": {
                         "argumentTypes": null,
-<<<<<<< Updated upstream
-                        "id": 7034,
+                        "id": 4057,
                         "name": "_a",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7026,
-                        "src": "1319:2:52",
-=======
-                        "id": 7131,
-                        "name": "_a",
-                        "nodeType": "Identifier",
-                        "overloadedDeclarations": [],
-                        "referencedDeclaration": 7123,
-                        "src": "1319:2:54",
->>>>>>> Stashed changes
+                        "referencedDeclaration": 4049,
+                        "src": "1319:2:20",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -1390,45 +933,32 @@
                       "operator": "+",
                       "rightExpression": {
                         "argumentTypes": null,
-<<<<<<< Updated upstream
-                        "id": 7035,
+                        "id": 4058,
                         "name": "_b",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7028,
-                        "src": "1324:2:52",
-=======
-                        "id": 7132,
-                        "name": "_b",
-                        "nodeType": "Identifier",
-                        "overloadedDeclarations": [],
-                        "referencedDeclaration": 7125,
-                        "src": "1324:2:54",
->>>>>>> Stashed changes
+                        "referencedDeclaration": 4051,
+                        "src": "1324:2:20",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         }
                       },
-                      "src": "1319:7:52",
+                      "src": "1319:7:20",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "1315:11:52",
+                    "src": "1315:11:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-<<<<<<< Updated upstream
-                  "id": 7038,
-=======
-                  "id": 7135,
->>>>>>> Stashed changes
+                  "id": 4061,
                   "nodeType": "ExpressionStatement",
-                  "src": "1315:11:52"
+                  "src": "1315:11:20"
                 },
                 {
                   "expression": {
@@ -1440,32 +970,19 @@
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
-<<<<<<< Updated upstream
-                        "id": 7042,
-=======
-                        "id": 7139,
->>>>>>> Stashed changes
+                        "id": 4065,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
                           "argumentTypes": null,
-<<<<<<< Updated upstream
-                          "id": 7040,
+                          "id": 4063,
                           "name": "c",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 7031,
-                          "src": "1339:1:52",
-=======
-                          "id": 7137,
-                          "name": "c",
-                          "nodeType": "Identifier",
-                          "overloadedDeclarations": [],
-                          "referencedDeclaration": 7128,
-                          "src": "1339:1:54",
->>>>>>> Stashed changes
+                          "referencedDeclaration": 4054,
+                          "src": "1339:1:20",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -1475,27 +992,18 @@
                         "operator": ">=",
                         "rightExpression": {
                           "argumentTypes": null,
-<<<<<<< Updated upstream
-                          "id": 7041,
+                          "id": 4064,
                           "name": "_a",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 7026,
-                          "src": "1344:2:52",
-=======
-                          "id": 7138,
-                          "name": "_a",
-                          "nodeType": "Identifier",
-                          "overloadedDeclarations": [],
-                          "referencedDeclaration": 7123,
-                          "src": "1344:2:54",
->>>>>>> Stashed changes
+                          "referencedDeclaration": 4049,
+                          "src": "1344:2:20",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "src": "1339:7:52",
+                        "src": "1339:7:20",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -1509,31 +1017,18 @@
                           "typeString": "bool"
                         }
                       ],
-<<<<<<< Updated upstream
-                      "id": 7039,
+                      "id": 4062,
                       "name": "assert",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 10758,
-                      "src": "1332:6:52",
-=======
-                      "id": 7136,
-                      "name": "assert",
-                      "nodeType": "Identifier",
-                      "overloadedDeclarations": [],
-                      "referencedDeclaration": 10855,
-                      "src": "1332:6:54",
->>>>>>> Stashed changes
+                      "referencedDeclaration": 4642,
+                      "src": "1332:6:20",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_assert_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-<<<<<<< Updated upstream
-                    "id": 7043,
-=======
-                    "id": 7140,
->>>>>>> Stashed changes
+                    "id": 4066,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1541,61 +1036,39 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "1332:15:52",
+                    "src": "1332:15:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-<<<<<<< Updated upstream
-                  "id": 7044,
-=======
-                  "id": 7141,
->>>>>>> Stashed changes
+                  "id": 4067,
                   "nodeType": "ExpressionStatement",
-                  "src": "1332:15:52"
+                  "src": "1332:15:20"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-<<<<<<< Updated upstream
-                    "id": 7045,
+                    "id": 4068,
                     "name": "c",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 7031,
-                    "src": "1360:1:52",
-=======
-                    "id": 7142,
-                    "name": "c",
-                    "nodeType": "Identifier",
-                    "overloadedDeclarations": [],
-                    "referencedDeclaration": 7128,
-                    "src": "1360:1:54",
->>>>>>> Stashed changes
+                    "referencedDeclaration": 4054,
+                    "src": "1360:1:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-<<<<<<< Updated upstream
-                  "functionReturnParameters": 7032,
-                  "id": 7046,
-=======
-                  "functionReturnParameters": 7129,
-                  "id": 7143,
->>>>>>> Stashed changes
+                  "functionReturnParameters": 4055,
+                  "id": 4069,
                   "nodeType": "Return",
-                  "src": "1353:8:52"
+                  "src": "1353:8:20"
                 }
               ]
             },
             "documentation": "@dev Adds two numbers, throws on overflow.",
-<<<<<<< Updated upstream
-            "id": 7048,
-=======
-            "id": 7145,
->>>>>>> Stashed changes
+            "id": 4071,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -1603,28 +1076,16 @@
             "name": "add",
             "nodeType": "FunctionDefinition",
             "parameters": {
-<<<<<<< Updated upstream
-              "id": 7029,
-=======
-              "id": 7126,
->>>>>>> Stashed changes
+              "id": 4052,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-<<<<<<< Updated upstream
-                  "id": 7026,
+                  "id": 4049,
                   "name": "_a",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7048,
-                  "src": "1251:10:52",
-=======
-                  "id": 7123,
-                  "name": "_a",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 7145,
-                  "src": "1251:10:54",
->>>>>>> Stashed changes
+                  "scope": 4071,
+                  "src": "1251:10:20",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1632,14 +1093,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-<<<<<<< Updated upstream
-                    "id": 7025,
-=======
-                    "id": 7122,
->>>>>>> Stashed changes
+                    "id": 4048,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1251:7:52",
+                    "src": "1251:7:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1650,19 +1107,11 @@
                 },
                 {
                   "constant": false,
-<<<<<<< Updated upstream
-                  "id": 7028,
+                  "id": 4051,
                   "name": "_b",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7048,
-                  "src": "1263:10:52",
-=======
-                  "id": 7125,
-                  "name": "_b",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 7145,
-                  "src": "1263:10:54",
->>>>>>> Stashed changes
+                  "scope": 4071,
+                  "src": "1263:10:20",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1670,14 +1119,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-<<<<<<< Updated upstream
-                    "id": 7027,
-=======
-                    "id": 7124,
->>>>>>> Stashed changes
+                    "id": 4050,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1263:7:52",
+                    "src": "1263:7:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1687,32 +1132,20 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1250:24:52"
+              "src": "1250:24:20"
             },
             "payable": false,
             "returnParameters": {
-<<<<<<< Updated upstream
-              "id": 7032,
-=======
-              "id": 7129,
->>>>>>> Stashed changes
+              "id": 4055,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-<<<<<<< Updated upstream
-                  "id": 7031,
+                  "id": 4054,
                   "name": "c",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7048,
-                  "src": "1298:9:52",
-=======
-                  "id": 7128,
-                  "name": "c",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 7145,
-                  "src": "1298:9:54",
->>>>>>> Stashed changes
+                  "scope": 4071,
+                  "src": "1298:9:20",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1720,14 +1153,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-<<<<<<< Updated upstream
-                    "id": 7030,
-=======
-                    "id": 7127,
->>>>>>> Stashed changes
+                    "id": 4053,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1298:7:52",
+                    "src": "1298:7:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1737,54 +1166,33 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1297:11:52"
+              "src": "1297:11:20"
             },
-<<<<<<< Updated upstream
-            "scope": 7049,
-            "src": "1238:128:52",
-=======
-            "scope": 7146,
-            "src": "1238:128:54",
->>>>>>> Stashed changes
+            "scope": 4072,
+            "src": "1238:128:20",
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "internal"
           }
         ],
-<<<<<<< Updated upstream
-        "scope": 7050,
-        "src": "117:1251:52"
-=======
-        "scope": 7147,
-        "src": "117:1251:54"
->>>>>>> Stashed changes
+        "scope": 4073,
+        "src": "117:1251:20"
       }
     ],
-    "src": "0:1369:52"
+    "src": "0:1369:20"
   },
   "legacyAST": {
     "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/math/SafeMath.sol",
     "exportedSymbols": {
       "SafeMath": [
-<<<<<<< Updated upstream
-        7049
+        4072
       ]
     },
-    "id": 7050,
+    "id": 4073,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 6957,
-=======
-        7146
-      ]
-    },
-    "id": 7147,
-    "nodeType": "SourceUnit",
-    "nodes": [
-      {
-        "id": 7054,
->>>>>>> Stashed changes
+        "id": 3980,
         "literals": [
           "solidity",
           "^",
@@ -1792,7 +1200,7 @@
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:24:52"
+        "src": "0:24:20"
       },
       {
         "baseContracts": [],
@@ -1800,28 +1208,18 @@
         "contractKind": "library",
         "documentation": "@title SafeMath\n@dev Math operations with safety checks that throw on error",
         "fullyImplemented": true,
-<<<<<<< Updated upstream
-        "id": 7049,
+        "id": 4072,
         "linearizedBaseContracts": [
-          7049
-=======
-        "id": 7146,
-        "linearizedBaseContracts": [
-          7146
->>>>>>> Stashed changes
+          4072
         ],
         "name": "SafeMath",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
-<<<<<<< Updated upstream
-              "id": 6989,
-=======
-              "id": 7086,
->>>>>>> Stashed changes
+              "id": 4012,
               "nodeType": "Block",
-              "src": "274:309:52",
+              "src": "274:309:20",
               "statements": [
                 {
                   "condition": {
@@ -1830,32 +1228,19 @@
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     },
-<<<<<<< Updated upstream
-                    "id": 6968,
-=======
-                    "id": 7065,
->>>>>>> Stashed changes
+                    "id": 3991,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
                       "argumentTypes": null,
-<<<<<<< Updated upstream
-                      "id": 6966,
+                      "id": 3989,
                       "name": "_a",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 6959,
-                      "src": "489:2:52",
-=======
-                      "id": 7063,
-                      "name": "_a",
-                      "nodeType": "Identifier",
-                      "overloadedDeclarations": [],
-                      "referencedDeclaration": 7056,
-                      "src": "489:2:54",
->>>>>>> Stashed changes
+                      "referencedDeclaration": 3982,
+                      "src": "489:2:20",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -1866,18 +1251,14 @@
                     "rightExpression": {
                       "argumentTypes": null,
                       "hexValue": "30",
-<<<<<<< Updated upstream
-                      "id": 6967,
-=======
-                      "id": 7064,
->>>>>>> Stashed changes
+                      "id": 3990,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
                       "kind": "number",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "495:1:52",
+                      "src": "495:1:20",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": "t_rational_0_by_1",
@@ -1885,45 +1266,33 @@
                       },
                       "value": "0"
                     },
-                    "src": "489:7:52",
+                    "src": "489:7:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
                     }
                   },
                   "falseBody": null,
-<<<<<<< Updated upstream
-                  "id": 6972,
-=======
-                  "id": 7069,
->>>>>>> Stashed changes
+                  "id": 3995,
                   "nodeType": "IfStatement",
-                  "src": "485:36:52",
+                  "src": "485:36:20",
                   "trueBody": {
-<<<<<<< Updated upstream
-                    "id": 6971,
-=======
-                    "id": 7068,
->>>>>>> Stashed changes
+                    "id": 3994,
                     "nodeType": "Block",
-                    "src": "498:23:52",
+                    "src": "498:23:20",
                     "statements": [
                       {
                         "expression": {
                           "argumentTypes": null,
                           "hexValue": "30",
-<<<<<<< Updated upstream
-                          "id": 6969,
-=======
-                          "id": 7066,
->>>>>>> Stashed changes
+                          "id": 3992,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "kind": "number",
                           "lValueRequested": false,
                           "nodeType": "Literal",
-                          "src": "513:1:52",
+                          "src": "513:1:20",
                           "subdenomination": null,
                           "typeDescriptions": {
                             "typeIdentifier": "t_rational_0_by_1",
@@ -1931,15 +1300,10 @@
                           },
                           "value": "0"
                         },
-<<<<<<< Updated upstream
-                        "functionReturnParameters": 6965,
-                        "id": 6970,
-=======
-                        "functionReturnParameters": 7062,
-                        "id": 7067,
->>>>>>> Stashed changes
+                        "functionReturnParameters": 3988,
+                        "id": 3993,
                         "nodeType": "Return",
-                        "src": "506:8:52"
+                        "src": "506:8:20"
                       }
                     ]
                   }
@@ -1947,32 +1311,19 @@
                 {
                   "expression": {
                     "argumentTypes": null,
-<<<<<<< Updated upstream
-                    "id": 6977,
-=======
-                    "id": 7074,
->>>>>>> Stashed changes
+                    "id": 4000,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-<<<<<<< Updated upstream
-                      "id": 6973,
+                      "id": 3996,
                       "name": "c",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 6964,
-                      "src": "527:1:52",
-=======
-                      "id": 7070,
-                      "name": "c",
-                      "nodeType": "Identifier",
-                      "overloadedDeclarations": [],
-                      "referencedDeclaration": 7061,
-                      "src": "527:1:54",
->>>>>>> Stashed changes
+                      "referencedDeclaration": 3987,
+                      "src": "527:1:20",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -1986,32 +1337,19 @@
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       },
-<<<<<<< Updated upstream
-                      "id": 6976,
-=======
-                      "id": 7073,
->>>>>>> Stashed changes
+                      "id": 3999,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "leftExpression": {
                         "argumentTypes": null,
-<<<<<<< Updated upstream
-                        "id": 6974,
+                        "id": 3997,
                         "name": "_a",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 6959,
-                        "src": "531:2:52",
-=======
-                        "id": 7071,
-                        "name": "_a",
-                        "nodeType": "Identifier",
-                        "overloadedDeclarations": [],
-                        "referencedDeclaration": 7056,
-                        "src": "531:2:54",
->>>>>>> Stashed changes
+                        "referencedDeclaration": 3982,
+                        "src": "531:2:20",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -2021,45 +1359,32 @@
                       "operator": "*",
                       "rightExpression": {
                         "argumentTypes": null,
-<<<<<<< Updated upstream
-                        "id": 6975,
+                        "id": 3998,
                         "name": "_b",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 6961,
-                        "src": "536:2:52",
-=======
-                        "id": 7072,
-                        "name": "_b",
-                        "nodeType": "Identifier",
-                        "overloadedDeclarations": [],
-                        "referencedDeclaration": 7058,
-                        "src": "536:2:54",
->>>>>>> Stashed changes
+                        "referencedDeclaration": 3984,
+                        "src": "536:2:20",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         }
                       },
-                      "src": "531:7:52",
+                      "src": "531:7:20",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "527:11:52",
+                    "src": "527:11:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-<<<<<<< Updated upstream
-                  "id": 6978,
-=======
-                  "id": 7075,
->>>>>>> Stashed changes
+                  "id": 4001,
                   "nodeType": "ExpressionStatement",
-                  "src": "527:11:52"
+                  "src": "527:11:20"
                 },
                 {
                   "expression": {
@@ -2071,11 +1396,7 @@
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
-<<<<<<< Updated upstream
-                        "id": 6984,
-=======
-                        "id": 7081,
->>>>>>> Stashed changes
+                        "id": 4007,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -2086,32 +1407,19 @@
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           },
-<<<<<<< Updated upstream
-                          "id": 6982,
-=======
-                          "id": 7079,
->>>>>>> Stashed changes
+                          "id": 4005,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "leftExpression": {
                             "argumentTypes": null,
-<<<<<<< Updated upstream
-                            "id": 6980,
+                            "id": 4003,
                             "name": "c",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 6964,
-                            "src": "551:1:52",
-=======
-                            "id": 7077,
-                            "name": "c",
-                            "nodeType": "Identifier",
-                            "overloadedDeclarations": [],
-                            "referencedDeclaration": 7061,
-                            "src": "551:1:54",
->>>>>>> Stashed changes
+                            "referencedDeclaration": 3987,
+                            "src": "551:1:20",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -2121,27 +1429,18 @@
                           "operator": "/",
                           "rightExpression": {
                             "argumentTypes": null,
-<<<<<<< Updated upstream
-                            "id": 6981,
+                            "id": 4004,
                             "name": "_a",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 6959,
-                            "src": "555:2:52",
-=======
-                            "id": 7078,
-                            "name": "_a",
-                            "nodeType": "Identifier",
-                            "overloadedDeclarations": [],
-                            "referencedDeclaration": 7056,
-                            "src": "555:2:54",
->>>>>>> Stashed changes
+                            "referencedDeclaration": 3982,
+                            "src": "555:2:20",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
                             }
                           },
-                          "src": "551:6:52",
+                          "src": "551:6:20",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -2151,27 +1450,18 @@
                         "operator": "==",
                         "rightExpression": {
                           "argumentTypes": null,
-<<<<<<< Updated upstream
-                          "id": 6983,
+                          "id": 4006,
                           "name": "_b",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 6961,
-                          "src": "561:2:52",
-=======
-                          "id": 7080,
-                          "name": "_b",
-                          "nodeType": "Identifier",
-                          "overloadedDeclarations": [],
-                          "referencedDeclaration": 7058,
-                          "src": "561:2:54",
->>>>>>> Stashed changes
+                          "referencedDeclaration": 3984,
+                          "src": "561:2:20",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "src": "551:12:52",
+                        "src": "551:12:20",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -2185,31 +1475,18 @@
                           "typeString": "bool"
                         }
                       ],
-<<<<<<< Updated upstream
-                      "id": 6979,
+                      "id": 4002,
                       "name": "assert",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 10758,
-                      "src": "544:6:52",
-=======
-                      "id": 7076,
-                      "name": "assert",
-                      "nodeType": "Identifier",
-                      "overloadedDeclarations": [],
-                      "referencedDeclaration": 10855,
-                      "src": "544:6:54",
->>>>>>> Stashed changes
+                      "referencedDeclaration": 4642,
+                      "src": "544:6:20",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_assert_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-<<<<<<< Updated upstream
-                    "id": 6985,
-=======
-                    "id": 7082,
->>>>>>> Stashed changes
+                    "id": 4008,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2217,61 +1494,39 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "544:20:52",
+                    "src": "544:20:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-<<<<<<< Updated upstream
-                  "id": 6986,
-=======
-                  "id": 7083,
->>>>>>> Stashed changes
+                  "id": 4009,
                   "nodeType": "ExpressionStatement",
-                  "src": "544:20:52"
+                  "src": "544:20:20"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-<<<<<<< Updated upstream
-                    "id": 6987,
+                    "id": 4010,
                     "name": "c",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 6964,
-                    "src": "577:1:52",
-=======
-                    "id": 7084,
-                    "name": "c",
-                    "nodeType": "Identifier",
-                    "overloadedDeclarations": [],
-                    "referencedDeclaration": 7061,
-                    "src": "577:1:54",
->>>>>>> Stashed changes
+                    "referencedDeclaration": 3987,
+                    "src": "577:1:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-<<<<<<< Updated upstream
-                  "functionReturnParameters": 6965,
-                  "id": 6988,
-=======
-                  "functionReturnParameters": 7062,
-                  "id": 7085,
->>>>>>> Stashed changes
+                  "functionReturnParameters": 3988,
+                  "id": 4011,
                   "nodeType": "Return",
-                  "src": "570:8:52"
+                  "src": "570:8:20"
                 }
               ]
             },
             "documentation": "@dev Multiplies two numbers, throws on overflow.",
-<<<<<<< Updated upstream
-            "id": 6990,
-=======
-            "id": 7087,
->>>>>>> Stashed changes
+            "id": 4013,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -2279,28 +1534,16 @@
             "name": "mul",
             "nodeType": "FunctionDefinition",
             "parameters": {
-<<<<<<< Updated upstream
-              "id": 6962,
-=======
-              "id": 7059,
->>>>>>> Stashed changes
+              "id": 3985,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-<<<<<<< Updated upstream
-                  "id": 6959,
+                  "id": 3982,
                   "name": "_a",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6990,
-                  "src": "216:10:52",
-=======
-                  "id": 7056,
-                  "name": "_a",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 7087,
-                  "src": "216:10:54",
->>>>>>> Stashed changes
+                  "scope": 4013,
+                  "src": "216:10:20",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2308,14 +1551,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-<<<<<<< Updated upstream
-                    "id": 6958,
-=======
-                    "id": 7055,
->>>>>>> Stashed changes
+                    "id": 3981,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "216:7:52",
+                    "src": "216:7:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2326,19 +1565,11 @@
                 },
                 {
                   "constant": false,
-<<<<<<< Updated upstream
-                  "id": 6961,
+                  "id": 3984,
                   "name": "_b",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6990,
-                  "src": "228:10:52",
-=======
-                  "id": 7058,
-                  "name": "_b",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 7087,
-                  "src": "228:10:54",
->>>>>>> Stashed changes
+                  "scope": 4013,
+                  "src": "228:10:20",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2346,14 +1577,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-<<<<<<< Updated upstream
-                    "id": 6960,
-=======
-                    "id": 7057,
->>>>>>> Stashed changes
+                    "id": 3983,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "228:7:52",
+                    "src": "228:7:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2363,32 +1590,20 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "215:24:52"
+              "src": "215:24:20"
             },
             "payable": false,
             "returnParameters": {
-<<<<<<< Updated upstream
-              "id": 6965,
-=======
-              "id": 7062,
->>>>>>> Stashed changes
+              "id": 3988,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-<<<<<<< Updated upstream
-                  "id": 6964,
+                  "id": 3987,
                   "name": "c",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6990,
-                  "src": "263:9:52",
-=======
-                  "id": 7061,
-                  "name": "c",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 7087,
-                  "src": "263:9:54",
->>>>>>> Stashed changes
+                  "scope": 4013,
+                  "src": "263:9:20",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2396,14 +1611,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-<<<<<<< Updated upstream
-                    "id": 6963,
-=======
-                    "id": 7060,
->>>>>>> Stashed changes
+                    "id": 3986,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "263:7:52",
+                    "src": "263:7:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2413,28 +1624,19 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "262:11:52"
+              "src": "262:11:20"
             },
-<<<<<<< Updated upstream
-            "scope": 7049,
-            "src": "203:380:52",
-=======
-            "scope": 7146,
-            "src": "203:380:54",
->>>>>>> Stashed changes
+            "scope": 4072,
+            "src": "203:380:20",
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "internal"
           },
           {
             "body": {
-<<<<<<< Updated upstream
-              "id": 7003,
-=======
-              "id": 7100,
->>>>>>> Stashed changes
+              "id": 4026,
               "nodeType": "Block",
-              "src": "734:214:52",
+              "src": "734:214:20",
               "statements": [
                 {
                   "expression": {
@@ -2443,32 +1645,19 @@
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     },
-<<<<<<< Updated upstream
-                    "id": 7001,
-=======
-                    "id": 7098,
->>>>>>> Stashed changes
+                    "id": 4024,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
                       "argumentTypes": null,
-<<<<<<< Updated upstream
-                      "id": 6999,
+                      "id": 4022,
                       "name": "_a",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 6992,
-                      "src": "936:2:52",
-=======
-                      "id": 7096,
-                      "name": "_a",
-                      "nodeType": "Identifier",
-                      "overloadedDeclarations": [],
-                      "referencedDeclaration": 7089,
-                      "src": "936:2:54",
->>>>>>> Stashed changes
+                      "referencedDeclaration": 4015,
+                      "src": "936:2:20",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -2478,50 +1667,32 @@
                     "operator": "/",
                     "rightExpression": {
                       "argumentTypes": null,
-<<<<<<< Updated upstream
-                      "id": 7000,
+                      "id": 4023,
                       "name": "_b",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 6994,
-                      "src": "941:2:52",
-=======
-                      "id": 7097,
-                      "name": "_b",
-                      "nodeType": "Identifier",
-                      "overloadedDeclarations": [],
-                      "referencedDeclaration": 7091,
-                      "src": "941:2:54",
->>>>>>> Stashed changes
+                      "referencedDeclaration": 4017,
+                      "src": "941:2:20",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "936:7:52",
+                    "src": "936:7:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-<<<<<<< Updated upstream
-                  "functionReturnParameters": 6998,
-                  "id": 7002,
-=======
-                  "functionReturnParameters": 7095,
-                  "id": 7099,
->>>>>>> Stashed changes
+                  "functionReturnParameters": 4021,
+                  "id": 4025,
                   "nodeType": "Return",
-                  "src": "929:14:52"
+                  "src": "929:14:20"
                 }
               ]
             },
             "documentation": "@dev Integer division of two numbers, truncating the quotient.",
-<<<<<<< Updated upstream
-            "id": 7004,
-=======
-            "id": 7101,
->>>>>>> Stashed changes
+            "id": 4027,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -2529,28 +1700,16 @@
             "name": "div",
             "nodeType": "FunctionDefinition",
             "parameters": {
-<<<<<<< Updated upstream
-              "id": 6995,
-=======
-              "id": 7092,
->>>>>>> Stashed changes
+              "id": 4018,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-<<<<<<< Updated upstream
-                  "id": 6992,
+                  "id": 4015,
                   "name": "_a",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7004,
-                  "src": "678:10:52",
-=======
-                  "id": 7089,
-                  "name": "_a",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 7101,
-                  "src": "678:10:54",
->>>>>>> Stashed changes
+                  "scope": 4027,
+                  "src": "678:10:20",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2558,14 +1717,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-<<<<<<< Updated upstream
-                    "id": 6991,
-=======
-                    "id": 7088,
->>>>>>> Stashed changes
+                    "id": 4014,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "678:7:52",
+                    "src": "678:7:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2576,19 +1731,11 @@
                 },
                 {
                   "constant": false,
-<<<<<<< Updated upstream
-                  "id": 6994,
+                  "id": 4017,
                   "name": "_b",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7004,
-                  "src": "690:10:52",
-=======
-                  "id": 7091,
-                  "name": "_b",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 7101,
-                  "src": "690:10:54",
->>>>>>> Stashed changes
+                  "scope": 4027,
+                  "src": "690:10:20",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2596,14 +1743,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-<<<<<<< Updated upstream
-                    "id": 6993,
-=======
-                    "id": 7090,
->>>>>>> Stashed changes
+                    "id": 4016,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "690:7:52",
+                    "src": "690:7:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2613,32 +1756,20 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "677:24:52"
+              "src": "677:24:20"
             },
             "payable": false,
             "returnParameters": {
-<<<<<<< Updated upstream
-              "id": 6998,
-=======
-              "id": 7095,
->>>>>>> Stashed changes
+              "id": 4021,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-<<<<<<< Updated upstream
-                  "id": 6997,
+                  "id": 4020,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7004,
-                  "src": "725:7:52",
-=======
-                  "id": 7094,
-                  "name": "",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 7101,
-                  "src": "725:7:54",
->>>>>>> Stashed changes
+                  "scope": 4027,
+                  "src": "725:7:20",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2646,14 +1777,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-<<<<<<< Updated upstream
-                    "id": 6996,
-=======
-                    "id": 7093,
->>>>>>> Stashed changes
+                    "id": 4019,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "725:7:52",
+                    "src": "725:7:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2663,28 +1790,19 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "724:9:52"
+              "src": "724:9:20"
             },
-<<<<<<< Updated upstream
-            "scope": 7049,
-            "src": "665:283:52",
-=======
-            "scope": 7146,
-            "src": "665:283:54",
->>>>>>> Stashed changes
+            "scope": 4072,
+            "src": "665:283:20",
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "internal"
           },
           {
             "body": {
-<<<<<<< Updated upstream
-              "id": 7023,
-=======
-              "id": 7120,
->>>>>>> Stashed changes
+              "id": 4046,
               "nodeType": "Block",
-              "src": "1129:47:52",
+              "src": "1129:47:20",
               "statements": [
                 {
                   "expression": {
@@ -2696,32 +1814,19 @@
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
-<<<<<<< Updated upstream
-                        "id": 7016,
-=======
-                        "id": 7113,
->>>>>>> Stashed changes
+                        "id": 4039,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
                           "argumentTypes": null,
-<<<<<<< Updated upstream
-                          "id": 7014,
+                          "id": 4037,
                           "name": "_b",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 7008,
-                          "src": "1142:2:52",
-=======
-                          "id": 7111,
-                          "name": "_b",
-                          "nodeType": "Identifier",
-                          "overloadedDeclarations": [],
-                          "referencedDeclaration": 7105,
-                          "src": "1142:2:54",
->>>>>>> Stashed changes
+                          "referencedDeclaration": 4031,
+                          "src": "1142:2:20",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -2731,27 +1836,18 @@
                         "operator": "<=",
                         "rightExpression": {
                           "argumentTypes": null,
-<<<<<<< Updated upstream
-                          "id": 7015,
+                          "id": 4038,
                           "name": "_a",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 7006,
-                          "src": "1148:2:52",
-=======
-                          "id": 7112,
-                          "name": "_a",
-                          "nodeType": "Identifier",
-                          "overloadedDeclarations": [],
-                          "referencedDeclaration": 7103,
-                          "src": "1148:2:54",
->>>>>>> Stashed changes
+                          "referencedDeclaration": 4029,
+                          "src": "1148:2:20",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "src": "1142:8:52",
+                        "src": "1142:8:20",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -2765,31 +1861,18 @@
                           "typeString": "bool"
                         }
                       ],
-<<<<<<< Updated upstream
-                      "id": 7013,
+                      "id": 4036,
                       "name": "assert",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 10758,
-                      "src": "1135:6:52",
-=======
-                      "id": 7110,
-                      "name": "assert",
-                      "nodeType": "Identifier",
-                      "overloadedDeclarations": [],
-                      "referencedDeclaration": 10855,
-                      "src": "1135:6:54",
->>>>>>> Stashed changes
+                      "referencedDeclaration": 4642,
+                      "src": "1135:6:20",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_assert_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-<<<<<<< Updated upstream
-                    "id": 7017,
-=======
-                    "id": 7114,
->>>>>>> Stashed changes
+                    "id": 4040,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2797,19 +1880,15 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "1135:16:52",
+                    "src": "1135:16:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-<<<<<<< Updated upstream
-                  "id": 7018,
-=======
-                  "id": 7115,
->>>>>>> Stashed changes
+                  "id": 4041,
                   "nodeType": "ExpressionStatement",
-                  "src": "1135:16:52"
+                  "src": "1135:16:20"
                 },
                 {
                   "expression": {
@@ -2818,32 +1897,19 @@
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     },
-<<<<<<< Updated upstream
-                    "id": 7021,
-=======
-                    "id": 7118,
->>>>>>> Stashed changes
+                    "id": 4044,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
                       "argumentTypes": null,
-<<<<<<< Updated upstream
-                      "id": 7019,
+                      "id": 4042,
                       "name": "_a",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 7006,
-                      "src": "1164:2:52",
-=======
-                      "id": 7116,
-                      "name": "_a",
-                      "nodeType": "Identifier",
-                      "overloadedDeclarations": [],
-                      "referencedDeclaration": 7103,
-                      "src": "1164:2:54",
->>>>>>> Stashed changes
+                      "referencedDeclaration": 4029,
+                      "src": "1164:2:20",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -2853,50 +1919,32 @@
                     "operator": "-",
                     "rightExpression": {
                       "argumentTypes": null,
-<<<<<<< Updated upstream
-                      "id": 7020,
+                      "id": 4043,
                       "name": "_b",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 7008,
-                      "src": "1169:2:52",
-=======
-                      "id": 7117,
-                      "name": "_b",
-                      "nodeType": "Identifier",
-                      "overloadedDeclarations": [],
-                      "referencedDeclaration": 7105,
-                      "src": "1169:2:54",
->>>>>>> Stashed changes
+                      "referencedDeclaration": 4031,
+                      "src": "1169:2:20",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "1164:7:52",
+                    "src": "1164:7:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-<<<<<<< Updated upstream
-                  "functionReturnParameters": 7012,
-                  "id": 7022,
-=======
-                  "functionReturnParameters": 7109,
-                  "id": 7119,
->>>>>>> Stashed changes
+                  "functionReturnParameters": 4035,
+                  "id": 4045,
                   "nodeType": "Return",
-                  "src": "1157:14:52"
+                  "src": "1157:14:20"
                 }
               ]
             },
             "documentation": "@dev Subtracts two numbers, throws on overflow (i.e. if subtrahend is greater than minuend).",
-<<<<<<< Updated upstream
-            "id": 7024,
-=======
-            "id": 7121,
->>>>>>> Stashed changes
+            "id": 4047,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -2904,28 +1952,16 @@
             "name": "sub",
             "nodeType": "FunctionDefinition",
             "parameters": {
-<<<<<<< Updated upstream
-              "id": 7009,
-=======
-              "id": 7106,
->>>>>>> Stashed changes
+              "id": 4032,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-<<<<<<< Updated upstream
-                  "id": 7006,
+                  "id": 4029,
                   "name": "_a",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7024,
-                  "src": "1073:10:52",
-=======
-                  "id": 7103,
-                  "name": "_a",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 7121,
-                  "src": "1073:10:54",
->>>>>>> Stashed changes
+                  "scope": 4047,
+                  "src": "1073:10:20",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2933,14 +1969,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-<<<<<<< Updated upstream
-                    "id": 7005,
-=======
-                    "id": 7102,
->>>>>>> Stashed changes
+                    "id": 4028,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1073:7:52",
+                    "src": "1073:7:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2951,19 +1983,11 @@
                 },
                 {
                   "constant": false,
-<<<<<<< Updated upstream
-                  "id": 7008,
+                  "id": 4031,
                   "name": "_b",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7024,
-                  "src": "1085:10:52",
-=======
-                  "id": 7105,
-                  "name": "_b",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 7121,
-                  "src": "1085:10:54",
->>>>>>> Stashed changes
+                  "scope": 4047,
+                  "src": "1085:10:20",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2971,14 +1995,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-<<<<<<< Updated upstream
-                    "id": 7007,
-=======
-                    "id": 7104,
->>>>>>> Stashed changes
+                    "id": 4030,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1085:7:52",
+                    "src": "1085:7:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2988,32 +2008,20 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1072:24:52"
+              "src": "1072:24:20"
             },
             "payable": false,
             "returnParameters": {
-<<<<<<< Updated upstream
-              "id": 7012,
-=======
-              "id": 7109,
->>>>>>> Stashed changes
+              "id": 4035,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-<<<<<<< Updated upstream
-                  "id": 7011,
+                  "id": 4034,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7024,
-                  "src": "1120:7:52",
-=======
-                  "id": 7108,
-                  "name": "",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 7121,
-                  "src": "1120:7:54",
->>>>>>> Stashed changes
+                  "scope": 4047,
+                  "src": "1120:7:20",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3021,14 +2029,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-<<<<<<< Updated upstream
-                    "id": 7010,
-=======
-                    "id": 7107,
->>>>>>> Stashed changes
+                    "id": 4033,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1120:7:52",
+                    "src": "1120:7:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -3038,58 +2042,36 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1119:9:52"
+              "src": "1119:9:20"
             },
-<<<<<<< Updated upstream
-            "scope": 7049,
-            "src": "1060:116:52",
-=======
-            "scope": 7146,
-            "src": "1060:116:54",
->>>>>>> Stashed changes
+            "scope": 4072,
+            "src": "1060:116:20",
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "internal"
           },
           {
             "body": {
-<<<<<<< Updated upstream
-              "id": 7047,
-=======
-              "id": 7144,
->>>>>>> Stashed changes
+              "id": 4070,
               "nodeType": "Block",
-              "src": "1309:57:52",
+              "src": "1309:57:20",
               "statements": [
                 {
                   "expression": {
                     "argumentTypes": null,
-<<<<<<< Updated upstream
-                    "id": 7037,
-=======
-                    "id": 7134,
->>>>>>> Stashed changes
+                    "id": 4060,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-<<<<<<< Updated upstream
-                      "id": 7033,
+                      "id": 4056,
                       "name": "c",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 7031,
-                      "src": "1315:1:52",
-=======
-                      "id": 7130,
-                      "name": "c",
-                      "nodeType": "Identifier",
-                      "overloadedDeclarations": [],
-                      "referencedDeclaration": 7128,
-                      "src": "1315:1:54",
->>>>>>> Stashed changes
+                      "referencedDeclaration": 4054,
+                      "src": "1315:1:20",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -3103,32 +2085,19 @@
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       },
-<<<<<<< Updated upstream
-                      "id": 7036,
-=======
-                      "id": 7133,
->>>>>>> Stashed changes
+                      "id": 4059,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "leftExpression": {
                         "argumentTypes": null,
-<<<<<<< Updated upstream
-                        "id": 7034,
+                        "id": 4057,
                         "name": "_a",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7026,
-                        "src": "1319:2:52",
-=======
-                        "id": 7131,
-                        "name": "_a",
-                        "nodeType": "Identifier",
-                        "overloadedDeclarations": [],
-                        "referencedDeclaration": 7123,
-                        "src": "1319:2:54",
->>>>>>> Stashed changes
+                        "referencedDeclaration": 4049,
+                        "src": "1319:2:20",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -3138,45 +2107,32 @@
                       "operator": "+",
                       "rightExpression": {
                         "argumentTypes": null,
-<<<<<<< Updated upstream
-                        "id": 7035,
+                        "id": 4058,
                         "name": "_b",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7028,
-                        "src": "1324:2:52",
-=======
-                        "id": 7132,
-                        "name": "_b",
-                        "nodeType": "Identifier",
-                        "overloadedDeclarations": [],
-                        "referencedDeclaration": 7125,
-                        "src": "1324:2:54",
->>>>>>> Stashed changes
+                        "referencedDeclaration": 4051,
+                        "src": "1324:2:20",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         }
                       },
-                      "src": "1319:7:52",
+                      "src": "1319:7:20",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "1315:11:52",
+                    "src": "1315:11:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-<<<<<<< Updated upstream
-                  "id": 7038,
-=======
-                  "id": 7135,
->>>>>>> Stashed changes
+                  "id": 4061,
                   "nodeType": "ExpressionStatement",
-                  "src": "1315:11:52"
+                  "src": "1315:11:20"
                 },
                 {
                   "expression": {
@@ -3188,32 +2144,19 @@
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
-<<<<<<< Updated upstream
-                        "id": 7042,
-=======
-                        "id": 7139,
->>>>>>> Stashed changes
+                        "id": 4065,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
                           "argumentTypes": null,
-<<<<<<< Updated upstream
-                          "id": 7040,
+                          "id": 4063,
                           "name": "c",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 7031,
-                          "src": "1339:1:52",
-=======
-                          "id": 7137,
-                          "name": "c",
-                          "nodeType": "Identifier",
-                          "overloadedDeclarations": [],
-                          "referencedDeclaration": 7128,
-                          "src": "1339:1:54",
->>>>>>> Stashed changes
+                          "referencedDeclaration": 4054,
+                          "src": "1339:1:20",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -3223,27 +2166,18 @@
                         "operator": ">=",
                         "rightExpression": {
                           "argumentTypes": null,
-<<<<<<< Updated upstream
-                          "id": 7041,
+                          "id": 4064,
                           "name": "_a",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 7026,
-                          "src": "1344:2:52",
-=======
-                          "id": 7138,
-                          "name": "_a",
-                          "nodeType": "Identifier",
-                          "overloadedDeclarations": [],
-                          "referencedDeclaration": 7123,
-                          "src": "1344:2:54",
->>>>>>> Stashed changes
+                          "referencedDeclaration": 4049,
+                          "src": "1344:2:20",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "src": "1339:7:52",
+                        "src": "1339:7:20",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -3257,31 +2191,18 @@
                           "typeString": "bool"
                         }
                       ],
-<<<<<<< Updated upstream
-                      "id": 7039,
+                      "id": 4062,
                       "name": "assert",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 10758,
-                      "src": "1332:6:52",
-=======
-                      "id": 7136,
-                      "name": "assert",
-                      "nodeType": "Identifier",
-                      "overloadedDeclarations": [],
-                      "referencedDeclaration": 10855,
-                      "src": "1332:6:54",
->>>>>>> Stashed changes
+                      "referencedDeclaration": 4642,
+                      "src": "1332:6:20",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_assert_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-<<<<<<< Updated upstream
-                    "id": 7043,
-=======
-                    "id": 7140,
->>>>>>> Stashed changes
+                    "id": 4066,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -3289,61 +2210,39 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "1332:15:52",
+                    "src": "1332:15:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-<<<<<<< Updated upstream
-                  "id": 7044,
-=======
-                  "id": 7141,
->>>>>>> Stashed changes
+                  "id": 4067,
                   "nodeType": "ExpressionStatement",
-                  "src": "1332:15:52"
+                  "src": "1332:15:20"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-<<<<<<< Updated upstream
-                    "id": 7045,
+                    "id": 4068,
                     "name": "c",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 7031,
-                    "src": "1360:1:52",
-=======
-                    "id": 7142,
-                    "name": "c",
-                    "nodeType": "Identifier",
-                    "overloadedDeclarations": [],
-                    "referencedDeclaration": 7128,
-                    "src": "1360:1:54",
->>>>>>> Stashed changes
+                    "referencedDeclaration": 4054,
+                    "src": "1360:1:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-<<<<<<< Updated upstream
-                  "functionReturnParameters": 7032,
-                  "id": 7046,
-=======
-                  "functionReturnParameters": 7129,
-                  "id": 7143,
->>>>>>> Stashed changes
+                  "functionReturnParameters": 4055,
+                  "id": 4069,
                   "nodeType": "Return",
-                  "src": "1353:8:52"
+                  "src": "1353:8:20"
                 }
               ]
             },
             "documentation": "@dev Adds two numbers, throws on overflow.",
-<<<<<<< Updated upstream
-            "id": 7048,
-=======
-            "id": 7145,
->>>>>>> Stashed changes
+            "id": 4071,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -3351,28 +2250,16 @@
             "name": "add",
             "nodeType": "FunctionDefinition",
             "parameters": {
-<<<<<<< Updated upstream
-              "id": 7029,
-=======
-              "id": 7126,
->>>>>>> Stashed changes
+              "id": 4052,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-<<<<<<< Updated upstream
-                  "id": 7026,
+                  "id": 4049,
                   "name": "_a",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7048,
-                  "src": "1251:10:52",
-=======
-                  "id": 7123,
-                  "name": "_a",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 7145,
-                  "src": "1251:10:54",
->>>>>>> Stashed changes
+                  "scope": 4071,
+                  "src": "1251:10:20",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3380,14 +2267,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-<<<<<<< Updated upstream
-                    "id": 7025,
-=======
-                    "id": 7122,
->>>>>>> Stashed changes
+                    "id": 4048,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1251:7:52",
+                    "src": "1251:7:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -3398,19 +2281,11 @@
                 },
                 {
                   "constant": false,
-<<<<<<< Updated upstream
-                  "id": 7028,
+                  "id": 4051,
                   "name": "_b",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7048,
-                  "src": "1263:10:52",
-=======
-                  "id": 7125,
-                  "name": "_b",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 7145,
-                  "src": "1263:10:54",
->>>>>>> Stashed changes
+                  "scope": 4071,
+                  "src": "1263:10:20",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3418,14 +2293,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-<<<<<<< Updated upstream
-                    "id": 7027,
-=======
-                    "id": 7124,
->>>>>>> Stashed changes
+                    "id": 4050,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1263:7:52",
+                    "src": "1263:7:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -3435,32 +2306,20 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1250:24:52"
+              "src": "1250:24:20"
             },
             "payable": false,
             "returnParameters": {
-<<<<<<< Updated upstream
-              "id": 7032,
-=======
-              "id": 7129,
->>>>>>> Stashed changes
+              "id": 4055,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-<<<<<<< Updated upstream
-                  "id": 7031,
+                  "id": 4054,
                   "name": "c",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7048,
-                  "src": "1298:9:52",
-=======
-                  "id": 7128,
-                  "name": "c",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 7145,
-                  "src": "1298:9:54",
->>>>>>> Stashed changes
+                  "scope": 4071,
+                  "src": "1298:9:20",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3468,14 +2327,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-<<<<<<< Updated upstream
-                    "id": 7030,
-=======
-                    "id": 7127,
->>>>>>> Stashed changes
+                    "id": 4053,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1298:7:52",
+                    "src": "1298:7:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -3485,30 +2340,20 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1297:11:52"
+              "src": "1297:11:20"
             },
-<<<<<<< Updated upstream
-            "scope": 7049,
-            "src": "1238:128:52",
-=======
-            "scope": 7146,
-            "src": "1238:128:54",
->>>>>>> Stashed changes
+            "scope": 4072,
+            "src": "1238:128:20",
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "internal"
           }
         ],
-<<<<<<< Updated upstream
-        "scope": 7050,
-        "src": "117:1251:52"
-=======
-        "scope": 7147,
-        "src": "117:1251:54"
->>>>>>> Stashed changes
+        "scope": 4073,
+        "src": "117:1251:20"
       }
     ],
-    "src": "0:1369:52"
+    "src": "0:1369:20"
   },
   "compiler": {
     "name": "solc",
@@ -3516,9 +2361,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
-<<<<<<< Updated upstream
-  "updatedAt": "2018-08-21T13:36:52.332Z"
-=======
-  "updatedAt": "2018-08-21T13:27:41.772Z"
->>>>>>> Stashed changes
+  "updatedAt": "2018-08-21T14:01:36.417Z"
 }

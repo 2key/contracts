@@ -1,33 +1,16 @@
 {
   "contractName": "MerkleProof",
   "abi": [],
-<<<<<<< Updated upstream
-  "bytecode": "0x604c602c600b82828239805160001a60731460008114601c57601e565bfe5b5030600052607381538281f30073000000000000000000000000000000000000000030146080604052600080fd00a165627a7a7230582068d0cc47602af5577323a51cef1d6670e18daa3c602dcc5be7d2b31852ae91140029",
-  "deployedBytecode": "0x73000000000000000000000000000000000000000030146080604052600080fd00a165627a7a7230582068d0cc47602af5577323a51cef1d6670e18daa3c602dcc5be7d2b31852ae91140029",
-  "sourceMap": "184:1120:29:-;;132:2:-1;166:7;155:9;146:7;137:37;252:7;246:14;243:1;238:23;232:4;229:33;270:1;265:20;;;;222:63;;265:20;274:9;222:63;;298:9;295:1;288:20;328:4;319:7;311:22;352:7;343;336:24",
-  "deployedSourceMap": "184:1120:29:-;;;;;;;;",
-=======
   "bytecode": "0x604c602c600b82828239805160001a60731460008114601c57601e565bfe5b5030600052607381538281f30073000000000000000000000000000000000000000030146080604052600080fd00a165627a7a723058203f64cd31310a801178315fd52470ea00cb4e7835b0058e60ec95c6fc373b8eae0029",
   "deployedBytecode": "0x73000000000000000000000000000000000000000030146080604052600080fd00a165627a7a723058203f64cd31310a801178315fd52470ea00cb4e7835b0058e60ec95c6fc373b8eae0029",
   "sourceMap": "184:1120:31:-;;132:2:-1;166:7;155:9;146:7;137:37;252:7;246:14;243:1;238:23;232:4;229:33;270:1;265:20;;;;222:63;;265:20;274:9;222:63;;298:9;295:1;288:20;328:4;319:7;311:22;352:7;343;336:24",
   "deployedSourceMap": "184:1120:31:-;;;;;;;;",
->>>>>>> Stashed changes
   "source": "pragma solidity ^0.4.24;\n\n\n/**\n * @title MerkleProof\n * @dev Merkle proof verification based on\n * https://github.com/ameensol/merkle-tree-solidity/blob/master/src/MerkleProof.sol\n */\nlibrary MerkleProof {\n  /**\n   * @dev Verifies a Merkle proof proving the existence of a leaf in a Merkle tree. Assumes that each pair of leaves\n   * and each pair of pre-images are sorted.\n   * @param _proof Merkle proof containing sibling hashes on the branch from the leaf to the root of the Merkle tree\n   * @param _root Merkle root\n   * @param _leaf Leaf of Merkle tree\n   */\n  function verifyProof(\n    bytes32[] _proof,\n    bytes32 _root,\n    bytes32 _leaf\n  )\n    internal\n    pure\n    returns (bool)\n  {\n    bytes32 computedHash = _leaf;\n\n    for (uint256 i = 0; i < _proof.length; i++) {\n      bytes32 proofElement = _proof[i];\n\n      if (computedHash < proofElement) {\n        // Hash(current computed hash + current element of the proof)\n        computedHash = keccak256(abi.encodePacked(computedHash, proofElement));\n      } else {\n        // Hash(current element of the proof + current computed hash)\n        computedHash = keccak256(abi.encodePacked(proofElement, computedHash));\n      }\n    }\n\n    // Check if the computed hash (root) is equal to the provided root\n    return computedHash == _root;\n  }\n}\n",
   "sourcePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/MerkleProof.sol",
   "ast": {
     "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/MerkleProof.sol",
     "exportedSymbols": {
       "MerkleProof": [
-<<<<<<< Updated upstream
-        5108
-      ]
-    },
-    "id": 5109,
-    "nodeType": "SourceUnit",
-    "nodes": [
-      {
-        "id": 5041,
-=======
         5205
       ]
     },
@@ -36,7 +19,6 @@
     "nodes": [
       {
         "id": 5138,
->>>>>>> Stashed changes
         "literals": [
           "solidity",
           "^",
@@ -44,7 +26,7 @@
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:24:29"
+        "src": "0:24:31"
       },
       {
         "baseContracts": [],
@@ -52,53 +34,31 @@
         "contractKind": "library",
         "documentation": "@title MerkleProof\n@dev Merkle proof verification based on\nhttps://github.com/ameensol/merkle-tree-solidity/blob/master/src/MerkleProof.sol",
         "fullyImplemented": true,
-<<<<<<< Updated upstream
-        "id": 5108,
-        "linearizedBaseContracts": [
-          5108
-=======
         "id": 5205,
         "linearizedBaseContracts": [
           5205
->>>>>>> Stashed changes
         ],
         "name": "MerkleProof",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
-<<<<<<< Updated upstream
-              "id": 5106,
-=======
               "id": 5203,
->>>>>>> Stashed changes
               "nodeType": "Block",
-              "src": "695:607:29",
+              "src": "695:607:31",
               "statements": [
                 {
                   "assignments": [
-<<<<<<< Updated upstream
-                    5054
-=======
                     5151
->>>>>>> Stashed changes
                   ],
                   "declarations": [
                     {
                       "constant": false,
-<<<<<<< Updated upstream
-                      "id": 5054,
-                      "name": "computedHash",
-                      "nodeType": "VariableDeclaration",
-                      "scope": 5107,
-                      "src": "701:20:29",
-=======
                       "id": 5151,
                       "name": "computedHash",
                       "nodeType": "VariableDeclaration",
                       "scope": 5204,
                       "src": "701:20:31",
->>>>>>> Stashed changes
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -106,14 +66,10 @@
                         "typeString": "bytes32"
                       },
                       "typeName": {
-<<<<<<< Updated upstream
-                        "id": 5053,
-=======
                         "id": 5150,
->>>>>>> Stashed changes
                         "name": "bytes32",
                         "nodeType": "ElementaryTypeName",
-                        "src": "701:7:29",
+                        "src": "701:7:31",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes32",
                           "typeString": "bytes32"
@@ -123,17 +79,6 @@
                       "visibility": "internal"
                     }
                   ],
-<<<<<<< Updated upstream
-                  "id": 5056,
-                  "initialValue": {
-                    "argumentTypes": null,
-                    "id": 5055,
-                    "name": "_leaf",
-                    "nodeType": "Identifier",
-                    "overloadedDeclarations": [],
-                    "referencedDeclaration": 5048,
-                    "src": "724:5:29",
-=======
                   "id": 5153,
                   "initialValue": {
                     "argumentTypes": null,
@@ -143,49 +88,32 @@
                     "overloadedDeclarations": [],
                     "referencedDeclaration": 5145,
                     "src": "724:5:31",
->>>>>>> Stashed changes
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes32",
                       "typeString": "bytes32"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "701:28:29"
+                  "src": "701:28:31"
                 },
                 {
                   "body": {
-<<<<<<< Updated upstream
-                    "id": 5100,
-=======
                     "id": 5197,
->>>>>>> Stashed changes
                     "nodeType": "Block",
-                    "src": "780:412:29",
+                    "src": "780:412:31",
                     "statements": [
                       {
                         "assignments": [
-<<<<<<< Updated upstream
-                          5069
-=======
                           5166
->>>>>>> Stashed changes
                         ],
                         "declarations": [
                           {
                             "constant": false,
-<<<<<<< Updated upstream
-                            "id": 5069,
-                            "name": "proofElement",
-                            "nodeType": "VariableDeclaration",
-                            "scope": 5107,
-                            "src": "788:20:29",
-=======
                             "id": 5166,
                             "name": "proofElement",
                             "nodeType": "VariableDeclaration",
                             "scope": 5204,
                             "src": "788:20:31",
->>>>>>> Stashed changes
                             "stateVariable": false,
                             "storageLocation": "default",
                             "typeDescriptions": {
@@ -193,14 +121,10 @@
                               "typeString": "bytes32"
                             },
                             "typeName": {
-<<<<<<< Updated upstream
-                              "id": 5068,
-=======
                               "id": 5165,
->>>>>>> Stashed changes
                               "name": "bytes32",
                               "nodeType": "ElementaryTypeName",
-                              "src": "788:7:29",
+                              "src": "788:7:31",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_bytes32",
                                 "typeString": "bytes32"
@@ -210,46 +134,22 @@
                             "visibility": "internal"
                           }
                         ],
-<<<<<<< Updated upstream
-                        "id": 5073,
-=======
                         "id": 5170,
->>>>>>> Stashed changes
                         "initialValue": {
                           "argumentTypes": null,
                           "baseExpression": {
                             "argumentTypes": null,
-<<<<<<< Updated upstream
-                            "id": 5070,
-                            "name": "_proof",
-                            "nodeType": "Identifier",
-                            "overloadedDeclarations": [],
-                            "referencedDeclaration": 5044,
-                            "src": "811:6:29",
-=======
                             "id": 5167,
                             "name": "_proof",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
                             "referencedDeclaration": 5141,
                             "src": "811:6:31",
->>>>>>> Stashed changes
                             "typeDescriptions": {
                               "typeIdentifier": "t_array$_t_bytes32_$dyn_memory_ptr",
                               "typeString": "bytes32[] memory"
                             }
                           },
-<<<<<<< Updated upstream
-                          "id": 5072,
-                          "indexExpression": {
-                            "argumentTypes": null,
-                            "id": 5071,
-                            "name": "i",
-                            "nodeType": "Identifier",
-                            "overloadedDeclarations": [],
-                            "referencedDeclaration": 5058,
-                            "src": "818:1:29",
-=======
                           "id": 5169,
                           "indexExpression": {
                             "argumentTypes": null,
@@ -259,7 +159,6 @@
                             "overloadedDeclarations": [],
                             "referencedDeclaration": 5155,
                             "src": "818:1:31",
->>>>>>> Stashed changes
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -270,14 +169,14 @@
                           "isPure": false,
                           "lValueRequested": false,
                           "nodeType": "IndexAccess",
-                          "src": "811:9:29",
+                          "src": "811:9:31",
                           "typeDescriptions": {
                             "typeIdentifier": "t_bytes32",
                             "typeString": "bytes32"
                           }
                         },
                         "nodeType": "VariableDeclarationStatement",
-                        "src": "788:32:29"
+                        "src": "788:32:31"
                       },
                       {
                         "condition": {
@@ -286,32 +185,19 @@
                             "typeIdentifier": "t_bytes32",
                             "typeString": "bytes32"
                           },
-<<<<<<< Updated upstream
-                          "id": 5076,
-=======
                           "id": 5173,
->>>>>>> Stashed changes
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "leftExpression": {
                             "argumentTypes": null,
-<<<<<<< Updated upstream
-                            "id": 5074,
-                            "name": "computedHash",
-                            "nodeType": "Identifier",
-                            "overloadedDeclarations": [],
-                            "referencedDeclaration": 5054,
-                            "src": "833:12:29",
-=======
                             "id": 5171,
                             "name": "computedHash",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
                             "referencedDeclaration": 5151,
                             "src": "833:12:31",
->>>>>>> Stashed changes
                             "typeDescriptions": {
                               "typeIdentifier": "t_bytes32",
                               "typeString": "bytes32"
@@ -321,70 +207,44 @@
                           "operator": "<",
                           "rightExpression": {
                             "argumentTypes": null,
-<<<<<<< Updated upstream
-                            "id": 5075,
-                            "name": "proofElement",
-                            "nodeType": "Identifier",
-                            "overloadedDeclarations": [],
-                            "referencedDeclaration": 5069,
-                            "src": "848:12:29",
-=======
                             "id": 5172,
                             "name": "proofElement",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
                             "referencedDeclaration": 5166,
                             "src": "848:12:31",
->>>>>>> Stashed changes
                             "typeDescriptions": {
                               "typeIdentifier": "t_bytes32",
                               "typeString": "bytes32"
                             }
                           },
-                          "src": "833:27:29",
+                          "src": "833:27:31",
                           "typeDescriptions": {
                             "typeIdentifier": "t_bool",
                             "typeString": "bool"
                           }
                         },
                         "falseBody": {
-<<<<<<< Updated upstream
-                          "id": 5098,
-=======
                           "id": 5195,
->>>>>>> Stashed changes
                           "nodeType": "Block",
-                          "src": "1027:159:29",
+                          "src": "1027:159:31",
                           "statements": [
                             {
                               "expression": {
                                 "argumentTypes": null,
-<<<<<<< Updated upstream
-                                "id": 5096,
-=======
                                 "id": 5193,
->>>>>>> Stashed changes
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": false,
                                 "lValueRequested": false,
                                 "leftHandSide": {
                                   "argumentTypes": null,
-<<<<<<< Updated upstream
-                                  "id": 5088,
-                                  "name": "computedHash",
-                                  "nodeType": "Identifier",
-                                  "overloadedDeclarations": [],
-                                  "referencedDeclaration": 5054,
-                                  "src": "1107:12:29",
-=======
                                   "id": 5185,
                                   "name": "computedHash",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
                                   "referencedDeclaration": 5151,
                                   "src": "1107:12:31",
->>>>>>> Stashed changes
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_bytes32",
                                     "typeString": "bytes32"
@@ -400,21 +260,12 @@
                                       "arguments": [
                                         {
                                           "argumentTypes": null,
-<<<<<<< Updated upstream
-                                          "id": 5092,
-                                          "name": "proofElement",
-                                          "nodeType": "Identifier",
-                                          "overloadedDeclarations": [],
-                                          "referencedDeclaration": 5069,
-                                          "src": "1149:12:29",
-=======
                                           "id": 5189,
                                           "name": "proofElement",
                                           "nodeType": "Identifier",
                                           "overloadedDeclarations": [],
                                           "referencedDeclaration": 5166,
                                           "src": "1149:12:31",
->>>>>>> Stashed changes
                                           "typeDescriptions": {
                                             "typeIdentifier": "t_bytes32",
                                             "typeString": "bytes32"
@@ -422,21 +273,12 @@
                                         },
                                         {
                                           "argumentTypes": null,
-<<<<<<< Updated upstream
-                                          "id": 5093,
-                                          "name": "computedHash",
-                                          "nodeType": "Identifier",
-                                          "overloadedDeclarations": [],
-                                          "referencedDeclaration": 5054,
-                                          "src": "1163:12:29",
-=======
                                           "id": 5190,
                                           "name": "computedHash",
                                           "nodeType": "Identifier",
                                           "overloadedDeclarations": [],
                                           "referencedDeclaration": 5151,
                                           "src": "1163:12:31",
->>>>>>> Stashed changes
                                           "typeDescriptions": {
                                             "typeIdentifier": "t_bytes32",
                                             "typeString": "bytes32"
@@ -456,31 +298,18 @@
                                         ],
                                         "expression": {
                                           "argumentTypes": null,
-<<<<<<< Updated upstream
-                                          "id": 5090,
-                                          "name": "abi",
-                                          "nodeType": "Identifier",
-                                          "overloadedDeclarations": [],
-                                          "referencedDeclaration": 10756,
-                                          "src": "1132:3:29",
-=======
                                           "id": 5187,
                                           "name": "abi",
                                           "nodeType": "Identifier",
                                           "overloadedDeclarations": [],
                                           "referencedDeclaration": 10853,
                                           "src": "1132:3:31",
->>>>>>> Stashed changes
                                           "typeDescriptions": {
                                             "typeIdentifier": "t_magic_abi",
                                             "typeString": "abi"
                                           }
                                         },
-<<<<<<< Updated upstream
-                                        "id": 5091,
-=======
                                         "id": 5188,
->>>>>>> Stashed changes
                                         "isConstant": false,
                                         "isLValue": false,
                                         "isPure": true,
@@ -488,17 +317,13 @@
                                         "memberName": "encodePacked",
                                         "nodeType": "MemberAccess",
                                         "referencedDeclaration": null,
-                                        "src": "1132:16:29",
+                                        "src": "1132:16:31",
                                         "typeDescriptions": {
                                           "typeIdentifier": "t_function_abiencodepacked_pure$__$returns$_t_bytes_memory_ptr_$",
                                           "typeString": "function () pure returns (bytes memory)"
                                         }
                                       },
-<<<<<<< Updated upstream
-                                      "id": 5094,
-=======
                                       "id": 5191,
->>>>>>> Stashed changes
                                       "isConstant": false,
                                       "isLValue": false,
                                       "isPure": false,
@@ -506,7 +331,7 @@
                                       "lValueRequested": false,
                                       "names": [],
                                       "nodeType": "FunctionCall",
-                                      "src": "1132:44:29",
+                                      "src": "1132:44:31",
                                       "typeDescriptions": {
                                         "typeIdentifier": "t_bytes_memory_ptr",
                                         "typeString": "bytes memory"
@@ -520,31 +345,18 @@
                                         "typeString": "bytes memory"
                                       }
                                     ],
-<<<<<<< Updated upstream
-                                    "id": 5089,
-                                    "name": "keccak256",
-                                    "nodeType": "Identifier",
-                                    "overloadedDeclarations": [],
-                                    "referencedDeclaration": 10763,
-                                    "src": "1122:9:29",
-=======
                                     "id": 5186,
                                     "name": "keccak256",
                                     "nodeType": "Identifier",
                                     "overloadedDeclarations": [],
                                     "referencedDeclaration": 10860,
                                     "src": "1122:9:31",
->>>>>>> Stashed changes
                                     "typeDescriptions": {
                                       "typeIdentifier": "t_function_sha3_pure$__$returns$_t_bytes32_$",
                                       "typeString": "function () pure returns (bytes32)"
                                     }
                                   },
-<<<<<<< Updated upstream
-                                  "id": 5095,
-=======
                                   "id": 5192,
->>>>>>> Stashed changes
                                   "isConstant": false,
                                   "isLValue": false,
                                   "isPure": false,
@@ -552,73 +364,48 @@
                                   "lValueRequested": false,
                                   "names": [],
                                   "nodeType": "FunctionCall",
-                                  "src": "1122:55:29",
+                                  "src": "1122:55:31",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_bytes32",
                                     "typeString": "bytes32"
                                   }
                                 },
-                                "src": "1107:70:29",
+                                "src": "1107:70:31",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_bytes32",
                                   "typeString": "bytes32"
                                 }
                               },
-<<<<<<< Updated upstream
-                              "id": 5097,
-=======
                               "id": 5194,
->>>>>>> Stashed changes
                               "nodeType": "ExpressionStatement",
-                              "src": "1107:70:29"
+                              "src": "1107:70:31"
                             }
                           ]
                         },
-<<<<<<< Updated upstream
-                        "id": 5099,
-=======
                         "id": 5196,
->>>>>>> Stashed changes
                         "nodeType": "IfStatement",
-                        "src": "829:357:29",
+                        "src": "829:357:31",
                         "trueBody": {
-<<<<<<< Updated upstream
-                          "id": 5087,
-=======
                           "id": 5184,
->>>>>>> Stashed changes
                           "nodeType": "Block",
-                          "src": "862:159:29",
+                          "src": "862:159:31",
                           "statements": [
                             {
                               "expression": {
                                 "argumentTypes": null,
-<<<<<<< Updated upstream
-                                "id": 5085,
-=======
                                 "id": 5182,
->>>>>>> Stashed changes
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": false,
                                 "lValueRequested": false,
                                 "leftHandSide": {
                                   "argumentTypes": null,
-<<<<<<< Updated upstream
-                                  "id": 5077,
-                                  "name": "computedHash",
-                                  "nodeType": "Identifier",
-                                  "overloadedDeclarations": [],
-                                  "referencedDeclaration": 5054,
-                                  "src": "942:12:29",
-=======
                                   "id": 5174,
                                   "name": "computedHash",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
                                   "referencedDeclaration": 5151,
                                   "src": "942:12:31",
->>>>>>> Stashed changes
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_bytes32",
                                     "typeString": "bytes32"
@@ -634,21 +421,12 @@
                                       "arguments": [
                                         {
                                           "argumentTypes": null,
-<<<<<<< Updated upstream
-                                          "id": 5081,
-                                          "name": "computedHash",
-                                          "nodeType": "Identifier",
-                                          "overloadedDeclarations": [],
-                                          "referencedDeclaration": 5054,
-                                          "src": "984:12:29",
-=======
                                           "id": 5178,
                                           "name": "computedHash",
                                           "nodeType": "Identifier",
                                           "overloadedDeclarations": [],
                                           "referencedDeclaration": 5151,
                                           "src": "984:12:31",
->>>>>>> Stashed changes
                                           "typeDescriptions": {
                                             "typeIdentifier": "t_bytes32",
                                             "typeString": "bytes32"
@@ -656,21 +434,12 @@
                                         },
                                         {
                                           "argumentTypes": null,
-<<<<<<< Updated upstream
-                                          "id": 5082,
-                                          "name": "proofElement",
-                                          "nodeType": "Identifier",
-                                          "overloadedDeclarations": [],
-                                          "referencedDeclaration": 5069,
-                                          "src": "998:12:29",
-=======
                                           "id": 5179,
                                           "name": "proofElement",
                                           "nodeType": "Identifier",
                                           "overloadedDeclarations": [],
                                           "referencedDeclaration": 5166,
                                           "src": "998:12:31",
->>>>>>> Stashed changes
                                           "typeDescriptions": {
                                             "typeIdentifier": "t_bytes32",
                                             "typeString": "bytes32"
@@ -690,31 +459,18 @@
                                         ],
                                         "expression": {
                                           "argumentTypes": null,
-<<<<<<< Updated upstream
-                                          "id": 5079,
-                                          "name": "abi",
-                                          "nodeType": "Identifier",
-                                          "overloadedDeclarations": [],
-                                          "referencedDeclaration": 10756,
-                                          "src": "967:3:29",
-=======
                                           "id": 5176,
                                           "name": "abi",
                                           "nodeType": "Identifier",
                                           "overloadedDeclarations": [],
                                           "referencedDeclaration": 10853,
                                           "src": "967:3:31",
->>>>>>> Stashed changes
                                           "typeDescriptions": {
                                             "typeIdentifier": "t_magic_abi",
                                             "typeString": "abi"
                                           }
                                         },
-<<<<<<< Updated upstream
-                                        "id": 5080,
-=======
                                         "id": 5177,
->>>>>>> Stashed changes
                                         "isConstant": false,
                                         "isLValue": false,
                                         "isPure": true,
@@ -722,17 +478,13 @@
                                         "memberName": "encodePacked",
                                         "nodeType": "MemberAccess",
                                         "referencedDeclaration": null,
-                                        "src": "967:16:29",
+                                        "src": "967:16:31",
                                         "typeDescriptions": {
                                           "typeIdentifier": "t_function_abiencodepacked_pure$__$returns$_t_bytes_memory_ptr_$",
                                           "typeString": "function () pure returns (bytes memory)"
                                         }
                                       },
-<<<<<<< Updated upstream
-                                      "id": 5083,
-=======
                                       "id": 5180,
->>>>>>> Stashed changes
                                       "isConstant": false,
                                       "isLValue": false,
                                       "isPure": false,
@@ -740,7 +492,7 @@
                                       "lValueRequested": false,
                                       "names": [],
                                       "nodeType": "FunctionCall",
-                                      "src": "967:44:29",
+                                      "src": "967:44:31",
                                       "typeDescriptions": {
                                         "typeIdentifier": "t_bytes_memory_ptr",
                                         "typeString": "bytes memory"
@@ -754,31 +506,18 @@
                                         "typeString": "bytes memory"
                                       }
                                     ],
-<<<<<<< Updated upstream
-                                    "id": 5078,
-                                    "name": "keccak256",
-                                    "nodeType": "Identifier",
-                                    "overloadedDeclarations": [],
-                                    "referencedDeclaration": 10763,
-                                    "src": "957:9:29",
-=======
                                     "id": 5175,
                                     "name": "keccak256",
                                     "nodeType": "Identifier",
                                     "overloadedDeclarations": [],
                                     "referencedDeclaration": 10860,
                                     "src": "957:9:31",
->>>>>>> Stashed changes
                                     "typeDescriptions": {
                                       "typeIdentifier": "t_function_sha3_pure$__$returns$_t_bytes32_$",
                                       "typeString": "function () pure returns (bytes32)"
                                     }
                                   },
-<<<<<<< Updated upstream
-                                  "id": 5084,
-=======
                                   "id": 5181,
->>>>>>> Stashed changes
                                   "isConstant": false,
                                   "isLValue": false,
                                   "isPure": false,
@@ -786,25 +525,21 @@
                                   "lValueRequested": false,
                                   "names": [],
                                   "nodeType": "FunctionCall",
-                                  "src": "957:55:29",
+                                  "src": "957:55:31",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_bytes32",
                                     "typeString": "bytes32"
                                   }
                                 },
-                                "src": "942:70:29",
+                                "src": "942:70:31",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_bytes32",
                                   "typeString": "bytes32"
                                 }
                               },
-<<<<<<< Updated upstream
-                              "id": 5086,
-=======
                               "id": 5183,
->>>>>>> Stashed changes
                               "nodeType": "ExpressionStatement",
-                              "src": "942:70:29"
+                              "src": "942:70:31"
                             }
                           ]
                         }
@@ -817,32 +552,19 @@
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     },
-<<<<<<< Updated upstream
-                    "id": 5064,
-=======
                     "id": 5161,
->>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
                       "argumentTypes": null,
-<<<<<<< Updated upstream
-                      "id": 5061,
-                      "name": "i",
-                      "nodeType": "Identifier",
-                      "overloadedDeclarations": [],
-                      "referencedDeclaration": 5058,
-                      "src": "756:1:29",
-=======
                       "id": 5158,
                       "name": "i",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 5155,
                       "src": "756:1:31",
->>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -854,31 +576,18 @@
                       "argumentTypes": null,
                       "expression": {
                         "argumentTypes": null,
-<<<<<<< Updated upstream
-                        "id": 5062,
-                        "name": "_proof",
-                        "nodeType": "Identifier",
-                        "overloadedDeclarations": [],
-                        "referencedDeclaration": 5044,
-                        "src": "760:6:29",
-=======
                         "id": 5159,
                         "name": "_proof",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 5141,
                         "src": "760:6:31",
->>>>>>> Stashed changes
                         "typeDescriptions": {
                           "typeIdentifier": "t_array$_t_bytes32_$dyn_memory_ptr",
                           "typeString": "bytes32[] memory"
                         }
                       },
-<<<<<<< Updated upstream
-                      "id": 5063,
-=======
                       "id": 5160,
->>>>>>> Stashed changes
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -886,46 +595,31 @@
                       "memberName": "length",
                       "nodeType": "MemberAccess",
                       "referencedDeclaration": null,
-                      "src": "760:13:29",
+                      "src": "760:13:31",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "756:17:29",
+                    "src": "756:17:31",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
                     }
                   },
-<<<<<<< Updated upstream
-                  "id": 5101,
-                  "initializationExpression": {
-                    "assignments": [
-                      5058
-=======
                   "id": 5198,
                   "initializationExpression": {
                     "assignments": [
                       5155
->>>>>>> Stashed changes
                     ],
                     "declarations": [
                       {
                         "constant": false,
-<<<<<<< Updated upstream
-                        "id": 5058,
-                        "name": "i",
-                        "nodeType": "VariableDeclaration",
-                        "scope": 5107,
-                        "src": "741:9:29",
-=======
                         "id": 5155,
                         "name": "i",
                         "nodeType": "VariableDeclaration",
                         "scope": 5204,
                         "src": "741:9:31",
->>>>>>> Stashed changes
                         "stateVariable": false,
                         "storageLocation": "default",
                         "typeDescriptions": {
@@ -933,14 +627,10 @@
                           "typeString": "uint256"
                         },
                         "typeName": {
-<<<<<<< Updated upstream
-                          "id": 5057,
-=======
                           "id": 5154,
->>>>>>> Stashed changes
                           "name": "uint256",
                           "nodeType": "ElementaryTypeName",
-                          "src": "741:7:29",
+                          "src": "741:7:31",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -950,26 +640,18 @@
                         "visibility": "internal"
                       }
                     ],
-<<<<<<< Updated upstream
-                    "id": 5060,
-                    "initialValue": {
-                      "argumentTypes": null,
-                      "hexValue": "30",
-                      "id": 5059,
-=======
                     "id": 5157,
                     "initialValue": {
                       "argumentTypes": null,
                       "hexValue": "30",
                       "id": 5156,
->>>>>>> Stashed changes
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
                       "kind": "number",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "753:1:29",
+                      "src": "753:1:31",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": "t_rational_0_by_1",
@@ -978,16 +660,12 @@
                       "value": "0"
                     },
                     "nodeType": "VariableDeclarationStatement",
-                    "src": "741:13:29"
+                    "src": "741:13:31"
                   },
                   "loopExpression": {
                     "expression": {
                       "argumentTypes": null,
-<<<<<<< Updated upstream
-                      "id": 5066,
-=======
                       "id": 5163,
->>>>>>> Stashed changes
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -995,24 +673,15 @@
                       "nodeType": "UnaryOperation",
                       "operator": "++",
                       "prefix": false,
-                      "src": "775:3:29",
+                      "src": "775:3:31",
                       "subExpression": {
                         "argumentTypes": null,
-<<<<<<< Updated upstream
-                        "id": 5065,
-                        "name": "i",
-                        "nodeType": "Identifier",
-                        "overloadedDeclarations": [],
-                        "referencedDeclaration": 5058,
-                        "src": "775:1:29",
-=======
                         "id": 5162,
                         "name": "i",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 5155,
                         "src": "775:1:31",
->>>>>>> Stashed changes
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -1023,16 +692,12 @@
                         "typeString": "uint256"
                       }
                     },
-<<<<<<< Updated upstream
-                    "id": 5067,
-=======
                     "id": 5164,
->>>>>>> Stashed changes
                     "nodeType": "ExpressionStatement",
-                    "src": "775:3:29"
+                    "src": "775:3:31"
                   },
                   "nodeType": "ForStatement",
-                  "src": "736:456:29"
+                  "src": "736:456:31"
                 },
                 {
                   "expression": {
@@ -1041,32 +706,19 @@
                       "typeIdentifier": "t_bytes32",
                       "typeString": "bytes32"
                     },
-<<<<<<< Updated upstream
-                    "id": 5104,
-=======
                     "id": 5201,
->>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
                       "argumentTypes": null,
-<<<<<<< Updated upstream
-                      "id": 5102,
-                      "name": "computedHash",
-                      "nodeType": "Identifier",
-                      "overloadedDeclarations": [],
-                      "referencedDeclaration": 5054,
-                      "src": "1276:12:29",
-=======
                       "id": 5199,
                       "name": "computedHash",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 5151,
                       "src": "1276:12:31",
->>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes32",
                         "typeString": "bytes32"
@@ -1076,50 +728,32 @@
                     "operator": "==",
                     "rightExpression": {
                       "argumentTypes": null,
-<<<<<<< Updated upstream
-                      "id": 5103,
-                      "name": "_root",
-                      "nodeType": "Identifier",
-                      "overloadedDeclarations": [],
-                      "referencedDeclaration": 5046,
-                      "src": "1292:5:29",
-=======
                       "id": 5200,
                       "name": "_root",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 5143,
                       "src": "1292:5:31",
->>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes32",
                         "typeString": "bytes32"
                       }
                     },
-                    "src": "1276:21:29",
+                    "src": "1276:21:31",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
                     }
                   },
-<<<<<<< Updated upstream
-                  "functionReturnParameters": 5052,
-                  "id": 5105,
-=======
                   "functionReturnParameters": 5149,
                   "id": 5202,
->>>>>>> Stashed changes
                   "nodeType": "Return",
-                  "src": "1269:28:29"
+                  "src": "1269:28:31"
                 }
               ]
             },
             "documentation": "@dev Verifies a Merkle proof proving the existence of a leaf in a Merkle tree. Assumes that each pair of leaves\nand each pair of pre-images are sorted.\n@param _proof Merkle proof containing sibling hashes on the branch from the leaf to the root of the Merkle tree\n@param _root Merkle root\n@param _leaf Leaf of Merkle tree",
-<<<<<<< Updated upstream
-            "id": 5107,
-=======
             "id": 5204,
->>>>>>> Stashed changes
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -1127,28 +761,16 @@
             "name": "verifyProof",
             "nodeType": "FunctionDefinition",
             "parameters": {
-<<<<<<< Updated upstream
-              "id": 5049,
-=======
               "id": 5146,
->>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-<<<<<<< Updated upstream
-                  "id": 5044,
-                  "name": "_proof",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 5107,
-                  "src": "593:16:29",
-=======
                   "id": 5141,
                   "name": "_proof",
                   "nodeType": "VariableDeclaration",
                   "scope": 5204,
                   "src": "593:16:31",
->>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1157,27 +779,19 @@
                   },
                   "typeName": {
                     "baseType": {
-<<<<<<< Updated upstream
-                      "id": 5042,
-=======
                       "id": 5139,
->>>>>>> Stashed changes
                       "name": "bytes32",
                       "nodeType": "ElementaryTypeName",
-                      "src": "593:7:29",
+                      "src": "593:7:31",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes32",
                         "typeString": "bytes32"
                       }
                     },
-<<<<<<< Updated upstream
-                    "id": 5043,
-=======
                     "id": 5140,
->>>>>>> Stashed changes
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "593:9:29",
+                    "src": "593:9:31",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_bytes32_$dyn_storage_ptr",
                       "typeString": "bytes32[]"
@@ -1188,19 +802,11 @@
                 },
                 {
                   "constant": false,
-<<<<<<< Updated upstream
-                  "id": 5046,
-                  "name": "_root",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 5107,
-                  "src": "615:13:29",
-=======
                   "id": 5143,
                   "name": "_root",
                   "nodeType": "VariableDeclaration",
                   "scope": 5204,
                   "src": "615:13:31",
->>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1208,14 +814,10 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-<<<<<<< Updated upstream
-                    "id": 5045,
-=======
                     "id": 5142,
->>>>>>> Stashed changes
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
-                    "src": "615:7:29",
+                    "src": "615:7:31",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes32",
                       "typeString": "bytes32"
@@ -1226,19 +828,11 @@
                 },
                 {
                   "constant": false,
-<<<<<<< Updated upstream
-                  "id": 5048,
-                  "name": "_leaf",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 5107,
-                  "src": "634:13:29",
-=======
                   "id": 5145,
                   "name": "_leaf",
                   "nodeType": "VariableDeclaration",
                   "scope": 5204,
                   "src": "634:13:31",
->>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1246,14 +840,10 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-<<<<<<< Updated upstream
-                    "id": 5047,
-=======
                     "id": 5144,
->>>>>>> Stashed changes
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
-                    "src": "634:7:29",
+                    "src": "634:7:31",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes32",
                       "typeString": "bytes32"
@@ -1263,32 +853,20 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "587:64:29"
+              "src": "587:64:31"
             },
             "payable": false,
             "returnParameters": {
-<<<<<<< Updated upstream
-              "id": 5052,
-=======
               "id": 5149,
->>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-<<<<<<< Updated upstream
-                  "id": 5051,
-                  "name": "",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 5107,
-                  "src": "687:4:29",
-=======
                   "id": 5148,
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "scope": 5204,
                   "src": "687:4:31",
->>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1296,14 +874,10 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-<<<<<<< Updated upstream
-                    "id": 5050,
-=======
                     "id": 5147,
->>>>>>> Stashed changes
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
-                    "src": "687:4:29",
+                    "src": "687:4:31",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -1313,45 +887,25 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "686:6:29"
+              "src": "686:6:31"
             },
-<<<<<<< Updated upstream
-            "scope": 5108,
-            "src": "567:735:29",
-=======
             "scope": 5205,
             "src": "567:735:31",
->>>>>>> Stashed changes
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "internal"
           }
         ],
-<<<<<<< Updated upstream
-        "scope": 5109,
-        "src": "184:1120:29"
-=======
         "scope": 5206,
         "src": "184:1120:31"
->>>>>>> Stashed changes
       }
     ],
-    "src": "0:1305:29"
+    "src": "0:1305:31"
   },
   "legacyAST": {
     "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/MerkleProof.sol",
     "exportedSymbols": {
       "MerkleProof": [
-<<<<<<< Updated upstream
-        5108
-      ]
-    },
-    "id": 5109,
-    "nodeType": "SourceUnit",
-    "nodes": [
-      {
-        "id": 5041,
-=======
         5205
       ]
     },
@@ -1360,7 +914,6 @@
     "nodes": [
       {
         "id": 5138,
->>>>>>> Stashed changes
         "literals": [
           "solidity",
           "^",
@@ -1368,7 +921,7 @@
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:24:29"
+        "src": "0:24:31"
       },
       {
         "baseContracts": [],
@@ -1376,53 +929,31 @@
         "contractKind": "library",
         "documentation": "@title MerkleProof\n@dev Merkle proof verification based on\nhttps://github.com/ameensol/merkle-tree-solidity/blob/master/src/MerkleProof.sol",
         "fullyImplemented": true,
-<<<<<<< Updated upstream
-        "id": 5108,
-        "linearizedBaseContracts": [
-          5108
-=======
         "id": 5205,
         "linearizedBaseContracts": [
           5205
->>>>>>> Stashed changes
         ],
         "name": "MerkleProof",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
-<<<<<<< Updated upstream
-              "id": 5106,
-=======
               "id": 5203,
->>>>>>> Stashed changes
               "nodeType": "Block",
-              "src": "695:607:29",
+              "src": "695:607:31",
               "statements": [
                 {
                   "assignments": [
-<<<<<<< Updated upstream
-                    5054
-=======
                     5151
->>>>>>> Stashed changes
                   ],
                   "declarations": [
                     {
                       "constant": false,
-<<<<<<< Updated upstream
-                      "id": 5054,
-                      "name": "computedHash",
-                      "nodeType": "VariableDeclaration",
-                      "scope": 5107,
-                      "src": "701:20:29",
-=======
                       "id": 5151,
                       "name": "computedHash",
                       "nodeType": "VariableDeclaration",
                       "scope": 5204,
                       "src": "701:20:31",
->>>>>>> Stashed changes
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -1430,14 +961,10 @@
                         "typeString": "bytes32"
                       },
                       "typeName": {
-<<<<<<< Updated upstream
-                        "id": 5053,
-=======
                         "id": 5150,
->>>>>>> Stashed changes
                         "name": "bytes32",
                         "nodeType": "ElementaryTypeName",
-                        "src": "701:7:29",
+                        "src": "701:7:31",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes32",
                           "typeString": "bytes32"
@@ -1447,17 +974,6 @@
                       "visibility": "internal"
                     }
                   ],
-<<<<<<< Updated upstream
-                  "id": 5056,
-                  "initialValue": {
-                    "argumentTypes": null,
-                    "id": 5055,
-                    "name": "_leaf",
-                    "nodeType": "Identifier",
-                    "overloadedDeclarations": [],
-                    "referencedDeclaration": 5048,
-                    "src": "724:5:29",
-=======
                   "id": 5153,
                   "initialValue": {
                     "argumentTypes": null,
@@ -1467,49 +983,32 @@
                     "overloadedDeclarations": [],
                     "referencedDeclaration": 5145,
                     "src": "724:5:31",
->>>>>>> Stashed changes
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes32",
                       "typeString": "bytes32"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "701:28:29"
+                  "src": "701:28:31"
                 },
                 {
                   "body": {
-<<<<<<< Updated upstream
-                    "id": 5100,
-=======
                     "id": 5197,
->>>>>>> Stashed changes
                     "nodeType": "Block",
-                    "src": "780:412:29",
+                    "src": "780:412:31",
                     "statements": [
                       {
                         "assignments": [
-<<<<<<< Updated upstream
-                          5069
-=======
                           5166
->>>>>>> Stashed changes
                         ],
                         "declarations": [
                           {
                             "constant": false,
-<<<<<<< Updated upstream
-                            "id": 5069,
-                            "name": "proofElement",
-                            "nodeType": "VariableDeclaration",
-                            "scope": 5107,
-                            "src": "788:20:29",
-=======
                             "id": 5166,
                             "name": "proofElement",
                             "nodeType": "VariableDeclaration",
                             "scope": 5204,
                             "src": "788:20:31",
->>>>>>> Stashed changes
                             "stateVariable": false,
                             "storageLocation": "default",
                             "typeDescriptions": {
@@ -1517,14 +1016,10 @@
                               "typeString": "bytes32"
                             },
                             "typeName": {
-<<<<<<< Updated upstream
-                              "id": 5068,
-=======
                               "id": 5165,
->>>>>>> Stashed changes
                               "name": "bytes32",
                               "nodeType": "ElementaryTypeName",
-                              "src": "788:7:29",
+                              "src": "788:7:31",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_bytes32",
                                 "typeString": "bytes32"
@@ -1534,46 +1029,22 @@
                             "visibility": "internal"
                           }
                         ],
-<<<<<<< Updated upstream
-                        "id": 5073,
-=======
                         "id": 5170,
->>>>>>> Stashed changes
                         "initialValue": {
                           "argumentTypes": null,
                           "baseExpression": {
                             "argumentTypes": null,
-<<<<<<< Updated upstream
-                            "id": 5070,
-                            "name": "_proof",
-                            "nodeType": "Identifier",
-                            "overloadedDeclarations": [],
-                            "referencedDeclaration": 5044,
-                            "src": "811:6:29",
-=======
                             "id": 5167,
                             "name": "_proof",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
                             "referencedDeclaration": 5141,
                             "src": "811:6:31",
->>>>>>> Stashed changes
                             "typeDescriptions": {
                               "typeIdentifier": "t_array$_t_bytes32_$dyn_memory_ptr",
                               "typeString": "bytes32[] memory"
                             }
                           },
-<<<<<<< Updated upstream
-                          "id": 5072,
-                          "indexExpression": {
-                            "argumentTypes": null,
-                            "id": 5071,
-                            "name": "i",
-                            "nodeType": "Identifier",
-                            "overloadedDeclarations": [],
-                            "referencedDeclaration": 5058,
-                            "src": "818:1:29",
-=======
                           "id": 5169,
                           "indexExpression": {
                             "argumentTypes": null,
@@ -1583,7 +1054,6 @@
                             "overloadedDeclarations": [],
                             "referencedDeclaration": 5155,
                             "src": "818:1:31",
->>>>>>> Stashed changes
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -1594,14 +1064,14 @@
                           "isPure": false,
                           "lValueRequested": false,
                           "nodeType": "IndexAccess",
-                          "src": "811:9:29",
+                          "src": "811:9:31",
                           "typeDescriptions": {
                             "typeIdentifier": "t_bytes32",
                             "typeString": "bytes32"
                           }
                         },
                         "nodeType": "VariableDeclarationStatement",
-                        "src": "788:32:29"
+                        "src": "788:32:31"
                       },
                       {
                         "condition": {
@@ -1610,32 +1080,19 @@
                             "typeIdentifier": "t_bytes32",
                             "typeString": "bytes32"
                           },
-<<<<<<< Updated upstream
-                          "id": 5076,
-=======
                           "id": 5173,
->>>>>>> Stashed changes
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "leftExpression": {
                             "argumentTypes": null,
-<<<<<<< Updated upstream
-                            "id": 5074,
-                            "name": "computedHash",
-                            "nodeType": "Identifier",
-                            "overloadedDeclarations": [],
-                            "referencedDeclaration": 5054,
-                            "src": "833:12:29",
-=======
                             "id": 5171,
                             "name": "computedHash",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
                             "referencedDeclaration": 5151,
                             "src": "833:12:31",
->>>>>>> Stashed changes
                             "typeDescriptions": {
                               "typeIdentifier": "t_bytes32",
                               "typeString": "bytes32"
@@ -1645,70 +1102,44 @@
                           "operator": "<",
                           "rightExpression": {
                             "argumentTypes": null,
-<<<<<<< Updated upstream
-                            "id": 5075,
-                            "name": "proofElement",
-                            "nodeType": "Identifier",
-                            "overloadedDeclarations": [],
-                            "referencedDeclaration": 5069,
-                            "src": "848:12:29",
-=======
                             "id": 5172,
                             "name": "proofElement",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
                             "referencedDeclaration": 5166,
                             "src": "848:12:31",
->>>>>>> Stashed changes
                             "typeDescriptions": {
                               "typeIdentifier": "t_bytes32",
                               "typeString": "bytes32"
                             }
                           },
-                          "src": "833:27:29",
+                          "src": "833:27:31",
                           "typeDescriptions": {
                             "typeIdentifier": "t_bool",
                             "typeString": "bool"
                           }
                         },
                         "falseBody": {
-<<<<<<< Updated upstream
-                          "id": 5098,
-=======
                           "id": 5195,
->>>>>>> Stashed changes
                           "nodeType": "Block",
-                          "src": "1027:159:29",
+                          "src": "1027:159:31",
                           "statements": [
                             {
                               "expression": {
                                 "argumentTypes": null,
-<<<<<<< Updated upstream
-                                "id": 5096,
-=======
                                 "id": 5193,
->>>>>>> Stashed changes
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": false,
                                 "lValueRequested": false,
                                 "leftHandSide": {
                                   "argumentTypes": null,
-<<<<<<< Updated upstream
-                                  "id": 5088,
-                                  "name": "computedHash",
-                                  "nodeType": "Identifier",
-                                  "overloadedDeclarations": [],
-                                  "referencedDeclaration": 5054,
-                                  "src": "1107:12:29",
-=======
                                   "id": 5185,
                                   "name": "computedHash",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
                                   "referencedDeclaration": 5151,
                                   "src": "1107:12:31",
->>>>>>> Stashed changes
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_bytes32",
                                     "typeString": "bytes32"
@@ -1724,21 +1155,12 @@
                                       "arguments": [
                                         {
                                           "argumentTypes": null,
-<<<<<<< Updated upstream
-                                          "id": 5092,
-                                          "name": "proofElement",
-                                          "nodeType": "Identifier",
-                                          "overloadedDeclarations": [],
-                                          "referencedDeclaration": 5069,
-                                          "src": "1149:12:29",
-=======
                                           "id": 5189,
                                           "name": "proofElement",
                                           "nodeType": "Identifier",
                                           "overloadedDeclarations": [],
                                           "referencedDeclaration": 5166,
                                           "src": "1149:12:31",
->>>>>>> Stashed changes
                                           "typeDescriptions": {
                                             "typeIdentifier": "t_bytes32",
                                             "typeString": "bytes32"
@@ -1746,21 +1168,12 @@
                                         },
                                         {
                                           "argumentTypes": null,
-<<<<<<< Updated upstream
-                                          "id": 5093,
-                                          "name": "computedHash",
-                                          "nodeType": "Identifier",
-                                          "overloadedDeclarations": [],
-                                          "referencedDeclaration": 5054,
-                                          "src": "1163:12:29",
-=======
                                           "id": 5190,
                                           "name": "computedHash",
                                           "nodeType": "Identifier",
                                           "overloadedDeclarations": [],
                                           "referencedDeclaration": 5151,
                                           "src": "1163:12:31",
->>>>>>> Stashed changes
                                           "typeDescriptions": {
                                             "typeIdentifier": "t_bytes32",
                                             "typeString": "bytes32"
@@ -1780,31 +1193,18 @@
                                         ],
                                         "expression": {
                                           "argumentTypes": null,
-<<<<<<< Updated upstream
-                                          "id": 5090,
-                                          "name": "abi",
-                                          "nodeType": "Identifier",
-                                          "overloadedDeclarations": [],
-                                          "referencedDeclaration": 10756,
-                                          "src": "1132:3:29",
-=======
                                           "id": 5187,
                                           "name": "abi",
                                           "nodeType": "Identifier",
                                           "overloadedDeclarations": [],
                                           "referencedDeclaration": 10853,
                                           "src": "1132:3:31",
->>>>>>> Stashed changes
                                           "typeDescriptions": {
                                             "typeIdentifier": "t_magic_abi",
                                             "typeString": "abi"
                                           }
                                         },
-<<<<<<< Updated upstream
-                                        "id": 5091,
-=======
                                         "id": 5188,
->>>>>>> Stashed changes
                                         "isConstant": false,
                                         "isLValue": false,
                                         "isPure": true,
@@ -1812,17 +1212,13 @@
                                         "memberName": "encodePacked",
                                         "nodeType": "MemberAccess",
                                         "referencedDeclaration": null,
-                                        "src": "1132:16:29",
+                                        "src": "1132:16:31",
                                         "typeDescriptions": {
                                           "typeIdentifier": "t_function_abiencodepacked_pure$__$returns$_t_bytes_memory_ptr_$",
                                           "typeString": "function () pure returns (bytes memory)"
                                         }
                                       },
-<<<<<<< Updated upstream
-                                      "id": 5094,
-=======
                                       "id": 5191,
->>>>>>> Stashed changes
                                       "isConstant": false,
                                       "isLValue": false,
                                       "isPure": false,
@@ -1830,7 +1226,7 @@
                                       "lValueRequested": false,
                                       "names": [],
                                       "nodeType": "FunctionCall",
-                                      "src": "1132:44:29",
+                                      "src": "1132:44:31",
                                       "typeDescriptions": {
                                         "typeIdentifier": "t_bytes_memory_ptr",
                                         "typeString": "bytes memory"
@@ -1844,31 +1240,18 @@
                                         "typeString": "bytes memory"
                                       }
                                     ],
-<<<<<<< Updated upstream
-                                    "id": 5089,
-                                    "name": "keccak256",
-                                    "nodeType": "Identifier",
-                                    "overloadedDeclarations": [],
-                                    "referencedDeclaration": 10763,
-                                    "src": "1122:9:29",
-=======
                                     "id": 5186,
                                     "name": "keccak256",
                                     "nodeType": "Identifier",
                                     "overloadedDeclarations": [],
                                     "referencedDeclaration": 10860,
                                     "src": "1122:9:31",
->>>>>>> Stashed changes
                                     "typeDescriptions": {
                                       "typeIdentifier": "t_function_sha3_pure$__$returns$_t_bytes32_$",
                                       "typeString": "function () pure returns (bytes32)"
                                     }
                                   },
-<<<<<<< Updated upstream
-                                  "id": 5095,
-=======
                                   "id": 5192,
->>>>>>> Stashed changes
                                   "isConstant": false,
                                   "isLValue": false,
                                   "isPure": false,
@@ -1876,73 +1259,48 @@
                                   "lValueRequested": false,
                                   "names": [],
                                   "nodeType": "FunctionCall",
-                                  "src": "1122:55:29",
+                                  "src": "1122:55:31",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_bytes32",
                                     "typeString": "bytes32"
                                   }
                                 },
-                                "src": "1107:70:29",
+                                "src": "1107:70:31",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_bytes32",
                                   "typeString": "bytes32"
                                 }
                               },
-<<<<<<< Updated upstream
-                              "id": 5097,
-=======
                               "id": 5194,
->>>>>>> Stashed changes
                               "nodeType": "ExpressionStatement",
-                              "src": "1107:70:29"
+                              "src": "1107:70:31"
                             }
                           ]
                         },
-<<<<<<< Updated upstream
-                        "id": 5099,
-=======
                         "id": 5196,
->>>>>>> Stashed changes
                         "nodeType": "IfStatement",
-                        "src": "829:357:29",
+                        "src": "829:357:31",
                         "trueBody": {
-<<<<<<< Updated upstream
-                          "id": 5087,
-=======
                           "id": 5184,
->>>>>>> Stashed changes
                           "nodeType": "Block",
-                          "src": "862:159:29",
+                          "src": "862:159:31",
                           "statements": [
                             {
                               "expression": {
                                 "argumentTypes": null,
-<<<<<<< Updated upstream
-                                "id": 5085,
-=======
                                 "id": 5182,
->>>>>>> Stashed changes
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": false,
                                 "lValueRequested": false,
                                 "leftHandSide": {
                                   "argumentTypes": null,
-<<<<<<< Updated upstream
-                                  "id": 5077,
-                                  "name": "computedHash",
-                                  "nodeType": "Identifier",
-                                  "overloadedDeclarations": [],
-                                  "referencedDeclaration": 5054,
-                                  "src": "942:12:29",
-=======
                                   "id": 5174,
                                   "name": "computedHash",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
                                   "referencedDeclaration": 5151,
                                   "src": "942:12:31",
->>>>>>> Stashed changes
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_bytes32",
                                     "typeString": "bytes32"
@@ -1958,21 +1316,12 @@
                                       "arguments": [
                                         {
                                           "argumentTypes": null,
-<<<<<<< Updated upstream
-                                          "id": 5081,
-                                          "name": "computedHash",
-                                          "nodeType": "Identifier",
-                                          "overloadedDeclarations": [],
-                                          "referencedDeclaration": 5054,
-                                          "src": "984:12:29",
-=======
                                           "id": 5178,
                                           "name": "computedHash",
                                           "nodeType": "Identifier",
                                           "overloadedDeclarations": [],
                                           "referencedDeclaration": 5151,
                                           "src": "984:12:31",
->>>>>>> Stashed changes
                                           "typeDescriptions": {
                                             "typeIdentifier": "t_bytes32",
                                             "typeString": "bytes32"
@@ -1980,21 +1329,12 @@
                                         },
                                         {
                                           "argumentTypes": null,
-<<<<<<< Updated upstream
-                                          "id": 5082,
-                                          "name": "proofElement",
-                                          "nodeType": "Identifier",
-                                          "overloadedDeclarations": [],
-                                          "referencedDeclaration": 5069,
-                                          "src": "998:12:29",
-=======
                                           "id": 5179,
                                           "name": "proofElement",
                                           "nodeType": "Identifier",
                                           "overloadedDeclarations": [],
                                           "referencedDeclaration": 5166,
                                           "src": "998:12:31",
->>>>>>> Stashed changes
                                           "typeDescriptions": {
                                             "typeIdentifier": "t_bytes32",
                                             "typeString": "bytes32"
@@ -2014,31 +1354,18 @@
                                         ],
                                         "expression": {
                                           "argumentTypes": null,
-<<<<<<< Updated upstream
-                                          "id": 5079,
-                                          "name": "abi",
-                                          "nodeType": "Identifier",
-                                          "overloadedDeclarations": [],
-                                          "referencedDeclaration": 10756,
-                                          "src": "967:3:29",
-=======
                                           "id": 5176,
                                           "name": "abi",
                                           "nodeType": "Identifier",
                                           "overloadedDeclarations": [],
                                           "referencedDeclaration": 10853,
                                           "src": "967:3:31",
->>>>>>> Stashed changes
                                           "typeDescriptions": {
                                             "typeIdentifier": "t_magic_abi",
                                             "typeString": "abi"
                                           }
                                         },
-<<<<<<< Updated upstream
-                                        "id": 5080,
-=======
                                         "id": 5177,
->>>>>>> Stashed changes
                                         "isConstant": false,
                                         "isLValue": false,
                                         "isPure": true,
@@ -2046,17 +1373,13 @@
                                         "memberName": "encodePacked",
                                         "nodeType": "MemberAccess",
                                         "referencedDeclaration": null,
-                                        "src": "967:16:29",
+                                        "src": "967:16:31",
                                         "typeDescriptions": {
                                           "typeIdentifier": "t_function_abiencodepacked_pure$__$returns$_t_bytes_memory_ptr_$",
                                           "typeString": "function () pure returns (bytes memory)"
                                         }
                                       },
-<<<<<<< Updated upstream
-                                      "id": 5083,
-=======
                                       "id": 5180,
->>>>>>> Stashed changes
                                       "isConstant": false,
                                       "isLValue": false,
                                       "isPure": false,
@@ -2064,7 +1387,7 @@
                                       "lValueRequested": false,
                                       "names": [],
                                       "nodeType": "FunctionCall",
-                                      "src": "967:44:29",
+                                      "src": "967:44:31",
                                       "typeDescriptions": {
                                         "typeIdentifier": "t_bytes_memory_ptr",
                                         "typeString": "bytes memory"
@@ -2078,31 +1401,18 @@
                                         "typeString": "bytes memory"
                                       }
                                     ],
-<<<<<<< Updated upstream
-                                    "id": 5078,
-                                    "name": "keccak256",
-                                    "nodeType": "Identifier",
-                                    "overloadedDeclarations": [],
-                                    "referencedDeclaration": 10763,
-                                    "src": "957:9:29",
-=======
                                     "id": 5175,
                                     "name": "keccak256",
                                     "nodeType": "Identifier",
                                     "overloadedDeclarations": [],
                                     "referencedDeclaration": 10860,
                                     "src": "957:9:31",
->>>>>>> Stashed changes
                                     "typeDescriptions": {
                                       "typeIdentifier": "t_function_sha3_pure$__$returns$_t_bytes32_$",
                                       "typeString": "function () pure returns (bytes32)"
                                     }
                                   },
-<<<<<<< Updated upstream
-                                  "id": 5084,
-=======
                                   "id": 5181,
->>>>>>> Stashed changes
                                   "isConstant": false,
                                   "isLValue": false,
                                   "isPure": false,
@@ -2110,25 +1420,21 @@
                                   "lValueRequested": false,
                                   "names": [],
                                   "nodeType": "FunctionCall",
-                                  "src": "957:55:29",
+                                  "src": "957:55:31",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_bytes32",
                                     "typeString": "bytes32"
                                   }
                                 },
-                                "src": "942:70:29",
+                                "src": "942:70:31",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_bytes32",
                                   "typeString": "bytes32"
                                 }
                               },
-<<<<<<< Updated upstream
-                              "id": 5086,
-=======
                               "id": 5183,
->>>>>>> Stashed changes
                               "nodeType": "ExpressionStatement",
-                              "src": "942:70:29"
+                              "src": "942:70:31"
                             }
                           ]
                         }
@@ -2141,32 +1447,19 @@
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     },
-<<<<<<< Updated upstream
-                    "id": 5064,
-=======
                     "id": 5161,
->>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
                       "argumentTypes": null,
-<<<<<<< Updated upstream
-                      "id": 5061,
-                      "name": "i",
-                      "nodeType": "Identifier",
-                      "overloadedDeclarations": [],
-                      "referencedDeclaration": 5058,
-                      "src": "756:1:29",
-=======
                       "id": 5158,
                       "name": "i",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 5155,
                       "src": "756:1:31",
->>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -2178,31 +1471,18 @@
                       "argumentTypes": null,
                       "expression": {
                         "argumentTypes": null,
-<<<<<<< Updated upstream
-                        "id": 5062,
-                        "name": "_proof",
-                        "nodeType": "Identifier",
-                        "overloadedDeclarations": [],
-                        "referencedDeclaration": 5044,
-                        "src": "760:6:29",
-=======
                         "id": 5159,
                         "name": "_proof",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 5141,
                         "src": "760:6:31",
->>>>>>> Stashed changes
                         "typeDescriptions": {
                           "typeIdentifier": "t_array$_t_bytes32_$dyn_memory_ptr",
                           "typeString": "bytes32[] memory"
                         }
                       },
-<<<<<<< Updated upstream
-                      "id": 5063,
-=======
                       "id": 5160,
->>>>>>> Stashed changes
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -2210,46 +1490,31 @@
                       "memberName": "length",
                       "nodeType": "MemberAccess",
                       "referencedDeclaration": null,
-                      "src": "760:13:29",
+                      "src": "760:13:31",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "756:17:29",
+                    "src": "756:17:31",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
                     }
                   },
-<<<<<<< Updated upstream
-                  "id": 5101,
-                  "initializationExpression": {
-                    "assignments": [
-                      5058
-=======
                   "id": 5198,
                   "initializationExpression": {
                     "assignments": [
                       5155
->>>>>>> Stashed changes
                     ],
                     "declarations": [
                       {
                         "constant": false,
-<<<<<<< Updated upstream
-                        "id": 5058,
-                        "name": "i",
-                        "nodeType": "VariableDeclaration",
-                        "scope": 5107,
-                        "src": "741:9:29",
-=======
                         "id": 5155,
                         "name": "i",
                         "nodeType": "VariableDeclaration",
                         "scope": 5204,
                         "src": "741:9:31",
->>>>>>> Stashed changes
                         "stateVariable": false,
                         "storageLocation": "default",
                         "typeDescriptions": {
@@ -2257,14 +1522,10 @@
                           "typeString": "uint256"
                         },
                         "typeName": {
-<<<<<<< Updated upstream
-                          "id": 5057,
-=======
                           "id": 5154,
->>>>>>> Stashed changes
                           "name": "uint256",
                           "nodeType": "ElementaryTypeName",
-                          "src": "741:7:29",
+                          "src": "741:7:31",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -2274,26 +1535,18 @@
                         "visibility": "internal"
                       }
                     ],
-<<<<<<< Updated upstream
-                    "id": 5060,
-                    "initialValue": {
-                      "argumentTypes": null,
-                      "hexValue": "30",
-                      "id": 5059,
-=======
                     "id": 5157,
                     "initialValue": {
                       "argumentTypes": null,
                       "hexValue": "30",
                       "id": 5156,
->>>>>>> Stashed changes
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
                       "kind": "number",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "753:1:29",
+                      "src": "753:1:31",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": "t_rational_0_by_1",
@@ -2302,16 +1555,12 @@
                       "value": "0"
                     },
                     "nodeType": "VariableDeclarationStatement",
-                    "src": "741:13:29"
+                    "src": "741:13:31"
                   },
                   "loopExpression": {
                     "expression": {
                       "argumentTypes": null,
-<<<<<<< Updated upstream
-                      "id": 5066,
-=======
                       "id": 5163,
->>>>>>> Stashed changes
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -2319,24 +1568,15 @@
                       "nodeType": "UnaryOperation",
                       "operator": "++",
                       "prefix": false,
-                      "src": "775:3:29",
+                      "src": "775:3:31",
                       "subExpression": {
                         "argumentTypes": null,
-<<<<<<< Updated upstream
-                        "id": 5065,
-                        "name": "i",
-                        "nodeType": "Identifier",
-                        "overloadedDeclarations": [],
-                        "referencedDeclaration": 5058,
-                        "src": "775:1:29",
-=======
                         "id": 5162,
                         "name": "i",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 5155,
                         "src": "775:1:31",
->>>>>>> Stashed changes
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -2347,16 +1587,12 @@
                         "typeString": "uint256"
                       }
                     },
-<<<<<<< Updated upstream
-                    "id": 5067,
-=======
                     "id": 5164,
->>>>>>> Stashed changes
                     "nodeType": "ExpressionStatement",
-                    "src": "775:3:29"
+                    "src": "775:3:31"
                   },
                   "nodeType": "ForStatement",
-                  "src": "736:456:29"
+                  "src": "736:456:31"
                 },
                 {
                   "expression": {
@@ -2365,32 +1601,19 @@
                       "typeIdentifier": "t_bytes32",
                       "typeString": "bytes32"
                     },
-<<<<<<< Updated upstream
-                    "id": 5104,
-=======
                     "id": 5201,
->>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
                       "argumentTypes": null,
-<<<<<<< Updated upstream
-                      "id": 5102,
-                      "name": "computedHash",
-                      "nodeType": "Identifier",
-                      "overloadedDeclarations": [],
-                      "referencedDeclaration": 5054,
-                      "src": "1276:12:29",
-=======
                       "id": 5199,
                       "name": "computedHash",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 5151,
                       "src": "1276:12:31",
->>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes32",
                         "typeString": "bytes32"
@@ -2400,50 +1623,32 @@
                     "operator": "==",
                     "rightExpression": {
                       "argumentTypes": null,
-<<<<<<< Updated upstream
-                      "id": 5103,
-                      "name": "_root",
-                      "nodeType": "Identifier",
-                      "overloadedDeclarations": [],
-                      "referencedDeclaration": 5046,
-                      "src": "1292:5:29",
-=======
                       "id": 5200,
                       "name": "_root",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 5143,
                       "src": "1292:5:31",
->>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes32",
                         "typeString": "bytes32"
                       }
                     },
-                    "src": "1276:21:29",
+                    "src": "1276:21:31",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
                     }
                   },
-<<<<<<< Updated upstream
-                  "functionReturnParameters": 5052,
-                  "id": 5105,
-=======
                   "functionReturnParameters": 5149,
                   "id": 5202,
->>>>>>> Stashed changes
                   "nodeType": "Return",
-                  "src": "1269:28:29"
+                  "src": "1269:28:31"
                 }
               ]
             },
             "documentation": "@dev Verifies a Merkle proof proving the existence of a leaf in a Merkle tree. Assumes that each pair of leaves\nand each pair of pre-images are sorted.\n@param _proof Merkle proof containing sibling hashes on the branch from the leaf to the root of the Merkle tree\n@param _root Merkle root\n@param _leaf Leaf of Merkle tree",
-<<<<<<< Updated upstream
-            "id": 5107,
-=======
             "id": 5204,
->>>>>>> Stashed changes
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -2451,28 +1656,16 @@
             "name": "verifyProof",
             "nodeType": "FunctionDefinition",
             "parameters": {
-<<<<<<< Updated upstream
-              "id": 5049,
-=======
               "id": 5146,
->>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-<<<<<<< Updated upstream
-                  "id": 5044,
-                  "name": "_proof",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 5107,
-                  "src": "593:16:29",
-=======
                   "id": 5141,
                   "name": "_proof",
                   "nodeType": "VariableDeclaration",
                   "scope": 5204,
                   "src": "593:16:31",
->>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2481,27 +1674,19 @@
                   },
                   "typeName": {
                     "baseType": {
-<<<<<<< Updated upstream
-                      "id": 5042,
-=======
                       "id": 5139,
->>>>>>> Stashed changes
                       "name": "bytes32",
                       "nodeType": "ElementaryTypeName",
-                      "src": "593:7:29",
+                      "src": "593:7:31",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes32",
                         "typeString": "bytes32"
                       }
                     },
-<<<<<<< Updated upstream
-                    "id": 5043,
-=======
                     "id": 5140,
->>>>>>> Stashed changes
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "593:9:29",
+                    "src": "593:9:31",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_bytes32_$dyn_storage_ptr",
                       "typeString": "bytes32[]"
@@ -2512,19 +1697,11 @@
                 },
                 {
                   "constant": false,
-<<<<<<< Updated upstream
-                  "id": 5046,
-                  "name": "_root",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 5107,
-                  "src": "615:13:29",
-=======
                   "id": 5143,
                   "name": "_root",
                   "nodeType": "VariableDeclaration",
                   "scope": 5204,
                   "src": "615:13:31",
->>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2532,14 +1709,10 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-<<<<<<< Updated upstream
-                    "id": 5045,
-=======
                     "id": 5142,
->>>>>>> Stashed changes
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
-                    "src": "615:7:29",
+                    "src": "615:7:31",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes32",
                       "typeString": "bytes32"
@@ -2550,19 +1723,11 @@
                 },
                 {
                   "constant": false,
-<<<<<<< Updated upstream
-                  "id": 5048,
-                  "name": "_leaf",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 5107,
-                  "src": "634:13:29",
-=======
                   "id": 5145,
                   "name": "_leaf",
                   "nodeType": "VariableDeclaration",
                   "scope": 5204,
                   "src": "634:13:31",
->>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2570,14 +1735,10 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-<<<<<<< Updated upstream
-                    "id": 5047,
-=======
                     "id": 5144,
->>>>>>> Stashed changes
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
-                    "src": "634:7:29",
+                    "src": "634:7:31",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes32",
                       "typeString": "bytes32"
@@ -2587,32 +1748,20 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "587:64:29"
+              "src": "587:64:31"
             },
             "payable": false,
             "returnParameters": {
-<<<<<<< Updated upstream
-              "id": 5052,
-=======
               "id": 5149,
->>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-<<<<<<< Updated upstream
-                  "id": 5051,
-                  "name": "",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 5107,
-                  "src": "687:4:29",
-=======
                   "id": 5148,
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "scope": 5204,
                   "src": "687:4:31",
->>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2620,14 +1769,10 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-<<<<<<< Updated upstream
-                    "id": 5050,
-=======
                     "id": 5147,
->>>>>>> Stashed changes
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
-                    "src": "687:4:29",
+                    "src": "687:4:31",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -2637,30 +1782,20 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "686:6:29"
+              "src": "686:6:31"
             },
-<<<<<<< Updated upstream
-            "scope": 5108,
-            "src": "567:735:29",
-=======
             "scope": 5205,
             "src": "567:735:31",
->>>>>>> Stashed changes
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "internal"
           }
         ],
-<<<<<<< Updated upstream
-        "scope": 5109,
-        "src": "184:1120:29"
-=======
         "scope": 5206,
         "src": "184:1120:31"
->>>>>>> Stashed changes
       }
     ],
-    "src": "0:1305:29"
+    "src": "0:1305:31"
   },
   "compiler": {
     "name": "solc",
@@ -2668,9 +1803,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
-<<<<<<< Updated upstream
-  "updatedAt": "2018-08-21T13:36:52.288Z"
-=======
-  "updatedAt": "2018-08-21T13:27:41.764Z"
->>>>>>> Stashed changes
+  "updatedAt": "2018-08-21T13:56:27.015Z"
 }
