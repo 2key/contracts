@@ -7,6 +7,7 @@ const TwoKeyEconomy = artifacts.require('TwoKeyEconomy');
 const TwoKeyCampaignETHCrowdsale = artifacts.require('TwoKeyCampaignETHCrowdsale');
 
 module.exports = function (deployer) {
+  console.log('TwoKeyCampaignETHCrowdsale', TwoKeyCampaignETHCrowdsale);
   if (deployer.network.startsWith('dev') || deployer.network == 'rinkeby-infura') {
     deployer.deploy(TwoKeyEconomy);
   } else if (deployer.network.startsWith('plasma')) {
