@@ -246,11 +246,12 @@
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "pragma solidity ^0.4.24;\n\nimport \"../../math/SafeMath.sol\";\nimport \"../../ownership/Ownable.sol\";\nimport \"../validation/TimedCrowdsale.sol\";\n\n\n/**\n * @title FinalizableCrowdsale\n * @dev Extension of Crowdsale where an owner can do extra work\n * after finishing.\n */\ncontract FinalizableCrowdsale is Ownable, TimedCrowdsale {\n  using SafeMath for uint256;\n\n  bool public isFinalized = false;\n\n  event Finalized();\n\n  /**\n   * @dev Must be called after crowdsale ends, to do some extra finalization\n   * work. Calls the contract's finalization function.\n   */\n  function finalize() public onlyOwner {\n    require(!isFinalized);\n    require(hasClosed());\n\n    finalization();\n    emit Finalized();\n\n    isFinalized = true;\n  }\n\n  /**\n   * @dev Can be overridden to add finalization logic. The overriding function\n   * should call super.finalization() to ensure the chain of finalization is\n   * executed entirely.\n   */\n  function finalization() internal {\n  }\n\n}\n",
-  "sourcePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/distribution/FinalizableCrowdsale.sol",
+  "sourcePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/distribution/FinalizableCrowdsale.sol",
   "ast": {
-    "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/distribution/FinalizableCrowdsale.sol",
+    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/distribution/FinalizableCrowdsale.sol",
     "exportedSymbols": {
       "FinalizableCrowdsale": [
+<<<<<<< Updated upstream
         5980
       ]
     },
@@ -259,6 +260,16 @@
     "nodes": [
       {
         "id": 5934,
+=======
+        6077
+      ]
+    },
+    "id": 6078,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 6031,
+>>>>>>> Stashed changes
         "literals": [
           "solidity",
           "^",
@@ -269,35 +280,59 @@
         "src": "0:24:36"
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/math/SafeMath.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/math/SafeMath.sol",
         "file": "../../math/SafeMath.sol",
+<<<<<<< Updated upstream
         "id": 5935,
         "nodeType": "ImportDirective",
         "scope": 5981,
         "sourceUnit": 7050,
         "src": "26:33:36",
+=======
+        "id": 6032,
+        "nodeType": "ImportDirective",
+        "scope": 6078,
+        "sourceUnit": 7147,
+        "src": "26:33:38",
+>>>>>>> Stashed changes
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/ownership/Ownable.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/ownership/Ownable.sol",
         "file": "../../ownership/Ownable.sol",
+<<<<<<< Updated upstream
         "id": 5936,
         "nodeType": "ImportDirective",
         "scope": 5981,
         "sourceUnit": 7637,
         "src": "60:37:36",
+=======
+        "id": 6033,
+        "nodeType": "ImportDirective",
+        "scope": 6078,
+        "sourceUnit": 7734,
+        "src": "60:37:38",
+>>>>>>> Stashed changes
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/validation/TimedCrowdsale.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/validation/TimedCrowdsale.sol",
         "file": "../validation/TimedCrowdsale.sol",
+<<<<<<< Updated upstream
         "id": 5937,
         "nodeType": "ImportDirective",
         "scope": 5981,
         "sourceUnit": 6650,
         "src": "98:42:36",
+=======
+        "id": 6034,
+        "nodeType": "ImportDirective",
+        "scope": 6078,
+        "sourceUnit": 6747,
+        "src": "98:42:38",
+>>>>>>> Stashed changes
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -307,6 +342,7 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
+<<<<<<< Updated upstream
               "id": 5938,
               "name": "Ownable",
               "nodeType": "UserDefinedTypeName",
@@ -318,6 +354,19 @@
               }
             },
             "id": 5939,
+=======
+              "id": 6035,
+              "name": "Ownable",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 7733,
+              "src": "299:7:38",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_Ownable_$7733",
+                "typeString": "contract Ownable"
+              }
+            },
+            "id": 6036,
+>>>>>>> Stashed changes
             "nodeType": "InheritanceSpecifier",
             "src": "299:7:36"
           },
@@ -325,6 +374,7 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
+<<<<<<< Updated upstream
               "id": 5940,
               "name": "TimedCrowdsale",
               "nodeType": "UserDefinedTypeName",
@@ -336,29 +386,58 @@
               }
             },
             "id": 5941,
+=======
+              "id": 6037,
+              "name": "TimedCrowdsale",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 6746,
+              "src": "308:14:38",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_TimedCrowdsale_$6746",
+                "typeString": "contract TimedCrowdsale"
+              }
+            },
+            "id": 6038,
+>>>>>>> Stashed changes
             "nodeType": "InheritanceSpecifier",
             "src": "308:14:36"
           }
         ],
         "contractDependencies": [
+<<<<<<< Updated upstream
           5932,
           6649,
           7636
+=======
+          6029,
+          6746,
+          7733
+>>>>>>> Stashed changes
         ],
         "contractKind": "contract",
         "documentation": "@title FinalizableCrowdsale\n@dev Extension of Crowdsale where an owner can do extra work\nafter finishing.",
         "fullyImplemented": false,
+<<<<<<< Updated upstream
         "id": 5980,
         "linearizedBaseContracts": [
           5980,
           6649,
           5932,
           7636
+=======
+        "id": 6077,
+        "linearizedBaseContracts": [
+          6077,
+          6746,
+          6029,
+          7733
+>>>>>>> Stashed changes
         ],
         "name": "FinalizableCrowdsale",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
+<<<<<<< Updated upstream
             "id": 5944,
             "libraryName": {
               "contractScope": null,
@@ -369,13 +448,29 @@
               "src": "333:8:36",
               "typeDescriptions": {
                 "typeIdentifier": "t_contract$_SafeMath_$7049",
+=======
+            "id": 6041,
+            "libraryName": {
+              "contractScope": null,
+              "id": 6039,
+              "name": "SafeMath",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 7146,
+              "src": "333:8:38",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_SafeMath_$7146",
+>>>>>>> Stashed changes
                 "typeString": "library SafeMath"
               }
             },
             "nodeType": "UsingForDirective",
             "src": "327:27:36",
             "typeName": {
+<<<<<<< Updated upstream
               "id": 5943,
+=======
+              "id": 6040,
+>>>>>>> Stashed changes
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
               "src": "346:7:36",
@@ -387,11 +482,19 @@
           },
           {
             "constant": false,
+<<<<<<< Updated upstream
             "id": 5947,
             "name": "isFinalized",
             "nodeType": "VariableDeclaration",
             "scope": 5980,
             "src": "358:31:36",
+=======
+            "id": 6044,
+            "name": "isFinalized",
+            "nodeType": "VariableDeclaration",
+            "scope": 6077,
+            "src": "358:31:38",
+>>>>>>> Stashed changes
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -399,7 +502,11 @@
               "typeString": "bool"
             },
             "typeName": {
+<<<<<<< Updated upstream
               "id": 5945,
+=======
+              "id": 6042,
+>>>>>>> Stashed changes
               "name": "bool",
               "nodeType": "ElementaryTypeName",
               "src": "358:4:36",
@@ -411,7 +518,11 @@
             "value": {
               "argumentTypes": null,
               "hexValue": "66616c7365",
+<<<<<<< Updated upstream
               "id": 5946,
+=======
+              "id": 6043,
+>>>>>>> Stashed changes
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -431,11 +542,19 @@
           {
             "anonymous": false,
             "documentation": null,
+<<<<<<< Updated upstream
             "id": 5949,
             "name": "Finalized",
             "nodeType": "EventDefinition",
             "parameters": {
               "id": 5948,
+=======
+            "id": 6046,
+            "name": "Finalized",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 6045,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "409:2:36"
@@ -444,7 +563,11 @@
           },
           {
             "body": {
+<<<<<<< Updated upstream
               "id": 5974,
+=======
+              "id": 6071,
+>>>>>>> Stashed changes
               "nodeType": "Block",
               "src": "597:126:36",
               "statements": [
@@ -454,7 +577,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
+<<<<<<< Updated upstream
                         "id": 5956,
+=======
+                        "id": 6053,
+>>>>>>> Stashed changes
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -465,12 +592,21 @@
                         "src": "611:12:36",
                         "subExpression": {
                           "argumentTypes": null,
+<<<<<<< Updated upstream
                           "id": 5955,
                           "name": "isFinalized",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 5947,
                           "src": "612:11:36",
+=======
+                          "id": 6052,
+                          "name": "isFinalized",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 6044,
+                          "src": "612:11:38",
+>>>>>>> Stashed changes
                           "typeDescriptions": {
                             "typeIdentifier": "t_bool",
                             "typeString": "bool"
@@ -489,6 +625,7 @@
                           "typeString": "bool"
                         }
                       ],
+<<<<<<< Updated upstream
                       "id": 5954,
                       "name": "require",
                       "nodeType": "Identifier",
@@ -498,12 +635,27 @@
                       ],
                       "referencedDeclaration": 10772,
                       "src": "603:7:36",
+=======
+                      "id": 6051,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        10869,
+                        10870
+                      ],
+                      "referencedDeclaration": 10869,
+                      "src": "603:7:38",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
+<<<<<<< Updated upstream
                     "id": 5957,
+=======
+                    "id": 6054,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -517,7 +669,11 @@
                       "typeString": "tuple()"
                     }
                   },
+<<<<<<< Updated upstream
                   "id": 5958,
+=======
+                  "id": 6055,
+>>>>>>> Stashed changes
                   "nodeType": "ExpressionStatement",
                   "src": "603:21:36"
                 },
@@ -530,18 +686,31 @@
                         "arguments": [],
                         "expression": {
                           "argumentTypes": [],
+<<<<<<< Updated upstream
                           "id": 5960,
                           "name": "hasClosed",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 6631,
                           "src": "638:9:36",
+=======
+                          "id": 6057,
+                          "name": "hasClosed",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 6728,
+                          "src": "638:9:38",
+>>>>>>> Stashed changes
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_view$__$returns$_t_bool_$",
                             "typeString": "function () view returns (bool)"
                           }
                         },
+<<<<<<< Updated upstream
                         "id": 5961,
+=======
+                        "id": 6058,
+>>>>>>> Stashed changes
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -563,6 +732,7 @@
                           "typeString": "bool"
                         }
                       ],
+<<<<<<< Updated upstream
                       "id": 5959,
                       "name": "require",
                       "nodeType": "Identifier",
@@ -572,12 +742,27 @@
                       ],
                       "referencedDeclaration": 10772,
                       "src": "630:7:36",
+=======
+                      "id": 6056,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        10869,
+                        10870
+                      ],
+                      "referencedDeclaration": 10869,
+                      "src": "630:7:38",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
+<<<<<<< Updated upstream
                     "id": 5962,
+=======
+                    "id": 6059,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -591,7 +776,11 @@
                       "typeString": "tuple()"
                     }
                   },
+<<<<<<< Updated upstream
                   "id": 5963,
+=======
+                  "id": 6060,
+>>>>>>> Stashed changes
                   "nodeType": "ExpressionStatement",
                   "src": "630:20:36"
                 },
@@ -601,18 +790,31 @@
                     "arguments": [],
                     "expression": {
                       "argumentTypes": [],
+<<<<<<< Updated upstream
                       "id": 5964,
                       "name": "finalization",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 5979,
                       "src": "657:12:36",
+=======
+                      "id": 6061,
+                      "name": "finalization",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 6076,
+                      "src": "657:12:38",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$__$returns$__$",
                         "typeString": "function ()"
                       }
                     },
+<<<<<<< Updated upstream
                     "id": 5965,
+=======
+                    "id": 6062,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -626,7 +828,11 @@
                       "typeString": "tuple()"
                     }
                   },
+<<<<<<< Updated upstream
                   "id": 5966,
+=======
+                  "id": 6063,
+>>>>>>> Stashed changes
                   "nodeType": "ExpressionStatement",
                   "src": "657:14:36"
                 },
@@ -636,18 +842,31 @@
                     "arguments": [],
                     "expression": {
                       "argumentTypes": [],
+<<<<<<< Updated upstream
                       "id": 5967,
                       "name": "Finalized",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 5949,
                       "src": "682:9:36",
+=======
+                      "id": 6064,
+                      "name": "Finalized",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 6046,
+                      "src": "682:9:38",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_event_nonpayable$__$returns$__$",
                         "typeString": "function ()"
                       }
                     },
+<<<<<<< Updated upstream
                     "id": 5968,
+=======
+                    "id": 6065,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -661,26 +880,43 @@
                       "typeString": "tuple()"
                     }
                   },
+<<<<<<< Updated upstream
                   "id": 5969,
+=======
+                  "id": 6066,
+>>>>>>> Stashed changes
                   "nodeType": "EmitStatement",
                   "src": "677:16:36"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
+<<<<<<< Updated upstream
                     "id": 5972,
+=======
+                    "id": 6069,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
+<<<<<<< Updated upstream
                       "id": 5970,
                       "name": "isFinalized",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 5947,
                       "src": "700:11:36",
+=======
+                      "id": 6067,
+                      "name": "isFinalized",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 6044,
+                      "src": "700:11:38",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_bool",
                         "typeString": "bool"
@@ -691,7 +927,11 @@
                     "rightHandSide": {
                       "argumentTypes": null,
                       "hexValue": "74727565",
+<<<<<<< Updated upstream
                       "id": 5971,
+=======
+                      "id": 6068,
+>>>>>>> Stashed changes
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -712,20 +952,29 @@
                       "typeString": "bool"
                     }
                   },
+<<<<<<< Updated upstream
                   "id": 5973,
+=======
+                  "id": 6070,
+>>>>>>> Stashed changes
                   "nodeType": "ExpressionStatement",
                   "src": "700:18:36"
                 }
               ]
             },
             "documentation": "@dev Must be called after crowdsale ends, to do some extra finalization\nwork. Calls the contract's finalization function.",
+<<<<<<< Updated upstream
             "id": 5975,
+=======
+            "id": 6072,
+>>>>>>> Stashed changes
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
             "modifiers": [
               {
                 "arguments": null,
+<<<<<<< Updated upstream
                 "id": 5952,
                 "modifierName": {
                   "argumentTypes": null,
@@ -735,6 +984,17 @@
                   "overloadedDeclarations": [],
                   "referencedDeclaration": 7584,
                   "src": "587:9:36",
+=======
+                "id": 6049,
+                "modifierName": {
+                  "argumentTypes": null,
+                  "id": 6048,
+                  "name": "onlyOwner",
+                  "nodeType": "Identifier",
+                  "overloadedDeclarations": [],
+                  "referencedDeclaration": 7681,
+                  "src": "587:9:38",
+>>>>>>> Stashed changes
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
                     "typeString": "modifier ()"
@@ -747,33 +1007,54 @@
             "name": "finalize",
             "nodeType": "FunctionDefinition",
             "parameters": {
+<<<<<<< Updated upstream
               "id": 5950,
+=======
+              "id": 6047,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "577:2:36"
             },
             "payable": false,
             "returnParameters": {
+<<<<<<< Updated upstream
               "id": 5953,
+=======
+              "id": 6050,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "597:0:36"
             },
+<<<<<<< Updated upstream
             "scope": 5980,
             "src": "560:163:36",
+=======
+            "scope": 6077,
+            "src": "560:163:38",
+>>>>>>> Stashed changes
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           },
           {
             "body": {
+<<<<<<< Updated upstream
               "id": 5978,
+=======
+              "id": 6075,
+>>>>>>> Stashed changes
               "nodeType": "Block",
               "src": "952:5:36",
               "statements": []
             },
             "documentation": "@dev Can be overridden to add finalization logic. The overriding function\nshould call super.finalization() to ensure the chain of finalization is\nexecuted entirely.",
+<<<<<<< Updated upstream
             "id": 5979,
+=======
+            "id": 6076,
+>>>>>>> Stashed changes
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -781,35 +1062,54 @@
             "name": "finalization",
             "nodeType": "FunctionDefinition",
             "parameters": {
+<<<<<<< Updated upstream
               "id": 5976,
+=======
+              "id": 6073,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "940:2:36"
             },
             "payable": false,
             "returnParameters": {
+<<<<<<< Updated upstream
               "id": 5977,
+=======
+              "id": 6074,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "952:0:36"
             },
+<<<<<<< Updated upstream
             "scope": 5980,
             "src": "919:38:36",
+=======
+            "scope": 6077,
+            "src": "919:38:38",
+>>>>>>> Stashed changes
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "internal"
           }
         ],
+<<<<<<< Updated upstream
         "scope": 5981,
         "src": "266:694:36"
+=======
+        "scope": 6078,
+        "src": "266:694:38"
+>>>>>>> Stashed changes
       }
     ],
     "src": "0:961:36"
   },
   "legacyAST": {
-    "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/distribution/FinalizableCrowdsale.sol",
+    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/distribution/FinalizableCrowdsale.sol",
     "exportedSymbols": {
       "FinalizableCrowdsale": [
+<<<<<<< Updated upstream
         5980
       ]
     },
@@ -818,6 +1118,16 @@
     "nodes": [
       {
         "id": 5934,
+=======
+        6077
+      ]
+    },
+    "id": 6078,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 6031,
+>>>>>>> Stashed changes
         "literals": [
           "solidity",
           "^",
@@ -828,35 +1138,59 @@
         "src": "0:24:36"
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/math/SafeMath.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/math/SafeMath.sol",
         "file": "../../math/SafeMath.sol",
+<<<<<<< Updated upstream
         "id": 5935,
         "nodeType": "ImportDirective",
         "scope": 5981,
         "sourceUnit": 7050,
         "src": "26:33:36",
+=======
+        "id": 6032,
+        "nodeType": "ImportDirective",
+        "scope": 6078,
+        "sourceUnit": 7147,
+        "src": "26:33:38",
+>>>>>>> Stashed changes
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/ownership/Ownable.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/ownership/Ownable.sol",
         "file": "../../ownership/Ownable.sol",
+<<<<<<< Updated upstream
         "id": 5936,
         "nodeType": "ImportDirective",
         "scope": 5981,
         "sourceUnit": 7637,
         "src": "60:37:36",
+=======
+        "id": 6033,
+        "nodeType": "ImportDirective",
+        "scope": 6078,
+        "sourceUnit": 7734,
+        "src": "60:37:38",
+>>>>>>> Stashed changes
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/validation/TimedCrowdsale.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/validation/TimedCrowdsale.sol",
         "file": "../validation/TimedCrowdsale.sol",
+<<<<<<< Updated upstream
         "id": 5937,
         "nodeType": "ImportDirective",
         "scope": 5981,
         "sourceUnit": 6650,
         "src": "98:42:36",
+=======
+        "id": 6034,
+        "nodeType": "ImportDirective",
+        "scope": 6078,
+        "sourceUnit": 6747,
+        "src": "98:42:38",
+>>>>>>> Stashed changes
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -866,6 +1200,7 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
+<<<<<<< Updated upstream
               "id": 5938,
               "name": "Ownable",
               "nodeType": "UserDefinedTypeName",
@@ -877,6 +1212,19 @@
               }
             },
             "id": 5939,
+=======
+              "id": 6035,
+              "name": "Ownable",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 7733,
+              "src": "299:7:38",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_Ownable_$7733",
+                "typeString": "contract Ownable"
+              }
+            },
+            "id": 6036,
+>>>>>>> Stashed changes
             "nodeType": "InheritanceSpecifier",
             "src": "299:7:36"
           },
@@ -884,6 +1232,7 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
+<<<<<<< Updated upstream
               "id": 5940,
               "name": "TimedCrowdsale",
               "nodeType": "UserDefinedTypeName",
@@ -895,29 +1244,58 @@
               }
             },
             "id": 5941,
+=======
+              "id": 6037,
+              "name": "TimedCrowdsale",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 6746,
+              "src": "308:14:38",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_TimedCrowdsale_$6746",
+                "typeString": "contract TimedCrowdsale"
+              }
+            },
+            "id": 6038,
+>>>>>>> Stashed changes
             "nodeType": "InheritanceSpecifier",
             "src": "308:14:36"
           }
         ],
         "contractDependencies": [
+<<<<<<< Updated upstream
           5932,
           6649,
           7636
+=======
+          6029,
+          6746,
+          7733
+>>>>>>> Stashed changes
         ],
         "contractKind": "contract",
         "documentation": "@title FinalizableCrowdsale\n@dev Extension of Crowdsale where an owner can do extra work\nafter finishing.",
         "fullyImplemented": false,
+<<<<<<< Updated upstream
         "id": 5980,
         "linearizedBaseContracts": [
           5980,
           6649,
           5932,
           7636
+=======
+        "id": 6077,
+        "linearizedBaseContracts": [
+          6077,
+          6746,
+          6029,
+          7733
+>>>>>>> Stashed changes
         ],
         "name": "FinalizableCrowdsale",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
+<<<<<<< Updated upstream
             "id": 5944,
             "libraryName": {
               "contractScope": null,
@@ -928,13 +1306,29 @@
               "src": "333:8:36",
               "typeDescriptions": {
                 "typeIdentifier": "t_contract$_SafeMath_$7049",
+=======
+            "id": 6041,
+            "libraryName": {
+              "contractScope": null,
+              "id": 6039,
+              "name": "SafeMath",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 7146,
+              "src": "333:8:38",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_SafeMath_$7146",
+>>>>>>> Stashed changes
                 "typeString": "library SafeMath"
               }
             },
             "nodeType": "UsingForDirective",
             "src": "327:27:36",
             "typeName": {
+<<<<<<< Updated upstream
               "id": 5943,
+=======
+              "id": 6040,
+>>>>>>> Stashed changes
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
               "src": "346:7:36",
@@ -946,11 +1340,19 @@
           },
           {
             "constant": false,
+<<<<<<< Updated upstream
             "id": 5947,
             "name": "isFinalized",
             "nodeType": "VariableDeclaration",
             "scope": 5980,
             "src": "358:31:36",
+=======
+            "id": 6044,
+            "name": "isFinalized",
+            "nodeType": "VariableDeclaration",
+            "scope": 6077,
+            "src": "358:31:38",
+>>>>>>> Stashed changes
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -958,7 +1360,11 @@
               "typeString": "bool"
             },
             "typeName": {
+<<<<<<< Updated upstream
               "id": 5945,
+=======
+              "id": 6042,
+>>>>>>> Stashed changes
               "name": "bool",
               "nodeType": "ElementaryTypeName",
               "src": "358:4:36",
@@ -970,7 +1376,11 @@
             "value": {
               "argumentTypes": null,
               "hexValue": "66616c7365",
+<<<<<<< Updated upstream
               "id": 5946,
+=======
+              "id": 6043,
+>>>>>>> Stashed changes
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -990,11 +1400,19 @@
           {
             "anonymous": false,
             "documentation": null,
+<<<<<<< Updated upstream
             "id": 5949,
             "name": "Finalized",
             "nodeType": "EventDefinition",
             "parameters": {
               "id": 5948,
+=======
+            "id": 6046,
+            "name": "Finalized",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 6045,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "409:2:36"
@@ -1003,7 +1421,11 @@
           },
           {
             "body": {
+<<<<<<< Updated upstream
               "id": 5974,
+=======
+              "id": 6071,
+>>>>>>> Stashed changes
               "nodeType": "Block",
               "src": "597:126:36",
               "statements": [
@@ -1013,7 +1435,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
+<<<<<<< Updated upstream
                         "id": 5956,
+=======
+                        "id": 6053,
+>>>>>>> Stashed changes
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -1024,12 +1450,21 @@
                         "src": "611:12:36",
                         "subExpression": {
                           "argumentTypes": null,
+<<<<<<< Updated upstream
                           "id": 5955,
                           "name": "isFinalized",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 5947,
                           "src": "612:11:36",
+=======
+                          "id": 6052,
+                          "name": "isFinalized",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 6044,
+                          "src": "612:11:38",
+>>>>>>> Stashed changes
                           "typeDescriptions": {
                             "typeIdentifier": "t_bool",
                             "typeString": "bool"
@@ -1048,6 +1483,7 @@
                           "typeString": "bool"
                         }
                       ],
+<<<<<<< Updated upstream
                       "id": 5954,
                       "name": "require",
                       "nodeType": "Identifier",
@@ -1057,12 +1493,27 @@
                       ],
                       "referencedDeclaration": 10772,
                       "src": "603:7:36",
+=======
+                      "id": 6051,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        10869,
+                        10870
+                      ],
+                      "referencedDeclaration": 10869,
+                      "src": "603:7:38",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
+<<<<<<< Updated upstream
                     "id": 5957,
+=======
+                    "id": 6054,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1076,7 +1527,11 @@
                       "typeString": "tuple()"
                     }
                   },
+<<<<<<< Updated upstream
                   "id": 5958,
+=======
+                  "id": 6055,
+>>>>>>> Stashed changes
                   "nodeType": "ExpressionStatement",
                   "src": "603:21:36"
                 },
@@ -1089,18 +1544,31 @@
                         "arguments": [],
                         "expression": {
                           "argumentTypes": [],
+<<<<<<< Updated upstream
                           "id": 5960,
                           "name": "hasClosed",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 6631,
                           "src": "638:9:36",
+=======
+                          "id": 6057,
+                          "name": "hasClosed",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 6728,
+                          "src": "638:9:38",
+>>>>>>> Stashed changes
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_view$__$returns$_t_bool_$",
                             "typeString": "function () view returns (bool)"
                           }
                         },
+<<<<<<< Updated upstream
                         "id": 5961,
+=======
+                        "id": 6058,
+>>>>>>> Stashed changes
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -1122,6 +1590,7 @@
                           "typeString": "bool"
                         }
                       ],
+<<<<<<< Updated upstream
                       "id": 5959,
                       "name": "require",
                       "nodeType": "Identifier",
@@ -1131,12 +1600,27 @@
                       ],
                       "referencedDeclaration": 10772,
                       "src": "630:7:36",
+=======
+                      "id": 6056,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        10869,
+                        10870
+                      ],
+                      "referencedDeclaration": 10869,
+                      "src": "630:7:38",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
+<<<<<<< Updated upstream
                     "id": 5962,
+=======
+                    "id": 6059,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1150,7 +1634,11 @@
                       "typeString": "tuple()"
                     }
                   },
+<<<<<<< Updated upstream
                   "id": 5963,
+=======
+                  "id": 6060,
+>>>>>>> Stashed changes
                   "nodeType": "ExpressionStatement",
                   "src": "630:20:36"
                 },
@@ -1160,18 +1648,31 @@
                     "arguments": [],
                     "expression": {
                       "argumentTypes": [],
+<<<<<<< Updated upstream
                       "id": 5964,
                       "name": "finalization",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 5979,
                       "src": "657:12:36",
+=======
+                      "id": 6061,
+                      "name": "finalization",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 6076,
+                      "src": "657:12:38",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$__$returns$__$",
                         "typeString": "function ()"
                       }
                     },
+<<<<<<< Updated upstream
                     "id": 5965,
+=======
+                    "id": 6062,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1185,7 +1686,11 @@
                       "typeString": "tuple()"
                     }
                   },
+<<<<<<< Updated upstream
                   "id": 5966,
+=======
+                  "id": 6063,
+>>>>>>> Stashed changes
                   "nodeType": "ExpressionStatement",
                   "src": "657:14:36"
                 },
@@ -1195,18 +1700,31 @@
                     "arguments": [],
                     "expression": {
                       "argumentTypes": [],
+<<<<<<< Updated upstream
                       "id": 5967,
                       "name": "Finalized",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 5949,
                       "src": "682:9:36",
+=======
+                      "id": 6064,
+                      "name": "Finalized",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 6046,
+                      "src": "682:9:38",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_event_nonpayable$__$returns$__$",
                         "typeString": "function ()"
                       }
                     },
+<<<<<<< Updated upstream
                     "id": 5968,
+=======
+                    "id": 6065,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1220,26 +1738,43 @@
                       "typeString": "tuple()"
                     }
                   },
+<<<<<<< Updated upstream
                   "id": 5969,
+=======
+                  "id": 6066,
+>>>>>>> Stashed changes
                   "nodeType": "EmitStatement",
                   "src": "677:16:36"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
+<<<<<<< Updated upstream
                     "id": 5972,
+=======
+                    "id": 6069,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
+<<<<<<< Updated upstream
                       "id": 5970,
                       "name": "isFinalized",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 5947,
                       "src": "700:11:36",
+=======
+                      "id": 6067,
+                      "name": "isFinalized",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 6044,
+                      "src": "700:11:38",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_bool",
                         "typeString": "bool"
@@ -1250,7 +1785,11 @@
                     "rightHandSide": {
                       "argumentTypes": null,
                       "hexValue": "74727565",
+<<<<<<< Updated upstream
                       "id": 5971,
+=======
+                      "id": 6068,
+>>>>>>> Stashed changes
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -1271,20 +1810,29 @@
                       "typeString": "bool"
                     }
                   },
+<<<<<<< Updated upstream
                   "id": 5973,
+=======
+                  "id": 6070,
+>>>>>>> Stashed changes
                   "nodeType": "ExpressionStatement",
                   "src": "700:18:36"
                 }
               ]
             },
             "documentation": "@dev Must be called after crowdsale ends, to do some extra finalization\nwork. Calls the contract's finalization function.",
+<<<<<<< Updated upstream
             "id": 5975,
+=======
+            "id": 6072,
+>>>>>>> Stashed changes
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
             "modifiers": [
               {
                 "arguments": null,
+<<<<<<< Updated upstream
                 "id": 5952,
                 "modifierName": {
                   "argumentTypes": null,
@@ -1294,6 +1842,17 @@
                   "overloadedDeclarations": [],
                   "referencedDeclaration": 7584,
                   "src": "587:9:36",
+=======
+                "id": 6049,
+                "modifierName": {
+                  "argumentTypes": null,
+                  "id": 6048,
+                  "name": "onlyOwner",
+                  "nodeType": "Identifier",
+                  "overloadedDeclarations": [],
+                  "referencedDeclaration": 7681,
+                  "src": "587:9:38",
+>>>>>>> Stashed changes
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
                     "typeString": "modifier ()"
@@ -1306,33 +1865,54 @@
             "name": "finalize",
             "nodeType": "FunctionDefinition",
             "parameters": {
+<<<<<<< Updated upstream
               "id": 5950,
+=======
+              "id": 6047,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "577:2:36"
             },
             "payable": false,
             "returnParameters": {
+<<<<<<< Updated upstream
               "id": 5953,
+=======
+              "id": 6050,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "597:0:36"
             },
+<<<<<<< Updated upstream
             "scope": 5980,
             "src": "560:163:36",
+=======
+            "scope": 6077,
+            "src": "560:163:38",
+>>>>>>> Stashed changes
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           },
           {
             "body": {
+<<<<<<< Updated upstream
               "id": 5978,
+=======
+              "id": 6075,
+>>>>>>> Stashed changes
               "nodeType": "Block",
               "src": "952:5:36",
               "statements": []
             },
             "documentation": "@dev Can be overridden to add finalization logic. The overriding function\nshould call super.finalization() to ensure the chain of finalization is\nexecuted entirely.",
+<<<<<<< Updated upstream
             "id": 5979,
+=======
+            "id": 6076,
+>>>>>>> Stashed changes
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -1340,27 +1920,45 @@
             "name": "finalization",
             "nodeType": "FunctionDefinition",
             "parameters": {
+<<<<<<< Updated upstream
               "id": 5976,
+=======
+              "id": 6073,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "940:2:36"
             },
             "payable": false,
             "returnParameters": {
+<<<<<<< Updated upstream
               "id": 5977,
+=======
+              "id": 6074,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "952:0:36"
             },
+<<<<<<< Updated upstream
             "scope": 5980,
             "src": "919:38:36",
+=======
+            "scope": 6077,
+            "src": "919:38:38",
+>>>>>>> Stashed changes
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "internal"
           }
         ],
+<<<<<<< Updated upstream
         "scope": 5981,
         "src": "266:694:36"
+=======
+        "scope": 6078,
+        "src": "266:694:38"
+>>>>>>> Stashed changes
       }
     ],
     "src": "0:961:36"
@@ -1371,5 +1969,9 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
+<<<<<<< Updated upstream
   "updatedAt": "2018-08-21T13:36:52.195Z"
+=======
+  "updatedAt": "2018-08-21T13:27:41.768Z"
+>>>>>>> Stashed changes
 }

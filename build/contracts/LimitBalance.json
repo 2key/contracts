@@ -27,16 +27,24 @@
       "type": "constructor"
     }
   ],
+<<<<<<< Updated upstream
   "bytecode": "0x608060405234801561001057600080fd5b506040516020806100e7833981018060405281019080805190602001909291905050508060008190555050609e806100496000396000f300608060405260043610603f576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff168063a4d66daf146044575b600080fd5b348015604f57600080fd5b506056606c565b6040518082815260200191505060405180910390f35b600054815600a165627a7a72305820b9af690ab3fb69c42ac3581f546145aeb1d9629e4f921349e4949a787ae5ad630029",
   "deployedBytecode": "0x608060405260043610603f576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff168063a4d66daf146044575b600080fd5b348015604f57600080fd5b506056606c565b6040518082815260200191505060405180910390f35b600054815600a165627a7a72305820b9af690ab3fb69c42ac3581f546145aeb1d9629e4f921349e4949a787ae5ad630029",
   "sourceMap": "335:400:28:-;;;511:60;8:9:-1;5:2;;;30:1;27;20:12;5:2;511:60:28;;;;;;;;;;;;;;;;;;;;;;;;;;;;;560:6;552:5;:14;;;;511:60;335:400;;;;;;",
   "deployedSourceMap": "335:400:28:-;;;;;;;;;;;;;;;;;;;;;;;;362:20;;8:9:-1;5:2;;;30:1;27;20:12;5:2;362:20:28;;;;;;;;;;;;;;;;;;;;;;;;;;;:::o",
+=======
+  "bytecode": "0x608060405234801561001057600080fd5b506040516020806100e7833981018060405281019080805190602001909291905050508060008190555050609e806100496000396000f300608060405260043610603f576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff168063a4d66daf146044575b600080fd5b348015604f57600080fd5b506056606c565b6040518082815260200191505060405180910390f35b600054815600a165627a7a7230582054d251b22eba9ce1d6274b12cc44f7c08dfcd237e93618256862a12d39d4757b0029",
+  "deployedBytecode": "0x608060405260043610603f576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff168063a4d66daf146044575b600080fd5b348015604f57600080fd5b506056606c565b6040518082815260200191505060405180910390f35b600054815600a165627a7a7230582054d251b22eba9ce1d6274b12cc44f7c08dfcd237e93618256862a12d39d4757b0029",
+  "sourceMap": "335:400:30:-;;;511:60;8:9:-1;5:2;;;30:1;27;20:12;5:2;511:60:30;;;;;;;;;;;;;;;;;;;;;;;;;;;;;560:6;552:5;:14;;;;511:60;335:400;;;;;;",
+  "deployedSourceMap": "335:400:30:-;;;;;;;;;;;;;;;;;;;;;;;;362:20;;8:9:-1;5:2;;;30:1;27;20:12;5:2;362:20:30;;;;;;;;;;;;;;;;;;;;;;;;;;;:::o",
+>>>>>>> Stashed changes
   "source": "pragma solidity ^0.4.24;\n\n\n/**\n * @title LimitBalance\n * @dev Simple contract to limit the balance of child contract.\n * Note this doesn't prevent other contracts to send funds by using selfdestruct(address);\n * See: https://github.com/ConsenSys/smart-contract-best-practices#remember-that-ether-can-be-forcibly-sent-to-an-account\n */\ncontract LimitBalance {\n\n  uint256 public limit;\n\n  /**\n   * @dev Constructor that sets the passed value as a limit.\n   * @param _limit uint256 to represent the limit.\n   */\n  constructor(uint256 _limit) public {\n    limit = _limit;\n  }\n\n  /**\n   * @dev Checks if limit was reached. Case true, it throws.\n   */\n  modifier limitedPayable() {\n    require(address(this).balance <= limit);\n    _;\n\n  }\n\n}\n",
-  "sourcePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/LimitBalance.sol",
+  "sourcePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/LimitBalance.sol",
   "ast": {
-    "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/LimitBalance.sol",
+    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/LimitBalance.sol",
     "exportedSymbols": {
       "LimitBalance": [
+<<<<<<< Updated upstream
         5039
       ]
     },
@@ -45,6 +53,16 @@
     "nodes": [
       {
         "id": 5013,
+=======
+        5136
+      ]
+    },
+    "id": 5137,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 5110,
+>>>>>>> Stashed changes
         "literals": [
           "solidity",
           "^",
@@ -60,20 +78,34 @@
         "contractKind": "contract",
         "documentation": "@title LimitBalance\n@dev Simple contract to limit the balance of child contract.\nNote this doesn't prevent other contracts to send funds by using selfdestruct(address);\nSee: https://github.com/ConsenSys/smart-contract-best-practices#remember-that-ether-can-be-forcibly-sent-to-an-account",
         "fullyImplemented": true,
+<<<<<<< Updated upstream
         "id": 5039,
         "linearizedBaseContracts": [
           5039
+=======
+        "id": 5136,
+        "linearizedBaseContracts": [
+          5136
+>>>>>>> Stashed changes
         ],
         "name": "LimitBalance",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "constant": false,
+<<<<<<< Updated upstream
             "id": 5015,
             "name": "limit",
             "nodeType": "VariableDeclaration",
             "scope": 5039,
             "src": "362:20:28",
+=======
+            "id": 5112,
+            "name": "limit",
+            "nodeType": "VariableDeclaration",
+            "scope": 5136,
+            "src": "362:20:30",
+>>>>>>> Stashed changes
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -81,7 +113,11 @@
               "typeString": "uint256"
             },
             "typeName": {
+<<<<<<< Updated upstream
               "id": 5014,
+=======
+              "id": 5111,
+>>>>>>> Stashed changes
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
               "src": "362:7:28",
@@ -95,26 +131,43 @@
           },
           {
             "body": {
+<<<<<<< Updated upstream
               "id": 5024,
+=======
+              "id": 5121,
+>>>>>>> Stashed changes
               "nodeType": "Block",
               "src": "546:25:28",
               "statements": [
                 {
                   "expression": {
                     "argumentTypes": null,
+<<<<<<< Updated upstream
                     "id": 5022,
+=======
+                    "id": 5119,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
+<<<<<<< Updated upstream
                       "id": 5020,
                       "name": "limit",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 5015,
                       "src": "552:5:28",
+=======
+                      "id": 5117,
+                      "name": "limit",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 5112,
+                      "src": "552:5:30",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -124,12 +177,21 @@
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
+<<<<<<< Updated upstream
                       "id": 5021,
                       "name": "_limit",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 5017,
                       "src": "560:6:28",
+=======
+                      "id": 5118,
+                      "name": "_limit",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 5114,
+                      "src": "560:6:30",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -141,14 +203,22 @@
                       "typeString": "uint256"
                     }
                   },
+<<<<<<< Updated upstream
                   "id": 5023,
+=======
+                  "id": 5120,
+>>>>>>> Stashed changes
                   "nodeType": "ExpressionStatement",
                   "src": "552:14:28"
                 }
               ]
             },
             "documentation": "@dev Constructor that sets the passed value as a limit.\n@param _limit uint256 to represent the limit.",
+<<<<<<< Updated upstream
             "id": 5025,
+=======
+            "id": 5122,
+>>>>>>> Stashed changes
             "implemented": true,
             "isConstructor": true,
             "isDeclaredConst": false,
@@ -156,16 +226,28 @@
             "name": "",
             "nodeType": "FunctionDefinition",
             "parameters": {
+<<<<<<< Updated upstream
               "id": 5018,
+=======
+              "id": 5115,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 5017,
                   "name": "_limit",
                   "nodeType": "VariableDeclaration",
                   "scope": 5025,
                   "src": "523:14:28",
+=======
+                  "id": 5114,
+                  "name": "_limit",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5122,
+                  "src": "523:14:30",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -173,7 +255,11 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 5016,
+=======
+                    "id": 5113,
+>>>>>>> Stashed changes
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "523:7:28",
@@ -190,20 +276,33 @@
             },
             "payable": false,
             "returnParameters": {
+<<<<<<< Updated upstream
               "id": 5019,
+=======
+              "id": 5116,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "546:0:28"
             },
+<<<<<<< Updated upstream
             "scope": 5039,
             "src": "511:60:28",
+=======
+            "scope": 5136,
+            "src": "511:60:30",
+>>>>>>> Stashed changes
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           },
           {
             "body": {
+<<<<<<< Updated upstream
               "id": 5037,
+=======
+              "id": 5134,
+>>>>>>> Stashed changes
               "nodeType": "Block",
               "src": "674:58:28",
               "statements": [
@@ -217,7 +316,11 @@
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
+<<<<<<< Updated upstream
                         "id": 5033,
+=======
+                        "id": 5130,
+>>>>>>> Stashed changes
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -229,6 +332,7 @@
                             "arguments": [
                               {
                                 "argumentTypes": null,
+<<<<<<< Updated upstream
                                 "id": 5029,
                                 "name": "this",
                                 "nodeType": "Identifier",
@@ -237,6 +341,16 @@
                                 "src": "696:4:28",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_contract$_LimitBalance_$5039",
+=======
+                                "id": 5126,
+                                "name": "this",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 11001,
+                                "src": "696:4:30",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_contract$_LimitBalance_$5136",
+>>>>>>> Stashed changes
                                   "typeString": "contract LimitBalance"
                                 }
                               }
@@ -244,11 +358,19 @@
                             "expression": {
                               "argumentTypes": [
                                 {
+<<<<<<< Updated upstream
                                   "typeIdentifier": "t_contract$_LimitBalance_$5039",
                                   "typeString": "contract LimitBalance"
                                 }
                               ],
                               "id": 5028,
+=======
+                                  "typeIdentifier": "t_contract$_LimitBalance_$5136",
+                                  "typeString": "contract LimitBalance"
+                                }
+                              ],
+                              "id": 5125,
+>>>>>>> Stashed changes
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
@@ -261,7 +383,11 @@
                               },
                               "typeName": "address"
                             },
+<<<<<<< Updated upstream
                             "id": 5030,
+=======
+                            "id": 5127,
+>>>>>>> Stashed changes
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -275,7 +401,11 @@
                               "typeString": "address"
                             }
                           },
+<<<<<<< Updated upstream
                           "id": 5031,
+=======
+                          "id": 5128,
+>>>>>>> Stashed changes
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -293,12 +423,21 @@
                         "operator": "<=",
                         "rightExpression": {
                           "argumentTypes": null,
+<<<<<<< Updated upstream
                           "id": 5032,
                           "name": "limit",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 5015,
                           "src": "713:5:28",
+=======
+                          "id": 5129,
+                          "name": "limit",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 5112,
+                          "src": "713:5:30",
+>>>>>>> Stashed changes
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -318,6 +457,7 @@
                           "typeString": "bool"
                         }
                       ],
+<<<<<<< Updated upstream
                       "id": 5027,
                       "name": "require",
                       "nodeType": "Identifier",
@@ -327,12 +467,27 @@
                       ],
                       "referencedDeclaration": 10772,
                       "src": "680:7:28",
+=======
+                      "id": 5124,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        10869,
+                        10870
+                      ],
+                      "referencedDeclaration": 10869,
+                      "src": "680:7:30",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
+<<<<<<< Updated upstream
                     "id": 5034,
+=======
+                    "id": 5131,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -346,23 +501,39 @@
                       "typeString": "tuple()"
                     }
                   },
+<<<<<<< Updated upstream
                   "id": 5035,
+=======
+                  "id": 5132,
+>>>>>>> Stashed changes
                   "nodeType": "ExpressionStatement",
                   "src": "680:39:28"
                 },
                 {
+<<<<<<< Updated upstream
                   "id": 5036,
+=======
+                  "id": 5133,
+>>>>>>> Stashed changes
                   "nodeType": "PlaceholderStatement",
                   "src": "725:1:28"
                 }
               ]
             },
             "documentation": "@dev Checks if limit was reached. Case true, it throws.",
+<<<<<<< Updated upstream
             "id": 5038,
             "name": "limitedPayable",
             "nodeType": "ModifierDefinition",
             "parameters": {
               "id": 5026,
+=======
+            "id": 5135,
+            "name": "limitedPayable",
+            "nodeType": "ModifierDefinition",
+            "parameters": {
+              "id": 5123,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "671:2:28"
@@ -371,16 +542,22 @@
             "visibility": "internal"
           }
         ],
+<<<<<<< Updated upstream
         "scope": 5040,
         "src": "335:400:28"
+=======
+        "scope": 5137,
+        "src": "335:400:30"
+>>>>>>> Stashed changes
       }
     ],
     "src": "0:736:28"
   },
   "legacyAST": {
-    "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/LimitBalance.sol",
+    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/LimitBalance.sol",
     "exportedSymbols": {
       "LimitBalance": [
+<<<<<<< Updated upstream
         5039
       ]
     },
@@ -389,6 +566,16 @@
     "nodes": [
       {
         "id": 5013,
+=======
+        5136
+      ]
+    },
+    "id": 5137,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 5110,
+>>>>>>> Stashed changes
         "literals": [
           "solidity",
           "^",
@@ -404,20 +591,34 @@
         "contractKind": "contract",
         "documentation": "@title LimitBalance\n@dev Simple contract to limit the balance of child contract.\nNote this doesn't prevent other contracts to send funds by using selfdestruct(address);\nSee: https://github.com/ConsenSys/smart-contract-best-practices#remember-that-ether-can-be-forcibly-sent-to-an-account",
         "fullyImplemented": true,
+<<<<<<< Updated upstream
         "id": 5039,
         "linearizedBaseContracts": [
           5039
+=======
+        "id": 5136,
+        "linearizedBaseContracts": [
+          5136
+>>>>>>> Stashed changes
         ],
         "name": "LimitBalance",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "constant": false,
+<<<<<<< Updated upstream
             "id": 5015,
             "name": "limit",
             "nodeType": "VariableDeclaration",
             "scope": 5039,
             "src": "362:20:28",
+=======
+            "id": 5112,
+            "name": "limit",
+            "nodeType": "VariableDeclaration",
+            "scope": 5136,
+            "src": "362:20:30",
+>>>>>>> Stashed changes
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -425,7 +626,11 @@
               "typeString": "uint256"
             },
             "typeName": {
+<<<<<<< Updated upstream
               "id": 5014,
+=======
+              "id": 5111,
+>>>>>>> Stashed changes
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
               "src": "362:7:28",
@@ -439,26 +644,43 @@
           },
           {
             "body": {
+<<<<<<< Updated upstream
               "id": 5024,
+=======
+              "id": 5121,
+>>>>>>> Stashed changes
               "nodeType": "Block",
               "src": "546:25:28",
               "statements": [
                 {
                   "expression": {
                     "argumentTypes": null,
+<<<<<<< Updated upstream
                     "id": 5022,
+=======
+                    "id": 5119,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
+<<<<<<< Updated upstream
                       "id": 5020,
                       "name": "limit",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 5015,
                       "src": "552:5:28",
+=======
+                      "id": 5117,
+                      "name": "limit",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 5112,
+                      "src": "552:5:30",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -468,12 +690,21 @@
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
+<<<<<<< Updated upstream
                       "id": 5021,
                       "name": "_limit",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 5017,
                       "src": "560:6:28",
+=======
+                      "id": 5118,
+                      "name": "_limit",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 5114,
+                      "src": "560:6:30",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -485,14 +716,22 @@
                       "typeString": "uint256"
                     }
                   },
+<<<<<<< Updated upstream
                   "id": 5023,
+=======
+                  "id": 5120,
+>>>>>>> Stashed changes
                   "nodeType": "ExpressionStatement",
                   "src": "552:14:28"
                 }
               ]
             },
             "documentation": "@dev Constructor that sets the passed value as a limit.\n@param _limit uint256 to represent the limit.",
+<<<<<<< Updated upstream
             "id": 5025,
+=======
+            "id": 5122,
+>>>>>>> Stashed changes
             "implemented": true,
             "isConstructor": true,
             "isDeclaredConst": false,
@@ -500,16 +739,28 @@
             "name": "",
             "nodeType": "FunctionDefinition",
             "parameters": {
+<<<<<<< Updated upstream
               "id": 5018,
+=======
+              "id": 5115,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 5017,
                   "name": "_limit",
                   "nodeType": "VariableDeclaration",
                   "scope": 5025,
                   "src": "523:14:28",
+=======
+                  "id": 5114,
+                  "name": "_limit",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5122,
+                  "src": "523:14:30",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -517,7 +768,11 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 5016,
+=======
+                    "id": 5113,
+>>>>>>> Stashed changes
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "523:7:28",
@@ -534,20 +789,33 @@
             },
             "payable": false,
             "returnParameters": {
+<<<<<<< Updated upstream
               "id": 5019,
+=======
+              "id": 5116,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "546:0:28"
             },
+<<<<<<< Updated upstream
             "scope": 5039,
             "src": "511:60:28",
+=======
+            "scope": 5136,
+            "src": "511:60:30",
+>>>>>>> Stashed changes
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           },
           {
             "body": {
+<<<<<<< Updated upstream
               "id": 5037,
+=======
+              "id": 5134,
+>>>>>>> Stashed changes
               "nodeType": "Block",
               "src": "674:58:28",
               "statements": [
@@ -561,7 +829,11 @@
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
+<<<<<<< Updated upstream
                         "id": 5033,
+=======
+                        "id": 5130,
+>>>>>>> Stashed changes
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -573,6 +845,7 @@
                             "arguments": [
                               {
                                 "argumentTypes": null,
+<<<<<<< Updated upstream
                                 "id": 5029,
                                 "name": "this",
                                 "nodeType": "Identifier",
@@ -581,6 +854,16 @@
                                 "src": "696:4:28",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_contract$_LimitBalance_$5039",
+=======
+                                "id": 5126,
+                                "name": "this",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 11001,
+                                "src": "696:4:30",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_contract$_LimitBalance_$5136",
+>>>>>>> Stashed changes
                                   "typeString": "contract LimitBalance"
                                 }
                               }
@@ -588,11 +871,19 @@
                             "expression": {
                               "argumentTypes": [
                                 {
+<<<<<<< Updated upstream
                                   "typeIdentifier": "t_contract$_LimitBalance_$5039",
                                   "typeString": "contract LimitBalance"
                                 }
                               ],
                               "id": 5028,
+=======
+                                  "typeIdentifier": "t_contract$_LimitBalance_$5136",
+                                  "typeString": "contract LimitBalance"
+                                }
+                              ],
+                              "id": 5125,
+>>>>>>> Stashed changes
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
@@ -605,7 +896,11 @@
                               },
                               "typeName": "address"
                             },
+<<<<<<< Updated upstream
                             "id": 5030,
+=======
+                            "id": 5127,
+>>>>>>> Stashed changes
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -619,7 +914,11 @@
                               "typeString": "address"
                             }
                           },
+<<<<<<< Updated upstream
                           "id": 5031,
+=======
+                          "id": 5128,
+>>>>>>> Stashed changes
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -637,12 +936,21 @@
                         "operator": "<=",
                         "rightExpression": {
                           "argumentTypes": null,
+<<<<<<< Updated upstream
                           "id": 5032,
                           "name": "limit",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 5015,
                           "src": "713:5:28",
+=======
+                          "id": 5129,
+                          "name": "limit",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 5112,
+                          "src": "713:5:30",
+>>>>>>> Stashed changes
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -662,6 +970,7 @@
                           "typeString": "bool"
                         }
                       ],
+<<<<<<< Updated upstream
                       "id": 5027,
                       "name": "require",
                       "nodeType": "Identifier",
@@ -671,12 +980,27 @@
                       ],
                       "referencedDeclaration": 10772,
                       "src": "680:7:28",
+=======
+                      "id": 5124,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        10869,
+                        10870
+                      ],
+                      "referencedDeclaration": 10869,
+                      "src": "680:7:30",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
+<<<<<<< Updated upstream
                     "id": 5034,
+=======
+                    "id": 5131,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -690,23 +1014,39 @@
                       "typeString": "tuple()"
                     }
                   },
+<<<<<<< Updated upstream
                   "id": 5035,
+=======
+                  "id": 5132,
+>>>>>>> Stashed changes
                   "nodeType": "ExpressionStatement",
                   "src": "680:39:28"
                 },
                 {
+<<<<<<< Updated upstream
                   "id": 5036,
+=======
+                  "id": 5133,
+>>>>>>> Stashed changes
                   "nodeType": "PlaceholderStatement",
                   "src": "725:1:28"
                 }
               ]
             },
             "documentation": "@dev Checks if limit was reached. Case true, it throws.",
+<<<<<<< Updated upstream
             "id": 5038,
             "name": "limitedPayable",
             "nodeType": "ModifierDefinition",
             "parameters": {
               "id": 5026,
+=======
+            "id": 5135,
+            "name": "limitedPayable",
+            "nodeType": "ModifierDefinition",
+            "parameters": {
+              "id": 5123,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "671:2:28"
@@ -715,8 +1055,13 @@
             "visibility": "internal"
           }
         ],
+<<<<<<< Updated upstream
         "scope": 5040,
         "src": "335:400:28"
+=======
+        "scope": 5137,
+        "src": "335:400:30"
+>>>>>>> Stashed changes
       }
     ],
     "src": "0:736:28"
@@ -727,5 +1072,9 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
+<<<<<<< Updated upstream
   "updatedAt": "2018-08-21T13:36:52.142Z"
+=======
+  "updatedAt": "2018-08-21T13:27:41.763Z"
+>>>>>>> Stashed changes
 }

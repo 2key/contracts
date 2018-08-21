@@ -38,11 +38,12 @@
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "pragma solidity ^0.4.24;\n\n\n/**\n * @title ERC721 token receiver interface\n * @dev Interface for any contract that wants to support safeTransfers\n * from ERC721 asset contracts.\n */\ncontract ERC721Receiver {\n  /**\n   * @dev Magic value to be returned upon successful reception of an NFT\n   *  Equals to `bytes4(keccak256(\"onERC721Received(address,address,uint256,bytes)\"))`,\n   *  which can be also obtained as `ERC721Receiver(0).onERC721Received.selector`\n   */\n  bytes4 internal constant ERC721_RECEIVED = 0x150b7a02;\n\n  /**\n   * @notice Handle the receipt of an NFT\n   * @dev The ERC721 smart contract calls this function on the recipient\n   * after a `safetransfer`. This function MAY throw to revert and reject the\n   * transfer. Return of other than the magic value MUST result in the\n   * transaction being reverted.\n   * Note: the contract address is always the message sender.\n   * @param _operator The address which called `safeTransferFrom` function\n   * @param _from The address which previously owned the token\n   * @param _tokenId The NFT identifier which is being transferred\n   * @param _data Additional data with no specified format\n   * @return `bytes4(keccak256(\"onERC721Received(address,address,uint256,bytes)\"))`\n   */\n  function onERC721Received(\n    address _operator,\n    address _from,\n    uint256 _tokenId,\n    bytes _data\n  )\n    public\n    returns(bytes4);\n}\n",
-  "sourcePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/token/ERC721/ERC721Receiver.sol",
+  "sourcePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/token/ERC721/ERC721Receiver.sol",
   "ast": {
-    "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/token/ERC721/ERC721Receiver.sol",
+    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/token/ERC721/ERC721Receiver.sol",
     "exportedSymbols": {
       "ERC721Receiver": [
+<<<<<<< Updated upstream
         10381
       ]
     },
@@ -51,6 +52,16 @@
     "nodes": [
       {
         "id": 10364,
+=======
+        10478
+      ]
+    },
+    "id": 10479,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 10461,
+>>>>>>> Stashed changes
         "literals": [
           "solidity",
           "^",
@@ -66,20 +77,34 @@
         "contractKind": "contract",
         "documentation": "@title ERC721 token receiver interface\n@dev Interface for any contract that wants to support safeTransfers\nfrom ERC721 asset contracts.",
         "fullyImplemented": false,
+<<<<<<< Updated upstream
         "id": 10381,
         "linearizedBaseContracts": [
           10381
+=======
+        "id": 10478,
+        "linearizedBaseContracts": [
+          10478
+>>>>>>> Stashed changes
         ],
         "name": "ERC721Receiver",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "constant": true,
+<<<<<<< Updated upstream
             "id": 10367,
             "name": "ERC721_RECEIVED",
             "nodeType": "VariableDeclaration",
             "scope": 10381,
             "src": "463:53:89",
+=======
+            "id": 10464,
+            "name": "ERC721_RECEIVED",
+            "nodeType": "VariableDeclaration",
+            "scope": 10478,
+            "src": "463:53:91",
+>>>>>>> Stashed changes
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -87,7 +112,11 @@
               "typeString": "bytes4"
             },
             "typeName": {
+<<<<<<< Updated upstream
               "id": 10365,
+=======
+              "id": 10462,
+>>>>>>> Stashed changes
               "name": "bytes4",
               "nodeType": "ElementaryTypeName",
               "src": "463:6:89",
@@ -99,7 +128,11 @@
             "value": {
               "argumentTypes": null,
               "hexValue": "30783135306237613032",
+<<<<<<< Updated upstream
               "id": 10366,
+=======
+              "id": 10463,
+>>>>>>> Stashed changes
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -119,7 +152,11 @@
           {
             "body": null,
             "documentation": "@notice Handle the receipt of an NFT\n@dev The ERC721 smart contract calls this function on the recipient\nafter a `safetransfer`. This function MAY throw to revert and reject the\ntransfer. Return of other than the magic value MUST result in the\ntransaction being reverted.\nNote: the contract address is always the message sender.\n@param _operator The address which called `safeTransferFrom` function\n@param _from The address which previously owned the token\n@param _tokenId The NFT identifier which is being transferred\n@param _data Additional data with no specified format\n@return `bytes4(keccak256(\"onERC721Received(address,address,uint256,bytes)\"))`",
+<<<<<<< Updated upstream
             "id": 10380,
+=======
+            "id": 10477,
+>>>>>>> Stashed changes
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -127,16 +164,28 @@
             "name": "onERC721Received",
             "nodeType": "FunctionDefinition",
             "parameters": {
+<<<<<<< Updated upstream
               "id": 10376,
+=======
+              "id": 10473,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 10369,
                   "name": "_operator",
                   "nodeType": "VariableDeclaration",
                   "scope": 10380,
                   "src": "1271:17:89",
+=======
+                  "id": 10466,
+                  "name": "_operator",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 10477,
+                  "src": "1271:17:91",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -144,7 +193,11 @@
                     "typeString": "address"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 10368,
+=======
+                    "id": 10465,
+>>>>>>> Stashed changes
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1271:7:89",
@@ -158,11 +211,19 @@
                 },
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 10371,
                   "name": "_from",
                   "nodeType": "VariableDeclaration",
                   "scope": 10380,
                   "src": "1294:13:89",
+=======
+                  "id": 10468,
+                  "name": "_from",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 10477,
+                  "src": "1294:13:91",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -170,7 +231,11 @@
                     "typeString": "address"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 10370,
+=======
+                    "id": 10467,
+>>>>>>> Stashed changes
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1294:7:89",
@@ -184,11 +249,19 @@
                 },
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 10373,
                   "name": "_tokenId",
                   "nodeType": "VariableDeclaration",
                   "scope": 10380,
                   "src": "1313:16:89",
+=======
+                  "id": 10470,
+                  "name": "_tokenId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 10477,
+                  "src": "1313:16:91",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -196,7 +269,11 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 10372,
+=======
+                    "id": 10469,
+>>>>>>> Stashed changes
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1313:7:89",
@@ -210,11 +287,19 @@
                 },
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 10375,
                   "name": "_data",
                   "nodeType": "VariableDeclaration",
                   "scope": 10380,
                   "src": "1335:11:89",
+=======
+                  "id": 10472,
+                  "name": "_data",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 10477,
+                  "src": "1335:11:91",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -222,7 +307,11 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 10374,
+=======
+                    "id": 10471,
+>>>>>>> Stashed changes
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "1335:5:89",
@@ -239,16 +328,28 @@
             },
             "payable": false,
             "returnParameters": {
+<<<<<<< Updated upstream
               "id": 10379,
+=======
+              "id": 10476,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 10378,
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "scope": 10380,
                   "src": "1374:6:89",
+=======
+                  "id": 10475,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 10477,
+                  "src": "1374:6:91",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -256,7 +357,11 @@
                     "typeString": "bytes4"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 10377,
+=======
+                    "id": 10474,
+>>>>>>> Stashed changes
                     "name": "bytes4",
                     "nodeType": "ElementaryTypeName",
                     "src": "1374:6:89",
@@ -271,23 +376,34 @@
               ],
               "src": "1373:8:89"
             },
+<<<<<<< Updated upstream
             "scope": 10381,
             "src": "1240:142:89",
+=======
+            "scope": 10478,
+            "src": "1240:142:91",
+>>>>>>> Stashed changes
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
+<<<<<<< Updated upstream
         "scope": 10382,
         "src": "180:1204:89"
+=======
+        "scope": 10479,
+        "src": "180:1204:91"
+>>>>>>> Stashed changes
       }
     ],
     "src": "0:1385:89"
   },
   "legacyAST": {
-    "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/token/ERC721/ERC721Receiver.sol",
+    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/token/ERC721/ERC721Receiver.sol",
     "exportedSymbols": {
       "ERC721Receiver": [
+<<<<<<< Updated upstream
         10381
       ]
     },
@@ -296,6 +412,16 @@
     "nodes": [
       {
         "id": 10364,
+=======
+        10478
+      ]
+    },
+    "id": 10479,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 10461,
+>>>>>>> Stashed changes
         "literals": [
           "solidity",
           "^",
@@ -311,20 +437,34 @@
         "contractKind": "contract",
         "documentation": "@title ERC721 token receiver interface\n@dev Interface for any contract that wants to support safeTransfers\nfrom ERC721 asset contracts.",
         "fullyImplemented": false,
+<<<<<<< Updated upstream
         "id": 10381,
         "linearizedBaseContracts": [
           10381
+=======
+        "id": 10478,
+        "linearizedBaseContracts": [
+          10478
+>>>>>>> Stashed changes
         ],
         "name": "ERC721Receiver",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "constant": true,
+<<<<<<< Updated upstream
             "id": 10367,
             "name": "ERC721_RECEIVED",
             "nodeType": "VariableDeclaration",
             "scope": 10381,
             "src": "463:53:89",
+=======
+            "id": 10464,
+            "name": "ERC721_RECEIVED",
+            "nodeType": "VariableDeclaration",
+            "scope": 10478,
+            "src": "463:53:91",
+>>>>>>> Stashed changes
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -332,7 +472,11 @@
               "typeString": "bytes4"
             },
             "typeName": {
+<<<<<<< Updated upstream
               "id": 10365,
+=======
+              "id": 10462,
+>>>>>>> Stashed changes
               "name": "bytes4",
               "nodeType": "ElementaryTypeName",
               "src": "463:6:89",
@@ -344,7 +488,11 @@
             "value": {
               "argumentTypes": null,
               "hexValue": "30783135306237613032",
+<<<<<<< Updated upstream
               "id": 10366,
+=======
+              "id": 10463,
+>>>>>>> Stashed changes
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -364,7 +512,11 @@
           {
             "body": null,
             "documentation": "@notice Handle the receipt of an NFT\n@dev The ERC721 smart contract calls this function on the recipient\nafter a `safetransfer`. This function MAY throw to revert and reject the\ntransfer. Return of other than the magic value MUST result in the\ntransaction being reverted.\nNote: the contract address is always the message sender.\n@param _operator The address which called `safeTransferFrom` function\n@param _from The address which previously owned the token\n@param _tokenId The NFT identifier which is being transferred\n@param _data Additional data with no specified format\n@return `bytes4(keccak256(\"onERC721Received(address,address,uint256,bytes)\"))`",
+<<<<<<< Updated upstream
             "id": 10380,
+=======
+            "id": 10477,
+>>>>>>> Stashed changes
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -372,16 +524,28 @@
             "name": "onERC721Received",
             "nodeType": "FunctionDefinition",
             "parameters": {
+<<<<<<< Updated upstream
               "id": 10376,
+=======
+              "id": 10473,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 10369,
                   "name": "_operator",
                   "nodeType": "VariableDeclaration",
                   "scope": 10380,
                   "src": "1271:17:89",
+=======
+                  "id": 10466,
+                  "name": "_operator",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 10477,
+                  "src": "1271:17:91",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -389,7 +553,11 @@
                     "typeString": "address"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 10368,
+=======
+                    "id": 10465,
+>>>>>>> Stashed changes
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1271:7:89",
@@ -403,11 +571,19 @@
                 },
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 10371,
                   "name": "_from",
                   "nodeType": "VariableDeclaration",
                   "scope": 10380,
                   "src": "1294:13:89",
+=======
+                  "id": 10468,
+                  "name": "_from",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 10477,
+                  "src": "1294:13:91",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -415,7 +591,11 @@
                     "typeString": "address"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 10370,
+=======
+                    "id": 10467,
+>>>>>>> Stashed changes
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1294:7:89",
@@ -429,11 +609,19 @@
                 },
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 10373,
                   "name": "_tokenId",
                   "nodeType": "VariableDeclaration",
                   "scope": 10380,
                   "src": "1313:16:89",
+=======
+                  "id": 10470,
+                  "name": "_tokenId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 10477,
+                  "src": "1313:16:91",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -441,7 +629,11 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 10372,
+=======
+                    "id": 10469,
+>>>>>>> Stashed changes
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1313:7:89",
@@ -455,11 +647,19 @@
                 },
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 10375,
                   "name": "_data",
                   "nodeType": "VariableDeclaration",
                   "scope": 10380,
                   "src": "1335:11:89",
+=======
+                  "id": 10472,
+                  "name": "_data",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 10477,
+                  "src": "1335:11:91",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -467,7 +667,11 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 10374,
+=======
+                    "id": 10471,
+>>>>>>> Stashed changes
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "1335:5:89",
@@ -484,16 +688,28 @@
             },
             "payable": false,
             "returnParameters": {
+<<<<<<< Updated upstream
               "id": 10379,
+=======
+              "id": 10476,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 10378,
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "scope": 10380,
                   "src": "1374:6:89",
+=======
+                  "id": 10475,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 10477,
+                  "src": "1374:6:91",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -501,7 +717,11 @@
                     "typeString": "bytes4"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 10377,
+=======
+                    "id": 10474,
+>>>>>>> Stashed changes
                     "name": "bytes4",
                     "nodeType": "ElementaryTypeName",
                     "src": "1374:6:89",
@@ -516,15 +736,25 @@
               ],
               "src": "1373:8:89"
             },
+<<<<<<< Updated upstream
             "scope": 10381,
             "src": "1240:142:89",
+=======
+            "scope": 10478,
+            "src": "1240:142:91",
+>>>>>>> Stashed changes
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
+<<<<<<< Updated upstream
         "scope": 10382,
         "src": "180:1204:89"
+=======
+        "scope": 10479,
+        "src": "180:1204:91"
+>>>>>>> Stashed changes
       }
     ],
     "src": "0:1385:89"
@@ -535,5 +765,9 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
+<<<<<<< Updated upstream
   "updatedAt": "2018-08-21T13:36:52.129Z"
+=======
+  "updatedAt": "2018-08-21T13:27:41.803Z"
+>>>>>>> Stashed changes
 }

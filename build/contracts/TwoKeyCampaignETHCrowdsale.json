@@ -1085,9 +1085,9 @@
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "pragma solidity ^0.4.24; \n\nimport '../openzeppelin-solidity/contracts/math/SafeMath.sol';\nimport '../openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol';\n\nimport './TwoKeyCampaignETH.sol';\nimport './TwoKeyReg.sol';\nimport './TwoKeyEconomy.sol';\nimport './TwoKeyWhitelisted.sol';\nimport './TwoKeyEventSource.sol';\n\ncontract TwoKeyCampaignETHCrowdsale is TwoKeyCampaignETH, Crowdsale {\n\n\tusing SafeMath for uint256;\n\n\tconstructor(\n\t\tTwoKeyEventSource _eventSource,\n\t\tTwoKeyEconomy _economy,\n\t\tTwoKeyWhitelisted _whitelistInfluencer,\n\t\tTwoKeyWhitelisted _whitelistConverter, \n\t\t \n\t\taddress _contractor,\n\t\taddress _moderator, \n\n\t\t\n\t\tuint256 _start,\n\t\tuint256 _duration,\n\t\tuint256 _expiryConversion, \n\t\tuint256 _escrowPrecentage,\n\t\tuint256 _rate,\n\t\tuint256 _maxPi) TwoKeyCampaign(\n\t\t_eventSource,\n\t\t_economy,\n\t\t_whitelistInfluencer,\n\t\t_whitelistConverter,  \n\t\t_contractor,\n\t\t_moderator, \t\t\n\t\t_start,\n\t\t_duration,\n\t\t_expiryConversion, \n\t\t_escrowPrecentage,\n\t\t_rate,\n\t\t_maxPi) public {\n\t}\n\n\t// buy product with ETH \n\tfunction buyFromWithETH(address _from, uint256 _tokenID, address _assetContract, uint256 _amountOrIndex) public payable {\n\t    buyTokens(address(this));\n\t    require(addFungibleAsset(_tokenID, _assetContract, _amountOrIndex));\t    \n\t    buyFromWithETH(_from, _tokenID, _assetContract, _amountOrIndex, CampaignType.Fungible); \n\t}\t\n\n}\n\n",
-  "sourcePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyCampaignETHCrowdsale.sol",
+  "sourcePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyCampaignETHCrowdsale.sol",
   "ast": {
-    "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyCampaignETHCrowdsale.sol",
+    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyCampaignETHCrowdsale.sol",
     "exportedSymbols": {
       "TwoKeyCampaignETHCrowdsale": [
         2676
@@ -1108,29 +1108,37 @@
         "src": "0:24:9"
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/math/SafeMath.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/math/SafeMath.sol",
         "file": "../openzeppelin-solidity/contracts/math/SafeMath.sol",
         "id": 2585,
         "nodeType": "ImportDirective",
         "scope": 2677,
+<<<<<<< Updated upstream
         "sourceUnit": 7050,
+=======
+        "sourceUnit": 7147,
+>>>>>>> Stashed changes
         "src": "27:62:9",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
         "file": "../openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
         "id": 2586,
         "nodeType": "ImportDirective",
         "scope": 2677,
+<<<<<<< Updated upstream
         "sourceUnit": 5933,
+=======
+        "sourceUnit": 6030,
+>>>>>>> Stashed changes
         "src": "90:68:9",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyCampaignETH.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyCampaignETH.sol",
         "file": "./TwoKeyCampaignETH.sol",
         "id": 2587,
         "nodeType": "ImportDirective",
@@ -1141,7 +1149,7 @@
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyReg.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyReg.sol",
         "file": "./TwoKeyReg.sol",
         "id": 2588,
         "nodeType": "ImportDirective",
@@ -1152,7 +1160,7 @@
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyEconomy.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyEconomy.sol",
         "file": "./TwoKeyEconomy.sol",
         "id": 2589,
         "nodeType": "ImportDirective",
@@ -1163,7 +1171,7 @@
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyWhitelisted.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyWhitelisted.sol",
         "file": "./TwoKeyWhitelisted.sol",
         "id": 2590,
         "nodeType": "ImportDirective",
@@ -1174,7 +1182,7 @@
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyEventSource.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyEventSource.sol",
         "file": "./TwoKeyEventSource.sol",
         "id": 2591,
         "nodeType": "ImportDirective",
@@ -1211,10 +1219,17 @@
               "id": 2594,
               "name": "Crowdsale",
               "nodeType": "UserDefinedTypeName",
+<<<<<<< Updated upstream
               "referencedDeclaration": 5932,
               "src": "377:9:9",
               "typeDescriptions": {
                 "typeIdentifier": "t_contract$_Crowdsale_$5932",
+=======
+              "referencedDeclaration": 6029,
+              "src": "377:9:9",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_Crowdsale_$6029",
+>>>>>>> Stashed changes
                 "typeString": "contract Crowdsale"
               }
             },
@@ -1230,12 +1245,21 @@
           2151,
           2582,
           4434,
+<<<<<<< Updated upstream
           5634,
           5932,
           8405,
           8602,
           8634,
           9249
+=======
+          5731,
+          6029,
+          8502,
+          8699,
+          8731,
+          9346
+>>>>>>> Stashed changes
         ],
         "contractKind": "contract",
         "documentation": null,
@@ -1243,18 +1267,31 @@
         "id": 2676,
         "linearizedBaseContracts": [
           2676,
+<<<<<<< Updated upstream
           5932,
+=======
+          6029,
+>>>>>>> Stashed changes
           2582,
           2151,
           4434,
           377,
           462,
+<<<<<<< Updated upstream
           5634,
           928,
           9249,
           8405,
           8602,
           8634
+=======
+          5731,
+          928,
+          9346,
+          8502,
+          8699,
+          8731
+>>>>>>> Stashed changes
         ],
         "name": "TwoKeyCampaignETHCrowdsale",
         "nodeType": "ContractDefinition",
@@ -1266,10 +1303,17 @@
               "id": 2596,
               "name": "SafeMath",
               "nodeType": "UserDefinedTypeName",
+<<<<<<< Updated upstream
               "referencedDeclaration": 7049,
               "src": "397:8:9",
               "typeDescriptions": {
                 "typeIdentifier": "t_contract$_SafeMath_$7049",
+=======
+              "referencedDeclaration": 7146,
+              "src": "397:8:9",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_SafeMath_$7146",
+>>>>>>> Stashed changes
                 "typeString": "library SafeMath"
               }
             },
@@ -1837,7 +1881,11 @@
                             "name": "this",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
+<<<<<<< Updated upstream
                             "referencedDeclaration": 10836,
+=======
+                            "referencedDeclaration": 10933,
+>>>>>>> Stashed changes
                             "src": "1160:4:9",
                             "typeDescriptions": {
                               "typeIdentifier": "t_contract$_TwoKeyCampaignETHCrowdsale_$2676",
@@ -1891,7 +1939,11 @@
                       "name": "buyTokens",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
+<<<<<<< Updated upstream
                       "referencedDeclaration": 5841,
+=======
+                      "referencedDeclaration": 5938,
+>>>>>>> Stashed changes
                       "src": "1142:9:9",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$_t_address_$returns$__$",
@@ -2015,10 +2067,17 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
+<<<<<<< Updated upstream
                         10772,
                         10773
                       ],
                       "referencedDeclaration": 10772,
+=======
+                        10869,
+                        10870
+                      ],
+                      "referencedDeclaration": 10869,
+>>>>>>> Stashed changes
                       "src": "1173:7:9",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -2326,7 +2385,7 @@
     "src": "0:1349:9"
   },
   "legacyAST": {
-    "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyCampaignETHCrowdsale.sol",
+    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyCampaignETHCrowdsale.sol",
     "exportedSymbols": {
       "TwoKeyCampaignETHCrowdsale": [
         2676
@@ -2347,29 +2406,37 @@
         "src": "0:24:9"
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/math/SafeMath.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/math/SafeMath.sol",
         "file": "../openzeppelin-solidity/contracts/math/SafeMath.sol",
         "id": 2585,
         "nodeType": "ImportDirective",
         "scope": 2677,
+<<<<<<< Updated upstream
         "sourceUnit": 7050,
+=======
+        "sourceUnit": 7147,
+>>>>>>> Stashed changes
         "src": "27:62:9",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
         "file": "../openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
         "id": 2586,
         "nodeType": "ImportDirective",
         "scope": 2677,
+<<<<<<< Updated upstream
         "sourceUnit": 5933,
+=======
+        "sourceUnit": 6030,
+>>>>>>> Stashed changes
         "src": "90:68:9",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyCampaignETH.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyCampaignETH.sol",
         "file": "./TwoKeyCampaignETH.sol",
         "id": 2587,
         "nodeType": "ImportDirective",
@@ -2380,7 +2447,7 @@
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyReg.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyReg.sol",
         "file": "./TwoKeyReg.sol",
         "id": 2588,
         "nodeType": "ImportDirective",
@@ -2391,7 +2458,7 @@
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyEconomy.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyEconomy.sol",
         "file": "./TwoKeyEconomy.sol",
         "id": 2589,
         "nodeType": "ImportDirective",
@@ -2402,7 +2469,7 @@
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyWhitelisted.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyWhitelisted.sol",
         "file": "./TwoKeyWhitelisted.sol",
         "id": 2590,
         "nodeType": "ImportDirective",
@@ -2413,7 +2480,7 @@
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyEventSource.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyEventSource.sol",
         "file": "./TwoKeyEventSource.sol",
         "id": 2591,
         "nodeType": "ImportDirective",
@@ -2450,10 +2517,17 @@
               "id": 2594,
               "name": "Crowdsale",
               "nodeType": "UserDefinedTypeName",
+<<<<<<< Updated upstream
               "referencedDeclaration": 5932,
               "src": "377:9:9",
               "typeDescriptions": {
                 "typeIdentifier": "t_contract$_Crowdsale_$5932",
+=======
+              "referencedDeclaration": 6029,
+              "src": "377:9:9",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_Crowdsale_$6029",
+>>>>>>> Stashed changes
                 "typeString": "contract Crowdsale"
               }
             },
@@ -2469,12 +2543,21 @@
           2151,
           2582,
           4434,
+<<<<<<< Updated upstream
           5634,
           5932,
           8405,
           8602,
           8634,
           9249
+=======
+          5731,
+          6029,
+          8502,
+          8699,
+          8731,
+          9346
+>>>>>>> Stashed changes
         ],
         "contractKind": "contract",
         "documentation": null,
@@ -2482,18 +2565,31 @@
         "id": 2676,
         "linearizedBaseContracts": [
           2676,
+<<<<<<< Updated upstream
           5932,
+=======
+          6029,
+>>>>>>> Stashed changes
           2582,
           2151,
           4434,
           377,
           462,
+<<<<<<< Updated upstream
           5634,
           928,
           9249,
           8405,
           8602,
           8634
+=======
+          5731,
+          928,
+          9346,
+          8502,
+          8699,
+          8731
+>>>>>>> Stashed changes
         ],
         "name": "TwoKeyCampaignETHCrowdsale",
         "nodeType": "ContractDefinition",
@@ -2505,10 +2601,17 @@
               "id": 2596,
               "name": "SafeMath",
               "nodeType": "UserDefinedTypeName",
+<<<<<<< Updated upstream
               "referencedDeclaration": 7049,
               "src": "397:8:9",
               "typeDescriptions": {
                 "typeIdentifier": "t_contract$_SafeMath_$7049",
+=======
+              "referencedDeclaration": 7146,
+              "src": "397:8:9",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_SafeMath_$7146",
+>>>>>>> Stashed changes
                 "typeString": "library SafeMath"
               }
             },
@@ -3076,7 +3179,11 @@
                             "name": "this",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
+<<<<<<< Updated upstream
                             "referencedDeclaration": 10836,
+=======
+                            "referencedDeclaration": 10933,
+>>>>>>> Stashed changes
                             "src": "1160:4:9",
                             "typeDescriptions": {
                               "typeIdentifier": "t_contract$_TwoKeyCampaignETHCrowdsale_$2676",
@@ -3130,7 +3237,11 @@
                       "name": "buyTokens",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
+<<<<<<< Updated upstream
                       "referencedDeclaration": 5841,
+=======
+                      "referencedDeclaration": 5938,
+>>>>>>> Stashed changes
                       "src": "1142:9:9",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$_t_address_$returns$__$",
@@ -3254,10 +3365,17 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
+<<<<<<< Updated upstream
                         10772,
                         10773
                       ],
                       "referencedDeclaration": 10772,
+=======
+                        10869,
+                        10870
+                      ],
+                      "referencedDeclaration": 10869,
+>>>>>>> Stashed changes
                       "src": "1173:7:9",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -3570,5 +3688,9 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
+<<<<<<< Updated upstream
   "updatedAt": "2018-08-21T13:36:52.406Z"
+=======
+  "updatedAt": "2018-08-21T13:27:41.744Z"
+>>>>>>> Stashed changes
 }

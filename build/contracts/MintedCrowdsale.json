@@ -109,11 +109,12 @@
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "pragma solidity ^0.4.24;\n\nimport \"../Crowdsale.sol\";\nimport \"../../token/ERC20/MintableToken.sol\";\n\n\n/**\n * @title MintedCrowdsale\n * @dev Extension of Crowdsale contract whose tokens are minted in each purchase.\n * Token ownership should be transferred to MintedCrowdsale for minting.\n */\ncontract MintedCrowdsale is Crowdsale {\n\n  /**\n   * @dev Overrides delivery by minting tokens upon purchase.\n   * @param _beneficiary Token purchaser\n   * @param _tokenAmount Number of tokens to be minted\n   */\n  function _deliverTokens(\n    address _beneficiary,\n    uint256 _tokenAmount\n  )\n    internal\n  {\n    // Potentially dangerous assumption about the type of the token.\n    require(MintableToken(address(token)).mint(_beneficiary, _tokenAmount));\n  }\n}\n",
-  "sourcePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/emission/MintedCrowdsale.sol",
+  "sourcePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/emission/MintedCrowdsale.sol",
   "ast": {
-    "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/emission/MintedCrowdsale.sol",
+    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/emission/MintedCrowdsale.sol",
     "exportedSymbols": {
       "MintedCrowdsale": [
+<<<<<<< Updated upstream
         6254
       ]
     },
@@ -122,6 +123,16 @@
     "nodes": [
       {
         "id": 6229,
+=======
+        6351
+      ]
+    },
+    "id": 6352,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 6326,
+>>>>>>> Stashed changes
         "literals": [
           "solidity",
           "^",
@@ -132,24 +143,40 @@
         "src": "0:24:40"
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
         "file": "../Crowdsale.sol",
+<<<<<<< Updated upstream
         "id": 6230,
         "nodeType": "ImportDirective",
         "scope": 6255,
         "sourceUnit": 5933,
         "src": "26:26:40",
+=======
+        "id": 6327,
+        "nodeType": "ImportDirective",
+        "scope": 6352,
+        "sourceUnit": 6030,
+        "src": "26:26:42",
+>>>>>>> Stashed changes
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/token/ERC20/MintableToken.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/token/ERC20/MintableToken.sol",
         "file": "../../token/ERC20/MintableToken.sol",
+<<<<<<< Updated upstream
         "id": 6231,
         "nodeType": "ImportDirective",
         "scope": 6255,
         "sourceUnit": 8741,
         "src": "53:45:40",
+=======
+        "id": 6328,
+        "nodeType": "ImportDirective",
+        "scope": 6352,
+        "sourceUnit": 8838,
+        "src": "53:45:42",
+>>>>>>> Stashed changes
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -159,6 +186,7 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
+<<<<<<< Updated upstream
               "id": 6232,
               "name": "Crowdsale",
               "nodeType": "UserDefinedTypeName",
@@ -170,27 +198,55 @@
               }
             },
             "id": 6233,
+=======
+              "id": 6329,
+              "name": "Crowdsale",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 6029,
+              "src": "318:9:42",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_Crowdsale_$6029",
+                "typeString": "contract Crowdsale"
+              }
+            },
+            "id": 6330,
+>>>>>>> Stashed changes
             "nodeType": "InheritanceSpecifier",
             "src": "318:9:40"
           }
         ],
         "contractDependencies": [
+<<<<<<< Updated upstream
           5932
+=======
+          6029
+>>>>>>> Stashed changes
         ],
         "contractKind": "contract",
         "documentation": "@title MintedCrowdsale\n@dev Extension of Crowdsale contract whose tokens are minted in each purchase.\nToken ownership should be transferred to MintedCrowdsale for minting.",
         "fullyImplemented": false,
+<<<<<<< Updated upstream
         "id": 6254,
         "linearizedBaseContracts": [
           6254,
           5932
+=======
+        "id": 6351,
+        "linearizedBaseContracts": [
+          6351,
+          6029
+>>>>>>> Stashed changes
         ],
         "name": "MintedCrowdsale",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
+<<<<<<< Updated upstream
               "id": 6252,
+=======
+              "id": 6349,
+>>>>>>> Stashed changes
               "nodeType": "Block",
               "src": "598:151:40",
               "statements": [
@@ -203,12 +259,21 @@
                         "arguments": [
                           {
                             "argumentTypes": null,
+<<<<<<< Updated upstream
                             "id": 6247,
                             "name": "_beneficiary",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
                             "referencedDeclaration": 6235,
                             "src": "716:12:40",
+=======
+                            "id": 6344,
+                            "name": "_beneficiary",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 6332,
+                            "src": "716:12:42",
+>>>>>>> Stashed changes
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
                               "typeString": "address"
@@ -216,12 +281,21 @@
                           },
                           {
                             "argumentTypes": null,
+<<<<<<< Updated upstream
                             "id": 6248,
                             "name": "_tokenAmount",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
                             "referencedDeclaration": 6237,
                             "src": "730:12:40",
+=======
+                            "id": 6345,
+                            "name": "_tokenAmount",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 6334,
+                            "src": "730:12:42",
+>>>>>>> Stashed changes
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -247,6 +321,7 @@
                                 "arguments": [
                                   {
                                     "argumentTypes": null,
+<<<<<<< Updated upstream
                                     "id": 6243,
                                     "name": "token",
                                     "nodeType": "Identifier",
@@ -255,6 +330,16 @@
                                     "src": "703:5:40",
                                     "typeDescriptions": {
                                       "typeIdentifier": "t_contract$_ERC20_$8602",
+=======
+                                    "id": 6340,
+                                    "name": "token",
+                                    "nodeType": "Identifier",
+                                    "overloadedDeclarations": [],
+                                    "referencedDeclaration": 5814,
+                                    "src": "703:5:42",
+                                    "typeDescriptions": {
+                                      "typeIdentifier": "t_contract$_ERC20_$8699",
+>>>>>>> Stashed changes
                                       "typeString": "contract ERC20"
                                     }
                                   }
@@ -262,11 +347,19 @@
                                 "expression": {
                                   "argumentTypes": [
                                     {
+<<<<<<< Updated upstream
                                       "typeIdentifier": "t_contract$_ERC20_$8602",
                                       "typeString": "contract ERC20"
                                     }
                                   ],
                                   "id": 6242,
+=======
+                                      "typeIdentifier": "t_contract$_ERC20_$8699",
+                                      "typeString": "contract ERC20"
+                                    }
+                                  ],
+                                  "id": 6339,
+>>>>>>> Stashed changes
                                   "isConstant": false,
                                   "isLValue": false,
                                   "isPure": true,
@@ -279,7 +372,11 @@
                                   },
                                   "typeName": "address"
                                 },
+<<<<<<< Updated upstream
                                 "id": 6244,
+=======
+                                "id": 6341,
+>>>>>>> Stashed changes
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": false,
@@ -301,6 +398,7 @@
                                   "typeString": "address"
                                 }
                               ],
+<<<<<<< Updated upstream
                               "id": 6241,
                               "name": "MintableToken",
                               "nodeType": "Identifier",
@@ -313,6 +411,20 @@
                               }
                             },
                             "id": 6245,
+=======
+                              "id": 6338,
+                              "name": "MintableToken",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 8837,
+                              "src": "681:13:42",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_type$_t_contract$_MintableToken_$8837_$",
+                                "typeString": "type(contract MintableToken)"
+                              }
+                            },
+                            "id": 6342,
+>>>>>>> Stashed changes
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -322,25 +434,42 @@
                             "nodeType": "FunctionCall",
                             "src": "681:29:40",
                             "typeDescriptions": {
+<<<<<<< Updated upstream
                               "typeIdentifier": "t_contract$_MintableToken_$8740",
                               "typeString": "contract MintableToken"
                             }
                           },
                           "id": 6246,
+=======
+                              "typeIdentifier": "t_contract$_MintableToken_$8837",
+                              "typeString": "contract MintableToken"
+                            }
+                          },
+                          "id": 6343,
+>>>>>>> Stashed changes
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "memberName": "mint",
                           "nodeType": "MemberAccess",
+<<<<<<< Updated upstream
                           "referencedDeclaration": 8720,
                           "src": "681:34:40",
+=======
+                          "referencedDeclaration": 8817,
+                          "src": "681:34:42",
+>>>>>>> Stashed changes
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_uint256_$returns$_t_bool_$",
                             "typeString": "function (address,uint256) external returns (bool)"
                           }
                         },
+<<<<<<< Updated upstream
                         "id": 6249,
+=======
+                        "id": 6346,
+>>>>>>> Stashed changes
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -362,6 +491,7 @@
                           "typeString": "bool"
                         }
                       ],
+<<<<<<< Updated upstream
                       "id": 6240,
                       "name": "require",
                       "nodeType": "Identifier",
@@ -371,12 +501,27 @@
                       ],
                       "referencedDeclaration": 10772,
                       "src": "673:7:40",
+=======
+                      "id": 6337,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        10869,
+                        10870
+                      ],
+                      "referencedDeclaration": 10869,
+                      "src": "673:7:42",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
+<<<<<<< Updated upstream
                     "id": 6250,
+=======
+                    "id": 6347,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -390,14 +535,22 @@
                       "typeString": "tuple()"
                     }
                   },
+<<<<<<< Updated upstream
                   "id": 6251,
+=======
+                  "id": 6348,
+>>>>>>> Stashed changes
                   "nodeType": "ExpressionStatement",
                   "src": "673:71:40"
                 }
               ]
             },
             "documentation": "@dev Overrides delivery by minting tokens upon purchase.\n@param _beneficiary Token purchaser\n@param _tokenAmount Number of tokens to be minted",
+<<<<<<< Updated upstream
             "id": 6253,
+=======
+            "id": 6350,
+>>>>>>> Stashed changes
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -405,16 +558,28 @@
             "name": "_deliverTokens",
             "nodeType": "FunctionDefinition",
             "parameters": {
+<<<<<<< Updated upstream
               "id": 6238,
+=======
+              "id": 6335,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 6235,
                   "name": "_beneficiary",
                   "nodeType": "VariableDeclaration",
                   "scope": 6253,
                   "src": "532:20:40",
+=======
+                  "id": 6332,
+                  "name": "_beneficiary",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6350,
+                  "src": "532:20:42",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -422,7 +587,11 @@
                     "typeString": "address"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 6234,
+=======
+                    "id": 6331,
+>>>>>>> Stashed changes
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "532:7:40",
@@ -436,11 +605,19 @@
                 },
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 6237,
                   "name": "_tokenAmount",
                   "nodeType": "VariableDeclaration",
                   "scope": 6253,
                   "src": "558:20:40",
+=======
+                  "id": 6334,
+                  "name": "_tokenAmount",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6350,
+                  "src": "558:20:42",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -448,7 +625,11 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 6236,
+=======
+                    "id": 6333,
+>>>>>>> Stashed changes
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "558:7:40",
@@ -465,11 +646,16 @@
             },
             "payable": false,
             "returnParameters": {
+<<<<<<< Updated upstream
               "id": 6239,
+=======
+              "id": 6336,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "598:0:40"
             },
+<<<<<<< Updated upstream
             "scope": 6254,
             "src": "503:246:40",
             "stateMutability": "nonpayable",
@@ -479,14 +665,26 @@
         ],
         "scope": 6255,
         "src": "290:461:40"
+=======
+            "scope": 6351,
+            "src": "503:246:42",
+            "stateMutability": "nonpayable",
+            "superFunction": 5983,
+            "visibility": "internal"
+          }
+        ],
+        "scope": 6352,
+        "src": "290:461:42"
+>>>>>>> Stashed changes
       }
     ],
     "src": "0:752:40"
   },
   "legacyAST": {
-    "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/emission/MintedCrowdsale.sol",
+    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/emission/MintedCrowdsale.sol",
     "exportedSymbols": {
       "MintedCrowdsale": [
+<<<<<<< Updated upstream
         6254
       ]
     },
@@ -495,6 +693,16 @@
     "nodes": [
       {
         "id": 6229,
+=======
+        6351
+      ]
+    },
+    "id": 6352,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 6326,
+>>>>>>> Stashed changes
         "literals": [
           "solidity",
           "^",
@@ -505,24 +713,40 @@
         "src": "0:24:40"
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
         "file": "../Crowdsale.sol",
+<<<<<<< Updated upstream
         "id": 6230,
         "nodeType": "ImportDirective",
         "scope": 6255,
         "sourceUnit": 5933,
         "src": "26:26:40",
+=======
+        "id": 6327,
+        "nodeType": "ImportDirective",
+        "scope": 6352,
+        "sourceUnit": 6030,
+        "src": "26:26:42",
+>>>>>>> Stashed changes
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/token/ERC20/MintableToken.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/token/ERC20/MintableToken.sol",
         "file": "../../token/ERC20/MintableToken.sol",
+<<<<<<< Updated upstream
         "id": 6231,
         "nodeType": "ImportDirective",
         "scope": 6255,
         "sourceUnit": 8741,
         "src": "53:45:40",
+=======
+        "id": 6328,
+        "nodeType": "ImportDirective",
+        "scope": 6352,
+        "sourceUnit": 8838,
+        "src": "53:45:42",
+>>>>>>> Stashed changes
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -532,6 +756,7 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
+<<<<<<< Updated upstream
               "id": 6232,
               "name": "Crowdsale",
               "nodeType": "UserDefinedTypeName",
@@ -543,27 +768,55 @@
               }
             },
             "id": 6233,
+=======
+              "id": 6329,
+              "name": "Crowdsale",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 6029,
+              "src": "318:9:42",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_Crowdsale_$6029",
+                "typeString": "contract Crowdsale"
+              }
+            },
+            "id": 6330,
+>>>>>>> Stashed changes
             "nodeType": "InheritanceSpecifier",
             "src": "318:9:40"
           }
         ],
         "contractDependencies": [
+<<<<<<< Updated upstream
           5932
+=======
+          6029
+>>>>>>> Stashed changes
         ],
         "contractKind": "contract",
         "documentation": "@title MintedCrowdsale\n@dev Extension of Crowdsale contract whose tokens are minted in each purchase.\nToken ownership should be transferred to MintedCrowdsale for minting.",
         "fullyImplemented": false,
+<<<<<<< Updated upstream
         "id": 6254,
         "linearizedBaseContracts": [
           6254,
           5932
+=======
+        "id": 6351,
+        "linearizedBaseContracts": [
+          6351,
+          6029
+>>>>>>> Stashed changes
         ],
         "name": "MintedCrowdsale",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
+<<<<<<< Updated upstream
               "id": 6252,
+=======
+              "id": 6349,
+>>>>>>> Stashed changes
               "nodeType": "Block",
               "src": "598:151:40",
               "statements": [
@@ -576,12 +829,21 @@
                         "arguments": [
                           {
                             "argumentTypes": null,
+<<<<<<< Updated upstream
                             "id": 6247,
                             "name": "_beneficiary",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
                             "referencedDeclaration": 6235,
                             "src": "716:12:40",
+=======
+                            "id": 6344,
+                            "name": "_beneficiary",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 6332,
+                            "src": "716:12:42",
+>>>>>>> Stashed changes
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
                               "typeString": "address"
@@ -589,12 +851,21 @@
                           },
                           {
                             "argumentTypes": null,
+<<<<<<< Updated upstream
                             "id": 6248,
                             "name": "_tokenAmount",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
                             "referencedDeclaration": 6237,
                             "src": "730:12:40",
+=======
+                            "id": 6345,
+                            "name": "_tokenAmount",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 6334,
+                            "src": "730:12:42",
+>>>>>>> Stashed changes
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -620,6 +891,7 @@
                                 "arguments": [
                                   {
                                     "argumentTypes": null,
+<<<<<<< Updated upstream
                                     "id": 6243,
                                     "name": "token",
                                     "nodeType": "Identifier",
@@ -628,6 +900,16 @@
                                     "src": "703:5:40",
                                     "typeDescriptions": {
                                       "typeIdentifier": "t_contract$_ERC20_$8602",
+=======
+                                    "id": 6340,
+                                    "name": "token",
+                                    "nodeType": "Identifier",
+                                    "overloadedDeclarations": [],
+                                    "referencedDeclaration": 5814,
+                                    "src": "703:5:42",
+                                    "typeDescriptions": {
+                                      "typeIdentifier": "t_contract$_ERC20_$8699",
+>>>>>>> Stashed changes
                                       "typeString": "contract ERC20"
                                     }
                                   }
@@ -635,11 +917,19 @@
                                 "expression": {
                                   "argumentTypes": [
                                     {
+<<<<<<< Updated upstream
                                       "typeIdentifier": "t_contract$_ERC20_$8602",
                                       "typeString": "contract ERC20"
                                     }
                                   ],
                                   "id": 6242,
+=======
+                                      "typeIdentifier": "t_contract$_ERC20_$8699",
+                                      "typeString": "contract ERC20"
+                                    }
+                                  ],
+                                  "id": 6339,
+>>>>>>> Stashed changes
                                   "isConstant": false,
                                   "isLValue": false,
                                   "isPure": true,
@@ -652,7 +942,11 @@
                                   },
                                   "typeName": "address"
                                 },
+<<<<<<< Updated upstream
                                 "id": 6244,
+=======
+                                "id": 6341,
+>>>>>>> Stashed changes
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": false,
@@ -674,6 +968,7 @@
                                   "typeString": "address"
                                 }
                               ],
+<<<<<<< Updated upstream
                               "id": 6241,
                               "name": "MintableToken",
                               "nodeType": "Identifier",
@@ -686,6 +981,20 @@
                               }
                             },
                             "id": 6245,
+=======
+                              "id": 6338,
+                              "name": "MintableToken",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 8837,
+                              "src": "681:13:42",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_type$_t_contract$_MintableToken_$8837_$",
+                                "typeString": "type(contract MintableToken)"
+                              }
+                            },
+                            "id": 6342,
+>>>>>>> Stashed changes
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -695,25 +1004,42 @@
                             "nodeType": "FunctionCall",
                             "src": "681:29:40",
                             "typeDescriptions": {
+<<<<<<< Updated upstream
                               "typeIdentifier": "t_contract$_MintableToken_$8740",
                               "typeString": "contract MintableToken"
                             }
                           },
                           "id": 6246,
+=======
+                              "typeIdentifier": "t_contract$_MintableToken_$8837",
+                              "typeString": "contract MintableToken"
+                            }
+                          },
+                          "id": 6343,
+>>>>>>> Stashed changes
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "memberName": "mint",
                           "nodeType": "MemberAccess",
+<<<<<<< Updated upstream
                           "referencedDeclaration": 8720,
                           "src": "681:34:40",
+=======
+                          "referencedDeclaration": 8817,
+                          "src": "681:34:42",
+>>>>>>> Stashed changes
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_uint256_$returns$_t_bool_$",
                             "typeString": "function (address,uint256) external returns (bool)"
                           }
                         },
+<<<<<<< Updated upstream
                         "id": 6249,
+=======
+                        "id": 6346,
+>>>>>>> Stashed changes
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -735,6 +1061,7 @@
                           "typeString": "bool"
                         }
                       ],
+<<<<<<< Updated upstream
                       "id": 6240,
                       "name": "require",
                       "nodeType": "Identifier",
@@ -744,12 +1071,27 @@
                       ],
                       "referencedDeclaration": 10772,
                       "src": "673:7:40",
+=======
+                      "id": 6337,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        10869,
+                        10870
+                      ],
+                      "referencedDeclaration": 10869,
+                      "src": "673:7:42",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
+<<<<<<< Updated upstream
                     "id": 6250,
+=======
+                    "id": 6347,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -763,14 +1105,22 @@
                       "typeString": "tuple()"
                     }
                   },
+<<<<<<< Updated upstream
                   "id": 6251,
+=======
+                  "id": 6348,
+>>>>>>> Stashed changes
                   "nodeType": "ExpressionStatement",
                   "src": "673:71:40"
                 }
               ]
             },
             "documentation": "@dev Overrides delivery by minting tokens upon purchase.\n@param _beneficiary Token purchaser\n@param _tokenAmount Number of tokens to be minted",
+<<<<<<< Updated upstream
             "id": 6253,
+=======
+            "id": 6350,
+>>>>>>> Stashed changes
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -778,16 +1128,28 @@
             "name": "_deliverTokens",
             "nodeType": "FunctionDefinition",
             "parameters": {
+<<<<<<< Updated upstream
               "id": 6238,
+=======
+              "id": 6335,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 6235,
                   "name": "_beneficiary",
                   "nodeType": "VariableDeclaration",
                   "scope": 6253,
                   "src": "532:20:40",
+=======
+                  "id": 6332,
+                  "name": "_beneficiary",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6350,
+                  "src": "532:20:42",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -795,7 +1157,11 @@
                     "typeString": "address"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 6234,
+=======
+                    "id": 6331,
+>>>>>>> Stashed changes
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "532:7:40",
@@ -809,11 +1175,19 @@
                 },
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 6237,
                   "name": "_tokenAmount",
                   "nodeType": "VariableDeclaration",
                   "scope": 6253,
                   "src": "558:20:40",
+=======
+                  "id": 6334,
+                  "name": "_tokenAmount",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6350,
+                  "src": "558:20:42",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -821,7 +1195,11 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 6236,
+=======
+                    "id": 6333,
+>>>>>>> Stashed changes
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "558:7:40",
@@ -838,11 +1216,16 @@
             },
             "payable": false,
             "returnParameters": {
+<<<<<<< Updated upstream
               "id": 6239,
+=======
+              "id": 6336,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "598:0:40"
             },
+<<<<<<< Updated upstream
             "scope": 6254,
             "src": "503:246:40",
             "stateMutability": "nonpayable",
@@ -852,6 +1235,17 @@
         ],
         "scope": 6255,
         "src": "290:461:40"
+=======
+            "scope": 6351,
+            "src": "503:246:42",
+            "stateMutability": "nonpayable",
+            "superFunction": 5983,
+            "visibility": "internal"
+          }
+        ],
+        "scope": 6352,
+        "src": "290:461:42"
+>>>>>>> Stashed changes
       }
     ],
     "src": "0:752:40"
@@ -862,5 +1256,9 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
+<<<<<<< Updated upstream
   "updatedAt": "2018-08-21T13:36:52.188Z"
+=======
+  "updatedAt": "2018-08-21T13:27:41.769Z"
+>>>>>>> Stashed changes
 }

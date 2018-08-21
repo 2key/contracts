@@ -148,11 +148,12 @@
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "pragma solidity ^0.4.24;\n\nimport \"../Crowdsale.sol\";\nimport \"../../token/ERC20/ERC20.sol\";\nimport \"../../token/ERC20/ERC20Basic.sol\";\nimport \"../../token/ERC20/SafeERC20.sol\";\nimport \"../../math/SafeMath.sol\";\n\n\n/**\n * @title AllowanceCrowdsale\n * @dev Extension of Crowdsale where tokens are held by a wallet, which approves an allowance to the crowdsale.\n */\ncontract AllowanceCrowdsale is Crowdsale {\n  using SafeMath for uint256;\n  using SafeERC20 for ERC20;\n\n  address public tokenWallet;\n\n  /**\n   * @dev Constructor, takes token wallet address.\n   * @param _tokenWallet Address holding the tokens, which has approved allowance to the crowdsale\n   */\n  constructor(address _tokenWallet) public {\n    require(_tokenWallet != address(0));\n    tokenWallet = _tokenWallet;\n  }\n\n  /**\n   * @dev Checks the amount of tokens left in the allowance.\n   * @return Amount of tokens left in the allowance\n   */\n  function remainingTokens() public view returns (uint256) {\n    return token.allowance(tokenWallet, this);\n  }\n\n  /**\n   * @dev Overrides parent behavior by transferring tokens from wallet.\n   * @param _beneficiary Token purchaser\n   * @param _tokenAmount Amount of tokens purchased\n   */\n  function _deliverTokens(\n    address _beneficiary,\n    uint256 _tokenAmount\n  )\n    internal\n  {\n    token.safeTransferFrom(tokenWallet, _beneficiary, _tokenAmount);\n  }\n}\n",
-  "sourcePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/emission/AllowanceCrowdsale.sol",
+  "sourcePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/emission/AllowanceCrowdsale.sol",
   "ast": {
-    "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/emission/AllowanceCrowdsale.sol",
+    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/emission/AllowanceCrowdsale.sol",
     "exportedSymbols": {
       "AllowanceCrowdsale": [
+<<<<<<< Updated upstream
         6227
       ]
     },
@@ -161,6 +162,16 @@
     "nodes": [
       {
         "id": 6165,
+=======
+        6324
+      ]
+    },
+    "id": 6325,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 6262,
+>>>>>>> Stashed changes
         "literals": [
           "solidity",
           "^",
@@ -171,57 +182,97 @@
         "src": "0:24:39"
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
         "file": "../Crowdsale.sol",
+<<<<<<< Updated upstream
         "id": 6166,
         "nodeType": "ImportDirective",
         "scope": 6228,
         "sourceUnit": 5933,
         "src": "26:26:39",
+=======
+        "id": 6263,
+        "nodeType": "ImportDirective",
+        "scope": 6325,
+        "sourceUnit": 6030,
+        "src": "26:26:41",
+>>>>>>> Stashed changes
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/token/ERC20/ERC20.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/token/ERC20/ERC20.sol",
         "file": "../../token/ERC20/ERC20.sol",
+<<<<<<< Updated upstream
         "id": 6167,
         "nodeType": "ImportDirective",
         "scope": 6228,
         "sourceUnit": 8603,
         "src": "53:37:39",
+=======
+        "id": 6264,
+        "nodeType": "ImportDirective",
+        "scope": 6325,
+        "sourceUnit": 8700,
+        "src": "53:37:41",
+>>>>>>> Stashed changes
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/token/ERC20/ERC20Basic.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/token/ERC20/ERC20Basic.sol",
         "file": "../../token/ERC20/ERC20Basic.sol",
+<<<<<<< Updated upstream
         "id": 6168,
         "nodeType": "ImportDirective",
         "scope": 6228,
         "sourceUnit": 8635,
         "src": "91:42:39",
+=======
+        "id": 6265,
+        "nodeType": "ImportDirective",
+        "scope": 6325,
+        "sourceUnit": 8732,
+        "src": "91:42:41",
+>>>>>>> Stashed changes
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol",
         "file": "../../token/ERC20/SafeERC20.sol",
+<<<<<<< Updated upstream
         "id": 6169,
         "nodeType": "ImportDirective",
         "scope": 6228,
         "sourceUnit": 8953,
         "src": "134:41:39",
+=======
+        "id": 6266,
+        "nodeType": "ImportDirective",
+        "scope": 6325,
+        "sourceUnit": 9050,
+        "src": "134:41:41",
+>>>>>>> Stashed changes
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/math/SafeMath.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/math/SafeMath.sol",
         "file": "../../math/SafeMath.sol",
+<<<<<<< Updated upstream
         "id": 6170,
         "nodeType": "ImportDirective",
         "scope": 6228,
         "sourceUnit": 7050,
         "src": "176:33:39",
+=======
+        "id": 6267,
+        "nodeType": "ImportDirective",
+        "scope": 6325,
+        "sourceUnit": 7147,
+        "src": "176:33:41",
+>>>>>>> Stashed changes
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -231,6 +282,7 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
+<<<<<<< Updated upstream
               "id": 6171,
               "name": "Crowdsale",
               "nodeType": "UserDefinedTypeName",
@@ -242,25 +294,50 @@
               }
             },
             "id": 6172,
+=======
+              "id": 6268,
+              "name": "Crowdsale",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 6029,
+              "src": "392:9:41",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_Crowdsale_$6029",
+                "typeString": "contract Crowdsale"
+              }
+            },
+            "id": 6269,
+>>>>>>> Stashed changes
             "nodeType": "InheritanceSpecifier",
             "src": "392:9:39"
           }
         ],
         "contractDependencies": [
+<<<<<<< Updated upstream
           5932
+=======
+          6029
+>>>>>>> Stashed changes
         ],
         "contractKind": "contract",
         "documentation": "@title AllowanceCrowdsale\n@dev Extension of Crowdsale where tokens are held by a wallet, which approves an allowance to the crowdsale.",
         "fullyImplemented": false,
+<<<<<<< Updated upstream
         "id": 6227,
         "linearizedBaseContracts": [
           6227,
           5932
+=======
+        "id": 6324,
+        "linearizedBaseContracts": [
+          6324,
+          6029
+>>>>>>> Stashed changes
         ],
         "name": "AllowanceCrowdsale",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
+<<<<<<< Updated upstream
             "id": 6175,
             "libraryName": {
               "contractScope": null,
@@ -271,13 +348,29 @@
               "src": "412:8:39",
               "typeDescriptions": {
                 "typeIdentifier": "t_contract$_SafeMath_$7049",
+=======
+            "id": 6272,
+            "libraryName": {
+              "contractScope": null,
+              "id": 6270,
+              "name": "SafeMath",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 7146,
+              "src": "412:8:41",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_SafeMath_$7146",
+>>>>>>> Stashed changes
                 "typeString": "library SafeMath"
               }
             },
             "nodeType": "UsingForDirective",
             "src": "406:27:39",
             "typeName": {
+<<<<<<< Updated upstream
               "id": 6174,
+=======
+              "id": 6271,
+>>>>>>> Stashed changes
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
               "src": "425:7:39",
@@ -288,6 +381,7 @@
             }
           },
           {
+<<<<<<< Updated upstream
             "id": 6178,
             "libraryName": {
               "contractScope": null,
@@ -298,6 +392,18 @@
               "src": "442:9:39",
               "typeDescriptions": {
                 "typeIdentifier": "t_contract$_SafeERC20_$8952",
+=======
+            "id": 6275,
+            "libraryName": {
+              "contractScope": null,
+              "id": 6273,
+              "name": "SafeERC20",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 9049,
+              "src": "442:9:41",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_SafeERC20_$9049",
+>>>>>>> Stashed changes
                 "typeString": "library SafeERC20"
               }
             },
@@ -305,6 +411,7 @@
             "src": "436:26:39",
             "typeName": {
               "contractScope": null,
+<<<<<<< Updated upstream
               "id": 6177,
               "name": "ERC20",
               "nodeType": "UserDefinedTypeName",
@@ -312,17 +419,34 @@
               "src": "456:5:39",
               "typeDescriptions": {
                 "typeIdentifier": "t_contract$_ERC20_$8602",
+=======
+              "id": 6274,
+              "name": "ERC20",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 8699,
+              "src": "456:5:41",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_ERC20_$8699",
+>>>>>>> Stashed changes
                 "typeString": "contract ERC20"
               }
             }
           },
           {
             "constant": false,
+<<<<<<< Updated upstream
             "id": 6180,
             "name": "tokenWallet",
             "nodeType": "VariableDeclaration",
             "scope": 6227,
             "src": "466:26:39",
+=======
+            "id": 6277,
+            "name": "tokenWallet",
+            "nodeType": "VariableDeclaration",
+            "scope": 6324,
+            "src": "466:26:41",
+>>>>>>> Stashed changes
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -330,7 +454,11 @@
               "typeString": "address"
             },
             "typeName": {
+<<<<<<< Updated upstream
               "id": 6179,
+=======
+              "id": 6276,
+>>>>>>> Stashed changes
               "name": "address",
               "nodeType": "ElementaryTypeName",
               "src": "466:7:39",
@@ -344,7 +472,11 @@
           },
           {
             "body": {
+<<<<<<< Updated upstream
               "id": 6197,
+=======
+              "id": 6294,
+>>>>>>> Stashed changes
               "nodeType": "Block",
               "src": "700:78:39",
               "statements": [
@@ -358,19 +490,32 @@
                           "typeIdentifier": "t_address",
                           "typeString": "address"
                         },
+<<<<<<< Updated upstream
                         "id": 6190,
+=======
+                        "id": 6287,
+>>>>>>> Stashed changes
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
                           "argumentTypes": null,
+<<<<<<< Updated upstream
                           "id": 6186,
                           "name": "_tokenWallet",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 6182,
                           "src": "714:12:39",
+=======
+                          "id": 6283,
+                          "name": "_tokenWallet",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 6279,
+                          "src": "714:12:41",
+>>>>>>> Stashed changes
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
                             "typeString": "address"
@@ -384,7 +529,11 @@
                             {
                               "argumentTypes": null,
                               "hexValue": "30",
+<<<<<<< Updated upstream
                               "id": 6188,
+=======
+                              "id": 6285,
+>>>>>>> Stashed changes
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
@@ -407,7 +556,11 @@
                                 "typeString": "int_const 0"
                               }
                             ],
+<<<<<<< Updated upstream
                             "id": 6187,
+=======
+                            "id": 6284,
+>>>>>>> Stashed changes
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": true,
@@ -420,7 +573,11 @@
                             },
                             "typeName": "address"
                           },
+<<<<<<< Updated upstream
                           "id": 6189,
+=======
+                          "id": 6286,
+>>>>>>> Stashed changes
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
@@ -448,6 +605,7 @@
                           "typeString": "bool"
                         }
                       ],
+<<<<<<< Updated upstream
                       "id": 6185,
                       "name": "require",
                       "nodeType": "Identifier",
@@ -457,12 +615,27 @@
                       ],
                       "referencedDeclaration": 10772,
                       "src": "706:7:39",
+=======
+                      "id": 6282,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        10869,
+                        10870
+                      ],
+                      "referencedDeclaration": 10869,
+                      "src": "706:7:41",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
+<<<<<<< Updated upstream
                     "id": 6191,
+=======
+                    "id": 6288,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -476,26 +649,43 @@
                       "typeString": "tuple()"
                     }
                   },
+<<<<<<< Updated upstream
                   "id": 6192,
+=======
+                  "id": 6289,
+>>>>>>> Stashed changes
                   "nodeType": "ExpressionStatement",
                   "src": "706:35:39"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
+<<<<<<< Updated upstream
                     "id": 6195,
+=======
+                    "id": 6292,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
+<<<<<<< Updated upstream
                       "id": 6193,
                       "name": "tokenWallet",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 6180,
                       "src": "747:11:39",
+=======
+                      "id": 6290,
+                      "name": "tokenWallet",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 6277,
+                      "src": "747:11:41",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
@@ -505,12 +695,21 @@
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
+<<<<<<< Updated upstream
                       "id": 6194,
                       "name": "_tokenWallet",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 6182,
                       "src": "761:12:39",
+=======
+                      "id": 6291,
+                      "name": "_tokenWallet",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 6279,
+                      "src": "761:12:41",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
@@ -522,14 +721,22 @@
                       "typeString": "address"
                     }
                   },
+<<<<<<< Updated upstream
                   "id": 6196,
+=======
+                  "id": 6293,
+>>>>>>> Stashed changes
                   "nodeType": "ExpressionStatement",
                   "src": "747:26:39"
                 }
               ]
             },
             "documentation": "@dev Constructor, takes token wallet address.\n@param _tokenWallet Address holding the tokens, which has approved allowance to the crowdsale",
+<<<<<<< Updated upstream
             "id": 6198,
+=======
+            "id": 6295,
+>>>>>>> Stashed changes
             "implemented": true,
             "isConstructor": true,
             "isDeclaredConst": false,
@@ -537,16 +744,28 @@
             "name": "",
             "nodeType": "FunctionDefinition",
             "parameters": {
+<<<<<<< Updated upstream
               "id": 6183,
+=======
+              "id": 6280,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 6182,
                   "name": "_tokenWallet",
                   "nodeType": "VariableDeclaration",
                   "scope": 6198,
                   "src": "671:20:39",
+=======
+                  "id": 6279,
+                  "name": "_tokenWallet",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6295,
+                  "src": "671:20:41",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -554,7 +773,11 @@
                     "typeString": "address"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 6181,
+=======
+                    "id": 6278,
+>>>>>>> Stashed changes
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "671:7:39",
@@ -571,20 +794,33 @@
             },
             "payable": false,
             "returnParameters": {
+<<<<<<< Updated upstream
               "id": 6184,
+=======
+              "id": 6281,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "700:0:39"
             },
+<<<<<<< Updated upstream
             "scope": 6227,
             "src": "659:119:39",
+=======
+            "scope": 6324,
+            "src": "659:119:41",
+>>>>>>> Stashed changes
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           },
           {
             "body": {
+<<<<<<< Updated upstream
               "id": 6209,
+=======
+              "id": 6306,
+>>>>>>> Stashed changes
               "nodeType": "Block",
               "src": "964:52:39",
               "statements": [
@@ -594,12 +830,21 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
+<<<<<<< Updated upstream
                         "id": 6205,
                         "name": "tokenWallet",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 6180,
                         "src": "993:11:39",
+=======
+                        "id": 6302,
+                        "name": "tokenWallet",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6277,
+                        "src": "993:11:41",
+>>>>>>> Stashed changes
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -607,6 +852,7 @@
                       },
                       {
                         "argumentTypes": null,
+<<<<<<< Updated upstream
                         "id": 6206,
                         "name": "this",
                         "nodeType": "Identifier",
@@ -615,6 +861,16 @@
                         "src": "1006:4:39",
                         "typeDescriptions": {
                           "typeIdentifier": "t_contract$_AllowanceCrowdsale_$6227",
+=======
+                        "id": 6303,
+                        "name": "this",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 11019,
+                        "src": "1006:4:41",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_contract$_AllowanceCrowdsale_$6324",
+>>>>>>> Stashed changes
                           "typeString": "contract AllowanceCrowdsale"
                         }
                       }
@@ -626,12 +882,17 @@
                           "typeString": "address"
                         },
                         {
+<<<<<<< Updated upstream
                           "typeIdentifier": "t_contract$_AllowanceCrowdsale_$6227",
+=======
+                          "typeIdentifier": "t_contract$_AllowanceCrowdsale_$6324",
+>>>>>>> Stashed changes
                           "typeString": "contract AllowanceCrowdsale"
                         }
                       ],
                       "expression": {
                         "argumentTypes": null,
+<<<<<<< Updated upstream
                         "id": 6203,
                         "name": "token",
                         "nodeType": "Identifier",
@@ -644,20 +905,43 @@
                         }
                       },
                       "id": 6204,
+=======
+                        "id": 6300,
+                        "name": "token",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5814,
+                        "src": "977:5:41",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_contract$_ERC20_$8699",
+                          "typeString": "contract ERC20"
+                        }
+                      },
+                      "id": 6301,
+>>>>>>> Stashed changes
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "allowance",
                       "nodeType": "MemberAccess",
+<<<<<<< Updated upstream
                       "referencedDeclaration": 8573,
                       "src": "977:15:39",
+=======
+                      "referencedDeclaration": 8670,
+                      "src": "977:15:41",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_view$_t_address_$_t_address_$returns$_t_uint256_$",
                         "typeString": "function (address,address) view external returns (uint256)"
                       }
                     },
+<<<<<<< Updated upstream
                     "id": 6207,
+=======
+                    "id": 6304,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -671,15 +955,24 @@
                       "typeString": "uint256"
                     }
                   },
+<<<<<<< Updated upstream
                   "functionReturnParameters": 6202,
                   "id": 6208,
+=======
+                  "functionReturnParameters": 6299,
+                  "id": 6305,
+>>>>>>> Stashed changes
                   "nodeType": "Return",
                   "src": "970:41:39"
                 }
               ]
             },
             "documentation": "@dev Checks the amount of tokens left in the allowance.\n@return Amount of tokens left in the allowance",
+<<<<<<< Updated upstream
             "id": 6210,
+=======
+            "id": 6307,
+>>>>>>> Stashed changes
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -687,23 +980,39 @@
             "name": "remainingTokens",
             "nodeType": "FunctionDefinition",
             "parameters": {
+<<<<<<< Updated upstream
               "id": 6199,
+=======
+              "id": 6296,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "931:2:39"
             },
             "payable": false,
             "returnParameters": {
+<<<<<<< Updated upstream
               "id": 6202,
+=======
+              "id": 6299,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 6201,
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "scope": 6210,
                   "src": "955:7:39",
+=======
+                  "id": 6298,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6307,
+                  "src": "955:7:41",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -711,7 +1020,11 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 6200,
+=======
+                    "id": 6297,
+>>>>>>> Stashed changes
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "955:7:39",
@@ -726,15 +1039,24 @@
               ],
               "src": "954:9:39"
             },
+<<<<<<< Updated upstream
             "scope": 6227,
             "src": "907:109:39",
+=======
+            "scope": 6324,
+            "src": "907:109:41",
+>>>>>>> Stashed changes
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
           },
           {
             "body": {
+<<<<<<< Updated upstream
               "id": 6225,
+=======
+              "id": 6322,
+>>>>>>> Stashed changes
               "nodeType": "Block",
               "src": "1292:74:39",
               "statements": [
@@ -744,12 +1066,21 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
+<<<<<<< Updated upstream
                         "id": 6220,
                         "name": "tokenWallet",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 6180,
                         "src": "1321:11:39",
+=======
+                        "id": 6317,
+                        "name": "tokenWallet",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6277,
+                        "src": "1321:11:41",
+>>>>>>> Stashed changes
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -757,12 +1088,21 @@
                       },
                       {
                         "argumentTypes": null,
+<<<<<<< Updated upstream
                         "id": 6221,
                         "name": "_beneficiary",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 6212,
                         "src": "1334:12:39",
+=======
+                        "id": 6318,
+                        "name": "_beneficiary",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6309,
+                        "src": "1334:12:41",
+>>>>>>> Stashed changes
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -770,12 +1110,21 @@
                       },
                       {
                         "argumentTypes": null,
+<<<<<<< Updated upstream
                         "id": 6222,
                         "name": "_tokenAmount",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 6214,
                         "src": "1348:12:39",
+=======
+                        "id": 6319,
+                        "name": "_tokenAmount",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6311,
+                        "src": "1348:12:41",
+>>>>>>> Stashed changes
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -799,6 +1148,7 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
+<<<<<<< Updated upstream
                         "id": 6217,
                         "name": "token",
                         "nodeType": "Identifier",
@@ -811,12 +1161,27 @@
                         }
                       },
                       "id": 6219,
+=======
+                        "id": 6314,
+                        "name": "token",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5814,
+                        "src": "1298:5:41",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_contract$_ERC20_$8699",
+                          "typeString": "contract ERC20"
+                        }
+                      },
+                      "id": 6316,
+>>>>>>> Stashed changes
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "safeTransferFrom",
                       "nodeType": "MemberAccess",
+<<<<<<< Updated upstream
                       "referencedDeclaration": 8933,
                       "src": "1298:22:39",
                       "typeDescriptions": {
@@ -825,6 +1190,16 @@
                       }
                     },
                     "id": 6223,
+=======
+                      "referencedDeclaration": 9030,
+                      "src": "1298:22:41",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_nonpayable$_t_contract$_ERC20_$8699_$_t_address_$_t_address_$_t_uint256_$returns$__$bound_to$_t_contract$_ERC20_$8699_$",
+                        "typeString": "function (contract ERC20,address,address,uint256)"
+                      }
+                    },
+                    "id": 6320,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -838,14 +1213,22 @@
                       "typeString": "tuple()"
                     }
                   },
+<<<<<<< Updated upstream
                   "id": 6224,
+=======
+                  "id": 6321,
+>>>>>>> Stashed changes
                   "nodeType": "ExpressionStatement",
                   "src": "1298:63:39"
                 }
               ]
             },
             "documentation": "@dev Overrides parent behavior by transferring tokens from wallet.\n@param _beneficiary Token purchaser\n@param _tokenAmount Amount of tokens purchased",
+<<<<<<< Updated upstream
             "id": 6226,
+=======
+            "id": 6323,
+>>>>>>> Stashed changes
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -853,16 +1236,28 @@
             "name": "_deliverTokens",
             "nodeType": "FunctionDefinition",
             "parameters": {
+<<<<<<< Updated upstream
               "id": 6215,
+=======
+              "id": 6312,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 6212,
                   "name": "_beneficiary",
                   "nodeType": "VariableDeclaration",
                   "scope": 6226,
                   "src": "1226:20:39",
+=======
+                  "id": 6309,
+                  "name": "_beneficiary",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6323,
+                  "src": "1226:20:41",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -870,7 +1265,11 @@
                     "typeString": "address"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 6211,
+=======
+                    "id": 6308,
+>>>>>>> Stashed changes
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1226:7:39",
@@ -884,11 +1283,19 @@
                 },
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 6214,
                   "name": "_tokenAmount",
                   "nodeType": "VariableDeclaration",
                   "scope": 6226,
                   "src": "1252:20:39",
+=======
+                  "id": 6311,
+                  "name": "_tokenAmount",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6323,
+                  "src": "1252:20:41",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -896,7 +1303,11 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 6213,
+=======
+                    "id": 6310,
+>>>>>>> Stashed changes
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1252:7:39",
@@ -913,11 +1324,16 @@
             },
             "payable": false,
             "returnParameters": {
+<<<<<<< Updated upstream
               "id": 6216,
+=======
+              "id": 6313,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1292:0:39"
             },
+<<<<<<< Updated upstream
             "scope": 6227,
             "src": "1197:169:39",
             "stateMutability": "nonpayable",
@@ -927,14 +1343,26 @@
         ],
         "scope": 6228,
         "src": "361:1007:39"
+=======
+            "scope": 6324,
+            "src": "1197:169:41",
+            "stateMutability": "nonpayable",
+            "superFunction": 5983,
+            "visibility": "internal"
+          }
+        ],
+        "scope": 6325,
+        "src": "361:1007:41"
+>>>>>>> Stashed changes
       }
     ],
     "src": "0:1369:39"
   },
   "legacyAST": {
-    "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/emission/AllowanceCrowdsale.sol",
+    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/emission/AllowanceCrowdsale.sol",
     "exportedSymbols": {
       "AllowanceCrowdsale": [
+<<<<<<< Updated upstream
         6227
       ]
     },
@@ -943,6 +1371,16 @@
     "nodes": [
       {
         "id": 6165,
+=======
+        6324
+      ]
+    },
+    "id": 6325,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 6262,
+>>>>>>> Stashed changes
         "literals": [
           "solidity",
           "^",
@@ -953,57 +1391,97 @@
         "src": "0:24:39"
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
         "file": "../Crowdsale.sol",
+<<<<<<< Updated upstream
         "id": 6166,
         "nodeType": "ImportDirective",
         "scope": 6228,
         "sourceUnit": 5933,
         "src": "26:26:39",
+=======
+        "id": 6263,
+        "nodeType": "ImportDirective",
+        "scope": 6325,
+        "sourceUnit": 6030,
+        "src": "26:26:41",
+>>>>>>> Stashed changes
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/token/ERC20/ERC20.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/token/ERC20/ERC20.sol",
         "file": "../../token/ERC20/ERC20.sol",
+<<<<<<< Updated upstream
         "id": 6167,
         "nodeType": "ImportDirective",
         "scope": 6228,
         "sourceUnit": 8603,
         "src": "53:37:39",
+=======
+        "id": 6264,
+        "nodeType": "ImportDirective",
+        "scope": 6325,
+        "sourceUnit": 8700,
+        "src": "53:37:41",
+>>>>>>> Stashed changes
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/token/ERC20/ERC20Basic.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/token/ERC20/ERC20Basic.sol",
         "file": "../../token/ERC20/ERC20Basic.sol",
+<<<<<<< Updated upstream
         "id": 6168,
         "nodeType": "ImportDirective",
         "scope": 6228,
         "sourceUnit": 8635,
         "src": "91:42:39",
+=======
+        "id": 6265,
+        "nodeType": "ImportDirective",
+        "scope": 6325,
+        "sourceUnit": 8732,
+        "src": "91:42:41",
+>>>>>>> Stashed changes
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol",
         "file": "../../token/ERC20/SafeERC20.sol",
+<<<<<<< Updated upstream
         "id": 6169,
         "nodeType": "ImportDirective",
         "scope": 6228,
         "sourceUnit": 8953,
         "src": "134:41:39",
+=======
+        "id": 6266,
+        "nodeType": "ImportDirective",
+        "scope": 6325,
+        "sourceUnit": 9050,
+        "src": "134:41:41",
+>>>>>>> Stashed changes
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/math/SafeMath.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/math/SafeMath.sol",
         "file": "../../math/SafeMath.sol",
+<<<<<<< Updated upstream
         "id": 6170,
         "nodeType": "ImportDirective",
         "scope": 6228,
         "sourceUnit": 7050,
         "src": "176:33:39",
+=======
+        "id": 6267,
+        "nodeType": "ImportDirective",
+        "scope": 6325,
+        "sourceUnit": 7147,
+        "src": "176:33:41",
+>>>>>>> Stashed changes
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -1013,6 +1491,7 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
+<<<<<<< Updated upstream
               "id": 6171,
               "name": "Crowdsale",
               "nodeType": "UserDefinedTypeName",
@@ -1024,25 +1503,50 @@
               }
             },
             "id": 6172,
+=======
+              "id": 6268,
+              "name": "Crowdsale",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 6029,
+              "src": "392:9:41",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_Crowdsale_$6029",
+                "typeString": "contract Crowdsale"
+              }
+            },
+            "id": 6269,
+>>>>>>> Stashed changes
             "nodeType": "InheritanceSpecifier",
             "src": "392:9:39"
           }
         ],
         "contractDependencies": [
+<<<<<<< Updated upstream
           5932
+=======
+          6029
+>>>>>>> Stashed changes
         ],
         "contractKind": "contract",
         "documentation": "@title AllowanceCrowdsale\n@dev Extension of Crowdsale where tokens are held by a wallet, which approves an allowance to the crowdsale.",
         "fullyImplemented": false,
+<<<<<<< Updated upstream
         "id": 6227,
         "linearizedBaseContracts": [
           6227,
           5932
+=======
+        "id": 6324,
+        "linearizedBaseContracts": [
+          6324,
+          6029
+>>>>>>> Stashed changes
         ],
         "name": "AllowanceCrowdsale",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
+<<<<<<< Updated upstream
             "id": 6175,
             "libraryName": {
               "contractScope": null,
@@ -1053,13 +1557,29 @@
               "src": "412:8:39",
               "typeDescriptions": {
                 "typeIdentifier": "t_contract$_SafeMath_$7049",
+=======
+            "id": 6272,
+            "libraryName": {
+              "contractScope": null,
+              "id": 6270,
+              "name": "SafeMath",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 7146,
+              "src": "412:8:41",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_SafeMath_$7146",
+>>>>>>> Stashed changes
                 "typeString": "library SafeMath"
               }
             },
             "nodeType": "UsingForDirective",
             "src": "406:27:39",
             "typeName": {
+<<<<<<< Updated upstream
               "id": 6174,
+=======
+              "id": 6271,
+>>>>>>> Stashed changes
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
               "src": "425:7:39",
@@ -1070,6 +1590,7 @@
             }
           },
           {
+<<<<<<< Updated upstream
             "id": 6178,
             "libraryName": {
               "contractScope": null,
@@ -1080,6 +1601,18 @@
               "src": "442:9:39",
               "typeDescriptions": {
                 "typeIdentifier": "t_contract$_SafeERC20_$8952",
+=======
+            "id": 6275,
+            "libraryName": {
+              "contractScope": null,
+              "id": 6273,
+              "name": "SafeERC20",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 9049,
+              "src": "442:9:41",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_SafeERC20_$9049",
+>>>>>>> Stashed changes
                 "typeString": "library SafeERC20"
               }
             },
@@ -1087,6 +1620,7 @@
             "src": "436:26:39",
             "typeName": {
               "contractScope": null,
+<<<<<<< Updated upstream
               "id": 6177,
               "name": "ERC20",
               "nodeType": "UserDefinedTypeName",
@@ -1094,17 +1628,34 @@
               "src": "456:5:39",
               "typeDescriptions": {
                 "typeIdentifier": "t_contract$_ERC20_$8602",
+=======
+              "id": 6274,
+              "name": "ERC20",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 8699,
+              "src": "456:5:41",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_ERC20_$8699",
+>>>>>>> Stashed changes
                 "typeString": "contract ERC20"
               }
             }
           },
           {
             "constant": false,
+<<<<<<< Updated upstream
             "id": 6180,
             "name": "tokenWallet",
             "nodeType": "VariableDeclaration",
             "scope": 6227,
             "src": "466:26:39",
+=======
+            "id": 6277,
+            "name": "tokenWallet",
+            "nodeType": "VariableDeclaration",
+            "scope": 6324,
+            "src": "466:26:41",
+>>>>>>> Stashed changes
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -1112,7 +1663,11 @@
               "typeString": "address"
             },
             "typeName": {
+<<<<<<< Updated upstream
               "id": 6179,
+=======
+              "id": 6276,
+>>>>>>> Stashed changes
               "name": "address",
               "nodeType": "ElementaryTypeName",
               "src": "466:7:39",
@@ -1126,7 +1681,11 @@
           },
           {
             "body": {
+<<<<<<< Updated upstream
               "id": 6197,
+=======
+              "id": 6294,
+>>>>>>> Stashed changes
               "nodeType": "Block",
               "src": "700:78:39",
               "statements": [
@@ -1140,19 +1699,32 @@
                           "typeIdentifier": "t_address",
                           "typeString": "address"
                         },
+<<<<<<< Updated upstream
                         "id": 6190,
+=======
+                        "id": 6287,
+>>>>>>> Stashed changes
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
                           "argumentTypes": null,
+<<<<<<< Updated upstream
                           "id": 6186,
                           "name": "_tokenWallet",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 6182,
                           "src": "714:12:39",
+=======
+                          "id": 6283,
+                          "name": "_tokenWallet",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 6279,
+                          "src": "714:12:41",
+>>>>>>> Stashed changes
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
                             "typeString": "address"
@@ -1166,7 +1738,11 @@
                             {
                               "argumentTypes": null,
                               "hexValue": "30",
+<<<<<<< Updated upstream
                               "id": 6188,
+=======
+                              "id": 6285,
+>>>>>>> Stashed changes
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
@@ -1189,7 +1765,11 @@
                                 "typeString": "int_const 0"
                               }
                             ],
+<<<<<<< Updated upstream
                             "id": 6187,
+=======
+                            "id": 6284,
+>>>>>>> Stashed changes
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": true,
@@ -1202,7 +1782,11 @@
                             },
                             "typeName": "address"
                           },
+<<<<<<< Updated upstream
                           "id": 6189,
+=======
+                          "id": 6286,
+>>>>>>> Stashed changes
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
@@ -1230,6 +1814,7 @@
                           "typeString": "bool"
                         }
                       ],
+<<<<<<< Updated upstream
                       "id": 6185,
                       "name": "require",
                       "nodeType": "Identifier",
@@ -1239,12 +1824,27 @@
                       ],
                       "referencedDeclaration": 10772,
                       "src": "706:7:39",
+=======
+                      "id": 6282,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        10869,
+                        10870
+                      ],
+                      "referencedDeclaration": 10869,
+                      "src": "706:7:41",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
+<<<<<<< Updated upstream
                     "id": 6191,
+=======
+                    "id": 6288,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1258,26 +1858,43 @@
                       "typeString": "tuple()"
                     }
                   },
+<<<<<<< Updated upstream
                   "id": 6192,
+=======
+                  "id": 6289,
+>>>>>>> Stashed changes
                   "nodeType": "ExpressionStatement",
                   "src": "706:35:39"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
+<<<<<<< Updated upstream
                     "id": 6195,
+=======
+                    "id": 6292,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
+<<<<<<< Updated upstream
                       "id": 6193,
                       "name": "tokenWallet",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 6180,
                       "src": "747:11:39",
+=======
+                      "id": 6290,
+                      "name": "tokenWallet",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 6277,
+                      "src": "747:11:41",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
@@ -1287,12 +1904,21 @@
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
+<<<<<<< Updated upstream
                       "id": 6194,
                       "name": "_tokenWallet",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 6182,
                       "src": "761:12:39",
+=======
+                      "id": 6291,
+                      "name": "_tokenWallet",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 6279,
+                      "src": "761:12:41",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
@@ -1304,14 +1930,22 @@
                       "typeString": "address"
                     }
                   },
+<<<<<<< Updated upstream
                   "id": 6196,
+=======
+                  "id": 6293,
+>>>>>>> Stashed changes
                   "nodeType": "ExpressionStatement",
                   "src": "747:26:39"
                 }
               ]
             },
             "documentation": "@dev Constructor, takes token wallet address.\n@param _tokenWallet Address holding the tokens, which has approved allowance to the crowdsale",
+<<<<<<< Updated upstream
             "id": 6198,
+=======
+            "id": 6295,
+>>>>>>> Stashed changes
             "implemented": true,
             "isConstructor": true,
             "isDeclaredConst": false,
@@ -1319,16 +1953,28 @@
             "name": "",
             "nodeType": "FunctionDefinition",
             "parameters": {
+<<<<<<< Updated upstream
               "id": 6183,
+=======
+              "id": 6280,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 6182,
                   "name": "_tokenWallet",
                   "nodeType": "VariableDeclaration",
                   "scope": 6198,
                   "src": "671:20:39",
+=======
+                  "id": 6279,
+                  "name": "_tokenWallet",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6295,
+                  "src": "671:20:41",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1336,7 +1982,11 @@
                     "typeString": "address"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 6181,
+=======
+                    "id": 6278,
+>>>>>>> Stashed changes
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "671:7:39",
@@ -1353,20 +2003,33 @@
             },
             "payable": false,
             "returnParameters": {
+<<<<<<< Updated upstream
               "id": 6184,
+=======
+              "id": 6281,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "700:0:39"
             },
+<<<<<<< Updated upstream
             "scope": 6227,
             "src": "659:119:39",
+=======
+            "scope": 6324,
+            "src": "659:119:41",
+>>>>>>> Stashed changes
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           },
           {
             "body": {
+<<<<<<< Updated upstream
               "id": 6209,
+=======
+              "id": 6306,
+>>>>>>> Stashed changes
               "nodeType": "Block",
               "src": "964:52:39",
               "statements": [
@@ -1376,12 +2039,21 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
+<<<<<<< Updated upstream
                         "id": 6205,
                         "name": "tokenWallet",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 6180,
                         "src": "993:11:39",
+=======
+                        "id": 6302,
+                        "name": "tokenWallet",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6277,
+                        "src": "993:11:41",
+>>>>>>> Stashed changes
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -1389,6 +2061,7 @@
                       },
                       {
                         "argumentTypes": null,
+<<<<<<< Updated upstream
                         "id": 6206,
                         "name": "this",
                         "nodeType": "Identifier",
@@ -1397,6 +2070,16 @@
                         "src": "1006:4:39",
                         "typeDescriptions": {
                           "typeIdentifier": "t_contract$_AllowanceCrowdsale_$6227",
+=======
+                        "id": 6303,
+                        "name": "this",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 11019,
+                        "src": "1006:4:41",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_contract$_AllowanceCrowdsale_$6324",
+>>>>>>> Stashed changes
                           "typeString": "contract AllowanceCrowdsale"
                         }
                       }
@@ -1408,12 +2091,17 @@
                           "typeString": "address"
                         },
                         {
+<<<<<<< Updated upstream
                           "typeIdentifier": "t_contract$_AllowanceCrowdsale_$6227",
+=======
+                          "typeIdentifier": "t_contract$_AllowanceCrowdsale_$6324",
+>>>>>>> Stashed changes
                           "typeString": "contract AllowanceCrowdsale"
                         }
                       ],
                       "expression": {
                         "argumentTypes": null,
+<<<<<<< Updated upstream
                         "id": 6203,
                         "name": "token",
                         "nodeType": "Identifier",
@@ -1426,20 +2114,43 @@
                         }
                       },
                       "id": 6204,
+=======
+                        "id": 6300,
+                        "name": "token",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5814,
+                        "src": "977:5:41",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_contract$_ERC20_$8699",
+                          "typeString": "contract ERC20"
+                        }
+                      },
+                      "id": 6301,
+>>>>>>> Stashed changes
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "allowance",
                       "nodeType": "MemberAccess",
+<<<<<<< Updated upstream
                       "referencedDeclaration": 8573,
                       "src": "977:15:39",
+=======
+                      "referencedDeclaration": 8670,
+                      "src": "977:15:41",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_view$_t_address_$_t_address_$returns$_t_uint256_$",
                         "typeString": "function (address,address) view external returns (uint256)"
                       }
                     },
+<<<<<<< Updated upstream
                     "id": 6207,
+=======
+                    "id": 6304,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1453,15 +2164,24 @@
                       "typeString": "uint256"
                     }
                   },
+<<<<<<< Updated upstream
                   "functionReturnParameters": 6202,
                   "id": 6208,
+=======
+                  "functionReturnParameters": 6299,
+                  "id": 6305,
+>>>>>>> Stashed changes
                   "nodeType": "Return",
                   "src": "970:41:39"
                 }
               ]
             },
             "documentation": "@dev Checks the amount of tokens left in the allowance.\n@return Amount of tokens left in the allowance",
+<<<<<<< Updated upstream
             "id": 6210,
+=======
+            "id": 6307,
+>>>>>>> Stashed changes
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -1469,23 +2189,39 @@
             "name": "remainingTokens",
             "nodeType": "FunctionDefinition",
             "parameters": {
+<<<<<<< Updated upstream
               "id": 6199,
+=======
+              "id": 6296,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "931:2:39"
             },
             "payable": false,
             "returnParameters": {
+<<<<<<< Updated upstream
               "id": 6202,
+=======
+              "id": 6299,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 6201,
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "scope": 6210,
                   "src": "955:7:39",
+=======
+                  "id": 6298,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6307,
+                  "src": "955:7:41",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1493,7 +2229,11 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 6200,
+=======
+                    "id": 6297,
+>>>>>>> Stashed changes
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "955:7:39",
@@ -1508,15 +2248,24 @@
               ],
               "src": "954:9:39"
             },
+<<<<<<< Updated upstream
             "scope": 6227,
             "src": "907:109:39",
+=======
+            "scope": 6324,
+            "src": "907:109:41",
+>>>>>>> Stashed changes
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
           },
           {
             "body": {
+<<<<<<< Updated upstream
               "id": 6225,
+=======
+              "id": 6322,
+>>>>>>> Stashed changes
               "nodeType": "Block",
               "src": "1292:74:39",
               "statements": [
@@ -1526,12 +2275,21 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
+<<<<<<< Updated upstream
                         "id": 6220,
                         "name": "tokenWallet",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 6180,
                         "src": "1321:11:39",
+=======
+                        "id": 6317,
+                        "name": "tokenWallet",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6277,
+                        "src": "1321:11:41",
+>>>>>>> Stashed changes
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -1539,12 +2297,21 @@
                       },
                       {
                         "argumentTypes": null,
+<<<<<<< Updated upstream
                         "id": 6221,
                         "name": "_beneficiary",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 6212,
                         "src": "1334:12:39",
+=======
+                        "id": 6318,
+                        "name": "_beneficiary",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6309,
+                        "src": "1334:12:41",
+>>>>>>> Stashed changes
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -1552,12 +2319,21 @@
                       },
                       {
                         "argumentTypes": null,
+<<<<<<< Updated upstream
                         "id": 6222,
                         "name": "_tokenAmount",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 6214,
                         "src": "1348:12:39",
+=======
+                        "id": 6319,
+                        "name": "_tokenAmount",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6311,
+                        "src": "1348:12:41",
+>>>>>>> Stashed changes
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -1581,6 +2357,7 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
+<<<<<<< Updated upstream
                         "id": 6217,
                         "name": "token",
                         "nodeType": "Identifier",
@@ -1593,12 +2370,27 @@
                         }
                       },
                       "id": 6219,
+=======
+                        "id": 6314,
+                        "name": "token",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5814,
+                        "src": "1298:5:41",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_contract$_ERC20_$8699",
+                          "typeString": "contract ERC20"
+                        }
+                      },
+                      "id": 6316,
+>>>>>>> Stashed changes
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "safeTransferFrom",
                       "nodeType": "MemberAccess",
+<<<<<<< Updated upstream
                       "referencedDeclaration": 8933,
                       "src": "1298:22:39",
                       "typeDescriptions": {
@@ -1607,6 +2399,16 @@
                       }
                     },
                     "id": 6223,
+=======
+                      "referencedDeclaration": 9030,
+                      "src": "1298:22:41",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_nonpayable$_t_contract$_ERC20_$8699_$_t_address_$_t_address_$_t_uint256_$returns$__$bound_to$_t_contract$_ERC20_$8699_$",
+                        "typeString": "function (contract ERC20,address,address,uint256)"
+                      }
+                    },
+                    "id": 6320,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1620,14 +2422,22 @@
                       "typeString": "tuple()"
                     }
                   },
+<<<<<<< Updated upstream
                   "id": 6224,
+=======
+                  "id": 6321,
+>>>>>>> Stashed changes
                   "nodeType": "ExpressionStatement",
                   "src": "1298:63:39"
                 }
               ]
             },
             "documentation": "@dev Overrides parent behavior by transferring tokens from wallet.\n@param _beneficiary Token purchaser\n@param _tokenAmount Amount of tokens purchased",
+<<<<<<< Updated upstream
             "id": 6226,
+=======
+            "id": 6323,
+>>>>>>> Stashed changes
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -1635,16 +2445,28 @@
             "name": "_deliverTokens",
             "nodeType": "FunctionDefinition",
             "parameters": {
+<<<<<<< Updated upstream
               "id": 6215,
+=======
+              "id": 6312,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 6212,
                   "name": "_beneficiary",
                   "nodeType": "VariableDeclaration",
                   "scope": 6226,
                   "src": "1226:20:39",
+=======
+                  "id": 6309,
+                  "name": "_beneficiary",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6323,
+                  "src": "1226:20:41",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1652,7 +2474,11 @@
                     "typeString": "address"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 6211,
+=======
+                    "id": 6308,
+>>>>>>> Stashed changes
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1226:7:39",
@@ -1666,11 +2492,19 @@
                 },
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 6214,
                   "name": "_tokenAmount",
                   "nodeType": "VariableDeclaration",
                   "scope": 6226,
                   "src": "1252:20:39",
+=======
+                  "id": 6311,
+                  "name": "_tokenAmount",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6323,
+                  "src": "1252:20:41",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1678,7 +2512,11 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 6213,
+=======
+                    "id": 6310,
+>>>>>>> Stashed changes
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1252:7:39",
@@ -1695,11 +2533,16 @@
             },
             "payable": false,
             "returnParameters": {
+<<<<<<< Updated upstream
               "id": 6216,
+=======
+              "id": 6313,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1292:0:39"
             },
+<<<<<<< Updated upstream
             "scope": 6227,
             "src": "1197:169:39",
             "stateMutability": "nonpayable",
@@ -1709,6 +2552,17 @@
         ],
         "scope": 6228,
         "src": "361:1007:39"
+=======
+            "scope": 6324,
+            "src": "1197:169:41",
+            "stateMutability": "nonpayable",
+            "superFunction": 5983,
+            "visibility": "internal"
+          }
+        ],
+        "scope": 6325,
+        "src": "361:1007:41"
+>>>>>>> Stashed changes
       }
     ],
     "src": "0:1369:39"
@@ -1719,5 +2573,9 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
+<<<<<<< Updated upstream
   "updatedAt": "2018-08-21T13:36:52.232Z"
+=======
+  "updatedAt": "2018-08-21T13:27:41.769Z"
+>>>>>>> Stashed changes
 }

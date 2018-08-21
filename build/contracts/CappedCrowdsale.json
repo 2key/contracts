@@ -148,11 +148,12 @@
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "pragma solidity ^0.4.24;\n\nimport \"../../math/SafeMath.sol\";\nimport \"../Crowdsale.sol\";\n\n\n/**\n * @title CappedCrowdsale\n * @dev Crowdsale with a limit for total contributions.\n */\ncontract CappedCrowdsale is Crowdsale {\n  using SafeMath for uint256;\n\n  uint256 public cap;\n\n  /**\n   * @dev Constructor, takes maximum amount of wei accepted in the crowdsale.\n   * @param _cap Max amount of wei to be contributed\n   */\n  constructor(uint256 _cap) public {\n    require(_cap > 0);\n    cap = _cap;\n  }\n\n  /**\n   * @dev Checks whether the cap has been reached.\n   * @return Whether the cap was reached\n   */\n  function capReached() public view returns (bool) {\n    return weiRaised >= cap;\n  }\n\n  /**\n   * @dev Extend parent behavior requiring purchase to respect the funding cap.\n   * @param _beneficiary Token purchaser\n   * @param _weiAmount Amount of wei contributed\n   */\n  function _preValidatePurchase(\n    address _beneficiary,\n    uint256 _weiAmount\n  )\n    internal\n  {\n    super._preValidatePurchase(_beneficiary, _weiAmount);\n    require(weiRaised.add(_weiAmount) <= cap);\n  }\n\n}\n",
-  "sourcePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/validation/CappedCrowdsale.sol",
+  "sourcePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/validation/CappedCrowdsale.sol",
   "ast": {
-    "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/validation/CappedCrowdsale.sol",
+    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/validation/CappedCrowdsale.sol",
     "exportedSymbols": {
       "CappedCrowdsale": [
+<<<<<<< Updated upstream
         6415
       ]
     },
@@ -161,6 +162,16 @@
     "nodes": [
       {
         "id": 6355,
+=======
+        6512
+      ]
+    },
+    "id": 6513,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 6452,
+>>>>>>> Stashed changes
         "literals": [
           "solidity",
           "^",
@@ -171,24 +182,40 @@
         "src": "0:24:42"
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/math/SafeMath.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/math/SafeMath.sol",
         "file": "../../math/SafeMath.sol",
+<<<<<<< Updated upstream
         "id": 6356,
         "nodeType": "ImportDirective",
         "scope": 6416,
         "sourceUnit": 7050,
         "src": "26:33:42",
+=======
+        "id": 6453,
+        "nodeType": "ImportDirective",
+        "scope": 6513,
+        "sourceUnit": 7147,
+        "src": "26:33:44",
+>>>>>>> Stashed changes
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
         "file": "../Crowdsale.sol",
+<<<<<<< Updated upstream
         "id": 6357,
         "nodeType": "ImportDirective",
         "scope": 6416,
         "sourceUnit": 5933,
         "src": "60:26:42",
+=======
+        "id": 6454,
+        "nodeType": "ImportDirective",
+        "scope": 6513,
+        "sourceUnit": 6030,
+        "src": "60:26:44",
+>>>>>>> Stashed changes
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -198,6 +225,7 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
+<<<<<<< Updated upstream
               "id": 6358,
               "name": "Crowdsale",
               "nodeType": "UserDefinedTypeName",
@@ -209,25 +237,50 @@
               }
             },
             "id": 6359,
+=======
+              "id": 6455,
+              "name": "Crowdsale",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 6029,
+              "src": "207:9:44",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_Crowdsale_$6029",
+                "typeString": "contract Crowdsale"
+              }
+            },
+            "id": 6456,
+>>>>>>> Stashed changes
             "nodeType": "InheritanceSpecifier",
             "src": "207:9:42"
           }
         ],
         "contractDependencies": [
+<<<<<<< Updated upstream
           5932
+=======
+          6029
+>>>>>>> Stashed changes
         ],
         "contractKind": "contract",
         "documentation": "@title CappedCrowdsale\n@dev Crowdsale with a limit for total contributions.",
         "fullyImplemented": false,
+<<<<<<< Updated upstream
         "id": 6415,
         "linearizedBaseContracts": [
           6415,
           5932
+=======
+        "id": 6512,
+        "linearizedBaseContracts": [
+          6512,
+          6029
+>>>>>>> Stashed changes
         ],
         "name": "CappedCrowdsale",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
+<<<<<<< Updated upstream
             "id": 6362,
             "libraryName": {
               "contractScope": null,
@@ -238,13 +291,29 @@
               "src": "227:8:42",
               "typeDescriptions": {
                 "typeIdentifier": "t_contract$_SafeMath_$7049",
+=======
+            "id": 6459,
+            "libraryName": {
+              "contractScope": null,
+              "id": 6457,
+              "name": "SafeMath",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 7146,
+              "src": "227:8:44",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_SafeMath_$7146",
+>>>>>>> Stashed changes
                 "typeString": "library SafeMath"
               }
             },
             "nodeType": "UsingForDirective",
             "src": "221:27:42",
             "typeName": {
+<<<<<<< Updated upstream
               "id": 6361,
+=======
+              "id": 6458,
+>>>>>>> Stashed changes
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
               "src": "240:7:42",
@@ -256,11 +325,19 @@
           },
           {
             "constant": false,
+<<<<<<< Updated upstream
             "id": 6364,
             "name": "cap",
             "nodeType": "VariableDeclaration",
             "scope": 6415,
             "src": "252:18:42",
+=======
+            "id": 6461,
+            "name": "cap",
+            "nodeType": "VariableDeclaration",
+            "scope": 6512,
+            "src": "252:18:44",
+>>>>>>> Stashed changes
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -268,7 +345,11 @@
               "typeString": "uint256"
             },
             "typeName": {
+<<<<<<< Updated upstream
               "id": 6363,
+=======
+              "id": 6460,
+>>>>>>> Stashed changes
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
               "src": "252:7:42",
@@ -282,7 +363,11 @@
           },
           {
             "body": {
+<<<<<<< Updated upstream
               "id": 6379,
+=======
+              "id": 6476,
+>>>>>>> Stashed changes
               "nodeType": "Block",
               "src": "451:44:42",
               "statements": [
@@ -296,19 +381,32 @@
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
+<<<<<<< Updated upstream
                         "id": 6372,
+=======
+                        "id": 6469,
+>>>>>>> Stashed changes
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
                           "argumentTypes": null,
+<<<<<<< Updated upstream
                           "id": 6370,
                           "name": "_cap",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 6366,
                           "src": "465:4:42",
+=======
+                          "id": 6467,
+                          "name": "_cap",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 6463,
+                          "src": "465:4:44",
+>>>>>>> Stashed changes
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -319,7 +417,11 @@
                         "rightExpression": {
                           "argumentTypes": null,
                           "hexValue": "30",
+<<<<<<< Updated upstream
                           "id": 6371,
+=======
+                          "id": 6468,
+>>>>>>> Stashed changes
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
@@ -348,6 +450,7 @@
                           "typeString": "bool"
                         }
                       ],
+<<<<<<< Updated upstream
                       "id": 6369,
                       "name": "require",
                       "nodeType": "Identifier",
@@ -357,12 +460,27 @@
                       ],
                       "referencedDeclaration": 10772,
                       "src": "457:7:42",
+=======
+                      "id": 6466,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        10869,
+                        10870
+                      ],
+                      "referencedDeclaration": 10869,
+                      "src": "457:7:44",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
+<<<<<<< Updated upstream
                     "id": 6373,
+=======
+                    "id": 6470,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -376,26 +494,43 @@
                       "typeString": "tuple()"
                     }
                   },
+<<<<<<< Updated upstream
                   "id": 6374,
+=======
+                  "id": 6471,
+>>>>>>> Stashed changes
                   "nodeType": "ExpressionStatement",
                   "src": "457:17:42"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
+<<<<<<< Updated upstream
                     "id": 6377,
+=======
+                    "id": 6474,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
+<<<<<<< Updated upstream
                       "id": 6375,
                       "name": "cap",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 6364,
                       "src": "480:3:42",
+=======
+                      "id": 6472,
+                      "name": "cap",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 6461,
+                      "src": "480:3:44",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -405,12 +540,21 @@
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
+<<<<<<< Updated upstream
                       "id": 6376,
                       "name": "_cap",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 6366,
                       "src": "486:4:42",
+=======
+                      "id": 6473,
+                      "name": "_cap",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 6463,
+                      "src": "486:4:44",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -422,14 +566,22 @@
                       "typeString": "uint256"
                     }
                   },
+<<<<<<< Updated upstream
                   "id": 6378,
+=======
+                  "id": 6475,
+>>>>>>> Stashed changes
                   "nodeType": "ExpressionStatement",
                   "src": "480:10:42"
                 }
               ]
             },
             "documentation": "@dev Constructor, takes maximum amount of wei accepted in the crowdsale.\n@param _cap Max amount of wei to be contributed",
+<<<<<<< Updated upstream
             "id": 6380,
+=======
+            "id": 6477,
+>>>>>>> Stashed changes
             "implemented": true,
             "isConstructor": true,
             "isDeclaredConst": false,
@@ -437,16 +589,28 @@
             "name": "",
             "nodeType": "FunctionDefinition",
             "parameters": {
+<<<<<<< Updated upstream
               "id": 6367,
+=======
+              "id": 6464,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 6366,
                   "name": "_cap",
                   "nodeType": "VariableDeclaration",
                   "scope": 6380,
                   "src": "430:12:42",
+=======
+                  "id": 6463,
+                  "name": "_cap",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6477,
+                  "src": "430:12:44",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -454,7 +618,11 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 6365,
+=======
+                    "id": 6462,
+>>>>>>> Stashed changes
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "430:7:42",
@@ -471,20 +639,33 @@
             },
             "payable": false,
             "returnParameters": {
+<<<<<<< Updated upstream
               "id": 6368,
+=======
+              "id": 6465,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "451:0:42"
             },
+<<<<<<< Updated upstream
             "scope": 6415,
             "src": "418:77:42",
+=======
+            "scope": 6512,
+            "src": "418:77:44",
+>>>>>>> Stashed changes
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           },
           {
             "body": {
+<<<<<<< Updated upstream
               "id": 6389,
+=======
+              "id": 6486,
+>>>>>>> Stashed changes
               "nodeType": "Block",
               "src": "652:34:42",
               "statements": [
@@ -495,19 +676,32 @@
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     },
+<<<<<<< Updated upstream
                     "id": 6387,
+=======
+                    "id": 6484,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
                       "argumentTypes": null,
+<<<<<<< Updated upstream
                       "id": 6385,
                       "name": "weiRaised",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 5723,
                       "src": "665:9:42",
+=======
+                      "id": 6482,
+                      "name": "weiRaised",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 5820,
+                      "src": "665:9:44",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -517,12 +711,21 @@
                     "operator": ">=",
                     "rightExpression": {
                       "argumentTypes": null,
+<<<<<<< Updated upstream
                       "id": 6386,
                       "name": "cap",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 6364,
                       "src": "678:3:42",
+=======
+                      "id": 6483,
+                      "name": "cap",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 6461,
+                      "src": "678:3:44",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -534,15 +737,24 @@
                       "typeString": "bool"
                     }
                   },
+<<<<<<< Updated upstream
                   "functionReturnParameters": 6384,
                   "id": 6388,
+=======
+                  "functionReturnParameters": 6481,
+                  "id": 6485,
+>>>>>>> Stashed changes
                   "nodeType": "Return",
                   "src": "658:23:42"
                 }
               ]
             },
             "documentation": "@dev Checks whether the cap has been reached.\n@return Whether the cap was reached",
+<<<<<<< Updated upstream
             "id": 6390,
+=======
+            "id": 6487,
+>>>>>>> Stashed changes
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -550,23 +762,39 @@
             "name": "capReached",
             "nodeType": "FunctionDefinition",
             "parameters": {
+<<<<<<< Updated upstream
               "id": 6381,
+=======
+              "id": 6478,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "622:2:42"
             },
             "payable": false,
             "returnParameters": {
+<<<<<<< Updated upstream
               "id": 6384,
+=======
+              "id": 6481,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 6383,
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "scope": 6390,
                   "src": "646:4:42",
+=======
+                  "id": 6480,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6487,
+                  "src": "646:4:44",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -574,7 +802,11 @@
                     "typeString": "bool"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 6382,
+=======
+                    "id": 6479,
+>>>>>>> Stashed changes
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "646:4:42",
@@ -589,15 +821,24 @@
               ],
               "src": "645:6:42"
             },
+<<<<<<< Updated upstream
             "scope": 6415,
             "src": "603:83:42",
+=======
+            "scope": 6512,
+            "src": "603:83:44",
+>>>>>>> Stashed changes
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
           },
           {
             "body": {
+<<<<<<< Updated upstream
               "id": 6413,
+=======
+              "id": 6510,
+>>>>>>> Stashed changes
               "nodeType": "Block",
               "src": "971:110:42",
               "statements": [
@@ -607,12 +848,21 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
+<<<<<<< Updated upstream
                         "id": 6400,
                         "name": "_beneficiary",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 6392,
                         "src": "1004:12:42",
+=======
+                        "id": 6497,
+                        "name": "_beneficiary",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6489,
+                        "src": "1004:12:44",
+>>>>>>> Stashed changes
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -620,12 +870,21 @@
                       },
                       {
                         "argumentTypes": null,
+<<<<<<< Updated upstream
                         "id": 6401,
                         "name": "_weiAmount",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 6394,
                         "src": "1018:10:42",
+=======
+                        "id": 6498,
+                        "name": "_weiAmount",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6491,
+                        "src": "1018:10:44",
+>>>>>>> Stashed changes
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -645,6 +904,7 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
+<<<<<<< Updated upstream
                         "id": 6397,
                         "name": "super",
                         "nodeType": "Identifier",
@@ -657,20 +917,43 @@
                         }
                       },
                       "id": 6399,
+=======
+                        "id": 6494,
+                        "name": "super",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 10950,
+                        "src": "977:5:44",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_super$_CappedCrowdsale_$6512",
+                          "typeString": "contract super CappedCrowdsale"
+                        }
+                      },
+                      "id": 6496,
+>>>>>>> Stashed changes
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "_preValidatePurchase",
                       "nodeType": "MemberAccess",
+<<<<<<< Updated upstream
                       "referencedDeclaration": 5863,
                       "src": "977:26:42",
+=======
+                      "referencedDeclaration": 5960,
+                      "src": "977:26:44",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_uint256_$returns$__$",
                         "typeString": "function (address,uint256)"
                       }
                     },
+<<<<<<< Updated upstream
                     "id": 6402,
+=======
+                    "id": 6499,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -684,7 +967,11 @@
                       "typeString": "tuple()"
                     }
                   },
+<<<<<<< Updated upstream
                   "id": 6403,
+=======
+                  "id": 6500,
+>>>>>>> Stashed changes
                   "nodeType": "ExpressionStatement",
                   "src": "977:52:42"
                 },
@@ -698,7 +985,11 @@
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
+<<<<<<< Updated upstream
                         "id": 6410,
+=======
+                        "id": 6507,
+>>>>>>> Stashed changes
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -708,12 +999,21 @@
                           "arguments": [
                             {
                               "argumentTypes": null,
+<<<<<<< Updated upstream
                               "id": 6407,
                               "name": "_weiAmount",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
                               "referencedDeclaration": 6394,
                               "src": "1057:10:42",
+=======
+                              "id": 6504,
+                              "name": "_weiAmount",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 6491,
+                              "src": "1057:10:44",
+>>>>>>> Stashed changes
                               "typeDescriptions": {
                                 "typeIdentifier": "t_uint256",
                                 "typeString": "uint256"
@@ -729,32 +1029,54 @@
                             ],
                             "expression": {
                               "argumentTypes": null,
+<<<<<<< Updated upstream
                               "id": 6405,
                               "name": "weiRaised",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
                               "referencedDeclaration": 5723,
                               "src": "1043:9:42",
+=======
+                              "id": 6502,
+                              "name": "weiRaised",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 5820,
+                              "src": "1043:9:44",
+>>>>>>> Stashed changes
                               "typeDescriptions": {
                                 "typeIdentifier": "t_uint256",
                                 "typeString": "uint256"
                               }
                             },
+<<<<<<< Updated upstream
                             "id": 6406,
+=======
+                            "id": 6503,
+>>>>>>> Stashed changes
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
                             "lValueRequested": false,
                             "memberName": "add",
                             "nodeType": "MemberAccess",
+<<<<<<< Updated upstream
                             "referencedDeclaration": 7048,
                             "src": "1043:13:42",
+=======
+                            "referencedDeclaration": 7145,
+                            "src": "1043:13:44",
+>>>>>>> Stashed changes
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                               "typeString": "function (uint256,uint256) pure returns (uint256)"
                             }
                           },
+<<<<<<< Updated upstream
                           "id": 6408,
+=======
+                          "id": 6505,
+>>>>>>> Stashed changes
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -772,12 +1094,21 @@
                         "operator": "<=",
                         "rightExpression": {
                           "argumentTypes": null,
+<<<<<<< Updated upstream
                           "id": 6409,
                           "name": "cap",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 6364,
                           "src": "1072:3:42",
+=======
+                          "id": 6506,
+                          "name": "cap",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 6461,
+                          "src": "1072:3:44",
+>>>>>>> Stashed changes
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -797,6 +1128,7 @@
                           "typeString": "bool"
                         }
                       ],
+<<<<<<< Updated upstream
                       "id": 6404,
                       "name": "require",
                       "nodeType": "Identifier",
@@ -806,12 +1138,27 @@
                       ],
                       "referencedDeclaration": 10772,
                       "src": "1035:7:42",
+=======
+                      "id": 6501,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        10869,
+                        10870
+                      ],
+                      "referencedDeclaration": 10869,
+                      "src": "1035:7:44",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
+<<<<<<< Updated upstream
                     "id": 6411,
+=======
+                    "id": 6508,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -825,14 +1172,22 @@
                       "typeString": "tuple()"
                     }
                   },
+<<<<<<< Updated upstream
                   "id": 6412,
+=======
+                  "id": 6509,
+>>>>>>> Stashed changes
                   "nodeType": "ExpressionStatement",
                   "src": "1035:41:42"
                 }
               ]
             },
             "documentation": "@dev Extend parent behavior requiring purchase to respect the funding cap.\n@param _beneficiary Token purchaser\n@param _weiAmount Amount of wei contributed",
+<<<<<<< Updated upstream
             "id": 6414,
+=======
+            "id": 6511,
+>>>>>>> Stashed changes
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -840,16 +1195,28 @@
             "name": "_preValidatePurchase",
             "nodeType": "FunctionDefinition",
             "parameters": {
+<<<<<<< Updated upstream
               "id": 6395,
+=======
+              "id": 6492,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 6392,
                   "name": "_beneficiary",
                   "nodeType": "VariableDeclaration",
                   "scope": 6414,
                   "src": "907:20:42",
+=======
+                  "id": 6489,
+                  "name": "_beneficiary",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6511,
+                  "src": "907:20:44",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -857,7 +1224,11 @@
                     "typeString": "address"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 6391,
+=======
+                    "id": 6488,
+>>>>>>> Stashed changes
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "907:7:42",
@@ -871,11 +1242,19 @@
                 },
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 6394,
                   "name": "_weiAmount",
                   "nodeType": "VariableDeclaration",
                   "scope": 6414,
                   "src": "933:18:42",
+=======
+                  "id": 6491,
+                  "name": "_weiAmount",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6511,
+                  "src": "933:18:44",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -883,7 +1262,11 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 6393,
+=======
+                    "id": 6490,
+>>>>>>> Stashed changes
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "933:7:42",
@@ -900,11 +1283,16 @@
             },
             "payable": false,
             "returnParameters": {
+<<<<<<< Updated upstream
               "id": 6396,
+=======
+              "id": 6493,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "971:0:42"
             },
+<<<<<<< Updated upstream
             "scope": 6415,
             "src": "872:209:42",
             "stateMutability": "nonpayable",
@@ -914,14 +1302,26 @@
         ],
         "scope": 6416,
         "src": "179:905:42"
+=======
+            "scope": 6512,
+            "src": "872:209:44",
+            "stateMutability": "nonpayable",
+            "superFunction": 5960,
+            "visibility": "internal"
+          }
+        ],
+        "scope": 6513,
+        "src": "179:905:44"
+>>>>>>> Stashed changes
       }
     ],
     "src": "0:1085:42"
   },
   "legacyAST": {
-    "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/validation/CappedCrowdsale.sol",
+    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/validation/CappedCrowdsale.sol",
     "exportedSymbols": {
       "CappedCrowdsale": [
+<<<<<<< Updated upstream
         6415
       ]
     },
@@ -930,6 +1330,16 @@
     "nodes": [
       {
         "id": 6355,
+=======
+        6512
+      ]
+    },
+    "id": 6513,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 6452,
+>>>>>>> Stashed changes
         "literals": [
           "solidity",
           "^",
@@ -940,24 +1350,40 @@
         "src": "0:24:42"
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/math/SafeMath.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/math/SafeMath.sol",
         "file": "../../math/SafeMath.sol",
+<<<<<<< Updated upstream
         "id": 6356,
         "nodeType": "ImportDirective",
         "scope": 6416,
         "sourceUnit": 7050,
         "src": "26:33:42",
+=======
+        "id": 6453,
+        "nodeType": "ImportDirective",
+        "scope": 6513,
+        "sourceUnit": 7147,
+        "src": "26:33:44",
+>>>>>>> Stashed changes
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
         "file": "../Crowdsale.sol",
+<<<<<<< Updated upstream
         "id": 6357,
         "nodeType": "ImportDirective",
         "scope": 6416,
         "sourceUnit": 5933,
         "src": "60:26:42",
+=======
+        "id": 6454,
+        "nodeType": "ImportDirective",
+        "scope": 6513,
+        "sourceUnit": 6030,
+        "src": "60:26:44",
+>>>>>>> Stashed changes
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -967,6 +1393,7 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
+<<<<<<< Updated upstream
               "id": 6358,
               "name": "Crowdsale",
               "nodeType": "UserDefinedTypeName",
@@ -978,25 +1405,50 @@
               }
             },
             "id": 6359,
+=======
+              "id": 6455,
+              "name": "Crowdsale",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 6029,
+              "src": "207:9:44",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_Crowdsale_$6029",
+                "typeString": "contract Crowdsale"
+              }
+            },
+            "id": 6456,
+>>>>>>> Stashed changes
             "nodeType": "InheritanceSpecifier",
             "src": "207:9:42"
           }
         ],
         "contractDependencies": [
+<<<<<<< Updated upstream
           5932
+=======
+          6029
+>>>>>>> Stashed changes
         ],
         "contractKind": "contract",
         "documentation": "@title CappedCrowdsale\n@dev Crowdsale with a limit for total contributions.",
         "fullyImplemented": false,
+<<<<<<< Updated upstream
         "id": 6415,
         "linearizedBaseContracts": [
           6415,
           5932
+=======
+        "id": 6512,
+        "linearizedBaseContracts": [
+          6512,
+          6029
+>>>>>>> Stashed changes
         ],
         "name": "CappedCrowdsale",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
+<<<<<<< Updated upstream
             "id": 6362,
             "libraryName": {
               "contractScope": null,
@@ -1007,13 +1459,29 @@
               "src": "227:8:42",
               "typeDescriptions": {
                 "typeIdentifier": "t_contract$_SafeMath_$7049",
+=======
+            "id": 6459,
+            "libraryName": {
+              "contractScope": null,
+              "id": 6457,
+              "name": "SafeMath",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 7146,
+              "src": "227:8:44",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_SafeMath_$7146",
+>>>>>>> Stashed changes
                 "typeString": "library SafeMath"
               }
             },
             "nodeType": "UsingForDirective",
             "src": "221:27:42",
             "typeName": {
+<<<<<<< Updated upstream
               "id": 6361,
+=======
+              "id": 6458,
+>>>>>>> Stashed changes
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
               "src": "240:7:42",
@@ -1025,11 +1493,19 @@
           },
           {
             "constant": false,
+<<<<<<< Updated upstream
             "id": 6364,
             "name": "cap",
             "nodeType": "VariableDeclaration",
             "scope": 6415,
             "src": "252:18:42",
+=======
+            "id": 6461,
+            "name": "cap",
+            "nodeType": "VariableDeclaration",
+            "scope": 6512,
+            "src": "252:18:44",
+>>>>>>> Stashed changes
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -1037,7 +1513,11 @@
               "typeString": "uint256"
             },
             "typeName": {
+<<<<<<< Updated upstream
               "id": 6363,
+=======
+              "id": 6460,
+>>>>>>> Stashed changes
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
               "src": "252:7:42",
@@ -1051,7 +1531,11 @@
           },
           {
             "body": {
+<<<<<<< Updated upstream
               "id": 6379,
+=======
+              "id": 6476,
+>>>>>>> Stashed changes
               "nodeType": "Block",
               "src": "451:44:42",
               "statements": [
@@ -1065,19 +1549,32 @@
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
+<<<<<<< Updated upstream
                         "id": 6372,
+=======
+                        "id": 6469,
+>>>>>>> Stashed changes
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
                           "argumentTypes": null,
+<<<<<<< Updated upstream
                           "id": 6370,
                           "name": "_cap",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 6366,
                           "src": "465:4:42",
+=======
+                          "id": 6467,
+                          "name": "_cap",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 6463,
+                          "src": "465:4:44",
+>>>>>>> Stashed changes
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -1088,7 +1585,11 @@
                         "rightExpression": {
                           "argumentTypes": null,
                           "hexValue": "30",
+<<<<<<< Updated upstream
                           "id": 6371,
+=======
+                          "id": 6468,
+>>>>>>> Stashed changes
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
@@ -1117,6 +1618,7 @@
                           "typeString": "bool"
                         }
                       ],
+<<<<<<< Updated upstream
                       "id": 6369,
                       "name": "require",
                       "nodeType": "Identifier",
@@ -1126,12 +1628,27 @@
                       ],
                       "referencedDeclaration": 10772,
                       "src": "457:7:42",
+=======
+                      "id": 6466,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        10869,
+                        10870
+                      ],
+                      "referencedDeclaration": 10869,
+                      "src": "457:7:44",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
+<<<<<<< Updated upstream
                     "id": 6373,
+=======
+                    "id": 6470,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1145,26 +1662,43 @@
                       "typeString": "tuple()"
                     }
                   },
+<<<<<<< Updated upstream
                   "id": 6374,
+=======
+                  "id": 6471,
+>>>>>>> Stashed changes
                   "nodeType": "ExpressionStatement",
                   "src": "457:17:42"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
+<<<<<<< Updated upstream
                     "id": 6377,
+=======
+                    "id": 6474,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
+<<<<<<< Updated upstream
                       "id": 6375,
                       "name": "cap",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 6364,
                       "src": "480:3:42",
+=======
+                      "id": 6472,
+                      "name": "cap",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 6461,
+                      "src": "480:3:44",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -1174,12 +1708,21 @@
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
+<<<<<<< Updated upstream
                       "id": 6376,
                       "name": "_cap",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 6366,
                       "src": "486:4:42",
+=======
+                      "id": 6473,
+                      "name": "_cap",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 6463,
+                      "src": "486:4:44",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -1191,14 +1734,22 @@
                       "typeString": "uint256"
                     }
                   },
+<<<<<<< Updated upstream
                   "id": 6378,
+=======
+                  "id": 6475,
+>>>>>>> Stashed changes
                   "nodeType": "ExpressionStatement",
                   "src": "480:10:42"
                 }
               ]
             },
             "documentation": "@dev Constructor, takes maximum amount of wei accepted in the crowdsale.\n@param _cap Max amount of wei to be contributed",
+<<<<<<< Updated upstream
             "id": 6380,
+=======
+            "id": 6477,
+>>>>>>> Stashed changes
             "implemented": true,
             "isConstructor": true,
             "isDeclaredConst": false,
@@ -1206,16 +1757,28 @@
             "name": "",
             "nodeType": "FunctionDefinition",
             "parameters": {
+<<<<<<< Updated upstream
               "id": 6367,
+=======
+              "id": 6464,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 6366,
                   "name": "_cap",
                   "nodeType": "VariableDeclaration",
                   "scope": 6380,
                   "src": "430:12:42",
+=======
+                  "id": 6463,
+                  "name": "_cap",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6477,
+                  "src": "430:12:44",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1223,7 +1786,11 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 6365,
+=======
+                    "id": 6462,
+>>>>>>> Stashed changes
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "430:7:42",
@@ -1240,20 +1807,33 @@
             },
             "payable": false,
             "returnParameters": {
+<<<<<<< Updated upstream
               "id": 6368,
+=======
+              "id": 6465,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "451:0:42"
             },
+<<<<<<< Updated upstream
             "scope": 6415,
             "src": "418:77:42",
+=======
+            "scope": 6512,
+            "src": "418:77:44",
+>>>>>>> Stashed changes
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           },
           {
             "body": {
+<<<<<<< Updated upstream
               "id": 6389,
+=======
+              "id": 6486,
+>>>>>>> Stashed changes
               "nodeType": "Block",
               "src": "652:34:42",
               "statements": [
@@ -1264,19 +1844,32 @@
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     },
+<<<<<<< Updated upstream
                     "id": 6387,
+=======
+                    "id": 6484,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
                       "argumentTypes": null,
+<<<<<<< Updated upstream
                       "id": 6385,
                       "name": "weiRaised",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 5723,
                       "src": "665:9:42",
+=======
+                      "id": 6482,
+                      "name": "weiRaised",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 5820,
+                      "src": "665:9:44",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -1286,12 +1879,21 @@
                     "operator": ">=",
                     "rightExpression": {
                       "argumentTypes": null,
+<<<<<<< Updated upstream
                       "id": 6386,
                       "name": "cap",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 6364,
                       "src": "678:3:42",
+=======
+                      "id": 6483,
+                      "name": "cap",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 6461,
+                      "src": "678:3:44",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -1303,15 +1905,24 @@
                       "typeString": "bool"
                     }
                   },
+<<<<<<< Updated upstream
                   "functionReturnParameters": 6384,
                   "id": 6388,
+=======
+                  "functionReturnParameters": 6481,
+                  "id": 6485,
+>>>>>>> Stashed changes
                   "nodeType": "Return",
                   "src": "658:23:42"
                 }
               ]
             },
             "documentation": "@dev Checks whether the cap has been reached.\n@return Whether the cap was reached",
+<<<<<<< Updated upstream
             "id": 6390,
+=======
+            "id": 6487,
+>>>>>>> Stashed changes
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -1319,23 +1930,39 @@
             "name": "capReached",
             "nodeType": "FunctionDefinition",
             "parameters": {
+<<<<<<< Updated upstream
               "id": 6381,
+=======
+              "id": 6478,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "622:2:42"
             },
             "payable": false,
             "returnParameters": {
+<<<<<<< Updated upstream
               "id": 6384,
+=======
+              "id": 6481,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 6383,
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "scope": 6390,
                   "src": "646:4:42",
+=======
+                  "id": 6480,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6487,
+                  "src": "646:4:44",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1343,7 +1970,11 @@
                     "typeString": "bool"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 6382,
+=======
+                    "id": 6479,
+>>>>>>> Stashed changes
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "646:4:42",
@@ -1358,15 +1989,24 @@
               ],
               "src": "645:6:42"
             },
+<<<<<<< Updated upstream
             "scope": 6415,
             "src": "603:83:42",
+=======
+            "scope": 6512,
+            "src": "603:83:44",
+>>>>>>> Stashed changes
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
           },
           {
             "body": {
+<<<<<<< Updated upstream
               "id": 6413,
+=======
+              "id": 6510,
+>>>>>>> Stashed changes
               "nodeType": "Block",
               "src": "971:110:42",
               "statements": [
@@ -1376,12 +2016,21 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
+<<<<<<< Updated upstream
                         "id": 6400,
                         "name": "_beneficiary",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 6392,
                         "src": "1004:12:42",
+=======
+                        "id": 6497,
+                        "name": "_beneficiary",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6489,
+                        "src": "1004:12:44",
+>>>>>>> Stashed changes
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -1389,12 +2038,21 @@
                       },
                       {
                         "argumentTypes": null,
+<<<<<<< Updated upstream
                         "id": 6401,
                         "name": "_weiAmount",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 6394,
                         "src": "1018:10:42",
+=======
+                        "id": 6498,
+                        "name": "_weiAmount",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6491,
+                        "src": "1018:10:44",
+>>>>>>> Stashed changes
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -1414,6 +2072,7 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
+<<<<<<< Updated upstream
                         "id": 6397,
                         "name": "super",
                         "nodeType": "Identifier",
@@ -1426,20 +2085,43 @@
                         }
                       },
                       "id": 6399,
+=======
+                        "id": 6494,
+                        "name": "super",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 10950,
+                        "src": "977:5:44",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_super$_CappedCrowdsale_$6512",
+                          "typeString": "contract super CappedCrowdsale"
+                        }
+                      },
+                      "id": 6496,
+>>>>>>> Stashed changes
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "_preValidatePurchase",
                       "nodeType": "MemberAccess",
+<<<<<<< Updated upstream
                       "referencedDeclaration": 5863,
                       "src": "977:26:42",
+=======
+                      "referencedDeclaration": 5960,
+                      "src": "977:26:44",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_uint256_$returns$__$",
                         "typeString": "function (address,uint256)"
                       }
                     },
+<<<<<<< Updated upstream
                     "id": 6402,
+=======
+                    "id": 6499,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1453,7 +2135,11 @@
                       "typeString": "tuple()"
                     }
                   },
+<<<<<<< Updated upstream
                   "id": 6403,
+=======
+                  "id": 6500,
+>>>>>>> Stashed changes
                   "nodeType": "ExpressionStatement",
                   "src": "977:52:42"
                 },
@@ -1467,7 +2153,11 @@
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
+<<<<<<< Updated upstream
                         "id": 6410,
+=======
+                        "id": 6507,
+>>>>>>> Stashed changes
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -1477,12 +2167,21 @@
                           "arguments": [
                             {
                               "argumentTypes": null,
+<<<<<<< Updated upstream
                               "id": 6407,
                               "name": "_weiAmount",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
                               "referencedDeclaration": 6394,
                               "src": "1057:10:42",
+=======
+                              "id": 6504,
+                              "name": "_weiAmount",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 6491,
+                              "src": "1057:10:44",
+>>>>>>> Stashed changes
                               "typeDescriptions": {
                                 "typeIdentifier": "t_uint256",
                                 "typeString": "uint256"
@@ -1498,32 +2197,54 @@
                             ],
                             "expression": {
                               "argumentTypes": null,
+<<<<<<< Updated upstream
                               "id": 6405,
                               "name": "weiRaised",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
                               "referencedDeclaration": 5723,
                               "src": "1043:9:42",
+=======
+                              "id": 6502,
+                              "name": "weiRaised",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 5820,
+                              "src": "1043:9:44",
+>>>>>>> Stashed changes
                               "typeDescriptions": {
                                 "typeIdentifier": "t_uint256",
                                 "typeString": "uint256"
                               }
                             },
+<<<<<<< Updated upstream
                             "id": 6406,
+=======
+                            "id": 6503,
+>>>>>>> Stashed changes
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
                             "lValueRequested": false,
                             "memberName": "add",
                             "nodeType": "MemberAccess",
+<<<<<<< Updated upstream
                             "referencedDeclaration": 7048,
                             "src": "1043:13:42",
+=======
+                            "referencedDeclaration": 7145,
+                            "src": "1043:13:44",
+>>>>>>> Stashed changes
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                               "typeString": "function (uint256,uint256) pure returns (uint256)"
                             }
                           },
+<<<<<<< Updated upstream
                           "id": 6408,
+=======
+                          "id": 6505,
+>>>>>>> Stashed changes
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -1541,12 +2262,21 @@
                         "operator": "<=",
                         "rightExpression": {
                           "argumentTypes": null,
+<<<<<<< Updated upstream
                           "id": 6409,
                           "name": "cap",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 6364,
                           "src": "1072:3:42",
+=======
+                          "id": 6506,
+                          "name": "cap",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 6461,
+                          "src": "1072:3:44",
+>>>>>>> Stashed changes
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -1566,6 +2296,7 @@
                           "typeString": "bool"
                         }
                       ],
+<<<<<<< Updated upstream
                       "id": 6404,
                       "name": "require",
                       "nodeType": "Identifier",
@@ -1575,12 +2306,27 @@
                       ],
                       "referencedDeclaration": 10772,
                       "src": "1035:7:42",
+=======
+                      "id": 6501,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        10869,
+                        10870
+                      ],
+                      "referencedDeclaration": 10869,
+                      "src": "1035:7:44",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
+<<<<<<< Updated upstream
                     "id": 6411,
+=======
+                    "id": 6508,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1594,14 +2340,22 @@
                       "typeString": "tuple()"
                     }
                   },
+<<<<<<< Updated upstream
                   "id": 6412,
+=======
+                  "id": 6509,
+>>>>>>> Stashed changes
                   "nodeType": "ExpressionStatement",
                   "src": "1035:41:42"
                 }
               ]
             },
             "documentation": "@dev Extend parent behavior requiring purchase to respect the funding cap.\n@param _beneficiary Token purchaser\n@param _weiAmount Amount of wei contributed",
+<<<<<<< Updated upstream
             "id": 6414,
+=======
+            "id": 6511,
+>>>>>>> Stashed changes
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -1609,16 +2363,28 @@
             "name": "_preValidatePurchase",
             "nodeType": "FunctionDefinition",
             "parameters": {
+<<<<<<< Updated upstream
               "id": 6395,
+=======
+              "id": 6492,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 6392,
                   "name": "_beneficiary",
                   "nodeType": "VariableDeclaration",
                   "scope": 6414,
                   "src": "907:20:42",
+=======
+                  "id": 6489,
+                  "name": "_beneficiary",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6511,
+                  "src": "907:20:44",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1626,7 +2392,11 @@
                     "typeString": "address"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 6391,
+=======
+                    "id": 6488,
+>>>>>>> Stashed changes
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "907:7:42",
@@ -1640,11 +2410,19 @@
                 },
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 6394,
                   "name": "_weiAmount",
                   "nodeType": "VariableDeclaration",
                   "scope": 6414,
                   "src": "933:18:42",
+=======
+                  "id": 6491,
+                  "name": "_weiAmount",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6511,
+                  "src": "933:18:44",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1652,7 +2430,11 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 6393,
+=======
+                    "id": 6490,
+>>>>>>> Stashed changes
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "933:7:42",
@@ -1669,11 +2451,16 @@
             },
             "payable": false,
             "returnParameters": {
+<<<<<<< Updated upstream
               "id": 6396,
+=======
+              "id": 6493,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "971:0:42"
             },
+<<<<<<< Updated upstream
             "scope": 6415,
             "src": "872:209:42",
             "stateMutability": "nonpayable",
@@ -1683,6 +2470,17 @@
         ],
         "scope": 6416,
         "src": "179:905:42"
+=======
+            "scope": 6512,
+            "src": "872:209:44",
+            "stateMutability": "nonpayable",
+            "superFunction": 5960,
+            "visibility": "internal"
+          }
+        ],
+        "scope": 6513,
+        "src": "179:905:44"
+>>>>>>> Stashed changes
       }
     ],
     "src": "0:1085:42"
@@ -1693,5 +2491,9 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
+<<<<<<< Updated upstream
   "updatedAt": "2018-08-21T13:36:52.230Z"
+=======
+  "updatedAt": "2018-08-21T13:27:41.770Z"
+>>>>>>> Stashed changes
 }

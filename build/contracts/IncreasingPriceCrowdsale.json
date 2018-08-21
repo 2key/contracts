@@ -208,11 +208,12 @@
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "pragma solidity ^0.4.24;\n\nimport \"../validation/TimedCrowdsale.sol\";\nimport \"../../math/SafeMath.sol\";\n\n\n/**\n * @title IncreasingPriceCrowdsale\n * @dev Extension of Crowdsale contract that increases the price of tokens linearly in time.\n * Note that what should be provided to the constructor is the initial and final _rates_, that is,\n * the amount of tokens per wei contributed. Thus, the initial rate must be greater than the final rate.\n */\ncontract IncreasingPriceCrowdsale is TimedCrowdsale {\n  using SafeMath for uint256;\n\n  uint256 public initialRate;\n  uint256 public finalRate;\n\n  /**\n   * @dev Constructor, takes initial and final rates of tokens received per wei contributed.\n   * @param _initialRate Number of tokens a buyer gets per wei at the start of the crowdsale\n   * @param _finalRate Number of tokens a buyer gets per wei at the end of the crowdsale\n   */\n  constructor(uint256 _initialRate, uint256 _finalRate) public {\n    require(_initialRate >= _finalRate);\n    require(_finalRate > 0);\n    initialRate = _initialRate;\n    finalRate = _finalRate;\n  }\n\n  /**\n   * @dev Returns the rate of tokens per wei at the present time.\n   * Note that, as price _increases_ with time, the rate _decreases_.\n   * @return The number of tokens a buyer gets per wei at a given time\n   */\n  function getCurrentRate() public view returns (uint256) {\n    // solium-disable-next-line security/no-block-members\n    uint256 elapsedTime = block.timestamp.sub(openingTime);\n    uint256 timeRange = closingTime.sub(openingTime);\n    uint256 rateRange = initialRate.sub(finalRate);\n    return initialRate.sub(elapsedTime.mul(rateRange).div(timeRange));\n  }\n\n  /**\n   * @dev Overrides parent method taking into account variable rate.\n   * @param _weiAmount The value in wei to be converted into tokens\n   * @return The number of tokens _weiAmount wei will buy at present time\n   */\n  function _getTokenAmount(uint256 _weiAmount)\n    internal view returns (uint256)\n  {\n    uint256 currentRate = getCurrentRate();\n    return currentRate.mul(_weiAmount);\n  }\n\n}\n",
-  "sourcePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/price/IncreasingPriceCrowdsale.sol",
+  "sourcePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/price/IncreasingPriceCrowdsale.sol",
   "ast": {
-    "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/price/IncreasingPriceCrowdsale.sol",
+    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/price/IncreasingPriceCrowdsale.sol",
     "exportedSymbols": {
       "IncreasingPriceCrowdsale": [
+<<<<<<< Updated upstream
         6353
       ]
     },
@@ -221,6 +222,16 @@
     "nodes": [
       {
         "id": 6256,
+=======
+        6450
+      ]
+    },
+    "id": 6451,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 6353,
+>>>>>>> Stashed changes
         "literals": [
           "solidity",
           "^",
@@ -231,24 +242,40 @@
         "src": "0:24:41"
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/validation/TimedCrowdsale.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/validation/TimedCrowdsale.sol",
         "file": "../validation/TimedCrowdsale.sol",
+<<<<<<< Updated upstream
         "id": 6257,
         "nodeType": "ImportDirective",
         "scope": 6354,
         "sourceUnit": 6650,
         "src": "26:42:41",
+=======
+        "id": 6354,
+        "nodeType": "ImportDirective",
+        "scope": 6451,
+        "sourceUnit": 6747,
+        "src": "26:42:43",
+>>>>>>> Stashed changes
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/math/SafeMath.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/math/SafeMath.sol",
         "file": "../../math/SafeMath.sol",
+<<<<<<< Updated upstream
         "id": 6258,
         "nodeType": "ImportDirective",
         "scope": 6354,
         "sourceUnit": 7050,
         "src": "69:33:41",
+=======
+        "id": 6355,
+        "nodeType": "ImportDirective",
+        "scope": 6451,
+        "sourceUnit": 7147,
+        "src": "69:33:43",
+>>>>>>> Stashed changes
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -258,6 +285,7 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
+<<<<<<< Updated upstream
               "id": 6259,
               "name": "TimedCrowdsale",
               "nodeType": "UserDefinedTypeName",
@@ -269,27 +297,54 @@
               }
             },
             "id": 6260,
+=======
+              "id": 6356,
+              "name": "TimedCrowdsale",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 6746,
+              "src": "482:14:43",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_TimedCrowdsale_$6746",
+                "typeString": "contract TimedCrowdsale"
+              }
+            },
+            "id": 6357,
+>>>>>>> Stashed changes
             "nodeType": "InheritanceSpecifier",
             "src": "482:14:41"
           }
         ],
         "contractDependencies": [
+<<<<<<< Updated upstream
           5932,
           6649
+=======
+          6029,
+          6746
+>>>>>>> Stashed changes
         ],
         "contractKind": "contract",
         "documentation": "@title IncreasingPriceCrowdsale\n@dev Extension of Crowdsale contract that increases the price of tokens linearly in time.\nNote that what should be provided to the constructor is the initial and final _rates_, that is,\nthe amount of tokens per wei contributed. Thus, the initial rate must be greater than the final rate.",
         "fullyImplemented": false,
+<<<<<<< Updated upstream
         "id": 6353,
         "linearizedBaseContracts": [
           6353,
           6649,
           5932
+=======
+        "id": 6450,
+        "linearizedBaseContracts": [
+          6450,
+          6746,
+          6029
+>>>>>>> Stashed changes
         ],
         "name": "IncreasingPriceCrowdsale",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
+<<<<<<< Updated upstream
             "id": 6263,
             "libraryName": {
               "contractScope": null,
@@ -300,13 +355,29 @@
               "src": "507:8:41",
               "typeDescriptions": {
                 "typeIdentifier": "t_contract$_SafeMath_$7049",
+=======
+            "id": 6360,
+            "libraryName": {
+              "contractScope": null,
+              "id": 6358,
+              "name": "SafeMath",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 7146,
+              "src": "507:8:43",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_SafeMath_$7146",
+>>>>>>> Stashed changes
                 "typeString": "library SafeMath"
               }
             },
             "nodeType": "UsingForDirective",
             "src": "501:27:41",
             "typeName": {
+<<<<<<< Updated upstream
               "id": 6262,
+=======
+              "id": 6359,
+>>>>>>> Stashed changes
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
               "src": "520:7:41",
@@ -318,11 +389,19 @@
           },
           {
             "constant": false,
+<<<<<<< Updated upstream
             "id": 6265,
             "name": "initialRate",
             "nodeType": "VariableDeclaration",
             "scope": 6353,
             "src": "532:26:41",
+=======
+            "id": 6362,
+            "name": "initialRate",
+            "nodeType": "VariableDeclaration",
+            "scope": 6450,
+            "src": "532:26:43",
+>>>>>>> Stashed changes
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -330,7 +409,11 @@
               "typeString": "uint256"
             },
             "typeName": {
+<<<<<<< Updated upstream
               "id": 6264,
+=======
+              "id": 6361,
+>>>>>>> Stashed changes
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
               "src": "532:7:41",
@@ -344,11 +427,19 @@
           },
           {
             "constant": false,
+<<<<<<< Updated upstream
             "id": 6267,
             "name": "finalRate",
             "nodeType": "VariableDeclaration",
             "scope": 6353,
             "src": "562:24:41",
+=======
+            "id": 6364,
+            "name": "finalRate",
+            "nodeType": "VariableDeclaration",
+            "scope": 6450,
+            "src": "562:24:43",
+>>>>>>> Stashed changes
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -356,7 +447,11 @@
               "typeString": "uint256"
             },
             "typeName": {
+<<<<<<< Updated upstream
               "id": 6266,
+=======
+              "id": 6363,
+>>>>>>> Stashed changes
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
               "src": "562:7:41",
@@ -370,7 +465,11 @@
           },
           {
             "body": {
+<<<<<<< Updated upstream
               "id": 6294,
+=======
+              "id": 6391,
+>>>>>>> Stashed changes
               "nodeType": "Block",
               "src": "939:135:41",
               "statements": [
@@ -384,19 +483,32 @@
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
+<<<<<<< Updated upstream
                         "id": 6277,
+=======
+                        "id": 6374,
+>>>>>>> Stashed changes
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
                           "argumentTypes": null,
+<<<<<<< Updated upstream
                           "id": 6275,
                           "name": "_initialRate",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 6269,
                           "src": "953:12:41",
+=======
+                          "id": 6372,
+                          "name": "_initialRate",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 6366,
+                          "src": "953:12:43",
+>>>>>>> Stashed changes
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -406,12 +518,21 @@
                         "operator": ">=",
                         "rightExpression": {
                           "argumentTypes": null,
+<<<<<<< Updated upstream
                           "id": 6276,
                           "name": "_finalRate",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 6271,
                           "src": "969:10:41",
+=======
+                          "id": 6373,
+                          "name": "_finalRate",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 6368,
+                          "src": "969:10:43",
+>>>>>>> Stashed changes
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -431,6 +552,7 @@
                           "typeString": "bool"
                         }
                       ],
+<<<<<<< Updated upstream
                       "id": 6274,
                       "name": "require",
                       "nodeType": "Identifier",
@@ -440,12 +562,27 @@
                       ],
                       "referencedDeclaration": 10772,
                       "src": "945:7:41",
+=======
+                      "id": 6371,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        10869,
+                        10870
+                      ],
+                      "referencedDeclaration": 10869,
+                      "src": "945:7:43",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
+<<<<<<< Updated upstream
                     "id": 6278,
+=======
+                    "id": 6375,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -459,7 +596,11 @@
                       "typeString": "tuple()"
                     }
                   },
+<<<<<<< Updated upstream
                   "id": 6279,
+=======
+                  "id": 6376,
+>>>>>>> Stashed changes
                   "nodeType": "ExpressionStatement",
                   "src": "945:35:41"
                 },
@@ -473,19 +614,32 @@
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
+<<<<<<< Updated upstream
                         "id": 6283,
+=======
+                        "id": 6380,
+>>>>>>> Stashed changes
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
                           "argumentTypes": null,
+<<<<<<< Updated upstream
                           "id": 6281,
                           "name": "_finalRate",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 6271,
                           "src": "994:10:41",
+=======
+                          "id": 6378,
+                          "name": "_finalRate",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 6368,
+                          "src": "994:10:43",
+>>>>>>> Stashed changes
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -496,7 +650,11 @@
                         "rightExpression": {
                           "argumentTypes": null,
                           "hexValue": "30",
+<<<<<<< Updated upstream
                           "id": 6282,
+=======
+                          "id": 6379,
+>>>>>>> Stashed changes
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
@@ -525,6 +683,7 @@
                           "typeString": "bool"
                         }
                       ],
+<<<<<<< Updated upstream
                       "id": 6280,
                       "name": "require",
                       "nodeType": "Identifier",
@@ -534,12 +693,27 @@
                       ],
                       "referencedDeclaration": 10772,
                       "src": "986:7:41",
+=======
+                      "id": 6377,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        10869,
+                        10870
+                      ],
+                      "referencedDeclaration": 10869,
+                      "src": "986:7:43",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
+<<<<<<< Updated upstream
                     "id": 6284,
+=======
+                    "id": 6381,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -553,26 +727,43 @@
                       "typeString": "tuple()"
                     }
                   },
+<<<<<<< Updated upstream
                   "id": 6285,
+=======
+                  "id": 6382,
+>>>>>>> Stashed changes
                   "nodeType": "ExpressionStatement",
                   "src": "986:23:41"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
+<<<<<<< Updated upstream
                     "id": 6288,
+=======
+                    "id": 6385,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
+<<<<<<< Updated upstream
                       "id": 6286,
                       "name": "initialRate",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 6265,
                       "src": "1015:11:41",
+=======
+                      "id": 6383,
+                      "name": "initialRate",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 6362,
+                      "src": "1015:11:43",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -582,12 +773,21 @@
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
+<<<<<<< Updated upstream
                       "id": 6287,
                       "name": "_initialRate",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 6269,
                       "src": "1029:12:41",
+=======
+                      "id": 6384,
+                      "name": "_initialRate",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 6366,
+                      "src": "1029:12:43",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -599,26 +799,43 @@
                       "typeString": "uint256"
                     }
                   },
+<<<<<<< Updated upstream
                   "id": 6289,
+=======
+                  "id": 6386,
+>>>>>>> Stashed changes
                   "nodeType": "ExpressionStatement",
                   "src": "1015:26:41"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
+<<<<<<< Updated upstream
                     "id": 6292,
+=======
+                    "id": 6389,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
+<<<<<<< Updated upstream
                       "id": 6290,
                       "name": "finalRate",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 6267,
                       "src": "1047:9:41",
+=======
+                      "id": 6387,
+                      "name": "finalRate",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 6364,
+                      "src": "1047:9:43",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -628,12 +845,21 @@
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
+<<<<<<< Updated upstream
                       "id": 6291,
                       "name": "_finalRate",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 6271,
                       "src": "1059:10:41",
+=======
+                      "id": 6388,
+                      "name": "_finalRate",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 6368,
+                      "src": "1059:10:43",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -645,14 +871,22 @@
                       "typeString": "uint256"
                     }
                   },
+<<<<<<< Updated upstream
                   "id": 6293,
+=======
+                  "id": 6390,
+>>>>>>> Stashed changes
                   "nodeType": "ExpressionStatement",
                   "src": "1047:22:41"
                 }
               ]
             },
             "documentation": "@dev Constructor, takes initial and final rates of tokens received per wei contributed.\n@param _initialRate Number of tokens a buyer gets per wei at the start of the crowdsale\n@param _finalRate Number of tokens a buyer gets per wei at the end of the crowdsale",
+<<<<<<< Updated upstream
             "id": 6295,
+=======
+            "id": 6392,
+>>>>>>> Stashed changes
             "implemented": true,
             "isConstructor": true,
             "isDeclaredConst": false,
@@ -660,16 +894,28 @@
             "name": "",
             "nodeType": "FunctionDefinition",
             "parameters": {
+<<<<<<< Updated upstream
               "id": 6272,
+=======
+              "id": 6369,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 6269,
                   "name": "_initialRate",
                   "nodeType": "VariableDeclaration",
                   "scope": 6295,
                   "src": "890:20:41",
+=======
+                  "id": 6366,
+                  "name": "_initialRate",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6392,
+                  "src": "890:20:43",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -677,7 +923,11 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 6268,
+=======
+                    "id": 6365,
+>>>>>>> Stashed changes
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "890:7:41",
@@ -691,11 +941,19 @@
                 },
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 6271,
                   "name": "_finalRate",
                   "nodeType": "VariableDeclaration",
                   "scope": 6295,
                   "src": "912:18:41",
+=======
+                  "id": 6368,
+                  "name": "_finalRate",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6392,
+                  "src": "912:18:43",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -703,7 +961,11 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 6270,
+=======
+                    "id": 6367,
+>>>>>>> Stashed changes
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "912:7:41",
@@ -720,35 +982,60 @@
             },
             "payable": false,
             "returnParameters": {
+<<<<<<< Updated upstream
               "id": 6273,
+=======
+              "id": 6370,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "939:0:41"
             },
+<<<<<<< Updated upstream
             "scope": 6353,
             "src": "878:196:41",
+=======
+            "scope": 6450,
+            "src": "878:196:43",
+>>>>>>> Stashed changes
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           },
           {
             "body": {
+<<<<<<< Updated upstream
               "id": 6333,
+=======
+              "id": 6430,
+>>>>>>> Stashed changes
               "nodeType": "Block",
               "src": "1353:300:41",
               "statements": [
                 {
                   "assignments": [
+<<<<<<< Updated upstream
                     6301
+=======
+                    6398
+>>>>>>> Stashed changes
                   ],
                   "declarations": [
                     {
                       "constant": false,
+<<<<<<< Updated upstream
                       "id": 6301,
                       "name": "elapsedTime",
                       "nodeType": "VariableDeclaration",
                       "scope": 6334,
                       "src": "1417:19:41",
+=======
+                      "id": 6398,
+                      "name": "elapsedTime",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 6431,
+                      "src": "1417:19:43",
+>>>>>>> Stashed changes
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -756,7 +1043,11 @@
                         "typeString": "uint256"
                       },
                       "typeName": {
+<<<<<<< Updated upstream
                         "id": 6300,
+=======
+                        "id": 6397,
+>>>>>>> Stashed changes
                         "name": "uint256",
                         "nodeType": "ElementaryTypeName",
                         "src": "1417:7:41",
@@ -769,18 +1060,31 @@
                       "visibility": "internal"
                     }
                   ],
+<<<<<<< Updated upstream
                   "id": 6307,
+=======
+                  "id": 6404,
+>>>>>>> Stashed changes
                   "initialValue": {
                     "argumentTypes": null,
                     "arguments": [
                       {
                         "argumentTypes": null,
+<<<<<<< Updated upstream
                         "id": 6305,
                         "name": "openingTime",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 6573,
                         "src": "1459:11:41",
+=======
+                        "id": 6402,
+                        "name": "openingTime",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6670,
+                        "src": "1459:11:43",
+>>>>>>> Stashed changes
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -798,18 +1102,31 @@
                         "argumentTypes": null,
                         "expression": {
                           "argumentTypes": null,
+<<<<<<< Updated upstream
                           "id": 6302,
                           "name": "block",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 10759,
                           "src": "1439:5:41",
+=======
+                          "id": 6399,
+                          "name": "block",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 10856,
+                          "src": "1439:5:43",
+>>>>>>> Stashed changes
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_block",
                             "typeString": "block"
                           }
                         },
+<<<<<<< Updated upstream
                         "id": 6303,
+=======
+                        "id": 6400,
+>>>>>>> Stashed changes
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -823,21 +1140,34 @@
                           "typeString": "uint256"
                         }
                       },
+<<<<<<< Updated upstream
                       "id": 6304,
+=======
+                      "id": 6401,
+>>>>>>> Stashed changes
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "sub",
                       "nodeType": "MemberAccess",
+<<<<<<< Updated upstream
                       "referencedDeclaration": 7024,
                       "src": "1439:19:41",
+=======
+                      "referencedDeclaration": 7121,
+                      "src": "1439:19:43",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                         "typeString": "function (uint256,uint256) pure returns (uint256)"
                       }
                     },
+<<<<<<< Updated upstream
                     "id": 6306,
+=======
+                    "id": 6403,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -856,16 +1186,28 @@
                 },
                 {
                   "assignments": [
+<<<<<<< Updated upstream
                     6309
+=======
+                    6406
+>>>>>>> Stashed changes
                   ],
                   "declarations": [
                     {
                       "constant": false,
+<<<<<<< Updated upstream
                       "id": 6309,
                       "name": "timeRange",
                       "nodeType": "VariableDeclaration",
                       "scope": 6334,
                       "src": "1477:17:41",
+=======
+                      "id": 6406,
+                      "name": "timeRange",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 6431,
+                      "src": "1477:17:43",
+>>>>>>> Stashed changes
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -873,7 +1215,11 @@
                         "typeString": "uint256"
                       },
                       "typeName": {
+<<<<<<< Updated upstream
                         "id": 6308,
+=======
+                        "id": 6405,
+>>>>>>> Stashed changes
                         "name": "uint256",
                         "nodeType": "ElementaryTypeName",
                         "src": "1477:7:41",
@@ -886,18 +1232,31 @@
                       "visibility": "internal"
                     }
                   ],
+<<<<<<< Updated upstream
                   "id": 6314,
+=======
+                  "id": 6411,
+>>>>>>> Stashed changes
                   "initialValue": {
                     "argumentTypes": null,
                     "arguments": [
                       {
                         "argumentTypes": null,
+<<<<<<< Updated upstream
                         "id": 6312,
                         "name": "openingTime",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 6573,
                         "src": "1513:11:41",
+=======
+                        "id": 6409,
+                        "name": "openingTime",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6670,
+                        "src": "1513:11:43",
+>>>>>>> Stashed changes
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -913,32 +1272,54 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
+<<<<<<< Updated upstream
                         "id": 6310,
                         "name": "closingTime",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 6575,
                         "src": "1497:11:41",
+=======
+                        "id": 6407,
+                        "name": "closingTime",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6672,
+                        "src": "1497:11:43",
+>>>>>>> Stashed changes
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         }
                       },
+<<<<<<< Updated upstream
                       "id": 6311,
+=======
+                      "id": 6408,
+>>>>>>> Stashed changes
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "sub",
                       "nodeType": "MemberAccess",
+<<<<<<< Updated upstream
                       "referencedDeclaration": 7024,
                       "src": "1497:15:41",
+=======
+                      "referencedDeclaration": 7121,
+                      "src": "1497:15:43",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                         "typeString": "function (uint256,uint256) pure returns (uint256)"
                       }
                     },
+<<<<<<< Updated upstream
                     "id": 6313,
+=======
+                    "id": 6410,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -957,16 +1338,28 @@
                 },
                 {
                   "assignments": [
+<<<<<<< Updated upstream
                     6316
+=======
+                    6413
+>>>>>>> Stashed changes
                   ],
                   "declarations": [
                     {
                       "constant": false,
+<<<<<<< Updated upstream
                       "id": 6316,
                       "name": "rateRange",
                       "nodeType": "VariableDeclaration",
                       "scope": 6334,
                       "src": "1531:17:41",
+=======
+                      "id": 6413,
+                      "name": "rateRange",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 6431,
+                      "src": "1531:17:43",
+>>>>>>> Stashed changes
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -974,7 +1367,11 @@
                         "typeString": "uint256"
                       },
                       "typeName": {
+<<<<<<< Updated upstream
                         "id": 6315,
+=======
+                        "id": 6412,
+>>>>>>> Stashed changes
                         "name": "uint256",
                         "nodeType": "ElementaryTypeName",
                         "src": "1531:7:41",
@@ -987,18 +1384,31 @@
                       "visibility": "internal"
                     }
                   ],
+<<<<<<< Updated upstream
                   "id": 6321,
+=======
+                  "id": 6418,
+>>>>>>> Stashed changes
                   "initialValue": {
                     "argumentTypes": null,
                     "arguments": [
                       {
                         "argumentTypes": null,
+<<<<<<< Updated upstream
                         "id": 6319,
                         "name": "finalRate",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 6267,
                         "src": "1567:9:41",
+=======
+                        "id": 6416,
+                        "name": "finalRate",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6364,
+                        "src": "1567:9:43",
+>>>>>>> Stashed changes
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -1014,32 +1424,54 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
+<<<<<<< Updated upstream
                         "id": 6317,
                         "name": "initialRate",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 6265,
                         "src": "1551:11:41",
+=======
+                        "id": 6414,
+                        "name": "initialRate",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6362,
+                        "src": "1551:11:43",
+>>>>>>> Stashed changes
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         }
                       },
+<<<<<<< Updated upstream
                       "id": 6318,
+=======
+                      "id": 6415,
+>>>>>>> Stashed changes
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "sub",
                       "nodeType": "MemberAccess",
+<<<<<<< Updated upstream
                       "referencedDeclaration": 7024,
                       "src": "1551:15:41",
+=======
+                      "referencedDeclaration": 7121,
+                      "src": "1551:15:43",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                         "typeString": "function (uint256,uint256) pure returns (uint256)"
                       }
                     },
+<<<<<<< Updated upstream
                     "id": 6320,
+=======
+                    "id": 6417,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1065,12 +1497,21 @@
                         "arguments": [
                           {
                             "argumentTypes": null,
+<<<<<<< Updated upstream
                             "id": 6329,
                             "name": "timeRange",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
                             "referencedDeclaration": 6309,
                             "src": "1637:9:41",
+=======
+                            "id": 6426,
+                            "name": "timeRange",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 6406,
+                            "src": "1637:9:43",
+>>>>>>> Stashed changes
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -1089,12 +1530,21 @@
                             "arguments": [
                               {
                                 "argumentTypes": null,
+<<<<<<< Updated upstream
                                 "id": 6326,
                                 "name": "rateRange",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
                                 "referencedDeclaration": 6316,
                                 "src": "1622:9:41",
+=======
+                                "id": 6423,
+                                "name": "rateRange",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 6413,
+                                "src": "1622:9:43",
+>>>>>>> Stashed changes
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_uint256",
                                   "typeString": "uint256"
@@ -1110,32 +1560,54 @@
                               ],
                               "expression": {
                                 "argumentTypes": null,
+<<<<<<< Updated upstream
                                 "id": 6324,
                                 "name": "elapsedTime",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
                                 "referencedDeclaration": 6301,
                                 "src": "1606:11:41",
+=======
+                                "id": 6421,
+                                "name": "elapsedTime",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 6398,
+                                "src": "1606:11:43",
+>>>>>>> Stashed changes
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_uint256",
                                   "typeString": "uint256"
                                 }
                               },
+<<<<<<< Updated upstream
                               "id": 6325,
+=======
+                              "id": 6422,
+>>>>>>> Stashed changes
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": false,
                               "lValueRequested": false,
                               "memberName": "mul",
                               "nodeType": "MemberAccess",
+<<<<<<< Updated upstream
                               "referencedDeclaration": 6990,
                               "src": "1606:15:41",
+=======
+                              "referencedDeclaration": 7087,
+                              "src": "1606:15:43",
+>>>>>>> Stashed changes
                               "typeDescriptions": {
                                 "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                                 "typeString": "function (uint256,uint256) pure returns (uint256)"
                               }
                             },
+<<<<<<< Updated upstream
                             "id": 6327,
+=======
+                            "id": 6424,
+>>>>>>> Stashed changes
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -1149,21 +1621,34 @@
                               "typeString": "uint256"
                             }
                           },
+<<<<<<< Updated upstream
                           "id": 6328,
+=======
+                          "id": 6425,
+>>>>>>> Stashed changes
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "memberName": "div",
                           "nodeType": "MemberAccess",
+<<<<<<< Updated upstream
                           "referencedDeclaration": 7004,
                           "src": "1606:30:41",
+=======
+                          "referencedDeclaration": 7101,
+                          "src": "1606:30:43",
+>>>>>>> Stashed changes
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                             "typeString": "function (uint256,uint256) pure returns (uint256)"
                           }
                         },
+<<<<<<< Updated upstream
                         "id": 6330,
+=======
+                        "id": 6427,
+>>>>>>> Stashed changes
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -1187,32 +1672,54 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
+<<<<<<< Updated upstream
                         "id": 6322,
                         "name": "initialRate",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 6265,
                         "src": "1590:11:41",
+=======
+                        "id": 6419,
+                        "name": "initialRate",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6362,
+                        "src": "1590:11:43",
+>>>>>>> Stashed changes
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         }
                       },
+<<<<<<< Updated upstream
                       "id": 6323,
+=======
+                      "id": 6420,
+>>>>>>> Stashed changes
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "sub",
                       "nodeType": "MemberAccess",
+<<<<<<< Updated upstream
                       "referencedDeclaration": 7024,
                       "src": "1590:15:41",
+=======
+                      "referencedDeclaration": 7121,
+                      "src": "1590:15:43",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                         "typeString": "function (uint256,uint256) pure returns (uint256)"
                       }
                     },
+<<<<<<< Updated upstream
                     "id": 6331,
+=======
+                    "id": 6428,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1226,15 +1733,24 @@
                       "typeString": "uint256"
                     }
                   },
+<<<<<<< Updated upstream
                   "functionReturnParameters": 6299,
                   "id": 6332,
+=======
+                  "functionReturnParameters": 6396,
+                  "id": 6429,
+>>>>>>> Stashed changes
                   "nodeType": "Return",
                   "src": "1583:65:41"
                 }
               ]
             },
             "documentation": "@dev Returns the rate of tokens per wei at the present time.\nNote that, as price _increases_ with time, the rate _decreases_.\n@return The number of tokens a buyer gets per wei at a given time",
+<<<<<<< Updated upstream
             "id": 6334,
+=======
+            "id": 6431,
+>>>>>>> Stashed changes
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -1242,23 +1758,39 @@
             "name": "getCurrentRate",
             "nodeType": "FunctionDefinition",
             "parameters": {
+<<<<<<< Updated upstream
               "id": 6296,
+=======
+              "id": 6393,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1320:2:41"
             },
             "payable": false,
             "returnParameters": {
+<<<<<<< Updated upstream
               "id": 6299,
+=======
+              "id": 6396,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 6298,
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "scope": 6334,
                   "src": "1344:7:41",
+=======
+                  "id": 6395,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6431,
+                  "src": "1344:7:43",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1266,7 +1798,11 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 6297,
+=======
+                    "id": 6394,
+>>>>>>> Stashed changes
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1344:7:41",
@@ -1281,30 +1817,51 @@
               ],
               "src": "1343:9:41"
             },
+<<<<<<< Updated upstream
             "scope": 6353,
             "src": "1297:356:41",
+=======
+            "scope": 6450,
+            "src": "1297:356:43",
+>>>>>>> Stashed changes
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
           },
           {
             "body": {
+<<<<<<< Updated upstream
               "id": 6351,
+=======
+              "id": 6448,
+>>>>>>> Stashed changes
               "nodeType": "Block",
               "src": "1963:89:41",
               "statements": [
                 {
                   "assignments": [
+<<<<<<< Updated upstream
                     6342
+=======
+                    6439
+>>>>>>> Stashed changes
                   ],
                   "declarations": [
                     {
                       "constant": false,
+<<<<<<< Updated upstream
                       "id": 6342,
                       "name": "currentRate",
                       "nodeType": "VariableDeclaration",
                       "scope": 6352,
                       "src": "1969:19:41",
+=======
+                      "id": 6439,
+                      "name": "currentRate",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 6449,
+                      "src": "1969:19:43",
+>>>>>>> Stashed changes
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -1312,7 +1869,11 @@
                         "typeString": "uint256"
                       },
                       "typeName": {
+<<<<<<< Updated upstream
                         "id": 6341,
+=======
+                        "id": 6438,
+>>>>>>> Stashed changes
                         "name": "uint256",
                         "nodeType": "ElementaryTypeName",
                         "src": "1969:7:41",
@@ -1325,24 +1886,41 @@
                       "visibility": "internal"
                     }
                   ],
+<<<<<<< Updated upstream
                   "id": 6345,
+=======
+                  "id": 6442,
+>>>>>>> Stashed changes
                   "initialValue": {
                     "argumentTypes": null,
                     "arguments": [],
                     "expression": {
                       "argumentTypes": [],
+<<<<<<< Updated upstream
                       "id": 6343,
                       "name": "getCurrentRate",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 6334,
                       "src": "1991:14:41",
+=======
+                      "id": 6440,
+                      "name": "getCurrentRate",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 6431,
+                      "src": "1991:14:43",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_view$__$returns$_t_uint256_$",
                         "typeString": "function () view returns (uint256)"
                       }
                     },
+<<<<<<< Updated upstream
                     "id": 6344,
+=======
+                    "id": 6441,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1365,12 +1943,21 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
+<<<<<<< Updated upstream
                         "id": 6348,
                         "name": "_weiAmount",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 6336,
                         "src": "2036:10:41",
+=======
+                        "id": 6445,
+                        "name": "_weiAmount",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6433,
+                        "src": "2036:10:43",
+>>>>>>> Stashed changes
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -1386,32 +1973,54 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
+<<<<<<< Updated upstream
                         "id": 6346,
                         "name": "currentRate",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 6342,
                         "src": "2020:11:41",
+=======
+                        "id": 6443,
+                        "name": "currentRate",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6439,
+                        "src": "2020:11:43",
+>>>>>>> Stashed changes
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         }
                       },
+<<<<<<< Updated upstream
                       "id": 6347,
+=======
+                      "id": 6444,
+>>>>>>> Stashed changes
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "mul",
                       "nodeType": "MemberAccess",
+<<<<<<< Updated upstream
                       "referencedDeclaration": 6990,
                       "src": "2020:15:41",
+=======
+                      "referencedDeclaration": 7087,
+                      "src": "2020:15:43",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                         "typeString": "function (uint256,uint256) pure returns (uint256)"
                       }
                     },
+<<<<<<< Updated upstream
                     "id": 6349,
+=======
+                    "id": 6446,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1425,15 +2034,24 @@
                       "typeString": "uint256"
                     }
                   },
+<<<<<<< Updated upstream
                   "functionReturnParameters": 6340,
                   "id": 6350,
+=======
+                  "functionReturnParameters": 6437,
+                  "id": 6447,
+>>>>>>> Stashed changes
                   "nodeType": "Return",
                   "src": "2013:34:41"
                 }
               ]
             },
             "documentation": "@dev Overrides parent method taking into account variable rate.\n@param _weiAmount The value in wei to be converted into tokens\n@return The number of tokens _weiAmount wei will buy at present time",
+<<<<<<< Updated upstream
             "id": 6352,
+=======
+            "id": 6449,
+>>>>>>> Stashed changes
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -1441,16 +2059,28 @@
             "name": "_getTokenAmount",
             "nodeType": "FunctionDefinition",
             "parameters": {
+<<<<<<< Updated upstream
               "id": 6337,
+=======
+              "id": 6434,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 6336,
                   "name": "_weiAmount",
                   "nodeType": "VariableDeclaration",
                   "scope": 6352,
                   "src": "1905:18:41",
+=======
+                  "id": 6433,
+                  "name": "_weiAmount",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6449,
+                  "src": "1905:18:43",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1458,7 +2088,11 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 6335,
+=======
+                    "id": 6432,
+>>>>>>> Stashed changes
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1905:7:41",
@@ -1475,16 +2109,28 @@
             },
             "payable": false,
             "returnParameters": {
+<<<<<<< Updated upstream
               "id": 6340,
+=======
+              "id": 6437,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 6339,
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "scope": 6352,
                   "src": "1952:7:41",
+=======
+                  "id": 6436,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6449,
+                  "src": "1952:7:43",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1492,7 +2138,11 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 6338,
+=======
+                    "id": 6435,
+>>>>>>> Stashed changes
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1952:7:41",
@@ -1507,6 +2157,7 @@
               ],
               "src": "1951:9:41"
             },
+<<<<<<< Updated upstream
             "scope": 6353,
             "src": "1880:172:41",
             "stateMutability": "view",
@@ -1516,14 +2167,26 @@
         ],
         "scope": 6354,
         "src": "445:1610:41"
+=======
+            "scope": 6450,
+            "src": "1880:172:43",
+            "stateMutability": "view",
+            "superFunction": 6017,
+            "visibility": "internal"
+          }
+        ],
+        "scope": 6451,
+        "src": "445:1610:43"
+>>>>>>> Stashed changes
       }
     ],
     "src": "0:2056:41"
   },
   "legacyAST": {
-    "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/price/IncreasingPriceCrowdsale.sol",
+    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/price/IncreasingPriceCrowdsale.sol",
     "exportedSymbols": {
       "IncreasingPriceCrowdsale": [
+<<<<<<< Updated upstream
         6353
       ]
     },
@@ -1532,6 +2195,16 @@
     "nodes": [
       {
         "id": 6256,
+=======
+        6450
+      ]
+    },
+    "id": 6451,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 6353,
+>>>>>>> Stashed changes
         "literals": [
           "solidity",
           "^",
@@ -1542,24 +2215,40 @@
         "src": "0:24:41"
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/validation/TimedCrowdsale.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/validation/TimedCrowdsale.sol",
         "file": "../validation/TimedCrowdsale.sol",
+<<<<<<< Updated upstream
         "id": 6257,
         "nodeType": "ImportDirective",
         "scope": 6354,
         "sourceUnit": 6650,
         "src": "26:42:41",
+=======
+        "id": 6354,
+        "nodeType": "ImportDirective",
+        "scope": 6451,
+        "sourceUnit": 6747,
+        "src": "26:42:43",
+>>>>>>> Stashed changes
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/math/SafeMath.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/math/SafeMath.sol",
         "file": "../../math/SafeMath.sol",
+<<<<<<< Updated upstream
         "id": 6258,
         "nodeType": "ImportDirective",
         "scope": 6354,
         "sourceUnit": 7050,
         "src": "69:33:41",
+=======
+        "id": 6355,
+        "nodeType": "ImportDirective",
+        "scope": 6451,
+        "sourceUnit": 7147,
+        "src": "69:33:43",
+>>>>>>> Stashed changes
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -1569,6 +2258,7 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
+<<<<<<< Updated upstream
               "id": 6259,
               "name": "TimedCrowdsale",
               "nodeType": "UserDefinedTypeName",
@@ -1580,27 +2270,54 @@
               }
             },
             "id": 6260,
+=======
+              "id": 6356,
+              "name": "TimedCrowdsale",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 6746,
+              "src": "482:14:43",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_TimedCrowdsale_$6746",
+                "typeString": "contract TimedCrowdsale"
+              }
+            },
+            "id": 6357,
+>>>>>>> Stashed changes
             "nodeType": "InheritanceSpecifier",
             "src": "482:14:41"
           }
         ],
         "contractDependencies": [
+<<<<<<< Updated upstream
           5932,
           6649
+=======
+          6029,
+          6746
+>>>>>>> Stashed changes
         ],
         "contractKind": "contract",
         "documentation": "@title IncreasingPriceCrowdsale\n@dev Extension of Crowdsale contract that increases the price of tokens linearly in time.\nNote that what should be provided to the constructor is the initial and final _rates_, that is,\nthe amount of tokens per wei contributed. Thus, the initial rate must be greater than the final rate.",
         "fullyImplemented": false,
+<<<<<<< Updated upstream
         "id": 6353,
         "linearizedBaseContracts": [
           6353,
           6649,
           5932
+=======
+        "id": 6450,
+        "linearizedBaseContracts": [
+          6450,
+          6746,
+          6029
+>>>>>>> Stashed changes
         ],
         "name": "IncreasingPriceCrowdsale",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
+<<<<<<< Updated upstream
             "id": 6263,
             "libraryName": {
               "contractScope": null,
@@ -1611,13 +2328,29 @@
               "src": "507:8:41",
               "typeDescriptions": {
                 "typeIdentifier": "t_contract$_SafeMath_$7049",
+=======
+            "id": 6360,
+            "libraryName": {
+              "contractScope": null,
+              "id": 6358,
+              "name": "SafeMath",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 7146,
+              "src": "507:8:43",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_SafeMath_$7146",
+>>>>>>> Stashed changes
                 "typeString": "library SafeMath"
               }
             },
             "nodeType": "UsingForDirective",
             "src": "501:27:41",
             "typeName": {
+<<<<<<< Updated upstream
               "id": 6262,
+=======
+              "id": 6359,
+>>>>>>> Stashed changes
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
               "src": "520:7:41",
@@ -1629,11 +2362,19 @@
           },
           {
             "constant": false,
+<<<<<<< Updated upstream
             "id": 6265,
             "name": "initialRate",
             "nodeType": "VariableDeclaration",
             "scope": 6353,
             "src": "532:26:41",
+=======
+            "id": 6362,
+            "name": "initialRate",
+            "nodeType": "VariableDeclaration",
+            "scope": 6450,
+            "src": "532:26:43",
+>>>>>>> Stashed changes
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -1641,7 +2382,11 @@
               "typeString": "uint256"
             },
             "typeName": {
+<<<<<<< Updated upstream
               "id": 6264,
+=======
+              "id": 6361,
+>>>>>>> Stashed changes
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
               "src": "532:7:41",
@@ -1655,11 +2400,19 @@
           },
           {
             "constant": false,
+<<<<<<< Updated upstream
             "id": 6267,
             "name": "finalRate",
             "nodeType": "VariableDeclaration",
             "scope": 6353,
             "src": "562:24:41",
+=======
+            "id": 6364,
+            "name": "finalRate",
+            "nodeType": "VariableDeclaration",
+            "scope": 6450,
+            "src": "562:24:43",
+>>>>>>> Stashed changes
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -1667,7 +2420,11 @@
               "typeString": "uint256"
             },
             "typeName": {
+<<<<<<< Updated upstream
               "id": 6266,
+=======
+              "id": 6363,
+>>>>>>> Stashed changes
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
               "src": "562:7:41",
@@ -1681,7 +2438,11 @@
           },
           {
             "body": {
+<<<<<<< Updated upstream
               "id": 6294,
+=======
+              "id": 6391,
+>>>>>>> Stashed changes
               "nodeType": "Block",
               "src": "939:135:41",
               "statements": [
@@ -1695,19 +2456,32 @@
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
+<<<<<<< Updated upstream
                         "id": 6277,
+=======
+                        "id": 6374,
+>>>>>>> Stashed changes
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
                           "argumentTypes": null,
+<<<<<<< Updated upstream
                           "id": 6275,
                           "name": "_initialRate",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 6269,
                           "src": "953:12:41",
+=======
+                          "id": 6372,
+                          "name": "_initialRate",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 6366,
+                          "src": "953:12:43",
+>>>>>>> Stashed changes
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -1717,12 +2491,21 @@
                         "operator": ">=",
                         "rightExpression": {
                           "argumentTypes": null,
+<<<<<<< Updated upstream
                           "id": 6276,
                           "name": "_finalRate",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 6271,
                           "src": "969:10:41",
+=======
+                          "id": 6373,
+                          "name": "_finalRate",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 6368,
+                          "src": "969:10:43",
+>>>>>>> Stashed changes
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -1742,6 +2525,7 @@
                           "typeString": "bool"
                         }
                       ],
+<<<<<<< Updated upstream
                       "id": 6274,
                       "name": "require",
                       "nodeType": "Identifier",
@@ -1751,12 +2535,27 @@
                       ],
                       "referencedDeclaration": 10772,
                       "src": "945:7:41",
+=======
+                      "id": 6371,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        10869,
+                        10870
+                      ],
+                      "referencedDeclaration": 10869,
+                      "src": "945:7:43",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
+<<<<<<< Updated upstream
                     "id": 6278,
+=======
+                    "id": 6375,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1770,7 +2569,11 @@
                       "typeString": "tuple()"
                     }
                   },
+<<<<<<< Updated upstream
                   "id": 6279,
+=======
+                  "id": 6376,
+>>>>>>> Stashed changes
                   "nodeType": "ExpressionStatement",
                   "src": "945:35:41"
                 },
@@ -1784,19 +2587,32 @@
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
+<<<<<<< Updated upstream
                         "id": 6283,
+=======
+                        "id": 6380,
+>>>>>>> Stashed changes
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
                           "argumentTypes": null,
+<<<<<<< Updated upstream
                           "id": 6281,
                           "name": "_finalRate",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 6271,
                           "src": "994:10:41",
+=======
+                          "id": 6378,
+                          "name": "_finalRate",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 6368,
+                          "src": "994:10:43",
+>>>>>>> Stashed changes
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -1807,7 +2623,11 @@
                         "rightExpression": {
                           "argumentTypes": null,
                           "hexValue": "30",
+<<<<<<< Updated upstream
                           "id": 6282,
+=======
+                          "id": 6379,
+>>>>>>> Stashed changes
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
@@ -1836,6 +2656,7 @@
                           "typeString": "bool"
                         }
                       ],
+<<<<<<< Updated upstream
                       "id": 6280,
                       "name": "require",
                       "nodeType": "Identifier",
@@ -1845,12 +2666,27 @@
                       ],
                       "referencedDeclaration": 10772,
                       "src": "986:7:41",
+=======
+                      "id": 6377,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        10869,
+                        10870
+                      ],
+                      "referencedDeclaration": 10869,
+                      "src": "986:7:43",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
+<<<<<<< Updated upstream
                     "id": 6284,
+=======
+                    "id": 6381,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1864,26 +2700,43 @@
                       "typeString": "tuple()"
                     }
                   },
+<<<<<<< Updated upstream
                   "id": 6285,
+=======
+                  "id": 6382,
+>>>>>>> Stashed changes
                   "nodeType": "ExpressionStatement",
                   "src": "986:23:41"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
+<<<<<<< Updated upstream
                     "id": 6288,
+=======
+                    "id": 6385,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
+<<<<<<< Updated upstream
                       "id": 6286,
                       "name": "initialRate",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 6265,
                       "src": "1015:11:41",
+=======
+                      "id": 6383,
+                      "name": "initialRate",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 6362,
+                      "src": "1015:11:43",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -1893,12 +2746,21 @@
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
+<<<<<<< Updated upstream
                       "id": 6287,
                       "name": "_initialRate",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 6269,
                       "src": "1029:12:41",
+=======
+                      "id": 6384,
+                      "name": "_initialRate",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 6366,
+                      "src": "1029:12:43",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -1910,26 +2772,43 @@
                       "typeString": "uint256"
                     }
                   },
+<<<<<<< Updated upstream
                   "id": 6289,
+=======
+                  "id": 6386,
+>>>>>>> Stashed changes
                   "nodeType": "ExpressionStatement",
                   "src": "1015:26:41"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
+<<<<<<< Updated upstream
                     "id": 6292,
+=======
+                    "id": 6389,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
+<<<<<<< Updated upstream
                       "id": 6290,
                       "name": "finalRate",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 6267,
                       "src": "1047:9:41",
+=======
+                      "id": 6387,
+                      "name": "finalRate",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 6364,
+                      "src": "1047:9:43",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -1939,12 +2818,21 @@
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
+<<<<<<< Updated upstream
                       "id": 6291,
                       "name": "_finalRate",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 6271,
                       "src": "1059:10:41",
+=======
+                      "id": 6388,
+                      "name": "_finalRate",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 6368,
+                      "src": "1059:10:43",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -1956,14 +2844,22 @@
                       "typeString": "uint256"
                     }
                   },
+<<<<<<< Updated upstream
                   "id": 6293,
+=======
+                  "id": 6390,
+>>>>>>> Stashed changes
                   "nodeType": "ExpressionStatement",
                   "src": "1047:22:41"
                 }
               ]
             },
             "documentation": "@dev Constructor, takes initial and final rates of tokens received per wei contributed.\n@param _initialRate Number of tokens a buyer gets per wei at the start of the crowdsale\n@param _finalRate Number of tokens a buyer gets per wei at the end of the crowdsale",
+<<<<<<< Updated upstream
             "id": 6295,
+=======
+            "id": 6392,
+>>>>>>> Stashed changes
             "implemented": true,
             "isConstructor": true,
             "isDeclaredConst": false,
@@ -1971,16 +2867,28 @@
             "name": "",
             "nodeType": "FunctionDefinition",
             "parameters": {
+<<<<<<< Updated upstream
               "id": 6272,
+=======
+              "id": 6369,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 6269,
                   "name": "_initialRate",
                   "nodeType": "VariableDeclaration",
                   "scope": 6295,
                   "src": "890:20:41",
+=======
+                  "id": 6366,
+                  "name": "_initialRate",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6392,
+                  "src": "890:20:43",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1988,7 +2896,11 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 6268,
+=======
+                    "id": 6365,
+>>>>>>> Stashed changes
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "890:7:41",
@@ -2002,11 +2914,19 @@
                 },
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 6271,
                   "name": "_finalRate",
                   "nodeType": "VariableDeclaration",
                   "scope": 6295,
                   "src": "912:18:41",
+=======
+                  "id": 6368,
+                  "name": "_finalRate",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6392,
+                  "src": "912:18:43",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2014,7 +2934,11 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 6270,
+=======
+                    "id": 6367,
+>>>>>>> Stashed changes
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "912:7:41",
@@ -2031,35 +2955,60 @@
             },
             "payable": false,
             "returnParameters": {
+<<<<<<< Updated upstream
               "id": 6273,
+=======
+              "id": 6370,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "939:0:41"
             },
+<<<<<<< Updated upstream
             "scope": 6353,
             "src": "878:196:41",
+=======
+            "scope": 6450,
+            "src": "878:196:43",
+>>>>>>> Stashed changes
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           },
           {
             "body": {
+<<<<<<< Updated upstream
               "id": 6333,
+=======
+              "id": 6430,
+>>>>>>> Stashed changes
               "nodeType": "Block",
               "src": "1353:300:41",
               "statements": [
                 {
                   "assignments": [
+<<<<<<< Updated upstream
                     6301
+=======
+                    6398
+>>>>>>> Stashed changes
                   ],
                   "declarations": [
                     {
                       "constant": false,
+<<<<<<< Updated upstream
                       "id": 6301,
                       "name": "elapsedTime",
                       "nodeType": "VariableDeclaration",
                       "scope": 6334,
                       "src": "1417:19:41",
+=======
+                      "id": 6398,
+                      "name": "elapsedTime",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 6431,
+                      "src": "1417:19:43",
+>>>>>>> Stashed changes
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -2067,7 +3016,11 @@
                         "typeString": "uint256"
                       },
                       "typeName": {
+<<<<<<< Updated upstream
                         "id": 6300,
+=======
+                        "id": 6397,
+>>>>>>> Stashed changes
                         "name": "uint256",
                         "nodeType": "ElementaryTypeName",
                         "src": "1417:7:41",
@@ -2080,18 +3033,31 @@
                       "visibility": "internal"
                     }
                   ],
+<<<<<<< Updated upstream
                   "id": 6307,
+=======
+                  "id": 6404,
+>>>>>>> Stashed changes
                   "initialValue": {
                     "argumentTypes": null,
                     "arguments": [
                       {
                         "argumentTypes": null,
+<<<<<<< Updated upstream
                         "id": 6305,
                         "name": "openingTime",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 6573,
                         "src": "1459:11:41",
+=======
+                        "id": 6402,
+                        "name": "openingTime",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6670,
+                        "src": "1459:11:43",
+>>>>>>> Stashed changes
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -2109,18 +3075,31 @@
                         "argumentTypes": null,
                         "expression": {
                           "argumentTypes": null,
+<<<<<<< Updated upstream
                           "id": 6302,
                           "name": "block",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 10759,
                           "src": "1439:5:41",
+=======
+                          "id": 6399,
+                          "name": "block",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 10856,
+                          "src": "1439:5:43",
+>>>>>>> Stashed changes
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_block",
                             "typeString": "block"
                           }
                         },
+<<<<<<< Updated upstream
                         "id": 6303,
+=======
+                        "id": 6400,
+>>>>>>> Stashed changes
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -2134,21 +3113,34 @@
                           "typeString": "uint256"
                         }
                       },
+<<<<<<< Updated upstream
                       "id": 6304,
+=======
+                      "id": 6401,
+>>>>>>> Stashed changes
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "sub",
                       "nodeType": "MemberAccess",
+<<<<<<< Updated upstream
                       "referencedDeclaration": 7024,
                       "src": "1439:19:41",
+=======
+                      "referencedDeclaration": 7121,
+                      "src": "1439:19:43",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                         "typeString": "function (uint256,uint256) pure returns (uint256)"
                       }
                     },
+<<<<<<< Updated upstream
                     "id": 6306,
+=======
+                    "id": 6403,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2167,16 +3159,28 @@
                 },
                 {
                   "assignments": [
+<<<<<<< Updated upstream
                     6309
+=======
+                    6406
+>>>>>>> Stashed changes
                   ],
                   "declarations": [
                     {
                       "constant": false,
+<<<<<<< Updated upstream
                       "id": 6309,
                       "name": "timeRange",
                       "nodeType": "VariableDeclaration",
                       "scope": 6334,
                       "src": "1477:17:41",
+=======
+                      "id": 6406,
+                      "name": "timeRange",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 6431,
+                      "src": "1477:17:43",
+>>>>>>> Stashed changes
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -2184,7 +3188,11 @@
                         "typeString": "uint256"
                       },
                       "typeName": {
+<<<<<<< Updated upstream
                         "id": 6308,
+=======
+                        "id": 6405,
+>>>>>>> Stashed changes
                         "name": "uint256",
                         "nodeType": "ElementaryTypeName",
                         "src": "1477:7:41",
@@ -2197,18 +3205,31 @@
                       "visibility": "internal"
                     }
                   ],
+<<<<<<< Updated upstream
                   "id": 6314,
+=======
+                  "id": 6411,
+>>>>>>> Stashed changes
                   "initialValue": {
                     "argumentTypes": null,
                     "arguments": [
                       {
                         "argumentTypes": null,
+<<<<<<< Updated upstream
                         "id": 6312,
                         "name": "openingTime",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 6573,
                         "src": "1513:11:41",
+=======
+                        "id": 6409,
+                        "name": "openingTime",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6670,
+                        "src": "1513:11:43",
+>>>>>>> Stashed changes
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -2224,32 +3245,54 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
+<<<<<<< Updated upstream
                         "id": 6310,
                         "name": "closingTime",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 6575,
                         "src": "1497:11:41",
+=======
+                        "id": 6407,
+                        "name": "closingTime",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6672,
+                        "src": "1497:11:43",
+>>>>>>> Stashed changes
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         }
                       },
+<<<<<<< Updated upstream
                       "id": 6311,
+=======
+                      "id": 6408,
+>>>>>>> Stashed changes
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "sub",
                       "nodeType": "MemberAccess",
+<<<<<<< Updated upstream
                       "referencedDeclaration": 7024,
                       "src": "1497:15:41",
+=======
+                      "referencedDeclaration": 7121,
+                      "src": "1497:15:43",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                         "typeString": "function (uint256,uint256) pure returns (uint256)"
                       }
                     },
+<<<<<<< Updated upstream
                     "id": 6313,
+=======
+                    "id": 6410,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2268,16 +3311,28 @@
                 },
                 {
                   "assignments": [
+<<<<<<< Updated upstream
                     6316
+=======
+                    6413
+>>>>>>> Stashed changes
                   ],
                   "declarations": [
                     {
                       "constant": false,
+<<<<<<< Updated upstream
                       "id": 6316,
                       "name": "rateRange",
                       "nodeType": "VariableDeclaration",
                       "scope": 6334,
                       "src": "1531:17:41",
+=======
+                      "id": 6413,
+                      "name": "rateRange",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 6431,
+                      "src": "1531:17:43",
+>>>>>>> Stashed changes
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -2285,7 +3340,11 @@
                         "typeString": "uint256"
                       },
                       "typeName": {
+<<<<<<< Updated upstream
                         "id": 6315,
+=======
+                        "id": 6412,
+>>>>>>> Stashed changes
                         "name": "uint256",
                         "nodeType": "ElementaryTypeName",
                         "src": "1531:7:41",
@@ -2298,18 +3357,31 @@
                       "visibility": "internal"
                     }
                   ],
+<<<<<<< Updated upstream
                   "id": 6321,
+=======
+                  "id": 6418,
+>>>>>>> Stashed changes
                   "initialValue": {
                     "argumentTypes": null,
                     "arguments": [
                       {
                         "argumentTypes": null,
+<<<<<<< Updated upstream
                         "id": 6319,
                         "name": "finalRate",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 6267,
                         "src": "1567:9:41",
+=======
+                        "id": 6416,
+                        "name": "finalRate",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6364,
+                        "src": "1567:9:43",
+>>>>>>> Stashed changes
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -2325,32 +3397,54 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
+<<<<<<< Updated upstream
                         "id": 6317,
                         "name": "initialRate",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 6265,
                         "src": "1551:11:41",
+=======
+                        "id": 6414,
+                        "name": "initialRate",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6362,
+                        "src": "1551:11:43",
+>>>>>>> Stashed changes
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         }
                       },
+<<<<<<< Updated upstream
                       "id": 6318,
+=======
+                      "id": 6415,
+>>>>>>> Stashed changes
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "sub",
                       "nodeType": "MemberAccess",
+<<<<<<< Updated upstream
                       "referencedDeclaration": 7024,
                       "src": "1551:15:41",
+=======
+                      "referencedDeclaration": 7121,
+                      "src": "1551:15:43",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                         "typeString": "function (uint256,uint256) pure returns (uint256)"
                       }
                     },
+<<<<<<< Updated upstream
                     "id": 6320,
+=======
+                    "id": 6417,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2376,12 +3470,21 @@
                         "arguments": [
                           {
                             "argumentTypes": null,
+<<<<<<< Updated upstream
                             "id": 6329,
                             "name": "timeRange",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
                             "referencedDeclaration": 6309,
                             "src": "1637:9:41",
+=======
+                            "id": 6426,
+                            "name": "timeRange",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 6406,
+                            "src": "1637:9:43",
+>>>>>>> Stashed changes
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -2400,12 +3503,21 @@
                             "arguments": [
                               {
                                 "argumentTypes": null,
+<<<<<<< Updated upstream
                                 "id": 6326,
                                 "name": "rateRange",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
                                 "referencedDeclaration": 6316,
                                 "src": "1622:9:41",
+=======
+                                "id": 6423,
+                                "name": "rateRange",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 6413,
+                                "src": "1622:9:43",
+>>>>>>> Stashed changes
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_uint256",
                                   "typeString": "uint256"
@@ -2421,32 +3533,54 @@
                               ],
                               "expression": {
                                 "argumentTypes": null,
+<<<<<<< Updated upstream
                                 "id": 6324,
                                 "name": "elapsedTime",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
                                 "referencedDeclaration": 6301,
                                 "src": "1606:11:41",
+=======
+                                "id": 6421,
+                                "name": "elapsedTime",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 6398,
+                                "src": "1606:11:43",
+>>>>>>> Stashed changes
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_uint256",
                                   "typeString": "uint256"
                                 }
                               },
+<<<<<<< Updated upstream
                               "id": 6325,
+=======
+                              "id": 6422,
+>>>>>>> Stashed changes
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": false,
                               "lValueRequested": false,
                               "memberName": "mul",
                               "nodeType": "MemberAccess",
+<<<<<<< Updated upstream
                               "referencedDeclaration": 6990,
                               "src": "1606:15:41",
+=======
+                              "referencedDeclaration": 7087,
+                              "src": "1606:15:43",
+>>>>>>> Stashed changes
                               "typeDescriptions": {
                                 "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                                 "typeString": "function (uint256,uint256) pure returns (uint256)"
                               }
                             },
+<<<<<<< Updated upstream
                             "id": 6327,
+=======
+                            "id": 6424,
+>>>>>>> Stashed changes
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -2460,21 +3594,34 @@
                               "typeString": "uint256"
                             }
                           },
+<<<<<<< Updated upstream
                           "id": 6328,
+=======
+                          "id": 6425,
+>>>>>>> Stashed changes
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "memberName": "div",
                           "nodeType": "MemberAccess",
+<<<<<<< Updated upstream
                           "referencedDeclaration": 7004,
                           "src": "1606:30:41",
+=======
+                          "referencedDeclaration": 7101,
+                          "src": "1606:30:43",
+>>>>>>> Stashed changes
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                             "typeString": "function (uint256,uint256) pure returns (uint256)"
                           }
                         },
+<<<<<<< Updated upstream
                         "id": 6330,
+=======
+                        "id": 6427,
+>>>>>>> Stashed changes
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -2498,32 +3645,54 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
+<<<<<<< Updated upstream
                         "id": 6322,
                         "name": "initialRate",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 6265,
                         "src": "1590:11:41",
+=======
+                        "id": 6419,
+                        "name": "initialRate",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6362,
+                        "src": "1590:11:43",
+>>>>>>> Stashed changes
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         }
                       },
+<<<<<<< Updated upstream
                       "id": 6323,
+=======
+                      "id": 6420,
+>>>>>>> Stashed changes
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "sub",
                       "nodeType": "MemberAccess",
+<<<<<<< Updated upstream
                       "referencedDeclaration": 7024,
                       "src": "1590:15:41",
+=======
+                      "referencedDeclaration": 7121,
+                      "src": "1590:15:43",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                         "typeString": "function (uint256,uint256) pure returns (uint256)"
                       }
                     },
+<<<<<<< Updated upstream
                     "id": 6331,
+=======
+                    "id": 6428,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2537,15 +3706,24 @@
                       "typeString": "uint256"
                     }
                   },
+<<<<<<< Updated upstream
                   "functionReturnParameters": 6299,
                   "id": 6332,
+=======
+                  "functionReturnParameters": 6396,
+                  "id": 6429,
+>>>>>>> Stashed changes
                   "nodeType": "Return",
                   "src": "1583:65:41"
                 }
               ]
             },
             "documentation": "@dev Returns the rate of tokens per wei at the present time.\nNote that, as price _increases_ with time, the rate _decreases_.\n@return The number of tokens a buyer gets per wei at a given time",
+<<<<<<< Updated upstream
             "id": 6334,
+=======
+            "id": 6431,
+>>>>>>> Stashed changes
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -2553,23 +3731,39 @@
             "name": "getCurrentRate",
             "nodeType": "FunctionDefinition",
             "parameters": {
+<<<<<<< Updated upstream
               "id": 6296,
+=======
+              "id": 6393,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1320:2:41"
             },
             "payable": false,
             "returnParameters": {
+<<<<<<< Updated upstream
               "id": 6299,
+=======
+              "id": 6396,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 6298,
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "scope": 6334,
                   "src": "1344:7:41",
+=======
+                  "id": 6395,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6431,
+                  "src": "1344:7:43",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2577,7 +3771,11 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 6297,
+=======
+                    "id": 6394,
+>>>>>>> Stashed changes
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1344:7:41",
@@ -2592,30 +3790,51 @@
               ],
               "src": "1343:9:41"
             },
+<<<<<<< Updated upstream
             "scope": 6353,
             "src": "1297:356:41",
+=======
+            "scope": 6450,
+            "src": "1297:356:43",
+>>>>>>> Stashed changes
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
           },
           {
             "body": {
+<<<<<<< Updated upstream
               "id": 6351,
+=======
+              "id": 6448,
+>>>>>>> Stashed changes
               "nodeType": "Block",
               "src": "1963:89:41",
               "statements": [
                 {
                   "assignments": [
+<<<<<<< Updated upstream
                     6342
+=======
+                    6439
+>>>>>>> Stashed changes
                   ],
                   "declarations": [
                     {
                       "constant": false,
+<<<<<<< Updated upstream
                       "id": 6342,
                       "name": "currentRate",
                       "nodeType": "VariableDeclaration",
                       "scope": 6352,
                       "src": "1969:19:41",
+=======
+                      "id": 6439,
+                      "name": "currentRate",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 6449,
+                      "src": "1969:19:43",
+>>>>>>> Stashed changes
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -2623,7 +3842,11 @@
                         "typeString": "uint256"
                       },
                       "typeName": {
+<<<<<<< Updated upstream
                         "id": 6341,
+=======
+                        "id": 6438,
+>>>>>>> Stashed changes
                         "name": "uint256",
                         "nodeType": "ElementaryTypeName",
                         "src": "1969:7:41",
@@ -2636,24 +3859,41 @@
                       "visibility": "internal"
                     }
                   ],
+<<<<<<< Updated upstream
                   "id": 6345,
+=======
+                  "id": 6442,
+>>>>>>> Stashed changes
                   "initialValue": {
                     "argumentTypes": null,
                     "arguments": [],
                     "expression": {
                       "argumentTypes": [],
+<<<<<<< Updated upstream
                       "id": 6343,
                       "name": "getCurrentRate",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 6334,
                       "src": "1991:14:41",
+=======
+                      "id": 6440,
+                      "name": "getCurrentRate",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 6431,
+                      "src": "1991:14:43",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_view$__$returns$_t_uint256_$",
                         "typeString": "function () view returns (uint256)"
                       }
                     },
+<<<<<<< Updated upstream
                     "id": 6344,
+=======
+                    "id": 6441,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2676,12 +3916,21 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
+<<<<<<< Updated upstream
                         "id": 6348,
                         "name": "_weiAmount",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 6336,
                         "src": "2036:10:41",
+=======
+                        "id": 6445,
+                        "name": "_weiAmount",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6433,
+                        "src": "2036:10:43",
+>>>>>>> Stashed changes
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -2697,32 +3946,54 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
+<<<<<<< Updated upstream
                         "id": 6346,
                         "name": "currentRate",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 6342,
                         "src": "2020:11:41",
+=======
+                        "id": 6443,
+                        "name": "currentRate",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6439,
+                        "src": "2020:11:43",
+>>>>>>> Stashed changes
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         }
                       },
+<<<<<<< Updated upstream
                       "id": 6347,
+=======
+                      "id": 6444,
+>>>>>>> Stashed changes
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "mul",
                       "nodeType": "MemberAccess",
+<<<<<<< Updated upstream
                       "referencedDeclaration": 6990,
                       "src": "2020:15:41",
+=======
+                      "referencedDeclaration": 7087,
+                      "src": "2020:15:43",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                         "typeString": "function (uint256,uint256) pure returns (uint256)"
                       }
                     },
+<<<<<<< Updated upstream
                     "id": 6349,
+=======
+                    "id": 6446,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2736,15 +4007,24 @@
                       "typeString": "uint256"
                     }
                   },
+<<<<<<< Updated upstream
                   "functionReturnParameters": 6340,
                   "id": 6350,
+=======
+                  "functionReturnParameters": 6437,
+                  "id": 6447,
+>>>>>>> Stashed changes
                   "nodeType": "Return",
                   "src": "2013:34:41"
                 }
               ]
             },
             "documentation": "@dev Overrides parent method taking into account variable rate.\n@param _weiAmount The value in wei to be converted into tokens\n@return The number of tokens _weiAmount wei will buy at present time",
+<<<<<<< Updated upstream
             "id": 6352,
+=======
+            "id": 6449,
+>>>>>>> Stashed changes
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -2752,16 +4032,28 @@
             "name": "_getTokenAmount",
             "nodeType": "FunctionDefinition",
             "parameters": {
+<<<<<<< Updated upstream
               "id": 6337,
+=======
+              "id": 6434,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 6336,
                   "name": "_weiAmount",
                   "nodeType": "VariableDeclaration",
                   "scope": 6352,
                   "src": "1905:18:41",
+=======
+                  "id": 6433,
+                  "name": "_weiAmount",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6449,
+                  "src": "1905:18:43",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2769,7 +4061,11 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 6335,
+=======
+                    "id": 6432,
+>>>>>>> Stashed changes
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1905:7:41",
@@ -2786,16 +4082,28 @@
             },
             "payable": false,
             "returnParameters": {
+<<<<<<< Updated upstream
               "id": 6340,
+=======
+              "id": 6437,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 6339,
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "scope": 6352,
                   "src": "1952:7:41",
+=======
+                  "id": 6436,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6449,
+                  "src": "1952:7:43",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2803,7 +4111,11 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 6338,
+=======
+                    "id": 6435,
+>>>>>>> Stashed changes
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1952:7:41",
@@ -2818,6 +4130,7 @@
               ],
               "src": "1951:9:41"
             },
+<<<<<<< Updated upstream
             "scope": 6353,
             "src": "1880:172:41",
             "stateMutability": "view",
@@ -2827,6 +4140,17 @@
         ],
         "scope": 6354,
         "src": "445:1610:41"
+=======
+            "scope": 6450,
+            "src": "1880:172:43",
+            "stateMutability": "view",
+            "superFunction": 6017,
+            "visibility": "internal"
+          }
+        ],
+        "scope": 6451,
+        "src": "445:1610:43"
+>>>>>>> Stashed changes
       }
     ],
     "src": "0:2056:41"
@@ -2837,5 +4161,9 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
+<<<<<<< Updated upstream
   "updatedAt": "2018-08-21T13:36:52.366Z"
+=======
+  "updatedAt": "2018-08-21T13:27:41.769Z"
+>>>>>>> Stashed changes
 }

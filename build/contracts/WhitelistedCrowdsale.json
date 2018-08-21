@@ -339,11 +339,12 @@
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "pragma solidity ^0.4.24;\n\nimport \"../Crowdsale.sol\";\nimport \"../../access/Whitelist.sol\";\n\n\n/**\n * @title WhitelistedCrowdsale\n * @dev Crowdsale in which only whitelisted users can contribute.\n */\ncontract WhitelistedCrowdsale is Whitelist, Crowdsale {\n  /**\n   * @dev Extend parent behavior requiring beneficiary to be in whitelist.\n   * @param _beneficiary Token beneficiary\n   * @param _weiAmount Amount of wei contributed\n   */\n  function _preValidatePurchase(\n    address _beneficiary,\n    uint256 _weiAmount\n  )\n    internal\n    onlyIfWhitelisted(_beneficiary)\n  {\n    super._preValidatePurchase(_beneficiary, _weiAmount);\n  }\n\n}\n",
-  "sourcePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/validation/WhitelistedCrowdsale.sol",
+  "sourcePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/validation/WhitelistedCrowdsale.sol",
   "ast": {
-    "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/validation/WhitelistedCrowdsale.sol",
+    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/validation/WhitelistedCrowdsale.sol",
     "exportedSymbols": {
       "WhitelistedCrowdsale": [
+<<<<<<< Updated upstream
         6676
       ]
     },
@@ -352,6 +353,16 @@
     "nodes": [
       {
         "id": 6651,
+=======
+        6773
+      ]
+    },
+    "id": 6774,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 6748,
+>>>>>>> Stashed changes
         "literals": [
           "solidity",
           "^",
@@ -362,24 +373,40 @@
         "src": "0:24:45"
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
         "file": "../Crowdsale.sol",
+<<<<<<< Updated upstream
         "id": 6652,
         "nodeType": "ImportDirective",
         "scope": 6677,
         "sourceUnit": 5933,
         "src": "26:26:45",
+=======
+        "id": 6749,
+        "nodeType": "ImportDirective",
+        "scope": 6774,
+        "sourceUnit": 6030,
+        "src": "26:26:47",
+>>>>>>> Stashed changes
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/access/Whitelist.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/access/Whitelist.sol",
         "file": "../../access/Whitelist.sol",
+<<<<<<< Updated upstream
         "id": 6653,
         "nodeType": "ImportDirective",
         "scope": 6677,
         "sourceUnit": 5528,
         "src": "53:36:45",
+=======
+        "id": 6750,
+        "nodeType": "ImportDirective",
+        "scope": 6774,
+        "sourceUnit": 5625,
+        "src": "53:36:47",
+>>>>>>> Stashed changes
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -389,6 +416,7 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
+<<<<<<< Updated upstream
               "id": 6654,
               "name": "Whitelist",
               "nodeType": "UserDefinedTypeName",
@@ -400,6 +428,19 @@
               }
             },
             "id": 6655,
+=======
+              "id": 6751,
+              "name": "Whitelist",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 5624,
+              "src": "230:9:47",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_Whitelist_$5624",
+                "typeString": "contract Whitelist"
+              }
+            },
+            "id": 6752,
+>>>>>>> Stashed changes
             "nodeType": "InheritanceSpecifier",
             "src": "230:9:45"
           },
@@ -407,6 +448,7 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
+<<<<<<< Updated upstream
               "id": 6656,
               "name": "Crowdsale",
               "nodeType": "UserDefinedTypeName",
@@ -418,19 +460,40 @@
               }
             },
             "id": 6657,
+=======
+              "id": 6753,
+              "name": "Crowdsale",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 6029,
+              "src": "241:9:47",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_Crowdsale_$6029",
+                "typeString": "contract Crowdsale"
+              }
+            },
+            "id": 6754,
+>>>>>>> Stashed changes
             "nodeType": "InheritanceSpecifier",
             "src": "241:9:45"
           }
         ],
         "contractDependencies": [
+<<<<<<< Updated upstream
           5527,
           5634,
           5932,
           7636
+=======
+          5624,
+          5731,
+          6029,
+          7733
+>>>>>>> Stashed changes
         ],
         "contractKind": "contract",
         "documentation": "@title WhitelistedCrowdsale\n@dev Crowdsale in which only whitelisted users can contribute.",
         "fullyImplemented": false,
+<<<<<<< Updated upstream
         "id": 6676,
         "linearizedBaseContracts": [
           6676,
@@ -438,13 +501,26 @@
           5527,
           5634,
           7636
+=======
+        "id": 6773,
+        "linearizedBaseContracts": [
+          6773,
+          6029,
+          5624,
+          5731,
+          7733
+>>>>>>> Stashed changes
         ],
         "name": "WhitelistedCrowdsale",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
+<<<<<<< Updated upstream
               "id": 6674,
+=======
+              "id": 6771,
+>>>>>>> Stashed changes
               "nodeType": "Block",
               "src": "569:63:45",
               "statements": [
@@ -454,12 +530,21 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
+<<<<<<< Updated upstream
                         "id": 6670,
                         "name": "_beneficiary",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 6659,
                         "src": "602:12:45",
+=======
+                        "id": 6767,
+                        "name": "_beneficiary",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6756,
+                        "src": "602:12:47",
+>>>>>>> Stashed changes
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -467,12 +552,21 @@
                       },
                       {
                         "argumentTypes": null,
+<<<<<<< Updated upstream
                         "id": 6671,
                         "name": "_weiAmount",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 6661,
                         "src": "616:10:45",
+=======
+                        "id": 6768,
+                        "name": "_weiAmount",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6758,
+                        "src": "616:10:47",
+>>>>>>> Stashed changes
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -492,6 +586,7 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
+<<<<<<< Updated upstream
                         "id": 6667,
                         "name": "super",
                         "nodeType": "Identifier",
@@ -504,20 +599,43 @@
                         }
                       },
                       "id": 6669,
+=======
+                        "id": 6764,
+                        "name": "super",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 10954,
+                        "src": "575:5:47",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_super$_WhitelistedCrowdsale_$6773",
+                          "typeString": "contract super WhitelistedCrowdsale"
+                        }
+                      },
+                      "id": 6766,
+>>>>>>> Stashed changes
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "_preValidatePurchase",
                       "nodeType": "MemberAccess",
+<<<<<<< Updated upstream
                       "referencedDeclaration": 5863,
                       "src": "575:26:45",
+=======
+                      "referencedDeclaration": 5960,
+                      "src": "575:26:47",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_uint256_$returns$__$",
                         "typeString": "function (address,uint256)"
                       }
                     },
+<<<<<<< Updated upstream
                     "id": 6672,
+=======
+                    "id": 6769,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -531,14 +649,22 @@
                       "typeString": "tuple()"
                     }
                   },
+<<<<<<< Updated upstream
                   "id": 6673,
+=======
+                  "id": 6770,
+>>>>>>> Stashed changes
                   "nodeType": "ExpressionStatement",
                   "src": "575:52:45"
                 }
               ]
             },
             "documentation": "@dev Extend parent behavior requiring beneficiary to be in whitelist.\n@param _beneficiary Token beneficiary\n@param _weiAmount Amount of wei contributed",
+<<<<<<< Updated upstream
             "id": 6675,
+=======
+            "id": 6772,
+>>>>>>> Stashed changes
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -547,18 +673,28 @@
                 "arguments": [
                   {
                     "argumentTypes": null,
+<<<<<<< Updated upstream
                     "id": 6664,
                     "name": "_beneficiary",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
                     "referencedDeclaration": 6659,
                     "src": "553:12:45",
+=======
+                    "id": 6761,
+                    "name": "_beneficiary",
+                    "nodeType": "Identifier",
+                    "overloadedDeclarations": [],
+                    "referencedDeclaration": 6756,
+                    "src": "553:12:47",
+>>>>>>> Stashed changes
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
                     }
                   }
                 ],
+<<<<<<< Updated upstream
                 "id": 6665,
                 "modifierName": {
                   "argumentTypes": null,
@@ -568,6 +704,17 @@
                   "overloadedDeclarations": [],
                   "referencedDeclaration": 5431,
                   "src": "535:17:45",
+=======
+                "id": 6762,
+                "modifierName": {
+                  "argumentTypes": null,
+                  "id": 6760,
+                  "name": "onlyIfWhitelisted",
+                  "nodeType": "Identifier",
+                  "overloadedDeclarations": [],
+                  "referencedDeclaration": 5528,
+                  "src": "535:17:47",
+>>>>>>> Stashed changes
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$_t_address_$",
                     "typeString": "modifier (address)"
@@ -580,16 +727,28 @@
             "name": "_preValidatePurchase",
             "nodeType": "FunctionDefinition",
             "parameters": {
+<<<<<<< Updated upstream
               "id": 6662,
+=======
+              "id": 6759,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 6659,
                   "name": "_beneficiary",
                   "nodeType": "VariableDeclaration",
                   "scope": 6675,
                   "src": "469:20:45",
+=======
+                  "id": 6756,
+                  "name": "_beneficiary",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6772,
+                  "src": "469:20:47",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -597,7 +756,11 @@
                     "typeString": "address"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 6658,
+=======
+                    "id": 6755,
+>>>>>>> Stashed changes
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "469:7:45",
@@ -611,11 +774,19 @@
                 },
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 6661,
                   "name": "_weiAmount",
                   "nodeType": "VariableDeclaration",
                   "scope": 6675,
                   "src": "495:18:45",
+=======
+                  "id": 6758,
+                  "name": "_weiAmount",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6772,
+                  "src": "495:18:47",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -623,7 +794,11 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 6660,
+=======
+                    "id": 6757,
+>>>>>>> Stashed changes
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "495:7:45",
@@ -640,11 +815,16 @@
             },
             "payable": false,
             "returnParameters": {
+<<<<<<< Updated upstream
               "id": 6666,
+=======
+              "id": 6763,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "569:0:45"
             },
+<<<<<<< Updated upstream
             "scope": 6676,
             "src": "434:198:45",
             "stateMutability": "nonpayable",
@@ -654,14 +834,26 @@
         ],
         "scope": 6677,
         "src": "197:438:45"
+=======
+            "scope": 6773,
+            "src": "434:198:47",
+            "stateMutability": "nonpayable",
+            "superFunction": 5960,
+            "visibility": "internal"
+          }
+        ],
+        "scope": 6774,
+        "src": "197:438:47"
+>>>>>>> Stashed changes
       }
     ],
     "src": "0:636:45"
   },
   "legacyAST": {
-    "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/validation/WhitelistedCrowdsale.sol",
+    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/validation/WhitelistedCrowdsale.sol",
     "exportedSymbols": {
       "WhitelistedCrowdsale": [
+<<<<<<< Updated upstream
         6676
       ]
     },
@@ -670,6 +862,16 @@
     "nodes": [
       {
         "id": 6651,
+=======
+        6773
+      ]
+    },
+    "id": 6774,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 6748,
+>>>>>>> Stashed changes
         "literals": [
           "solidity",
           "^",
@@ -680,24 +882,40 @@
         "src": "0:24:45"
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
         "file": "../Crowdsale.sol",
+<<<<<<< Updated upstream
         "id": 6652,
         "nodeType": "ImportDirective",
         "scope": 6677,
         "sourceUnit": 5933,
         "src": "26:26:45",
+=======
+        "id": 6749,
+        "nodeType": "ImportDirective",
+        "scope": 6774,
+        "sourceUnit": 6030,
+        "src": "26:26:47",
+>>>>>>> Stashed changes
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/access/Whitelist.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/access/Whitelist.sol",
         "file": "../../access/Whitelist.sol",
+<<<<<<< Updated upstream
         "id": 6653,
         "nodeType": "ImportDirective",
         "scope": 6677,
         "sourceUnit": 5528,
         "src": "53:36:45",
+=======
+        "id": 6750,
+        "nodeType": "ImportDirective",
+        "scope": 6774,
+        "sourceUnit": 5625,
+        "src": "53:36:47",
+>>>>>>> Stashed changes
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -707,6 +925,7 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
+<<<<<<< Updated upstream
               "id": 6654,
               "name": "Whitelist",
               "nodeType": "UserDefinedTypeName",
@@ -718,6 +937,19 @@
               }
             },
             "id": 6655,
+=======
+              "id": 6751,
+              "name": "Whitelist",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 5624,
+              "src": "230:9:47",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_Whitelist_$5624",
+                "typeString": "contract Whitelist"
+              }
+            },
+            "id": 6752,
+>>>>>>> Stashed changes
             "nodeType": "InheritanceSpecifier",
             "src": "230:9:45"
           },
@@ -725,6 +957,7 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
+<<<<<<< Updated upstream
               "id": 6656,
               "name": "Crowdsale",
               "nodeType": "UserDefinedTypeName",
@@ -736,19 +969,40 @@
               }
             },
             "id": 6657,
+=======
+              "id": 6753,
+              "name": "Crowdsale",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 6029,
+              "src": "241:9:47",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_Crowdsale_$6029",
+                "typeString": "contract Crowdsale"
+              }
+            },
+            "id": 6754,
+>>>>>>> Stashed changes
             "nodeType": "InheritanceSpecifier",
             "src": "241:9:45"
           }
         ],
         "contractDependencies": [
+<<<<<<< Updated upstream
           5527,
           5634,
           5932,
           7636
+=======
+          5624,
+          5731,
+          6029,
+          7733
+>>>>>>> Stashed changes
         ],
         "contractKind": "contract",
         "documentation": "@title WhitelistedCrowdsale\n@dev Crowdsale in which only whitelisted users can contribute.",
         "fullyImplemented": false,
+<<<<<<< Updated upstream
         "id": 6676,
         "linearizedBaseContracts": [
           6676,
@@ -756,13 +1010,26 @@
           5527,
           5634,
           7636
+=======
+        "id": 6773,
+        "linearizedBaseContracts": [
+          6773,
+          6029,
+          5624,
+          5731,
+          7733
+>>>>>>> Stashed changes
         ],
         "name": "WhitelistedCrowdsale",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
+<<<<<<< Updated upstream
               "id": 6674,
+=======
+              "id": 6771,
+>>>>>>> Stashed changes
               "nodeType": "Block",
               "src": "569:63:45",
               "statements": [
@@ -772,12 +1039,21 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
+<<<<<<< Updated upstream
                         "id": 6670,
                         "name": "_beneficiary",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 6659,
                         "src": "602:12:45",
+=======
+                        "id": 6767,
+                        "name": "_beneficiary",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6756,
+                        "src": "602:12:47",
+>>>>>>> Stashed changes
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -785,12 +1061,21 @@
                       },
                       {
                         "argumentTypes": null,
+<<<<<<< Updated upstream
                         "id": 6671,
                         "name": "_weiAmount",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 6661,
                         "src": "616:10:45",
+=======
+                        "id": 6768,
+                        "name": "_weiAmount",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6758,
+                        "src": "616:10:47",
+>>>>>>> Stashed changes
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -810,6 +1095,7 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
+<<<<<<< Updated upstream
                         "id": 6667,
                         "name": "super",
                         "nodeType": "Identifier",
@@ -822,20 +1108,43 @@
                         }
                       },
                       "id": 6669,
+=======
+                        "id": 6764,
+                        "name": "super",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 10954,
+                        "src": "575:5:47",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_super$_WhitelistedCrowdsale_$6773",
+                          "typeString": "contract super WhitelistedCrowdsale"
+                        }
+                      },
+                      "id": 6766,
+>>>>>>> Stashed changes
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "_preValidatePurchase",
                       "nodeType": "MemberAccess",
+<<<<<<< Updated upstream
                       "referencedDeclaration": 5863,
                       "src": "575:26:45",
+=======
+                      "referencedDeclaration": 5960,
+                      "src": "575:26:47",
+>>>>>>> Stashed changes
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_uint256_$returns$__$",
                         "typeString": "function (address,uint256)"
                       }
                     },
+<<<<<<< Updated upstream
                     "id": 6672,
+=======
+                    "id": 6769,
+>>>>>>> Stashed changes
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -849,14 +1158,22 @@
                       "typeString": "tuple()"
                     }
                   },
+<<<<<<< Updated upstream
                   "id": 6673,
+=======
+                  "id": 6770,
+>>>>>>> Stashed changes
                   "nodeType": "ExpressionStatement",
                   "src": "575:52:45"
                 }
               ]
             },
             "documentation": "@dev Extend parent behavior requiring beneficiary to be in whitelist.\n@param _beneficiary Token beneficiary\n@param _weiAmount Amount of wei contributed",
+<<<<<<< Updated upstream
             "id": 6675,
+=======
+            "id": 6772,
+>>>>>>> Stashed changes
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -865,18 +1182,28 @@
                 "arguments": [
                   {
                     "argumentTypes": null,
+<<<<<<< Updated upstream
                     "id": 6664,
                     "name": "_beneficiary",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
                     "referencedDeclaration": 6659,
                     "src": "553:12:45",
+=======
+                    "id": 6761,
+                    "name": "_beneficiary",
+                    "nodeType": "Identifier",
+                    "overloadedDeclarations": [],
+                    "referencedDeclaration": 6756,
+                    "src": "553:12:47",
+>>>>>>> Stashed changes
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
                     }
                   }
                 ],
+<<<<<<< Updated upstream
                 "id": 6665,
                 "modifierName": {
                   "argumentTypes": null,
@@ -886,6 +1213,17 @@
                   "overloadedDeclarations": [],
                   "referencedDeclaration": 5431,
                   "src": "535:17:45",
+=======
+                "id": 6762,
+                "modifierName": {
+                  "argumentTypes": null,
+                  "id": 6760,
+                  "name": "onlyIfWhitelisted",
+                  "nodeType": "Identifier",
+                  "overloadedDeclarations": [],
+                  "referencedDeclaration": 5528,
+                  "src": "535:17:47",
+>>>>>>> Stashed changes
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$_t_address_$",
                     "typeString": "modifier (address)"
@@ -898,16 +1236,28 @@
             "name": "_preValidatePurchase",
             "nodeType": "FunctionDefinition",
             "parameters": {
+<<<<<<< Updated upstream
               "id": 6662,
+=======
+              "id": 6759,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 6659,
                   "name": "_beneficiary",
                   "nodeType": "VariableDeclaration",
                   "scope": 6675,
                   "src": "469:20:45",
+=======
+                  "id": 6756,
+                  "name": "_beneficiary",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6772,
+                  "src": "469:20:47",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -915,7 +1265,11 @@
                     "typeString": "address"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 6658,
+=======
+                    "id": 6755,
+>>>>>>> Stashed changes
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "469:7:45",
@@ -929,11 +1283,19 @@
                 },
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 6661,
                   "name": "_weiAmount",
                   "nodeType": "VariableDeclaration",
                   "scope": 6675,
                   "src": "495:18:45",
+=======
+                  "id": 6758,
+                  "name": "_weiAmount",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6772,
+                  "src": "495:18:47",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -941,7 +1303,11 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 6660,
+=======
+                    "id": 6757,
+>>>>>>> Stashed changes
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "495:7:45",
@@ -958,11 +1324,16 @@
             },
             "payable": false,
             "returnParameters": {
+<<<<<<< Updated upstream
               "id": 6666,
+=======
+              "id": 6763,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "569:0:45"
             },
+<<<<<<< Updated upstream
             "scope": 6676,
             "src": "434:198:45",
             "stateMutability": "nonpayable",
@@ -972,6 +1343,17 @@
         ],
         "scope": 6677,
         "src": "197:438:45"
+=======
+            "scope": 6773,
+            "src": "434:198:47",
+            "stateMutability": "nonpayable",
+            "superFunction": 5960,
+            "visibility": "internal"
+          }
+        ],
+        "scope": 6774,
+        "src": "197:438:47"
+>>>>>>> Stashed changes
       }
     ],
     "src": "0:636:45"
@@ -982,5 +1364,9 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
+<<<<<<< Updated upstream
   "updatedAt": "2018-08-21T13:36:52.145Z"
+=======
+  "updatedAt": "2018-08-21T13:27:41.771Z"
+>>>>>>> Stashed changes
 }

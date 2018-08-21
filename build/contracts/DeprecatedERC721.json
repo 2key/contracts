@@ -451,11 +451,12 @@
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "pragma solidity ^0.4.24;\n\nimport \"./ERC721.sol\";\n\n\n/**\n * @title ERC-721 methods shipped in OpenZeppelin v1.7.0, removed in the latest version of the standard\n * @dev Only use this interface for compatibility with previously deployed contracts\n * Use ERC721 for interacting with new contracts which are standard-compliant\n */\ncontract DeprecatedERC721 is ERC721 {\n  function takeOwnership(uint256 _tokenId) public;\n  function transfer(address _to, uint256 _tokenId) public;\n  function tokensOf(address _owner) public view returns (uint256[]);\n}\n",
-  "sourcePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/token/ERC721/DeprecatedERC721.sol",
+  "sourcePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/token/ERC721/DeprecatedERC721.sol",
   "ast": {
-    "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/token/ERC721/DeprecatedERC721.sol",
+    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/token/ERC721/DeprecatedERC721.sol",
     "exportedSymbols": {
       "DeprecatedERC721": [
+<<<<<<< Updated upstream
         9616
       ]
     },
@@ -464,6 +465,16 @@
     "nodes": [
       {
         "id": 9592,
+=======
+        9713
+      ]
+    },
+    "id": 9714,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 9689,
+>>>>>>> Stashed changes
         "literals": [
           "solidity",
           "^",
@@ -474,13 +485,21 @@
         "src": "0:24:84"
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/token/ERC721/ERC721.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/token/ERC721/ERC721.sol",
         "file": "./ERC721.sol",
+<<<<<<< Updated upstream
         "id": 9593,
         "nodeType": "ImportDirective",
         "scope": 9617,
         "sourceUnit": 9671,
         "src": "26:22:84",
+=======
+        "id": 9690,
+        "nodeType": "ImportDirective",
+        "scope": 9714,
+        "sourceUnit": 9768,
+        "src": "26:22:86",
+>>>>>>> Stashed changes
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -490,6 +509,7 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
+<<<<<<< Updated upstream
               "id": 9594,
               "name": "ERC721",
               "nodeType": "UserDefinedTypeName",
@@ -501,20 +521,42 @@
               }
             },
             "id": 9595,
+=======
+              "id": 9691,
+              "name": "ERC721",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 9767,
+              "src": "355:6:86",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_ERC721_$9767",
+                "typeString": "contract ERC721"
+              }
+            },
+            "id": 9692,
+>>>>>>> Stashed changes
             "nodeType": "InheritanceSpecifier",
             "src": "355:6:84"
           }
         ],
         "contractDependencies": [
+<<<<<<< Updated upstream
           6686,
           9643,
           9663,
           9670,
           9792
+=======
+          6783,
+          9740,
+          9760,
+          9767,
+          9889
+>>>>>>> Stashed changes
         ],
         "contractKind": "contract",
         "documentation": "@title ERC-721 methods shipped in OpenZeppelin v1.7.0, removed in the latest version of the standard\n@dev Only use this interface for compatibility with previously deployed contracts\nUse ERC721 for interacting with new contracts which are standard-compliant",
         "fullyImplemented": false,
+<<<<<<< Updated upstream
         "id": 9616,
         "linearizedBaseContracts": [
           9616,
@@ -523,6 +565,16 @@
           9643,
           9792,
           6686
+=======
+        "id": 9713,
+        "linearizedBaseContracts": [
+          9713,
+          9767,
+          9760,
+          9740,
+          9889,
+          6783
+>>>>>>> Stashed changes
         ],
         "name": "DeprecatedERC721",
         "nodeType": "ContractDefinition",
@@ -530,7 +582,11 @@
           {
             "body": null,
             "documentation": null,
+<<<<<<< Updated upstream
             "id": 9600,
+=======
+            "id": 9697,
+>>>>>>> Stashed changes
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -538,16 +594,28 @@
             "name": "takeOwnership",
             "nodeType": "FunctionDefinition",
             "parameters": {
+<<<<<<< Updated upstream
               "id": 9598,
+=======
+              "id": 9695,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 9597,
                   "name": "_tokenId",
                   "nodeType": "VariableDeclaration",
                   "scope": 9600,
                   "src": "389:16:84",
+=======
+                  "id": 9694,
+                  "name": "_tokenId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9697,
+                  "src": "389:16:86",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -555,7 +623,11 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 9596,
+=======
+                    "id": 9693,
+>>>>>>> Stashed changes
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "389:7:84",
@@ -572,13 +644,22 @@
             },
             "payable": false,
             "returnParameters": {
+<<<<<<< Updated upstream
               "id": 9599,
+=======
+              "id": 9696,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "413:0:84"
             },
+<<<<<<< Updated upstream
             "scope": 9616,
             "src": "366:48:84",
+=======
+            "scope": 9713,
+            "src": "366:48:86",
+>>>>>>> Stashed changes
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
@@ -586,7 +667,11 @@
           {
             "body": null,
             "documentation": null,
+<<<<<<< Updated upstream
             "id": 9607,
+=======
+            "id": 9704,
+>>>>>>> Stashed changes
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -594,16 +679,28 @@
             "name": "transfer",
             "nodeType": "FunctionDefinition",
             "parameters": {
+<<<<<<< Updated upstream
               "id": 9605,
+=======
+              "id": 9702,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 9602,
                   "name": "_to",
                   "nodeType": "VariableDeclaration",
                   "scope": 9607,
                   "src": "435:11:84",
+=======
+                  "id": 9699,
+                  "name": "_to",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9704,
+                  "src": "435:11:86",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -611,7 +708,11 @@
                     "typeString": "address"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 9601,
+=======
+                    "id": 9698,
+>>>>>>> Stashed changes
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "435:7:84",
@@ -625,11 +726,19 @@
                 },
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 9604,
                   "name": "_tokenId",
                   "nodeType": "VariableDeclaration",
                   "scope": 9607,
                   "src": "448:16:84",
+=======
+                  "id": 9701,
+                  "name": "_tokenId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9704,
+                  "src": "448:16:86",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -637,7 +746,11 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 9603,
+=======
+                    "id": 9700,
+>>>>>>> Stashed changes
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "448:7:84",
@@ -654,13 +767,22 @@
             },
             "payable": false,
             "returnParameters": {
+<<<<<<< Updated upstream
               "id": 9606,
+=======
+              "id": 9703,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "472:0:84"
             },
+<<<<<<< Updated upstream
             "scope": 9616,
             "src": "417:56:84",
+=======
+            "scope": 9713,
+            "src": "417:56:86",
+>>>>>>> Stashed changes
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
@@ -668,7 +790,11 @@
           {
             "body": null,
             "documentation": null,
+<<<<<<< Updated upstream
             "id": 9615,
+=======
+            "id": 9712,
+>>>>>>> Stashed changes
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -676,16 +802,28 @@
             "name": "tokensOf",
             "nodeType": "FunctionDefinition",
             "parameters": {
+<<<<<<< Updated upstream
               "id": 9610,
+=======
+              "id": 9707,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 9609,
                   "name": "_owner",
                   "nodeType": "VariableDeclaration",
                   "scope": 9615,
                   "src": "494:14:84",
+=======
+                  "id": 9706,
+                  "name": "_owner",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9712,
+                  "src": "494:14:86",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -693,7 +831,11 @@
                     "typeString": "address"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 9608,
+=======
+                    "id": 9705,
+>>>>>>> Stashed changes
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "494:7:84",
@@ -710,16 +852,28 @@
             },
             "payable": false,
             "returnParameters": {
+<<<<<<< Updated upstream
               "id": 9614,
+=======
+              "id": 9711,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 9613,
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "scope": 9615,
                   "src": "531:9:84",
+=======
+                  "id": 9710,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9712,
+                  "src": "531:9:86",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -728,7 +882,11 @@
                   },
                   "typeName": {
                     "baseType": {
+<<<<<<< Updated upstream
                       "id": 9611,
+=======
+                      "id": 9708,
+>>>>>>> Stashed changes
                       "name": "uint256",
                       "nodeType": "ElementaryTypeName",
                       "src": "531:7:84",
@@ -737,7 +895,11 @@
                         "typeString": "uint256"
                       }
                     },
+<<<<<<< Updated upstream
                     "id": 9612,
+=======
+                    "id": 9709,
+>>>>>>> Stashed changes
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "531:9:84",
@@ -752,23 +914,34 @@
               ],
               "src": "530:11:84"
             },
+<<<<<<< Updated upstream
             "scope": 9616,
             "src": "476:66:84",
+=======
+            "scope": 9713,
+            "src": "476:66:86",
+>>>>>>> Stashed changes
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
           }
         ],
+<<<<<<< Updated upstream
         "scope": 9617,
         "src": "326:218:84"
+=======
+        "scope": 9714,
+        "src": "326:218:86"
+>>>>>>> Stashed changes
       }
     ],
     "src": "0:545:84"
   },
   "legacyAST": {
-    "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/token/ERC721/DeprecatedERC721.sol",
+    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/token/ERC721/DeprecatedERC721.sol",
     "exportedSymbols": {
       "DeprecatedERC721": [
+<<<<<<< Updated upstream
         9616
       ]
     },
@@ -777,6 +950,16 @@
     "nodes": [
       {
         "id": 9592,
+=======
+        9713
+      ]
+    },
+    "id": 9714,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 9689,
+>>>>>>> Stashed changes
         "literals": [
           "solidity",
           "^",
@@ -787,13 +970,21 @@
         "src": "0:24:84"
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/token/ERC721/ERC721.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/token/ERC721/ERC721.sol",
         "file": "./ERC721.sol",
+<<<<<<< Updated upstream
         "id": 9593,
         "nodeType": "ImportDirective",
         "scope": 9617,
         "sourceUnit": 9671,
         "src": "26:22:84",
+=======
+        "id": 9690,
+        "nodeType": "ImportDirective",
+        "scope": 9714,
+        "sourceUnit": 9768,
+        "src": "26:22:86",
+>>>>>>> Stashed changes
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -803,6 +994,7 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
+<<<<<<< Updated upstream
               "id": 9594,
               "name": "ERC721",
               "nodeType": "UserDefinedTypeName",
@@ -814,20 +1006,42 @@
               }
             },
             "id": 9595,
+=======
+              "id": 9691,
+              "name": "ERC721",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 9767,
+              "src": "355:6:86",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_ERC721_$9767",
+                "typeString": "contract ERC721"
+              }
+            },
+            "id": 9692,
+>>>>>>> Stashed changes
             "nodeType": "InheritanceSpecifier",
             "src": "355:6:84"
           }
         ],
         "contractDependencies": [
+<<<<<<< Updated upstream
           6686,
           9643,
           9663,
           9670,
           9792
+=======
+          6783,
+          9740,
+          9760,
+          9767,
+          9889
+>>>>>>> Stashed changes
         ],
         "contractKind": "contract",
         "documentation": "@title ERC-721 methods shipped in OpenZeppelin v1.7.0, removed in the latest version of the standard\n@dev Only use this interface for compatibility with previously deployed contracts\nUse ERC721 for interacting with new contracts which are standard-compliant",
         "fullyImplemented": false,
+<<<<<<< Updated upstream
         "id": 9616,
         "linearizedBaseContracts": [
           9616,
@@ -836,6 +1050,16 @@
           9643,
           9792,
           6686
+=======
+        "id": 9713,
+        "linearizedBaseContracts": [
+          9713,
+          9767,
+          9760,
+          9740,
+          9889,
+          6783
+>>>>>>> Stashed changes
         ],
         "name": "DeprecatedERC721",
         "nodeType": "ContractDefinition",
@@ -843,7 +1067,11 @@
           {
             "body": null,
             "documentation": null,
+<<<<<<< Updated upstream
             "id": 9600,
+=======
+            "id": 9697,
+>>>>>>> Stashed changes
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -851,16 +1079,28 @@
             "name": "takeOwnership",
             "nodeType": "FunctionDefinition",
             "parameters": {
+<<<<<<< Updated upstream
               "id": 9598,
+=======
+              "id": 9695,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 9597,
                   "name": "_tokenId",
                   "nodeType": "VariableDeclaration",
                   "scope": 9600,
                   "src": "389:16:84",
+=======
+                  "id": 9694,
+                  "name": "_tokenId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9697,
+                  "src": "389:16:86",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -868,7 +1108,11 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 9596,
+=======
+                    "id": 9693,
+>>>>>>> Stashed changes
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "389:7:84",
@@ -885,13 +1129,22 @@
             },
             "payable": false,
             "returnParameters": {
+<<<<<<< Updated upstream
               "id": 9599,
+=======
+              "id": 9696,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "413:0:84"
             },
+<<<<<<< Updated upstream
             "scope": 9616,
             "src": "366:48:84",
+=======
+            "scope": 9713,
+            "src": "366:48:86",
+>>>>>>> Stashed changes
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
@@ -899,7 +1152,11 @@
           {
             "body": null,
             "documentation": null,
+<<<<<<< Updated upstream
             "id": 9607,
+=======
+            "id": 9704,
+>>>>>>> Stashed changes
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -907,16 +1164,28 @@
             "name": "transfer",
             "nodeType": "FunctionDefinition",
             "parameters": {
+<<<<<<< Updated upstream
               "id": 9605,
+=======
+              "id": 9702,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 9602,
                   "name": "_to",
                   "nodeType": "VariableDeclaration",
                   "scope": 9607,
                   "src": "435:11:84",
+=======
+                  "id": 9699,
+                  "name": "_to",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9704,
+                  "src": "435:11:86",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -924,7 +1193,11 @@
                     "typeString": "address"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 9601,
+=======
+                    "id": 9698,
+>>>>>>> Stashed changes
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "435:7:84",
@@ -938,11 +1211,19 @@
                 },
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 9604,
                   "name": "_tokenId",
                   "nodeType": "VariableDeclaration",
                   "scope": 9607,
                   "src": "448:16:84",
+=======
+                  "id": 9701,
+                  "name": "_tokenId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9704,
+                  "src": "448:16:86",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -950,7 +1231,11 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 9603,
+=======
+                    "id": 9700,
+>>>>>>> Stashed changes
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "448:7:84",
@@ -967,13 +1252,22 @@
             },
             "payable": false,
             "returnParameters": {
+<<<<<<< Updated upstream
               "id": 9606,
+=======
+              "id": 9703,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "472:0:84"
             },
+<<<<<<< Updated upstream
             "scope": 9616,
             "src": "417:56:84",
+=======
+            "scope": 9713,
+            "src": "417:56:86",
+>>>>>>> Stashed changes
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
@@ -981,7 +1275,11 @@
           {
             "body": null,
             "documentation": null,
+<<<<<<< Updated upstream
             "id": 9615,
+=======
+            "id": 9712,
+>>>>>>> Stashed changes
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -989,16 +1287,28 @@
             "name": "tokensOf",
             "nodeType": "FunctionDefinition",
             "parameters": {
+<<<<<<< Updated upstream
               "id": 9610,
+=======
+              "id": 9707,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 9609,
                   "name": "_owner",
                   "nodeType": "VariableDeclaration",
                   "scope": 9615,
                   "src": "494:14:84",
+=======
+                  "id": 9706,
+                  "name": "_owner",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9712,
+                  "src": "494:14:86",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1006,7 +1316,11 @@
                     "typeString": "address"
                   },
                   "typeName": {
+<<<<<<< Updated upstream
                     "id": 9608,
+=======
+                    "id": 9705,
+>>>>>>> Stashed changes
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "494:7:84",
@@ -1023,16 +1337,28 @@
             },
             "payable": false,
             "returnParameters": {
+<<<<<<< Updated upstream
               "id": 9614,
+=======
+              "id": 9711,
+>>>>>>> Stashed changes
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
+<<<<<<< Updated upstream
                   "id": 9613,
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "scope": 9615,
                   "src": "531:9:84",
+=======
+                  "id": 9710,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9712,
+                  "src": "531:9:86",
+>>>>>>> Stashed changes
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1041,7 +1367,11 @@
                   },
                   "typeName": {
                     "baseType": {
+<<<<<<< Updated upstream
                       "id": 9611,
+=======
+                      "id": 9708,
+>>>>>>> Stashed changes
                       "name": "uint256",
                       "nodeType": "ElementaryTypeName",
                       "src": "531:7:84",
@@ -1050,7 +1380,11 @@
                         "typeString": "uint256"
                       }
                     },
+<<<<<<< Updated upstream
                     "id": 9612,
+=======
+                    "id": 9709,
+>>>>>>> Stashed changes
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "531:9:84",
@@ -1065,15 +1399,25 @@
               ],
               "src": "530:11:84"
             },
+<<<<<<< Updated upstream
             "scope": 9616,
             "src": "476:66:84",
+=======
+            "scope": 9713,
+            "src": "476:66:86",
+>>>>>>> Stashed changes
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
           }
         ],
+<<<<<<< Updated upstream
         "scope": 9617,
         "src": "326:218:84"
+=======
+        "scope": 9714,
+        "src": "326:218:86"
+>>>>>>> Stashed changes
       }
     ],
     "src": "0:545:84"
@@ -1084,5 +1428,9 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
+<<<<<<< Updated upstream
   "updatedAt": "2018-08-21T13:36:52.173Z"
+=======
+  "updatedAt": "2018-08-21T13:27:41.790Z"
+>>>>>>> Stashed changes
 }

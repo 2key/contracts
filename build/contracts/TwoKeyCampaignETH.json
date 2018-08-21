@@ -902,9 +902,9 @@
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "pragma solidity ^0.4.24;\n\nimport './TwoKeyCampaign.sol';\n\n\ncontract TwoKeyCampaignETH is TwoKeyCampaign {\n \n\t/*  \n\t    fulfills a fungible asset purchase\n\t    creates the escrow for a fungible asset\n\t    computes the payout in ETH \n\t    transfers to the escrow the asset purchased\n    */ \n\tfunction fulfillFungibleETH(\n\t\taddress _from, \n\t\tuint256 _tokenID, \n\t\taddress _assetContract, \n\t\tuint256 _amount) isOngoing internal {\t\n\t\trequire(_amount > 0 && prices[_tokenID][_assetContract] > 0);\n\t\tuint256 payout = prices[_tokenID][_assetContract].mul(_amount);\n\t\trequire(msg.value == payout);\n\t\tConversion memory c = Conversion(_from, payout, msg.sender, false, false, _tokenID, _assetContract, _amount, CampaignType.Fungible, now, now + expiryConversion * 1 days);\n\t\t// move funds\n\t\tassets[_tokenID][_assetContract] -= _amount;\n\t\teventSource.escrow(address(this), msg.sender, _tokenID, _assetContract, _amount, CampaignType.Fungible);\n\t\tconversions[msg.sender] = c;\n\t}\n\n    /*  \n\t    fulfills a non fungible asset purchase\n\t    creates the escrow for a fungible asset\n\t    computes the payout in ETH\n\t    transfers to the escrow the asset purchased\n    */\n\tfunction fulfillNonFungibleETH(address _from, uint256 _tokenID, address _assetContract, uint256 _index) isOngoing internal {\t\n\t\taddress assetToken = address(\n\t      keccak256(abi.encodePacked(_assetContract, _index))\n\t    );\n\t\trequire(_index != 0 && prices[_tokenID][assetToken] > 0);\n\t\tuint256 payout = prices[_tokenID][assetToken];\n\t\trequire(msg.value == payout);\n\t\tConversion memory c = Conversion(_from, payout, msg.sender, false, false, _tokenID, _assetContract, _index, CampaignType.NonFungible, now, now + expiryConversion * 1 days);\n\t\teventSource.escrow(address(this), msg.sender, _tokenID, _assetContract, _index, CampaignType.NonFungible);\n\t\tconversions[msg.sender] = c;\n\t}\n\n    /**\n     * calculates moderetor fee, pays the moderator, \n     * computes total reward\n     * transfer payout to buyer, deducting the fee and the total reward\n     * asks the campaign to distribute rewards to influencers\n     */\n\n\tfunction actuallyFulfilledTwoKeyToken() internal {\n\t\tConversion memory c = conversions[msg.sender];\n        c.isFulfilled = true; \n        conversions[msg.sender] = c;\n\t\tuint256 fee = calculateModeratorFee(c.payout);\n        moderator.transfer(fee); \n        uint256 payout = c.payout;\n        uint256 maxReward = maxPi.mul(payout).div(100);\n        \n        // transfer payout - fee - rewards to seller\n        contractor.transfer(payout.sub(fee).sub(maxReward));\n        \n        transferRewardsTwoKeyToken(c.from, maxReward.mul(rate));\n        eventSource.fulfilled(address(this), c.converter, c.tokenID, c.assetContract, c.indexOrAmount, c.campaignType);\n\t}\n\n\t/**\n  \t * buy product withETH, \n  \t * _from is the influencer from which you received the referral\n  \t * _tokenID is the asset sku\n  \t * _assetContract - erc20 (fungible) or erc721 (non fungible) which represents the class of the asset\n  \t * _amountOrIndex - for erc20 amount in asset class, for erc21 index within asset class\n  \t */\n\tfunction buyFromWithETH(\n\t\taddress _from, \n\t\tuint256 _tokenID, \n\t\taddress _assetContract, \n\t\tuint256 _amountOrIndex,\n\t\tCampaignType _campaignType) public payable {\n\t\tif (_campaignType == CampaignType.Fungible) {\n\t\t\tfulfillFungibleETH(_from, _tokenID, _assetContract, _amountOrIndex);\n\t\t} else if (_campaignType == CampaignType.NonFungible) {\n\t\t\tfulfillNonFungibleETH(_from, _tokenID, _assetContract, _amountOrIndex);\n\t\t} \n\t}\n\n}\n\n",
-  "sourcePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyCampaignETH.sol",
+  "sourcePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyCampaignETH.sol",
   "ast": {
-    "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyCampaignETH.sol",
+    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyCampaignETH.sol",
     "exportedSymbols": {
       "TwoKeyCampaignETH": [
         2582
@@ -925,7 +925,7 @@
         "src": "0:24:8"
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyCampaign.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyCampaign.sol",
         "file": "./TwoKeyCampaign.sol",
         "id": 2251,
         "nodeType": "ImportDirective",
@@ -962,11 +962,19 @@
           928,
           2151,
           4434,
+<<<<<<< Updated upstream
           5634,
           8405,
           8602,
           8634,
           9249
+=======
+          5731,
+          8502,
+          8699,
+          8731,
+          9346
+>>>>>>> Stashed changes
         ],
         "contractKind": "contract",
         "documentation": null,
@@ -978,12 +986,21 @@
           4434,
           377,
           462,
+<<<<<<< Updated upstream
           5634,
           928,
           9249,
           8405,
           8602,
           8634
+=======
+          5731,
+          928,
+          9346,
+          8502,
+          8699,
+          8731
+>>>>>>> Stashed changes
         ],
         "name": "TwoKeyCampaignETH",
         "nodeType": "ContractDefinition",
@@ -1183,10 +1200,17 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
+<<<<<<< Updated upstream
                         10772,
                         10773
                       ],
                       "referencedDeclaration": 10772,
+=======
+                        10869,
+                        10870
+                      ],
+                      "referencedDeclaration": 10869,
+>>>>>>> Stashed changes
                       "src": "428:7:8",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -1342,7 +1366,11 @@
                       "lValueRequested": false,
                       "memberName": "mul",
                       "nodeType": "MemberAccess",
+<<<<<<< Updated upstream
                       "referencedDeclaration": 6990,
+=======
+                      "referencedDeclaration": 7087,
+>>>>>>> Stashed changes
                       "src": "509:36:8",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -1389,7 +1417,11 @@
                             "name": "msg",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
+<<<<<<< Updated upstream
                             "referencedDeclaration": 10769,
+=======
+                            "referencedDeclaration": 10866,
+>>>>>>> Stashed changes
                             "src": "566:3:8",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_message",
@@ -1443,10 +1475,17 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
+<<<<<<< Updated upstream
                         10772,
                         10773
                       ],
                       "referencedDeclaration": 10772,
+=======
+                        10869,
+                        10870
+                      ],
+                      "referencedDeclaration": 10869,
+>>>>>>> Stashed changes
                       "src": "558:7:8",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -1543,7 +1582,11 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
+<<<<<<< Updated upstream
                           "referencedDeclaration": 10769,
+=======
+                          "referencedDeclaration": 10866,
+>>>>>>> Stashed changes
                           "src": "638:3:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -1674,7 +1717,11 @@
                         "name": "now",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
+<<<<<<< Updated upstream
                         "referencedDeclaration": 10771,
+=======
+                        "referencedDeclaration": 10868,
+>>>>>>> Stashed changes
                         "src": "722:3:8",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -1698,7 +1745,11 @@
                           "name": "now",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
+<<<<<<< Updated upstream
                           "referencedDeclaration": 10771,
+=======
+                          "referencedDeclaration": 10868,
+>>>>>>> Stashed changes
                           "src": "727:3:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
@@ -1952,7 +2003,11 @@
                             "name": "this",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
+<<<<<<< Updated upstream
                             "referencedDeclaration": 10834,
+=======
+                            "referencedDeclaration": 10931,
+>>>>>>> Stashed changes
                             "src": "853:4:8",
                             "typeDescriptions": {
                               "typeIdentifier": "t_contract$_TwoKeyCampaignETH_$2582",
@@ -2002,7 +2057,11 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
+<<<<<<< Updated upstream
                           "referencedDeclaration": 10769,
+=======
+                          "referencedDeclaration": 10866,
+>>>>>>> Stashed changes
                           "src": "860:3:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -2196,7 +2255,11 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
+<<<<<<< Updated upstream
                           "referencedDeclaration": 10769,
+=======
+                          "referencedDeclaration": 10866,
+>>>>>>> Stashed changes
                           "src": "945:3:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -2499,7 +2562,11 @@
                                 "name": "abi",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
+<<<<<<< Updated upstream
                                 "referencedDeclaration": 10756,
+=======
+                                "referencedDeclaration": 10853,
+>>>>>>> Stashed changes
                                 "src": "1328:3:8",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_magic_abi",
@@ -2546,7 +2613,11 @@
                           "name": "keccak256",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
+<<<<<<< Updated upstream
                           "referencedDeclaration": 10763,
+=======
+                          "referencedDeclaration": 10860,
+>>>>>>> Stashed changes
                           "src": "1318:9:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_sha3_pure$__$returns$_t_bytes32_$",
@@ -2794,10 +2865,17 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
+<<<<<<< Updated upstream
                         10772,
                         10773
                       ],
                       "referencedDeclaration": 10772,
+=======
+                        10869,
+                        10870
+                      ],
+                      "referencedDeclaration": 10869,
+>>>>>>> Stashed changes
                       "src": "1380:7:8",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -2948,7 +3026,11 @@
                             "name": "msg",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
+<<<<<<< Updated upstream
                             "referencedDeclaration": 10769,
+=======
+                            "referencedDeclaration": 10866,
+>>>>>>> Stashed changes
                             "src": "1497:3:8",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_message",
@@ -3002,10 +3084,17 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
+<<<<<<< Updated upstream
                         10772,
                         10773
                       ],
                       "referencedDeclaration": 10772,
+=======
+                        10869,
+                        10870
+                      ],
+                      "referencedDeclaration": 10869,
+>>>>>>> Stashed changes
                       "src": "1489:7:8",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -3102,7 +3191,11 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
+<<<<<<< Updated upstream
                           "referencedDeclaration": 10769,
+=======
+                          "referencedDeclaration": 10866,
+>>>>>>> Stashed changes
                           "src": "1569:3:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -3233,7 +3326,11 @@
                         "name": "now",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
+<<<<<<< Updated upstream
                         "referencedDeclaration": 10771,
+=======
+                        "referencedDeclaration": 10868,
+>>>>>>> Stashed changes
                         "src": "1655:3:8",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -3257,7 +3354,11 @@
                           "name": "now",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
+<<<<<<< Updated upstream
                           "referencedDeclaration": 10771,
+=======
+                          "referencedDeclaration": 10868,
+>>>>>>> Stashed changes
                           "src": "1660:3:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
@@ -3411,7 +3512,11 @@
                             "name": "this",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
+<<<<<<< Updated upstream
                             "referencedDeclaration": 10834,
+=======
+                            "referencedDeclaration": 10931,
+>>>>>>> Stashed changes
                             "src": "1723:4:8",
                             "typeDescriptions": {
                               "typeIdentifier": "t_contract$_TwoKeyCampaignETH_$2582",
@@ -3461,7 +3566,11 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
+<<<<<<< Updated upstream
                           "referencedDeclaration": 10769,
+=======
+                          "referencedDeclaration": 10866,
+>>>>>>> Stashed changes
                           "src": "1730:3:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -3655,7 +3764,11 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
+<<<<<<< Updated upstream
                           "referencedDeclaration": 10769,
+=======
+                          "referencedDeclaration": 10866,
+>>>>>>> Stashed changes
                           "src": "1817:3:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -3931,7 +4044,11 @@
                         "name": "msg",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
+<<<<<<< Updated upstream
                         "referencedDeclaration": 10769,
+=======
+                        "referencedDeclaration": 10866,
+>>>>>>> Stashed changes
                         "src": "2160:3:8",
                         "typeDescriptions": {
                           "typeIdentifier": "t_magic_message",
@@ -4065,7 +4182,11 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
+<<<<<<< Updated upstream
                           "referencedDeclaration": 10769,
+=======
+                          "referencedDeclaration": 10866,
+>>>>>>> Stashed changes
                           "src": "2224:3:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -4464,7 +4585,11 @@
                           "lValueRequested": false,
                           "memberName": "mul",
                           "nodeType": "MemberAccess",
+<<<<<<< Updated upstream
                           "referencedDeclaration": 6990,
+=======
+                          "referencedDeclaration": 7087,
+>>>>>>> Stashed changes
                           "src": "2387:9:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -4492,7 +4617,11 @@
                       "lValueRequested": false,
                       "memberName": "div",
                       "nodeType": "MemberAccess",
+<<<<<<< Updated upstream
                       "referencedDeclaration": 7004,
+=======
+                      "referencedDeclaration": 7101,
+>>>>>>> Stashed changes
                       "src": "2387:21:8",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -4588,7 +4717,11 @@
                               "lValueRequested": false,
                               "memberName": "sub",
                               "nodeType": "MemberAccess",
+<<<<<<< Updated upstream
                               "referencedDeclaration": 7024,
+=======
+                              "referencedDeclaration": 7121,
+>>>>>>> Stashed changes
                               "src": "2505:10:8",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -4616,7 +4749,11 @@
                           "lValueRequested": false,
                           "memberName": "sub",
                           "nodeType": "MemberAccess",
+<<<<<<< Updated upstream
                           "referencedDeclaration": 7024,
+=======
+                          "referencedDeclaration": 7121,
+>>>>>>> Stashed changes
                           "src": "2505:19:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -4767,7 +4904,11 @@
                           "lValueRequested": false,
                           "memberName": "mul",
                           "nodeType": "MemberAccess",
+<<<<<<< Updated upstream
                           "referencedDeclaration": 6990,
+=======
+                          "referencedDeclaration": 7087,
+>>>>>>> Stashed changes
                           "src": "2590:13:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -4842,7 +4983,11 @@
                             "name": "this",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
+<<<<<<< Updated upstream
                             "referencedDeclaration": 10834,
+=======
+                            "referencedDeclaration": 10931,
+>>>>>>> Stashed changes
                             "src": "2650:4:8",
                             "typeDescriptions": {
                               "typeIdentifier": "t_contract$_TwoKeyCampaignETH_$2582",
@@ -5664,7 +5809,7 @@
     "src": "0:3501:8"
   },
   "legacyAST": {
-    "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyCampaignETH.sol",
+    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyCampaignETH.sol",
     "exportedSymbols": {
       "TwoKeyCampaignETH": [
         2582
@@ -5685,7 +5830,7 @@
         "src": "0:24:8"
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyCampaign.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyCampaign.sol",
         "file": "./TwoKeyCampaign.sol",
         "id": 2251,
         "nodeType": "ImportDirective",
@@ -5722,11 +5867,19 @@
           928,
           2151,
           4434,
+<<<<<<< Updated upstream
           5634,
           8405,
           8602,
           8634,
           9249
+=======
+          5731,
+          8502,
+          8699,
+          8731,
+          9346
+>>>>>>> Stashed changes
         ],
         "contractKind": "contract",
         "documentation": null,
@@ -5738,12 +5891,21 @@
           4434,
           377,
           462,
+<<<<<<< Updated upstream
           5634,
           928,
           9249,
           8405,
           8602,
           8634
+=======
+          5731,
+          928,
+          9346,
+          8502,
+          8699,
+          8731
+>>>>>>> Stashed changes
         ],
         "name": "TwoKeyCampaignETH",
         "nodeType": "ContractDefinition",
@@ -5943,10 +6105,17 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
+<<<<<<< Updated upstream
                         10772,
                         10773
                       ],
                       "referencedDeclaration": 10772,
+=======
+                        10869,
+                        10870
+                      ],
+                      "referencedDeclaration": 10869,
+>>>>>>> Stashed changes
                       "src": "428:7:8",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -6102,7 +6271,11 @@
                       "lValueRequested": false,
                       "memberName": "mul",
                       "nodeType": "MemberAccess",
+<<<<<<< Updated upstream
                       "referencedDeclaration": 6990,
+=======
+                      "referencedDeclaration": 7087,
+>>>>>>> Stashed changes
                       "src": "509:36:8",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -6149,7 +6322,11 @@
                             "name": "msg",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
+<<<<<<< Updated upstream
                             "referencedDeclaration": 10769,
+=======
+                            "referencedDeclaration": 10866,
+>>>>>>> Stashed changes
                             "src": "566:3:8",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_message",
@@ -6203,10 +6380,17 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
+<<<<<<< Updated upstream
                         10772,
                         10773
                       ],
                       "referencedDeclaration": 10772,
+=======
+                        10869,
+                        10870
+                      ],
+                      "referencedDeclaration": 10869,
+>>>>>>> Stashed changes
                       "src": "558:7:8",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -6303,7 +6487,11 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
+<<<<<<< Updated upstream
                           "referencedDeclaration": 10769,
+=======
+                          "referencedDeclaration": 10866,
+>>>>>>> Stashed changes
                           "src": "638:3:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -6434,7 +6622,11 @@
                         "name": "now",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
+<<<<<<< Updated upstream
                         "referencedDeclaration": 10771,
+=======
+                        "referencedDeclaration": 10868,
+>>>>>>> Stashed changes
                         "src": "722:3:8",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -6458,7 +6650,11 @@
                           "name": "now",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
+<<<<<<< Updated upstream
                           "referencedDeclaration": 10771,
+=======
+                          "referencedDeclaration": 10868,
+>>>>>>> Stashed changes
                           "src": "727:3:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
@@ -6712,7 +6908,11 @@
                             "name": "this",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
+<<<<<<< Updated upstream
                             "referencedDeclaration": 10834,
+=======
+                            "referencedDeclaration": 10931,
+>>>>>>> Stashed changes
                             "src": "853:4:8",
                             "typeDescriptions": {
                               "typeIdentifier": "t_contract$_TwoKeyCampaignETH_$2582",
@@ -6762,7 +6962,11 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
+<<<<<<< Updated upstream
                           "referencedDeclaration": 10769,
+=======
+                          "referencedDeclaration": 10866,
+>>>>>>> Stashed changes
                           "src": "860:3:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -6956,7 +7160,11 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
+<<<<<<< Updated upstream
                           "referencedDeclaration": 10769,
+=======
+                          "referencedDeclaration": 10866,
+>>>>>>> Stashed changes
                           "src": "945:3:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -7259,7 +7467,11 @@
                                 "name": "abi",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
+<<<<<<< Updated upstream
                                 "referencedDeclaration": 10756,
+=======
+                                "referencedDeclaration": 10853,
+>>>>>>> Stashed changes
                                 "src": "1328:3:8",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_magic_abi",
@@ -7306,7 +7518,11 @@
                           "name": "keccak256",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
+<<<<<<< Updated upstream
                           "referencedDeclaration": 10763,
+=======
+                          "referencedDeclaration": 10860,
+>>>>>>> Stashed changes
                           "src": "1318:9:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_sha3_pure$__$returns$_t_bytes32_$",
@@ -7554,10 +7770,17 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
+<<<<<<< Updated upstream
                         10772,
                         10773
                       ],
                       "referencedDeclaration": 10772,
+=======
+                        10869,
+                        10870
+                      ],
+                      "referencedDeclaration": 10869,
+>>>>>>> Stashed changes
                       "src": "1380:7:8",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -7708,7 +7931,11 @@
                             "name": "msg",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
+<<<<<<< Updated upstream
                             "referencedDeclaration": 10769,
+=======
+                            "referencedDeclaration": 10866,
+>>>>>>> Stashed changes
                             "src": "1497:3:8",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_message",
@@ -7762,10 +7989,17 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
+<<<<<<< Updated upstream
                         10772,
                         10773
                       ],
                       "referencedDeclaration": 10772,
+=======
+                        10869,
+                        10870
+                      ],
+                      "referencedDeclaration": 10869,
+>>>>>>> Stashed changes
                       "src": "1489:7:8",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -7862,7 +8096,11 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
+<<<<<<< Updated upstream
                           "referencedDeclaration": 10769,
+=======
+                          "referencedDeclaration": 10866,
+>>>>>>> Stashed changes
                           "src": "1569:3:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -7993,7 +8231,11 @@
                         "name": "now",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
+<<<<<<< Updated upstream
                         "referencedDeclaration": 10771,
+=======
+                        "referencedDeclaration": 10868,
+>>>>>>> Stashed changes
                         "src": "1655:3:8",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -8017,7 +8259,11 @@
                           "name": "now",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
+<<<<<<< Updated upstream
                           "referencedDeclaration": 10771,
+=======
+                          "referencedDeclaration": 10868,
+>>>>>>> Stashed changes
                           "src": "1660:3:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
@@ -8171,7 +8417,11 @@
                             "name": "this",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
+<<<<<<< Updated upstream
                             "referencedDeclaration": 10834,
+=======
+                            "referencedDeclaration": 10931,
+>>>>>>> Stashed changes
                             "src": "1723:4:8",
                             "typeDescriptions": {
                               "typeIdentifier": "t_contract$_TwoKeyCampaignETH_$2582",
@@ -8221,7 +8471,11 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
+<<<<<<< Updated upstream
                           "referencedDeclaration": 10769,
+=======
+                          "referencedDeclaration": 10866,
+>>>>>>> Stashed changes
                           "src": "1730:3:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -8415,7 +8669,11 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
+<<<<<<< Updated upstream
                           "referencedDeclaration": 10769,
+=======
+                          "referencedDeclaration": 10866,
+>>>>>>> Stashed changes
                           "src": "1817:3:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -8691,7 +8949,11 @@
                         "name": "msg",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
+<<<<<<< Updated upstream
                         "referencedDeclaration": 10769,
+=======
+                        "referencedDeclaration": 10866,
+>>>>>>> Stashed changes
                         "src": "2160:3:8",
                         "typeDescriptions": {
                           "typeIdentifier": "t_magic_message",
@@ -8825,7 +9087,11 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
+<<<<<<< Updated upstream
                           "referencedDeclaration": 10769,
+=======
+                          "referencedDeclaration": 10866,
+>>>>>>> Stashed changes
                           "src": "2224:3:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -9224,7 +9490,11 @@
                           "lValueRequested": false,
                           "memberName": "mul",
                           "nodeType": "MemberAccess",
+<<<<<<< Updated upstream
                           "referencedDeclaration": 6990,
+=======
+                          "referencedDeclaration": 7087,
+>>>>>>> Stashed changes
                           "src": "2387:9:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -9252,7 +9522,11 @@
                       "lValueRequested": false,
                       "memberName": "div",
                       "nodeType": "MemberAccess",
+<<<<<<< Updated upstream
                       "referencedDeclaration": 7004,
+=======
+                      "referencedDeclaration": 7101,
+>>>>>>> Stashed changes
                       "src": "2387:21:8",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -9348,7 +9622,11 @@
                               "lValueRequested": false,
                               "memberName": "sub",
                               "nodeType": "MemberAccess",
+<<<<<<< Updated upstream
                               "referencedDeclaration": 7024,
+=======
+                              "referencedDeclaration": 7121,
+>>>>>>> Stashed changes
                               "src": "2505:10:8",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -9376,7 +9654,11 @@
                           "lValueRequested": false,
                           "memberName": "sub",
                           "nodeType": "MemberAccess",
+<<<<<<< Updated upstream
                           "referencedDeclaration": 7024,
+=======
+                          "referencedDeclaration": 7121,
+>>>>>>> Stashed changes
                           "src": "2505:19:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -9527,7 +9809,11 @@
                           "lValueRequested": false,
                           "memberName": "mul",
                           "nodeType": "MemberAccess",
+<<<<<<< Updated upstream
                           "referencedDeclaration": 6990,
+=======
+                          "referencedDeclaration": 7087,
+>>>>>>> Stashed changes
                           "src": "2590:13:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -9602,7 +9888,11 @@
                             "name": "this",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
+<<<<<<< Updated upstream
                             "referencedDeclaration": 10834,
+=======
+                            "referencedDeclaration": 10931,
+>>>>>>> Stashed changes
                             "src": "2650:4:8",
                             "typeDescriptions": {
                               "typeIdentifier": "t_contract$_TwoKeyCampaignETH_$2582",
@@ -10429,5 +10719,9 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
+<<<<<<< Updated upstream
   "updatedAt": "2018-08-21T13:36:52.598Z"
+=======
+  "updatedAt": "2018-08-21T13:27:41.742Z"
+>>>>>>> Stashed changes
 }
