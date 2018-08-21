@@ -11,8 +11,8 @@ const TwoKeyEconomy = artifacts.require("TwoKeyEconomy");
 const TwoKeyCampaign = artifacts.require("TwoKeyCampaign");
 const TwoKeyAdmin = artifacts.require("TwoKeyAdmin");
 const TwoKeyUpgradableExchange = artifacts.require("TwoKeyUpgradableExchange");
-
-
+const TwoKeyARC = artifacts.require("TwoKeyARC");
+const ComposableAssetFactory = artifacts.require("ComposableAssetFactory");
 
 const ERC721Mock = artifacts.require("ERC721TokenMock");
 const ERC20Mock = artifacts.require("ERC20TokenMock");
@@ -22,10 +22,12 @@ contract('TwoKeyCampaign', async (accounts) => {
     let whitelistInfluencer, 
         whitelistConverter, 
         eventSource, 
-        economy, 
+        economy,
         campaign,
         twoKeyAdmin,
         upgradeableExchange,
+        twoKeyARC,
+        composableAssetFactory,
         erc721, 
         erc20;
 
@@ -57,18 +59,22 @@ contract('TwoKeyCampaign', async (accounts) => {
         eventSource = await TwoKeyEventSource.new(twoKeyAdmin.address);
         whitelistInfluencer = await TwoKeyWhitelisted.new();
         whitelistConverter = await TwoKeyWhitelisted.new();
-        
+        twoKeyARC = await TwoKeyARC.new(eventSource.address, contractor);
 
-        // erc721 = await ERC721Mock.new("NFT", "NFT");
-        // await erc721.mint(contractor, tokenIndex, {
-        //     from: coinbase,
-        // });
+        erc721 = await ERC721Mock.new("NFT", "NFT");
 
 
-        const openingTime = latestTime();
+        await erc721.mint(contractor, tokenIndex, {
+            from: coinbase,
+        });
+
+
+        const openingTime = latestTime() + duration.minutes(1);
+        const closingTime = latestTime() + duration.minutes(30);
         const durationCampaign = duration.minutes(30);
         const durationEscrow = duration.minutes(5);
 
+        composableAssetFactory = await ComposableAssetFactory.new(openingTime, closingTime);
 
         // campaign = await TwoKeyCampaign.new(
         //     eventSource.address,
@@ -80,25 +86,28 @@ contract('TwoKeyCampaign', async (accounts) => {
         //     moderator,
         //
         //     openingTime,
-        //     durationCampaign,
-        //     durationEscrow,
+        //     closingTime,
+        //     closingTime,
         //     escrowPrecentage,
         //     rate,
         //     maxPi
         //     ,
         //     {
-        //         from: campaignCreator
+        //         from: accounts[0]
         //     }
         // );
     });
     it("Should print addresses of contracts", async() => {
         console.log("[ERC 20] : " + erc20.address);
+        console.log("[ERC 721] : " + erc721.address);
         console.log("[TwoKeyUpgradebleExchange] : " + upgradeableExchange.address);
         console.log("[TwoKeyAdmin] : " + twoKeyAdmin.address);
         console.log("[TwoKeyEventSource] : " + eventSource.address);
         // console.log("TwoKeyCampaign : " + campaign.address);
         console.log("[TwoKeyWhitelistConverter] : " + whitelistConverter.address);
         console.log("[TwoKeyWhiteListInfluencer] : " + whitelistInfluencer.address);
+        console.log("[TwoKeyARC] : " + twoKeyARC.address);
+        console.log("[ComposableAssetFactory] : " + composableAssetFactory.address);
     });
     // it("transfer fungible to compaign", async () => {
     //
