@@ -41,6 +41,7 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
     const contracts = {
       version: Date.now(),
       date: new Date().toDateString(),
+      contracts: {},
     };
     readdir(buildPath).then((files) => {
       try {
@@ -49,7 +50,7 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
             abi, networks, contractName, bytecode,
           } = JSON.parse(fs.readFileSync(path.join(buildPath, file)));
           if (whitelist[contractName]) {
-            contracts[contractName] = whitelist[contractName].deployed
+            contracts.contracts[contractName] = whitelist[contractName].deployed
               ? { abi, networks } : { abi, networks, bytecode };
           }
           // if (abi.length) {
@@ -66,7 +67,7 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
           fs.mkdirSync(twoKeyProtocolSrcDir);
         }
         fs.writeFileSync(path.join(twoKeyProtocolSrcDir, 'contracts.ts'), `export default ${util.inspect(contracts, { depth: 10 })}`);
-        fs.writeFileSync(path.join(twoKeyProtocolSrcDir, 'abi.json'), JSON.stringify(contracts));
+        // fs.writeFileSync(path.join(twoKeyProtocolSrcDir, 'abi.json'), JSON.stringify(contracts));
         // compressor.minify({
         //   compressor: 'gcc',
         //   input: path.join(twoKeyProtocolDir, 'index.js'),
