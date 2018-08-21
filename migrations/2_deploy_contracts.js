@@ -4,7 +4,7 @@
 // * sample contract for each type of campagin.
 // * Use fake constractor parameters. coinbase is the contractor
 const TwoKeyEconomy = artifacts.require('TwoKeyEconomy');
-// const TwoKeyCampaignETHCrowdsale = artifacts.require('TwoKeyCampaignETHCrowdsale');
+const TwoKeyCampaignETHCrowdsale = artifacts.require('TwoKeyCampaignETHCrowdsale');
 
 module.exports = function (deployer) {
   console.log('TwoKeyCampaignETHCrowdsale', TwoKeyCampaignETHCrowdsale);
