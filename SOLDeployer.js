@@ -86,10 +86,9 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
   }
 });
 
-const runTruffle = args => new Promise((resolve, reject) => {
-  console.log('Run truffle', args.join(' '));
-  console.time('truffle migrate');
-  const truffle = childProcess.spawn(path.join(__dirname, 'node_modules/.bin/truffle'), args);
+const runProcess = args => new Promise((resolve, reject) => {
+  console.log('Run process', args.join(' '));
+  const truffle = childProcess.spawn(args);
   truffle.stdout.on('data', (data) => {
     console.log(data.toString('utf8'));
   });
@@ -98,8 +97,7 @@ const runTruffle = args => new Promise((resolve, reject) => {
     reject(data);
   });
   truffle.on('close', async (code) => {
-    console.timeEnd('truffle migrate');
-    console.log('truffle exit with code', code);
+    console.log('process exit with code', code);
     if (code === 0) {
       resolve(code);
     } else {
@@ -148,9 +146,10 @@ async function main() {
     const l = networks.length;
     for (let i = 0; i < l; i += 1) {
       /* eslint-disable no-await-in-loop */
-      await runTruffle(['migrate', '--network', networks[i]].concat(process.argv.slice(3)));
+      await runProcess([path.join(__dirname, 'node_modules/.bin/truffle'), 'migrate', '--network', networks[i]].concat(process.argv.slice(3)));
       /* eslint-enable no-await-in-loop */
     }
+    await runProcess([path.join(__dirname, './node_modules/.bin/typechain'), '--outDir build/2key-protocol/src/contracts', './build/contracts/*.json']);
     unlinkTruffleConfig();
     await generateSOLInterface();
     contractsStatus = await contractsGit.status();
