@@ -5,6 +5,7 @@ const BigNumber = web3.BigNumber;
 
 const HOUR = 3600;
 
+/// contracts
 const TwoKeyWhitelisted = artifacts.require("TwoKeyWhitelisted");
 const TwoKeyEventSource = artifacts.require("TwoKeyEventSource");
 const TwoKeyEconomy = artifacts.require("TwoKeyEconomy");
@@ -14,6 +15,9 @@ const TwoKeyUpgradableExchange = artifacts.require("TwoKeyUpgradableExchange");
 const TwoKeyARC = artifacts.require("TwoKeyARC");
 const ComposableAssetFactory = artifacts.require("ComposableAssetFactory");
 
+
+/// tokens
+const StandardToken = artifacts.require("StandardToken");
 const ERC721Mock = artifacts.require("ERC721TokenMock");
 const ERC20Mock = artifacts.require("ERC20TokenMock");
 
@@ -28,7 +32,8 @@ contract('TwoKeyCampaign', async (accounts) => {
         upgradeableExchange,
         twoKeyARC,
         composableAssetFactory,
-        erc721, 
+        erc721,
+        standardToken,
         erc20;
 
 
@@ -62,7 +67,7 @@ contract('TwoKeyCampaign', async (accounts) => {
         twoKeyARC = await TwoKeyARC.new(eventSource.address, contractor);
 
         erc721 = await ERC721Mock.new("NFT", "NFT");
-
+        standardToken = await StandardToken.new();
 
         await erc721.mint(contractor, tokenIndex, {
             from: coinbase,
@@ -98,8 +103,9 @@ contract('TwoKeyCampaign', async (accounts) => {
         // );
     });
     it("Should print addresses of contracts", async() => {
-        console.log("[ERC 20] : " + erc20.address);
-        console.log("[ERC 721] : " + erc721.address);
+        console.log("[ERC20] : " + erc20.address);
+        console.log("[ERC721] : " + erc721.address);
+        console.log("[StandardToken] : " + standardToken.address);
         console.log("[TwoKeyUpgradebleExchange] : " + upgradeableExchange.address);
         console.log("[TwoKeyAdmin] : " + twoKeyAdmin.address);
         console.log("[TwoKeyEventSource] : " + eventSource.address);
