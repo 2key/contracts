@@ -39,7 +39,7 @@ process.on('uncaughtException', handleExit);
 const generateSOLInterface = () => new Promise((resolve, reject) => {
   if (fs.existsSync(buildPath)) {
     const contracts = {
-      version: Date.now(),
+      // version: version.join('.'),
       date: new Date().toDateString(),
       contracts: {},
     };
@@ -152,12 +152,6 @@ async function main() {
       /* eslint-enable no-await-in-loop */
     }
     unlinkTruffleConfig();
-    const twoKeyProtocolPackageJson = JSON.parse(fs.readFileSync(path.join(twoKeyProtocolDir, 'package.json')));
-    const version = twoKeyProtocolPackageJson.version.split('.');
-    version[version.length - 1] = parseInt(version.pop(), 10) + 1;
-    twoKeyProtocolPackageJson.version = version.join('.');
-    console.log('2key-protocol version:', twoKeyProtocolPackageJson.version);
-    fs.writeFileSync(path.join(twoKeyProtocolDir, 'package.json'), JSON.stringify(twoKeyProtocolPackageJson));
     await generateSOLInterface();
     contractsStatus = await contractsGit.status();
     twoKeyProtocolStatus = await twoKeyProtocolGit.status();
