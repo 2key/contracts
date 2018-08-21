@@ -121,43 +121,43 @@ contract TwoKeyCampaign is TwoKeyARC, ComposableAssetFactory, TwoKeyTypes {
 
 
 		/// requires that all contracts from constructor are already deployed
-//		require(_eventSource != address(0));
-//		require(_economy != address(0));
-//		require(_whitelistInfluencer != address(0));
-//		require(_whitelistConverter != address(0));
-//
-//		/// uint values
-//		require(_rate > 0);
-//		require(_maxPi > 0);
-//
-//		/// adminAddRole can only be called from the address which is already admin, meaning address of this contract need to be an admin
-//		/// This can revert transaction
-//		adminAddRole(msg.sender, ROLE_CONTROLLER);
-//		adminAddRole(_contractor, ROLE_CONTROLLER);
-//		adminAddRole(_moderator, ROLE_CONTROLLER);
-//
-//		balances[msg.sender] = totalSupply_;
-//
-//		economy = _economy;
-//		whitelistInfluencer = _whitelistInfluencer;
-//		whitelistConverter = _whitelistConverter;
-//
-//		contractor = _contractor;
-//		moderator = _moderator;
-//
-//		expiryConversion = _expiryConversion;
-//		escrowPrecentage = _escrowPrecentage;
-//
-//		rate = _rate;
+		require(_eventSource != address(0));
+		require(_economy != address(0));
+		require(_whitelistInfluencer != address(0));
+		require(_whitelistConverter != address(0));
 
-		// in general max_pi is dynamic and is computed by the incentive model 
-	    // per conversion
-	    // there should be a discount - but not for now
+		/// uint values
+		require(_rate > 0);
+		require(_maxPi > 0);
 
-//	    maxPi = _maxPi;
+		/// adminAddRole can only be called from the address which is already admin, meaning address of this contract need to be an admin
+		/// This can revert transaction
+		adminAddRole(msg.sender, ROLE_CONTROLLER);
+		adminAddRole(_contractor, ROLE_CONTROLLER);
+		adminAddRole(_moderator, ROLE_CONTROLLER);
+
+		balances[msg.sender] = totalSupply_;
+
+		economy = _economy;
+		whitelistInfluencer = _whitelistInfluencer;
+		whitelistConverter = _whitelistConverter;
+
+		contractor = _contractor;
+		moderator = _moderator;
+
+		expiryConversion = _expiryConversion;
+		escrowPrecentage = _escrowPrecentage;
+
+		rate = _rate;
+
+//		 in general max_pi is dynamic and is computed by the incentive model
+//	     per conversion
+//	     there should be a discount - but not for now
+
+        maxPi = _maxPi;
 
 		
-		// eventSource.created(address(this), contractor);
+		 eventSource.created(address(this), contractor);
 
 	}
 
