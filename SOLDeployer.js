@@ -40,18 +40,20 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
   if (fs.existsSync(buildPath)) {
     const contracts = {
       // version: version.join('.'),
-      date: new Date().toDateString(),
-      contracts: {},
+      // date: new Date().toDateString(),
+      // contracts: {},
     };
     readdir(buildPath).then((files) => {
       try {
         files.forEach((file) => {
           const {
-            abi, networks, contractName, bytecode,
+            networks, contractName, bytecode,
           } = JSON.parse(fs.readFileSync(path.join(buildPath, file)));
           if (whitelist[contractName]) {
-            contracts.contracts[contractName] = whitelist[contractName].deployed
-              ? { abi, networks } : { abi, networks, bytecode };
+            // contracts[contractName] = whitelist[contractName].deployed
+            //   ? { abi, networks } : { abi, networks, bytecode };
+            contracts[contractName] = whitelist[contractName].deployed
+              ? { networks } : { networks, bytecode };
           }
           // if (abi.length) {
           // contracts[contractName] =
@@ -66,7 +68,7 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
         if (!fs.existsSync(twoKeyProtocolSrcDir)) {
           fs.mkdirSync(twoKeyProtocolSrcDir);
         }
-        fs.writeFileSync(path.join(twoKeyProtocolSrcDir, 'contracts.ts'), `export default ${util.inspect(contracts, { depth: 10 })}`);
+        fs.writeFileSync(path.join(twoKeyProtocolSrcDir, 'contracts/meta.ts'), `export default ${util.inspect(contracts, { depth: 10 })}`);
         // fs.writeFileSync(path.join(twoKeyProtocolSrcDir, 'abi.json'), JSON.stringify(contracts));
         // compressor.minify({
         //   compressor: 'gcc',
