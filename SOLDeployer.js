@@ -90,15 +90,15 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
 
 const runProcess = (app, args) => new Promise((resolve, reject) => {
   console.log('Run process', app, args.join(' '));
-  const truffle = childProcess.spawn(app, args.join(' '));
-  truffle.stdout.on('data', (data) => {
+  const proc = childProcess.spawn(app, args);
+  proc.stdout.on('data', (data) => {
     console.log(data.toString('utf8'));
   });
-  truffle.stderr.on('data', (data) => {
+  proc.stderr.on('data', (data) => {
     console.log(data.toString('utf8'));
     reject(data);
   });
-  truffle.on('close', async (code) => {
+  proc.on('close', async (code) => {
     console.log('process exit with code', code);
     if (code === 0) {
       resolve(code);
