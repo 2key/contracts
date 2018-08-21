@@ -86,9 +86,9 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
   }
 });
 
-const runProcess = args => new Promise((resolve, reject) => {
+const runProcess = (app, args) => new Promise((resolve, reject) => {
   console.log('Run process', args.join(' '));
-  const truffle = childProcess.spawn(args);
+  const truffle = childProcess.spawn(app, args);
   truffle.stdout.on('data', (data) => {
     console.log(data.toString('utf8'));
   });
