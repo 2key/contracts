@@ -902,9 +902,9 @@
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "pragma solidity ^0.4.24;\n\nimport './TwoKeyCampaign.sol';\n\n\ncontract TwoKeyCampaignETH is TwoKeyCampaign {\n \n\t/*  \n\t    fulfills a fungible asset purchase\n\t    creates the escrow for a fungible asset\n\t    computes the payout in ETH \n\t    transfers to the escrow the asset purchased\n    */ \n\tfunction fulfillFungibleETH(\n\t\taddress _from, \n\t\tuint256 _tokenID, \n\t\taddress _assetContract, \n\t\tuint256 _amount) isOngoing internal {\t\n\t\trequire(_amount > 0 && prices[_tokenID][_assetContract] > 0);\n\t\tuint256 payout = prices[_tokenID][_assetContract].mul(_amount);\n\t\trequire(msg.value == payout);\n\t\tConversion memory c = Conversion(_from, payout, msg.sender, false, false, _tokenID, _assetContract, _amount, CampaignType.Fungible, now, now + expiryConversion * 1 days);\n\t\t// move funds\n\t\tassets[_tokenID][_assetContract] -= _amount;\n\t\teventSource.escrow(address(this), msg.sender, _tokenID, _assetContract, _amount, CampaignType.Fungible);\n\t\tconversions[msg.sender] = c;\n\t}\n\n    /*  \n\t    fulfills a non fungible asset purchase\n\t    creates the escrow for a fungible asset\n\t    computes the payout in ETH\n\t    transfers to the escrow the asset purchased\n    */\n\tfunction fulfillNonFungibleETH(address _from, uint256 _tokenID, address _assetContract, uint256 _index) isOngoing internal {\t\n\t\taddress assetToken = address(\n\t      keccak256(abi.encodePacked(_assetContract, _index))\n\t    );\n\t\trequire(_index != 0 && prices[_tokenID][assetToken] > 0);\n\t\tuint256 payout = prices[_tokenID][assetToken];\n\t\trequire(msg.value == payout);\n\t\tConversion memory c = Conversion(_from, payout, msg.sender, false, false, _tokenID, _assetContract, _index, CampaignType.NonFungible, now, now + expiryConversion * 1 days);\n\t\teventSource.escrow(address(this), msg.sender, _tokenID, _assetContract, _index, CampaignType.NonFungible);\n\t\tconversions[msg.sender] = c;\n\t}\n\n    /**\n     * calculates moderetor fee, pays the moderator, \n     * computes total reward\n     * transfer payout to buyer, deducting the fee and the total reward\n     * asks the campaign to distribute rewards to influencers\n     */\n\n\tfunction actuallyFulfilledTwoKeyToken() internal {\n\t\tConversion memory c = conversions[msg.sender];\n        c.isFulfilled = true; \n        conversions[msg.sender] = c;\n\t\tuint256 fee = calculateModeratorFee(c.payout);\n        moderator.transfer(fee); \n        uint256 payout = c.payout;\n        uint256 maxReward = maxPi.mul(payout).div(100);\n        \n        // transfer payout - fee - rewards to seller\n        contractor.transfer(payout.sub(fee).sub(maxReward));\n        \n        transferRewardsTwoKeyToken(c.from, maxReward.mul(rate));\n        eventSource.fulfilled(address(this), c.converter, c.tokenID, c.assetContract, c.indexOrAmount, c.campaignType);\n\t}\n\n\t/**\n  \t * buy product withETH, \n  \t * _from is the influencer from which you received the referral\n  \t * _tokenID is the asset sku\n  \t * _assetContract - erc20 (fungible) or erc721 (non fungible) which represents the class of the asset\n  \t * _amountOrIndex - for erc20 amount in asset class, for erc21 index within asset class\n  \t */\n\tfunction buyFromWithETH(\n\t\taddress _from, \n\t\tuint256 _tokenID, \n\t\taddress _assetContract, \n\t\tuint256 _amountOrIndex,\n\t\tCampaignType _campaignType) public payable {\n\t\tif (_campaignType == CampaignType.Fungible) {\n\t\t\tfulfillFungibleETH(_from, _tokenID, _assetContract, _amountOrIndex);\n\t\t} else if (_campaignType == CampaignType.NonFungible) {\n\t\t\tfulfillNonFungibleETH(_from, _tokenID, _assetContract, _amountOrIndex);\n\t\t} \n\t}\n\n}\n\n",
-  "sourcePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyCampaignETH.sol",
+  "sourcePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyCampaignETH.sol",
   "ast": {
-    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyCampaignETH.sol",
+    "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyCampaignETH.sol",
     "exportedSymbols": {
       "TwoKeyCampaignETH": [
         2582
@@ -925,7 +925,7 @@
         "src": "0:24:8"
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyCampaign.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyCampaign.sol",
         "file": "./TwoKeyCampaign.sol",
         "id": 2251,
         "nodeType": "ImportDirective",
@@ -961,12 +961,12 @@
           462,
           928,
           2151,
-          3282,
-          3652,
-          4254,
-          4297,
-          4329,
-          4638
+          4456,
+          5753,
+          8524,
+          8721,
+          8753,
+          9368
         ],
         "contractKind": "contract",
         "documentation": null,
@@ -975,15 +975,15 @@
         "linearizedBaseContracts": [
           2582,
           2151,
-          3282,
+          4456,
           377,
           462,
-          3652,
+          5753,
           928,
-          4638,
-          4254,
-          4297,
-          4329
+          9368,
+          8524,
+          8721,
+          8753
         ],
         "name": "TwoKeyCampaignETH",
         "nodeType": "ContractDefinition",
@@ -1183,10 +1183,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        4656,
-                        4657
+                        10891,
+                        10892
                       ],
-                      "referencedDeclaration": 4656,
+                      "referencedDeclaration": 10891,
                       "src": "428:7:8",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -1342,7 +1342,7 @@
                       "lValueRequested": false,
                       "memberName": "mul",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 4013,
+                      "referencedDeclaration": 7109,
                       "src": "509:36:8",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -1389,7 +1389,7 @@
                             "name": "msg",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 4653,
+                            "referencedDeclaration": 10888,
                             "src": "566:3:8",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_message",
@@ -1443,10 +1443,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        4656,
-                        4657
+                        10891,
+                        10892
                       ],
-                      "referencedDeclaration": 4656,
+                      "referencedDeclaration": 10891,
                       "src": "558:7:8",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -1543,7 +1543,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 4653,
+                          "referencedDeclaration": 10888,
                           "src": "638:3:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -1647,10 +1647,10 @@
                           "name": "CampaignType",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3281,
+                          "referencedDeclaration": 4455,
                           "src": "699:12:8",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_type$_t_enum$_CampaignType_$3281_$",
+                            "typeIdentifier": "t_type$_t_enum$_CampaignType_$4455_$",
                             "typeString": "type(enum TwoKeyTypes.CampaignType)"
                           }
                         },
@@ -1664,7 +1664,7 @@
                         "referencedDeclaration": null,
                         "src": "699:21:8",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_enum$_CampaignType_$3281",
+                          "typeIdentifier": "t_enum$_CampaignType_$4455",
                           "typeString": "enum TwoKeyTypes.CampaignType"
                         }
                       },
@@ -1674,7 +1674,7 @@
                         "name": "now",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 4655,
+                        "referencedDeclaration": 10890,
                         "src": "722:3:8",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -1698,7 +1698,7 @@
                           "name": "now",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 4655,
+                          "referencedDeclaration": 10890,
                           "src": "727:3:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
@@ -1799,7 +1799,7 @@
                           "typeString": "uint256"
                         },
                         {
-                          "typeIdentifier": "t_enum$_CampaignType_$3281",
+                          "typeIdentifier": "t_enum$_CampaignType_$4455",
                           "typeString": "enum TwoKeyTypes.CampaignType"
                         },
                         {
@@ -1952,7 +1952,7 @@
                             "name": "this",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 4718,
+                            "referencedDeclaration": 10953,
                             "src": "853:4:8",
                             "typeDescriptions": {
                               "typeIdentifier": "t_contract$_TwoKeyCampaignETH_$2582",
@@ -2002,7 +2002,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 4653,
+                          "referencedDeclaration": 10888,
                           "src": "860:3:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -2070,10 +2070,10 @@
                           "name": "CampaignType",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3281,
+                          "referencedDeclaration": 4455,
                           "src": "907:12:8",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_type$_t_enum$_CampaignType_$3281_$",
+                            "typeIdentifier": "t_type$_t_enum$_CampaignType_$4455_$",
                             "typeString": "type(enum TwoKeyTypes.CampaignType)"
                           }
                         },
@@ -2087,7 +2087,7 @@
                         "referencedDeclaration": null,
                         "src": "907:21:8",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_enum$_CampaignType_$3281",
+                          "typeIdentifier": "t_enum$_CampaignType_$4455",
                           "typeString": "enum TwoKeyTypes.CampaignType"
                         }
                       }
@@ -2115,7 +2115,7 @@
                           "typeString": "uint256"
                         },
                         {
-                          "typeIdentifier": "t_enum$_CampaignType_$3281",
+                          "typeIdentifier": "t_enum$_CampaignType_$4455",
                           "typeString": "enum TwoKeyTypes.CampaignType"
                         }
                       ],
@@ -2128,7 +2128,7 @@
                         "referencedDeclaration": 1254,
                         "src": "826:11:8",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_TwoKeyEventSource_$3162",
+                          "typeIdentifier": "t_contract$_TwoKeyEventSource_$3920",
                           "typeString": "contract TwoKeyEventSource"
                         }
                       },
@@ -2139,10 +2139,10 @@
                       "lValueRequested": false,
                       "memberName": "escrow",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 3079,
+                      "referencedDeclaration": 3825,
                       "src": "826:18:8",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_address_$_t_uint256_$_t_address_$_t_uint256_$_t_enum$_CampaignType_$3281_$returns$__$",
+                        "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_address_$_t_uint256_$_t_address_$_t_uint256_$_t_enum$_CampaignType_$4455_$returns$__$",
                         "typeString": "function (address,address,uint256,address,uint256,enum TwoKeyTypes.CampaignType) external"
                       }
                     },
@@ -2196,7 +2196,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 4653,
+                          "referencedDeclaration": 10888,
                           "src": "945:3:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -2499,7 +2499,7 @@
                                 "name": "abi",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 4640,
+                                "referencedDeclaration": 10875,
                                 "src": "1328:3:8",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_magic_abi",
@@ -2546,7 +2546,7 @@
                           "name": "keccak256",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 4647,
+                          "referencedDeclaration": 10882,
                           "src": "1318:9:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_sha3_pure$__$returns$_t_bytes32_$",
@@ -2794,10 +2794,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        4656,
-                        4657
+                        10891,
+                        10892
                       ],
-                      "referencedDeclaration": 4656,
+                      "referencedDeclaration": 10891,
                       "src": "1380:7:8",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -2948,7 +2948,7 @@
                             "name": "msg",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 4653,
+                            "referencedDeclaration": 10888,
                             "src": "1497:3:8",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_message",
@@ -3002,10 +3002,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        4656,
-                        4657
+                        10891,
+                        10892
                       ],
-                      "referencedDeclaration": 4656,
+                      "referencedDeclaration": 10891,
                       "src": "1489:7:8",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -3102,7 +3102,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 4653,
+                          "referencedDeclaration": 10888,
                           "src": "1569:3:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -3206,10 +3206,10 @@
                           "name": "CampaignType",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3281,
+                          "referencedDeclaration": 4455,
                           "src": "1629:12:8",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_type$_t_enum$_CampaignType_$3281_$",
+                            "typeIdentifier": "t_type$_t_enum$_CampaignType_$4455_$",
                             "typeString": "type(enum TwoKeyTypes.CampaignType)"
                           }
                         },
@@ -3223,7 +3223,7 @@
                         "referencedDeclaration": null,
                         "src": "1629:24:8",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_enum$_CampaignType_$3281",
+                          "typeIdentifier": "t_enum$_CampaignType_$4455",
                           "typeString": "enum TwoKeyTypes.CampaignType"
                         }
                       },
@@ -3233,7 +3233,7 @@
                         "name": "now",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 4655,
+                        "referencedDeclaration": 10890,
                         "src": "1655:3:8",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -3257,7 +3257,7 @@
                           "name": "now",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 4655,
+                          "referencedDeclaration": 10890,
                           "src": "1660:3:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
@@ -3358,7 +3358,7 @@
                           "typeString": "uint256"
                         },
                         {
-                          "typeIdentifier": "t_enum$_CampaignType_$3281",
+                          "typeIdentifier": "t_enum$_CampaignType_$4455",
                           "typeString": "enum TwoKeyTypes.CampaignType"
                         },
                         {
@@ -3411,7 +3411,7 @@
                             "name": "this",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 4718,
+                            "referencedDeclaration": 10953,
                             "src": "1723:4:8",
                             "typeDescriptions": {
                               "typeIdentifier": "t_contract$_TwoKeyCampaignETH_$2582",
@@ -3461,7 +3461,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 4653,
+                          "referencedDeclaration": 10888,
                           "src": "1730:3:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -3529,10 +3529,10 @@
                           "name": "CampaignType",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3281,
+                          "referencedDeclaration": 4455,
                           "src": "1776:12:8",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_type$_t_enum$_CampaignType_$3281_$",
+                            "typeIdentifier": "t_type$_t_enum$_CampaignType_$4455_$",
                             "typeString": "type(enum TwoKeyTypes.CampaignType)"
                           }
                         },
@@ -3546,7 +3546,7 @@
                         "referencedDeclaration": null,
                         "src": "1776:24:8",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_enum$_CampaignType_$3281",
+                          "typeIdentifier": "t_enum$_CampaignType_$4455",
                           "typeString": "enum TwoKeyTypes.CampaignType"
                         }
                       }
@@ -3574,7 +3574,7 @@
                           "typeString": "uint256"
                         },
                         {
-                          "typeIdentifier": "t_enum$_CampaignType_$3281",
+                          "typeIdentifier": "t_enum$_CampaignType_$4455",
                           "typeString": "enum TwoKeyTypes.CampaignType"
                         }
                       ],
@@ -3587,7 +3587,7 @@
                         "referencedDeclaration": 1254,
                         "src": "1696:11:8",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_TwoKeyEventSource_$3162",
+                          "typeIdentifier": "t_contract$_TwoKeyEventSource_$3920",
                           "typeString": "contract TwoKeyEventSource"
                         }
                       },
@@ -3598,10 +3598,10 @@
                       "lValueRequested": false,
                       "memberName": "escrow",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 3079,
+                      "referencedDeclaration": 3825,
                       "src": "1696:18:8",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_address_$_t_uint256_$_t_address_$_t_uint256_$_t_enum$_CampaignType_$3281_$returns$__$",
+                        "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_address_$_t_uint256_$_t_address_$_t_uint256_$_t_enum$_CampaignType_$4455_$returns$__$",
                         "typeString": "function (address,address,uint256,address,uint256,enum TwoKeyTypes.CampaignType) external"
                       }
                     },
@@ -3655,7 +3655,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 4653,
+                          "referencedDeclaration": 10888,
                           "src": "1817:3:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -3931,7 +3931,7 @@
                         "name": "msg",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 4653,
+                        "referencedDeclaration": 10888,
                         "src": "2160:3:8",
                         "typeDescriptions": {
                           "typeIdentifier": "t_magic_message",
@@ -4065,7 +4065,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 4653,
+                          "referencedDeclaration": 10888,
                           "src": "2224:3:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -4464,7 +4464,7 @@
                           "lValueRequested": false,
                           "memberName": "mul",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 4013,
+                          "referencedDeclaration": 7109,
                           "src": "2387:9:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -4492,7 +4492,7 @@
                       "lValueRequested": false,
                       "memberName": "div",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 4027,
+                      "referencedDeclaration": 7123,
                       "src": "2387:21:8",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -4588,7 +4588,7 @@
                               "lValueRequested": false,
                               "memberName": "sub",
                               "nodeType": "MemberAccess",
-                              "referencedDeclaration": 4047,
+                              "referencedDeclaration": 7143,
                               "src": "2505:10:8",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -4616,7 +4616,7 @@
                           "lValueRequested": false,
                           "memberName": "sub",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 4047,
+                          "referencedDeclaration": 7143,
                           "src": "2505:19:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -4767,7 +4767,7 @@
                           "lValueRequested": false,
                           "memberName": "mul",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 4013,
+                          "referencedDeclaration": 7109,
                           "src": "2590:13:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -4842,7 +4842,7 @@
                             "name": "this",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 4718,
+                            "referencedDeclaration": 10953,
                             "src": "2650:4:8",
                             "typeDescriptions": {
                               "typeIdentifier": "t_contract$_TwoKeyCampaignETH_$2582",
@@ -5025,7 +5025,7 @@
                         "referencedDeclaration": 1243,
                         "src": "2715:14:8",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_enum$_CampaignType_$3281",
+                          "typeIdentifier": "t_enum$_CampaignType_$4455",
                           "typeString": "enum TwoKeyTypes.CampaignType"
                         }
                       }
@@ -5053,7 +5053,7 @@
                           "typeString": "uint256"
                         },
                         {
-                          "typeIdentifier": "t_enum$_CampaignType_$3281",
+                          "typeIdentifier": "t_enum$_CampaignType_$4455",
                           "typeString": "enum TwoKeyTypes.CampaignType"
                         }
                       ],
@@ -5066,7 +5066,7 @@
                         "referencedDeclaration": 1254,
                         "src": "2620:11:8",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_TwoKeyEventSource_$3162",
+                          "typeIdentifier": "t_contract$_TwoKeyEventSource_$3920",
                           "typeString": "contract TwoKeyEventSource"
                         }
                       },
@@ -5077,10 +5077,10 @@
                       "lValueRequested": false,
                       "memberName": "fulfilled",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 3124,
+                      "referencedDeclaration": 3870,
                       "src": "2620:21:8",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_address_$_t_uint256_$_t_address_$_t_uint256_$_t_enum$_CampaignType_$3281_$returns$__$",
+                        "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_address_$_t_uint256_$_t_address_$_t_uint256_$_t_enum$_CampaignType_$4455_$returns$__$",
                         "typeString": "function (address,address,uint256,address,uint256,enum TwoKeyTypes.CampaignType) external"
                       }
                     },
@@ -5141,7 +5141,7 @@
                   "condition": {
                     "argumentTypes": null,
                     "commonType": {
-                      "typeIdentifier": "t_enum$_CampaignType_$3281",
+                      "typeIdentifier": "t_enum$_CampaignType_$4455",
                       "typeString": "enum TwoKeyTypes.CampaignType"
                     },
                     "id": 2557,
@@ -5158,7 +5158,7 @@
                       "referencedDeclaration": 2551,
                       "src": "3242:13:8",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_enum$_CampaignType_$3281",
+                        "typeIdentifier": "t_enum$_CampaignType_$4455",
                         "typeString": "enum TwoKeyTypes.CampaignType"
                       }
                     },
@@ -5172,10 +5172,10 @@
                         "name": "CampaignType",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3281,
+                        "referencedDeclaration": 4455,
                         "src": "3259:12:8",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_type$_t_enum$_CampaignType_$3281_$",
+                          "typeIdentifier": "t_type$_t_enum$_CampaignType_$4455_$",
                           "typeString": "type(enum TwoKeyTypes.CampaignType)"
                         }
                       },
@@ -5189,7 +5189,7 @@
                       "referencedDeclaration": null,
                       "src": "3259:21:8",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_enum$_CampaignType_$3281",
+                        "typeIdentifier": "t_enum$_CampaignType_$4455",
                         "typeString": "enum TwoKeyTypes.CampaignType"
                       }
                     },
@@ -5203,7 +5203,7 @@
                     "condition": {
                       "argumentTypes": null,
                       "commonType": {
-                        "typeIdentifier": "t_enum$_CampaignType_$3281",
+                        "typeIdentifier": "t_enum$_CampaignType_$4455",
                         "typeString": "enum TwoKeyTypes.CampaignType"
                       },
                       "id": 2569,
@@ -5220,7 +5220,7 @@
                         "referencedDeclaration": 2551,
                         "src": "3369:13:8",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_enum$_CampaignType_$3281",
+                          "typeIdentifier": "t_enum$_CampaignType_$4455",
                           "typeString": "enum TwoKeyTypes.CampaignType"
                         }
                       },
@@ -5234,10 +5234,10 @@
                           "name": "CampaignType",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3281,
+                          "referencedDeclaration": 4455,
                           "src": "3386:12:8",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_type$_t_enum$_CampaignType_$3281_$",
+                            "typeIdentifier": "t_type$_t_enum$_CampaignType_$4455_$",
                             "typeString": "type(enum TwoKeyTypes.CampaignType)"
                           }
                         },
@@ -5251,7 +5251,7 @@
                         "referencedDeclaration": null,
                         "src": "3386:24:8",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_enum$_CampaignType_$3281",
+                          "typeIdentifier": "t_enum$_CampaignType_$4455",
                           "typeString": "enum TwoKeyTypes.CampaignType"
                         }
                       },
@@ -5622,7 +5622,7 @@
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_enum$_CampaignType_$3281",
+                    "typeIdentifier": "t_enum$_CampaignType_$4455",
                     "typeString": "enum TwoKeyTypes.CampaignType"
                   },
                   "typeName": {
@@ -5630,10 +5630,10 @@
                     "id": 2550,
                     "name": "CampaignType",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 3281,
+                    "referencedDeclaration": 4455,
                     "src": "3191:12:8",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_enum$_CampaignType_$3281",
+                      "typeIdentifier": "t_enum$_CampaignType_$4455",
                       "typeString": "enum TwoKeyTypes.CampaignType"
                     }
                   },
@@ -5664,7 +5664,7 @@
     "src": "0:3501:8"
   },
   "legacyAST": {
-    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyCampaignETH.sol",
+    "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyCampaignETH.sol",
     "exportedSymbols": {
       "TwoKeyCampaignETH": [
         2582
@@ -5685,7 +5685,7 @@
         "src": "0:24:8"
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyCampaign.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyCampaign.sol",
         "file": "./TwoKeyCampaign.sol",
         "id": 2251,
         "nodeType": "ImportDirective",
@@ -5721,12 +5721,12 @@
           462,
           928,
           2151,
-          3282,
-          3652,
-          4254,
-          4297,
-          4329,
-          4638
+          4456,
+          5753,
+          8524,
+          8721,
+          8753,
+          9368
         ],
         "contractKind": "contract",
         "documentation": null,
@@ -5735,15 +5735,15 @@
         "linearizedBaseContracts": [
           2582,
           2151,
-          3282,
+          4456,
           377,
           462,
-          3652,
+          5753,
           928,
-          4638,
-          4254,
-          4297,
-          4329
+          9368,
+          8524,
+          8721,
+          8753
         ],
         "name": "TwoKeyCampaignETH",
         "nodeType": "ContractDefinition",
@@ -5943,10 +5943,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        4656,
-                        4657
+                        10891,
+                        10892
                       ],
-                      "referencedDeclaration": 4656,
+                      "referencedDeclaration": 10891,
                       "src": "428:7:8",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -6102,7 +6102,7 @@
                       "lValueRequested": false,
                       "memberName": "mul",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 4013,
+                      "referencedDeclaration": 7109,
                       "src": "509:36:8",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -6149,7 +6149,7 @@
                             "name": "msg",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 4653,
+                            "referencedDeclaration": 10888,
                             "src": "566:3:8",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_message",
@@ -6203,10 +6203,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        4656,
-                        4657
+                        10891,
+                        10892
                       ],
-                      "referencedDeclaration": 4656,
+                      "referencedDeclaration": 10891,
                       "src": "558:7:8",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -6303,7 +6303,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 4653,
+                          "referencedDeclaration": 10888,
                           "src": "638:3:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -6407,10 +6407,10 @@
                           "name": "CampaignType",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3281,
+                          "referencedDeclaration": 4455,
                           "src": "699:12:8",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_type$_t_enum$_CampaignType_$3281_$",
+                            "typeIdentifier": "t_type$_t_enum$_CampaignType_$4455_$",
                             "typeString": "type(enum TwoKeyTypes.CampaignType)"
                           }
                         },
@@ -6424,7 +6424,7 @@
                         "referencedDeclaration": null,
                         "src": "699:21:8",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_enum$_CampaignType_$3281",
+                          "typeIdentifier": "t_enum$_CampaignType_$4455",
                           "typeString": "enum TwoKeyTypes.CampaignType"
                         }
                       },
@@ -6434,7 +6434,7 @@
                         "name": "now",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 4655,
+                        "referencedDeclaration": 10890,
                         "src": "722:3:8",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -6458,7 +6458,7 @@
                           "name": "now",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 4655,
+                          "referencedDeclaration": 10890,
                           "src": "727:3:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
@@ -6559,7 +6559,7 @@
                           "typeString": "uint256"
                         },
                         {
-                          "typeIdentifier": "t_enum$_CampaignType_$3281",
+                          "typeIdentifier": "t_enum$_CampaignType_$4455",
                           "typeString": "enum TwoKeyTypes.CampaignType"
                         },
                         {
@@ -6712,7 +6712,7 @@
                             "name": "this",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 4718,
+                            "referencedDeclaration": 10953,
                             "src": "853:4:8",
                             "typeDescriptions": {
                               "typeIdentifier": "t_contract$_TwoKeyCampaignETH_$2582",
@@ -6762,7 +6762,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 4653,
+                          "referencedDeclaration": 10888,
                           "src": "860:3:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -6830,10 +6830,10 @@
                           "name": "CampaignType",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3281,
+                          "referencedDeclaration": 4455,
                           "src": "907:12:8",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_type$_t_enum$_CampaignType_$3281_$",
+                            "typeIdentifier": "t_type$_t_enum$_CampaignType_$4455_$",
                             "typeString": "type(enum TwoKeyTypes.CampaignType)"
                           }
                         },
@@ -6847,7 +6847,7 @@
                         "referencedDeclaration": null,
                         "src": "907:21:8",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_enum$_CampaignType_$3281",
+                          "typeIdentifier": "t_enum$_CampaignType_$4455",
                           "typeString": "enum TwoKeyTypes.CampaignType"
                         }
                       }
@@ -6875,7 +6875,7 @@
                           "typeString": "uint256"
                         },
                         {
-                          "typeIdentifier": "t_enum$_CampaignType_$3281",
+                          "typeIdentifier": "t_enum$_CampaignType_$4455",
                           "typeString": "enum TwoKeyTypes.CampaignType"
                         }
                       ],
@@ -6888,7 +6888,7 @@
                         "referencedDeclaration": 1254,
                         "src": "826:11:8",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_TwoKeyEventSource_$3162",
+                          "typeIdentifier": "t_contract$_TwoKeyEventSource_$3920",
                           "typeString": "contract TwoKeyEventSource"
                         }
                       },
@@ -6899,10 +6899,10 @@
                       "lValueRequested": false,
                       "memberName": "escrow",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 3079,
+                      "referencedDeclaration": 3825,
                       "src": "826:18:8",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_address_$_t_uint256_$_t_address_$_t_uint256_$_t_enum$_CampaignType_$3281_$returns$__$",
+                        "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_address_$_t_uint256_$_t_address_$_t_uint256_$_t_enum$_CampaignType_$4455_$returns$__$",
                         "typeString": "function (address,address,uint256,address,uint256,enum TwoKeyTypes.CampaignType) external"
                       }
                     },
@@ -6956,7 +6956,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 4653,
+                          "referencedDeclaration": 10888,
                           "src": "945:3:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -7259,7 +7259,7 @@
                                 "name": "abi",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 4640,
+                                "referencedDeclaration": 10875,
                                 "src": "1328:3:8",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_magic_abi",
@@ -7306,7 +7306,7 @@
                           "name": "keccak256",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 4647,
+                          "referencedDeclaration": 10882,
                           "src": "1318:9:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_sha3_pure$__$returns$_t_bytes32_$",
@@ -7554,10 +7554,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        4656,
-                        4657
+                        10891,
+                        10892
                       ],
-                      "referencedDeclaration": 4656,
+                      "referencedDeclaration": 10891,
                       "src": "1380:7:8",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -7708,7 +7708,7 @@
                             "name": "msg",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 4653,
+                            "referencedDeclaration": 10888,
                             "src": "1497:3:8",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_message",
@@ -7762,10 +7762,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        4656,
-                        4657
+                        10891,
+                        10892
                       ],
-                      "referencedDeclaration": 4656,
+                      "referencedDeclaration": 10891,
                       "src": "1489:7:8",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -7862,7 +7862,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 4653,
+                          "referencedDeclaration": 10888,
                           "src": "1569:3:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -7966,10 +7966,10 @@
                           "name": "CampaignType",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3281,
+                          "referencedDeclaration": 4455,
                           "src": "1629:12:8",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_type$_t_enum$_CampaignType_$3281_$",
+                            "typeIdentifier": "t_type$_t_enum$_CampaignType_$4455_$",
                             "typeString": "type(enum TwoKeyTypes.CampaignType)"
                           }
                         },
@@ -7983,7 +7983,7 @@
                         "referencedDeclaration": null,
                         "src": "1629:24:8",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_enum$_CampaignType_$3281",
+                          "typeIdentifier": "t_enum$_CampaignType_$4455",
                           "typeString": "enum TwoKeyTypes.CampaignType"
                         }
                       },
@@ -7993,7 +7993,7 @@
                         "name": "now",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 4655,
+                        "referencedDeclaration": 10890,
                         "src": "1655:3:8",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -8017,7 +8017,7 @@
                           "name": "now",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 4655,
+                          "referencedDeclaration": 10890,
                           "src": "1660:3:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
@@ -8118,7 +8118,7 @@
                           "typeString": "uint256"
                         },
                         {
-                          "typeIdentifier": "t_enum$_CampaignType_$3281",
+                          "typeIdentifier": "t_enum$_CampaignType_$4455",
                           "typeString": "enum TwoKeyTypes.CampaignType"
                         },
                         {
@@ -8171,7 +8171,7 @@
                             "name": "this",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 4718,
+                            "referencedDeclaration": 10953,
                             "src": "1723:4:8",
                             "typeDescriptions": {
                               "typeIdentifier": "t_contract$_TwoKeyCampaignETH_$2582",
@@ -8221,7 +8221,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 4653,
+                          "referencedDeclaration": 10888,
                           "src": "1730:3:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -8289,10 +8289,10 @@
                           "name": "CampaignType",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3281,
+                          "referencedDeclaration": 4455,
                           "src": "1776:12:8",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_type$_t_enum$_CampaignType_$3281_$",
+                            "typeIdentifier": "t_type$_t_enum$_CampaignType_$4455_$",
                             "typeString": "type(enum TwoKeyTypes.CampaignType)"
                           }
                         },
@@ -8306,7 +8306,7 @@
                         "referencedDeclaration": null,
                         "src": "1776:24:8",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_enum$_CampaignType_$3281",
+                          "typeIdentifier": "t_enum$_CampaignType_$4455",
                           "typeString": "enum TwoKeyTypes.CampaignType"
                         }
                       }
@@ -8334,7 +8334,7 @@
                           "typeString": "uint256"
                         },
                         {
-                          "typeIdentifier": "t_enum$_CampaignType_$3281",
+                          "typeIdentifier": "t_enum$_CampaignType_$4455",
                           "typeString": "enum TwoKeyTypes.CampaignType"
                         }
                       ],
@@ -8347,7 +8347,7 @@
                         "referencedDeclaration": 1254,
                         "src": "1696:11:8",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_TwoKeyEventSource_$3162",
+                          "typeIdentifier": "t_contract$_TwoKeyEventSource_$3920",
                           "typeString": "contract TwoKeyEventSource"
                         }
                       },
@@ -8358,10 +8358,10 @@
                       "lValueRequested": false,
                       "memberName": "escrow",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 3079,
+                      "referencedDeclaration": 3825,
                       "src": "1696:18:8",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_address_$_t_uint256_$_t_address_$_t_uint256_$_t_enum$_CampaignType_$3281_$returns$__$",
+                        "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_address_$_t_uint256_$_t_address_$_t_uint256_$_t_enum$_CampaignType_$4455_$returns$__$",
                         "typeString": "function (address,address,uint256,address,uint256,enum TwoKeyTypes.CampaignType) external"
                       }
                     },
@@ -8415,7 +8415,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 4653,
+                          "referencedDeclaration": 10888,
                           "src": "1817:3:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -8691,7 +8691,7 @@
                         "name": "msg",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 4653,
+                        "referencedDeclaration": 10888,
                         "src": "2160:3:8",
                         "typeDescriptions": {
                           "typeIdentifier": "t_magic_message",
@@ -8825,7 +8825,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 4653,
+                          "referencedDeclaration": 10888,
                           "src": "2224:3:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -9224,7 +9224,7 @@
                           "lValueRequested": false,
                           "memberName": "mul",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 4013,
+                          "referencedDeclaration": 7109,
                           "src": "2387:9:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -9252,7 +9252,7 @@
                       "lValueRequested": false,
                       "memberName": "div",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 4027,
+                      "referencedDeclaration": 7123,
                       "src": "2387:21:8",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -9348,7 +9348,7 @@
                               "lValueRequested": false,
                               "memberName": "sub",
                               "nodeType": "MemberAccess",
-                              "referencedDeclaration": 4047,
+                              "referencedDeclaration": 7143,
                               "src": "2505:10:8",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -9376,7 +9376,7 @@
                           "lValueRequested": false,
                           "memberName": "sub",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 4047,
+                          "referencedDeclaration": 7143,
                           "src": "2505:19:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -9527,7 +9527,7 @@
                           "lValueRequested": false,
                           "memberName": "mul",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 4013,
+                          "referencedDeclaration": 7109,
                           "src": "2590:13:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -9602,7 +9602,7 @@
                             "name": "this",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 4718,
+                            "referencedDeclaration": 10953,
                             "src": "2650:4:8",
                             "typeDescriptions": {
                               "typeIdentifier": "t_contract$_TwoKeyCampaignETH_$2582",
@@ -9785,7 +9785,7 @@
                         "referencedDeclaration": 1243,
                         "src": "2715:14:8",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_enum$_CampaignType_$3281",
+                          "typeIdentifier": "t_enum$_CampaignType_$4455",
                           "typeString": "enum TwoKeyTypes.CampaignType"
                         }
                       }
@@ -9813,7 +9813,7 @@
                           "typeString": "uint256"
                         },
                         {
-                          "typeIdentifier": "t_enum$_CampaignType_$3281",
+                          "typeIdentifier": "t_enum$_CampaignType_$4455",
                           "typeString": "enum TwoKeyTypes.CampaignType"
                         }
                       ],
@@ -9826,7 +9826,7 @@
                         "referencedDeclaration": 1254,
                         "src": "2620:11:8",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_TwoKeyEventSource_$3162",
+                          "typeIdentifier": "t_contract$_TwoKeyEventSource_$3920",
                           "typeString": "contract TwoKeyEventSource"
                         }
                       },
@@ -9837,10 +9837,10 @@
                       "lValueRequested": false,
                       "memberName": "fulfilled",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 3124,
+                      "referencedDeclaration": 3870,
                       "src": "2620:21:8",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_address_$_t_uint256_$_t_address_$_t_uint256_$_t_enum$_CampaignType_$3281_$returns$__$",
+                        "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_address_$_t_uint256_$_t_address_$_t_uint256_$_t_enum$_CampaignType_$4455_$returns$__$",
                         "typeString": "function (address,address,uint256,address,uint256,enum TwoKeyTypes.CampaignType) external"
                       }
                     },
@@ -9901,7 +9901,7 @@
                   "condition": {
                     "argumentTypes": null,
                     "commonType": {
-                      "typeIdentifier": "t_enum$_CampaignType_$3281",
+                      "typeIdentifier": "t_enum$_CampaignType_$4455",
                       "typeString": "enum TwoKeyTypes.CampaignType"
                     },
                     "id": 2557,
@@ -9918,7 +9918,7 @@
                       "referencedDeclaration": 2551,
                       "src": "3242:13:8",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_enum$_CampaignType_$3281",
+                        "typeIdentifier": "t_enum$_CampaignType_$4455",
                         "typeString": "enum TwoKeyTypes.CampaignType"
                       }
                     },
@@ -9932,10 +9932,10 @@
                         "name": "CampaignType",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3281,
+                        "referencedDeclaration": 4455,
                         "src": "3259:12:8",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_type$_t_enum$_CampaignType_$3281_$",
+                          "typeIdentifier": "t_type$_t_enum$_CampaignType_$4455_$",
                           "typeString": "type(enum TwoKeyTypes.CampaignType)"
                         }
                       },
@@ -9949,7 +9949,7 @@
                       "referencedDeclaration": null,
                       "src": "3259:21:8",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_enum$_CampaignType_$3281",
+                        "typeIdentifier": "t_enum$_CampaignType_$4455",
                         "typeString": "enum TwoKeyTypes.CampaignType"
                       }
                     },
@@ -9963,7 +9963,7 @@
                     "condition": {
                       "argumentTypes": null,
                       "commonType": {
-                        "typeIdentifier": "t_enum$_CampaignType_$3281",
+                        "typeIdentifier": "t_enum$_CampaignType_$4455",
                         "typeString": "enum TwoKeyTypes.CampaignType"
                       },
                       "id": 2569,
@@ -9980,7 +9980,7 @@
                         "referencedDeclaration": 2551,
                         "src": "3369:13:8",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_enum$_CampaignType_$3281",
+                          "typeIdentifier": "t_enum$_CampaignType_$4455",
                           "typeString": "enum TwoKeyTypes.CampaignType"
                         }
                       },
@@ -9994,10 +9994,10 @@
                           "name": "CampaignType",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3281,
+                          "referencedDeclaration": 4455,
                           "src": "3386:12:8",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_type$_t_enum$_CampaignType_$3281_$",
+                            "typeIdentifier": "t_type$_t_enum$_CampaignType_$4455_$",
                             "typeString": "type(enum TwoKeyTypes.CampaignType)"
                           }
                         },
@@ -10011,7 +10011,7 @@
                         "referencedDeclaration": null,
                         "src": "3386:24:8",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_enum$_CampaignType_$3281",
+                          "typeIdentifier": "t_enum$_CampaignType_$4455",
                           "typeString": "enum TwoKeyTypes.CampaignType"
                         }
                       },
@@ -10382,7 +10382,7 @@
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_enum$_CampaignType_$3281",
+                    "typeIdentifier": "t_enum$_CampaignType_$4455",
                     "typeString": "enum TwoKeyTypes.CampaignType"
                   },
                   "typeName": {
@@ -10390,10 +10390,10 @@
                     "id": 2550,
                     "name": "CampaignType",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 3281,
+                    "referencedDeclaration": 4455,
                     "src": "3191:12:8",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_enum$_CampaignType_$3281",
+                      "typeIdentifier": "t_enum$_CampaignType_$4455",
                       "typeString": "enum TwoKeyTypes.CampaignType"
                     }
                   },
@@ -10429,5 +10429,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
-  "updatedAt": "2018-08-21T14:01:36.415Z"
+  "updatedAt": "2018-08-21T14:33:39.536Z"
 }

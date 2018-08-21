@@ -1085,9 +1085,9 @@
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "pragma solidity ^0.4.24; \n\nimport '../openzeppelin-solidity/contracts/math/SafeMath.sol';\nimport '../openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol';\n\nimport './TwoKeyCampaignETH.sol';\nimport './TwoKeyReg.sol';\nimport './TwoKeyEconomy.sol';\nimport './TwoKeyWhitelisted.sol';\nimport './TwoKeyEventSource.sol';\n\ncontract TwoKeyCampaignETHCrowdsale is TwoKeyCampaignETH, Crowdsale {\n\n\tusing SafeMath for uint256;\n\n\tconstructor(\n\t\tTwoKeyEventSource _eventSource,\n\t\tTwoKeyEconomy _economy,\n\t\tTwoKeyWhitelisted _whitelistInfluencer,\n\t\tTwoKeyWhitelisted _whitelistConverter, \n\t\t \n\t\taddress _contractor,\n\t\taddress _moderator, \n\n\t\t\n\t\tuint256 _start,\n\t\tuint256 _duration,\n\t\tuint256 _expiryConversion, \n\t\tuint256 _escrowPrecentage,\n\t\tuint256 _rate,\n\t\tuint256 _maxPi) TwoKeyCampaign(\n\t\t_eventSource,\n\t\t_economy,\n\t\t_whitelistInfluencer,\n\t\t_whitelistConverter,  \n\t\t_contractor,\n\t\t_moderator, \t\t\n\t\t_start,\n\t\t_duration,\n\t\t_expiryConversion, \n\t\t_escrowPrecentage,\n\t\t_rate,\n\t\t_maxPi) public {\n\t}\n\n\t// buy product with ETH \n\tfunction buyFromWithETH(address _from, uint256 _tokenID, address _assetContract, uint256 _amountOrIndex) public payable {\n\t    buyTokens(address(this));\n\t    require(addFungibleAsset(_tokenID, _assetContract, _amountOrIndex));\t    \n\t    buyFromWithETH(_from, _tokenID, _assetContract, _amountOrIndex, CampaignType.Fungible); \n\t}\t\n\n}\n\n",
-  "sourcePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyCampaignETHCrowdsale.sol",
+  "sourcePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyCampaignETHCrowdsale.sol",
   "ast": {
-    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyCampaignETHCrowdsale.sol",
+    "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyCampaignETHCrowdsale.sol",
     "exportedSymbols": {
       "TwoKeyCampaignETHCrowdsale": [
         2676
@@ -1108,29 +1108,29 @@
         "src": "0:24:9"
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/math/SafeMath.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/math/SafeMath.sol",
         "file": "../openzeppelin-solidity/contracts/math/SafeMath.sol",
         "id": 2585,
         "nodeType": "ImportDirective",
         "scope": 2677,
-        "sourceUnit": 4073,
+        "sourceUnit": 7169,
         "src": "27:62:9",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
         "file": "../openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
         "id": 2586,
         "nodeType": "ImportDirective",
         "scope": 2677,
-        "sourceUnit": 3951,
+        "sourceUnit": 6052,
         "src": "90:68:9",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyCampaignETH.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyCampaignETH.sol",
         "file": "./TwoKeyCampaignETH.sol",
         "id": 2587,
         "nodeType": "ImportDirective",
@@ -1141,45 +1141,45 @@
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyReg.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyReg.sol",
         "file": "./TwoKeyReg.sol",
         "id": 2588,
         "nodeType": "ImportDirective",
         "scope": 2677,
-        "sourceUnit": 3275,
+        "sourceUnit": 4449,
         "src": "194:25:9",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyEconomy.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyEconomy.sol",
         "file": "./TwoKeyEconomy.sol",
         "id": 2589,
         "nodeType": "ImportDirective",
         "scope": 2677,
-        "sourceUnit": 2712,
+        "sourceUnit": 3458,
         "src": "220:29:9",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyWhitelisted.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyWhitelisted.sol",
         "file": "./TwoKeyWhitelisted.sol",
         "id": 2590,
         "nodeType": "ImportDirective",
         "scope": 2677,
-        "sourceUnit": 3546,
+        "sourceUnit": 4720,
         "src": "250:33:9",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyEventSource.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyEventSource.sol",
         "file": "./TwoKeyEventSource.sol",
         "id": 2591,
         "nodeType": "ImportDirective",
         "scope": 2677,
-        "sourceUnit": 3163,
+        "sourceUnit": 3921,
         "src": "284:33:9",
         "symbolAliases": [],
         "unitAlias": ""
@@ -1211,10 +1211,10 @@
               "id": 2594,
               "name": "Crowdsale",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3950,
+              "referencedDeclaration": 6051,
               "src": "377:9:9",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Crowdsale_$3950",
+                "typeIdentifier": "t_contract$_Crowdsale_$6051",
                 "typeString": "contract Crowdsale"
               }
             },
@@ -1229,13 +1229,13 @@
           928,
           2151,
           2582,
-          3282,
-          3652,
-          3950,
-          4254,
-          4297,
-          4329,
-          4638
+          4456,
+          5753,
+          6051,
+          8524,
+          8721,
+          8753,
+          9368
         ],
         "contractKind": "contract",
         "documentation": null,
@@ -1243,18 +1243,18 @@
         "id": 2676,
         "linearizedBaseContracts": [
           2676,
-          3950,
+          6051,
           2582,
           2151,
-          3282,
+          4456,
           377,
           462,
-          3652,
+          5753,
           928,
-          4638,
-          4254,
-          4297,
-          4329
+          9368,
+          8524,
+          8721,
+          8753
         ],
         "name": "TwoKeyCampaignETHCrowdsale",
         "nodeType": "ContractDefinition",
@@ -1266,10 +1266,10 @@
               "id": 2596,
               "name": "SafeMath",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 4072,
+              "referencedDeclaration": 7168,
               "src": "397:8:9",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_SafeMath_$4072",
+                "typeIdentifier": "t_contract$_SafeMath_$7168",
                 "typeString": "library SafeMath"
               }
             },
@@ -1310,7 +1310,7 @@
                     "referencedDeclaration": 2600,
                     "src": "783:12:9",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_TwoKeyEventSource_$3162",
+                      "typeIdentifier": "t_contract$_TwoKeyEventSource_$3920",
                       "typeString": "contract TwoKeyEventSource"
                     }
                   },
@@ -1323,7 +1323,7 @@
                     "referencedDeclaration": 2602,
                     "src": "799:8:9",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_TwoKeyEconomy_$2711",
+                      "typeIdentifier": "t_contract$_TwoKeyEconomy_$3457",
                       "typeString": "contract TwoKeyEconomy"
                     }
                   },
@@ -1336,7 +1336,7 @@
                     "referencedDeclaration": 2604,
                     "src": "811:20:9",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$3545",
+                      "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$4719",
                       "typeString": "contract TwoKeyWhitelisted"
                     }
                   },
@@ -1349,7 +1349,7 @@
                     "referencedDeclaration": 2606,
                     "src": "835:19:9",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$3545",
+                      "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$4719",
                       "typeString": "contract TwoKeyWhitelisted"
                     }
                   },
@@ -1492,7 +1492,7 @@
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_TwoKeyEventSource_$3162",
+                    "typeIdentifier": "t_contract$_TwoKeyEventSource_$3920",
                     "typeString": "contract TwoKeyEventSource"
                   },
                   "typeName": {
@@ -1500,10 +1500,10 @@
                     "id": 2599,
                     "name": "TwoKeyEventSource",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 3162,
+                    "referencedDeclaration": 3920,
                     "src": "436:17:9",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_TwoKeyEventSource_$3162",
+                      "typeIdentifier": "t_contract$_TwoKeyEventSource_$3920",
                       "typeString": "contract TwoKeyEventSource"
                     }
                   },
@@ -1520,7 +1520,7 @@
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_TwoKeyEconomy_$2711",
+                    "typeIdentifier": "t_contract$_TwoKeyEconomy_$3457",
                     "typeString": "contract TwoKeyEconomy"
                   },
                   "typeName": {
@@ -1528,10 +1528,10 @@
                     "id": 2601,
                     "name": "TwoKeyEconomy",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 2711,
+                    "referencedDeclaration": 3457,
                     "src": "470:13:9",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_TwoKeyEconomy_$2711",
+                      "typeIdentifier": "t_contract$_TwoKeyEconomy_$3457",
                       "typeString": "contract TwoKeyEconomy"
                     }
                   },
@@ -1548,7 +1548,7 @@
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$3545",
+                    "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$4719",
                     "typeString": "contract TwoKeyWhitelisted"
                   },
                   "typeName": {
@@ -1556,10 +1556,10 @@
                     "id": 2603,
                     "name": "TwoKeyWhitelisted",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 3545,
+                    "referencedDeclaration": 4719,
                     "src": "496:17:9",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$3545",
+                      "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$4719",
                       "typeString": "contract TwoKeyWhitelisted"
                     }
                   },
@@ -1576,7 +1576,7 @@
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$3545",
+                    "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$4719",
                     "typeString": "contract TwoKeyWhitelisted"
                   },
                   "typeName": {
@@ -1584,10 +1584,10 @@
                     "id": 2605,
                     "name": "TwoKeyWhitelisted",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 3545,
+                    "referencedDeclaration": 4719,
                     "src": "538:17:9",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$3545",
+                      "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$4719",
                       "typeString": "contract TwoKeyWhitelisted"
                     }
                   },
@@ -1837,7 +1837,7 @@
                             "name": "this",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 4720,
+                            "referencedDeclaration": 10955,
                             "src": "1160:4:9",
                             "typeDescriptions": {
                               "typeIdentifier": "t_contract$_TwoKeyCampaignETHCrowdsale_$2676",
@@ -1891,7 +1891,7 @@
                       "name": "buyTokens",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3859,
+                      "referencedDeclaration": 5960,
                       "src": "1142:9:9",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$_t_address_$returns$__$",
@@ -2015,10 +2015,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        4656,
-                        4657
+                        10891,
+                        10892
                       ],
-                      "referencedDeclaration": 4656,
+                      "referencedDeclaration": 10891,
                       "src": "1173:7:9",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -2107,10 +2107,10 @@
                           "name": "CampaignType",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3281,
+                          "referencedDeclaration": 4455,
                           "src": "1316:12:9",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_type$_t_enum$_CampaignType_$3281_$",
+                            "typeIdentifier": "t_type$_t_enum$_CampaignType_$4455_$",
                             "typeString": "type(enum TwoKeyTypes.CampaignType)"
                           }
                         },
@@ -2124,7 +2124,7 @@
                         "referencedDeclaration": null,
                         "src": "1316:21:9",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_enum$_CampaignType_$3281",
+                          "typeIdentifier": "t_enum$_CampaignType_$4455",
                           "typeString": "enum TwoKeyTypes.CampaignType"
                         }
                       }
@@ -2148,7 +2148,7 @@
                           "typeString": "uint256"
                         },
                         {
-                          "typeIdentifier": "t_enum$_CampaignType_$3281",
+                          "typeIdentifier": "t_enum$_CampaignType_$4455",
                           "typeString": "enum TwoKeyTypes.CampaignType"
                         }
                       ],
@@ -2162,7 +2162,7 @@
                       "referencedDeclaration": 2581,
                       "src": "1252:14:9",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_uint256_$_t_address_$_t_uint256_$_t_enum$_CampaignType_$3281_$returns$__$",
+                        "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_uint256_$_t_address_$_t_uint256_$_t_enum$_CampaignType_$4455_$returns$__$",
                         "typeString": "function (address,uint256,address,uint256,enum TwoKeyTypes.CampaignType)"
                       }
                     },
@@ -2326,7 +2326,7 @@
     "src": "0:1349:9"
   },
   "legacyAST": {
-    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyCampaignETHCrowdsale.sol",
+    "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyCampaignETHCrowdsale.sol",
     "exportedSymbols": {
       "TwoKeyCampaignETHCrowdsale": [
         2676
@@ -2347,29 +2347,29 @@
         "src": "0:24:9"
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/math/SafeMath.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/math/SafeMath.sol",
         "file": "../openzeppelin-solidity/contracts/math/SafeMath.sol",
         "id": 2585,
         "nodeType": "ImportDirective",
         "scope": 2677,
-        "sourceUnit": 4073,
+        "sourceUnit": 7169,
         "src": "27:62:9",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
         "file": "../openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
         "id": 2586,
         "nodeType": "ImportDirective",
         "scope": 2677,
-        "sourceUnit": 3951,
+        "sourceUnit": 6052,
         "src": "90:68:9",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyCampaignETH.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyCampaignETH.sol",
         "file": "./TwoKeyCampaignETH.sol",
         "id": 2587,
         "nodeType": "ImportDirective",
@@ -2380,45 +2380,45 @@
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyReg.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyReg.sol",
         "file": "./TwoKeyReg.sol",
         "id": 2588,
         "nodeType": "ImportDirective",
         "scope": 2677,
-        "sourceUnit": 3275,
+        "sourceUnit": 4449,
         "src": "194:25:9",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyEconomy.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyEconomy.sol",
         "file": "./TwoKeyEconomy.sol",
         "id": 2589,
         "nodeType": "ImportDirective",
         "scope": 2677,
-        "sourceUnit": 2712,
+        "sourceUnit": 3458,
         "src": "220:29:9",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyWhitelisted.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyWhitelisted.sol",
         "file": "./TwoKeyWhitelisted.sol",
         "id": 2590,
         "nodeType": "ImportDirective",
         "scope": 2677,
-        "sourceUnit": 3546,
+        "sourceUnit": 4720,
         "src": "250:33:9",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyEventSource.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyEventSource.sol",
         "file": "./TwoKeyEventSource.sol",
         "id": 2591,
         "nodeType": "ImportDirective",
         "scope": 2677,
-        "sourceUnit": 3163,
+        "sourceUnit": 3921,
         "src": "284:33:9",
         "symbolAliases": [],
         "unitAlias": ""
@@ -2450,10 +2450,10 @@
               "id": 2594,
               "name": "Crowdsale",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3950,
+              "referencedDeclaration": 6051,
               "src": "377:9:9",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Crowdsale_$3950",
+                "typeIdentifier": "t_contract$_Crowdsale_$6051",
                 "typeString": "contract Crowdsale"
               }
             },
@@ -2468,13 +2468,13 @@
           928,
           2151,
           2582,
-          3282,
-          3652,
-          3950,
-          4254,
-          4297,
-          4329,
-          4638
+          4456,
+          5753,
+          6051,
+          8524,
+          8721,
+          8753,
+          9368
         ],
         "contractKind": "contract",
         "documentation": null,
@@ -2482,18 +2482,18 @@
         "id": 2676,
         "linearizedBaseContracts": [
           2676,
-          3950,
+          6051,
           2582,
           2151,
-          3282,
+          4456,
           377,
           462,
-          3652,
+          5753,
           928,
-          4638,
-          4254,
-          4297,
-          4329
+          9368,
+          8524,
+          8721,
+          8753
         ],
         "name": "TwoKeyCampaignETHCrowdsale",
         "nodeType": "ContractDefinition",
@@ -2505,10 +2505,10 @@
               "id": 2596,
               "name": "SafeMath",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 4072,
+              "referencedDeclaration": 7168,
               "src": "397:8:9",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_SafeMath_$4072",
+                "typeIdentifier": "t_contract$_SafeMath_$7168",
                 "typeString": "library SafeMath"
               }
             },
@@ -2549,7 +2549,7 @@
                     "referencedDeclaration": 2600,
                     "src": "783:12:9",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_TwoKeyEventSource_$3162",
+                      "typeIdentifier": "t_contract$_TwoKeyEventSource_$3920",
                       "typeString": "contract TwoKeyEventSource"
                     }
                   },
@@ -2562,7 +2562,7 @@
                     "referencedDeclaration": 2602,
                     "src": "799:8:9",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_TwoKeyEconomy_$2711",
+                      "typeIdentifier": "t_contract$_TwoKeyEconomy_$3457",
                       "typeString": "contract TwoKeyEconomy"
                     }
                   },
@@ -2575,7 +2575,7 @@
                     "referencedDeclaration": 2604,
                     "src": "811:20:9",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$3545",
+                      "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$4719",
                       "typeString": "contract TwoKeyWhitelisted"
                     }
                   },
@@ -2588,7 +2588,7 @@
                     "referencedDeclaration": 2606,
                     "src": "835:19:9",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$3545",
+                      "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$4719",
                       "typeString": "contract TwoKeyWhitelisted"
                     }
                   },
@@ -2731,7 +2731,7 @@
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_TwoKeyEventSource_$3162",
+                    "typeIdentifier": "t_contract$_TwoKeyEventSource_$3920",
                     "typeString": "contract TwoKeyEventSource"
                   },
                   "typeName": {
@@ -2739,10 +2739,10 @@
                     "id": 2599,
                     "name": "TwoKeyEventSource",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 3162,
+                    "referencedDeclaration": 3920,
                     "src": "436:17:9",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_TwoKeyEventSource_$3162",
+                      "typeIdentifier": "t_contract$_TwoKeyEventSource_$3920",
                       "typeString": "contract TwoKeyEventSource"
                     }
                   },
@@ -2759,7 +2759,7 @@
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_TwoKeyEconomy_$2711",
+                    "typeIdentifier": "t_contract$_TwoKeyEconomy_$3457",
                     "typeString": "contract TwoKeyEconomy"
                   },
                   "typeName": {
@@ -2767,10 +2767,10 @@
                     "id": 2601,
                     "name": "TwoKeyEconomy",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 2711,
+                    "referencedDeclaration": 3457,
                     "src": "470:13:9",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_TwoKeyEconomy_$2711",
+                      "typeIdentifier": "t_contract$_TwoKeyEconomy_$3457",
                       "typeString": "contract TwoKeyEconomy"
                     }
                   },
@@ -2787,7 +2787,7 @@
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$3545",
+                    "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$4719",
                     "typeString": "contract TwoKeyWhitelisted"
                   },
                   "typeName": {
@@ -2795,10 +2795,10 @@
                     "id": 2603,
                     "name": "TwoKeyWhitelisted",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 3545,
+                    "referencedDeclaration": 4719,
                     "src": "496:17:9",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$3545",
+                      "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$4719",
                       "typeString": "contract TwoKeyWhitelisted"
                     }
                   },
@@ -2815,7 +2815,7 @@
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$3545",
+                    "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$4719",
                     "typeString": "contract TwoKeyWhitelisted"
                   },
                   "typeName": {
@@ -2823,10 +2823,10 @@
                     "id": 2605,
                     "name": "TwoKeyWhitelisted",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 3545,
+                    "referencedDeclaration": 4719,
                     "src": "538:17:9",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$3545",
+                      "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$4719",
                       "typeString": "contract TwoKeyWhitelisted"
                     }
                   },
@@ -3076,7 +3076,7 @@
                             "name": "this",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 4720,
+                            "referencedDeclaration": 10955,
                             "src": "1160:4:9",
                             "typeDescriptions": {
                               "typeIdentifier": "t_contract$_TwoKeyCampaignETHCrowdsale_$2676",
@@ -3130,7 +3130,7 @@
                       "name": "buyTokens",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3859,
+                      "referencedDeclaration": 5960,
                       "src": "1142:9:9",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$_t_address_$returns$__$",
@@ -3254,10 +3254,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        4656,
-                        4657
+                        10891,
+                        10892
                       ],
-                      "referencedDeclaration": 4656,
+                      "referencedDeclaration": 10891,
                       "src": "1173:7:9",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -3346,10 +3346,10 @@
                           "name": "CampaignType",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3281,
+                          "referencedDeclaration": 4455,
                           "src": "1316:12:9",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_type$_t_enum$_CampaignType_$3281_$",
+                            "typeIdentifier": "t_type$_t_enum$_CampaignType_$4455_$",
                             "typeString": "type(enum TwoKeyTypes.CampaignType)"
                           }
                         },
@@ -3363,7 +3363,7 @@
                         "referencedDeclaration": null,
                         "src": "1316:21:9",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_enum$_CampaignType_$3281",
+                          "typeIdentifier": "t_enum$_CampaignType_$4455",
                           "typeString": "enum TwoKeyTypes.CampaignType"
                         }
                       }
@@ -3387,7 +3387,7 @@
                           "typeString": "uint256"
                         },
                         {
-                          "typeIdentifier": "t_enum$_CampaignType_$3281",
+                          "typeIdentifier": "t_enum$_CampaignType_$4455",
                           "typeString": "enum TwoKeyTypes.CampaignType"
                         }
                       ],
@@ -3401,7 +3401,7 @@
                       "referencedDeclaration": 2581,
                       "src": "1252:14:9",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_uint256_$_t_address_$_t_uint256_$_t_enum$_CampaignType_$3281_$returns$__$",
+                        "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_uint256_$_t_address_$_t_uint256_$_t_enum$_CampaignType_$4455_$returns$__$",
                         "typeString": "function (address,uint256,address,uint256,enum TwoKeyTypes.CampaignType)"
                       }
                     },
@@ -3570,5 +3570,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
-  "updatedAt": "2018-08-21T14:01:36.403Z"
+  "updatedAt": "2018-08-21T14:36:07.511Z"
 }
