@@ -33,7 +33,7 @@ module.exports = {
       gas: 7000000,
       gasPrice: 2000000000,
     },
-    'dev-shlomi': {
+    'dev-2key': {
       // host: 'localhost',
       // port: 8545,
       provider: () => new HDWalletProvider(mnemonic, 'http://18.233.2.70:8500'),

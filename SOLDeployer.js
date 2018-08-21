@@ -90,15 +90,15 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
 
 const runProcess = (app, args) => new Promise((resolve, reject) => {
   console.log('Run process', app, args.join(' '));
-  const truffle = childProcess.spawn(app, args);
-  truffle.stdout.on('data', (data) => {
+  const proc = childProcess.spawn(app, args);
+  proc.stdout.on('data', (data) => {
     console.log(data.toString('utf8'));
   });
-  truffle.stderr.on('data', (data) => {
+  proc.stderr.on('data', (data) => {
     console.log(data.toString('utf8'));
     reject(data);
   });
-  truffle.on('close', async (code) => {
+  proc.on('close', async (code) => {
     console.log('process exit with code', code);
     if (code === 0) {
       resolve(code);
@@ -148,10 +148,10 @@ async function main() {
     const l = networks.length;
     for (let i = 0; i < l; i += 1) {
       /* eslint-disable no-await-in-loop */
-      await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--network', networks[i]].concat(process.argv.slice(3)));
+      await runProcess('./node_modules/.bin/truffle', ['migrate', '--network', networks[i]].concat(process.argv.slice(3)));
       /* eslint-enable no-await-in-loop */
     }
-    await runProcess(path.join(__dirname, './node_modules/.bin/typechain'), ['--outDir', path.join(twoKeyProtocolDir, 'src/contracts'), `${buildPath}/*.json`]);
+    await runProcess('./node_modules/.bin/typechain', ['--outDir', path.join(twoKeyProtocolDir, 'src/contracts'), `${buildPath}/*.json`]);
     unlinkTruffleConfig();
     await generateSOLInterface();
     contractsStatus = await contractsGit.status();
