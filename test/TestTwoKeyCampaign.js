@@ -9,6 +9,10 @@ const TwoKeyWhitelisted = artifacts.require("TwoKeyWhitelisted");
 const TwoKeyEventSource = artifacts.require("TwoKeyEventSource");
 const TwoKeyEconomy = artifacts.require("TwoKeyEconomy");
 const TwoKeyCampaign = artifacts.require("TwoKeyCampaign");
+const TwoKeyAdmin = artifacts.require("TwoKeyAdmin");
+const TwoKeyUpgradableExchange = artifacts.require("TwoKeyUpgradableExchange");
+
+
 
 const ERC721Mock = artifacts.require("ERC721TokenMock");
 const ERC20Mock = artifacts.require("ERC20TokenMock");
@@ -20,6 +24,8 @@ contract('TwoKeyCampaign', async (accounts) => {
         eventSource, 
         economy, 
         campaign,
+        twoKeyAdmin,
+        upgradeableExchange,
         erc721, 
         erc20;
 
@@ -36,9 +42,19 @@ contract('TwoKeyCampaign', async (accounts) => {
     const maxPi = 15;
 
 
+    const electorateAdmins = accounts[4];
+    const walletExchange = accounts[5];
     before(async () => {
-        eventSource = await TwoKeyEventSource.new();
+        // Deploy instance of erc20
+        erc20 = await ERC20Mock.new({
+            from: coinbase
+        });
+
+        upgradeableExchange = await TwoKeyUpgradableExchange.new(100, walletExchange, erc20.address);
         economy = await TwoKeyEconomy.new();
+        twoKeyAdmin = await TwoKeyAdmin.new(economy.address, electorateAdmins, upgradeableExchange.address);
+
+        eventSource = await TwoKeyEventSource.new(twoKeyAdmin.address);
         whitelistInfluencer = await TwoKeyWhitelisted.new();
         whitelistConverter = await TwoKeyWhitelisted.new();
         
@@ -47,42 +63,49 @@ contract('TwoKeyCampaign', async (accounts) => {
         // await erc721.mint(contractor, tokenIndex, {
         //     from: coinbase,
         // });
-        erc20 = await ERC20Mock.new({
-            from: coinbase
-        });
 
-        const openingTime = latestTime() + duration.minutes(1);
+
+        const openingTime = latestTime();
         const durationCampaign = duration.minutes(30);
         const durationEscrow = duration.minutes(5);
 
-        campaign = await TwoKeyCampaign.new(
-            eventSource.address, 
-            economy.address, 
-            whitelistInfluencer.address, 
-            whitelistConverter.address,
-            
-            contractor,
-            moderator,
 
-            openingTime,
-            durationCampaign, 
-            durationEscrow,
-            escrowPrecentage,
-            rate,
-            maxPi
-            , 
-            {
-                from: campaignCreator
-            }
-        );
+        // campaign = await TwoKeyCampaign.new(
+        //     eventSource.address,
+        //     economy.address,
+        //     whitelistInfluencer.address,
+        //     whitelistConverter.address,
+        //
+        //     contractor,
+        //     moderator,
+        //
+        //     openingTime,
+        //     durationCampaign,
+        //     durationEscrow,
+        //     escrowPrecentage,
+        //     rate,
+        //     maxPi
+        //     ,
+        //     {
+        //         from: campaignCreator
+        //     }
+        // );
     });
-
-    it("transfer fungible to compaign", async () => {
-
-
-        await erc20.transfer(contractor, 200, {
-            from: coinbase
-        });
+    it("Should print addresses of contracts", async() => {
+        console.log("[ERC 20] : " + erc20.address);
+        console.log("[TwoKeyUpgradebleExchange] : " + upgradeableExchange.address);
+        console.log("[TwoKeyAdmin] : " + twoKeyAdmin.address);
+        console.log("[TwoKeyEventSource] : " + eventSource.address);
+        // console.log("TwoKeyCampaign : " + campaign.address);
+        console.log("[TwoKeyWhitelistConverter] : " + whitelistConverter.address);
+        console.log("[TwoKeyWhiteListInfluencer] : " + whitelistInfluencer.address);
+    });
+    // it("transfer fungible to compaign", async () => {
+    //
+    //
+    //     await erc20.transfer(contractor, 200, {
+    //         from: coinbase
+    //     });
 
         // await erc20.approve(campaign.address, 20, {
         //     from: contractor,
@@ -94,7 +117,7 @@ contract('TwoKeyCampaign', async (accounts) => {
     //     await campaign.setPriceFungible(tokenIDFT, erc20, ether(5), {
     //         from: campaignCreator
     //     });
-    });
+    // });
   
    
 });

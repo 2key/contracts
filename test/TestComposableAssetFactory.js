@@ -39,7 +39,9 @@ contract('ComposableAssetFactory', async (accounts) => {
         });
 
     });
-
+    it("dada", async() => {
+       assert.equal(true,true,"");
+    });
     it("add fungible asset", async () => {
 
 
@@ -103,29 +105,29 @@ contract('ComposableAssetFactory', async (accounts) => {
     });
 
     // it("add non fungible asset", async () => {
-
+    //
     //     await erc721.mint(inventoryOwner, tokenIndex, {
     //         from: coinbase,
     //     });
-
+    //
     //     await erc721.approve(factory.address, tokenIndex, {
     //         from: inventoryOwner
     //     });
-
-    //     // let flag = await erc721.isApprovedOrOwner(factory.address, tokenIndex);
-    //     // assert.isTrue(flag, 'composable not really approved');
-
+    //
+    //     let flag = await erc721.isApprovedOrOwner(factory.address, tokenIndex);
+    //     assert.isTrue(flag, 'composable not really approved');
+    //
     //     await factory.addNonFungibleChild(tokenIDNFT, erc721.address, tokenIndex, {
     //         from: factoryCreator
     //     });
-
-    //     // let flagFactory = await erc721.isOwner(factory.address, tokenIndex);
-    //     // assert.isTrue(flagFactory, 'composable owns the non fungible asset');
-
-    //     // let flaginventoryOwner = await erc721.isOwner(factory.address, tokenIndex);
-    //     // assert.isFalse(flaginventoryOwner, 'composable owns the non fungible asset');
-
-
+    //
+    //     let flagFactory = await erc721.isOwner(factory.address, tokenIndex);
+    //     assert.isTrue(flagFactory, 'composable owns the non fungible asset');
+    //
+    //     let flaginventoryOwner = await erc721.isOwner(factory.address, tokenIndex);
+    //     assert.isFalse(flaginventoryOwner, 'composable owns the non fungible asset');
+    //
+    //
     // });
   
    
