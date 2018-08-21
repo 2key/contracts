@@ -1,34 +1,71 @@
 require('truffle-test-utils').init();
 
+/// required contracts in order to deploy TwoKeyEventSource
 const TwoKeyEventSource = artifacts.require("TwoKeyEventSource");
+const TwoKeyEconomy = artifacts.require("TwoKeyEconomy");
 const TwoKeyAdmin = artifacts.require("TwoKeyAdmin");
+const TwoKeyUpgradableExchange = artifacts.require("TwoKeyUpgradableExchange");
 
-contract('Event Source', async (accounts) => {
-    it('emits events', async () => {
-        let eventSource = await TwoKeyEventSource.new("0x0");
 
-        let result = await eventSource.created(accounts[1], accounts[2]);
+/// required Mock ERC20 contract in order to deploy & test TwoKeyEventSource
+const ERC20Mock = artifacts.require("ERC20TokenMock");
 
-        assert.web3Event(result, {
-		  event: 'Created',
-		  args: {
-		    _campaign: accounts[1],
-		    _owner: accounts[2],
-		  }
-		}, 'The event is not emitted');
 
-    });
 
-    it('Should not have permission to emit', async() => {
-    	let eventSource = await TwoKeyEventSource.new("0x0");
+contract("TwoKeyEventSource", async (accounts) => {
 
-    	let canEmit = await eventSource.checkCanEmit("0x0");
-    	assert.equal(canEmit, false, 'should fail if no');
+	/// contract instances
+	let twoKeyAdmin,
+		eventSource,
+		upgradeableExchange,
+		economy,
+		erc20;
+
+
+	/// accounts
+    const coinbase = accounts[0];
+	const electorateAdmins = accounts[1];
+	const walletExchange = accounts[2];
+	const subAdminAddress = accounts[3];
+
+
+
+    before(async()=> {
+
+        erc20 = await ERC20Mock.new({
+            from: coinbase
+        });
+
+        upgradeableExchange = await TwoKeyUpgradableExchange.new(100, walletExchange, erc20.address);
+        economy = await TwoKeyEconomy.new();
+        twoKeyAdmin = await TwoKeyAdmin.new(economy.address, electorateAdmins, upgradeableExchange.address);
+
+        eventSource = await TwoKeyEventSource.new(twoKeyAdmin.address);
 	});
 
+	it("should have deployed all contracts", async () => {
+		console.log("[TwoKeyUpgradeableExchange] : " + upgradeableExchange.address);
+		console.log("[TwoKeyEconomy] : " + economy.address);
+		console.log("[TwoKeyAdmin] : " + twoKeyAdmin.address);
+		console.log("[TwoKeyEventSource] : " + eventSource.address);
+	});
 
-    it('Should try an error while trying to emit an event', async() => {
-        let eventSource = await TwoKeyEventSource.new("0x0");
+	it("should be admin permission", async() => {
+        let adminAddress = await eventSource.getAdmin();
+    	assert.equal(adminAddress, twoKeyAdmin.address, "addresses should be same");
+	});
 
-    })
+	/// after creating the account in the way we've done, our new adminAddress is not returned when we do web3.eth.getAccounts()
+	//  because this creates an account that is not associated with your node. Need to research how to add it to accounts
+	it("admin should add subadmins", async() => {
+		try {
+            await eventSource.addAuthorizedAddress(subAdminAddress, {from: twoKeyAdmin.address});
+        } catch (error) {
+			console.log(error);
+			assert.fail();
+		}
+
+		let canEmit = await eventSource.checkIsAuthorized(subAdminAddress);
+		assert.equal(canEmit, true, "should be true");
+	});
 });
