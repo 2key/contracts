@@ -30,10 +30,10 @@ module.exports = {
       // port: 8545,
       provider: () => new HDWalletProvider(mnemonic, 'http://192.168.47.100:8545'),
       network_id: '*', // Match any network id
-      gas: 7000000,
-      gasPrice: 2000000000,
+      gas: 70000000,
+      gasPrice: 5000000000,
     },
-    'dev-shlomi': {
+    'dev-2key': {
       // host: 'localhost',
       // port: 8545,
       provider: () => new HDWalletProvider(mnemonic, 'http://18.233.2.70:8500'),
@@ -69,8 +69,8 @@ module.exports = {
       // port: 8545,
       provider: () => new HDWalletProvider(mnemonic, 'http://192.168.47.100:18545'),
       network_id: '*', // Match any network id
-      gas: 7000000,
-      gasPrice: 2000000000,
+      gas: 70000000,
+      gasPrice: 5000000000,
     },
   },
 };
