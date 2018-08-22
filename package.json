@@ -7,8 +7,8 @@
     "build": "webpack",
     "dev": "webpack-dev-server",
     "deploy": "node SOLDeployer.js",
-    "geth": "cd geth && ./geth.bash",
-    "geth:stop": "./geth/stop.geth.bash",
+    "geth": "node geth/geth.js start",
+    "geth:stop": "node geth/geth.js stop",
     "typechain": "typechain --outDir build/ts './build/contracts/*.json'"
   },
   "author": "Douglas von Kohorn",
