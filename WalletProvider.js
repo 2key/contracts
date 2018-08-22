@@ -13,6 +13,7 @@ function WalletProvider(mnemonic, rpcUrl, websocket) {
   const engine = new ProviderEngine();
   engine.addProvider(new WalletSubprovider(wallet, {}));
   engine.addProvider(websocket ? new WSSubprovider({ rpcUrl }) : new RpcSubprovider({ rpcUrl }));
+  engine.start();
   return engine;
 }
 
