@@ -65,8 +65,8 @@ contract TwoKeyCampaign is TwoKeyARC, ComposableAssetFactory, TwoKeyTypes {
 	// how long will hold asset in escrow
 	uint256 expiryConversion;
 
-	// precentage of payout to. be paid for moderator for escrow
-	uint256 escrowPrecentage;
+	// percentage of payout to. be paid for moderator for escrow
+	uint256 escrowPercentage;
 
     // maximum precentage of all rewards out of payout for asset
     // acording to incentive model, for each campaign, 
@@ -115,7 +115,7 @@ contract TwoKeyCampaign is TwoKeyARC, ComposableAssetFactory, TwoKeyTypes {
 		uint256 _openingTime,
 		uint256 _closingTime,
 		uint256 _expiryConversion, 
-		uint256 _escrowPrecentage,
+		uint256 _escrowPercentage,
 		uint256 _rate,
 		uint256 _maxPi) TwoKeyARC(_eventSource, _contractor) ComposableAssetFactory(_openingTime, _closingTime) StandardToken() public {
 
@@ -146,7 +146,7 @@ contract TwoKeyCampaign is TwoKeyARC, ComposableAssetFactory, TwoKeyTypes {
 		moderator = _moderator;
 
 		expiryConversion = _expiryConversion;
-		escrowPrecentage = _escrowPrecentage;
+		escrowPercentage = _escrowPercentage;
 
 		rate = _rate;
 
@@ -209,8 +209,8 @@ contract TwoKeyCampaign is TwoKeyARC, ComposableAssetFactory, TwoKeyTypes {
      * @return moderator fee
      */
     function calculateModeratorFee(uint256 _payout) internal view returns (uint256)  {
-        if (escrowPrecentage > 0) { // send the fee to moderator
-            uint256 fee = _payout.mul(escrowPrecentage).div(100);
+        if (escrowPercentage > 0) { // send the fee to moderator
+            uint256 fee = _payout.mul(escrowPercentage).div(100);
             return fee;
         }  
         return 0;      

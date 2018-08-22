@@ -74,10 +74,13 @@ contract('TwoKeyCampaign', async (accounts) => {
         });
 
 
-        const openingTime = latestTime() + duration.minutes(1);
+        const openingTime = latestTime() + duration.minutes(5);
         const closingTime = latestTime() + duration.minutes(30);
         const durationCampaign = duration.minutes(30);
         const durationEscrow = duration.minutes(5);
+
+        console.log(openingTime);
+        console.log(closingTime);
 
         composableAssetFactory = await ComposableAssetFactory.new(openingTime, closingTime);
 
@@ -97,7 +100,8 @@ contract('TwoKeyCampaign', async (accounts) => {
             rate,
             maxPi,
             {
-                from: campaignCreator
+                from: campaignCreator,
+                gas: 7000000
             }
         );
     });
