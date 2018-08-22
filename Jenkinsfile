@@ -1,19 +1,18 @@
 pipeline {
   agent {
         docker {
-            image 'maven:3-alpine'
-            args '-v $HOME/.m2:/root/.m2'
+            image 'node:10.9.0-jessie'
         }
     }
   stages {
     stage('build-solidity-docs') {
       steps {
-        sh 'solidity-docgen ./ contracts/ ./docs'
+        sh 'node -v'
       }
     }
     stage('deploy-to-gh-pages') {
       steps {
-        sh 'cd docs/website && npm install && npm run publish-gh-pages'
+        sh 'npm -v'
       }
     }
   }
