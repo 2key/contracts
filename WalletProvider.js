@@ -12,9 +12,9 @@ function WalletProvider(mnemonic, rpcUrl, websocket) {
   /* eslint-enable prefer-template */
   const engine = new ProviderEngine();
   engine.addProvider(new WalletSubprovider(wallet, {}));
-  console.log('Added wallet');
+  // console.log('Added wallet');
   engine.addProvider(websocket ? new WSSubprovider({ rpcUrl }) : new RpcSubprovider({ rpcUrl }));
-  console.log('Added provider', websocket ? `WS-${rpcUrl}` : `RPC-${rpcUrl}`);
+  // console.log('Added provider', websocket ? `WS-${rpcUrl}` : `RPC-${rpcUrl}`);
   engine.start();
   return engine;
 }
