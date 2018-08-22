@@ -29,7 +29,7 @@ module.exports = {
     'dev-ap': {
       // host: 'localhost',
       // port: 8545,
-      provider: new HDWalletProvider(mnemonic, 'http://192.168.47.100:8545'),
+      provider: () => new HDWalletProvider(mnemonic, 'http://192.168.47.100:8545'),
       network_id: '*', // Match any network id
       gas: 70000000,
       gasPrice: 5000000000,
@@ -37,7 +37,7 @@ module.exports = {
     'dev-ap-ws': {
       // host: 'localhost',
       // port: 8545,
-      provider: new HDWalletProvider(mnemonic, 'ws://192.168.47.100:8546', true),
+      provider: () => new HDWalletProvider(mnemonic, 'ws://192.168.47.100:8546', true),
       network_id: '*', // Match any network id
       gas: 70000000,
       gasPrice: 5000000000,
@@ -45,7 +45,7 @@ module.exports = {
     'dev-2key': {
       // host: 'localhost',
       // port: 8545,
-      provider: new HDWalletProvider(mnemonic, 'http://18.233.2.70:8500'),
+      provider: () => new HDWalletProvider(mnemonic, 'http://18.233.2.70:8500'),
       network_id: '*', // Match any network id
       gas: 7000000,
       gasPrice: 2000000000,
@@ -53,7 +53,7 @@ module.exports = {
     'dev-2key-ws': {
       // host: 'localhost',
       // port: 8545,
-      provider: new HDWalletProvider(mnemonic, 'ws://18.233.2.70:8501', true),
+      provider: () => new HDWalletProvider(mnemonic, 'ws://18.233.2.70:8501', true),
       network_id: '*', // Match any network id
       gas: 7000000,
       gasPrice: 2000000000,
@@ -71,13 +71,13 @@ module.exports = {
       gasPrice: 2000000000,
     },
     'rinkeby-infura': {
-      provider: new HDWalletProvider(mnemonic, 'https://rinkeby.infura.io/6rAARDbMXpJlwODa2kbk'),
+      provider: () => new HDWalletProvider(mnemonic, 'https://rinkeby.infura.io/6rAARDbMXpJlwODa2kbk'),
       network_id: '*',
       gas: 7000000,
       gasPrice: 2000000000,
     },
     'rinkeby-infura-ws': {
-      provider: new HDWalletProvider(mnemonic, 'wss://rinkeby.infura.io/ws', true),
+      provider: () => new HDWalletProvider(mnemonic, 'wss://rinkeby.infura.io/ws', true),
       network_id: '*',
       gas: 7000000,
       gasPrice: 2000000000,
@@ -90,7 +90,7 @@ module.exports = {
     'plasma-ap': {
       // host: 'localhost',
       // port: 8545,
-      provider: new HDWalletProvider(mnemonic, 'http://192.168.47.100:18545'),
+      provider: () => new HDWalletProvider(mnemonic, 'http://192.168.47.100:18545'),
       network_id: '*', // Match any network id
       gas: 70000000,
       gasPrice: 5000000000,
