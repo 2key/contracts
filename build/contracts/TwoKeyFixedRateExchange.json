@@ -1,0 +1,417 @@
+{
+  "contractName": "TwoKeyFixedRateExchange",
+  "abi": [
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_to",
+          "type": "address"
+        }
+      ],
+      "name": "upgrade",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "rate",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "weiRaised",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "wallet",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_tokenAmount",
+          "type": "uint256"
+        }
+      ],
+      "name": "sellTokens",
+      "outputs": [],
+      "payable": true,
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "renounceOwnership",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_beneficiary",
+          "type": "address"
+        }
+      ],
+      "name": "buyTokens",
+      "outputs": [],
+      "payable": true,
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "token",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "payable": true,
+      "stateMutability": "payable",
+      "type": "fallback"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "purchaser",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "beneficiary",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "value",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "TokenSell",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "previousOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipRenounced",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferred",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "purchaser",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "beneficiary",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "value",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "TokenPurchase",
+      "type": "event"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "pragma solidity ^0.4.24;\n\nimport '../openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol';\nimport './TwoKeyUpgradableExchange.sol';\n\ncontract TwoKeyFixedRateExchange is TwoKeyUpgradableExchange  {\n\n\n\n\n}",
+  "sourcePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyFixedRateExchange.sol",
+  "ast": {
+    "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyFixedRateExchange.sol",
+    "exportedSymbols": {
+      "TwoKeyFixedRateExchange": [
+        3980
+      ]
+    },
+    "id": 3981,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 3975,
+        "literals": [
+          "solidity",
+          "^",
+          "0.4",
+          ".24"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:24:14"
+      },
+      {
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
+        "file": "../openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
+        "id": 3976,
+        "nodeType": "ImportDirective",
+        "scope": 3981,
+        "sourceUnit": 6052,
+        "src": "26:68:14",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyUpgradableExchange.sol",
+        "file": "./TwoKeyUpgradableExchange.sol",
+        "id": 3977,
+        "nodeType": "ImportDirective",
+        "scope": 3981,
+        "sourceUnit": 4686,
+        "src": "95:40:14",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "baseContracts": [
+          {
+            "arguments": null,
+            "baseName": {
+              "contractScope": null,
+              "id": 3978,
+              "name": "TwoKeyUpgradableExchange",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 4685,
+              "src": "173:24:14",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_TwoKeyUpgradableExchange_$4685",
+                "typeString": "contract TwoKeyUpgradableExchange"
+              }
+            },
+            "id": 3979,
+            "nodeType": "InheritanceSpecifier",
+            "src": "173:24:14"
+          }
+        ],
+        "contractDependencies": [
+          4685,
+          6051,
+          7755
+        ],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": false,
+        "id": 3980,
+        "linearizedBaseContracts": [
+          3980,
+          4685,
+          7755,
+          6051
+        ],
+        "name": "TwoKeyFixedRateExchange",
+        "nodeType": "ContractDefinition",
+        "nodes": [],
+        "scope": 3981,
+        "src": "137:69:14"
+      }
+    ],
+    "src": "0:206:14"
+  },
+  "legacyAST": {
+    "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyFixedRateExchange.sol",
+    "exportedSymbols": {
+      "TwoKeyFixedRateExchange": [
+        3980
+      ]
+    },
+    "id": 3981,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 3975,
+        "literals": [
+          "solidity",
+          "^",
+          "0.4",
+          ".24"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:24:14"
+      },
+      {
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
+        "file": "../openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
+        "id": 3976,
+        "nodeType": "ImportDirective",
+        "scope": 3981,
+        "sourceUnit": 6052,
+        "src": "26:68:14",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyUpgradableExchange.sol",
+        "file": "./TwoKeyUpgradableExchange.sol",
+        "id": 3977,
+        "nodeType": "ImportDirective",
+        "scope": 3981,
+        "sourceUnit": 4686,
+        "src": "95:40:14",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "baseContracts": [
+          {
+            "arguments": null,
+            "baseName": {
+              "contractScope": null,
+              "id": 3978,
+              "name": "TwoKeyUpgradableExchange",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 4685,
+              "src": "173:24:14",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_TwoKeyUpgradableExchange_$4685",
+                "typeString": "contract TwoKeyUpgradableExchange"
+              }
+            },
+            "id": 3979,
+            "nodeType": "InheritanceSpecifier",
+            "src": "173:24:14"
+          }
+        ],
+        "contractDependencies": [
+          4685,
+          6051,
+          7755
+        ],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": false,
+        "id": 3980,
+        "linearizedBaseContracts": [
+          3980,
+          4685,
+          7755,
+          6051
+        ],
+        "name": "TwoKeyFixedRateExchange",
+        "nodeType": "ContractDefinition",
+        "nodes": [],
+        "scope": 3981,
+        "src": "137:69:14"
+      }
+    ],
+    "src": "0:206:14"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.4.24+commit.e67f0147.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "2.0.1",
+  "updatedAt": "2018-08-22T06:50:50.794Z"
+}
