@@ -1,18 +1,19 @@
 pipeline {
   agent {
         docker {
-            image 'node:10.9.0-jessie'
+            image 'shlomiz2key/runners'
         }
     }
   stages {
     stage('build-solidity-docs') {
       steps {
-        sh 'node -v'
+        sh 'npm install -g solidity-docgen'
+        sh 'solidity-docgen ./ contracts/ ./docs'
       }
     }
     stage('deploy-to-gh-pages') {
       steps {
-        sh 'npm -v'
+        sh 'cd docs/website && npm run publish-gh-pages'
       }
     }
   }
