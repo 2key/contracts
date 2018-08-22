@@ -103,7 +103,7 @@ async function start() {
     '--miner.threads',
     '1',
     '--gasprice',
-    '0',
+    '2000000000',
     '--targetgaslimit',
     '9000000',
     '--unlock',
