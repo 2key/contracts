@@ -9,7 +9,7 @@ const whitelist = require('./whitelist.json');
 
 const readdir = util.promisify(fs.readdir);
 const buildPath = path.join(__dirname, 'build', 'contracts');
-const abiPath = path.join(__dirname, 'build', 'sol-interface');
+const abiPath = path.join(__dirname, 'build', '2key-protocol');
 const truffleTemplatePath = path.join(__dirname, 'truffle-template.js');
 const truffleConfigPath = path.join(__dirname, 'truffle.js');
 
@@ -120,7 +120,7 @@ async function main() {
     await solGit.reset('hard');
     solStatus = await solGit.status();
     const localChanges = contractsStatus.files
-      .filter(item => !(item.path.includes('build/sol-interface')
+      .filter(item => !(item.path.includes('build/2key-protocol')
         || (process.env.NODE_ENV === 'development' && item.path.includes(process.argv[1].split('/').pop()))));
     if (contractsStatus.behind || localChanges.length) {
       console.log('You have unsynced changes!', localChanges);
@@ -150,7 +150,7 @@ async function main() {
     const version = solConfigJSON.version.split('.');
     version[version.length - 1] = parseInt(version.pop(), 10) + 1;
     solConfigJSON.version = version.join('.');
-    console.log('sol-interface version:', solConfigJSON.version);
+    console.log('2key-protocol version:', solConfigJSON.version);
     fs.writeFileSync(path.join(abiPath, 'package.json'), JSON.stringify(solConfigJSON));
     await generateSOLInterface();
     contractsStatus = await contractsGit.status();
