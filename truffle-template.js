@@ -31,16 +31,16 @@ module.exports = {
       // port: 8545,
       provider: () => new HDWalletProvider(mnemonic, 'http://192.168.47.100:8545'),
       network_id: '*', // Match any network id
-      gas: 70000000,
-      gasPrice: 5000000000,
+      gas: 77000000,
+      gasPrice: 12000000000,
     },
     'dev-ap-ws': {
       // host: 'localhost',
       // port: 8545,
       provider: () => new HDWalletProvider(mnemonic, 'ws://192.168.47.100:8546', true),
       network_id: '*', // Match any network id
-      gas: 70000000,
-      gasPrice: 5000000000,
+      gas: 7000000,
+      gasPrice: 2000000000,
     },
     'dev-2key': {
       // host: 'localhost',
@@ -92,8 +92,8 @@ module.exports = {
       // port: 8545,
       provider: () => new HDWalletProvider(mnemonic, 'http://192.168.47.100:18545'),
       network_id: '*', // Match any network id
-      gas: 70000000,
-      gasPrice: 5000000000,
+      gas: 7000000,
+      gasPrice: 2000000000,
     },
   },
 };
