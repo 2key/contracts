@@ -1,7 +1,8 @@
 // Allows us to use ES6 in our migrations and tests.
 require('babel-register');
 // https://github.com/trufflesuite/truffle-hdwallet-provider
-const HDWalletProvider = require('truffle-hdwallet-provider');
+// const HDWalletProvider = require('truffle-hdwallet-provider');
+const HDWalletProvider = require('./WalletProvider');
 
 const mnemonic = 'laundry version question endless august scatter desert crew memory toy attract cruel';
 // make sure you have Ether on rinkeby address 0xb3fa520368f2df7bed4df5185101f303f6c7decc
