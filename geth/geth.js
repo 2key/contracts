@@ -35,16 +35,20 @@ function stop() {
   return new Promise((resolve) => {
     let found = false;
     docker.listContainers({ all: true }, (err, containers) => {
-      containers.forEach((containerInfo) => {
-        if (containerInfo.Image === '2key/geth:dev') {
-          found = true;
-          console.log('Stopping private network...', containerInfo.Id);
-          docker.getContainer(containerInfo.Id).stop(() => {
-            docker.getContainer(containerInfo.Id).remove(resolve);
-          });
+      if (containers) {
+        containers.forEach((containerInfo) => {
+          if (containerInfo.Image === '2key/geth:dev') {
+            found = true;
+            console.log('Stopping private network...', containerInfo.Id);
+            docker.getContainer(containerInfo.Id).stop(() => {
+              docker.getContainer(containerInfo.Id).remove(resolve);
+            });
+          }
+        });
+        if (!found) {
+          resolve();
         }
-      });
-      if (!found) {
+      } else {
         resolve();
       }
     });
