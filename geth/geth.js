@@ -99,11 +99,11 @@ async function start() {
     '--miner.threads',
     '1',
     '--gasprice',
-    '0',
+    '2000000000',
     '--targetgaslimit',
     '9000000',
     '--unlock',
-    '0,1,2',
+    '0,1',
     '--password',
     '/opt/geth/passwords',
   ];

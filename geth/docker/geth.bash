@@ -5,7 +5,7 @@ if [ ! -d /geth/data/keystore ]; then
 	geth init --datadir=/geth/data /opt/geth/genesis.json
 	echo "...done!"
 
-	for i in {1..3}
+	for i in {1..2}
 	do 
 		echo "GENERATIONG KEY "$i" ON DEVNET"
 		geth --datadir=/geth/data account import --password /opt/geth/passwords <(sed -n "$i"p /opt/geth/key.prv)
