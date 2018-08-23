@@ -9,9 +9,10 @@ contract TwoKeyEconomy is StandardToken, Ownable {
   string public name = 'TwoKeyEconomy';
   string public symbol = '2Key';
   uint8 public decimals = 18;
-  uint256 private totalSupply_ = 1000000000000000000000000000;  
+//  uint256 private totalSupply_ = 1000000000000000000000000000;
 
   constructor() Ownable() public {
-    balances[msg.sender] = totalSupply_;  
+    totalSupply_ = 1000000000000000000000000000;
+    balances[msg.sender] = totalSupply_;
   }
 }

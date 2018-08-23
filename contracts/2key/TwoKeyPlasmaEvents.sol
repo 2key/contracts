@@ -5,6 +5,7 @@ contract TwoKeyPlasmaEvents is Ownable {
 
 
     mapping(address => mapping(address => mapping(address => bool))) public visits;
+    mapping(address => mapping(address => address[])) public visits_list;
     mapping(address => bool) public verifiedUsers;
 
     // Its better if dApp handles created contract by itself
@@ -24,9 +25,10 @@ contract TwoKeyPlasmaEvents is Ownable {
         // Its better if dApp handles created contract by itself
         //    require(verifiedCampaigns[c] != address(0));
         address to = msg.sender;
-        require(verifiedUsers[to]);
+        //    require(verifiedUsers[to]);  // TODO we want to use verified users BUT without gas
         if (!visits[c][from][to]) {  // generate event only once for each tripplet
             visits[c][from][to] = true;
+            visits_list[c][from].push(to);
             emit Visited(to, c, from);
         }
     }
@@ -36,5 +38,9 @@ contract TwoKeyPlasmaEvents is Ownable {
     /// @dev is _from actually msg.sender?
     function joined(address _campaign, address _from, address _to) public {
         emit Joined(_campaign, _from, _to);
+    }
+
+    function get_visits_list(address from, address c) public view returns (address[]) {
+        return visits_list[c][from];
     }
 }
