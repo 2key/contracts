@@ -85,7 +85,7 @@ async function start() {
     '--nodiscover',
     '--rpc',
     '--rpcapi',
-    'db,personal,eth,net,web3,debug',
+    'db,personal,eth,net,web3,debug,txpool,miner',
     '--rpccorsdomain=*',
     '--rpcaddr=0.0.0.0',
     '--rpcport',

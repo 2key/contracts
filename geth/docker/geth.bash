@@ -2,7 +2,7 @@
 echo "Starting GETH"
 if [ ! -d /geth/data/keystore ]; then
 	echo "/geth/data/keystore not found, running 'geth init'..."
-	geth init --datadir=/geth/data /opt/geth/genesis.json
+	geth init --datadir=/geth/data /opt/geth/genesis.2key.json
 	echo "...done!"
 
 	for i in {1..2}
