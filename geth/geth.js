@@ -103,7 +103,7 @@ async function start() {
     '--targetgaslimit',
     '9000000',
     '--unlock',
-    '0,1',
+    '0',
     '--password',
     '/opt/geth/passwords',
   ];
