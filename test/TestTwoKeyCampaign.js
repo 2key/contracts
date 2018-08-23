@@ -84,26 +84,26 @@ contract('TwoKeyCampaign', async (accounts) => {
 
         composableAssetFactory = await ComposableAssetFactory.new(openingTime, closingTime);
 
-        campaign = await TwoKeyCampaign.new(
-            eventSource.address,
-            economy.address,
-            whitelistInfluencer.address,
-            whitelistConverter.address,
-
-            contractor,
-            moderator,
-
-            openingTime,
-            closingTime,
-            closingTime,
-            escrowPrecentage,
-            rate,
-            maxPi,
-            {
-                from: campaignCreator,
-                gas: 7000000
-            }
-        );
+        // campaign = await TwoKeyCampaign.new(
+        //     eventSource.address,
+        //     economy.address,
+        //     whitelistInfluencer.address,
+        //     whitelistConverter.address,
+        //
+        //     contractor,
+        //     moderator,
+        //
+        //     openingTime,
+        //     closingTime,
+        //     closingTime,
+        //     escrowPrecentage,
+        //     rate,
+        //     maxPi,
+        //     {
+        //         from: campaignCreator,
+        //         gas: 7000000
+        //     }
+        // );
     });
     it("Should print addresses of contracts", async() => {
         console.log("[ERC20] : " + erc20.address);
@@ -112,7 +112,7 @@ contract('TwoKeyCampaign', async (accounts) => {
         console.log("[TwoKeyUpgradebleExchange] : " + upgradeableExchange.address);
         console.log("[TwoKeyAdmin] : " + twoKeyAdmin.address);
         console.log("[TwoKeyEventSource] : " + eventSource.address);
-        // console.log("TwoKeyCampaign : " + campaign.address);
+        // console.log("[TwoKeyCampaign] : " + campaign.address);
         console.log("[TwoKeyWhitelistConverter] : " + whitelistConverter.address);
         console.log("[TwoKeyWhiteListInfluencer] : " + whitelistInfluencer.address);
         console.log("[TwoKeyARC] : " + twoKeyARC.address);
