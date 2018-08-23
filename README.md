@@ -348,7 +348,19 @@ How to deploy contracts to any network except local dev
 * Change truffle-template.js and add your configuration
 * Edit whitelist.json
 * Commit your changes
-* Make sure that you on same branches in contracts and sol-interface submodule
-* run ```node SOLDeployer.js migrate --network {netowrk}```
+* Make sure that you on same branches in contracts and 2key-protocol submodule (./build/2key-protocol)
+* run ```node SOLDeployer.js {netowrk} {truffle params if needed}```
 * wait until process finish
-* check both repos contracts and sol-interface should have same tags
+* check both repos contracts and 2key-protocol should have same tags
+
+
+# Docker testnet
+
+You need docker installed on your machine [See here](https://www.docker.com)
+
+Chaindata stored in ```./build/geth.dev``` you can remove it if need clean
+To run docker
+```npm run geth```
+you can close console if needed docker will continue work
+To stop docker
+```npm run geth:stop```
