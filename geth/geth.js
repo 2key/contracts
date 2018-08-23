@@ -89,7 +89,7 @@ async function start() {
     '--nodiscover',
     '--rpc',
     '--rpcapi',
-    'db,personal,eth,net,web3,debug',
+    'db,personal,eth,net,web3,debug,txpool,miner',
     '--rpccorsdomain=*',
     '--rpcaddr=0.0.0.0',
     '--rpcport',
@@ -107,7 +107,7 @@ async function start() {
     '--targetgaslimit',
     '9000000',
     '--unlock',
-    '0,1,2',
+    '0',
     '--password',
     '/opt/geth/passwords',
   ];
