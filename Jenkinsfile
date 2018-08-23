@@ -14,7 +14,7 @@ pipeline {
     }
     stage('deploy-to-gh-pages') {
       steps {
-        sh 'cd docs/website && npm run publish-gh-pages'
+        sh 'cd docs/website && npm install && npm run publish-gh-pages'
       }
     }
   }
