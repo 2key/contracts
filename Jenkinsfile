@@ -1,7 +1,7 @@
 pipeline {
   agent {
         docker {
-            image 'shlomiz2key/runners:deployer-1.0.4'
+            image 'shlomiz2key/runners:deployer-1.0.5'
             args '-u 0:0'
         }
     }
