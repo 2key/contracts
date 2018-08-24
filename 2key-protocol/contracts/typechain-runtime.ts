@@ -5,7 +5,6 @@ export interface ITxParams {
   from?: string;
   gas?: number | string | BigNumber;
   gasPrice?: number | string | BigNumber;
-  nonce?: number
 }
 
 export interface IPayableTxParams extends ITxParams {

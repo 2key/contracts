@@ -17,8 +17,10 @@ const twoKeyProtocolLibGit = simpleGit(twoKeyProtocolLibDir);
 
 async function handleExit(p) {
   console.log(p);
-  await contractsGit.reset('hard');
-  await twoKeyProtocolLibGit.reset('hard');
+  if (p !== 0) {
+    await contractsGit.reset('hard');
+    await twoKeyProtocolLibGit.reset('hard');
+  }
   process.exit();
 }
 
@@ -74,7 +76,7 @@ const runProcess = (app, args) => new Promise((resolve, reject) => {
   });
 });
 
-async function main() {
+async function deploy() {
   try {
     await contractsGit.fetch();
     await contractsGit.submoduleUpdate();
@@ -100,20 +102,15 @@ async function main() {
     }
     console.log(process.argv);
     const networks = process.argv[2].split(',');
-    // const truffleJobs = [];
-
-    // networks.forEach((network) => {
-    //   truffleJobs.push(
-    //  runTruffle(['migrate', '--network', network].concat(process.argv.slice(3))));
-    // });
     const l = networks.length;
     for (let i = 0; i < l; i += 1) {
       /* eslint-disable no-await-in-loop */
       await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--network', networks[i]].concat(process.argv.slice(3)));
       /* eslint-enable no-await-in-loop */
     }
-    // await runProcess(path.join(__dirname, 'node_modules/.bin/typechain'), ['--force', '--outDir', path.join(twoKeyProtocolDir, 'src/contracts'), `${buildPath}/*.json`]);
     await generateSOLInterface();
+    await runProcess(path.join(__dirname, 'node_modules/.bin/typechain'), ['--force', '--outDir', path.join(twoKeyProtocolDir, 'contracts'), `${buildPath}/*.json`]);
+    await runProcess(path.join(__dirname, 'node_modules/.bin/webpack'));
     contractsStatus = await contractsGit.status();
     twoKeyProtocolStatus = await twoKeyProtocolLibGit.status();
     const network = networks.join('/');
@@ -142,6 +139,30 @@ async function main() {
       console.warn('Error', e);
     }
     await contractsGit.reset('hard');
+  }
+}
+
+async function main() {
+  const mode = process.argv[2];
+  switch (mode) {
+    case '--migrate':
+      try {
+        const networks = process.argv[3].split(',');
+        const l = networks.length;
+        for (let i = 0; i < l; i += 1) {
+          /* eslint-disable no-await-in-loop */
+          await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--network', networks[i]].concat(process.argv.slice(4)));
+          /* eslint-enable no-await-in-loop */
+        }
+        await generateSOLInterface();
+        await runProcess(path.join(__dirname, 'node_modules/.bin/typechain'), ['--force', '--outDir', path.join(twoKeyProtocolDir, 'contracts'), `${buildPath}/*.json`]);
+        process.exit(0);
+      } catch (err) {
+        process.exit(1);
+      }
+      break;
+    default:
+      deploy();
   }
 }
 

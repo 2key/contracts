@@ -10,9 +10,9 @@ export default { TwoKeyCampaignETHCrowdsale: { networks: {}, bytecode: '0x' },
         '17':
          { events: {},
            links: {},
-           address: '0x835aaf6ea6b04892915a8299110652e7cc897a4e',
+           address: '0x63aa72a7477da148f6bdb3df19ebea289871e074',
            transactionHash:
-            '0x0fe0fec15bab2d5daa7904f3077db0c1056bf5059b242a665f51b8ff28734330' },
+            '0x4b782b27d37a4bcdc85e502e0cabd5b21b7e0b220b4d2cfed8a1b11d8ae23473' },
         '5777':
          { events: {},
            links: {},
@@ -30,9 +30,9 @@ export default { TwoKeyCampaignETHCrowdsale: { networks: {}, bytecode: '0x' },
         '17':
          { events: {},
            links: {},
-           address: '0x9993da88b6721bc0844e5c5b1ea02d25c38b2c12',
+           address: '0xda3856bd6b032518117cb13a49285ef38835a08f',
            transactionHash:
-            '0xe89d28de7209efd0d3fd418ed5ec3d111012e6cfb94c5bcccf641fe26e49244f' },
+            '0x9ae434c90f3b4566b8c20f184e7b72758484f288a264fe18d81d9b55b0873850' },
         '5777':
          { events: {},
            links: {},
@@ -58,9 +58,9 @@ export default { TwoKeyCampaignETHCrowdsale: { networks: {}, bytecode: '0x' },
         '17':
          { events: {},
            links: {},
-           address: '0x5263b6d2b58419dada5312a46be476551c29fd8a',
+           address: '0x52c0a82c4e573d45449dac9034fb14a85509b7bf',
            transactionHash:
-            '0x316adcbbd7e4d85e00170b05d92a1d133f078e4737bb07dc34455724420bb392' },
+            '0x487e53e2992cb627b22e81a8efb5e6bc0a102307c9fdd21180e051937188a5a3' },
         '5777':
          { events: {},
            links: {},
