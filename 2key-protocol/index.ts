@@ -1,4 +1,5 @@
 import Web3 from 'web3';
+import { Transaction } from 'web3/eth/types'
 import ProviderEngine from 'web3-provider-engine';
 import RpcSubprovider from 'web3-provider-engine/subproviders/rpc';
 import WSSubprovider from 'web3-provider-engine/subproviders/websocket';
@@ -8,7 +9,7 @@ import { BigNumber } from 'bignumber.js';
 import Tx from 'ethereumjs-tx';
 import solidityContracts from './contracts/meta';
 import { TwoKeyEconomy } from './contracts/TwoKeyEconomy';
-import { EhtereumNetworks, ContractsAdressess, TwoKeyInit, BalanceMeta, Gas, Transaction, RawTransaction } from './interfaces';
+import { EhtereumNetworks, ContractsAdressess, TwoKeyInit, BalanceMeta, Gas, RawTransaction } from './interfaces';
 import Sign from './sign';
 // import HDWalletProvider from './HDWalletProvider';
 
@@ -112,11 +113,18 @@ export default class TwoKeyNetwork {
   }
 
   public fromWei(number: string | number | BigNumber, unit?: string): string {
+    // @ts-ignore: Web3 version missmatch
     return this.mainWeb3.fromWei(number, unit);
   }
 
   public toWei(number: string | number | BigNumber, unit?: string): number | BigNumber {
+    // @ts-ignore: Web3 version missmatch
     return this.mainWeb3.toWei(number, unit);
+  }
+
+  public toHex(data: any): string {
+    // @ts-ignore: Web3 version missmatch
+    return this.mainWeb3.toHex(data);
   }
 
   public getTransaction(txHash: string): Promise<Transaction> {
@@ -158,7 +166,7 @@ export default class TwoKeyNetwork {
   public getERC20TransferGas(to: string, value: number): Promise<Gas> {
     this.gas = null;
     return new Promise((resolve, reject) => {
-      this.twoKeyEconomy.transferTx(to, this.mainWeb3.toWei(value, 'ether')).estimateGas({ from: this.address })
+      this.twoKeyEconomy.transferTx(to, this.toWei(value, 'ether')).estimateGas({ from: this.address })
         .then(res => {
           this.gas = res;
           resolve({ wei: this.gas });
@@ -170,7 +178,7 @@ export default class TwoKeyNetwork {
   public getETHTransferGas(to: string, value: number): Promise<Gas> {
     this.gas = null;
     return new Promise((resolve, reject) => {
-      this.mainWeb3.eth.estimateGas({ to, value: this.toWei(value, 'ether') }, (err, res) => {
+      this.mainWeb3.eth.estimateGas({ to, value: this.toWei(value, 'ether').toString() }, (err, res) => {
         if (err) {
           reject(err);
         } else {
@@ -183,12 +191,12 @@ export default class TwoKeyNetwork {
 
   public async transferTokens(to: string, value: number, gasPrice: number = this.gasPrice): Promise<string> {
     console.log('Gas Price', gasPrice);
-    const params = { from: this.address, gasLimit: this.mainWeb3.toHex(this.gas), gasPrice };
+    const params = { from: this.address, gasLimit: this.toHex(this.gas), gasPrice };
     return this.twoKeyEconomy.transferTx(to, this.toWei(value, 'ether')).send(params);
   }
 
   public async transferEther(to: string, value: number, gasPrice: number = this.gasPrice): Promise<any> {
-    const params = { to, gasPrice, gasLimit: this.mainWeb3.toHex(this.gas), value: this.toWei(value, 'ether'), from: this.address }
+    const params = { to, gasPrice, gasLimit: this.toHex(this.gas), value: this.toWei(value, 'ether').toString(), from: this.address }
     return new Promise((resolve, reject) => {
       this.mainWeb3.eth.sendTransaction(params, (err, res) => {
         if (err) {
@@ -210,6 +218,7 @@ export default class TwoKeyNetwork {
         if (err) {
           reject(err);
         } else {
+          // @ts-ignore: Web3 version missmatch
           this.gasPrice = res.toNumber();
           resolve(res.toString());
         }
@@ -233,7 +242,7 @@ export default class TwoKeyNetwork {
     return new Promise((resolve, reject) => {
       this.twoKeyEconomy.balanceOf(this.address)
         .then(res => {
-          resolve(this.mainWeb3.fromWei(res.toString()))
+          resolve(this.fromWei(res.toString()))
         })
         .catch(reject);
     });

@@ -1,6 +1,6 @@
-const webpack = require('webpack');
 const path = require('path');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const ProgressBarPlugin = require('progress-bar-webpack-plugin');
 
 const libraryName = 'twokey-protocol';
 
@@ -34,6 +34,7 @@ const config = {
     new UglifyJsPlugin({
       sourceMap: true,
     }),
+    new ProgressBarPlugin(),
   ],
 };
 
