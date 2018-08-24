@@ -57,7 +57,7 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
 });
 
 const runProcess = (app, args) => new Promise((resolve, reject) => {
-  console.log('Run process', app, args.join(' '));
+  console.log('Run process', app, args && args.join(' '));
   const proc = childProcess.spawn(app, args);
   proc.stdout.on('data', (data) => {
     console.log(data.toString('utf8'));
