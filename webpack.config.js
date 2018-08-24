@@ -5,7 +5,7 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const libraryName = 'twokey-protocol';
 
 const config = {
-  entry: './src/index.ts',
+  entry: './2key-protocol/index.ts',
   devtool: 'source-map',
   output: {
     path: path.join(__dirname, 'build', '2key-protocol'),
