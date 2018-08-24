@@ -13,6 +13,7 @@ contract TwoKeyEventSource is TwoKeyTypes {
     event Rewarded(address indexed _campaign, address indexed _to, uint256 _amount);
     event Fulfilled(address indexed _campaign, address indexed _converter, uint256 indexed _tokenID, address _childContractID, uint256 _indexOrAmount, CampaignType _type);
     event Cancelled(address indexed _campaign, address indexed _converter, uint256 indexed _tokenID, address _childContractID, uint256 _indexOrAmount, CampaignType _type);
+    event Code(bytes32 _code, uint256 _index);
 
 
 
@@ -23,10 +24,10 @@ contract TwoKeyEventSource is TwoKeyTypes {
 
 
     ///Mapping contract bytecode to boolean if is allowed to emit an event
-    mapping(bytes => bool) canEmit;
+    mapping(bytes32 => bool) canEmit;
 
     /// Mapping contract bytecode to enumerator CampaignType.
-    mapping(bytes => CampaignType) codeToType;
+    mapping(bytes32 => CampaignType) codeToType;
 
 
     ///Mapping an address to boolean if allowed to modify
@@ -50,7 +51,9 @@ contract TwoKeyEventSource is TwoKeyTypes {
     modifier onlyAllowedContracts {
         //just to use contract code instead of msg.sender address
         bytes memory code = GetCode.at(msg.sender);
-        require(canEmit[code] == true);
+        bytes32 cc = keccak256(abi.encodePacked(code));
+        emit Code(cc,1);
+        require(canEmit[cc] == true);
         _;
     }
 
@@ -67,7 +70,9 @@ contract TwoKeyEventSource is TwoKeyTypes {
     function addContract(address _contractAddress) public onlyAuthorizedSubadmins {
         require(_contractAddress != address(0));
         bytes memory _contractCode = GetCode.at(_contractAddress);
-        canEmit[_contractCode] = true;
+        bytes32 cc = keccak256(abi.encodePacked(_contractCode));
+        emit Code(cc,2);
+        canEmit[cc] = true;
     }
 
     /// @notice function where admin or any authorized person (will be added if needed) can remove contract (disable permissions to emit Events)
@@ -77,7 +82,9 @@ contract TwoKeyEventSource is TwoKeyTypes {
     function removeContract(address _contractAddress) public onlyAuthorizedSubadmins {
         require(_contractAddress != address(0));
         bytes memory _contractCode = GetCode.at(_contractAddress);
-        canEmit[_contractCode] = false;
+        bytes32 cc = keccak256(abi.encodePacked(_contractCode));
+        emit Code(cc,3);
+        canEmit[cc] = false;
     }
 
     /// @notice Function where an admin can authorize any other person to modify allowed contracts
@@ -103,8 +110,9 @@ contract TwoKeyEventSource is TwoKeyTypes {
     /// @param _contractCode is code od contract
     /// @param _campaignType is enumerator representing type of campaign
     function addCampaignType(bytes _contractCode, CampaignType _campaignType) {
-        require(canEmit[_contractCode] == true); //Check if this validation is needed
-        codeToType[_contractCode] = _campaignType;
+        bytes32 cc = keccak256(abi.encodePacked(_contractCode));
+        require(canEmit[cc] == true); //Check if this validation is needed
+        codeToType[cc] = _campaignType;
     }
 
     /// @notice Function where admin can be changed
@@ -115,7 +123,8 @@ contract TwoKeyEventSource is TwoKeyTypes {
     }
 
     function checkCanEmit(bytes _contractCode) public view returns (bool) {
-        return canEmit[_contractCode];
+        bytes32 cc = keccak256(abi.encodePacked(_contractCode));
+        return canEmit[cc];
     }
 
     /// @dev Only allowed contracts can call this function ---> means can emit events
