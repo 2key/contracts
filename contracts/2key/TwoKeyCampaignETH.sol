@@ -10,18 +10,19 @@ contract TwoKeyCampaignETH is TwoKeyCampaign {
 	    creates the escrow for a fungible asset
 	    computes the payout in ETH 
 	    transfers to the escrow the asset purchased
-    */ 
+    */
+	//isOngoing -commented
 	function fulfillFungibleETH(
 		address _from, 
 		uint256 _tokenID, 
 		address _assetContract, 
-		uint256 _amount) isOngoing internal {	
+		uint256 _amount) internal {
 		require(_amount > 0 && prices[_tokenID][_assetContract] > 0);
 		uint256 payout = prices[_tokenID][_assetContract].mul(_amount);
 		require(msg.value == payout);
 		Conversion memory c = Conversion(_from, payout, msg.sender, false, false, _tokenID, _assetContract, _amount, CampaignType.Fungible, now, now + expiryConversion * 1 days);
 		// move funds
-		assets[_tokenID][_assetContract] -= _amount;
+		composableAssetFactory.remAssets(_tokenID, _assetContract, _amount);
 		eventSource.escrow(address(this), msg.sender, _tokenID, _assetContract, _amount, CampaignType.Fungible);
 		conversions[msg.sender] = c;
 	}
@@ -32,7 +33,8 @@ contract TwoKeyCampaignETH is TwoKeyCampaign {
 	    computes the payout in ETH
 	    transfers to the escrow the asset purchased
     */
-	function fulfillNonFungibleETH(address _from, uint256 _tokenID, address _assetContract, uint256 _index) isOngoing internal {	
+	// isOngoing - commented
+	function fulfillNonFungibleETH(address _from, uint256 _tokenID, address _assetContract, uint256 _index) internal {
 		address assetToken = address(
 	      keccak256(abi.encodePacked(_assetContract, _index))
 	    );

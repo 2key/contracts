@@ -6,9 +6,9 @@ import '../openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol';
 import './TwoKeyCampaign.sol';
 import './TwoKeyReg.sol';
 import './TwoKeyEconomy.sol';
-import './TwoKeyWhitelisted.sol';
 import './TwoKeyEventSource.sol';
 import './TwoKeyTypes.sol';
+import "./TwoKeyWhitelisted.sol";
 
 contract TwoKeyCampaignCrowdsale is TwoKeyCampaign, Crowdsale {
 
@@ -19,14 +19,15 @@ contract TwoKeyCampaignCrowdsale is TwoKeyCampaign, Crowdsale {
 		TwoKeyEconomy _economy,
 		TwoKeyWhitelisted _whitelistInfluencer,
 		TwoKeyWhitelisted _whitelistConverter,
-		 
-		address _contractor,
-		address _moderator, 
+		ComposableAssetFactory _composableAssetFactory,
 
-		
-		uint256 _start,
-		uint256 _duration,
-		uint256 _expiryConversion, 
+		address _contractor,
+		address _moderator,
+
+
+//		uint256 _start,
+//		uint256 _duration,
+		uint256 _expiryConversion,
 		uint256 _escrowPrecentage,
 		uint256 _rate,
 		uint256 _maxPi) TwoKeyCampaign(
@@ -34,11 +35,12 @@ contract TwoKeyCampaignCrowdsale is TwoKeyCampaign, Crowdsale {
 		_economy,
 		_whitelistInfluencer,
 		_whitelistConverter,
+		_composableAssetFactory,
 		_contractor,
-		_moderator, 		
-		_start,
-		_duration,
-		_expiryConversion, 
+		_moderator,
+//		_start,
+//		_duration,
+		_expiryConversion,
 		_escrowPrecentage,
 		_rate,
 		_maxPi) public {
@@ -50,7 +52,7 @@ contract TwoKeyCampaignCrowdsale is TwoKeyCampaign, Crowdsale {
 	    // need to transfer ETH to campaign
 	    // so this function is not usable in the present form
 	    buyTokens(address(this));
-	    require(addFungibleAsset(_tokenID, _assetContract, _amountOrIndex));
+	    require(composableAssetFactory.addFungibleAsset(_tokenID, _assetContract, _amountOrIndex));
 	    super.buyFromWithTwoKey(_from, _tokenID, _assetContract, _amountOrIndex, CampaignType.Fungible);
 	}	
 

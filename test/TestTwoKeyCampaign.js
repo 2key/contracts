@@ -84,26 +84,27 @@ contract('TwoKeyCampaign', async (accounts) => {
 
         composableAssetFactory = await ComposableAssetFactory.new(openingTime, closingTime);
 
-        // campaign = await TwoKeyCampaign.new(
-        //     eventSource.address,
-        //     economy.address,
-        //     whitelistInfluencer.address,
-        //     whitelistConverter.address,
-        //
-        //     contractor,
-        //     moderator,
-        //
-        //     openingTime,
-        //     closingTime,
-        //     closingTime,
-        //     escrowPrecentage,
-        //     rate,
-        //     maxPi,
-        //     {
-        //         from: campaignCreator,
-        //         gas: 7000000
-        //     }
-        // );
+        campaign = await TwoKeyCampaign.new(
+            eventSource.address,
+            economy.address,
+            whitelistInfluencer.address,
+            whitelistConverter.address,
+            composableAssetFactory.address,
+
+            contractor,
+            moderator,
+
+            // openingTime,
+            // closingTime,
+            closingTime,
+            escrowPrecentage,
+            rate,
+            maxPi,
+            {
+                from: campaignCreator,
+                gas: '7000000'
+            }
+        );
     });
     it("Should print addresses of contracts", async() => {
         console.log("[ERC20] : " + erc20.address);

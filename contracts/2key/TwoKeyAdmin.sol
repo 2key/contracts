@@ -5,19 +5,9 @@ import '../openzeppelin-solidity/contracts/ownership/Ownable.sol';
 
 import './TwoKeyEconomy.sol';
 import './TwoKeyUpgradableExchange.sol';
+import "../interfaces/IAdminContract.sol";
 
 
-interface AdminContract {
-
-	function replaceOneself(address newAdminContract) external;
-
-	function transferByAdmins(address to, uint256 tokens) external;
-
-	function upgradeEconomyExchangeByAdmins(address newExchange) external;
-
-	function transferEtherByAdmins(address to, uint256 amount) external;
-
-}
 
 // SAFT are to be implemented by transferEtherByAdmins with the amount including the discount, according to the prevailing rate
 

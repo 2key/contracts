@@ -2,15 +2,14 @@ pragma solidity ^0.4.24;
 
 import '../openzeppelin-solidity/contracts/math/SafeMath.sol';
 
-import './ERC20full.sol';
 import './TwoKeyEconomy.sol';
-import './TwoKeyWhitelisted.sol';
-import './ComposableAssetFactory.sol';
 import './TwoKeyTypes.sol';
 import './TwoKeyEventSource.sol';
 import './TwoKeyARC.sol';
+import "./ComposableAssetFactory.sol";
+import "./TwoKeyWhitelisted.sol";
 
-contract TwoKeyCampaign is TwoKeyARC, ComposableAssetFactory, TwoKeyTypes {
+contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
 
 	using SafeMath for uint256;
 
@@ -48,6 +47,10 @@ contract TwoKeyCampaign is TwoKeyARC, ComposableAssetFactory, TwoKeyTypes {
 
 	// whitelist of converters, to which users are added after kyc
 	TwoKeyWhitelisted whitelistConverter;
+
+	// Composable asset factory
+	ComposableAssetFactory composableAssetFactory;
+
 
 	// prices of assets
 	// TODO (udi) there should be just one token->address->price you dont need two maps
@@ -108,16 +111,17 @@ contract TwoKeyCampaign is TwoKeyARC, ComposableAssetFactory, TwoKeyTypes {
 		TwoKeyEconomy _economy,
 		TwoKeyWhitelisted _whitelistInfluencer,
 		TwoKeyWhitelisted _whitelistConverter,
-		 
+		ComposableAssetFactory _composableAssetFactory,
+
 		address _contractor,
-		address _moderator, 
-		
-		uint256 _openingTime,
-		uint256 _closingTime,
-		uint256 _expiryConversion, 
+		address _moderator,
+
+//		uint256 _openingTime,
+//		uint256 _closingTime,
+		uint256 _expiryConversion,
 		uint256 _escrowPercentage,
 		uint256 _rate,
-		uint256 _maxPi) TwoKeyARC(_eventSource, _contractor) ComposableAssetFactory(_openingTime, _closingTime) StandardToken() public {
+		uint256 _maxPi) TwoKeyARC(_eventSource, _contractor) StandardToken() public {
 
 
 		/// requires that all contracts from constructor are already deployed
@@ -130,14 +134,6 @@ contract TwoKeyCampaign is TwoKeyARC, ComposableAssetFactory, TwoKeyTypes {
 		require(_rate > 0);
 		require(_maxPi > 0);
 
-//		/// adminAddRole can only be called from the address which is already admin, meaning address of this contract need to be an admin
-//		/// This can revert transaction
-		adminAddRole(msg.sender, ROLE_CONTROLLER);
-		adminAddRole(_contractor, ROLE_CONTROLLER);
-		adminAddRole(_moderator, ROLE_CONTROLLER);
-
-		balances[msg.sender] = totalSupply_;
-
 		economy = _economy;
 		whitelistInfluencer = _whitelistInfluencer;
 		whitelistConverter = _whitelistConverter;
@@ -148,6 +144,7 @@ contract TwoKeyCampaign is TwoKeyARC, ComposableAssetFactory, TwoKeyTypes {
 		expiryConversion = _expiryConversion;
 		escrowPercentage = _escrowPercentage;
 
+		composableAssetFactory = _composableAssetFactory;
 		rate = _rate;
 
 //		 in general max_pi is dynamic and is computed by the incentive model
@@ -161,6 +158,13 @@ contract TwoKeyCampaign is TwoKeyARC, ComposableAssetFactory, TwoKeyTypes {
 
 	}
 
+//    function addAdminRolesAndBalancesAfterDeployed() public {
+//		composableAssetFactory.adminAddRole(msg.sender, composableAssetFactory.ROLE_CONTROLLER);
+//		composableAssetFactory.adminAddRole(contractor, composableAssetFactory.ROLE_CONTROLLER);
+//		composableAssetFactory.adminAddRole(moderator, composableAssetFactory.ROLE_CONTROLLER);
+//		composableAssetFactory.balances[msg.sender] = totalSupply_;
+//    }
+
     /*  
 	    fulfills a fungible asset purchase
 	    creates the escrow for a fungible asset
@@ -171,13 +175,13 @@ contract TwoKeyCampaign is TwoKeyARC, ComposableAssetFactory, TwoKeyTypes {
 		address _from, 
 		uint256 _tokenID, 
 		address _assetContract, 
-		uint256 _amount) isOngoing internal {	
+		uint256 _amount)  internal {
 		require(_amount > 0 && prices[_tokenID][_assetContract] > 0);
 		uint256 payout = prices[_tokenID][_assetContract].mul(_amount).mul(rate);
 		require(economy.transferFrom(msg.sender, this, payout));	
 		Conversion memory c = Conversion(_from, payout, msg.sender, false, false, _tokenID, _assetContract, _amount, CampaignType.Fungible, now, now + expiryConversion * 1 minutes);
 		// move funds
-		assets[_tokenID][_assetContract] -= _amount;
+		composableAssetFactory.remAssets(_tokenID, _assetContract, _amount);
 		eventSource.escrow(address(this), msg.sender, _tokenID, _assetContract, _amount, CampaignType.Fungible);	
 		conversions[msg.sender] = c;
 	}
@@ -188,8 +192,10 @@ contract TwoKeyCampaign is TwoKeyARC, ComposableAssetFactory, TwoKeyTypes {
 	    creates the escrow for a fungible asset
 	    computes the payout 
 	    transfers to the escrow the asset purchased
-    */ 
-	function fulfillNonFungibleTwoKeyToken(address _from, uint256 _tokenID, address _assetContract, uint256 _index) isOngoing internal {
+
+    */
+	/// Removed isOngoing while testing, will be returned
+	function fulfillNonFungibleTwoKeyToken(address _from, uint256 _tokenID, address _assetContract, uint256 _index) internal {
 		address assetToken = address(
 	      keccak256(abi.encodePacked(_assetContract, _index))
 	    );
@@ -198,7 +204,7 @@ contract TwoKeyCampaign is TwoKeyARC, ComposableAssetFactory, TwoKeyTypes {
 		require(economy.transferFrom(msg.sender, this, payout));
 		Conversion memory c = Conversion(_from, payout, msg.sender, false, false, _tokenID, _assetContract, _index, CampaignType.NonFungible, now, now + expiryConversion * 1 minutes);
 		// move funds
-		assets[_tokenID][assetToken] = 0;
+		composableAssetFactory.setAssetsToZero(_tokenID, _assetContract);
 		eventSource.escrow(address(this), msg.sender, _tokenID, _assetContract, _index, CampaignType.NonFungible);
 		conversions[msg.sender] = c;
 	}
@@ -232,9 +238,9 @@ contract TwoKeyCampaign is TwoKeyARC, ComposableAssetFactory, TwoKeyTypes {
         CampaignType _type) isWhitelistedConverter didConverterConvert public {
         actuallyFulfilledTwoKeyToken();
         if (_type == CampaignType.NonFungible) {
-			require(transferNonFungibleAsset(msg.sender, _tokenID, _assetContract, _assetTokenIDOrAmount));
+			require(composableAssetFactory.transferNonFungibleAsset(msg.sender, _tokenID, _assetContract, _assetTokenIDOrAmount));
         } else if (_type == CampaignType.Fungible) {
-			require(transferFungibleAsset(msg.sender, _tokenID, _assetContract, _assetTokenIDOrAmount));
+			require(composableAssetFactory.transferFungibleAsset(msg.sender, _tokenID, _assetContract, _assetTokenIDOrAmount));
         }
 
     }
@@ -252,12 +258,12 @@ contract TwoKeyCampaign is TwoKeyARC, ComposableAssetFactory, TwoKeyTypes {
 	        address assetToken = address(
 		      keccak256(abi.encodePacked(_assetContract, _assetTokenIDOrAmount))
 		    );
-	        assets[_tokenID][assetToken] = 1;          	
+			composableAssetFactory.setAssetsToOne(_tokenID, _assetContract);
         } else if (_type == CampaignType.Fungible) {
-	        assets[_tokenID][_assetContract] += _assetTokenIDOrAmount;  
+			composableAssetFactory.addAssets(_tokenID, _assetContract, _assetTokenIDOrAmount);
         }
 
-        require(economy.transfer(_converter, (c.payout).mul(rate)));	
+        require(economy.transfer(_converter, (c.payout).mul(rate)));
     }
 
 
@@ -271,38 +277,39 @@ contract TwoKeyCampaign is TwoKeyARC, ComposableAssetFactory, TwoKeyTypes {
      * @param  _type NonFungible or Fungible
      * 
      */
-//    function cancelAssetTwoKey(
-//        address _converter,
-//        uint256 _tokenID,
-//        address _assetContract,
-//        uint256 _assetTokenIDOrAmount,
-//        CampaignType _type) onlyRole(ROLE_CONTROLLER) public returns (bool) {
-//    	Conversion memory c = conversions[_converter];
-//	    require(c.tokenID != 0 && !c.isCancelled && !c.isFulfilled);
-//	    if (_type == CampaignType.NonFungible) {
-//	    	cancelledEscrow(_converter, _tokenID, _assetContract, _assetTokenIDOrAmount, CampaignType.NonFungible);
-//	        eventSource.cancelled(address(this), _converter, _tokenID, _assetContract, _assetTokenIDOrAmount, CampaignType.NonFungible);
-//	    } else if (_type == CampaignType.Fungible) {
-//	    	cancelledEscrow(_converter, _tokenID, _assetContract, _assetTokenIDOrAmount, CampaignType.Fungible);
-//        	eventSource.cancelled(address(this), _converter, _tokenID, _assetContract, _assetTokenIDOrAmount, CampaignType.Fungible);
-//	    }
-//        return true;
-//    }
+	// comment onlyRole(ROLE_CONTROLLER)
+    function cancelAssetTwoKey(
+        address _converter,
+        uint256 _tokenID,
+        address _assetContract,
+        uint256 _assetTokenIDOrAmount,
+        CampaignType _type)  public returns (bool) {
+    	Conversion memory c = conversions[_converter];
+	    require(c.tokenID != 0 && !c.isCancelled && !c.isFulfilled);
+	    if (_type == CampaignType.NonFungible) {
+	    	cancelledEscrow(_converter, _tokenID, _assetContract, _assetTokenIDOrAmount, CampaignType.NonFungible);
+	        eventSource.cancelled(address(this), _converter, _tokenID, _assetContract, _assetTokenIDOrAmount, CampaignType.NonFungible);
+	    } else if (_type == CampaignType.Fungible) {
+	    	cancelledEscrow(_converter, _tokenID, _assetContract, _assetTokenIDOrAmount, CampaignType.Fungible);
+        	eventSource.cancelled(address(this), _converter, _tokenID, _assetContract, _assetTokenIDOrAmount, CampaignType.Fungible);
+	    }
+        return true;
+    }
 
-
-//    function expireEscrow(
-//		address _converter,
-//		uint256 _tokenID,
-//		address _assetContract,
-//		uint256 _assetTokenIDOrAmount,
-//		CampaignType _type) onlyRole(ROLE_CONTROLLER) public returns (bool){
-//	    Conversion memory c = conversions[_converter];
-//	    require(c.tokenID != 0 && !c.isCancelled && !c.isFulfilled);
-//    	require(now > c.closingTime);
-//		cancelledEscrow(_converter, _tokenID, _assetContract, _assetTokenIDOrAmount, _type);
+	//onlyRole(ROLE_CONTROLLER) - comment
+    function expireEscrow(
+		address _converter,
+		uint256 _tokenID,
+		address _assetContract,
+		uint256 _assetTokenIDOrAmount,
+		CampaignType _type)  public returns (bool){
+	    Conversion memory c = conversions[_converter];
+	    require(c.tokenID != 0 && !c.isCancelled && !c.isFulfilled);
+    	require(now > c.closingTime);
+		cancelledEscrow(_converter, _tokenID, _assetContract, _assetTokenIDOrAmount, _type);
 //		emit Expired(address(this));
-//		return true;
-//	}
+		return true;
+	}
 
 
     /**
@@ -329,12 +336,14 @@ contract TwoKeyCampaign is TwoKeyARC, ComposableAssetFactory, TwoKeyTypes {
 	}
 
 	// set price for fungible asset held by the campaign
-	function setPriceFungible(uint256 _tokenID, address _assetContract, uint256 _pricePerUnit) onlyRole(ROLE_CONTROLLER) public {
+	// onlyRole(ROLE_CONTROLLER) - removed temp
+	function setPriceFungible(uint256 _tokenID, address _assetContract, uint256 _pricePerUnit)  public {
 		prices[_tokenID][_assetContract] = _pricePerUnit;
 	}
 
 	// set price for a non fungible asset held by the campaign
-	function setPriceNonFungible(uint256 _tokenID, address _assetContract, uint256 _index, uint256 _pricePerUnit) onlyRole(ROLE_CONTROLLER) public {
+	// onlyRole(ROLE_CONTROLLER) - removed temp
+	function setPriceNonFungible(uint256 _tokenID, address _assetContract, uint256 _index, uint256 _pricePerUnit)  public {
 		address assetToken = address(
 	      keccak256(abi.encodePacked(_assetContract, _index))
 	    );
@@ -367,6 +376,7 @@ contract TwoKeyCampaign is TwoKeyARC, ComposableAssetFactory, TwoKeyTypes {
 			fulfillNonFungibleTwoKeyToken(_from, _tokenID, _assetContract, _amountOrIndex);
 		} 
 	}
+
 
 }
 

@@ -162,11 +162,12 @@ contract ComposableAssetFactory is RBACWithAdmin {
   }
 
   // transfer a unique item from a erc721 in our catalogue to someone
+  // public - need to be callable only by two key campaign
   function transferNonFungibleAsset(
     address _to,
     uint256 _tokenID,
     address _assetContract,
-    uint256 _assetTokenID) isOngoing onlyRole(ROLE_CONTROLLER) internal returns (bool) {
+    uint256 _assetTokenID) isOngoing onlyRole(ROLE_CONTROLLER) public returns (bool) {
     return moveNonFungibleAsset(_to, _tokenID, _assetContract, _assetTokenID);
   }
 
@@ -189,5 +190,22 @@ contract ComposableAssetFactory is RBACWithAdmin {
     emit Expired(address(this));
     return true;
   }
+
+  // This method should be called only by TwoKeyCampaign Contract
+  function remAssets(uint _tokenID, address _assetContract, uint _amount) public {
+      assets[_tokenID][_assetContract] -= _amount;
+  }
+  function addAssets(uint _tokenID, address _assetContract, uint _amount) public {
+    assets[_tokenID][_assetContract] += _amount;
+  }
+
+  function setAssetsToZero(uint _tokenID, address _assetContract) public {
+    assets[_tokenID][_assetContract] = 0;
+  }
+
+  function setAssetsToOne(uint _tokenID, address _assetContract) public {
+    assets[_tokenID][_assetContract] = 1;
+  }
+
 
 }

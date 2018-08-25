@@ -6,8 +6,8 @@ import '../openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol';
 import './TwoKeyCampaignETH.sol';
 import './TwoKeyReg.sol';
 import './TwoKeyEconomy.sol';
-import './TwoKeyWhitelisted.sol';
 import './TwoKeyEventSource.sol';
+import "./TwoKeyWhitelisted.sol";
 
 contract TwoKeyCampaignETHCrowdsale is TwoKeyCampaignETH, Crowdsale {
 
@@ -18,14 +18,15 @@ contract TwoKeyCampaignETHCrowdsale is TwoKeyCampaignETH, Crowdsale {
 		TwoKeyEconomy _economy,
 		TwoKeyWhitelisted _whitelistInfluencer,
 		TwoKeyWhitelisted _whitelistConverter,
-		 
-		address _contractor,
-		address _moderator, 
+		ComposableAssetFactory _composableAssetFactory,
 
-		
-		uint256 _start,
-		uint256 _duration,
-		uint256 _expiryConversion, 
+		address _contractor,
+		address _moderator,
+
+
+//		uint256 _start,
+//		uint256 _duration,
+		uint256 _expiryConversion,
 		uint256 _escrowPrecentage,
 		uint256 _rate,
 		uint256 _maxPi) TwoKeyCampaign(
@@ -33,20 +34,22 @@ contract TwoKeyCampaignETHCrowdsale is TwoKeyCampaignETH, Crowdsale {
 		_economy,
 		_whitelistInfluencer,
 		_whitelistConverter,
+		_composableAssetFactory,
 		_contractor,
-		_moderator, 		
-		_start,
-		_duration,
-		_expiryConversion, 
+		_moderator,
+//		_start,
+//		_duration,
+		_expiryConversion,
 		_escrowPrecentage,
 		_rate,
-		_maxPi) public {
+		_maxPi
+	) public {
 	}
 
 	// buy product with ETH 
 	function buyFromWithETH(address _from, uint256 _tokenID, address _assetContract, uint256 _amountOrIndex) public payable {
 	    buyTokens(address(this));
-	    require(addFungibleAsset(_tokenID, _assetContract, _amountOrIndex));	    
+	    require(composableAssetFactory.addFungibleAsset(_tokenID, _assetContract, _amountOrIndex));
 	    buyFromWithETH(_from, _tokenID, _assetContract, _amountOrIndex, CampaignType.Fungible); 
 	}	
 
