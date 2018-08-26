@@ -195,30 +195,58 @@ contract ComposableAssetFactory is RBACWithAdmin {
     return true;
   }
 
-  // This method should be called only by TwoKeyCampaign Contract
+  /// @notice Since we don't any more inherit this contract, we can access to it's variables and modify them only with functions
+  /// @notice Removes specific amount of assets
+  /// @dev need to setup some kind of validation that only TwoKeyCampaign contract can call this
+  /// @param _tokenID is id of token
+  /// @param _assetContract is address of asset contract
+  /// @param _amount is the actual amount
   function remAssets(uint _tokenID, address _assetContract, uint _amount) public {
       assets[_tokenID][_assetContract] -= _amount;
   }
+
+  /// @notice Since we don't any more inherit this contract, we can access to it's variables and modify them only with functions
+  /// @notice Adds specific amount of assets
+  /// @dev need to setup some kind of validation that only TwoKeyCampaign contract can call this
+  /// @param _tokenID is id of token
+  /// @param _assetContract is address of asset contract
+  /// @param _amount is the actual amount
   function addAssets(uint _tokenID, address _assetContract, uint _amount) public {
     assets[_tokenID][_assetContract] += _amount;
   }
-
+  /// @notice Since we don't any more inherit this contract, we can access to it's variables and modify them only with functions
+  /// @notice Sets amount of assets to 0
+  /// @dev need to setup some kind of validation that only TwoKeyCampaign contract can call this
+  /// @param _tokenID is id of token
+  /// @param _assetContract is address of asset contract
   function setAssetsToZero(uint _tokenID, address _assetContract) public {
     assets[_tokenID][_assetContract] = 0;
   }
-
+  /// @notice Since we don't any more inherit this contract, we can access to it's variables and modify them only with functions
+  /// @notice Sets amount of assets to 1
+  /// @dev need to setup some kind of validation that only TwoKeyCampaign contract can call this
+  /// @param _tokenID is id of token
+  /// @param _assetContract is address of asset contract
   function setAssetsToOne(uint _tokenID, address _assetContract) public {
     assets[_tokenID][_assetContract] = 1;
   }
 
 
 
-  /// Since we can't use modifiers anymore here, we'll use functions and call them in other contracts
+  /// Since we can't use modifiers anymore here, we'll use functions and call them in other contracts / implement modifiers there
+  /// @notice Function to replace old modifier isOngoing - checks if current time is between opening and closing time
+  /// @dev Because TwoKeyCampaign doesn't inherit anymore this contract, it doesn't have access to it's modifiers
+  /// @return - if require pass will return true, otherwise it will revert trnx
   function isOnGoing() public view returns (bool) {
     require(block.timestamp >= openingTime && block.timestamp <= closingTime);
     return true;
   }
 
+
+  /// Since we can't use modifiers anymore here, we'll use functions and call them in other contracts / implement modifiers there
+  /// @notice Function to replace old modifier isClosed - checks if current time is greater than closingTime
+  /// @dev Because TwoKeyCampaign doesn't inherit anymore this contract, it doesn't have access to it's modifiers
+  /// @return - if require pass, will return true, otherwise it will revert trnx
   function isClosed() public view returns (bool) {
     require(block.timestamp > closingTime);
     return true;
