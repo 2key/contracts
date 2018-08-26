@@ -82,6 +82,7 @@ contract RBAC {
     _;
   }
 
+
   /**
    * @dev modifier to scope access to a set of roles (uses msg.sender as addr)
    * @param _roles the names of the roles to scope access to

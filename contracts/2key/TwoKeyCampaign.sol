@@ -154,6 +154,9 @@ contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
 		escrowPercentage = _escrowPercentage;
 
 		composableAssetFactory = _composableAssetFactory;
+
+
+
 		rate = _rate;
 
 //		 in general max_pi is dynamic and is computed by the incentive model
@@ -167,12 +170,12 @@ contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
 
 	}
 
-//    function addAdminRolesAndBalancesAfterDeployed() public {
-//		composableAssetFactory.adminAddRole(msg.sender, composableAssetFactory.ROLE_CONTROLLER);
-//		composableAssetFactory.adminAddRole(contractor, composableAssetFactory.ROLE_CONTROLLER);
-//		composableAssetFactory.adminAddRole(moderator, composableAssetFactory.ROLE_CONTROLLER);
-//		composableAssetFactory.balances[msg.sender] = totalSupply_;
-//    }
+    function addAdminRolesAndBalancesAfterDeployed() public {
+		composableAssetFactory.adminAddRole(msg.sender, composableAssetFactory.getControllerRole());
+		composableAssetFactory.adminAddRole(contractor, composableAssetFactory.getControllerRole());
+		composableAssetFactory.adminAddRole(moderator, composableAssetFactory.getControllerRole());
+		balances[msg.sender] = totalSupply_;
+    }
 
     /*  
 	    fulfills a fungible asset purchase

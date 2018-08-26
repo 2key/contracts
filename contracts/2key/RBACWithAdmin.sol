@@ -64,4 +64,18 @@ contract RBACWithAdmin is RBAC {
   {
     removeRole(addr, roleName);
   }
+
+  /// @notice Function will revert if user doesn't have controller role
+  /// @return bool returns true if user has controller role.
+  function onlyControllerRole() public view returns (bool) {
+    checkRole(msg.sender, ROLE_CONTROLLER);
+    return true;
+  }
+
+  function getAdminRole() public view returns (string) {
+    return ROLE_ADMIN;
+  }
+  function getControllerRole() public view returns (string) {
+    return ROLE_CONTROLLER;
+  }
 }
