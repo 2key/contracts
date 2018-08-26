@@ -48,6 +48,7 @@ contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
 	// whitelist of converters, to which users are added after kyc
 	TwoKeyWhitelisted whitelistConverter;
 
+
 	// Composable asset factory
 	ComposableAssetFactory composableAssetFactory;
 
@@ -99,7 +100,15 @@ contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
         _;
     }
 
+	modifier isOngoing() {
+		require(composableAssetFactory.isOnGoing() == true);
+		_;
+	}
 
+	modifier isClosed() {
+		require(composableAssetFactory.isClosed() == true);
+		_;
+	}
 
 	// if we just work with two key tokens, 
 	// rate is 1, and all prices are in two key tokens
@@ -194,8 +203,8 @@ contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
 	    transfers to the escrow the asset purchased
 
     */
-	/// Removed isOngoing while testing, will be returned
-	function fulfillNonFungibleTwoKeyToken(address _from, uint256 _tokenID, address _assetContract, uint256 _index) internal {
+
+	function fulfillNonFungibleTwoKeyToken(address _from, uint256 _tokenID, address _assetContract, uint256 _index) isOngoing internal {
 		address assetToken = address(
 	      keccak256(abi.encodePacked(_assetContract, _index))
 	    );

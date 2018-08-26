@@ -11,12 +11,12 @@ contract TwoKeyCampaignETH is TwoKeyCampaign {
 	    computes the payout in ETH 
 	    transfers to the escrow the asset purchased
     */
-	//isOngoing -commented
+
 	function fulfillFungibleETH(
 		address _from, 
 		uint256 _tokenID, 
 		address _assetContract, 
-		uint256 _amount) internal {
+		uint256 _amount) isOngoing internal {
 		require(_amount > 0 && prices[_tokenID][_assetContract] > 0);
 		uint256 payout = prices[_tokenID][_assetContract].mul(_amount);
 		require(msg.value == payout);
@@ -33,8 +33,7 @@ contract TwoKeyCampaignETH is TwoKeyCampaign {
 	    computes the payout in ETH
 	    transfers to the escrow the asset purchased
     */
-	// isOngoing - commented
-	function fulfillNonFungibleETH(address _from, uint256 _tokenID, address _assetContract, uint256 _index) internal {
+	function fulfillNonFungibleETH(address _from, uint256 _tokenID, address _assetContract, uint256 _index) isOngoing internal {
 		address assetToken = address(
 	      keccak256(abi.encodePacked(_assetContract, _index))
 	    );

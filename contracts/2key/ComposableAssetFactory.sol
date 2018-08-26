@@ -16,15 +16,15 @@ contract ComposableAssetFactory is RBACWithAdmin {
   uint256 private openingTime;
   uint256 private closingTime;
 
-  modifier isOngoing() {
-    require(block.timestamp >= openingTime && block.timestamp <= closingTime);
-    _;
-  }
-
-  modifier isClosed() {
-    require(now > closingTime);
-    _;
-  }
+//  modifier isOngoing() {
+//    require(block.timestamp >= openingTime && block.timestamp <= closingTime);
+//    _;
+//  }
+//
+//  modifier isClosed() {
+//    require(now > closingTime);
+//    _;
+//  }
 
 
   /*
@@ -74,9 +74,9 @@ contract ComposableAssetFactory is RBACWithAdmin {
   }
 
 
-  // remove isOngoing modifier - there is the error, need to find out.
   // add erc20 asset amount to the store, which adds an amount of that erc20 to our catalogue
-  function addFungibleAsset(uint256 _tokenID, address _assetContract, uint256 _amount) isOngoing public returns (bool) {
+  function addFungibleAsset(uint256 _tokenID, address _assetContract, uint256 _amount) public returns (bool) {
+    require(isOnGoing() == true);
     require(
       _assetContract.call(
         bytes4(keccak256("transferFrom(address,address,uint256)")),
@@ -93,7 +93,8 @@ contract ComposableAssetFactory is RBACWithAdmin {
   }
 
   // add erc721 asset to the store, which adds a particular unique item from that erc721 to our catalogue
-  function addNonFungibleAsset(uint256 _tokenID, address _assetContract, uint256 _index) isOngoing public returns (bool) {
+  function addNonFungibleAsset(uint256 _tokenID, address _assetContract, uint256 _index) public returns (bool) {
+    require(isOnGoing() == true);
     require(
       _assetContract.call(
         bytes4(keccak256("transferFrom(address,address,uint256)")),
@@ -157,7 +158,7 @@ contract ComposableAssetFactory is RBACWithAdmin {
     address _to,
     uint256 _tokenID,
     address _assetContract,
-    uint256 _amount)  public returns (bool) {
+    uint256 _amount) public returns (bool) {
     return moveFungibleAsset(_to, _tokenID, _assetContract, _amount);
   }
 
@@ -167,7 +168,8 @@ contract ComposableAssetFactory is RBACWithAdmin {
     address _to,
     uint256 _tokenID,
     address _assetContract,
-    uint256 _assetTokenID) isOngoing onlyRole(ROLE_CONTROLLER) public returns (bool) {
+    uint256 _assetTokenID) onlyRole(ROLE_CONTROLLER) public returns (bool) {
+    require(isOnGoing() == true);
     return moveNonFungibleAsset(_to, _tokenID, _assetContract, _assetTokenID);
   }
 
@@ -175,7 +177,8 @@ contract ComposableAssetFactory is RBACWithAdmin {
     address _to,
     uint256 _tokenID,
     address _assetContract,
-    uint256 _amount) onlyRole(ROLE_CONTROLLER) isClosed public returns (bool) {
+    uint256 _amount) onlyRole(ROLE_CONTROLLER) public returns (bool) {
+    require(isClosed() == true);
     moveFungibleAsset(_to, _tokenID, _assetContract, _amount);
     emit Expired(address(this));
     return true;
@@ -185,7 +188,8 @@ contract ComposableAssetFactory is RBACWithAdmin {
     address _to,
     uint256 _tokenID,
     address _assetContract,
-    uint256 _assetTokenID) onlyRole(ROLE_CONTROLLER) isClosed public returns (bool){   
+    uint256 _assetTokenID) onlyRole(ROLE_CONTROLLER) public returns (bool){
+    require(isClosed() == true);
     moveNonFungibleAsset(_to, _tokenID, _assetContract, _assetTokenID);
     emit Expired(address(this));
     return true;
@@ -207,5 +211,17 @@ contract ComposableAssetFactory is RBACWithAdmin {
     assets[_tokenID][_assetContract] = 1;
   }
 
+
+
+  /// Since we can't use modifiers anymore here, we'll use functions and call them in other contracts
+  function isOnGoing() public view returns (bool) {
+    require(block.timestamp >= openingTime && block.timestamp <= closingTime);
+    return true;
+  }
+
+  function isClosed() public view returns (bool) {
+    require(block.timestamp > closingTime);
+    return true;
+  }
 
 }

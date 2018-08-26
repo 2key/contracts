@@ -39,9 +39,10 @@ contract('ComposableAssetFactory', async (accounts) => {
         });
 
     });
-    it("dada", async() => {
+    it("deployed succesfully", async() => {
        assert.equal(true,true,"");
     });
+
     it("add fungible asset", async () => {
 
 

@@ -113,7 +113,7 @@ contract('TwoKeyCampaign', async (accounts) => {
         console.log("[TwoKeyUpgradebleExchange] : " + upgradeableExchange.address);
         console.log("[TwoKeyAdmin] : " + twoKeyAdmin.address);
         console.log("[TwoKeyEventSource] : " + eventSource.address);
-        // console.log("[TwoKeyCampaign] : " + campaign.address);
+        console.log("[TwoKeyCampaign] : " + campaign.address);
         console.log("[TwoKeyWhitelistConverter] : " + whitelistConverter.address);
         console.log("[TwoKeyWhiteListInfluencer] : " + whitelistInfluencer.address);
         console.log("[TwoKeyARC] : " + twoKeyARC.address);
