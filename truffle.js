@@ -74,7 +74,7 @@ module.exports = {
       provider: () => new HDWalletProvider(mnemonic, 'https://rinkeby.infura.io/6rAARDbMXpJlwODa2kbk'),
       network_id: '*',
       gas: 7000000,
-      gasPrice: 2000000000,
+      gasPrice: 5000000000,
     },
     'rinkeby-infura-ws': {
       provider: () => new HDWalletProvider(mnemonic, 'wss://rinkeby.infura.io/ws', true),
