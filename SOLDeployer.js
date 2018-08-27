@@ -9,8 +9,10 @@ const whitelist = require('./whitelist.json');
 
 const readdir = util.promisify(fs.readdir);
 const buildPath = path.join(__dirname, 'build', 'contracts');
-const twoKeyProtocolDir = path.join(__dirname, '2key-protocol');
-const twoKeyProtocolLibDir = path.join(__dirname, 'build', '2key-protocol');
+const twoKeyProtocolDir = path.join(__dirname, '2key-protocol-src');
+const twoKeyProtocolLibDir = path.join(__dirname, 'build', '2key-protocol-npm');
+
+// const deploymentHistoryPath = path.join(__dirname, 'history.json');
 
 const contractsGit = simpleGit();
 const twoKeyProtocolLibGit = simpleGit(twoKeyProtocolLibDir);
@@ -29,6 +31,28 @@ process.on('SIGINT', handleExit);
 process.on('SIGUSR1', handleExit);
 process.on('SIGUSR2', handleExit);
 process.on('uncaughtException', handleExit);
+
+/*
+const getCurrentDeployedAddresses = () => {
+  const contracts = {};
+  if (fs.existsSync(buildPath)) {
+    readdir(buildPath).then((files) => {
+      files.forEach((file) => {
+        const {
+          networks, contractName, bytecode, abi,
+        } = JSON.parse(fs.readFileSync(path.join(buildPath, file)));
+        if (whitelist[contractName]) {
+          // contracts[contractName] = whitelist[contractName].deployed
+          //   ? { abi, networks } : { abi, networks, bytecode };
+          contracts[contractName] = whitelist[contractName].deployed
+            ? { networks, abi } : { bytecode, abi };
+        }
+      });
+    });
+  }
+  return contracts;
+};
+*/
 
 const generateSOLInterface = () => new Promise((resolve, reject) => {
   if (fs.existsSync(buildPath)) {
@@ -94,13 +118,17 @@ async function deploy() {
     await twoKeyProtocolLibGit.reset('hard');
     twoKeyProtocolStatus = await twoKeyProtocolLibGit.status();
     const localChanges = contractsStatus.files
-      .filter(item => !(item.path.includes('build/2key-protocol')
+      .filter(item => !(item.path.includes('build/2key-protocol-npm')
         || (process.env.NODE_ENV === 'development' && item.path.includes(process.argv[1].split('/').pop()))));
     if (contractsStatus.behind || localChanges.length) {
       console.log('You have unsynced changes!', localChanges);
       process.exit(1);
     }
     console.log(process.argv);
+
+    // const getDeployedHistory = fs.existsSync(deploymentHistoryPath)
+    //   ? JSON.parse(fs.readFileSync(deploymentHistoryPath)) : {};
+
     const networks = process.argv[2].split(',');
     const l = networks.length;
     for (let i = 0; i < l; i += 1) {
