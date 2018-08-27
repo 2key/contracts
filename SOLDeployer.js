@@ -33,26 +33,25 @@ process.on('SIGUSR2', handleExit);
 process.on('uncaughtException', handleExit);
 
 
-const getCurrentDeployedAddresses = () => {
+const getCurrentDeployedAddresses = () => new Promise((resolve) => {
   const contracts = {};
   if (fs.existsSync(buildPath)) {
     readdir(buildPath).then((files) => {
-      files.forEach((file) => {
+      const l = files.length;
+      for (let i = 0; i < l; i += 1) {
         const {
           networks, contractName, bytecode, abi,
-        } = JSON.parse(fs.readFileSync(path.join(buildPath, file)));
-        contracts[contractName] = Object.keys(networks).length ? networks : undefined;
-        // if (whitelist[contractName]) {
-        //   // contracts[contractName] = whitelist[contractName].deployed
-        //   //   ? { abi, networks } : { abi, networks, bytecode };
-        //   contracts[contractName] = whitelist[contractName].deployed
-        //     ? { networks, abi } : { bytecode, abi };
-        // }
-      });
+        } = JSON.parse(fs.readFileSync(path.join(buildPath, files[i])));
+        if (Object.keys(networks).length) {
+          contracts[contractName] = networks;
+        }
+      }
+      resolve(contracts);
     });
+  } else {
+    resolve(contracts);
   }
-  return contracts;
-};
+});
 
 
 const generateSOLInterface = () => new Promise((resolve, reject) => {
@@ -135,7 +134,7 @@ async function deploy() {
 
     const deployedHistory = fs.existsSync(deploymentHistoryPath)
       ? JSON.parse(fs.readFileSync(deploymentHistoryPath)) : {};
-    const artifacts = getCurrentDeployedAddresses();
+    const artifacts = await getCurrentDeployedAddresses();
     if (Object.keys(artifacts).length) {
       if (!Object.keys(deployedHistory).length) {
         deployedHistory.initial = {
@@ -143,15 +142,13 @@ async function deploy() {
         };
       }
     }
-    console.log(artifacts, deployedHistory);
     const l = networks.length;
     for (let i = 0; i < l; i += 1) {
       /* eslint-disable no-await-in-loop */
       await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--network', networks[i]].concat(process.argv.slice(3)));
       /* eslint-enable no-await-in-loop */
     }
-    const sessionDeployedContracts = getCurrentDeployedAddresses();
-    console.log('sessionDeployedContracts', sessionDeployedContracts);
+    const sessionDeployedContracts = await getCurrentDeployedAddresses();
     const lastDeployed = Object.keys(deployedHistory).filter(key => key !== 'initial').sort((a, b) => {
       if (a > b) {
         return 1;
@@ -160,9 +157,15 @@ async function deploy() {
       }
       return 0;
     }).pop();
-    const deployedUpdates = {};
+    console.log('sessionDeployedContracts', sessionDeployedContracts, lastDeployed);
+    const deployedUpdates = {
+      contracts: {},
+    };
     Object.keys(sessionDeployedContracts).forEach((contract) => {
-      if (lastDeployed[contract] && Object.keys(lastDeployed[contract].networks)) {
+      if (!lastDeployed || !lastDeployed[contract]
+        || !Object.keys(lastDeployed[contract].networks).length) {
+        deployedUpdates.contracts[contract] = { ...sessionDeployedContracts[contract] };
+      } else if (lastDeployed[contract] && Object.keys(lastDeployed[contract].networks).length) {
         Object.keys(lastDeployed[contract].networks).forEach((net) => {
           if (sessionDeployedContracts[contract].networks
             && sessionDeployedContracts[contract].networks[net]
@@ -183,7 +186,7 @@ async function deploy() {
       }
     });
     console.log('deployedUpdates', deployedUpdates);
-    if (Object.keys(deployedUpdates).length) {
+    if (Object.keys(deployedUpdates.contracts).length) {
       deployedUpdates.data = now.format();
       deployedUpdates.networks = networks;
       deployedHistory[tag] = deployedUpdates;
