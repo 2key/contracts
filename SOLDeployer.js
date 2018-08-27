@@ -154,6 +154,7 @@ async function main() {
     await runProcess('./node_modules/.bin/typechain', ['--force', '--outDir', path.join(twoKeyProtocolDir, 'src/contracts'), `${buildPath}/*.json`]);
     unlinkTruffleConfig();
     await generateSOLInterface();
+    await runProcess('./node_modules/.bin/webpack');
     contractsStatus = await contractsGit.status();
     twoKeyProtocolStatus = await twoKeyProtocolGit.status();
     const network = networks.join('/');
