@@ -8,9 +8,9 @@ export default { TwoKeyAdmin: { networks: {} },
       { '17':
          { events: {},
            links: {},
-           address: '0x6c2fc8e761bc61270bbc4cfc8709d86a77842ec5',
+           address: '0x6615cfa5d861430cfe998c6fa1989229cce344a4',
            transactionHash:
-            '0xc0a82503cd83a02824a255021e948f2f9a747b6cd423c46f2f1c94bb1750d42d' },
+            '0x5a273ef811a1011dd54af9800329f9de514e2de389d63ef40bbac21020a96dde' },
         '1535289665441':
          { events: {},
            links: {},
@@ -22,9 +22,9 @@ export default { TwoKeyAdmin: { networks: {} },
       { '17':
          { events: {},
            links: {},
-           address: '0xa5e57eac2037ce6c331deb254bbab9da5a264a95',
+           address: '0x524793585665ee82712b7c8ebda6d85de8cadf52',
            transactionHash:
-            '0xf3290b7496eefaab303f842703fa382b83f772ca7c8a8fe1a0063d51bab457dd' },
+            '0x80d3974fa5fee004dd938d43d4c5aafea8264ecd6885d141e97c20a5bfe06352' },
         '1535289665441':
          { events: {},
            links: {},
@@ -37,9 +37,9 @@ export default { TwoKeyAdmin: { networks: {} },
       { '17':
          { events: {},
            links: {},
-           address: '0x2d76d8b80b86deb1810a357c18fcc5a742151e83',
+           address: '0xc608e05ab2c5ecf8c3646697d0ca6969a0b8917e',
            transactionHash:
-            '0x3fa47363ee7814a16d7fbc407bbc4e313255a9e96d1836deca9775fa6f522e7b' },
+            '0xb078bdbabb70b16ee115ef4ebcb70e12d9c5817b44ee956a3456501b8a1599ca' },
         '1535289665441':
          { events: {},
            links: {},
