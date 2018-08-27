@@ -12,7 +12,7 @@ const buildPath = path.join(__dirname, 'build', 'contracts');
 const twoKeyProtocolDir = path.join(__dirname, '2key-protocol-src');
 const twoKeyProtocolLibDir = path.join(__dirname, 'build', '2key-protocol-npm');
 
-// const deploymentHistoryPath = path.join(__dirname, 'history.json');
+const deploymentHistoryPath = path.join(__dirname, 'history.json');
 
 const contractsGit = simpleGit();
 const twoKeyProtocolLibGit = simpleGit(twoKeyProtocolLibDir);
@@ -32,7 +32,7 @@ process.on('SIGUSR1', handleExit);
 process.on('SIGUSR2', handleExit);
 process.on('uncaughtException', handleExit);
 
-/*
+
 const getCurrentDeployedAddresses = () => {
   const contracts = {};
   if (fs.existsSync(buildPath)) {
@@ -41,18 +41,19 @@ const getCurrentDeployedAddresses = () => {
         const {
           networks, contractName, bytecode, abi,
         } = JSON.parse(fs.readFileSync(path.join(buildPath, file)));
-        if (whitelist[contractName]) {
-          // contracts[contractName] = whitelist[contractName].deployed
-          //   ? { abi, networks } : { abi, networks, bytecode };
-          contracts[contractName] = whitelist[contractName].deployed
-            ? { networks, abi } : { bytecode, abi };
-        }
+        contracts[contractName] = Object.keys(networks).length ? networks : undefined;
+        // if (whitelist[contractName]) {
+        //   // contracts[contractName] = whitelist[contractName].deployed
+        //   //   ? { abi, networks } : { abi, networks, bytecode };
+        //   contracts[contractName] = whitelist[contractName].deployed
+        //     ? { networks, abi } : { bytecode, abi };
+        // }
       });
     });
   }
   return contracts;
 };
-*/
+
 
 const generateSOLInterface = () => new Promise((resolve, reject) => {
   if (fs.existsSync(buildPath)) {
@@ -126,10 +127,23 @@ async function deploy() {
     }
     console.log(process.argv);
 
-    // const getDeployedHistory = fs.existsSync(deploymentHistoryPath)
-    //   ? JSON.parse(fs.readFileSync(deploymentHistoryPath)) : {};
-
     const networks = process.argv[2].split(',');
+    const network = networks.join('/');
+    const now = moment();
+    const commit = `SOL Deployed to ${network} ${now.format('lll')}`;
+    const tag = `${network}-${now.format('YYYYMMDDHHmmss')}`;
+
+    const deployedHistory = fs.existsSync(deploymentHistoryPath)
+      ? JSON.parse(fs.readFileSync(deploymentHistoryPath)) : {};
+    const artifacts = getCurrentDeployedAddresses();
+    if (Object.length(artifacts)) {
+      if (!Object.keys(deployedHistory).length) {
+        deployedHistory.initial = {
+          contracts: artifacts,
+        };
+      }
+    }
+
     const l = networks.length;
     for (let i = 0; i < l; i += 1) {
       /* eslint-disable no-await-in-loop */
@@ -139,12 +153,45 @@ async function deploy() {
     await generateSOLInterface();
     await runProcess(path.join(__dirname, 'node_modules/.bin/typechain'), ['--force', '--outDir', path.join(twoKeyProtocolDir, 'contracts'), `${buildPath}/*.json`]);
     await runProcess(path.join(__dirname, 'node_modules/.bin/webpack'));
+    const sessionDeployedContracts = getCurrentDeployedAddresses();
+    const lastDeployed = Object.keys(deployedHistory).filter(key => key !== 'initial').sort((a, b) => {
+      if (a > b) {
+        return 1;
+      } if (b > a) {
+        return -1;
+      }
+      return 0;
+    }).pop();
+    const deployedUpdates = {};
+    Object.keys(sessionDeployedContracts).forEach((contract) => {
+      if (lastDeployed[contract] && Object.keys(lastDeployed[contract].networks)) {
+        Object.keys(lastDeployed[contract].networks).forEach((net) => {
+          if (sessionDeployedContracts[contract].networks
+            && sessionDeployedContracts[contract].networks[net]
+            && sessionDeployedContracts[contract].networks[net].address
+            && lastDeployed[contract].networks[net].address
+            !== sessionDeployedContracts[contract].networks[net].address) {
+            // deployUpdates.date = now.format();
+            // deployUpdates.networks = networks;
+            deployedUpdates.contracts[contract] = {
+              ...sessionDeployedContracts[contract],
+              networks: {
+                ...deployedUpdates.contracts[contract].networks,
+                [net]: sessionDeployedContracts[contract].networks[net],
+              },
+            };
+          }
+        });
+      }
+    });
+    if (Object.keys(deployedUpdates).length) {
+      deployedUpdates.data = now.format();
+      deployedUpdates.networks = networks;
+      deployedHistory[tag] = deployedUpdates;
+      fs.writeFileSync(deploymentHistoryPath, JSON.stringify(deployedHistory, null, 2));
+    }
     contractsStatus = await contractsGit.status();
     twoKeyProtocolStatus = await twoKeyProtocolLibGit.status();
-    const network = networks.join('/');
-    const now = moment();
-    const commit = `SOL Deployed to ${network} ${now.format('lll')}`;
-    const tag = `${network}-${now.format('YYYYMMDDHHmmss')}`;
     console.log(commit, tag);
     await twoKeyProtocolLibGit.add(twoKeyProtocolStatus.files.map(item => item.path));
     await twoKeyProtocolLibGit.commit(commit);
