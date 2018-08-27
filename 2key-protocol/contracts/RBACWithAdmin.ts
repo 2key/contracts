@@ -98,6 +98,33 @@ export class RBACWithAdmin extends TC.TypeChainContract {
         payable: false,
         stateMutability: "nonpayable",
         type: "function"
+      },
+      {
+        constant: true,
+        inputs: [],
+        name: "onlyControllerRole",
+        outputs: [{ name: "", type: "bool" }],
+        payable: false,
+        stateMutability: "view",
+        type: "function"
+      },
+      {
+        constant: true,
+        inputs: [],
+        name: "getAdminRole",
+        outputs: [{ name: "", type: "string" }],
+        payable: false,
+        stateMutability: "view",
+        type: "function"
+      },
+      {
+        constant: true,
+        inputs: [],
+        name: "getControllerRole",
+        outputs: [{ name: "", type: "string" }],
+        payable: false,
+        stateMutability: "view",
+        type: "function"
       }
     ];
     super(web3, address, abi);
@@ -124,6 +151,18 @@ export class RBACWithAdmin extends TC.TypeChainContract {
 
   public get ROLE_ADMIN(): Promise<string> {
     return TC.promisify(this.rawWeb3Contract.ROLE_ADMIN, []);
+  }
+
+  public get onlyControllerRole(): Promise<boolean> {
+    return TC.promisify(this.rawWeb3Contract.onlyControllerRole, []);
+  }
+
+  public get getAdminRole(): Promise<string> {
+    return TC.promisify(this.rawWeb3Contract.getAdminRole, []);
+  }
+
+  public get getControllerRole(): Promise<string> {
+    return TC.promisify(this.rawWeb3Contract.getControllerRole, []);
   }
 
   public checkRole(

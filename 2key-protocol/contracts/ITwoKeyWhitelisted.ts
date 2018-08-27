@@ -4,7 +4,7 @@
 import { BigNumber } from "bignumber.js";
 import * as TC from "./typechain-runtime";
 
-export class TwoKeyReg extends TC.TypeChainContract {
+export class ITwoKeyWhitelisted extends TC.TypeChainContract {
   public readonly rawWeb3Contract: any;
 
   public constructor(web3: any, address: string | BigNumber) {
@@ -20,26 +20,8 @@ export class TwoKeyReg extends TC.TypeChainContract {
       },
       {
         constant: true,
-        inputs: [{ name: "", type: "address" }],
-        name: "owner2name",
-        outputs: [{ name: "", type: "string" }],
-        payable: false,
-        stateMutability: "view",
-        type: "function"
-      },
-      {
-        constant: true,
         inputs: [],
         name: "owner",
-        outputs: [{ name: "", type: "address" }],
-        payable: false,
-        stateMutability: "view",
-        type: "function"
-      },
-      {
-        constant: true,
-        inputs: [{ name: "", type: "bytes32" }],
-        name: "name2owner",
         outputs: [{ name: "", type: "address" }],
         payable: false,
         stateMutability: "view",
@@ -53,15 +35,6 @@ export class TwoKeyReg extends TC.TypeChainContract {
         payable: false,
         stateMutability: "nonpayable",
         type: "function"
-      },
-      {
-        anonymous: false,
-        inputs: [
-          { indexed: false, name: "owner", type: "address" },
-          { indexed: false, name: "name", type: "string" }
-        ],
-        name: "UserNameChanged",
-        type: "event"
       },
       {
         anonymous: false,
@@ -79,12 +52,18 @@ export class TwoKeyReg extends TC.TypeChainContract {
         type: "event"
       },
       {
+        constant: true,
+        inputs: [{ name: "_beneficiary", type: "address" }],
+        name: "isWhitelisted",
+        outputs: [{ name: "", type: "bool" }],
+        payable: false,
+        stateMutability: "view",
+        type: "function"
+      },
+      {
         constant: false,
-        inputs: [
-          { name: "_name", type: "string" },
-          { name: "_sender", type: "address" }
-        ],
-        name: "addName",
+        inputs: [{ name: "_beneficiary", type: "address" }],
+        name: "addToWhitelist",
         outputs: [],
         payable: false,
         stateMutability: "nonpayable",
@@ -92,29 +71,20 @@ export class TwoKeyReg extends TC.TypeChainContract {
       },
       {
         constant: false,
-        inputs: [{ name: "_name", type: "string" }],
-        name: "addNameByUser",
+        inputs: [{ name: "_beneficiaries", type: "address[]" }],
+        name: "addManyToWhitelist",
         outputs: [],
         payable: false,
         stateMutability: "nonpayable",
         type: "function"
       },
       {
-        constant: true,
-        inputs: [{ name: "_name", type: "string" }],
-        name: "getName2Owner",
-        outputs: [{ name: "", type: "address" }],
+        constant: false,
+        inputs: [{ name: "_beneficiary", type: "address" }],
+        name: "removeFromWhitelist",
+        outputs: [],
         payable: false,
-        stateMutability: "view",
-        type: "function"
-      },
-      {
-        constant: true,
-        inputs: [{ name: "_sender", type: "address" }],
-        name: "getOwner2Name",
-        outputs: [{ name: "", type: "string" }],
-        payable: false,
-        stateMutability: "view",
+        stateMutability: "nonpayable",
         type: "function"
       }
     ];
@@ -124,8 +94,8 @@ export class TwoKeyReg extends TC.TypeChainContract {
   static async createAndValidate(
     web3: any,
     address: string | BigNumber
-  ): Promise<TwoKeyReg> {
-    const contract = new TwoKeyReg(web3, address);
+  ): Promise<ITwoKeyWhitelisted> {
+    const contract = new ITwoKeyWhitelisted(web3, address);
     const code = await TC.promisify(web3.eth.getCode, [address]);
 
     // in case of missing smartcontract, code can be equal to "0x0" or "0x" depending on exact web3 implementation
@@ -140,21 +110,9 @@ export class TwoKeyReg extends TC.TypeChainContract {
     return TC.promisify(this.rawWeb3Contract.owner, []);
   }
 
-  public owner2name(arg0: BigNumber | string): Promise<string> {
-    return TC.promisify(this.rawWeb3Contract.owner2name, [arg0.toString()]);
-  }
-
-  public name2owner(arg0: string): Promise<string> {
-    return TC.promisify(this.rawWeb3Contract.name2owner, [arg0.toString()]);
-  }
-
-  public getName2Owner(_name: string): Promise<string> {
-    return TC.promisify(this.rawWeb3Contract.getName2Owner, [_name.toString()]);
-  }
-
-  public getOwner2Name(_sender: BigNumber | string): Promise<string> {
-    return TC.promisify(this.rawWeb3Contract.getOwner2Name, [
-      _sender.toString()
+  public isWhitelisted(_beneficiary: BigNumber | string): Promise<boolean> {
+    return TC.promisify(this.rawWeb3Contract.isWhitelisted, [
+      _beneficiary.toString()
     ]);
   }
 
@@ -174,34 +132,34 @@ export class TwoKeyReg extends TC.TypeChainContract {
       [_newOwner.toString()]
     );
   }
-  public addNameTx(
-    _name: string,
-    _sender: BigNumber | string
-  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
-    return new TC.DeferredTransactionWrapper<TC.ITxParams>(this, "addName", [
-      _name.toString(),
-      _sender.toString()
-    ]);
-  }
-  public addNameByUserTx(
-    _name: string
+  public addToWhitelistTx(
+    _beneficiary: BigNumber | string
   ): TC.DeferredTransactionWrapper<TC.ITxParams> {
     return new TC.DeferredTransactionWrapper<TC.ITxParams>(
       this,
-      "addNameByUser",
-      [_name.toString()]
+      "addToWhitelist",
+      [_beneficiary.toString()]
+    );
+  }
+  public addManyToWhitelistTx(
+    _beneficiaries: string[]
+  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
+    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
+      this,
+      "addManyToWhitelist",
+      [_beneficiaries.map(val => val.toString())]
+    );
+  }
+  public removeFromWhitelistTx(
+    _beneficiary: BigNumber | string
+  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
+    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
+      this,
+      "removeFromWhitelist",
+      [_beneficiary.toString()]
     );
   }
 
-  public UserNameChangedEvent(eventFilter: {}): TC.DeferredEventWrapper<
-    { owner: BigNumber | string; name: string },
-    {}
-  > {
-    return new TC.DeferredEventWrapper<
-      { owner: BigNumber | string; name: string },
-      {}
-    >(this, "UserNameChanged", eventFilter);
-  }
   public OwnershipRenouncedEvent(eventFilter: {
     previousOwner?: BigNumber | string | Array<BigNumber | string>;
   }): TC.DeferredEventWrapper<

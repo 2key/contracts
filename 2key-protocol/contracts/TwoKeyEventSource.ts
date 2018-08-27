@@ -10,10 +10,16 @@ export class TwoKeyEventSource extends TC.TypeChainContract {
   public constructor(web3: any, address: string | BigNumber) {
     const abi = [
       {
+        inputs: [{ name: "_twoKeyAdminAddress", type: "address" }],
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "constructor"
+      },
+      {
         anonymous: false,
         inputs: [
-          { indexed: true, name: "_owner", type: "address" },
-          { indexed: false, name: "_campaign", type: "address" }
+          { indexed: true, name: "_campaign", type: "address" },
+          { indexed: true, name: "_owner", type: "address" }
         ],
         name: "Created",
         type: "event"
@@ -21,8 +27,9 @@ export class TwoKeyEventSource extends TC.TypeChainContract {
       {
         anonymous: false,
         inputs: [
-          { indexed: true, name: "_to", type: "address" },
-          { indexed: false, name: "_campaign", type: "address" }
+          { indexed: true, name: "_campaign", type: "address" },
+          { indexed: true, name: "_from", type: "address" },
+          { indexed: true, name: "_to", type: "address" }
         ],
         name: "Joined",
         type: "event"
@@ -31,11 +38,11 @@ export class TwoKeyEventSource extends TC.TypeChainContract {
         anonymous: false,
         inputs: [
           { indexed: true, name: "_campaign", type: "address" },
-          { indexed: true, name: "_escrow", type: "address" },
-          { indexed: true, name: "_sender", type: "address" },
+          { indexed: true, name: "_converter", type: "address" },
           { indexed: false, name: "_tokenID", type: "uint256" },
           { indexed: false, name: "_childContractID", type: "address" },
-          { indexed: false, name: "_indexOrAmount", type: "uint256" }
+          { indexed: false, name: "_indexOrAmount", type: "uint256" },
+          { indexed: false, name: "_type", type: "uint8" }
         ],
         name: "Escrow",
         type: "event"
@@ -57,7 +64,8 @@ export class TwoKeyEventSource extends TC.TypeChainContract {
           { indexed: true, name: "_converter", type: "address" },
           { indexed: true, name: "_tokenID", type: "uint256" },
           { indexed: false, name: "_childContractID", type: "address" },
-          { indexed: false, name: "_indexOrAmount", type: "uint256" }
+          { indexed: false, name: "_indexOrAmount", type: "uint256" },
+          { indexed: false, name: "_type", type: "uint8" }
         ],
         name: "Fulfilled",
         type: "event"
@@ -69,14 +77,84 @@ export class TwoKeyEventSource extends TC.TypeChainContract {
           { indexed: true, name: "_converter", type: "address" },
           { indexed: true, name: "_tokenID", type: "uint256" },
           { indexed: false, name: "_childContractID", type: "address" },
-          { indexed: false, name: "_indexOrAmount", type: "uint256" }
+          { indexed: false, name: "_indexOrAmount", type: "uint256" },
+          { indexed: false, name: "_type", type: "uint8" }
         ],
         name: "Cancelled",
         type: "event"
       },
       {
         constant: false,
-        inputs: [{ name: "_owner", type: "address" }],
+        inputs: [{ name: "_contractAddress", type: "address" }],
+        name: "addContract",
+        outputs: [],
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "function"
+      },
+      {
+        constant: false,
+        inputs: [{ name: "_contractAddress", type: "address" }],
+        name: "removeContract",
+        outputs: [],
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "function"
+      },
+      {
+        constant: false,
+        inputs: [{ name: "_newAddress", type: "address" }],
+        name: "addAuthorizedAddress",
+        outputs: [],
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "function"
+      },
+      {
+        constant: false,
+        inputs: [{ name: "_authorizedAddress", type: "address" }],
+        name: "removeAuthorizedAddress",
+        outputs: [],
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "function"
+      },
+      {
+        constant: false,
+        inputs: [
+          { name: "_contractCode", type: "bytes" },
+          { name: "_campaignType", type: "uint8" }
+        ],
+        name: "addCampaignType",
+        outputs: [],
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "function"
+      },
+      {
+        constant: false,
+        inputs: [{ name: "_newAdminAddress", type: "address" }],
+        name: "changeAdmin",
+        outputs: [],
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "function"
+      },
+      {
+        constant: true,
+        inputs: [{ name: "_contractCode", type: "bytes" }],
+        name: "checkCanEmit",
+        outputs: [{ name: "", type: "bool" }],
+        payable: false,
+        stateMutability: "view",
+        type: "function"
+      },
+      {
+        constant: false,
+        inputs: [
+          { name: "_campaign", type: "address" },
+          { name: "_owner", type: "address" }
+        ],
         name: "created",
         outputs: [],
         payable: false,
@@ -85,7 +163,11 @@ export class TwoKeyEventSource extends TC.TypeChainContract {
       },
       {
         constant: false,
-        inputs: [{ name: "_to", type: "address" }],
+        inputs: [
+          { name: "_campaign", type: "address" },
+          { name: "_from", type: "address" },
+          { name: "_to", type: "address" }
+        ],
         name: "joined",
         outputs: [],
         payable: false,
@@ -96,11 +178,11 @@ export class TwoKeyEventSource extends TC.TypeChainContract {
         constant: false,
         inputs: [
           { name: "_campaign", type: "address" },
-          { name: "_escrow", type: "address" },
-          { name: "_sender", type: "address" },
+          { name: "_converter", type: "address" },
           { name: "_tokenID", type: "uint256" },
           { name: "_childContractID", type: "address" },
-          { name: "_indexOrAmount", type: "uint256" }
+          { name: "_indexOrAmount", type: "uint256" },
+          { name: "_type", type: "uint8" }
         ],
         name: "escrow",
         outputs: [],
@@ -128,7 +210,8 @@ export class TwoKeyEventSource extends TC.TypeChainContract {
           { name: "_converter", type: "address" },
           { name: "_tokenID", type: "uint256" },
           { name: "_childContractID", type: "address" },
-          { name: "_indexOrAmount", type: "uint256" }
+          { name: "_indexOrAmount", type: "uint256" },
+          { name: "_type", type: "uint8" }
         ],
         name: "fulfilled",
         outputs: [],
@@ -143,12 +226,31 @@ export class TwoKeyEventSource extends TC.TypeChainContract {
           { name: "_converter", type: "address" },
           { name: "_tokenID", type: "uint256" },
           { name: "_childContractID", type: "address" },
-          { name: "_indexOrAmount", type: "uint256" }
+          { name: "_indexOrAmount", type: "uint256" },
+          { name: "_type", type: "uint8" }
         ],
         name: "cancelled",
         outputs: [],
         payable: false,
         stateMutability: "nonpayable",
+        type: "function"
+      },
+      {
+        constant: true,
+        inputs: [],
+        name: "getAdmin",
+        outputs: [{ name: "", type: "address" }],
+        payable: false,
+        stateMutability: "view",
+        type: "function"
+      },
+      {
+        constant: true,
+        inputs: [{ name: "_subAdmin", type: "address" }],
+        name: "checkIsAuthorized",
+        outputs: [{ name: "", type: "bool" }],
+        payable: false,
+        stateMutability: "view",
         type: "function"
       }
     ];
@@ -170,35 +272,112 @@ export class TwoKeyEventSource extends TC.TypeChainContract {
     return contract;
   }
 
+  public get getAdmin(): Promise<string> {
+    return TC.promisify(this.rawWeb3Contract.getAdmin, []);
+  }
+
+  public checkCanEmit(_contractCode: string[]): Promise<boolean> {
+    return TC.promisify(this.rawWeb3Contract.checkCanEmit, [
+      _contractCode.map(val => val.toString())
+    ]);
+  }
+
+  public checkIsAuthorized(_subAdmin: BigNumber | string): Promise<boolean> {
+    return TC.promisify(this.rawWeb3Contract.checkIsAuthorized, [
+      _subAdmin.toString()
+    ]);
+  }
+
+  public addContractTx(
+    _contractAddress: BigNumber | string
+  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
+    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
+      this,
+      "addContract",
+      [_contractAddress.toString()]
+    );
+  }
+  public removeContractTx(
+    _contractAddress: BigNumber | string
+  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
+    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
+      this,
+      "removeContract",
+      [_contractAddress.toString()]
+    );
+  }
+  public addAuthorizedAddressTx(
+    _newAddress: BigNumber | string
+  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
+    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
+      this,
+      "addAuthorizedAddress",
+      [_newAddress.toString()]
+    );
+  }
+  public removeAuthorizedAddressTx(
+    _authorizedAddress: BigNumber | string
+  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
+    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
+      this,
+      "removeAuthorizedAddress",
+      [_authorizedAddress.toString()]
+    );
+  }
+  public addCampaignTypeTx(
+    _contractCode: string[],
+    _campaignType: BigNumber | number
+  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
+    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
+      this,
+      "addCampaignType",
+      [_contractCode.map(val => val.toString()), _campaignType.toString()]
+    );
+  }
+  public changeAdminTx(
+    _newAdminAddress: BigNumber | string
+  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
+    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
+      this,
+      "changeAdmin",
+      [_newAdminAddress.toString()]
+    );
+  }
   public createdTx(
+    _campaign: BigNumber | string,
     _owner: BigNumber | string
   ): TC.DeferredTransactionWrapper<TC.ITxParams> {
     return new TC.DeferredTransactionWrapper<TC.ITxParams>(this, "created", [
+      _campaign.toString(),
       _owner.toString()
     ]);
   }
   public joinedTx(
+    _campaign: BigNumber | string,
+    _from: BigNumber | string,
     _to: BigNumber | string
   ): TC.DeferredTransactionWrapper<TC.ITxParams> {
     return new TC.DeferredTransactionWrapper<TC.ITxParams>(this, "joined", [
+      _campaign.toString(),
+      _from.toString(),
       _to.toString()
     ]);
   }
   public escrowTx(
     _campaign: BigNumber | string,
-    _escrow: BigNumber | string,
-    _sender: BigNumber | string,
+    _converter: BigNumber | string,
     _tokenID: BigNumber | number,
     _childContractID: BigNumber | string,
-    _indexOrAmount: BigNumber | number
+    _indexOrAmount: BigNumber | number,
+    _type: BigNumber | number
   ): TC.DeferredTransactionWrapper<TC.ITxParams> {
     return new TC.DeferredTransactionWrapper<TC.ITxParams>(this, "escrow", [
       _campaign.toString(),
-      _escrow.toString(),
-      _sender.toString(),
+      _converter.toString(),
       _tokenID.toString(),
       _childContractID.toString(),
-      _indexOrAmount.toString()
+      _indexOrAmount.toString(),
+      _type.toString()
     ]);
   }
   public rewardedTx(
@@ -217,14 +396,16 @@ export class TwoKeyEventSource extends TC.TypeChainContract {
     _converter: BigNumber | string,
     _tokenID: BigNumber | number,
     _childContractID: BigNumber | string,
-    _indexOrAmount: BigNumber | number
+    _indexOrAmount: BigNumber | number,
+    _type: BigNumber | number
   ): TC.DeferredTransactionWrapper<TC.ITxParams> {
     return new TC.DeferredTransactionWrapper<TC.ITxParams>(this, "fulfilled", [
       _campaign.toString(),
       _converter.toString(),
       _tokenID.toString(),
       _childContractID.toString(),
-      _indexOrAmount.toString()
+      _indexOrAmount.toString(),
+      _type.toString()
     ]);
   }
   public cancelledTx(
@@ -232,71 +413,95 @@ export class TwoKeyEventSource extends TC.TypeChainContract {
     _converter: BigNumber | string,
     _tokenID: BigNumber | number,
     _childContractID: BigNumber | string,
-    _indexOrAmount: BigNumber | number
+    _indexOrAmount: BigNumber | number,
+    _type: BigNumber | number
   ): TC.DeferredTransactionWrapper<TC.ITxParams> {
     return new TC.DeferredTransactionWrapper<TC.ITxParams>(this, "cancelled", [
       _campaign.toString(),
       _converter.toString(),
       _tokenID.toString(),
       _childContractID.toString(),
-      _indexOrAmount.toString()
+      _indexOrAmount.toString(),
+      _type.toString()
     ]);
   }
 
   public CreatedEvent(eventFilter: {
+    _campaign?: BigNumber | string | Array<BigNumber | string>;
     _owner?: BigNumber | string | Array<BigNumber | string>;
   }): TC.DeferredEventWrapper<
-    { _owner: BigNumber | string; _campaign: BigNumber | string },
-    { _owner?: BigNumber | string | Array<BigNumber | string> }
+    { _campaign: BigNumber | string; _owner: BigNumber | string },
+    {
+      _campaign?: BigNumber | string | Array<BigNumber | string>;
+      _owner?: BigNumber | string | Array<BigNumber | string>;
+    }
   > {
     return new TC.DeferredEventWrapper<
-      { _owner: BigNumber | string; _campaign: BigNumber | string },
-      { _owner?: BigNumber | string | Array<BigNumber | string> }
+      { _campaign: BigNumber | string; _owner: BigNumber | string },
+      {
+        _campaign?: BigNumber | string | Array<BigNumber | string>;
+        _owner?: BigNumber | string | Array<BigNumber | string>;
+      }
     >(this, "Created", eventFilter);
   }
   public JoinedEvent(eventFilter: {
-    _to?: BigNumber | string | Array<BigNumber | string>;
-  }): TC.DeferredEventWrapper<
-    { _to: BigNumber | string; _campaign: BigNumber | string },
-    { _to?: BigNumber | string | Array<BigNumber | string> }
-  > {
-    return new TC.DeferredEventWrapper<
-      { _to: BigNumber | string; _campaign: BigNumber | string },
-      { _to?: BigNumber | string | Array<BigNumber | string> }
-    >(this, "Joined", eventFilter);
-  }
-  public EscrowEvent(eventFilter: {
     _campaign?: BigNumber | string | Array<BigNumber | string>;
-    _escrow?: BigNumber | string | Array<BigNumber | string>;
-    _sender?: BigNumber | string | Array<BigNumber | string>;
+    _from?: BigNumber | string | Array<BigNumber | string>;
+    _to?: BigNumber | string | Array<BigNumber | string>;
   }): TC.DeferredEventWrapper<
     {
       _campaign: BigNumber | string;
-      _escrow: BigNumber | string;
-      _sender: BigNumber | string;
-      _tokenID: BigNumber | number;
-      _childContractID: BigNumber | string;
-      _indexOrAmount: BigNumber | number;
+      _from: BigNumber | string;
+      _to: BigNumber | string;
     },
     {
       _campaign?: BigNumber | string | Array<BigNumber | string>;
-      _escrow?: BigNumber | string | Array<BigNumber | string>;
-      _sender?: BigNumber | string | Array<BigNumber | string>;
+      _from?: BigNumber | string | Array<BigNumber | string>;
+      _to?: BigNumber | string | Array<BigNumber | string>;
     }
   > {
     return new TC.DeferredEventWrapper<
       {
         _campaign: BigNumber | string;
-        _escrow: BigNumber | string;
-        _sender: BigNumber | string;
-        _tokenID: BigNumber | number;
-        _childContractID: BigNumber | string;
-        _indexOrAmount: BigNumber | number;
+        _from: BigNumber | string;
+        _to: BigNumber | string;
       },
       {
         _campaign?: BigNumber | string | Array<BigNumber | string>;
-        _escrow?: BigNumber | string | Array<BigNumber | string>;
-        _sender?: BigNumber | string | Array<BigNumber | string>;
+        _from?: BigNumber | string | Array<BigNumber | string>;
+        _to?: BigNumber | string | Array<BigNumber | string>;
+      }
+    >(this, "Joined", eventFilter);
+  }
+  public EscrowEvent(eventFilter: {
+    _campaign?: BigNumber | string | Array<BigNumber | string>;
+    _converter?: BigNumber | string | Array<BigNumber | string>;
+  }): TC.DeferredEventWrapper<
+    {
+      _campaign: BigNumber | string;
+      _converter: BigNumber | string;
+      _tokenID: BigNumber | number;
+      _childContractID: BigNumber | string;
+      _indexOrAmount: BigNumber | number;
+      _type: BigNumber | number;
+    },
+    {
+      _campaign?: BigNumber | string | Array<BigNumber | string>;
+      _converter?: BigNumber | string | Array<BigNumber | string>;
+    }
+  > {
+    return new TC.DeferredEventWrapper<
+      {
+        _campaign: BigNumber | string;
+        _converter: BigNumber | string;
+        _tokenID: BigNumber | number;
+        _childContractID: BigNumber | string;
+        _indexOrAmount: BigNumber | number;
+        _type: BigNumber | number;
+      },
+      {
+        _campaign?: BigNumber | string | Array<BigNumber | string>;
+        _converter?: BigNumber | string | Array<BigNumber | string>;
       }
     >(this, "Escrow", eventFilter);
   }
@@ -337,6 +542,7 @@ export class TwoKeyEventSource extends TC.TypeChainContract {
       _tokenID: BigNumber | number;
       _childContractID: BigNumber | string;
       _indexOrAmount: BigNumber | number;
+      _type: BigNumber | number;
     },
     {
       _campaign?: BigNumber | string | Array<BigNumber | string>;
@@ -351,6 +557,7 @@ export class TwoKeyEventSource extends TC.TypeChainContract {
         _tokenID: BigNumber | number;
         _childContractID: BigNumber | string;
         _indexOrAmount: BigNumber | number;
+        _type: BigNumber | number;
       },
       {
         _campaign?: BigNumber | string | Array<BigNumber | string>;
@@ -370,6 +577,7 @@ export class TwoKeyEventSource extends TC.TypeChainContract {
       _tokenID: BigNumber | number;
       _childContractID: BigNumber | string;
       _indexOrAmount: BigNumber | number;
+      _type: BigNumber | number;
     },
     {
       _campaign?: BigNumber | string | Array<BigNumber | string>;
@@ -384,6 +592,7 @@ export class TwoKeyEventSource extends TC.TypeChainContract {
         _tokenID: BigNumber | number;
         _childContractID: BigNumber | string;
         _indexOrAmount: BigNumber | number;
+        _type: BigNumber | number;
       },
       {
         _campaign?: BigNumber | string | Array<BigNumber | string>;

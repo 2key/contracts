@@ -46,6 +46,12 @@ export class TwoKeyWhitelisted extends TC.TypeChainContract {
         type: "function"
       },
       {
+        inputs: [],
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "constructor"
+      },
+      {
         anonymous: false,
         inputs: [{ indexed: true, name: "previousOwner", type: "address" }],
         name: "OwnershipRenounced",

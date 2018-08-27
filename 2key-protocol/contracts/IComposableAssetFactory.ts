@@ -4,7 +4,7 @@
 import { BigNumber } from "bignumber.js";
 import * as TC from "./typechain-runtime";
 
-export class ComposableAssetFactory extends TC.TypeChainContract {
+export class IComposableAssetFactory extends TC.TypeChainContract {
   public readonly rawWeb3Contract: any;
 
   public constructor(web3: any, address: string | BigNumber) {
@@ -113,12 +113,6 @@ export class ComposableAssetFactory extends TC.TypeChainContract {
       },
       {
         anonymous: false,
-        inputs: [{ indexed: true, name: "_contract", type: "address" }],
-        name: "Expired",
-        type: "event"
-      },
-      {
-        anonymous: false,
         inputs: [
           { indexed: true, name: "operator", type: "address" },
           { indexed: false, name: "role", type: "string" }
@@ -181,20 +175,6 @@ export class ComposableAssetFactory extends TC.TypeChainContract {
           { name: "_to", type: "address" },
           { name: "_tokenID", type: "uint256" },
           { name: "_assetContract", type: "address" },
-          { name: "_assetTokenID", type: "uint256" }
-        ],
-        name: "transferNonFungibleAsset",
-        outputs: [{ name: "", type: "bool" }],
-        payable: false,
-        stateMutability: "nonpayable",
-        type: "function"
-      },
-      {
-        constant: false,
-        inputs: [
-          { name: "_to", type: "address" },
-          { name: "_tokenID", type: "uint256" },
-          { name: "_assetContract", type: "address" },
           { name: "_amount", type: "uint256" }
         ],
         name: "expireFungible",
@@ -216,74 +196,6 @@ export class ComposableAssetFactory extends TC.TypeChainContract {
         payable: false,
         stateMutability: "nonpayable",
         type: "function"
-      },
-      {
-        constant: false,
-        inputs: [
-          { name: "_tokenID", type: "uint256" },
-          { name: "_assetContract", type: "address" },
-          { name: "_amount", type: "uint256" }
-        ],
-        name: "remAssets",
-        outputs: [],
-        payable: false,
-        stateMutability: "nonpayable",
-        type: "function"
-      },
-      {
-        constant: false,
-        inputs: [
-          { name: "_tokenID", type: "uint256" },
-          { name: "_assetContract", type: "address" },
-          { name: "_amount", type: "uint256" }
-        ],
-        name: "addAssets",
-        outputs: [],
-        payable: false,
-        stateMutability: "nonpayable",
-        type: "function"
-      },
-      {
-        constant: false,
-        inputs: [
-          { name: "_tokenID", type: "uint256" },
-          { name: "_assetContract", type: "address" }
-        ],
-        name: "setAssetsToZero",
-        outputs: [],
-        payable: false,
-        stateMutability: "nonpayable",
-        type: "function"
-      },
-      {
-        constant: false,
-        inputs: [
-          { name: "_tokenID", type: "uint256" },
-          { name: "_assetContract", type: "address" }
-        ],
-        name: "setAssetsToOne",
-        outputs: [],
-        payable: false,
-        stateMutability: "nonpayable",
-        type: "function"
-      },
-      {
-        constant: true,
-        inputs: [],
-        name: "isOnGoing",
-        outputs: [{ name: "", type: "bool" }],
-        payable: false,
-        stateMutability: "view",
-        type: "function"
-      },
-      {
-        constant: true,
-        inputs: [],
-        name: "isClosed",
-        outputs: [{ name: "", type: "bool" }],
-        payable: false,
-        stateMutability: "view",
-        type: "function"
       }
     ];
     super(web3, address, abi);
@@ -292,8 +204,8 @@ export class ComposableAssetFactory extends TC.TypeChainContract {
   static async createAndValidate(
     web3: any,
     address: string | BigNumber
-  ): Promise<ComposableAssetFactory> {
-    const contract = new ComposableAssetFactory(web3, address);
+  ): Promise<IComposableAssetFactory> {
+    const contract = new IComposableAssetFactory(web3, address);
     const code = await TC.promisify(web3.eth.getCode, [address]);
 
     // in case of missing smartcontract, code can be equal to "0x0" or "0x" depending on exact web3 implementation
@@ -322,14 +234,6 @@ export class ComposableAssetFactory extends TC.TypeChainContract {
 
   public get getControllerRole(): Promise<string> {
     return TC.promisify(this.rawWeb3Contract.getControllerRole, []);
-  }
-
-  public get isOnGoing(): Promise<boolean> {
-    return TC.promisify(this.rawWeb3Contract.isOnGoing, []);
-  }
-
-  public get isClosed(): Promise<boolean> {
-    return TC.promisify(this.rawWeb3Contract.isClosed, []);
   }
 
   public checkRole(
@@ -411,23 +315,6 @@ export class ComposableAssetFactory extends TC.TypeChainContract {
       ]
     );
   }
-  public transferNonFungibleAssetTx(
-    _to: BigNumber | string,
-    _tokenID: BigNumber | number,
-    _assetContract: BigNumber | string,
-    _assetTokenID: BigNumber | number
-  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
-    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
-      this,
-      "transferNonFungibleAsset",
-      [
-        _to.toString(),
-        _tokenID.toString(),
-        _assetContract.toString(),
-        _assetTokenID.toString()
-      ]
-    );
-  }
   public expireFungibleTx(
     _to: BigNumber | string,
     _tokenID: BigNumber | number,
@@ -462,60 +349,7 @@ export class ComposableAssetFactory extends TC.TypeChainContract {
       ]
     );
   }
-  public remAssetsTx(
-    _tokenID: BigNumber | number,
-    _assetContract: BigNumber | string,
-    _amount: BigNumber | number
-  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
-    return new TC.DeferredTransactionWrapper<TC.ITxParams>(this, "remAssets", [
-      _tokenID.toString(),
-      _assetContract.toString(),
-      _amount.toString()
-    ]);
-  }
-  public addAssetsTx(
-    _tokenID: BigNumber | number,
-    _assetContract: BigNumber | string,
-    _amount: BigNumber | number
-  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
-    return new TC.DeferredTransactionWrapper<TC.ITxParams>(this, "addAssets", [
-      _tokenID.toString(),
-      _assetContract.toString(),
-      _amount.toString()
-    ]);
-  }
-  public setAssetsToZeroTx(
-    _tokenID: BigNumber | number,
-    _assetContract: BigNumber | string
-  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
-    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
-      this,
-      "setAssetsToZero",
-      [_tokenID.toString(), _assetContract.toString()]
-    );
-  }
-  public setAssetsToOneTx(
-    _tokenID: BigNumber | number,
-    _assetContract: BigNumber | string
-  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
-    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
-      this,
-      "setAssetsToOne",
-      [_tokenID.toString(), _assetContract.toString()]
-    );
-  }
 
-  public ExpiredEvent(eventFilter: {
-    _contract?: BigNumber | string | Array<BigNumber | string>;
-  }): TC.DeferredEventWrapper<
-    { _contract: BigNumber | string },
-    { _contract?: BigNumber | string | Array<BigNumber | string> }
-  > {
-    return new TC.DeferredEventWrapper<
-      { _contract: BigNumber | string },
-      { _contract?: BigNumber | string | Array<BigNumber | string> }
-    >(this, "Expired", eventFilter);
-  }
   public RoleAddedEvent(eventFilter: {
     operator?: BigNumber | string | Array<BigNumber | string>;
   }): TC.DeferredEventWrapper<

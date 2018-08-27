@@ -23,6 +23,19 @@ export class TwoKeyPlasmaEvents extends TC.TypeChainContract {
         type: "function"
       },
       {
+        constant: true,
+        inputs: [
+          { name: "", type: "address" },
+          { name: "", type: "address" },
+          { name: "", type: "uint256" }
+        ],
+        name: "visits_list",
+        outputs: [{ name: "", type: "address" }],
+        payable: false,
+        stateMutability: "view",
+        type: "function"
+      },
+      {
         constant: false,
         inputs: [],
         name: "renounceOwnership",
@@ -70,6 +83,16 @@ export class TwoKeyPlasmaEvents extends TC.TypeChainContract {
       },
       {
         anonymous: false,
+        inputs: [
+          { indexed: true, name: "_campaign", type: "address" },
+          { indexed: true, name: "_from", type: "address" },
+          { indexed: true, name: "_to", type: "address" }
+        ],
+        name: "Joined",
+        type: "event"
+      },
+      {
+        anonymous: false,
         inputs: [{ indexed: true, name: "previousOwner", type: "address" }],
         name: "OwnershipRenounced",
         type: "event"
@@ -102,6 +125,31 @@ export class TwoKeyPlasmaEvents extends TC.TypeChainContract {
         outputs: [],
         payable: false,
         stateMutability: "nonpayable",
+        type: "function"
+      },
+      {
+        constant: false,
+        inputs: [
+          { name: "_campaign", type: "address" },
+          { name: "_from", type: "address" },
+          { name: "_to", type: "address" }
+        ],
+        name: "joined",
+        outputs: [],
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "function"
+      },
+      {
+        constant: true,
+        inputs: [
+          { name: "from", type: "address" },
+          { name: "c", type: "address" }
+        ],
+        name: "get_visits_list",
+        outputs: [{ name: "", type: "address[]" }],
+        payable: false,
+        stateMutability: "view",
         type: "function"
       }
     ];
@@ -139,8 +187,30 @@ export class TwoKeyPlasmaEvents extends TC.TypeChainContract {
     ]);
   }
 
+  public visits_list(
+    arg0: BigNumber | string,
+    arg1: BigNumber | string,
+    arg2: BigNumber | number
+  ): Promise<string> {
+    return TC.promisify(this.rawWeb3Contract.visits_list, [
+      arg0.toString(),
+      arg1.toString(),
+      arg2.toString()
+    ]);
+  }
+
   public verifiedUsers(arg0: BigNumber | string): Promise<boolean> {
     return TC.promisify(this.rawWeb3Contract.verifiedUsers, [arg0.toString()]);
+  }
+
+  public get_visits_list(
+    from: BigNumber | string,
+    c: BigNumber | string
+  ): Promise<string[]> {
+    return TC.promisify(this.rawWeb3Contract.get_visits_list, [
+      from.toString(),
+      c.toString()
+    ]);
   }
 
   public renounceOwnershipTx(): TC.DeferredTransactionWrapper<TC.ITxParams> {
@@ -177,6 +247,17 @@ export class TwoKeyPlasmaEvents extends TC.TypeChainContract {
       c.toString()
     ]);
   }
+  public joinedTx(
+    _campaign: BigNumber | string,
+    _from: BigNumber | string,
+    _to: BigNumber | string
+  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
+    return new TC.DeferredTransactionWrapper<TC.ITxParams>(this, "joined", [
+      _campaign.toString(),
+      _from.toString(),
+      _to.toString()
+    ]);
+  }
 
   public VisitedEvent(eventFilter: {
     to?: BigNumber | string | Array<BigNumber | string>;
@@ -199,6 +280,35 @@ export class TwoKeyPlasmaEvents extends TC.TypeChainContract {
         c?: BigNumber | string | Array<BigNumber | string>;
       }
     >(this, "Visited", eventFilter);
+  }
+  public JoinedEvent(eventFilter: {
+    _campaign?: BigNumber | string | Array<BigNumber | string>;
+    _from?: BigNumber | string | Array<BigNumber | string>;
+    _to?: BigNumber | string | Array<BigNumber | string>;
+  }): TC.DeferredEventWrapper<
+    {
+      _campaign: BigNumber | string;
+      _from: BigNumber | string;
+      _to: BigNumber | string;
+    },
+    {
+      _campaign?: BigNumber | string | Array<BigNumber | string>;
+      _from?: BigNumber | string | Array<BigNumber | string>;
+      _to?: BigNumber | string | Array<BigNumber | string>;
+    }
+  > {
+    return new TC.DeferredEventWrapper<
+      {
+        _campaign: BigNumber | string;
+        _from: BigNumber | string;
+        _to: BigNumber | string;
+      },
+      {
+        _campaign?: BigNumber | string | Array<BigNumber | string>;
+        _from?: BigNumber | string | Array<BigNumber | string>;
+        _to?: BigNumber | string | Array<BigNumber | string>;
+      }
+    >(this, "Joined", eventFilter);
   }
   public OwnershipRenouncedEvent(eventFilter: {
     previousOwner?: BigNumber | string | Array<BigNumber | string>;

@@ -1,69 +1,44 @@
-export default { TwoKeyCampaignETHCrowdsale: { networks: {}, bytecode: '0x' },
+export default { TwoKeyCampaignETHCrowdsale: { bytecode: '0x' },
   TwoKeyEconomy:
    { networks:
-      { '4':
-         { events: {},
-           links: {},
-           address: '0x01a1301aa828ef1cb9f46a2f6a1f26ecdeffb84a',
-           transactionHash:
-            '0xfcc6841b5a1b3891ee68716a63c090fb195f6550e437fe43dc40de18f43e69c8' },
-        '17':
-         { events: {},
-           links: {},
-           address: '0x63aa72a7477da148f6bdb3df19ebea289871e074',
-           transactionHash:
-            '0x4b782b27d37a4bcdc85e502e0cabd5b21b7e0b220b4d2cfed8a1b11d8ae23473' },
-        '5777':
-         { events: {},
-           links: {},
-           address: '0x21c449de33714bf92f06fbd6056bfa8527105e99',
-           transactionHash:
-            '0xb51ce0c469dd796cba6bf704ea29d20a3aa707a965eff142bd007e0f0cad4e54' } } },
-  TwoKeyEventSource:
-   { networks:
-      { '4':
-         { events: {},
-           links: {},
-           address: '0x9ab165a117ef5f0a0ff12b83cbc99a96aa173921',
-           transactionHash:
-            '0xa27812c0a3837b39939e2f4ef0374728c12e4c4085b2f76dcc89bbce99364938' },
-        '17':
+      { '17':
          { events: {},
            links: {},
            address: '0xda3856bd6b032518117cb13a49285ef38835a08f',
            transactionHash:
-            '0x9ae434c90f3b4566b8c20f184e7b72758484f288a264fe18d81d9b55b0873850' },
-        '5777':
+            '0x3342a06db9d0fe434ab8f10fb2b47b90d65812cd39ceab4b649301eb3e0fdc3a' },
+        '1535289665441':
          { events: {},
            links: {},
-           address: '0x5263b6d2b58419dada5312a46be476551c29fd8a',
+           address: '0xc22ffa318051d8af4e5f2e2732d7049486fce093',
            transactionHash:
-            '0x60da47e8553775a6ad70912b354a72e4a943bb25957782c6d613fd226e33fd72' } } },
-  TwoKeyPlasmaEvents:
+            '0xe2484d2d34a2e027971e418ff58dde0fc664d2aee619bc5f4d2fb7377d2de0c4' } } },
+  TwoKeyEventSource:
    { networks:
-      { '47':
+      { '17':
          { events: {},
            links: {},
-           address: '0x21c449de33714bf92f06fbd6056bfa8527105e99',
+           address: '0xdc39648461e4f3d90ad62d2cc67dbd236229b86f',
            transactionHash:
-            '0x28c2ca1d8de7107096a0558d1a638c67b75b99497bd26066f7e0f6d5db431313' } } },
+            '0xd2eb3303a55485f0e07e2191324218876f9babb65d00a00f69a432bec6fc2561' },
+        '1535289665441':
+         { events: {},
+           links: {},
+           address: '0xa6f8431c9eee4ac2859207af4004f7a948924c30',
+           transactionHash:
+            '0x7b5b4717f02821d3c960722c47cf5ad12e901dd5b56d3bc6bf7840b83ac229c7' } } },
+  TwoKeyPlasmaEvents: { networks: {} },
   TwoKeyReg:
    { networks:
-      { '4':
+      { '17':
          { events: {},
            links: {},
-           address: '0x5c3e5f4144938b13427f7a61078d3ab903d085bc',
+           address: '0x0b7d588ac8e3e15fc0e7687f7e42569bac8c9a47',
            transactionHash:
-            '0xa5a932e3ab35aac850a6dbc6a10cbe77909b055c766a9e914a650abe766ea27c' },
-        '17':
+            '0x9c4f70513ff57f329fed9526a87017f89b84aa1a5d5fba352ad39b7b8ff29167' },
+        '1535289665441':
          { events: {},
            links: {},
-           address: '0x52c0a82c4e573d45449dac9034fb14a85509b7bf',
+           address: '0xe6da6e31540239b4a09ec574f147004d50f1b140',
            transactionHash:
-            '0x487e53e2992cb627b22e81a8efb5e6bc0a102307c9fdd21180e051937188a5a3' },
-        '5777':
-         { events: {},
-           links: {},
-           address: '0x835aaf6ea6b04892915a8299110652e7cc897a4e',
-           transactionHash:
-            '0x8f35a978a24606960ae259eb87c05dfd94dc328f96fbf3e84c5df87fa5215f0f' } } } }
+            '0xe2fc3d13e84a69a48065cce0a358f5321bb417305a29a39704bb5e6513a2bce2' } } } }

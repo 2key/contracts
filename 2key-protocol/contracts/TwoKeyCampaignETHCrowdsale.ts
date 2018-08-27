@@ -22,18 +22,6 @@ export class TwoKeyCampaignETHCrowdsale extends TC.TypeChainContract {
         type: "function"
       },
       {
-        constant: true,
-        inputs: [
-          { name: "_operator", type: "address" },
-          { name: "_role", type: "string" }
-        ],
-        name: "checkRole",
-        outputs: [],
-        payable: false,
-        stateMutability: "view",
-        type: "function"
-      },
-      {
         constant: false,
         inputs: [
           { name: "_to", type: "address" },
@@ -50,18 +38,6 @@ export class TwoKeyCampaignETHCrowdsale extends TC.TypeChainContract {
         inputs: [],
         name: "totalSupply",
         outputs: [{ name: "", type: "uint256" }],
-        payable: false,
-        stateMutability: "view",
-        type: "function"
-      },
-      {
-        constant: true,
-        inputs: [
-          { name: "_operator", type: "address" },
-          { name: "_role", type: "string" }
-        ],
-        name: "hasRole",
-        outputs: [{ name: "", type: "bool" }],
         payable: false,
         stateMutability: "view",
         type: "function"
@@ -157,15 +133,6 @@ export class TwoKeyCampaignETHCrowdsale extends TC.TypeChainContract {
         type: "function"
       },
       {
-        constant: true,
-        inputs: [],
-        name: "ROLE_CONTROLLER",
-        outputs: [{ name: "", type: "string" }],
-        payable: false,
-        stateMutability: "view",
-        type: "function"
-      },
-      {
         constant: false,
         inputs: [
           { name: "_from", type: "address" },
@@ -179,14 +146,9 @@ export class TwoKeyCampaignETHCrowdsale extends TC.TypeChainContract {
       },
       {
         constant: false,
-        inputs: [
-          { name: "_to", type: "address" },
-          { name: "_tokenID", type: "uint256" },
-          { name: "_assetContract", type: "address" },
-          { name: "_amount", type: "uint256" }
-        ],
-        name: "expireFungible",
-        outputs: [{ name: "", type: "bool" }],
+        inputs: [],
+        name: "addAdminRolesAndBalancesAfterDeployed",
+        outputs: [],
         payable: false,
         stateMutability: "nonpayable",
         type: "function"
@@ -215,18 +177,6 @@ export class TwoKeyCampaignETHCrowdsale extends TC.TypeChainContract {
       {
         constant: false,
         inputs: [
-          { name: "addr", type: "address" },
-          { name: "roleName", type: "string" }
-        ],
-        name: "adminRemoveRole",
-        outputs: [],
-        payable: false,
-        stateMutability: "nonpayable",
-        type: "function"
-      },
-      {
-        constant: false,
-        inputs: [
           { name: "_converter", type: "address" },
           { name: "_tokenID", type: "uint256" },
           { name: "_assetContract", type: "address" },
@@ -234,19 +184,6 @@ export class TwoKeyCampaignETHCrowdsale extends TC.TypeChainContract {
           { name: "_type", type: "uint8" }
         ],
         name: "cancelAssetTwoKey",
-        outputs: [{ name: "", type: "bool" }],
-        payable: false,
-        stateMutability: "nonpayable",
-        type: "function"
-      },
-      {
-        constant: false,
-        inputs: [
-          { name: "_tokenID", type: "uint256" },
-          { name: "_assetContract", type: "address" },
-          { name: "_amount", type: "uint256" }
-        ],
-        name: "addFungibleAsset",
         outputs: [{ name: "", type: "bool" }],
         payable: false,
         stateMutability: "nonpayable",
@@ -294,45 +231,6 @@ export class TwoKeyCampaignETHCrowdsale extends TC.TypeChainContract {
       },
       {
         constant: false,
-        inputs: [
-          { name: "addr", type: "address" },
-          { name: "roleName", type: "string" }
-        ],
-        name: "adminAddRole",
-        outputs: [],
-        payable: false,
-        stateMutability: "nonpayable",
-        type: "function"
-      },
-      {
-        constant: false,
-        inputs: [
-          { name: "_to", type: "address" },
-          { name: "_tokenID", type: "uint256" },
-          { name: "_assetContract", type: "address" },
-          { name: "_amount", type: "uint256" }
-        ],
-        name: "transferFungibleAsset",
-        outputs: [{ name: "", type: "bool" }],
-        payable: false,
-        stateMutability: "nonpayable",
-        type: "function"
-      },
-      {
-        constant: false,
-        inputs: [
-          { name: "_tokenID", type: "uint256" },
-          { name: "_assetContract", type: "address" },
-          { name: "_index", type: "uint256" }
-        ],
-        name: "addNonFungibleAsset",
-        outputs: [{ name: "", type: "bool" }],
-        payable: false,
-        stateMutability: "nonpayable",
-        type: "function"
-      },
-      {
-        constant: false,
         inputs: [{ name: "_amount", type: "uint256" }],
         name: "redeemTwoKeyToken",
         outputs: [],
@@ -345,15 +243,6 @@ export class TwoKeyCampaignETHCrowdsale extends TC.TypeChainContract {
         inputs: [],
         name: "quota",
         outputs: [{ name: "", type: "uint256" }],
-        payable: false,
-        stateMutability: "view",
-        type: "function"
-      },
-      {
-        constant: true,
-        inputs: [],
-        name: "ROLE_ADMIN",
-        outputs: [{ name: "", type: "string" }],
         payable: false,
         stateMutability: "view",
         type: "function"
@@ -405,20 +294,6 @@ export class TwoKeyCampaignETHCrowdsale extends TC.TypeChainContract {
       },
       {
         constant: false,
-        inputs: [
-          { name: "_to", type: "address" },
-          { name: "_tokenID", type: "uint256" },
-          { name: "_assetContract", type: "address" },
-          { name: "_assetTokenID", type: "uint256" }
-        ],
-        name: "expireNonFungible",
-        outputs: [{ name: "", type: "bool" }],
-        payable: false,
-        stateMutability: "nonpayable",
-        type: "function"
-      },
-      {
-        constant: false,
         inputs: [{ name: "_beneficiary", type: "address" }],
         name: "buyTokens",
         outputs: [],
@@ -456,10 +331,9 @@ export class TwoKeyCampaignETHCrowdsale extends TC.TypeChainContract {
           { name: "_economy", type: "address" },
           { name: "_whitelistInfluencer", type: "address" },
           { name: "_whitelistConverter", type: "address" },
+          { name: "_composableAssetFactory", type: "address" },
           { name: "_contractor", type: "address" },
           { name: "_moderator", type: "address" },
-          { name: "_start", type: "uint256" },
-          { name: "_duration", type: "uint256" },
           { name: "_expiryConversion", type: "uint256" },
           { name: "_escrowPrecentage", type: "uint256" },
           { name: "_rate", type: "uint256" },
@@ -479,30 +353,6 @@ export class TwoKeyCampaignETHCrowdsale extends TC.TypeChainContract {
           { indexed: false, name: "amount", type: "uint256" }
         ],
         name: "TokenPurchase",
-        type: "event"
-      },
-      {
-        anonymous: false,
-        inputs: [{ indexed: true, name: "_contract", type: "address" }],
-        name: "Expired",
-        type: "event"
-      },
-      {
-        anonymous: false,
-        inputs: [
-          { indexed: true, name: "operator", type: "address" },
-          { indexed: false, name: "role", type: "string" }
-        ],
-        name: "RoleAdded",
-        type: "event"
-      },
-      {
-        anonymous: false,
-        inputs: [
-          { indexed: true, name: "operator", type: "address" },
-          { indexed: false, name: "role", type: "string" }
-        ],
-        name: "RoleRemoved",
         type: "event"
       },
       {
@@ -589,40 +439,12 @@ export class TwoKeyCampaignETHCrowdsale extends TC.TypeChainContract {
     return TC.promisify(this.rawWeb3Contract.wallet, []);
   }
 
-  public get ROLE_CONTROLLER(): Promise<string> {
-    return TC.promisify(this.rawWeb3Contract.ROLE_CONTROLLER, []);
-  }
-
   public get quota(): Promise<BigNumber> {
     return TC.promisify(this.rawWeb3Contract.quota, []);
   }
 
-  public get ROLE_ADMIN(): Promise<string> {
-    return TC.promisify(this.rawWeb3Contract.ROLE_ADMIN, []);
-  }
-
   public get token(): Promise<string> {
     return TC.promisify(this.rawWeb3Contract.token, []);
-  }
-
-  public checkRole(
-    _operator: BigNumber | string,
-    _role: string
-  ): Promise<void> {
-    return TC.promisify(this.rawWeb3Contract.checkRole, [
-      _operator.toString(),
-      _role.toString()
-    ]);
-  }
-
-  public hasRole(
-    _operator: BigNumber | string,
-    _role: string
-  ): Promise<boolean> {
-    return TC.promisify(this.rawWeb3Contract.hasRole, [
-      _operator.toString(),
-      _role.toString()
-    ]);
   }
 
   public received_from(arg0: BigNumber | string): Promise<string> {
@@ -748,21 +570,13 @@ export class TwoKeyCampaignETHCrowdsale extends TC.TypeChainContract {
       [_from.toString(), _maxReward.toString()]
     );
   }
-  public expireFungibleTx(
-    _to: BigNumber | string,
-    _tokenID: BigNumber | number,
-    _assetContract: BigNumber | string,
-    _amount: BigNumber | number
-  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
+  public addAdminRolesAndBalancesAfterDeployedTx(): TC.DeferredTransactionWrapper<
+    TC.ITxParams
+  > {
     return new TC.DeferredTransactionWrapper<TC.ITxParams>(
       this,
-      "expireFungible",
-      [
-        _to.toString(),
-        _tokenID.toString(),
-        _assetContract.toString(),
-        _amount.toString()
-      ]
+      "addAdminRolesAndBalancesAfterDeployed",
+      []
     );
   }
   public decreaseApprovalTx(
@@ -773,16 +587,6 @@ export class TwoKeyCampaignETHCrowdsale extends TC.TypeChainContract {
       this,
       "decreaseApproval",
       [_spender.toString(), _subtractedValue.toString()]
-    );
-  }
-  public adminRemoveRoleTx(
-    addr: BigNumber | string,
-    roleName: string
-  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
-    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
-      this,
-      "adminRemoveRole",
-      [addr.toString(), roleName.toString()]
     );
   }
   public cancelAssetTwoKeyTx(
@@ -802,17 +606,6 @@ export class TwoKeyCampaignETHCrowdsale extends TC.TypeChainContract {
         _assetTokenIDOrAmount.toString(),
         _type.toString()
       ]
-    );
-  }
-  public addFungibleAssetTx(
-    _tokenID: BigNumber | number,
-    _assetContract: BigNumber | string,
-    _amount: BigNumber | number
-  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
-    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
-      this,
-      "addFungibleAsset",
-      [_tokenID.toString(), _assetContract.toString(), _amount.toString()]
     );
   }
   public expireEscrowTx(
@@ -854,44 +647,6 @@ export class TwoKeyCampaignETHCrowdsale extends TC.TypeChainContract {
       [_tokenID.toString(), _assetContract.toString(), _pricePerUnit.toString()]
     );
   }
-  public adminAddRoleTx(
-    addr: BigNumber | string,
-    roleName: string
-  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
-    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
-      this,
-      "adminAddRole",
-      [addr.toString(), roleName.toString()]
-    );
-  }
-  public transferFungibleAssetTx(
-    _to: BigNumber | string,
-    _tokenID: BigNumber | number,
-    _assetContract: BigNumber | string,
-    _amount: BigNumber | number
-  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
-    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
-      this,
-      "transferFungibleAsset",
-      [
-        _to.toString(),
-        _tokenID.toString(),
-        _assetContract.toString(),
-        _amount.toString()
-      ]
-    );
-  }
-  public addNonFungibleAssetTx(
-    _tokenID: BigNumber | number,
-    _assetContract: BigNumber | string,
-    _index: BigNumber | number
-  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
-    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
-      this,
-      "addNonFungibleAsset",
-      [_tokenID.toString(), _assetContract.toString(), _index.toString()]
-    );
-  }
   public redeemTwoKeyTokenTx(
     _amount: BigNumber | number
   ): TC.DeferredTransactionWrapper<TC.ITxParams> {
@@ -909,23 +664,6 @@ export class TwoKeyCampaignETHCrowdsale extends TC.TypeChainContract {
       this,
       "increaseApproval",
       [_spender.toString(), _addedValue.toString()]
-    );
-  }
-  public expireNonFungibleTx(
-    _to: BigNumber | string,
-    _tokenID: BigNumber | number,
-    _assetContract: BigNumber | string,
-    _assetTokenID: BigNumber | number
-  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
-    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
-      this,
-      "expireNonFungible",
-      [
-        _to.toString(),
-        _tokenID.toString(),
-        _assetContract.toString(),
-        _assetTokenID.toString()
-      ]
     );
   }
   public buyTokensTx(
@@ -1003,39 +741,6 @@ export class TwoKeyCampaignETHCrowdsale extends TC.TypeChainContract {
         beneficiary?: BigNumber | string | Array<BigNumber | string>;
       }
     >(this, "TokenPurchase", eventFilter);
-  }
-  public ExpiredEvent(eventFilter: {
-    _contract?: BigNumber | string | Array<BigNumber | string>;
-  }): TC.DeferredEventWrapper<
-    { _contract: BigNumber | string },
-    { _contract?: BigNumber | string | Array<BigNumber | string> }
-  > {
-    return new TC.DeferredEventWrapper<
-      { _contract: BigNumber | string },
-      { _contract?: BigNumber | string | Array<BigNumber | string> }
-    >(this, "Expired", eventFilter);
-  }
-  public RoleAddedEvent(eventFilter: {
-    operator?: BigNumber | string | Array<BigNumber | string>;
-  }): TC.DeferredEventWrapper<
-    { operator: BigNumber | string; role: string },
-    { operator?: BigNumber | string | Array<BigNumber | string> }
-  > {
-    return new TC.DeferredEventWrapper<
-      { operator: BigNumber | string; role: string },
-      { operator?: BigNumber | string | Array<BigNumber | string> }
-    >(this, "RoleAdded", eventFilter);
-  }
-  public RoleRemovedEvent(eventFilter: {
-    operator?: BigNumber | string | Array<BigNumber | string>;
-  }): TC.DeferredEventWrapper<
-    { operator: BigNumber | string; role: string },
-    { operator?: BigNumber | string | Array<BigNumber | string> }
-  > {
-    return new TC.DeferredEventWrapper<
-      { operator: BigNumber | string; role: string },
-      { operator?: BigNumber | string | Array<BigNumber | string> }
-    >(this, "RoleRemoved", eventFilter);
   }
   public ApprovalEvent(eventFilter: {
     owner?: BigNumber | string | Array<BigNumber | string>;
