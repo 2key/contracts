@@ -157,7 +157,6 @@ async function deploy() {
       }
       return 0;
     }).pop();
-    console.log('sessionDeployedContracts', sessionDeployedContracts, lastDeployed);
     const deployedUpdates = {
       contracts: {},
     };
@@ -185,7 +184,6 @@ async function deploy() {
         });
       }
     });
-    console.log('deployedUpdates', deployedUpdates);
     if (Object.keys(deployedUpdates.contracts).length) {
       deployedUpdates.data = now.format();
       deployedUpdates.networks = networks;
