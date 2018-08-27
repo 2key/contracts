@@ -4,7 +4,7 @@
 // * sample contract for each type of campagin.
 // * Use fake constractor parameters. coinbase is the contractor
 const TwoKeyEconomy = artifacts.require('TwoKeyEconomy');
-// const TwoKeyAdmin = artifacts.require('TwoKeyAdmin');
+const TwoKeyAdmin = artifacts.require('TwoKeyAdmin');
 
 module.exports = function (deployer) {
   if (deployer.network.startsWith('dev') || deployer.network == 'rinkeby-infura') {
