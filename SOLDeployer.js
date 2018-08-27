@@ -143,17 +143,15 @@ async function deploy() {
         };
       }
     }
-
+    console.log(artifacts, deployedHistory);
     const l = networks.length;
     for (let i = 0; i < l; i += 1) {
       /* eslint-disable no-await-in-loop */
       await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--network', networks[i]].concat(process.argv.slice(3)));
       /* eslint-enable no-await-in-loop */
     }
-    await generateSOLInterface();
-    await runProcess(path.join(__dirname, 'node_modules/.bin/typechain'), ['--force', '--outDir', path.join(twoKeyProtocolDir, 'contracts'), `${buildPath}/*.json`]);
-    await runProcess(path.join(__dirname, 'node_modules/.bin/webpack'));
     const sessionDeployedContracts = getCurrentDeployedAddresses();
+    console.log('sessionDeployedContracts', sessionDeployedContracts);
     const lastDeployed = Object.keys(deployedHistory).filter(key => key !== 'initial').sort((a, b) => {
       if (a > b) {
         return 1;
@@ -184,12 +182,16 @@ async function deploy() {
         });
       }
     });
+    console.log('deployedUpdates', deployedUpdates);
     if (Object.keys(deployedUpdates).length) {
       deployedUpdates.data = now.format();
       deployedUpdates.networks = networks;
       deployedHistory[tag] = deployedUpdates;
       fs.writeFileSync(deploymentHistoryPath, JSON.stringify(deployedHistory, null, 2));
     }
+    await generateSOLInterface();
+    await runProcess(path.join(__dirname, 'node_modules/.bin/typechain'), ['--force', '--outDir', path.join(twoKeyProtocolDir, 'contracts'), `${buildPath}/*.json`]);
+    await runProcess(path.join(__dirname, 'node_modules/.bin/webpack'));
     contractsStatus = await contractsGit.status();
     twoKeyProtocolStatus = await twoKeyProtocolLibGit.status();
     console.log(commit, tag);
