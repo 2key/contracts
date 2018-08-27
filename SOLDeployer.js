@@ -53,7 +53,7 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
             // contracts[contractName] = whitelist[contractName].deployed
             //   ? { abi, networks } : { abi, networks, bytecode };
             contracts[contractName] = whitelist[contractName].deployed
-              ? { networks } : { networks, bytecode };
+              ? { networks } : { bytecode };
           }
           // if (abi.length) {
           // contracts[contractName] =
