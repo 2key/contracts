@@ -136,7 +136,7 @@ async function deploy() {
     const deployedHistory = fs.existsSync(deploymentHistoryPath)
       ? JSON.parse(fs.readFileSync(deploymentHistoryPath)) : {};
     const artifacts = getCurrentDeployedAddresses();
-    if (Object.length(artifacts)) {
+    if (Object.keys(artifacts).length) {
       if (!Object.keys(deployedHistory).length) {
         deployedHistory.initial = {
           contracts: artifacts,
