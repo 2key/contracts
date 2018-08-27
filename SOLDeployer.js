@@ -151,7 +151,7 @@ async function main() {
       await runProcess('./node_modules/.bin/truffle', ['migrate', '--network', networks[i]].concat(process.argv.slice(3)));
       /* eslint-enable no-await-in-loop */
     }
-    await runProcess('./node_modules/.bin/typechain', ['--outDir', path.join(twoKeyProtocolDir, 'src/contracts'), `${buildPath}/*.json`]);
+    await runProcess('./node_modules/.bin/typechain', ['--force', '--outDir', path.join(twoKeyProtocolDir, 'src/contracts'), `${buildPath}/*.json`]);
     unlinkTruffleConfig();
     await generateSOLInterface();
     contractsStatus = await contractsGit.status();
