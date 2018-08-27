@@ -5,12 +5,10 @@
   "scripts": {
     "lint": "eslint ./",
     "build": "webpack",
-    "dev": "webpack-dev-server",
     "deploy": "node SOLDeployer.js",
     "geth": "node geth/geth.js start",
     "geth:stop": "node geth/geth.js stop",
-    "typechain": "typechain --outDir build/ts './build/contracts/*.json'",
-    "test": "mocha --exit -r ts-node/register 2key-protocol/**/*.spec.ts"
+    "test": "mocha --exit -r ts-node/register 2key-protocol-src/**/*.spec.ts"
   },
   "author": "Douglas von Kohorn",
   "license": "MIT",

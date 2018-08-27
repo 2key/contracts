@@ -1,4 +1,5 @@
 import Web3 from 'web3';
+import { Transaction } from 'web3/eth/types'
 import ProviderEngine from 'web3-provider-engine';
 import RpcSubprovider from 'web3-provider-engine/subproviders/rpc';
 import WSSubprovider from 'web3-provider-engine/subproviders/websocket';
@@ -126,7 +127,7 @@ export default class TwoKeyNetwork {
     return this.mainWeb3.toHex(data);
   }
 
-  public getTransaction(txHash: string): Promise<Web3.Transaction> {
+  public getTransaction(txHash: string): Promise<Transaction> {
     return new Promise((resolve, reject) => {
       this.mainWeb3.eth.getTransaction(txHash, (err, res) => {
         if (err) {
@@ -227,8 +228,7 @@ export default class TwoKeyNetwork {
 
   private _getEthBalance(): Promise<string> {
     return new Promise((resolve, reject) => {
-      // this.mainWeb3.eth.getBalance(this.address, this.mainWeb3.eth.defaultBlock, (err, res) => {
-      this.mainWeb3.eth.getBalance(this.address, (err, res) => {
+      this.mainWeb3.eth.getBalance(this.address, this.mainWeb3.eth.defaultBlock, (err, res) => {
         if (err) {
           reject(err);
         } else {
