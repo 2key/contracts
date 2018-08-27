@@ -8,8 +8,9 @@ const TwoKeyEconomy = artifacts.require('TwoKeyEconomy');
 
 module.exports = function (deployer) {
   if (deployer.network.startsWith('dev') || deployer.network == 'rinkeby-infura') {
-    deployer.deploy(TwoKeyEconomy);
-    // deployer.deploy(TwoKeyAdmin);
+    deployer.deploy(TwoKeyAdmin).then((admin) => {
+      deployer.deploy(TwoKeyEconomy, admin.address);
+    });
   } else if (deployer.network.startsWith('plasma')) {
     const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
     deployer.deploy(TwoKeyPlasmaEvents);
