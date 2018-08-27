@@ -35,20 +35,16 @@ function stop() {
   return new Promise((resolve) => {
     let found = false;
     docker.listContainers({ all: true }, (err, containers) => {
-      if (containers) {
-        containers.forEach((containerInfo) => {
-          if (containerInfo.Image === '2key/geth:dev') {
-            found = true;
-            console.log('Stopping private network...', containerInfo.Id);
-            docker.getContainer(containerInfo.Id).stop(() => {
-              docker.getContainer(containerInfo.Id).remove(resolve);
-            });
-          }
-        });
-        if (!found) {
-          resolve();
+      containers.forEach((containerInfo) => {
+        if (containerInfo.Image === '2key/geth:dev') {
+          found = true;
+          console.log('Stopping private network...', containerInfo.Id);
+          docker.getContainer(containerInfo.Id).stop(() => {
+            docker.getContainer(containerInfo.Id).remove(resolve);
+          });
         }
-      } else {
+      });
+      if (!found) {
         resolve();
       }
     });
@@ -107,7 +103,7 @@ async function start() {
     '--targetgaslimit',
     '9000000',
     '--unlock',
-    '0',
+    '0,1',
     '--password',
     '/opt/geth/passwords',
   ];
