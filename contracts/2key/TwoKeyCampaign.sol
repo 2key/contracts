@@ -123,6 +123,8 @@ contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
 		ComposableAssetFactory _composableAssetFactory,
 
 		address _contractor,
+
+		// set moderator as admin of twokeywhitelist contracts here
 		address _moderator,
 
 //		uint256 _openingTime,
@@ -193,7 +195,7 @@ contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
 		require(economy.transferFrom(msg.sender, this, payout));	
 		Conversion memory c = Conversion(_from, payout, msg.sender, false, false, _tokenID, _assetContract, _amount, CampaignType.Fungible, now, now + expiryConversion * 1 minutes);
 		// move funds
-		composableAssetFactory.remAssets(_tokenID, _assetContract, _amount);
+		composableAssetFactory.removeFungibleAssets(_tokenID, _assetContract, _amount);
 		eventSource.escrow(address(this), msg.sender, _tokenID, _assetContract, _amount, CampaignType.Fungible);	
 		conversions[msg.sender] = c;
 	}
@@ -216,7 +218,7 @@ contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
 		require(economy.transferFrom(msg.sender, this, payout));
 		Conversion memory c = Conversion(_from, payout, msg.sender, false, false, _tokenID, _assetContract, _index, CampaignType.NonFungible, now, now + expiryConversion * 1 minutes);
 		// move funds
-		composableAssetFactory.setAssetsToZero(_tokenID, _assetContract);
+		composableAssetFactory.setFungibleAssetsToZero(_tokenID, _assetContract);
 		eventSource.escrow(address(this), msg.sender, _tokenID, _assetContract, _index, CampaignType.NonFungible);
 		conversions[msg.sender] = c;
 	}
@@ -256,7 +258,9 @@ contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
         }
 
     }
-
+    /// TODO: Contractor names moderator, and moderator manages whitelist
+    /// TODO: Otherwise: Contractor can name moderator, and as part of issuing of twokeycampaign, we issue whitelist contract where we
+    /// TODO: name the moderator (Should be some kind of admin)
     function cancelledEscrow(
     	address _converter,
         uint256 _tokenID,
@@ -270,9 +274,9 @@ contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
 	        address assetToken = address(
 		      keccak256(abi.encodePacked(_assetContract, _assetTokenIDOrAmount))
 		    );
-			composableAssetFactory.setAssetsToOne(_tokenID, _assetContract);
+			composableAssetFactory.setFungibleAssetsToOne(_tokenID, _assetContract);
         } else if (_type == CampaignType.Fungible) {
-			composableAssetFactory.addAssets(_tokenID, _assetContract, _assetTokenIDOrAmount);
+			composableAssetFactory.addFungibleAssets(_tokenID, _assetContract, _assetTokenIDOrAmount);
         }
 
         require(economy.transfer(_converter, (c.payout).mul(rate)));
