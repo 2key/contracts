@@ -1,0 +1,314 @@
+import Web3 from 'web3';
+import { Transaction } from 'web3/eth/types'
+import ProviderEngine from 'web3-provider-engine';
+import RpcSubprovider from 'web3-provider-engine/subproviders/rpc';
+import WSSubprovider from 'web3-provider-engine/subproviders/websocket';
+import ipfsAPI from 'ipfs-api';
+import WalletSubprovider from 'ethereumjs-wallet/provider-engine';
+import { BigNumber } from 'bignumber.js';
+import Tx from 'ethereumjs-tx';
+import solidityContracts from './contracts/meta';
+import { TwoKeyEconomy } from './contracts/TwoKeyEconomy';
+import { EhtereumNetworks, ContractsAdressess, TwoKeyInit, BalanceMeta, Gas, RawTransaction } from './interfaces';
+import Sign from './sign';
+// import HDWalletProvider from './HDWalletProvider';
+
+// console.log(Sign);
+
+const TwoKeyDefaults = {
+  rpcUrl: 'http://18.233.2.70:8500',
+  wsUrl: 'ws://18.233.2.70:8501',
+  twoKeySyncUrl: 'ws://192.168.47.100:18546',
+  ipfsIp: '192.168.47.100',
+  ipfsPort: '5001',
+  mainNetId: 4,
+  syncTwoKeyNetId: 17,
+};
+
+
+const addressRegex = /^0x[a-fA-F0-9]{40}$/;
+
+export default class TwoKeyNetwork {
+  private mainWeb3: Web3;
+  private syncWeb3: Web3;
+  private ipfs: ipfsAPI;
+  private address: string;
+  private gasPrice: number;
+  private totalSupply: BigNumber;
+  private gas: number;
+  private networks: EhtereumNetworks;
+  private contracts: ContractsAdressess;
+  private twoKeyEconomy: TwoKeyEconomy;
+  private pk: string;
+
+  constructor(initValues: TwoKeyInit) {
+    // init MainNet Client
+    const {
+      wallet,
+      wsUrl,
+      rpcUrl,
+      syncUrl = TwoKeyDefaults.twoKeySyncUrl,
+      ipfsIp = TwoKeyDefaults.ipfsIp,
+      ipfsPort = TwoKeyDefaults.ipfsPort,
+      contracts,
+      networks,
+    } = initValues;
+    if (!wallet) {
+      throw new Error('Wallet required!');
+    }
+    this.address = `0x${wallet.getAddress().toString('hex')}`
+    if (contracts) {
+      this.contracts = contracts;
+    } else if (networks) {
+      this.networks = networks;
+    } else {
+      this.networks = {
+        mainNetId: TwoKeyDefaults.mainNetId,
+        syncTwoKeyNetId: TwoKeyDefaults.syncTwoKeyNetId,
+      }
+    }
+
+    const mainEngine = new ProviderEngine();
+    const mainProvider = wsUrl
+      ? new WSSubprovider({ rpcUrl: wsUrl })
+      : (rpcUrl && new RpcSubprovider({ rpcUrl })) || new WSSubprovider({ rpcUrl: TwoKeyDefaults.wsUrl })
+    if (!wsUrl && rpcUrl) {
+      // mainProvider.handleRequest = handleRequest;
+    }
+    mainEngine.addProvider(new WalletSubprovider(wallet, {}));
+    mainEngine.addProvider(mainProvider);
+    mainEngine.addProvider(mainProvider);
+
+    // this.mainWeb3 = new Web3(new HDWalletProvider(wallet, address, rpcUrl));
+    this.mainWeb3 = new Web3(mainEngine);
+    mainEngine.start();
+    this.mainWeb3.eth.defaultBlock = 'pending';
+    this.pk = wallet.getPrivateKey().toString('hex');
+
+    this.twoKeyEconomy = new TwoKeyEconomy(this.mainWeb3, this.getContractDeployedAddress('TwoKeyEconomy'))
+
+    // init 2KeySyncNet Client
+    // const syncEngine = new ProviderEngine();
+    // this.syncWeb3 = new Web3(syncEngine);
+    // const syncProvider = new WSSubprovider({ rpcUrl: syncUrl });
+    // syncEngine.addProvider(syncProvider);
+    // syncEngine.start();
+    // this.ipfs = ipfsAPI(ipfsIp, ipfsPort, { protocol: 'http' });
+  }
+
+  public getGasPrice(): number {
+    return this.gasPrice;
+  }
+
+  public getTotalSupply(): BigNumber {
+    return this.totalSupply;
+  }
+
+  public getGas(): number {
+    return this.gas;
+  }
+
+  public getAddress(): string {
+    return this.address;
+  }
+
+  public fromWei(number: string | number | BigNumber, unit?: string): string {
+    // @ts-ignore: Web3 version missmatch
+    return this.mainWeb3.fromWei(number, unit);
+  }
+
+  public toWei(number: string | number | BigNumber, unit?: string): number | BigNumber {
+    // @ts-ignore: Web3 version missmatch
+    return this.mainWeb3.toWei(number, unit);
+  }
+
+  public toHex(data: any): string {
+    // @ts-ignore: Web3 version missmatch
+    return this.mainWeb3.toHex(data);
+  }
+
+  public getTransaction(txHash: string): Promise<Transaction> {
+    return new Promise((resolve, reject) => {
+      this.mainWeb3.eth.getTransaction(txHash, (err, res) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(res);
+        }
+      });
+    });
+  }
+
+  public getBalance(): Promise<BalanceMeta> {
+    const promises = [
+      this._getEthBalance(),
+      this._getTokenBalance(),
+      this._getTotalSupply(),
+      this._getGasPrice()
+    ];
+    return new Promise((resolve, reject) => {
+      Promise.all(promises)
+        .then(([eth, token, total, gasPrice]) => {
+          resolve({
+            balance: {
+              ETH: parseFloat(eth),
+              total: parseFloat(this.fromWei(total.toString())),
+              '2KEY': parseFloat(token),
+            },
+            local_address: this.address,
+            gasPrice: parseFloat(gasPrice),
+          });
+        })
+        .catch(reject)
+    });
+  }
+
+  public getERC20TransferGas(to: string, value: number): Promise<Gas> {
+    this.gas = null;
+    return new Promise((resolve, reject) => {
+      this.twoKeyEconomy.transferTx(to, this.toWei(value, 'ether')).estimateGas({ from: this.address })
+        .then(res => {
+          this.gas = res;
+          resolve({ wei: this.gas });
+        })
+        .catch(reject);
+    });
+  }
+
+  public getETHTransferGas(to: string, value: number): Promise<Gas> {
+    this.gas = null;
+    return new Promise((resolve, reject) => {
+      this.mainWeb3.eth.estimateGas({ to, value: this.toWei(value, 'ether').toString() }, (err, res) => {
+        if (err) {
+          reject(err);
+        } else {
+          this.gas = res;
+          resolve({ wei: this.gas });
+        }
+      });
+    });
+  }
+
+  public async transferTokens(to: string, value: number, gasPrice: number = this.gasPrice): Promise<string> {
+    console.log('Gas Price', gasPrice);
+    const params = { from: this.address, gasLimit: this.toHex(this.gas), gasPrice };
+    return this.twoKeyEconomy.transferTx(to, this.toWei(value, 'ether')).send(params);
+  }
+
+  public async transferEther(to: string, value: number, gasPrice: number = this.gasPrice): Promise<any> {
+    const params = { to, gasPrice, gasLimit: this.toHex(this.gas), value: this.toWei(value, 'ether').toString(), from: this.address }
+    return new Promise((resolve, reject) => {
+      this.mainWeb3.eth.sendTransaction(params, (err, res) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(res);
+        }
+      });
+    });
+  }
+
+  private getContractDeployedAddress(contract: string): string {
+    return this.contracts ? this.contracts[contract] : solidityContracts[contract].networks[this.networks.mainNetId].address
+  }
+
+  private _getGasPrice(): Promise<string> {
+    return new Promise((resolve, reject) => {
+      this.mainWeb3.eth.getGasPrice((err, res) => {
+        if (err) {
+          reject(err);
+        } else {
+          // @ts-ignore: Web3 version missmatch
+          this.gasPrice = res.toNumber();
+          resolve(res.toString());
+        }
+      });
+    });
+  }
+
+  private _getEthBalance(): Promise<string> {
+    return new Promise((resolve, reject) => {
+      this.mainWeb3.eth.getBalance(this.address, this.mainWeb3.eth.defaultBlock, (err, res) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(this.fromWei(res.toString(), 'ether'));
+        }
+      })
+    })
+  }
+
+  private _getTokenBalance(): Promise<string> {
+    return new Promise((resolve, reject) => {
+      this.twoKeyEconomy.balanceOf(this.address)
+        .then(res => {
+          resolve(this.fromWei(res.toString()))
+        })
+        .catch(reject);
+    });
+  }
+
+  private _getTotalSupply(): Promise<string> {
+    if (this.totalSupply) {
+      return Promise.resolve(this.fromWei(this.totalSupply.toString()));
+    }
+    return new Promise((resolve, reject) => {
+      this.twoKeyEconomy.totalSupply
+        .then(res => {
+          this.totalSupply = res;
+          resolve(this.fromWei(this.totalSupply.toString()));
+        })
+        .catch(reject);
+    });
+  }
+
+  /*
+  private _getNonce(): Promise<number> {
+    return new Promise((resolve, reject) => {
+      this.mainWeb3.eth.getTransactionCount(this.address, 'pending', (err, res) => {
+        if (err) {
+          reject(err);
+        } else {
+          console.log('NONCE', res, this.address);
+          resolve(res);
+        }
+      });
+    });
+  }
+
+  private _createRawTransaction(params: RawTransaction): Promise<string> {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const nonce = this.mainWeb3.toHex(await this._getNonce());
+        const rawTransaction = {
+          nonce: this.mainWeb3.toHex(nonce),
+          from: params.from || this.address,
+          gasLimit: this.mainWeb3.toHex(params.gas || this.gas),
+          gasPrice: this.mainWeb3.toHex(params.gasPrice || this.gasPrice),
+          to: params.to,
+          value: params.value,
+          data: params.data
+        };
+        const tx = new Tx(rawTransaction);
+        tx.sign(Buffer.from(this.pk, 'hex'));
+        const signedTransaction = `0x${tx.serialize().toString('hex')}`;
+        resolve(signedTransaction);
+      } catch (err) {
+        reject(err);
+      }
+    });
+  }
+
+  private _sendRawTransaction(transaction: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      this.mainWeb3.eth.sendRawTransaction(transaction, (err, res) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(res);
+        }
+      })
+    });
+  }
+  */
+}
