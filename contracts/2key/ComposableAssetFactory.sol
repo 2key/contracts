@@ -201,17 +201,16 @@ contract ComposableAssetFactory is RBACWithAdmin {
   /// @param _tokenID is id of token
   /// @param _assetContract is address of asset contract
   /// @param _amount is the actual amount
-  function remAssets(uint _tokenID, address _assetContract, uint _amount) public {
+  function removeFungibleAssets(uint _tokenID, address _assetContract, uint _amount) public {
       assets[_tokenID][_assetContract] -= _amount;
   }
-
   /// @notice Since we don't any more inherit this contract, we can access to it's variables and modify them only with functions
   /// @notice Adds specific amount of assets
   /// @dev need to setup some kind of validation that only TwoKeyCampaign contract can call this
   /// @param _tokenID is id of token
   /// @param _assetContract is address of asset contract
   /// @param _amount is the actual amount
-  function addAssets(uint _tokenID, address _assetContract, uint _amount) public {
+  function addFungibleAssets(uint _tokenID, address _assetContract, uint _amount) public {
     assets[_tokenID][_assetContract] += _amount;
   }
   /// @notice Since we don't any more inherit this contract, we can access to it's variables and modify them only with functions
@@ -219,7 +218,7 @@ contract ComposableAssetFactory is RBACWithAdmin {
   /// @dev need to setup some kind of validation that only TwoKeyCampaign contract can call this
   /// @param _tokenID is id of token
   /// @param _assetContract is address of asset contract
-  function setAssetsToZero(uint _tokenID, address _assetContract) public {
+  function setFungibleAssetsToZero(uint _tokenID, address _assetContract) public {
     assets[_tokenID][_assetContract] = 0;
   }
   /// @notice Since we don't any more inherit this contract, we can access to it's variables and modify them only with functions
@@ -227,7 +226,7 @@ contract ComposableAssetFactory is RBACWithAdmin {
   /// @dev need to setup some kind of validation that only TwoKeyCampaign contract can call this
   /// @param _tokenID is id of token
   /// @param _assetContract is address of asset contract
-  function setAssetsToOne(uint _tokenID, address _assetContract) public {
+  function setFungibleAssetsToOne(uint _tokenID, address _assetContract) public {
     assets[_tokenID][_assetContract] = 1;
   }
 
