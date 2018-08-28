@@ -1,6 +1,12 @@
 export default { TwoKeyAdmin:
    { networks:
-      { '17':
+      { '4':
+         { events: {},
+           links: {},
+           address: '0x6e2cdb2188665a83143eb837a9120295f8bbe2b9',
+           transactionHash:
+            '0xc8c950446662e798b6e2f07578c3484ffd4ac342b7d460e13739b8ecec4cfd7e' },
+        '17':
          { events: {},
            links: {},
            address: '0x6615cfa5d861430cfe998c6fa1989229cce344a4',
@@ -12,7 +18,13 @@ export default { TwoKeyAdmin:
   TwoKeyCampaignETHCrowdsale: { bytecode: '0x' },
   TwoKeyEconomy:
    { networks:
-      { '17':
+      { '4':
+         { events: {},
+           links: {},
+           address: '0xb51c32ae3c6367db4d21e9279f04b3232480f685',
+           transactionHash:
+            '0x92bff17d80ca8c526a5c30059b98a730183c84382f205fe109af29415669131e' },
+        '17':
          { events: {},
            links: {},
            address: '0x9993da88b6721bc0844e5c5b1ea02d25c38b2c12',
@@ -26,7 +38,13 @@ export default { TwoKeyAdmin:
             '0xe2484d2d34a2e027971e418ff58dde0fc664d2aee619bc5f4d2fb7377d2de0c4' } } },
   TwoKeyEventSource:
    { networks:
-      { '17':
+      { '4':
+         { events: {},
+           links: {},
+           address: '0xe2b46c78fdd93923934dd80eee4d235cfc2d6310',
+           transactionHash:
+            '0x3f34a56be2b528768625facfef0852ba38d08955f377596795a2ed7cb87ebbde' },
+        '17':
          { events: {},
            links: {},
            address: '0x835aaf6ea6b04892915a8299110652e7cc897a4e',
@@ -41,7 +59,13 @@ export default { TwoKeyAdmin:
   TwoKeyPlasmaEvents: { networks: {} },
   TwoKeyReg:
    { networks:
-      { '17':
+      { '4':
+         { events: {},
+           links: {},
+           address: '0xaaf846de2bc761b4671472b734bbba6c648de6a9',
+           transactionHash:
+            '0xbb11bef4eb4e6c3257424fc18cb31f6d0ee00bbcc9b339ecd5d7f2f4d09a3900' },
+        '17':
          { events: {},
            links: {},
            address: '0xc608e05ab2c5ecf8c3646697d0ca6969a0b8917e',
