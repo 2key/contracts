@@ -2,7 +2,7 @@ pipeline {
   agent {
         docker {
             image 'shlomiz2key/runners:deployer-1.0.5'
-            args '-u $JENKINS_USER:$JENKINS_USER'
+            args '-u jenkins:jenkins'
         }
     }
   stages {
