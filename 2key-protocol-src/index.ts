@@ -7,19 +7,14 @@ import Sign from './sign';
 // import HDWalletProvider from './HDWalletProvider';
 
 // console.log(Sign);
+// const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 
 const TwoKeyDefaults = {
-  rpcUrl: 'http://18.233.2.70:8500',
-  wsUrl: 'ws://18.233.2.70:8501',
-  twoKeySyncUrl: 'ws://192.168.47.100:18546',
   ipfsIp: '192.168.47.100',
   ipfsPort: '5001',
   mainNetId: 4,
   syncTwoKeyNetId: 17,
 };
-
-
-const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 
 export default class TwoKeyNetwork {
   private web3: any;
