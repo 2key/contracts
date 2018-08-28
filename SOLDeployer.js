@@ -5,7 +5,7 @@ const util = require('util');
 const simpleGit = require('simple-git/promise');
 const childProcess = require('child_process');
 const moment = require('moment');
-const whitelist = require('./whitelist.json');
+const whitelist = require('./ContractDeploymentWhiteList.json');
 
 const readdir = util.promisify(fs.readdir);
 const buildPath = path.join(__dirname, 'build', 'contracts');
