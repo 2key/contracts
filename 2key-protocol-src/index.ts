@@ -2,7 +2,11 @@ import ipfsAPI from 'ipfs-api';
 import { BigNumber } from 'bignumber.js';
 import solidityContracts from './contracts/meta';
 import { TwoKeyEconomy } from './contracts/TwoKeyEconomy';
-import { EhtereumNetworks, ContractsAdressess, TwoKeyInit, BalanceMeta, Gas, Transaction } from './interfaces';
+import { TwoKeyCampaign } from './contracts/TwoKeyCampaign';
+import { TwoKeyWhitelisted } from './contracts/TwoKeyWhitelisted';
+import { TwoKeyARC } from './contracts/TwoKeyARC';
+import { ComposableAssetFactory } from './contracts/ComposableAssetFactory';
+import { EhtereumNetworks, ContractsAdressess, TwoKeyInit, BalanceMeta, Gas, Transaction, CreateCampaign } from './interfaces';
 import Sign from './sign';
 // import HDWalletProvider from './HDWalletProvider';
 
@@ -195,6 +199,11 @@ export default class TwoKeyNetwork {
     });
   }
 
+  public async createSaleCampaign(data: CreateCampaign): Promise<string> {
+    return new Promise((resolve, reject) => {
+    });
+  }
+
   private getContractDeployedAddress(contract: string): string {
     return this.contracts ? this.contracts[contract] : solidityContracts[contract].networks[this.networks.mainNetId].address
   }
@@ -245,6 +254,12 @@ export default class TwoKeyNetwork {
           resolve(this.fromWei(this.totalSupply.toString()));
         })
         .catch(reject);
+    });
+  }
+
+  private _createWhiteList(): Promise<string> {
+    return new Promise((resolve, reject) => {
+      
     });
   }
 

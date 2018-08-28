@@ -96,4 +96,7 @@ describe('TwoKeyProtocol', () => {
       done();
     }, 10000);
   }).timeout(15000);
+  it('should create a new campaign contract', (done) => {
+    done();
+  }).timeout(600000);
 });
