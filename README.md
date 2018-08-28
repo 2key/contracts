@@ -259,18 +259,17 @@ Run with:
 
 Assuming we previously created 5 acounts. The password file should have a line with the password for each account to be unlocked.
 
-### Docker
+## TESTNET Docker
 To run geth in docker please follow next steps:
 * [Install Docker](https://www.docker.com/get-started)
 * ```npm run geth``` - to run build & run docker container
 * ```npm run geth:stop``` - to stop docker container
+* ```npm run geth:reset``` - to reset geth data folder (be carefull it will destroy all private node data)
 * Please notice that mining take a lot of hardware recources
 * Default exposed ports 8585 - rpc, 8546 - websockets
-* Coinbase address 0xb3FA520368f2Df7BED4dF5185101f303f6c7decc
-* geth runs with 3 addresses if you need more please change ./geth/docker/genesis.dev.json ./geth/docker/key.prv ./geth/docker/passwords.dev and ./geth/docke/geth.bash
+* geth runs with 12 addresses if you need more please change ./geth/docker/genesis.2key.json ./geth/docker/key.prv ./geth/docker/passwords and ./geth/docker/geth.bash
 * First time run takes some time to generate all neccessary data
 * All steps before valid only for unix based OS if you have Windows based ping Adnrii Pindiura for a help
-* Also we have continiously running docker container with geth rcp://astring.aydnep.com.ua:8545 ws://astring.aydnep.com.ua:8546
 
 ## Remix 
 
