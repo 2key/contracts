@@ -1,18 +1,11 @@
+
 pipeline {
   agent {
-        docker {
-            image 'shlomiz2key/runners:deployer-1.0.6'
-            reuseNode true
-        }
+    docker {
+      image 'shlomiz2key/runners:deployer-1.0.6'
+      reuseNode true
+      args '-e npm_config_cache=npm-cache -e HOME=.'
     }
-  environment {
-    /* Override the npm cache directory to avoid: EACCES: permission denied, mkdir '/.npm' */
-    npm_config_cache = 'npm-cache',
-    /* set home to our current directory because other bower
-    * nonsense breaks with HOME=/, e.g.:
-    * EACCES: permission denied, mkdir '/.config'
-    */
-    HOME = '.'
   }
   stages {
     stage('build-solidity-docs') {
