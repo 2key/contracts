@@ -199,8 +199,9 @@ export default class TwoKeyNetwork {
     });
   }
 
-  public async createSaleCampaign(data: CreateCampaign): Promise<string> {
+  public createSaleCampaign(data: CreateCampaign): Promise<string> {
     return new Promise((resolve, reject) => {
+      resolve('qwerty');
     });
   }
 
