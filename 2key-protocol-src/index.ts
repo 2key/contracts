@@ -1,10 +1,6 @@
 import Web3 from 'web3';
 import { Transaction } from 'web3/eth/types'
-import ProviderEngine from 'web3-provider-engine';
-import RpcSubprovider from 'web3-provider-engine/subproviders/rpc';
-import WSSubprovider from 'web3-provider-engine/subproviders/websocket';
 import ipfsAPI from 'ipfs-api';
-import WalletSubprovider from 'ethereumjs-wallet/provider-engine';
 import { BigNumber } from 'bignumber.js';
 import Tx from 'ethereumjs-tx';
 import solidityContracts from './contracts/meta';
@@ -29,7 +25,7 @@ const TwoKeyDefaults = {
 const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 
 export default class TwoKeyNetwork {
-  private mainWeb3: Web3;
+  private web3: Web3;
   private syncWeb3: Web3;
   private ipfs: ipfsAPI;
   private address: string;
@@ -39,24 +35,25 @@ export default class TwoKeyNetwork {
   private networks: EhtereumNetworks;
   private contracts: ContractsAdressess;
   private twoKeyEconomy: TwoKeyEconomy;
-  private pk: string;
 
   constructor(initValues: TwoKeyInit) {
     // init MainNet Client
     const {
-      wallet,
-      wsUrl,
-      rpcUrl,
-      syncUrl = TwoKeyDefaults.twoKeySyncUrl,
+      web3,
+      // syncUrl = TwoKeyDefaults.twoKeySyncUrl,
       ipfsIp = TwoKeyDefaults.ipfsIp,
       ipfsPort = TwoKeyDefaults.ipfsPort,
       contracts,
       networks,
     } = initValues;
-    if (!wallet) {
-      throw new Error('Wallet required!');
+    if (!web3) {
+      throw new Error('Web3 instanse required!');
     }
-    this.address = `0x${wallet.getAddress().toString('hex')}`
+    if (!web3.eth.defaultAccount) {
+      throw new Error('defaultAccount required!');
+    }
+    this.web3 = web3;
+    this.address = this.web3.eth.defaultAccount;
     if (contracts) {
       this.contracts = contracts;
     } else if (networks) {
@@ -67,25 +64,10 @@ export default class TwoKeyNetwork {
         syncTwoKeyNetId: TwoKeyDefaults.syncTwoKeyNetId,
       }
     }
+    this.web3.eth.defaultBlock = 'pending';
+    // this.pk = wallet.getPrivateKey().toString('hex');
 
-    const mainEngine = new ProviderEngine();
-    const mainProvider = wsUrl
-      ? new WSSubprovider({ rpcUrl: wsUrl })
-      : (rpcUrl && new RpcSubprovider({ rpcUrl })) || new WSSubprovider({ rpcUrl: TwoKeyDefaults.wsUrl })
-    if (!wsUrl && rpcUrl) {
-      // mainProvider.handleRequest = handleRequest;
-    }
-    mainEngine.addProvider(new WalletSubprovider(wallet, {}));
-    mainEngine.addProvider(mainProvider);
-    mainEngine.addProvider(mainProvider);
-
-    // this.mainWeb3 = new Web3(new HDWalletProvider(wallet, address, rpcUrl));
-    this.mainWeb3 = new Web3(mainEngine);
-    mainEngine.start();
-    this.mainWeb3.eth.defaultBlock = 'pending';
-    this.pk = wallet.getPrivateKey().toString('hex');
-
-    this.twoKeyEconomy = new TwoKeyEconomy(this.mainWeb3, this.getContractDeployedAddress('TwoKeyEconomy'))
+    this.twoKeyEconomy = new TwoKeyEconomy(this.web3, this.getContractDeployedAddress('TwoKeyEconomy'))
 
     // init 2KeySyncNet Client
     // const syncEngine = new ProviderEngine();
@@ -114,22 +96,22 @@ export default class TwoKeyNetwork {
 
   public fromWei(number: string | number | BigNumber, unit?: string): string {
     // @ts-ignore: Web3 version missmatch
-    return this.mainWeb3.fromWei(number, unit);
+    return this.web3.fromWei(number, unit);
   }
 
   public toWei(number: string | number | BigNumber, unit?: string): number | BigNumber {
     // @ts-ignore: Web3 version missmatch
-    return this.mainWeb3.toWei(number, unit);
+    return this.web3.toWei(number, unit);
   }
 
   public toHex(data: any): string {
     // @ts-ignore: Web3 version missmatch
-    return this.mainWeb3.toHex(data);
+    return this.web3.toHex(data);
   }
 
   public getTransaction(txHash: string): Promise<Transaction> {
     return new Promise((resolve, reject) => {
-      this.mainWeb3.eth.getTransaction(txHash, (err, res) => {
+      this.web3.eth.getTransaction(txHash, (err, res) => {
         if (err) {
           reject(err);
         } else {
@@ -139,10 +121,11 @@ export default class TwoKeyNetwork {
     });
   }
 
-  public getBalance(): Promise<BalanceMeta> {
+  public getBalance(address: string = this.address): Promise<BalanceMeta> {
+    console.log('getBalance', address);
     const promises = [
-      this._getEthBalance(),
-      this._getTokenBalance(),
+      this._getEthBalance(address),
+      this._getTokenBalance(address),
       this._getTotalSupply(),
       this._getGasPrice()
     ];
@@ -178,7 +161,7 @@ export default class TwoKeyNetwork {
   public getETHTransferGas(to: string, value: number): Promise<Gas> {
     this.gas = null;
     return new Promise((resolve, reject) => {
-      this.mainWeb3.eth.estimateGas({ to, value: this.toWei(value, 'ether').toString() }, (err, res) => {
+      this.web3.eth.estimateGas({ to, value: this.toWei(value, 'ether').toString() }, (err, res) => {
         if (err) {
           reject(err);
         } else {
@@ -198,7 +181,7 @@ export default class TwoKeyNetwork {
   public async transferEther(to: string, value: number, gasPrice: number = this.gasPrice): Promise<any> {
     const params = { to, gasPrice, gasLimit: this.toHex(this.gas), value: this.toWei(value, 'ether').toString(), from: this.address }
     return new Promise((resolve, reject) => {
-      this.mainWeb3.eth.sendTransaction(params, (err, res) => {
+      this.web3.eth.sendTransaction(params, (err, res) => {
         if (err) {
           reject(err);
         } else {
@@ -214,7 +197,7 @@ export default class TwoKeyNetwork {
 
   private _getGasPrice(): Promise<string> {
     return new Promise((resolve, reject) => {
-      this.mainWeb3.eth.getGasPrice((err, res) => {
+      this.web3.eth.getGasPrice((err, res) => {
         if (err) {
           reject(err);
         } else {
@@ -226,9 +209,9 @@ export default class TwoKeyNetwork {
     });
   }
 
-  private _getEthBalance(): Promise<string> {
+  private _getEthBalance(address: string): Promise<string> {
     return new Promise((resolve, reject) => {
-      this.mainWeb3.eth.getBalance(this.address, this.mainWeb3.eth.defaultBlock, (err, res) => {
+      this.web3.eth.getBalance(address, this.web3.eth.defaultBlock, (err, res) => {
         if (err) {
           reject(err);
         } else {
@@ -238,9 +221,9 @@ export default class TwoKeyNetwork {
     })
   }
 
-  private _getTokenBalance(): Promise<string> {
+  private _getTokenBalance(address: string): Promise<string> {
     return new Promise((resolve, reject) => {
-      this.twoKeyEconomy.balanceOf(this.address)
+      this.twoKeyEconomy.balanceOf(address)
         .then(res => {
           resolve(this.fromWei(res.toString()))
         })

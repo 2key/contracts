@@ -1,4 +1,5 @@
 import { BigNumber } from 'bignumber.js';
+import Web3 from 'web3';
 
 interface Balance {
   ETH: number,
@@ -22,12 +23,9 @@ export interface EhtereumNetworks {
 }
 
 export interface TwoKeyInit {
-  rpcUrl?: string,
-  wsUrl?: string,
-  syncUrl?: string,
+  web3: Web3,
   ipfsIp?: string,
   ipfsPort?: string | number,
-  wallet: any,
   contracts?: ContractsAdressess,
   networks?: EhtereumNetworks,
 }
