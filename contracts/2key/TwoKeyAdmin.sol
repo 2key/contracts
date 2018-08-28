@@ -22,8 +22,9 @@ contract TwoKeyAdmin is Ownable, Destructible, AdminContract {
 
 	constructor(
 		TwoKeyEconomy _economy, 
-		address _electorateAdmins, 
-		TwoKeyUpgradableExchange _exchange) Ownable() Destructible() payable public {
+		address _electorateAdmins,
+		TwoKeyUpgradableExchange _exchange
+	) Ownable() Destructible() payable public {
 		require(_economy != address(0));
 		require(_electorateAdmins != address(0));
 		require(_exchange != address(0));
@@ -50,7 +51,7 @@ contract TwoKeyAdmin is Ownable, Destructible, AdminContract {
 
 
 	function upgradeEconomyExchangeByAdmins(address newExchange) external wasNotReplaced adminsVotingApproved {
-		if (newExchange != address(0)) 
+		if (newExchange != address(0))
 			exchange.upgrade(newExchange);
 	}
 

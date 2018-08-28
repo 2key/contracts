@@ -7,8 +7,9 @@ import '../openzeppelin-solidity/contracts/ownership/Ownable.sol';
 // adapted from: 
 // https://openzeppelin.org/api/docs/crowdsale_validation_WhitelistedCrowdsale.html
 
-contract  TwoKeyWhitelisted is Ownable {
+contract TwoKeyWhitelisted is Ownable {
 
+  /// TODO: Moderator only can update whitelist
 
   mapping(address => bool) public whitelist;
 

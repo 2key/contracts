@@ -1,6 +1,7 @@
 pragma solidity ^0.4.24;
 
 import './TwoKeyCampaign.sol';
+import "./TwoKeyTypes.sol";
 
 
 contract TwoKeyCampaignETH is TwoKeyCampaign {
@@ -22,7 +23,7 @@ contract TwoKeyCampaignETH is TwoKeyCampaign {
 		require(msg.value == payout);
 		Conversion memory c = Conversion(_from, payout, msg.sender, false, false, _tokenID, _assetContract, _amount, CampaignType.Fungible, now, now + expiryConversion * 1 days);
 		// move funds
-		composableAssetFactory.remAssets(_tokenID, _assetContract, _amount);
+		composableAssetFactory.removeFungibleAssets(_tokenID, _assetContract, _amount);
 		eventSource.escrow(address(this), msg.sender, _tokenID, _assetContract, _amount, CampaignType.Fungible);
 		conversions[msg.sender] = c;
 	}

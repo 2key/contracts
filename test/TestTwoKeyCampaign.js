@@ -26,7 +26,7 @@ contract('TwoKeyCampaign', async (accounts) => {
     let whitelistInfluencer, 
         whitelistConverter, 
         eventSource, 
-        economy,
+        twoKeyEconomy,
         campaign,
         twoKeyAdmin,
         upgradeableExchange,
@@ -52,47 +52,42 @@ contract('TwoKeyCampaign', async (accounts) => {
     const electorateAdmins = accounts[4];
     const walletExchange = accounts[5];
     before(async () => {
-        // Deploy instance of erc20
+
+        /// TODO: Act as inventory
+        // Contractor input addresses
         erc20 = await ERC20Mock.new({
             from: coinbase
         });
+        const openingTime = latestTime() + duration.minutes(5);
+        const closingTime = latestTime() + duration.minutes(30);
 
+        /*
+            Singleton area (one per TwoKeyNetwork)
+         */
         upgradeableExchange = await TwoKeyUpgradableExchange.new(100, walletExchange, erc20.address);
-        economy = await TwoKeyEconomy.new();
-        twoKeyAdmin = await TwoKeyAdmin.new(economy.address, electorateAdmins, upgradeableExchange.address);
-
+        twoKeyEconomy = await TwoKeyEconomy.new();
+        twoKeyAdmin = await TwoKeyAdmin.new(twoKeyEconomy.address, electorateAdmins, upgradeableExchange.address);
         eventSource = await TwoKeyEventSource.new(twoKeyAdmin.address);
+
+        /*
+            Subcontracts required for TwoKeyCampaign
+         */
+        /// TODO: Move subcontracts to be deployed in TwoKeyCampaign constructor
+
         whitelistInfluencer = await TwoKeyWhitelisted.new();
         whitelistConverter = await TwoKeyWhitelisted.new();
         twoKeyARC = await TwoKeyARC.new(eventSource.address, contractor);
-
-        erc721 = await ERC721Mock.new("NFT", "NFT");
-        standardToken = await StandardToken.new();
-
-        await erc721.mint(contractor, tokenIndex, {
-            from: coinbase,
-        });
-
-
-        const openingTime = latestTime() + duration.minutes(5);
-        const closingTime = latestTime() + duration.minutes(30);
-        const durationCampaign = duration.minutes(30);
-        const durationEscrow = duration.minutes(5);
-
-        console.log(openingTime);
-        console.log(closingTime);
-
         composableAssetFactory = await ComposableAssetFactory.new(openingTime, closingTime);
 
         campaign = await TwoKeyCampaign.new(
             eventSource.address,
-            economy.address,
+            twoKeyEconomy.address,
             whitelistInfluencer.address,
             whitelistConverter.address,
             composableAssetFactory.address,
 
-            contractor,
-            moderator,
+            contractor, //Address of the user
+            moderator, //Address of the moderator - it's a contract that works (operates) as admin of whitelists contracts
 
             // openingTime,
             // closingTime,
@@ -102,14 +97,13 @@ contract('TwoKeyCampaign', async (accounts) => {
             maxPi,
             {
                 from: campaignCreator,
-                gas: '7000000'
+                gas: '8000000'
             }
         );
     });
     it("Should print addresses of contracts", async() => {
         console.log("[ERC20] : " + erc20.address);
-        console.log("[ERC721] : " + erc721.address);
-        console.log("[StandardToken] : " + standardToken.address);
+        // console.log("[StandardToken] : " + standardToken.address);
         console.log("[TwoKeyUpgradebleExchange] : " + upgradeableExchange.address);
         console.log("[TwoKeyAdmin] : " + twoKeyAdmin.address);
         console.log("[TwoKeyEventSource] : " + eventSource.address);
