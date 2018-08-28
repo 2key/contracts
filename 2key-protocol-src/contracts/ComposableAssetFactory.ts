@@ -224,7 +224,7 @@ export class ComposableAssetFactory extends TC.TypeChainContract {
           { name: "_assetContract", type: "address" },
           { name: "_amount", type: "uint256" }
         ],
-        name: "remAssets",
+        name: "removeFungibleAssets",
         outputs: [],
         payable: false,
         stateMutability: "nonpayable",
@@ -237,7 +237,7 @@ export class ComposableAssetFactory extends TC.TypeChainContract {
           { name: "_assetContract", type: "address" },
           { name: "_amount", type: "uint256" }
         ],
-        name: "addAssets",
+        name: "addFungibleAssets",
         outputs: [],
         payable: false,
         stateMutability: "nonpayable",
@@ -249,7 +249,7 @@ export class ComposableAssetFactory extends TC.TypeChainContract {
           { name: "_tokenID", type: "uint256" },
           { name: "_assetContract", type: "address" }
         ],
-        name: "setAssetsToZero",
+        name: "setFungibleAssetsToZero",
         outputs: [],
         payable: false,
         stateMutability: "nonpayable",
@@ -261,7 +261,7 @@ export class ComposableAssetFactory extends TC.TypeChainContract {
           { name: "_tokenID", type: "uint256" },
           { name: "_assetContract", type: "address" }
         ],
-        name: "setAssetsToOne",
+        name: "setFungibleAssetsToOne",
         outputs: [],
         payable: false,
         stateMutability: "nonpayable",
@@ -462,45 +462,45 @@ export class ComposableAssetFactory extends TC.TypeChainContract {
       ]
     );
   }
-  public remAssetsTx(
+  public removeFungibleAssetsTx(
     _tokenID: BigNumber | number,
     _assetContract: BigNumber | string,
     _amount: BigNumber | number
   ): TC.DeferredTransactionWrapper<TC.ITxParams> {
-    return new TC.DeferredTransactionWrapper<TC.ITxParams>(this, "remAssets", [
-      _tokenID.toString(),
-      _assetContract.toString(),
-      _amount.toString()
-    ]);
+    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
+      this,
+      "removeFungibleAssets",
+      [_tokenID.toString(), _assetContract.toString(), _amount.toString()]
+    );
   }
-  public addAssetsTx(
+  public addFungibleAssetsTx(
     _tokenID: BigNumber | number,
     _assetContract: BigNumber | string,
     _amount: BigNumber | number
   ): TC.DeferredTransactionWrapper<TC.ITxParams> {
-    return new TC.DeferredTransactionWrapper<TC.ITxParams>(this, "addAssets", [
-      _tokenID.toString(),
-      _assetContract.toString(),
-      _amount.toString()
-    ]);
+    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
+      this,
+      "addFungibleAssets",
+      [_tokenID.toString(), _assetContract.toString(), _amount.toString()]
+    );
   }
-  public setAssetsToZeroTx(
+  public setFungibleAssetsToZeroTx(
     _tokenID: BigNumber | number,
     _assetContract: BigNumber | string
   ): TC.DeferredTransactionWrapper<TC.ITxParams> {
     return new TC.DeferredTransactionWrapper<TC.ITxParams>(
       this,
-      "setAssetsToZero",
+      "setFungibleAssetsToZero",
       [_tokenID.toString(), _assetContract.toString()]
     );
   }
-  public setAssetsToOneTx(
+  public setFungibleAssetsToOneTx(
     _tokenID: BigNumber | number,
     _assetContract: BigNumber | string
   ): TC.DeferredTransactionWrapper<TC.ITxParams> {
     return new TC.DeferredTransactionWrapper<TC.ITxParams>(
       this,
-      "setAssetsToOne",
+      "setFungibleAssetsToOne",
       [_tokenID.toString(), _assetContract.toString()]
     );
   }
