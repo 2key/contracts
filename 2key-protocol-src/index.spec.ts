@@ -8,7 +8,7 @@ import RpcSubprovider from 'web3-provider-engine/subproviders/rpc';
 import WSSubprovider from 'web3-provider-engine/subproviders/websocket';
 import WalletSubprovider from 'ethereumjs-wallet/provider-engine';
 import TwoKeyProtocol from '.';
-import { BalanceMeta } from './interfaces';
+import { CreateCampaign } from './interfaces';
 
 const mnemonic = 'laundry version question endless august scatter desert crew memory toy attract cruel';
 const aydnepMnemonic = 'bundle insect salad atom alcohol broom frog crumble cigar throw toe alter';
@@ -96,7 +96,11 @@ describe('TwoKeyProtocol', () => {
       done();
     }, 10000);
   }).timeout(15000);
-  it('should create a new campaign contract', (done) => {
+  it('should create a new campaign contract', async (done) => {
+    const campaign = await twoKeyProtocol.createSaleCampaign({
+      eventSource: '0x835aaf6ea6b04892915a8299110652e7cc897a4e',
+      twoKeyEconomy: '0x9993da88b6721bc0844e5c5b1ea02d25c38b2c12',
+    });
     done();
   }).timeout(600000);
 });

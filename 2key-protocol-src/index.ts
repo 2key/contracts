@@ -2,10 +2,7 @@ import ipfsAPI from 'ipfs-api';
 import { BigNumber } from 'bignumber.js';
 import solidityContracts from './contracts/meta';
 import { TwoKeyEconomy } from './contracts/TwoKeyEconomy';
-import { TwoKeyCampaign } from './contracts/TwoKeyCampaign';
 import { TwoKeyWhitelisted } from './contracts/TwoKeyWhitelisted';
-import { TwoKeyARC } from './contracts/TwoKeyARC';
-import { ComposableAssetFactory } from './contracts/ComposableAssetFactory';
 import { EhtereumNetworks, ContractsAdressess, TwoKeyInit, BalanceMeta, Gas, Transaction, CreateCampaign } from './interfaces';
 import Sign from './sign';
 // import HDWalletProvider from './HDWalletProvider';
@@ -200,7 +197,8 @@ export default class TwoKeyNetwork {
   }
 
   public createSaleCampaign(data: CreateCampaign): Promise<string> {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
+      const whitelistInfluencer = await this._createWhiteList();
       resolve('qwerty');
     });
   }
@@ -259,8 +257,12 @@ export default class TwoKeyNetwork {
   }
 
   private _createWhiteList(): Promise<string> {
-    return new Promise((resolve, reject) => {
-      
+    return new Promise(async (resolve, reject) => {
+      // const { TwoKeyWhitelisted: { abi, bytecode } } = solidityContracts
+      const whiteList = await TwoKeyWhitelisted.createAndValidate(this.web3, '0x0');
+      console.log(whiteList);
+      // const { TwoKeyWhitelisted: { abi, bytecode} } = solidityContracts;
+      // this.web3.eth.contract()
     });
   }
 

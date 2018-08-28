@@ -61,13 +61,13 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
       try {
         files.forEach((file) => {
           const {
-            networks, contractName, bytecode,
+            networks, contractName, bytecode, abi,
           } = JSON.parse(fs.readFileSync(path.join(buildPath, file)));
           if (whitelist[contractName]) {
             // contracts[contractName] = whitelist[contractName].deployed
             //   ? { abi, networks } : { abi, networks, bytecode };
             contracts[contractName] = whitelist[contractName].deployed
-              ? { networks } : { bytecode };
+              ? { networks } : { bytecode, abi };
           }
         });
         fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts/meta.ts'), `export default ${util.inspect(contracts, { depth: 10 })}`);

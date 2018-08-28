@@ -63,11 +63,11 @@ export interface RawTransaction {
 export interface CreateCampaign {
   eventSource: string, // Address of TwoKeyEvent source
   twoKeyEconomy: string, // Address of TwoKeyEconomy
-  contractor: string, // Address of the user
-  moderator: string, // Address of the moderator - it's a contract that works (operates) as admin of whitelists contracts
-  openingTime: number, // Timestamp
-  closingTime: number, // Timestamp
-  bonusOffer: number,
-  rate: number,
-  maxCPA: number,
+  contractor?: string, // Address of the user
+  moderator?: string, // Address of the moderator - it's a contract that works (operates) as admin of whitelists contracts
+  openingTime?: number, // Timestamp
+  closingTime?: number, // Timestamp
+  bonusOffer?: number,
+  rate?: number,
+  maxCPA?: number,
 }
