@@ -13,7 +13,7 @@ module.exports = async function (deployer) {
     const economy = await deployer.deploy(TwoKeyEconomy);
     const erc20 = await deployer.deploy(ERC20TokenMock);
     const twoKeyUpgradableExchange = await deployer.deploy(TwoKeyUpgradableExchange, 1, '0xb3fa520368f2df7bed4df5185101f303f6c7decc', erc20.address);
-    deployer.deploy(TwoKeyAdmin, economy, '0xb3fa520368f2df7bed4df5185101f303f6c7decc', twoKeyUpgradableExchange);
+    await deployer.deploy(TwoKeyAdmin, economy, '0xb3fa520368f2df7bed4df5185101f303f6c7decc', twoKeyUpgradableExchange);
   } else if (deployer.network.startsWith('plasma')) {
     const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
     deployer.deploy(TwoKeyPlasmaEvents);
