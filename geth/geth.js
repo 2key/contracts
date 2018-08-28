@@ -2,13 +2,15 @@ const fs = require('fs');
 const path = require('path');
 const childProcess = require('child_process');
 const Docker = require('dockerode');
+const rmDir = require('rimraf');
 
 if (process.argv.length < 3) {
-  console.log('Usage: node geth.js start|stop');
+  console.log('Usage: node geth.js start|stop|reset');
   console.log('Exiting');
   process.exit(1);
 }
 
+const datadir = path.join(__dirname, '../build', 'geth.dev');
 const docker = new Docker({ socketPath: process.platform === 'win32' ? 'npipe:////./pipe/docker_engine' : '/var/run/docker.sock' });
 
 const runDocker = args => new Promise((resolve, reject) => {
@@ -67,7 +69,6 @@ function stop() {
 // }
 
 async function start() {
-  const datadir = path.join(__dirname, '../build', 'geth.dev');
   const gethdir = path.join(__dirname, 'docker');
   const buildDockerArgs = ['build', '-t', '2key/geth:dev', __dirname];
   const runDockerArgs = [
@@ -122,8 +123,41 @@ async function start() {
   }
 }
 
-if (process.argv[2] === 'start') {
-  start();
-} else if (process.argv[2] === 'stop') {
-  stop();
+async function reset() {
+  try {
+    await stop();
+    console.log('Starting local private network...');
+    if (fs.existsSync(datadir)) {
+      rmDir(datadir, (err) => {
+        if (err) {
+          console.log(err.toString('utf8'));
+          process.exit(1);
+        } else {
+          start();
+        }
+      });
+    }
+  } catch (err) {
+    console.log(err.toString('utf8'));
+    process.exit(1);
+  }
+}
+
+switch (process.argv[2]) {
+  case 'start': {
+    start();
+    break;
+  }
+  case 'stop': {
+    stop();
+    break;
+  }
+  case 'reset': {
+    reset();
+    break;
+  }
+  default: {
+    console.log('Usage: node geth.js start|stop|reset');
+    process.exit(1);
+  }
 }
