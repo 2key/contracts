@@ -20,13 +20,15 @@ const wallet = hdwallet.derivePath('m/44\'/60\'/0\'/0/' + 0).getWallet();
 // const aydnepWallet = aydnepHDWallet.derivePath('m/44\'/60\'/0\'/0/' + 0).getWallet();
 
 const engine = new ProviderEngine();
-const mainProvider = new WSSubprovider({ rpcUrl: 'ws://18.233.2.70:8501' })
+// const mainProvider = new WSSubprovider({ rpcUrl: 'ws://18.233.2.70:8501' })
+const mainProvider = new WSSubprovider({ rpcUrl: 'ws://localhost:8546' })
 engine.addProvider(new WalletSubprovider(wallet, {}));
 engine.addProvider(mainProvider);
 
 // this.web3 = new Web3(new HDWalletProvider(wallet, address, rpcUrl));
 const web3 = new Web3(engine);
 engine.start();
+web3.eth.defaultBlock = 'pending';
 web3.eth.defaultAccount = `0x${wallet.getAddress().toString('hex')}`;
 
 

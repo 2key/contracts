@@ -1,11 +1,9 @@
-import Web3 from 'web3';
-import { Transaction } from 'web3/eth/types'
 import ipfsAPI from 'ipfs-api';
 import { BigNumber } from 'bignumber.js';
 import Tx from 'ethereumjs-tx';
 import solidityContracts from './contracts/meta';
 import { TwoKeyEconomy } from './contracts/TwoKeyEconomy';
-import { EhtereumNetworks, ContractsAdressess, TwoKeyInit, BalanceMeta, Gas } from './interfaces';
+import { EhtereumNetworks, ContractsAdressess, TwoKeyInit, BalanceMeta, Gas, Transaction } from './interfaces';
 import Sign from './sign';
 // import HDWalletProvider from './HDWalletProvider';
 
@@ -25,8 +23,8 @@ const TwoKeyDefaults = {
 const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 
 export default class TwoKeyNetwork {
-  private web3: Web3;
-  private syncWeb3: Web3;
+  private web3: any;
+  private syncWeb3: any;
   private ipfs: ipfsAPI;
   private address: string;
   private gasPrice: number;
@@ -95,17 +93,14 @@ export default class TwoKeyNetwork {
   }
 
   public fromWei(number: string | number | BigNumber, unit?: string): string {
-    // @ts-ignore: Web3 version missmatch
     return this.web3.fromWei(number, unit);
   }
 
   public toWei(number: string | number | BigNumber, unit?: string): number | BigNumber {
-    // @ts-ignore: Web3 version missmatch
     return this.web3.toWei(number, unit);
   }
 
   public toHex(data: any): string {
-    // @ts-ignore: Web3 version missmatch
     return this.web3.toHex(data);
   }
 
@@ -201,7 +196,6 @@ export default class TwoKeyNetwork {
         if (err) {
           reject(err);
         } else {
-          // @ts-ignore: Web3 version missmatch
           this.gasPrice = res.toNumber();
           resolve(res.toString());
         }
