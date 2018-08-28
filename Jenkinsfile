@@ -7,7 +7,6 @@ pipeline {
   stages {
     stage('build-solidity-docs') {
       steps {
-        sh 'npm install -g solidity-docgen'
         sh 'solidity-docgen ./ contracts/ ./docs'
       }
     }
