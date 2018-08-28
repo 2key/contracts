@@ -199,6 +199,8 @@ export default class TwoKeyNetwork {
   public createSaleCampaign(data: CreateCampaign): Promise<string> {
     return new Promise(async (resolve, reject) => {
       const whitelistInfluencer = await this._createWhiteList();
+      const whitelistConverter = await this._createWhiteList();
+      console.log(whitelistInfluencer);
       resolve('qwerty');
     });
   }
@@ -258,11 +260,19 @@ export default class TwoKeyNetwork {
 
   private _createWhiteList(): Promise<string> {
     return new Promise(async (resolve, reject) => {
-      // const { TwoKeyWhitelisted: { abi, bytecode } } = solidityContracts
-      const whiteList = await TwoKeyWhitelisted.createAndValidate(this.web3, '0x0');
-      console.log(whiteList);
-      // const { TwoKeyWhitelisted: { abi, bytecode} } = solidityContracts;
-      // this.web3.eth.contract()
+      const { TwoKeyWhitelisted: { abi, bytecode: data } } = solidityContracts;
+      // const whiteList = await TwoKeyWhitelisted.createAndValidate(this.web3, '0x0');
+      // console.log(whiteList);
+      this.web3.eth.contract(abi).new({ data, from: this.address, gas: 7000000 }, (err, res) => {
+        if (err) {
+          reject(err);
+        } else {
+          // console.log('Contract Created', res.address || res.transactionHash);
+          if (res.address) {
+            resolve(res.address);
+          }
+        }
+      });
     });
   }
 

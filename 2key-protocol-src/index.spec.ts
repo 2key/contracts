@@ -101,6 +101,5 @@ describe('TwoKeyProtocol', () => {
       eventSource: '0x835aaf6ea6b04892915a8299110652e7cc897a4e',
       twoKeyEconomy: '0x9993da88b6721bc0844e5c5b1ea02d25c38b2c12',
     });
-    done();
   }).timeout(600000);
 });
