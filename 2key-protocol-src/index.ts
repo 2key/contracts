@@ -1,6 +1,5 @@
 import ipfsAPI from 'ipfs-api';
 import { BigNumber } from 'bignumber.js';
-import Tx from 'ethereumjs-tx';
 import solidityContracts from './contracts/meta';
 import { TwoKeyEconomy } from './contracts/TwoKeyEconomy';
 import { EhtereumNetworks, ContractsAdressess, TwoKeyInit, BalanceMeta, Gas, Transaction } from './interfaces';
@@ -168,12 +167,27 @@ export default class TwoKeyNetwork {
   }
 
   public async transferTokens(to: string, value: number, gasPrice: number = this.gasPrice): Promise<string> {
-    console.log('Gas Price', gasPrice);
+    const balance = parseFloat(await this._getEthBalance(this.address));
+    const tokenBalance = parseFloat(await this._getTokenBalance(this.address));
+    const { wei: gasRequired } = await this.getERC20TransferGas(to, value);
+    const etherRequired = parseFloat(this.fromWei(gasPrice * gasRequired, 'ether'));
+    console.log(value, etherRequired);
+    if (tokenBalance < value || balance < etherRequired) {
+      throw new Error('Not enough founds');
+    }
+
     const params = { from: this.address, gasLimit: this.toHex(this.gas), gasPrice };
     return this.twoKeyEconomy.transferTx(to, this.toWei(value, 'ether')).send(params);
   }
 
   public async transferEther(to: string, value: number, gasPrice: number = this.gasPrice): Promise<any> {
+    const balance = parseFloat(await this._getEthBalance(this.address));
+    const { wei: gasRequired } = await this.getETHTransferGas(to, value);
+    const totalValue = value + parseFloat(this.fromWei(gasPrice * gasRequired, 'ether'));
+    console.log(value, totalValue);
+    if (totalValue > balance) {
+      throw new Error('Not enough founds');
+    }
     const params = { to, gasPrice, gasLimit: this.toHex(this.gas), value: this.toWei(value, 'ether').toString(), from: this.address }
     return new Promise((resolve, reject) => {
       this.web3.eth.sendTransaction(params, (err, res) => {
