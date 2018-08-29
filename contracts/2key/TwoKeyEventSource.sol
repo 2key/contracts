@@ -3,6 +3,7 @@ pragma solidity ^0.4.24;
 import './TwoKeyTypes.sol';
 import "./GetCode.sol";
 import "./TwoKeyAdmin.sol";
+import "../interfaces/ITwoKeyReg.sol";
 
 contract TwoKeyEventSource is TwoKeyTypes {
 
@@ -20,7 +21,8 @@ contract TwoKeyEventSource is TwoKeyTypes {
     ///Address of the contract admin - interface
     TwoKeyAdmin twoKeyAdmin;
 
-
+    /// Interface representing TwoKeyReg contract (Reducing gas usage that's why interface instead of contract instance)
+    ITwoKeyReg interfaceTwoKeyReg;
 
     ///Mapping contract bytecode to boolean if is allowed to emit an event
     mapping(bytes => bool) canEmit;
@@ -60,6 +62,10 @@ contract TwoKeyEventSource is TwoKeyTypes {
         twoKeyAdmin = TwoKeyAdmin(_twoKeyAdminAddress);
     }
 
+    /// TODO: Put in constructor because of security issues (?)
+    function addTwoKeyReg(address _twoKeyReg) public {
+        interfaceTwoKeyReg = ITwoKeyReg(_twoKeyReg);
+    }
     /// @notice function where admin or any authorized person (will be added if needed) can add more contracts to allow them call methods
     /// @param _contractAddress is actually the address of contract we'd like to allow
     /// @dev We first fetch bytes32 contract code and then update our mapping
