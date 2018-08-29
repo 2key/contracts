@@ -4,20 +4,11 @@
 import { BigNumber } from "bignumber.js";
 import * as TC from "./typechain-runtime";
 
-export class TwoKeyReg extends TC.TypeChainContract {
+export class ITwoKeyReg extends TC.TypeChainContract {
   public readonly rawWeb3Contract: any;
 
   public constructor(web3: any, address: string | BigNumber) {
     const abi = [
-      {
-        constant: true,
-        inputs: [{ name: "", type: "address" }, { name: "", type: "uint256" }],
-        name: "userToCampaignsWhereConverter",
-        outputs: [{ name: "", type: "address" }],
-        payable: false,
-        stateMutability: "view",
-        type: "function"
-      },
       {
         constant: false,
         inputs: [],
@@ -29,44 +20,8 @@ export class TwoKeyReg extends TC.TypeChainContract {
       },
       {
         constant: true,
-        inputs: [{ name: "", type: "address" }],
-        name: "owner2name",
-        outputs: [{ name: "", type: "string" }],
-        payable: false,
-        stateMutability: "view",
-        type: "function"
-      },
-      {
-        constant: true,
         inputs: [],
         name: "owner",
-        outputs: [{ name: "", type: "address" }],
-        payable: false,
-        stateMutability: "view",
-        type: "function"
-      },
-      {
-        constant: true,
-        inputs: [{ name: "", type: "address" }, { name: "", type: "uint256" }],
-        name: "userToCampaignsWhereModerator",
-        outputs: [{ name: "", type: "address" }],
-        payable: false,
-        stateMutability: "view",
-        type: "function"
-      },
-      {
-        constant: true,
-        inputs: [{ name: "", type: "address" }, { name: "", type: "uint256" }],
-        name: "userToCampaignsWhereRefferer",
-        outputs: [{ name: "", type: "address" }],
-        payable: false,
-        stateMutability: "view",
-        type: "function"
-      },
-      {
-        constant: true,
-        inputs: [{ name: "", type: "bytes32" }],
-        name: "name2owner",
         outputs: [{ name: "", type: "address" }],
         payable: false,
         stateMutability: "view",
@@ -80,24 +35,6 @@ export class TwoKeyReg extends TC.TypeChainContract {
         payable: false,
         stateMutability: "nonpayable",
         type: "function"
-      },
-      {
-        constant: true,
-        inputs: [{ name: "", type: "address" }, { name: "", type: "uint256" }],
-        name: "userToCampaignsWhereContractor",
-        outputs: [{ name: "", type: "address" }],
-        payable: false,
-        stateMutability: "view",
-        type: "function"
-      },
-      {
-        anonymous: false,
-        inputs: [
-          { indexed: false, name: "owner", type: "address" },
-          { indexed: false, name: "name", type: "string" }
-        ],
-        name: "UserNameChanged",
-        type: "event"
       },
       {
         anonymous: false,
@@ -271,8 +208,8 @@ export class TwoKeyReg extends TC.TypeChainContract {
   static async createAndValidate(
     web3: any,
     address: string | BigNumber
-  ): Promise<TwoKeyReg> {
-    const contract = new TwoKeyReg(web3, address);
+  ): Promise<ITwoKeyReg> {
+    const contract = new ITwoKeyReg(web3, address);
     const code = await TC.promisify(web3.eth.getCode, [address]);
 
     // in case of missing smartcontract, code can be equal to "0x0" or "0x" depending on exact web3 implementation
@@ -289,54 +226,6 @@ export class TwoKeyReg extends TC.TypeChainContract {
 
   public get getTwoKeyEventSourceAddress(): Promise<string> {
     return TC.promisify(this.rawWeb3Contract.getTwoKeyEventSourceAddress, []);
-  }
-
-  public userToCampaignsWhereConverter(
-    arg0: BigNumber | string,
-    arg1: BigNumber | number
-  ): Promise<string> {
-    return TC.promisify(this.rawWeb3Contract.userToCampaignsWhereConverter, [
-      arg0.toString(),
-      arg1.toString()
-    ]);
-  }
-
-  public owner2name(arg0: BigNumber | string): Promise<string> {
-    return TC.promisify(this.rawWeb3Contract.owner2name, [arg0.toString()]);
-  }
-
-  public userToCampaignsWhereModerator(
-    arg0: BigNumber | string,
-    arg1: BigNumber | number
-  ): Promise<string> {
-    return TC.promisify(this.rawWeb3Contract.userToCampaignsWhereModerator, [
-      arg0.toString(),
-      arg1.toString()
-    ]);
-  }
-
-  public userToCampaignsWhereRefferer(
-    arg0: BigNumber | string,
-    arg1: BigNumber | number
-  ): Promise<string> {
-    return TC.promisify(this.rawWeb3Contract.userToCampaignsWhereRefferer, [
-      arg0.toString(),
-      arg1.toString()
-    ]);
-  }
-
-  public name2owner(arg0: string): Promise<string> {
-    return TC.promisify(this.rawWeb3Contract.name2owner, [arg0.toString()]);
-  }
-
-  public userToCampaignsWhereContractor(
-    arg0: BigNumber | string,
-    arg1: BigNumber | number
-  ): Promise<string> {
-    return TC.promisify(this.rawWeb3Contract.userToCampaignsWhereContractor, [
-      arg0.toString(),
-      arg1.toString()
-    ]);
   }
 
   public getContractsWhereUserIsContractor(
@@ -475,15 +364,6 @@ export class TwoKeyReg extends TC.TypeChainContract {
     );
   }
 
-  public UserNameChangedEvent(eventFilter: {}): TC.DeferredEventWrapper<
-    { owner: BigNumber | string; name: string },
-    {}
-  > {
-    return new TC.DeferredEventWrapper<
-      { owner: BigNumber | string; name: string },
-      {}
-    >(this, "UserNameChanged", eventFilter);
-  }
   public OwnershipRenouncedEvent(eventFilter: {
     previousOwner?: BigNumber | string | Array<BigNumber | string>;
   }): TC.DeferredEventWrapper<

@@ -71,19 +71,19 @@
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "pragma solidity ^0.4.24;\n\ninterface AdminContract {\n\n    function replaceOneself(address newAdminContract) external;\n\n    function transferByAdmins(address to, uint256 tokens) external;\n\n    function upgradeEconomyExchangeByAdmins(address newExchange) external;\n\n    function transferEtherByAdmins(address to, uint256 amount) external;\n\n}\n\n",
-  "sourcePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/interfaces/IAdminContract.sol",
+  "sourcePath": "/Users/aydnep/2key/contracts/contracts/interfaces/IAdminContract.sol",
   "ast": {
-    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/interfaces/IAdminContract.sol",
+    "absolutePath": "/Users/aydnep/2key/contracts/contracts/interfaces/IAdminContract.sol",
     "exportedSymbols": {
       "AdminContract": [
-        4088
+        7159
       ]
     },
-    "id": 4089,
+    "id": 7160,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 4063,
+        "id": 7134,
         "literals": [
           "solidity",
           "^",
@@ -91,7 +91,7 @@
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:24:15"
+        "src": "0:24:27"
       },
       {
         "baseContracts": [],
@@ -99,9 +99,9 @@
         "contractKind": "interface",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 4088,
+        "id": 7159,
         "linearizedBaseContracts": [
-          4088
+          7159
         ],
         "name": "AdminContract",
         "nodeType": "ContractDefinition",
@@ -109,7 +109,7 @@
           {
             "body": null,
             "documentation": null,
-            "id": 4068,
+            "id": 7139,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -117,16 +117,16 @@
             "name": "replaceOneself",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4066,
+              "id": 7137,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4065,
+                  "id": 7136,
                   "name": "newAdminContract",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4068,
-                  "src": "81:24:15",
+                  "scope": 7139,
+                  "src": "81:24:27",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -134,10 +134,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 4064,
+                    "id": 7135,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "81:7:15",
+                    "src": "81:7:27",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -147,17 +147,17 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "80:26:15"
+              "src": "80:26:27"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4067,
+              "id": 7138,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "115:0:15"
+              "src": "115:0:27"
             },
-            "scope": 4088,
-            "src": "57:59:15",
+            "scope": 7159,
+            "src": "57:59:27",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -165,7 +165,7 @@
           {
             "body": null,
             "documentation": null,
-            "id": 4075,
+            "id": 7146,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -173,16 +173,16 @@
             "name": "transferByAdmins",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4073,
+              "id": 7144,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4070,
+                  "id": 7141,
                   "name": "to",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4075,
-                  "src": "148:10:15",
+                  "scope": 7146,
+                  "src": "148:10:27",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -190,10 +190,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 4069,
+                    "id": 7140,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "148:7:15",
+                    "src": "148:7:27",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -204,11 +204,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 4072,
+                  "id": 7143,
                   "name": "tokens",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4075,
-                  "src": "160:14:15",
+                  "scope": 7146,
+                  "src": "160:14:27",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -216,10 +216,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 4071,
+                    "id": 7142,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "160:7:15",
+                    "src": "160:7:27",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -229,17 +229,17 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "147:28:15"
+              "src": "147:28:27"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4074,
+              "id": 7145,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "184:0:15"
+              "src": "184:0:27"
             },
-            "scope": 4088,
-            "src": "122:63:15",
+            "scope": 7159,
+            "src": "122:63:27",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -247,7 +247,7 @@
           {
             "body": null,
             "documentation": null,
-            "id": 4080,
+            "id": 7151,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -255,16 +255,16 @@
             "name": "upgradeEconomyExchangeByAdmins",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4078,
+              "id": 7149,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4077,
+                  "id": 7148,
                   "name": "newExchange",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4080,
-                  "src": "231:19:15",
+                  "scope": 7151,
+                  "src": "231:19:27",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -272,10 +272,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 4076,
+                    "id": 7147,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "231:7:15",
+                    "src": "231:7:27",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -285,17 +285,17 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "230:21:15"
+              "src": "230:21:27"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4079,
+              "id": 7150,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "260:0:15"
+              "src": "260:0:27"
             },
-            "scope": 4088,
-            "src": "191:70:15",
+            "scope": 7159,
+            "src": "191:70:27",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -303,7 +303,7 @@
           {
             "body": null,
             "documentation": null,
-            "id": 4087,
+            "id": 7158,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -311,16 +311,16 @@
             "name": "transferEtherByAdmins",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4085,
+              "id": 7156,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4082,
+                  "id": 7153,
                   "name": "to",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4087,
-                  "src": "298:10:15",
+                  "scope": 7158,
+                  "src": "298:10:27",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -328,10 +328,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 4081,
+                    "id": 7152,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "298:7:15",
+                    "src": "298:7:27",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -342,11 +342,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 4084,
+                  "id": 7155,
                   "name": "amount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4087,
-                  "src": "310:14:15",
+                  "scope": 7158,
+                  "src": "310:14:27",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -354,10 +354,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 4083,
+                    "id": 7154,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "310:7:15",
+                    "src": "310:7:27",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -367,40 +367,40 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "297:28:15"
+              "src": "297:28:27"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4086,
+              "id": 7157,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "334:0:15"
+              "src": "334:0:27"
             },
-            "scope": 4088,
-            "src": "267:68:15",
+            "scope": 7159,
+            "src": "267:68:27",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 4089,
-        "src": "26:312:15"
+        "scope": 7160,
+        "src": "26:312:27"
       }
     ],
-    "src": "0:340:15"
+    "src": "0:340:27"
   },
   "legacyAST": {
-    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/interfaces/IAdminContract.sol",
+    "absolutePath": "/Users/aydnep/2key/contracts/contracts/interfaces/IAdminContract.sol",
     "exportedSymbols": {
       "AdminContract": [
-        4088
+        7159
       ]
     },
-    "id": 4089,
+    "id": 7160,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 4063,
+        "id": 7134,
         "literals": [
           "solidity",
           "^",
@@ -408,7 +408,7 @@
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:24:15"
+        "src": "0:24:27"
       },
       {
         "baseContracts": [],
@@ -416,9 +416,9 @@
         "contractKind": "interface",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 4088,
+        "id": 7159,
         "linearizedBaseContracts": [
-          4088
+          7159
         ],
         "name": "AdminContract",
         "nodeType": "ContractDefinition",
@@ -426,7 +426,7 @@
           {
             "body": null,
             "documentation": null,
-            "id": 4068,
+            "id": 7139,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -434,16 +434,16 @@
             "name": "replaceOneself",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4066,
+              "id": 7137,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4065,
+                  "id": 7136,
                   "name": "newAdminContract",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4068,
-                  "src": "81:24:15",
+                  "scope": 7139,
+                  "src": "81:24:27",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -451,10 +451,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 4064,
+                    "id": 7135,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "81:7:15",
+                    "src": "81:7:27",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -464,17 +464,17 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "80:26:15"
+              "src": "80:26:27"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4067,
+              "id": 7138,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "115:0:15"
+              "src": "115:0:27"
             },
-            "scope": 4088,
-            "src": "57:59:15",
+            "scope": 7159,
+            "src": "57:59:27",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -482,7 +482,7 @@
           {
             "body": null,
             "documentation": null,
-            "id": 4075,
+            "id": 7146,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -490,16 +490,16 @@
             "name": "transferByAdmins",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4073,
+              "id": 7144,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4070,
+                  "id": 7141,
                   "name": "to",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4075,
-                  "src": "148:10:15",
+                  "scope": 7146,
+                  "src": "148:10:27",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -507,10 +507,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 4069,
+                    "id": 7140,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "148:7:15",
+                    "src": "148:7:27",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -521,11 +521,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 4072,
+                  "id": 7143,
                   "name": "tokens",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4075,
-                  "src": "160:14:15",
+                  "scope": 7146,
+                  "src": "160:14:27",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -533,10 +533,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 4071,
+                    "id": 7142,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "160:7:15",
+                    "src": "160:7:27",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -546,17 +546,17 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "147:28:15"
+              "src": "147:28:27"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4074,
+              "id": 7145,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "184:0:15"
+              "src": "184:0:27"
             },
-            "scope": 4088,
-            "src": "122:63:15",
+            "scope": 7159,
+            "src": "122:63:27",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -564,7 +564,7 @@
           {
             "body": null,
             "documentation": null,
-            "id": 4080,
+            "id": 7151,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -572,16 +572,16 @@
             "name": "upgradeEconomyExchangeByAdmins",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4078,
+              "id": 7149,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4077,
+                  "id": 7148,
                   "name": "newExchange",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4080,
-                  "src": "231:19:15",
+                  "scope": 7151,
+                  "src": "231:19:27",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -589,10 +589,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 4076,
+                    "id": 7147,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "231:7:15",
+                    "src": "231:7:27",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -602,17 +602,17 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "230:21:15"
+              "src": "230:21:27"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4079,
+              "id": 7150,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "260:0:15"
+              "src": "260:0:27"
             },
-            "scope": 4088,
-            "src": "191:70:15",
+            "scope": 7159,
+            "src": "191:70:27",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -620,7 +620,7 @@
           {
             "body": null,
             "documentation": null,
-            "id": 4087,
+            "id": 7158,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -628,16 +628,16 @@
             "name": "transferEtherByAdmins",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4085,
+              "id": 7156,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4082,
+                  "id": 7153,
                   "name": "to",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4087,
-                  "src": "298:10:15",
+                  "scope": 7158,
+                  "src": "298:10:27",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -645,10 +645,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 4081,
+                    "id": 7152,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "298:7:15",
+                    "src": "298:7:27",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -659,11 +659,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 4084,
+                  "id": 7155,
                   "name": "amount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4087,
-                  "src": "310:14:15",
+                  "scope": 7158,
+                  "src": "310:14:27",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -671,10 +671,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 4083,
+                    "id": 7154,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "310:7:15",
+                    "src": "310:7:27",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -684,27 +684,27 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "297:28:15"
+              "src": "297:28:27"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4086,
+              "id": 7157,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "334:0:15"
+              "src": "334:0:27"
             },
-            "scope": 4088,
-            "src": "267:68:15",
+            "scope": 7159,
+            "src": "267:68:27",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 4089,
-        "src": "26:312:15"
+        "scope": 7160,
+        "src": "26:312:27"
       }
     ],
-    "src": "0:340:15"
+    "src": "0:340:27"
   },
   "compiler": {
     "name": "solc",
@@ -712,5 +712,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
-  "updatedAt": "2018-08-29T10:37:27.615Z"
+  "updatedAt": "2018-08-29T12:22:32.867Z"
 }

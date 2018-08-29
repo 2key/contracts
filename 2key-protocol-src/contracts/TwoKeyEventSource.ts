@@ -85,6 +85,15 @@ export class TwoKeyEventSource extends TC.TypeChainContract {
       },
       {
         constant: false,
+        inputs: [{ name: "_twoKeyReg", type: "address" }],
+        name: "addTwoKeyReg",
+        outputs: [],
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "function"
+      },
+      {
+        constant: false,
         inputs: [{ name: "_contractAddress", type: "address" }],
         name: "addContract",
         outputs: [],
@@ -288,6 +297,15 @@ export class TwoKeyEventSource extends TC.TypeChainContract {
     ]);
   }
 
+  public addTwoKeyRegTx(
+    _twoKeyReg: BigNumber | string
+  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
+    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
+      this,
+      "addTwoKeyReg",
+      [_twoKeyReg.toString()]
+    );
+  }
   public addContractTx(
     _contractAddress: BigNumber | string
   ): TC.DeferredTransactionWrapper<TC.ITxParams> {
