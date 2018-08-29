@@ -224,26 +224,30 @@ export default class TwoKeyNetwork {
     });
   }
 
-  public createSaleCampaign(data: CreateCampaign): Promise<TwoKeyCampaign> {
+  public createSaleCampaign(data: CreateCampaign, gasPrice?: number): Promise<TwoKeyCampaign> {
     return new Promise(async (resolve, reject) => {
-      const whitelistInfluencerAddress = await this._createSubcontract(solidityContracts.TwoKeyWhitelisted);
-      const whitelistConverterAddress = await this._createSubcontract(solidityContracts.TwoKeyWhitelisted);
-      const assetFactoryAddress = await this._createSubcontract(solidityContracts.ComposableAssetFactory, [data.openingTime, data.closingTime]);
-      const campaignAddress = await this._createSubcontract(solidityContracts.TwoKeyCampaign, [
-        this._getContractDeployedAddress('TwoKeyEventSource'),
-        this.twoKeyEconomy.address,
-        whitelistInfluencerAddress,
-        whitelistConverterAddress,
-        assetFactoryAddress,
-        data.contractor || this.address,
-        data.moderator || this.address,
-        data.closingTime,
-        data.bonusOffer,
-        data.rate,
-        data.maxCPA,
-      ]);
-      const campaign = new TwoKeyCampaign(this.web3, campaignAddress);
-      resolve(campaign);
+      try {
+        const whitelistInfluencerAddress = await this._createSubcontract(solidityContracts.TwoKeyWhitelisted);
+        const whitelistConverterAddress = await this._createSubcontract(solidityContracts.TwoKeyWhitelisted);
+        const assetFactoryAddress = await this._createSubcontract(solidityContracts.ComposableAssetFactory, gasPrice, [data.openingTime, data.closingTime]);
+        const campaignAddress = await this._createSubcontract(solidityContracts.TwoKeyCampaign, gasPrice, [
+          this._getContractDeployedAddress('TwoKeyEventSource'),
+          this.twoKeyEconomy.address,
+          whitelistInfluencerAddress,
+          whitelistConverterAddress,
+          assetFactoryAddress,
+          data.contractor || this.address,
+          data.moderator || this.address,
+          data.closingTime,
+          data.bonusOffer,
+          data.rate,
+          data.maxCPA,
+        ]);
+        const campaign = new TwoKeyCampaign(this.web3, campaignAddress);
+        resolve(campaign);
+      } catch (err) {
+        reject(err);
+      }
     });
   }
 
@@ -300,11 +304,11 @@ export default class TwoKeyNetwork {
     });
   }
 
-  private _createSubcontract(contract: Contract, params?: any[]): Promise<string> {
+  private _createSubcontract(contract: Contract, gasPrice: number = this.gasPrice, params?: any[]): Promise<string> {
     return new Promise(async (resolve, reject) => {
       const { abi, bytecode: data } = contract;
       const gas = await this._estimateSubcontractGas(contract, params);
-      const createParams = params ? [...params, { data, from: this.address, gas }] : [{ data, from: this.address, gas }];
+      const createParams = params ? [...params, { data, from: this.address, gas, gasPrice }] : [{ data, from: this.address, gas, gasPrice }];
       this.web3.eth.contract(abi).new(...createParams, (err, res) => {
         if (err) {
           reject(err);
