@@ -3,14 +3,14 @@ require('truffle-test-utils').init();
 
 const HOUR = 3600;
 
-const ComposableAssetFactory = artifacts.require("ComposableAssetFactory");
+const TwoKeyCampaignInventory = artifacts.require("TwoKeyCampaignInventory");
 
 const ERC721Mock = artifacts.require("ERC721TokenMock");
 const ERC20Mock = artifacts.require("ERC20TokenMock");
 
-contract('ComposableAssetFactory', async (accounts) => {
+contract('TwoKeyCampaignInventory', async (accounts) => {
 
-    let factory,
+    let inventory,
         erc721, 
         erc20;
 
@@ -34,7 +34,7 @@ contract('ComposableAssetFactory', async (accounts) => {
         console.log("Opening time : " + openingTime);
         console.log("Closing time : " + closingTime);
 
-        factory = await ComposableAssetFactory.new(openingTime, closingTime, {
+        inventory = await TwoKeyCampaignInventory.new(openingTime, closingTime, {
             from: factoryCreator
         });
 
@@ -53,19 +53,19 @@ contract('ComposableAssetFactory', async (accounts) => {
         let bal = await erc20.balanceOf(inventoryOwner, {from: coinbase});
         assert.equal(bal.toNumber(), 200, 'nothing tranferred to inventoryOwner');
 
-        await erc20.approve(factory.address, 8, {
+        await erc20.approve(inventory.address, 8, {
             from: inventoryOwner
         });
 
-        let allow = await erc20.allowance(inventoryOwner, factory.address);
+        let allow = await erc20.allowance(inventoryOwner, inventory.address);
         assert.equal(allow.toNumber(), 8, 'allowance factory not set properly');
 
 
-        await factory.addFungibleAsset(tokenIDNFT, erc20.address, 5, {
+        await inventory.addFungibleAsset(tokenIDNFT, erc20.address, 5, {
             from:  inventoryOwner
         });
 
-        let balFactory = await erc20.balanceOf(factory.address);
+        let balFactory = await erc20.balanceOf(inventory.address);
         assert.equal(balFactory.toNumber(), 5, 'fungible was not transferred to composable by factoryCreator');
 
 
@@ -76,12 +76,12 @@ contract('ComposableAssetFactory', async (accounts) => {
 
     it("should return role of the address" , async() => {
         try {
-            let isAdmin = await factory.checkRole(factoryCreator, "admin");
+            let isAdmin = await inventory.checkRole(factoryCreator, "admin");
         } catch (error) {
             console.log("Transaction reverts because this address : ["+factoryCreator+"] doesn't have admin role.");
         }
 
-        let isAdmin = await factory.hasRole(factoryCreator, "admin");
+        let isAdmin = await inventory.hasRole(factoryCreator, "admin");
         assert.equal(isAdmin, true, "should be the admin");
     });
 
@@ -92,11 +92,11 @@ contract('ComposableAssetFactory', async (accounts) => {
         assert.equal(initialBalanceTarget.toNumber(), 0, 'target has some balance');
 
 
-        await factory.transferFungibleAsset(target, tokenIDFT, erc20.address, 3, {
+        await inventory.transferFungibleAsset(target, tokenIDFT, erc20.address, 3, {
             from: factoryCreator
         });
 
-        let balFactory = await erc20.balanceOf(factory.address);
+        let balFactory = await erc20.balanceOf(inventory.address);
         assert.equal(balFactory.toNumber(), 2, 'fungible was not transferred from factory by factoryCreator');
 
         let balTarget = await erc20.balanceOf(target);
