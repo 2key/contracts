@@ -11,14 +11,14 @@
     "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/GetCode.sol",
     "exportedSymbols": {
       "GetCode": [
-        491
+        492
       ]
     },
-    "id": 492,
+    "id": 493,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 481,
+        "id": 482,
         "literals": [
           "solidity",
           "^",
@@ -34,16 +34,16 @@
         "contractKind": "library",
         "documentation": "The following example provides library code to access the code of another contract and load it into a bytes variable.\n This is not possible at all with “plain Solidity\" and the idea is that assembly libraries will be used to enhance the\n language in such ways.\n Took from Solidity official documentation\n https://solidity.readthedocs.io/en/latest/assembly.html?highlight=getCode",
         "fullyImplemented": true,
-        "id": 491,
+        "id": 492,
         "linearizedBaseContracts": [
-          491
+          492
         ],
         "name": "GetCode",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
-              "id": 489,
+              "id": 490,
               "nodeType": "Block",
               "src": "505:614:1",
               "statements": [
@@ -51,7 +51,7 @@
                   "externalReferences": [
                     {
                       "_addr": {
-                        "declaration": 483,
+                        "declaration": 484,
                         "isOffset": false,
                         "isSlot": false,
                         "src": "624:5:1",
@@ -60,7 +60,7 @@
                     },
                     {
                       "o_code": {
-                        "declaration": 486,
+                        "declaration": 487,
                         "isOffset": false,
                         "isSlot": false,
                         "src": "769:6:1",
@@ -69,7 +69,7 @@
                     },
                     {
                       "o_code": {
-                        "declaration": 486,
+                        "declaration": 487,
                         "isOffset": false,
                         "isSlot": false,
                         "src": "1080:6:1",
@@ -78,7 +78,7 @@
                     },
                     {
                       "o_code": {
-                        "declaration": 486,
+                        "declaration": 487,
                         "isOffset": false,
                         "isSlot": false,
                         "src": "972:6:1",
@@ -87,7 +87,7 @@
                     },
                     {
                       "_addr": {
-                        "declaration": 483,
+                        "declaration": 484,
                         "isOffset": false,
                         "isSlot": false,
                         "src": "1069:5:1",
@@ -96,7 +96,7 @@
                     },
                     {
                       "o_code": {
-                        "declaration": 486,
+                        "declaration": 487,
                         "isOffset": false,
                         "isSlot": false,
                         "src": "866:6:1",
@@ -104,7 +104,7 @@
                       }
                     }
                   ],
-                  "id": 488,
+                  "id": 489,
                   "nodeType": "InlineAssembly",
                   "operations": "{\n    let size := extcodesize(_addr)\n    o_code := mload(0x40)\n    mstore(0x40, add(o_code, and(add(add(size, 0x20), 0x1f), not(0x1f))))\n    mstore(o_code, size)\n    extcodecopy(_addr, add(o_code, 0x20), 0, size)\n}",
                   "src": "515:604:1"
@@ -112,7 +112,7 @@
               ]
             },
             "documentation": null,
-            "id": 490,
+            "id": 491,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -120,15 +120,15 @@
             "name": "at",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 484,
+              "id": 485,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 483,
+                  "id": 484,
                   "name": "_addr",
                   "nodeType": "VariableDeclaration",
-                  "scope": 490,
+                  "scope": 491,
                   "src": "458:13:1",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -137,7 +137,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 482,
+                    "id": 483,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "458:7:1",
@@ -154,15 +154,15 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 487,
+              "id": 488,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 486,
+                  "id": 487,
                   "name": "o_code",
                   "nodeType": "VariableDeclaration",
-                  "scope": 490,
+                  "scope": 491,
                   "src": "491:12:1",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -171,7 +171,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 485,
+                    "id": 486,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "491:5:1",
@@ -186,14 +186,14 @@
               ],
               "src": "490:14:1"
             },
-            "scope": 491,
+            "scope": 492,
             "src": "446:673:1",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "internal"
           }
         ],
-        "scope": 492,
+        "scope": 493,
         "src": "424:697:1"
       }
     ],
@@ -203,14 +203,14 @@
     "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/GetCode.sol",
     "exportedSymbols": {
       "GetCode": [
-        491
+        492
       ]
     },
-    "id": 492,
+    "id": 493,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 481,
+        "id": 482,
         "literals": [
           "solidity",
           "^",
@@ -226,16 +226,16 @@
         "contractKind": "library",
         "documentation": "The following example provides library code to access the code of another contract and load it into a bytes variable.\n This is not possible at all with “plain Solidity\" and the idea is that assembly libraries will be used to enhance the\n language in such ways.\n Took from Solidity official documentation\n https://solidity.readthedocs.io/en/latest/assembly.html?highlight=getCode",
         "fullyImplemented": true,
-        "id": 491,
+        "id": 492,
         "linearizedBaseContracts": [
-          491
+          492
         ],
         "name": "GetCode",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
-              "id": 489,
+              "id": 490,
               "nodeType": "Block",
               "src": "505:614:1",
               "statements": [
@@ -243,7 +243,7 @@
                   "externalReferences": [
                     {
                       "_addr": {
-                        "declaration": 483,
+                        "declaration": 484,
                         "isOffset": false,
                         "isSlot": false,
                         "src": "624:5:1",
@@ -252,7 +252,7 @@
                     },
                     {
                       "o_code": {
-                        "declaration": 486,
+                        "declaration": 487,
                         "isOffset": false,
                         "isSlot": false,
                         "src": "769:6:1",
@@ -261,7 +261,7 @@
                     },
                     {
                       "o_code": {
-                        "declaration": 486,
+                        "declaration": 487,
                         "isOffset": false,
                         "isSlot": false,
                         "src": "1080:6:1",
@@ -270,7 +270,7 @@
                     },
                     {
                       "o_code": {
-                        "declaration": 486,
+                        "declaration": 487,
                         "isOffset": false,
                         "isSlot": false,
                         "src": "972:6:1",
@@ -279,7 +279,7 @@
                     },
                     {
                       "_addr": {
-                        "declaration": 483,
+                        "declaration": 484,
                         "isOffset": false,
                         "isSlot": false,
                         "src": "1069:5:1",
@@ -288,7 +288,7 @@
                     },
                     {
                       "o_code": {
-                        "declaration": 486,
+                        "declaration": 487,
                         "isOffset": false,
                         "isSlot": false,
                         "src": "866:6:1",
@@ -296,7 +296,7 @@
                       }
                     }
                   ],
-                  "id": 488,
+                  "id": 489,
                   "nodeType": "InlineAssembly",
                   "operations": "{\n    let size := extcodesize(_addr)\n    o_code := mload(0x40)\n    mstore(0x40, add(o_code, and(add(add(size, 0x20), 0x1f), not(0x1f))))\n    mstore(o_code, size)\n    extcodecopy(_addr, add(o_code, 0x20), 0, size)\n}",
                   "src": "515:604:1"
@@ -304,7 +304,7 @@
               ]
             },
             "documentation": null,
-            "id": 490,
+            "id": 491,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -312,15 +312,15 @@
             "name": "at",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 484,
+              "id": 485,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 483,
+                  "id": 484,
                   "name": "_addr",
                   "nodeType": "VariableDeclaration",
-                  "scope": 490,
+                  "scope": 491,
                   "src": "458:13:1",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -329,7 +329,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 482,
+                    "id": 483,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "458:7:1",
@@ -346,15 +346,15 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 487,
+              "id": 488,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 486,
+                  "id": 487,
                   "name": "o_code",
                   "nodeType": "VariableDeclaration",
-                  "scope": 490,
+                  "scope": 491,
                   "src": "491:12:1",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -363,7 +363,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 485,
+                    "id": 486,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "491:5:1",
@@ -378,14 +378,14 @@
               ],
               "src": "490:14:1"
             },
-            "scope": 491,
+            "scope": 492,
             "src": "446:673:1",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "internal"
           }
         ],
-        "scope": 492,
+        "scope": 493,
         "src": "424:697:1"
       }
     ],
@@ -397,5 +397,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
-  "updatedAt": "2018-08-28T16:35:42.187Z"
+  "updatedAt": "2018-08-29T06:29:38.382Z"
 }
