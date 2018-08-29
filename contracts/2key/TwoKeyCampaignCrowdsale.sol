@@ -9,6 +9,7 @@ import './TwoKeyEconomy.sol';
 import './TwoKeyEventSource.sol';
 import './TwoKeyTypes.sol';
 import "./TwoKeyWhitelisted.sol";
+import "./TwoKeyCampaignInventory.sol";
 
 contract TwoKeyCampaignCrowdsale is TwoKeyCampaign, Crowdsale {
 
@@ -19,7 +20,7 @@ contract TwoKeyCampaignCrowdsale is TwoKeyCampaign, Crowdsale {
 		TwoKeyEconomy _economy,
 		TwoKeyWhitelisted _whitelistInfluencer,
 		TwoKeyWhitelisted _whitelistConverter,
-		ComposableAssetFactory _composableAssetFactory,
+//		TwoKeyCampaignInventory _composableAssetFactory,
 
 		address _contractor,
 		address _moderator,
@@ -35,7 +36,7 @@ contract TwoKeyCampaignCrowdsale is TwoKeyCampaign, Crowdsale {
 		_economy,
 		_whitelistInfluencer,
 		_whitelistConverter,
-		_composableAssetFactory,
+//		_composableAssetFactory,
 		_contractor,
 		_moderator,
 //		_start,
@@ -52,7 +53,7 @@ contract TwoKeyCampaignCrowdsale is TwoKeyCampaign, Crowdsale {
 	    // need to transfer ETH to campaign
 	    // so this function is not usable in the present form
 	    buyTokens(address(this));
-	    require(composableAssetFactory.addFungibleAsset(_tokenID, _assetContract, _amountOrIndex));
+	    require(twoKeyCampaignInventory.addFungibleAsset(_tokenID, _assetContract, _amountOrIndex));
 	    super.buyFromWithTwoKey(_from, _tokenID, _assetContract, _amountOrIndex, CampaignType.Fungible);
 	}	
 

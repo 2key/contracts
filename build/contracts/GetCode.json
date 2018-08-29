@@ -1,24 +1,24 @@
 {
   "contractName": "GetCode",
   "abi": [],
-  "bytecode": "0x604c602c600b82828239805160001a60731460008114601c57601e565bfe5b5030600052607381538281f30073000000000000000000000000000000000000000030146080604052600080fd00a165627a7a72305820e66f7b098d5b129b4cf0c2e6efe5d51f40a437dea917238e71091a4faae6c5310029",
-  "deployedBytecode": "0x73000000000000000000000000000000000000000030146080604052600080fd00a165627a7a72305820e66f7b098d5b129b4cf0c2e6efe5d51f40a437dea917238e71091a4faae6c5310029",
+  "bytecode": "0x604c602c600b82828239805160001a60731460008114601c57601e565bfe5b5030600052607381538281f30073000000000000000000000000000000000000000030146080604052600080fd00a165627a7a72305820db8c8caa22b6d30ce865524ff769249c70786dbf80e1da83009376dffd920a6d0029",
+  "deployedBytecode": "0x73000000000000000000000000000000000000000030146080604052600080fd00a165627a7a72305820db8c8caa22b6d30ce865524ff769249c70786dbf80e1da83009376dffd920a6d0029",
   "sourceMap": "424:697:4:-;;132:2:-1;166:7;155:9;146:7;137:37;252:7;246:14;243:1;238:23;232:4;229:33;270:1;265:20;;;;222:63;;265:20;274:9;222:63;;298:9;295:1;288:20;328:4;319:7;311:22;352:7;343;336:24",
   "deployedSourceMap": "424:697:4:-;;;;;;;;",
   "source": "pragma solidity ^0.4.24;\n\n/// The following example provides library code to access the code of another contract and load it into a bytes variable.\n/// This is not possible at all with “plain Solidity\" and the idea is that assembly libraries will be used to enhance the\n/// language in such ways.\n\n/// Took from Solidity official documentation\n/// https://solidity.readthedocs.io/en/latest/assembly.html?highlight=getCode\nlibrary GetCode {\n    function at(address _addr) internal returns (bytes o_code) {\n        assembly {\n        // retrieve the size of the code, this needs assembly\n            let size := extcodesize(_addr)\n        // allocate output byte array - this could also be done without assembly\n        // by using o_code = new bytes(size)\n            o_code := mload(0x40)\n        // new \"memory end\" including padding\n            mstore(0x40, add(o_code, and(add(add(size, 0x20), 0x1f), not(0x1f))))\n        // store length in memory\n            mstore(o_code, size)\n        // actually retrieve the code, this needs assembly\n            extcodecopy(_addr, add(o_code, 0x20), 0, size)\n        }\n    }\n}",
-  "sourcePath": "/Users/aydnep/2key/contracts/contracts/2key/GetCode.sol",
+  "sourcePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/GetCode.sol",
   "ast": {
-    "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/GetCode.sol",
+    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/GetCode.sol",
     "exportedSymbols": {
       "GetCode": [
-        610
+        150
       ]
     },
-    "id": 611,
+    "id": 151,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 600,
+        "id": 140,
         "literals": [
           "solidity",
           "^",
@@ -34,16 +34,16 @@
         "contractKind": "library",
         "documentation": "The following example provides library code to access the code of another contract and load it into a bytes variable.\n This is not possible at all with “plain Solidity\" and the idea is that assembly libraries will be used to enhance the\n language in such ways.\n Took from Solidity official documentation\n https://solidity.readthedocs.io/en/latest/assembly.html?highlight=getCode",
         "fullyImplemented": true,
-        "id": 610,
+        "id": 150,
         "linearizedBaseContracts": [
-          610
+          150
         ],
         "name": "GetCode",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
-              "id": 608,
+              "id": 148,
               "nodeType": "Block",
               "src": "505:614:4",
               "statements": [
@@ -51,7 +51,16 @@
                   "externalReferences": [
                     {
                       "_addr": {
-                        "declaration": 602,
+                        "declaration": 142,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "1069:5:4",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "_addr": {
+                        "declaration": 142,
                         "isOffset": false,
                         "isSlot": false,
                         "src": "624:5:4",
@@ -60,16 +69,7 @@
                     },
                     {
                       "o_code": {
-                        "declaration": 605,
-                        "isOffset": false,
-                        "isSlot": false,
-                        "src": "769:6:4",
-                        "valueSize": 1
-                      }
-                    },
-                    {
-                      "o_code": {
-                        "declaration": 605,
+                        "declaration": 145,
                         "isOffset": false,
                         "isSlot": false,
                         "src": "1080:6:4",
@@ -78,33 +78,33 @@
                     },
                     {
                       "o_code": {
-                        "declaration": 605,
+                        "declaration": 145,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "972:6:4",
-                        "valueSize": 1
-                      }
-                    },
-                    {
-                      "_addr": {
-                        "declaration": 602,
-                        "isOffset": false,
-                        "isSlot": false,
-                        "src": "1069:5:4",
+                        "src": "769:6:4",
                         "valueSize": 1
                       }
                     },
                     {
                       "o_code": {
-                        "declaration": 605,
+                        "declaration": 145,
                         "isOffset": false,
                         "isSlot": false,
                         "src": "866:6:4",
                         "valueSize": 1
                       }
+                    },
+                    {
+                      "o_code": {
+                        "declaration": 145,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "972:6:4",
+                        "valueSize": 1
+                      }
                     }
                   ],
-                  "id": 607,
+                  "id": 147,
                   "nodeType": "InlineAssembly",
                   "operations": "{\n    let size := extcodesize(_addr)\n    o_code := mload(0x40)\n    mstore(0x40, add(o_code, and(add(add(size, 0x20), 0x1f), not(0x1f))))\n    mstore(o_code, size)\n    extcodecopy(_addr, add(o_code, 0x20), 0, size)\n}",
                   "src": "515:604:4"
@@ -112,7 +112,7 @@
               ]
             },
             "documentation": null,
-            "id": 609,
+            "id": 149,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -120,15 +120,15 @@
             "name": "at",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 603,
+              "id": 143,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 602,
+                  "id": 142,
                   "name": "_addr",
                   "nodeType": "VariableDeclaration",
-                  "scope": 609,
+                  "scope": 149,
                   "src": "458:13:4",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -137,7 +137,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 601,
+                    "id": 141,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "458:7:4",
@@ -154,15 +154,15 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 606,
+              "id": 146,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 605,
+                  "id": 145,
                   "name": "o_code",
                   "nodeType": "VariableDeclaration",
-                  "scope": 609,
+                  "scope": 149,
                   "src": "491:12:4",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -171,7 +171,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 604,
+                    "id": 144,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "491:5:4",
@@ -186,31 +186,31 @@
               ],
               "src": "490:14:4"
             },
-            "scope": 610,
+            "scope": 150,
             "src": "446:673:4",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "internal"
           }
         ],
-        "scope": 611,
+        "scope": 151,
         "src": "424:697:4"
       }
     ],
     "src": "0:1121:4"
   },
   "legacyAST": {
-    "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/GetCode.sol",
+    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/GetCode.sol",
     "exportedSymbols": {
       "GetCode": [
-        610
+        150
       ]
     },
-    "id": 611,
+    "id": 151,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 600,
+        "id": 140,
         "literals": [
           "solidity",
           "^",
@@ -226,16 +226,16 @@
         "contractKind": "library",
         "documentation": "The following example provides library code to access the code of another contract and load it into a bytes variable.\n This is not possible at all with “plain Solidity\" and the idea is that assembly libraries will be used to enhance the\n language in such ways.\n Took from Solidity official documentation\n https://solidity.readthedocs.io/en/latest/assembly.html?highlight=getCode",
         "fullyImplemented": true,
-        "id": 610,
+        "id": 150,
         "linearizedBaseContracts": [
-          610
+          150
         ],
         "name": "GetCode",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
-              "id": 608,
+              "id": 148,
               "nodeType": "Block",
               "src": "505:614:4",
               "statements": [
@@ -243,7 +243,16 @@
                   "externalReferences": [
                     {
                       "_addr": {
-                        "declaration": 602,
+                        "declaration": 142,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "1069:5:4",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "_addr": {
+                        "declaration": 142,
                         "isOffset": false,
                         "isSlot": false,
                         "src": "624:5:4",
@@ -252,16 +261,7 @@
                     },
                     {
                       "o_code": {
-                        "declaration": 605,
-                        "isOffset": false,
-                        "isSlot": false,
-                        "src": "769:6:4",
-                        "valueSize": 1
-                      }
-                    },
-                    {
-                      "o_code": {
-                        "declaration": 605,
+                        "declaration": 145,
                         "isOffset": false,
                         "isSlot": false,
                         "src": "1080:6:4",
@@ -270,33 +270,33 @@
                     },
                     {
                       "o_code": {
-                        "declaration": 605,
+                        "declaration": 145,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "972:6:4",
-                        "valueSize": 1
-                      }
-                    },
-                    {
-                      "_addr": {
-                        "declaration": 602,
-                        "isOffset": false,
-                        "isSlot": false,
-                        "src": "1069:5:4",
+                        "src": "769:6:4",
                         "valueSize": 1
                       }
                     },
                     {
                       "o_code": {
-                        "declaration": 605,
+                        "declaration": 145,
                         "isOffset": false,
                         "isSlot": false,
                         "src": "866:6:4",
                         "valueSize": 1
                       }
+                    },
+                    {
+                      "o_code": {
+                        "declaration": 145,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "972:6:4",
+                        "valueSize": 1
+                      }
                     }
                   ],
-                  "id": 607,
+                  "id": 147,
                   "nodeType": "InlineAssembly",
                   "operations": "{\n    let size := extcodesize(_addr)\n    o_code := mload(0x40)\n    mstore(0x40, add(o_code, and(add(add(size, 0x20), 0x1f), not(0x1f))))\n    mstore(o_code, size)\n    extcodecopy(_addr, add(o_code, 0x20), 0, size)\n}",
                   "src": "515:604:4"
@@ -304,7 +304,7 @@
               ]
             },
             "documentation": null,
-            "id": 609,
+            "id": 149,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -312,15 +312,15 @@
             "name": "at",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 603,
+              "id": 143,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 602,
+                  "id": 142,
                   "name": "_addr",
                   "nodeType": "VariableDeclaration",
-                  "scope": 609,
+                  "scope": 149,
                   "src": "458:13:4",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -329,7 +329,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 601,
+                    "id": 141,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "458:7:4",
@@ -346,15 +346,15 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 606,
+              "id": 146,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 605,
+                  "id": 145,
                   "name": "o_code",
                   "nodeType": "VariableDeclaration",
-                  "scope": 609,
+                  "scope": 149,
                   "src": "491:12:4",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -363,7 +363,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 604,
+                    "id": 144,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "491:5:4",
@@ -378,14 +378,14 @@
               ],
               "src": "490:14:4"
             },
-            "scope": 610,
+            "scope": 150,
             "src": "446:673:4",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "internal"
           }
         ],
-        "scope": 611,
+        "scope": 151,
         "src": "424:697:4"
       }
     ],
@@ -397,5 +397,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
-  "updatedAt": "2018-08-29T12:22:32.845Z"
+  "updatedAt": "2018-08-29T23:25:36.516Z"
 }

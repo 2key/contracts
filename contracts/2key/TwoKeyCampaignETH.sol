@@ -23,7 +23,7 @@ contract TwoKeyCampaignETH is TwoKeyCampaign {
 		require(msg.value == payout);
 		Conversion memory c = Conversion(_from, payout, msg.sender, false, false, _tokenID, _assetContract, _amount, CampaignType.Fungible, now, now + expiryConversion * 1 days);
 		// move funds
-		composableAssetFactory.removeFungibleAssets(_tokenID, _assetContract, _amount);
+		twoKeyCampaignInventory.removeFungibleAssets(_tokenID, _assetContract, _amount);
 		eventSource.escrow(address(this), msg.sender, _tokenID, _assetContract, _amount, CampaignType.Fungible);
 		conversions[msg.sender] = c;
 	}

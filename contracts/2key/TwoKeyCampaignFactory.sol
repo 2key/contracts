@@ -13,12 +13,12 @@ contract TwoKeyCampaignFactory {
     TwoKeyCampaign twoKeyCampaign;
     TwoKeyWhitelisted whitelistInfluencer;
     TwoKeyWhitelisted whitelistConverter;
-    ComposableAssetFactory composableAssetFactory;
+    TwoKeyCampaignInventory twoKeyCampaignInventory;
 
     constructor (uint openingTime, uint closingTime) public {
         whitelistInfluencer = new TwoKeyWhitelisted();
         whitelistConverter = new TwoKeyWhitelisted();
-        composableAssetFactory = new ComposableAssetFactory(openingTime, closingTime);
+        twoKeyCampaignInventory = new TwoKeyCampaignInventory(openingTime, closingTime);
     }
 
 //                TwoKeyEventSource twoKeyEventSource, TwoKeyEconomy twoKeyEconomy,
@@ -74,7 +74,7 @@ contract TwoKeyCampaignFactory {
 //    }
 
     function getAddresses() public view returns (address, address, address) {
-        return (address(whitelistInfluencer), address(whitelistConverter), address(composableAssetFactory));
+        return (address(whitelistInfluencer), address(whitelistConverter), address(twoKeyCampaignInventory));
     }
 
 
