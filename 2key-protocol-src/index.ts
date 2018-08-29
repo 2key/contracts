@@ -2,8 +2,8 @@ import ipfsAPI from 'ipfs-api';
 import { BigNumber } from 'bignumber.js';
 import solidityContracts from './contracts/meta';
 import { TwoKeyEconomy } from './contracts/TwoKeyEconomy';
-import { TwoKeyWhitelisted } from './contracts/TwoKeyWhitelisted';
-import { EhtereumNetworks, ContractsAdressess, TwoKeyInit, BalanceMeta, Gas, Transaction, CreateCampaign, Contract } from './interfaces';
+import { TwoKeyCampaign } from './contracts/TwoKeyCampaign';
+import { EhtereumNetworks, ContractsAdressess, TwoKeyInit, BalanceMeta, Transaction, CreateCampaign, Contract } from './interfaces';
 import Sign from './sign';
 // import HDWalletProvider from './HDWalletProvider';
 
@@ -135,19 +135,19 @@ export default class TwoKeyNetwork {
     });
   }
 
-  public getERC20TransferGas(to: string, value: number): Promise<Gas> {
+  public getERC20TransferGas(to: string, value: number): Promise<number> {
     this.gas = null;
     return new Promise((resolve, reject) => {
       this.twoKeyEconomy.transferTx(to, this.toWei(value, 'ether')).estimateGas({ from: this.address })
         .then(res => {
           this.gas = res;
-          resolve({ wei: this.gas });
+          resolve(this.gas);
         })
         .catch(reject);
     });
   }
 
-  public getETHTransferGas(to: string, value: number): Promise<Gas> {
+  public getETHTransferGas(to: string, value: number): Promise<number> {
     this.gas = null;
     return new Promise((resolve, reject) => {
       this.web3.eth.estimateGas({ to, value: this.toWei(value, 'ether').toString() }, (err, res) => {
@@ -155,7 +155,7 @@ export default class TwoKeyNetwork {
           reject(err);
         } else {
           this.gas = res;
-          resolve({ wei: this.gas });
+          resolve(this.gas);
         }
       });
     });
@@ -164,7 +164,7 @@ export default class TwoKeyNetwork {
   public async transferTokens(to: string, value: number, gasPrice: number = this.gasPrice): Promise<string> {
     const balance = parseFloat(await this._getEthBalance(this.address));
     const tokenBalance = parseFloat(await this._getTokenBalance(this.address));
-    const { wei: gasRequired } = await this.getERC20TransferGas(to, value);
+    const gasRequired = await this.getERC20TransferGas(to, value);
     const etherRequired = parseFloat(this.fromWei(gasPrice * gasRequired, 'ether'));
     if (tokenBalance < value || balance < etherRequired) {
       throw new Error('Not enough founds');
@@ -176,7 +176,7 @@ export default class TwoKeyNetwork {
 
   public async transferEther(to: string, value: number, gasPrice: number = this.gasPrice): Promise<any> {
     const balance = parseFloat(await this._getEthBalance(this.address));
-    const { wei: gasRequired } = await this.getETHTransferGas(to, value);
+    const gasRequired = await this.getETHTransferGas(to, value);
     const totalValue = value + parseFloat(this.fromWei(gasPrice * gasRequired, 'ether'));
     if (totalValue > balance) {
       throw new Error('Not enough founds');
@@ -203,9 +203,11 @@ export default class TwoKeyNetwork {
         const campaignGas = await this._estimateSubcontractGas(solidityContracts.TwoKeyCampaign, [
           this._getContractDeployedAddress('TwoKeyEventSource'),
           this.twoKeyEconomy.address,
+          // TODO: GasEstimation with fake addresses
           this.twoKeyEconomy.address,
           this.twoKeyEconomy.address,
           this.twoKeyEconomy.address,
+
           data.contractor || this.address,
           data.moderator || this.address,
           data.closingTime,
@@ -222,17 +224,17 @@ export default class TwoKeyNetwork {
     });
   }
 
-  public createSaleCampaign(data: CreateCampaign): Promise<string> {
+  public createSaleCampaign(data: CreateCampaign): Promise<TwoKeyCampaign> {
     return new Promise(async (resolve, reject) => {
-      const whitelistInfluencer = await this._createSubcontract(solidityContracts.TwoKeyWhitelisted);
-      const whitelistConverter = await this._createSubcontract(solidityContracts.TwoKeyWhitelisted);
-      const assetFactory = await this._createSubcontract(solidityContracts.ComposableAssetFactory, [data.openingTime, data.closingTime]);
-      const campaign = await this._createSubcontract(solidityContracts.TwoKeyCampaign, [
+      const whitelistInfluencerAddress = await this._createSubcontract(solidityContracts.TwoKeyWhitelisted);
+      const whitelistConverterAddress = await this._createSubcontract(solidityContracts.TwoKeyWhitelisted);
+      const assetFactoryAddress = await this._createSubcontract(solidityContracts.ComposableAssetFactory, [data.openingTime, data.closingTime]);
+      const campaignAddress = await this._createSubcontract(solidityContracts.TwoKeyCampaign, [
         this._getContractDeployedAddress('TwoKeyEventSource'),
         this.twoKeyEconomy.address,
-        whitelistInfluencer,
-        whitelistConverter,
-        assetFactory,
+        whitelistInfluencerAddress,
+        whitelistConverterAddress,
+        assetFactoryAddress,
         data.contractor || this.address,
         data.moderator || this.address,
         data.closingTime,
@@ -240,6 +242,7 @@ export default class TwoKeyNetwork {
         data.rate,
         data.maxCPA,
       ]);
+      const campaign = new TwoKeyCampaign(this.web3, campaignAddress);
       resolve(campaign);
     });
   }

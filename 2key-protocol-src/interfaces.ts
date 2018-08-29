@@ -29,11 +29,6 @@ export interface TwoKeyInit {
   contracts?: ContractsAdressess,
   networks?: EhtereumNetworks,
 }
-
-export interface Gas {
-  wei: number,
-}
-
 export interface Transaction {
 	hash: string;
 	nonce: number;

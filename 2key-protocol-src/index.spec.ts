@@ -70,8 +70,7 @@ describe('TwoKeyProtocol', () => {
     const gas = await twoKeyProtocol.getERC20TransferGas('0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7', 1000);
     console.log(gas);
     expect(gas).to.exist;
-    expect(gas).to.haveOwnProperty('wei');
-    expect(gas.wei).to.be.equal(twoKeyProtocol.getGas());
+    expect(gas).to.be.greaterThan(0);
   }).timeout(30000);
   it('should transfer tokens', async () => {
     console.log(await twoKeyProtocol.getTransaction('0x07230b24628f9bafde23d0196b52f70acf35a258f855e4e08d866d2975934984'));
@@ -86,8 +85,7 @@ describe('TwoKeyProtocol', () => {
     const gas = await twoKeyProtocol.getETHTransferGas('0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7', 1);
     console.log(gas);
     expect(gas).to.exist;
-    expect(gas).to.haveOwnProperty('wei');
-    expect(gas.wei).to.be.equal(twoKeyProtocol.getGas());
+    expect(gas).to.be.greaterThan(0);
   }).timeout(30000);
   it('should transfer ether', () => {
     setTimeout(async () => {
@@ -131,8 +129,9 @@ describe('TwoKeyProtocol', () => {
       rate,
       maxCPA,
     });
-    console.log('Campaign address', campaign);
+    console.log('Campaign address', campaign && campaign.address);
     expect(campaign).to.exist;
-    expect(addressRegex.test(campaign)).to.be.true;
+    expect(campaign).to.haveOwnProperty('address');
+    expect(addressRegex.test(campaign.address)).to.be.true;
   }).timeout(600000);
 });
