@@ -12,7 +12,7 @@ module.exports = {
   networks: {
     development: {
       host: 'localhost',
-      port: 8500,
+      port: 8545,
       // provider: new HDWalletProvider(mnemonic, "http://localhost:8500"),
       network_id: '*', // Match any network id
       gas: 7000000,

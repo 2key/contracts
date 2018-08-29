@@ -52,9 +52,10 @@ contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
 	// Composable asset factory
 	ComposableAssetFactory composableAssetFactory;
 
+	/// TODO: Make contract TwoKeyCampaignFactory to deploy singleton contracts and TwoKeyCampaign
 
 	// prices of assets
-	// TODO (udi) there should be just one token->address->price you dont need two maps
+	// TODO (udi) there should be just one token->address->price you don't need two maps
 	mapping(uint256 => mapping(address => uint256)) prices; 
 
 	// rate of conversion from TwoKey to ETH
@@ -132,22 +133,18 @@ contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
 		uint256 _expiryConversion,
 		uint256 _escrowPercentage,
 		uint256 _rate,
-		uint256 _maxPi) TwoKeyARC(_eventSource, _contractor) StandardToken() public {
+		uint256 _maxPi) TwoKeyARC(	_eventSource, _contractor) StandardToken() public {
 
 
 		/// requires that all contracts from constructor are already deployed
 		require(_eventSource != address(0));
 		require(_economy != address(0));
-		require(_whitelistInfluencer != address(0));
-		require(_whitelistConverter != address(0));
 
 		/// uint values
 		require(_rate > 0);
 		require(_maxPi > 0);
 
 		economy = _economy;
-		whitelistInfluencer = _whitelistInfluencer;
-		whitelistConverter = _whitelistConverter;
 
 		contractor = _contractor;
 		moderator = _moderator;
@@ -155,7 +152,10 @@ contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
 		expiryConversion = _expiryConversion;
 		escrowPercentage = _escrowPercentage;
 
-		composableAssetFactory = _composableAssetFactory;
+
+//		whitelistInfluencer = _whitelistInfluencer;
+//		whitelistConverter = _whitelistConverter;
+//		composableAssetFactory = _composableAssetFactory;
 
 
 
@@ -172,6 +172,19 @@ contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
 
 	}
 
+//	/// add modifiers who can call this
+//	function addSingletonSubcontracts(uint openingTime, uint closingTime) public {
+//		/// We require at least that those contracts are not previously deployed (malicious attack)
+//		require(address(composableAssetFactory) == address(0));
+//		require(address(whitelistInfluencer) == address(0));
+//		require(address(whitelistConverter) == address(0));
+//
+//		composableAssetFactory = new ComposableAssetFactory(openingTime,closingTime);
+//		whitelistInfluencer = new TwoKeyWhitelisted();
+//		whitelistConverter = new TwoKeyWhitelisted();
+//	}
+
+	/// add modifiers who can call this
     function addAdminRolesAndBalancesAfterDeployed() public {
 		composableAssetFactory.adminAddRole(msg.sender, composableAssetFactory.getControllerRole());
 		composableAssetFactory.adminAddRole(contractor, composableAssetFactory.getControllerRole());
