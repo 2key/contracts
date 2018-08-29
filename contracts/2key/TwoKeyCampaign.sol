@@ -9,7 +9,7 @@ import './TwoKeyARC.sol';
 import "./ComposableAssetFactory.sol";
 import "./TwoKeyWhitelisted.sol";
 
-contract TwoKeyCampaign is RBACWithAdmin, TwoKeyARC, TwoKeyTypes {
+contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
 
 	using SafeMath for uint256;
 
@@ -172,17 +172,6 @@ contract TwoKeyCampaign is RBACWithAdmin, TwoKeyARC, TwoKeyTypes {
 
 	}
 
-//	function addSingletonSubcontracts(uint openingTime, uint closingTime) public {
-//		/// We require at least that those contracts are not previously deployed (malicious attack)
-//		require(address(composableAssetFactory) == address(0));
-//		require(address(whitelistInfluencer) == address(0));
-//		require(address(whitelistConverter) == address(0));
-//
-//		composableAssetFactory = new ComposableAssetFactory(openingTime,closingTime);
-//		whitelistInfluencer = new TwoKeyWhitelisted();
-//		whitelistConverter = new TwoKeyWhitelisted();
-//	}
-
 	/// add modifiers who can call this
     function addAdminRolesAndBalancesAfterDeployed() public {
 		composableAssetFactory.adminAddRole(msg.sender, composableAssetFactory.getControllerRole());
@@ -190,6 +179,7 @@ contract TwoKeyCampaign is RBACWithAdmin, TwoKeyARC, TwoKeyTypes {
 		composableAssetFactory.adminAddRole(moderator, composableAssetFactory.getControllerRole());
 		balances[msg.sender] = totalSupply_;
     }
+
 
     /*  
 	    fulfills a fungible asset purchase
