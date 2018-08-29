@@ -126,4 +126,25 @@ contract('TwoKeyReg', async (accounts) => {
     assert.equal(name, test_name, 'name stored for address is wrong');
   });
 
+
+  it("should add TwoKeyEventSource contract", async() => {
+    let reg = await TwoKeyReg.new({from: accounts[0]});
+    await reg.addTwoKeyEventSource(accounts[1], {from: accounts[0]});
+
+    let eventSourceAddress = await reg.getTwoKeyEventSourceAddress();
+
+    assert.equal(eventSourceAddress, accounts[1], "wrong address");
+  });
+
+  it("should fail if tried to call methods", async() => {
+    let reg = await TwoKeyReg.new({from: accounts[0]});
+
+    //all 4 trnx should be reverted in order to pass the test
+    await tryCatch(reg.addWhereContractor(accounts[1],accounts[2]), 'revert');
+    await tryCatch(reg.addWhereModerator(accounts[1],accounts[2]), 'revert');
+    await tryCatch(reg.addWhereRefferer(accounts[1],accounts[2]), 'revert');
+    await tryCatch(reg.addWhereConverter(accounts[1],accounts[2]), 'revert');
+
+  });
+
 });
