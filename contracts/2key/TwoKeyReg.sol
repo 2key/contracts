@@ -33,7 +33,7 @@ contract TwoKeyReg is Ownable {
     twoKeyEventSource = _twoKeyEventSource;
   }
   /*
-    Those mappings are for the fetchin informations about in what contracts user participates in which role
+    Those mappings are for the fetching data about in what contracts user participates in which role
   */
 
   /// mapping users address to addresses of campaigns where he is contractor
@@ -48,7 +48,43 @@ contract TwoKeyReg is Ownable {
   /// mapping users address to addresses of campaigns where he is converter
   mapping(address => address[]) public userToCampaignsWhereConverter;
 
+  /// Only TwoKeyEventSource contract can issue this calls
+  /// @notice Function to add new campaign contract where user is contractor
+  /// @dev We're requiring the contract address different address 0 because it needs to be deployed
+  /// @param _userAddress is address of contractor
+  /// @param _contractAddress is address of deployed campaign contract
+  function addWhereContractor(address _userAddress, address _contractAddress) public onlyTwoKeyEventSource {
+    require(_contractAddress != address(0));
+    userToCampaignsWhereContractor[_userAddress].push(_contractAddress);
+  }
+  /// Only TwoKeyEventSource contract can issue this calls
+  /// @notice Function to add new campaign contract where user is moderator
+  /// @dev We're requiring the contract address different address 0 because it needs to be deployed
+  /// @param _userAddress is address of moderator
+  /// @param _contractAddress is address of deployed campaign contract
+  function addWhereModerator(address _userAddress, address _contractAddress) public onlyTwoKeyEventSource {
+    require(_contractAddress != address(0));
+    userToCampaignsWhereModerator[_userAddress].push(_contractAddress);
+  }
+  /// Only TwoKeyEventSource contract can issue this calls
+  /// @notice Function to add new campaign contract where user is refferer
+  /// @dev We're requiring the contract address different address 0 because it needs to be deployed
+  /// @param _userAddress is address of refferer
+  /// @param _contractAddress is address of deployed campaign contract
+  function addWhereRefferer(address _userAddress, address _contractAddress) public onlyTwoKeyEventSource {
+    require(_contractAddress != address(0));
+    userToCampaignsWhereRefferer[_userAddress].push(_contractAddress);
+  }
 
+  /// Only TwoKeyEventSource contract can issue this calls
+  /// @notice Function to add new campaign contract where user is converter
+  /// @dev We're requiring the contract address different address 0 because it needs to be deployed
+  /// @param _userAddress is address of converter
+  /// @param _contractAddress is address of deployed campaign contract
+  function addWhereConverter(address _userAddress, address _contractAddress) public onlyTwoKeyEventSource {
+    require(_contractAddress != address(0));
+    userToCampaignsWhereConverter[_userAddress].push(_contractAddress);
+  }
 
   mapping(address => string) public owner2name;
   mapping(bytes32 => address) public name2owner;

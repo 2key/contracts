@@ -205,22 +205,22 @@
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "pragma solidity ^0.4.21;\n\nimport \"../../token/ERC20/ERC20.sol\";\n\n\n/**\n * @title ERC-1047 Token Metadata\n * @dev See https://eips.ethereum.org/EIPS/eip-1046\n * @dev tokenURI must respond with a URI that implements https://eips.ethereum.org/EIPS/eip-1047\n * @dev TODO - update https://github.com/OpenZeppelin/openzeppelin-solidity/blob/master/contracts/token/ERC721/ERC721.sol#L17 when 1046 is finalized\n */\ncontract ERC20TokenMetadata is ERC20 {\n  function tokenURI() external view returns (string);\n}\n\n\ncontract ERC20WithMetadata is ERC20TokenMetadata {\n  string private tokenURI_ = \"\";\n\n  constructor(string _tokenURI)\n    public\n  {\n    tokenURI_ = _tokenURI;\n  }\n\n  function tokenURI() external view returns (string) {\n    return tokenURI_;\n  }\n}\n",
-  "sourcePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/proposals/ERC1046/TokenMetadata.sol",
+  "sourcePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/proposals/ERC1046/TokenMetadata.sol",
   "ast": {
-    "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/proposals/ERC1046/TokenMetadata.sol",
+    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/proposals/ERC1046/TokenMetadata.sol",
     "exportedSymbols": {
       "ERC20TokenMetadata": [
-        10607
+        10688
       ],
       "ERC20WithMetadata": [
-        10631
+        10712
       ]
     },
-    "id": 10632,
+    "id": 10713,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 10598,
+        "id": 10679,
         "literals": [
           "solidity",
           "^",
@@ -231,12 +231,12 @@
         "src": "0:24:77"
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/token/ERC20/ERC20.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/token/ERC20/ERC20.sol",
         "file": "../../token/ERC20/ERC20.sol",
-        "id": 10599,
+        "id": 10680,
         "nodeType": "ImportDirective",
-        "scope": 10632,
-        "sourceUnit": 10925,
+        "scope": 10713,
+        "sourceUnit": 11006,
         "src": "26:37:77",
         "symbolAliases": [],
         "unitAlias": ""
@@ -247,33 +247,33 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 10600,
+              "id": 10681,
               "name": "ERC20",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 10924,
+              "referencedDeclaration": 11005,
               "src": "437:5:77",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_ERC20_$10924",
+                "typeIdentifier": "t_contract$_ERC20_$11005",
                 "typeString": "contract ERC20"
               }
             },
-            "id": 10601,
+            "id": 10682,
             "nodeType": "InheritanceSpecifier",
             "src": "437:5:77"
           }
         ],
         "contractDependencies": [
-          10924,
-          10956
+          11005,
+          11037
         ],
         "contractKind": "contract",
         "documentation": "@title ERC-1047 Token Metadata\n@dev See https://eips.ethereum.org/EIPS/eip-1046\n@dev tokenURI must respond with a URI that implements https://eips.ethereum.org/EIPS/eip-1047\n@dev TODO - update https://github.com/OpenZeppelin/openzeppelin-solidity/blob/master/contracts/token/ERC721/ERC721.sol#L17 when 1046 is finalized",
         "fullyImplemented": false,
-        "id": 10607,
+        "id": 10688,
         "linearizedBaseContracts": [
-          10607,
-          10924,
-          10956
+          10688,
+          11005,
+          11037
         ],
         "name": "ERC20TokenMetadata",
         "nodeType": "ContractDefinition",
@@ -281,7 +281,7 @@
           {
             "body": null,
             "documentation": null,
-            "id": 10606,
+            "id": 10687,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -289,22 +289,22 @@
             "name": "tokenURI",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 10602,
+              "id": 10683,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "464:2:77"
             },
             "payable": false,
             "returnParameters": {
-              "id": 10605,
+              "id": 10686,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 10604,
+                  "id": 10685,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 10606,
+                  "scope": 10687,
                   "src": "490:6:77",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -313,7 +313,7 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 10603,
+                    "id": 10684,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
                     "src": "490:6:77",
@@ -328,14 +328,14 @@
               ],
               "src": "489:8:77"
             },
-            "scope": 10607,
+            "scope": 10688,
             "src": "447:51:77",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 10632,
+        "scope": 10713,
         "src": "406:94:77"
       },
       {
@@ -344,45 +344,45 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 10608,
+              "id": 10689,
               "name": "ERC20TokenMetadata",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 10607,
+              "referencedDeclaration": 10688,
               "src": "533:18:77",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_ERC20TokenMetadata_$10607",
+                "typeIdentifier": "t_contract$_ERC20TokenMetadata_$10688",
                 "typeString": "contract ERC20TokenMetadata"
               }
             },
-            "id": 10609,
+            "id": 10690,
             "nodeType": "InheritanceSpecifier",
             "src": "533:18:77"
           }
         ],
         "contractDependencies": [
-          10607,
-          10924,
-          10956
+          10688,
+          11005,
+          11037
         ],
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 10631,
+        "id": 10712,
         "linearizedBaseContracts": [
-          10631,
-          10607,
-          10924,
-          10956
+          10712,
+          10688,
+          11005,
+          11037
         ],
         "name": "ERC20WithMetadata",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "constant": false,
-            "id": 10612,
+            "id": 10693,
             "name": "tokenURI_",
             "nodeType": "VariableDeclaration",
-            "scope": 10631,
+            "scope": 10712,
             "src": "556:29:77",
             "stateVariable": true,
             "storageLocation": "default",
@@ -391,7 +391,7 @@
               "typeString": "string"
             },
             "typeName": {
-              "id": 10610,
+              "id": 10691,
               "name": "string",
               "nodeType": "ElementaryTypeName",
               "src": "556:6:77",
@@ -403,7 +403,7 @@
             "value": {
               "argumentTypes": null,
               "hexValue": "",
-              "id": 10611,
+              "id": 10692,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -422,25 +422,25 @@
           },
           {
             "body": {
-              "id": 10621,
+              "id": 10702,
               "nodeType": "Block",
               "src": "633:32:77",
               "statements": [
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 10619,
+                    "id": 10700,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 10617,
+                      "id": 10698,
                       "name": "tokenURI_",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 10612,
+                      "referencedDeclaration": 10693,
                       "src": "639:9:77",
                       "typeDescriptions": {
                         "typeIdentifier": "t_string_storage",
@@ -451,11 +451,11 @@
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "id": 10618,
+                      "id": 10699,
                       "name": "_tokenURI",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 10614,
+                      "referencedDeclaration": 10695,
                       "src": "651:9:77",
                       "typeDescriptions": {
                         "typeIdentifier": "t_string_memory_ptr",
@@ -468,14 +468,14 @@
                       "typeString": "string storage ref"
                     }
                   },
-                  "id": 10620,
+                  "id": 10701,
                   "nodeType": "ExpressionStatement",
                   "src": "639:21:77"
                 }
               ]
             },
             "documentation": null,
-            "id": 10622,
+            "id": 10703,
             "implemented": true,
             "isConstructor": true,
             "isDeclaredConst": false,
@@ -483,15 +483,15 @@
             "name": "",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 10615,
+              "id": 10696,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 10614,
+                  "id": 10695,
                   "name": "_tokenURI",
                   "nodeType": "VariableDeclaration",
-                  "scope": 10622,
+                  "scope": 10703,
                   "src": "602:16:77",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -500,7 +500,7 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 10613,
+                    "id": 10694,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
                     "src": "602:6:77",
@@ -517,12 +517,12 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 10616,
+              "id": 10697,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "633:0:77"
             },
-            "scope": 10631,
+            "scope": 10712,
             "src": "590:75:77",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -530,33 +530,33 @@
           },
           {
             "body": {
-              "id": 10629,
+              "id": 10710,
               "nodeType": "Block",
               "src": "720:27:77",
               "statements": [
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 10627,
+                    "id": 10708,
                     "name": "tokenURI_",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 10612,
+                    "referencedDeclaration": 10693,
                     "src": "733:9:77",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage",
                       "typeString": "string storage ref"
                     }
                   },
-                  "functionReturnParameters": 10626,
-                  "id": 10628,
+                  "functionReturnParameters": 10707,
+                  "id": 10709,
                   "nodeType": "Return",
                   "src": "726:16:77"
                 }
               ]
             },
             "documentation": null,
-            "id": 10630,
+            "id": 10711,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -564,22 +564,22 @@
             "name": "tokenURI",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 10623,
+              "id": 10704,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "686:2:77"
             },
             "payable": false,
             "returnParameters": {
-              "id": 10626,
+              "id": 10707,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 10625,
+                  "id": 10706,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 10630,
+                  "scope": 10711,
                   "src": "712:6:77",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -588,7 +588,7 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 10624,
+                    "id": 10705,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
                     "src": "712:6:77",
@@ -603,34 +603,34 @@
               ],
               "src": "711:8:77"
             },
-            "scope": 10631,
+            "scope": 10712,
             "src": "669:78:77",
             "stateMutability": "view",
-            "superFunction": 10606,
+            "superFunction": 10687,
             "visibility": "external"
           }
         ],
-        "scope": 10632,
+        "scope": 10713,
         "src": "503:246:77"
       }
     ],
     "src": "0:750:77"
   },
   "legacyAST": {
-    "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/proposals/ERC1046/TokenMetadata.sol",
+    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/proposals/ERC1046/TokenMetadata.sol",
     "exportedSymbols": {
       "ERC20TokenMetadata": [
-        10607
+        10688
       ],
       "ERC20WithMetadata": [
-        10631
+        10712
       ]
     },
-    "id": 10632,
+    "id": 10713,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 10598,
+        "id": 10679,
         "literals": [
           "solidity",
           "^",
@@ -641,12 +641,12 @@
         "src": "0:24:77"
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/token/ERC20/ERC20.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/token/ERC20/ERC20.sol",
         "file": "../../token/ERC20/ERC20.sol",
-        "id": 10599,
+        "id": 10680,
         "nodeType": "ImportDirective",
-        "scope": 10632,
-        "sourceUnit": 10925,
+        "scope": 10713,
+        "sourceUnit": 11006,
         "src": "26:37:77",
         "symbolAliases": [],
         "unitAlias": ""
@@ -657,33 +657,33 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 10600,
+              "id": 10681,
               "name": "ERC20",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 10924,
+              "referencedDeclaration": 11005,
               "src": "437:5:77",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_ERC20_$10924",
+                "typeIdentifier": "t_contract$_ERC20_$11005",
                 "typeString": "contract ERC20"
               }
             },
-            "id": 10601,
+            "id": 10682,
             "nodeType": "InheritanceSpecifier",
             "src": "437:5:77"
           }
         ],
         "contractDependencies": [
-          10924,
-          10956
+          11005,
+          11037
         ],
         "contractKind": "contract",
         "documentation": "@title ERC-1047 Token Metadata\n@dev See https://eips.ethereum.org/EIPS/eip-1046\n@dev tokenURI must respond with a URI that implements https://eips.ethereum.org/EIPS/eip-1047\n@dev TODO - update https://github.com/OpenZeppelin/openzeppelin-solidity/blob/master/contracts/token/ERC721/ERC721.sol#L17 when 1046 is finalized",
         "fullyImplemented": false,
-        "id": 10607,
+        "id": 10688,
         "linearizedBaseContracts": [
-          10607,
-          10924,
-          10956
+          10688,
+          11005,
+          11037
         ],
         "name": "ERC20TokenMetadata",
         "nodeType": "ContractDefinition",
@@ -691,7 +691,7 @@
           {
             "body": null,
             "documentation": null,
-            "id": 10606,
+            "id": 10687,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -699,22 +699,22 @@
             "name": "tokenURI",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 10602,
+              "id": 10683,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "464:2:77"
             },
             "payable": false,
             "returnParameters": {
-              "id": 10605,
+              "id": 10686,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 10604,
+                  "id": 10685,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 10606,
+                  "scope": 10687,
                   "src": "490:6:77",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -723,7 +723,7 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 10603,
+                    "id": 10684,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
                     "src": "490:6:77",
@@ -738,14 +738,14 @@
               ],
               "src": "489:8:77"
             },
-            "scope": 10607,
+            "scope": 10688,
             "src": "447:51:77",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 10632,
+        "scope": 10713,
         "src": "406:94:77"
       },
       {
@@ -754,45 +754,45 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 10608,
+              "id": 10689,
               "name": "ERC20TokenMetadata",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 10607,
+              "referencedDeclaration": 10688,
               "src": "533:18:77",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_ERC20TokenMetadata_$10607",
+                "typeIdentifier": "t_contract$_ERC20TokenMetadata_$10688",
                 "typeString": "contract ERC20TokenMetadata"
               }
             },
-            "id": 10609,
+            "id": 10690,
             "nodeType": "InheritanceSpecifier",
             "src": "533:18:77"
           }
         ],
         "contractDependencies": [
-          10607,
-          10924,
-          10956
+          10688,
+          11005,
+          11037
         ],
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 10631,
+        "id": 10712,
         "linearizedBaseContracts": [
-          10631,
-          10607,
-          10924,
-          10956
+          10712,
+          10688,
+          11005,
+          11037
         ],
         "name": "ERC20WithMetadata",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "constant": false,
-            "id": 10612,
+            "id": 10693,
             "name": "tokenURI_",
             "nodeType": "VariableDeclaration",
-            "scope": 10631,
+            "scope": 10712,
             "src": "556:29:77",
             "stateVariable": true,
             "storageLocation": "default",
@@ -801,7 +801,7 @@
               "typeString": "string"
             },
             "typeName": {
-              "id": 10610,
+              "id": 10691,
               "name": "string",
               "nodeType": "ElementaryTypeName",
               "src": "556:6:77",
@@ -813,7 +813,7 @@
             "value": {
               "argumentTypes": null,
               "hexValue": "",
-              "id": 10611,
+              "id": 10692,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -832,25 +832,25 @@
           },
           {
             "body": {
-              "id": 10621,
+              "id": 10702,
               "nodeType": "Block",
               "src": "633:32:77",
               "statements": [
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 10619,
+                    "id": 10700,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 10617,
+                      "id": 10698,
                       "name": "tokenURI_",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 10612,
+                      "referencedDeclaration": 10693,
                       "src": "639:9:77",
                       "typeDescriptions": {
                         "typeIdentifier": "t_string_storage",
@@ -861,11 +861,11 @@
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "id": 10618,
+                      "id": 10699,
                       "name": "_tokenURI",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 10614,
+                      "referencedDeclaration": 10695,
                       "src": "651:9:77",
                       "typeDescriptions": {
                         "typeIdentifier": "t_string_memory_ptr",
@@ -878,14 +878,14 @@
                       "typeString": "string storage ref"
                     }
                   },
-                  "id": 10620,
+                  "id": 10701,
                   "nodeType": "ExpressionStatement",
                   "src": "639:21:77"
                 }
               ]
             },
             "documentation": null,
-            "id": 10622,
+            "id": 10703,
             "implemented": true,
             "isConstructor": true,
             "isDeclaredConst": false,
@@ -893,15 +893,15 @@
             "name": "",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 10615,
+              "id": 10696,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 10614,
+                  "id": 10695,
                   "name": "_tokenURI",
                   "nodeType": "VariableDeclaration",
-                  "scope": 10622,
+                  "scope": 10703,
                   "src": "602:16:77",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -910,7 +910,7 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 10613,
+                    "id": 10694,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
                     "src": "602:6:77",
@@ -927,12 +927,12 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 10616,
+              "id": 10697,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "633:0:77"
             },
-            "scope": 10631,
+            "scope": 10712,
             "src": "590:75:77",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -940,33 +940,33 @@
           },
           {
             "body": {
-              "id": 10629,
+              "id": 10710,
               "nodeType": "Block",
               "src": "720:27:77",
               "statements": [
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 10627,
+                    "id": 10708,
                     "name": "tokenURI_",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 10612,
+                    "referencedDeclaration": 10693,
                     "src": "733:9:77",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage",
                       "typeString": "string storage ref"
                     }
                   },
-                  "functionReturnParameters": 10626,
-                  "id": 10628,
+                  "functionReturnParameters": 10707,
+                  "id": 10709,
                   "nodeType": "Return",
                   "src": "726:16:77"
                 }
               ]
             },
             "documentation": null,
-            "id": 10630,
+            "id": 10711,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -974,22 +974,22 @@
             "name": "tokenURI",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 10623,
+              "id": 10704,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "686:2:77"
             },
             "payable": false,
             "returnParameters": {
-              "id": 10626,
+              "id": 10707,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 10625,
+                  "id": 10706,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 10630,
+                  "scope": 10711,
                   "src": "712:6:77",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -998,7 +998,7 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 10624,
+                    "id": 10705,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
                     "src": "712:6:77",
@@ -1013,14 +1013,14 @@
               ],
               "src": "711:8:77"
             },
-            "scope": 10631,
+            "scope": 10712,
             "src": "669:78:77",
             "stateMutability": "view",
-            "superFunction": 10606,
+            "superFunction": 10687,
             "visibility": "external"
           }
         ],
-        "scope": 10632,
+        "scope": 10713,
         "src": "503:246:77"
       }
     ],
@@ -1032,5 +1032,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
-  "updatedAt": "2018-08-29T08:42:46.611Z"
+  "updatedAt": "2018-08-29T10:14:12.480Z"
 }
