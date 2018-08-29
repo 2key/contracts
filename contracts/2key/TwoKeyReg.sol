@@ -121,6 +121,10 @@ contract TwoKeyReg is Ownable {
       require(_userAddress != address(0));
       return userToCampaignsWhereConverter[_userAddress];
   }
+  /// View function to return address of current active twoKeyEventSource contract
+  function getTwoKeyEventSourceAddress() public view returns (address) {
+    return twoKeyEventSource;
+  }
   mapping(address => string) public owner2name;
   mapping(bytes32 => address) public name2owner;
 
