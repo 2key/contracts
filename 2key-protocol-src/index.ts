@@ -3,7 +3,7 @@ import { BigNumber } from 'bignumber.js';
 import solidityContracts from './contracts/meta';
 import { TwoKeyEconomy } from './contracts/TwoKeyEconomy';
 import { TwoKeyWhitelisted } from './contracts/TwoKeyWhitelisted';
-import { EhtereumNetworks, ContractsAdressess, TwoKeyInit, BalanceMeta, Gas, Transaction, CreateCampaign } from './interfaces';
+import { EhtereumNetworks, ContractsAdressess, TwoKeyInit, BalanceMeta, Gas, Transaction, CreateCampaign, Contract } from './interfaces';
 import Sign from './sign';
 // import HDWalletProvider from './HDWalletProvider';
 
@@ -60,7 +60,7 @@ export default class TwoKeyNetwork {
     this.web3.eth.defaultBlock = 'pending';
     // this.pk = wallet.getPrivateKey().toString('hex');
 
-    this.twoKeyEconomy = new TwoKeyEconomy(this.web3, this.getContractDeployedAddress('TwoKeyEconomy'))
+    this.twoKeyEconomy = new TwoKeyEconomy(this.web3, this._getContractDeployedAddress('TwoKeyEconomy'))
 
     // init 2KeySyncNet Client
     // const syncEngine = new ProviderEngine();
@@ -112,7 +112,6 @@ export default class TwoKeyNetwork {
   }
 
   public getBalance(address: string = this.address): Promise<BalanceMeta> {
-    console.log('getBalance', address);
     const promises = [
       this._getEthBalance(address),
       this._getTokenBalance(address),
@@ -167,7 +166,6 @@ export default class TwoKeyNetwork {
     const tokenBalance = parseFloat(await this._getTokenBalance(this.address));
     const { wei: gasRequired } = await this.getERC20TransferGas(to, value);
     const etherRequired = parseFloat(this.fromWei(gasPrice * gasRequired, 'ether'));
-    console.log(value, etherRequired);
     if (tokenBalance < value || balance < etherRequired) {
       throw new Error('Not enough founds');
     }
@@ -180,7 +178,6 @@ export default class TwoKeyNetwork {
     const balance = parseFloat(await this._getEthBalance(this.address));
     const { wei: gasRequired } = await this.getETHTransferGas(to, value);
     const totalValue = value + parseFloat(this.fromWei(gasPrice * gasRequired, 'ether'));
-    console.log(value, totalValue);
     if (totalValue > balance) {
       throw new Error('Not enough founds');
     }
@@ -196,16 +193,58 @@ export default class TwoKeyNetwork {
     });
   }
 
-  public createSaleCampaign(data: CreateCampaign): Promise<string> {
+  public estimateSaleCampaign(data: CreateCampaign): Promise<number> {
     return new Promise(async (resolve, reject) => {
-      const whitelistInfluencer = await this._createWhiteList();
-      const whitelistConverter = await this._createWhiteList();
-      console.log(whitelistInfluencer);
-      resolve('qwerty');
+      try {
+        const whiteListGas = await this._estimateSubcontractGas(solidityContracts.TwoKeyWhitelisted);
+        console.log('TwoKeyWhiteList', whiteListGas);
+        const assetFactoryGas = await this._estimateSubcontractGas(solidityContracts.ComposableAssetFactory, [data.openingTime, data.closingTime]);
+        console.log('ComposableAssetFactory', assetFactoryGas);
+        const campaignGas = await this._estimateSubcontractGas(solidityContracts.TwoKeyCampaign, [
+          this._getContractDeployedAddress('TwoKeyEventSource'),
+          this.twoKeyEconomy.address,
+          this.twoKeyEconomy.address,
+          this.twoKeyEconomy.address,
+          this.twoKeyEconomy.address,
+          data.contractor || this.address,
+          data.moderator || this.address,
+          data.closingTime,
+          data.bonusOffer,
+          data.rate,
+          data.maxCPA,
+        ]);
+        console.log('TwoKeyCampaign', campaignGas);
+        const totalGas = whiteListGas * 2 + assetFactoryGas + campaignGas;
+        resolve(totalGas);
+      } catch (err) {
+        reject(err);
+      }
     });
   }
 
-  private getContractDeployedAddress(contract: string): string {
+  public createSaleCampaign(data: CreateCampaign): Promise<string> {
+    return new Promise(async (resolve, reject) => {
+      const whitelistInfluencer = await this._createSubcontract(solidityContracts.TwoKeyWhitelisted);
+      const whitelistConverter = await this._createSubcontract(solidityContracts.TwoKeyWhitelisted);
+      const assetFactory = await this._createSubcontract(solidityContracts.ComposableAssetFactory, [data.openingTime, data.closingTime]);
+      const campaign = await this._createSubcontract(solidityContracts.TwoKeyCampaign, [
+        this._getContractDeployedAddress('TwoKeyEventSource'),
+        this.twoKeyEconomy.address,
+        whitelistInfluencer,
+        whitelistConverter,
+        assetFactory,
+        data.contractor || this.address,
+        data.moderator || this.address,
+        data.closingTime,
+        data.bonusOffer,
+        data.rate,
+        data.maxCPA,
+      ]);
+      resolve(campaign);
+    });
+  }
+
+  private _getContractDeployedAddress(contract: string): string {
     return this.contracts ? this.contracts[contract] : solidityContracts[contract].networks[this.networks.mainNetId].address
   }
 
@@ -258,21 +297,36 @@ export default class TwoKeyNetwork {
     });
   }
 
-  private _createWhiteList(): Promise<string> {
+  private _createSubcontract(contract: Contract, params?: any[]): Promise<string> {
     return new Promise(async (resolve, reject) => {
-      const { TwoKeyWhitelisted: { abi, bytecode: data } } = solidityContracts;
-      // const whiteList = await TwoKeyWhitelisted.createAndValidate(this.web3, '0x0');
-      // console.log(whiteList);
-      this.web3.eth.contract(abi).new({ data, from: this.address, gas: 7000000 }, (err, res) => {
+      const { abi, bytecode: data } = contract;
+      const gas = await this._estimateSubcontractGas(contract, params);
+      const createParams = params ? [...params, { data, from: this.address, gas }] : [{ data, from: this.address, gas }];
+      this.web3.eth.contract(abi).new(...createParams, (err, res) => {
         if (err) {
           reject(err);
         } else {
-          // console.log('Contract Created', res.address || res.transactionHash);
           if (res.address) {
             resolve(res.address);
           }
         }
       });
+    });
+  }
+
+  private _estimateSubcontractGas(contract: Contract, params?: any[]): Promise<number> {
+    return new Promise(async (resolve, reject) => {
+      const { abi, bytecode: data } = contract;
+      const estimateParams = params ? [...params, { data, from: this.address }] : [{ data, from: this.address }];
+      this.web3.eth.estimateGas({
+        data: this.web3.eth.contract(abi).new.getData(...estimateParams),
+      }, (err, res) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(res);
+        }
+      })
     });
   }
 

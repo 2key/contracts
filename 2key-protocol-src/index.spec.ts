@@ -9,10 +9,10 @@ import WSSubprovider from 'web3-provider-engine/subproviders/websocket';
 import WalletSubprovider from 'ethereumjs-wallet/provider-engine';
 import TwoKeyProtocol from '.';
 import { CreateCampaign } from './interfaces';
+import contractsMeta from './contracts/meta';
 
 const mnemonic = 'laundry version question endless august scatter desert crew memory toy attract cruel';
-const aydnepMnemonic = 'bundle insect salad atom alcohol broom frog crumble cigar throw toe alter';
-
+const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 const hdwallet = hdkey.fromMasterSeed(bip39.mnemonicToSeed(mnemonic));
 const wallet = hdwallet.derivePath('m/44\'/60\'/0\'/0/' + 0).getWallet();
 
@@ -33,14 +33,25 @@ web3.eth.defaultAccount = `0x${wallet.getAddress().toString('hex')}`;
 
 
 let twoKeyProtocol: TwoKeyProtocol;
+const openingTime = new Date();
+const closingTime = new Date(openingTime.valueOf()).setDate(openingTime.getDate() + 30);
+
+const mainNetId = 17;
+const syncTwoKeyNetId = 47;
+const eventSource = contractsMeta.TwoKeyEventSource.networks[mainNetId].address;
+const twoKeyEconomy = contractsMeta.TwoKeyEconomy.networks[mainNetId].address;
+const bonusOffer = 10;
+const rate = 1;
+const maxCPA = 5;
+
 
 describe('TwoKeyProtocol', () => {
   it('should create a 2Key-protocol instance', () => {
     twoKeyProtocol = new TwoKeyProtocol({
       web3,
       networks: {
-        mainNetId: 17,
-        syncTwoKeyNetId: 47,
+        mainNetId,
+        syncTwoKeyNetId,
       },
     });
     expect(twoKeyProtocol).to.instanceOf(TwoKeyProtocol);
@@ -96,10 +107,32 @@ describe('TwoKeyProtocol', () => {
       done();
     }, 10000);
   }).timeout(15000);
-  it('should create a new campaign contract', async (done) => {
-    const campaign = await twoKeyProtocol.createSaleCampaign({
-      eventSource: '0x835aaf6ea6b04892915a8299110652e7cc897a4e',
-      twoKeyEconomy: '0x9993da88b6721bc0844e5c5b1ea02d25c38b2c12',
+  it('should calculate gas for campaign contract creation', async () => {
+    const gas = await twoKeyProtocol.estimateSaleCampaign({
+      eventSource,
+      twoKeyEconomy,
+      openingTime: openingTime.getTime(),
+      closingTime,
+      bonusOffer,
+      rate,
+      maxCPA,
     });
+    console.log('TotalGas required', gas);
+    expect(gas).to.exist;
+    expect(gas).to.greaterThan(0);
+  })
+  it('should create a new campaign contract', async () => {
+    const campaign = await twoKeyProtocol.createSaleCampaign({
+      eventSource,
+      twoKeyEconomy,
+      openingTime: openingTime.getTime(),
+      closingTime,
+      bonusOffer,
+      rate,
+      maxCPA,
+    });
+    console.log('Campaign address', campaign);
+    expect(campaign).to.exist;
+    expect(addressRegex.test(campaign)).to.be.true;
   }).timeout(600000);
 });
