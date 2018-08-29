@@ -6,9 +6,16 @@ import './TwoKeyEconomy.sol';
 import './TwoKeyTypes.sol';
 import './TwoKeyEventSource.sol';
 import './TwoKeyARC.sol';
-import "./ComposableAssetFactory.sol";
+import "./TwoKeyCampaignInventory.sol";
 import "./TwoKeyWhitelisted.sol";
 
+/// TODO: Fix emit event created when deployed
+/// TODO: method to set contractor public key  (when user create campaign we generate a link)
+/// TODO: Somehow to check if contractor public key is set
+/// TODO: Add inventory (ETHCrowdsale()?)
+/// TODO: Method to buy inventory
+/// TODO: function Initialize inventory contract (ex. Composable asset factory) (if inventory is not initialized)
+/// TODO: opening/closing time campaign constructor not inventory (in comp.asset factory usless)
 contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
 
 	using SafeMath for uint256;
@@ -50,7 +57,7 @@ contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
 
 
 	// Composable asset factory
-	ComposableAssetFactory composableAssetFactory;
+	TwoKeyCampaignInventory twoKeyCampaignInventory;
 
 	/// TODO: Make contract TwoKeyCampaignFactory to deploy singleton contracts and TwoKeyCampaign
 
@@ -102,12 +109,12 @@ contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
     }
 
 	modifier isOngoing() {
-		require(composableAssetFactory.isOnGoing() == true);
+		require(twoKeyCampaignInventory.isOnGoing() == true);
 		_;
 	}
 
 	modifier isClosed() {
-		require(composableAssetFactory.isClosed() == true);
+		require(twoKeyCampaignInventory.isClosed() == true);
 		_;
 	}
 
@@ -121,7 +128,7 @@ contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
 		TwoKeyEconomy _economy,
 		TwoKeyWhitelisted _whitelistInfluencer,
 		TwoKeyWhitelisted _whitelistConverter,
-		ComposableAssetFactory _composableAssetFactory,
+//		ComposableAssetFactory _composableAssetFactory,
 
 		address _contractor,
 
@@ -133,7 +140,7 @@ contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
 		uint256 _expiryConversion,
 		uint256 _escrowPercentage,
 		uint256 _rate,
-		uint256 _maxPi) TwoKeyARC(	_eventSource, _contractor) StandardToken() public {
+		uint256 _maxPi) TwoKeyARC(_eventSource, _contractor) StandardToken() public {
 
 
 		/// requires that all contracts from constructor are already deployed
@@ -155,7 +162,7 @@ contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
 
 		whitelistInfluencer = _whitelistInfluencer;
 		whitelistConverter = _whitelistConverter;
-		composableAssetFactory = _composableAssetFactory;
+//		composableAssetFactory = _composableAssetFactory;
 
 
 
@@ -172,14 +179,19 @@ contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
 
 	}
 
+	/// Method to deploy twoKeyInventory
+	function addInventory(uint openingTime, uint closingTime) public {
+		require(address(twoKeyCampaignInventory) == address(0));
+		twoKeyCampaignInventory = new TwoKeyCampaignInventory(openingTime, closingTime);
+	}
+
 	/// add modifiers who can call this
     function addAdminRolesAndBalancesAfterDeployed() public {
-		composableAssetFactory.adminAddRole(msg.sender, composableAssetFactory.getControllerRole());
-		composableAssetFactory.adminAddRole(contractor, composableAssetFactory.getControllerRole());
-		composableAssetFactory.adminAddRole(moderator, composableAssetFactory.getControllerRole());
+		twoKeyCampaignInventory.adminAddRole(msg.sender, twoKeyCampaignInventory.getControllerRole());
+		twoKeyCampaignInventory.adminAddRole(contractor, twoKeyCampaignInventory.getControllerRole());
+		twoKeyCampaignInventory.adminAddRole(moderator, twoKeyCampaignInventory.getControllerRole());
 		balances[msg.sender] = totalSupply_;
     }
-
 
     /*  
 	    fulfills a fungible asset purchase
@@ -197,7 +209,7 @@ contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
 		require(economy.transferFrom(msg.sender, this, payout));	
 		Conversion memory c = Conversion(_from, payout, msg.sender, false, false, _tokenID, _assetContract, _amount, CampaignType.Fungible, now, now + expiryConversion * 1 minutes);
 		// move funds
-		composableAssetFactory.removeFungibleAssets(_tokenID, _assetContract, _amount);
+		twoKeyCampaignInventory.removeFungibleAssets(_tokenID, _assetContract, _amount);
 		eventSource.escrow(address(this), msg.sender, _tokenID, _assetContract, _amount, CampaignType.Fungible);	
 		conversions[msg.sender] = c;
 	}
@@ -220,7 +232,7 @@ contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
 		require(economy.transferFrom(msg.sender, this, payout));
 		Conversion memory c = Conversion(_from, payout, msg.sender, false, false, _tokenID, _assetContract, _index, CampaignType.NonFungible, now, now + expiryConversion * 1 minutes);
 		// move funds
-		composableAssetFactory.setFungibleAssetsToZero(_tokenID, _assetContract);
+		twoKeyCampaignInventory.setFungibleAssetsToZero(_tokenID, _assetContract);
 		eventSource.escrow(address(this), msg.sender, _tokenID, _assetContract, _index, CampaignType.NonFungible);
 		conversions[msg.sender] = c;
 	}
@@ -254,9 +266,9 @@ contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
         CampaignType _type) isWhitelistedConverter didConverterConvert public {
         actuallyFulfilledTwoKeyToken();
         if (_type == CampaignType.NonFungible) {
-			require(composableAssetFactory.transferNonFungibleAsset(msg.sender, _tokenID, _assetContract, _assetTokenIDOrAmount));
+			require(twoKeyCampaignInventory.transferNonFungibleAsset(msg.sender, _tokenID, _assetContract, _assetTokenIDOrAmount));
         } else if (_type == CampaignType.Fungible) {
-			require(composableAssetFactory.transferFungibleAsset(msg.sender, _tokenID, _assetContract, _assetTokenIDOrAmount));
+			require(twoKeyCampaignInventory.transferFungibleAsset(msg.sender, _tokenID, _assetContract, _assetTokenIDOrAmount));
         }
 
     }
@@ -276,9 +288,9 @@ contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
 	        address assetToken = address(
 		      keccak256(abi.encodePacked(_assetContract, _assetTokenIDOrAmount))
 		    );
-			composableAssetFactory.setFungibleAssetsToOne(_tokenID, _assetContract);
+			twoKeyCampaignInventory.setFungibleAssetsToOne(_tokenID, _assetContract);
         } else if (_type == CampaignType.Fungible) {
-			composableAssetFactory.addFungibleAssets(_tokenID, _assetContract, _assetTokenIDOrAmount);
+			twoKeyCampaignInventory.addFungibleAssets(_tokenID, _assetContract, _assetTokenIDOrAmount);
         }
 
         require(economy.transfer(_converter, (c.payout).mul(rate)));

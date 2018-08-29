@@ -14,8 +14,7 @@ contract TwoKeyEventSource is TwoKeyTypes {
     event Rewarded(address indexed _campaign, address indexed _to, uint256 _amount);
     event Fulfilled(address indexed _campaign, address indexed _converter, uint256 indexed _tokenID, address _childContractID, uint256 _indexOrAmount, CampaignType _type);
     event Cancelled(address indexed _campaign, address indexed _converter, uint256 indexed _tokenID, address _childContractID, uint256 _indexOrAmount, CampaignType _type);
-
-
+    /// event Convert (?)
 
 
     ///Address of the contract admin - interface
@@ -125,12 +124,14 @@ contract TwoKeyEventSource is TwoKeyTypes {
     }
 
     /// @dev Only allowed contracts can call this function ---> means can emit events
-    function created(address _campaign, address _owner) public onlyAllowedContracts{
+    /// This user will be contractor
+    function created(address _campaign, address _owner) public onlyAllowedContracts {
     	emit Created(_campaign, _owner);
     }
 
     /// @dev Only allowed contracts can call this function ---> means can emit events
-    function joined(address _campaign, address _from, address _to) public onlyAllowedContracts{
+    /// This user will be refferer
+    function joined(address _campaign, address _from, address _to) public onlyAllowedContracts {
     	emit Joined(_campaign, _from, _to);
     }
 

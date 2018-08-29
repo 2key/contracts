@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-import "./ComposableAssetFactory.sol";
+import "./TwoKeyCampaignInventory.sol";
 import "./TwoKeyWhitelisted.sol";
 import "./TwoKeyCampaign.sol";
 import "./TwoKeyCampaign.sol";

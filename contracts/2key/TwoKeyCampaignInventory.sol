@@ -6,7 +6,7 @@ import '../openzeppelin-solidity/contracts/math/SafeMath.sol';
 
 import './RBACWithAdmin.sol';
 
-contract ComposableAssetFactory is RBACWithAdmin { 
+contract TwoKeyCampaignInventory is RBACWithAdmin {
 
   event Expired(address indexed _contract);
 
