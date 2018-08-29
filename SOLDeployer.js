@@ -67,7 +67,7 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
             // contracts[contractName] = whitelist[contractName].deployed
             //   ? { abi, networks } : { abi, networks, bytecode };
             contracts[contractName] = whitelist[contractName].deployed
-              ? { networks } : { bytecode, abi };
+              ? { networks } : { bytecode, abi, networks };
           }
         });
         fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts/meta.ts'), `export default ${util.inspect(contracts, { depth: 10 })}`);
