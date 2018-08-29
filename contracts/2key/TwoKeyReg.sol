@@ -86,6 +86,41 @@ contract TwoKeyReg is Ownable {
     userToCampaignsWhereConverter[_userAddress].push(_contractAddress);
   }
 
+  /// View function - doesn't cost any gas to be executed
+  /// @notice Function to fetch all campaign contracts where user is contractor
+  /// @param _userAddress is address of user
+  /// @return array of addresses (campaign contracts)
+  function getContractsWhereUserIsContractor(address _userAddress) public view returns (address[]) {
+      require(_userAddress != address(0));
+      return userToCampaignsWhereContractor[_userAddress];
+  }
+
+  /// View function - doesn't cost any gas to be executed
+  /// @notice Function to fetch all campaign contracts where user is moderator
+  /// @param _userAddress is address of user
+  /// @return array of addresses (campaign contracts)
+  function getContractsWhereUserIsModerator(address _userAddress) public view returns (address[]) {
+      require(_userAddress != address(0));
+      return userToCampaignsWhereModerator[_userAddress];
+  }
+
+  /// View function - doesn't cost any gas to be executed
+  /// @notice Function to fetch all campaign contracts where user is refferer
+  /// @param _userAddress is address of user
+  /// @return array of addresses (campaign contracts)
+  function getContractsWhereUserIsRefferer(address _userAddress) public view returns (address[]) {
+      require(_userAddress != address(0));
+      return userToCampaignsWhereRefferer[_userAddress];
+  }
+
+  /// View function - doesn't cost any gas to be executed
+  /// @notice Function to fetch all campaign contracts where user is converter
+  /// @param _userAddress is address of user
+  /// @return array of addresses (campaign contracts)
+  function getContractsWhereUserIsConverter(address _userAddress) public view returns (address[]) {
+      require(_userAddress != address(0));
+      return userToCampaignsWhereConverter[_userAddress];
+  }
   mapping(address => string) public owner2name;
   mapping(bytes32 => address) public name2owner;
 

@@ -72,6 +72,7 @@ contract('TwoKeyCampaign', async (accounts) => {
         /*
             Subcontracts required for TwoKeyCampaign
          */
+
         /// TODO: Move subcontracts to be deployed in TwoKeyCampaign constructor
 
         whitelistInfluencer = await TwoKeyWhitelisted.new();
