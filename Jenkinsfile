@@ -2,7 +2,7 @@
 pipeline {
   agent {
     docker {
-      image 'shlomiz2key/runners:deployer-1.0.8'
+      image 'shlomiz2key/runners:deployer-1.0.9'
       reuseNode true
       args '-e npm_config_cache=npm-cache -e HOME=.'
     }
