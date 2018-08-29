@@ -18,8 +18,8 @@ export interface ContractsAdressess {
 }
 
 export interface EhtereumNetworks {
-  mainNetId: number,
-  syncTwoKeyNetId: number,
+  mainNetId: number | string,
+  syncTwoKeyNetId: number | string,
 }
 
 export interface TwoKeyInit {
