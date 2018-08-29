@@ -9,7 +9,7 @@ import './TwoKeyARC.sol';
 import "./ComposableAssetFactory.sol";
 import "./TwoKeyWhitelisted.sol";
 
-contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
+contract TwoKeyCampaign is RBACWithAdmin, TwoKeyARC, TwoKeyTypes {
 
 	using SafeMath for uint256;
 
@@ -153,9 +153,9 @@ contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
 		escrowPercentage = _escrowPercentage;
 
 
-//		whitelistInfluencer = _whitelistInfluencer;
-//		whitelistConverter = _whitelistConverter;
-//		composableAssetFactory = _composableAssetFactory;
+		whitelistInfluencer = _whitelistInfluencer;
+		whitelistConverter = _whitelistConverter;
+		composableAssetFactory = _composableAssetFactory;
 
 
 
@@ -172,7 +172,6 @@ contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
 
 	}
 
-//	/// add modifiers who can call this
 //	function addSingletonSubcontracts(uint openingTime, uint closingTime) public {
 //		/// We require at least that those contracts are not previously deployed (malicious attack)
 //		require(address(composableAssetFactory) == address(0));

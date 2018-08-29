@@ -52,7 +52,6 @@ contract('TwoKeyCampaign', async (accounts) => {
     const electorateAdmins = accounts[4];
     const walletExchange = accounts[5];
     before(async () => {
-
         /// TODO: Act as inventory
         // Contractor input addresses
         erc20 = await ERC20Mock.new({
@@ -98,7 +97,7 @@ contract('TwoKeyCampaign', async (accounts) => {
             maxPi,
             {
                 from: campaignCreator,
-                gas: '20000000'
+                gas: '8000000'
             }
         );
     });
