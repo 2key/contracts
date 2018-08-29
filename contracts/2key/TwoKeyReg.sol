@@ -18,7 +18,7 @@ contract TwoKeyReg is Ownable {
   /// @notice Method which will allow us to add allowed 2key event source contract to write here
   /// @dev Only owner can call this method (?)
   /// @param _twoKeyEventSource is address of already deployed 2key Event source contract
-  function addTwoKeyEventSource(address _twoKeyEventSource) onlyOwner {
+  function addTwoKeyEventSource(address _twoKeyEventSource) public onlyOwner {
     require(twoKeyEventSource == address(0));
     require(_twoKeyEventSource != address(0));
 
@@ -27,7 +27,7 @@ contract TwoKeyReg is Ownable {
 
   /// @notice Method to change the allowed TwoKeyEventSource contract address
   /// @param _twoKeyEventSource new TwoKeyEventSource contract address
-  function changeTwoKeyEventSource(address _twoKeyEventSource) onlyOwner {
+  function changeTwoKeyEventSource(address _twoKeyEventSource) public onlyOwner {
     require(_twoKeyEventSource != address(0));
 
     twoKeyEventSource = _twoKeyEventSource;
