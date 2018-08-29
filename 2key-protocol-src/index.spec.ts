@@ -11,7 +11,24 @@ import TwoKeyProtocol from '.';
 import { CreateCampaign } from './interfaces';
 import contractsMeta from './contracts/meta';
 
-const mnemonic = 'laundry version question endless august scatter desert crew memory toy attract cruel';
+const { env } = process;
+
+const mnemonic = env.MNEMONIC;
+const rpcUrl = env.RCP_URL;
+const mainNetId = env.MAIN_NET_ID;
+const syncTwoKeyNetId = env.SYNC_NET_ID;
+
+const bonusOffer = 10;
+const rate = 1;
+const maxCPA = 5;
+const openingTime = new Date();
+const closingTime = new Date(openingTime.valueOf()).setDate(openingTime.getDate() + 30);
+const eventSource = contractsMeta.TwoKeyEventSource.networks[mainNetId].address;
+const twoKeyEconomy = contractsMeta.TwoKeyEconomy.networks[mainNetId].address;
+
+console.log(contractsMeta.TwoKeyEventSource.networks[mainNetId].address);
+console.log(contractsMeta.TwoKeyEconomy.networks[mainNetId].address);
+
 const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 const hdwallet = hdkey.fromMasterSeed(bip39.mnemonicToSeed(mnemonic));
 const wallet = hdwallet.derivePath('m/44\'/60\'/0\'/0/' + 0).getWallet();
@@ -21,7 +38,7 @@ const wallet = hdwallet.derivePath('m/44\'/60\'/0\'/0/' + 0).getWallet();
 
 const engine = new ProviderEngine();
 // const mainProvider = new WSSubprovider({ rpcUrl: 'ws://18.233.2.70:8501' })
-const mainProvider = new WSSubprovider({ rpcUrl: 'ws://localhost:8546' })
+const mainProvider = new WSSubprovider({ rpcUrl })
 engine.addProvider(new WalletSubprovider(wallet, {}));
 engine.addProvider(mainProvider);
 
@@ -33,16 +50,6 @@ web3.eth.defaultAccount = `0x${wallet.getAddress().toString('hex')}`;
 
 
 let twoKeyProtocol: TwoKeyProtocol;
-const openingTime = new Date();
-const closingTime = new Date(openingTime.valueOf()).setDate(openingTime.getDate() + 30);
-
-const mainNetId = 17;
-const syncTwoKeyNetId = 47;
-const eventSource = contractsMeta.TwoKeyEventSource.networks[mainNetId].address;
-const twoKeyEconomy = contractsMeta.TwoKeyEconomy.networks[mainNetId].address;
-const bonusOffer = 10;
-const rate = 1;
-const maxCPA = 5;
 
 
 describe('TwoKeyProtocol', () => {
