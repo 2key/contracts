@@ -12,6 +12,15 @@ export class TwoKeyReg extends TC.TypeChainContract {
       {
         constant: true,
         inputs: [{ name: "", type: "address" }, { name: "", type: "uint256" }],
+        name: "userToCampaignsWhereReferrer",
+        outputs: [{ name: "", type: "address" }],
+        payable: false,
+        stateMutability: "view",
+        type: "function"
+      },
+      {
+        constant: true,
+        inputs: [{ name: "", type: "address" }, { name: "", type: "uint256" }],
         name: "userToCampaignsWhereConverter",
         outputs: [{ name: "", type: "address" }],
         payable: false,
@@ -49,15 +58,6 @@ export class TwoKeyReg extends TC.TypeChainContract {
         constant: true,
         inputs: [{ name: "", type: "address" }, { name: "", type: "uint256" }],
         name: "userToCampaignsWhereModerator",
-        outputs: [{ name: "", type: "address" }],
-        payable: false,
-        stateMutability: "view",
-        type: "function"
-      },
-      {
-        constant: true,
-        inputs: [{ name: "", type: "address" }, { name: "", type: "uint256" }],
-        name: "userToCampaignsWhereRefferer",
         outputs: [{ name: "", type: "address" }],
         payable: false,
         stateMutability: "view",
@@ -159,7 +159,7 @@ export class TwoKeyReg extends TC.TypeChainContract {
           { name: "_userAddress", type: "address" },
           { name: "_contractAddress", type: "address" }
         ],
-        name: "addWhereRefferer",
+        name: "addWhereReferrer",
         outputs: [],
         payable: false,
         stateMutability: "nonpayable",
@@ -198,7 +198,7 @@ export class TwoKeyReg extends TC.TypeChainContract {
       {
         constant: true,
         inputs: [{ name: "_userAddress", type: "address" }],
-        name: "getContractsWhereUserIsRefferer",
+        name: "getContractsWhereUserIsReferrer",
         outputs: [{ name: "", type: "address[]" }],
         payable: false,
         stateMutability: "view",
@@ -288,6 +288,16 @@ export class TwoKeyReg extends TC.TypeChainContract {
     return TC.promisify(this.rawWeb3Contract.getTwoKeyEventSourceAddress, []);
   }
 
+  public userToCampaignsWhereReferrer(
+    arg0: BigNumber | string,
+    arg1: BigNumber | number
+  ): Promise<string> {
+    return TC.promisify(this.rawWeb3Contract.userToCampaignsWhereReferrer, [
+      arg0.toString(),
+      arg1.toString()
+    ]);
+  }
+
   public userToCampaignsWhereConverter(
     arg0: BigNumber | string,
     arg1: BigNumber | number
@@ -307,16 +317,6 @@ export class TwoKeyReg extends TC.TypeChainContract {
     arg1: BigNumber | number
   ): Promise<string> {
     return TC.promisify(this.rawWeb3Contract.userToCampaignsWhereModerator, [
-      arg0.toString(),
-      arg1.toString()
-    ]);
-  }
-
-  public userToCampaignsWhereRefferer(
-    arg0: BigNumber | string,
-    arg1: BigNumber | number
-  ): Promise<string> {
-    return TC.promisify(this.rawWeb3Contract.userToCampaignsWhereRefferer, [
       arg0.toString(),
       arg1.toString()
     ]);
@@ -353,10 +353,10 @@ export class TwoKeyReg extends TC.TypeChainContract {
     ]);
   }
 
-  public getContractsWhereUserIsRefferer(
+  public getContractsWhereUserIsReferrer(
     _userAddress: BigNumber | string
   ): Promise<string[]> {
-    return TC.promisify(this.rawWeb3Contract.getContractsWhereUserIsRefferer, [
+    return TC.promisify(this.rawWeb3Contract.getContractsWhereUserIsReferrer, [
       _userAddress.toString()
     ]);
   }
@@ -424,13 +424,13 @@ export class TwoKeyReg extends TC.TypeChainContract {
       [_userAddress.toString(), _contractAddress.toString()]
     );
   }
-  public addWhereReffererTx(
+  public addWhereReferrerTx(
     _userAddress: BigNumber | string,
     _contractAddress: BigNumber | string
   ): TC.DeferredTransactionWrapper<TC.ITxParams> {
     return new TC.DeferredTransactionWrapper<TC.ITxParams>(
       this,
-      "addWhereRefferer",
+      "addWhereReferrer",
       [_userAddress.toString(), _contractAddress.toString()]
     );
   }
