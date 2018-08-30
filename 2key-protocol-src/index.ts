@@ -341,7 +341,7 @@ export default class TwoKeyNetwork {
           if (res.address) {
             resolve(res.address);
           } else {
-            console.log(res.transactionHash);
+            console.log('Transaction Hash:', res.transactionHash);
           }
         }
       });
