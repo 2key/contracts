@@ -67,7 +67,7 @@ describe('TwoKeyProtocol', () => {
   });
   it('should return a balance for address', async () => {
     const balance = await twoKeyProtocol.getBalance();
-    console.log(balance);
+    console.log('Balance', balance);
     expect(balance).to.exist;
     expect(balance).to.haveOwnProperty('balance');
     expect(balance).to.haveOwnProperty('local_address');
@@ -77,12 +77,12 @@ describe('TwoKeyProtocol', () => {
   }).timeout(30000);
   it('should return estimated gas for transferTokens', async () => {
     const gas = await twoKeyProtocol.getERC20TransferGas('0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7', 1000);
-    console.log(gas);
+    console.log('Gas required for Token transfer', gas);
     expect(gas).to.exist;
     expect(gas).to.be.greaterThan(0);
   }).timeout(30000);
   it('should transfer tokens', async () => {
-    console.log(await twoKeyProtocol.getTransaction('0x07230b24628f9bafde23d0196b52f70acf35a258f855e4e08d866d2975934984'));
+    // console.log(await twoKeyProtocol.getTransaction('0x07230b24628f9bafde23d0196b52f70acf35a258f855e4e08d866d2975934984'));
     // const gasLimit = await twoKeyProtocol.getERC20TransferGas(twoKeyProtocolAydnep.getAddress(), 1000);
     const txHash = await twoKeyProtocol.transferTokens('0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7', 1000, 3000000000);
     // console.log(await twoKeyProtocol.getTransaction(txHash));
@@ -92,7 +92,7 @@ describe('TwoKeyProtocol', () => {
   }).timeout(30000);
   it('should return estimated gas for transfer ether', async () => {
     const gas = await twoKeyProtocol.getETHTransferGas('0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7', 1);
-    console.log(gas);
+    console.log('Gas required for ETH transfer', gas);
     expect(gas).to.exist;
     expect(gas).to.be.greaterThan(0);
   }).timeout(30000);
@@ -109,8 +109,8 @@ describe('TwoKeyProtocol', () => {
     setTimeout(async () => {
       const business = await twoKeyProtocol.getBalance();
       const aydnep = await twoKeyProtocol.getBalance('0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7');
-      console.log(business);
-      console.log(aydnep);
+      console.log('BUSINESS balance', business);
+      console.log('DESTINATION balance', aydnep);
       done();
     }, 10000);
   }).timeout(15000);

@@ -46,6 +46,7 @@ export default class TwoKeyNetwork {
       throw new Error('defaultAccount required!');
     }
     this.web3 = web3;
+    this.web3.eth.defaultBlock = 'pending';
     this.address = this.web3.eth.defaultAccount;
     if (contracts) {
       this.contracts = contracts;
@@ -169,7 +170,9 @@ export default class TwoKeyNetwork {
     if (tokenBalance < value || balance < etherRequired) {
       throw new Error('Not enough founds');
     }
-
+    const nonce = await this._getNonce();
+    console.log('Nonce for transferTokens', nonce);
+    // const params = { from: this.address, gasLimit: this.toHex(this.gas), gasPrice, nonce };
     const params = { from: this.address, gasLimit: this.toHex(this.gas), gasPrice };
     return this.twoKeyEconomy.transferTx(to, this.toWei(value, 'ether')).send(params);
   }
@@ -181,7 +184,9 @@ export default class TwoKeyNetwork {
     if (totalValue > balance) {
       throw new Error('Not enough founds');
     }
-    const params = { to, gasPrice, gasLimit: this.toHex(this.gas), value: this.toWei(value, 'ether').toString(), from: this.address }
+    const nonce = await this._getNonce();
+    console.log('Nonce for transfer ETH', nonce);
+    const params = { to, gasPrice, gasLimit: this.toHex(this.gas), value: this.toWei(value, 'ether').toString(), from: this.address, nonce }
     return new Promise((resolve, reject) => {
       this.web3.eth.sendTransaction(params, (err, res) => {
         if (err) {
@@ -198,7 +203,7 @@ export default class TwoKeyNetwork {
       try {
         const whiteListGas = await this._estimateSubcontractGas(solidityContracts.TwoKeyWhitelisted);
         console.log('TwoKeyWhiteList', whiteListGas);
-        const inventoryGas = await this._estimateSubcontractGas(solidityContracts.TwoKeyCampaignInventory);
+        const inventoryGas = await this._estimateSubcontractGas(solidityContracts.TwoKeyCampaignInventory, [data.openingTime, data.closingTime]);
         console.log('TwoKeyCampaignInventory', whiteListGas);
         const campaignGas = await this._estimateSubcontractGas(solidityContracts.TwoKeyCampaign, [
           this._getContractDeployedAddress('TwoKeyEventSource'),
@@ -230,8 +235,11 @@ export default class TwoKeyNetwork {
     return new Promise(async (resolve, reject) => {
       try {
         const whitelistInfluencerAddress = await this._createSubcontract(solidityContracts.TwoKeyWhitelisted);
+        console.log('whitelistInfluencerAddress', whitelistInfluencerAddress);
         const whitelistConverterAddress = await this._createSubcontract(solidityContracts.TwoKeyWhitelisted);
+        console.log('whitelistConverterAddress', whitelistConverterAddress);
         const campaignInventoryAddress = await this._createSubcontract(solidityContracts.TwoKeyCampaignInventory, gasPrice, [data.openingTime, data.closingTime]);
+        console.log('campaignInventoryAddress', campaignInventoryAddress);
         const campaignAddress = await this._createSubcontract(solidityContracts.TwoKeyCampaign, gasPrice, [
           this._getContractDeployedAddress('TwoKeyEventSource'),
           this.twoKeyEconomy.address,
@@ -312,6 +320,7 @@ export default class TwoKeyNetwork {
     return new Promise(async (resolve, reject) => {
       const { abi, bytecode: data } = contract;
       const gas = await this._estimateSubcontractGas(contract, params);
+      console.log('Nonce', await this._getNonce());
       const createParams = params ? [...params, { data, from: this.address, gas, gasPrice }] : [{ data, from: this.address, gas, gasPrice }];
       this.web3.eth.contract(abi).new(...createParams, (err, res) => {
         if (err) {
@@ -319,6 +328,8 @@ export default class TwoKeyNetwork {
         } else {
           if (res.address) {
             resolve(res.address);
+          } else {
+            console.log(res.transactionHash);
           }
         }
       });
@@ -342,20 +353,19 @@ export default class TwoKeyNetwork {
     });
   }
 
-  /*
   private _getNonce(): Promise<number> {
     return new Promise((resolve, reject) => {
-      this.mainWeb3.eth.getTransactionCount(this.address, 'pending', (err, res) => {
+      this.web3.eth.getTransactionCount(this.address, 'pending', (err, res) => {
         if (err) {
           reject(err);
         } else {
-          console.log('NONCE', res, this.address);
+          // console.log('NONCE', res, this.address);
           resolve(res);
         }
       });
     });
   }
-
+  /*
   private _createRawTransaction(params: RawTransaction): Promise<string> {
     return new Promise(async (resolve, reject) => {
       try {
