@@ -14,9 +14,10 @@ import "./TwoKeyWhitelisted.sol";
 /// TODO: Somehow to check if contractor public key is set
 /// TODO: Add inventory (ETHCrowdsale()?)
 /// TODO: Method to buy inventory
-/// TODO: function Initialize inventory contract (ex. Composable asset factory) (if inventory is not initialized)
-/// TODO: opening/closing time campaign constructor not inventory (in comp.asset factory usless)
 contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
+
+
+	event Created(address indexed _campaign, address indexed _owner);
 
 	using SafeMath for uint256;
 
@@ -181,18 +182,17 @@ contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
 
         maxPi = _maxPi;
 
-//		REVERTS - MEANING adding roles don't work well and nowhere we've configured (allowed) this contract to emit events!!!
-//		eventSource.created(address(this), contractor);
+		emit Created(address(this), contractor);
 
 	}
 
 	/// add modifiers who can call this
-    function addAdminRolesAndBalancesAfterDeployed() public {
-		twoKeyCampaignInventory.adminAddRole(msg.sender, twoKeyCampaignInventory.getControllerRole());
-		twoKeyCampaignInventory.adminAddRole(contractor, twoKeyCampaignInventory.getControllerRole());
-		twoKeyCampaignInventory.adminAddRole(moderator, twoKeyCampaignInventory.getControllerRole());
-		balances[msg.sender] = totalSupply_;
-    }
+//    function addAdminRolesAndBalancesAfterDeployed() public {
+//		twoKeyCampaignInventory.adminAddRole(msg.sender, twoKeyCampaignInventory.getControllerRole());
+//		twoKeyCampaignInventory.adminAddRole(contractor, twoKeyCampaignInventory.getControllerRole());
+//		twoKeyCampaignInventory.adminAddRole(moderator, twoKeyCampaignInventory.getControllerRole());
+//		balances[msg.sender] = totalSupply_;
+//    }
 
     /*  
 	    fulfills a fungible asset purchase
