@@ -31,7 +31,7 @@ contract('TwoKeyCampaign', async (accounts) => {
         twoKeyAdmin,
         upgradeableExchange,
         twoKeyARC,
-        // composableAssetFactory,
+        twoKeyCampaignInventory,
         erc721,
         standardToken,
         erc20;
@@ -78,27 +78,27 @@ contract('TwoKeyCampaign', async (accounts) => {
         whitelistInfluencer = await TwoKeyWhitelisted.new();
         whitelistConverter = await TwoKeyWhitelisted.new();
         twoKeyARC = await TwoKeyARC.new(eventSource.address, contractor);
-        // composableAssetFactory = await ComposableAssetFactory.new(openingTime, closingTime);
+        twoKeyCampaignInventory = await TwoKeyCampaignInventory.new();
 
         campaign = await TwoKeyCampaign.new(
             eventSource.address,
             twoKeyEconomy.address,
             whitelistInfluencer.address,
             whitelistConverter.address,
-            // composableAssetFactory.address,
+            twoKeyCampaignInventory.address,
 
             contractor, //Address of the user
             moderator, //Address of the moderator - it's a contract that works (operates) as admin of whitelists contracts
 
-            // openingTime,
-            // closingTime,
+            openingTime,
+            closingTime,
             closingTime,
             escrowPrecentage,
             rate,
             maxPi,
             {
                 from: campaignCreator,
-                gas: '9000000'
+                gas: '8000000'
             }
         );
     });
