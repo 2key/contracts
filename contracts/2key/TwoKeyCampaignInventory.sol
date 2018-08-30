@@ -11,7 +11,8 @@ contract TwoKeyCampaignInventory is RBACWithAdmin {
   event Expired(address indexed _contract);
 
   using SafeMath for uint256;
-  
+
+  /// TODO: Strictly owned and all methods can be called only by TwoKeyCampaign contracts
 
   uint256 private openingTime;
   uint256 private closingTime;

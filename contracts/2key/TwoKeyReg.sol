@@ -14,16 +14,18 @@ contract TwoKeyReg is Ownable {
     _;
   }
 
-  /// Only TwoKeyReg owner can call this method (modifier) since TwoKeyReg is Ownable
-  /// @notice Method which will allow us to add allowed 2key event source contract to write here
-  /// @dev Only owner can call this method (?)
-  /// @param _twoKeyEventSource is address of already deployed 2key Event source contract
-  function addTwoKeyEventSource(address _twoKeyEventSource) public onlyOwner {
-    require(twoKeyEventSource == address(0));
-    require(_twoKeyEventSource != address(0));
 
+  constructor (address _twoKeyEventSource) public {
+    require(_twoKeyEventSource != address(0));
     twoKeyEventSource = _twoKeyEventSource;
   }
+
+//  function addTwoKeyEventSource(address _twoKeyEventSource) public onlyOwner {
+//    require(twoKeyEventSource == address(0));
+//    require(_twoKeyEventSource != address(0));
+//
+//    twoKeyEventSource = _twoKeyEventSource;
+//  }
 
   /// @notice Method to change the allowed TwoKeyEventSource contract address
   /// @param _twoKeyEventSource new TwoKeyEventSource contract address
@@ -35,7 +37,7 @@ contract TwoKeyReg is Ownable {
   /*
     Those mappings are for the fetching data about in what contracts user participates in which role
   */
-
+  /// TODO: Referrer typo change
   /// mapping users address to addresses of campaigns where he is contractor
   mapping(address => address[]) public userToCampaignsWhereContractor;
 

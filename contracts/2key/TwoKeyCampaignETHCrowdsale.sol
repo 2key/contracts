@@ -19,7 +19,7 @@ contract TwoKeyCampaignETHCrowdsale is TwoKeyCampaignETH, Crowdsale {
 		TwoKeyEconomy _economy,
 		TwoKeyWhitelisted _whitelistInfluencer,
 		TwoKeyWhitelisted _whitelistConverter,
-//		TwoKeyCampaignInventory twoKeyCampaignInventory,
+		TwoKeyCampaignInventory _twoKeyCampaignInventory,
 
 		address _contractor,
 		address _moderator,
@@ -35,7 +35,7 @@ contract TwoKeyCampaignETHCrowdsale is TwoKeyCampaignETH, Crowdsale {
 		_economy,
 		_whitelistInfluencer,
 		_whitelistConverter,
-//		_composableAssetFactory,
+		_twoKeyCampaignInventory,
 		_contractor,
 		_moderator,
 //		_start,

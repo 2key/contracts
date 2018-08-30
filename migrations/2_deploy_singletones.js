@@ -9,6 +9,7 @@ const ERC20TokenMock = artifacts.require('ERC20TokenMock');
 const TwoKeyUpgradableExchange = artifacts.require('TwoKeyUpgradableExchange');
 const TwoKeyAdmin = artifacts.require('TwoKeyAdmin');
 const EventSource = artifacts.require('TwoKeyEventSource');
+const TwoKeyReg = artifacts.require('TwoKeyReg');
 
 module.exports = function deploy(deployer) {
   if (deployer.network.startsWith('dev') || deployer.network === 'rinkeby-infura') {
@@ -19,6 +20,7 @@ module.exports = function deploy(deployer) {
       .then(() => deployer.deploy(TwoKeyAdmin, TwoKeyEconomy.address, '0xb3fa520368f2df7bed4df5185101f303f6c7decc', TwoKeyUpgradableExchange.address))
       .then(() => TwoKeyAdmin.deployed())
       .then(() => deployer.deploy(EventSource, TwoKeyAdmin.address))
+      .then(() => deployer.deploy(TwoKeyReg, EventSource.address))
       .then(() => true)
       .catch((err) => {
         console.log('\x1b[31m', 'Error:', err.message, '\x1b[0m');

@@ -62,6 +62,8 @@ contract TwoKeyEventSource is TwoKeyTypes {
     }
 
     /// TODO: Put in constructor because of security issues (?)
+    /// TODO: TwoKeyAdmin is owner
+    /// TODO: Research about synchronization (concurrency)
     function addTwoKeyReg(address _twoKeyReg) public {
         interfaceTwoKeyReg = ITwoKeyReg(_twoKeyReg);
     }

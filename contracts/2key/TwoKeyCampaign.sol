@@ -123,12 +123,14 @@ contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
 	/*
 	
 	 */
+
+	/// TODO: Factory deploy subcontracts and then we deploy campaign
 	constructor(
 		TwoKeyEventSource _eventSource,
 		TwoKeyEconomy _economy,
 		TwoKeyWhitelisted _whitelistInfluencer,
 		TwoKeyWhitelisted _whitelistConverter,
-//		ComposableAssetFactory _composableAssetFactory,
+		TwoKeyCampaignInventory _twoKeyCampaignInventory,
 
 		address _contractor,
 
@@ -162,7 +164,7 @@ contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
 
 		whitelistInfluencer = _whitelistInfluencer;
 		whitelistConverter = _whitelistConverter;
-//		composableAssetFactory = _composableAssetFactory;
+		twoKeyCampaignInventory = _twoKeyCampaignInventory;
 
 
 
@@ -177,12 +179,6 @@ contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
 //		REVERTS - MEANING adding roles don't work well and nowhere we've configured (allowed) this contract to emit events!!!
 //		eventSource.created(address(this), contractor);
 
-	}
-
-	/// Method to deploy twoKeyInventory
-	function addInventory(uint openingTime, uint closingTime) public {
-		require(address(twoKeyCampaignInventory) == address(0));
-		twoKeyCampaignInventory = new TwoKeyCampaignInventory(openingTime, closingTime);
 	}
 
 	/// add modifiers who can call this

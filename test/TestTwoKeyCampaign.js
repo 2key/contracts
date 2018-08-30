@@ -13,7 +13,7 @@ const TwoKeyCampaign = artifacts.require("TwoKeyCampaign");
 const TwoKeyAdmin = artifacts.require("TwoKeyAdmin");
 const TwoKeyUpgradableExchange = artifacts.require("TwoKeyUpgradableExchange");
 const TwoKeyARC = artifacts.require("TwoKeyARC");
-const ComposableAssetFactory = artifacts.require("ComposableAssetFactory");
+const TwoKeyCampaignInventory = artifacts.require("TwoKeyCampaignInventory.sol");
 
 
 /// tokens
@@ -31,7 +31,7 @@ contract('TwoKeyCampaign', async (accounts) => {
         twoKeyAdmin,
         upgradeableExchange,
         twoKeyARC,
-        composableAssetFactory,
+        // composableAssetFactory,
         erc721,
         standardToken,
         erc20;
@@ -78,14 +78,14 @@ contract('TwoKeyCampaign', async (accounts) => {
         whitelistInfluencer = await TwoKeyWhitelisted.new();
         whitelistConverter = await TwoKeyWhitelisted.new();
         twoKeyARC = await TwoKeyARC.new(eventSource.address, contractor);
-        composableAssetFactory = await ComposableAssetFactory.new(openingTime, closingTime);
+        // composableAssetFactory = await ComposableAssetFactory.new(openingTime, closingTime);
 
         campaign = await TwoKeyCampaign.new(
             eventSource.address,
             twoKeyEconomy.address,
             whitelistInfluencer.address,
             whitelistConverter.address,
-            composableAssetFactory.address,
+            // composableAssetFactory.address,
 
             contractor, //Address of the user
             moderator, //Address of the moderator - it's a contract that works (operates) as admin of whitelists contracts
@@ -98,7 +98,7 @@ contract('TwoKeyCampaign', async (accounts) => {
             maxPi,
             {
                 from: campaignCreator,
-                gas: '8000000'
+                gas: '9000000'
             }
         );
     });
@@ -112,7 +112,7 @@ contract('TwoKeyCampaign', async (accounts) => {
         console.log("[TwoKeyWhitelistConverter] : " + whitelistConverter.address);
         console.log("[TwoKeyWhiteListInfluencer] : " + whitelistInfluencer.address);
         console.log("[TwoKeyARC] : " + twoKeyARC.address);
-        console.log("[ComposableAssetFactory] : " + composableAssetFactory.address);
+        // console.log("[ComposableAssetFactory] : " + composableAssetFactory.address);
     });
     // it("transfer fungible to compaign", async () => {
     //

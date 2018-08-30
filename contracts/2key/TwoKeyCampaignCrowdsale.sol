@@ -20,7 +20,7 @@ contract TwoKeyCampaignCrowdsale is TwoKeyCampaign, Crowdsale {
 		TwoKeyEconomy _economy,
 		TwoKeyWhitelisted _whitelistInfluencer,
 		TwoKeyWhitelisted _whitelistConverter,
-//		TwoKeyCampaignInventory _composableAssetFactory,
+		TwoKeyCampaignInventory _twoKeyCampaignInventory,
 
 		address _contractor,
 		address _moderator,
@@ -36,7 +36,7 @@ contract TwoKeyCampaignCrowdsale is TwoKeyCampaign, Crowdsale {
 		_economy,
 		_whitelistInfluencer,
 		_whitelistConverter,
-//		_composableAssetFactory,
+		_twoKeyCampaignInventory,
 		_contractor,
 		_moderator,
 //		_start,
