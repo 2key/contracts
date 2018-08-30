@@ -27,6 +27,7 @@ const eventSource = contractsMeta.TwoKeyEventSource.networks[mainNetId].address;
 const twoKeyEconomy = contractsMeta.TwoKeyEconomy.networks[mainNetId].address;
 
 console.log(rpcUrl);
+console.log(mainNetId);
 console.log(contractsMeta.TwoKeyEventSource.networks[mainNetId].address);
 console.log(contractsMeta.TwoKeyEconomy.networks[mainNetId].address);
 
@@ -136,7 +137,7 @@ describe('TwoKeyProtocol', () => {
       bonusOffer,
       rate,
       maxCPA,
-    }, 15000000000);
+    });
     console.log('Campaign address', campaign && campaign.address);
     expect(campaign).to.exist;
     expect(campaign).to.haveOwnProperty('address');

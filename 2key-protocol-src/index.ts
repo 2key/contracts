@@ -198,16 +198,13 @@ export default class TwoKeyNetwork {
       try {
         const whiteListGas = await this._estimateSubcontractGas(solidityContracts.TwoKeyWhitelisted);
         console.log('TwoKeyWhiteList', whiteListGas);
-        const assetFactoryGas = await this._estimateSubcontractGas(solidityContracts.ComposableAssetFactory, [data.openingTime, data.closingTime]);
-        console.log('ComposableAssetFactory', assetFactoryGas);
         const campaignGas = await this._estimateSubcontractGas(solidityContracts.TwoKeyCampaign, [
           this._getContractDeployedAddress('TwoKeyEventSource'),
           this.twoKeyEconomy.address,
-          // TODO: GasEstimation with fake addresses
+          // Fake WhiteListInfluence address
           this.twoKeyEconomy.address,
+          // Fake WhiteListConverter address
           this.twoKeyEconomy.address,
-          this.twoKeyEconomy.address,
-
           data.contractor || this.address,
           data.moderator || this.address,
           data.closingTime,
@@ -216,7 +213,7 @@ export default class TwoKeyNetwork {
           data.maxCPA,
         ]);
         console.log('TwoKeyCampaign', campaignGas);
-        const totalGas = whiteListGas * 2 + assetFactoryGas + campaignGas;
+        const totalGas = whiteListGas * 2 + campaignGas;
         resolve(totalGas);
       } catch (err) {
         reject(err);
@@ -229,13 +226,13 @@ export default class TwoKeyNetwork {
       try {
         const whitelistInfluencerAddress = await this._createSubcontract(solidityContracts.TwoKeyWhitelisted);
         const whitelistConverterAddress = await this._createSubcontract(solidityContracts.TwoKeyWhitelisted);
-        const assetFactoryAddress = await this._createSubcontract(solidityContracts.ComposableAssetFactory, gasPrice, [data.openingTime, data.closingTime]);
+        // const assetFactoryAddress = await this._createSubcontract(solidityContracts.ComposableAssetFactory, gasPrice, [data.openingTime, data.closingTime]);
         const campaignAddress = await this._createSubcontract(solidityContracts.TwoKeyCampaign, gasPrice, [
           this._getContractDeployedAddress('TwoKeyEventSource'),
           this.twoKeyEconomy.address,
           whitelistInfluencerAddress,
           whitelistConverterAddress,
-          assetFactoryAddress,
+          // assetFactoryAddress,
           data.contractor || this.address,
           data.moderator || this.address,
           data.closingTime,
@@ -325,6 +322,7 @@ export default class TwoKeyNetwork {
     return new Promise(async (resolve, reject) => {
       const { abi, bytecode: data } = contract;
       const estimateParams = params ? [...params, { data, from: this.address }] : [{ data, from: this.address }];
+      // console.log('estimateParams', estimateParams);
       this.web3.eth.estimateGas({
         data: this.web3.eth.contract(abi).new.getData(...estimateParams),
       }, (err, res) => {
