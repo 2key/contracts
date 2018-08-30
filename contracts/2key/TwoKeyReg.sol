@@ -37,7 +37,6 @@ contract TwoKeyReg is Ownable {
   /*
     Those mappings are for the fetching data about in what contracts user participates in which role
   */
-  /// TODO: Referrer typo change
   /// mapping users address to addresses of campaigns where he is contractor
   mapping(address => address[]) public userToCampaignsWhereContractor;
 
