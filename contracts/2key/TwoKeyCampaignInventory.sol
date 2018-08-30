@@ -12,10 +12,10 @@ contract TwoKeyCampaignInventory is RBACWithAdmin {
 
   using SafeMath for uint256;
 
+  uint openingTime;
+  uint closingTime;
   /// TODO: Strictly owned and all methods can be called only by TwoKeyCampaign contracts
 
-  uint256 private openingTime;
-  uint256 private closingTime;
 
 //  modifier isOngoing() {
 //    require(block.timestamp >= openingTime && block.timestamp <= closingTime);
@@ -63,15 +63,8 @@ contract TwoKeyCampaignInventory is RBACWithAdmin {
   mapping(uint256 => mapping(address => uint256)) assets;
 
 
-  /// @notice Constructor for factory
-  /// @dev RBACWithAdmin() is contract we've inherited and it's constructor will set msg.sender to be an admin
-  /// @param _openingTime is opening time
-  /// @param _closingTime is closing time
-  constructor(uint256 _openingTime, uint256 _closingTime) RBACWithAdmin() public {
-    require(_openingTime >= block.timestamp);
-    require(_closingTime >= _openingTime);    
-    openingTime = _openingTime;
-    closingTime = _closingTime;
+  constructor() RBACWithAdmin() public {
+
   }
 
 

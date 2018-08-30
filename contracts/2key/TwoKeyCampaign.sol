@@ -69,6 +69,9 @@ contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
 	uint256 rate;
 
 
+	uint openingTime;
+	uint closingTime;
+
 	address contractor;
 	address moderator;
 
@@ -108,15 +111,15 @@ contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
         _;
     }
 
-	modifier isOngoing() {
-		require(twoKeyCampaignInventory.isOnGoing() == true);
-		_;
-	}
+	  modifier isOngoing() {
+	    require(block.timestamp >= openingTime && block.timestamp <= closingTime);
+	    _;
+	  }
 
-	modifier isClosed() {
-		require(twoKeyCampaignInventory.isClosed() == true);
-		_;
-	}
+	  modifier isClosed() {
+	    require(now > closingTime);
+	    _;
+	  }
 
 	// if we just work with two key tokens, 
 	// rate is 1, and all prices are in two key tokens
@@ -137,8 +140,8 @@ contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
 		// set moderator as admin of twokeywhitelist contracts here
 		address _moderator,
 
-//		uint256 _openingTime,
-//		uint256 _closingTime,
+		uint256 _openingTime,
+		uint256 _closingTime,
 		uint256 _expiryConversion,
 		uint256 _escrowPercentage,
 		uint256 _rate,
@@ -158,6 +161,10 @@ contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
 		contractor = _contractor;
 		moderator = _moderator;
 
+		openingTime = _openingTime;
+		closingTime = _closingTime;
+
+
 		expiryConversion = _expiryConversion;
 		escrowPercentage = _escrowPercentage;
 
@@ -165,8 +172,6 @@ contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
 		whitelistInfluencer = _whitelistInfluencer;
 		whitelistConverter = _whitelistConverter;
 		twoKeyCampaignInventory = _twoKeyCampaignInventory;
-
-
 
 		rate = _rate;
 

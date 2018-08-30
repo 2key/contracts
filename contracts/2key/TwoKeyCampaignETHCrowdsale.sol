@@ -25,8 +25,8 @@ contract TwoKeyCampaignETHCrowdsale is TwoKeyCampaignETH, Crowdsale {
 		address _moderator,
 
 
-//		uint256 _start,
-//		uint256 _duration,
+		uint256 _start,
+		uint256 _duration,
 		uint256 _expiryConversion,
 		uint256 _escrowPrecentage,
 		uint256 _rate,
@@ -38,8 +38,8 @@ contract TwoKeyCampaignETHCrowdsale is TwoKeyCampaignETH, Crowdsale {
 		_twoKeyCampaignInventory,
 		_contractor,
 		_moderator,
-//		_start,
-//		_duration,
+		_start,
+		_duration,
 		_expiryConversion,
 		_escrowPrecentage,
 		_rate,
