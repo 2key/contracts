@@ -198,6 +198,8 @@ export default class TwoKeyNetwork {
       try {
         const whiteListGas = await this._estimateSubcontractGas(solidityContracts.TwoKeyWhitelisted);
         console.log('TwoKeyWhiteList', whiteListGas);
+        const inventoryGas = await this._estimateSubcontractGas(solidityContracts.TwoKeyCampaignInventory);
+        console.log('TwoKeyCampaignInventory', whiteListGas);
         const campaignGas = await this._estimateSubcontractGas(solidityContracts.TwoKeyCampaign, [
           this._getContractDeployedAddress('TwoKeyEventSource'),
           this.twoKeyEconomy.address,
@@ -213,7 +215,7 @@ export default class TwoKeyNetwork {
           data.maxCPA,
         ]);
         console.log('TwoKeyCampaign', campaignGas);
-        const totalGas = whiteListGas * 2 + campaignGas;
+        const totalGas = whiteListGas * 2 + inventoryGas + campaignGas;
         resolve(totalGas);
       } catch (err) {
         reject(err);
@@ -226,13 +228,13 @@ export default class TwoKeyNetwork {
       try {
         const whitelistInfluencerAddress = await this._createSubcontract(solidityContracts.TwoKeyWhitelisted);
         const whitelistConverterAddress = await this._createSubcontract(solidityContracts.TwoKeyWhitelisted);
-        const assetFactoryAddress = await this._createSubcontract(solidityContracts.ComposableAssetFactory, gasPrice, [data.openingTime, data.closingTime]);
+        const campaignInventoryAddress = await this._createSubcontract(solidityContracts.TwoKeyCampaignInventory, gasPrice, [data.openingTime, data.closingTime]);
         const campaignAddress = await this._createSubcontract(solidityContracts.TwoKeyCampaign, gasPrice, [
           this._getContractDeployedAddress('TwoKeyEventSource'),
           this.twoKeyEconomy.address,
           whitelistInfluencerAddress,
           whitelistConverterAddress,
-          // assetFactoryAddress,
+          campaignInventoryAddress,
           data.contractor || this.address,
           data.moderator || this.address,
           data.closingTime,
