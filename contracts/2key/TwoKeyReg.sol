@@ -45,7 +45,7 @@ contract TwoKeyReg is Ownable {
   mapping(address => address[]) public userToCampaignsWhereModerator;
 
   /// mapping users address to addresses of campaigns where he is refferer
-  mapping(address => address[]) public userToCampaignsWhereRefferer;
+  mapping(address => address[]) public userToCampaignsWhereReferrer;
 
   /// mapping users address to addresses of campaigns where he is converter
   mapping(address => address[]) public userToCampaignsWhereConverter;
@@ -73,9 +73,9 @@ contract TwoKeyReg is Ownable {
   /// @dev We're requiring the contract address different address 0 because it needs to be deployed
   /// @param _userAddress is address of refferer
   /// @param _contractAddress is address of deployed campaign contract
-  function addWhereRefferer(address _userAddress, address _contractAddress) public onlyTwoKeyEventSource {
+  function addWhereReferrer(address _userAddress, address _contractAddress) public onlyTwoKeyEventSource {
     require(_contractAddress != address(0));
-    userToCampaignsWhereRefferer[_userAddress].push(_contractAddress);
+    userToCampaignsWhereReferrer[_userAddress].push(_contractAddress);
   }
 
   /// Only TwoKeyEventSource contract can issue this calls
@@ -110,9 +110,9 @@ contract TwoKeyReg is Ownable {
   /// @notice Function to fetch all campaign contracts where user is refferer
   /// @param _userAddress is address of user
   /// @return array of addresses (campaign contracts)
-  function getContractsWhereUserIsRefferer(address _userAddress) public view returns (address[]) {
+  function getContractsWhereUserIsReferrer(address _userAddress) public view returns (address[]) {
       require(_userAddress != address(0));
-      return userToCampaignsWhereRefferer[_userAddress];
+      return userToCampaignsWhereReferrer[_userAddress];
   }
 
   /// View function - doesn't cost any gas to be executed
