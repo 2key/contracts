@@ -14,10 +14,10 @@ contract TwoKeyCampaignFactory {
     TwoKeyWhitelisted whitelistConverter;
     TwoKeyCampaignInventory twoKeyCampaignInventory;
 
-    constructor (uint openingTime, uint closingTime) public {
+    constructor () public {
         whitelistInfluencer = new TwoKeyWhitelisted();
         whitelistConverter = new TwoKeyWhitelisted();
-        twoKeyCampaignInventory = new TwoKeyCampaignInventory(openingTime, closingTime);
+        twoKeyCampaignInventory = new TwoKeyCampaignInventory();
     }
 
 
