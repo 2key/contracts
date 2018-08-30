@@ -91,7 +91,7 @@ async function start() {
     '--rpcaddr=0.0.0.0',
     '--rpcport',
     '8545',
-    '--networkid=17',
+    `--networkid=${process.argv[3] || '17'}`,
     '--ws',
     '--wsaddr=0.0.0.0',
     '--wsport=8546',

@@ -350,9 +350,9 @@
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "pragma solidity ^0.4.24;\n\nimport \"../2key/RBACWithAdmin.sol\";\nimport \"../openzeppelin-solidity/contracts/math/SafeMath.sol\";\n\ncontract IComposableAssetFactory is RBACWithAdmin{\n\n    modifier isOngoing() {\n        _;\n    }\n\n    constructor(uint256 _openingTime, uint256 _closingTime) RBACWithAdmin() public{\n\n    }\n    function addFungibleAsset(uint256 _tokenID, address _assetContract, uint256 _amount) public returns (bool);\n\n    function addNonFungibleAsset(uint256 _tokenID, address _assetContract, uint256 _index) public returns (bool);\n\n    function moveFungibleAsset(address _to, uint256 _tokenID, address _assetContract, uint256 _amount) internal returns (bool);\n\n    function moveNonFungibleAsset(address _to, uint256 _tokenID, uint256 _assetTokenID) internal returns (bool);\n\n    function transferFungibleAsset(address _to, uint256 _tokenID, address _assetContract, uint256 _amount)  public returns (bool);\n\n    function transferNonFungibleAsset(address _to, uint256 _tokenID, address _assetContract, uint256 _assetTokenID) internal returns (bool);\n\n    function expireFungible(address _to, uint256 _tokenID, address _assetContract, uint256 _amount) public returns (bool);\n\n    function expireNonFungible(address _to, uint256 _tokenID, address _assetContract, uint256 _assetTokenID) public returns (bool);\n}\n",
-  "sourcePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/interfaces/IComposableAssetFactory.sol",
+  "sourcePath": "/Users/aydnep/2key/contracts/contracts/interfaces/IComposableAssetFactory.sol",
   "ast": {
-    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/interfaces/IComposableAssetFactory.sol",
+    "absolutePath": "/Users/aydnep/2key/contracts/contracts/interfaces/IComposableAssetFactory.sol",
     "exportedSymbols": {
       "IComposableAssetFactory": [
         7372
@@ -373,7 +373,7 @@
         "src": "0:24:30"
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/RBACWithAdmin.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/RBACWithAdmin.sol",
         "file": "../2key/RBACWithAdmin.sol",
         "id": 7256,
         "nodeType": "ImportDirective",
@@ -384,7 +384,7 @@
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/math/SafeMath.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/math/SafeMath.sol",
         "file": "../openzeppelin-solidity/contracts/math/SafeMath.sol",
         "id": 7257,
         "nodeType": "ImportDirective",
@@ -1782,7 +1782,7 @@
     "src": "0:1317:30"
   },
   "legacyAST": {
-    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/interfaces/IComposableAssetFactory.sol",
+    "absolutePath": "/Users/aydnep/2key/contracts/contracts/interfaces/IComposableAssetFactory.sol",
     "exportedSymbols": {
       "IComposableAssetFactory": [
         7372
@@ -1803,7 +1803,7 @@
         "src": "0:24:30"
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/RBACWithAdmin.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/RBACWithAdmin.sol",
         "file": "../2key/RBACWithAdmin.sol",
         "id": 7256,
         "nodeType": "ImportDirective",
@@ -1814,7 +1814,7 @@
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/math/SafeMath.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/math/SafeMath.sol",
         "file": "../openzeppelin-solidity/contracts/math/SafeMath.sol",
         "id": 7257,
         "nodeType": "ImportDirective",
@@ -3217,5 +3217,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
-  "updatedAt": "2018-08-29T23:25:36.643Z"
+  "updatedAt": "2018-08-30T05:03:03.940Z"
 }
