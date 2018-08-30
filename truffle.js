@@ -76,6 +76,12 @@ module.exports = {
       gas: 7000000,
       gasPrice: 5000000000,
     },
+    'kovan': {
+        provider: () => new HDWalletProvider(mnemonic, 'https://kovan.infura.io/6rAARDbMXpJlwODa2kbk'),
+        network_id: '42',
+        gas: 7000000,
+        gasPrice: 3000000000,
+    },
     'rinkeby-infura-ws': {
       provider: () => new HDWalletProvider(mnemonic, 'wss://rinkeby.infura.io/ws', true),
       network_id: '*',
