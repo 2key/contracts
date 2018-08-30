@@ -88,7 +88,7 @@ describe('TwoKeyProtocol', () => {
     // console.log(await twoKeyProtocol.getTransaction(txHash));
     console.log('Transfer Tokens', txHash);
     expect(txHash).to.exist;
-    expect(txHash).to.not.null;
+    expect(txHash).to.be.a('string');
   }).timeout(30000);
   it('should return estimated gas for transfer ether', async () => {
     const gas = await twoKeyProtocol.getETHTransferGas('0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7', 1);
@@ -100,9 +100,9 @@ describe('TwoKeyProtocol', () => {
     setTimeout(async () => {
       // const gasLimit = await twoKeyProtocol.getETHTransferGas(twoKeyProtocolAydnep.getAddress(), 1);
       const txHash = await twoKeyProtocol.transferEther('0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7', 1, 3000000000);
-      console.log('Transfer Ether', txHash);
+      console.log('Transfer Ether', txHash, typeof txHash);
       expect(txHash).to.exist;
-      expect(txHash).to.not.null;
+      expect(txHash).to.be.a('string');
     }, 5000);
   }).timeout(30000);
   it('should print balances', (done) => {
@@ -139,7 +139,7 @@ describe('TwoKeyProtocol', () => {
       bonusOffer,
       rate,
       maxCPA,
-    });
+    }, 15000000000);
     console.log('Campaign address', campaign && campaign.address);
     expect(campaign).to.exist;
     expect(campaign).to.haveOwnProperty('address');

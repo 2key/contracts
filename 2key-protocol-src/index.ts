@@ -186,7 +186,7 @@ export default class TwoKeyNetwork {
     }
     const nonce = await this._getNonce();
     console.log('Nonce for transfer ETH', nonce);
-    const params = { to, gasPrice, gasLimit: this.toHex(this.gas), value: this.toWei(value, 'ether').toString(), from: this.address, nonce }
+    const params = { to, gasPrice, gasLimit: this.toHex(this.gas), value: this.toWei(value, 'ether').toString(), from: this.address }
     return new Promise((resolve, reject) => {
       this.web3.eth.sendTransaction(params, (err, res) => {
         if (err) {
@@ -234,13 +234,21 @@ export default class TwoKeyNetwork {
   public createSaleCampaign(data: CreateCampaign, gasPrice?: number): Promise<TwoKeyCampaign> {
     return new Promise(async (resolve, reject) => {
       try {
-        const whitelistInfluencerAddress = await this._createSubcontract(solidityContracts.TwoKeyWhitelisted);
+        const gasRequired = await this.estimateSaleCampaign(data);
+        const balance = parseFloat(await this._getEthBalance(this.address));
+        const totalValue = parseFloat(this.fromWei(gasPrice || this.gasPrice * gasRequired, 'ether'));
+
+        if (totalValue > balance) {
+          throw new Error('Not enough founds');
+        }
+    
+        const whitelistInfluencerAddress = await this._createContract(solidityContracts.TwoKeyWhitelisted);
         console.log('whitelistInfluencerAddress', whitelistInfluencerAddress);
-        const whitelistConverterAddress = await this._createSubcontract(solidityContracts.TwoKeyWhitelisted);
+        const whitelistConverterAddress = await this._createContract(solidityContracts.TwoKeyWhitelisted);
         console.log('whitelistConverterAddress', whitelistConverterAddress);
-        const campaignInventoryAddress = await this._createSubcontract(solidityContracts.TwoKeyCampaignInventory, gasPrice, [data.openingTime, data.closingTime]);
+        const campaignInventoryAddress = await this._createContract(solidityContracts.TwoKeyCampaignInventory, gasPrice, [data.openingTime, data.closingTime]);
         console.log('campaignInventoryAddress', campaignInventoryAddress);
-        const campaignAddress = await this._createSubcontract(solidityContracts.TwoKeyCampaign, gasPrice, [
+        const campaignAddress = await this._createContract(solidityContracts.TwoKeyCampaign, gasPrice, [
           this._getContractDeployedAddress('TwoKeyEventSource'),
           this.twoKeyEconomy.address,
           whitelistInfluencerAddress,
@@ -316,12 +324,13 @@ export default class TwoKeyNetwork {
     });
   }
 
-  private _createSubcontract(contract: Contract, gasPrice: number = this.gasPrice, params?: any[]): Promise<string> {
+  private _createContract(contract: Contract, gasPrice: number = this.gasPrice, params?: any[]): Promise<string> {
     return new Promise(async (resolve, reject) => {
       const { abi, bytecode: data } = contract;
       const gas = await this._estimateSubcontractGas(contract, params);
-      console.log('Nonce', await this._getNonce());
-      const createParams = params ? [...params, { data, from: this.address, gas, gasPrice }] : [{ data, from: this.address, gas, gasPrice }];
+      const nonce = await this._getNonce()
+      console.log('Create contract nonce', nonce);
+      const createParams = params ? [...params, nonce, { data, from: this.address, gas, gasPrice }] : [{ data, from: this.address, gas, gasPrice }];
       this.web3.eth.contract(abi).new(...createParams, (err, res) => {
         if (err) {
           reject(err);
