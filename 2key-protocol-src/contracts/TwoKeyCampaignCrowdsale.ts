@@ -319,6 +319,8 @@ export class TwoKeyCampaignCrowdsale extends TC.TypeChainContract {
           { name: "_twoKeyCampaignInventory", type: "address" },
           { name: "_contractor", type: "address" },
           { name: "_moderator", type: "address" },
+          { name: "_start", type: "uint256" },
+          { name: "_duration", type: "uint256" },
           { name: "_expiryConversion", type: "uint256" },
           { name: "_escrowPrecentage", type: "uint256" },
           { name: "_rate", type: "uint256" },

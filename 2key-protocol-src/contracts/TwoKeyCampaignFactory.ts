@@ -10,10 +10,7 @@ export class TwoKeyCampaignFactory extends TC.TypeChainContract {
   public constructor(web3: any, address: string | BigNumber) {
     const abi = [
       {
-        inputs: [
-          { name: "openingTime", type: "uint256" },
-          { name: "closingTime", type: "uint256" }
-        ],
+        inputs: [],
         payable: false,
         stateMutability: "nonpayable",
         type: "constructor"

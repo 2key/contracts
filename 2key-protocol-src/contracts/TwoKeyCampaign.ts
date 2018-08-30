@@ -185,6 +185,8 @@ export class TwoKeyCampaign extends TC.TypeChainContract {
           { name: "_twoKeyCampaignInventory", type: "address" },
           { name: "_contractor", type: "address" },
           { name: "_moderator", type: "address" },
+          { name: "_openingTime", type: "uint256" },
+          { name: "_closingTime", type: "uint256" },
           { name: "_expiryConversion", type: "uint256" },
           { name: "_escrowPercentage", type: "uint256" },
           { name: "_rate", type: "uint256" },
