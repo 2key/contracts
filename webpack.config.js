@@ -30,7 +30,12 @@ const config = {
   externals: [nodeExternals()],
   plugins: [
     new UglifyJsPlugin({
-      sourceMap: true,
+      sourceMap: false,
+      uglifyOptions: {
+        compress: {
+          drop_console: true,
+        }
+      }
     }),
     new ProgressBarPlugin(),
   ],

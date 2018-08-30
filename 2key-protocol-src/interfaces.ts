@@ -62,6 +62,7 @@ export interface CreateCampaign {
   moderator?: string, // Address of the moderator - it's a contract that works (operates) as admin of whitelists contracts
   openingTime: number, // Timestamp
   closingTime: number, // Timestamp
+  expiryConversion: number, // Timestamp
   bonusOffer?: number,
   rate?: number,
   maxCPA?: number,

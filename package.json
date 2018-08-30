@@ -9,7 +9,7 @@
     "geth": "node geth/geth.js start",
     "geth:stop": "node geth/geth.js stop",
     "geth:reset": "node geth/geth.js reset",
-    "test": "node -r dotenv/config ./node_modules/.bin/mocha --exit -r ts-node/register 2key-protocol-src/**/*.spec.ts"
+    "test": "node -r dotenv/config ./node_modules/.bin/mocha --exit --bail -r ts-node/register 2key-protocol-src/**/*.spec.ts"
   },
   "author": "Douglas von Kohorn",
   "license": "MIT",
