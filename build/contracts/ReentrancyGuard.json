@@ -1,14 +1,14 @@
 {
   "contractName": "ReentrancyGuard",
   "abi": [],
-  "bytecode": "0x60806040526001600055348015601457600080fd5b5060358060226000396000f3006080604052600080fd00a165627a7a72305820a2b8a7dc0b8c85b5db576f1d2167bf6f57ebf7956eeadb104176db796accd8210029",
-  "deployedBytecode": "0x6080604052600080fd00a165627a7a72305820a2b8a7dc0b8c85b5db576f1d2167bf6f57ebf7956eeadb104176db796accd8210029",
+  "bytecode": "0x60806040526001600055348015601457600080fd5b5060358060226000396000f3006080604052600080fd00a165627a7a72305820111ededdbf08e94c9eddddefe0a7f6b2cfac4e58e77f18c8ee4025e3f52ac11b0029",
+  "deployedBytecode": "0x6080604052600080fd00a165627a7a72305820111ededdbf08e94c9eddddefe0a7f6b2cfac4e58e77f18c8ee4025e3f52ac11b0029",
   "sourceMap": "250:1023:39:-;;;487:1;657:51;;250:1023;8:9:-1;5:2;;;30:1;27;20:12;5:2;250:1023:39;;;;;;;",
   "deployedSourceMap": "250:1023:39:-;;;;;",
   "source": "pragma solidity ^0.4.24;\n\n\n/**\n * @title Helps contracts guard against reentrancy attacks.\n * @author Remco Bloemen <remco@2π.com>, Eenae <alexey@mixbytes.io>\n * @dev If you mark a function `nonReentrant`, you should also\n * mark it `external`.\n */\ncontract ReentrancyGuard {\n\n  /// @dev Constant for unlocked guard state - non-zero to prevent extra gas costs.\n  /// See: https://github.com/OpenZeppelin/openzeppelin-solidity/issues/1056\n  uint private constant REENTRANCY_GUARD_FREE = 1;\n\n  /// @dev Constant for locked guard state\n  uint private constant REENTRANCY_GUARD_LOCKED = 2;\n\n  /**\n   * @dev We use a single lock for the whole contract.\n   */\n  uint private reentrancyLock = REENTRANCY_GUARD_FREE;\n\n  /**\n   * @dev Prevents a contract from calling itself, directly or indirectly.\n   * If you mark a function `nonReentrant`, you should also\n   * mark it `external`. Calling one `nonReentrant` function from\n   * another is not supported. Instead, you can implement a\n   * `private` function doing the actual work, and an `external`\n   * wrapper marked as `nonReentrant`.\n   */\n  modifier nonReentrant() {\n    require(reentrancyLock == REENTRANCY_GUARD_FREE);\n    reentrancyLock = REENTRANCY_GUARD_LOCKED;\n    _;\n    reentrancyLock = REENTRANCY_GUARD_FREE;\n  }\n\n}\n",
-  "sourcePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/ReentrancyGuard.sol",
+  "sourcePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/ReentrancyGuard.sol",
   "ast": {
-    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/ReentrancyGuard.sol",
+    "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/ReentrancyGuard.sol",
     "exportedSymbols": {
       "ReentrancyGuard": [
         7878
@@ -380,7 +380,7 @@
     "src": "0:1274:39"
   },
   "legacyAST": {
-    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/ReentrancyGuard.sol",
+    "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/ReentrancyGuard.sol",
     "exportedSymbols": {
       "ReentrancyGuard": [
         7878
@@ -757,5 +757,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
-  "updatedAt": "2018-08-29T23:25:36.532Z"
+  "updatedAt": "2018-08-30T05:03:03.734Z"
 }

@@ -806,9 +806,9 @@
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "pragma solidity ^0.4.24; \n\nimport '../openzeppelin-solidity/contracts/math/SafeMath.sol';\nimport '../openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol';\n\nimport './TwoKeyCampaignETH.sol';\nimport './TwoKeyReg.sol';\nimport './TwoKeyEconomy.sol';\nimport './TwoKeyEventSource.sol';\nimport \"./TwoKeyWhitelisted.sol\";\nimport \"./TwoKeyCampaignInventory.sol\";\n\ncontract TwoKeyCampaignETHCrowdsale is TwoKeyCampaignETH, Crowdsale {\n\n\tusing SafeMath for uint256;\n\n\tconstructor(\n\t\tTwoKeyEventSource _eventSource,\n\t\tTwoKeyEconomy _economy,\n\t\tTwoKeyWhitelisted _whitelistInfluencer,\n\t\tTwoKeyWhitelisted _whitelistConverter,\n//\t\tTwoKeyCampaignInventory twoKeyCampaignInventory,\n\n\t\taddress _contractor,\n\t\taddress _moderator,\n\n\n//\t\tuint256 _start,\n//\t\tuint256 _duration,\n\t\tuint256 _expiryConversion,\n\t\tuint256 _escrowPrecentage,\n\t\tuint256 _rate,\n\t\tuint256 _maxPi) TwoKeyCampaign(\n\t\t_eventSource,\n\t\t_economy,\n\t\t_whitelistInfluencer,\n\t\t_whitelistConverter,\n//\t\t_composableAssetFactory,\n\t\t_contractor,\n\t\t_moderator,\n//\t\t_start,\n//\t\t_duration,\n\t\t_expiryConversion,\n\t\t_escrowPrecentage,\n\t\t_rate,\n\t\t_maxPi\n\t) public {\n\t}\n\n\t// buy product with ETH \n\tfunction buyFromWithETH(address _from, uint256 _tokenID, address _assetContract, uint256 _amountOrIndex) public payable {\n\t    buyTokens(address(this));\n\t    require(twoKeyCampaignInventory.addFungibleAsset(_tokenID, _assetContract, _amountOrIndex));\n\t    buyFromWithETH(_from, _tokenID, _assetContract, _amountOrIndex, CampaignType.Fungible); \n\t}\t\n\n}\n\n",
-  "sourcePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyCampaignETHCrowdsale.sol",
+  "sourcePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyCampaignETHCrowdsale.sol",
   "ast": {
-    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyCampaignETHCrowdsale.sol",
+    "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyCampaignETHCrowdsale.sol",
     "exportedSymbols": {
       "TwoKeyCampaignETHCrowdsale": [
         2606
@@ -829,7 +829,7 @@
         "src": "0:24:12"
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/math/SafeMath.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/math/SafeMath.sol",
         "file": "../openzeppelin-solidity/contracts/math/SafeMath.sol",
         "id": 2519,
         "nodeType": "ImportDirective",
@@ -840,7 +840,7 @@
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
         "file": "../openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
         "id": 2520,
         "nodeType": "ImportDirective",
@@ -851,7 +851,7 @@
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyCampaignETH.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyCampaignETH.sol",
         "file": "./TwoKeyCampaignETH.sol",
         "id": 2521,
         "nodeType": "ImportDirective",
@@ -862,7 +862,7 @@
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyReg.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyReg.sol",
         "file": "./TwoKeyReg.sol",
         "id": 2522,
         "nodeType": "ImportDirective",
@@ -873,7 +873,7 @@
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyEconomy.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyEconomy.sol",
         "file": "./TwoKeyEconomy.sol",
         "id": 2523,
         "nodeType": "ImportDirective",
@@ -884,7 +884,7 @@
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyEventSource.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyEventSource.sol",
         "file": "./TwoKeyEventSource.sol",
         "id": 2524,
         "nodeType": "ImportDirective",
@@ -895,7 +895,7 @@
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyWhitelisted.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyWhitelisted.sol",
         "file": "./TwoKeyWhitelisted.sol",
         "id": 2525,
         "nodeType": "ImportDirective",
@@ -906,7 +906,7 @@
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyCampaignInventory.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyCampaignInventory.sol",
         "file": "./TwoKeyCampaignInventory.sol",
         "id": 2526,
         "nodeType": "ImportDirective",
@@ -1990,7 +1990,7 @@
     "src": "0:1486:12"
   },
   "legacyAST": {
-    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyCampaignETHCrowdsale.sol",
+    "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyCampaignETHCrowdsale.sol",
     "exportedSymbols": {
       "TwoKeyCampaignETHCrowdsale": [
         2606
@@ -2011,7 +2011,7 @@
         "src": "0:24:12"
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/math/SafeMath.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/math/SafeMath.sol",
         "file": "../openzeppelin-solidity/contracts/math/SafeMath.sol",
         "id": 2519,
         "nodeType": "ImportDirective",
@@ -2022,7 +2022,7 @@
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
         "file": "../openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
         "id": 2520,
         "nodeType": "ImportDirective",
@@ -2033,7 +2033,7 @@
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyCampaignETH.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyCampaignETH.sol",
         "file": "./TwoKeyCampaignETH.sol",
         "id": 2521,
         "nodeType": "ImportDirective",
@@ -2044,7 +2044,7 @@
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyReg.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyReg.sol",
         "file": "./TwoKeyReg.sol",
         "id": 2522,
         "nodeType": "ImportDirective",
@@ -2055,7 +2055,7 @@
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyEconomy.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyEconomy.sol",
         "file": "./TwoKeyEconomy.sol",
         "id": 2523,
         "nodeType": "ImportDirective",
@@ -2066,7 +2066,7 @@
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyEventSource.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyEventSource.sol",
         "file": "./TwoKeyEventSource.sol",
         "id": 2524,
         "nodeType": "ImportDirective",
@@ -2077,7 +2077,7 @@
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyWhitelisted.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyWhitelisted.sol",
         "file": "./TwoKeyWhitelisted.sol",
         "id": 2525,
         "nodeType": "ImportDirective",
@@ -2088,7 +2088,7 @@
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyCampaignInventory.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyCampaignInventory.sol",
         "file": "./TwoKeyCampaignInventory.sol",
         "id": 2526,
         "nodeType": "ImportDirective",
@@ -3177,5 +3177,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
-  "updatedAt": "2018-08-29T23:25:36.642Z"
+  "updatedAt": "2018-08-30T05:03:03.922Z"
 }

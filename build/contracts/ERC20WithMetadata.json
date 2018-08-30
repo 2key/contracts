@@ -205,9 +205,9 @@
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "pragma solidity ^0.4.21;\n\nimport \"../../token/ERC20/ERC20.sol\";\n\n\n/**\n * @title ERC-1047 Token Metadata\n * @dev See https://eips.ethereum.org/EIPS/eip-1046\n * @dev tokenURI must respond with a URI that implements https://eips.ethereum.org/EIPS/eip-1047\n * @dev TODO - update https://github.com/OpenZeppelin/openzeppelin-solidity/blob/master/contracts/token/ERC721/ERC721.sol#L17 when 1046 is finalized\n */\ncontract ERC20TokenMetadata is ERC20 {\n  function tokenURI() external view returns (string);\n}\n\n\ncontract ERC20WithMetadata is ERC20TokenMetadata {\n  string private tokenURI_ = \"\";\n\n  constructor(string _tokenURI)\n    public\n  {\n    tokenURI_ = _tokenURI;\n  }\n\n  function tokenURI() external view returns (string) {\n    return tokenURI_;\n  }\n}\n",
-  "sourcePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/proposals/ERC1046/TokenMetadata.sol",
+  "sourcePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/proposals/ERC1046/TokenMetadata.sol",
   "ast": {
-    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/proposals/ERC1046/TokenMetadata.sol",
+    "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/proposals/ERC1046/TokenMetadata.sol",
     "exportedSymbols": {
       "ERC20TokenMetadata": [
         11025
@@ -231,7 +231,7 @@
         "src": "0:24:78"
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/token/ERC20/ERC20.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/token/ERC20/ERC20.sol",
         "file": "../../token/ERC20/ERC20.sol",
         "id": 11017,
         "nodeType": "ImportDirective",
@@ -617,7 +617,7 @@
     "src": "0:750:78"
   },
   "legacyAST": {
-    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/proposals/ERC1046/TokenMetadata.sol",
+    "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/proposals/ERC1046/TokenMetadata.sol",
     "exportedSymbols": {
       "ERC20TokenMetadata": [
         11025
@@ -641,7 +641,7 @@
         "src": "0:24:78"
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/token/ERC20/ERC20.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/token/ERC20/ERC20.sol",
         "file": "../../token/ERC20/ERC20.sol",
         "id": 11017,
         "nodeType": "ImportDirective",
@@ -1032,5 +1032,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
-  "updatedAt": "2018-08-29T23:25:36.552Z"
+  "updatedAt": "2018-08-30T05:03:03.746Z"
 }

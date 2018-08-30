@@ -631,9 +631,9 @@
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "pragma solidity ^0.4.24;\n\nimport './TwoKeyCampaign.sol';\nimport \"./TwoKeyTypes.sol\";\n\n\ncontract TwoKeyCampaignETH is TwoKeyCampaign {\n \n\t/*  \n\t    fulfills a fungible asset purchase\n\t    creates the escrow for a fungible asset\n\t    computes the payout in ETH \n\t    transfers to the escrow the asset purchased\n    */\n\n\tfunction fulfillFungibleETH(\n\t\taddress _from, \n\t\tuint256 _tokenID, \n\t\taddress _assetContract, \n\t\tuint256 _amount) isOngoing internal {\n\t\trequire(_amount > 0 && prices[_tokenID][_assetContract] > 0);\n\t\tuint256 payout = prices[_tokenID][_assetContract].mul(_amount);\n\t\trequire(msg.value == payout);\n\t\tConversion memory c = Conversion(_from, payout, msg.sender, false, false, _tokenID, _assetContract, _amount, CampaignType.Fungible, now, now + expiryConversion * 1 days);\n\t\t// move funds\n\t\ttwoKeyCampaignInventory.removeFungibleAssets(_tokenID, _assetContract, _amount);\n\t\teventSource.escrow(address(this), msg.sender, _tokenID, _assetContract, _amount, CampaignType.Fungible);\n\t\tconversions[msg.sender] = c;\n\t}\n\n    /*  \n\t    fulfills a non fungible asset purchase\n\t    creates the escrow for a fungible asset\n\t    computes the payout in ETH\n\t    transfers to the escrow the asset purchased\n    */\n\tfunction fulfillNonFungibleETH(address _from, uint256 _tokenID, address _assetContract, uint256 _index) isOngoing internal {\n\t\taddress assetToken = address(\n\t      keccak256(abi.encodePacked(_assetContract, _index))\n\t    );\n\t\trequire(_index != 0 && prices[_tokenID][assetToken] > 0);\n\t\tuint256 payout = prices[_tokenID][assetToken];\n\t\trequire(msg.value == payout);\n\t\tConversion memory c = Conversion(_from, payout, msg.sender, false, false, _tokenID, _assetContract, _index, CampaignType.NonFungible, now, now + expiryConversion * 1 days);\n\t\teventSource.escrow(address(this), msg.sender, _tokenID, _assetContract, _index, CampaignType.NonFungible);\n\t\tconversions[msg.sender] = c;\n\t}\n\n    /**\n     * calculates moderetor fee, pays the moderator, \n     * computes total reward\n     * transfer payout to buyer, deducting the fee and the total reward\n     * asks the campaign to distribute rewards to influencers\n     */\n\n\tfunction actuallyFulfilledTwoKeyToken() internal {\n\t\tConversion memory c = conversions[msg.sender];\n        c.isFulfilled = true; \n        conversions[msg.sender] = c;\n\t\tuint256 fee = calculateModeratorFee(c.payout);\n        moderator.transfer(fee); \n        uint256 payout = c.payout;\n        uint256 maxReward = maxPi.mul(payout).div(100);\n        \n        // transfer payout - fee - rewards to seller\n        contractor.transfer(payout.sub(fee).sub(maxReward));\n        \n        transferRewardsTwoKeyToken(c.from, maxReward.mul(rate));\n        eventSource.fulfilled(address(this), c.converter, c.tokenID, c.assetContract, c.indexOrAmount, c.campaignType);\n\t}\n\n\t/**\n  \t * buy product withETH, \n  \t * _from is the influencer from which you received the referral\n  \t * _tokenID is the asset sku\n  \t * _assetContract - erc20 (fungible) or erc721 (non fungible) which represents the class of the asset\n  \t * _amountOrIndex - for erc20 amount in asset class, for erc21 index within asset class\n  \t */\n\tfunction buyFromWithETH(\n\t\taddress _from, \n\t\tuint256 _tokenID, \n\t\taddress _assetContract, \n\t\tuint256 _amountOrIndex,\n\t\tCampaignType _campaignType) public payable {\n\t\tif (_campaignType == CampaignType.Fungible) {\n\t\t\tfulfillFungibleETH(_from, _tokenID, _assetContract, _amountOrIndex);\n\t\t} else if (_campaignType == CampaignType.NonFungible) {\n\t\t\tfulfillNonFungibleETH(_from, _tokenID, _assetContract, _amountOrIndex);\n\t\t} \n\t}\n\n}\n\n",
-  "sourcePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyCampaignETH.sol",
+  "sourcePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyCampaignETH.sol",
   "ast": {
-    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyCampaignETH.sol",
+    "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyCampaignETH.sol",
     "exportedSymbols": {
       "TwoKeyCampaignETH": [
         2516
@@ -654,7 +654,7 @@
         "src": "0:24:11"
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyCampaign.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyCampaign.sol",
         "file": "./TwoKeyCampaign.sol",
         "id": 2184,
         "nodeType": "ImportDirective",
@@ -665,7 +665,7 @@
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyTypes.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyTypes.sol",
         "file": "./TwoKeyTypes.sol",
         "id": 2185,
         "nodeType": "ImportDirective",
@@ -5402,7 +5402,7 @@
     "src": "0:3563:11"
   },
   "legacyAST": {
-    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyCampaignETH.sol",
+    "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyCampaignETH.sol",
     "exportedSymbols": {
       "TwoKeyCampaignETH": [
         2516
@@ -5423,7 +5423,7 @@
         "src": "0:24:11"
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyCampaign.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyCampaign.sol",
         "file": "./TwoKeyCampaign.sol",
         "id": 2184,
         "nodeType": "ImportDirective",
@@ -5434,7 +5434,7 @@
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyTypes.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyTypes.sol",
         "file": "./TwoKeyTypes.sol",
         "id": 2185,
         "nodeType": "ImportDirective",
@@ -10176,5 +10176,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
-  "updatedAt": "2018-08-29T23:25:36.734Z"
+  "updatedAt": "2018-08-30T05:03:04.397Z"
 }

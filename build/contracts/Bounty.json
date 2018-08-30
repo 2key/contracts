@@ -202,9 +202,9 @@
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "pragma solidity ^0.4.24;\n\n\nimport \"./payment/PullPayment.sol\";\nimport \"./lifecycle/Destructible.sol\";\n\n\n/**\n * @title Bounty\n * @dev This bounty will pay out to a researcher if they break invariant logic of the contract.\n */\ncontract Bounty is PullPayment, Destructible {\n  bool public claimed;\n  mapping(address => address) public researchers;\n\n  event TargetCreated(address createdAddress);\n\n  /**\n   * @dev Fallback function allowing the contract to receive funds, if they haven't already been claimed.\n   */\n  function() external payable {\n    require(!claimed);\n  }\n\n  /**\n   * @dev Create and deploy the target contract (extension of Target contract), and sets the\n   * msg.sender as a researcher\n   * @return A target contract\n   */\n  function createTarget() public returns(Target) {\n    Target target = Target(deployContract());\n    researchers[target] = msg.sender;\n    emit TargetCreated(target);\n    return target;\n  }\n\n  /**\n   * @dev Transfers the contract funds to the researcher that proved the contract is broken.\n   * @param _target contract\n   */\n  function claim(Target _target) public {\n    address researcher = researchers[_target];\n    require(researcher != address(0));\n    // Check Target contract invariants\n    require(!_target.checkInvariant());\n    asyncTransfer(researcher, address(this).balance);\n    claimed = true;\n  }\n\n  /**\n   * @dev Internal function to deploy the target contract.\n   * @return A target contract address\n   */\n  function deployContract() internal returns(address);\n\n}\n\n\n/**\n * @title Target\n * @dev Your main contract should inherit from this class and implement the checkInvariant method.\n */\ncontract Target {\n\n   /**\n    * @dev Checks all values a contract assumes to be true all the time. If this function returns\n    * false, the contract is broken in some way and is in an inconsistent state.\n    * In order to win the bounty, security researchers will try to cause this broken state.\n    * @return True if all invariant values are correct, false otherwise.\n    */\n  function checkInvariant() public returns(bool);\n}\n",
-  "sourcePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/Bounty.sol",
+  "sourcePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/Bounty.sol",
   "ast": {
-    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/Bounty.sol",
+    "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/Bounty.sol",
     "exportedSymbols": {
       "Bounty": [
         7664
@@ -228,7 +228,7 @@
         "src": "0:24:35"
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/payment/PullPayment.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/payment/PullPayment.sol",
         "file": "./payment/PullPayment.sol",
         "id": 7569,
         "nodeType": "ImportDirective",
@@ -239,7 +239,7 @@
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/lifecycle/Destructible.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/lifecycle/Destructible.sol",
         "file": "./lifecycle/Destructible.sol",
         "id": 7570,
         "nodeType": "ImportDirective",
@@ -1548,7 +1548,7 @@
     "src": "0:2075:35"
   },
   "legacyAST": {
-    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/Bounty.sol",
+    "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/Bounty.sol",
     "exportedSymbols": {
       "Bounty": [
         7664
@@ -1572,7 +1572,7 @@
         "src": "0:24:35"
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/payment/PullPayment.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/payment/PullPayment.sol",
         "file": "./payment/PullPayment.sol",
         "id": 7569,
         "nodeType": "ImportDirective",
@@ -1583,7 +1583,7 @@
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/lifecycle/Destructible.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/lifecycle/Destructible.sol",
         "file": "./lifecycle/Destructible.sol",
         "id": 7570,
         "nodeType": "ImportDirective",
@@ -2897,5 +2897,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
-  "updatedAt": "2018-08-29T23:25:36.645Z"
+  "updatedAt": "2018-08-30T05:03:03.945Z"
 }
