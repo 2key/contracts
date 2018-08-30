@@ -4,32 +4,21 @@ pragma solidity ^0.4.24;
 
 import '../openzeppelin-solidity/contracts/math/SafeMath.sol';
 
-import './RBACWithAdmin.sol';
+//import './RBACWithAdmin.sol';
 
-contract TwoKeyCampaignInventory is RBACWithAdmin {
+/// is RBACWithAdmin (?)
+contract TwoKeyCampaignInventory {
 
   event Expired(address indexed _contract);
 
   using SafeMath for uint256;
 
-  uint openingTime;
-  uint closingTime;
+
   /// TODO: Strictly owned and all methods can be called only by TwoKeyCampaign contracts
 
 
-//  modifier isOngoing() {
-//    require(block.timestamp >= openingTime && block.timestamp <= closingTime);
-//    _;
-//  }
-//
-//  modifier isClosed() {
-//    require(now > closingTime);
-//    _;
-//  }
-
-
   /*
-  
+
     The contract acts as a store. The assets data structure is the catalogue of the store.
     
     Each asset is identified by a uint256 tokenID that acts as a SKU (shop keeping unit)
@@ -62,15 +51,30 @@ contract TwoKeyCampaignInventory is RBACWithAdmin {
   //
   mapping(uint256 => mapping(address => uint256)) assets;
 
+  /// Only 2key campaign can issue calls on this contract
+  address twoKeyCampaign;
 
-  constructor() RBACWithAdmin() public {
+  modifier onlyTwoKeyCampaign {
+    require(msg.sender != address(0));
+    require(msg.sender == twoKeyCampaign);
+    _;
+  }
+
+
+  function addTwoKeyCampaign(address _twoKeyCampaign) public {
+    /// Because campaign can be added only once
+    require(twoKeyCampaign == address(0));
+    twoKeyCampaign = _twoKeyCampaign;
+  }
+
+
+  constructor() public {
 
   }
 
 
   // add erc20 asset amount to the store, which adds an amount of that erc20 to our catalogue
   function addFungibleAsset(uint256 _tokenID, address _assetContract, uint256 _amount) public returns (bool) {
-    require(isOnGoing() == true);
     require(
       _assetContract.call(
         bytes4(keccak256("transferFrom(address,address,uint256)")),
@@ -88,7 +92,6 @@ contract TwoKeyCampaignInventory is RBACWithAdmin {
 
   // add erc721 asset to the store, which adds a particular unique item from that erc721 to our catalogue
   function addNonFungibleAsset(uint256 _tokenID, address _assetContract, uint256 _index) public returns (bool) {
-    require(isOnGoing() == true);
     require(
       _assetContract.call(
         bytes4(keccak256("transferFrom(address,address,uint256)")),
@@ -158,32 +161,32 @@ contract TwoKeyCampaignInventory is RBACWithAdmin {
 
   // transfer a unique item from a erc721 in our catalogue to someone
   // public - need to be callable only by two key campaign
+  // onlyRole(ROLE_CONTROLLER)
   function transferNonFungibleAsset(
     address _to,
     uint256 _tokenID,
     address _assetContract,
-    uint256 _assetTokenID) onlyRole(ROLE_CONTROLLER) public returns (bool) {
-    require(isOnGoing() == true);
+    uint256 _assetTokenID) public returns (bool) {
     return moveNonFungibleAsset(_to, _tokenID, _assetContract, _assetTokenID);
   }
 
+  // onlyRole(ROLE_CONTROLLER)
   function expireFungible(
     address _to,
     uint256 _tokenID,
     address _assetContract,
-    uint256 _amount) onlyRole(ROLE_CONTROLLER) public returns (bool) {
-    require(isClosed() == true);
+    uint256 _amount)  public returns (bool) {
     moveFungibleAsset(_to, _tokenID, _assetContract, _amount);
     emit Expired(address(this));
     return true;
   }
 
+  // onlyRole(ROLE_CONTROLLER)
   function expireNonFungible(
     address _to,
     uint256 _tokenID,
     address _assetContract,
-    uint256 _assetTokenID) onlyRole(ROLE_CONTROLLER) public returns (bool){
-    require(isClosed() == true);
+    uint256 _assetTokenID) public returns (bool){
     moveNonFungibleAsset(_to, _tokenID, _assetContract, _assetTokenID);
     emit Expired(address(this));
     return true;
@@ -224,25 +227,5 @@ contract TwoKeyCampaignInventory is RBACWithAdmin {
     assets[_tokenID][_assetContract] = 1;
   }
 
-
-
-  /// Since we can't use modifiers anymore here, we'll use functions and call them in other contracts / implement modifiers there
-  /// @notice Function to replace old modifier isOngoing - checks if current time is between opening and closing time
-  /// @dev Because TwoKeyCampaign doesn't inherit anymore this contract, it doesn't have access to it's modifiers
-  /// @return - if require pass will return true, otherwise it will revert trnx
-  function isOnGoing() public view returns (bool) {
-    require(block.timestamp >= openingTime && block.timestamp <= closingTime);
-    return true;
-  }
-
-
-  /// Since we can't use modifiers anymore here, we'll use functions and call them in other contracts / implement modifiers there
-  /// @notice Function to replace old modifier isClosed - checks if current time is greater than closingTime
-  /// @dev Because TwoKeyCampaign doesn't inherit anymore this contract, it doesn't have access to it's modifiers
-  /// @return - if require pass, will return true, otherwise it will revert trnx
-  function isClosed() public view returns (bool) {
-    require(block.timestamp > closingTime);
-    return true;
-  }
 
 }
