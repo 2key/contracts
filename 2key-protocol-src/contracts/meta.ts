@@ -142,6 +142,12 @@ export default { TwoKeyARC:
            address: '0x77c53e9eb9ca7948bf468fc6894ce031937bf882',
            transactionHash:
             '0x75f72982288bad9801b5e0e3b11323a1f64f73eca2545f04f53aa7b5a7976908' },
+        '8086':
+         { events: {},
+           links: {},
+           address: '0xbc3b5a0a64fedb9936cefc34d12d6ff5946f2e41',
+           transactionHash:
+            '0x3aa6c3b0097511104c7c52b1f523163a12825c169b199a6326ebb8cfafd37d1b' },
         '1535619347694':
          { events: {},
            links: {},
@@ -836,6 +842,12 @@ export default { TwoKeyARC:
            address: '0xbb39f0bc4faf13be0f1a55bc2ee03fbcdda6ffab',
            transactionHash:
             '0x0d61e8864fa8b0b33a820cf18807376b0c06cb50b5a6699ed730a42f7d3f0fac' },
+        '8086':
+         { events: {},
+           links: {},
+           address: '0x311df7d0354f3a8bb044ca1dedb086a64a4874d6',
+           transactionHash:
+            '0x575e04e50e62fe97e6e67a9e8cfa9c263a5221df277695b09f542bb31f817b14' },
         '1535619347694':
          { events: {},
            links: {},
@@ -850,6 +862,12 @@ export default { TwoKeyARC:
            address: '0x4b8ddab499a005dced928bf603dae70520602909',
            transactionHash:
             '0x8ef72c79f18847cab6a7bc82db671482ab69c6410cabb1a7418e3e7a29e8867b' },
+        '8086':
+         { events: {},
+           links: {},
+           address: '0x7a256852072f4bd78841d3236c8f5ba623b803ba',
+           transactionHash:
+            '0xd3d6f58575aa576f6abe75447f3bab4ac666479faaf2f9ad429b0f7a25113de7' },
         '1535619347694':
          { events: {},
            links: {},
@@ -865,6 +883,12 @@ export default { TwoKeyARC:
            address: '0x4fe246ddf9d16cb7a9aba870a83bf9efbd8cb8e5',
            transactionHash:
             '0x5e0d9fb38ab607f78a5c3a4c9ba2d89411ef5633938a25e8b6891136e4e57109' },
+        '8086':
+         { events: {},
+           links: {},
+           address: '0xe3c983363ecfb0fa19f0ef2675aabb1dac0aed40',
+           transactionHash:
+            '0x9c464db117d695a8c96c30a3a61c9709ead6c784eb20fa86575610cb47737e5c' },
         '1535619347694':
          { events: {},
            links: {},
