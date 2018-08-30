@@ -103,10 +103,7 @@ export class TwoKeyCampaignInventory extends TC.TypeChainContract {
         type: "function"
       },
       {
-        inputs: [
-          { name: "_openingTime", type: "uint256" },
-          { name: "_closingTime", type: "uint256" }
-        ],
+        inputs: [],
         payable: false,
         stateMutability: "nonpayable",
         type: "constructor"
