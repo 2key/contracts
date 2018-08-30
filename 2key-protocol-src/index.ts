@@ -226,7 +226,7 @@ export default class TwoKeyNetwork {
       try {
         const whitelistInfluencerAddress = await this._createSubcontract(solidityContracts.TwoKeyWhitelisted);
         const whitelistConverterAddress = await this._createSubcontract(solidityContracts.TwoKeyWhitelisted);
-        // const assetFactoryAddress = await this._createSubcontract(solidityContracts.ComposableAssetFactory, gasPrice, [data.openingTime, data.closingTime]);
+        const assetFactoryAddress = await this._createSubcontract(solidityContracts.ComposableAssetFactory, gasPrice, [data.openingTime, data.closingTime]);
         const campaignAddress = await this._createSubcontract(solidityContracts.TwoKeyCampaign, gasPrice, [
           this._getContractDeployedAddress('TwoKeyEventSource'),
           this.twoKeyEconomy.address,
