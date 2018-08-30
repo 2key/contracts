@@ -88,18 +88,6 @@ export default class TwoKeyNetwork {
     return this.address;
   }
 
-  public fromWei(number: string | number | BigNumber, unit?: string): string {
-    return this.web3.fromWei(number, unit);
-  }
-
-  public toWei(number: string | number | BigNumber, unit?: string): number | BigNumber {
-    return this.web3.toWei(number, unit);
-  }
-
-  public toHex(data: any): string {
-    return this.web3.toHex(data);
-  }
-
   public getTransaction(txHash: string): Promise<Transaction> {
     return new Promise((resolve, reject) => {
       this.web3.eth.getTransaction(txHash, (err, res) => {
@@ -125,7 +113,7 @@ export default class TwoKeyNetwork {
           resolve({
             balance: {
               ETH: parseFloat(eth),
-              total: parseFloat(this.fromWei(total.toString())),
+              total: parseFloat(this._fromWei(total.toString())),
               '2KEY': parseFloat(token),
             },
             local_address: this.address,
@@ -139,7 +127,7 @@ export default class TwoKeyNetwork {
   public getERC20TransferGas(to: string, value: number): Promise<number> {
     this.gas = null;
     return new Promise((resolve, reject) => {
-      this.twoKeyEconomy.transferTx(to, this.toWei(value, 'ether')).estimateGas({ from: this.address })
+      this.twoKeyEconomy.transferTx(to, this._toWei(value, 'ether')).estimateGas({ from: this.address })
         .then(res => {
           this.gas = res;
           resolve(this.gas);
@@ -151,7 +139,7 @@ export default class TwoKeyNetwork {
   public getETHTransferGas(to: string, value: number): Promise<number> {
     this.gas = null;
     return new Promise((resolve, reject) => {
-      this.web3.eth.estimateGas({ to, value: this.toWei(value, 'ether').toString() }, (err, res) => {
+      this.web3.eth.estimateGas({ to, value: this._toWei(value, 'ether').toString() }, (err, res) => {
         if (err) {
           reject(err);
         } else {
@@ -166,27 +154,27 @@ export default class TwoKeyNetwork {
     const balance = parseFloat(await this._getEthBalance(this.address));
     const tokenBalance = parseFloat(await this._getTokenBalance(this.address));
     const gasRequired = await this.getERC20TransferGas(to, value);
-    const etherRequired = parseFloat(this.fromWei(gasPrice * gasRequired, 'ether'));
+    const etherRequired = parseFloat(this._fromWei(gasPrice * gasRequired, 'ether'));
     if (tokenBalance < value || balance < etherRequired) {
       throw new Error('Not enough founds');
     }
     const nonce = await this._getNonce();
     console.log('Nonce for transferTokens', nonce);
-    // const params = { from: this.address, gasLimit: this.toHex(this.gas), gasPrice, nonce };
-    const params = { from: this.address, gasLimit: this.toHex(this.gas), gasPrice };
-    return this.twoKeyEconomy.transferTx(to, this.toWei(value, 'ether')).send(params);
+    // const params = { from: this.address, gasLimit: this._toHex(this.gas), gasPrice, nonce };
+    const params = { from: this.address, gasLimit: this._toHex(this.gas), gasPrice };
+    return this.twoKeyEconomy.transferTx(to, this._toWei(value, 'ether')).send(params);
   }
 
   public async transferEther(to: string, value: number, gasPrice: number = this.gasPrice): Promise<any> {
     const balance = parseFloat(await this._getEthBalance(this.address));
     const gasRequired = await this.getETHTransferGas(to, value);
-    const totalValue = value + parseFloat(this.fromWei(gasPrice * gasRequired, 'ether'));
+    const totalValue = value + parseFloat(this._fromWei(gasPrice * gasRequired, 'ether'));
     if (totalValue > balance) {
       throw new Error('Not enough founds');
     }
     const nonce = await this._getNonce();
     console.log('Nonce for transfer ETH', nonce);
-    const params = { to, gasPrice, gasLimit: this.toHex(this.gas), value: this.toWei(value, 'ether').toString(), from: this.address }
+    const params = { to, gasPrice, gasLimit: this._toHex(this.gas), value: this._toWei(value, 'ether').toString(), from: this.address }
     return new Promise((resolve, reject) => {
       this.web3.eth.sendTransaction(params, (err, res) => {
         if (err) {
@@ -236,18 +224,21 @@ export default class TwoKeyNetwork {
       try {
         const gasRequired = await this.estimateSaleCampaign(data);
         const balance = parseFloat(await this._getEthBalance(this.address));
-        const totalValue = parseFloat(this.fromWei(gasPrice || this.gasPrice * gasRequired, 'ether'));
+        const totalValue = parseFloat(this._fromWei(gasPrice || this.gasPrice * gasRequired, 'ether'));
 
         if (totalValue > balance) {
           throw new Error('Not enough founds');
         }
-    
+        console.log('Creating TwoKeyWhitelisted...');
         const whitelistInfluencerAddress = await this._createContract(solidityContracts.TwoKeyWhitelisted);
         console.log('whitelistInfluencerAddress', whitelistInfluencerAddress);
+        console.log('Creating TwoKeyWhitelisted...');
         const whitelistConverterAddress = await this._createContract(solidityContracts.TwoKeyWhitelisted);
         console.log('whitelistConverterAddress', whitelistConverterAddress);
+        console.log('Creating TwoKeyCampaignInventory...');
         const campaignInventoryAddress = await this._createContract(solidityContracts.TwoKeyCampaignInventory, gasPrice, [data.openingTime, data.closingTime]);
         console.log('campaignInventoryAddress', campaignInventoryAddress);
+        console.log('Creating TwoKeyCampaign...');
         const campaignAddress = await this._createContract(solidityContracts.TwoKeyCampaign, gasPrice, [
           this._getContractDeployedAddress('TwoKeyEventSource'),
           this.twoKeyEconomy.address,
@@ -269,6 +260,18 @@ export default class TwoKeyNetwork {
         reject(err);
       }
     });
+  }
+
+  private _fromWei(number: string | number | BigNumber, unit?: string): string {
+    return this.web3.fromWei(number, unit);
+  }
+
+  private _toWei(number: string | number | BigNumber, unit?: string): number | BigNumber {
+    return this.web3.toWei(number, unit);
+  }
+
+  private _toHex(data: any): string {
+    return this.web3.toHex(data);
   }
 
   private _getContractDeployedAddress(contract: string): string {
@@ -294,7 +297,7 @@ export default class TwoKeyNetwork {
         if (err) {
           reject(err);
         } else {
-          resolve(this.fromWei(res.toString(), 'ether'));
+          resolve(this._fromWei(res.toString(), 'ether'));
         }
       })
     })
@@ -304,7 +307,7 @@ export default class TwoKeyNetwork {
     return new Promise((resolve, reject) => {
       this.twoKeyEconomy.balanceOf(address)
         .then(res => {
-          resolve(this.fromWei(res.toString()))
+          resolve(this._fromWei(res.toString()))
         })
         .catch(reject);
     });
@@ -312,13 +315,13 @@ export default class TwoKeyNetwork {
 
   private _getTotalSupply(): Promise<string> {
     if (this.totalSupply) {
-      return Promise.resolve(this.fromWei(this.totalSupply.toString()));
+      return Promise.resolve(this._fromWei(this.totalSupply.toString()));
     }
     return new Promise((resolve, reject) => {
       this.twoKeyEconomy.totalSupply
         .then(res => {
           this.totalSupply = res;
-          resolve(this.fromWei(this.totalSupply.toString()));
+          resolve(this._fromWei(this.totalSupply.toString()));
         })
         .catch(reject);
     });
@@ -378,12 +381,12 @@ export default class TwoKeyNetwork {
   private _createRawTransaction(params: RawTransaction): Promise<string> {
     return new Promise(async (resolve, reject) => {
       try {
-        const nonce = this.mainWeb3.toHex(await this._getNonce());
+        const nonce = this.mainWeb3._toHex(await this._getNonce());
         const rawTransaction = {
-          nonce: this.mainWeb3.toHex(nonce),
+          nonce: this.mainWeb3._toHex(nonce),
           from: params.from || this.address,
-          gasLimit: this.mainWeb3.toHex(params.gas || this.gas),
-          gasPrice: this.mainWeb3.toHex(params.gasPrice || this.gasPrice),
+          gasLimit: this.mainWeb3._toHex(params.gas || this.gas),
+          gasPrice: this.mainWeb3._toHex(params.gasPrice || this.gasPrice),
           to: params.to,
           value: params.value,
           data: params.data
