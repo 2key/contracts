@@ -90,7 +90,7 @@ contract TwoKeyEventSource is TwoKeyTypes {
     /// @notice Function where an admin can authorize any other person to modify allowed contracts
     /// @param _newAddress is the address of new modifier contract / account
     /// @dev if only contract can be modifier then we'll add one more validation step
-    function addAuthorizedAddress(address _newAddress) public onlyAdmin {
+    function addAuthorizedAddress(address _newAddress) public {
         require(_newAddress != address(0));
         authorizedSubadmins[_newAddress] = true;
     }

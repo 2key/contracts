@@ -41,6 +41,10 @@ contract("TwoKeyEventSource", async (accounts) => {
         twoKeyAdmin = await TwoKeyAdmin.new(economy.address, electorateAdmins, upgradeableExchange.address);
 
         eventSource = await TwoKeyEventSource.new(twoKeyAdmin.address);
+
+
+        /// Adding the event source contract
+        await twoKeyAdmin.addTwoKeyEventSource(eventSource.address);
 	});
 
 	it("should have deployed all contracts", async () => {
@@ -59,7 +63,7 @@ contract("TwoKeyEventSource", async (accounts) => {
 	//  because this creates an account that is not associated with your node. Need to research how to add it to accounts
 	it("admin should add subadmins", async() => {
 		try {
-            await eventSource.addAuthorizedAddress(subAdminAddress, {from: twoKeyAdmin.address});
+            await twoKeyAdmin.twoKeyEventSourceAddAuthorizedAddress(subAdminAddress);
         } catch (error) {
 			console.log(error);
 			assert.fail();

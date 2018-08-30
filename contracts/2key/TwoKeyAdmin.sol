@@ -6,6 +6,7 @@ import '../openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import './TwoKeyEconomy.sol';
 import './TwoKeyUpgradableExchange.sol';
 import "../interfaces/IAdminContract.sol";
+import "./TwoKeyEventSource.sol";
 
 
 
@@ -13,12 +14,12 @@ import "../interfaces/IAdminContract.sol";
 
 contract TwoKeyAdmin is Ownable, Destructible, AdminContract {
 
-
 	TwoKeyEconomy economy;
 	address electorateAdmins;
 	TwoKeyUpgradableExchange exchange;
 	address public newAdmin;
 	bool wasReplaced; 
+	TwoKeyEventSource twoKeyEventSource;
 
 	constructor(
 		TwoKeyEconomy _economy, 
@@ -87,5 +88,12 @@ contract TwoKeyAdmin is Ownable, Destructible, AdminContract {
 		_;
 	}
 
-
+	function twoKeyEventSourceAddAuthorizedAddress(address _address) public {
+		require(_address != address(0));
+		twoKeyEventSource.addAuthorizedAddress(_address);
+	}
+	function addTwoKeyEventSource(address _twoKeyEventSource) public {
+		require(_twoKeyEventSource != address(0));
+		twoKeyEventSource = TwoKeyEventSource(_twoKeyEventSource);
+	}
 }
