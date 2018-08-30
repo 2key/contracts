@@ -130,6 +130,24 @@ export class TwoKeyAdmin extends TC.TypeChainContract {
         payable: false,
         stateMutability: "nonpayable",
         type: "function"
+      },
+      {
+        constant: false,
+        inputs: [{ name: "_address", type: "address" }],
+        name: "twoKeyEventSourceAddAuthorizedAddress",
+        outputs: [],
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "function"
+      },
+      {
+        constant: false,
+        inputs: [{ name: "_twoKeyEventSource", type: "address" }],
+        name: "addTwoKeyEventSource",
+        outputs: [],
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "function"
       }
     ];
     super(web3, address, abi);
@@ -223,6 +241,24 @@ export class TwoKeyAdmin extends TC.TypeChainContract {
   }
   public destroyTx(): TC.DeferredTransactionWrapper<TC.ITxParams> {
     return new TC.DeferredTransactionWrapper<TC.ITxParams>(this, "destroy", []);
+  }
+  public twoKeyEventSourceAddAuthorizedAddressTx(
+    _address: BigNumber | string
+  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
+    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
+      this,
+      "twoKeyEventSourceAddAuthorizedAddress",
+      [_address.toString()]
+    );
+  }
+  public addTwoKeyEventSourceTx(
+    _twoKeyEventSource: BigNumber | string
+  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
+    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
+      this,
+      "addTwoKeyEventSource",
+      [_twoKeyEventSource.toString()]
+    );
   }
 
   public OwnershipRenouncedEvent(eventFilter: {

@@ -199,6 +199,15 @@ export class TwoKeyCampaign extends TC.TypeChainContract {
       {
         anonymous: false,
         inputs: [
+          { indexed: true, name: "_campaign", type: "address" },
+          { indexed: true, name: "_owner", type: "address" }
+        ],
+        name: "Created",
+        type: "event"
+      },
+      {
+        anonymous: false,
+        inputs: [
           { indexed: true, name: "owner", type: "address" },
           { indexed: true, name: "spender", type: "address" },
           { indexed: false, name: "value", type: "uint256" }
@@ -215,15 +224,6 @@ export class TwoKeyCampaign extends TC.TypeChainContract {
         ],
         name: "Transfer",
         type: "event"
-      },
-      {
-        constant: false,
-        inputs: [],
-        name: "addAdminRolesAndBalancesAfterDeployed",
-        outputs: [],
-        payable: false,
-        stateMutability: "nonpayable",
-        type: "function"
       },
       {
         constant: false,
@@ -465,15 +465,6 @@ export class TwoKeyCampaign extends TC.TypeChainContract {
       [_spender.toString(), _addedValue.toString()]
     );
   }
-  public addAdminRolesAndBalancesAfterDeployedTx(): TC.DeferredTransactionWrapper<
-    TC.ITxParams
-  > {
-    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
-      this,
-      "addAdminRolesAndBalancesAfterDeployed",
-      []
-    );
-  }
   public transferAssetTwoKeyTokenTx(
     _tokenID: BigNumber | number,
     _assetContract: BigNumber | string,
@@ -586,6 +577,24 @@ export class TwoKeyCampaign extends TC.TypeChainContract {
     );
   }
 
+  public CreatedEvent(eventFilter: {
+    _campaign?: BigNumber | string | Array<BigNumber | string>;
+    _owner?: BigNumber | string | Array<BigNumber | string>;
+  }): TC.DeferredEventWrapper<
+    { _campaign: BigNumber | string; _owner: BigNumber | string },
+    {
+      _campaign?: BigNumber | string | Array<BigNumber | string>;
+      _owner?: BigNumber | string | Array<BigNumber | string>;
+    }
+  > {
+    return new TC.DeferredEventWrapper<
+      { _campaign: BigNumber | string; _owner: BigNumber | string },
+      {
+        _campaign?: BigNumber | string | Array<BigNumber | string>;
+        _owner?: BigNumber | string | Array<BigNumber | string>;
+      }
+    >(this, "Created", eventFilter);
+  }
   public ApprovalEvent(eventFilter: {
     owner?: BigNumber | string | Array<BigNumber | string>;
     spender?: BigNumber | string | Array<BigNumber | string>;
