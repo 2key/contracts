@@ -129,18 +129,6 @@ export class TwoKeyCampaignETH extends TC.TypeChainContract {
       {
         constant: false,
         inputs: [
-          { name: "openingTime", type: "uint256" },
-          { name: "closingTime", type: "uint256" }
-        ],
-        name: "addInventory",
-        outputs: [],
-        payable: false,
-        stateMutability: "nonpayable",
-        type: "function"
-      },
-      {
-        constant: false,
-        inputs: [
           { name: "_spender", type: "address" },
           { name: "_subtractedValue", type: "uint256" }
         ],
@@ -484,16 +472,6 @@ export class TwoKeyCampaignETH extends TC.TypeChainContract {
       this,
       "addAdminRolesAndBalancesAfterDeployed",
       []
-    );
-  }
-  public addInventoryTx(
-    openingTime: BigNumber | number,
-    closingTime: BigNumber | number
-  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
-    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
-      this,
-      "addInventory",
-      [openingTime.toString(), closingTime.toString()]
     );
   }
   public decreaseApprovalTx(

@@ -91,6 +91,12 @@ export class TwoKeyReg extends TC.TypeChainContract {
         type: "function"
       },
       {
+        inputs: [{ name: "_twoKeyEventSource", type: "address" }],
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "constructor"
+      },
+      {
         anonymous: false,
         inputs: [
           { indexed: false, name: "owner", type: "address" },
@@ -113,15 +119,6 @@ export class TwoKeyReg extends TC.TypeChainContract {
         ],
         name: "OwnershipTransferred",
         type: "event"
-      },
-      {
-        constant: false,
-        inputs: [{ name: "_twoKeyEventSource", type: "address" }],
-        name: "addTwoKeyEventSource",
-        outputs: [],
-        payable: false,
-        stateMutability: "nonpayable",
-        type: "function"
       },
       {
         constant: false,
@@ -396,15 +393,6 @@ export class TwoKeyReg extends TC.TypeChainContract {
       this,
       "transferOwnership",
       [_newOwner.toString()]
-    );
-  }
-  public addTwoKeyEventSourceTx(
-    _twoKeyEventSource: BigNumber | string
-  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
-    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
-      this,
-      "addTwoKeyEventSource",
-      [_twoKeyEventSource.toString()]
     );
   }
   public changeTwoKeyEventSourceTx(
