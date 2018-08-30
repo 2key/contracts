@@ -9,7 +9,6 @@ import './TwoKeyARC.sol';
 import "./TwoKeyCampaignInventory.sol";
 import "./TwoKeyWhitelisted.sol";
 
-/// TODO: Fix emit event created when deployed
 /// TODO: method to set contractor public key  (when user create campaign we generate a link)
 /// TODO: Somehow to check if contractor public key is set
 /// TODO: Add inventory (ETHCrowdsale()?)
@@ -60,7 +59,6 @@ contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
 	// Composable asset factory
 	TwoKeyCampaignInventory twoKeyCampaignInventory;
 
-	/// TODO: Make contract TwoKeyCampaignFactory to deploy singleton contracts and TwoKeyCampaign
 
 	// prices of assets
 	// TODO (udi) there should be just one token->address->price you don't need two maps
@@ -128,7 +126,6 @@ contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
 	
 	 */
 
-	/// TODO: Factory deploy subcontracts and then we deploy campaign
 	constructor(
 		TwoKeyEventSource _eventSource,
 		TwoKeyEconomy _economy,
