@@ -58,7 +58,8 @@ let twoKeyProtocol: TwoKeyProtocol;
 
 
 describe('TwoKeyProtocol', () => {
-  beforeEach((done) => {
+  beforeEach(function(done) {
+    this.timeout((parseInt(delay) || 1000) + 1000);
     setTimeout(() => done(), parseInt(delay) || 1000);
   });
   it('should create a 2Key-protocol instance', () => {
