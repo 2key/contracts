@@ -7,6 +7,7 @@ import { EhtereumNetworks, ContractsAdressess, TwoKeyInit, BalanceMeta, Transact
 import Sign from './sign';
 // import HDWalletProvider from './HDWalletProvider';
 
+const contracts = require('./contracts.json');
 // console.log(Sign);
 // const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 
@@ -150,7 +151,7 @@ export default class TwoKeyNetwork {
     });
   }
 
-  public async transferTokens(to: string, value: number, gasPrice: number = this.gasPrice): Promise<string> {
+  public async transferTokens(to: string, value: number, gasPrice: number = this.gasPrice): Promise<any> {
     const balance = parseFloat(await this._getEthBalance(this.address));
     const tokenBalance = parseFloat(await this._getTokenBalance(this.address));
     const gasRequired = await this.getERC20TransferGas(to, value);
@@ -158,11 +159,23 @@ export default class TwoKeyNetwork {
     if (tokenBalance < value || balance < etherRequired) {
       throw new Error('Not enough founds');
     }
-    const nonce = await this._getNonce();
-    console.log('Nonce for transferTokens', nonce);
+    // const nonce = await this._getNonce();
+    // console.log('Nonce for transferTokens', nonce);
     // const params = { from: this.address, gasLimit: this._toHex(this.gas), gasPrice, nonce };
     const params = { from: this.address, gasLimit: this._toHex(this.gas), gasPrice };
-    return this.twoKeyEconomy.transferTx(to, this._toWei(value, 'ether')).send(params);
+    return new Promise((resolve, reject) => {
+      const economy = this.web3.eth.contract(contracts.TwoKeyEconomy.abi).at(contracts.TwoKeyEconomy.networks[this.networks.mainNetId].address);
+
+      economy.transfer(to, this._toWei(value, 'ether'), params, async (err, res) => {
+        if (err) {
+          reject(err);
+        } else {
+          // console.log('After token', await this._getNonce());
+          resolve(res);
+        }
+      });
+        // const tx = await this.twoKeyEconomy.transferTx(to, this._toWei(value, 'ether')).send(params)
+    });
   }
 
   public async transferEther(to: string, value: number, gasPrice: number = this.gasPrice): Promise<any> {
@@ -172,14 +185,15 @@ export default class TwoKeyNetwork {
     if (totalValue > balance) {
       throw new Error('Not enough founds');
     }
-    const nonce = await this._getNonce();
-    console.log('Nonce for transfer ETH', nonce);
+    // const nonce = await this._getNonce();
+    // console.log('Nonce for transfer ETH', nonce);
     const params = { to, gasPrice, gasLimit: this._toHex(this.gas), value: this._toWei(value, 'ether').toString(), from: this.address }
     return new Promise((resolve, reject) => {
-      this.web3.eth.sendTransaction(params, (err, res) => {
+      this.web3.eth.sendTransaction(params, async (err, res) => {
         if (err) {
           reject(err);
         } else {
+          // console.log('After ETH', await this._getNonce());
           resolve(res);
         }
       });
@@ -331,9 +345,10 @@ export default class TwoKeyNetwork {
     return new Promise(async (resolve, reject) => {
       const { abi, bytecode: data } = contract;
       const gas = await this._estimateSubcontractGas(contract, params);
-      const nonce = await this._getNonce()
-      console.log('Create contract nonce', nonce);
-      const createParams = params ? [...params, nonce, { data, from: this.address, gas, gasPrice }] : [{ data, from: this.address, gas, gasPrice }];
+      // const nonce = await this._getNonce()
+      // console.log('Create contract nonce', nonce);
+      // const createParams = params ? [...params, nonce, { data, from: this.address, gas, gasPrice }] : [{ data, from: this.address, gas, gasPrice }];
+      const createParams = params ? [...params, { data, from: this.address, gas, gasPrice }] : [{ data, from: this.address, gas, gasPrice }];
       this.web3.eth.contract(abi).new(...createParams, (err, res) => {
         if (err) {
           reject(err);

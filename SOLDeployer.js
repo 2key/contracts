@@ -19,7 +19,7 @@ const twoKeyProtocolLibGit = simpleGit(twoKeyProtocolLibDir);
 
 async function handleExit(p) {
   console.log(p);
-  if (p !== 0) {
+  if (p !== 0 && (process.argv[2] !== '--migrate' || process.argv[2] !== '--test')) {
     await contractsGit.reset('hard');
     await twoKeyProtocolLibGit.reset('hard');
   }
@@ -67,10 +67,11 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
             // contracts[contractName] = whitelist[contractName].deployed
             //   ? { abi, networks } : { abi, networks, bytecode };
             contracts[contractName] = whitelist[contractName].deployed
-              ? { networks } : { bytecode, abi, networks };
+              ? { networks, abi } : { bytecode, abi, networks };
           }
         });
         fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts/meta.ts'), `export default ${util.inspect(contracts, { depth: 10 })}`);
+        fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts.json'), JSON.stringify(contracts, null, 2));
         console.log('Done');
         resolve();
       } catch (err) {
@@ -220,6 +221,21 @@ async function deploy() {
   }
 }
 
+async function test() {
+  // const testsPath = path.join(twoKeyProtocolDir, 'test');
+  await runProcess('node', ['-r', 'dotenv/config', './node_modules/.bin/mocha', '--exit', '--bail', '-r', 'ts-node/register', '2key-protocol-src/**/*.spec.ts']);
+
+  // if (fs.existsSync(testsPath)) {
+  //   const files = (await readdir(testsPath)).filter(file => file.endsWith('.spec.ts'));
+  //   const l = files.length;
+  //   for (let i = 0; i < l; i += 1) {
+  //     /* eslint-disable no-await-in-loop */
+  //     await runProcess('node', ['-r', 'dotenv/config', './node_modules/.bin/mocha', '--exit', '--bail', '-r', 'ts-node/register', path.join(testsPath, files[i])]);
+  //     /* eslint-enable no-await-in-loop */
+  //   }
+  // }
+}
+
 async function main() {
   const mode = process.argv[2];
   switch (mode) {
@@ -238,6 +254,12 @@ async function main() {
       } catch (err) {
         process.exit(1);
       }
+      break;
+    case '--test': 
+      test();
+    break;
+    case '--generate':
+      generateSOLInterface();
       break;
     default:
       deploy();
