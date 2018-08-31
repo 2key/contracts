@@ -57,6 +57,7 @@ const getCurrentDeployedAddresses = () => new Promise((resolve) => {
 const generateSOLInterface = () => new Promise((resolve, reject) => {
   if (fs.existsSync(buildPath)) {
     const contracts = {};
+    const json = {};
     readdir(buildPath).then((files) => {
       try {
         files.forEach((file) => {
@@ -66,7 +67,9 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
           if (whitelist[contractName]) {
             // contracts[contractName] = whitelist[contractName].deployed
             //   ? { abi, networks } : { abi, networks, bytecode };
-            contracts[contractName] = whitelist[contractName].deployed
+            contracts[contractName] = whitelist[contractName].singletone
+              ? { networks } : { bytecode, abi, networks };
+            json[contractName] = whitelist[contractName].singletone
               ? { networks, abi } : { bytecode, abi, networks };
           }
         });

@@ -8,7 +8,6 @@ import RpcSubprovider from 'web3-provider-engine/subproviders/rpc';
 import WSSubprovider from 'web3-provider-engine/subproviders/websocket';
 import WalletSubprovider from 'ethereumjs-wallet/provider-engine';
 import TwoKeyProtocol from '../index';
-import { CreateCampaign } from '../interfaces';
 import contractsMeta from '../contracts/meta';
 
 const { env } = process;
