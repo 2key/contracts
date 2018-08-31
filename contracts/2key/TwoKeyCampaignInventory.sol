@@ -74,11 +74,11 @@ contract TwoKeyCampaignInventory {
 
 
   // add erc20 asset amount to the store, which adds an amount of that erc20 to our catalogue
-  function addFungibleAsset(uint256 _tokenID, address _assetContract, uint256 _amount, address sender) public returns (bool) {
+  function addFungibleAsset(uint256 _tokenID, address _assetContract, uint256 _amount) public returns (bool) {
     require(
       _assetContract.call(
         bytes4(keccak256("transferFrom(address,address,uint256)")),
-        sender,
+        msg.sender,
         address(this),
         _amount
       )
