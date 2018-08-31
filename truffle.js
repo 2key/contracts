@@ -10,65 +10,24 @@ const mnemonic = 'laundry version question endless august scatter desert crew me
 
 module.exports = {
   networks: {
-    development: {
+    'dev-ganache': {
       host: 'localhost',
-      port: 8545,
-      // provider: new HDWalletProvider(mnemonic, "http://localhost:8500"),
+      port: 8500,
       network_id: '*', // Match any network id
       gas: 7000000,
       gasPrice: 2000000000,
     },
     'dev-local': {
-      // host: 'localhost',
-      // port: 8545,
       provider: () => new HDWalletProvider(mnemonic, 'http://localhost:8545'),
-      network_id: '*', // Match any network id
-      gas: 7000000,
-      gasPrice: 2000000000,
-    },
-    'dev-ap': {
-      // host: 'localhost',
-      // port: 8545,
-      provider: () => new HDWalletProvider(mnemonic, 'http://192.168.47.100:8545'),
-      network_id: '*', // Match any network id
-      gas: 7000000,
-      gasPrice: 2000000000,
-    },
-    'dev-ap-ws': {
-      // host: 'localhost',
-      // port: 8545,
-      provider: () => new HDWalletProvider(mnemonic, 'ws://192.168.47.100:8546', true),
       network_id: '*', // Match any network id
       gas: 7000000,
       gasPrice: 2000000000,
     },
     'dev-2key': {
-      // host: 'localhost',
-      // port: 8545,
       provider: () => new HDWalletProvider(mnemonic, 'http://18.233.2.70:8500'),
       network_id: '*', // Match any network id
       gas: 7000000,
-      gasPrice: 2000000000,
-    },
-    'dev-2key-ws': {
-      // host: 'localhost',
-      // port: 8545,
-      provider: () => new HDWalletProvider(mnemonic, 'ws://18.233.2.70:8501', true),
-      network_id: '*', // Match any network id
-      gas: 7000000,
-      gasPrice: 2000000000,
-    },
-    'geth-local': {
-      provider: () => new HDWalletProvider(mnemonic, 'http://localhost:8545'),
-      network_id: '*',
-      gas: 7000000,
-      gasPrice: 2000000000,
-    },
-    'poc-dev': {
-      provider: () => new HDWalletProvider(mnemonic, 'http://poc-dev.2key.network:3000'),
-      network_id: '*',
-      gas: 7000000,
-      gasPrice: 2000000000,
+      gasPrice: 5000000000,
     },
     'rinkeby-infura': {
       provider: () => new HDWalletProvider(mnemonic, 'https://rinkeby.infura.io/6rAARDbMXpJlwODa2kbk'),
@@ -81,17 +40,6 @@ module.exports = {
         network_id: '42',
         gas: 7000000,
         gasPrice: 3000000000,
-    },
-    'rinkeby-infura-ws': {
-      provider: () => new HDWalletProvider(mnemonic, 'wss://rinkeby.infura.io/ws', true),
-      network_id: '*',
-      gas: 7000000,
-      gasPrice: 2000000000,
-    },
-    plasma: {
-      host: 'localhost',
-      port: 8888,
-      network_id: '*', // Match any network id
     },
     'plasma-ap': {
       // host: 'localhost',

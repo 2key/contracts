@@ -19,7 +19,7 @@ const twoKeyProtocolLibGit = simpleGit(twoKeyProtocolLibDir);
 
 async function handleExit(p) {
   console.log(p);
-  if (p !== 0 && (process.argv[2] !== '--migrate' || process.argv[2] !== '--test')) {
+  if (p !== 0 && (process.argv[2] !== '--migrate' || process.argv[2] !== '--test' || !process.argv[2].includes('local'))) {
     await contractsGit.reset('hard');
     await twoKeyProtocolLibGit.reset('hard');
   }
@@ -129,6 +129,10 @@ async function deploy() {
       process.exit(1);
     }
     console.log(process.argv);
+    const local = process.argv[2].contains('local');
+    if (!local) {
+      await test();
+    }
 
     const networks = process.argv[2].split(',');
     const network = networks.join('/');
@@ -196,7 +200,9 @@ async function deploy() {
     }
     await generateSOLInterface();
     await runProcess(path.join(__dirname, 'node_modules/.bin/typechain'), ['--force', '--outDir', path.join(twoKeyProtocolDir, 'contracts'), `${buildPath}/*.json`]);
-    await runProcess(path.join(__dirname, 'node_modules/.bin/webpack'));
+    if (!local) {
+      await runProcess(path.join(__dirname, 'node_modules/.bin/webpack'));
+    }
     contractsStatus = await contractsGit.status();
     twoKeyProtocolStatus = await twoKeyProtocolLibGit.status();
     console.log(commit, tag);
@@ -204,12 +210,14 @@ async function deploy() {
     await twoKeyProtocolLibGit.commit(commit);
     await contractsGit.add(contractsStatus.files.map(item => item.path));
     await contractsGit.commit(commit);
-    await twoKeyProtocolLibGit.addTag(tag);
-    await contractsGit.addTag(tag);
     await twoKeyProtocolLibGit.push('origin', contractsStatus.current);
     await contractsGit.push('origin', contractsStatus.current);
-    await twoKeyProtocolLibGit.pushTags('origin');
-    await contractsGit.pushTags('origin');
+    if (!local) {
+      await twoKeyProtocolLibGit.addTag(tag);
+      await contractsGit.addTag(tag);
+      await twoKeyProtocolLibGit.pushTags('origin');
+      await contractsGit.pushTags('origin');
+    }
   } catch (e) {
     if (e.output) {
       e.output.forEach((buff) => {
