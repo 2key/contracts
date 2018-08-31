@@ -129,7 +129,7 @@ async function deploy() {
       process.exit(1);
     }
     console.log(process.argv);
-    const local = process.argv[2].contains('local');
+    const local = process.argv[2].includes('local');
     if (!local) {
       await test();
     }
