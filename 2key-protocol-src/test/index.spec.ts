@@ -7,9 +7,8 @@ import ProviderEngine from 'web3-provider-engine';
 import RpcSubprovider from 'web3-provider-engine/subproviders/rpc';
 import WSSubprovider from 'web3-provider-engine/subproviders/websocket';
 import WalletSubprovider from 'ethereumjs-wallet/provider-engine';
-import TwoKeyProtocol from '.';
-import { CreateCampaign } from './interfaces';
-import contractsMeta from './contracts/meta';
+import TwoKeyProtocol from '../index';
+import contractsMeta from '../contracts/meta';
 
 const { env } = process;
 
@@ -17,6 +16,9 @@ const mnemonic = env.MNEMONIC;
 const rpcUrl = env.RCP_URL;
 const mainNetId = env.MAIN_NET_ID;
 const syncTwoKeyNetId = env.SYNC_NET_ID;
+const destinationAddress = env.DESTINATION_ADDRESS;
+const delay = env.TEST_DELAY;
+// const destinationAddress = env.DESTINATION_ADDRESS || '0xd9ce6800b997a0f26faffc0d74405c841dfc64b7'
 
 const bonusOffer = 10;
 const rate = 1;
@@ -55,6 +57,10 @@ let twoKeyProtocol: TwoKeyProtocol;
 
 
 describe('TwoKeyProtocol', () => {
+  beforeEach(function(done) {
+    this.timeout((parseInt(delay) || 1000) + 1000);
+    setTimeout(() => done(), parseInt(delay) || 1000);
+  });
   it('should create a 2Key-protocol instance', () => {
     twoKeyProtocol = new TwoKeyProtocol({
       web3,
@@ -76,7 +82,7 @@ describe('TwoKeyProtocol', () => {
     // expect(balance).to.haveOwnProperty('gasPrice1');
   }).timeout(30000);
   it('should return estimated gas for transferTokens', async () => {
-    const gas = await twoKeyProtocol.getERC20TransferGas('0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7', 1000);
+    const gas = await twoKeyProtocol.getERC20TransferGas(destinationAddress, 1000);
     console.log('Gas required for Token transfer', gas);
     expect(gas).to.exist;
     expect(gas).to.be.greaterThan(0);
@@ -84,14 +90,14 @@ describe('TwoKeyProtocol', () => {
   it('should transfer tokens', async () => {
     // console.log(await twoKeyProtocol.getTransaction('0x07230b24628f9bafde23d0196b52f70acf35a258f855e4e08d866d2975934984'));
     // const gasLimit = await twoKeyProtocol.getERC20TransferGas(twoKeyProtocolAydnep.getAddress(), 1000);
-    const txHash = await twoKeyProtocol.transferTokens('0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7', 1000, 3000000000);
+    const txHash = await twoKeyProtocol.transferTokens(destinationAddress, 1000, 3000000000);
     // console.log(await twoKeyProtocol.getTransaction(txHash));
     console.log('Transfer Tokens', txHash);
     expect(txHash).to.exist;
-    expect(txHash).to.not.null;
+    expect(txHash).to.be.a('string');
   }).timeout(30000);
   it('should return estimated gas for transfer ether', async () => {
-    const gas = await twoKeyProtocol.getETHTransferGas('0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7', 1);
+    const gas = await twoKeyProtocol.getETHTransferGas(destinationAddress, 1);
     console.log('Gas required for ETH transfer', gas);
     expect(gas).to.exist;
     expect(gas).to.be.greaterThan(0);
@@ -99,16 +105,16 @@ describe('TwoKeyProtocol', () => {
   it('should transfer ether', () => {
     setTimeout(async () => {
       // const gasLimit = await twoKeyProtocol.getETHTransferGas(twoKeyProtocolAydnep.getAddress(), 1);
-      const txHash = await twoKeyProtocol.transferEther('0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7', 1, 3000000000);
-      console.log('Transfer Ether', txHash);
+      const txHash = await twoKeyProtocol.transferEther(destinationAddress, 1, 3000000000);
+      console.log('Transfer Ether', txHash, typeof txHash);
       expect(txHash).to.exist;
-      expect(txHash).to.not.null;
+      expect(txHash).to.be.a('string');
     }, 5000);
   }).timeout(30000);
   it('should print balances', (done) => {
     setTimeout(async () => {
       const business = await twoKeyProtocol.getBalance();
-      const aydnep = await twoKeyProtocol.getBalance('0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7');
+      const aydnep = await twoKeyProtocol.getBalance(destinationAddress);
       console.log('BUSINESS balance', business);
       console.log('DESTINATION balance', aydnep);
       done();
@@ -139,7 +145,7 @@ describe('TwoKeyProtocol', () => {
       bonusOffer,
       rate,
       maxCPA,
-    });
+    }, 15000000000);
     console.log('Campaign address', campaign && campaign.address);
     expect(campaign).to.exist;
     expect(campaign).to.haveOwnProperty('address');

@@ -19,7 +19,7 @@ const twoKeyProtocolLibGit = simpleGit(twoKeyProtocolLibDir);
 
 async function handleExit(p) {
   console.log(p);
-  if (p !== 0) {
+  if (p !== 0 && (process.argv[2] !== '--migrate' && process.argv[2] !== '--test' && !process.argv[2].includes('local'))) {
     await contractsGit.reset('hard');
     await twoKeyProtocolLibGit.reset('hard');
   }
@@ -57,6 +57,7 @@ const getCurrentDeployedAddresses = () => new Promise((resolve) => {
 const generateSOLInterface = () => new Promise((resolve, reject) => {
   if (fs.existsSync(buildPath)) {
     const contracts = {};
+    const json = {};
     readdir(buildPath).then((files) => {
       try {
         files.forEach((file) => {
@@ -66,11 +67,14 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
           if (whitelist[contractName]) {
             // contracts[contractName] = whitelist[contractName].deployed
             //   ? { abi, networks } : { abi, networks, bytecode };
-            contracts[contractName] = whitelist[contractName].deployed
+            contracts[contractName] = whitelist[contractName].singletone
               ? { networks } : { bytecode, abi, networks };
+            json[contractName] = whitelist[contractName].singletone
+              ? { networks, abi } : { bytecode, abi, networks };
           }
         });
         fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts/meta.ts'), `export default ${util.inspect(contracts, { depth: 10 })}`);
+        fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts.json'), JSON.stringify(contracts, null, 2));
         console.log('Done');
         resolve();
       } catch (err) {
@@ -125,6 +129,10 @@ async function deploy() {
       process.exit(1);
     }
     console.log(process.argv);
+    const local = process.argv[2].includes('local');
+    if (!local) {
+      await test();
+    }
 
     const networks = process.argv[2].split(',');
     const network = networks.join('/');
@@ -192,7 +200,9 @@ async function deploy() {
     }
     await generateSOLInterface();
     await runProcess(path.join(__dirname, 'node_modules/.bin/typechain'), ['--force', '--outDir', path.join(twoKeyProtocolDir, 'contracts'), `${buildPath}/*.json`]);
-    await runProcess(path.join(__dirname, 'node_modules/.bin/webpack'));
+    if (!local) {
+      await runProcess(path.join(__dirname, 'node_modules/.bin/webpack'));
+    }
     contractsStatus = await contractsGit.status();
     twoKeyProtocolStatus = await twoKeyProtocolLibGit.status();
     console.log(commit, tag);
@@ -200,12 +210,14 @@ async function deploy() {
     await twoKeyProtocolLibGit.commit(commit);
     await contractsGit.add(contractsStatus.files.map(item => item.path));
     await contractsGit.commit(commit);
-    await twoKeyProtocolLibGit.addTag(tag);
-    await contractsGit.addTag(tag);
     await twoKeyProtocolLibGit.push('origin', contractsStatus.current);
     await contractsGit.push('origin', contractsStatus.current);
-    await twoKeyProtocolLibGit.pushTags('origin');
-    await contractsGit.pushTags('origin');
+    if (!local) {
+      await twoKeyProtocolLibGit.addTag(tag);
+      await contractsGit.addTag(tag);
+      await twoKeyProtocolLibGit.pushTags('origin');
+      await contractsGit.pushTags('origin');
+    }
   } catch (e) {
     if (e.output) {
       e.output.forEach((buff) => {
@@ -219,6 +231,26 @@ async function deploy() {
     await contractsGit.reset('hard');
   }
 }
+
+const test = () => new Promise(async (resolve, reject) => {
+  // const testsPath = path.join(twoKeyProtocolDir, 'test');
+  try {
+    await runProcess('node', ['-r', 'dotenv/config', './node_modules/.bin/mocha', '--exit', '--bail', '-r', 'ts-node/register', '2key-protocol-src/**/*.spec.ts']);
+    resolve();
+  } catch (err) {
+    reject(err);
+  }
+
+  // if (fs.existsSync(testsPath)) {
+  //   const files = (await readdir(testsPath)).filter(file => file.endsWith('.spec.ts'));
+  //   const l = files.length;
+  //   for (let i = 0; i < l; i += 1) {
+  //     /* eslint-disable no-await-in-loop */
+  //     await runProcess('node', ['-r', 'dotenv/config', './node_modules/.bin/mocha', '--exit', '--bail', '-r', 'ts-node/register', path.join(testsPath, files[i])]);
+  //     /* eslint-enable no-await-in-loop */
+  //   }
+  // }
+});
 
 async function main() {
   const mode = process.argv[2];
@@ -238,6 +270,12 @@ async function main() {
       } catch (err) {
         process.exit(1);
       }
+      break;
+    case '--test': 
+      test();
+    break;
+    case '--generate':
+      generateSOLInterface();
       break;
     default:
       deploy();
