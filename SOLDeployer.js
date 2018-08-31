@@ -19,7 +19,7 @@ const twoKeyProtocolLibGit = simpleGit(twoKeyProtocolLibDir);
 
 async function handleExit(p) {
   console.log(p);
-  if (p !== 0 && (process.argv[2] !== '--migrate' && process.argv[2] !== '--test' && !process.argv[2].includes('local'))) {
+  if (p !== 0 && (process.argv[2] !== '--migrate' && process.argv[2] !== '--test')) {
     await contractsGit.reset('hard');
     await twoKeyProtocolLibGit.reset('hard');
   }
