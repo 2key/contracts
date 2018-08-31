@@ -163,19 +163,20 @@ export default class TwoKeyNetwork {
     // console.log('Nonce for transferTokens', nonce);
     // const params = { from: this.address, gasLimit: this._toHex(this.gas), gasPrice, nonce };
     const params = { from: this.address, gasLimit: this._toHex(this.gas), gasPrice };
-    return new Promise((resolve, reject) => {
-      const economy = this.web3.eth.contract(contracts.TwoKeyEconomy.abi).at(contracts.TwoKeyEconomy.networks[this.networks.mainNetId].address);
+    return this.twoKeyEconomy.transferTx(to, this._toWei(value, 'ether')).send(params);
+    // return new Promise((resolve, reject) => {
+    //   const economy = this.web3.eth.contract(contracts.TwoKeyEconomy.abi).at(contracts.TwoKeyEconomy.networks[this.networks.mainNetId].address);
 
-      economy.transfer(to, this._toWei(value, 'ether'), params, async (err, res) => {
-        if (err) {
-          reject(err);
-        } else {
-          // console.log('After token', await this._getNonce());
-          resolve(res);
-        }
-      });
-        // const tx = await this.twoKeyEconomy.transferTx(to, this._toWei(value, 'ether')).send(params)
-    });
+    //   economy.transfer(to, this._toWei(value, 'ether'), params, async (err, res) => {
+    //     if (err) {
+    //       reject(err);
+    //     } else {
+    //       // console.log('After token', await this._getNonce());
+    //       resolve(res);
+    //     }
+    //   });
+    //     // const tx = await this.twoKeyEconomy.transferTx(to, this._toWei(value, 'ether')).send(params)
+    // });
   }
 
   public async transferEther(to: string, value: number, gasPrice: number = this.gasPrice): Promise<any> {
