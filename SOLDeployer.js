@@ -19,7 +19,7 @@ const twoKeyProtocolLibGit = simpleGit(twoKeyProtocolLibDir);
 
 async function handleExit(p) {
   console.log(p);
-  if (p !== 0 && (process.argv[2] !== '--migrate' || process.argv[2] !== '--test' || !process.argv[2].includes('local'))) {
+  if (p !== 0 && (process.argv[2] !== '--migrate' && process.argv[2] !== '--test' && !process.argv[2].includes('local'))) {
     await contractsGit.reset('hard');
     await twoKeyProtocolLibGit.reset('hard');
   }
@@ -232,9 +232,14 @@ async function deploy() {
   }
 }
 
-async function test() {
+const test = () => new Promise(async (resolve, reject) => {
   // const testsPath = path.join(twoKeyProtocolDir, 'test');
-  await runProcess('node', ['-r', 'dotenv/config', './node_modules/.bin/mocha', '--exit', '--bail', '-r', 'ts-node/register', '2key-protocol-src/**/*.spec.ts']);
+  try {
+    await runProcess('node', ['-r', 'dotenv/config', './node_modules/.bin/mocha', '--exit', '--bail', '-r', 'ts-node/register', '2key-protocol-src/**/*.spec.ts']);
+    resolve();
+  } catch (err) {
+    reject(err);
+  }
 
   // if (fs.existsSync(testsPath)) {
   //   const files = (await readdir(testsPath)).filter(file => file.endsWith('.spec.ts'));
@@ -245,7 +250,7 @@ async function test() {
   //     /* eslint-enable no-await-in-loop */
   //   }
   // }
-}
+});
 
 async function main() {
   const mode = process.argv[2];
