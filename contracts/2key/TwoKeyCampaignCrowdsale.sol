@@ -53,7 +53,7 @@ contract TwoKeyCampaignCrowdsale is TwoKeyCampaign, Crowdsale {
 	    // need to transfer ETH to campaign
 	    // so this function is not usable in the present form
 	    buyTokens(address(this));
-	    require(twoKeyCampaignInventory.addFungibleAsset(_tokenID, _assetContract, _amountOrIndex));
+	    require(twoKeyCampaignInventory.addFungibleAsset(_tokenID, _assetContract, _amountOrIndex, msg.sender));
 	    super.buyFromWithTwoKey(_from, _tokenID, _assetContract, _amountOrIndex, CampaignType.Fungible);
 	}	
 
