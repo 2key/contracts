@@ -27,14 +27,7 @@ contract('TwoKeyCampaignInventory', async (accounts) => {
         erc721 = await ERC721Mock.new("NFT", "NFT");
         erc20 = await ERC20Mock.new();
 
-        // New constructor needs only opening and closing time, duration is sufficient
-        const openingTime = latestTime();
-        const closingTime = openingTime + duration.minutes(30);
-
-        console.log("Opening time : " + openingTime);
-        console.log("Closing time : " + closingTime);
-
-        inventory = await TwoKeyCampaignInventory.new(openingTime, closingTime, {
+        inventory = await TwoKeyCampaignInventory.new({
             from: factoryCreator
         });
 
@@ -74,16 +67,6 @@ contract('TwoKeyCampaignInventory', async (accounts) => {
 
     });
 
-    it("should return role of the address" , async() => {
-        try {
-            let isAdmin = await inventory.checkRole(factoryCreator, "admin");
-        } catch (error) {
-            console.log("Transaction reverts because this address : ["+factoryCreator+"] doesn't have admin role.");
-        }
-
-        let isAdmin = await inventory.hasRole(factoryCreator, "admin");
-        assert.equal(isAdmin, true, "should be the admin");
-    });
 
     it("transfer fungible asset", async () => {
         const target = accounts[7];
