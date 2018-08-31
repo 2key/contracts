@@ -96,4 +96,9 @@ contract TwoKeyAdmin is Ownable, Destructible, AdminContract {
 		require(_twoKeyEventSource != address(0));
 		twoKeyEventSource = TwoKeyEventSource(_twoKeyEventSource);
 	}
+
+	function twoKeyEventSourceAddAuthorizedContracts(address _contractAddress) public {
+		require(_contractAddress != address(0));
+		twoKeyEventSource.addContract(_contractAddress);
+	}
 }

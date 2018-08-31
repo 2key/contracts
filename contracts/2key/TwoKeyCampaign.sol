@@ -407,7 +407,7 @@ contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
 
 
 	function addFungibleInventory(uint256 _tokenID, address _assetContract, uint256 _amount) public {
-		twoKeyCampaignInventory.addFungibleAsset(_tokenID, _assetContract, _amount;
+		twoKeyCampaignInventory.addFungibleAsset(_tokenID, _assetContract, _amount);
 	}
 
 	function getInventoryBalance() public view returns (uint256) {
