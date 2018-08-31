@@ -124,6 +124,19 @@ export class TwoKeyCampaignCrowdsale extends TC.TypeChainContract {
         type: "function"
       },
       {
+        constant: false,
+        inputs: [
+          { name: "_tokenID", type: "uint256" },
+          { name: "_assetContract", type: "address" },
+          { name: "_amount", type: "uint256" }
+        ],
+        name: "addFungibleInventory",
+        outputs: [],
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "function"
+      },
+      {
         constant: true,
         inputs: [],
         name: "wallet",
@@ -257,6 +270,15 @@ export class TwoKeyCampaignCrowdsale extends TC.TypeChainContract {
           { name: "_spender", type: "address" }
         ],
         name: "allowance",
+        outputs: [{ name: "", type: "uint256" }],
+        payable: false,
+        stateMutability: "view",
+        type: "function"
+      },
+      {
+        constant: true,
+        inputs: [],
+        name: "getInventoryBalance",
         outputs: [{ name: "", type: "uint256" }],
         payable: false,
         stateMutability: "view",
@@ -430,6 +452,10 @@ export class TwoKeyCampaignCrowdsale extends TC.TypeChainContract {
     return TC.promisify(this.rawWeb3Contract.quota, []);
   }
 
+  public get getInventoryBalance(): Promise<BigNumber> {
+    return TC.promisify(this.rawWeb3Contract.getInventoryBalance, []);
+  }
+
   public get token(): Promise<string> {
     return TC.promisify(this.rawWeb3Contract.token, []);
   }
@@ -545,6 +571,17 @@ export class TwoKeyCampaignCrowdsale extends TC.TypeChainContract {
       this,
       "transferFromQuota",
       [_from.toString(), _to.toString(), _value.toString()]
+    );
+  }
+  public addFungibleInventoryTx(
+    _tokenID: BigNumber | number,
+    _assetContract: BigNumber | string,
+    _amount: BigNumber | number
+  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
+    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
+      this,
+      "addFungibleInventory",
+      [_tokenID.toString(), _assetContract.toString(), _amount.toString()]
     );
   }
   public transferRewardsTwoKeyTokenTx(

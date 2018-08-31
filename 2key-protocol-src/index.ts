@@ -1,9 +1,22 @@
 import ipfsAPI from 'ipfs-api';
 import { BigNumber } from 'bignumber.js';
 import solidityContracts from './contracts/meta';
+import { ERC20 } from './contracts/ERC20';
 import { TwoKeyEconomy } from './contracts/TwoKeyEconomy';
+import { TwoKeyReg } from './contracts/TwoKeyReg'
 import { TwoKeyCampaign } from './contracts/TwoKeyCampaign';
-import { EhtereumNetworks, ContractsAdressess, TwoKeyInit, BalanceMeta, Transaction, CreateCampaign, Contract } from './interfaces';
+import { TwoKeyCampaignInventory } from './contracts/TwoKeyCampaignInventory';
+import { TwoKeyCampaignETHCrowdsale } from './contracts/TwoKeyCampaignETHCrowdsale';
+import {
+  EhtereumNetworks,
+  ContractsAdressess,
+  TwoKeyInit,
+  BalanceMeta,
+  Transaction,
+  CreateCampaign,
+  Contract,
+  RawTransaction,
+} from './interfaces';
 import Sign from './sign';
 // import HDWalletProvider from './HDWalletProvider';
 
@@ -29,6 +42,7 @@ export default class TwoKeyNetwork {
   private networks: EhtereumNetworks;
   private contracts: ContractsAdressess;
   private twoKeyEconomy: TwoKeyEconomy;
+  private twoKeyReg: TwoKeyReg;
 
   constructor(initValues: TwoKeyInit) {
     // init MainNet Client
@@ -62,7 +76,9 @@ export default class TwoKeyNetwork {
     this.web3.eth.defaultBlock = 'pending';
     // this.pk = wallet.getPrivateKey().toString('hex');
 
-    this.twoKeyEconomy = new TwoKeyEconomy(this.web3, this._getContractDeployedAddress('TwoKeyEconomy'))
+    this.twoKeyEconomy = new TwoKeyEconomy(this.web3, this._getContractDeployedAddress('TwoKeyEconomy'));
+    this.twoKeyReg = new TwoKeyReg(this.web3, this._getContractDeployedAddress('TwoKeyReg'));
+    // this.twoKeyEventSource = new 
 
     // init 2KeySyncNet Client
     // const syncEngine = new ProviderEngine();
@@ -234,14 +250,14 @@ export default class TwoKeyNetwork {
     });
   }
 
-  public createSaleCampaign(data: CreateCampaign, gasPrice?: number): Promise<TwoKeyCampaign> {
+  public createSaleCampaign(data: CreateCampaign, gasPrice?: number): Promise<string[]> {
     return new Promise(async (resolve, reject) => {
       try {
         const gasRequired = await this.estimateSaleCampaign(data);
         const balance = parseFloat(await this._getEthBalance(this.address));
-        const totalValue = parseFloat(this._fromWei(gasPrice || this.gasPrice * gasRequired, 'ether'));
+        const transactionFee = parseFloat(this._fromWei(gasPrice || this.gasPrice * gasRequired, 'ether'));
 
-        if (totalValue > balance) {
+        if (transactionFee > balance) {
           throw new Error('Not enough founds');
         }
         console.log('Creating TwoKeyWhitelisted...');
@@ -270,11 +286,92 @@ export default class TwoKeyNetwork {
           data.maxCPA,
         ]);
         const campaign = new TwoKeyCampaign(this.web3, campaignAddress);
-        resolve(campaign);
+        resolve([campaign.address, campaignInventoryAddress]);
       } catch (err) {
         reject(err);
       }
     });
+  }
+
+  public getContractorCampaigns(): Promise<string[]> {
+    return this.twoKeyReg.getContractsWhereUserIsContractor(this.address)
+  }
+
+  public async addFungibleInventory(inventoryAddress: string, erc20Address: string, amount: number, token: number = 1, gasPrice: number = this.gasPrice): Promise<any> {
+    // const campaign = await TwoKeyCampaign.createAndValidate(this.web3, campaignAddress);
+    const erc20 = await ERC20.createAndValidate(this.web3, erc20Address);
+    const inventory = await TwoKeyCampaignInventory.createAndValidate(this.web3, inventoryAddress);
+    // console.log('CURRENT ADRRESS', this.address);
+    // const txHash = await erc20.transferTx(inventoryAddress, this._toWei(amount, 'ether')).send({ from: this.address, gasPrice });
+    const delay = () => new Promise((resolve) => {
+      setTimeout(() => resolve(), 3000);
+    });
+    console.log('Nonce', await this._getNonce(), this.web3.eth.defaultBlock);
+
+    // const e20 = this.web3.eth.contract(contracts.ERC20.abi).at(erc20Address);
+    // const q = () => new Promise((resolve, reject) => {
+    //   e20.approve(inventoryAddress, amount, { from: this.address, gasPrice }, (err, res) => {
+    //     if (err) {
+    //       reject(err)
+    //     } else {
+    //       console.log(res);
+    //       resolve(res);
+    //     }
+    //   });
+    // });
+
+    // const a = await q();
+
+    // let nonce = await this._getNonce();
+    const approve = await erc20.approveTx(inventoryAddress, amount).send({ from: this.address, gasPrice });
+    console.log('Approve', approve);
+    await delay();
+    // this.web3.eth.defaultBlock = this._toHex(++nonce);
+    console.log('Nonce', await this._getNonce(), this.web3.eth.defaultBlock);
+    const allowance = await erc20.allowance(this.address, inventoryAddress);
+    // this.web3.eth.defaultBlock = this._toHex(++nonce);
+    await delay();
+    console.log('Allowance', allowance.toNumber());
+    console.log('Nonce', await this._getNonce(), this.web3.eth.defaultBlock);
+    return new Promise((resolve, reject) => {
+      inventory.addFungibleAssetTx(token, erc20Address, amount).send({ from: this.address, gasPrice, gas: 200000 })
+        .then((res) => {
+          this.web3.eth.defaultBlock = 'pending';
+          resolve(res);
+        }).catch(reject);
+    });
+    // return Promise.resolve(txHash);
+    // console.log('campaign validated', campaign.address);
+    // const data = campaign.addFungibleInventoryTx(token, erc20Address, amount).getData();
+    // const tx = {
+    //   from: this.address,
+    //   to: erc20Address,
+    //   data,
+    //   value: '0x0',
+    // }
+    // const gas = await this._estimateTransactionGas(tx);
+    // const gas = await campaign.addFungibleInventoryTx(token, erc20Address, amount).estimateGas({ from: this.address });
+    // console.log('Gas Required', gas);
+    // const balance = parseFloat(await this._getEthBalance(this.address));
+    // const transactionFee = parseFloat(this._fromWei(gas * gasPrice, 'ether'));
+    // if (transactionFee > balance) {
+    //   throw new Error('Not enough founds');
+    // }
+    // return Promise.resolve('qwerty');
+    // return campaign.addFungibleInventoryTx(token, erc20Address, amount).send({ from: this.address, gas: 200000, gasPrice });
+  }
+
+  public async getFungibleInventory(erc20Address, inventoryAddress): Promise<any> {
+    const erc20 = new ERC20(this.web3, erc20Address);
+    return new Promise(async (resolve, reject) => {
+      try {
+        const inventory = await erc20.balanceOf(inventoryAddress);
+        resolve(inventory.toNumber());
+      } catch (err) {
+        reject(err);
+      }
+    });
+    return ;
   }
 
   private _fromWei(number: string | number | BigNumber, unit?: string): string {
@@ -368,7 +465,6 @@ export default class TwoKeyNetwork {
     return new Promise(async (resolve, reject) => {
       const { abi, bytecode: data } = contract;
       const estimateParams = params ? [...params, { data, from: this.address }] : [{ data, from: this.address }];
-      // console.log('estimateParams', estimateParams);
       this.web3.eth.estimateGas({
         data: this.web3.eth.contract(abi).new.getData(...estimateParams),
       }, (err, res) => {
@@ -378,6 +474,18 @@ export default class TwoKeyNetwork {
           resolve(res);
         }
       })
+    });
+  }
+
+  private _estimateTransactionGas(data: RawTransaction): Promise<number> {
+    return new Promise((resolve, reject) => {
+      this.web3.eth.estimateGas(data, (err, res) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(res);
+        }
+      });
     });
   }
 

@@ -319,6 +319,28 @@ export class TwoKeyCampaign extends TC.TypeChainContract {
         payable: true,
         stateMutability: "payable",
         type: "function"
+      },
+      {
+        constant: false,
+        inputs: [
+          { name: "_tokenID", type: "uint256" },
+          { name: "_assetContract", type: "address" },
+          { name: "_amount", type: "uint256" }
+        ],
+        name: "addFungibleInventory",
+        outputs: [],
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "function"
+      },
+      {
+        constant: true,
+        inputs: [],
+        name: "getInventoryBalance",
+        outputs: [{ name: "", type: "uint256" }],
+        payable: false,
+        stateMutability: "view",
+        type: "function"
       }
     ];
     super(web3, address, abi);
@@ -345,6 +367,10 @@ export class TwoKeyCampaign extends TC.TypeChainContract {
 
   public get quota(): Promise<BigNumber> {
     return TC.promisify(this.rawWeb3Contract.quota, []);
+  }
+
+  public get getInventoryBalance(): Promise<BigNumber> {
+    return TC.promisify(this.rawWeb3Contract.getInventoryBalance, []);
   }
 
   public received_from(arg0: BigNumber | string): Promise<string> {
@@ -574,6 +600,17 @@ export class TwoKeyCampaign extends TC.TypeChainContract {
         _amountOrIndex.toString(),
         _campaignType.toString()
       ]
+    );
+  }
+  public addFungibleInventoryTx(
+    _tokenID: BigNumber | number,
+    _assetContract: BigNumber | string,
+    _amount: BigNumber | number
+  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
+    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
+      this,
+      "addFungibleInventory",
+      [_tokenID.toString(), _assetContract.toString(), _amount.toString()]
     );
   }
 

@@ -215,6 +215,28 @@
       "type": "function"
     },
     {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_tokenID",
+          "type": "uint256"
+        },
+        {
+          "name": "_assetContract",
+          "type": "address"
+        },
+        {
+          "name": "_amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "addFungibleInventory",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
       "constant": true,
       "inputs": [],
       "name": "wallet",
@@ -467,6 +489,20 @@
         }
       ],
       "name": "allowance",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "getInventoryBalance",
       "outputs": [
         {
           "name": "",
@@ -813,14 +849,14 @@
     "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyCampaignETHCrowdsale.sol",
     "exportedSymbols": {
       "TwoKeyCampaignETHCrowdsale": [
-        2639
+        2413
       ]
     },
-    "id": 2640,
+    "id": 2414,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 2542,
+        "id": 2316,
         "literals": [
           "solidity",
           "^",
@@ -828,93 +864,93 @@
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:24:12"
+        "src": "0:24:7"
       },
       {
         "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/math/SafeMath.sol",
         "file": "../openzeppelin-solidity/contracts/math/SafeMath.sol",
-        "id": 2543,
+        "id": 2317,
         "nodeType": "ImportDirective",
-        "scope": 2640,
-        "sourceUnit": 9730,
-        "src": "27:62:12",
+        "scope": 2414,
+        "sourceUnit": 6243,
+        "src": "27:62:7",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
         "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
         "file": "../openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
-        "id": 2544,
+        "id": 2318,
         "nodeType": "ImportDirective",
-        "scope": 2640,
-        "sourceUnit": 8613,
-        "src": "90:68:12",
+        "scope": 2414,
+        "sourceUnit": 6121,
+        "src": "90:68:7",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
         "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyCampaignETH.sol",
         "file": "./TwoKeyCampaignETH.sol",
-        "id": 2545,
+        "id": 2319,
         "nodeType": "ImportDirective",
-        "scope": 2640,
-        "sourceUnit": 2541,
-        "src": "160:33:12",
+        "scope": 2414,
+        "sourceUnit": 2315,
+        "src": "160:33:7",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
         "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyReg.sol",
         "file": "./TwoKeyReg.sol",
-        "id": 2546,
+        "id": 2320,
         "nodeType": "ImportDirective",
-        "scope": 2640,
-        "sourceUnit": 6538,
-        "src": "194:25:12",
+        "scope": 2414,
+        "sourceUnit": 5123,
+        "src": "194:25:7",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
         "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyEconomy.sol",
         "file": "./TwoKeyEconomy.sol",
-        "id": 2547,
+        "id": 2321,
         "nodeType": "ImportDirective",
-        "scope": 2640,
-        "sourceUnit": 5208,
-        "src": "220:29:12",
+        "scope": 2414,
+        "sourceUnit": 4236,
+        "src": "220:29:7",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
         "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyEventSource.sol",
         "file": "./TwoKeyEventSource.sol",
-        "id": 2548,
+        "id": 2322,
         "nodeType": "ImportDirective",
-        "scope": 2640,
-        "sourceUnit": 5684,
-        "src": "250:33:12",
+        "scope": 2414,
+        "sourceUnit": 4712,
+        "src": "250:33:7",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
         "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyWhitelisted.sol",
         "file": "./TwoKeyWhitelisted.sol",
-        "id": 2549,
+        "id": 2323,
         "nodeType": "ImportDirective",
-        "scope": 2640,
-        "sourceUnit": 7167,
-        "src": "284:33:12",
+        "scope": 2414,
+        "sourceUnit": 5752,
+        "src": "284:33:7",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
         "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyCampaignInventory.sol",
         "file": "./TwoKeyCampaignInventory.sol",
-        "id": 2550,
+        "id": 2324,
         "nodeType": "ImportDirective",
-        "scope": 2640,
-        "sourceUnit": 3106,
-        "src": "318:39:12",
+        "scope": 2414,
+        "sourceUnit": 2880,
+        "src": "318:39:7",
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -924,90 +960,90 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 2551,
+              "id": 2325,
               "name": "TwoKeyCampaignETH",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 2540,
-              "src": "398:17:12",
+              "referencedDeclaration": 2314,
+              "src": "398:17:7",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_TwoKeyCampaignETH_$2540",
+                "typeIdentifier": "t_contract$_TwoKeyCampaignETH_$2314",
                 "typeString": "contract TwoKeyCampaignETH"
               }
             },
-            "id": 2552,
+            "id": 2326,
             "nodeType": "InheritanceSpecifier",
-            "src": "398:17:12"
+            "src": "398:17:7"
           },
           {
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 2553,
+              "id": 2327,
               "name": "Crowdsale",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 8612,
-              "src": "417:9:12",
+              "referencedDeclaration": 6120,
+              "src": "417:9:7",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Crowdsale_$8612",
+                "typeIdentifier": "t_contract$_Crowdsale_$6120",
                 "typeString": "contract Crowdsale"
               }
             },
-            "id": 2554,
+            "id": 2328,
             "nodeType": "InheritanceSpecifier",
-            "src": "417:9:12"
+            "src": "417:9:7"
           }
         ],
         "contractDependencies": [
-          765,
-          2103,
-          2540,
-          6900,
-          8612,
-          11085,
-          11282,
-          11314,
-          11929
+          488,
+          1877,
+          2314,
+          5485,
+          6120,
+          6424,
+          6467,
+          6499,
+          6808
         ],
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 2639,
+        "id": 2413,
         "linearizedBaseContracts": [
-          2639,
-          8612,
-          2540,
-          2103,
-          6900,
-          765,
-          11929,
-          11085,
-          11282,
-          11314
+          2413,
+          6120,
+          2314,
+          1877,
+          5485,
+          488,
+          6808,
+          6424,
+          6467,
+          6499
         ],
         "name": "TwoKeyCampaignETHCrowdsale",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
-            "id": 2557,
+            "id": 2331,
             "libraryName": {
               "contractScope": null,
-              "id": 2555,
+              "id": 2329,
               "name": "SafeMath",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 9729,
-              "src": "437:8:12",
+              "referencedDeclaration": 6242,
+              "src": "437:8:7",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_SafeMath_$9729",
+                "typeIdentifier": "t_contract$_SafeMath_$6242",
                 "typeString": "library SafeMath"
               }
             },
             "nodeType": "UsingForDirective",
-            "src": "431:27:12",
+            "src": "431:27:7",
             "typeName": {
-              "id": 2556,
+              "id": 2330,
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
-              "src": "450:7:12",
+              "src": "450:7:7",
               "typeDescriptions": {
                 "typeIdentifier": "t_uint256",
                 "typeString": "uint256"
@@ -1016,13 +1052,13 @@
           },
           {
             "body": {
-              "id": 2601,
+              "id": 2375,
               "nodeType": "Block",
-              "src": "1090:4:12",
+              "src": "1090:4:7",
               "statements": []
             },
             "documentation": null,
-            "id": 2602,
+            "id": 2376,
             "implemented": true,
             "isConstructor": true,
             "isDeclaredConst": false,
@@ -1031,77 +1067,77 @@
                 "arguments": [
                   {
                     "argumentTypes": null,
-                    "id": 2586,
+                    "id": 2360,
                     "name": "_eventSource",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 2559,
-                    "src": "867:12:12",
+                    "referencedDeclaration": 2333,
+                    "src": "867:12:7",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_TwoKeyEventSource_$5683",
+                      "typeIdentifier": "t_contract$_TwoKeyEventSource_$4711",
                       "typeString": "contract TwoKeyEventSource"
                     }
                   },
                   {
                     "argumentTypes": null,
-                    "id": 2587,
+                    "id": 2361,
                     "name": "_economy",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 2561,
-                    "src": "883:8:12",
+                    "referencedDeclaration": 2335,
+                    "src": "883:8:7",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_TwoKeyEconomy_$5207",
+                      "typeIdentifier": "t_contract$_TwoKeyEconomy_$4235",
                       "typeString": "contract TwoKeyEconomy"
                     }
                   },
                   {
                     "argumentTypes": null,
-                    "id": 2588,
+                    "id": 2362,
                     "name": "_whitelistInfluencer",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 2563,
-                    "src": "895:20:12",
+                    "referencedDeclaration": 2337,
+                    "src": "895:20:7",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$7166",
+                      "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$5751",
                       "typeString": "contract TwoKeyWhitelisted"
                     }
                   },
                   {
                     "argumentTypes": null,
-                    "id": 2589,
+                    "id": 2363,
                     "name": "_whitelistConverter",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 2565,
-                    "src": "919:19:12",
+                    "referencedDeclaration": 2339,
+                    "src": "919:19:7",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$7166",
+                      "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$5751",
                       "typeString": "contract TwoKeyWhitelisted"
                     }
                   },
                   {
                     "argumentTypes": null,
-                    "id": 2590,
+                    "id": 2364,
                     "name": "_twoKeyCampaignInventory",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 2567,
-                    "src": "942:24:12",
+                    "referencedDeclaration": 2341,
+                    "src": "942:24:7",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_TwoKeyCampaignInventory_$3105",
+                      "typeIdentifier": "t_contract$_TwoKeyCampaignInventory_$2879",
                       "typeString": "contract TwoKeyCampaignInventory"
                     }
                   },
                   {
                     "argumentTypes": null,
-                    "id": 2591,
+                    "id": 2365,
                     "name": "_contractor",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 2569,
-                    "src": "970:11:12",
+                    "referencedDeclaration": 2343,
+                    "src": "970:11:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -1109,12 +1145,12 @@
                   },
                   {
                     "argumentTypes": null,
-                    "id": 2592,
+                    "id": 2366,
                     "name": "_moderator",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 2571,
-                    "src": "985:10:12",
+                    "referencedDeclaration": 2345,
+                    "src": "985:10:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -1122,12 +1158,12 @@
                   },
                   {
                     "argumentTypes": null,
-                    "id": 2593,
+                    "id": 2367,
                     "name": "_start",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 2573,
-                    "src": "999:6:12",
+                    "referencedDeclaration": 2347,
+                    "src": "999:6:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1135,12 +1171,12 @@
                   },
                   {
                     "argumentTypes": null,
-                    "id": 2594,
+                    "id": 2368,
                     "name": "_duration",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 2575,
-                    "src": "1009:9:12",
+                    "referencedDeclaration": 2349,
+                    "src": "1009:9:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1148,12 +1184,12 @@
                   },
                   {
                     "argumentTypes": null,
-                    "id": 2595,
+                    "id": 2369,
                     "name": "_expiryConversion",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 2577,
-                    "src": "1022:17:12",
+                    "referencedDeclaration": 2351,
+                    "src": "1022:17:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1161,12 +1197,12 @@
                   },
                   {
                     "argumentTypes": null,
-                    "id": 2596,
+                    "id": 2370,
                     "name": "_escrowPrecentage",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 2579,
-                    "src": "1043:17:12",
+                    "referencedDeclaration": 2353,
+                    "src": "1043:17:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1174,12 +1210,12 @@
                   },
                   {
                     "argumentTypes": null,
-                    "id": 2597,
+                    "id": 2371,
                     "name": "_rate",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 2581,
-                    "src": "1064:5:12",
+                    "referencedDeclaration": 2355,
+                    "src": "1064:5:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1187,64 +1223,64 @@
                   },
                   {
                     "argumentTypes": null,
-                    "id": 2598,
+                    "id": 2372,
                     "name": "_maxPi",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 2583,
-                    "src": "1073:6:12",
+                    "referencedDeclaration": 2357,
+                    "src": "1073:6:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   }
                 ],
-                "id": 2599,
+                "id": 2373,
                 "modifierName": {
                   "argumentTypes": null,
-                  "id": 2585,
+                  "id": 2359,
                   "name": "TwoKeyCampaign",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 2103,
-                  "src": "849:14:12",
+                  "referencedDeclaration": 1877,
+                  "src": "849:14:7",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_type$_t_contract$_TwoKeyCampaign_$2103_$",
+                    "typeIdentifier": "t_type$_t_contract$_TwoKeyCampaign_$1877_$",
                     "typeString": "type(contract TwoKeyCampaign)"
                   }
                 },
                 "nodeType": "ModifierInvocation",
-                "src": "849:233:12"
+                "src": "849:233:7"
               }
             ],
             "name": "",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2584,
+              "id": 2358,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2559,
+                  "id": 2333,
                   "name": "_eventSource",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2602,
-                  "src": "476:30:12",
+                  "scope": 2376,
+                  "src": "476:30:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_TwoKeyEventSource_$5683",
+                    "typeIdentifier": "t_contract$_TwoKeyEventSource_$4711",
                     "typeString": "contract TwoKeyEventSource"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 2558,
+                    "id": 2332,
                     "name": "TwoKeyEventSource",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 5683,
-                    "src": "476:17:12",
+                    "referencedDeclaration": 4711,
+                    "src": "476:17:7",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_TwoKeyEventSource_$5683",
+                      "typeIdentifier": "t_contract$_TwoKeyEventSource_$4711",
                       "typeString": "contract TwoKeyEventSource"
                     }
                   },
@@ -1253,26 +1289,26 @@
                 },
                 {
                   "constant": false,
-                  "id": 2561,
+                  "id": 2335,
                   "name": "_economy",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2602,
-                  "src": "510:22:12",
+                  "scope": 2376,
+                  "src": "510:22:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_TwoKeyEconomy_$5207",
+                    "typeIdentifier": "t_contract$_TwoKeyEconomy_$4235",
                     "typeString": "contract TwoKeyEconomy"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 2560,
+                    "id": 2334,
                     "name": "TwoKeyEconomy",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 5207,
-                    "src": "510:13:12",
+                    "referencedDeclaration": 4235,
+                    "src": "510:13:7",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_TwoKeyEconomy_$5207",
+                      "typeIdentifier": "t_contract$_TwoKeyEconomy_$4235",
                       "typeString": "contract TwoKeyEconomy"
                     }
                   },
@@ -1281,26 +1317,26 @@
                 },
                 {
                   "constant": false,
-                  "id": 2563,
+                  "id": 2337,
                   "name": "_whitelistInfluencer",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2602,
-                  "src": "536:38:12",
+                  "scope": 2376,
+                  "src": "536:38:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$7166",
+                    "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$5751",
                     "typeString": "contract TwoKeyWhitelisted"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 2562,
+                    "id": 2336,
                     "name": "TwoKeyWhitelisted",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 7166,
-                    "src": "536:17:12",
+                    "referencedDeclaration": 5751,
+                    "src": "536:17:7",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$7166",
+                      "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$5751",
                       "typeString": "contract TwoKeyWhitelisted"
                     }
                   },
@@ -1309,26 +1345,26 @@
                 },
                 {
                   "constant": false,
-                  "id": 2565,
+                  "id": 2339,
                   "name": "_whitelistConverter",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2602,
-                  "src": "578:37:12",
+                  "scope": 2376,
+                  "src": "578:37:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$7166",
+                    "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$5751",
                     "typeString": "contract TwoKeyWhitelisted"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 2564,
+                    "id": 2338,
                     "name": "TwoKeyWhitelisted",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 7166,
-                    "src": "578:17:12",
+                    "referencedDeclaration": 5751,
+                    "src": "578:17:7",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$7166",
+                      "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$5751",
                       "typeString": "contract TwoKeyWhitelisted"
                     }
                   },
@@ -1337,26 +1373,26 @@
                 },
                 {
                   "constant": false,
-                  "id": 2567,
+                  "id": 2341,
                   "name": "_twoKeyCampaignInventory",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2602,
-                  "src": "619:48:12",
+                  "scope": 2376,
+                  "src": "619:48:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_TwoKeyCampaignInventory_$3105",
+                    "typeIdentifier": "t_contract$_TwoKeyCampaignInventory_$2879",
                     "typeString": "contract TwoKeyCampaignInventory"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 2566,
+                    "id": 2340,
                     "name": "TwoKeyCampaignInventory",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 3105,
-                    "src": "619:23:12",
+                    "referencedDeclaration": 2879,
+                    "src": "619:23:7",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_TwoKeyCampaignInventory_$3105",
+                      "typeIdentifier": "t_contract$_TwoKeyCampaignInventory_$2879",
                       "typeString": "contract TwoKeyCampaignInventory"
                     }
                   },
@@ -1365,11 +1401,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 2569,
+                  "id": 2343,
                   "name": "_contractor",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2602,
-                  "src": "672:19:12",
+                  "scope": 2376,
+                  "src": "672:19:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1377,10 +1413,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2568,
+                    "id": 2342,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "672:7:12",
+                    "src": "672:7:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -1391,11 +1427,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 2571,
+                  "id": 2345,
                   "name": "_moderator",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2602,
-                  "src": "695:18:12",
+                  "scope": 2376,
+                  "src": "695:18:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1403,10 +1439,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2570,
+                    "id": 2344,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "695:7:12",
+                    "src": "695:7:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -1417,11 +1453,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 2573,
+                  "id": 2347,
                   "name": "_start",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2602,
-                  "src": "719:14:12",
+                  "scope": 2376,
+                  "src": "719:14:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1429,10 +1465,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2572,
+                    "id": 2346,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "719:7:12",
+                    "src": "719:7:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1443,11 +1479,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 2575,
+                  "id": 2349,
                   "name": "_duration",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2602,
-                  "src": "737:17:12",
+                  "scope": 2376,
+                  "src": "737:17:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1455,10 +1491,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2574,
+                    "id": 2348,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "737:7:12",
+                    "src": "737:7:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1469,11 +1505,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 2577,
+                  "id": 2351,
                   "name": "_expiryConversion",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2602,
-                  "src": "758:25:12",
+                  "scope": 2376,
+                  "src": "758:25:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1481,10 +1517,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2576,
+                    "id": 2350,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "758:7:12",
+                    "src": "758:7:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1495,11 +1531,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 2579,
+                  "id": 2353,
                   "name": "_escrowPrecentage",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2602,
-                  "src": "787:25:12",
+                  "scope": 2376,
+                  "src": "787:25:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1507,10 +1543,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2578,
+                    "id": 2352,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "787:7:12",
+                    "src": "787:7:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1521,11 +1557,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 2581,
+                  "id": 2355,
                   "name": "_rate",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2602,
-                  "src": "816:13:12",
+                  "scope": 2376,
+                  "src": "816:13:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1533,10 +1569,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2580,
+                    "id": 2354,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "816:7:12",
+                    "src": "816:7:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1547,11 +1583,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 2583,
+                  "id": 2357,
                   "name": "_maxPi",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2602,
-                  "src": "833:14:12",
+                  "scope": 2376,
+                  "src": "833:14:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1559,10 +1595,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2582,
+                    "id": 2356,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "833:7:12",
+                    "src": "833:7:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1572,26 +1608,26 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "472:376:12"
+              "src": "472:376:7"
             },
             "payable": false,
             "returnParameters": {
-              "id": 2600,
+              "id": 2374,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1090:0:12"
+              "src": "1090:0:7"
             },
-            "scope": 2639,
-            "src": "461:633:12",
+            "scope": 2413,
+            "src": "461:633:7",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           },
           {
             "body": {
-              "id": 2637,
+              "id": 2411,
               "nodeType": "Block",
-              "src": "1243:227:12",
+              "src": "1243:227:7",
               "statements": [
                 {
                   "expression": {
@@ -1602,14 +1638,14 @@
                         "arguments": [
                           {
                             "argumentTypes": null,
-                            "id": 2615,
+                            "id": 2389,
                             "name": "this",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 13546,
-                            "src": "1268:4:12",
+                            "referencedDeclaration": 6886,
+                            "src": "1268:4:7",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_contract$_TwoKeyCampaignETHCrowdsale_$2639",
+                              "typeIdentifier": "t_contract$_TwoKeyCampaignETHCrowdsale_$2413",
                               "typeString": "contract TwoKeyCampaignETHCrowdsale"
                             }
                           }
@@ -1617,24 +1653,24 @@
                         "expression": {
                           "argumentTypes": [
                             {
-                              "typeIdentifier": "t_contract$_TwoKeyCampaignETHCrowdsale_$2639",
+                              "typeIdentifier": "t_contract$_TwoKeyCampaignETHCrowdsale_$2413",
                               "typeString": "contract TwoKeyCampaignETHCrowdsale"
                             }
                           ],
-                          "id": 2614,
+                          "id": 2388,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "lValueRequested": false,
                           "nodeType": "ElementaryTypeNameExpression",
-                          "src": "1260:7:12",
+                          "src": "1260:7:7",
                           "typeDescriptions": {
                             "typeIdentifier": "t_type$_t_address_$",
                             "typeString": "type(address)"
                           },
                           "typeName": "address"
                         },
-                        "id": 2616,
+                        "id": 2390,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -1642,7 +1678,7 @@
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "1260:13:12",
+                        "src": "1260:13:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -1656,18 +1692,18 @@
                           "typeString": "address"
                         }
                       ],
-                      "id": 2613,
+                      "id": 2387,
                       "name": "buyTokens",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 8521,
-                      "src": "1250:9:12",
+                      "referencedDeclaration": 6029,
+                      "src": "1250:9:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$_t_address_$returns$__$",
                         "typeString": "function (address)"
                       }
                     },
-                    "id": 2617,
+                    "id": 2391,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1675,15 +1711,15 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "1250:24:12",
+                    "src": "1250:24:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 2618,
+                  "id": 2392,
                   "nodeType": "ExpressionStatement",
-                  "src": "1250:24:12"
+                  "src": "1250:24:7"
                 },
                 {
                   "expression": {
@@ -1694,12 +1730,12 @@
                         "arguments": [
                           {
                             "argumentTypes": null,
-                            "id": 2622,
+                            "id": 2396,
                             "name": "_tokenID",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 2606,
-                            "src": "1330:8:12",
+                            "referencedDeclaration": 2380,
+                            "src": "1330:8:7",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -1707,12 +1743,12 @@
                           },
                           {
                             "argumentTypes": null,
-                            "id": 2623,
+                            "id": 2397,
                             "name": "_assetContract",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 2608,
-                            "src": "1340:14:12",
+                            "referencedDeclaration": 2382,
+                            "src": "1340:14:7",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
                               "typeString": "address"
@@ -1720,12 +1756,12 @@
                           },
                           {
                             "argumentTypes": null,
-                            "id": 2624,
+                            "id": 2398,
                             "name": "_amountOrIndex",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 2610,
-                            "src": "1356:14:12",
+                            "referencedDeclaration": 2384,
+                            "src": "1356:14:7",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -1749,32 +1785,32 @@
                           ],
                           "expression": {
                             "argumentTypes": null,
-                            "id": 2620,
+                            "id": 2394,
                             "name": "twoKeyCampaignInventory",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1121,
-                            "src": "1289:23:12",
+                            "referencedDeclaration": 864,
+                            "src": "1289:23:7",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_contract$_TwoKeyCampaignInventory_$3105",
+                              "typeIdentifier": "t_contract$_TwoKeyCampaignInventory_$2879",
                               "typeString": "contract TwoKeyCampaignInventory"
                             }
                           },
-                          "id": 2621,
+                          "id": 2395,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "memberName": "addFungibleAsset",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 2796,
-                          "src": "1289:40:12",
+                          "referencedDeclaration": 2570,
+                          "src": "1289:40:7",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_external_nonpayable$_t_uint256_$_t_address_$_t_uint256_$returns$_t_bool_$",
                             "typeString": "function (uint256,address,uint256) external returns (bool)"
                           }
                         },
-                        "id": 2625,
+                        "id": 2399,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -1782,7 +1818,7 @@
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "1289:82:12",
+                        "src": "1289:82:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -1796,21 +1832,21 @@
                           "typeString": "bool"
                         }
                       ],
-                      "id": 2619,
+                      "id": 2393,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        13452,
-                        13453
+                        6826,
+                        6827
                       ],
-                      "referencedDeclaration": 13452,
-                      "src": "1281:7:12",
+                      "referencedDeclaration": 6826,
+                      "src": "1281:7:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 2626,
+                    "id": 2400,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1818,15 +1854,15 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "1281:91:12",
+                    "src": "1281:91:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 2627,
+                  "id": 2401,
                   "nodeType": "ExpressionStatement",
-                  "src": "1281:91:12"
+                  "src": "1281:91:7"
                 },
                 {
                   "expression": {
@@ -1834,12 +1870,12 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 2629,
+                        "id": 2403,
                         "name": "_from",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2604,
-                        "src": "1394:5:12",
+                        "referencedDeclaration": 2378,
+                        "src": "1394:5:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -1847,12 +1883,12 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 2630,
+                        "id": 2404,
                         "name": "_tokenID",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2606,
-                        "src": "1401:8:12",
+                        "referencedDeclaration": 2380,
+                        "src": "1401:8:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -1860,12 +1896,12 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 2631,
+                        "id": 2405,
                         "name": "_assetContract",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2608,
-                        "src": "1411:14:12",
+                        "referencedDeclaration": 2382,
+                        "src": "1411:14:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -1873,12 +1909,12 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 2632,
+                        "id": 2406,
                         "name": "_amountOrIndex",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2610,
-                        "src": "1427:14:12",
+                        "referencedDeclaration": 2384,
+                        "src": "1427:14:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -1888,18 +1924,18 @@
                         "argumentTypes": null,
                         "expression": {
                           "argumentTypes": null,
-                          "id": 2633,
+                          "id": 2407,
                           "name": "CampaignType",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 6899,
-                          "src": "1443:12:12",
+                          "referencedDeclaration": 5484,
+                          "src": "1443:12:7",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_type$_t_enum$_CampaignType_$6899_$",
+                            "typeIdentifier": "t_type$_t_enum$_CampaignType_$5484_$",
                             "typeString": "type(enum TwoKeyTypes.CampaignType)"
                           }
                         },
-                        "id": 2634,
+                        "id": 2408,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": true,
@@ -1907,9 +1943,9 @@
                         "memberName": "Fungible",
                         "nodeType": "MemberAccess",
                         "referencedDeclaration": null,
-                        "src": "1443:21:12",
+                        "src": "1443:21:7",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_enum$_CampaignType_$6899",
+                          "typeIdentifier": "t_enum$_CampaignType_$5484",
                           "typeString": "enum TwoKeyTypes.CampaignType"
                         }
                       }
@@ -1933,25 +1969,25 @@
                           "typeString": "uint256"
                         },
                         {
-                          "typeIdentifier": "t_enum$_CampaignType_$6899",
+                          "typeIdentifier": "t_enum$_CampaignType_$5484",
                           "typeString": "enum TwoKeyTypes.CampaignType"
                         }
                       ],
-                      "id": 2628,
+                      "id": 2402,
                       "name": "buyFromWithETH",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        2638,
-                        2539
+                        2412,
+                        2313
                       ],
-                      "referencedDeclaration": 2539,
-                      "src": "1379:14:12",
+                      "referencedDeclaration": 2313,
+                      "src": "1379:14:7",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_uint256_$_t_address_$_t_uint256_$_t_enum$_CampaignType_$6899_$returns$__$",
+                        "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_uint256_$_t_address_$_t_uint256_$_t_enum$_CampaignType_$5484_$returns$__$",
                         "typeString": "function (address,uint256,address,uint256,enum TwoKeyTypes.CampaignType)"
                       }
                     },
-                    "id": 2635,
+                    "id": 2409,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1959,20 +1995,20 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "1379:86:12",
+                    "src": "1379:86:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 2636,
+                  "id": 2410,
                   "nodeType": "ExpressionStatement",
-                  "src": "1379:86:12"
+                  "src": "1379:86:7"
                 }
               ]
             },
             "documentation": null,
-            "id": 2638,
+            "id": 2412,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -1980,16 +2016,16 @@
             "name": "buyFromWithETH",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2611,
+              "id": 2385,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2604,
+                  "id": 2378,
                   "name": "_from",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2638,
-                  "src": "1147:13:12",
+                  "scope": 2412,
+                  "src": "1147:13:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1997,10 +2033,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2603,
+                    "id": 2377,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1147:7:12",
+                    "src": "1147:7:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -2011,11 +2047,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 2606,
+                  "id": 2380,
                   "name": "_tokenID",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2638,
-                  "src": "1162:16:12",
+                  "scope": 2412,
+                  "src": "1162:16:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2023,10 +2059,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2605,
+                    "id": 2379,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1162:7:12",
+                    "src": "1162:7:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2037,11 +2073,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 2608,
+                  "id": 2382,
                   "name": "_assetContract",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2638,
-                  "src": "1180:22:12",
+                  "scope": 2412,
+                  "src": "1180:22:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2049,10 +2085,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2607,
+                    "id": 2381,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1180:7:12",
+                    "src": "1180:7:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -2063,11 +2099,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 2610,
+                  "id": 2384,
                   "name": "_amountOrIndex",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2638,
-                  "src": "1204:22:12",
+                  "scope": 2412,
+                  "src": "1204:22:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2075,10 +2111,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2609,
+                    "id": 2383,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1204:7:12",
+                    "src": "1204:7:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2088,40 +2124,40 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1146:81:12"
+              "src": "1146:81:7"
             },
             "payable": true,
             "returnParameters": {
-              "id": 2612,
+              "id": 2386,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1243:0:12"
+              "src": "1243:0:7"
             },
-            "scope": 2639,
-            "src": "1123:347:12",
+            "scope": 2413,
+            "src": "1123:347:7",
             "stateMutability": "payable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 2640,
-        "src": "359:1115:12"
+        "scope": 2414,
+        "src": "359:1115:7"
       }
     ],
-    "src": "0:1476:12"
+    "src": "0:1476:7"
   },
   "legacyAST": {
     "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyCampaignETHCrowdsale.sol",
     "exportedSymbols": {
       "TwoKeyCampaignETHCrowdsale": [
-        2639
+        2413
       ]
     },
-    "id": 2640,
+    "id": 2414,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 2542,
+        "id": 2316,
         "literals": [
           "solidity",
           "^",
@@ -2129,93 +2165,93 @@
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:24:12"
+        "src": "0:24:7"
       },
       {
         "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/math/SafeMath.sol",
         "file": "../openzeppelin-solidity/contracts/math/SafeMath.sol",
-        "id": 2543,
+        "id": 2317,
         "nodeType": "ImportDirective",
-        "scope": 2640,
-        "sourceUnit": 9730,
-        "src": "27:62:12",
+        "scope": 2414,
+        "sourceUnit": 6243,
+        "src": "27:62:7",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
         "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
         "file": "../openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
-        "id": 2544,
+        "id": 2318,
         "nodeType": "ImportDirective",
-        "scope": 2640,
-        "sourceUnit": 8613,
-        "src": "90:68:12",
+        "scope": 2414,
+        "sourceUnit": 6121,
+        "src": "90:68:7",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
         "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyCampaignETH.sol",
         "file": "./TwoKeyCampaignETH.sol",
-        "id": 2545,
+        "id": 2319,
         "nodeType": "ImportDirective",
-        "scope": 2640,
-        "sourceUnit": 2541,
-        "src": "160:33:12",
+        "scope": 2414,
+        "sourceUnit": 2315,
+        "src": "160:33:7",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
         "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyReg.sol",
         "file": "./TwoKeyReg.sol",
-        "id": 2546,
+        "id": 2320,
         "nodeType": "ImportDirective",
-        "scope": 2640,
-        "sourceUnit": 6538,
-        "src": "194:25:12",
+        "scope": 2414,
+        "sourceUnit": 5123,
+        "src": "194:25:7",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
         "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyEconomy.sol",
         "file": "./TwoKeyEconomy.sol",
-        "id": 2547,
+        "id": 2321,
         "nodeType": "ImportDirective",
-        "scope": 2640,
-        "sourceUnit": 5208,
-        "src": "220:29:12",
+        "scope": 2414,
+        "sourceUnit": 4236,
+        "src": "220:29:7",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
         "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyEventSource.sol",
         "file": "./TwoKeyEventSource.sol",
-        "id": 2548,
+        "id": 2322,
         "nodeType": "ImportDirective",
-        "scope": 2640,
-        "sourceUnit": 5684,
-        "src": "250:33:12",
+        "scope": 2414,
+        "sourceUnit": 4712,
+        "src": "250:33:7",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
         "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyWhitelisted.sol",
         "file": "./TwoKeyWhitelisted.sol",
-        "id": 2549,
+        "id": 2323,
         "nodeType": "ImportDirective",
-        "scope": 2640,
-        "sourceUnit": 7167,
-        "src": "284:33:12",
+        "scope": 2414,
+        "sourceUnit": 5752,
+        "src": "284:33:7",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
         "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyCampaignInventory.sol",
         "file": "./TwoKeyCampaignInventory.sol",
-        "id": 2550,
+        "id": 2324,
         "nodeType": "ImportDirective",
-        "scope": 2640,
-        "sourceUnit": 3106,
-        "src": "318:39:12",
+        "scope": 2414,
+        "sourceUnit": 2880,
+        "src": "318:39:7",
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -2225,90 +2261,90 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 2551,
+              "id": 2325,
               "name": "TwoKeyCampaignETH",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 2540,
-              "src": "398:17:12",
+              "referencedDeclaration": 2314,
+              "src": "398:17:7",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_TwoKeyCampaignETH_$2540",
+                "typeIdentifier": "t_contract$_TwoKeyCampaignETH_$2314",
                 "typeString": "contract TwoKeyCampaignETH"
               }
             },
-            "id": 2552,
+            "id": 2326,
             "nodeType": "InheritanceSpecifier",
-            "src": "398:17:12"
+            "src": "398:17:7"
           },
           {
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 2553,
+              "id": 2327,
               "name": "Crowdsale",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 8612,
-              "src": "417:9:12",
+              "referencedDeclaration": 6120,
+              "src": "417:9:7",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Crowdsale_$8612",
+                "typeIdentifier": "t_contract$_Crowdsale_$6120",
                 "typeString": "contract Crowdsale"
               }
             },
-            "id": 2554,
+            "id": 2328,
             "nodeType": "InheritanceSpecifier",
-            "src": "417:9:12"
+            "src": "417:9:7"
           }
         ],
         "contractDependencies": [
-          765,
-          2103,
-          2540,
-          6900,
-          8612,
-          11085,
-          11282,
-          11314,
-          11929
+          488,
+          1877,
+          2314,
+          5485,
+          6120,
+          6424,
+          6467,
+          6499,
+          6808
         ],
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 2639,
+        "id": 2413,
         "linearizedBaseContracts": [
-          2639,
-          8612,
-          2540,
-          2103,
-          6900,
-          765,
-          11929,
-          11085,
-          11282,
-          11314
+          2413,
+          6120,
+          2314,
+          1877,
+          5485,
+          488,
+          6808,
+          6424,
+          6467,
+          6499
         ],
         "name": "TwoKeyCampaignETHCrowdsale",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
-            "id": 2557,
+            "id": 2331,
             "libraryName": {
               "contractScope": null,
-              "id": 2555,
+              "id": 2329,
               "name": "SafeMath",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 9729,
-              "src": "437:8:12",
+              "referencedDeclaration": 6242,
+              "src": "437:8:7",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_SafeMath_$9729",
+                "typeIdentifier": "t_contract$_SafeMath_$6242",
                 "typeString": "library SafeMath"
               }
             },
             "nodeType": "UsingForDirective",
-            "src": "431:27:12",
+            "src": "431:27:7",
             "typeName": {
-              "id": 2556,
+              "id": 2330,
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
-              "src": "450:7:12",
+              "src": "450:7:7",
               "typeDescriptions": {
                 "typeIdentifier": "t_uint256",
                 "typeString": "uint256"
@@ -2317,13 +2353,13 @@
           },
           {
             "body": {
-              "id": 2601,
+              "id": 2375,
               "nodeType": "Block",
-              "src": "1090:4:12",
+              "src": "1090:4:7",
               "statements": []
             },
             "documentation": null,
-            "id": 2602,
+            "id": 2376,
             "implemented": true,
             "isConstructor": true,
             "isDeclaredConst": false,
@@ -2332,77 +2368,77 @@
                 "arguments": [
                   {
                     "argumentTypes": null,
-                    "id": 2586,
+                    "id": 2360,
                     "name": "_eventSource",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 2559,
-                    "src": "867:12:12",
+                    "referencedDeclaration": 2333,
+                    "src": "867:12:7",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_TwoKeyEventSource_$5683",
+                      "typeIdentifier": "t_contract$_TwoKeyEventSource_$4711",
                       "typeString": "contract TwoKeyEventSource"
                     }
                   },
                   {
                     "argumentTypes": null,
-                    "id": 2587,
+                    "id": 2361,
                     "name": "_economy",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 2561,
-                    "src": "883:8:12",
+                    "referencedDeclaration": 2335,
+                    "src": "883:8:7",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_TwoKeyEconomy_$5207",
+                      "typeIdentifier": "t_contract$_TwoKeyEconomy_$4235",
                       "typeString": "contract TwoKeyEconomy"
                     }
                   },
                   {
                     "argumentTypes": null,
-                    "id": 2588,
+                    "id": 2362,
                     "name": "_whitelistInfluencer",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 2563,
-                    "src": "895:20:12",
+                    "referencedDeclaration": 2337,
+                    "src": "895:20:7",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$7166",
+                      "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$5751",
                       "typeString": "contract TwoKeyWhitelisted"
                     }
                   },
                   {
                     "argumentTypes": null,
-                    "id": 2589,
+                    "id": 2363,
                     "name": "_whitelistConverter",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 2565,
-                    "src": "919:19:12",
+                    "referencedDeclaration": 2339,
+                    "src": "919:19:7",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$7166",
+                      "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$5751",
                       "typeString": "contract TwoKeyWhitelisted"
                     }
                   },
                   {
                     "argumentTypes": null,
-                    "id": 2590,
+                    "id": 2364,
                     "name": "_twoKeyCampaignInventory",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 2567,
-                    "src": "942:24:12",
+                    "referencedDeclaration": 2341,
+                    "src": "942:24:7",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_TwoKeyCampaignInventory_$3105",
+                      "typeIdentifier": "t_contract$_TwoKeyCampaignInventory_$2879",
                       "typeString": "contract TwoKeyCampaignInventory"
                     }
                   },
                   {
                     "argumentTypes": null,
-                    "id": 2591,
+                    "id": 2365,
                     "name": "_contractor",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 2569,
-                    "src": "970:11:12",
+                    "referencedDeclaration": 2343,
+                    "src": "970:11:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -2410,12 +2446,12 @@
                   },
                   {
                     "argumentTypes": null,
-                    "id": 2592,
+                    "id": 2366,
                     "name": "_moderator",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 2571,
-                    "src": "985:10:12",
+                    "referencedDeclaration": 2345,
+                    "src": "985:10:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -2423,12 +2459,12 @@
                   },
                   {
                     "argumentTypes": null,
-                    "id": 2593,
+                    "id": 2367,
                     "name": "_start",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 2573,
-                    "src": "999:6:12",
+                    "referencedDeclaration": 2347,
+                    "src": "999:6:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2436,12 +2472,12 @@
                   },
                   {
                     "argumentTypes": null,
-                    "id": 2594,
+                    "id": 2368,
                     "name": "_duration",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 2575,
-                    "src": "1009:9:12",
+                    "referencedDeclaration": 2349,
+                    "src": "1009:9:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2449,12 +2485,12 @@
                   },
                   {
                     "argumentTypes": null,
-                    "id": 2595,
+                    "id": 2369,
                     "name": "_expiryConversion",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 2577,
-                    "src": "1022:17:12",
+                    "referencedDeclaration": 2351,
+                    "src": "1022:17:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2462,12 +2498,12 @@
                   },
                   {
                     "argumentTypes": null,
-                    "id": 2596,
+                    "id": 2370,
                     "name": "_escrowPrecentage",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 2579,
-                    "src": "1043:17:12",
+                    "referencedDeclaration": 2353,
+                    "src": "1043:17:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2475,12 +2511,12 @@
                   },
                   {
                     "argumentTypes": null,
-                    "id": 2597,
+                    "id": 2371,
                     "name": "_rate",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 2581,
-                    "src": "1064:5:12",
+                    "referencedDeclaration": 2355,
+                    "src": "1064:5:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2488,64 +2524,64 @@
                   },
                   {
                     "argumentTypes": null,
-                    "id": 2598,
+                    "id": 2372,
                     "name": "_maxPi",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 2583,
-                    "src": "1073:6:12",
+                    "referencedDeclaration": 2357,
+                    "src": "1073:6:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   }
                 ],
-                "id": 2599,
+                "id": 2373,
                 "modifierName": {
                   "argumentTypes": null,
-                  "id": 2585,
+                  "id": 2359,
                   "name": "TwoKeyCampaign",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 2103,
-                  "src": "849:14:12",
+                  "referencedDeclaration": 1877,
+                  "src": "849:14:7",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_type$_t_contract$_TwoKeyCampaign_$2103_$",
+                    "typeIdentifier": "t_type$_t_contract$_TwoKeyCampaign_$1877_$",
                     "typeString": "type(contract TwoKeyCampaign)"
                   }
                 },
                 "nodeType": "ModifierInvocation",
-                "src": "849:233:12"
+                "src": "849:233:7"
               }
             ],
             "name": "",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2584,
+              "id": 2358,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2559,
+                  "id": 2333,
                   "name": "_eventSource",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2602,
-                  "src": "476:30:12",
+                  "scope": 2376,
+                  "src": "476:30:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_TwoKeyEventSource_$5683",
+                    "typeIdentifier": "t_contract$_TwoKeyEventSource_$4711",
                     "typeString": "contract TwoKeyEventSource"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 2558,
+                    "id": 2332,
                     "name": "TwoKeyEventSource",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 5683,
-                    "src": "476:17:12",
+                    "referencedDeclaration": 4711,
+                    "src": "476:17:7",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_TwoKeyEventSource_$5683",
+                      "typeIdentifier": "t_contract$_TwoKeyEventSource_$4711",
                       "typeString": "contract TwoKeyEventSource"
                     }
                   },
@@ -2554,26 +2590,26 @@
                 },
                 {
                   "constant": false,
-                  "id": 2561,
+                  "id": 2335,
                   "name": "_economy",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2602,
-                  "src": "510:22:12",
+                  "scope": 2376,
+                  "src": "510:22:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_TwoKeyEconomy_$5207",
+                    "typeIdentifier": "t_contract$_TwoKeyEconomy_$4235",
                     "typeString": "contract TwoKeyEconomy"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 2560,
+                    "id": 2334,
                     "name": "TwoKeyEconomy",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 5207,
-                    "src": "510:13:12",
+                    "referencedDeclaration": 4235,
+                    "src": "510:13:7",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_TwoKeyEconomy_$5207",
+                      "typeIdentifier": "t_contract$_TwoKeyEconomy_$4235",
                       "typeString": "contract TwoKeyEconomy"
                     }
                   },
@@ -2582,26 +2618,26 @@
                 },
                 {
                   "constant": false,
-                  "id": 2563,
+                  "id": 2337,
                   "name": "_whitelistInfluencer",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2602,
-                  "src": "536:38:12",
+                  "scope": 2376,
+                  "src": "536:38:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$7166",
+                    "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$5751",
                     "typeString": "contract TwoKeyWhitelisted"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 2562,
+                    "id": 2336,
                     "name": "TwoKeyWhitelisted",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 7166,
-                    "src": "536:17:12",
+                    "referencedDeclaration": 5751,
+                    "src": "536:17:7",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$7166",
+                      "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$5751",
                       "typeString": "contract TwoKeyWhitelisted"
                     }
                   },
@@ -2610,26 +2646,26 @@
                 },
                 {
                   "constant": false,
-                  "id": 2565,
+                  "id": 2339,
                   "name": "_whitelistConverter",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2602,
-                  "src": "578:37:12",
+                  "scope": 2376,
+                  "src": "578:37:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$7166",
+                    "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$5751",
                     "typeString": "contract TwoKeyWhitelisted"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 2564,
+                    "id": 2338,
                     "name": "TwoKeyWhitelisted",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 7166,
-                    "src": "578:17:12",
+                    "referencedDeclaration": 5751,
+                    "src": "578:17:7",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$7166",
+                      "typeIdentifier": "t_contract$_TwoKeyWhitelisted_$5751",
                       "typeString": "contract TwoKeyWhitelisted"
                     }
                   },
@@ -2638,26 +2674,26 @@
                 },
                 {
                   "constant": false,
-                  "id": 2567,
+                  "id": 2341,
                   "name": "_twoKeyCampaignInventory",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2602,
-                  "src": "619:48:12",
+                  "scope": 2376,
+                  "src": "619:48:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_TwoKeyCampaignInventory_$3105",
+                    "typeIdentifier": "t_contract$_TwoKeyCampaignInventory_$2879",
                     "typeString": "contract TwoKeyCampaignInventory"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 2566,
+                    "id": 2340,
                     "name": "TwoKeyCampaignInventory",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 3105,
-                    "src": "619:23:12",
+                    "referencedDeclaration": 2879,
+                    "src": "619:23:7",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_TwoKeyCampaignInventory_$3105",
+                      "typeIdentifier": "t_contract$_TwoKeyCampaignInventory_$2879",
                       "typeString": "contract TwoKeyCampaignInventory"
                     }
                   },
@@ -2666,11 +2702,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 2569,
+                  "id": 2343,
                   "name": "_contractor",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2602,
-                  "src": "672:19:12",
+                  "scope": 2376,
+                  "src": "672:19:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2678,10 +2714,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2568,
+                    "id": 2342,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "672:7:12",
+                    "src": "672:7:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -2692,11 +2728,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 2571,
+                  "id": 2345,
                   "name": "_moderator",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2602,
-                  "src": "695:18:12",
+                  "scope": 2376,
+                  "src": "695:18:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2704,10 +2740,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2570,
+                    "id": 2344,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "695:7:12",
+                    "src": "695:7:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -2718,11 +2754,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 2573,
+                  "id": 2347,
                   "name": "_start",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2602,
-                  "src": "719:14:12",
+                  "scope": 2376,
+                  "src": "719:14:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2730,10 +2766,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2572,
+                    "id": 2346,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "719:7:12",
+                    "src": "719:7:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2744,11 +2780,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 2575,
+                  "id": 2349,
                   "name": "_duration",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2602,
-                  "src": "737:17:12",
+                  "scope": 2376,
+                  "src": "737:17:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2756,10 +2792,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2574,
+                    "id": 2348,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "737:7:12",
+                    "src": "737:7:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2770,11 +2806,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 2577,
+                  "id": 2351,
                   "name": "_expiryConversion",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2602,
-                  "src": "758:25:12",
+                  "scope": 2376,
+                  "src": "758:25:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2782,10 +2818,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2576,
+                    "id": 2350,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "758:7:12",
+                    "src": "758:7:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2796,11 +2832,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 2579,
+                  "id": 2353,
                   "name": "_escrowPrecentage",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2602,
-                  "src": "787:25:12",
+                  "scope": 2376,
+                  "src": "787:25:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2808,10 +2844,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2578,
+                    "id": 2352,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "787:7:12",
+                    "src": "787:7:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2822,11 +2858,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 2581,
+                  "id": 2355,
                   "name": "_rate",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2602,
-                  "src": "816:13:12",
+                  "scope": 2376,
+                  "src": "816:13:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2834,10 +2870,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2580,
+                    "id": 2354,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "816:7:12",
+                    "src": "816:7:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2848,11 +2884,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 2583,
+                  "id": 2357,
                   "name": "_maxPi",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2602,
-                  "src": "833:14:12",
+                  "scope": 2376,
+                  "src": "833:14:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2860,10 +2896,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2582,
+                    "id": 2356,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "833:7:12",
+                    "src": "833:7:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2873,26 +2909,26 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "472:376:12"
+              "src": "472:376:7"
             },
             "payable": false,
             "returnParameters": {
-              "id": 2600,
+              "id": 2374,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1090:0:12"
+              "src": "1090:0:7"
             },
-            "scope": 2639,
-            "src": "461:633:12",
+            "scope": 2413,
+            "src": "461:633:7",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           },
           {
             "body": {
-              "id": 2637,
+              "id": 2411,
               "nodeType": "Block",
-              "src": "1243:227:12",
+              "src": "1243:227:7",
               "statements": [
                 {
                   "expression": {
@@ -2903,14 +2939,14 @@
                         "arguments": [
                           {
                             "argumentTypes": null,
-                            "id": 2615,
+                            "id": 2389,
                             "name": "this",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 13546,
-                            "src": "1268:4:12",
+                            "referencedDeclaration": 6886,
+                            "src": "1268:4:7",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_contract$_TwoKeyCampaignETHCrowdsale_$2639",
+                              "typeIdentifier": "t_contract$_TwoKeyCampaignETHCrowdsale_$2413",
                               "typeString": "contract TwoKeyCampaignETHCrowdsale"
                             }
                           }
@@ -2918,24 +2954,24 @@
                         "expression": {
                           "argumentTypes": [
                             {
-                              "typeIdentifier": "t_contract$_TwoKeyCampaignETHCrowdsale_$2639",
+                              "typeIdentifier": "t_contract$_TwoKeyCampaignETHCrowdsale_$2413",
                               "typeString": "contract TwoKeyCampaignETHCrowdsale"
                             }
                           ],
-                          "id": 2614,
+                          "id": 2388,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "lValueRequested": false,
                           "nodeType": "ElementaryTypeNameExpression",
-                          "src": "1260:7:12",
+                          "src": "1260:7:7",
                           "typeDescriptions": {
                             "typeIdentifier": "t_type$_t_address_$",
                             "typeString": "type(address)"
                           },
                           "typeName": "address"
                         },
-                        "id": 2616,
+                        "id": 2390,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -2943,7 +2979,7 @@
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "1260:13:12",
+                        "src": "1260:13:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -2957,18 +2993,18 @@
                           "typeString": "address"
                         }
                       ],
-                      "id": 2613,
+                      "id": 2387,
                       "name": "buyTokens",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 8521,
-                      "src": "1250:9:12",
+                      "referencedDeclaration": 6029,
+                      "src": "1250:9:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$_t_address_$returns$__$",
                         "typeString": "function (address)"
                       }
                     },
-                    "id": 2617,
+                    "id": 2391,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2976,15 +3012,15 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "1250:24:12",
+                    "src": "1250:24:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 2618,
+                  "id": 2392,
                   "nodeType": "ExpressionStatement",
-                  "src": "1250:24:12"
+                  "src": "1250:24:7"
                 },
                 {
                   "expression": {
@@ -2995,12 +3031,12 @@
                         "arguments": [
                           {
                             "argumentTypes": null,
-                            "id": 2622,
+                            "id": 2396,
                             "name": "_tokenID",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 2606,
-                            "src": "1330:8:12",
+                            "referencedDeclaration": 2380,
+                            "src": "1330:8:7",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -3008,12 +3044,12 @@
                           },
                           {
                             "argumentTypes": null,
-                            "id": 2623,
+                            "id": 2397,
                             "name": "_assetContract",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 2608,
-                            "src": "1340:14:12",
+                            "referencedDeclaration": 2382,
+                            "src": "1340:14:7",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
                               "typeString": "address"
@@ -3021,12 +3057,12 @@
                           },
                           {
                             "argumentTypes": null,
-                            "id": 2624,
+                            "id": 2398,
                             "name": "_amountOrIndex",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 2610,
-                            "src": "1356:14:12",
+                            "referencedDeclaration": 2384,
+                            "src": "1356:14:7",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -3050,32 +3086,32 @@
                           ],
                           "expression": {
                             "argumentTypes": null,
-                            "id": 2620,
+                            "id": 2394,
                             "name": "twoKeyCampaignInventory",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1121,
-                            "src": "1289:23:12",
+                            "referencedDeclaration": 864,
+                            "src": "1289:23:7",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_contract$_TwoKeyCampaignInventory_$3105",
+                              "typeIdentifier": "t_contract$_TwoKeyCampaignInventory_$2879",
                               "typeString": "contract TwoKeyCampaignInventory"
                             }
                           },
-                          "id": 2621,
+                          "id": 2395,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "memberName": "addFungibleAsset",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 2796,
-                          "src": "1289:40:12",
+                          "referencedDeclaration": 2570,
+                          "src": "1289:40:7",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_external_nonpayable$_t_uint256_$_t_address_$_t_uint256_$returns$_t_bool_$",
                             "typeString": "function (uint256,address,uint256) external returns (bool)"
                           }
                         },
-                        "id": 2625,
+                        "id": 2399,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -3083,7 +3119,7 @@
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "1289:82:12",
+                        "src": "1289:82:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -3097,21 +3133,21 @@
                           "typeString": "bool"
                         }
                       ],
-                      "id": 2619,
+                      "id": 2393,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        13452,
-                        13453
+                        6826,
+                        6827
                       ],
-                      "referencedDeclaration": 13452,
-                      "src": "1281:7:12",
+                      "referencedDeclaration": 6826,
+                      "src": "1281:7:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 2626,
+                    "id": 2400,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -3119,15 +3155,15 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "1281:91:12",
+                    "src": "1281:91:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 2627,
+                  "id": 2401,
                   "nodeType": "ExpressionStatement",
-                  "src": "1281:91:12"
+                  "src": "1281:91:7"
                 },
                 {
                   "expression": {
@@ -3135,12 +3171,12 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 2629,
+                        "id": 2403,
                         "name": "_from",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2604,
-                        "src": "1394:5:12",
+                        "referencedDeclaration": 2378,
+                        "src": "1394:5:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -3148,12 +3184,12 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 2630,
+                        "id": 2404,
                         "name": "_tokenID",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2606,
-                        "src": "1401:8:12",
+                        "referencedDeclaration": 2380,
+                        "src": "1401:8:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -3161,12 +3197,12 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 2631,
+                        "id": 2405,
                         "name": "_assetContract",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2608,
-                        "src": "1411:14:12",
+                        "referencedDeclaration": 2382,
+                        "src": "1411:14:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -3174,12 +3210,12 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 2632,
+                        "id": 2406,
                         "name": "_amountOrIndex",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2610,
-                        "src": "1427:14:12",
+                        "referencedDeclaration": 2384,
+                        "src": "1427:14:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -3189,18 +3225,18 @@
                         "argumentTypes": null,
                         "expression": {
                           "argumentTypes": null,
-                          "id": 2633,
+                          "id": 2407,
                           "name": "CampaignType",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 6899,
-                          "src": "1443:12:12",
+                          "referencedDeclaration": 5484,
+                          "src": "1443:12:7",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_type$_t_enum$_CampaignType_$6899_$",
+                            "typeIdentifier": "t_type$_t_enum$_CampaignType_$5484_$",
                             "typeString": "type(enum TwoKeyTypes.CampaignType)"
                           }
                         },
-                        "id": 2634,
+                        "id": 2408,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": true,
@@ -3208,9 +3244,9 @@
                         "memberName": "Fungible",
                         "nodeType": "MemberAccess",
                         "referencedDeclaration": null,
-                        "src": "1443:21:12",
+                        "src": "1443:21:7",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_enum$_CampaignType_$6899",
+                          "typeIdentifier": "t_enum$_CampaignType_$5484",
                           "typeString": "enum TwoKeyTypes.CampaignType"
                         }
                       }
@@ -3234,25 +3270,25 @@
                           "typeString": "uint256"
                         },
                         {
-                          "typeIdentifier": "t_enum$_CampaignType_$6899",
+                          "typeIdentifier": "t_enum$_CampaignType_$5484",
                           "typeString": "enum TwoKeyTypes.CampaignType"
                         }
                       ],
-                      "id": 2628,
+                      "id": 2402,
                       "name": "buyFromWithETH",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        2638,
-                        2539
+                        2412,
+                        2313
                       ],
-                      "referencedDeclaration": 2539,
-                      "src": "1379:14:12",
+                      "referencedDeclaration": 2313,
+                      "src": "1379:14:7",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_uint256_$_t_address_$_t_uint256_$_t_enum$_CampaignType_$6899_$returns$__$",
+                        "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_uint256_$_t_address_$_t_uint256_$_t_enum$_CampaignType_$5484_$returns$__$",
                         "typeString": "function (address,uint256,address,uint256,enum TwoKeyTypes.CampaignType)"
                       }
                     },
-                    "id": 2635,
+                    "id": 2409,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -3260,20 +3296,20 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "1379:86:12",
+                    "src": "1379:86:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 2636,
+                  "id": 2410,
                   "nodeType": "ExpressionStatement",
-                  "src": "1379:86:12"
+                  "src": "1379:86:7"
                 }
               ]
             },
             "documentation": null,
-            "id": 2638,
+            "id": 2412,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -3281,16 +3317,16 @@
             "name": "buyFromWithETH",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2611,
+              "id": 2385,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2604,
+                  "id": 2378,
                   "name": "_from",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2638,
-                  "src": "1147:13:12",
+                  "scope": 2412,
+                  "src": "1147:13:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3298,10 +3334,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2603,
+                    "id": 2377,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1147:7:12",
+                    "src": "1147:7:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -3312,11 +3348,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 2606,
+                  "id": 2380,
                   "name": "_tokenID",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2638,
-                  "src": "1162:16:12",
+                  "scope": 2412,
+                  "src": "1162:16:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3324,10 +3360,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2605,
+                    "id": 2379,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1162:7:12",
+                    "src": "1162:7:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -3338,11 +3374,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 2608,
+                  "id": 2382,
                   "name": "_assetContract",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2638,
-                  "src": "1180:22:12",
+                  "scope": 2412,
+                  "src": "1180:22:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3350,10 +3386,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2607,
+                    "id": 2381,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1180:7:12",
+                    "src": "1180:7:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -3364,11 +3400,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 2610,
+                  "id": 2384,
                   "name": "_amountOrIndex",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2638,
-                  "src": "1204:22:12",
+                  "scope": 2412,
+                  "src": "1204:22:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3376,10 +3412,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2609,
+                    "id": 2383,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1204:7:12",
+                    "src": "1204:7:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -3389,27 +3425,27 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1146:81:12"
+              "src": "1146:81:7"
             },
             "payable": true,
             "returnParameters": {
-              "id": 2612,
+              "id": 2386,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1243:0:12"
+              "src": "1243:0:7"
             },
-            "scope": 2639,
-            "src": "1123:347:12",
+            "scope": 2413,
+            "src": "1123:347:7",
             "stateMutability": "payable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 2640,
-        "src": "359:1115:12"
+        "scope": 2414,
+        "src": "359:1115:7"
       }
     ],
-    "src": "0:1476:12"
+    "src": "0:1476:7"
   },
   "compiler": {
     "name": "solc",
@@ -3417,5 +3453,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
-  "updatedAt": "2018-08-30T13:16:39.341Z"
+  "updatedAt": "2018-08-31T13:56:15.388Z"
 }

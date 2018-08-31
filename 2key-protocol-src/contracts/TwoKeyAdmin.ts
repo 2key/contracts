@@ -148,6 +148,15 @@ export class TwoKeyAdmin extends TC.TypeChainContract {
         payable: false,
         stateMutability: "nonpayable",
         type: "function"
+      },
+      {
+        constant: false,
+        inputs: [{ name: "_contractAddress", type: "address" }],
+        name: "twoKeyEventSourceAddAuthorizedContracts",
+        outputs: [],
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "function"
       }
     ];
     super(web3, address, abi);
@@ -258,6 +267,15 @@ export class TwoKeyAdmin extends TC.TypeChainContract {
       this,
       "addTwoKeyEventSource",
       [_twoKeyEventSource.toString()]
+    );
+  }
+  public twoKeyEventSourceAddAuthorizedContractsTx(
+    _contractAddress: BigNumber | string
+  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
+    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
+      this,
+      "twoKeyEventSourceAddAuthorizedContracts",
+      [_contractAddress.toString()]
     );
   }
 

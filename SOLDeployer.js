@@ -74,7 +74,7 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
           }
         });
         fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts/meta.ts'), `export default ${util.inspect(contracts, { depth: 10 })}`);
-        fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts.json'), JSON.stringify(contracts, null, 2));
+        fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts.json'), JSON.stringify(json, null, 2));
         console.log('Done');
         resolve();
       } catch (err) {
