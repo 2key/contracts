@@ -21,7 +21,7 @@ contract RBACWithAdmin is RBAC {
    */
   string public constant ROLE_ADMIN = "admin";
   string public constant ROLE_CONTROLLER = "controller"; 
-
+  address private adminAddress;
   /**
    * @dev modifier to scope access to admins
    * // reverts
@@ -35,12 +35,16 @@ contract RBACWithAdmin is RBAC {
   /**
    * @dev constructor. Sets msg.sender as admin by default
    */
-  constructor()
+ constructor(address _twoKeyAdmin)
     public
   {
-    addRole(msg.sender, ROLE_ADMIN);
+    if (_twoKeyAdmin == address(0)) {
+      adminAddress = msg.sender;
+    } else {
+      adminAddress = _twoKeyAdmin;      
+    }
+    addRole(adminAddress, ROLE_ADMIN);
   }
-
   /**
    * @dev add a role to an address
    * @param addr address

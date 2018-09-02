@@ -12,25 +12,28 @@ import "./TwoKeyEventSource.sol";
 
 // SAFT are to be implemented by transferEtherByAdmins with the amount including the discount, according to the prevailing rate
 
-contract TwoKeyAdmin is Ownable, Destructible, AdminContract {
+contract TwoKeyAdmin is  Ownable, Destructible, AdminContract {
+
+	
 
 	TwoKeyEconomy economy;
 	address electorateAdmins;
 	TwoKeyUpgradableExchange exchange;
-	address public newAdmin;
+	address private newAdmin;
 	bool wasReplaced; 
 	TwoKeyEventSource twoKeyEventSource;
 
+
 	constructor(
-		TwoKeyEconomy _economy, 
+		//TwoKeyEconomy _economy, 
 		address _electorateAdmins,
 		TwoKeyUpgradableExchange _exchange
 	) Ownable() Destructible() payable public {
-		require(_economy != address(0));
+		//require(_economy != address(0));
 		require(_electorateAdmins != address(0));
 		require(_exchange != address(0));
 		wasReplaced = false;
-		economy = _economy;
+		//economy = _economy;
 		exchange = _exchange;
 		electorateAdmins = _electorateAdmins;	
 	}
@@ -39,12 +42,21 @@ contract TwoKeyAdmin is Ownable, Destructible, AdminContract {
 		AdminContract adminContract = AdminContract(newAdminContract);
 		uint balanceOfOldAdmin = economy.balanceOf(adminContract);
 		// move to deploy
-		wasReplaced = true;	
+		// assign default values to new admin here:
+		//newAdminContract.SetTwoKeyEonomy(economy);
+		//newAdminContract.SetTwoKeyExchange(exchange);
+		//newAdminContract.set
+
+		wasReplaced = true;
+
 		economy.transfer(newAdminContract, balanceOfOldAdmin);	
 		economy.transferOwnership(newAdminContract);
-		exchange.transferOwnership(newAdminContract);
-		newAdminContract.transfer(address(this).balance);	
+		//exchange.transferOwnership(newAdminContract); // need to take care
+		newAdminContract.transfer(address(this).balance);
+		//eventsource	
 	}
+
+	
 
 	function transferByAdmins(address _to, uint256 _tokens) external wasNotReplaced adminsVotingApproved {
 		economy.transfer(_to, _tokens);
@@ -101,4 +113,17 @@ contract TwoKeyAdmin is Ownable, Destructible, AdminContract {
 		require(_contractAddress != address(0));
 		twoKeyEventSource.addContract(_contractAddress);
 	}
-}
+
+	// modifier for admin call check
+    function SetTwoKeyEonomy(address _economy) public adminsVotingApproved {
+		require(_economy != address(0));
+    	economy = TwoKeyEconomy(_economy);
+
+    }
+
+function SetTwoKeyExchange(address _exchange) public adminsVotingApproved {
+		require(_exchange != address(0));
+    	exchange = TwoKeyUpgradableExchange(exchange);
+    	
+    }
+} 

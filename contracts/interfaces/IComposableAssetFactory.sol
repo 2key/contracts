@@ -9,7 +9,7 @@ contract IComposableAssetFactory is RBACWithAdmin{
         _;
     }
 
-    constructor(uint256 _openingTime, uint256 _closingTime) RBACWithAdmin() public{
+    constructor(uint256 _openingTime, uint256 _closingTime) RBACWithAdmin(address(0)) public{
 
     }
     function addFungibleAsset(uint256 _tokenID, address _assetContract, uint256 _amount) public returns (bool);
