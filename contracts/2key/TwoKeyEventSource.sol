@@ -128,7 +128,8 @@ contract TwoKeyEventSource is TwoKeyTypes {
 
     /// @dev Only allowed contracts can call this function ---> means can emit events
     /// This user will be contractor
-    function created(address _campaign, address _owner) public onlyAllowedContracts {
+    /// onlyAllowedContracts commented so Andri can fetch this
+    function created(address _campaign, address _owner) public {
         interfaceTwoKeyReg.addWhereContractor(_campaign, _owner);
     	emit Created(_campaign, _owner);
 

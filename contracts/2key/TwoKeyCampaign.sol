@@ -178,8 +178,8 @@ contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
 //	     there should be a discount - but not for now
 
         maxPi = _maxPi;
-//		eventSource.create()
-		emit Created(address(this), contractor);
+		eventSource.created(address(this), contractor);
+//		emit Created(address(this), contractor);
 
 	}
 
