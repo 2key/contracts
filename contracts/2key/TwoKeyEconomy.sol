@@ -9,16 +9,15 @@ import "./TwoKeyAdmin.sol";
 
 contract TwoKeyEconomy is RBACWithAdmin, StandardToken, Ownable {
   string public name = 'TwoKeyEconomy';
-  string public symbol = '2Key';
-  uint8 public decimals = 18;
+  string public symbol= '2Key';
+  uint8 public decimals= 18;
  
   constructor (address _twoKeyAdmin) RBACWithAdmin(_twoKeyAdmin)  Ownable() public {
  	
  	require(_twoKeyAdmin != address(0));
-    TwoKeyAdmin admin ;
+   TwoKeyAdmin admin ;
     admin = TwoKeyAdmin(_twoKeyAdmin);
-    totalSupply_ = 1000000000000000000000000000;
-    //balances[msg.sender] = totalSupply_;
+    totalSupply_=1000000000000000000000000000;
     balances[_twoKeyAdmin] = totalSupply_;
     admin.SetTwoKeyEonomy(address(this)); 
   }
