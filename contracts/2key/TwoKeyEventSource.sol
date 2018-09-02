@@ -53,7 +53,7 @@ contract TwoKeyEventSource is TwoKeyTypes {
         bytes memory code = GetCode.at(msg.sender);
         bytes32 cc = keccak256(abi.encodePacked(code));
         emit Code(cc,1);
-        require(canEmit[cc] == true);
+//        require(canEmit[cc] == true);
         _;
     }
 
