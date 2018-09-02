@@ -125,7 +125,7 @@ contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
 	/*
 	
 	 */
-
+	/// TODO: Check the best way to emit event for creation
 	constructor(
 		TwoKeyEventSource _eventSource,
 		TwoKeyEconomy _economy,
@@ -178,7 +178,7 @@ contract TwoKeyCampaign is TwoKeyARC, TwoKeyTypes {
 //	     there should be a discount - but not for now
 
         maxPi = _maxPi;
-
+//		eventSource.create()
 		emit Created(address(this), contractor);
 
 	}
