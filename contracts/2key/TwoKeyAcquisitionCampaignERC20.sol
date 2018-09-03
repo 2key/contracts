@@ -86,6 +86,12 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
 //                twoKeyEventSource.created(address(this), contractor);
     }
 
+    /// @notice Function to add asset contract of specific ERC20
+    /// @param _assetContract of that asset Contract
+    function addAssetContractERC20(address _assetContract) public {
+        assetContract = _assetContract;
+    }
+
     /// @notice Modifier which is going to check if current time is between opening-closing campaign time
     modifier isOngoing() {
         require(block.timestamp >= openingTime && block.timestamp <= closingTime);
@@ -274,7 +280,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
     /// @dev we require that msg.value is greater than 0
     /// @dev function will update the mapping balances where we're mapping how much ether has been sent to contract from specified address
     /// @dev will emit an event with address and value sent
-    function () payable {
+    function () external payable {
         require(msg.value > 0);
         balances[msg.sender] += msg.value;
         emit ReceivedEther(msg.sender, msg.value);
