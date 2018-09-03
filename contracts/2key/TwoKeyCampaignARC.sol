@@ -5,7 +5,7 @@ import '../openzeppelin-solidity/contracts/math/SafeMath.sol';
 
 import './TwoKeyEventSource.sol';
 
-contract TwoKeyARC is StandardToken {
+contract TwoKeyCampaignARC is StandardToken {
 
 	using SafeMath for uint256;
 
@@ -15,20 +15,20 @@ contract TwoKeyARC is StandardToken {
     mapping(address => uint256) internal xbalancesTwoKey;  
  
 
-	TwoKeyEventSource eventSource;
+	TwoKeyEventSource twoKeyEventSource;
 	address contractor;
 
 	uint256 public quota;  // maximal ARC tokens that can be passed in transferFrom
 
 	// referral graph, who did you receive the referral from
-	mapping (address => address) public received_from;
+	mapping(address => address) public received_from;
 
 
 
-	constructor(TwoKeyEventSource _eventSource, address _contractor) StandardToken() public {
-		require(_eventSource != address(0));
+	constructor(address _twoKeyEventSource, address _contractor) StandardToken() public {
+		require(_twoKeyEventSource != address(0));
 		contractor = _contractor;
-		eventSource = _eventSource;
+		twoKeyEventSource = TwoKeyEventSource(_twoKeyEventSource);
 	}
 
 	/**
@@ -80,7 +80,7 @@ contract TwoKeyARC is StandardToken {
 	    if (transferFromQuota(_from, _to, _value)) {
 	      if (received_from[_to] == 0) {
 	        // inform the 2key admin contract, once, that an influencer has joined
-	        eventSource.joined(address(this), _from, _to);
+			  twoKeyEventSource.joined(address(this), _from, _to);
 	      }
 	      received_from[_to] = _from;
 	      return true;
@@ -99,7 +99,7 @@ contract TwoKeyARC is StandardToken {
 	    if (transferQuota(_to, _value)) {
 	      if (received_from[_to] == 0) {
 	        // inform the 2key admin contract, once, that an influencer has joined
-	        eventSource.joined(address(this), msg.sender, _to);
+			  twoKeyEventSource.joined(address(this), msg.sender, _to);
 	      }
 	      received_from[_to] = msg.sender;
 	      return true;
@@ -140,7 +140,7 @@ contract TwoKeyARC is StandardToken {
         for(uint256 i = 0; i < influencersCount; i++) {
         	influencer = received_from[influencer];
             xbalancesTwoKey[influencer] = xbalancesTwoKey[influencer].add(rewardPerInfluencer);
-            eventSource.rewarded(address(this), influencer, rewardPerInfluencer);
+			twoKeyEventSource.rewarded(address(this), influencer, rewardPerInfluencer);
         }
 
     }
