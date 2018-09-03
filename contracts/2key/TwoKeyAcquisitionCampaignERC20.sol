@@ -193,7 +193,9 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
         require(twoKeyEconomy.transferFrom(msg.sender, this, _amount));
 
         /// compute how many units he can buy with amount of twokey
+        /// TODO: Where's this defined, where's price defined
         uint units = 1;
+
         Conversion memory c = Conversion(_from, _amount, msg.sender, false, false, _assetName, _assetContract, units, CampaignType.CPA_FUNGIBLE, now, now + expiryConversion * 1 minutes);
         // move funds
         campaign_balance = campaign_balance - units;
