@@ -194,8 +194,16 @@ contract('TwoKeyAcquisitionCampaignERC20', async (accounts) => {
         await twoKeyEconomy.transfer(userAddress, 5000, {from : coinbase});
 
         let balance = await twoKeyEconomy.balanceOf(userAddress);
-        assert.equal(balance, 5000, "balance is not good updated");
-    })
+        assert.equal(balance, 5000, "balance is not well updated");
+    });
+
+    it("should buy with 2key tokens", async() => {
+        await twoKeyEconomy.approve(twoKeyAcquisitionCampaignERC20.address, 2000, {from: userAddress});
+        await twoKeyAcquisitionCampaignERC20.buyFromWithTwoKey(userAddress, assetName, erc20.address, 2000, {from: userAddress});
+
+        let balance = await twoKeyEconomy.balanceOf(twoKeyAcquisitionCampaignERC20.address);
+        assert.equal(balance, 2000, "balance is not well updated");
+    });
 
 
 });
