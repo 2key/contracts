@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.4.24; 
 
 import '../openzeppelin-solidity/contracts/lifecycle/Destructible.sol';
 import '../openzeppelin-solidity/contracts/ownership/Ownable.sol';
@@ -7,6 +7,7 @@ import './TwoKeyEconomy.sol';
 import './TwoKeyUpgradableExchange.sol';
 import "../interfaces/IAdminContract.sol";
 import "./TwoKeyEventSource.sol";
+import "./TwoKeyReg.sol";
 
 
 
@@ -16,41 +17,49 @@ contract TwoKeyAdmin is  Ownable, Destructible, AdminContract {
 
 	
 
-	TwoKeyEconomy economy;
-	address electorateAdmins;
-	TwoKeyUpgradableExchange exchange;
-	address private newAdmin;
-	bool wasReplaced; 
+	TwoKeyEconomy private economy;
+	address private electorateAdmins;
+	TwoKeyUpgradableExchange private exchange;
+	address private newTwoKeyAdminAddress;
+	bool private wasReplaced; 
 	TwoKeyEventSource twoKeyEventSource;
-
+	TwoKeyReg private twoKeyReg;
 
 	constructor(
-		//TwoKeyEconomy _economy, 
 		address _electorateAdmins,
 		TwoKeyUpgradableExchange _exchange
 	) Ownable() Destructible() payable public {
-		//require(_economy != address(0));
 		require(_electorateAdmins != address(0));
 		require(_exchange != address(0));
 		wasReplaced = false;
-		//economy = _economy;
 		exchange = _exchange;
 		electorateAdmins = _electorateAdmins;	
 	}
 
 	function replaceOneself(address newAdminContract) external wasNotReplaced adminsVotingApproved {
-		AdminContract adminContract = AdminContract(newAdminContract);
-		uint balanceOfOldAdmin = economy.balanceOf(adminContract);
+		// take care of : twoKeyReg, TwoKeyEconomy, twoKeyEventSource,TwoKeyUpgradableExchange
+
+		//AdminContract adminContract = AdminContract(newAdminContract);
+		//uint balanceOfOldAdmin = economy.balanceOf(adminContract);
+		
+		uint balanceOfOldAdmin = economy.balanceOf(address(this	));
+		TwoKeyAdmin newAdminContractObject= TwoKeyAdmin(newAdminContract);
+		newTwoKeyAdminAddress=newAdminContract;
+
 		// move to deploy
 		// assign default values to new admin here:
-		//newAdminContract.SetTwoKeyEonomy(economy);
+		 newAdminContractObject.SetTwoKeyEonomy(economy);
 		//newAdminContract.SetTwoKeyExchange(exchange);
-		//newAdminContract.set
+		 newAdminContractObject.SetTwoKeyReg(twoKeyReg);
+
 
 		wasReplaced = true;
 
 		economy.transfer(newAdminContract, balanceOfOldAdmin);	
-		economy.transferOwnership(newAdminContract);
+		//economy.transferOwnership(newAdminContract);
+
+		//economy.transferOwnership(newAdminContract)
+		economy.adminAddRole(newAdminContract,"admin");
 		//exchange.transferOwnership(newAdminContract); // need to take care
 		newAdminContract.transfer(address(this).balance);
 		//eventsource	
@@ -78,7 +87,7 @@ contract TwoKeyAdmin is  Ownable, Destructible, AdminContract {
 
 	function() public payable {
 		if (wasReplaced) {
-			newAdmin.transfer(msg.value);
+			newTwoKeyAdminAddress.transfer(msg.value);
 		}
 	}
 
@@ -86,7 +95,7 @@ contract TwoKeyAdmin is  Ownable, Destructible, AdminContract {
 		if (wasReplaced)
 			selfdestruct(owner);
 		else
-			selfdestruct(newAdmin);
+			selfdestruct(newTwoKeyAdminAddress);
 	}
 
 	// modifiers
@@ -116,9 +125,17 @@ contract TwoKeyAdmin is  Ownable, Destructible, AdminContract {
 
 	// modifier for admin call check
 	//<TBD> may be owner
-    function SetTwoKeyEonomy(address _economy)   {
+    function SetTwoKeyEonomy(address _economy) public   {
 		require(_economy != address(0));
     	economy = TwoKeyEconomy(_economy);
+
+    }
+
+	// modifier for admin call check
+	//<TBD> may be owner
+    function SetTwoKeyReg(address _address) public  {
+		require(_address != address(0));
+    	twoKeyReg = TwoKeyReg(_address);
 
     }
 
@@ -128,10 +145,17 @@ contract TwoKeyAdmin is  Ownable, Destructible, AdminContract {
     	
     }
 
+
 // modifier for admin call check
 	//<TBD> may be owner
     function GetTwoKeyEconomy () public view  returns(address _economy)  {
     	return address(economy);
+    }
+
+    // modifier for admin call check
+	//<TBD> may be owner
+    function GetTwoKeyReg () public view  returns(address _address)  {
+    	return address(twoKeyReg);
     }
     
 } 
