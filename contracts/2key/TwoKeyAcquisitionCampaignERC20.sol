@@ -171,6 +171,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
         return moveFungibleAsset(_to, _amount);
     }
 
+
+    // TODO: What is this method going to do ?
     function expireFungible(address _to, uint256 _amount)  public returns (bool) {
         moveFungibleAsset(_to, _amount);
         emit Expired(address(this));
@@ -233,12 +235,12 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
     }
 
     //onlyRole(ROLE_CONTROLLER) - comment
-    function expireEscrow(address _converter, uint256 _tokenID, address _assetContract, uint256 _amount) public returns (bool) {
+    function expireEscrow(address _converter,address _assetContract, uint256 _amount) public returns (bool) {
         Conversion memory c = conversions[_converter];
         require(!c.isCancelled && !c.isFulfilled);
         require(now > c.closingTime);
         cancelledEscrow(_converter, _assetContract, _amount);
-//        emit Expired(address(this));
+        emit Expired(address(this));
         return true;
     }
 
@@ -276,7 +278,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
     /// emit event updated mapping
     /// function check amount for address
 
-    /// @notice Payable function which will accept all transactions which are sending ether to contract
+    /// @notice (Fallback)Payable function which will accept all transactions which are sending ether to contract
     /// @dev we require that msg.value is greater than 0
     /// @dev function will update the mapping balances where we're mapping how much ether has been sent to contract from specified address
     /// @dev will emit an event with address and value sent
