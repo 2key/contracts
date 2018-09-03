@@ -37,14 +37,14 @@
     "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/LimitBalance.sol",
     "exportedSymbols": {
       "LimitBalance": [
-        7399
+        7560
       ]
     },
-    "id": 7400,
+    "id": 7561,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 7373,
+        "id": 7534,
         "literals": [
           "solidity",
           "^",
@@ -60,19 +60,19 @@
         "contractKind": "contract",
         "documentation": "@title LimitBalance\n@dev Simple contract to limit the balance of child contract.\nNote this doesn't prevent other contracts to send funds by using selfdestruct(address);\nSee: https://github.com/ConsenSys/smart-contract-best-practices#remember-that-ether-can-be-forcibly-sent-to-an-account",
         "fullyImplemented": true,
-        "id": 7399,
+        "id": 7560,
         "linearizedBaseContracts": [
-          7399
+          7560
         ],
         "name": "LimitBalance",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "constant": false,
-            "id": 7375,
+            "id": 7536,
             "name": "limit",
             "nodeType": "VariableDeclaration",
-            "scope": 7399,
+            "scope": 7560,
             "src": "362:20:38",
             "stateVariable": true,
             "storageLocation": "default",
@@ -81,7 +81,7 @@
               "typeString": "uint256"
             },
             "typeName": {
-              "id": 7374,
+              "id": 7535,
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
               "src": "362:7:38",
@@ -95,25 +95,25 @@
           },
           {
             "body": {
-              "id": 7384,
+              "id": 7545,
               "nodeType": "Block",
               "src": "546:25:38",
               "statements": [
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 7382,
+                    "id": 7543,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 7380,
+                      "id": 7541,
                       "name": "limit",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 7375,
+                      "referencedDeclaration": 7536,
                       "src": "552:5:38",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -124,11 +124,11 @@
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "id": 7381,
+                      "id": 7542,
                       "name": "_limit",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 7377,
+                      "referencedDeclaration": 7538,
                       "src": "560:6:38",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -141,14 +141,14 @@
                       "typeString": "uint256"
                     }
                   },
-                  "id": 7383,
+                  "id": 7544,
                   "nodeType": "ExpressionStatement",
                   "src": "552:14:38"
                 }
               ]
             },
             "documentation": "@dev Constructor that sets the passed value as a limit.\n@param _limit uint256 to represent the limit.",
-            "id": 7385,
+            "id": 7546,
             "implemented": true,
             "isConstructor": true,
             "isDeclaredConst": false,
@@ -156,15 +156,15 @@
             "name": "",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7378,
+              "id": 7539,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7377,
+                  "id": 7538,
                   "name": "_limit",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7385,
+                  "scope": 7546,
                   "src": "523:14:38",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -173,7 +173,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7376,
+                    "id": 7537,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "523:7:38",
@@ -190,12 +190,12 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 7379,
+              "id": 7540,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "546:0:38"
             },
-            "scope": 7399,
+            "scope": 7560,
             "src": "511:60:38",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -203,7 +203,7 @@
           },
           {
             "body": {
-              "id": 7397,
+              "id": 7558,
               "nodeType": "Block",
               "src": "674:58:38",
               "statements": [
@@ -217,7 +217,7 @@
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
-                        "id": 7393,
+                        "id": 7554,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -229,14 +229,14 @@
                             "arguments": [
                               {
                                 "argumentTypes": null,
-                                "id": 7389,
+                                "id": 7550,
                                 "name": "this",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 13286,
+                                "referencedDeclaration": 13447,
                                 "src": "696:4:38",
                                 "typeDescriptions": {
-                                  "typeIdentifier": "t_contract$_LimitBalance_$7399",
+                                  "typeIdentifier": "t_contract$_LimitBalance_$7560",
                                   "typeString": "contract LimitBalance"
                                 }
                               }
@@ -244,11 +244,11 @@
                             "expression": {
                               "argumentTypes": [
                                 {
-                                  "typeIdentifier": "t_contract$_LimitBalance_$7399",
+                                  "typeIdentifier": "t_contract$_LimitBalance_$7560",
                                   "typeString": "contract LimitBalance"
                                 }
                               ],
-                              "id": 7388,
+                              "id": 7549,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
@@ -261,7 +261,7 @@
                               },
                               "typeName": "address"
                             },
-                            "id": 7390,
+                            "id": 7551,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -275,7 +275,7 @@
                               "typeString": "address"
                             }
                           },
-                          "id": 7391,
+                          "id": 7552,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -293,11 +293,11 @@
                         "operator": "<=",
                         "rightExpression": {
                           "argumentTypes": null,
-                          "id": 7392,
+                          "id": 7553,
                           "name": "limit",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 7375,
+                          "referencedDeclaration": 7536,
                           "src": "713:5:38",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
@@ -318,21 +318,21 @@
                           "typeString": "bool"
                         }
                       ],
-                      "id": 7387,
+                      "id": 7548,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        13132,
-                        13133
+                        13293,
+                        13294
                       ],
-                      "referencedDeclaration": 13132,
+                      "referencedDeclaration": 13293,
                       "src": "680:7:38",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 7394,
+                    "id": 7555,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -346,23 +346,23 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 7395,
+                  "id": 7556,
                   "nodeType": "ExpressionStatement",
                   "src": "680:39:38"
                 },
                 {
-                  "id": 7396,
+                  "id": 7557,
                   "nodeType": "PlaceholderStatement",
                   "src": "725:1:38"
                 }
               ]
             },
             "documentation": "@dev Checks if limit was reached. Case true, it throws.",
-            "id": 7398,
+            "id": 7559,
             "name": "limitedPayable",
             "nodeType": "ModifierDefinition",
             "parameters": {
-              "id": 7386,
+              "id": 7547,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "671:2:38"
@@ -371,7 +371,7 @@
             "visibility": "internal"
           }
         ],
-        "scope": 7400,
+        "scope": 7561,
         "src": "335:400:38"
       }
     ],
@@ -381,14 +381,14 @@
     "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/LimitBalance.sol",
     "exportedSymbols": {
       "LimitBalance": [
-        7399
+        7560
       ]
     },
-    "id": 7400,
+    "id": 7561,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 7373,
+        "id": 7534,
         "literals": [
           "solidity",
           "^",
@@ -404,19 +404,19 @@
         "contractKind": "contract",
         "documentation": "@title LimitBalance\n@dev Simple contract to limit the balance of child contract.\nNote this doesn't prevent other contracts to send funds by using selfdestruct(address);\nSee: https://github.com/ConsenSys/smart-contract-best-practices#remember-that-ether-can-be-forcibly-sent-to-an-account",
         "fullyImplemented": true,
-        "id": 7399,
+        "id": 7560,
         "linearizedBaseContracts": [
-          7399
+          7560
         ],
         "name": "LimitBalance",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "constant": false,
-            "id": 7375,
+            "id": 7536,
             "name": "limit",
             "nodeType": "VariableDeclaration",
-            "scope": 7399,
+            "scope": 7560,
             "src": "362:20:38",
             "stateVariable": true,
             "storageLocation": "default",
@@ -425,7 +425,7 @@
               "typeString": "uint256"
             },
             "typeName": {
-              "id": 7374,
+              "id": 7535,
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
               "src": "362:7:38",
@@ -439,25 +439,25 @@
           },
           {
             "body": {
-              "id": 7384,
+              "id": 7545,
               "nodeType": "Block",
               "src": "546:25:38",
               "statements": [
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 7382,
+                    "id": 7543,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 7380,
+                      "id": 7541,
                       "name": "limit",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 7375,
+                      "referencedDeclaration": 7536,
                       "src": "552:5:38",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -468,11 +468,11 @@
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "id": 7381,
+                      "id": 7542,
                       "name": "_limit",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 7377,
+                      "referencedDeclaration": 7538,
                       "src": "560:6:38",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -485,14 +485,14 @@
                       "typeString": "uint256"
                     }
                   },
-                  "id": 7383,
+                  "id": 7544,
                   "nodeType": "ExpressionStatement",
                   "src": "552:14:38"
                 }
               ]
             },
             "documentation": "@dev Constructor that sets the passed value as a limit.\n@param _limit uint256 to represent the limit.",
-            "id": 7385,
+            "id": 7546,
             "implemented": true,
             "isConstructor": true,
             "isDeclaredConst": false,
@@ -500,15 +500,15 @@
             "name": "",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7378,
+              "id": 7539,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7377,
+                  "id": 7538,
                   "name": "_limit",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7385,
+                  "scope": 7546,
                   "src": "523:14:38",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -517,7 +517,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7376,
+                    "id": 7537,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "523:7:38",
@@ -534,12 +534,12 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 7379,
+              "id": 7540,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "546:0:38"
             },
-            "scope": 7399,
+            "scope": 7560,
             "src": "511:60:38",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -547,7 +547,7 @@
           },
           {
             "body": {
-              "id": 7397,
+              "id": 7558,
               "nodeType": "Block",
               "src": "674:58:38",
               "statements": [
@@ -561,7 +561,7 @@
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
-                        "id": 7393,
+                        "id": 7554,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -573,14 +573,14 @@
                             "arguments": [
                               {
                                 "argumentTypes": null,
-                                "id": 7389,
+                                "id": 7550,
                                 "name": "this",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 13286,
+                                "referencedDeclaration": 13447,
                                 "src": "696:4:38",
                                 "typeDescriptions": {
-                                  "typeIdentifier": "t_contract$_LimitBalance_$7399",
+                                  "typeIdentifier": "t_contract$_LimitBalance_$7560",
                                   "typeString": "contract LimitBalance"
                                 }
                               }
@@ -588,11 +588,11 @@
                             "expression": {
                               "argumentTypes": [
                                 {
-                                  "typeIdentifier": "t_contract$_LimitBalance_$7399",
+                                  "typeIdentifier": "t_contract$_LimitBalance_$7560",
                                   "typeString": "contract LimitBalance"
                                 }
                               ],
-                              "id": 7388,
+                              "id": 7549,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
@@ -605,7 +605,7 @@
                               },
                               "typeName": "address"
                             },
-                            "id": 7390,
+                            "id": 7551,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -619,7 +619,7 @@
                               "typeString": "address"
                             }
                           },
-                          "id": 7391,
+                          "id": 7552,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -637,11 +637,11 @@
                         "operator": "<=",
                         "rightExpression": {
                           "argumentTypes": null,
-                          "id": 7392,
+                          "id": 7553,
                           "name": "limit",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 7375,
+                          "referencedDeclaration": 7536,
                           "src": "713:5:38",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
@@ -662,21 +662,21 @@
                           "typeString": "bool"
                         }
                       ],
-                      "id": 7387,
+                      "id": 7548,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        13132,
-                        13133
+                        13293,
+                        13294
                       ],
-                      "referencedDeclaration": 13132,
+                      "referencedDeclaration": 13293,
                       "src": "680:7:38",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 7394,
+                    "id": 7555,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -690,23 +690,23 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 7395,
+                  "id": 7556,
                   "nodeType": "ExpressionStatement",
                   "src": "680:39:38"
                 },
                 {
-                  "id": 7396,
+                  "id": 7557,
                   "nodeType": "PlaceholderStatement",
                   "src": "725:1:38"
                 }
               ]
             },
             "documentation": "@dev Checks if limit was reached. Case true, it throws.",
-            "id": 7398,
+            "id": 7559,
             "name": "limitedPayable",
             "nodeType": "ModifierDefinition",
             "parameters": {
-              "id": 7386,
+              "id": 7547,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "671:2:38"
@@ -715,7 +715,7 @@
             "visibility": "internal"
           }
         ],
-        "scope": 7400,
+        "scope": 7561,
         "src": "335:400:38"
       }
     ],
@@ -727,5 +727,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
-  "updatedAt": "2018-09-03T20:13:47.910Z"
+  "updatedAt": "2018-09-03T22:41:14.806Z"
 }

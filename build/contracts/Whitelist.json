@@ -242,14 +242,14 @@
     "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/access/Whitelist.sol",
     "exportedSymbols": {
       "Whitelist": [
-        7887
+        8048
       ]
     },
-    "id": 7888,
+    "id": 8049,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 7771,
+        "id": 7932,
         "literals": [
           "solidity",
           "^",
@@ -262,10 +262,10 @@
       {
         "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/ownership/Ownable.sol",
         "file": "../ownership/Ownable.sol",
-        "id": 7772,
+        "id": 7933,
         "nodeType": "ImportDirective",
-        "scope": 7888,
-        "sourceUnit": 9997,
+        "scope": 8049,
+        "sourceUnit": 10158,
         "src": "27:34:42",
         "symbolAliases": [],
         "unitAlias": ""
@@ -273,10 +273,10 @@
       {
         "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/access/rbac/RBAC.sol",
         "file": "../access/rbac/RBAC.sol",
-        "id": 7773,
+        "id": 7934,
         "nodeType": "ImportDirective",
-        "scope": 7888,
-        "sourceUnit": 7995,
+        "scope": 8049,
+        "sourceUnit": 8156,
         "src": "62:33:42",
         "symbolAliases": [],
         "unitAlias": ""
@@ -287,17 +287,17 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 7774,
+              "id": 7935,
               "name": "Ownable",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 9996,
+              "referencedDeclaration": 10157,
               "src": "322:7:42",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Ownable_$9996",
+                "typeIdentifier": "t_contract$_Ownable_$10157",
                 "typeString": "contract Ownable"
               }
             },
-            "id": 7775,
+            "id": 7936,
             "nodeType": "InheritanceSpecifier",
             "src": "322:7:42"
           },
@@ -305,43 +305,43 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 7776,
+              "id": 7937,
               "name": "RBAC",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 7994,
+              "referencedDeclaration": 8155,
               "src": "331:4:42",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_RBAC_$7994",
+                "typeIdentifier": "t_contract$_RBAC_$8155",
                 "typeString": "contract RBAC"
               }
             },
-            "id": 7777,
+            "id": 7938,
             "nodeType": "InheritanceSpecifier",
             "src": "331:4:42"
           }
         ],
         "contractDependencies": [
-          7994,
-          9996
+          8155,
+          10157
         ],
         "contractKind": "contract",
         "documentation": "@title Whitelist\n@dev The Whitelist contract has a whitelist of addresses, and provides basic authorization control functions.\nThis simplifies the implementation of \"user permissions\".",
         "fullyImplemented": true,
-        "id": 7887,
+        "id": 8048,
         "linearizedBaseContracts": [
-          7887,
-          7994,
-          9996
+          8048,
+          8155,
+          10157
         ],
         "name": "Whitelist",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "constant": true,
-            "id": 7780,
+            "id": 7941,
             "name": "ROLE_WHITELISTED",
             "nodeType": "VariableDeclaration",
-            "scope": 7887,
+            "scope": 8048,
             "src": "340:53:42",
             "stateVariable": true,
             "storageLocation": "default",
@@ -350,7 +350,7 @@
               "typeString": "string"
             },
             "typeName": {
-              "id": 7778,
+              "id": 7939,
               "name": "string",
               "nodeType": "ElementaryTypeName",
               "src": "340:6:42",
@@ -362,7 +362,7 @@
             "value": {
               "argumentTypes": null,
               "hexValue": "77686974656c697374",
-              "id": 7779,
+              "id": 7940,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -381,7 +381,7 @@
           },
           {
             "body": {
-              "id": 7790,
+              "id": 7951,
               "nodeType": "Block",
               "src": "535:56:42",
               "statements": [
@@ -391,11 +391,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 7785,
+                        "id": 7946,
                         "name": "_operator",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7782,
+                        "referencedDeclaration": 7943,
                         "src": "551:9:42",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -404,11 +404,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 7786,
+                        "id": 7947,
                         "name": "ROLE_WHITELISTED",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7780,
+                        "referencedDeclaration": 7941,
                         "src": "562:16:42",
                         "typeDescriptions": {
                           "typeIdentifier": "t_string_memory",
@@ -427,18 +427,18 @@
                           "typeString": "string memory"
                         }
                       ],
-                      "id": 7784,
+                      "id": 7945,
                       "name": "checkRole",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 7924,
+                      "referencedDeclaration": 8085,
                       "src": "541:9:42",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_view$_t_address_$_t_string_memory_ptr_$returns$__$",
                         "typeString": "function (address,string memory) view"
                       }
                     },
-                    "id": 7787,
+                    "id": 7948,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -452,31 +452,31 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 7788,
+                  "id": 7949,
                   "nodeType": "ExpressionStatement",
                   "src": "541:38:42"
                 },
                 {
-                  "id": 7789,
+                  "id": 7950,
                   "nodeType": "PlaceholderStatement",
                   "src": "585:1:42"
                 }
               ]
             },
             "documentation": "@dev Throws if operator is not whitelisted.\n@param _operator address",
-            "id": 7791,
+            "id": 7952,
             "name": "onlyIfWhitelisted",
             "nodeType": "ModifierDefinition",
             "parameters": {
-              "id": 7783,
+              "id": 7944,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7782,
+                  "id": 7943,
                   "name": "_operator",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7791,
+                  "scope": 7952,
                   "src": "516:17:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -485,7 +485,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7781,
+                    "id": 7942,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "516:7:42",
@@ -505,7 +505,7 @@
           },
           {
             "body": {
-              "id": 7803,
+              "id": 7964,
               "nodeType": "Block",
               "src": "867:47:42",
               "statements": [
@@ -515,11 +515,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 7799,
+                        "id": 7960,
                         "name": "_operator",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7793,
+                        "referencedDeclaration": 7954,
                         "src": "881:9:42",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -528,11 +528,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 7800,
+                        "id": 7961,
                         "name": "ROLE_WHITELISTED",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7780,
+                        "referencedDeclaration": 7941,
                         "src": "892:16:42",
                         "typeDescriptions": {
                           "typeIdentifier": "t_string_memory",
@@ -551,18 +551,18 @@
                           "typeString": "string memory"
                         }
                       ],
-                      "id": 7798,
+                      "id": 7959,
                       "name": "addRole",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 7961,
+                      "referencedDeclaration": 8122,
                       "src": "873:7:42",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_string_memory_ptr_$returns$__$",
                         "typeString": "function (address,string memory)"
                       }
                     },
-                    "id": 7801,
+                    "id": 7962,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -576,28 +576,28 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 7802,
+                  "id": 7963,
                   "nodeType": "ExpressionStatement",
                   "src": "873:36:42"
                 }
               ]
             },
             "documentation": "@dev add an address to the whitelist\n@param _operator address\n@return true if the address was added to the whitelist, false if the address was already in the whitelist",
-            "id": 7804,
+            "id": 7965,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
             "modifiers": [
               {
                 "arguments": null,
-                "id": 7796,
+                "id": 7957,
                 "modifierName": {
                   "argumentTypes": null,
-                  "id": 7795,
+                  "id": 7956,
                   "name": "onlyOwner",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 9944,
+                  "referencedDeclaration": 10105,
                   "src": "855:9:42",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
@@ -611,15 +611,15 @@
             "name": "addAddressToWhitelist",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7794,
+              "id": 7955,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7793,
+                  "id": 7954,
                   "name": "_operator",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7804,
+                  "scope": 7965,
                   "src": "821:17:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -628,7 +628,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7792,
+                    "id": 7953,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "821:7:42",
@@ -645,12 +645,12 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 7797,
+              "id": 7958,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "867:0:42"
             },
-            "scope": 7887,
+            "scope": 8048,
             "src": "790:124:42",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -658,7 +658,7 @@
           },
           {
             "body": {
-              "id": 7816,
+              "id": 7977,
               "nodeType": "Block",
               "src": "1066:54:42",
               "statements": [
@@ -668,11 +668,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 7812,
+                        "id": 7973,
                         "name": "_operator",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7806,
+                        "referencedDeclaration": 7967,
                         "src": "1087:9:42",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -681,11 +681,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 7813,
+                        "id": 7974,
                         "name": "ROLE_WHITELISTED",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7780,
+                        "referencedDeclaration": 7941,
                         "src": "1098:16:42",
                         "typeDescriptions": {
                           "typeIdentifier": "t_string_memory",
@@ -704,18 +704,18 @@
                           "typeString": "string memory"
                         }
                       ],
-                      "id": 7811,
+                      "id": 7972,
                       "name": "hasRole",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 7941,
+                      "referencedDeclaration": 8102,
                       "src": "1079:7:42",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_view$_t_address_$_t_string_memory_ptr_$returns$_t_bool_$",
                         "typeString": "function (address,string memory) view returns (bool)"
                       }
                     },
-                    "id": 7814,
+                    "id": 7975,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -729,15 +729,15 @@
                       "typeString": "bool"
                     }
                   },
-                  "functionReturnParameters": 7810,
-                  "id": 7815,
+                  "functionReturnParameters": 7971,
+                  "id": 7976,
                   "nodeType": "Return",
                   "src": "1072:43:42"
                 }
               ]
             },
             "documentation": "@dev getter to determine if address is in whitelist",
-            "id": 7817,
+            "id": 7978,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -745,15 +745,15 @@
             "name": "whitelist",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7807,
+              "id": 7968,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7806,
+                  "id": 7967,
                   "name": "_operator",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7817,
+                  "scope": 7978,
                   "src": "1006:17:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -762,7 +762,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7805,
+                    "id": 7966,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1006:7:42",
@@ -779,15 +779,15 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 7810,
+              "id": 7971,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7809,
+                  "id": 7970,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7817,
+                  "scope": 7978,
                   "src": "1058:4:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -796,7 +796,7 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 7808,
+                    "id": 7969,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "1058:4:42",
@@ -811,7 +811,7 @@
               ],
               "src": "1057:6:42"
             },
-            "scope": 7887,
+            "scope": 8048,
             "src": "987:133:42",
             "stateMutability": "view",
             "superFunction": null,
@@ -819,13 +819,13 @@
           },
           {
             "body": {
-              "id": 7844,
+              "id": 8005,
               "nodeType": "Block",
               "src": "1420:109:42",
               "statements": [
                 {
                   "body": {
-                    "id": 7842,
+                    "id": 8003,
                     "nodeType": "Block",
                     "src": "1474:51:42",
                     "statements": [
@@ -837,25 +837,25 @@
                               "argumentTypes": null,
                               "baseExpression": {
                                 "argumentTypes": null,
-                                "id": 7837,
+                                "id": 7998,
                                 "name": "_operators",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 7820,
+                                "referencedDeclaration": 7981,
                                 "src": "1504:10:42",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
                                   "typeString": "address[] memory"
                                 }
                               },
-                              "id": 7839,
+                              "id": 8000,
                               "indexExpression": {
                                 "argumentTypes": null,
-                                "id": 7838,
+                                "id": 7999,
                                 "name": "i",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 7826,
+                                "referencedDeclaration": 7987,
                                 "src": "1515:1:42",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_uint256",
@@ -881,18 +881,18 @@
                                 "typeString": "address"
                               }
                             ],
-                            "id": 7836,
+                            "id": 7997,
                             "name": "addAddressToWhitelist",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 7804,
+                            "referencedDeclaration": 7965,
                             "src": "1482:21:42",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_internal_nonpayable$_t_address_$returns$__$",
                               "typeString": "function (address)"
                             }
                           },
-                          "id": 7840,
+                          "id": 8001,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -906,7 +906,7 @@
                             "typeString": "tuple()"
                           }
                         },
-                        "id": 7841,
+                        "id": 8002,
                         "nodeType": "ExpressionStatement",
                         "src": "1482:36:42"
                       }
@@ -918,18 +918,18 @@
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     },
-                    "id": 7832,
+                    "id": 7993,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
                       "argumentTypes": null,
-                      "id": 7829,
+                      "id": 7990,
                       "name": "i",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 7826,
+                      "referencedDeclaration": 7987,
                       "src": "1446:1:42",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -942,18 +942,18 @@
                       "argumentTypes": null,
                       "expression": {
                         "argumentTypes": null,
-                        "id": 7830,
+                        "id": 7991,
                         "name": "_operators",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7820,
+                        "referencedDeclaration": 7981,
                         "src": "1450:10:42",
                         "typeDescriptions": {
                           "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
                           "typeString": "address[] memory"
                         }
                       },
-                      "id": 7831,
+                      "id": 7992,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -973,18 +973,18 @@
                       "typeString": "bool"
                     }
                   },
-                  "id": 7843,
+                  "id": 8004,
                   "initializationExpression": {
                     "assignments": [
-                      7826
+                      7987
                     ],
                     "declarations": [
                       {
                         "constant": false,
-                        "id": 7826,
+                        "id": 7987,
                         "name": "i",
                         "nodeType": "VariableDeclaration",
-                        "scope": 7845,
+                        "scope": 8006,
                         "src": "1431:9:42",
                         "stateVariable": false,
                         "storageLocation": "default",
@@ -993,7 +993,7 @@
                           "typeString": "uint256"
                         },
                         "typeName": {
-                          "id": 7825,
+                          "id": 7986,
                           "name": "uint256",
                           "nodeType": "ElementaryTypeName",
                           "src": "1431:7:42",
@@ -1006,11 +1006,11 @@
                         "visibility": "internal"
                       }
                     ],
-                    "id": 7828,
+                    "id": 7989,
                     "initialValue": {
                       "argumentTypes": null,
                       "hexValue": "30",
-                      "id": 7827,
+                      "id": 7988,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -1031,7 +1031,7 @@
                   "loopExpression": {
                     "expression": {
                       "argumentTypes": null,
-                      "id": 7834,
+                      "id": 7995,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -1042,11 +1042,11 @@
                       "src": "1469:3:42",
                       "subExpression": {
                         "argumentTypes": null,
-                        "id": 7833,
+                        "id": 7994,
                         "name": "i",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7826,
+                        "referencedDeclaration": 7987,
                         "src": "1469:1:42",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -1058,7 +1058,7 @@
                         "typeString": "uint256"
                       }
                     },
-                    "id": 7835,
+                    "id": 7996,
                     "nodeType": "ExpressionStatement",
                     "src": "1469:3:42"
                   },
@@ -1068,21 +1068,21 @@
               ]
             },
             "documentation": "@dev add addresses to the whitelist\n@param _operators addresses\n@return true if at least one address was added to the whitelist,\nfalse if all addresses were already in the whitelist",
-            "id": 7845,
+            "id": 8006,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
             "modifiers": [
               {
                 "arguments": null,
-                "id": 7823,
+                "id": 7984,
                 "modifierName": {
                   "argumentTypes": null,
-                  "id": 7822,
+                  "id": 7983,
                   "name": "onlyOwner",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 9944,
+                  "referencedDeclaration": 10105,
                   "src": "1408:9:42",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
@@ -1096,15 +1096,15 @@
             "name": "addAddressesToWhitelist",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7821,
+              "id": 7982,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7820,
+                  "id": 7981,
                   "name": "_operators",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7845,
+                  "scope": 8006,
                   "src": "1371:20:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1114,7 +1114,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 7818,
+                      "id": 7979,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
                       "src": "1371:7:42",
@@ -1123,7 +1123,7 @@
                         "typeString": "address"
                       }
                     },
-                    "id": 7819,
+                    "id": 7980,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "1371:9:42",
@@ -1140,12 +1140,12 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 7824,
+              "id": 7985,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1420:0:42"
             },
-            "scope": 7887,
+            "scope": 8048,
             "src": "1338:191:42",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -1153,7 +1153,7 @@
           },
           {
             "body": {
-              "id": 7857,
+              "id": 8018,
               "nodeType": "Block",
               "src": "1838:50:42",
               "statements": [
@@ -1163,11 +1163,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 7853,
+                        "id": 8014,
                         "name": "_operator",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7847,
+                        "referencedDeclaration": 8008,
                         "src": "1855:9:42",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -1176,11 +1176,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 7854,
+                        "id": 8015,
                         "name": "ROLE_WHITELISTED",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7780,
+                        "referencedDeclaration": 7941,
                         "src": "1866:16:42",
                         "typeDescriptions": {
                           "typeIdentifier": "t_string_memory",
@@ -1199,18 +1199,18 @@
                           "typeString": "string memory"
                         }
                       ],
-                      "id": 7852,
+                      "id": 8013,
                       "name": "removeRole",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 7981,
+                      "referencedDeclaration": 8142,
                       "src": "1844:10:42",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_string_memory_ptr_$returns$__$",
                         "typeString": "function (address,string memory)"
                       }
                     },
-                    "id": 7855,
+                    "id": 8016,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1224,28 +1224,28 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 7856,
+                  "id": 8017,
                   "nodeType": "ExpressionStatement",
                   "src": "1844:39:42"
                 }
               ]
             },
             "documentation": "@dev remove an address from the whitelist\n@param _operator address\n@return true if the address was removed from the whitelist,\nfalse if the address wasn't in the whitelist in the first place",
-            "id": 7858,
+            "id": 8019,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
             "modifiers": [
               {
                 "arguments": null,
-                "id": 7850,
+                "id": 8011,
                 "modifierName": {
                   "argumentTypes": null,
-                  "id": 7849,
+                  "id": 8010,
                   "name": "onlyOwner",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 9944,
+                  "referencedDeclaration": 10105,
                   "src": "1826:9:42",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
@@ -1259,15 +1259,15 @@
             "name": "removeAddressFromWhitelist",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7848,
+              "id": 8009,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7847,
+                  "id": 8008,
                   "name": "_operator",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7858,
+                  "scope": 8019,
                   "src": "1792:17:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1276,7 +1276,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7846,
+                    "id": 8007,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1792:7:42",
@@ -1293,12 +1293,12 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 7851,
+              "id": 8012,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1838:0:42"
             },
-            "scope": 7887,
+            "scope": 8048,
             "src": "1756:132:42",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -1306,13 +1306,13 @@
           },
           {
             "body": {
-              "id": 7885,
+              "id": 8046,
               "nodeType": "Block",
               "src": "2216:114:42",
               "statements": [
                 {
                   "body": {
-                    "id": 7883,
+                    "id": 8044,
                     "nodeType": "Block",
                     "src": "2270:56:42",
                     "statements": [
@@ -1324,25 +1324,25 @@
                               "argumentTypes": null,
                               "baseExpression": {
                                 "argumentTypes": null,
-                                "id": 7878,
+                                "id": 8039,
                                 "name": "_operators",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 7861,
+                                "referencedDeclaration": 8022,
                                 "src": "2305:10:42",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
                                   "typeString": "address[] memory"
                                 }
                               },
-                              "id": 7880,
+                              "id": 8041,
                               "indexExpression": {
                                 "argumentTypes": null,
-                                "id": 7879,
+                                "id": 8040,
                                 "name": "i",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 7867,
+                                "referencedDeclaration": 8028,
                                 "src": "2316:1:42",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_uint256",
@@ -1368,18 +1368,18 @@
                                 "typeString": "address"
                               }
                             ],
-                            "id": 7877,
+                            "id": 8038,
                             "name": "removeAddressFromWhitelist",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 7858,
+                            "referencedDeclaration": 8019,
                             "src": "2278:26:42",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_internal_nonpayable$_t_address_$returns$__$",
                               "typeString": "function (address)"
                             }
                           },
-                          "id": 7881,
+                          "id": 8042,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -1393,7 +1393,7 @@
                             "typeString": "tuple()"
                           }
                         },
-                        "id": 7882,
+                        "id": 8043,
                         "nodeType": "ExpressionStatement",
                         "src": "2278:41:42"
                       }
@@ -1405,18 +1405,18 @@
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     },
-                    "id": 7873,
+                    "id": 8034,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
                       "argumentTypes": null,
-                      "id": 7870,
+                      "id": 8031,
                       "name": "i",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 7867,
+                      "referencedDeclaration": 8028,
                       "src": "2242:1:42",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -1429,18 +1429,18 @@
                       "argumentTypes": null,
                       "expression": {
                         "argumentTypes": null,
-                        "id": 7871,
+                        "id": 8032,
                         "name": "_operators",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7861,
+                        "referencedDeclaration": 8022,
                         "src": "2246:10:42",
                         "typeDescriptions": {
                           "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
                           "typeString": "address[] memory"
                         }
                       },
-                      "id": 7872,
+                      "id": 8033,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -1460,18 +1460,18 @@
                       "typeString": "bool"
                     }
                   },
-                  "id": 7884,
+                  "id": 8045,
                   "initializationExpression": {
                     "assignments": [
-                      7867
+                      8028
                     ],
                     "declarations": [
                       {
                         "constant": false,
-                        "id": 7867,
+                        "id": 8028,
                         "name": "i",
                         "nodeType": "VariableDeclaration",
-                        "scope": 7886,
+                        "scope": 8047,
                         "src": "2227:9:42",
                         "stateVariable": false,
                         "storageLocation": "default",
@@ -1480,7 +1480,7 @@
                           "typeString": "uint256"
                         },
                         "typeName": {
-                          "id": 7866,
+                          "id": 8027,
                           "name": "uint256",
                           "nodeType": "ElementaryTypeName",
                           "src": "2227:7:42",
@@ -1493,11 +1493,11 @@
                         "visibility": "internal"
                       }
                     ],
-                    "id": 7869,
+                    "id": 8030,
                     "initialValue": {
                       "argumentTypes": null,
                       "hexValue": "30",
-                      "id": 7868,
+                      "id": 8029,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -1518,7 +1518,7 @@
                   "loopExpression": {
                     "expression": {
                       "argumentTypes": null,
-                      "id": 7875,
+                      "id": 8036,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -1529,11 +1529,11 @@
                       "src": "2265:3:42",
                       "subExpression": {
                         "argumentTypes": null,
-                        "id": 7874,
+                        "id": 8035,
                         "name": "i",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7867,
+                        "referencedDeclaration": 8028,
                         "src": "2265:1:42",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -1545,7 +1545,7 @@
                         "typeString": "uint256"
                       }
                     },
-                    "id": 7876,
+                    "id": 8037,
                     "nodeType": "ExpressionStatement",
                     "src": "2265:3:42"
                   },
@@ -1555,21 +1555,21 @@
               ]
             },
             "documentation": "@dev remove addresses from the whitelist\n@param _operators addresses\n@return true if at least one address was removed from the whitelist,\nfalse if all addresses weren't in the whitelist in the first place",
-            "id": 7886,
+            "id": 8047,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
             "modifiers": [
               {
                 "arguments": null,
-                "id": 7864,
+                "id": 8025,
                 "modifierName": {
                   "argumentTypes": null,
-                  "id": 7863,
+                  "id": 8024,
                   "name": "onlyOwner",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 9944,
+                  "referencedDeclaration": 10105,
                   "src": "2204:9:42",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
@@ -1583,15 +1583,15 @@
             "name": "removeAddressesFromWhitelist",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7862,
+              "id": 8023,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7861,
+                  "id": 8022,
                   "name": "_operators",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7886,
+                  "scope": 8047,
                   "src": "2167:20:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1601,7 +1601,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 7859,
+                      "id": 8020,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
                       "src": "2167:7:42",
@@ -1610,7 +1610,7 @@
                         "typeString": "address"
                       }
                     },
-                    "id": 7860,
+                    "id": 8021,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "2167:9:42",
@@ -1627,19 +1627,19 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 7865,
+              "id": 8026,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "2216:0:42"
             },
-            "scope": 7887,
+            "scope": 8048,
             "src": "2129:201:42",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 7888,
+        "scope": 8049,
         "src": "300:2033:42"
       }
     ],
@@ -1649,14 +1649,14 @@
     "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/access/Whitelist.sol",
     "exportedSymbols": {
       "Whitelist": [
-        7887
+        8048
       ]
     },
-    "id": 7888,
+    "id": 8049,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 7771,
+        "id": 7932,
         "literals": [
           "solidity",
           "^",
@@ -1669,10 +1669,10 @@
       {
         "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/ownership/Ownable.sol",
         "file": "../ownership/Ownable.sol",
-        "id": 7772,
+        "id": 7933,
         "nodeType": "ImportDirective",
-        "scope": 7888,
-        "sourceUnit": 9997,
+        "scope": 8049,
+        "sourceUnit": 10158,
         "src": "27:34:42",
         "symbolAliases": [],
         "unitAlias": ""
@@ -1680,10 +1680,10 @@
       {
         "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/access/rbac/RBAC.sol",
         "file": "../access/rbac/RBAC.sol",
-        "id": 7773,
+        "id": 7934,
         "nodeType": "ImportDirective",
-        "scope": 7888,
-        "sourceUnit": 7995,
+        "scope": 8049,
+        "sourceUnit": 8156,
         "src": "62:33:42",
         "symbolAliases": [],
         "unitAlias": ""
@@ -1694,17 +1694,17 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 7774,
+              "id": 7935,
               "name": "Ownable",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 9996,
+              "referencedDeclaration": 10157,
               "src": "322:7:42",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Ownable_$9996",
+                "typeIdentifier": "t_contract$_Ownable_$10157",
                 "typeString": "contract Ownable"
               }
             },
-            "id": 7775,
+            "id": 7936,
             "nodeType": "InheritanceSpecifier",
             "src": "322:7:42"
           },
@@ -1712,43 +1712,43 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 7776,
+              "id": 7937,
               "name": "RBAC",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 7994,
+              "referencedDeclaration": 8155,
               "src": "331:4:42",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_RBAC_$7994",
+                "typeIdentifier": "t_contract$_RBAC_$8155",
                 "typeString": "contract RBAC"
               }
             },
-            "id": 7777,
+            "id": 7938,
             "nodeType": "InheritanceSpecifier",
             "src": "331:4:42"
           }
         ],
         "contractDependencies": [
-          7994,
-          9996
+          8155,
+          10157
         ],
         "contractKind": "contract",
         "documentation": "@title Whitelist\n@dev The Whitelist contract has a whitelist of addresses, and provides basic authorization control functions.\nThis simplifies the implementation of \"user permissions\".",
         "fullyImplemented": true,
-        "id": 7887,
+        "id": 8048,
         "linearizedBaseContracts": [
-          7887,
-          7994,
-          9996
+          8048,
+          8155,
+          10157
         ],
         "name": "Whitelist",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "constant": true,
-            "id": 7780,
+            "id": 7941,
             "name": "ROLE_WHITELISTED",
             "nodeType": "VariableDeclaration",
-            "scope": 7887,
+            "scope": 8048,
             "src": "340:53:42",
             "stateVariable": true,
             "storageLocation": "default",
@@ -1757,7 +1757,7 @@
               "typeString": "string"
             },
             "typeName": {
-              "id": 7778,
+              "id": 7939,
               "name": "string",
               "nodeType": "ElementaryTypeName",
               "src": "340:6:42",
@@ -1769,7 +1769,7 @@
             "value": {
               "argumentTypes": null,
               "hexValue": "77686974656c697374",
-              "id": 7779,
+              "id": 7940,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -1788,7 +1788,7 @@
           },
           {
             "body": {
-              "id": 7790,
+              "id": 7951,
               "nodeType": "Block",
               "src": "535:56:42",
               "statements": [
@@ -1798,11 +1798,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 7785,
+                        "id": 7946,
                         "name": "_operator",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7782,
+                        "referencedDeclaration": 7943,
                         "src": "551:9:42",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -1811,11 +1811,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 7786,
+                        "id": 7947,
                         "name": "ROLE_WHITELISTED",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7780,
+                        "referencedDeclaration": 7941,
                         "src": "562:16:42",
                         "typeDescriptions": {
                           "typeIdentifier": "t_string_memory",
@@ -1834,18 +1834,18 @@
                           "typeString": "string memory"
                         }
                       ],
-                      "id": 7784,
+                      "id": 7945,
                       "name": "checkRole",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 7924,
+                      "referencedDeclaration": 8085,
                       "src": "541:9:42",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_view$_t_address_$_t_string_memory_ptr_$returns$__$",
                         "typeString": "function (address,string memory) view"
                       }
                     },
-                    "id": 7787,
+                    "id": 7948,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1859,31 +1859,31 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 7788,
+                  "id": 7949,
                   "nodeType": "ExpressionStatement",
                   "src": "541:38:42"
                 },
                 {
-                  "id": 7789,
+                  "id": 7950,
                   "nodeType": "PlaceholderStatement",
                   "src": "585:1:42"
                 }
               ]
             },
             "documentation": "@dev Throws if operator is not whitelisted.\n@param _operator address",
-            "id": 7791,
+            "id": 7952,
             "name": "onlyIfWhitelisted",
             "nodeType": "ModifierDefinition",
             "parameters": {
-              "id": 7783,
+              "id": 7944,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7782,
+                  "id": 7943,
                   "name": "_operator",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7791,
+                  "scope": 7952,
                   "src": "516:17:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1892,7 +1892,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7781,
+                    "id": 7942,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "516:7:42",
@@ -1912,7 +1912,7 @@
           },
           {
             "body": {
-              "id": 7803,
+              "id": 7964,
               "nodeType": "Block",
               "src": "867:47:42",
               "statements": [
@@ -1922,11 +1922,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 7799,
+                        "id": 7960,
                         "name": "_operator",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7793,
+                        "referencedDeclaration": 7954,
                         "src": "881:9:42",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -1935,11 +1935,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 7800,
+                        "id": 7961,
                         "name": "ROLE_WHITELISTED",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7780,
+                        "referencedDeclaration": 7941,
                         "src": "892:16:42",
                         "typeDescriptions": {
                           "typeIdentifier": "t_string_memory",
@@ -1958,18 +1958,18 @@
                           "typeString": "string memory"
                         }
                       ],
-                      "id": 7798,
+                      "id": 7959,
                       "name": "addRole",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 7961,
+                      "referencedDeclaration": 8122,
                       "src": "873:7:42",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_string_memory_ptr_$returns$__$",
                         "typeString": "function (address,string memory)"
                       }
                     },
-                    "id": 7801,
+                    "id": 7962,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1983,28 +1983,28 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 7802,
+                  "id": 7963,
                   "nodeType": "ExpressionStatement",
                   "src": "873:36:42"
                 }
               ]
             },
             "documentation": "@dev add an address to the whitelist\n@param _operator address\n@return true if the address was added to the whitelist, false if the address was already in the whitelist",
-            "id": 7804,
+            "id": 7965,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
             "modifiers": [
               {
                 "arguments": null,
-                "id": 7796,
+                "id": 7957,
                 "modifierName": {
                   "argumentTypes": null,
-                  "id": 7795,
+                  "id": 7956,
                   "name": "onlyOwner",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 9944,
+                  "referencedDeclaration": 10105,
                   "src": "855:9:42",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
@@ -2018,15 +2018,15 @@
             "name": "addAddressToWhitelist",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7794,
+              "id": 7955,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7793,
+                  "id": 7954,
                   "name": "_operator",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7804,
+                  "scope": 7965,
                   "src": "821:17:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2035,7 +2035,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7792,
+                    "id": 7953,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "821:7:42",
@@ -2052,12 +2052,12 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 7797,
+              "id": 7958,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "867:0:42"
             },
-            "scope": 7887,
+            "scope": 8048,
             "src": "790:124:42",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -2065,7 +2065,7 @@
           },
           {
             "body": {
-              "id": 7816,
+              "id": 7977,
               "nodeType": "Block",
               "src": "1066:54:42",
               "statements": [
@@ -2075,11 +2075,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 7812,
+                        "id": 7973,
                         "name": "_operator",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7806,
+                        "referencedDeclaration": 7967,
                         "src": "1087:9:42",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -2088,11 +2088,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 7813,
+                        "id": 7974,
                         "name": "ROLE_WHITELISTED",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7780,
+                        "referencedDeclaration": 7941,
                         "src": "1098:16:42",
                         "typeDescriptions": {
                           "typeIdentifier": "t_string_memory",
@@ -2111,18 +2111,18 @@
                           "typeString": "string memory"
                         }
                       ],
-                      "id": 7811,
+                      "id": 7972,
                       "name": "hasRole",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 7941,
+                      "referencedDeclaration": 8102,
                       "src": "1079:7:42",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_view$_t_address_$_t_string_memory_ptr_$returns$_t_bool_$",
                         "typeString": "function (address,string memory) view returns (bool)"
                       }
                     },
-                    "id": 7814,
+                    "id": 7975,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2136,15 +2136,15 @@
                       "typeString": "bool"
                     }
                   },
-                  "functionReturnParameters": 7810,
-                  "id": 7815,
+                  "functionReturnParameters": 7971,
+                  "id": 7976,
                   "nodeType": "Return",
                   "src": "1072:43:42"
                 }
               ]
             },
             "documentation": "@dev getter to determine if address is in whitelist",
-            "id": 7817,
+            "id": 7978,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -2152,15 +2152,15 @@
             "name": "whitelist",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7807,
+              "id": 7968,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7806,
+                  "id": 7967,
                   "name": "_operator",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7817,
+                  "scope": 7978,
                   "src": "1006:17:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2169,7 +2169,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7805,
+                    "id": 7966,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1006:7:42",
@@ -2186,15 +2186,15 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 7810,
+              "id": 7971,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7809,
+                  "id": 7970,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7817,
+                  "scope": 7978,
                   "src": "1058:4:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2203,7 +2203,7 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 7808,
+                    "id": 7969,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "1058:4:42",
@@ -2218,7 +2218,7 @@
               ],
               "src": "1057:6:42"
             },
-            "scope": 7887,
+            "scope": 8048,
             "src": "987:133:42",
             "stateMutability": "view",
             "superFunction": null,
@@ -2226,13 +2226,13 @@
           },
           {
             "body": {
-              "id": 7844,
+              "id": 8005,
               "nodeType": "Block",
               "src": "1420:109:42",
               "statements": [
                 {
                   "body": {
-                    "id": 7842,
+                    "id": 8003,
                     "nodeType": "Block",
                     "src": "1474:51:42",
                     "statements": [
@@ -2244,25 +2244,25 @@
                               "argumentTypes": null,
                               "baseExpression": {
                                 "argumentTypes": null,
-                                "id": 7837,
+                                "id": 7998,
                                 "name": "_operators",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 7820,
+                                "referencedDeclaration": 7981,
                                 "src": "1504:10:42",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
                                   "typeString": "address[] memory"
                                 }
                               },
-                              "id": 7839,
+                              "id": 8000,
                               "indexExpression": {
                                 "argumentTypes": null,
-                                "id": 7838,
+                                "id": 7999,
                                 "name": "i",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 7826,
+                                "referencedDeclaration": 7987,
                                 "src": "1515:1:42",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_uint256",
@@ -2288,18 +2288,18 @@
                                 "typeString": "address"
                               }
                             ],
-                            "id": 7836,
+                            "id": 7997,
                             "name": "addAddressToWhitelist",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 7804,
+                            "referencedDeclaration": 7965,
                             "src": "1482:21:42",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_internal_nonpayable$_t_address_$returns$__$",
                               "typeString": "function (address)"
                             }
                           },
-                          "id": 7840,
+                          "id": 8001,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -2313,7 +2313,7 @@
                             "typeString": "tuple()"
                           }
                         },
-                        "id": 7841,
+                        "id": 8002,
                         "nodeType": "ExpressionStatement",
                         "src": "1482:36:42"
                       }
@@ -2325,18 +2325,18 @@
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     },
-                    "id": 7832,
+                    "id": 7993,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
                       "argumentTypes": null,
-                      "id": 7829,
+                      "id": 7990,
                       "name": "i",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 7826,
+                      "referencedDeclaration": 7987,
                       "src": "1446:1:42",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -2349,18 +2349,18 @@
                       "argumentTypes": null,
                       "expression": {
                         "argumentTypes": null,
-                        "id": 7830,
+                        "id": 7991,
                         "name": "_operators",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7820,
+                        "referencedDeclaration": 7981,
                         "src": "1450:10:42",
                         "typeDescriptions": {
                           "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
                           "typeString": "address[] memory"
                         }
                       },
-                      "id": 7831,
+                      "id": 7992,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -2380,18 +2380,18 @@
                       "typeString": "bool"
                     }
                   },
-                  "id": 7843,
+                  "id": 8004,
                   "initializationExpression": {
                     "assignments": [
-                      7826
+                      7987
                     ],
                     "declarations": [
                       {
                         "constant": false,
-                        "id": 7826,
+                        "id": 7987,
                         "name": "i",
                         "nodeType": "VariableDeclaration",
-                        "scope": 7845,
+                        "scope": 8006,
                         "src": "1431:9:42",
                         "stateVariable": false,
                         "storageLocation": "default",
@@ -2400,7 +2400,7 @@
                           "typeString": "uint256"
                         },
                         "typeName": {
-                          "id": 7825,
+                          "id": 7986,
                           "name": "uint256",
                           "nodeType": "ElementaryTypeName",
                           "src": "1431:7:42",
@@ -2413,11 +2413,11 @@
                         "visibility": "internal"
                       }
                     ],
-                    "id": 7828,
+                    "id": 7989,
                     "initialValue": {
                       "argumentTypes": null,
                       "hexValue": "30",
-                      "id": 7827,
+                      "id": 7988,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -2438,7 +2438,7 @@
                   "loopExpression": {
                     "expression": {
                       "argumentTypes": null,
-                      "id": 7834,
+                      "id": 7995,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -2449,11 +2449,11 @@
                       "src": "1469:3:42",
                       "subExpression": {
                         "argumentTypes": null,
-                        "id": 7833,
+                        "id": 7994,
                         "name": "i",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7826,
+                        "referencedDeclaration": 7987,
                         "src": "1469:1:42",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -2465,7 +2465,7 @@
                         "typeString": "uint256"
                       }
                     },
-                    "id": 7835,
+                    "id": 7996,
                     "nodeType": "ExpressionStatement",
                     "src": "1469:3:42"
                   },
@@ -2475,21 +2475,21 @@
               ]
             },
             "documentation": "@dev add addresses to the whitelist\n@param _operators addresses\n@return true if at least one address was added to the whitelist,\nfalse if all addresses were already in the whitelist",
-            "id": 7845,
+            "id": 8006,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
             "modifiers": [
               {
                 "arguments": null,
-                "id": 7823,
+                "id": 7984,
                 "modifierName": {
                   "argumentTypes": null,
-                  "id": 7822,
+                  "id": 7983,
                   "name": "onlyOwner",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 9944,
+                  "referencedDeclaration": 10105,
                   "src": "1408:9:42",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
@@ -2503,15 +2503,15 @@
             "name": "addAddressesToWhitelist",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7821,
+              "id": 7982,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7820,
+                  "id": 7981,
                   "name": "_operators",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7845,
+                  "scope": 8006,
                   "src": "1371:20:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2521,7 +2521,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 7818,
+                      "id": 7979,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
                       "src": "1371:7:42",
@@ -2530,7 +2530,7 @@
                         "typeString": "address"
                       }
                     },
-                    "id": 7819,
+                    "id": 7980,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "1371:9:42",
@@ -2547,12 +2547,12 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 7824,
+              "id": 7985,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1420:0:42"
             },
-            "scope": 7887,
+            "scope": 8048,
             "src": "1338:191:42",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -2560,7 +2560,7 @@
           },
           {
             "body": {
-              "id": 7857,
+              "id": 8018,
               "nodeType": "Block",
               "src": "1838:50:42",
               "statements": [
@@ -2570,11 +2570,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 7853,
+                        "id": 8014,
                         "name": "_operator",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7847,
+                        "referencedDeclaration": 8008,
                         "src": "1855:9:42",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -2583,11 +2583,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 7854,
+                        "id": 8015,
                         "name": "ROLE_WHITELISTED",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7780,
+                        "referencedDeclaration": 7941,
                         "src": "1866:16:42",
                         "typeDescriptions": {
                           "typeIdentifier": "t_string_memory",
@@ -2606,18 +2606,18 @@
                           "typeString": "string memory"
                         }
                       ],
-                      "id": 7852,
+                      "id": 8013,
                       "name": "removeRole",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 7981,
+                      "referencedDeclaration": 8142,
                       "src": "1844:10:42",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_string_memory_ptr_$returns$__$",
                         "typeString": "function (address,string memory)"
                       }
                     },
-                    "id": 7855,
+                    "id": 8016,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2631,28 +2631,28 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 7856,
+                  "id": 8017,
                   "nodeType": "ExpressionStatement",
                   "src": "1844:39:42"
                 }
               ]
             },
             "documentation": "@dev remove an address from the whitelist\n@param _operator address\n@return true if the address was removed from the whitelist,\nfalse if the address wasn't in the whitelist in the first place",
-            "id": 7858,
+            "id": 8019,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
             "modifiers": [
               {
                 "arguments": null,
-                "id": 7850,
+                "id": 8011,
                 "modifierName": {
                   "argumentTypes": null,
-                  "id": 7849,
+                  "id": 8010,
                   "name": "onlyOwner",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 9944,
+                  "referencedDeclaration": 10105,
                   "src": "1826:9:42",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
@@ -2666,15 +2666,15 @@
             "name": "removeAddressFromWhitelist",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7848,
+              "id": 8009,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7847,
+                  "id": 8008,
                   "name": "_operator",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7858,
+                  "scope": 8019,
                   "src": "1792:17:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2683,7 +2683,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7846,
+                    "id": 8007,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1792:7:42",
@@ -2700,12 +2700,12 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 7851,
+              "id": 8012,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1838:0:42"
             },
-            "scope": 7887,
+            "scope": 8048,
             "src": "1756:132:42",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -2713,13 +2713,13 @@
           },
           {
             "body": {
-              "id": 7885,
+              "id": 8046,
               "nodeType": "Block",
               "src": "2216:114:42",
               "statements": [
                 {
                   "body": {
-                    "id": 7883,
+                    "id": 8044,
                     "nodeType": "Block",
                     "src": "2270:56:42",
                     "statements": [
@@ -2731,25 +2731,25 @@
                               "argumentTypes": null,
                               "baseExpression": {
                                 "argumentTypes": null,
-                                "id": 7878,
+                                "id": 8039,
                                 "name": "_operators",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 7861,
+                                "referencedDeclaration": 8022,
                                 "src": "2305:10:42",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
                                   "typeString": "address[] memory"
                                 }
                               },
-                              "id": 7880,
+                              "id": 8041,
                               "indexExpression": {
                                 "argumentTypes": null,
-                                "id": 7879,
+                                "id": 8040,
                                 "name": "i",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 7867,
+                                "referencedDeclaration": 8028,
                                 "src": "2316:1:42",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_uint256",
@@ -2775,18 +2775,18 @@
                                 "typeString": "address"
                               }
                             ],
-                            "id": 7877,
+                            "id": 8038,
                             "name": "removeAddressFromWhitelist",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 7858,
+                            "referencedDeclaration": 8019,
                             "src": "2278:26:42",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_internal_nonpayable$_t_address_$returns$__$",
                               "typeString": "function (address)"
                             }
                           },
-                          "id": 7881,
+                          "id": 8042,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -2800,7 +2800,7 @@
                             "typeString": "tuple()"
                           }
                         },
-                        "id": 7882,
+                        "id": 8043,
                         "nodeType": "ExpressionStatement",
                         "src": "2278:41:42"
                       }
@@ -2812,18 +2812,18 @@
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     },
-                    "id": 7873,
+                    "id": 8034,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
                       "argumentTypes": null,
-                      "id": 7870,
+                      "id": 8031,
                       "name": "i",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 7867,
+                      "referencedDeclaration": 8028,
                       "src": "2242:1:42",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -2836,18 +2836,18 @@
                       "argumentTypes": null,
                       "expression": {
                         "argumentTypes": null,
-                        "id": 7871,
+                        "id": 8032,
                         "name": "_operators",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7861,
+                        "referencedDeclaration": 8022,
                         "src": "2246:10:42",
                         "typeDescriptions": {
                           "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
                           "typeString": "address[] memory"
                         }
                       },
-                      "id": 7872,
+                      "id": 8033,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -2867,18 +2867,18 @@
                       "typeString": "bool"
                     }
                   },
-                  "id": 7884,
+                  "id": 8045,
                   "initializationExpression": {
                     "assignments": [
-                      7867
+                      8028
                     ],
                     "declarations": [
                       {
                         "constant": false,
-                        "id": 7867,
+                        "id": 8028,
                         "name": "i",
                         "nodeType": "VariableDeclaration",
-                        "scope": 7886,
+                        "scope": 8047,
                         "src": "2227:9:42",
                         "stateVariable": false,
                         "storageLocation": "default",
@@ -2887,7 +2887,7 @@
                           "typeString": "uint256"
                         },
                         "typeName": {
-                          "id": 7866,
+                          "id": 8027,
                           "name": "uint256",
                           "nodeType": "ElementaryTypeName",
                           "src": "2227:7:42",
@@ -2900,11 +2900,11 @@
                         "visibility": "internal"
                       }
                     ],
-                    "id": 7869,
+                    "id": 8030,
                     "initialValue": {
                       "argumentTypes": null,
                       "hexValue": "30",
-                      "id": 7868,
+                      "id": 8029,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -2925,7 +2925,7 @@
                   "loopExpression": {
                     "expression": {
                       "argumentTypes": null,
-                      "id": 7875,
+                      "id": 8036,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -2936,11 +2936,11 @@
                       "src": "2265:3:42",
                       "subExpression": {
                         "argumentTypes": null,
-                        "id": 7874,
+                        "id": 8035,
                         "name": "i",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7867,
+                        "referencedDeclaration": 8028,
                         "src": "2265:1:42",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -2952,7 +2952,7 @@
                         "typeString": "uint256"
                       }
                     },
-                    "id": 7876,
+                    "id": 8037,
                     "nodeType": "ExpressionStatement",
                     "src": "2265:3:42"
                   },
@@ -2962,21 +2962,21 @@
               ]
             },
             "documentation": "@dev remove addresses from the whitelist\n@param _operators addresses\n@return true if at least one address was removed from the whitelist,\nfalse if all addresses weren't in the whitelist in the first place",
-            "id": 7886,
+            "id": 8047,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
             "modifiers": [
               {
                 "arguments": null,
-                "id": 7864,
+                "id": 8025,
                 "modifierName": {
                   "argumentTypes": null,
-                  "id": 7863,
+                  "id": 8024,
                   "name": "onlyOwner",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 9944,
+                  "referencedDeclaration": 10105,
                   "src": "2204:9:42",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
@@ -2990,15 +2990,15 @@
             "name": "removeAddressesFromWhitelist",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7862,
+              "id": 8023,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7861,
+                  "id": 8022,
                   "name": "_operators",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7886,
+                  "scope": 8047,
                   "src": "2167:20:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3008,7 +3008,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 7859,
+                      "id": 8020,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
                       "src": "2167:7:42",
@@ -3017,7 +3017,7 @@
                         "typeString": "address"
                       }
                     },
-                    "id": 7860,
+                    "id": 8021,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "2167:9:42",
@@ -3034,19 +3034,19 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 7865,
+              "id": 8026,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "2216:0:42"
             },
-            "scope": 7887,
+            "scope": 8048,
             "src": "2129:201:42",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 7888,
+        "scope": 8049,
         "src": "300:2033:42"
       }
     ],
@@ -3058,5 +3058,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
-  "updatedAt": "2018-09-03T20:13:47.912Z"
+  "updatedAt": "2018-09-03T22:41:14.808Z"
 }
