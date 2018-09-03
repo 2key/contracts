@@ -10,7 +10,7 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
   /// Address of 2key event source contract which will have permission to write on this contract
   /// (Address is enough, there is no need to spend sufficient gas and instantiate whole contract)
   address twoKeyEventSource;
-  TwoKeyAdmin twoKeyAdminContarct;
+  TwoKeyAdmin twoKeyAdminContract;
 
   /// Modifier which will allow only 2key event source to issue calls on selected methods
   modifier onlyTwoKeyEventSource {
@@ -23,8 +23,8 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
     require(_twoKeyEventSource != address(0));
     require(_twoKeyAdmin != address(0));
     twoKeyEventSource = _twoKeyEventSource;
-    twoKeyAdminContarct= TwoKeyAdmin( _twoKeyAdmin);
-    twoKeyAdminContarct.SetTwoKeyReg(address(this));
+    twoKeyAdminContract = TwoKeyAdmin( _twoKeyAdmin);
+    twoKeyAdminContract.setTwoKeyReg(address(this));
    
   }
 

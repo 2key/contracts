@@ -48,9 +48,9 @@ contract TwoKeyAdmin is  Ownable, Destructible, AdminContract {
 
 		// move to deploy
 		// assign default values to new admin here:
-		 newAdminContractObject.SetTwoKeyEonomy(economy);
+		 newAdminContractObject.setTwoKeyEconomy(economy);
 		//newAdminContract.SetTwoKeyExchange(exchange);
-		 newAdminContractObject.SetTwoKeyReg(twoKeyReg);
+		 newAdminContractObject.setTwoKeyReg(twoKeyReg);
 
 
 		wasReplaced = true;
@@ -125,7 +125,7 @@ contract TwoKeyAdmin is  Ownable, Destructible, AdminContract {
 
 	// modifier for admin call check
 	//<TBD> may be owner
-    function SetTwoKeyEonomy(address _economy) public   {
+    function setTwoKeyEconomy(address _economy) public   {
 		require(_economy != address(0));
     	economy = TwoKeyEconomy(_economy);
 
@@ -133,13 +133,13 @@ contract TwoKeyAdmin is  Ownable, Destructible, AdminContract {
 
 	// modifier for admin call check
 	//<TBD> may be owner
-    function SetTwoKeyReg(address _address) public  {
+    function setTwoKeyReg(address _address) public  {
 		require(_address != address(0));
     	twoKeyReg = TwoKeyReg(_address);
 
     }
 
-	function SetTwoKeyExchange(address _exchange) public adminsVotingApproved {
+	function setTwoKeyExchange(address _exchange) public adminsVotingApproved {
 		require(_exchange != address(0));
     	exchange = TwoKeyUpgradableExchange(exchange);
     	
@@ -148,13 +148,13 @@ contract TwoKeyAdmin is  Ownable, Destructible, AdminContract {
 
 // modifier for admin call check
 	//<TBD> may be owner
-    function GetTwoKeyEconomy () public view  returns(address _economy)  {
+    function getTwoKeyEconomy () public view  returns(address _economy)  {
     	return address(economy);
     }
 
     // modifier for admin call check
 	//<TBD> may be owner
-    function GetTwoKeyReg () public view  returns(address _address)  {
+    function getTwoKeyReg () public view  returns(address _address)  {
     	return address(twoKeyReg);
     }
     
