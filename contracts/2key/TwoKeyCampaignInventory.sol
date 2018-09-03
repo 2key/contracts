@@ -50,30 +50,22 @@ contract TwoKeyCampaignInventory {
   //    is used.
   //
   mapping(uint256 => mapping(address => uint256)) assets;
-
-  /// Only 2key campaign can issue calls on this contract
-  address twoKeyCampaign;
-
-  modifier onlyTwoKeyCampaign {
-    require(msg.sender != address(0));
-    require(msg.sender == twoKeyCampaign);
-    _;
-  }
-
-
-  function addTwoKeyCampaign(address _twoKeyCampaign) public {
-    /// Because campaign can be added only once
-    require(twoKeyCampaign == address(0));
-    twoKeyCampaign = _twoKeyCampaign;
-  }
-
+  //assetcontract(address) => balance(uint)
+  // assetcontract will be the contract of that ERC20
+  // balance will represent how many that tokens we have on our Campaign
 
   constructor() public {
 
   }
 
 
+  // Check and update balance function(another)
+  // Check the current balance of this contract in aragon ERC20 call the balanceOf there
+
+
   // add erc20 asset amount to the store, which adds an amount of that erc20 to our catalogue
+  // assetContract is already known
+  // Consider that owner of "aragon" sent some aragon to our address
   function addFungibleAsset(uint256 _tokenID, address _assetContract, uint256 _amount) public returns (bool) {
     require(
       _assetContract.call(
@@ -151,6 +143,8 @@ contract TwoKeyCampaignInventory {
   // transfer an amount of erc20 from our catalogue to someone
   // If transferFungibleAsset is internal that means it can't be called from out of the contract - set it to public
   // onlyRole(ROLE_CONTROLLER) modifier also doesn't work, need to check it.
+  // This should be called when conversion is executed
+  // Refactor!
   function transferFungibleAsset(
     address _to,
     uint256 _tokenID,

@@ -7,7 +7,7 @@ contract ITwoKeyReg is Ownable{
     function changeTwoKeyEventSource(address _twoKeyEventSource) public;
     function addWhereContractor(address _userAddress, address _contractAddress) public;
     function addWhereModerator(address _userAddress, address _contractAddress) public;
-    function addWhereRefferer(address _userAddress, address _contractAddress) public;
+    function addWhereReferrer(address _userAddress, address _contractAddress) public;
     function addWhereConverter(address _userAddress, address _contractAddress) public;
     function getContractsWhereUserIsContractor(address _userAddress) public view returns (address[]);
     function getContractsWhereUserIsModerator(address _userAddress) public view returns (address[]);

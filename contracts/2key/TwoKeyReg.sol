@@ -54,8 +54,9 @@ contract TwoKeyReg is Ownable {
   /// @dev We're requiring the contract address different address 0 because it needs to be deployed
   /// @param _userAddress is address of contractor
   /// @param _contractAddress is address of deployed campaign contract
-  function addWhereContractor(address _userAddress, address _contractAddress) public onlyTwoKeyEventSource {
-    require(_contractAddress != address(0));
+  /// commented modifier onlyTwoKeyEventSource
+  function addWhereContractor(address _userAddress, address _contractAddress) public{
+//    require(_contractAddress != address(0));
     userToCampaignsWhereContractor[_userAddress].push(_contractAddress);
   }
   /// Only TwoKeyEventSource contract can issue this calls

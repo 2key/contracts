@@ -21,7 +21,8 @@ contract TwoKeyContract is StandardToken, Ownable {
 
   using SafeMath for uint256;
   // Public variables of the token
-//  TwoKeyReg registry;  // 2key admin contract that created this
+  // TwoKeyReg registry;
+  // 2key admin contract that created this
   TwoKeyEventSource eventSource;
 
   // address public owner;  // Who created the contract (business) // contained in Ownable.sol

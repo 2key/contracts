@@ -7,10 +7,10 @@ contract TwoKeySignedContract is TwoKeyContract {
   mapping(address => address)  public public_link_key;
 
   function setPublicLinkKey(address _public_link_key) public {
-    address owner_influencer = msg.sender;
-    require(balanceOf(owner_influencer) > 0);
-    require(public_link_key[owner_influencer] == address(0));
-    public_link_key[owner_influencer] = _public_link_key;
+    //Requires need to be on top
+    require(balanceOf(msg.sender) > 0);
+    require(public_link_key[msg.sender] == address(0));
+    public_link_key[msg.sender] = _public_link_key;
   }
 
   function transferSig(bytes sig) public {

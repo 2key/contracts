@@ -3,7 +3,7 @@ pragma solidity ^0.4.24;
 import '../openzeppelin-solidity/contracts/math/SafeMath.sol';
 import '../openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol';
 
-import './TwoKeyCampaign.sol';
+import './TwoKeyAcquisitionCampaignERC20.sol';
 import './TwoKeyReg.sol';
 import './TwoKeyEconomy.sol';
 import './TwoKeyEventSource.sol';
@@ -11,16 +11,15 @@ import './TwoKeyTypes.sol';
 import "./TwoKeyWhitelisted.sol";
 import "./TwoKeyCampaignInventory.sol";
 
-contract TwoKeyCampaignCrowdsale is TwoKeyCampaign, Crowdsale {
+contract TwoKeyCampaignCrowdsale is TwoKeyAcquisitionCampaignERC20 {
 
 	using SafeMath for uint256;
 
 	constructor(
-		TwoKeyEventSource _eventSource,
-		TwoKeyEconomy _economy,
-		TwoKeyWhitelisted _whitelistInfluencer,
-		TwoKeyWhitelisted _whitelistConverter,
-		TwoKeyCampaignInventory _twoKeyCampaignInventory,
+		address _eventSource,
+		address _economy,
+		address _whitelistInfluencer,
+		address _whitelistConverter,
 
 		address _contractor,
 		address _moderator,
@@ -31,12 +30,11 @@ contract TwoKeyCampaignCrowdsale is TwoKeyCampaign, Crowdsale {
 		uint256 _expiryConversion,
 		uint256 _escrowPrecentage,
 		uint256 _rate,
-		uint256 _maxPi) TwoKeyCampaign(
+		uint256 _maxPi) TwoKeyAcquisitionCampaignERC20(
 		_eventSource,
 		_economy,
 		_whitelistInfluencer,
 		_whitelistConverter,
-		_twoKeyCampaignInventory,
 		_contractor,
 		_moderator,
 		_start,
@@ -52,9 +50,9 @@ contract TwoKeyCampaignCrowdsale is TwoKeyCampaign, Crowdsale {
 	    // requires an exchange to work because the buyer pays with TwoKey and we 
 	    // need to transfer ETH to campaign
 	    // so this function is not usable in the present form
-	    buyTokens(address(this));
-	    require(twoKeyCampaignInventory.addFungibleAsset(_tokenID, _assetContract, _amountOrIndex));
-	    super.buyFromWithTwoKey(_from, _tokenID, _assetContract, _amountOrIndex, CampaignType.Fungible);
+//	    buyTokens(address(this));
+//	    require(addFungibleAsset(_tokenID, _assetContract, _amountOrIndex));
+//	    super.buyFromWithTwoKey(_from, _tokenID, _assetContract, _amountOrIndex, CampaignType.CPA_FUNGIBLE);
 	}	
 
 }

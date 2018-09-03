@@ -34,7 +34,6 @@ contract TwoKeyEventSource is TwoKeyTypes {
     mapping(address => bool) authorizedSubadmins;
 
 
-
     ///@notice Modifier which allows only admin to call a function - can be easily modified if there is going to be more admins
     modifier onlyAdmin {
         require(msg.sender == address(twoKeyAdmin));
@@ -138,7 +137,7 @@ contract TwoKeyEventSource is TwoKeyTypes {
     /// @dev Only allowed contracts can call this function ---> means can emit events
     /// This user will be refferer
     function joined(address _campaign, address _from, address _to) public onlyAllowedContracts {
-        interfaceTwoKeyReg.addWhereRefferer(_campaign, _from);
+        interfaceTwoKeyReg.addWhereReferrer(_campaign, _from);
     	emit Joined(_campaign, _from, _to);
     }
 
