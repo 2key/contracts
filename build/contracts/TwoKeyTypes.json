@@ -1,24 +1,24 @@
 {
   "contractName": "TwoKeyTypes",
   "abi": [],
-  "bytecode": "0x6080604052348015600f57600080fd5b50603580601d6000396000f3006080604052600080fd00a165627a7a72305820b2921246cc06729825799e735a89062f83de5d90aef12fadafa2cc62fc694fe80029",
-  "deployedBytecode": "0x6080604052600080fd00a165627a7a72305820b2921246cc06729825799e735a89062f83de5d90aef12fadafa2cc62fc694fe80029",
-  "sourceMap": "26:84:15:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;26:84:15;;;;;;;",
-  "deployedSourceMap": "26:84:15:-;;;;;",
-  "source": "pragma solidity ^0.4.24;\n\ncontract TwoKeyTypes {\n\tenum CampaignType { NonFungible, Fungible, Counter, None }\n}",
-  "sourcePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyTypes.sol",
+  "bytecode": "0x6080604052348015600f57600080fd5b50603580601d6000396000f3006080604052600080fd00a165627a7a723058203f10a99ab5b6b292022a770f1d9d6cf8a608edc6b691bcedaee5154b5e857dfb0029",
+  "deployedBytecode": "0x6080604052600080fd00a165627a7a723058203f10a99ab5b6b292022a770f1d9d6cf8a608edc6b691bcedaee5154b5e857dfb0029",
+  "sourceMap": "26:228:27:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;26:228:27;;;;;;;",
+  "deployedSourceMap": "26:228:27:-;;;;;",
+  "source": "pragma solidity ^0.4.24;\n\ncontract TwoKeyTypes {\n\tenum CampaignType {CPL, CPA_TOKENS, CPI_SIGN_UP, CPC, CPA_PRODUCT, CPA_SERVICE, CPA_FUNGIBLE, CPA_NON_FUNGIBLE}\n\tenum CampaignActionType {LEADS, CLICKS, ACQUISITION, SIGN_UP, INSTALL, INFORMATION, VOTE}\n}",
+  "sourcePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyTypes.sol",
   "ast": {
-    "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyTypes.sol",
+    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyTypes.sol",
     "exportedSymbols": {
       "TwoKeyTypes": [
-        5485
+        6577
       ]
     },
-    "id": 5486,
+    "id": 6578,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 5479,
+        "id": 6559,
         "literals": [
           "solidity",
           "^",
@@ -26,7 +26,7 @@
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:24:15"
+        "src": "0:24:27"
       },
       {
         "baseContracts": [],
@@ -34,65 +34,140 @@
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": true,
-        "id": 5485,
+        "id": 6577,
         "linearizedBaseContracts": [
-          5485
+          6577
         ],
         "name": "TwoKeyTypes",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "canonicalName": "TwoKeyTypes.CampaignType",
-            "id": 5484,
+            "id": 6568,
             "members": [
               {
-                "id": 5480,
-                "name": "NonFungible",
+                "id": 6560,
+                "name": "CPL",
                 "nodeType": "EnumValue",
-                "src": "70:11:15"
+                "src": "69:3:27"
               },
               {
-                "id": 5481,
-                "name": "Fungible",
+                "id": 6561,
+                "name": "CPA_TOKENS",
                 "nodeType": "EnumValue",
-                "src": "83:8:15"
+                "src": "74:10:27"
               },
               {
-                "id": 5482,
-                "name": "Counter",
+                "id": 6562,
+                "name": "CPI_SIGN_UP",
                 "nodeType": "EnumValue",
-                "src": "93:7:15"
+                "src": "86:11:27"
               },
               {
-                "id": 5483,
-                "name": "None",
+                "id": 6563,
+                "name": "CPC",
                 "nodeType": "EnumValue",
-                "src": "102:4:15"
+                "src": "99:3:27"
+              },
+              {
+                "id": 6564,
+                "name": "CPA_PRODUCT",
+                "nodeType": "EnumValue",
+                "src": "104:11:27"
+              },
+              {
+                "id": 6565,
+                "name": "CPA_SERVICE",
+                "nodeType": "EnumValue",
+                "src": "117:11:27"
+              },
+              {
+                "id": 6566,
+                "name": "CPA_FUNGIBLE",
+                "nodeType": "EnumValue",
+                "src": "130:12:27"
+              },
+              {
+                "id": 6567,
+                "name": "CPA_NON_FUNGIBLE",
+                "nodeType": "EnumValue",
+                "src": "144:16:27"
               }
             ],
             "name": "CampaignType",
             "nodeType": "EnumDefinition",
-            "src": "50:58:15"
+            "src": "50:111:27"
+          },
+          {
+            "canonicalName": "TwoKeyTypes.CampaignActionType",
+            "id": 6576,
+            "members": [
+              {
+                "id": 6569,
+                "name": "LEADS",
+                "nodeType": "EnumValue",
+                "src": "188:5:27"
+              },
+              {
+                "id": 6570,
+                "name": "CLICKS",
+                "nodeType": "EnumValue",
+                "src": "195:6:27"
+              },
+              {
+                "id": 6571,
+                "name": "ACQUISITION",
+                "nodeType": "EnumValue",
+                "src": "203:11:27"
+              },
+              {
+                "id": 6572,
+                "name": "SIGN_UP",
+                "nodeType": "EnumValue",
+                "src": "216:7:27"
+              },
+              {
+                "id": 6573,
+                "name": "INSTALL",
+                "nodeType": "EnumValue",
+                "src": "225:7:27"
+              },
+              {
+                "id": 6574,
+                "name": "INFORMATION",
+                "nodeType": "EnumValue",
+                "src": "234:11:27"
+              },
+              {
+                "id": 6575,
+                "name": "VOTE",
+                "nodeType": "EnumValue",
+                "src": "247:4:27"
+              }
+            ],
+            "name": "CampaignActionType",
+            "nodeType": "EnumDefinition",
+            "src": "163:89:27"
           }
         ],
-        "scope": 5486,
-        "src": "26:84:15"
+        "scope": 6578,
+        "src": "26:228:27"
       }
     ],
-    "src": "0:110:15"
+    "src": "0:254:27"
   },
   "legacyAST": {
-    "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyTypes.sol",
+    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyTypes.sol",
     "exportedSymbols": {
       "TwoKeyTypes": [
-        5485
+        6577
       ]
     },
-    "id": 5486,
+    "id": 6578,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 5479,
+        "id": 6559,
         "literals": [
           "solidity",
           "^",
@@ -100,7 +175,7 @@
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:24:15"
+        "src": "0:24:27"
       },
       {
         "baseContracts": [],
@@ -108,52 +183,127 @@
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": true,
-        "id": 5485,
+        "id": 6577,
         "linearizedBaseContracts": [
-          5485
+          6577
         ],
         "name": "TwoKeyTypes",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "canonicalName": "TwoKeyTypes.CampaignType",
-            "id": 5484,
+            "id": 6568,
             "members": [
               {
-                "id": 5480,
-                "name": "NonFungible",
+                "id": 6560,
+                "name": "CPL",
                 "nodeType": "EnumValue",
-                "src": "70:11:15"
+                "src": "69:3:27"
               },
               {
-                "id": 5481,
-                "name": "Fungible",
+                "id": 6561,
+                "name": "CPA_TOKENS",
                 "nodeType": "EnumValue",
-                "src": "83:8:15"
+                "src": "74:10:27"
               },
               {
-                "id": 5482,
-                "name": "Counter",
+                "id": 6562,
+                "name": "CPI_SIGN_UP",
                 "nodeType": "EnumValue",
-                "src": "93:7:15"
+                "src": "86:11:27"
               },
               {
-                "id": 5483,
-                "name": "None",
+                "id": 6563,
+                "name": "CPC",
                 "nodeType": "EnumValue",
-                "src": "102:4:15"
+                "src": "99:3:27"
+              },
+              {
+                "id": 6564,
+                "name": "CPA_PRODUCT",
+                "nodeType": "EnumValue",
+                "src": "104:11:27"
+              },
+              {
+                "id": 6565,
+                "name": "CPA_SERVICE",
+                "nodeType": "EnumValue",
+                "src": "117:11:27"
+              },
+              {
+                "id": 6566,
+                "name": "CPA_FUNGIBLE",
+                "nodeType": "EnumValue",
+                "src": "130:12:27"
+              },
+              {
+                "id": 6567,
+                "name": "CPA_NON_FUNGIBLE",
+                "nodeType": "EnumValue",
+                "src": "144:16:27"
               }
             ],
             "name": "CampaignType",
             "nodeType": "EnumDefinition",
-            "src": "50:58:15"
+            "src": "50:111:27"
+          },
+          {
+            "canonicalName": "TwoKeyTypes.CampaignActionType",
+            "id": 6576,
+            "members": [
+              {
+                "id": 6569,
+                "name": "LEADS",
+                "nodeType": "EnumValue",
+                "src": "188:5:27"
+              },
+              {
+                "id": 6570,
+                "name": "CLICKS",
+                "nodeType": "EnumValue",
+                "src": "195:6:27"
+              },
+              {
+                "id": 6571,
+                "name": "ACQUISITION",
+                "nodeType": "EnumValue",
+                "src": "203:11:27"
+              },
+              {
+                "id": 6572,
+                "name": "SIGN_UP",
+                "nodeType": "EnumValue",
+                "src": "216:7:27"
+              },
+              {
+                "id": 6573,
+                "name": "INSTALL",
+                "nodeType": "EnumValue",
+                "src": "225:7:27"
+              },
+              {
+                "id": 6574,
+                "name": "INFORMATION",
+                "nodeType": "EnumValue",
+                "src": "234:11:27"
+              },
+              {
+                "id": 6575,
+                "name": "VOTE",
+                "nodeType": "EnumValue",
+                "src": "247:4:27"
+              }
+            ],
+            "name": "CampaignActionType",
+            "nodeType": "EnumDefinition",
+            "src": "163:89:27"
           }
         ],
-        "scope": 5486,
-        "src": "26:84:15"
+        "scope": 6578,
+        "src": "26:228:27"
       }
     ],
-    "src": "0:110:15"
+    "src": "0:254:27"
   },
   "compiler": {
     "name": "solc",
@@ -161,5 +311,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
-  "updatedAt": "2018-08-31T13:56:15.308Z"
+  "updatedAt": "2018-09-03T20:13:47.904Z"
 }
