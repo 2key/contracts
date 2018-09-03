@@ -110,6 +110,7 @@ contract('TwoKeyAcquisitionCampaignERC20', async (accounts) => {
 
 
     it("should print addresses of contracts", async() => {
+        console.log("================================DEPLOYED CONTRACT ADDRESSES====================================");
         console.log("[ERC20] : " + erc20.address);
         console.log("[TwoKeyUpgradebleExchange] : " + upgradeableExchange.address);
         console.log("[TwoKeyAdmin] : " + twoKeyAdmin.address);
@@ -117,6 +118,7 @@ contract('TwoKeyAcquisitionCampaignERC20', async (accounts) => {
         console.log("[TwoKeyWhitelistConverter] : " + whitelistConverter.address);
         console.log("[TwoKeyWhiteListInfluencer] : " + whitelistInfluencer.address);
         console.log("[TwoKeyAcquisitionCampaignERC20] : " + twoKeyAcquisitionCampaignERC20.address);
+        console.log("===============================================================================================");
     });
 
     it("should add asset contract to the campaign", async() => {
