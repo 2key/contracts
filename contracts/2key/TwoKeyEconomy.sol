@@ -11,7 +11,7 @@ contract TwoKeyEconomy is RBACWithAdmin, StandardToken, Ownable {
   string public name = 'TwoKeyEconomy';
   string public symbol= '2Key';
   uint8 public decimals= 18;
- 
+
   constructor (address _twoKeyAdmin) RBACWithAdmin(_twoKeyAdmin)  Ownable() public {
  	
  	require(_twoKeyAdmin != address(0));
@@ -20,5 +20,17 @@ contract TwoKeyEconomy is RBACWithAdmin, StandardToken, Ownable {
     totalSupply_= 1000000000000000000000000000;
     balances[_twoKeyAdmin] = totalSupply_;
     admin.setTwoKeyEconomy(address(this));
+  }
+
+  function getTokenName() public view returns(string) {
+    return name;    
+  }
+  
+  function getTokenSymbol() public view returns(string) {
+    return symbol;    
+  }
+
+  function getTokenDecimals() public view returns(uint8) {
+    return decimals;    
   }
 }

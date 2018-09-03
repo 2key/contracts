@@ -1,10 +1,10 @@
 import eth_util from 'ethereumjs-util';
 import assert from 'assert';
+import crypto from 'crypto-browserify';
 
-// declare module 'ethereumjs-util' {
-//   const publicToAddress: any;
-//   export = publicToAddress;
-// }
+function generatePrivateKey(): Buffer {
+  return crypto.randomBytes(32)
+}
 
 function privateToPublic(private_key: Buffer) {
   // convert a private_key buffer to a public address string
@@ -196,4 +196,5 @@ export default {
   free_join,
   privateToPublic,
   validate_join,
+  generatePrivateKey,
 };

@@ -1,12 +1,16 @@
 pragma solidity ^0.4.24;
 
 import '../openzeppelin-solidity/contracts/ownership/Ownable.sol';
+import "./RBACWithAdmin.sol";
+import "./TwoKeyAdmin.sol";
 
-contract TwoKeyReg is Ownable {
+
+contract TwoKeyReg is Ownable, RBACWithAdmin {
 
   /// Address of 2key event source contract which will have permission to write on this contract
   /// (Address is enough, there is no need to spend sufficient gas and instantiate whole contract)
   address twoKeyEventSource;
+  TwoKeyAdmin twoKeyAdminContarct;
 
   /// Modifier which will allow only 2key event source to issue calls on selected methods
   modifier onlyTwoKeyEventSource {
@@ -15,9 +19,13 @@ contract TwoKeyReg is Ownable {
   }
 
 
-  constructor (address _twoKeyEventSource) public {
+  constructor (address _twoKeyEventSource, address _twoKeyAdmin) RBACWithAdmin(_twoKeyAdmin)  public {
     require(_twoKeyEventSource != address(0));
+    require(_twoKeyAdmin != address(0));
     twoKeyEventSource = _twoKeyEventSource;
+    twoKeyAdminContarct= TwoKeyAdmin( _twoKeyAdmin);
+    twoKeyAdminContarct.SetTwoKeyReg(address(this));
+   
   }
 
 //  function addTwoKeyEventSource(address _twoKeyEventSource) public onlyOwner {
