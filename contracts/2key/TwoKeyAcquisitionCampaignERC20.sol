@@ -190,13 +190,18 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
 
         /// Make sure that the payment has been sent
         require(twoKeyEconomy.transferFrom(msg.sender, this, _amount));
+
         /// compute how many units he can buy with amount of twokey
         uint units = 1;
         Conversion memory c = Conversion(_from, _amount, msg.sender, false, false, _assetName, _assetContract, units, CampaignType.CPA_FUNGIBLE, now, now + expiryConversion * 1 minutes);
         // move funds
         campaign_balance = campaign_balance - units;
-        twoKeyEventSource.escrow(address(this), msg.sender, _assetName, _assetContract, units, CampaignType.CPA_FUNGIBLE);
+//        twoKeyEventSource.escrow(address(this), msg.sender, _assetName, _assetContract, units, CampaignType.CPA_FUNGIBLE);
         conversions[msg.sender] = c;
+    }
+
+    function buyFromWithTwoKey(address _from, string _assetName, address _assetContract, uint256 _amount) public payable {
+        fulfillFungibleTwoKeyToken(_from, _assetName, _assetContract, _amount);
     }
 
     /**
@@ -267,10 +272,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
         require(xbalancesTwoKey[msg.sender] >= _amount && _amount > 0);
         xbalancesTwoKey[msg.sender] = xbalancesTwoKey[msg.sender].sub(_amount);
         twoKeyEconomy.transferFrom(this, msg.sender, _amount);
-    }
-
-    function buyFromWithTwoKey(address _from, string _assetName, address _assetContract, uint256 _amount) public payable {
-        fulfillFungibleTwoKeyToken(_from, _assetName, _assetContract, _amount);
     }
 
     /// handle incoming ether
