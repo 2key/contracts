@@ -51,7 +51,7 @@ module.exports = function deploy(deployer) {
       .then(() => TwoKeyAdmin.deployed())
       .then(() => deployer.deploy(TwoKeyEconomy, TwoKeyAdmin.address))
       .then(() => deployer.deploy(EventSource, TwoKeyAdmin.address))
-      .then(() => deployer.deploy(TwoKeyReg, EventSource.address))
+      .then(() => deployer.deploy(TwoKeyReg, EventSource.address,TwoKeyAdmin.address))
       .then(() => true)
       .catch((err) => {
         console.log('\x1b[31m', 'Error:', err.message, '\x1b[0m');
