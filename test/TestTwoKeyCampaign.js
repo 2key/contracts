@@ -9,16 +9,15 @@ const HOUR = 3600;
 const TwoKeyWhitelisted = artifacts.require("TwoKeyWhitelisted");
 const TwoKeyEventSource = artifacts.require("TwoKeyEventSource");
 const TwoKeyEconomy = artifacts.require("TwoKeyEconomy");
-const TwoKeyCampaign = artifacts.require("TwoKeyCampaign");
+const TwoKeyAcquisitionCampaignERC20 = artifacts.require("TwoKeyAcquisitionCampaignERC20");
 const TwoKeyAdmin = artifacts.require("TwoKeyAdmin");
 const TwoKeyUpgradableExchange = artifacts.require("TwoKeyUpgradableExchange");
-const TwoKeyARC = artifacts.require("TwoKeyARC");
+const TwoKeyCampaignARC = artifacts.require("TwoKeyCampaignARC");
 const TwoKeyCampaignInventory = artifacts.require("TwoKeyCampaignInventory.sol");
 
 
 /// tokens
 const StandardToken = artifacts.require("StandardToken");
-const ERC721Mock = artifacts.require("ERC721TokenMock");
 const ERC20Mock = artifacts.require("ERC20TokenMock");
 
 contract('TwoKeyCampaign', async (accounts) => {
@@ -27,36 +26,31 @@ contract('TwoKeyCampaign', async (accounts) => {
         whitelistConverter, 
         eventSource, 
         twoKeyEconomy,
-        campaign,
+        twoKeyAcquisitionCampaignERC20,
         twoKeyAdmin,
         upgradeableExchange,
-        twoKeyARC,
-        twoKeyCampaignInventory,
-        erc721,
-        standardToken,
         erc20;
 
 
     const coinbase = accounts[0];
-    const tokenIndex = "123";
     const contractor = accounts[2];
     const moderator = accounts[1];
     const campaignCreator = accounts[3];
-    const tokenIDNFT = "1";
-    const tokenIDFT = "2";
     const escrowPrecentage = 10;
     const rate = 2;
     const maxPi = 15;
+    const assetName = "TestingTokenERC20";
 
 
     const electorateAdmins = accounts[4];
     const walletExchange = accounts[5];
+
     before(async () => {
-        /// TODO: Act as inventory
         // Contractor input addresses
         erc20 = await ERC20Mock.new({
             from: coinbase
         });
+
         const openingTime = latestTime() + duration.minutes(5);
         const closingTime = latestTime() + duration.minutes(30);
 
@@ -64,10 +58,9 @@ contract('TwoKeyCampaign', async (accounts) => {
             Singleton area (one per TwoKeyNetwork)
          */
         upgradeableExchange = await TwoKeyUpgradableExchange.new(100, walletExchange, erc20.address);
-        twoKeyEconomy = await TwoKeyEconomy.new();
-        twoKeyAdmin = await TwoKeyAdmin.new(twoKeyEconomy.address, electorateAdmins, upgradeableExchange.address);
+        twoKeyAdmin = await TwoKeyAdmin.new(electorateAdmins, upgradeableExchange.address);
+        twoKeyEconomy = await TwoKeyEconomy.new(twoKeyAdmin.address);
         eventSource = await TwoKeyEventSource.new(twoKeyAdmin.address);
-
 
         /*
             Subcontracts required for TwoKeyCampaign
@@ -77,15 +70,12 @@ contract('TwoKeyCampaign', async (accounts) => {
 
         whitelistInfluencer = await TwoKeyWhitelisted.new();
         whitelistConverter = await TwoKeyWhitelisted.new();
-        twoKeyARC = await TwoKeyARC.new(eventSource.address, contractor);
-        twoKeyCampaignInventory = await TwoKeyCampaignInventory.new();
 
-        campaign = await TwoKeyCampaign.new(
+        twoKeyAcquisitionCampaignERC20 = await TwoKeyAcquisitionCampaignERC20.new(
             eventSource.address,
             twoKeyEconomy.address,
             whitelistInfluencer.address,
             whitelistConverter.address,
-            twoKeyCampaignInventory.address,
 
             contractor, //Address of the user
             moderator, //Address of the moderator - it's a contract that works (operates) as admin of whitelists contracts
@@ -104,34 +94,31 @@ contract('TwoKeyCampaign', async (accounts) => {
     });
     it("Should print addresses of contracts", async() => {
         console.log("[ERC20] : " + erc20.address);
-        // console.log("[StandardToken] : " + standardToken.address);
         console.log("[TwoKeyUpgradebleExchange] : " + upgradeableExchange.address);
         console.log("[TwoKeyAdmin] : " + twoKeyAdmin.address);
         console.log("[TwoKeyEventSource] : " + eventSource.address);
-        console.log("[TwoKeyCampaign] : " + campaign.address);
         console.log("[TwoKeyWhitelistConverter] : " + whitelistConverter.address);
         console.log("[TwoKeyWhiteListInfluencer] : " + whitelistInfluencer.address);
-        console.log("[TwoKeyARC] : " + twoKeyARC.address);
-        // console.log("[ComposableAssetFactory] : " + composableAssetFactory.address);
+        console.log("[TwoKeyAcquisitionCampaignERC20] : " + twoKeyAcquisitionCampaignERC20.address);
     });
-    // it("transfer fungible to compaign", async () => {
-    //
-    //
-    //     await erc20.transfer(contractor, 200, {
-    //         from: coinbase
-    //     });
 
-        // await erc20.approve(campaign.address, 20, {
-        //     from: contractor,
+
+    it("transfer fungible to campaign", async () => {
+        await erc20.transfer(contractor, 200, {
+            from: coinbase
+        });
+
+        await erc20.approve(campaign.address, 20, {
+            from: contractor,
+        });
+
+        // await campaign.addFungibleChild(tokenIDFT, erc20, 20, {
+        //     from: campaignCreator
         // });
-
-    //     await campaign.addFungibleChild(tokenIDFT, erc20, 20, {
-    //         from: campaignCreator
-    //     });
-    //     await campaign.setPriceFungible(tokenIDFT, erc20, ether(5), {
-    //         from: campaignCreator
-    //     });
-    // });
+        // await campaign.setPriceFungible(tokenIDFT, erc20, ether(5), {
+        //     from: campaignCreator
+        // });
+    });
   
    
 });
