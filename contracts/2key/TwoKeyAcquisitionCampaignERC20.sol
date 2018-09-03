@@ -49,7 +49,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
     TwoKeyWhitelisted whitelistConverter;
 
 
-    uint price; /// There's single price for the unit
+    uint price; /// There's single price for the unit ERC20
     uint256 rate; /// rate of conversion from TwoKey to ETH
     uint openingTime;
     uint closingTime;
@@ -185,7 +185,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
     /// tokenID -> assetName
     /// Acquisition campaign is campaign which is selling something which can be bought with 2key or ETH
     function fulfillFungibleTwoKeyToken(address _from, string _assetName, address _assetContract, uint256 _amount)  internal {
-        require(_amount > 0 && price > 0);
+        require(_amount > 0);
+        // require(price > 0);
 //        uint256 payout = price.mul(_amount).mul(rate);
 
         /// Make sure that the payment has been sent
