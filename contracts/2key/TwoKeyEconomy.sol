@@ -19,6 +19,6 @@ contract TwoKeyEconomy is RBACWithAdmin, StandardToken, Ownable {
     admin = TwoKeyAdmin(_twoKeyAdmin);
     totalSupply_=1000000000000000000000000000;
     balances[_twoKeyAdmin] = totalSupply_;
-    admin.SetTwoKeyEonomy(address(this)); 
+    admin.SetTwoKeyEconomy(address(this));
   }
 }
