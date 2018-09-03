@@ -30,6 +30,18 @@ const closingTime = new Date(openingTime.valueOf()).setDate(openingTime.getDate(
 const eventSource = contractsMeta.TwoKeyEventSource.networks[mainNetId].address;
 const twoKeyEconomy = contractsMeta.TwoKeyEconomy.networks[mainNetId].address;
 
+function makeHandle(max: number = 8): string {
+  let text = '';
+  let possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+  for (let i = 0; i < max; i++)
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+  return text;
+}
+
+// console.log(makeHandle(4096));
+
 console.log(rpcUrl);
 console.log(mainNetId);
 console.log(contractsMeta.TwoKeyEventSource.networks[mainNetId].address);
@@ -103,15 +115,25 @@ describe('TwoKeyProtocol', () => {
       done();
     }, 10000);
   }).timeout(15000);
+  // const rndHandle = makeHandle();
+  // it('should update handle', async () => {
+  //   web3 = createWeb3(env.MNEMONIC_DST, rpcUrl);
+  //   twoKeyProtocol = new TwoKeyProtocol({
+  //     web3,
+  //     networks: {
+  //       mainNetId,
+  //       syncTwoKeyNetId,
+  //     },
+  //   });
+  //   const txHash = await twoKeyProtocol.setHandle(rndHandle);
+  //   expect(txHash).to.be.a('string');
+  // }).timeout(30000);
+  // it('should check address handle', async () => {
+  //   const handle = await twoKeyProtocol.getAddressHandle(rndHandle);
+  //   console.log('Handle', handle);
+  //   expect(handle).to.be.equal(rndHandle);
+  // });
   it('should calculate gas for campaign contract creation', async () => {
-    web3 = createWeb3(env.MNEMONIC_DST, rpcUrl);
-    twoKeyProtocol = new TwoKeyProtocol({
-      web3,
-      networks: {
-        mainNetId,
-        syncTwoKeyNetId,
-      },
-    });
     const gas = await twoKeyProtocol.estimateSaleCampaign({
       eventSource,
       twoKeyEconomy,
@@ -144,23 +166,36 @@ describe('TwoKeyProtocol', () => {
     // const userCampaigns = await twoKeyProtocol.getContractorCampaigns();
     // console.log('User Campaigns', userCampaigns);
   }).timeout(600000);
-  it('should add inventory to contract', async () => {
-    const txHash = await twoKeyProtocol.addFungibleInventory(campaignInventoryAddress, twoKeyEconomy, 1234);
-    console.log('Add Inventory:', txHash);
-    return expect(txHash).to.be.a('string');
-    // setTimeout(async () => {
-    //   const business = await twoKeyProtocol.getBalance();
-    //   const aydnep = await twoKeyProtocol.getBalance(destinationAddress);
-    //   console.log('BUSINESS balance', business);
-    //   console.log('DESTINATION balance', aydnep);
-    //   done();
-    // }, 10000);
-  }).timeout(30000);
-  it('should print inventory', (done) => {
-    setTimeout(async () => {
-      const inventory = await twoKeyProtocol.getFungibleInventory(twoKeyEconomy, campaignInventoryAddress);
-      console.log('Inventory', inventory);
-      done();
-    }, 15000);
-  }).timeout(32000);
+  let fMessage;
+  it('should add something to ipfs', async () => {
+    const hash = await twoKeyProtocol.joinCampaign();
+    console.log('IPFS:', hash);
+    fMessage = hash;
+    expect(hash).to.be.a('string');
+  });
+  it('should create a join link', async () => {
+    // const hash = await twoKeyProtocol.joinCampaign(campaignAddress, 0, fMessage);
+    let hash = fMessage;
+    for (let i = 0; i < 20; i++) {
+      hash = await twoKeyProtocol.joinCampaign(campaignAddress, 0, hash);
+      console.log(i + 1, hash.length);
+    }
+    console.log(hash);
+    console.log(hash.length);
+    expect(hash).to.be.a('string');
+  });
+  // it('should add inventory to contract', async () => {
+  //   const txHash = await twoKeyProtocol.addFungibleInventory(campaignInventoryAddress, twoKeyEconomy, 1234);
+  //   console.log('Add Inventory:', txHash);
+  //   return expect(txHash).to.be.a('string');
+  // }).timeout(30000);
+  // it('should print inventory', (done) => {
+  //   setTimeout(async () => {
+  //     const inventory = await twoKeyProtocol.getFungibleInventory(twoKeyEconomy, campaignInventoryAddress);
+  //     console.log('Inventory', inventory);
+  //     const campaigns = await twoKeyProtocol.getContractorCampaigns();
+  //     console.log('Canpaigns', campaigns);
+  //     done();
+  //   }, 15000);
+  // }).timeout(32000);
 });
