@@ -11,8 +11,11 @@ import './TwoKeyEconomy.sol';
 /// Contract which will represent campaign for the fungible assets
 contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
 
+
     /// @notice Event which will be emitted when
     event Expired(address indexed _contract);
+    event ReceivedEther(address _sender, uint value);
+
     using SafeMath for uint256;
 
     /// Structure which will represent conversion
@@ -266,8 +269,34 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
     /// update mapping for address the amount sent
     /// emit event updated mapping
     /// function check amount for address
-    function () payable {
 
+    /// @notice Payable function which will accept all transactions which are sending ether to contract
+    /// @dev we require that msg.value is greater than 0
+    /// @dev function will update the mapping balances where we're mapping how much ether has been sent to contract from specified address
+    /// @dev will emit an event with address and value sent
+    function () payable {
+        require(msg.value > 0);
+        balances[msg.sender] += msg.value;
+        emit ReceivedEther(msg.sender, msg.value);
+    }
+
+    /// @notice Function to check how much eth has been sent to contract from address
+    /// @param _from is the address we'd like to check balance
+    /// @return amount of ether sent to contract from the specified address
+    function checkAmountAddressSent(address _from) public view returns (uint) {
+        return balances[_from];
+    }
+
+    /// @notice Function to check contract balance of specified ERC20 tokens
+    /// @return balance
+    function getContractBalance() public view returns(uint) {
+        return campaign_balance;
+    }
+
+    /// @notice View function to fetch the address of asset contract
+    /// @return address of that asset contract
+    function getAssetContractAddress() public view returns(address) {
+        return assetContract;
     }
 
 //    function checkETHAmountSent
