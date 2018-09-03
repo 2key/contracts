@@ -116,13 +116,13 @@ contract TwoKeyAdmin is  Ownable, Destructible, AdminContract {
 
 	// modifier for admin call check
 	//<TBD> may be owner
-    function SetTwoKeyEonomy(address _economy)   {
+    function setTwoKeyEconomy(address _economy)   {
 		require(_economy != address(0));
     	economy = TwoKeyEconomy(_economy);
 
     }
 
-	function SetTwoKeyExchange(address _exchange) public adminsVotingApproved {
+	function setTwoKeyExchange(address _exchange) public adminsVotingApproved {
 		require(_exchange != address(0));
     	exchange = TwoKeyUpgradableExchange(exchange);
     	
@@ -130,7 +130,7 @@ contract TwoKeyAdmin is  Ownable, Destructible, AdminContract {
 
 // modifier for admin call check
 	//<TBD> may be owner
-    function GetTwoKeyEconomy () public view  returns(address _economy)  {
+    function getTwoKeyEconomy () public view  returns(address _economy)  {
     	return address(economy);
     }
     
