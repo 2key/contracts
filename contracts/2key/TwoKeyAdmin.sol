@@ -36,45 +36,36 @@ contract TwoKeyAdmin is  Ownable, Destructible, AdminContract {
 		electorateAdmins = _electorateAdmins;	
 	}
 
-	function replaceOneself(address newAdminContract) external wasNotReplaced adminsVotingApproved {
-		// take care of : twoKeyReg, TwoKeyEconomy, twoKeyEventSource,TwoKeyUpgradableExchange
+	function replaceOneself(address _newAdminContract) external wasNotReplaced adminsVotingApproved {
+		uint balanceOfOldAdmin = economy.balanceOf(address(this));
+		TwoKeyAdmin newAdminContractObject = TwoKeyAdmin(_newAdminContract);
+		newTwoKeyAdminAddress = _newAdminContract;
 
-		//AdminContract adminContract = AdminContract(newAdminContract);
-		//uint balanceOfOldAdmin = economy.balanceOf(adminContract);
-		
-		uint balanceOfOldAdmin = economy.balanceOf(address(this	));
-		TwoKeyAdmin newAdminContractObject= TwoKeyAdmin(newAdminContract);
-		newTwoKeyAdminAddress=newAdminContract;
-
-		// move to deploy
-		// assign default values to new admin here:
-		 newAdminContractObject.setTwoKeyEconomy(economy);
-		//newAdminContract.SetTwoKeyExchange(exchange);
-		 newAdminContractObject.setTwoKeyReg(twoKeyReg);
-
+		newAdminContractObject.setTwoKeyEconomy(economy);
+		newAdminContractObject.setTwoKeyReg(twoKeyReg);
 
 		wasReplaced = true;
 
-		economy.transfer(newAdminContract, balanceOfOldAdmin);	
-		//economy.transferOwnership(newAdminContract);
-
-		//economy.transferOwnership(newAdminContract)
-		economy.adminAddRole(newAdminContract,"admin");
-		//exchange.transferOwnership(newAdminContract); // need to take care
-		newAdminContract.transfer(address(this).balance);
-		//eventsource	
+		economy.transfer(_newAdminContract, balanceOfOldAdmin);	
+		
+		economy.adminAddRole(_newAdminContract, "admin");
+		newAdminContractObject.transfer(address(this).balance);				// updated to newAdminContractObject
+        newAdminContractObject.setTwoKeyEconomy(economy);
+		newAdminContractObject.setTwoKeyReg(twoKeyReg);
+		// newAdminContractObject.setTwoKeyExchange(exchange);
+		// twoKeyEventSource.changeAdmin(_newAdminContract);
 	}
-
 	
 
 	function transferByAdmins(address _to, uint256 _tokens) external wasNotReplaced adminsVotingApproved {
+		require (_to != address(0) && _tokens > 0);
 		economy.transfer(_to, _tokens);
 	}
 
 
 	function upgradeEconomyExchangeByAdmins(address newExchange) external wasNotReplaced adminsVotingApproved {
-		if (newExchange != address(0))
-			exchange.upgrade(newExchange);
+		require (newExchange != address(0));
+		exchange.upgrade(newExchange);
 	}
 
 	function transferEtherByAdmins(address to, uint256 amount) external wasNotReplaced adminsVotingApproved {
@@ -92,7 +83,7 @@ contract TwoKeyAdmin is  Ownable, Destructible, AdminContract {
 	}
 
 	function destroy() public adminsVotingApproved {
-		if (wasReplaced)
+		if (!wasReplaced)
 			selfdestruct(owner);
 		else
 			selfdestruct(newTwoKeyAdminAddress);
@@ -138,12 +129,16 @@ contract TwoKeyAdmin is  Ownable, Destructible, AdminContract {
     	
     }
 
+    // modifier for admin call check
+	//<TBD> may be owner
 	function setTwoKeyEconomy(address _economy) public   {
 		require(_economy != address(0));
 		economy = TwoKeyEconomy(_economy);
-
 	}
 
+	function getEtherBalanceOfAnAddress(address _addr) public view returns (uint256){
+		return address(_addr).balance;
+	}
 	// modifier for admin call check
 	//<TBD> may be owner
     function getTwoKeyEconomy () public view  returns(address _economy)  {
