@@ -40,7 +40,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
 
     uint campaignInventoryUnitsBalance; // balance will represent how many that tokens (erc20) we have on our Campaign
     address assetContract; //asset contract is address of that ERC20 inventory
-
+    string assetName;
     // TwoKeyEventSource contract is instantiated in TwoKeyARC
     // address contractor is instantiated in TwoKeyArc
 
@@ -206,30 +206,33 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
         conversions[msg.sender] = c;
     }
 
-//    function fulfillFungibleETH(
-//        address _from,
-//        uint256 _amountETH) isOngoing internal {
-//        // TODO: Idea is that payout is msg.value
-//        // Compute for the amount of ether how much tokens can be got by the amount
-//        require(_amount > 0 && price > 0);
+    function fulfillFungibleETH(
+        address _from,
+        uint256 _amountETH
+        ) isOngoing internal {
+        uint _amount = msg.value;
+        // TODO: Idea is that payout is msg.value
+        // Compute for the amount of ether how much tokens can be got by the amount
+        require(_amount > 0);
+//        require(price > 0);
+        uint payout = 1;
 //        uint256 payout = price.mul(_amount);
-//        require(msg.value == payout);
-//        //TODO: Someone put 100 eth and he's entitled to X base + Y bonus  = (X+Y) taken from Inventory
-//        //TODO: Take the msg.value, and regarding value I compute number of base and bonus tokens - sum of base and bonus is took out of the twoKeyCampaignInvent
-//        Conversion memory c = Conversion(_from, payout, msg.sender, false, false, _assetName, _assetContract, _amount, CampaignType.CPA_FUNGIBLE, now, now + expiryConversion * 1 days);
-//
-//
-//        // move funds
-//        // rename to remove from inventory
-//        campaignInventoryUnitsBalance = campaignInventoryUnitsBalance - _amount;
-//        //		removeFungibleAssets(_tokenID, _assetContract, _amount);
-//
-//
-//        //tokenID can be string specifying the name of token ("ETH", "BTC",etc)
-//        // value in escrow (msg.value), total amount of tokens
+        require(msg.value == payout);
+        //TODO: Someone put 100 eth and he's entitled to X base + Y bonus  = (X+Y) taken from Inventory
+        //TODO: Take the msg.value, and regarding value I compute number of base and bonus tokens - sum of base and bonus is took out of the twoKeyCampaignInvent
+        Conversion memory c = Conversion(_from, payout, msg.sender, false, false, assetName, assetContract, _amount, CampaignType.CPA_FUNGIBLE, now, now + expiryConversion * 1 days);
+
+
+        // move funds
+        // rename to remove from inventory
+        campaignInventoryUnitsBalance = campaignInventoryUnitsBalance - _amount;
+        //		removeFungibleAssets(_tokenID, _assetContract, _amount);
+
+        //tokenID can be string specifying the name of token ("ETH", "BTC",etc)
+        // value in escrow (msg.value), total amount of tokens
 //        twoKeyEventSource.escrow(address(this), msg.sender, _assetName, _assetContract, _amount, CampaignType.CPA_FUNGIBLE);
-//        conversions[msg.sender] = c;
-//    }
+        conversions[msg.sender] = c;
+    }
 
     function buyFromWithTwoKey(address _from, string _assetName, address _assetContract, uint256 _amount) public payable {
         fulfillFungibleTwoKeyToken(_from, _assetName, _assetContract, _amount);
