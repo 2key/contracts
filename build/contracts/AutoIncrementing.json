@@ -3,22 +3,22 @@
   "abi": [],
   "bytecode": "0x604c602c600b82828239805160001a60731460008114601c57601e565bfe5b5030600052607381538281f30073000000000000000000000000000000000000000030146080604052600080fd00a165627a7a72305820333325c4c05f91caa5534a2d7a41e60a0fe6063df62713121adb03f273e6dbde0029",
   "deployedBytecode": "0x73000000000000000000000000000000000000000030146080604052600080fd00a165627a7a72305820333325c4c05f91caa5534a2d7a41e60a0fe6063df62713121adb03f273e6dbde0029",
-  "sourceMap": "693:245:35:-;;132:2:-1;166:7;155:9;146:7;137:37;252:7;246:14;243:1;238:23;232:4;229:33;270:1;265:20;;;;222:63;;265:20;274:9;222:63;;298:9;295:1;288:20;328:4;319:7;311:22;352:7;343;336:24",
-  "deployedSourceMap": "693:245:35:-;;;;;;;;",
+  "sourceMap": "693:245:36:-;;132:2:-1;166:7;155:9;146:7;137:37;252:7;246:14;243:1;238:23;232:4;229:33;270:1;265:20;;;;222:63;;265:20;274:9;222:63;;298:9;295:1;288:20;328:4;319:7;311:22;352:7;343;336:24",
+  "deployedSourceMap": "693:245:36:-;;;;;;;;",
   "source": "pragma solidity ^0.4.24;\n\n\n/**\n * @title AutoIncrementing\n * @author Matt Condon (@shrugs)\n * @dev Provides an auto-incrementing uint256 id acquired by the `Counter#nextId` getter.\n * Use this for issuing ERC721Token ids or keeping track of request ids, anything you want, really.\n *\n * Include with `using AutoIncrementing for AutoIncrementing.Counter;`\n * @notice Does not allow an Id of 0, which is popularly used to signify a null state in solidity.\n * Does not protect from overflows, but if you have 2^256 ids, you have other problems.\n * (But actually, it's generally impossible to increment a counter this many times, energy wise\n * so it's not something you have to worry about.)\n */\nlibrary AutoIncrementing {\n\n  struct Counter {\n    uint256 prevId; // default: 0\n  }\n\n  function nextId(Counter storage _counter)\n    internal\n    returns (uint256)\n  {\n    _counter.prevId = _counter.prevId + 1;\n    return _counter.prevId;\n  }\n}\n",
   "sourcePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/AutoIncrementing.sol",
   "ast": {
     "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/AutoIncrementing.sol",
     "exportedSymbols": {
       "AutoIncrementing": [
-        7347
+        7237
       ]
     },
-    "id": 7348,
+    "id": 7238,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 7323,
+        "id": 7213,
         "literals": [
           "solidity",
           "^",
@@ -26,7 +26,7 @@
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:24:35"
+        "src": "0:24:36"
       },
       {
         "baseContracts": [],
@@ -34,24 +34,24 @@
         "contractKind": "library",
         "documentation": "@title AutoIncrementing\n@author Matt Condon (@shrugs)\n@dev Provides an auto-incrementing uint256 id acquired by the `Counter#nextId` getter.\nUse this for issuing ERC721Token ids or keeping track of request ids, anything you want, really.\n * Include with `using AutoIncrementing for AutoIncrementing.Counter;`\n@notice Does not allow an Id of 0, which is popularly used to signify a null state in solidity.\nDoes not protect from overflows, but if you have 2^256 ids, you have other problems.\n(But actually, it's generally impossible to increment a counter this many times, energy wise\nso it's not something you have to worry about.)",
         "fullyImplemented": true,
-        "id": 7347,
+        "id": 7237,
         "linearizedBaseContracts": [
-          7347
+          7237
         ],
         "name": "AutoIncrementing",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "canonicalName": "AutoIncrementing.Counter",
-            "id": 7326,
+            "id": 7216,
             "members": [
               {
                 "constant": false,
-                "id": 7325,
+                "id": 7215,
                 "name": "prevId",
                 "nodeType": "VariableDeclaration",
-                "scope": 7326,
-                "src": "744:14:35",
+                "scope": 7216,
+                "src": "744:14:36",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -59,10 +59,10 @@
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 7324,
+                  "id": 7214,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "744:7:35",
+                  "src": "744:7:36",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -74,20 +74,20 @@
             ],
             "name": "Counter",
             "nodeType": "StructDefinition",
-            "scope": 7347,
-            "src": "723:54:35",
+            "scope": 7237,
+            "src": "723:54:36",
             "visibility": "public"
           },
           {
             "body": {
-              "id": 7345,
+              "id": 7235,
               "nodeType": "Block",
-              "src": "860:76:35",
+              "src": "860:76:36",
               "statements": [
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 7340,
+                    "id": 7230,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -96,26 +96,26 @@
                       "argumentTypes": null,
                       "expression": {
                         "argumentTypes": null,
-                        "id": 7333,
+                        "id": 7223,
                         "name": "_counter",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7328,
-                        "src": "866:8:35",
+                        "referencedDeclaration": 7218,
+                        "src": "866:8:36",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_Counter_$7326_storage_ptr",
+                          "typeIdentifier": "t_struct$_Counter_$7216_storage_ptr",
                           "typeString": "struct AutoIncrementing.Counter storage pointer"
                         }
                       },
-                      "id": 7335,
+                      "id": 7225,
                       "isConstant": false,
                       "isLValue": true,
                       "isPure": false,
                       "lValueRequested": true,
                       "memberName": "prevId",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 7325,
-                      "src": "866:15:35",
+                      "referencedDeclaration": 7215,
+                      "src": "866:15:36",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -129,7 +129,7 @@
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       },
-                      "id": 7339,
+                      "id": 7229,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -138,26 +138,26 @@
                         "argumentTypes": null,
                         "expression": {
                           "argumentTypes": null,
-                          "id": 7336,
+                          "id": 7226,
                           "name": "_counter",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 7328,
-                          "src": "884:8:35",
+                          "referencedDeclaration": 7218,
+                          "src": "884:8:36",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_struct$_Counter_$7326_storage_ptr",
+                            "typeIdentifier": "t_struct$_Counter_$7216_storage_ptr",
                             "typeString": "struct AutoIncrementing.Counter storage pointer"
                           }
                         },
-                        "id": 7337,
+                        "id": 7227,
                         "isConstant": false,
                         "isLValue": true,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "prevId",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 7325,
-                        "src": "884:15:35",
+                        "referencedDeclaration": 7215,
+                        "src": "884:15:36",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -168,14 +168,14 @@
                       "rightExpression": {
                         "argumentTypes": null,
                         "hexValue": "31",
-                        "id": 7338,
+                        "id": 7228,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": true,
                         "kind": "number",
                         "lValueRequested": false,
                         "nodeType": "Literal",
-                        "src": "902:1:35",
+                        "src": "902:1:36",
                         "subdenomination": null,
                         "typeDescriptions": {
                           "typeIdentifier": "t_rational_1_by_1",
@@ -183,61 +183,61 @@
                         },
                         "value": "1"
                       },
-                      "src": "884:19:35",
+                      "src": "884:19:36",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "866:37:35",
+                    "src": "866:37:36",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "id": 7341,
+                  "id": 7231,
                   "nodeType": "ExpressionStatement",
-                  "src": "866:37:35"
+                  "src": "866:37:36"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
                     "expression": {
                       "argumentTypes": null,
-                      "id": 7342,
+                      "id": 7232,
                       "name": "_counter",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 7328,
-                      "src": "916:8:35",
+                      "referencedDeclaration": 7218,
+                      "src": "916:8:36",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Counter_$7326_storage_ptr",
+                        "typeIdentifier": "t_struct$_Counter_$7216_storage_ptr",
                         "typeString": "struct AutoIncrementing.Counter storage pointer"
                       }
                     },
-                    "id": 7343,
+                    "id": 7233,
                     "isConstant": false,
                     "isLValue": true,
                     "isPure": false,
                     "lValueRequested": false,
                     "memberName": "prevId",
                     "nodeType": "MemberAccess",
-                    "referencedDeclaration": 7325,
-                    "src": "916:15:35",
+                    "referencedDeclaration": 7215,
+                    "src": "916:15:36",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 7332,
-                  "id": 7344,
+                  "functionReturnParameters": 7222,
+                  "id": 7234,
                   "nodeType": "Return",
-                  "src": "909:22:35"
+                  "src": "909:22:36"
                 }
               ]
             },
             "documentation": null,
-            "id": 7346,
+            "id": 7236,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -245,31 +245,31 @@
             "name": "nextId",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7329,
+              "id": 7219,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7328,
+                  "id": 7218,
                   "name": "_counter",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7346,
-                  "src": "797:24:35",
+                  "scope": 7236,
+                  "src": "797:24:36",
                   "stateVariable": false,
                   "storageLocation": "storage",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Counter_$7326_storage_ptr",
+                    "typeIdentifier": "t_struct$_Counter_$7216_storage_ptr",
                     "typeString": "struct AutoIncrementing.Counter"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 7327,
+                    "id": 7217,
                     "name": "Counter",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 7326,
-                    "src": "797:7:35",
+                    "referencedDeclaration": 7216,
+                    "src": "797:7:36",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Counter_$7326_storage_ptr",
+                      "typeIdentifier": "t_struct$_Counter_$7216_storage_ptr",
                       "typeString": "struct AutoIncrementing.Counter"
                     }
                   },
@@ -277,20 +277,20 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "796:26:35"
+              "src": "796:26:36"
             },
             "payable": false,
             "returnParameters": {
-              "id": 7332,
+              "id": 7222,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7331,
+                  "id": 7221,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7346,
-                  "src": "849:7:35",
+                  "scope": 7236,
+                  "src": "849:7:36",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -298,10 +298,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7330,
+                    "id": 7220,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "849:7:35",
+                    "src": "849:7:36",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -311,33 +311,33 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "848:9:35"
+              "src": "848:9:36"
             },
-            "scope": 7347,
-            "src": "781:155:35",
+            "scope": 7237,
+            "src": "781:155:36",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "internal"
           }
         ],
-        "scope": 7348,
-        "src": "693:245:35"
+        "scope": 7238,
+        "src": "693:245:36"
       }
     ],
-    "src": "0:939:35"
+    "src": "0:939:36"
   },
   "legacyAST": {
     "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/AutoIncrementing.sol",
     "exportedSymbols": {
       "AutoIncrementing": [
-        7347
+        7237
       ]
     },
-    "id": 7348,
+    "id": 7238,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 7323,
+        "id": 7213,
         "literals": [
           "solidity",
           "^",
@@ -345,7 +345,7 @@
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:24:35"
+        "src": "0:24:36"
       },
       {
         "baseContracts": [],
@@ -353,24 +353,24 @@
         "contractKind": "library",
         "documentation": "@title AutoIncrementing\n@author Matt Condon (@shrugs)\n@dev Provides an auto-incrementing uint256 id acquired by the `Counter#nextId` getter.\nUse this for issuing ERC721Token ids or keeping track of request ids, anything you want, really.\n * Include with `using AutoIncrementing for AutoIncrementing.Counter;`\n@notice Does not allow an Id of 0, which is popularly used to signify a null state in solidity.\nDoes not protect from overflows, but if you have 2^256 ids, you have other problems.\n(But actually, it's generally impossible to increment a counter this many times, energy wise\nso it's not something you have to worry about.)",
         "fullyImplemented": true,
-        "id": 7347,
+        "id": 7237,
         "linearizedBaseContracts": [
-          7347
+          7237
         ],
         "name": "AutoIncrementing",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "canonicalName": "AutoIncrementing.Counter",
-            "id": 7326,
+            "id": 7216,
             "members": [
               {
                 "constant": false,
-                "id": 7325,
+                "id": 7215,
                 "name": "prevId",
                 "nodeType": "VariableDeclaration",
-                "scope": 7326,
-                "src": "744:14:35",
+                "scope": 7216,
+                "src": "744:14:36",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -378,10 +378,10 @@
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 7324,
+                  "id": 7214,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "744:7:35",
+                  "src": "744:7:36",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -393,20 +393,20 @@
             ],
             "name": "Counter",
             "nodeType": "StructDefinition",
-            "scope": 7347,
-            "src": "723:54:35",
+            "scope": 7237,
+            "src": "723:54:36",
             "visibility": "public"
           },
           {
             "body": {
-              "id": 7345,
+              "id": 7235,
               "nodeType": "Block",
-              "src": "860:76:35",
+              "src": "860:76:36",
               "statements": [
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 7340,
+                    "id": 7230,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -415,26 +415,26 @@
                       "argumentTypes": null,
                       "expression": {
                         "argumentTypes": null,
-                        "id": 7333,
+                        "id": 7223,
                         "name": "_counter",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7328,
-                        "src": "866:8:35",
+                        "referencedDeclaration": 7218,
+                        "src": "866:8:36",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_Counter_$7326_storage_ptr",
+                          "typeIdentifier": "t_struct$_Counter_$7216_storage_ptr",
                           "typeString": "struct AutoIncrementing.Counter storage pointer"
                         }
                       },
-                      "id": 7335,
+                      "id": 7225,
                       "isConstant": false,
                       "isLValue": true,
                       "isPure": false,
                       "lValueRequested": true,
                       "memberName": "prevId",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 7325,
-                      "src": "866:15:35",
+                      "referencedDeclaration": 7215,
+                      "src": "866:15:36",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -448,7 +448,7 @@
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       },
-                      "id": 7339,
+                      "id": 7229,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -457,26 +457,26 @@
                         "argumentTypes": null,
                         "expression": {
                           "argumentTypes": null,
-                          "id": 7336,
+                          "id": 7226,
                           "name": "_counter",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 7328,
-                          "src": "884:8:35",
+                          "referencedDeclaration": 7218,
+                          "src": "884:8:36",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_struct$_Counter_$7326_storage_ptr",
+                            "typeIdentifier": "t_struct$_Counter_$7216_storage_ptr",
                             "typeString": "struct AutoIncrementing.Counter storage pointer"
                           }
                         },
-                        "id": 7337,
+                        "id": 7227,
                         "isConstant": false,
                         "isLValue": true,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "prevId",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 7325,
-                        "src": "884:15:35",
+                        "referencedDeclaration": 7215,
+                        "src": "884:15:36",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -487,14 +487,14 @@
                       "rightExpression": {
                         "argumentTypes": null,
                         "hexValue": "31",
-                        "id": 7338,
+                        "id": 7228,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": true,
                         "kind": "number",
                         "lValueRequested": false,
                         "nodeType": "Literal",
-                        "src": "902:1:35",
+                        "src": "902:1:36",
                         "subdenomination": null,
                         "typeDescriptions": {
                           "typeIdentifier": "t_rational_1_by_1",
@@ -502,61 +502,61 @@
                         },
                         "value": "1"
                       },
-                      "src": "884:19:35",
+                      "src": "884:19:36",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "866:37:35",
+                    "src": "866:37:36",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "id": 7341,
+                  "id": 7231,
                   "nodeType": "ExpressionStatement",
-                  "src": "866:37:35"
+                  "src": "866:37:36"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
                     "expression": {
                       "argumentTypes": null,
-                      "id": 7342,
+                      "id": 7232,
                       "name": "_counter",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 7328,
-                      "src": "916:8:35",
+                      "referencedDeclaration": 7218,
+                      "src": "916:8:36",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Counter_$7326_storage_ptr",
+                        "typeIdentifier": "t_struct$_Counter_$7216_storage_ptr",
                         "typeString": "struct AutoIncrementing.Counter storage pointer"
                       }
                     },
-                    "id": 7343,
+                    "id": 7233,
                     "isConstant": false,
                     "isLValue": true,
                     "isPure": false,
                     "lValueRequested": false,
                     "memberName": "prevId",
                     "nodeType": "MemberAccess",
-                    "referencedDeclaration": 7325,
-                    "src": "916:15:35",
+                    "referencedDeclaration": 7215,
+                    "src": "916:15:36",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 7332,
-                  "id": 7344,
+                  "functionReturnParameters": 7222,
+                  "id": 7234,
                   "nodeType": "Return",
-                  "src": "909:22:35"
+                  "src": "909:22:36"
                 }
               ]
             },
             "documentation": null,
-            "id": 7346,
+            "id": 7236,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -564,31 +564,31 @@
             "name": "nextId",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7329,
+              "id": 7219,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7328,
+                  "id": 7218,
                   "name": "_counter",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7346,
-                  "src": "797:24:35",
+                  "scope": 7236,
+                  "src": "797:24:36",
                   "stateVariable": false,
                   "storageLocation": "storage",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Counter_$7326_storage_ptr",
+                    "typeIdentifier": "t_struct$_Counter_$7216_storage_ptr",
                     "typeString": "struct AutoIncrementing.Counter"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 7327,
+                    "id": 7217,
                     "name": "Counter",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 7326,
-                    "src": "797:7:35",
+                    "referencedDeclaration": 7216,
+                    "src": "797:7:36",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Counter_$7326_storage_ptr",
+                      "typeIdentifier": "t_struct$_Counter_$7216_storage_ptr",
                       "typeString": "struct AutoIncrementing.Counter"
                     }
                   },
@@ -596,20 +596,20 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "796:26:35"
+              "src": "796:26:36"
             },
             "payable": false,
             "returnParameters": {
-              "id": 7332,
+              "id": 7222,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7331,
+                  "id": 7221,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7346,
-                  "src": "849:7:35",
+                  "scope": 7236,
+                  "src": "849:7:36",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -617,10 +617,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7330,
+                    "id": 7220,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "849:7:35",
+                    "src": "849:7:36",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -630,20 +630,20 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "848:9:35"
+              "src": "848:9:36"
             },
-            "scope": 7347,
-            "src": "781:155:35",
+            "scope": 7237,
+            "src": "781:155:36",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "internal"
           }
         ],
-        "scope": 7348,
-        "src": "693:245:35"
+        "scope": 7238,
+        "src": "693:245:36"
       }
     ],
-    "src": "0:939:35"
+    "src": "0:939:36"
   },
   "compiler": {
     "name": "solc",
@@ -651,5 +651,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
-  "updatedAt": "2018-09-03T22:41:14.804Z"
+  "updatedAt": "2018-09-04T12:07:23.499Z"
 }
