@@ -4,8 +4,6 @@ import '../openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import "./RBACWithAdmin.sol";
 import "./TwoKeyAdmin.sol";
 
-/// TODO: Add address maintainer which will be able to update mappings for user
-/// TODO: modifier admin | maintener
 contract TwoKeyReg is Ownable, RBACWithAdmin {
 
   /// Address of 2key event source contract which will have permission to write on this contract
@@ -22,7 +20,7 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
     require(msg.sender == twoKeyEventSource);
     _;
   }
-
+  /// TODO: (Amit) Put this modifier on methods where required
   /// Modifier which will allow only 2keyAdmin or maintener to invoke function calls
   modifier onlyTwoKeyAuthorized {
     require(msg.sender == address(twoKeyAdminContract) || msg.sender == maintainer);
