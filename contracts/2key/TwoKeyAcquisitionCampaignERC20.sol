@@ -6,6 +6,7 @@ import "./TwoKeyCampaignARC.sol";
 import "./TwoKeyEventSource.sol";
 import "./TwoKeyWhitelisted.sol";
 import './TwoKeyEconomy.sol';
+import "../interfaces/IERC20.sol";
 
 /// @author Nikola Madjarevic
 /// Contract which will represent campaign for the fungible assets
@@ -35,9 +36,9 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
 
 
     mapping (address => Conversion) public conversions;
-    mapping (address => uint) balances;
+    mapping (address => uint) balancesConvertersETH;
 
-    uint campaign_balance; // balance will represent how many that tokens we have on our Campaign
+    uint campaignInventoryUnitsBalance; // balance will represent how many that tokens (erc20) we have on our Campaign
     address assetContract; //asset contract is address of that ERC20 inventory
 
     // TwoKeyEventSource contract is instantiated in TwoKeyARC
@@ -140,27 +141,35 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
         );
 
         /// Add amount of assets to our contract balance tracking
-        /// TODO: Do we need to track this?
-        balances[msg.sender] += _amount;
-
-        campaign_balance += _amount;
+//        balances[msg.sender] += _amount;
+        campaignInventoryUnitsBalance += _amount;
         return true;
     }
 
-    /// @notice Move some amount of ERC20 from our catalogue to someone
+    function checkInventoryBalance() public view returns (uint) {
+        uint balance = IERC20(assetContract).balanceOf(address(this));
+        return balance;
+    }
+
+    function checkAndUpdateInventoryBalance() public returns (uint) {
+        uint balance = checkInventoryBalance();
+        campaignInventoryUnitsBalance = balance;
+        return balance;
+    }
+    /// @notice Move some amount of ERC20 from our campaignInventoryUnitsBalance to someone
     /// @dev internal function
     /// @param _to address we're sending the amount of ERC20
     /// @param _amount is the amount of ERC20's we're going to transfer
     /// @return true if successful, otherwise reverts
     function moveFungibleAsset(address _to, uint256 _amount) internal returns (bool) {
-        require(campaign_balance >= _amount);
+        require(campaignInventoryUnitsBalance >= _amount);
         require(
             assetContract.call(
                 bytes4(keccak256(abi.encodePacked("transfer(address,uint256)"))),
                 _to, _amount
             )
         );
-        campaign_balance = campaign_balance - _amount;
+        campaignInventoryUnitsBalance = campaignInventoryUnitsBalance - _amount;
         return true;
     }
 
@@ -170,15 +179,9 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
     function transferFungibleAsset(address _to, uint256 _amount) public returns (bool) {
         return moveFungibleAsset(_to, _amount);
     }
-
-
-    // TODO: What is this method going to do ?
-    function expireFungible(address _to, uint256 _amount)  public returns (bool) {
-        moveFungibleAsset(_to, _amount);
-        emit Expired(address(this));
-        return true;
-    }
-
+    // TODO: Udis code which sends rewards etc get it
+    // TODO: Expiry of conversion event (Two-steps for conversion user puts in ether, and converter being approved by KYC)
+    // TODO: When conversion happens, there's timeout where converter can be approved, otherwise everything's transfered to contractor
 
     /// I wanna pay for something with TwoKey tokens
     /// Amount should be the amount of twokey tokens
@@ -198,10 +201,35 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
 
         Conversion memory c = Conversion(_from, _amount, msg.sender, false, false, _assetName, _assetContract, units, CampaignType.CPA_FUNGIBLE, now, now + expiryConversion * 1 minutes);
         // move funds
-        campaign_balance = campaign_balance - units;
+        campaignInventoryUnitsBalance = campaignInventoryUnitsBalance - units;
 //        twoKeyEventSource.escrow(address(this), msg.sender, _assetName, _assetContract, units, CampaignType.CPA_FUNGIBLE);
         conversions[msg.sender] = c;
     }
+
+//    function fulfillFungibleETH(
+//        address _from,
+//        uint256 _amountETH) isOngoing internal {
+//        // TODO: Idea is that payout is msg.value
+//        // Compute for the amount of ether how much tokens can be got by the amount
+//        require(_amount > 0 && price > 0);
+//        uint256 payout = price.mul(_amount);
+//        require(msg.value == payout);
+//        //TODO: Someone put 100 eth and he's entitled to X base + Y bonus  = (X+Y) taken from Inventory
+//        //TODO: Take the msg.value, and regarding value I compute number of base and bonus tokens - sum of base and bonus is took out of the twoKeyCampaignInvent
+//        Conversion memory c = Conversion(_from, payout, msg.sender, false, false, _assetName, _assetContract, _amount, CampaignType.CPA_FUNGIBLE, now, now + expiryConversion * 1 days);
+//
+//
+//        // move funds
+//        // rename to remove from inventory
+//        campaignInventoryUnitsBalance = campaignInventoryUnitsBalance - _amount;
+//        //		removeFungibleAssets(_tokenID, _assetContract, _amount);
+//
+//
+//        //tokenID can be string specifying the name of token ("ETH", "BTC",etc)
+//        // value in escrow (msg.value), total amount of tokens
+//        twoKeyEventSource.escrow(address(this), msg.sender, _assetName, _assetContract, _amount, CampaignType.CPA_FUNGIBLE);
+//        conversions[msg.sender] = c;
+//    }
 
     function buyFromWithTwoKey(address _from, string _assetName, address _assetContract, uint256 _amount) public payable {
         fulfillFungibleTwoKeyToken(_from, _assetName, _assetContract, _amount);
@@ -288,7 +316,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
     /// @dev will emit an event with address and value sent
     function () external payable {
         require(msg.value > 0);
-        balances[msg.sender] += msg.value;
+        balancesConvertersETH[msg.sender] += msg.value;
+//        fulfillFungibleETH(from, msg.value);
         emit ReceivedEther(msg.sender, msg.value);
     }
 
@@ -296,13 +325,13 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
     /// @param _from is the address we'd like to check balance
     /// @return amount of ether sent to contract from the specified address
     function checkAmountAddressSent(address _from) public view returns (uint) {
-        return balances[_from];
+        return balancesConvertersETH[_from];
     }
 
     /// @notice Function to check contract balance of specified ERC20 tokens
     /// @return balance
     function getContractBalance() public view returns(uint) {
-        return campaign_balance;
+        return campaignInventoryUnitsBalance;
     }
 
     /// @notice View function to fetch the address of asset contract
@@ -310,7 +339,5 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
     function getAssetContractAddress() public view returns(address) {
         return assetContract;
     }
-
-//    function checkETHAmountSent
 
 }

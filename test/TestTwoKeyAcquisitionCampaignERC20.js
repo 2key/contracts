@@ -127,6 +127,7 @@ contract('TwoKeyAcquisitionCampaignERC20', async (accounts) => {
        let assetContract = await twoKeyAcquisitionCampaignERC20.getAssetContractAddress();
 
        assert.equal(erc20.address, assetContract, "asset contract is not added successfully");
+       console.log("Asset contract added to campaign");
 
     });
 
@@ -204,6 +205,11 @@ contract('TwoKeyAcquisitionCampaignERC20', async (accounts) => {
         let balance = await twoKeyEconomy.balanceOf(twoKeyAcquisitionCampaignERC20.address);
         assert.equal(balance, 2000, "balance is not well updated");
     });
+
+    it("should return balanceOf our contract in ERC20 contract", async() => {
+        let balanceOfERC20 = await twoKeyAcquisitionCampaignERC20.checkInventoryBalance();
+        assert.equal(balanceOfERC20, 700, "balance should be 700");
+    })
 
 
 });

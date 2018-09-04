@@ -50,11 +50,11 @@ contract TwoKeyCampaignETHCrowdsale is TwoKeyCampaignETH {
 	// TODO: buyFungibleFromWithEth
 	// address _from, uint256 _tokenID, address _assetContract, uint256 _amountOrIndex can be removed
 	// We don't need params, know who's sender and the amount is calculated with msg.value
-	function buyFromWithETH(address _from, string _assetName, address _assetContract, uint256 _amount) public payable {
-//	    buyTokens(address(this));
-//	    require(twoKeyCampaignInventory.addFungibleAsset(_tokenID, _assetContract, _amountOrIndex));
-	    buyFromWithETH(_from, _assetName, _assetContract, _amount, CampaignType.CPA_FUNGIBLE);
-	}	
+//	function buyFromWithETH(address _from, string _assetName, address _assetContract, uint256 _amount) public payable {
+////	    buyTokens(address(this));
+////	    require(twoKeyCampaignInventory.addFungibleAsset(_tokenID, _assetContract, _amountOrIndex));
+//	    buyFromWithETH(_from, _assetName, _assetContract, _amount, CampaignType.CPA_FUNGIBLE);
+//	}
 
 }
 
