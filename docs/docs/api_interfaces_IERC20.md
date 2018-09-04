@@ -1,0 +1,6 @@
+---
+id: interfaces_IERC20
+title: IERC20
+---
+
+<div class="contract-doc"><div class="contract"><h2 class="contract-header"><span class="contract-kind">contract</span> IERC20</h2><p class="description">Interface of ERC20 contract we need in order to invoke balanceOf method from another contracts.</p><div class="source">Source: <a href="git+https://github.com/2keynet/web3-alpha/blob/v0.0.1/contracts/interfaces/IERC20.sol" target="_blank">interfaces/IERC20.sol</a></div></div><div class="index"><h2>Index</h2><ul><li><a href="interfaces_IERC20.html#balanceOf">balanceOf</a></li></ul></div><div class="reference"><h2>Reference</h2><div class="functions"><h3>Functions</h3><ul><li><div class="item function"><span id="balanceOf" class="anchor-marker"></span><h4 class="name">balanceOf</h4><div class="body"><code class="signature"><span>abstract </span>function <strong>balanceOf</strong><span>(address whom) </span><span>public </span><span>view </span><span>returns  (uint) </span></code><hr/><dl><dt><span class="label-parameters">Parameters:</span></dt><dd><div><code>whom</code> - address</div></dd><dt><span class="label-return">Returns:</span></dt><dd>uint</dd></dl></div></div></li></ul></div></div></div>

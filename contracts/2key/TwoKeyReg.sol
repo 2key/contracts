@@ -4,12 +4,15 @@ import '../openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import "./RBACWithAdmin.sol";
 import "./TwoKeyAdmin.sol";
 
-
 contract TwoKeyReg is Ownable, RBACWithAdmin {
 
   /// Address of 2key event source contract which will have permission to write on this contract
   /// (Address is enough, there is no need to spend sufficient gas and instantiate whole contract)
   address twoKeyEventSource;
+
+  /// Address for contract maintainer
+  address maintainer;
+
   TwoKeyAdmin twoKeyAdminContract;
 
   /// Modifier which will allow only 2key event source to issue calls on selected methods
@@ -17,7 +20,12 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
     require(msg.sender == twoKeyEventSource);
     _;
   }
-
+  /// TODO: (Amit) Put this modifier on methods where required
+  /// Modifier which will allow only 2keyAdmin or maintener to invoke function calls
+  modifier onlyTwoKeyAuthorized {
+    require(msg.sender == address(twoKeyAdminContract) || msg.sender == maintainer);
+    _;
+  }
 
   constructor (address _twoKeyEventSource, address _twoKeyAdmin) RBACWithAdmin(_twoKeyAdmin)  public {
     require(_twoKeyEventSource != address(0));
