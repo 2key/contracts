@@ -155,7 +155,7 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
     emit UserNameChanged(_sender, _name);
   }
 
-  function addName(string _name, address _sender) onlyOwner public {
+  function addName(string _name, address _sender) onlyAdmin public {
     addNameInternal(_name, _sender);
   }
 

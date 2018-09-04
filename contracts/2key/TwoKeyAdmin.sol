@@ -113,6 +113,7 @@ contract TwoKeyAdmin is  Ownable, Destructible, AdminContract {
 		require(_address != address(0));
 		twoKeyEventSource.addAuthorizedAddress(_address);
 	}
+
 	function addTwoKeyEventSource(address _twoKeyEventSource) public {
 		require(_twoKeyEventSource != address(0));
 		twoKeyEventSource = TwoKeyEventSource(_twoKeyEventSource);
@@ -124,29 +125,30 @@ contract TwoKeyAdmin is  Ownable, Destructible, AdminContract {
 	}
 
 
+    function addNameToReg(string _name, address _addr) public {
+    	twoKeyReg.addName(_name, _addr);
+    }
+
 
 	// modifier for admin call check
 	//<TBD> may be owner
-
-
-
-
-	function setTwoKeyExchange(address _exchange) public adminsVotingApproved {
+    function setTwoKeyExchange(address _exchange) public adminsVotingApproved {
 		require(_exchange != address(0));
     	exchange = TwoKeyUpgradableExchange(exchange);
     	
     }
+
 	function setTwoKeyEconomy(address _economy) public   {
 		require(_economy != address(0));
 		economy = TwoKeyEconomy(_economy);
 
 	}
+
 	// modifier for admin call check
 	//<TBD> may be owner
     function getTwoKeyEconomy () public view  returns(address _economy)  {
     	return address(economy);
     }
-
 
 	// modifier for admin call check
 	//<TBD> may be owner
@@ -155,6 +157,7 @@ contract TwoKeyAdmin is  Ownable, Destructible, AdminContract {
 		twoKeyReg = TwoKeyReg(_address);
 
 	}
+
     // modifier for admin call check
 	//<TBD> may be owner
     function getTwoKeyReg () public view  returns(address _address)  {
