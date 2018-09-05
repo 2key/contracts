@@ -1,410 +1,402 @@
 const TwoKeyAdmin = artifacts.require("TwoKeyAdmin");
 const TwoKeyEconomy = artifacts.require("TwoKeyEconomy");
 const TwoKeyExchange = artifacts.require("TwoKeyUpgradableExchange");
-const ethers = require("./utils");
+const ERC20TokenMock = artifacts.require('ERC20TokenMock');
+const TwoKeyReg = artifacts.require('TwoKeyReg');
+const TwoKeyEventSource = artifacts.require('TwoKeyEventSource');
+//const ethers = require("./utils");
 
 contract('TwoKeyAdmin', async (accounts) => {
   let tryCatch = require("./exceptions.js").tryCatch;
   let errTypes = require("./exceptions.js").errTypes;
+
+    let adminContract;
+    let exchangeContract;
+    let erc20MockContract;
+    let economyContract;
+    let regContract;
+    let eventContract;
+    let deployerAddress = '0xb3FA520368f2Df7BED4dF5185101f303f6c7decc';
+    let not_admin = '0x22d491bde2303f2f43325b2108d26f1eaba1e32b';
+    
+    const null_address = '0x0000000000000000000000000000000000000000';   
+     
+    const BigNumber = web3.BigNumber;
+
+    before(async() => {
+          erc20MockContract = await ERC20TokenMock.new();
+          exchangeContract = await TwoKeyExchange.new(1, deployerAddress, erc20MockContract.address);
+    });
   
-  let electorateAdmins_address = accounts[0];
-  let coinbase = accounts[0];
-  let rate = 1;
+    //============================================================================================================
+    // TEST CASES FOR INITIAL
 
-  //const BigNumber = web3.BigNumber;
- // const tokens = new BigNumber(100);
-
-  const null_address = '0x0000000000000000000000000000000000000000';
-
-  //============================================================================================================
-  // TEST CASES FOR INITIAL
-
-  // Test Case: Passing null_address as Economy Address should revert
- it('Initial :: Null-Economy-Address-TestCase', async () => {
-    let economyObj = await TwoKeyEconomy.new({from: coinbase});
-    let economy_address = economyObj.address;
-    let exchangeObj = await TwoKeyExchange.new(rate, coinbase, economy_address, {from: coinbase});
-    let exchange_address = exchangeObj.address;
-    
-    //await TwoKeyAdmin.new(null_address, electorateAdmins_address, exchange_address, {from: coinbase});
-    await tryCatch(TwoKeyAdmin.new(null_address, electorateAdmins_address, exchange_address), errTypes.anyError);
-  });
-
- //  // Test Case: Passing null_address as ElectorateAdmins Address should revert  
-  it('Initial :: Null-ElectorateAdmins-Address-TestCase', async () => {
-    let economyObj = await TwoKeyEconomy.new({from: coinbase});
-    let economy_address = economyObj.address;
-    let exchangeObj = await TwoKeyExchange.new(rate, coinbase, economy_address, {from: coinbase});
-    let exchange_address = exchangeObj.address;
-
-    await tryCatch(TwoKeyAdmin.new(economy_address, null_address, exchange_address), errTypes.anyError);  
-  });
-
- //  // Test Case: Passing null_address as Exchange Address should revert  
-  it('Initial :: Null-Exchange-Address-TestCase', async () => {
-    let economyObj = await TwoKeyEconomy.new({from: coinbase});
-    let economy_address = economyObj.address;
-    let exchangeObj = await TwoKeyExchange.new(rate, coinbase, economy_address, {from: coinbase});
-    await tryCatch(TwoKeyAdmin.new(economy_address, electorateAdmins_address, null), errTypes.anyError)
-   // await tryCatch(TwoKeyAdmin.new(economy_address, electorateAdmins_address, null_address), errTypes.anyError);
-  });
-
-  // Test Case: Passing non null addresses in all three should not revert
-  it('Initial :: Non-Null-Parameters-TestCase', async () => {
-    let economyObj = await TwoKeyEconomy.new({from: coinbase});
-    let economy_address = economyObj.address;
-    let exchangeObj = await TwoKeyExchange.new(rate, coinbase, economy_address, {from: coinbase});
-    let exchange_address = exchangeObj.address;
-
-    await TwoKeyAdmin.new(economy_address, electorateAdmins_address, exchange_address, {from: coinbase});
-  });
-  //============================================================================================================
-  // TEST CASES FOR REPLACE
-
-  // Test Case: Passing null address as admincontract address should revert
-  it('Replace :: Passing-Null-Address-TestCase', async () => {
-    let economyObj = await TwoKeyEconomy.new({from: coinbase});
-    let economy_address = economyObj.address;
-    let exchangeObj = await TwoKeyExchange.new(rate, coinbase, economy_address, {from: coinbase});
-    let exchange_address = exchangeObj.address;
-
-    let admin = await TwoKeyAdmin.new(economy_address, electorateAdmins_address, exchange_address);
-    
-    await tryCatch(admin.replaceOneself(null_address), errTypes.anyError); // null address check is required in sol ! (here error is catched due to revert thrown by transfer)
-  });
-
-  // Test Case: Passing admincontract address which is already replaced once should revert
-  //Need to work on it after re code of Admin
-    it('Replace :: Already-Replaced-AdminContract-TestCase', async () => {
-      let economyObj = await TwoKeyEconomy.new({from: coinbase});
-      let economy_address = economyObj.address;
-      let exchangeObj = await TwoKeyExchange.new(rate, coinbase, economy_address, {from: coinbase});
-      let exchange_address = exchangeObj.address;
-
-      let admin = await TwoKeyAdmin.new(economy_address, electorateAdmins_address, exchange_address, {from: coinbase});
-
-      let new_economyObj = await TwoKeyEconomy.new({from: coinbase});
-      let new_economy_address = new_economyObj.address;
-      let new_exchangeObj = await TwoKeyExchange.new(rate, coinbase, new_economy_address, {from: coinbase});
-      let new_exchange_address = new_exchangeObj.address;
-
-      let new_admin = await TwoKeyAdmin.new(new_economy_address, electorateAdmins_address, new_exchange_address, {from: coinbase});
-      
-      await admin.replaceOneself(new_admin.address, {from: coinbase});  
-
-      await tryCatch(admin.replaceOneself(admin.address), errTypes.revert); 
+    // Test Case: Passing null_address as ElectorateAdmins Address should revert
+    it('Case 1 : Initial :: Null-Economy-Address-TestCase', async () => {
+          await tryCatch(TwoKeyAdmin.new(null_address, exchangeContract.address), errTypes.anyError); 
     });
 
-  // Test Case: Passing admincontract address which is not admin Voting Approved should revert
-  // create new accounts to test this case
-  it('Replace :: Address-Not-Approved-By-Admin-TestCase', async () => {
-    let economyObj = await TwoKeyEconomy.new({from: coinbase});
-    let economy_address = economyObj.address;
-    let exchangeObj = await TwoKeyExchange.new(rate, coinbase, economy_address, {from: coinbase});
-    let exchange_address = exchangeObj.address;
+    // Test Case: Passing null_address as Exchange Address should revert  
+    it('Case 2 : Initial :: Null-Exchange-Address-TestCase', async () => {
+          await tryCatch(TwoKeyAdmin.new(deployerAddress, null_address), errTypes.anyError)
+    });
 
-    let admin = await TwoKeyAdmin.new(economy_address, electorateAdmins_address, exchange_address);
-    electorateAdmins_address = accounts[2];
-    let not_admin = await TwoKeyAdmin.new(economy_address, electorateAdmins_address, exchange_address);
+    // Test Case: Passing non null addresses in all three should not revert
+    it('Case 3 : Initial :: Non-Null-Parameters-TestCase', async () => {
+          await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+    });
 
-    await tryCatch(not_admin.replaceOneself(admin.address), errTypes.anyError);  
-  });
+    //============================================================================================================
+    // TEST CASES FOR REPLACE
+
+    // Test Case: Passing null address as admincontract address should revert
+    it('Case 4 : Replace :: Passing-Null-Address-TestCase', async () => {
+          adminContract = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+          
+          await tryCatch(adminContract.replaceOneself(null_address), errTypes.anyError); // null address check is required in sol ! (here error is catched due to revert thrown by transfer)
+    });
+
+    // Test Case: Passing admincontract address which is already replaced once should revert
+    it('Case 5 : Replace :: Already-Replaced-AdminContract-TestCase', async () => {
+          adminContract = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+          economyContract = await TwoKeyEconomy.new(adminContract.address);
+          eventContract  =await TwoKeyEventSource.new(adminContract.address);
+          regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
+
+          exchangeContract_new = await TwoKeyExchange.new(1, deployerAddress, erc20MockContract.address);
+          adminContract_new = await TwoKeyAdmin.new(deployerAddress, exchangeContract_new.address);
+          
+          await adminContract.replaceOneself(adminContract_new.address);  
+          //await adminContract.replaceOneself(adminContract.address);  
+          //await tryCatch(adminContract.replaceOneself(adminContract_new.address), errTypes.anyError); 
+    });
+
+    // Test Case: Passing admincontract address which is not admin Voting Approved should revert
+    it('Case 6 : Replace :: Address-Not-Approved-By-Admin-TestCase', async () => {
+          adminContract = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+          economyContract = await TwoKeyEconomy.new(adminContract.address);
+          eventContract  =await TwoKeyEventSource.new(adminContract.address);
+          regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
+          
+          adminContract_new = await TwoKeyAdmin.new(not_admin, exchangeContract.address);
+          economyContract_new = await TwoKeyEconomy.new(adminContract_new.address);
+          eventContract_new  =await TwoKeyEventSource.new(adminContract_new.address);
+          regContract_new = await TwoKeyReg.new(eventContract_new.address, adminContract_new.address);
+
+          await tryCatch(adminContract_new.replaceOneself(adminContract.address), errTypes.anyError);  
+    });
+
+    // Test Case: Positive scenarios where Replace should work
+    // it('Case 7 : Replace', async () => {
+    //       adminContract = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+    //       economyContract = await TwoKeyEconomy.new(adminContract.address);
+    //       eventContract  =await TwoKeyEventSource.new(adminContract.address);
+    //       regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
+
+    //       adminContract_new = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+          
+    //       const adminContract_balance1 = await economyContract.balanceOf(adminContract.address);
+    //       const adminContract_balance1_string = JSON.stringify(adminContract_balance1);
+
+    //       await adminContract.replaceOneself(adminContract_new.address);
+
+    //       const adminContract_new_balance = await economyContract.balanceOf(adminContract_new.address);
+    //       const adminContract_new_balance_string = JSON.stringify(adminContract_new_balance); 
+
+    //       const adminContract_balance2 = await economyContract.balanceOf(adminContract.address);
+    //       const adminContract_balance2_string = JSON.stringify(adminContract_balance2); 
+
+    //       //const zero = JSON.stringify(0);
+
+    //       assert.equal(adminContract_balance1_string, adminContract_new_balance_string, "New Admin should have 1e+24 tokens");
+    //       //assert.equal(adminContract_balance2, 0, "Old admin contract balance should be zero after replace")
+    // });
+
+    it('Case 8 : To verify if TwoKeyEconomy is set to new_admin', async () => {
+          adminContract = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+          economyContract = await TwoKeyEconomy.new(adminContract.address);
+          eventContract  = await TwoKeyEventSource.new(adminContract.address);
+          regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
+
+          exchangeContract_new = await TwoKeyExchange.new(1, deployerAddress, erc20MockContract.address);
+          adminContract_new = await TwoKeyAdmin.new(deployerAddress, exchangeContract_new.address);
+
+          await adminContract.replaceOneself(adminContract_new.address); 
+          
+          let economyObj = await adminContract_new.getTwoKeyEconomy();
+          assert.equal(economyContract.address, economyObj, "TwoKeyEconomy Addresses should match"); 
+    });
+
+    it('Case 9 : To verify if TwoKeyReg is set to new_admin', async () => {
+          adminContract = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+          economyContract = await TwoKeyEconomy.new(adminContract.address);
+          eventContract  = await TwoKeyEventSource.new(adminContract.address);
+          regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
+
+          exchangeContract_new = await TwoKeyExchange.new(1, deployerAddress, erc20MockContract.address);
+          adminContract_new = await TwoKeyAdmin.new(deployerAddress, exchangeContract_new.address);
+
+          await adminContract.replaceOneself(adminContract_new.address); 
+          
+          let regObj = await adminContract_new.getTwoKeyReg();
+          assert.equal(regContract.address, regObj, "TwoKeyReg Addresses should match"); 
+    });
 
 
-  // Test Case: Positive scenarios where Replace should work
-  // Need to be taken care after re writing the admin contract
-  it('Replace', async () => {
-    let economyObj = await TwoKeyEconomy.new({from: coinbase});
-    let economy_address = economyObj.address;
-    let exchangeObj = await TwoKeyExchange.new(rate, coinbase, economy_address, {from: coinbase});
-    let exchange_address = exchangeObj.address;
+    //===================================================================================
+    // TEST CASES FOR transferByAdmin
 
-    let admin = await TwoKeyAdmin.new(economy_address, electorateAdmins_address, exchange_address);
-    let new_admin = await TwoKeyAdmin.new(economy_address, electorateAdmins_address, exchange_address);
+    it('Case 10 : transferByAdmins-null-address', async () => {
+          adminContract = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+          economyContract = await TwoKeyEconomy.new(adminContract.address);
+          eventContract  =await TwoKeyEventSource.new(adminContract.address);
+          regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
 
-    const adminContract_balance = web3.eth.getBalance(admin.address);
+          tokens = new BigNumber(100);
+          await tryCatch(adminContract.transferByAdmins(null_address, tokens), errTypes.anyError); 
+    });
 
-     await admin.replaceOneself(new_admin.address);
+    it('Case 11 : transferByAdmins-null-value', async () => {
+          adminContract = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+          economyContract = await TwoKeyEconomy.new(adminContract.address);
+          eventContract  =await TwoKeyEventSource.new(adminContract.address);
+          regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
+
+          tokens = new BigNumber(0);
+          await tryCatch(adminContract.transferByAdmins(deployerAddress, 0), errTypes.anyError); 
+    });
+  
+    // Test Case: When adminContract already replaced
+    it('Case 12 : transferByAdmins-adminContract-already-replaced', async () => {
+          adminContract = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+          economyContract = await TwoKeyEconomy.new(adminContract.address);
+          eventContract  = await TwoKeyEventSource.new(adminContract.address);
+          regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
+
+          exchangeContract_new = await TwoKeyExchange.new(1, deployerAddress, erc20MockContract.address);
+          adminContract_new = await TwoKeyAdmin.new(deployerAddress, exchangeContract_new.address);
+          economyContract_new = await TwoKeyEconomy.new(adminContract_new.address);
+          eventContract_new  = await TwoKeyEventSource.new(adminContract_new.address);
+          regContract_new = await TwoKeyReg.new(eventContract_new.address, adminContract_new.address);
+
+          await adminContract.replaceOneself(adminContract_new.address);
+          
+          await tryCatch(adminContract.transferByAdmins(deployerAddress, 1000), errTypes.anyError);
+    });
+    
+    // Test Case: When calling address not approved by admin
+    it('Case 13 : transferByAdmins-adminContract-not-approved-by-admin', async () => {
+          adminContract = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+          economyContract = await TwoKeyEconomy.new(adminContract.address);
+          eventContract  =await TwoKeyEventSource.new(adminContract.address);
+          regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
+
+          adminContract_new = await TwoKeyAdmin.new(not_admin, exchangeContract.address);
+          economyContract_new = await TwoKeyEconomy.new(adminContract_new.address);
+          eventContract_new  =await TwoKeyEventSource.new(adminContract_new.address);
+          regContract_new = await TwoKeyReg.new(eventContract_new.address, adminContract_new.address);
+      
+          await tryCatch(adminContract_new.transferByAdmins(deployerAddress, 100), errTypes.anyError); // revert is due to incorrect params
+    });
+
+    it('Case 14 : transferByAdmins', async () => {
+          adminContract = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+          economyContract = await TwoKeyEconomy.new(adminContract.address);
+          eventContract  =await TwoKeyEventSource.new(adminContract.address);
+          regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
+
+          address = not_admin;
+
+          await adminContract.transferByAdmins(address, 1000);
+
+          let not_admin_balance = await economyContract.balanceOf(not_admin);
+
+          assert.equal(not_admin_balance, 1000, "new address should have 1000 tokens in balance");
+    });
+
+  
+    // // // ========================================================================
+    // // // TEST CASES for Upgradable Exchange Method 
+
+    // // it('Case 15 : upgradeEconomyExchangeByAdmins', async () => {
+    // //       let adminContract = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+    // //       let exchangeContract_new = await TwoKeyExchange.new(1, deployerAddress, erc20MockContract.address);
+    // //       await adminContract.upgradeEconomyExchangeByAdmins(exchangeContract_new);   
+    // // });
+
+    // // // Test Case: null address
+    // // it('Case 16 : upgradeEconomyExchangeByAdmins-null-address', async () => {
+    // //     let adminContract = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+    // //     await tryCatch(adminContract.upgradeEconomyExchangeByAdmins(null_address), errTypes.anyError);
+    // // });
+
+    // //  // Test Case: wasNotReplaced = false
+    // //  // Need to redo after admin contract modification
+    // //  it('Case 17 : upgradeEconomyExchangeByAdmins-already-replaced', async () => {
+    // //   let economyObj = await TwoKeyEconomy.new({from:coinbase});
+    // //   let economy_address = economyObj.address;
+    // //   let exchangeObj = await TwoKeyExchange.new(rate, coinbase, economy_address, {from:coinbase});
+    // //   let exchange_address = exchangeObj.address;
+
+    // //   let admin = await TwoKeyAdmin.new(economy_address, electorateAdmins_address, exchange_address, {from:coinbase});
+    // //   let new_admin = await TwoKeyAdmin.new(economy_address, electorateAdmins_address, exchange_address, {from:coinbase});
+
+    // //   await admin.replaceOneself(new_admin.address);
+
+    // //   let exchangeObjNew = await TwoKeyExchange.new(rate, coinbase, economy_address);
+    // //   let exchange_new_address = exchangeObjNew.address;
+
+    // // //  await admin.upgradeEconomyExchangeByAdmins(exchange_new_address);   // error is expected
+    // //   await tryCatch(admin.upgradeEconomyExchangeByAdmins(exchange_new_address), errTypes.revert);
+    // // });
+
+    // // // Test Case: when admin not approve
+    // // it('Case 18 : upgradeEconomyExchangeByAdmins-not-approved-by-admin', async () => {
+    // //       let adminContract = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+    // //       let adminContract_new = await TwoKeyAdmin.new(not_admin, exchangeContract.address);
+
+    // //       let exchangeContract_new = await TwoKeyExchange.new(1, deployerAddress, erc20MockContract.address);
+    // //       // await not_admin.upgradeEconomyExchangeByAdmins(exchange_new_address);   // error is expected
+    // //       await tryCatch(adminContract_new.upgradeEconomyExchangeByAdmins(exchangeContract_new.address), errTypes.anyError);
+    // // });
+
+    //===================================================================================================
+    // TEST CASES for Transfer Ethers By Admin Method
+
+    it('Case 19 : transferEtherByAdmins', async () => {
+          adminContract = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+          economyContract = await TwoKeyEconomy.new(adminContract.address);
+          eventContract  =await TwoKeyEventSource.new(adminContract.address);
+          regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
+    
+          let address = not_admin;
+          let amount = 100;
+
+          await adminContract.send("100000");
+    
+          await adminContract.transferEtherByAdmins(address, amount);
+
+          let bal = await adminContract.getEtherBalanceOfAnAddress(address);
+          // how to check
+    });
+  
+    // Test Case: null address 
+    it('Case 20 : transferEtherByAdmins - null address', async () => {
+          adminContract = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+          economyContract = await TwoKeyEconomy.new(adminContract.address);
+          eventContract  =await TwoKeyEventSource.new(adminContract.address);
+          regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
+
+          const ethers = 10;
+          // await admin.transferEtherByAdmins(null_address, 1000000);  // error expected
+          await tryCatch(adminContract.transferEtherByAdmins(null_address, ethers), errTypes.anyError); // issue with the params
+    });
+
+    // Test Case: null value
+    it('Case 21 : transferEtherByAdmins - null value', async () => {
+          adminContract = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+          economyContract = await TwoKeyEconomy.new(adminContract.address);
+          eventContract  =await TwoKeyEventSource.new(adminContract.address);
+          regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
+
+          let address = not_admin;
    
-    let adminContract_new_balance = await web3.eth.getBalance(admin.address);
-    //assert.equal(true,false, 'admin address = '+ adminContract_balance+ ' ===========> '+ adminContract_new_balance); 
-    assert.equal(adminContract_balance, adminContract_new_balance, ' Message');     // balances are 0 still assertion fails    
-  });
+          const ethers = 0;
+          //await admin.transferEtherByAdmins(address1, 0);  // error expected
+          await tryCatch(adminContract.transferEtherByAdmins(deployerAddress, ethers), errTypes.anyError); // params issue 
+    });
 
-  //===================================================================================
-  // TEST CASES FOR transferByAdmin
+    // Test Case: wasNotReplaced
+    it('Case 22 : transferEtherByAdmins - already - replaced', async () => {
+          adminContract = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+          economyContract = await TwoKeyEconomy.new(adminContract.address);
+          eventContract  =await TwoKeyEventSource.new(adminContract.address);
+          regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
 
+          adminContract_new = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+          economyContract_new = await TwoKeyEconomy.new(adminContract_new.address);
+          eventContract_new  =await TwoKeyEventSource.new(adminContract_new.address);
+          regContract_new = await TwoKeyReg.new(eventContract_new.address, adminContract_new.address);
 
-  // Need to be taken care of after modifying admin contract (required Statement missing)
-  it('transferByAdmins-null-address', async () => {
-    let economyObj = await TwoKeyEconomy.new({from: coinbase});
-    let economy_address = economyObj.address;
-    let exchangeObj = await TwoKeyExchange.new(rate, coinbase, economy_address, {from: coinbase});
-    let exchange_address = exchangeObj.address;
+          await adminContract.replaceOneself(adminContract_new.address);
+       
+          address = not_admin;
+          //const ethers = new web3.BigNumber(1000); 
+          const ethers = 1000; 
 
-    let admin = await TwoKeyAdmin.new(economy_address, electorateAdmins_address, exchange_address);
+          //await admin.transferEtherByAdmins(address1, 10000);  // error expected
+          await tryCatch(adminContract.transferEtherByAdmins(address, ethers),errTypes.anyError); // TODO: solve param issue
+    });
+
+     // Test Case: admin not approve
+     it('Case 23 : transferEtherByAdmins -not-approved-by-admin', async () => {
+          adminContract = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+          economyContract = await TwoKeyEconomy.new(adminContract.address);
+          eventContract  =await TwoKeyEventSource.new(adminContract.address);
+          regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
+
+          adminContract_new = await TwoKeyAdmin.new(not_admin, exchangeContract.address);
+          economyContract_new = await TwoKeyEconomy.new(adminContract_new.address);
+          eventContract_new  =await TwoKeyEventSource.new(adminContract_new.address);
+          regContract_new = await TwoKeyReg.new(eventContract_new.address, adminContract_new.address);
+
+          let address = not_admin; 
+          const ethers = 1000; 
     
-    tokens = new web3.BigNumber(0);
-    //const balanceValue = await web3.eth.getBalance(coinbase);
-
-    //assert.equal(true, false, "==========> "+ balanceValue)
-
-   //await admin.transferByAdmins(coinbase, tokens);   // null address check is reuired in sol !
-   await tryCatch(admin.transferByAdmins(null_address, tokens), errTypes.anyError); // error is catched due to transfer or parameters are not passed correctly
-  });
-
-
-  // need to add require statement in sol
-  it('transferByAdmins-null-value', async () => {
-    let economyObj = await TwoKeyEconomy.new({from: coinbase});
-    let economy_address = economyObj.address;
-
-    let exchangeObj = await TwoKeyExchange.new(rate, coinbase, economy_address, {from:coinbase});
-    let exchange_address = exchangeObj.address;
-
-    let admin = await TwoKeyAdmin.new(economy_address, electorateAdmins_address, exchange_address, {from:coinbase});
-  
-//    await admin.transferByAdmins(wallet, 10);   // null value check is reuired in sol !
-    await tryCatch(admin.transferByAdmins(coinbase, 0), errTypes.anyError);   // error is catched due to transfer or parameters are not passed correctly
-  });
-  
-  // Test Case: When adminContract already replaced
-  // need to work on it after modifying admin contract
-  it('transferByAdmins-adminContract-already-replaced', async () => {
-    let economyObj = await TwoKeyEconomy.new();
-    let economy_address = economyObj.address;
-    let exchangeObj = await TwoKeyExchange.new(rate, wallet, economy_address);
-    let exchange_address = exchangeObj.address;
-
-    let admin = await TwoKeyAdmin.new(economy_address, electorateAdmins_address, exchange_address);
-    let new_admin = await TwoKeyAdmin.new(economy_address, electorateAdmins_address, exchange_address);
-    await admin.replaceOneself(new_admin);
-
-    //await admin.transferByAdmins(wallet, 1000000 );   // expected error -- add tryCatch
-    await tryCatch(admin.transferByAdmins(wallet, 1000000),errTypes.revert); // revert is due to incorrect parameters
-  });
-    
-  // Test Case: When calling address not approved by admin
-  it('transferByAdmins-adminContract-not-approved-by-admin', async () => {
-    let economyObj = await TwoKeyEconomy.new({from:coinbase});
-    let economy_address = economyObj.address;
-    let exchangeObj = await TwoKeyExchange.new(rate, coinbase, economy_address, {from:coinbase});
-    let exchange_address = exchangeObj.address;
-
-    let admin = await TwoKeyAdmin.new(economy_address, electorateAdmins_address, exchange_address, {from:coinbase});
-    electorateAdmins_address = accounts[2];
-    let not_admin = await TwoKeyAdmin.new(economy_address, electorateAdmins_address, exchange_address, {from:coinbase});
-
-    const tokens = new web3.BigNumber(1000);
-  //  await not_admin.transferByAdmins(wallet, 1000000 );   // expected error -- add tryCatch
-    await tryCatch(not_admin.transferByAdmins(coinbase, tokens ), errTypes.anyError); // revert is due to incorrect params
-  });
-
-// need to re work after admin modifications
-  it('transferByAdmins', async () => {
-    let economyObj = await TwoKeyEconomy.new();
-    let economy_address = economyObj.address;
-
-    let exchangeObj = await TwoKeyExchange.new(rate, wallet, economy_address);
-    let exchange_address = exchangeObj.address;
-
-    let admin = await TwoKeyAdmin.new(economy_address, electorateAdmins_address, exchange_address);
-
-    let address = accounts[2];
-    //let tokens = 1;
-
-    //let balance = await admin.getBalances(address);
-    //assert.equal(true, false, "==============================>" + balance);
-    await admin.transferByAdmins(address, 1);
-
-    // let address_balance = web3.eth.getBalance(address);
-    // let address_balance = economyObj.getBalances(wallet);
-    // assert.equal(true, false, 'address balance ========> '+ address_balance);
-  });
-
-  
-  // ========================================================================
-  // TEST CASES for Upgradable Exchange Method 
-
-  it('upgradeEconomyExchangeByAdmins', async () => {
-    let economyObj = await TwoKeyEconomy.new({from:coinbase});
-    let economy_address = economyObj.address;
-    let exchangeObj = await TwoKeyExchange.new(rate, coinbase, economy_address, {from:coinbase});
-    let exchange_address = exchangeObj.address;
-
-    let admin = await TwoKeyAdmin.new(economy_address, electorateAdmins_address, exchange_address, {from:coinbase});
-
-    let exchangeObjNew = await TwoKeyExchange.new(rate, coinbase, economy_address, {from:coinbase});
-    let exchange_new_address = exchangeObjNew.address;
-
-    await admin.upgradeEconomyExchangeByAdmins(exchange_new_address);   
-  });
-
-   // Test Case: null address
-   // require statement missing
-   it('upgradeEconomyExchangeByAdmins-null-address', async () => {
-    let economyObj = await TwoKeyEconomy.new({from:coinbase});
-    let economy_address = economyObj.address;
-    let exchangeObj = await TwoKeyExchange.new(rate, coinbase, economy_address, {from:coinbase});
-    let exchange_address = exchangeObj.address;
-
-    let admin = await TwoKeyAdmin.new(economy_address, electorateAdmins_address, exchange_address, {from:coinbase});
-
-  //  await admin.upgradeEconomyExchangeByAdmins(null_address);   // error is expected
-    await tryCatch(admin.upgradeEconomyExchangeByAdmins(null_address), errTypes.revert);
-  });
-
-   // Test Case: wasNotReplaced = false
-   // Need to redo after admin contract modification
-   it('upgradeEconomyExchangeByAdmins-already-replaced', async () => {
-    let economyObj = await TwoKeyEconomy.new({from:coinbase});
-    let economy_address = economyObj.address;
-    let exchangeObj = await TwoKeyExchange.new(rate, coinbase, economy_address, {from:coinbase});
-    let exchange_address = exchangeObj.address;
-
-    let admin = await TwoKeyAdmin.new(economy_address, electorateAdmins_address, exchange_address, {from:coinbase});
-    let new_admin = await TwoKeyAdmin.new(economy_address, electorateAdmins_address, exchange_address, {from:coinbase});
-
-    await admin.replaceOneself(new_admin.address);
-
-    let exchangeObjNew = await TwoKeyExchange.new(rate, coinbase, economy_address);
-    let exchange_new_address = exchangeObjNew.address;
-
-  //  await admin.upgradeEconomyExchangeByAdmins(exchange_new_address);   // error is expected
-    await tryCatch(admin.upgradeEconomyExchangeByAdmins(exchange_new_address), errTypes.revert);
-  });
-
-   // Test Case: when admin not approve
-   it('upgradeEconomyExchangeByAdmins-not-approved-by-admin', async () => {
-    let economyObj = await TwoKeyEconomy.new({from:coinbase});
-    let economy_address = economyObj.address;
-    let exchangeObj = await TwoKeyExchange.new(rate, coinbase, economy_address, {from:coinbase});
-    let exchange_address = exchangeObj.address;
-
-    let admin = await TwoKeyAdmin.new(economy_address, electorateAdmins_address, exchange_address, {from:coinbase});
-    
-    electorateAdmins_address = accounts[2];
-    let not_admin = await TwoKeyAdmin.new(economy_address, electorateAdmins_address, exchange_address, {from:coinbase});
-
-    let exchangeObjNew = await TwoKeyExchange.new(rate, coinbase, economy_address, {from:coinbase});
-    let exchange_new_address = exchangeObjNew.address;
-
-   // await not_admin.upgradeEconomyExchangeByAdmins(exchange_new_address);   // error is expected
-    await tryCatch(not_admin.upgradeEconomyExchangeByAdmins(exchange_new_address), errTypes.revert);
-  });
-
-   //===================================================================================================
-  // TEST CASES for Transfer Ethers By Admin Method
-
-  // Re work required
-  it('transferEtherByAdmins', async () => {
-    let economyObj = await TwoKeyEconomy.new({from:coinbase});
-    let economy_address = economyObj.address;
-    let exchangeObj = await TwoKeyExchange.new(rate, coinbase, economy_address, {from:coinbase});
-    let exchange_address = exchangeObj.address;
-
-    let admin = await TwoKeyAdmin.new(economy_address, electorateAdmins_address, exchange_address,{from:coinbase});
-
-    let address = accounts[1];
-    let amount = new BigNumber(100);
-
-    await admin.transferEtherByAdmins(address, amount);
-    
-    //assert.equal(true, false, "Address 0 =============> "+web3.eth.getBalance(accounts[0])+"Address 1 =============> "+web3.eth.getBalance(accounts[1]));
-  });
-  
-   // Test Case: null address 
-   it('transferEtherByAdmins - null address', async () => {
-    let economyObj = await TwoKeyEconomy.new({from:coinbase});
-    let economy_address = economyObj.address;
-    let exchangeObj = await TwoKeyExchange.new(rate, coinbase, economy_address, {from:coinbase});
-    let exchange_address = exchangeObj.address;
-
-    let admin = await TwoKeyAdmin.new(economy_address, electorateAdmins_address, exchange_address, {from:coinbase});
-
-    const ethers = new web3.BigNumber(10);
-    // await admin.transferEtherByAdmins(null_address, 1000000);  // error expected
-    await tryCatch(admin.transferEtherByAdmins(null_address, ethers),errTypes.anyError); // issue with the params
-  });
-
-  // Test Case: null value
-  it('transferEtherByAdmins - null value', async () => {
-    let economyObj = await TwoKeyEconomy.new({from:coinbase});
-    let economy_address = economyObj.address;
-    let exchangeObj = await TwoKeyExchange.new(rate, coinbase, economy_address, {from:coinbase});
-    let exchange_address = exchangeObj.address;
-
-    let admin = await TwoKeyAdmin.new(economy_address, electorateAdmins_address, exchange_address, {from:coinbase});
-    let address1 = accounts[1];
-
-    const ethers = new web3.BigNumber(0);
-    //await admin.transferEtherByAdmins(address1, 0);  // error expected
-    await tryCatch(admin.transferEtherByAdmins(coinbase, ethers),errTypes.anyError); // params issue 
-  });
-
-  // Test Case: wasNotReplaced
-  // need to redo after admin contract modifications
-  it('transferEtherByAdmins - already - replaced', async () => {
-    let economyObj = await TwoKeyEconomy.new();
-    let economy_address = economyObj.address;
-    let exchangeObj = await TwoKeyExchange.new(rate, wallet, economy_address);
-    let exchange_address = exchangeObj.address;
-
-    let admin = await TwoKeyAdmin.new(economy_address, electorateAdmins_address, exchange_address);
-    let new_admin = await TwoKeyAdmin.new(economy_address, electorateAdmins_address, exchange_address);
-    //await admin.replaceOneself(new_admin.address);
-    
-    let address1 = accounts[1];
-    const ethers = new web3.BigNumber(1000); 
-
-    //await admin.transferEtherByAdmins(address1, 10000);  // error expected
-    await tryCatch(admin.transferEtherByAdmins(address1, ethers),errTypes.revert); // TODO: solve param issue
-  });
-
-   // Test Case: admin not approve
-   it('transferEtherByAdmins -not-approved-by-admin', async () => {
-    let economyObj = await TwoKeyEconomy.new({from:coinbase});
-    let economy_address = economyObj.address;
-    let exchangeObj = await TwoKeyExchange.new(rate, coinbase, economy_address, {from:coinbase});
-    let exchange_address = exchangeObj.address;
-
-    let admin = await TwoKeyAdmin.new(economy_address, electorateAdmins_address, exchange_address, {from:coinbase});
-    electorateAdmins_address = accounts[2];
-    let not_admin = await TwoKeyAdmin.new(economy_address, electorateAdmins_address, exchange_address, {from:coinbase});
-    
-    let address1 = accounts[1];
-    const ethers = new web3.BigNumber(1000); 
-    
-    //await not_admin.transferEtherByAdmins(address1, 10000);  // error expected
-    await tryCatch(not_admin.transferEtherByAdmins(address1, ethers), errTypes.anyError); // param issue
-  });
+          await tryCatch(adminContract_new.transferEtherByAdmins(address, ethers), errTypes.anyError); // param issue
+    });
    
    // ==================================================================================================
 
-  // need to redo after admin contract
-  // it('payable-function', async () => {
-  //   let economyObj = await TwoKeyEconomy.new();
-  //   let economy_address = economyObj.address;
+    it('Case 24 : payable-function when not replaced', async () => {
+        adminContract = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+        economyContract = await TwoKeyEconomy.new(adminContract.address);
+        eventContract  =await TwoKeyEventSource.new(adminContract.address);
+        regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
 
-  //   let exchangeObj = await TwoKeyExchange.new(rate, wallet, economy_address);
-  //   let exchange_address = exchangeObj.address;
+        await adminContract.send("1000");
 
-  //   let admin = await TwoKeyAdmin.new(economy_address, electorateAdmins_address, exchange_address);
+        let bal = await adminContract.getEtherBalanceOfAnAddress(adminContract.address);
+        
+        assert.equal(bal, 1000, "Admin Contract ether balance should be equal to 100");
+    });
 
-  //   await admin.();
-  // });
+    it('Case 25 : payable-function when replaced', async () => {
+        adminContract = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+        economyContract = await TwoKeyEconomy.new(adminContract.address);
+        eventContract  =await TwoKeyEventSource.new(adminContract.address);
+        regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
+     
+        adminContract_new = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
 
-  it('destroy-function', async () => {
-    let economyObj = await TwoKeyEconomy.new({from:coinbase});
-    let economy_address = economyObj.address;
-    let exchangeObj = await TwoKeyExchange.new(rate, coinbase, economy_address, {from:coinbase});
-    let exchange_address = exchangeObj.address;
+        await adminContract.replaceOneself(adminContract_new.address);
 
-    let admin = await TwoKeyAdmin.new(economy_address, electorateAdmins_address, exchange_address, {from:coinbase});
+        await adminContract.send("1000");
 
-    await admin.destroy();
+        let bal = await adminContract.getEtherBalanceOfAnAddress(adminContract.address);
+        let bal2 = await adminContract_new.getEtherBalanceOfAnAddress(adminContract_new.address);
 
-    assert.equal(null_address, admin.address, "admin address should be undefined");
-  });
+        assert.equal(bal, 0, "Old Admin Address should have 0 ethers");
+        assert.equal(bal2, 1000, "New Admin Address should have 1000 ethers");
+    });
 
+
+    it('Case 26: destroy-function when admin not replaced', async () => {
+        adminContract = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+        economyContract = await TwoKeyEconomy.new(adminContract.address);
+        eventContract  =await TwoKeyEventSource.new(adminContract.address);
+        regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
+     
+        const deployerAddressBal1 = await adminContract.getEtherBalanceOfAnAddress(deployerAddress);  // 0
+        
+        await adminContract.send("10000");
+        const adminBal = await adminContract.getEtherBalanceOfAnAddress(adminContract.address); // 10000
+
+        await adminContract.destroy();
+
+        let admin_bal = await adminContract.getEtherBalanceOfAnAddress(adminContract.address); // 0
+        
+        assert.equal(adminBal, 10000, "Admin contract should have 10000 ethers before destroyed");
+        assert.equal(admin_bal, 0, "Admin contract should have 0 ethers after destroyed");
+    });
 });
