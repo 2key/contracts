@@ -98,14 +98,14 @@
     "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/ownership/HasNoEther.sol",
     "exportedSymbols": {
       "HasNoEther": [
-        9789
+        9831
       ]
     },
-    "id": 9790,
+    "id": 9832,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 9755,
+        "id": 9797,
         "literals": [
           "solidity",
           "^",
@@ -118,10 +118,10 @@
       {
         "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/ownership/Ownable.sol",
         "file": "./Ownable.sol",
-        "id": 9756,
+        "id": 9798,
         "nodeType": "ImportDirective",
-        "scope": 9790,
-        "sourceUnit": 10137,
+        "scope": 9832,
+        "sourceUnit": 10179,
         "src": "26:23:69",
         "symbolAliases": [],
         "unitAlias": ""
@@ -132,38 +132,38 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 9757,
+              "id": 9799,
               "name": "Ownable",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 10136,
+              "referencedDeclaration": 10178,
               "src": "511:7:69",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Ownable_$10136",
+                "typeIdentifier": "t_contract$_Ownable_$10178",
                 "typeString": "contract Ownable"
               }
             },
-            "id": 9758,
+            "id": 9800,
             "nodeType": "InheritanceSpecifier",
             "src": "511:7:69"
           }
         ],
         "contractDependencies": [
-          10136
+          10178
         ],
         "contractKind": "contract",
         "documentation": "@title Contracts that should not own Ether\n@author Remco Bloemen <remco@2π.com>\n@dev This tries to block incoming ether to prevent accidental loss of Ether. Should Ether end up\nin the contract, it will allow the owner to reclaim this Ether.\n@notice Ether can still be sent to this contract by:\ncalling functions labeled `payable`\n`selfdestruct(contract_address)`\nmining directly to the contract address",
         "fullyImplemented": true,
-        "id": 9789,
+        "id": 9831,
         "linearizedBaseContracts": [
-          9789,
-          10136
+          9831,
+          10178
         ],
         "name": "HasNoEther",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
-              "id": 9768,
+              "id": 9810,
               "nodeType": "Block",
               "src": "944:34:69",
               "statements": [
@@ -177,7 +177,7 @@
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
-                        "id": 9765,
+                        "id": 9807,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -186,18 +186,18 @@
                           "argumentTypes": null,
                           "expression": {
                             "argumentTypes": null,
-                            "id": 9762,
+                            "id": 9804,
                             "name": "msg",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 13269,
+                            "referencedDeclaration": 13311,
                             "src": "958:3:69",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_message",
                               "typeString": "msg"
                             }
                           },
-                          "id": 9763,
+                          "id": 9805,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -216,7 +216,7 @@
                         "rightExpression": {
                           "argumentTypes": null,
                           "hexValue": "30",
-                          "id": 9764,
+                          "id": 9806,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
@@ -245,21 +245,21 @@
                           "typeString": "bool"
                         }
                       ],
-                      "id": 9761,
+                      "id": 9803,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        13272,
-                        13273
+                        13314,
+                        13315
                       ],
-                      "referencedDeclaration": 13272,
+                      "referencedDeclaration": 13314,
                       "src": "950:7:69",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 9766,
+                    "id": 9808,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -273,14 +273,14 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 9767,
+                  "id": 9809,
                   "nodeType": "ExpressionStatement",
                   "src": "950:23:69"
                 }
               ]
             },
             "documentation": "@dev Constructor that rejects incoming Ether\nThe `payable` flag is added so we can access `msg.value` without compiler warning. If we\nleave out payable, then Solidity will allow inheriting contracts to implement a payable\nconstructor. By doing it this way we prevent a payable constructor from working. Alternatively\nwe could use assembly to access msg.value.",
-            "id": 9769,
+            "id": 9811,
             "implemented": true,
             "isConstructor": true,
             "isDeclaredConst": false,
@@ -288,19 +288,19 @@
             "name": "",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 9759,
+              "id": 9801,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "926:2:69"
             },
             "payable": true,
             "returnParameters": {
-              "id": 9760,
+              "id": 9802,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "944:0:69"
             },
-            "scope": 9789,
+            "scope": 9831,
             "src": "915:63:69",
             "stateMutability": "payable",
             "superFunction": null,
@@ -308,13 +308,13 @@
           },
           {
             "body": {
-              "id": 9772,
+              "id": 9814,
               "nodeType": "Block",
               "src": "1104:5:69",
               "statements": []
             },
             "documentation": "@dev Disallows direct send by setting a default function without the `payable` flag.",
-            "id": 9773,
+            "id": 9815,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -322,19 +322,19 @@
             "name": "",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 9770,
+              "id": 9812,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1092:2:69"
             },
             "payable": false,
             "returnParameters": {
-              "id": 9771,
+              "id": 9813,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1104:0:69"
             },
-            "scope": 9789,
+            "scope": 9831,
             "src": "1084:25:69",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -342,7 +342,7 @@
           },
           {
             "body": {
-              "id": 9787,
+              "id": 9829,
               "nodeType": "Block",
               "src": "1232:48:69",
               "statements": [
@@ -357,14 +357,14 @@
                           "arguments": [
                             {
                               "argumentTypes": null,
-                              "id": 9782,
+                              "id": 9824,
                               "name": "this",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 13472,
+                              "referencedDeclaration": 13514,
                               "src": "1261:4:69",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_contract$_HasNoEther_$9789",
+                                "typeIdentifier": "t_contract$_HasNoEther_$9831",
                                 "typeString": "contract HasNoEther"
                               }
                             }
@@ -372,11 +372,11 @@
                           "expression": {
                             "argumentTypes": [
                               {
-                                "typeIdentifier": "t_contract$_HasNoEther_$9789",
+                                "typeIdentifier": "t_contract$_HasNoEther_$9831",
                                 "typeString": "contract HasNoEther"
                               }
                             ],
-                            "id": 9781,
+                            "id": 9823,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": true,
@@ -389,7 +389,7 @@
                             },
                             "typeName": "address"
                           },
-                          "id": 9783,
+                          "id": 9825,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -403,7 +403,7 @@
                             "typeString": "address"
                           }
                         },
-                        "id": 9784,
+                        "id": 9826,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -427,18 +427,18 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 9778,
+                        "id": 9820,
                         "name": "owner",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 10054,
+                        "referencedDeclaration": 10096,
                         "src": "1238:5:69",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
                         }
                       },
-                      "id": 9780,
+                      "id": 9822,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -452,7 +452,7 @@
                         "typeString": "function (uint256)"
                       }
                     },
-                    "id": 9785,
+                    "id": 9827,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -466,28 +466,28 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 9786,
+                  "id": 9828,
                   "nodeType": "ExpressionStatement",
                   "src": "1238:37:69"
                 }
               ]
             },
             "documentation": "@dev Transfer all Ether held by the contract to the owner.",
-            "id": 9788,
+            "id": 9830,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
             "modifiers": [
               {
                 "arguments": null,
-                "id": 9776,
+                "id": 9818,
                 "modifierName": {
                   "argumentTypes": null,
-                  "id": 9775,
+                  "id": 9817,
                   "name": "onlyOwner",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 10084,
+                  "referencedDeclaration": 10126,
                   "src": "1222:9:69",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
@@ -501,26 +501,26 @@
             "name": "reclaimEther",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 9774,
+              "id": 9816,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1210:2:69"
             },
             "payable": false,
             "returnParameters": {
-              "id": 9777,
+              "id": 9819,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1232:0:69"
             },
-            "scope": 9789,
+            "scope": 9831,
             "src": "1189:91:69",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 9790,
+        "scope": 9832,
         "src": "488:794:69"
       }
     ],
@@ -530,14 +530,14 @@
     "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/ownership/HasNoEther.sol",
     "exportedSymbols": {
       "HasNoEther": [
-        9789
+        9831
       ]
     },
-    "id": 9790,
+    "id": 9832,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 9755,
+        "id": 9797,
         "literals": [
           "solidity",
           "^",
@@ -550,10 +550,10 @@
       {
         "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/ownership/Ownable.sol",
         "file": "./Ownable.sol",
-        "id": 9756,
+        "id": 9798,
         "nodeType": "ImportDirective",
-        "scope": 9790,
-        "sourceUnit": 10137,
+        "scope": 9832,
+        "sourceUnit": 10179,
         "src": "26:23:69",
         "symbolAliases": [],
         "unitAlias": ""
@@ -564,38 +564,38 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 9757,
+              "id": 9799,
               "name": "Ownable",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 10136,
+              "referencedDeclaration": 10178,
               "src": "511:7:69",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Ownable_$10136",
+                "typeIdentifier": "t_contract$_Ownable_$10178",
                 "typeString": "contract Ownable"
               }
             },
-            "id": 9758,
+            "id": 9800,
             "nodeType": "InheritanceSpecifier",
             "src": "511:7:69"
           }
         ],
         "contractDependencies": [
-          10136
+          10178
         ],
         "contractKind": "contract",
         "documentation": "@title Contracts that should not own Ether\n@author Remco Bloemen <remco@2π.com>\n@dev This tries to block incoming ether to prevent accidental loss of Ether. Should Ether end up\nin the contract, it will allow the owner to reclaim this Ether.\n@notice Ether can still be sent to this contract by:\ncalling functions labeled `payable`\n`selfdestruct(contract_address)`\nmining directly to the contract address",
         "fullyImplemented": true,
-        "id": 9789,
+        "id": 9831,
         "linearizedBaseContracts": [
-          9789,
-          10136
+          9831,
+          10178
         ],
         "name": "HasNoEther",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
-              "id": 9768,
+              "id": 9810,
               "nodeType": "Block",
               "src": "944:34:69",
               "statements": [
@@ -609,7 +609,7 @@
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
-                        "id": 9765,
+                        "id": 9807,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -618,18 +618,18 @@
                           "argumentTypes": null,
                           "expression": {
                             "argumentTypes": null,
-                            "id": 9762,
+                            "id": 9804,
                             "name": "msg",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 13269,
+                            "referencedDeclaration": 13311,
                             "src": "958:3:69",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_message",
                               "typeString": "msg"
                             }
                           },
-                          "id": 9763,
+                          "id": 9805,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -648,7 +648,7 @@
                         "rightExpression": {
                           "argumentTypes": null,
                           "hexValue": "30",
-                          "id": 9764,
+                          "id": 9806,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
@@ -677,21 +677,21 @@
                           "typeString": "bool"
                         }
                       ],
-                      "id": 9761,
+                      "id": 9803,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        13272,
-                        13273
+                        13314,
+                        13315
                       ],
-                      "referencedDeclaration": 13272,
+                      "referencedDeclaration": 13314,
                       "src": "950:7:69",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 9766,
+                    "id": 9808,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -705,14 +705,14 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 9767,
+                  "id": 9809,
                   "nodeType": "ExpressionStatement",
                   "src": "950:23:69"
                 }
               ]
             },
             "documentation": "@dev Constructor that rejects incoming Ether\nThe `payable` flag is added so we can access `msg.value` without compiler warning. If we\nleave out payable, then Solidity will allow inheriting contracts to implement a payable\nconstructor. By doing it this way we prevent a payable constructor from working. Alternatively\nwe could use assembly to access msg.value.",
-            "id": 9769,
+            "id": 9811,
             "implemented": true,
             "isConstructor": true,
             "isDeclaredConst": false,
@@ -720,19 +720,19 @@
             "name": "",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 9759,
+              "id": 9801,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "926:2:69"
             },
             "payable": true,
             "returnParameters": {
-              "id": 9760,
+              "id": 9802,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "944:0:69"
             },
-            "scope": 9789,
+            "scope": 9831,
             "src": "915:63:69",
             "stateMutability": "payable",
             "superFunction": null,
@@ -740,13 +740,13 @@
           },
           {
             "body": {
-              "id": 9772,
+              "id": 9814,
               "nodeType": "Block",
               "src": "1104:5:69",
               "statements": []
             },
             "documentation": "@dev Disallows direct send by setting a default function without the `payable` flag.",
-            "id": 9773,
+            "id": 9815,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -754,19 +754,19 @@
             "name": "",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 9770,
+              "id": 9812,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1092:2:69"
             },
             "payable": false,
             "returnParameters": {
-              "id": 9771,
+              "id": 9813,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1104:0:69"
             },
-            "scope": 9789,
+            "scope": 9831,
             "src": "1084:25:69",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -774,7 +774,7 @@
           },
           {
             "body": {
-              "id": 9787,
+              "id": 9829,
               "nodeType": "Block",
               "src": "1232:48:69",
               "statements": [
@@ -789,14 +789,14 @@
                           "arguments": [
                             {
                               "argumentTypes": null,
-                              "id": 9782,
+                              "id": 9824,
                               "name": "this",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 13472,
+                              "referencedDeclaration": 13514,
                               "src": "1261:4:69",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_contract$_HasNoEther_$9789",
+                                "typeIdentifier": "t_contract$_HasNoEther_$9831",
                                 "typeString": "contract HasNoEther"
                               }
                             }
@@ -804,11 +804,11 @@
                           "expression": {
                             "argumentTypes": [
                               {
-                                "typeIdentifier": "t_contract$_HasNoEther_$9789",
+                                "typeIdentifier": "t_contract$_HasNoEther_$9831",
                                 "typeString": "contract HasNoEther"
                               }
                             ],
-                            "id": 9781,
+                            "id": 9823,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": true,
@@ -821,7 +821,7 @@
                             },
                             "typeName": "address"
                           },
-                          "id": 9783,
+                          "id": 9825,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -835,7 +835,7 @@
                             "typeString": "address"
                           }
                         },
-                        "id": 9784,
+                        "id": 9826,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -859,18 +859,18 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 9778,
+                        "id": 9820,
                         "name": "owner",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 10054,
+                        "referencedDeclaration": 10096,
                         "src": "1238:5:69",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
                         }
                       },
-                      "id": 9780,
+                      "id": 9822,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -884,7 +884,7 @@
                         "typeString": "function (uint256)"
                       }
                     },
-                    "id": 9785,
+                    "id": 9827,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -898,28 +898,28 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 9786,
+                  "id": 9828,
                   "nodeType": "ExpressionStatement",
                   "src": "1238:37:69"
                 }
               ]
             },
             "documentation": "@dev Transfer all Ether held by the contract to the owner.",
-            "id": 9788,
+            "id": 9830,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
             "modifiers": [
               {
                 "arguments": null,
-                "id": 9776,
+                "id": 9818,
                 "modifierName": {
                   "argumentTypes": null,
-                  "id": 9775,
+                  "id": 9817,
                   "name": "onlyOwner",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 10084,
+                  "referencedDeclaration": 10126,
                   "src": "1222:9:69",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
@@ -933,26 +933,26 @@
             "name": "reclaimEther",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 9774,
+              "id": 9816,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1210:2:69"
             },
             "payable": false,
             "returnParameters": {
-              "id": 9777,
+              "id": 9819,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1232:0:69"
             },
-            "scope": 9789,
+            "scope": 9831,
             "src": "1189:91:69",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 9790,
+        "scope": 9832,
         "src": "488:794:69"
       }
     ],
@@ -964,5 +964,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
-  "updatedAt": "2018-09-04T19:35:44.623Z"
+  "updatedAt": "2018-09-05T08:06:39.957Z"
 }

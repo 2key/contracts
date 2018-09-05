@@ -249,14 +249,14 @@
     "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/ownership/Heritable.sol",
     "exportedSymbols": {
       "Heritable": [
-        10038
+        10080
       ]
     },
-    "id": 10039,
+    "id": 10081,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 9816,
+        "id": 9858,
         "literals": [
           "solidity",
           "^",
@@ -269,10 +269,10 @@
       {
         "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/ownership/Ownable.sol",
         "file": "./Ownable.sol",
-        "id": 9817,
+        "id": 9859,
         "nodeType": "ImportDirective",
-        "scope": 10039,
-        "sourceUnit": 10137,
+        "scope": 10081,
+        "sourceUnit": 10179,
         "src": "27:23:71",
         "symbolAliases": [],
         "unitAlias": ""
@@ -283,41 +283,41 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 9818,
+              "id": 9860,
               "name": "Ownable",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 10136,
+              "referencedDeclaration": 10178,
               "src": "286:7:71",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Ownable_$10136",
+                "typeIdentifier": "t_contract$_Ownable_$10178",
                 "typeString": "contract Ownable"
               }
             },
-            "id": 9819,
+            "id": 9861,
             "nodeType": "InheritanceSpecifier",
             "src": "286:7:71"
           }
         ],
         "contractDependencies": [
-          10136
+          10178
         ],
         "contractKind": "contract",
         "documentation": "@title Heritable\n@dev The Heritable contract provides ownership transfer capabilities, in the\ncase that the current owner stops \"heartbeating\". Only the heir can pronounce the\nowner's death.",
         "fullyImplemented": true,
-        "id": 10038,
+        "id": 10080,
         "linearizedBaseContracts": [
-          10038,
-          10136
+          10080,
+          10178
         ],
         "name": "Heritable",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "constant": false,
-            "id": 9821,
+            "id": 9863,
             "name": "heir_",
             "nodeType": "VariableDeclaration",
-            "scope": 10038,
+            "scope": 10080,
             "src": "298:21:71",
             "stateVariable": true,
             "storageLocation": "default",
@@ -326,7 +326,7 @@
               "typeString": "address"
             },
             "typeName": {
-              "id": 9820,
+              "id": 9862,
               "name": "address",
               "nodeType": "ElementaryTypeName",
               "src": "298:7:71",
@@ -340,10 +340,10 @@
           },
           {
             "constant": false,
-            "id": 9823,
+            "id": 9865,
             "name": "heartbeatTimeout_",
             "nodeType": "VariableDeclaration",
-            "scope": 10038,
+            "scope": 10080,
             "src": "381:33:71",
             "stateVariable": true,
             "storageLocation": "default",
@@ -352,7 +352,7 @@
               "typeString": "uint256"
             },
             "typeName": {
-              "id": 9822,
+              "id": 9864,
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
               "src": "381:7:71",
@@ -366,10 +366,10 @@
           },
           {
             "constant": false,
-            "id": 9825,
+            "id": 9867,
             "name": "timeOfDeath_",
             "nodeType": "VariableDeclaration",
-            "scope": 10038,
+            "scope": 10080,
             "src": "483:28:71",
             "stateVariable": true,
             "storageLocation": "default",
@@ -378,7 +378,7 @@
               "typeString": "uint256"
             },
             "typeName": {
-              "id": 9824,
+              "id": 9866,
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
               "src": "483:7:71",
@@ -393,20 +393,20 @@
           {
             "anonymous": false,
             "documentation": null,
-            "id": 9831,
+            "id": 9873,
             "name": "HeirChanged",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 9830,
+              "id": 9872,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 9827,
+                  "id": 9869,
                   "indexed": true,
                   "name": "owner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9831,
+                  "scope": 9873,
                   "src": "534:21:71",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -415,7 +415,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 9826,
+                    "id": 9868,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "534:7:71",
@@ -429,11 +429,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 9829,
+                  "id": 9871,
                   "indexed": true,
                   "name": "newHeir",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9831,
+                  "scope": 9873,
                   "src": "557:23:71",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -442,7 +442,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 9828,
+                    "id": 9870,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "557:7:71",
@@ -462,20 +462,20 @@
           {
             "anonymous": false,
             "documentation": null,
-            "id": 9835,
+            "id": 9877,
             "name": "OwnerHeartbeated",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 9834,
+              "id": 9876,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 9833,
+                  "id": 9875,
                   "indexed": true,
                   "name": "owner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9835,
+                  "scope": 9877,
                   "src": "608:21:71",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -484,7 +484,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 9832,
+                    "id": 9874,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "608:7:71",
@@ -504,20 +504,20 @@
           {
             "anonymous": false,
             "documentation": null,
-            "id": 9843,
+            "id": 9885,
             "name": "OwnerProclaimedDead",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 9842,
+              "id": 9884,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 9837,
+                  "id": 9879,
                   "indexed": true,
                   "name": "owner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9843,
+                  "scope": 9885,
                   "src": "665:21:71",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -526,7 +526,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 9836,
+                    "id": 9878,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "665:7:71",
@@ -540,11 +540,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 9839,
+                  "id": 9881,
                   "indexed": true,
                   "name": "heir",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9843,
+                  "scope": 9885,
                   "src": "692:20:71",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -553,7 +553,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 9838,
+                    "id": 9880,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "692:7:71",
@@ -567,11 +567,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 9841,
+                  "id": 9883,
                   "indexed": false,
                   "name": "timeOfDeath",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9843,
+                  "scope": 9885,
                   "src": "718:19:71",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -580,7 +580,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 9840,
+                    "id": 9882,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "718:7:71",
@@ -600,20 +600,20 @@
           {
             "anonymous": false,
             "documentation": null,
-            "id": 9849,
+            "id": 9891,
             "name": "HeirOwnershipClaimed",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 9848,
+              "id": 9890,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 9845,
+                  "id": 9887,
                   "indexed": true,
                   "name": "previousOwner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9849,
+                  "scope": 9891,
                   "src": "777:29:71",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -622,7 +622,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 9844,
+                    "id": 9886,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "777:7:71",
@@ -636,11 +636,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 9847,
+                  "id": 9889,
                   "indexed": true,
                   "name": "newOwner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9849,
+                  "scope": 9891,
                   "src": "812:24:71",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -649,7 +649,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 9846,
+                    "id": 9888,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "812:7:71",
@@ -668,7 +668,7 @@
           },
           {
             "body": {
-              "id": 9859,
+              "id": 9901,
               "nodeType": "Block",
               "src": "955:46:71",
               "statements": [
@@ -682,7 +682,7 @@
                           "typeIdentifier": "t_address",
                           "typeString": "address"
                         },
-                        "id": 9855,
+                        "id": 9897,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -691,18 +691,18 @@
                           "argumentTypes": null,
                           "expression": {
                             "argumentTypes": null,
-                            "id": 9852,
+                            "id": 9894,
                             "name": "msg",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 13269,
+                            "referencedDeclaration": 13311,
                             "src": "969:3:71",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_message",
                               "typeString": "msg"
                             }
                           },
-                          "id": 9853,
+                          "id": 9895,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -720,11 +720,11 @@
                         "operator": "==",
                         "rightExpression": {
                           "argumentTypes": null,
-                          "id": 9854,
+                          "id": 9896,
                           "name": "heir_",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 9821,
+                          "referencedDeclaration": 9863,
                           "src": "983:5:71",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
@@ -745,21 +745,21 @@
                           "typeString": "bool"
                         }
                       ],
-                      "id": 9851,
+                      "id": 9893,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        13272,
-                        13273
+                        13314,
+                        13315
                       ],
-                      "referencedDeclaration": 13272,
+                      "referencedDeclaration": 13314,
                       "src": "961:7:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 9856,
+                    "id": 9898,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -773,23 +773,23 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 9857,
+                  "id": 9899,
                   "nodeType": "ExpressionStatement",
                   "src": "961:28:71"
                 },
                 {
-                  "id": 9858,
+                  "id": 9900,
                   "nodeType": "PlaceholderStatement",
                   "src": "995:1:71"
                 }
               ]
             },
             "documentation": "@dev Throw an exception if called by any account other than the heir's.",
-            "id": 9860,
+            "id": 9902,
             "name": "onlyHeir",
             "nodeType": "ModifierDefinition",
             "parameters": {
-              "id": 9850,
+              "id": 9892,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "952:2:71"
@@ -799,7 +799,7 @@
           },
           {
             "body": {
-              "id": 9869,
+              "id": 9911,
               "nodeType": "Block",
               "src": "1258:49:71",
               "statements": [
@@ -809,11 +809,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 9866,
+                        "id": 9908,
                         "name": "_heartbeatTimeout",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 9862,
+                        "referencedDeclaration": 9904,
                         "src": "1284:17:71",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -828,18 +828,18 @@
                           "typeString": "uint256"
                         }
                       ],
-                      "id": 9865,
+                      "id": 9907,
                       "name": "setHeartbeatTimeout",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 10027,
+                      "referencedDeclaration": 10069,
                       "src": "1264:19:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$_t_uint256_$returns$__$",
                         "typeString": "function (uint256)"
                       }
                     },
-                    "id": 9867,
+                    "id": 9909,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -853,14 +853,14 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 9868,
+                  "id": 9910,
                   "nodeType": "ExpressionStatement",
                   "src": "1264:38:71"
                 }
               ]
             },
             "documentation": "@notice Create a new Heritable Contract with heir address 0x0.\n@param _heartbeatTimeout time available for the owner to notify they are alive,\nbefore the heir can take ownership.",
-            "id": 9870,
+            "id": 9912,
             "implemented": true,
             "isConstructor": true,
             "isDeclaredConst": false,
@@ -868,15 +868,15 @@
             "name": "",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 9863,
+              "id": 9905,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 9862,
+                  "id": 9904,
                   "name": "_heartbeatTimeout",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9870,
+                  "scope": 9912,
                   "src": "1224:25:71",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -885,7 +885,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 9861,
+                    "id": 9903,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1224:7:71",
@@ -902,12 +902,12 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 9864,
+              "id": 9906,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1258:0:71"
             },
-            "scope": 10038,
+            "scope": 10080,
             "src": "1212:95:71",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -915,7 +915,7 @@
           },
           {
             "body": {
-              "id": 9895,
+              "id": 9937,
               "nodeType": "Block",
               "src": "1363:115:71",
               "statements": [
@@ -929,18 +929,18 @@
                           "typeIdentifier": "t_address",
                           "typeString": "address"
                         },
-                        "id": 9880,
+                        "id": 9922,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
                           "argumentTypes": null,
-                          "id": 9878,
+                          "id": 9920,
                           "name": "_newHeir",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 9872,
+                          "referencedDeclaration": 9914,
                           "src": "1377:8:71",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
@@ -951,11 +951,11 @@
                         "operator": "!=",
                         "rightExpression": {
                           "argumentTypes": null,
-                          "id": 9879,
+                          "id": 9921,
                           "name": "owner",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 10054,
+                          "referencedDeclaration": 10096,
                           "src": "1389:5:71",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
@@ -976,21 +976,21 @@
                           "typeString": "bool"
                         }
                       ],
-                      "id": 9877,
+                      "id": 9919,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        13272,
-                        13273
+                        13314,
+                        13315
                       ],
-                      "referencedDeclaration": 13272,
+                      "referencedDeclaration": 13314,
                       "src": "1369:7:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 9881,
+                    "id": 9923,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1004,7 +1004,7 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 9882,
+                  "id": 9924,
                   "nodeType": "ExpressionStatement",
                   "src": "1369:26:71"
                 },
@@ -1014,18 +1014,18 @@
                     "arguments": [],
                     "expression": {
                       "argumentTypes": [],
-                      "id": 9883,
+                      "id": 9925,
                       "name": "heartbeat",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 9971,
+                      "referencedDeclaration": 10013,
                       "src": "1401:9:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$__$returns$__$",
                         "typeString": "function ()"
                       }
                     },
-                    "id": 9884,
+                    "id": 9926,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1039,7 +1039,7 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 9885,
+                  "id": 9927,
                   "nodeType": "ExpressionStatement",
                   "src": "1401:11:71"
                 },
@@ -1049,11 +1049,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 9887,
+                        "id": 9929,
                         "name": "owner",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 10054,
+                        "referencedDeclaration": 10096,
                         "src": "1435:5:71",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -1062,11 +1062,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 9888,
+                        "id": 9930,
                         "name": "_newHeir",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 9872,
+                        "referencedDeclaration": 9914,
                         "src": "1442:8:71",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -1085,18 +1085,18 @@
                           "typeString": "address"
                         }
                       ],
-                      "id": 9886,
+                      "id": 9928,
                       "name": "HeirChanged",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 9831,
+                      "referencedDeclaration": 9873,
                       "src": "1423:11:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_event_nonpayable$_t_address_$_t_address_$returns$__$",
                         "typeString": "function (address,address)"
                       }
                     },
-                    "id": 9889,
+                    "id": 9931,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1110,25 +1110,25 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 9890,
+                  "id": 9932,
                   "nodeType": "EmitStatement",
                   "src": "1418:33:71"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 9893,
+                    "id": 9935,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 9891,
+                      "id": 9933,
                       "name": "heir_",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 9821,
+                      "referencedDeclaration": 9863,
                       "src": "1457:5:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
@@ -1139,11 +1139,11 @@
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "id": 9892,
+                      "id": 9934,
                       "name": "_newHeir",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 9872,
+                      "referencedDeclaration": 9914,
                       "src": "1465:8:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
@@ -1156,28 +1156,28 @@
                       "typeString": "address"
                     }
                   },
-                  "id": 9894,
+                  "id": 9936,
                   "nodeType": "ExpressionStatement",
                   "src": "1457:16:71"
                 }
               ]
             },
             "documentation": null,
-            "id": 9896,
+            "id": 9938,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
             "modifiers": [
               {
                 "arguments": null,
-                "id": 9875,
+                "id": 9917,
                 "modifierName": {
                   "argumentTypes": null,
-                  "id": 9874,
+                  "id": 9916,
                   "name": "onlyOwner",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 10084,
+                  "referencedDeclaration": 10126,
                   "src": "1353:9:71",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
@@ -1191,15 +1191,15 @@
             "name": "setHeir",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 9873,
+              "id": 9915,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 9872,
+                  "id": 9914,
                   "name": "_newHeir",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9896,
+                  "scope": 9938,
                   "src": "1328:16:71",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1208,7 +1208,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 9871,
+                    "id": 9913,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1328:7:71",
@@ -1225,12 +1225,12 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 9876,
+              "id": 9918,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1363:0:71"
             },
-            "scope": 10038,
+            "scope": 10080,
             "src": "1311:167:71",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -1238,33 +1238,33 @@
           },
           {
             "body": {
-              "id": 9903,
+              "id": 9945,
               "nodeType": "Block",
               "src": "1640:23:71",
               "statements": [
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 9901,
+                    "id": 9943,
                     "name": "heir_",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 9821,
+                    "referencedDeclaration": 9863,
                     "src": "1653:5:71",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
                     }
                   },
-                  "functionReturnParameters": 9900,
-                  "id": 9902,
+                  "functionReturnParameters": 9942,
+                  "id": 9944,
                   "nodeType": "Return",
                   "src": "1646:12:71"
                 }
               ]
             },
             "documentation": "@dev Use these getter functions to access the internal variables in\nan inherited contract.",
-            "id": 9904,
+            "id": 9946,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -1272,22 +1272,22 @@
             "name": "heir",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 9897,
+              "id": 9939,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1608:2:71"
             },
             "payable": false,
             "returnParameters": {
-              "id": 9900,
+              "id": 9942,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 9899,
+                  "id": 9941,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9904,
+                  "scope": 9946,
                   "src": "1631:7:71",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1296,7 +1296,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 9898,
+                    "id": 9940,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1631:7:71",
@@ -1311,7 +1311,7 @@
               ],
               "src": "1630:9:71"
             },
-            "scope": 10038,
+            "scope": 10080,
             "src": "1595:68:71",
             "stateMutability": "view",
             "superFunction": null,
@@ -1319,33 +1319,33 @@
           },
           {
             "body": {
-              "id": 9911,
+              "id": 9953,
               "nodeType": "Block",
               "src": "1724:35:71",
               "statements": [
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 9909,
+                    "id": 9951,
                     "name": "heartbeatTimeout_",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 9823,
+                    "referencedDeclaration": 9865,
                     "src": "1737:17:71",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 9908,
-                  "id": 9910,
+                  "functionReturnParameters": 9950,
+                  "id": 9952,
                   "nodeType": "Return",
                   "src": "1730:24:71"
                 }
               ]
             },
             "documentation": null,
-            "id": 9912,
+            "id": 9954,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -1353,22 +1353,22 @@
             "name": "heartbeatTimeout",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 9905,
+              "id": 9947,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1692:2:71"
             },
             "payable": false,
             "returnParameters": {
-              "id": 9908,
+              "id": 9950,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 9907,
+                  "id": 9949,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9912,
+                  "scope": 9954,
                   "src": "1715:7:71",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1377,7 +1377,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 9906,
+                    "id": 9948,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1715:7:71",
@@ -1392,7 +1392,7 @@
               ],
               "src": "1714:9:71"
             },
-            "scope": 10038,
+            "scope": 10080,
             "src": "1667:92:71",
             "stateMutability": "view",
             "superFunction": null,
@@ -1400,33 +1400,33 @@
           },
           {
             "body": {
-              "id": 9919,
+              "id": 9961,
               "nodeType": "Block",
               "src": "1815:30:71",
               "statements": [
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 9917,
+                    "id": 9959,
                     "name": "timeOfDeath_",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 9825,
+                    "referencedDeclaration": 9867,
                     "src": "1828:12:71",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 9916,
-                  "id": 9918,
+                  "functionReturnParameters": 9958,
+                  "id": 9960,
                   "nodeType": "Return",
                   "src": "1821:19:71"
                 }
               ]
             },
             "documentation": null,
-            "id": 9920,
+            "id": 9962,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -1434,22 +1434,22 @@
             "name": "timeOfDeath",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 9913,
+              "id": 9955,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1783:2:71"
             },
             "payable": false,
             "returnParameters": {
-              "id": 9916,
+              "id": 9958,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 9915,
+                  "id": 9957,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9920,
+                  "scope": 9962,
                   "src": "1806:7:71",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1458,7 +1458,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 9914,
+                    "id": 9956,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1806:7:71",
@@ -1473,7 +1473,7 @@
               ],
               "src": "1805:9:71"
             },
-            "scope": 10038,
+            "scope": 10080,
             "src": "1763:82:71",
             "stateMutability": "view",
             "superFunction": null,
@@ -1481,7 +1481,7 @@
           },
           {
             "body": {
-              "id": 9934,
+              "id": 9976,
               "nodeType": "Block",
               "src": "1925:46:71",
               "statements": [
@@ -1491,18 +1491,18 @@
                     "arguments": [],
                     "expression": {
                       "argumentTypes": [],
-                      "id": 9925,
+                      "id": 9967,
                       "name": "heartbeat",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 9971,
+                      "referencedDeclaration": 10013,
                       "src": "1931:9:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$__$returns$__$",
                         "typeString": "function ()"
                       }
                     },
-                    "id": 9926,
+                    "id": 9968,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1516,25 +1516,25 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 9927,
+                  "id": 9969,
                   "nodeType": "ExpressionStatement",
                   "src": "1931:11:71"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 9932,
+                    "id": 9974,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 9928,
+                      "id": 9970,
                       "name": "heir_",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 9821,
+                      "referencedDeclaration": 9863,
                       "src": "1948:5:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
@@ -1549,7 +1549,7 @@
                         {
                           "argumentTypes": null,
                           "hexValue": "30",
-                          "id": 9930,
+                          "id": 9972,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
@@ -1572,7 +1572,7 @@
                             "typeString": "int_const 0"
                           }
                         ],
-                        "id": 9929,
+                        "id": 9971,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": true,
@@ -1585,7 +1585,7 @@
                         },
                         "typeName": "address"
                       },
-                      "id": 9931,
+                      "id": 9973,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -1605,28 +1605,28 @@
                       "typeString": "address"
                     }
                   },
-                  "id": 9933,
+                  "id": 9975,
                   "nodeType": "ExpressionStatement",
                   "src": "1948:18:71"
                 }
               ]
             },
             "documentation": "@dev set heir = 0x0",
-            "id": 9935,
+            "id": 9977,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
             "modifiers": [
               {
                 "arguments": null,
-                "id": 9923,
+                "id": 9965,
                 "modifierName": {
                   "argumentTypes": null,
-                  "id": 9922,
+                  "id": 9964,
                   "name": "onlyOwner",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 10084,
+                  "referencedDeclaration": 10126,
                   "src": "1915:9:71",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
@@ -1640,19 +1640,19 @@
             "name": "removeHeir",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 9921,
+              "id": 9963,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1905:2:71"
             },
             "payable": false,
             "returnParameters": {
-              "id": 9924,
+              "id": 9966,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1925:0:71"
             },
-            "scope": 10038,
+            "scope": 10080,
             "src": "1886:85:71",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -1660,7 +1660,7 @@
           },
           {
             "body": {
-              "id": 9956,
+              "id": 9998,
               "nodeType": "Block",
               "src": "2159:184:71",
               "statements": [
@@ -1673,18 +1673,18 @@
                         "arguments": [],
                         "expression": {
                           "argumentTypes": [],
-                          "id": 9941,
+                          "id": 9983,
                           "name": "ownerLives",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 10037,
+                          "referencedDeclaration": 10079,
                           "src": "2173:10:71",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_view$__$returns$_t_bool_$",
                             "typeString": "function () view returns (bool)"
                           }
                         },
-                        "id": 9942,
+                        "id": 9984,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -1706,21 +1706,21 @@
                           "typeString": "bool"
                         }
                       ],
-                      "id": 9940,
+                      "id": 9982,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        13272,
-                        13273
+                        13314,
+                        13315
                       ],
-                      "referencedDeclaration": 13272,
+                      "referencedDeclaration": 13314,
                       "src": "2165:7:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 9943,
+                    "id": 9985,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1734,7 +1734,7 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 9944,
+                  "id": 9986,
                   "nodeType": "ExpressionStatement",
                   "src": "2165:21:71"
                 },
@@ -1744,11 +1744,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 9946,
+                        "id": 9988,
                         "name": "owner",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 10054,
+                        "referencedDeclaration": 10096,
                         "src": "2217:5:71",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -1757,11 +1757,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 9947,
+                        "id": 9989,
                         "name": "heir_",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 9821,
+                        "referencedDeclaration": 9863,
                         "src": "2224:5:71",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -1770,11 +1770,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 9948,
+                        "id": 9990,
                         "name": "timeOfDeath_",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 9825,
+                        "referencedDeclaration": 9867,
                         "src": "2231:12:71",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -1797,18 +1797,18 @@
                           "typeString": "uint256"
                         }
                       ],
-                      "id": 9945,
+                      "id": 9987,
                       "name": "OwnerProclaimedDead",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 9843,
+                      "referencedDeclaration": 9885,
                       "src": "2197:19:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_event_nonpayable$_t_address_$_t_address_$_t_uint256_$returns$__$",
                         "typeString": "function (address,address,uint256)"
                       }
                     },
-                    "id": 9949,
+                    "id": 9991,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1822,25 +1822,25 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 9950,
+                  "id": 9992,
                   "nodeType": "EmitStatement",
                   "src": "2192:52:71"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 9954,
+                    "id": 9996,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 9951,
+                      "id": 9993,
                       "name": "timeOfDeath_",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 9825,
+                      "referencedDeclaration": 9867,
                       "src": "2308:12:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -1853,18 +1853,18 @@
                       "argumentTypes": null,
                       "expression": {
                         "argumentTypes": null,
-                        "id": 9952,
+                        "id": 9994,
                         "name": "block",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 13259,
+                        "referencedDeclaration": 13301,
                         "src": "2323:5:71",
                         "typeDescriptions": {
                           "typeIdentifier": "t_magic_block",
                           "typeString": "block"
                         }
                       },
-                      "id": 9953,
+                      "id": 9995,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -1884,28 +1884,28 @@
                       "typeString": "uint256"
                     }
                   },
-                  "id": 9955,
+                  "id": 9997,
                   "nodeType": "ExpressionStatement",
                   "src": "2308:30:71"
                 }
               ]
             },
             "documentation": "@dev Heir can pronounce the owners death. To claim the ownership, they will\nhave to wait for `heartbeatTimeout` seconds.",
-            "id": 9957,
+            "id": 9999,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
             "modifiers": [
               {
                 "arguments": null,
-                "id": 9938,
+                "id": 9980,
                 "modifierName": {
                   "argumentTypes": null,
-                  "id": 9937,
+                  "id": 9979,
                   "name": "onlyHeir",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 9860,
+                  "referencedDeclaration": 9902,
                   "src": "2150:8:71",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
@@ -1919,19 +1919,19 @@
             "name": "proclaimDeath",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 9936,
+              "id": 9978,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "2140:2:71"
             },
             "payable": false,
             "returnParameters": {
-              "id": 9939,
+              "id": 9981,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "2159:0:71"
             },
-            "scope": 10038,
+            "scope": 10080,
             "src": "2118:225:71",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -1939,7 +1939,7 @@
           },
           {
             "body": {
-              "id": 9970,
+              "id": 10012,
               "nodeType": "Block",
               "src": "2475:61:71",
               "statements": [
@@ -1949,11 +1949,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 9963,
+                        "id": 10005,
                         "name": "owner",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 10054,
+                        "referencedDeclaration": 10096,
                         "src": "2503:5:71",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -1968,18 +1968,18 @@
                           "typeString": "address"
                         }
                       ],
-                      "id": 9962,
+                      "id": 10004,
                       "name": "OwnerHeartbeated",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 9835,
+                      "referencedDeclaration": 9877,
                       "src": "2486:16:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_event_nonpayable$_t_address_$returns$__$",
                         "typeString": "function (address)"
                       }
                     },
-                    "id": 9964,
+                    "id": 10006,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1993,25 +1993,25 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 9965,
+                  "id": 10007,
                   "nodeType": "EmitStatement",
                   "src": "2481:28:71"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 9968,
+                    "id": 10010,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 9966,
+                      "id": 10008,
                       "name": "timeOfDeath_",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 9825,
+                      "referencedDeclaration": 9867,
                       "src": "2515:12:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -2023,7 +2023,7 @@
                     "rightHandSide": {
                       "argumentTypes": null,
                       "hexValue": "30",
-                      "id": 9967,
+                      "id": 10009,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -2044,28 +2044,28 @@
                       "typeString": "uint256"
                     }
                   },
-                  "id": 9969,
+                  "id": 10011,
                   "nodeType": "ExpressionStatement",
                   "src": "2515:16:71"
                 }
               ]
             },
             "documentation": "@dev Owner can send a heartbeat if they were mistakenly pronounced dead.",
-            "id": 9971,
+            "id": 10013,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
             "modifiers": [
               {
                 "arguments": null,
-                "id": 9960,
+                "id": 10002,
                 "modifierName": {
                   "argumentTypes": null,
-                  "id": 9959,
+                  "id": 10001,
                   "name": "onlyOwner",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 10084,
+                  "referencedDeclaration": 10126,
                   "src": "2465:9:71",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
@@ -2079,19 +2079,19 @@
             "name": "heartbeat",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 9958,
+              "id": 10000,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "2455:2:71"
             },
             "payable": false,
             "returnParameters": {
-              "id": 9961,
+              "id": 10003,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "2475:0:71"
             },
-            "scope": 10038,
+            "scope": 10080,
             "src": "2437:99:71",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -2099,7 +2099,7 @@
           },
           {
             "body": {
-              "id": 10009,
+              "id": 10051,
               "nodeType": "Block",
               "src": "2675:288:71",
               "statements": [
@@ -2109,7 +2109,7 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 9979,
+                        "id": 10021,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -2123,18 +2123,18 @@
                           "arguments": [],
                           "expression": {
                             "argumentTypes": [],
-                            "id": 9977,
+                            "id": 10019,
                             "name": "ownerLives",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 10037,
+                            "referencedDeclaration": 10079,
                             "src": "2690:10:71",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_internal_view$__$returns$_t_bool_$",
                               "typeString": "function () view returns (bool)"
                             }
                           },
-                          "id": 9978,
+                          "id": 10020,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -2161,21 +2161,21 @@
                           "typeString": "bool"
                         }
                       ],
-                      "id": 9976,
+                      "id": 10018,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        13272,
-                        13273
+                        13314,
+                        13315
                       ],
-                      "referencedDeclaration": 13272,
+                      "referencedDeclaration": 13314,
                       "src": "2681:7:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 9980,
+                    "id": 10022,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2189,7 +2189,7 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 9981,
+                  "id": 10023,
                   "nodeType": "ExpressionStatement",
                   "src": "2681:22:71"
                 },
@@ -2203,7 +2203,7 @@
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
-                        "id": 9988,
+                        "id": 10030,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -2212,18 +2212,18 @@
                           "argumentTypes": null,
                           "expression": {
                             "argumentTypes": null,
-                            "id": 9983,
+                            "id": 10025,
                             "name": "block",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 13259,
+                            "referencedDeclaration": 13301,
                             "src": "2775:5:71",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_block",
                               "typeString": "block"
                             }
                           },
-                          "id": 9984,
+                          "id": 10026,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -2245,18 +2245,18 @@
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           },
-                          "id": 9987,
+                          "id": 10029,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "leftExpression": {
                             "argumentTypes": null,
-                            "id": 9985,
+                            "id": 10027,
                             "name": "timeOfDeath_",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 9825,
+                            "referencedDeclaration": 9867,
                             "src": "2794:12:71",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
@@ -2267,11 +2267,11 @@
                           "operator": "+",
                           "rightExpression": {
                             "argumentTypes": null,
-                            "id": 9986,
+                            "id": 10028,
                             "name": "heartbeatTimeout_",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 9823,
+                            "referencedDeclaration": 9865,
                             "src": "2809:17:71",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
@@ -2298,21 +2298,21 @@
                           "typeString": "bool"
                         }
                       ],
-                      "id": 9982,
+                      "id": 10024,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        13272,
-                        13273
+                        13314,
+                        13315
                       ],
-                      "referencedDeclaration": 13272,
+                      "referencedDeclaration": 13314,
                       "src": "2767:7:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 9989,
+                    "id": 10031,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2326,7 +2326,7 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 9990,
+                  "id": 10032,
                   "nodeType": "ExpressionStatement",
                   "src": "2767:60:71"
                 },
@@ -2336,11 +2336,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 9992,
+                        "id": 10034,
                         "name": "owner",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 10054,
+                        "referencedDeclaration": 10096,
                         "src": "2859:5:71",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -2349,11 +2349,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 9993,
+                        "id": 10035,
                         "name": "heir_",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 9821,
+                        "referencedDeclaration": 9863,
                         "src": "2866:5:71",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -2372,18 +2372,18 @@
                           "typeString": "address"
                         }
                       ],
-                      "id": 9991,
+                      "id": 10033,
                       "name": "OwnershipTransferred",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 10064,
+                      "referencedDeclaration": 10106,
                       "src": "2838:20:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_event_nonpayable$_t_address_$_t_address_$returns$__$",
                         "typeString": "function (address,address)"
                       }
                     },
-                    "id": 9994,
+                    "id": 10036,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2397,7 +2397,7 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 9995,
+                  "id": 10037,
                   "nodeType": "EmitStatement",
                   "src": "2833:39:71"
                 },
@@ -2407,11 +2407,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 9997,
+                        "id": 10039,
                         "name": "owner",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 10054,
+                        "referencedDeclaration": 10096,
                         "src": "2904:5:71",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -2420,11 +2420,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 9998,
+                        "id": 10040,
                         "name": "heir_",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 9821,
+                        "referencedDeclaration": 9863,
                         "src": "2911:5:71",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -2443,18 +2443,18 @@
                           "typeString": "address"
                         }
                       ],
-                      "id": 9996,
+                      "id": 10038,
                       "name": "HeirOwnershipClaimed",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 9849,
+                      "referencedDeclaration": 9891,
                       "src": "2883:20:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_event_nonpayable$_t_address_$_t_address_$returns$__$",
                         "typeString": "function (address,address)"
                       }
                     },
-                    "id": 9999,
+                    "id": 10041,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2468,25 +2468,25 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 10000,
+                  "id": 10042,
                   "nodeType": "EmitStatement",
                   "src": "2878:39:71"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 10003,
+                    "id": 10045,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 10001,
+                      "id": 10043,
                       "name": "owner",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 10054,
+                      "referencedDeclaration": 10096,
                       "src": "2923:5:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
@@ -2497,11 +2497,11 @@
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "id": 10002,
+                      "id": 10044,
                       "name": "heir_",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 9821,
+                      "referencedDeclaration": 9863,
                       "src": "2931:5:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
@@ -2514,25 +2514,25 @@
                       "typeString": "address"
                     }
                   },
-                  "id": 10004,
+                  "id": 10046,
                   "nodeType": "ExpressionStatement",
                   "src": "2923:13:71"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 10007,
+                    "id": 10049,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 10005,
+                      "id": 10047,
                       "name": "timeOfDeath_",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 9825,
+                      "referencedDeclaration": 9867,
                       "src": "2942:12:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -2544,7 +2544,7 @@
                     "rightHandSide": {
                       "argumentTypes": null,
                       "hexValue": "30",
-                      "id": 10006,
+                      "id": 10048,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -2565,28 +2565,28 @@
                       "typeString": "uint256"
                     }
                   },
-                  "id": 10008,
+                  "id": 10050,
                   "nodeType": "ExpressionStatement",
                   "src": "2942:16:71"
                 }
               ]
             },
             "documentation": "@dev Allows heir to transfer ownership only if heartbeat has timed out.",
-            "id": 10010,
+            "id": 10052,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
             "modifiers": [
               {
                 "arguments": null,
-                "id": 9974,
+                "id": 10016,
                 "modifierName": {
                   "argumentTypes": null,
-                  "id": 9973,
+                  "id": 10015,
                   "name": "onlyHeir",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 9860,
+                  "referencedDeclaration": 9902,
                   "src": "2666:8:71",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
@@ -2600,19 +2600,19 @@
             "name": "claimHeirOwnership",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 9972,
+              "id": 10014,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "2656:2:71"
             },
             "payable": false,
             "returnParameters": {
-              "id": 9975,
+              "id": 10017,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "2675:0:71"
             },
-            "scope": 10038,
+            "scope": 10080,
             "src": "2629:334:71",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -2620,7 +2620,7 @@
           },
           {
             "body": {
-              "id": 10026,
+              "id": 10068,
               "nodeType": "Block",
               "src": "3051:78:71",
               "statements": [
@@ -2633,18 +2633,18 @@
                         "arguments": [],
                         "expression": {
                           "argumentTypes": [],
-                          "id": 10018,
+                          "id": 10060,
                           "name": "ownerLives",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 10037,
+                          "referencedDeclaration": 10079,
                           "src": "3065:10:71",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_view$__$returns$_t_bool_$",
                             "typeString": "function () view returns (bool)"
                           }
                         },
-                        "id": 10019,
+                        "id": 10061,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -2666,21 +2666,21 @@
                           "typeString": "bool"
                         }
                       ],
-                      "id": 10017,
+                      "id": 10059,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        13272,
-                        13273
+                        13314,
+                        13315
                       ],
-                      "referencedDeclaration": 13272,
+                      "referencedDeclaration": 13314,
                       "src": "3057:7:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 10020,
+                    "id": 10062,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2694,25 +2694,25 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 10021,
+                  "id": 10063,
                   "nodeType": "ExpressionStatement",
                   "src": "3057:21:71"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 10024,
+                    "id": 10066,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 10022,
+                      "id": 10064,
                       "name": "heartbeatTimeout_",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 9823,
+                      "referencedDeclaration": 9865,
                       "src": "3084:17:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -2723,11 +2723,11 @@
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "id": 10023,
+                      "id": 10065,
                       "name": "_newHeartbeatTimeout",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 10012,
+                      "referencedDeclaration": 10054,
                       "src": "3104:20:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -2740,28 +2740,28 @@
                       "typeString": "uint256"
                     }
                   },
-                  "id": 10025,
+                  "id": 10067,
                   "nodeType": "ExpressionStatement",
                   "src": "3084:40:71"
                 }
               ]
             },
             "documentation": null,
-            "id": 10027,
+            "id": 10069,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
             "modifiers": [
               {
                 "arguments": null,
-                "id": 10015,
+                "id": 10057,
                 "modifierName": {
                   "argumentTypes": null,
-                  "id": 10014,
+                  "id": 10056,
                   "name": "onlyOwner",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 10084,
+                  "referencedDeclaration": 10126,
                   "src": "3039:9:71",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
@@ -2775,15 +2775,15 @@
             "name": "setHeartbeatTimeout",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 10013,
+              "id": 10055,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 10012,
+                  "id": 10054,
                   "name": "_newHeartbeatTimeout",
                   "nodeType": "VariableDeclaration",
-                  "scope": 10027,
+                  "scope": 10069,
                   "src": "2996:28:71",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2792,7 +2792,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 10011,
+                    "id": 10053,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "2996:7:71",
@@ -2809,12 +2809,12 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 10016,
+              "id": 10058,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "3051:0:71"
             },
-            "scope": 10038,
+            "scope": 10080,
             "src": "2967:162:71",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -2822,7 +2822,7 @@
           },
           {
             "body": {
-              "id": 10036,
+              "id": 10078,
               "nodeType": "Block",
               "src": "3184:35:71",
               "statements": [
@@ -2833,18 +2833,18 @@
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     },
-                    "id": 10034,
+                    "id": 10076,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
                       "argumentTypes": null,
-                      "id": 10032,
+                      "id": 10074,
                       "name": "timeOfDeath_",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 9825,
+                      "referencedDeclaration": 9867,
                       "src": "3197:12:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -2856,7 +2856,7 @@
                     "rightExpression": {
                       "argumentTypes": null,
                       "hexValue": "30",
-                      "id": 10033,
+                      "id": 10075,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -2877,15 +2877,15 @@
                       "typeString": "bool"
                     }
                   },
-                  "functionReturnParameters": 10031,
-                  "id": 10035,
+                  "functionReturnParameters": 10073,
+                  "id": 10077,
                   "nodeType": "Return",
                   "src": "3190:24:71"
                 }
               ]
             },
             "documentation": null,
-            "id": 10037,
+            "id": 10079,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -2893,22 +2893,22 @@
             "name": "ownerLives",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 10028,
+              "id": 10070,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "3152:2:71"
             },
             "payable": false,
             "returnParameters": {
-              "id": 10031,
+              "id": 10073,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 10030,
+                  "id": 10072,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 10037,
+                  "scope": 10079,
                   "src": "3178:4:71",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2917,7 +2917,7 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 10029,
+                    "id": 10071,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "3178:4:71",
@@ -2932,14 +2932,14 @@
               ],
               "src": "3177:6:71"
             },
-            "scope": 10038,
+            "scope": 10080,
             "src": "3133:86:71",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "internal"
           }
         ],
-        "scope": 10039,
+        "scope": 10081,
         "src": "264:2957:71"
       }
     ],
@@ -2949,14 +2949,14 @@
     "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/ownership/Heritable.sol",
     "exportedSymbols": {
       "Heritable": [
-        10038
+        10080
       ]
     },
-    "id": 10039,
+    "id": 10081,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 9816,
+        "id": 9858,
         "literals": [
           "solidity",
           "^",
@@ -2969,10 +2969,10 @@
       {
         "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/ownership/Ownable.sol",
         "file": "./Ownable.sol",
-        "id": 9817,
+        "id": 9859,
         "nodeType": "ImportDirective",
-        "scope": 10039,
-        "sourceUnit": 10137,
+        "scope": 10081,
+        "sourceUnit": 10179,
         "src": "27:23:71",
         "symbolAliases": [],
         "unitAlias": ""
@@ -2983,41 +2983,41 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 9818,
+              "id": 9860,
               "name": "Ownable",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 10136,
+              "referencedDeclaration": 10178,
               "src": "286:7:71",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Ownable_$10136",
+                "typeIdentifier": "t_contract$_Ownable_$10178",
                 "typeString": "contract Ownable"
               }
             },
-            "id": 9819,
+            "id": 9861,
             "nodeType": "InheritanceSpecifier",
             "src": "286:7:71"
           }
         ],
         "contractDependencies": [
-          10136
+          10178
         ],
         "contractKind": "contract",
         "documentation": "@title Heritable\n@dev The Heritable contract provides ownership transfer capabilities, in the\ncase that the current owner stops \"heartbeating\". Only the heir can pronounce the\nowner's death.",
         "fullyImplemented": true,
-        "id": 10038,
+        "id": 10080,
         "linearizedBaseContracts": [
-          10038,
-          10136
+          10080,
+          10178
         ],
         "name": "Heritable",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "constant": false,
-            "id": 9821,
+            "id": 9863,
             "name": "heir_",
             "nodeType": "VariableDeclaration",
-            "scope": 10038,
+            "scope": 10080,
             "src": "298:21:71",
             "stateVariable": true,
             "storageLocation": "default",
@@ -3026,7 +3026,7 @@
               "typeString": "address"
             },
             "typeName": {
-              "id": 9820,
+              "id": 9862,
               "name": "address",
               "nodeType": "ElementaryTypeName",
               "src": "298:7:71",
@@ -3040,10 +3040,10 @@
           },
           {
             "constant": false,
-            "id": 9823,
+            "id": 9865,
             "name": "heartbeatTimeout_",
             "nodeType": "VariableDeclaration",
-            "scope": 10038,
+            "scope": 10080,
             "src": "381:33:71",
             "stateVariable": true,
             "storageLocation": "default",
@@ -3052,7 +3052,7 @@
               "typeString": "uint256"
             },
             "typeName": {
-              "id": 9822,
+              "id": 9864,
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
               "src": "381:7:71",
@@ -3066,10 +3066,10 @@
           },
           {
             "constant": false,
-            "id": 9825,
+            "id": 9867,
             "name": "timeOfDeath_",
             "nodeType": "VariableDeclaration",
-            "scope": 10038,
+            "scope": 10080,
             "src": "483:28:71",
             "stateVariable": true,
             "storageLocation": "default",
@@ -3078,7 +3078,7 @@
               "typeString": "uint256"
             },
             "typeName": {
-              "id": 9824,
+              "id": 9866,
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
               "src": "483:7:71",
@@ -3093,20 +3093,20 @@
           {
             "anonymous": false,
             "documentation": null,
-            "id": 9831,
+            "id": 9873,
             "name": "HeirChanged",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 9830,
+              "id": 9872,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 9827,
+                  "id": 9869,
                   "indexed": true,
                   "name": "owner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9831,
+                  "scope": 9873,
                   "src": "534:21:71",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3115,7 +3115,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 9826,
+                    "id": 9868,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "534:7:71",
@@ -3129,11 +3129,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 9829,
+                  "id": 9871,
                   "indexed": true,
                   "name": "newHeir",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9831,
+                  "scope": 9873,
                   "src": "557:23:71",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3142,7 +3142,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 9828,
+                    "id": 9870,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "557:7:71",
@@ -3162,20 +3162,20 @@
           {
             "anonymous": false,
             "documentation": null,
-            "id": 9835,
+            "id": 9877,
             "name": "OwnerHeartbeated",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 9834,
+              "id": 9876,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 9833,
+                  "id": 9875,
                   "indexed": true,
                   "name": "owner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9835,
+                  "scope": 9877,
                   "src": "608:21:71",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3184,7 +3184,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 9832,
+                    "id": 9874,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "608:7:71",
@@ -3204,20 +3204,20 @@
           {
             "anonymous": false,
             "documentation": null,
-            "id": 9843,
+            "id": 9885,
             "name": "OwnerProclaimedDead",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 9842,
+              "id": 9884,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 9837,
+                  "id": 9879,
                   "indexed": true,
                   "name": "owner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9843,
+                  "scope": 9885,
                   "src": "665:21:71",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3226,7 +3226,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 9836,
+                    "id": 9878,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "665:7:71",
@@ -3240,11 +3240,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 9839,
+                  "id": 9881,
                   "indexed": true,
                   "name": "heir",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9843,
+                  "scope": 9885,
                   "src": "692:20:71",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3253,7 +3253,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 9838,
+                    "id": 9880,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "692:7:71",
@@ -3267,11 +3267,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 9841,
+                  "id": 9883,
                   "indexed": false,
                   "name": "timeOfDeath",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9843,
+                  "scope": 9885,
                   "src": "718:19:71",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3280,7 +3280,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 9840,
+                    "id": 9882,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "718:7:71",
@@ -3300,20 +3300,20 @@
           {
             "anonymous": false,
             "documentation": null,
-            "id": 9849,
+            "id": 9891,
             "name": "HeirOwnershipClaimed",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 9848,
+              "id": 9890,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 9845,
+                  "id": 9887,
                   "indexed": true,
                   "name": "previousOwner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9849,
+                  "scope": 9891,
                   "src": "777:29:71",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3322,7 +3322,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 9844,
+                    "id": 9886,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "777:7:71",
@@ -3336,11 +3336,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 9847,
+                  "id": 9889,
                   "indexed": true,
                   "name": "newOwner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9849,
+                  "scope": 9891,
                   "src": "812:24:71",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3349,7 +3349,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 9846,
+                    "id": 9888,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "812:7:71",
@@ -3368,7 +3368,7 @@
           },
           {
             "body": {
-              "id": 9859,
+              "id": 9901,
               "nodeType": "Block",
               "src": "955:46:71",
               "statements": [
@@ -3382,7 +3382,7 @@
                           "typeIdentifier": "t_address",
                           "typeString": "address"
                         },
-                        "id": 9855,
+                        "id": 9897,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -3391,18 +3391,18 @@
                           "argumentTypes": null,
                           "expression": {
                             "argumentTypes": null,
-                            "id": 9852,
+                            "id": 9894,
                             "name": "msg",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 13269,
+                            "referencedDeclaration": 13311,
                             "src": "969:3:71",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_message",
                               "typeString": "msg"
                             }
                           },
-                          "id": 9853,
+                          "id": 9895,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -3420,11 +3420,11 @@
                         "operator": "==",
                         "rightExpression": {
                           "argumentTypes": null,
-                          "id": 9854,
+                          "id": 9896,
                           "name": "heir_",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 9821,
+                          "referencedDeclaration": 9863,
                           "src": "983:5:71",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
@@ -3445,21 +3445,21 @@
                           "typeString": "bool"
                         }
                       ],
-                      "id": 9851,
+                      "id": 9893,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        13272,
-                        13273
+                        13314,
+                        13315
                       ],
-                      "referencedDeclaration": 13272,
+                      "referencedDeclaration": 13314,
                       "src": "961:7:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 9856,
+                    "id": 9898,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -3473,23 +3473,23 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 9857,
+                  "id": 9899,
                   "nodeType": "ExpressionStatement",
                   "src": "961:28:71"
                 },
                 {
-                  "id": 9858,
+                  "id": 9900,
                   "nodeType": "PlaceholderStatement",
                   "src": "995:1:71"
                 }
               ]
             },
             "documentation": "@dev Throw an exception if called by any account other than the heir's.",
-            "id": 9860,
+            "id": 9902,
             "name": "onlyHeir",
             "nodeType": "ModifierDefinition",
             "parameters": {
-              "id": 9850,
+              "id": 9892,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "952:2:71"
@@ -3499,7 +3499,7 @@
           },
           {
             "body": {
-              "id": 9869,
+              "id": 9911,
               "nodeType": "Block",
               "src": "1258:49:71",
               "statements": [
@@ -3509,11 +3509,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 9866,
+                        "id": 9908,
                         "name": "_heartbeatTimeout",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 9862,
+                        "referencedDeclaration": 9904,
                         "src": "1284:17:71",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -3528,18 +3528,18 @@
                           "typeString": "uint256"
                         }
                       ],
-                      "id": 9865,
+                      "id": 9907,
                       "name": "setHeartbeatTimeout",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 10027,
+                      "referencedDeclaration": 10069,
                       "src": "1264:19:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$_t_uint256_$returns$__$",
                         "typeString": "function (uint256)"
                       }
                     },
-                    "id": 9867,
+                    "id": 9909,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -3553,14 +3553,14 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 9868,
+                  "id": 9910,
                   "nodeType": "ExpressionStatement",
                   "src": "1264:38:71"
                 }
               ]
             },
             "documentation": "@notice Create a new Heritable Contract with heir address 0x0.\n@param _heartbeatTimeout time available for the owner to notify they are alive,\nbefore the heir can take ownership.",
-            "id": 9870,
+            "id": 9912,
             "implemented": true,
             "isConstructor": true,
             "isDeclaredConst": false,
@@ -3568,15 +3568,15 @@
             "name": "",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 9863,
+              "id": 9905,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 9862,
+                  "id": 9904,
                   "name": "_heartbeatTimeout",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9870,
+                  "scope": 9912,
                   "src": "1224:25:71",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3585,7 +3585,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 9861,
+                    "id": 9903,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1224:7:71",
@@ -3602,12 +3602,12 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 9864,
+              "id": 9906,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1258:0:71"
             },
-            "scope": 10038,
+            "scope": 10080,
             "src": "1212:95:71",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -3615,7 +3615,7 @@
           },
           {
             "body": {
-              "id": 9895,
+              "id": 9937,
               "nodeType": "Block",
               "src": "1363:115:71",
               "statements": [
@@ -3629,18 +3629,18 @@
                           "typeIdentifier": "t_address",
                           "typeString": "address"
                         },
-                        "id": 9880,
+                        "id": 9922,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
                           "argumentTypes": null,
-                          "id": 9878,
+                          "id": 9920,
                           "name": "_newHeir",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 9872,
+                          "referencedDeclaration": 9914,
                           "src": "1377:8:71",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
@@ -3651,11 +3651,11 @@
                         "operator": "!=",
                         "rightExpression": {
                           "argumentTypes": null,
-                          "id": 9879,
+                          "id": 9921,
                           "name": "owner",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 10054,
+                          "referencedDeclaration": 10096,
                           "src": "1389:5:71",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
@@ -3676,21 +3676,21 @@
                           "typeString": "bool"
                         }
                       ],
-                      "id": 9877,
+                      "id": 9919,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        13272,
-                        13273
+                        13314,
+                        13315
                       ],
-                      "referencedDeclaration": 13272,
+                      "referencedDeclaration": 13314,
                       "src": "1369:7:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 9881,
+                    "id": 9923,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -3704,7 +3704,7 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 9882,
+                  "id": 9924,
                   "nodeType": "ExpressionStatement",
                   "src": "1369:26:71"
                 },
@@ -3714,18 +3714,18 @@
                     "arguments": [],
                     "expression": {
                       "argumentTypes": [],
-                      "id": 9883,
+                      "id": 9925,
                       "name": "heartbeat",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 9971,
+                      "referencedDeclaration": 10013,
                       "src": "1401:9:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$__$returns$__$",
                         "typeString": "function ()"
                       }
                     },
-                    "id": 9884,
+                    "id": 9926,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -3739,7 +3739,7 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 9885,
+                  "id": 9927,
                   "nodeType": "ExpressionStatement",
                   "src": "1401:11:71"
                 },
@@ -3749,11 +3749,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 9887,
+                        "id": 9929,
                         "name": "owner",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 10054,
+                        "referencedDeclaration": 10096,
                         "src": "1435:5:71",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -3762,11 +3762,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 9888,
+                        "id": 9930,
                         "name": "_newHeir",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 9872,
+                        "referencedDeclaration": 9914,
                         "src": "1442:8:71",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -3785,18 +3785,18 @@
                           "typeString": "address"
                         }
                       ],
-                      "id": 9886,
+                      "id": 9928,
                       "name": "HeirChanged",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 9831,
+                      "referencedDeclaration": 9873,
                       "src": "1423:11:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_event_nonpayable$_t_address_$_t_address_$returns$__$",
                         "typeString": "function (address,address)"
                       }
                     },
-                    "id": 9889,
+                    "id": 9931,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -3810,25 +3810,25 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 9890,
+                  "id": 9932,
                   "nodeType": "EmitStatement",
                   "src": "1418:33:71"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 9893,
+                    "id": 9935,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 9891,
+                      "id": 9933,
                       "name": "heir_",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 9821,
+                      "referencedDeclaration": 9863,
                       "src": "1457:5:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
@@ -3839,11 +3839,11 @@
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "id": 9892,
+                      "id": 9934,
                       "name": "_newHeir",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 9872,
+                      "referencedDeclaration": 9914,
                       "src": "1465:8:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
@@ -3856,28 +3856,28 @@
                       "typeString": "address"
                     }
                   },
-                  "id": 9894,
+                  "id": 9936,
                   "nodeType": "ExpressionStatement",
                   "src": "1457:16:71"
                 }
               ]
             },
             "documentation": null,
-            "id": 9896,
+            "id": 9938,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
             "modifiers": [
               {
                 "arguments": null,
-                "id": 9875,
+                "id": 9917,
                 "modifierName": {
                   "argumentTypes": null,
-                  "id": 9874,
+                  "id": 9916,
                   "name": "onlyOwner",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 10084,
+                  "referencedDeclaration": 10126,
                   "src": "1353:9:71",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
@@ -3891,15 +3891,15 @@
             "name": "setHeir",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 9873,
+              "id": 9915,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 9872,
+                  "id": 9914,
                   "name": "_newHeir",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9896,
+                  "scope": 9938,
                   "src": "1328:16:71",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3908,7 +3908,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 9871,
+                    "id": 9913,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1328:7:71",
@@ -3925,12 +3925,12 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 9876,
+              "id": 9918,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1363:0:71"
             },
-            "scope": 10038,
+            "scope": 10080,
             "src": "1311:167:71",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -3938,33 +3938,33 @@
           },
           {
             "body": {
-              "id": 9903,
+              "id": 9945,
               "nodeType": "Block",
               "src": "1640:23:71",
               "statements": [
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 9901,
+                    "id": 9943,
                     "name": "heir_",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 9821,
+                    "referencedDeclaration": 9863,
                     "src": "1653:5:71",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
                     }
                   },
-                  "functionReturnParameters": 9900,
-                  "id": 9902,
+                  "functionReturnParameters": 9942,
+                  "id": 9944,
                   "nodeType": "Return",
                   "src": "1646:12:71"
                 }
               ]
             },
             "documentation": "@dev Use these getter functions to access the internal variables in\nan inherited contract.",
-            "id": 9904,
+            "id": 9946,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -3972,22 +3972,22 @@
             "name": "heir",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 9897,
+              "id": 9939,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1608:2:71"
             },
             "payable": false,
             "returnParameters": {
-              "id": 9900,
+              "id": 9942,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 9899,
+                  "id": 9941,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9904,
+                  "scope": 9946,
                   "src": "1631:7:71",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3996,7 +3996,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 9898,
+                    "id": 9940,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1631:7:71",
@@ -4011,7 +4011,7 @@
               ],
               "src": "1630:9:71"
             },
-            "scope": 10038,
+            "scope": 10080,
             "src": "1595:68:71",
             "stateMutability": "view",
             "superFunction": null,
@@ -4019,33 +4019,33 @@
           },
           {
             "body": {
-              "id": 9911,
+              "id": 9953,
               "nodeType": "Block",
               "src": "1724:35:71",
               "statements": [
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 9909,
+                    "id": 9951,
                     "name": "heartbeatTimeout_",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 9823,
+                    "referencedDeclaration": 9865,
                     "src": "1737:17:71",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 9908,
-                  "id": 9910,
+                  "functionReturnParameters": 9950,
+                  "id": 9952,
                   "nodeType": "Return",
                   "src": "1730:24:71"
                 }
               ]
             },
             "documentation": null,
-            "id": 9912,
+            "id": 9954,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -4053,22 +4053,22 @@
             "name": "heartbeatTimeout",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 9905,
+              "id": 9947,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1692:2:71"
             },
             "payable": false,
             "returnParameters": {
-              "id": 9908,
+              "id": 9950,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 9907,
+                  "id": 9949,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9912,
+                  "scope": 9954,
                   "src": "1715:7:71",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -4077,7 +4077,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 9906,
+                    "id": 9948,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1715:7:71",
@@ -4092,7 +4092,7 @@
               ],
               "src": "1714:9:71"
             },
-            "scope": 10038,
+            "scope": 10080,
             "src": "1667:92:71",
             "stateMutability": "view",
             "superFunction": null,
@@ -4100,33 +4100,33 @@
           },
           {
             "body": {
-              "id": 9919,
+              "id": 9961,
               "nodeType": "Block",
               "src": "1815:30:71",
               "statements": [
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 9917,
+                    "id": 9959,
                     "name": "timeOfDeath_",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 9825,
+                    "referencedDeclaration": 9867,
                     "src": "1828:12:71",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 9916,
-                  "id": 9918,
+                  "functionReturnParameters": 9958,
+                  "id": 9960,
                   "nodeType": "Return",
                   "src": "1821:19:71"
                 }
               ]
             },
             "documentation": null,
-            "id": 9920,
+            "id": 9962,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -4134,22 +4134,22 @@
             "name": "timeOfDeath",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 9913,
+              "id": 9955,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1783:2:71"
             },
             "payable": false,
             "returnParameters": {
-              "id": 9916,
+              "id": 9958,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 9915,
+                  "id": 9957,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9920,
+                  "scope": 9962,
                   "src": "1806:7:71",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -4158,7 +4158,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 9914,
+                    "id": 9956,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1806:7:71",
@@ -4173,7 +4173,7 @@
               ],
               "src": "1805:9:71"
             },
-            "scope": 10038,
+            "scope": 10080,
             "src": "1763:82:71",
             "stateMutability": "view",
             "superFunction": null,
@@ -4181,7 +4181,7 @@
           },
           {
             "body": {
-              "id": 9934,
+              "id": 9976,
               "nodeType": "Block",
               "src": "1925:46:71",
               "statements": [
@@ -4191,18 +4191,18 @@
                     "arguments": [],
                     "expression": {
                       "argumentTypes": [],
-                      "id": 9925,
+                      "id": 9967,
                       "name": "heartbeat",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 9971,
+                      "referencedDeclaration": 10013,
                       "src": "1931:9:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$__$returns$__$",
                         "typeString": "function ()"
                       }
                     },
-                    "id": 9926,
+                    "id": 9968,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -4216,25 +4216,25 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 9927,
+                  "id": 9969,
                   "nodeType": "ExpressionStatement",
                   "src": "1931:11:71"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 9932,
+                    "id": 9974,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 9928,
+                      "id": 9970,
                       "name": "heir_",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 9821,
+                      "referencedDeclaration": 9863,
                       "src": "1948:5:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
@@ -4249,7 +4249,7 @@
                         {
                           "argumentTypes": null,
                           "hexValue": "30",
-                          "id": 9930,
+                          "id": 9972,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
@@ -4272,7 +4272,7 @@
                             "typeString": "int_const 0"
                           }
                         ],
-                        "id": 9929,
+                        "id": 9971,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": true,
@@ -4285,7 +4285,7 @@
                         },
                         "typeName": "address"
                       },
-                      "id": 9931,
+                      "id": 9973,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -4305,28 +4305,28 @@
                       "typeString": "address"
                     }
                   },
-                  "id": 9933,
+                  "id": 9975,
                   "nodeType": "ExpressionStatement",
                   "src": "1948:18:71"
                 }
               ]
             },
             "documentation": "@dev set heir = 0x0",
-            "id": 9935,
+            "id": 9977,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
             "modifiers": [
               {
                 "arguments": null,
-                "id": 9923,
+                "id": 9965,
                 "modifierName": {
                   "argumentTypes": null,
-                  "id": 9922,
+                  "id": 9964,
                   "name": "onlyOwner",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 10084,
+                  "referencedDeclaration": 10126,
                   "src": "1915:9:71",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
@@ -4340,19 +4340,19 @@
             "name": "removeHeir",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 9921,
+              "id": 9963,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1905:2:71"
             },
             "payable": false,
             "returnParameters": {
-              "id": 9924,
+              "id": 9966,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1925:0:71"
             },
-            "scope": 10038,
+            "scope": 10080,
             "src": "1886:85:71",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -4360,7 +4360,7 @@
           },
           {
             "body": {
-              "id": 9956,
+              "id": 9998,
               "nodeType": "Block",
               "src": "2159:184:71",
               "statements": [
@@ -4373,18 +4373,18 @@
                         "arguments": [],
                         "expression": {
                           "argumentTypes": [],
-                          "id": 9941,
+                          "id": 9983,
                           "name": "ownerLives",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 10037,
+                          "referencedDeclaration": 10079,
                           "src": "2173:10:71",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_view$__$returns$_t_bool_$",
                             "typeString": "function () view returns (bool)"
                           }
                         },
-                        "id": 9942,
+                        "id": 9984,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -4406,21 +4406,21 @@
                           "typeString": "bool"
                         }
                       ],
-                      "id": 9940,
+                      "id": 9982,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        13272,
-                        13273
+                        13314,
+                        13315
                       ],
-                      "referencedDeclaration": 13272,
+                      "referencedDeclaration": 13314,
                       "src": "2165:7:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 9943,
+                    "id": 9985,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -4434,7 +4434,7 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 9944,
+                  "id": 9986,
                   "nodeType": "ExpressionStatement",
                   "src": "2165:21:71"
                 },
@@ -4444,11 +4444,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 9946,
+                        "id": 9988,
                         "name": "owner",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 10054,
+                        "referencedDeclaration": 10096,
                         "src": "2217:5:71",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -4457,11 +4457,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 9947,
+                        "id": 9989,
                         "name": "heir_",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 9821,
+                        "referencedDeclaration": 9863,
                         "src": "2224:5:71",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -4470,11 +4470,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 9948,
+                        "id": 9990,
                         "name": "timeOfDeath_",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 9825,
+                        "referencedDeclaration": 9867,
                         "src": "2231:12:71",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -4497,18 +4497,18 @@
                           "typeString": "uint256"
                         }
                       ],
-                      "id": 9945,
+                      "id": 9987,
                       "name": "OwnerProclaimedDead",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 9843,
+                      "referencedDeclaration": 9885,
                       "src": "2197:19:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_event_nonpayable$_t_address_$_t_address_$_t_uint256_$returns$__$",
                         "typeString": "function (address,address,uint256)"
                       }
                     },
-                    "id": 9949,
+                    "id": 9991,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -4522,25 +4522,25 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 9950,
+                  "id": 9992,
                   "nodeType": "EmitStatement",
                   "src": "2192:52:71"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 9954,
+                    "id": 9996,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 9951,
+                      "id": 9993,
                       "name": "timeOfDeath_",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 9825,
+                      "referencedDeclaration": 9867,
                       "src": "2308:12:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -4553,18 +4553,18 @@
                       "argumentTypes": null,
                       "expression": {
                         "argumentTypes": null,
-                        "id": 9952,
+                        "id": 9994,
                         "name": "block",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 13259,
+                        "referencedDeclaration": 13301,
                         "src": "2323:5:71",
                         "typeDescriptions": {
                           "typeIdentifier": "t_magic_block",
                           "typeString": "block"
                         }
                       },
-                      "id": 9953,
+                      "id": 9995,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -4584,28 +4584,28 @@
                       "typeString": "uint256"
                     }
                   },
-                  "id": 9955,
+                  "id": 9997,
                   "nodeType": "ExpressionStatement",
                   "src": "2308:30:71"
                 }
               ]
             },
             "documentation": "@dev Heir can pronounce the owners death. To claim the ownership, they will\nhave to wait for `heartbeatTimeout` seconds.",
-            "id": 9957,
+            "id": 9999,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
             "modifiers": [
               {
                 "arguments": null,
-                "id": 9938,
+                "id": 9980,
                 "modifierName": {
                   "argumentTypes": null,
-                  "id": 9937,
+                  "id": 9979,
                   "name": "onlyHeir",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 9860,
+                  "referencedDeclaration": 9902,
                   "src": "2150:8:71",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
@@ -4619,19 +4619,19 @@
             "name": "proclaimDeath",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 9936,
+              "id": 9978,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "2140:2:71"
             },
             "payable": false,
             "returnParameters": {
-              "id": 9939,
+              "id": 9981,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "2159:0:71"
             },
-            "scope": 10038,
+            "scope": 10080,
             "src": "2118:225:71",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -4639,7 +4639,7 @@
           },
           {
             "body": {
-              "id": 9970,
+              "id": 10012,
               "nodeType": "Block",
               "src": "2475:61:71",
               "statements": [
@@ -4649,11 +4649,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 9963,
+                        "id": 10005,
                         "name": "owner",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 10054,
+                        "referencedDeclaration": 10096,
                         "src": "2503:5:71",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -4668,18 +4668,18 @@
                           "typeString": "address"
                         }
                       ],
-                      "id": 9962,
+                      "id": 10004,
                       "name": "OwnerHeartbeated",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 9835,
+                      "referencedDeclaration": 9877,
                       "src": "2486:16:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_event_nonpayable$_t_address_$returns$__$",
                         "typeString": "function (address)"
                       }
                     },
-                    "id": 9964,
+                    "id": 10006,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -4693,25 +4693,25 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 9965,
+                  "id": 10007,
                   "nodeType": "EmitStatement",
                   "src": "2481:28:71"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 9968,
+                    "id": 10010,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 9966,
+                      "id": 10008,
                       "name": "timeOfDeath_",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 9825,
+                      "referencedDeclaration": 9867,
                       "src": "2515:12:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -4723,7 +4723,7 @@
                     "rightHandSide": {
                       "argumentTypes": null,
                       "hexValue": "30",
-                      "id": 9967,
+                      "id": 10009,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -4744,28 +4744,28 @@
                       "typeString": "uint256"
                     }
                   },
-                  "id": 9969,
+                  "id": 10011,
                   "nodeType": "ExpressionStatement",
                   "src": "2515:16:71"
                 }
               ]
             },
             "documentation": "@dev Owner can send a heartbeat if they were mistakenly pronounced dead.",
-            "id": 9971,
+            "id": 10013,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
             "modifiers": [
               {
                 "arguments": null,
-                "id": 9960,
+                "id": 10002,
                 "modifierName": {
                   "argumentTypes": null,
-                  "id": 9959,
+                  "id": 10001,
                   "name": "onlyOwner",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 10084,
+                  "referencedDeclaration": 10126,
                   "src": "2465:9:71",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
@@ -4779,19 +4779,19 @@
             "name": "heartbeat",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 9958,
+              "id": 10000,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "2455:2:71"
             },
             "payable": false,
             "returnParameters": {
-              "id": 9961,
+              "id": 10003,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "2475:0:71"
             },
-            "scope": 10038,
+            "scope": 10080,
             "src": "2437:99:71",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -4799,7 +4799,7 @@
           },
           {
             "body": {
-              "id": 10009,
+              "id": 10051,
               "nodeType": "Block",
               "src": "2675:288:71",
               "statements": [
@@ -4809,7 +4809,7 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 9979,
+                        "id": 10021,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -4823,18 +4823,18 @@
                           "arguments": [],
                           "expression": {
                             "argumentTypes": [],
-                            "id": 9977,
+                            "id": 10019,
                             "name": "ownerLives",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 10037,
+                            "referencedDeclaration": 10079,
                             "src": "2690:10:71",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_internal_view$__$returns$_t_bool_$",
                               "typeString": "function () view returns (bool)"
                             }
                           },
-                          "id": 9978,
+                          "id": 10020,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -4861,21 +4861,21 @@
                           "typeString": "bool"
                         }
                       ],
-                      "id": 9976,
+                      "id": 10018,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        13272,
-                        13273
+                        13314,
+                        13315
                       ],
-                      "referencedDeclaration": 13272,
+                      "referencedDeclaration": 13314,
                       "src": "2681:7:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 9980,
+                    "id": 10022,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -4889,7 +4889,7 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 9981,
+                  "id": 10023,
                   "nodeType": "ExpressionStatement",
                   "src": "2681:22:71"
                 },
@@ -4903,7 +4903,7 @@
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
-                        "id": 9988,
+                        "id": 10030,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -4912,18 +4912,18 @@
                           "argumentTypes": null,
                           "expression": {
                             "argumentTypes": null,
-                            "id": 9983,
+                            "id": 10025,
                             "name": "block",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 13259,
+                            "referencedDeclaration": 13301,
                             "src": "2775:5:71",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_block",
                               "typeString": "block"
                             }
                           },
-                          "id": 9984,
+                          "id": 10026,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -4945,18 +4945,18 @@
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           },
-                          "id": 9987,
+                          "id": 10029,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "leftExpression": {
                             "argumentTypes": null,
-                            "id": 9985,
+                            "id": 10027,
                             "name": "timeOfDeath_",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 9825,
+                            "referencedDeclaration": 9867,
                             "src": "2794:12:71",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
@@ -4967,11 +4967,11 @@
                           "operator": "+",
                           "rightExpression": {
                             "argumentTypes": null,
-                            "id": 9986,
+                            "id": 10028,
                             "name": "heartbeatTimeout_",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 9823,
+                            "referencedDeclaration": 9865,
                             "src": "2809:17:71",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
@@ -4998,21 +4998,21 @@
                           "typeString": "bool"
                         }
                       ],
-                      "id": 9982,
+                      "id": 10024,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        13272,
-                        13273
+                        13314,
+                        13315
                       ],
-                      "referencedDeclaration": 13272,
+                      "referencedDeclaration": 13314,
                       "src": "2767:7:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 9989,
+                    "id": 10031,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -5026,7 +5026,7 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 9990,
+                  "id": 10032,
                   "nodeType": "ExpressionStatement",
                   "src": "2767:60:71"
                 },
@@ -5036,11 +5036,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 9992,
+                        "id": 10034,
                         "name": "owner",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 10054,
+                        "referencedDeclaration": 10096,
                         "src": "2859:5:71",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -5049,11 +5049,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 9993,
+                        "id": 10035,
                         "name": "heir_",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 9821,
+                        "referencedDeclaration": 9863,
                         "src": "2866:5:71",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -5072,18 +5072,18 @@
                           "typeString": "address"
                         }
                       ],
-                      "id": 9991,
+                      "id": 10033,
                       "name": "OwnershipTransferred",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 10064,
+                      "referencedDeclaration": 10106,
                       "src": "2838:20:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_event_nonpayable$_t_address_$_t_address_$returns$__$",
                         "typeString": "function (address,address)"
                       }
                     },
-                    "id": 9994,
+                    "id": 10036,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -5097,7 +5097,7 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 9995,
+                  "id": 10037,
                   "nodeType": "EmitStatement",
                   "src": "2833:39:71"
                 },
@@ -5107,11 +5107,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 9997,
+                        "id": 10039,
                         "name": "owner",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 10054,
+                        "referencedDeclaration": 10096,
                         "src": "2904:5:71",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -5120,11 +5120,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 9998,
+                        "id": 10040,
                         "name": "heir_",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 9821,
+                        "referencedDeclaration": 9863,
                         "src": "2911:5:71",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -5143,18 +5143,18 @@
                           "typeString": "address"
                         }
                       ],
-                      "id": 9996,
+                      "id": 10038,
                       "name": "HeirOwnershipClaimed",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 9849,
+                      "referencedDeclaration": 9891,
                       "src": "2883:20:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_event_nonpayable$_t_address_$_t_address_$returns$__$",
                         "typeString": "function (address,address)"
                       }
                     },
-                    "id": 9999,
+                    "id": 10041,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -5168,25 +5168,25 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 10000,
+                  "id": 10042,
                   "nodeType": "EmitStatement",
                   "src": "2878:39:71"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 10003,
+                    "id": 10045,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 10001,
+                      "id": 10043,
                       "name": "owner",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 10054,
+                      "referencedDeclaration": 10096,
                       "src": "2923:5:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
@@ -5197,11 +5197,11 @@
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "id": 10002,
+                      "id": 10044,
                       "name": "heir_",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 9821,
+                      "referencedDeclaration": 9863,
                       "src": "2931:5:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
@@ -5214,25 +5214,25 @@
                       "typeString": "address"
                     }
                   },
-                  "id": 10004,
+                  "id": 10046,
                   "nodeType": "ExpressionStatement",
                   "src": "2923:13:71"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 10007,
+                    "id": 10049,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 10005,
+                      "id": 10047,
                       "name": "timeOfDeath_",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 9825,
+                      "referencedDeclaration": 9867,
                       "src": "2942:12:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -5244,7 +5244,7 @@
                     "rightHandSide": {
                       "argumentTypes": null,
                       "hexValue": "30",
-                      "id": 10006,
+                      "id": 10048,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -5265,28 +5265,28 @@
                       "typeString": "uint256"
                     }
                   },
-                  "id": 10008,
+                  "id": 10050,
                   "nodeType": "ExpressionStatement",
                   "src": "2942:16:71"
                 }
               ]
             },
             "documentation": "@dev Allows heir to transfer ownership only if heartbeat has timed out.",
-            "id": 10010,
+            "id": 10052,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
             "modifiers": [
               {
                 "arguments": null,
-                "id": 9974,
+                "id": 10016,
                 "modifierName": {
                   "argumentTypes": null,
-                  "id": 9973,
+                  "id": 10015,
                   "name": "onlyHeir",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 9860,
+                  "referencedDeclaration": 9902,
                   "src": "2666:8:71",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
@@ -5300,19 +5300,19 @@
             "name": "claimHeirOwnership",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 9972,
+              "id": 10014,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "2656:2:71"
             },
             "payable": false,
             "returnParameters": {
-              "id": 9975,
+              "id": 10017,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "2675:0:71"
             },
-            "scope": 10038,
+            "scope": 10080,
             "src": "2629:334:71",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -5320,7 +5320,7 @@
           },
           {
             "body": {
-              "id": 10026,
+              "id": 10068,
               "nodeType": "Block",
               "src": "3051:78:71",
               "statements": [
@@ -5333,18 +5333,18 @@
                         "arguments": [],
                         "expression": {
                           "argumentTypes": [],
-                          "id": 10018,
+                          "id": 10060,
                           "name": "ownerLives",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 10037,
+                          "referencedDeclaration": 10079,
                           "src": "3065:10:71",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_view$__$returns$_t_bool_$",
                             "typeString": "function () view returns (bool)"
                           }
                         },
-                        "id": 10019,
+                        "id": 10061,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -5366,21 +5366,21 @@
                           "typeString": "bool"
                         }
                       ],
-                      "id": 10017,
+                      "id": 10059,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        13272,
-                        13273
+                        13314,
+                        13315
                       ],
-                      "referencedDeclaration": 13272,
+                      "referencedDeclaration": 13314,
                       "src": "3057:7:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 10020,
+                    "id": 10062,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -5394,25 +5394,25 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 10021,
+                  "id": 10063,
                   "nodeType": "ExpressionStatement",
                   "src": "3057:21:71"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 10024,
+                    "id": 10066,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 10022,
+                      "id": 10064,
                       "name": "heartbeatTimeout_",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 9823,
+                      "referencedDeclaration": 9865,
                       "src": "3084:17:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -5423,11 +5423,11 @@
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "id": 10023,
+                      "id": 10065,
                       "name": "_newHeartbeatTimeout",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 10012,
+                      "referencedDeclaration": 10054,
                       "src": "3104:20:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -5440,28 +5440,28 @@
                       "typeString": "uint256"
                     }
                   },
-                  "id": 10025,
+                  "id": 10067,
                   "nodeType": "ExpressionStatement",
                   "src": "3084:40:71"
                 }
               ]
             },
             "documentation": null,
-            "id": 10027,
+            "id": 10069,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
             "modifiers": [
               {
                 "arguments": null,
-                "id": 10015,
+                "id": 10057,
                 "modifierName": {
                   "argumentTypes": null,
-                  "id": 10014,
+                  "id": 10056,
                   "name": "onlyOwner",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 10084,
+                  "referencedDeclaration": 10126,
                   "src": "3039:9:71",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
@@ -5475,15 +5475,15 @@
             "name": "setHeartbeatTimeout",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 10013,
+              "id": 10055,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 10012,
+                  "id": 10054,
                   "name": "_newHeartbeatTimeout",
                   "nodeType": "VariableDeclaration",
-                  "scope": 10027,
+                  "scope": 10069,
                   "src": "2996:28:71",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -5492,7 +5492,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 10011,
+                    "id": 10053,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "2996:7:71",
@@ -5509,12 +5509,12 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 10016,
+              "id": 10058,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "3051:0:71"
             },
-            "scope": 10038,
+            "scope": 10080,
             "src": "2967:162:71",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -5522,7 +5522,7 @@
           },
           {
             "body": {
-              "id": 10036,
+              "id": 10078,
               "nodeType": "Block",
               "src": "3184:35:71",
               "statements": [
@@ -5533,18 +5533,18 @@
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     },
-                    "id": 10034,
+                    "id": 10076,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
                       "argumentTypes": null,
-                      "id": 10032,
+                      "id": 10074,
                       "name": "timeOfDeath_",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 9825,
+                      "referencedDeclaration": 9867,
                       "src": "3197:12:71",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -5556,7 +5556,7 @@
                     "rightExpression": {
                       "argumentTypes": null,
                       "hexValue": "30",
-                      "id": 10033,
+                      "id": 10075,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -5577,15 +5577,15 @@
                       "typeString": "bool"
                     }
                   },
-                  "functionReturnParameters": 10031,
-                  "id": 10035,
+                  "functionReturnParameters": 10073,
+                  "id": 10077,
                   "nodeType": "Return",
                   "src": "3190:24:71"
                 }
               ]
             },
             "documentation": null,
-            "id": 10037,
+            "id": 10079,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -5593,22 +5593,22 @@
             "name": "ownerLives",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 10028,
+              "id": 10070,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "3152:2:71"
             },
             "payable": false,
             "returnParameters": {
-              "id": 10031,
+              "id": 10073,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 10030,
+                  "id": 10072,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 10037,
+                  "scope": 10079,
                   "src": "3178:4:71",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -5617,7 +5617,7 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 10029,
+                    "id": 10071,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "3178:4:71",
@@ -5632,14 +5632,14 @@
               ],
               "src": "3177:6:71"
             },
-            "scope": 10038,
+            "scope": 10080,
             "src": "3133:86:71",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "internal"
           }
         ],
-        "scope": 10039,
+        "scope": 10081,
         "src": "264:2957:71"
       }
     ],
@@ -5651,5 +5651,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
-  "updatedAt": "2018-09-04T19:35:44.623Z"
+  "updatedAt": "2018-09-05T08:06:39.957Z"
 }

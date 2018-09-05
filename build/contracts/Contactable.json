@@ -106,14 +106,14 @@
     "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/ownership/Contactable.sol",
     "exportedSymbols": {
       "Contactable": [
-        9654
+        9696
       ]
     },
-    "id": 9655,
+    "id": 9697,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 9636,
+        "id": 9678,
         "literals": [
           "solidity",
           "^",
@@ -126,10 +126,10 @@
       {
         "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/ownership/Ownable.sol",
         "file": "./Ownable.sol",
-        "id": 9637,
+        "id": 9679,
         "nodeType": "ImportDirective",
-        "scope": 9655,
-        "sourceUnit": 10137,
+        "scope": 9697,
+        "sourceUnit": 10179,
         "src": "26:23:66",
         "symbolAliases": [],
         "unitAlias": ""
@@ -140,41 +140,41 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 9638,
+              "id": 9680,
               "name": "Ownable",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 10136,
+              "referencedDeclaration": 10178,
               "src": "235:7:66",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Ownable_$10136",
+                "typeIdentifier": "t_contract$_Ownable_$10178",
                 "typeString": "contract Ownable"
               }
             },
-            "id": 9639,
+            "id": 9681,
             "nodeType": "InheritanceSpecifier",
             "src": "235:7:66"
           }
         ],
         "contractDependencies": [
-          10136
+          10178
         ],
         "contractKind": "contract",
         "documentation": "@title Contactable token\n@dev Basic version of a contactable contract, allowing the owner to provide a string with their\ncontact information.",
         "fullyImplemented": true,
-        "id": 9654,
+        "id": 9696,
         "linearizedBaseContracts": [
-          9654,
-          10136
+          9696,
+          10178
         ],
         "name": "Contactable",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "constant": false,
-            "id": 9641,
+            "id": 9683,
             "name": "contactInformation",
             "nodeType": "VariableDeclaration",
-            "scope": 9654,
+            "scope": 9696,
             "src": "248:32:66",
             "stateVariable": true,
             "storageLocation": "default",
@@ -183,7 +183,7 @@
               "typeString": "string"
             },
             "typeName": {
-              "id": 9640,
+              "id": 9682,
               "name": "string",
               "nodeType": "ElementaryTypeName",
               "src": "248:6:66",
@@ -197,25 +197,25 @@
           },
           {
             "body": {
-              "id": 9652,
+              "id": 9694,
               "nodeType": "Block",
               "src": "506:37:66",
               "statements": [
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 9650,
+                    "id": 9692,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 9648,
+                      "id": 9690,
                       "name": "contactInformation",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 9641,
+                      "referencedDeclaration": 9683,
                       "src": "512:18:66",
                       "typeDescriptions": {
                         "typeIdentifier": "t_string_storage",
@@ -226,11 +226,11 @@
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "id": 9649,
+                      "id": 9691,
                       "name": "_info",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 9643,
+                      "referencedDeclaration": 9685,
                       "src": "533:5:66",
                       "typeDescriptions": {
                         "typeIdentifier": "t_string_memory_ptr",
@@ -243,28 +243,28 @@
                       "typeString": "string storage ref"
                     }
                   },
-                  "id": 9651,
+                  "id": 9693,
                   "nodeType": "ExpressionStatement",
                   "src": "512:26:66"
                 }
               ]
             },
             "documentation": "@dev Allows the owner to set a string with their contact information.\n@param _info The contact information to attach to the contract.",
-            "id": 9653,
+            "id": 9695,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
             "modifiers": [
               {
                 "arguments": null,
-                "id": 9646,
+                "id": 9688,
                 "modifierName": {
                   "argumentTypes": null,
-                  "id": 9645,
+                  "id": 9687,
                   "name": "onlyOwner",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 10084,
+                  "referencedDeclaration": 10126,
                   "src": "496:9:66",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
@@ -278,15 +278,15 @@
             "name": "setContactInformation",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 9644,
+              "id": 9686,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 9643,
+                  "id": 9685,
                   "name": "_info",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9653,
+                  "scope": 9695,
                   "src": "475:12:66",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -295,7 +295,7 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 9642,
+                    "id": 9684,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
                     "src": "475:6:66",
@@ -312,19 +312,19 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 9647,
+              "id": 9689,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "506:0:66"
             },
-            "scope": 9654,
+            "scope": 9696,
             "src": "444:99:66",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 9655,
+        "scope": 9697,
         "src": "211:334:66"
       }
     ],
@@ -334,14 +334,14 @@
     "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/ownership/Contactable.sol",
     "exportedSymbols": {
       "Contactable": [
-        9654
+        9696
       ]
     },
-    "id": 9655,
+    "id": 9697,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 9636,
+        "id": 9678,
         "literals": [
           "solidity",
           "^",
@@ -354,10 +354,10 @@
       {
         "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/ownership/Ownable.sol",
         "file": "./Ownable.sol",
-        "id": 9637,
+        "id": 9679,
         "nodeType": "ImportDirective",
-        "scope": 9655,
-        "sourceUnit": 10137,
+        "scope": 9697,
+        "sourceUnit": 10179,
         "src": "26:23:66",
         "symbolAliases": [],
         "unitAlias": ""
@@ -368,41 +368,41 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 9638,
+              "id": 9680,
               "name": "Ownable",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 10136,
+              "referencedDeclaration": 10178,
               "src": "235:7:66",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Ownable_$10136",
+                "typeIdentifier": "t_contract$_Ownable_$10178",
                 "typeString": "contract Ownable"
               }
             },
-            "id": 9639,
+            "id": 9681,
             "nodeType": "InheritanceSpecifier",
             "src": "235:7:66"
           }
         ],
         "contractDependencies": [
-          10136
+          10178
         ],
         "contractKind": "contract",
         "documentation": "@title Contactable token\n@dev Basic version of a contactable contract, allowing the owner to provide a string with their\ncontact information.",
         "fullyImplemented": true,
-        "id": 9654,
+        "id": 9696,
         "linearizedBaseContracts": [
-          9654,
-          10136
+          9696,
+          10178
         ],
         "name": "Contactable",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "constant": false,
-            "id": 9641,
+            "id": 9683,
             "name": "contactInformation",
             "nodeType": "VariableDeclaration",
-            "scope": 9654,
+            "scope": 9696,
             "src": "248:32:66",
             "stateVariable": true,
             "storageLocation": "default",
@@ -411,7 +411,7 @@
               "typeString": "string"
             },
             "typeName": {
-              "id": 9640,
+              "id": 9682,
               "name": "string",
               "nodeType": "ElementaryTypeName",
               "src": "248:6:66",
@@ -425,25 +425,25 @@
           },
           {
             "body": {
-              "id": 9652,
+              "id": 9694,
               "nodeType": "Block",
               "src": "506:37:66",
               "statements": [
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 9650,
+                    "id": 9692,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 9648,
+                      "id": 9690,
                       "name": "contactInformation",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 9641,
+                      "referencedDeclaration": 9683,
                       "src": "512:18:66",
                       "typeDescriptions": {
                         "typeIdentifier": "t_string_storage",
@@ -454,11 +454,11 @@
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "id": 9649,
+                      "id": 9691,
                       "name": "_info",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 9643,
+                      "referencedDeclaration": 9685,
                       "src": "533:5:66",
                       "typeDescriptions": {
                         "typeIdentifier": "t_string_memory_ptr",
@@ -471,28 +471,28 @@
                       "typeString": "string storage ref"
                     }
                   },
-                  "id": 9651,
+                  "id": 9693,
                   "nodeType": "ExpressionStatement",
                   "src": "512:26:66"
                 }
               ]
             },
             "documentation": "@dev Allows the owner to set a string with their contact information.\n@param _info The contact information to attach to the contract.",
-            "id": 9653,
+            "id": 9695,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
             "modifiers": [
               {
                 "arguments": null,
-                "id": 9646,
+                "id": 9688,
                 "modifierName": {
                   "argumentTypes": null,
-                  "id": 9645,
+                  "id": 9687,
                   "name": "onlyOwner",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 10084,
+                  "referencedDeclaration": 10126,
                   "src": "496:9:66",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
@@ -506,15 +506,15 @@
             "name": "setContactInformation",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 9644,
+              "id": 9686,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 9643,
+                  "id": 9685,
                   "name": "_info",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9653,
+                  "scope": 9695,
                   "src": "475:12:66",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -523,7 +523,7 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 9642,
+                    "id": 9684,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
                     "src": "475:6:66",
@@ -540,19 +540,19 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 9647,
+              "id": 9689,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "506:0:66"
             },
-            "scope": 9654,
+            "scope": 9696,
             "src": "444:99:66",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 9655,
+        "scope": 9697,
         "src": "211:334:66"
       }
     ],
@@ -564,5 +564,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
-  "updatedAt": "2018-09-04T19:35:44.622Z"
+  "updatedAt": "2018-09-05T08:06:39.956Z"
 }
