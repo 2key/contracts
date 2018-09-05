@@ -99,7 +99,7 @@ export class ITwoKeyReg extends TC.TypeChainContract {
           { name: "_userAddress", type: "address" },
           { name: "_contractAddress", type: "address" }
         ],
-        name: "addWhereRefferer",
+        name: "addWhereReferrer",
         outputs: [],
         payable: false,
         stateMutability: "nonpayable",
@@ -325,13 +325,13 @@ export class ITwoKeyReg extends TC.TypeChainContract {
       [_userAddress.toString(), _contractAddress.toString()]
     );
   }
-  public addWhereReffererTx(
+  public addWhereReferrerTx(
     _userAddress: BigNumber | string,
     _contractAddress: BigNumber | string
   ): TC.DeferredTransactionWrapper<TC.ITxParams> {
     return new TC.DeferredTransactionWrapper<TC.ITxParams>(
       this,
-      "addWhereRefferer",
+      "addWhereReferrer",
       [_userAddress.toString(), _contractAddress.toString()]
     );
   }

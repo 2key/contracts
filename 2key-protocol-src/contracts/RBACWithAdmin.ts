@@ -52,7 +52,7 @@ export class RBACWithAdmin extends TC.TypeChainContract {
         type: "function"
       },
       {
-        inputs: [],
+        inputs: [{ name: "_twoKeyAdmin", type: "address" }],
         payable: false,
         stateMutability: "nonpayable",
         type: "constructor"

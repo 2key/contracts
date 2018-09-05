@@ -23,15 +23,6 @@ export class TwoKeyCampaignInventory extends TC.TypeChainContract {
       },
       {
         constant: false,
-        inputs: [{ name: "_twoKeyCampaign", type: "address" }],
-        name: "addTwoKeyCampaign",
-        outputs: [],
-        payable: false,
-        stateMutability: "nonpayable",
-        type: "function"
-      },
-      {
-        constant: false,
         inputs: [
           { name: "_tokenID", type: "uint256" },
           { name: "_assetContract", type: "address" },
@@ -181,15 +172,6 @@ export class TwoKeyCampaignInventory extends TC.TypeChainContract {
     return contract;
   }
 
-  public addTwoKeyCampaignTx(
-    _twoKeyCampaign: BigNumber | string
-  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
-    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
-      this,
-      "addTwoKeyCampaign",
-      [_twoKeyCampaign.toString()]
-    );
-  }
   public addFungibleAssetTx(
     _tokenID: BigNumber | number,
     _assetContract: BigNumber | string,

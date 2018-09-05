@@ -39,7 +39,7 @@ export class TwoKeyEventSource extends TC.TypeChainContract {
         inputs: [
           { indexed: true, name: "_campaign", type: "address" },
           { indexed: true, name: "_converter", type: "address" },
-          { indexed: false, name: "_tokenID", type: "uint256" },
+          { indexed: false, name: "assetName", type: "string" },
           { indexed: false, name: "_childContractID", type: "address" },
           { indexed: false, name: "_indexOrAmount", type: "uint256" },
           { indexed: false, name: "_type", type: "uint8" }
@@ -62,7 +62,7 @@ export class TwoKeyEventSource extends TC.TypeChainContract {
         inputs: [
           { indexed: true, name: "_campaign", type: "address" },
           { indexed: true, name: "_converter", type: "address" },
-          { indexed: true, name: "_tokenID", type: "uint256" },
+          { indexed: true, name: "assetName", type: "string" },
           { indexed: false, name: "_childContractID", type: "address" },
           { indexed: false, name: "_indexOrAmount", type: "uint256" },
           { indexed: false, name: "_type", type: "uint8" }
@@ -75,7 +75,7 @@ export class TwoKeyEventSource extends TC.TypeChainContract {
         inputs: [
           { indexed: true, name: "_campaign", type: "address" },
           { indexed: true, name: "_converter", type: "address" },
-          { indexed: true, name: "_tokenID", type: "uint256" },
+          { indexed: true, name: "assetName", type: "string" },
           { indexed: false, name: "_childContractID", type: "address" },
           { indexed: false, name: "_indexOrAmount", type: "uint256" },
           { indexed: false, name: "_type", type: "uint8" }
@@ -188,7 +188,7 @@ export class TwoKeyEventSource extends TC.TypeChainContract {
         inputs: [
           { name: "_campaign", type: "address" },
           { name: "_converter", type: "address" },
-          { name: "_tokenID", type: "uint256" },
+          { name: "_assetName", type: "string" },
           { name: "_childContractID", type: "address" },
           { name: "_indexOrAmount", type: "uint256" },
           { name: "_type", type: "uint8" }
@@ -217,7 +217,7 @@ export class TwoKeyEventSource extends TC.TypeChainContract {
         inputs: [
           { name: "_campaign", type: "address" },
           { name: "_converter", type: "address" },
-          { name: "_tokenID", type: "uint256" },
+          { name: "_assetName", type: "string" },
           { name: "_childContractID", type: "address" },
           { name: "_indexOrAmount", type: "uint256" },
           { name: "_type", type: "uint8" }
@@ -233,7 +233,7 @@ export class TwoKeyEventSource extends TC.TypeChainContract {
         inputs: [
           { name: "_campaign", type: "address" },
           { name: "_converter", type: "address" },
-          { name: "_tokenID", type: "uint256" },
+          { name: "_assetName", type: "string" },
           { name: "_childContractID", type: "address" },
           { name: "_indexOrAmount", type: "uint256" },
           { name: "_type", type: "uint8" }
@@ -384,7 +384,7 @@ export class TwoKeyEventSource extends TC.TypeChainContract {
   public escrowTx(
     _campaign: BigNumber | string,
     _converter: BigNumber | string,
-    _tokenID: BigNumber | number,
+    _assetName: string,
     _childContractID: BigNumber | string,
     _indexOrAmount: BigNumber | number,
     _type: BigNumber | number
@@ -392,7 +392,7 @@ export class TwoKeyEventSource extends TC.TypeChainContract {
     return new TC.DeferredTransactionWrapper<TC.ITxParams>(this, "escrow", [
       _campaign.toString(),
       _converter.toString(),
-      _tokenID.toString(),
+      _assetName.toString(),
       _childContractID.toString(),
       _indexOrAmount.toString(),
       _type.toString()
@@ -412,7 +412,7 @@ export class TwoKeyEventSource extends TC.TypeChainContract {
   public fulfilledTx(
     _campaign: BigNumber | string,
     _converter: BigNumber | string,
-    _tokenID: BigNumber | number,
+    _assetName: string,
     _childContractID: BigNumber | string,
     _indexOrAmount: BigNumber | number,
     _type: BigNumber | number
@@ -420,7 +420,7 @@ export class TwoKeyEventSource extends TC.TypeChainContract {
     return new TC.DeferredTransactionWrapper<TC.ITxParams>(this, "fulfilled", [
       _campaign.toString(),
       _converter.toString(),
-      _tokenID.toString(),
+      _assetName.toString(),
       _childContractID.toString(),
       _indexOrAmount.toString(),
       _type.toString()
@@ -429,7 +429,7 @@ export class TwoKeyEventSource extends TC.TypeChainContract {
   public cancelledTx(
     _campaign: BigNumber | string,
     _converter: BigNumber | string,
-    _tokenID: BigNumber | number,
+    _assetName: string,
     _childContractID: BigNumber | string,
     _indexOrAmount: BigNumber | number,
     _type: BigNumber | number
@@ -437,7 +437,7 @@ export class TwoKeyEventSource extends TC.TypeChainContract {
     return new TC.DeferredTransactionWrapper<TC.ITxParams>(this, "cancelled", [
       _campaign.toString(),
       _converter.toString(),
-      _tokenID.toString(),
+      _assetName.toString(),
       _childContractID.toString(),
       _indexOrAmount.toString(),
       _type.toString()
@@ -498,7 +498,7 @@ export class TwoKeyEventSource extends TC.TypeChainContract {
     {
       _campaign: BigNumber | string;
       _converter: BigNumber | string;
-      _tokenID: BigNumber | number;
+      assetName: string;
       _childContractID: BigNumber | string;
       _indexOrAmount: BigNumber | number;
       _type: BigNumber | number;
@@ -512,7 +512,7 @@ export class TwoKeyEventSource extends TC.TypeChainContract {
       {
         _campaign: BigNumber | string;
         _converter: BigNumber | string;
-        _tokenID: BigNumber | number;
+        assetName: string;
         _childContractID: BigNumber | string;
         _indexOrAmount: BigNumber | number;
         _type: BigNumber | number;
@@ -552,12 +552,12 @@ export class TwoKeyEventSource extends TC.TypeChainContract {
   public FulfilledEvent(eventFilter: {
     _campaign?: BigNumber | string | Array<BigNumber | string>;
     _converter?: BigNumber | string | Array<BigNumber | string>;
-    _tokenID?: BigNumber | number | Array<BigNumber | number>;
+    assetName?: string | Array<string>;
   }): TC.DeferredEventWrapper<
     {
       _campaign: BigNumber | string;
       _converter: BigNumber | string;
-      _tokenID: BigNumber | number;
+      assetName: string;
       _childContractID: BigNumber | string;
       _indexOrAmount: BigNumber | number;
       _type: BigNumber | number;
@@ -565,14 +565,14 @@ export class TwoKeyEventSource extends TC.TypeChainContract {
     {
       _campaign?: BigNumber | string | Array<BigNumber | string>;
       _converter?: BigNumber | string | Array<BigNumber | string>;
-      _tokenID?: BigNumber | number | Array<BigNumber | number>;
+      assetName?: string | Array<string>;
     }
   > {
     return new TC.DeferredEventWrapper<
       {
         _campaign: BigNumber | string;
         _converter: BigNumber | string;
-        _tokenID: BigNumber | number;
+        assetName: string;
         _childContractID: BigNumber | string;
         _indexOrAmount: BigNumber | number;
         _type: BigNumber | number;
@@ -580,19 +580,19 @@ export class TwoKeyEventSource extends TC.TypeChainContract {
       {
         _campaign?: BigNumber | string | Array<BigNumber | string>;
         _converter?: BigNumber | string | Array<BigNumber | string>;
-        _tokenID?: BigNumber | number | Array<BigNumber | number>;
+        assetName?: string | Array<string>;
       }
     >(this, "Fulfilled", eventFilter);
   }
   public CancelledEvent(eventFilter: {
     _campaign?: BigNumber | string | Array<BigNumber | string>;
     _converter?: BigNumber | string | Array<BigNumber | string>;
-    _tokenID?: BigNumber | number | Array<BigNumber | number>;
+    assetName?: string | Array<string>;
   }): TC.DeferredEventWrapper<
     {
       _campaign: BigNumber | string;
       _converter: BigNumber | string;
-      _tokenID: BigNumber | number;
+      assetName: string;
       _childContractID: BigNumber | string;
       _indexOrAmount: BigNumber | number;
       _type: BigNumber | number;
@@ -600,14 +600,14 @@ export class TwoKeyEventSource extends TC.TypeChainContract {
     {
       _campaign?: BigNumber | string | Array<BigNumber | string>;
       _converter?: BigNumber | string | Array<BigNumber | string>;
-      _tokenID?: BigNumber | number | Array<BigNumber | number>;
+      assetName?: string | Array<string>;
     }
   > {
     return new TC.DeferredEventWrapper<
       {
         _campaign: BigNumber | string;
         _converter: BigNumber | string;
-        _tokenID: BigNumber | number;
+        assetName: string;
         _childContractID: BigNumber | string;
         _indexOrAmount: BigNumber | number;
         _type: BigNumber | number;
@@ -615,7 +615,7 @@ export class TwoKeyEventSource extends TC.TypeChainContract {
       {
         _campaign?: BigNumber | string | Array<BigNumber | string>;
         _converter?: BigNumber | string | Array<BigNumber | string>;
-        _tokenID?: BigNumber | number | Array<BigNumber | number>;
+        assetName?: string | Array<string>;
       }
     >(this, "Cancelled", eventFilter);
   }

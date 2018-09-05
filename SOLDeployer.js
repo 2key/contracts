@@ -73,7 +73,9 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
               ? { networks, abi } : { bytecode, abi, networks };
           }
         });
+        console.log('Writing meta.ts...');
         fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts/meta.ts'), `export default ${util.inspect(contracts, { depth: 10 })}`);
+        console.log('Writing contracts.json...');
         fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts.json'), JSON.stringify(json, null, 2));
         console.log('Done');
         resolve();
