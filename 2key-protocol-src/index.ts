@@ -345,6 +345,14 @@ export default class TwoKeyNetwork {
   }
 
   public joinCampaign(campaignAddress: string, cut: number, fromHash?: string, gasPrice: number = this.gasPrice): Promise<string> {
+    // TODO AP Implement method shortUrl
+    // If we want to shortLink
+    // 1. Check ures tokenArcs TwoKeyAcquisitionCampaignERC20.balanceOf()
+    // 2. Transfer Arc if needed TwoKeyAcquisitionCampaignERC20.transferSig(sign.fre_take(...fromHash))  
+    // 3. Generate new PublicLink (without Hash)
+    // 4. TwoKeyAcquisitionCampaignERC20.setPublicLink()
+    // 5. If need TwoKeyAcquisitionCampaignERC20.setCut()
+
     let pk = Sign.generatePrivateKey();
     let public_address = Sign.privateToPublic(pk);
     const private_key = pk.toString('hex');
