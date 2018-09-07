@@ -10,15 +10,6 @@ export class TwoKeyAdmin extends TC.TypeChainContract {
   public constructor(web3: any, address: string | BigNumber) {
     const abi = [
       {
-        constant: true,
-        inputs: [],
-        name: "newAdmin",
-        outputs: [{ name: "", type: "address" }],
-        payable: false,
-        stateMutability: "view",
-        type: "function"
-      },
-      {
         constant: false,
         inputs: [],
         name: "renounceOwnership",
@@ -56,7 +47,6 @@ export class TwoKeyAdmin extends TC.TypeChainContract {
       },
       {
         inputs: [
-          { name: "_economy", type: "address" },
           { name: "_electorateAdmins", type: "address" },
           { name: "_exchange", type: "address" }
         ],
@@ -82,7 +72,7 @@ export class TwoKeyAdmin extends TC.TypeChainContract {
       },
       {
         constant: false,
-        inputs: [{ name: "newAdminContract", type: "address" }],
+        inputs: [{ name: "_newAdminContract", type: "address" }],
         name: "replaceOneself",
         outputs: [],
         payable: false,
@@ -157,6 +147,72 @@ export class TwoKeyAdmin extends TC.TypeChainContract {
         payable: false,
         stateMutability: "nonpayable",
         type: "function"
+      },
+      {
+        constant: false,
+        inputs: [
+          { name: "_name", type: "string" },
+          { name: "_addr", type: "address" }
+        ],
+        name: "addNameToReg",
+        outputs: [],
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "function"
+      },
+      {
+        constant: false,
+        inputs: [{ name: "_exchange", type: "address" }],
+        name: "setTwoKeyExchange",
+        outputs: [],
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "function"
+      },
+      {
+        constant: false,
+        inputs: [{ name: "_economy", type: "address" }],
+        name: "setTwoKeyEconomy",
+        outputs: [],
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "function"
+      },
+      {
+        constant: true,
+        inputs: [{ name: "_addr", type: "address" }],
+        name: "getEtherBalanceOfAnAddress",
+        outputs: [{ name: "", type: "uint256" }],
+        payable: false,
+        stateMutability: "view",
+        type: "function"
+      },
+      {
+        constant: true,
+        inputs: [],
+        name: "getTwoKeyEconomy",
+        outputs: [{ name: "_economy", type: "address" }],
+        payable: false,
+        stateMutability: "view",
+        type: "function"
+      },
+      {
+        constant: false,
+        inputs: [{ name: "_address", type: "address" }],
+        name: "setTwoKeyReg",
+        outputs: [],
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "function"
+      },
+      {
+        constant: true,
+        inputs: [],
+        name: "getTwoKeyReg",
+        outputs: [{ name: "_address", type: "address" }],
+        payable: false,
+        stateMutability: "view",
+        type: "function"
       }
     ];
     super(web3, address, abi);
@@ -177,12 +233,24 @@ export class TwoKeyAdmin extends TC.TypeChainContract {
     return contract;
   }
 
-  public get newAdmin(): Promise<string> {
-    return TC.promisify(this.rawWeb3Contract.newAdmin, []);
-  }
-
   public get owner(): Promise<string> {
     return TC.promisify(this.rawWeb3Contract.owner, []);
+  }
+
+  public get getTwoKeyEconomy(): Promise<string> {
+    return TC.promisify(this.rawWeb3Contract.getTwoKeyEconomy, []);
+  }
+
+  public get getTwoKeyReg(): Promise<string> {
+    return TC.promisify(this.rawWeb3Contract.getTwoKeyReg, []);
+  }
+
+  public getEtherBalanceOfAnAddress(
+    _addr: BigNumber | string
+  ): Promise<BigNumber> {
+    return TC.promisify(this.rawWeb3Contract.getEtherBalanceOfAnAddress, [
+      _addr.toString()
+    ]);
   }
 
   public renounceOwnershipTx(): TC.DeferredTransactionWrapper<TC.ITxParams> {
@@ -211,12 +279,12 @@ export class TwoKeyAdmin extends TC.TypeChainContract {
     );
   }
   public replaceOneselfTx(
-    newAdminContract: BigNumber | string
+    _newAdminContract: BigNumber | string
   ): TC.DeferredTransactionWrapper<TC.ITxParams> {
     return new TC.DeferredTransactionWrapper<TC.ITxParams>(
       this,
       "replaceOneself",
-      [newAdminContract.toString()]
+      [_newAdminContract.toString()]
     );
   }
   public transferByAdminsTx(
@@ -276,6 +344,43 @@ export class TwoKeyAdmin extends TC.TypeChainContract {
       this,
       "twoKeyEventSourceAddAuthorizedContracts",
       [_contractAddress.toString()]
+    );
+  }
+  public addNameToRegTx(
+    _name: string,
+    _addr: BigNumber | string
+  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
+    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
+      this,
+      "addNameToReg",
+      [_name.toString(), _addr.toString()]
+    );
+  }
+  public setTwoKeyExchangeTx(
+    _exchange: BigNumber | string
+  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
+    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
+      this,
+      "setTwoKeyExchange",
+      [_exchange.toString()]
+    );
+  }
+  public setTwoKeyEconomyTx(
+    _economy: BigNumber | string
+  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
+    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
+      this,
+      "setTwoKeyEconomy",
+      [_economy.toString()]
+    );
+  }
+  public setTwoKeyRegTx(
+    _address: BigNumber | string
+  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
+    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
+      this,
+      "setTwoKeyReg",
+      [_address.toString()]
     );
   }
 

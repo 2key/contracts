@@ -54,7 +54,7 @@ let twoKeyProtocol: TwoKeyProtocol;
 
 
 describe('TwoKeyProtocol', () => {
-  beforeEach(function(done) {
+  beforeEach(function (done) {
     this.timeout((parseInt(delay) || 1000) + 1000);
     setTimeout(() => done(), parseInt(delay) || 1000);
   });
@@ -74,10 +74,10 @@ describe('TwoKeyProtocol', () => {
     const balance = await twoKeyProtocol.getBalance();
     console.log('Balance', balance);
     return expect(balance).to.exist
-    // .to.haveOwnProperty('local_address')
-    .to.haveOwnProperty('gasPrice')
-    // .to.haveOwnProperty('balance')
-    .to.be.equal(twoKeyProtocol.getGasPrice());
+      // .to.haveOwnProperty('local_address')
+      .to.haveOwnProperty('gasPrice')
+      // .to.haveOwnProperty('balance')
+      .to.be.equal(twoKeyProtocol.getGasPrice());
     // expect(balance).to.haveOwnProperty('gasPrice1');
   }).timeout(30000);
   it('should return estimated gas for transferTokens', async () => {
@@ -158,21 +158,32 @@ describe('TwoKeyProtocol', () => {
       rate,
       maxCPA,
     }, 15000000000);
-    console.log('Campaign address', campaign[0]);
-    campaignAddress = campaign[0];
-    campaignInventoryAddress = campaign[1];
+    console.log('Campaign address', campaign);
+    campaignAddress = campaign;
     // return expect(campaign[0]).to.exist.to.haveOwnProperty('address');
-    return expect(addressRegex.test(campaign[0]) && addressRegex.test(campaign[1])).to.be.true;
+    return expect(addressRegex.test(campaign)).to.be.true;
     // const userCampaigns = await twoKeyProtocol.getContractorCampaigns();
     // console.log('User Campaigns', userCampaigns);
   }).timeout(600000);
+  it('should set ERC20 address', async () => {
+    const address = await twoKeyProtocol.addAssetContractERC20(campaignAddress, twoKeyEconomy);
+    expect(address).to.be.equal(twoKeyEconomy);
+  }).timeout(30000);
+  it('should get ERC20 address', async () => {
+    const address = await twoKeyProtocol.getAssetContractAddress(campaignAddress);
+    expect(address).to.be.equal(twoKeyEconomy);
+  }).timeout(30000);
   let fMessage;
-  it('should add something to ipfs', async () => {
-    const hash = await twoKeyProtocol.joinCampaign();
-    console.log('IPFS:', hash);
-    fMessage = hash;
-    expect(hash).to.be.a('string');
-  });
+  it('should create public link for address', async () => {
+    try {
+      const hash = await twoKeyProtocol.joinCampaign(campaignAddress, 0);
+      console.log('IPFS:', hash);
+      fMessage = hash;
+      expect(hash).to.be.a('string');
+    } catch (err) {
+      throw err
+    }
+  }).timeout(30000);
   it('should create a join link', async () => {
     // const hash = await twoKeyProtocol.joinCampaign(campaignAddress, 0, fMessage);
     let hash = fMessage;

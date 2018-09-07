@@ -34,6 +34,19 @@ export class TwoKeyCampaignETH extends TC.TypeChainContract {
         type: "function"
       },
       {
+        constant: false,
+        inputs: [
+          { name: "_tokenID", type: "uint256" },
+          { name: "_assetContract", type: "address" },
+          { name: "_amount", type: "uint256" }
+        ],
+        name: "transferAssetTwoKeyToken",
+        outputs: [],
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "function"
+      },
+      {
         constant: true,
         inputs: [],
         name: "totalSupply",
@@ -65,31 +78,21 @@ export class TwoKeyCampaignETH extends TC.TypeChainContract {
         type: "function"
       },
       {
-        constant: false,
-        inputs: [
-          { name: "_tokenID", type: "uint256" },
-          { name: "_assetContract", type: "address" },
-          { name: "_index", type: "uint256" },
-          { name: "_pricePerUnit", type: "uint256" }
-        ],
-        name: "setPriceNonFungible",
-        outputs: [],
+        constant: true,
+        inputs: [],
+        name: "getAssetContractAddress",
+        outputs: [{ name: "", type: "address" }],
         payable: false,
-        stateMutability: "nonpayable",
+        stateMutability: "view",
         type: "function"
       },
       {
-        constant: false,
-        inputs: [
-          { name: "_tokenID", type: "uint256" },
-          { name: "_assetContract", type: "address" },
-          { name: "_assetTokenIDOrAmount", type: "uint256" },
-          { name: "_type", type: "uint8" }
-        ],
-        name: "transferAssetTwoKeyToken",
-        outputs: [],
+        constant: true,
+        inputs: [{ name: "", type: "address" }],
+        name: "public_link_key",
+        outputs: [{ name: "", type: "address" }],
         payable: false,
-        stateMutability: "nonpayable",
+        stateMutability: "view",
         type: "function"
       },
       {
@@ -106,16 +109,12 @@ export class TwoKeyCampaignETH extends TC.TypeChainContract {
         type: "function"
       },
       {
-        constant: false,
-        inputs: [
-          { name: "_tokenID", type: "uint256" },
-          { name: "_assetContract", type: "address" },
-          { name: "_amount", type: "uint256" }
-        ],
-        name: "addFungibleInventory",
-        outputs: [],
+        constant: true,
+        inputs: [],
+        name: "checkInventoryBalance",
+        outputs: [{ name: "", type: "uint256" }],
         payable: false,
-        stateMutability: "nonpayable",
+        stateMutability: "view",
         type: "function"
       },
       {
@@ -143,6 +142,24 @@ export class TwoKeyCampaignETH extends TC.TypeChainContract {
         type: "function"
       },
       {
+        constant: false,
+        inputs: [{ name: "_assetContract", type: "address" }],
+        name: "addAssetContractERC20",
+        outputs: [],
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "function"
+      },
+      {
+        constant: true,
+        inputs: [],
+        name: "getContractBalance",
+        outputs: [{ name: "", type: "uint256" }],
+        payable: false,
+        stateMutability: "view",
+        type: "function"
+      },
+      {
         constant: true,
         inputs: [{ name: "_owner", type: "address" }],
         name: "balanceOf",
@@ -153,29 +170,8 @@ export class TwoKeyCampaignETH extends TC.TypeChainContract {
       },
       {
         constant: false,
-        inputs: [
-          { name: "_converter", type: "address" },
-          { name: "_tokenID", type: "uint256" },
-          { name: "_assetContract", type: "address" },
-          { name: "_assetTokenIDOrAmount", type: "uint256" },
-          { name: "_type", type: "uint8" }
-        ],
-        name: "cancelAssetTwoKey",
-        outputs: [{ name: "", type: "bool" }],
-        payable: false,
-        stateMutability: "nonpayable",
-        type: "function"
-      },
-      {
-        constant: false,
-        inputs: [
-          { name: "_converter", type: "address" },
-          { name: "_tokenID", type: "uint256" },
-          { name: "_assetContract", type: "address" },
-          { name: "_assetTokenIDOrAmount", type: "uint256" },
-          { name: "_type", type: "uint8" }
-        ],
-        name: "expireEscrow",
+        inputs: [{ name: "_amount", type: "uint256" }],
+        name: "addFungibleAsset",
         outputs: [{ name: "", type: "bool" }],
         payable: false,
         stateMutability: "nonpayable",
@@ -194,14 +190,23 @@ export class TwoKeyCampaignETH extends TC.TypeChainContract {
         type: "function"
       },
       {
+        constant: true,
+        inputs: [{ name: "_from", type: "address" }],
+        name: "checkAmountAddressSent",
+        outputs: [{ name: "", type: "uint256" }],
+        payable: false,
+        stateMutability: "view",
+        type: "function"
+      },
+      {
         constant: false,
         inputs: [
-          { name: "_tokenID", type: "uint256" },
+          { name: "_converter", type: "address" },
           { name: "_assetContract", type: "address" },
-          { name: "_pricePerUnit", type: "uint256" }
+          { name: "_amount", type: "uint256" }
         ],
-        name: "setPriceFungible",
-        outputs: [],
+        name: "expireEscrow",
+        outputs: [{ name: "", type: "bool" }],
         payable: false,
         stateMutability: "nonpayable",
         type: "function"
@@ -226,6 +231,24 @@ export class TwoKeyCampaignETH extends TC.TypeChainContract {
       },
       {
         constant: false,
+        inputs: [{ name: "_public_link_key", type: "address" }],
+        name: "setPublicLinkKey",
+        outputs: [],
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "function"
+      },
+      {
+        constant: false,
+        inputs: [],
+        name: "checkAndUpdateInventoryBalance",
+        outputs: [{ name: "", type: "uint256" }],
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "function"
+      },
+      {
+        constant: false,
         inputs: [
           { name: "_spender", type: "address" },
           { name: "_addedValue", type: "uint256" }
@@ -234,6 +257,20 @@ export class TwoKeyCampaignETH extends TC.TypeChainContract {
         outputs: [{ name: "", type: "bool" }],
         payable: false,
         stateMutability: "nonpayable",
+        type: "function"
+      },
+      {
+        constant: false,
+        inputs: [
+          { name: "_from", type: "address" },
+          { name: "_assetName", type: "string" },
+          { name: "_assetContract", type: "address" },
+          { name: "_amount", type: "uint256" }
+        ],
+        name: "buyFromWithTwoKey",
+        outputs: [],
+        payable: true,
+        stateMutability: "payable",
         type: "function"
       },
       {
@@ -250,15 +287,6 @@ export class TwoKeyCampaignETH extends TC.TypeChainContract {
       },
       {
         constant: true,
-        inputs: [],
-        name: "getInventoryBalance",
-        outputs: [{ name: "", type: "uint256" }],
-        payable: false,
-        stateMutability: "view",
-        type: "function"
-      },
-      {
-        constant: true,
         inputs: [{ name: "", type: "address" }],
         name: "conversions",
         outputs: [
@@ -267,9 +295,9 @@ export class TwoKeyCampaignETH extends TC.TypeChainContract {
           { name: "converter", type: "address" },
           { name: "isFulfilled", type: "bool" },
           { name: "isCancelled", type: "bool" },
-          { name: "tokenID", type: "uint256" },
+          { name: "assetName", type: "string" },
           { name: "assetContract", type: "address" },
-          { name: "indexOrAmount", type: "uint256" },
+          { name: "amount", type: "uint256" },
           { name: "campaignType", type: "uint8" },
           { name: "openingTime", type: "uint256" },
           { name: "closingTime", type: "uint256" }
@@ -281,25 +309,31 @@ export class TwoKeyCampaignETH extends TC.TypeChainContract {
       {
         constant: false,
         inputs: [
-          { name: "_from", type: "address" },
-          { name: "_tokenID", type: "uint256" },
+          { name: "_converter", type: "address" },
+          { name: "_assetName", type: "string" },
           { name: "_assetContract", type: "address" },
-          { name: "_amountOrIndex", type: "uint256" },
-          { name: "_campaignType", type: "uint8" }
+          { name: "_amount", type: "uint256" }
         ],
-        name: "buyFromWithTwoKey",
-        outputs: [],
-        payable: true,
-        stateMutability: "payable",
+        name: "cancelAssetTwoKey",
+        outputs: [{ name: "", type: "bool" }],
+        payable: false,
+        stateMutability: "nonpayable",
         type: "function"
+      },
+      { payable: true, stateMutability: "payable", type: "fallback" },
+      {
+        anonymous: false,
+        inputs: [{ indexed: true, name: "_contract", type: "address" }],
+        name: "Expired",
+        type: "event"
       },
       {
         anonymous: false,
         inputs: [
-          { indexed: true, name: "_campaign", type: "address" },
-          { indexed: true, name: "_owner", type: "address" }
+          { indexed: false, name: "_sender", type: "address" },
+          { indexed: false, name: "value", type: "uint256" }
         ],
-        name: "Created",
+        name: "ReceivedEther",
         type: "event"
       },
       {
@@ -321,21 +355,6 @@ export class TwoKeyCampaignETH extends TC.TypeChainContract {
         ],
         name: "Transfer",
         type: "event"
-      },
-      {
-        constant: false,
-        inputs: [
-          { name: "_from", type: "address" },
-          { name: "_tokenID", type: "uint256" },
-          { name: "_assetContract", type: "address" },
-          { name: "_amountOrIndex", type: "uint256" },
-          { name: "_campaignType", type: "uint8" }
-        ],
-        name: "buyFromWithETH",
-        outputs: [],
-        payable: true,
-        stateMutability: "payable",
-        type: "function"
       }
     ];
     super(web3, address, abi);
@@ -360,20 +379,40 @@ export class TwoKeyCampaignETH extends TC.TypeChainContract {
     return TC.promisify(this.rawWeb3Contract.totalSupply, []);
   }
 
-  public get quota(): Promise<BigNumber> {
-    return TC.promisify(this.rawWeb3Contract.quota, []);
+  public get getAssetContractAddress(): Promise<string> {
+    return TC.promisify(this.rawWeb3Contract.getAssetContractAddress, []);
   }
 
-  public get getInventoryBalance(): Promise<BigNumber> {
-    return TC.promisify(this.rawWeb3Contract.getInventoryBalance, []);
+  public get checkInventoryBalance(): Promise<BigNumber> {
+    return TC.promisify(this.rawWeb3Contract.checkInventoryBalance, []);
+  }
+
+  public get getContractBalance(): Promise<BigNumber> {
+    return TC.promisify(this.rawWeb3Contract.getContractBalance, []);
+  }
+
+  public get quota(): Promise<BigNumber> {
+    return TC.promisify(this.rawWeb3Contract.quota, []);
   }
 
   public received_from(arg0: BigNumber | string): Promise<string> {
     return TC.promisify(this.rawWeb3Contract.received_from, [arg0.toString()]);
   }
 
+  public public_link_key(arg0: BigNumber | string): Promise<string> {
+    return TC.promisify(this.rawWeb3Contract.public_link_key, [
+      arg0.toString()
+    ]);
+  }
+
   public balanceOf(_owner: BigNumber | string): Promise<BigNumber> {
     return TC.promisify(this.rawWeb3Contract.balanceOf, [_owner.toString()]);
+  }
+
+  public checkAmountAddressSent(_from: BigNumber | string): Promise<BigNumber> {
+    return TC.promisify(this.rawWeb3Contract.checkAmountAddressSent, [
+      _from.toString()
+    ]);
   }
 
   public allowance(
@@ -395,7 +434,7 @@ export class TwoKeyCampaignETH extends TC.TypeChainContract {
       string,
       boolean,
       boolean,
-      BigNumber,
+      string,
       string,
       BigNumber,
       BigNumber,
@@ -425,6 +464,17 @@ export class TwoKeyCampaignETH extends TC.TypeChainContract {
       [_to.toString(), _value.toString()]
     );
   }
+  public transferAssetTwoKeyTokenTx(
+    _tokenID: BigNumber | number,
+    _assetContract: BigNumber | string,
+    _amount: BigNumber | number
+  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
+    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
+      this,
+      "transferAssetTwoKeyToken",
+      [_tokenID.toString(), _assetContract.toString(), _amount.toString()]
+    );
+  }
   public transferFromTx(
     _from: BigNumber | string,
     _to: BigNumber | string,
@@ -436,40 +486,6 @@ export class TwoKeyCampaignETH extends TC.TypeChainContract {
       [_from.toString(), _to.toString(), _value.toString()]
     );
   }
-  public setPriceNonFungibleTx(
-    _tokenID: BigNumber | number,
-    _assetContract: BigNumber | string,
-    _index: BigNumber | number,
-    _pricePerUnit: BigNumber | number
-  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
-    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
-      this,
-      "setPriceNonFungible",
-      [
-        _tokenID.toString(),
-        _assetContract.toString(),
-        _index.toString(),
-        _pricePerUnit.toString()
-      ]
-    );
-  }
-  public transferAssetTwoKeyTokenTx(
-    _tokenID: BigNumber | number,
-    _assetContract: BigNumber | string,
-    _assetTokenIDOrAmount: BigNumber | number,
-    _type: BigNumber | number
-  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
-    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
-      this,
-      "transferAssetTwoKeyToken",
-      [
-        _tokenID.toString(),
-        _assetContract.toString(),
-        _assetTokenIDOrAmount.toString(),
-        _type.toString()
-      ]
-    );
-  }
   public transferFromQuotaTx(
     _from: BigNumber | string,
     _to: BigNumber | string,
@@ -479,17 +495,6 @@ export class TwoKeyCampaignETH extends TC.TypeChainContract {
       this,
       "transferFromQuota",
       [_from.toString(), _to.toString(), _value.toString()]
-    );
-  }
-  public addFungibleInventoryTx(
-    _tokenID: BigNumber | number,
-    _assetContract: BigNumber | string,
-    _amount: BigNumber | number
-  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
-    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
-      this,
-      "addFungibleInventory",
-      [_tokenID.toString(), _assetContract.toString(), _amount.toString()]
     );
   }
   public transferRewardsTwoKeyTokenTx(
@@ -512,42 +517,22 @@ export class TwoKeyCampaignETH extends TC.TypeChainContract {
       [_spender.toString(), _subtractedValue.toString()]
     );
   }
-  public cancelAssetTwoKeyTx(
-    _converter: BigNumber | string,
-    _tokenID: BigNumber | number,
-    _assetContract: BigNumber | string,
-    _assetTokenIDOrAmount: BigNumber | number,
-    _type: BigNumber | number
+  public addAssetContractERC20Tx(
+    _assetContract: BigNumber | string
   ): TC.DeferredTransactionWrapper<TC.ITxParams> {
     return new TC.DeferredTransactionWrapper<TC.ITxParams>(
       this,
-      "cancelAssetTwoKey",
-      [
-        _converter.toString(),
-        _tokenID.toString(),
-        _assetContract.toString(),
-        _assetTokenIDOrAmount.toString(),
-        _type.toString()
-      ]
+      "addAssetContractERC20",
+      [_assetContract.toString()]
     );
   }
-  public expireEscrowTx(
-    _converter: BigNumber | string,
-    _tokenID: BigNumber | number,
-    _assetContract: BigNumber | string,
-    _assetTokenIDOrAmount: BigNumber | number,
-    _type: BigNumber | number
+  public addFungibleAssetTx(
+    _amount: BigNumber | number
   ): TC.DeferredTransactionWrapper<TC.ITxParams> {
     return new TC.DeferredTransactionWrapper<TC.ITxParams>(
       this,
-      "expireEscrow",
-      [
-        _converter.toString(),
-        _tokenID.toString(),
-        _assetContract.toString(),
-        _assetTokenIDOrAmount.toString(),
-        _type.toString()
-      ]
+      "addFungibleAsset",
+      [_amount.toString()]
     );
   }
   public transferTx(
@@ -559,15 +544,15 @@ export class TwoKeyCampaignETH extends TC.TypeChainContract {
       _value.toString()
     ]);
   }
-  public setPriceFungibleTx(
-    _tokenID: BigNumber | number,
+  public expireEscrowTx(
+    _converter: BigNumber | string,
     _assetContract: BigNumber | string,
-    _pricePerUnit: BigNumber | number
+    _amount: BigNumber | number
   ): TC.DeferredTransactionWrapper<TC.ITxParams> {
     return new TC.DeferredTransactionWrapper<TC.ITxParams>(
       this,
-      "setPriceFungible",
-      [_tokenID.toString(), _assetContract.toString(), _pricePerUnit.toString()]
+      "expireEscrow",
+      [_converter.toString(), _assetContract.toString(), _amount.toString()]
     );
   }
   public redeemTwoKeyTokenTx(
@@ -577,6 +562,24 @@ export class TwoKeyCampaignETH extends TC.TypeChainContract {
       this,
       "redeemTwoKeyToken",
       [_amount.toString()]
+    );
+  }
+  public setPublicLinkKeyTx(
+    _public_link_key: BigNumber | string
+  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
+    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
+      this,
+      "setPublicLinkKey",
+      [_public_link_key.toString()]
+    );
+  }
+  public checkAndUpdateInventoryBalanceTx(): TC.DeferredTransactionWrapper<
+    TC.ITxParams
+  > {
+    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
+      this,
+      "checkAndUpdateInventoryBalance",
+      []
     );
   }
   public increaseApprovalTx(
@@ -591,60 +594,58 @@ export class TwoKeyCampaignETH extends TC.TypeChainContract {
   }
   public buyFromWithTwoKeyTx(
     _from: BigNumber | string,
-    _tokenID: BigNumber | number,
+    _assetName: string,
     _assetContract: BigNumber | string,
-    _amountOrIndex: BigNumber | number,
-    _campaignType: BigNumber | number
+    _amount: BigNumber | number
   ): TC.DeferredTransactionWrapper<TC.IPayableTxParams> {
     return new TC.DeferredTransactionWrapper<TC.IPayableTxParams>(
       this,
       "buyFromWithTwoKey",
       [
         _from.toString(),
-        _tokenID.toString(),
+        _assetName.toString(),
         _assetContract.toString(),
-        _amountOrIndex.toString(),
-        _campaignType.toString()
+        _amount.toString()
       ]
     );
   }
-  public buyFromWithETHTx(
-    _from: BigNumber | string,
-    _tokenID: BigNumber | number,
+  public cancelAssetTwoKeyTx(
+    _converter: BigNumber | string,
+    _assetName: string,
     _assetContract: BigNumber | string,
-    _amountOrIndex: BigNumber | number,
-    _campaignType: BigNumber | number
-  ): TC.DeferredTransactionWrapper<TC.IPayableTxParams> {
-    return new TC.DeferredTransactionWrapper<TC.IPayableTxParams>(
+    _amount: BigNumber | number
+  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
+    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
       this,
-      "buyFromWithETH",
+      "cancelAssetTwoKey",
       [
-        _from.toString(),
-        _tokenID.toString(),
+        _converter.toString(),
+        _assetName.toString(),
         _assetContract.toString(),
-        _amountOrIndex.toString(),
-        _campaignType.toString()
+        _amount.toString()
       ]
     );
   }
 
-  public CreatedEvent(eventFilter: {
-    _campaign?: BigNumber | string | Array<BigNumber | string>;
-    _owner?: BigNumber | string | Array<BigNumber | string>;
+  public ExpiredEvent(eventFilter: {
+    _contract?: BigNumber | string | Array<BigNumber | string>;
   }): TC.DeferredEventWrapper<
-    { _campaign: BigNumber | string; _owner: BigNumber | string },
-    {
-      _campaign?: BigNumber | string | Array<BigNumber | string>;
-      _owner?: BigNumber | string | Array<BigNumber | string>;
-    }
+    { _contract: BigNumber | string },
+    { _contract?: BigNumber | string | Array<BigNumber | string> }
   > {
     return new TC.DeferredEventWrapper<
-      { _campaign: BigNumber | string; _owner: BigNumber | string },
-      {
-        _campaign?: BigNumber | string | Array<BigNumber | string>;
-        _owner?: BigNumber | string | Array<BigNumber | string>;
-      }
-    >(this, "Created", eventFilter);
+      { _contract: BigNumber | string },
+      { _contract?: BigNumber | string | Array<BigNumber | string> }
+    >(this, "Expired", eventFilter);
+  }
+  public ReceivedEtherEvent(eventFilter: {}): TC.DeferredEventWrapper<
+    { _sender: BigNumber | string; value: BigNumber | number },
+    {}
+  > {
+    return new TC.DeferredEventWrapper<
+      { _sender: BigNumber | string; value: BigNumber | number },
+      {}
+    >(this, "ReceivedEther", eventFilter);
   }
   public ApprovalEvent(eventFilter: {
     owner?: BigNumber | string | Array<BigNumber | string>;
