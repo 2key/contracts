@@ -15,7 +15,7 @@ module.exports = {
         port: 8545,
         // provider: new HDWalletProvider(mnemonic, "http://localhost:8500"),
         network_id: '*', // Match any network id
-        gas: 7000000,
+        gas: 10000000,
         gasPrice: 2000000000,
       },
     'dev-ganache': {
