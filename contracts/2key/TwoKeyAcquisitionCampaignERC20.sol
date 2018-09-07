@@ -6,17 +6,16 @@ import "./TwoKeyCampaignARC.sol";
 import "./TwoKeyEventSource.sol";
 import "./TwoKeyWhitelisted.sol";
 import './TwoKeyEconomy.sol';
-import "../interfaces/IERC20.sol";
 import "./TwoKeySignedContract.sol";
-import "../interfaces/IUtils.sol";
+import "./Utils.sol";
 
 /// @author Nikola Madjarevic
 /// Contract which will represent campaign for the fungible assets
-contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, IUtils {
+contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils {
+
 
     event Fulfilled(address indexed to, uint256 units);
     event Rewarded(address indexed to, uint256 amount);
-
     /// @notice Event which will be emitted when conversion expire
     event Expired(address indexed _contract);
 
@@ -41,23 +40,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, IUtil
         uint256 closingTime;
     }
 
-
-    mapping (address => Conversion) public conversions;
-
-    mapping(address => uint256) public units; // number of units bought
-
-    /// Amount converter put to the contract in Ether
-    mapping (address => uint) balancesConvertersETH;
-
-
-    /// Balance will represent how many that tokens (erc20) we have on our Campaign
-    uint campaignInventoryUnitsBalance;
-    /// asset contract is address of that ERC20 inventory
-    address assetContract;
-    /// asset name is short name of the asset for example "2key"
-    string assetName;
-    uint converterProceeds;
-
     string public name;
     string public ipfs_hash;
     string public symbol;
@@ -66,6 +48,22 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, IUtil
     uint256 public bounty; // Cost of product in wei
     uint256 public quota;  // maximal tokens that can be passed in transferFrom
     uint256 unit_decimals;  // units being sold can be fractional (for example tokens in ERC20)
+
+    mapping (address => Conversion) public conversions;
+    mapping(address => uint256) public influencer2cut;
+
+    /// Amount converter put to the contract in Ether
+    mapping (address => uint) balancesConvertersETH;
+    mapping(address => uint256) public units; // number of units bought
+    /// Balance will represent how many that tokens (erc20) we have on our Campaign
+    uint campaignInventoryUnitsBalance;
+
+    /// asset contract is address of that ERC20 inventory
+    address assetContract;
+
+    /// asset name is short name of the asset for example "2key"
+    string assetName;
+    uint converterProceeds;
 
     TwoKeyEconomy twoKeyEconomy;
     TwoKeyWhitelisted whitelistInfluencer;
@@ -83,30 +81,30 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, IUtil
 
 
     constructor(address _twoKeyEventSource, address _twoKeyEconomy,
-                address _whitelistInfluencer, address _whitelistConverter,
-                address _contractor, address _moderator, uint _openingTime, uint _closingTime,
-                    uint _expiryConversion, uint _escrowPercentage, uint _rate, uint _maxPi) TwoKeyCampaignARC(_twoKeyEventSource, _contractor)StandardToken()
-            public {
-                require(_twoKeyEconomy != address(0));
-                require(_whitelistInfluencer != address(0));
-                require(_whitelistConverter != address(0));
-                require(_rate > 0);
-                require(_maxPi > 0);
+        address _whitelistInfluencer, address _whitelistConverter,
+        address _contractor, address _moderator, uint _openingTime, uint _closingTime,
+        uint _expiryConversion, uint _escrowPercentage, uint _rate, uint _maxPi) TwoKeyCampaignARC(_twoKeyEventSource, _contractor)StandardToken()
+        public {
+            require(_twoKeyEconomy != address(0));
+            require(_whitelistInfluencer != address(0));
+            require(_whitelistConverter != address(0));
+            require(_rate > 0);
+            require(_maxPi > 0);
 
 
-                twoKeyEconomy = TwoKeyEconomy(_twoKeyEconomy);
-                whitelistInfluencer = TwoKeyWhitelisted(_whitelistInfluencer);
-                whitelistConverter = TwoKeyWhitelisted(_whitelistConverter);
+            twoKeyEconomy = TwoKeyEconomy(_twoKeyEconomy);
+            whitelistInfluencer = TwoKeyWhitelisted(_whitelistInfluencer);
+            whitelistConverter = TwoKeyWhitelisted(_whitelistConverter);
 
-                moderator = _moderator;
-                openingTime = _openingTime;
-                closingTime = _closingTime;
-                expiryConversion = _expiryConversion;
-                escrowPercentage = _escrowPercentage;
-                maxPi = _maxPi;
+            moderator = _moderator;
+            openingTime = _openingTime;
+            closingTime = _closingTime;
+            expiryConversion = _expiryConversion;
+            escrowPercentage = _escrowPercentage;
+            maxPi = _maxPi;
 
-                // Emit event that TwoKeyCampaign is created
-                twoKeyEventSource.created(address(this), contractor);
+            // Emit event that TwoKeyCampaign is created
+            twoKeyEventSource.created(address(this), contractor);
     }
 
 
@@ -170,7 +168,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, IUtil
     /// @dev we're using interface of ERC20 and fetching the balance of this contract address
     /// @return balance value as uint
     function checkInventoryBalance() public view returns (uint) {
-        uint balance = IERC20(assetContract).balanceOf(address(this));
+//        uint balance = IERC20(assetContract).balanceOf(address(this));
+        uint balance = Utils.call_return(assetContract,"balanceOf(address)",uint(this));
         return balance;
     }
 
@@ -221,7 +220,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, IUtil
     function fulfillFungibleTwoKeyToken(address _from, string _assetName, address _assetContract, uint256 _amount)  internal {
         require(_amount > 0);
         // require(price > 0);
-//        uint256 payout = price.mul(_amount).mul(rate);
+        //        uint256 payout = price.mul(_amount).mul(rate);
 
         /// Make sure that the payment has been sent
         require(twoKeyEconomy.transferFrom(msg.sender, this, _amount));
@@ -233,21 +232,21 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, IUtil
         Conversion memory c = Conversion(_from, _amount, msg.sender, false, false, _assetName, _assetContract, _units, CampaignType.CPA_FUNGIBLE, now, now + expiryConversion * 1 minutes);
         // move funds
         campaignInventoryUnitsBalance = campaignInventoryUnitsBalance - _units;
-//        twoKeyEventSource.escrow(address(this), msg.sender, _assetName, _assetContract, units, CampaignType.CPA_FUNGIBLE);
+        //        twoKeyEventSource.escrow(address(this), msg.sender, _assetName, _assetContract, units, CampaignType.CPA_FUNGIBLE);
         conversions[msg.sender] = c;
     }
 
     function fulfillFungibleETH(
         address _from,
         uint256 _amountETH
-        ) isOngoing internal {
+    ) isOngoing internal {
         uint _amount = msg.value;
         // TODO: Idea is that payout is msg.value
         // Compute for the amount of ether how much tokens can be got by the amount
         require(_amount > 0);
-//        require(price > 0);
+        //        require(price > 0);
         uint payout = 1;
-//        uint256 payout = price.mul(_amount);
+        //        uint256 payout = price.mul(_amount);
         require(msg.value == payout);
         //TODO: Someone put 100 eth and he's entitled to X base + Y bonus  = (X+Y) taken from Inventory
         //TODO: Take the msg.value, and regarding value I compute number of base and bonus tokens - sum of base and bonus is took out of the twoKeyCampaignInvent
@@ -261,7 +260,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, IUtil
 
         //tokenID can be string specifying the name of token ("ETH", "BTC",etc)
         // value in escrow (msg.value), total amount of tokens
-//        twoKeyEventSource.escrow(address(this), msg.sender, _assetName, _assetContract, _amount, CampaignType.CPA_FUNGIBLE);
+        //        twoKeyEventSource.escrow(address(this), msg.sender, _assetName, _assetContract, _amount, CampaignType.CPA_FUNGIBLE);
         conversions[msg.sender] = c;
     }
 
@@ -334,7 +333,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, IUtil
         require(twoKeyEconomy.transfer(contractor, (payout.sub(fee).sub(maxReward)).mul(rate)));
 
 //        transferRewardsTwoKeyToken(c.from, maxReward.mul(rate));
-//        twoKeyEventSource.fulfilled(address(this), c.converter, c.tokenID, c.assetContract, c.indexOrAmount, c.campaignType);
+        //        twoKeyEventSource.fulfilled(address(this), c.converter, c.tokenID, c.assetContract, c.indexOrAmount, c.campaignType);
     }
 
     // @notice Function where an influencer that wishes to cash an _amount of 2key from the campaign can do it
@@ -348,12 +347,12 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, IUtil
     /// @dev we require that msg.value is greater than 0
     /// @dev function will update the mapping balances where we're mapping how much ether has been sent to contract from specified address
     /// @dev will emit an event with address and value sent
-//    function () external payable {
-//        require(msg.value > 0);
-//        balancesConvertersETH[msg.sender] += msg.value;
-////        fulfillFungibleETH(from, msg.value);
-//        emit ReceivedEther(msg.sender, msg.value);
-//    }
+    function () external payable {
+        require(msg.value > 0);
+        balancesConvertersETH[msg.sender] += msg.value;
+        //        fulfillFungibleETH(from, msg.value);
+        emit ReceivedEther(msg.sender, msg.value);
+    }
 
     /// @notice Function to check how much eth has been sent to contract from address
     /// @param _from is the address we'd like to check balance
@@ -373,7 +372,11 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, IUtil
     function getAssetContractAddress() public view returns(address) {
         return assetContract;
     }
-    // ===================================================
+
+
+    //==========================================================================================
+    //==========================================================================================
+
     // the 2key link generated by the owner of this contract contains a secret which is a private key,
     // this is the public part of this secret
     mapping(address => address)  public public_link_key;
@@ -383,28 +386,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, IUtil
         require(balanceOf(owner_influencer) > 0);
         require(public_link_key[owner_influencer] == address(0));
         public_link_key[owner_influencer] = _public_link_key;
-    }
-
-    function joinOnChain(bytes sig, address _public_link_key, uint cut) public {
-        if(balanceOf(msg.sender) == 0) {
-            transferSig(sig);
-        }
-        setPublicLinkKey(_public_link_key);
-        setCut(cut);
-    }
-
-    mapping(address => uint256) public influencer2cut; //TODO: need this
-
-    function getCuts(address last_influencer) public view returns (uint256[]) {
-        address[] memory influencers = getInfluencers(last_influencer);
-        uint n_influencers = influencers.length;
-        uint256[] memory cuts = new uint256[](n_influencers + 1);
-        for (uint i = 0; i < n_influencers; i++) {
-            address influencer = influencers[i];
-            cuts[i] = influencer2cut[influencer];
-        }
-        cuts[n_influencers] = influencer2cut[last_influencer];
-        return cuts;
     }
 
     function setCut(uint256 cut) private {
@@ -418,10 +399,20 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, IUtil
         }
         influencer2cut[msg.sender] = cut;
     }
+    function getCuts(address last_influencer) public view returns (uint256[]) {
+        address[] memory influencers = getInfluencers(last_influencer);
+        uint n_influencers = influencers.length;
+        uint256[] memory cuts = new uint256[](n_influencers + 1);
+        for (uint i = 0; i < n_influencers; i++) {
+            address influencer = influencers[i];
+            cuts[i] = influencer2cut[influencer];
+        }
+        cuts[n_influencers] = influencer2cut[last_influencer];
+        return cuts;
+    }
 
     function transferSig(bytes sig) public {
         // move ARCs based on signature information
-
         // if version=1, with_cut is true then sig also include the cut (percentage) each influencer takes from the bounty
         // the cut is stored in influencer2cut
         uint idx = 0;
@@ -540,74 +531,44 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, IUtil
         }
         //    require(idx == sig.length);
     }
-    // THIS IS CONVERTER ENTRY POINT
-    function buyFromWithSignedLink(bytes sig) public payable {
-        require(msg.value > 0);
-
-        if(balanceOf(msg.sender) == 0) {
-            transferSig(sig);
-        }
-
-        balancesConvertersETH[msg.sender] += msg.value;
-        //        fulfillFungibleETH(from, msg.value);
-        emit ReceivedEther(msg.sender, msg.value);
-        // TODO: We need to actually change this to initiate conversion
-        // TODO: From Yoram: The way of creating conversion
-        // TODO: Second part of conversion take from :
-        // 1) Udi distribution of rewards to referrers specificly using manual incentive model
-        // 2) Do myself: Create the lockup contracts transfers converter tokens into them
-        buyProduct();
-    }
-
 
     function buyProduct() public payable {
-//        emit Log1('unit_decimals', unit_decimals);
-        //    unit_decimals = 18; // uint256(erc20_token_sell_contract.decimals());
+        unit_decimals = 18; // uint256(erc20_token_sell_contract.decimals());
         // cost is the cost of a single token. Each token has 10**decimals units
         // TODO: Compute valid base units and bonus units per the msg.value and token price and bonus percentage
         uint256 _units = msg.value.mul(10**unit_decimals).div(cost);
-//        emit Log1('units', _units);
         // bounty is the cost of a single token. Compute the bounty for the units
         // we are buying
         // TODO: Replace bounty with new parameter maxReferralReward
-
 
         uint256 _bounty = bounty.mul(_units).div(10**unit_decimals);
         // TODO replace _bounty with this conversion reward
         // Example; MaxReferralReward = 10% then msg.value = 100ETH
         // then this conversionReward = 10ETH
-//        emit Log1('_bounty', _bounty);
 
 
         // TODO: this function has to be part of conversion
-        updateRefchainRewardsAndConverterProceeds(_units, _bounty);
-
-//        emit Log1('going to transfer', _units);
-
-        //    erc20_token_sell_contract.transfer(msg.sender, _units);  // TODO is this dangerous!?
+//        updateRefchainRewardsAndConverterProceeds(_units, _bounty);
         require(assetContract.call(bytes4(keccak256("transfer(address,uint256)")),msg.sender,_units));
     }
 
-    function executeConversion() public {
-        // 1) Check converter is whitelisted
-        // 2) If whitelisted  {
-        // 3) then we create lockup contract for converters tokens
-        // 4) allocation of referral rewards and proceeds
-        // }
-        // 5) After allocation send funds to referrers and converter
-    }
+//    function buyFrom(address _from) private payable {
+//        require(_from != address(0));
+//        address _to = msg.sender;
+//        if (balanceOf(_to) == 0) {
+//            transferFrom(_from, _to, 1);
+//        }
+//        buyProduct();
+//    }
 
     function updateRefchainRewardsAndConverterProceeds(uint256 _units, uint256 _bounty) public payable {
         // buy coins with cut
         // low level product purchase function
         address customer = msg.sender;
-//        emit Log1A('customer',customer);
         uint256 customer_balance = balanceOf(customer);
-//        emit Log1('customer_balance', customer_balance);
         require(customer_balance > 0);
 
-        uint256 _total_units = total_units();
-//        emit Log1('_total_units',_total_units);
+        uint256 _total_units = checkInventoryBalance();
 
         require(_units > 0);
         require(_total_units >= _units);
@@ -641,22 +602,5 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, IUtil
         units[customer] = units[customer].add(_units);
 
         emit Fulfilled(customer, units[customer]);
-    }
-
-    //    function buyFrom(address _from) private payable {
-//        require(_from != address(0));
-//        address _to = msg.sender;
-//        if (balanceOf(_to) == 0) {
-//            transferFrom(_from, _to, 1);
-//        }
-//
-//        buyProduct();
-//    }
-
-    function total_units() public view returns (uint256) {
-        uint256 _total_units;
-        //    _total_units = erc20_token_sell_contract.balanceOf(address(this));
-        _total_units = call_return(assetContract, "balanceOf(address)",uint(this));
-        return _total_units;
     }
 }
