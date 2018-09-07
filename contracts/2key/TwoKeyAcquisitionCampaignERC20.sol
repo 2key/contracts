@@ -548,7 +548,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
 
 
         // TODO: this function has to be part of conversion
-//        updateRefchainRewardsAndConverterProceeds(_units, _bounty);
+        updateRefchainRewardsAndConverterProceeds(_units, _bounty);
         require(assetContract.call(bytes4(keccak256("transfer(address,uint256)")),msg.sender,_units));
     }
 
