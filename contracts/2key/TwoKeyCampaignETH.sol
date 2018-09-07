@@ -77,7 +77,7 @@ contract TwoKeyCampaignETH is TwoKeyAcquisitionCampaignERC20 {
         // transfer payout - fee - rewards to seller
         contractor.transfer(payout.sub(fee).sub(maxReward));
         
-        transferRewardsTwoKeyToken(c.from, maxReward.mul(rate));
+//        transferRewardsTwoKeyToken(c.from, maxReward.mul(rate));
 		twoKeyEventSource.fulfilled(address(this), c.converter, c.assetName, c.assetContract, c.amount, c.campaignType);
 	}
 

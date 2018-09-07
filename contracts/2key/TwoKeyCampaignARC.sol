@@ -12,8 +12,8 @@ contract TwoKeyCampaignARC is StandardToken {
 	uint256 totalSupply_ = 1000000;
 
 	// balance of TwoKeyToken for each influencer that they can withdraw 
-    mapping(address => uint256) internal xbalancesTwoKey;  
- 
+    mapping(address => uint256) internal referrerBalances2KEY;
+ 	mapping(address => uint256) internal referrerBalancesETH;
 
 	TwoKeyEventSource twoKeyEventSource;
 	address contractor;
@@ -112,37 +112,66 @@ contract TwoKeyCampaignARC is StandardToken {
     // no reputation model really
     // compute the last referral chain, _from is the last influencer before the converter, and _maxReward is the total rewarded
     // to all influencers
-    function transferRewardsTwoKeyToken(address _from, uint256 _maxReward) public { 
+//    function transferRewardsTwoKeyToken(address _from, uint256 _maxReward) public {
+//
+//		require(_from != address(0));
+//	    address _to = msg.sender;
+//
+//	    // if you dont have ARCs then first take them (join) from _from
+//	    if (this.balanceOf(_to) == 0) {
+//	      transferFrom(_from, _to, 1);
+//	    }
+//
+//
+//	    // compute last referral chain
+//
+//	    uint256 influencersCount;
+//	    address influencer = msg.sender;
+//	    while (true) {
+//	        influencer = received_from[influencer];
+//	        if (influencer == contractor) {
+//	            break;
+//	        }
+//	        influencersCount++;
+//	    }
+//
+//        uint256 rewardPerInfluencer = _maxReward.div(influencersCount);
+//        influencer = msg.sender;
+//        for(uint256 i = 0; i < influencersCount; i++) {
+//        	influencer = received_from[influencer];
+//            xbalancesTwoKey[influencer] = xbalancesTwoKey[influencer].add(rewardPerInfluencer);
+//			twoKeyEventSource.rewarded(address(this), influencer, rewardPerInfluencer);
+//        }
+//
+//    }
 
-		require(_from != address(0));
-	    address _to = msg.sender;
+	function getInfluencers(address customer) internal view returns (address[]) {
+		// build a list of all influencers from converter back to to contractor
+		// dont count the conveter and contractr themselves
+		address influencer = customer;
+		// first count how many influencers
+		uint n_influencers = 0;
+		while (true) {
+			influencer = received_from[influencer];
+			// Owner is owner of campaign (contractor)
+			if (influencer == contractor) {
+				break;
+			}
+			n_influencers++;
+		}
+		// allocate temporary memory to hold the influencers
+		address[] memory influencers = new address[](n_influencers);
+		// fill the array of influencers in reverse order, from the last influencer just before the converter to the
+		// first influencer just after the contractor
+		influencer = customer;
+		while (n_influencers > 0) {
+			influencer = received_from[influencer];
+			n_influencers--;
+			influencers[n_influencers] = influencer;
+		}
 
-	    // if you dont have ARCs then first take them (join) from _from
-	    if (this.balanceOf(_to) == 0) {
-	      transferFrom(_from, _to, 1);
-	    }
+		return influencers;
+	}
 
-
-	    // compute last referral chain
-	   
-	    uint256 influencersCount;
-	    address influencer = msg.sender;
-	    while (true) {
-	        influencer = received_from[influencer];
-	        if (influencer == contractor) {
-	            break;
-	        }
-	        influencersCount++;
-	    }
-        
-        uint256 rewardPerInfluencer = _maxReward.div(influencersCount);
-        influencer = msg.sender;
-        for(uint256 i = 0; i < influencersCount; i++) {
-        	influencer = received_from[influencer];
-            xbalancesTwoKey[influencer] = xbalancesTwoKey[influencer].add(rewardPerInfluencer);
-			twoKeyEventSource.rewarded(address(this), influencer, rewardPerInfluencer);
-        }
-
-    }
 
 }

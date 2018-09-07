@@ -25,6 +25,7 @@ contract TwoKeyContract is StandardToken, Ownable {
   // 2key admin contract that created this
   TwoKeyEventSource eventSource;
 
+  // TODo: Get this params we need and add more (Andrii sent me this)
   // address public owner;  // Who created the contract (business) // contained in Ownable.sol
   string public name;
   string public ipfs_hash;
@@ -42,7 +43,7 @@ contract TwoKeyContract is StandardToken, Ownable {
 
   // The cut from the bounty each influencer is taking + 1
   // zero (also the default value) indicates default behaviour in which the influencer takes an equal amount as other influencers
-  mapping(address => uint256) public influencer2cut;
+  mapping(address => uint256) public influencer2cut; //TODO: need this
 
   function getCuts(address last_influencer) public view returns (uint256[]) {
     address[] memory influencers = getInfluencers(last_influencer);
@@ -151,13 +152,14 @@ contract TwoKeyContract is StandardToken, Ownable {
   }
 
   // New 2Key method
-
+  // TODO: add this getter params and missing params
   function getConstantInfo() public view returns (string,string,uint256,uint256,uint256,address,string,uint256) {
     return (name,symbol,cost,bounty,quota,owner,ipfs_hash,unit_decimals);
   }
 
   function total_units() public view returns (uint256);
 
+  // TODO: add this getter
   function getDynamicInfo(address me) public view returns (uint256,uint256,uint256,uint256,uint256,uint256,uint256) {
     // address(this).balance is solidity reserved word for the the ETH amount deposited in the contract
     return (balanceOf(me),units[me],xbalances[me],totalSupply_,address(this).balance,total_units(),influencer2cut[me]);
@@ -167,6 +169,8 @@ contract TwoKeyContract is StandardToken, Ownable {
   //   buyProduct();
   // }
 
+  // TODO: Validate join before you can actually buyFrom
+  // TODO: If using link need to be provided (Refactor)
   // buy product. if you dont have ARCs then first take them (join) from _from
   function buyFrom(address _from) public payable {
     require(_from != address(0));
