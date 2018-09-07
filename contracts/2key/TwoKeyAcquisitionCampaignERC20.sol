@@ -8,11 +8,11 @@ import "./TwoKeyWhitelisted.sol";
 import './TwoKeyEconomy.sol';
 import "../interfaces/IERC20.sol";
 import "./TwoKeySignedContract.sol";
-import "./Utils.sol";
+import "../interfaces/IUtils.sol";
 
 /// @author Nikola Madjarevic
 /// Contract which will represent campaign for the fungible assets
-contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils {
+contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, IUtils {
 
     event Fulfilled(address indexed to, uint256 units);
     event Rewarded(address indexed to, uint256 amount);
