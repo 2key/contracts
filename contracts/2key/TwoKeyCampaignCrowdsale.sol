@@ -30,7 +30,8 @@ contract TwoKeyCampaignCrowdsale is TwoKeyAcquisitionCampaignERC20 {
 		uint256 _expiryConversion,
 		uint256 _escrowPrecentage,
 		uint256 _rate,
-		uint256 _maxPi) TwoKeyAcquisitionCampaignERC20(
+		uint256 _maxPi,
+		address _assetContract) TwoKeyAcquisitionCampaignERC20(
 		_eventSource,
 		_economy,
 		_whitelistInfluencer,
@@ -42,7 +43,8 @@ contract TwoKeyCampaignCrowdsale is TwoKeyAcquisitionCampaignERC20 {
 		_expiryConversion,
 		_escrowPrecentage,
 		_rate,
-		_maxPi) public {
+		_maxPi,
+		_assetContract) public {
 	}
 
   	// buy product with twokey token

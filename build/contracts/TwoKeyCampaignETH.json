@@ -329,20 +329,6 @@
       "type": "function"
     },
     {
-      "constant": false,
-      "inputs": [
-        {
-          "name": "_assetContract",
-          "type": "address"
-        }
-      ],
-      "name": "addAssetContractERC20",
-      "outputs": [],
-      "payable": false,
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
       "constant": true,
       "inputs": [],
       "name": "getContractBalance",
@@ -906,19 +892,19 @@
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "pragma solidity ^0.4.24;\n\nimport \"./TwoKeyTypes.sol\";\nimport \"./TwoKeyAcquisitionCampaignERC20.sol\";\n\n\ncontract TwoKeyCampaignETH is TwoKeyAcquisitionCampaignERC20 {\n \n\t/*  \n\t    fulfills a fungible asset purchase\n\t    creates the escrow for a fungible asset\n\t    computes the payout in ETH \n\t    transfers to the escrow the asset purchased\n    */\n\n\t// tokenID, asset contract, sufficient\n\t//\n//\tfunction fulfillFungibleETH(\n//\t\taddress _from,\n//\t\tuint256 _amountETH) isOngoing internal {\n//\t\t// TODO: Idea is that payout is msg.value\n//\t\t// Compute for the amount of ether how much tokens can be got by the amount\n//\t\trequire(_amount > 0 && price > 0);\n//\t\tuint256 payout = price.mul(_amount);\n//\t\trequire(msg.value == payout);\n//\t\t//TODO: Someone put 100 eth and he's entitled to X base + Y bonus  = (X+Y) taken from Inventory\n//\t\t//TODO: Take the msg.value, and regarding value I compute number of base and bonus tokens - sum of base and bonus is took out of the twoKeyCampaignInvent\n//\t\tConversion memory c = Conversion(_from, payout, msg.sender, false, false, _assetName, _assetContract, _amount, CampaignType.CPA_FUNGIBLE, now, now + expiryConversion * 1 days);\n//\n//\n//\t\t// move funds\n//\t\t// rename to remove from inventory\n//\t\tcampaignInventoryUnitsBalance = campaignInventoryUnitsBalance - _amount;\n////\t\tremoveFungibleAssets(_tokenID, _assetContract, _amount);\n//\n//\n//\t\t//tokenID can be string specifying the name of token (\"ETH\", \"BTC\",etc)\n//\t\t// value in escrow (msg.value), total amount of tokens\n//\t\ttwoKeyEventSource.escrow(address(this), msg.sender, _assetName, _assetContract, _amount, CampaignType.CPA_FUNGIBLE);\n//\t\tconversions[msg.sender] = c;\n//\t}\n\n    /*  \n\t    fulfills a non fungible asset purchase\n\t    creates the escrow for a fungible asset\n\t    computes the payout in ETH\n\t    transfers to the escrow the asset purchased\n    */\n//\tfunction fulfillNonFungibleETH(address _from, uint256 _tokenID, address _assetContract, uint256 _index) isOngoing internal {\n//\t\taddress assetToken = address(\n//\t      keccak256(abi.encodePacked(_assetContract, _index))\n//\t    );\n//\t\trequire(_index != 0 && price > 0);\n//\t\tuint256 payout = price;\n//\t\trequire(msg.value == payout);\n//\t\tConversion memory c = Conversion(_from, payout, msg.sender, false, false, _tokenID, _assetContract, _index, CampaignType.NonFungible, now, now + expiryConversion * 1 days);\n//\t\ttwoKeyEventSource.escrow(address(this), msg.sender, _tokenID, _assetContract, _index, CampaignType.NonFungible);\n//\t\tconversions[msg.sender] = c;\n//\t}\n\n    /**\n     * calculates moderetor fee, pays the moderator, \n     * computes total reward\n     * transfer payout to buyer, deducting the fee and the total reward\n     * asks the campaign to distribute rewards to influencers\n     */\n\n\tfunction actuallyFulfilledTwoKeyToken() internal {\n\t\tConversion memory c = conversions[msg.sender];\n        c.isFulfilled = true; \n        conversions[msg.sender] = c;\n\t\tuint256 fee = calculateModeratorFee(c.payout);\n        moderator.transfer(fee); \n        uint256 payout = c.payout;\n        uint256 maxReward = maxPi.mul(payout).div(100);\n        \n        // transfer payout - fee - rewards to seller\n        contractor.transfer(payout.sub(fee).sub(maxReward));\n        \n//        transferRewardsTwoKeyToken(c.from, maxReward.mul(rate));\n\t\ttwoKeyEventSource.fulfilled(address(this), c.converter, c.assetName, c.assetContract, c.amount, c.campaignType);\n\t}\n\n\t/**\n  \t * buy product withETH, \n  \t * _from is the influencer from which you received the referral\n  \t * _tokenID is the asset sku\n  \t * _assetContract - erc20 (fungible) or erc721 (non fungible) which represents the class of the asset\n  \t * _amountOrIndex - for erc20 amount in asset class, for erc21 index within asset class\n  \t */\n\n\t/*/// this is going to be in campaign contract\n\tfunction buyFromWithETH(\n\t\taddress _from, \n\t\tCampaignType _campaignType) public payable {\n\t\tif (_campaignType == CampaignType.CPA_FUNGIBLE) {\n\t\t} else if (_campaignType == CampaignType.CPA_NON_FUNGIBLE) {\n//\t\t\tfulfillNonFungibleETH(_from, _tokenID, _assetContract, _amountOrIndex);\n\t\t} \n\t}\n*/\n}\n\n",
-  "sourcePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyCampaignETH.sol",
+  "sourcePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyCampaignETH.sol",
   "ast": {
-    "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyCampaignETH.sol",
+    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyCampaignETH.sol",
     "exportedSymbols": {
       "TwoKeyCampaignETH": [
-        2768
+        2766
       ]
     },
-    "id": 2769,
+    "id": 2767,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 2681,
+        "id": 2679,
         "literals": [
           "solidity",
           "^",
@@ -926,27 +912,27 @@
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:24:8"
+        "src": "0:24:7"
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyTypes.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyTypes.sol",
         "file": "./TwoKeyTypes.sol",
-        "id": 2682,
+        "id": 2680,
         "nodeType": "ImportDirective",
-        "scope": 2769,
-        "sourceUnit": 6138,
-        "src": "26:27:8",
+        "scope": 2767,
+        "sourceUnit": 6057,
+        "src": "26:27:7",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyAcquisitionCampaignERC20.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyAcquisitionCampaignERC20.sol",
         "file": "./TwoKeyAcquisitionCampaignERC20.sol",
-        "id": 2683,
+        "id": 2681,
         "nodeType": "ImportDirective",
-        "scope": 2769,
-        "sourceUnit": 1719,
-        "src": "54:46:8",
+        "scope": 2767,
+        "sourceUnit": 1717,
+        "src": "54:46:7",
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -956,67 +942,67 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 2684,
+              "id": 2682,
               "name": "TwoKeyAcquisitionCampaignERC20",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 1718,
-              "src": "133:30:8",
+              "referencedDeclaration": 1716,
+              "src": "133:30:7",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_TwoKeyAcquisitionCampaignERC20_$1718",
+                "typeIdentifier": "t_contract$_TwoKeyAcquisitionCampaignERC20_$1716",
                 "typeString": "contract TwoKeyAcquisitionCampaignERC20"
               }
             },
-            "id": 2685,
+            "id": 2683,
             "nodeType": "InheritanceSpecifier",
-            "src": "133:30:8"
+            "src": "133:30:7"
           }
         ],
         "contractDependencies": [
-          1718,
-          2608,
-          6137,
-          6461,
-          7605,
-          7648,
-          7680,
-          7989
+          1716,
+          2603,
+          6056,
+          6380,
+          7524,
+          7567,
+          7599,
+          7908
         ],
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 2768,
+        "id": 2766,
         "linearizedBaseContracts": [
-          2768,
-          1718,
-          6461,
-          6137,
-          2608,
-          7989,
-          7605,
-          7648,
-          7680
+          2766,
+          1716,
+          6380,
+          6056,
+          2603,
+          7908,
+          7524,
+          7567,
+          7599
         ],
         "name": "TwoKeyCampaignETH",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
-              "id": 2766,
+              "id": 2764,
               "nodeType": "Block",
-              "src": "2809:609:8",
+              "src": "2809:609:7",
               "statements": [
                 {
                   "assignments": [
-                    2689
+                    2687
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 2689,
+                      "id": 2687,
                       "name": "c",
                       "nodeType": "VariableDeclaration",
-                      "scope": 2767,
-                      "src": "2813:19:8",
+                      "scope": 2765,
+                      "src": "2813:19:7",
                       "stateVariable": false,
                       "storageLocation": "memory",
                       "typeDescriptions": {
@@ -1025,11 +1011,11 @@
                       },
                       "typeName": {
                         "contractScope": null,
-                        "id": 2688,
+                        "id": 2686,
                         "name": "Conversion",
                         "nodeType": "UserDefinedTypeName",
                         "referencedDeclaration": 198,
-                        "src": "2813:10:8",
+                        "src": "2813:10:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_struct$_Conversion_$198_storage_ptr",
                           "typeString": "struct TwoKeyAcquisitionCampaignERC20.Conversion"
@@ -1039,39 +1025,39 @@
                       "visibility": "internal"
                     }
                   ],
-                  "id": 2694,
+                  "id": 2692,
                   "initialValue": {
                     "argumentTypes": null,
                     "baseExpression": {
                       "argumentTypes": null,
-                      "id": 2690,
+                      "id": 2688,
                       "name": "conversions",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 219,
-                      "src": "2835:11:8",
+                      "src": "2835:11:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Conversion_$198_storage_$",
                         "typeString": "mapping(address => struct TwoKeyAcquisitionCampaignERC20.Conversion storage ref)"
                       }
                     },
-                    "id": 2693,
+                    "id": 2691,
                     "indexExpression": {
                       "argumentTypes": null,
                       "expression": {
                         "argumentTypes": null,
-                        "id": 2691,
+                        "id": 2689,
                         "name": "msg",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 8270,
-                        "src": "2847:3:8",
+                        "referencedDeclaration": 8189,
+                        "src": "2847:3:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_magic_message",
                           "typeString": "msg"
                         }
                       },
-                      "id": 2692,
+                      "id": 2690,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -1079,7 +1065,7 @@
                       "memberName": "sender",
                       "nodeType": "MemberAccess",
                       "referencedDeclaration": null,
-                      "src": "2847:10:8",
+                      "src": "2847:10:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
@@ -1090,19 +1076,19 @@
                     "isPure": false,
                     "lValueRequested": false,
                     "nodeType": "IndexAccess",
-                    "src": "2835:23:8",
+                    "src": "2835:23:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_struct$_Conversion_$198_storage",
                       "typeString": "struct TwoKeyAcquisitionCampaignERC20.Conversion storage ref"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "2813:45:8"
+                  "src": "2813:45:7"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 2699,
+                    "id": 2697,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1111,18 +1097,18 @@
                       "argumentTypes": null,
                       "expression": {
                         "argumentTypes": null,
-                        "id": 2695,
+                        "id": 2693,
                         "name": "c",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2689,
-                        "src": "2868:1:8",
+                        "referencedDeclaration": 2687,
+                        "src": "2868:1:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_struct$_Conversion_$198_memory_ptr",
                           "typeString": "struct TwoKeyAcquisitionCampaignERC20.Conversion memory"
                         }
                       },
-                      "id": 2697,
+                      "id": 2695,
                       "isConstant": false,
                       "isLValue": true,
                       "isPure": false,
@@ -1130,7 +1116,7 @@
                       "memberName": "isFulfilled",
                       "nodeType": "MemberAccess",
                       "referencedDeclaration": 183,
-                      "src": "2868:13:8",
+                      "src": "2868:13:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bool",
                         "typeString": "bool"
@@ -1141,14 +1127,14 @@
                     "rightHandSide": {
                       "argumentTypes": null,
                       "hexValue": "74727565",
-                      "id": 2698,
+                      "id": 2696,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
                       "kind": "bool",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "2884:4:8",
+                      "src": "2884:4:7",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": "t_bool",
@@ -1156,20 +1142,20 @@
                       },
                       "value": "true"
                     },
-                    "src": "2868:20:8",
+                    "src": "2868:20:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
                     }
                   },
-                  "id": 2700,
+                  "id": 2698,
                   "nodeType": "ExpressionStatement",
-                  "src": "2868:20:8"
+                  "src": "2868:20:7"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 2706,
+                    "id": 2704,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1178,34 +1164,34 @@
                       "argumentTypes": null,
                       "baseExpression": {
                         "argumentTypes": null,
-                        "id": 2701,
+                        "id": 2699,
                         "name": "conversions",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 219,
-                        "src": "2899:11:8",
+                        "src": "2899:11:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Conversion_$198_storage_$",
                           "typeString": "mapping(address => struct TwoKeyAcquisitionCampaignERC20.Conversion storage ref)"
                         }
                       },
-                      "id": 2704,
+                      "id": 2702,
                       "indexExpression": {
                         "argumentTypes": null,
                         "expression": {
                           "argumentTypes": null,
-                          "id": 2702,
+                          "id": 2700,
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 8270,
-                          "src": "2911:3:8",
+                          "referencedDeclaration": 8189,
+                          "src": "2911:3:7",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
                             "typeString": "msg"
                           }
                         },
-                        "id": 2703,
+                        "id": 2701,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -1213,7 +1199,7 @@
                         "memberName": "sender",
                         "nodeType": "MemberAccess",
                         "referencedDeclaration": null,
-                        "src": "2911:10:8",
+                        "src": "2911:10:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -1224,7 +1210,7 @@
                       "isPure": false,
                       "lValueRequested": true,
                       "nodeType": "IndexAccess",
-                      "src": "2899:23:8",
+                      "src": "2899:23:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_struct$_Conversion_$198_storage",
                         "typeString": "struct TwoKeyAcquisitionCampaignERC20.Conversion storage ref"
@@ -1234,39 +1220,39 @@
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "id": 2705,
+                      "id": 2703,
                       "name": "c",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 2689,
-                      "src": "2925:1:8",
+                      "referencedDeclaration": 2687,
+                      "src": "2925:1:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_struct$_Conversion_$198_memory_ptr",
                         "typeString": "struct TwoKeyAcquisitionCampaignERC20.Conversion memory"
                       }
                     },
-                    "src": "2899:27:8",
+                    "src": "2899:27:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_struct$_Conversion_$198_storage",
                       "typeString": "struct TwoKeyAcquisitionCampaignERC20.Conversion storage ref"
                     }
                   },
-                  "id": 2707,
+                  "id": 2705,
                   "nodeType": "ExpressionStatement",
-                  "src": "2899:27:8"
+                  "src": "2899:27:7"
                 },
                 {
                   "assignments": [
-                    2709
+                    2707
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 2709,
+                      "id": 2707,
                       "name": "fee",
                       "nodeType": "VariableDeclaration",
-                      "scope": 2767,
-                      "src": "2930:11:8",
+                      "scope": 2765,
+                      "src": "2930:11:7",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -1274,10 +1260,10 @@
                         "typeString": "uint256"
                       },
                       "typeName": {
-                        "id": 2708,
+                        "id": 2706,
                         "name": "uint256",
                         "nodeType": "ElementaryTypeName",
-                        "src": "2930:7:8",
+                        "src": "2930:7:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -1287,7 +1273,7 @@
                       "visibility": "internal"
                     }
                   ],
-                  "id": 2714,
+                  "id": 2712,
                   "initialValue": {
                     "argumentTypes": null,
                     "arguments": [
@@ -1295,18 +1281,18 @@
                         "argumentTypes": null,
                         "expression": {
                           "argumentTypes": null,
-                          "id": 2711,
+                          "id": 2709,
                           "name": "c",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 2689,
-                          "src": "2966:1:8",
+                          "referencedDeclaration": 2687,
+                          "src": "2966:1:7",
                           "typeDescriptions": {
                             "typeIdentifier": "t_struct$_Conversion_$198_memory_ptr",
                             "typeString": "struct TwoKeyAcquisitionCampaignERC20.Conversion memory"
                           }
                         },
-                        "id": 2712,
+                        "id": 2710,
                         "isConstant": false,
                         "isLValue": true,
                         "isPure": false,
@@ -1314,7 +1300,7 @@
                         "memberName": "payout",
                         "nodeType": "MemberAccess",
                         "referencedDeclaration": 179,
-                        "src": "2966:8:8",
+                        "src": "2966:8:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -1328,18 +1314,18 @@
                           "typeString": "uint256"
                         }
                       ],
-                      "id": 2710,
+                      "id": 2708,
                       "name": "calculateModeratorFee",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 765,
-                      "src": "2944:21:8",
+                      "referencedDeclaration": 769,
+                      "src": "2944:21:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_view$_t_uint256_$returns$_t_uint256_$",
                         "typeString": "function (uint256) view returns (uint256)"
                       }
                     },
-                    "id": 2713,
+                    "id": 2711,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1347,14 +1333,14 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "2944:31:8",
+                    "src": "2944:31:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "2930:45:8"
+                  "src": "2930:45:7"
                 },
                 {
                   "expression": {
@@ -1362,12 +1348,12 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 2718,
+                        "id": 2716,
                         "name": "fee",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2709,
-                        "src": "3004:3:8",
+                        "referencedDeclaration": 2707,
+                        "src": "3004:3:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -1383,18 +1369,18 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 2715,
+                        "id": 2713,
                         "name": "moderator",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 255,
-                        "src": "2985:9:8",
+                        "src": "2985:9:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
                         }
                       },
-                      "id": 2717,
+                      "id": 2715,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -1402,13 +1388,13 @@
                       "memberName": "transfer",
                       "nodeType": "MemberAccess",
                       "referencedDeclaration": null,
-                      "src": "2985:18:8",
+                      "src": "2985:18:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_transfer_nonpayable$_t_uint256_$returns$__$",
                         "typeString": "function (uint256)"
                       }
                     },
-                    "id": 2719,
+                    "id": 2717,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1416,28 +1402,28 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "2985:23:8",
+                    "src": "2985:23:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 2720,
+                  "id": 2718,
                   "nodeType": "ExpressionStatement",
-                  "src": "2985:23:8"
+                  "src": "2985:23:7"
                 },
                 {
                   "assignments": [
-                    2722
+                    2720
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 2722,
+                      "id": 2720,
                       "name": "payout",
                       "nodeType": "VariableDeclaration",
-                      "scope": 2767,
-                      "src": "3019:14:8",
+                      "scope": 2765,
+                      "src": "3019:14:7",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -1445,10 +1431,10 @@
                         "typeString": "uint256"
                       },
                       "typeName": {
-                        "id": 2721,
+                        "id": 2719,
                         "name": "uint256",
                         "nodeType": "ElementaryTypeName",
-                        "src": "3019:7:8",
+                        "src": "3019:7:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -1458,23 +1444,23 @@
                       "visibility": "internal"
                     }
                   ],
-                  "id": 2725,
+                  "id": 2723,
                   "initialValue": {
                     "argumentTypes": null,
                     "expression": {
                       "argumentTypes": null,
-                      "id": 2723,
+                      "id": 2721,
                       "name": "c",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 2689,
-                      "src": "3036:1:8",
+                      "referencedDeclaration": 2687,
+                      "src": "3036:1:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_struct$_Conversion_$198_memory_ptr",
                         "typeString": "struct TwoKeyAcquisitionCampaignERC20.Conversion memory"
                       }
                     },
-                    "id": 2724,
+                    "id": 2722,
                     "isConstant": false,
                     "isLValue": true,
                     "isPure": false,
@@ -1482,27 +1468,27 @@
                     "memberName": "payout",
                     "nodeType": "MemberAccess",
                     "referencedDeclaration": 179,
-                    "src": "3036:8:8",
+                    "src": "3036:8:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "3019:25:8"
+                  "src": "3019:25:7"
                 },
                 {
                   "assignments": [
-                    2727
+                    2725
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 2727,
+                      "id": 2725,
                       "name": "maxReward",
                       "nodeType": "VariableDeclaration",
-                      "scope": 2767,
-                      "src": "3054:17:8",
+                      "scope": 2765,
+                      "src": "3054:17:7",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -1510,10 +1496,10 @@
                         "typeString": "uint256"
                       },
                       "typeName": {
-                        "id": 2726,
+                        "id": 2724,
                         "name": "uint256",
                         "nodeType": "ElementaryTypeName",
-                        "src": "3054:7:8",
+                        "src": "3054:7:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -1523,21 +1509,21 @@
                       "visibility": "internal"
                     }
                   ],
-                  "id": 2735,
+                  "id": 2733,
                   "initialValue": {
                     "argumentTypes": null,
                     "arguments": [
                       {
                         "argumentTypes": null,
                         "hexValue": "313030",
-                        "id": 2733,
+                        "id": 2731,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": true,
                         "kind": "number",
                         "lValueRequested": false,
                         "nodeType": "Literal",
-                        "src": "3096:3:8",
+                        "src": "3096:3:7",
                         "subdenomination": null,
                         "typeDescriptions": {
                           "typeIdentifier": "t_rational_100_by_1",
@@ -1558,12 +1544,12 @@
                         "arguments": [
                           {
                             "argumentTypes": null,
-                            "id": 2730,
+                            "id": 2728,
                             "name": "payout",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 2722,
-                            "src": "3084:6:8",
+                            "referencedDeclaration": 2720,
+                            "src": "3084:6:7",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -1579,32 +1565,32 @@
                           ],
                           "expression": {
                             "argumentTypes": null,
-                            "id": 2728,
+                            "id": 2726,
                             "name": "maxPi",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
                             "referencedDeclaration": 261,
-                            "src": "3074:5:8",
+                            "src": "3074:5:7",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
                             }
                           },
-                          "id": 2729,
+                          "id": 2727,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "memberName": "mul",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 7364,
-                          "src": "3074:9:8",
+                          "referencedDeclaration": 7283,
+                          "src": "3074:9:7",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                             "typeString": "function (uint256,uint256) pure returns (uint256)"
                           }
                         },
-                        "id": 2731,
+                        "id": 2729,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -1612,27 +1598,27 @@
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "3074:17:8",
+                        "src": "3074:17:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         }
                       },
-                      "id": 2732,
+                      "id": 2730,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "div",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 7378,
-                      "src": "3074:21:8",
+                      "referencedDeclaration": 7297,
+                      "src": "3074:21:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                         "typeString": "function (uint256,uint256) pure returns (uint256)"
                       }
                     },
-                    "id": 2734,
+                    "id": 2732,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1640,14 +1626,14 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "3074:26:8",
+                    "src": "3074:26:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "3054:46:8"
+                  "src": "3054:46:7"
                 },
                 {
                   "expression": {
@@ -1658,12 +1644,12 @@
                         "arguments": [
                           {
                             "argumentTypes": null,
-                            "id": 2744,
+                            "id": 2742,
                             "name": "maxReward",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 2727,
-                            "src": "3212:9:8",
+                            "referencedDeclaration": 2725,
+                            "src": "3212:9:7",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -1682,12 +1668,12 @@
                             "arguments": [
                               {
                                 "argumentTypes": null,
-                                "id": 2741,
+                                "id": 2739,
                                 "name": "fee",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 2709,
-                                "src": "3203:3:8",
+                                "referencedDeclaration": 2707,
+                                "src": "3203:3:7",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_uint256",
                                   "typeString": "uint256"
@@ -1703,32 +1689,32 @@
                               ],
                               "expression": {
                                 "argumentTypes": null,
-                                "id": 2739,
+                                "id": 2737,
                                 "name": "payout",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 2722,
-                                "src": "3192:6:8",
+                                "referencedDeclaration": 2720,
+                                "src": "3192:6:7",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_uint256",
                                   "typeString": "uint256"
                                 }
                               },
-                              "id": 2740,
+                              "id": 2738,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": false,
                               "lValueRequested": false,
                               "memberName": "sub",
                               "nodeType": "MemberAccess",
-                              "referencedDeclaration": 7398,
-                              "src": "3192:10:8",
+                              "referencedDeclaration": 7317,
+                              "src": "3192:10:7",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                                 "typeString": "function (uint256,uint256) pure returns (uint256)"
                               }
                             },
-                            "id": 2742,
+                            "id": 2740,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -1736,27 +1722,27 @@
                             "lValueRequested": false,
                             "names": [],
                             "nodeType": "FunctionCall",
-                            "src": "3192:15:8",
+                            "src": "3192:15:7",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
                             }
                           },
-                          "id": 2743,
+                          "id": 2741,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "memberName": "sub",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 7398,
-                          "src": "3192:19:8",
+                          "referencedDeclaration": 7317,
+                          "src": "3192:19:7",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                             "typeString": "function (uint256,uint256) pure returns (uint256)"
                           }
                         },
-                        "id": 2745,
+                        "id": 2743,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -1764,7 +1750,7 @@
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "3192:30:8",
+                        "src": "3192:30:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -1780,18 +1766,18 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 2736,
+                        "id": 2734,
                         "name": "contractor",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2202,
-                        "src": "3172:10:8",
+                        "referencedDeclaration": 2197,
+                        "src": "3172:10:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
                         }
                       },
-                      "id": 2738,
+                      "id": 2736,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -1799,13 +1785,13 @@
                       "memberName": "transfer",
                       "nodeType": "MemberAccess",
                       "referencedDeclaration": null,
-                      "src": "3172:19:8",
+                      "src": "3172:19:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_transfer_nonpayable$_t_uint256_$returns$__$",
                         "typeString": "function (uint256)"
                       }
                     },
-                    "id": 2746,
+                    "id": 2744,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1813,15 +1799,15 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "3172:51:8",
+                    "src": "3172:51:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 2747,
+                  "id": 2745,
                   "nodeType": "ExpressionStatement",
-                  "src": "3172:51:8"
+                  "src": "3172:51:7"
                 },
                 {
                   "expression": {
@@ -1832,14 +1818,14 @@
                         "arguments": [
                           {
                             "argumentTypes": null,
-                            "id": 2752,
+                            "id": 2750,
                             "name": "this",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 8353,
-                            "src": "3339:4:8",
+                            "referencedDeclaration": 8270,
+                            "src": "3339:4:7",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_contract$_TwoKeyCampaignETH_$2768",
+                              "typeIdentifier": "t_contract$_TwoKeyCampaignETH_$2766",
                               "typeString": "contract TwoKeyCampaignETH"
                             }
                           }
@@ -1847,24 +1833,24 @@
                         "expression": {
                           "argumentTypes": [
                             {
-                              "typeIdentifier": "t_contract$_TwoKeyCampaignETH_$2768",
+                              "typeIdentifier": "t_contract$_TwoKeyCampaignETH_$2766",
                               "typeString": "contract TwoKeyCampaignETH"
                             }
                           ],
-                          "id": 2751,
+                          "id": 2749,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "lValueRequested": false,
                           "nodeType": "ElementaryTypeNameExpression",
-                          "src": "3331:7:8",
+                          "src": "3331:7:7",
                           "typeDescriptions": {
                             "typeIdentifier": "t_type$_t_address_$",
                             "typeString": "type(address)"
                           },
                           "typeName": "address"
                         },
-                        "id": 2753,
+                        "id": 2751,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -1872,7 +1858,36 @@
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "3331:13:8",
+                        "src": "3331:13:7",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "expression": {
+                          "argumentTypes": null,
+                          "id": 2752,
+                          "name": "c",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 2687,
+                          "src": "3346:1:7",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_struct$_Conversion_$198_memory_ptr",
+                            "typeString": "struct TwoKeyAcquisitionCampaignERC20.Conversion memory"
+                          }
+                        },
+                        "id": 2753,
+                        "isConstant": false,
+                        "isLValue": true,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "memberName": "converter",
+                        "nodeType": "MemberAccess",
+                        "referencedDeclaration": 181,
+                        "src": "3346:11:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -1886,8 +1901,8 @@
                           "name": "c",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 2689,
-                          "src": "3346:1:8",
+                          "referencedDeclaration": 2687,
+                          "src": "3359:1:7",
                           "typeDescriptions": {
                             "typeIdentifier": "t_struct$_Conversion_$198_memory_ptr",
                             "typeString": "struct TwoKeyAcquisitionCampaignERC20.Conversion memory"
@@ -1898,13 +1913,13 @@
                         "isLValue": true,
                         "isPure": false,
                         "lValueRequested": false,
-                        "memberName": "converter",
+                        "memberName": "assetName",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 181,
-                        "src": "3346:11:8",
+                        "referencedDeclaration": 187,
+                        "src": "3359:11:7",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_address",
-                          "typeString": "address"
+                          "typeIdentifier": "t_string_memory",
+                          "typeString": "string memory"
                         }
                       },
                       {
@@ -1915,8 +1930,8 @@
                           "name": "c",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 2689,
-                          "src": "3359:1:8",
+                          "referencedDeclaration": 2687,
+                          "src": "3372:1:7",
                           "typeDescriptions": {
                             "typeIdentifier": "t_struct$_Conversion_$198_memory_ptr",
                             "typeString": "struct TwoKeyAcquisitionCampaignERC20.Conversion memory"
@@ -1927,13 +1942,13 @@
                         "isLValue": true,
                         "isPure": false,
                         "lValueRequested": false,
-                        "memberName": "assetName",
+                        "memberName": "assetContract",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 187,
-                        "src": "3359:11:8",
+                        "referencedDeclaration": 189,
+                        "src": "3372:15:7",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_string_memory",
-                          "typeString": "string memory"
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
                         }
                       },
                       {
@@ -1944,8 +1959,8 @@
                           "name": "c",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 2689,
-                          "src": "3372:1:8",
+                          "referencedDeclaration": 2687,
+                          "src": "3389:1:7",
                           "typeDescriptions": {
                             "typeIdentifier": "t_struct$_Conversion_$198_memory_ptr",
                             "typeString": "struct TwoKeyAcquisitionCampaignERC20.Conversion memory"
@@ -1956,13 +1971,13 @@
                         "isLValue": true,
                         "isPure": false,
                         "lValueRequested": false,
-                        "memberName": "assetContract",
+                        "memberName": "amount",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 189,
-                        "src": "3372:15:8",
+                        "referencedDeclaration": 191,
+                        "src": "3389:8:7",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_address",
-                          "typeString": "address"
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
                         }
                       },
                       {
@@ -1973,8 +1988,8 @@
                           "name": "c",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 2689,
-                          "src": "3389:1:8",
+                          "referencedDeclaration": 2687,
+                          "src": "3399:1:7",
                           "typeDescriptions": {
                             "typeIdentifier": "t_struct$_Conversion_$198_memory_ptr",
                             "typeString": "struct TwoKeyAcquisitionCampaignERC20.Conversion memory"
@@ -1985,41 +2000,12 @@
                         "isLValue": true,
                         "isPure": false,
                         "lValueRequested": false,
-                        "memberName": "amount",
-                        "nodeType": "MemberAccess",
-                        "referencedDeclaration": 191,
-                        "src": "3389:8:8",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_uint256",
-                          "typeString": "uint256"
-                        }
-                      },
-                      {
-                        "argumentTypes": null,
-                        "expression": {
-                          "argumentTypes": null,
-                          "id": 2762,
-                          "name": "c",
-                          "nodeType": "Identifier",
-                          "overloadedDeclarations": [],
-                          "referencedDeclaration": 2689,
-                          "src": "3399:1:8",
-                          "typeDescriptions": {
-                            "typeIdentifier": "t_struct$_Conversion_$198_memory_ptr",
-                            "typeString": "struct TwoKeyAcquisitionCampaignERC20.Conversion memory"
-                          }
-                        },
-                        "id": 2763,
-                        "isConstant": false,
-                        "isLValue": true,
-                        "isPure": false,
-                        "lValueRequested": false,
                         "memberName": "campaignType",
                         "nodeType": "MemberAccess",
                         "referencedDeclaration": 193,
-                        "src": "3399:14:8",
+                        "src": "3399:14:7",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_enum$_CampaignType_$6128",
+                          "typeIdentifier": "t_enum$_CampaignType_$6047",
                           "typeString": "enum TwoKeyTypes.CampaignType"
                         }
                       }
@@ -2047,38 +2033,38 @@
                           "typeString": "uint256"
                         },
                         {
-                          "typeIdentifier": "t_enum$_CampaignType_$6128",
+                          "typeIdentifier": "t_enum$_CampaignType_$6047",
                           "typeString": "enum TwoKeyTypes.CampaignType"
                         }
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 2748,
+                        "id": 2746,
                         "name": "twoKeyEventSource",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2200,
-                        "src": "3303:17:8",
+                        "referencedDeclaration": 2195,
+                        "src": "3303:17:7",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_TwoKeyEventSource_$5145",
+                          "typeIdentifier": "t_contract$_TwoKeyEventSource_$5088",
                           "typeString": "contract TwoKeyEventSource"
                         }
                       },
-                      "id": 2750,
+                      "id": 2748,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "fulfilled",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 5095,
-                      "src": "3303:27:8",
+                      "referencedDeclaration": 5038,
+                      "src": "3303:27:7",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_address_$_t_string_memory_ptr_$_t_address_$_t_uint256_$_t_enum$_CampaignType_$6128_$returns$__$",
+                        "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_address_$_t_string_memory_ptr_$_t_address_$_t_uint256_$_t_enum$_CampaignType_$6047_$returns$__$",
                         "typeString": "function (address,address,string memory,address,uint256,enum TwoKeyTypes.CampaignType) external"
                       }
                     },
-                    "id": 2764,
+                    "id": 2762,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2086,20 +2072,20 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "3303:111:8",
+                    "src": "3303:111:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 2765,
+                  "id": 2763,
                   "nodeType": "ExpressionStatement",
-                  "src": "3303:111:8"
+                  "src": "3303:111:7"
                 }
               ]
             },
             "documentation": "calculates moderetor fee, pays the moderator, \ncomputes total reward\ntransfer payout to buyer, deducting the fee and the total reward\nasks the campaign to distribute rewards to influencers",
-            "id": 2767,
+            "id": 2765,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -2107,43 +2093,43 @@
             "name": "actuallyFulfilledTwoKeyToken",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2686,
+              "id": 2684,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "2797:2:8"
+              "src": "2797:2:7"
             },
             "payable": false,
             "returnParameters": {
-              "id": 2687,
+              "id": 2685,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "2809:0:8"
+              "src": "2809:0:7"
             },
-            "scope": 2768,
-            "src": "2760:658:8",
+            "scope": 2766,
+            "src": "2760:658:7",
             "stateMutability": "nonpayable",
-            "superFunction": 1011,
+            "superFunction": 1015,
             "visibility": "internal"
           }
         ],
-        "scope": 2769,
-        "src": "103:3996:8"
+        "scope": 2767,
+        "src": "103:3996:7"
       }
     ],
-    "src": "0:4101:8"
+    "src": "0:4101:7"
   },
   "legacyAST": {
-    "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyCampaignETH.sol",
+    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyCampaignETH.sol",
     "exportedSymbols": {
       "TwoKeyCampaignETH": [
-        2768
+        2766
       ]
     },
-    "id": 2769,
+    "id": 2767,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 2681,
+        "id": 2679,
         "literals": [
           "solidity",
           "^",
@@ -2151,27 +2137,27 @@
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:24:8"
+        "src": "0:24:7"
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyTypes.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyTypes.sol",
         "file": "./TwoKeyTypes.sol",
-        "id": 2682,
+        "id": 2680,
         "nodeType": "ImportDirective",
-        "scope": 2769,
-        "sourceUnit": 6138,
-        "src": "26:27:8",
+        "scope": 2767,
+        "sourceUnit": 6057,
+        "src": "26:27:7",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyAcquisitionCampaignERC20.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyAcquisitionCampaignERC20.sol",
         "file": "./TwoKeyAcquisitionCampaignERC20.sol",
-        "id": 2683,
+        "id": 2681,
         "nodeType": "ImportDirective",
-        "scope": 2769,
-        "sourceUnit": 1719,
-        "src": "54:46:8",
+        "scope": 2767,
+        "sourceUnit": 1717,
+        "src": "54:46:7",
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -2181,67 +2167,67 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 2684,
+              "id": 2682,
               "name": "TwoKeyAcquisitionCampaignERC20",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 1718,
-              "src": "133:30:8",
+              "referencedDeclaration": 1716,
+              "src": "133:30:7",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_TwoKeyAcquisitionCampaignERC20_$1718",
+                "typeIdentifier": "t_contract$_TwoKeyAcquisitionCampaignERC20_$1716",
                 "typeString": "contract TwoKeyAcquisitionCampaignERC20"
               }
             },
-            "id": 2685,
+            "id": 2683,
             "nodeType": "InheritanceSpecifier",
-            "src": "133:30:8"
+            "src": "133:30:7"
           }
         ],
         "contractDependencies": [
-          1718,
-          2608,
-          6137,
-          6461,
-          7605,
-          7648,
-          7680,
-          7989
+          1716,
+          2603,
+          6056,
+          6380,
+          7524,
+          7567,
+          7599,
+          7908
         ],
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 2768,
+        "id": 2766,
         "linearizedBaseContracts": [
-          2768,
-          1718,
-          6461,
-          6137,
-          2608,
-          7989,
-          7605,
-          7648,
-          7680
+          2766,
+          1716,
+          6380,
+          6056,
+          2603,
+          7908,
+          7524,
+          7567,
+          7599
         ],
         "name": "TwoKeyCampaignETH",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
-              "id": 2766,
+              "id": 2764,
               "nodeType": "Block",
-              "src": "2809:609:8",
+              "src": "2809:609:7",
               "statements": [
                 {
                   "assignments": [
-                    2689
+                    2687
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 2689,
+                      "id": 2687,
                       "name": "c",
                       "nodeType": "VariableDeclaration",
-                      "scope": 2767,
-                      "src": "2813:19:8",
+                      "scope": 2765,
+                      "src": "2813:19:7",
                       "stateVariable": false,
                       "storageLocation": "memory",
                       "typeDescriptions": {
@@ -2250,11 +2236,11 @@
                       },
                       "typeName": {
                         "contractScope": null,
-                        "id": 2688,
+                        "id": 2686,
                         "name": "Conversion",
                         "nodeType": "UserDefinedTypeName",
                         "referencedDeclaration": 198,
-                        "src": "2813:10:8",
+                        "src": "2813:10:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_struct$_Conversion_$198_storage_ptr",
                           "typeString": "struct TwoKeyAcquisitionCampaignERC20.Conversion"
@@ -2264,39 +2250,39 @@
                       "visibility": "internal"
                     }
                   ],
-                  "id": 2694,
+                  "id": 2692,
                   "initialValue": {
                     "argumentTypes": null,
                     "baseExpression": {
                       "argumentTypes": null,
-                      "id": 2690,
+                      "id": 2688,
                       "name": "conversions",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 219,
-                      "src": "2835:11:8",
+                      "src": "2835:11:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Conversion_$198_storage_$",
                         "typeString": "mapping(address => struct TwoKeyAcquisitionCampaignERC20.Conversion storage ref)"
                       }
                     },
-                    "id": 2693,
+                    "id": 2691,
                     "indexExpression": {
                       "argumentTypes": null,
                       "expression": {
                         "argumentTypes": null,
-                        "id": 2691,
+                        "id": 2689,
                         "name": "msg",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 8270,
-                        "src": "2847:3:8",
+                        "referencedDeclaration": 8189,
+                        "src": "2847:3:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_magic_message",
                           "typeString": "msg"
                         }
                       },
-                      "id": 2692,
+                      "id": 2690,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -2304,7 +2290,7 @@
                       "memberName": "sender",
                       "nodeType": "MemberAccess",
                       "referencedDeclaration": null,
-                      "src": "2847:10:8",
+                      "src": "2847:10:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
@@ -2315,19 +2301,19 @@
                     "isPure": false,
                     "lValueRequested": false,
                     "nodeType": "IndexAccess",
-                    "src": "2835:23:8",
+                    "src": "2835:23:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_struct$_Conversion_$198_storage",
                       "typeString": "struct TwoKeyAcquisitionCampaignERC20.Conversion storage ref"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "2813:45:8"
+                  "src": "2813:45:7"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 2699,
+                    "id": 2697,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2336,18 +2322,18 @@
                       "argumentTypes": null,
                       "expression": {
                         "argumentTypes": null,
-                        "id": 2695,
+                        "id": 2693,
                         "name": "c",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2689,
-                        "src": "2868:1:8",
+                        "referencedDeclaration": 2687,
+                        "src": "2868:1:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_struct$_Conversion_$198_memory_ptr",
                           "typeString": "struct TwoKeyAcquisitionCampaignERC20.Conversion memory"
                         }
                       },
-                      "id": 2697,
+                      "id": 2695,
                       "isConstant": false,
                       "isLValue": true,
                       "isPure": false,
@@ -2355,7 +2341,7 @@
                       "memberName": "isFulfilled",
                       "nodeType": "MemberAccess",
                       "referencedDeclaration": 183,
-                      "src": "2868:13:8",
+                      "src": "2868:13:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bool",
                         "typeString": "bool"
@@ -2366,14 +2352,14 @@
                     "rightHandSide": {
                       "argumentTypes": null,
                       "hexValue": "74727565",
-                      "id": 2698,
+                      "id": 2696,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
                       "kind": "bool",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "2884:4:8",
+                      "src": "2884:4:7",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": "t_bool",
@@ -2381,20 +2367,20 @@
                       },
                       "value": "true"
                     },
-                    "src": "2868:20:8",
+                    "src": "2868:20:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
                     }
                   },
-                  "id": 2700,
+                  "id": 2698,
                   "nodeType": "ExpressionStatement",
-                  "src": "2868:20:8"
+                  "src": "2868:20:7"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 2706,
+                    "id": 2704,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2403,34 +2389,34 @@
                       "argumentTypes": null,
                       "baseExpression": {
                         "argumentTypes": null,
-                        "id": 2701,
+                        "id": 2699,
                         "name": "conversions",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 219,
-                        "src": "2899:11:8",
+                        "src": "2899:11:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Conversion_$198_storage_$",
                           "typeString": "mapping(address => struct TwoKeyAcquisitionCampaignERC20.Conversion storage ref)"
                         }
                       },
-                      "id": 2704,
+                      "id": 2702,
                       "indexExpression": {
                         "argumentTypes": null,
                         "expression": {
                           "argumentTypes": null,
-                          "id": 2702,
+                          "id": 2700,
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 8270,
-                          "src": "2911:3:8",
+                          "referencedDeclaration": 8189,
+                          "src": "2911:3:7",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
                             "typeString": "msg"
                           }
                         },
-                        "id": 2703,
+                        "id": 2701,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -2438,7 +2424,7 @@
                         "memberName": "sender",
                         "nodeType": "MemberAccess",
                         "referencedDeclaration": null,
-                        "src": "2911:10:8",
+                        "src": "2911:10:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -2449,7 +2435,7 @@
                       "isPure": false,
                       "lValueRequested": true,
                       "nodeType": "IndexAccess",
-                      "src": "2899:23:8",
+                      "src": "2899:23:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_struct$_Conversion_$198_storage",
                         "typeString": "struct TwoKeyAcquisitionCampaignERC20.Conversion storage ref"
@@ -2459,39 +2445,39 @@
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "id": 2705,
+                      "id": 2703,
                       "name": "c",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 2689,
-                      "src": "2925:1:8",
+                      "referencedDeclaration": 2687,
+                      "src": "2925:1:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_struct$_Conversion_$198_memory_ptr",
                         "typeString": "struct TwoKeyAcquisitionCampaignERC20.Conversion memory"
                       }
                     },
-                    "src": "2899:27:8",
+                    "src": "2899:27:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_struct$_Conversion_$198_storage",
                       "typeString": "struct TwoKeyAcquisitionCampaignERC20.Conversion storage ref"
                     }
                   },
-                  "id": 2707,
+                  "id": 2705,
                   "nodeType": "ExpressionStatement",
-                  "src": "2899:27:8"
+                  "src": "2899:27:7"
                 },
                 {
                   "assignments": [
-                    2709
+                    2707
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 2709,
+                      "id": 2707,
                       "name": "fee",
                       "nodeType": "VariableDeclaration",
-                      "scope": 2767,
-                      "src": "2930:11:8",
+                      "scope": 2765,
+                      "src": "2930:11:7",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -2499,10 +2485,10 @@
                         "typeString": "uint256"
                       },
                       "typeName": {
-                        "id": 2708,
+                        "id": 2706,
                         "name": "uint256",
                         "nodeType": "ElementaryTypeName",
-                        "src": "2930:7:8",
+                        "src": "2930:7:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -2512,7 +2498,7 @@
                       "visibility": "internal"
                     }
                   ],
-                  "id": 2714,
+                  "id": 2712,
                   "initialValue": {
                     "argumentTypes": null,
                     "arguments": [
@@ -2520,18 +2506,18 @@
                         "argumentTypes": null,
                         "expression": {
                           "argumentTypes": null,
-                          "id": 2711,
+                          "id": 2709,
                           "name": "c",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 2689,
-                          "src": "2966:1:8",
+                          "referencedDeclaration": 2687,
+                          "src": "2966:1:7",
                           "typeDescriptions": {
                             "typeIdentifier": "t_struct$_Conversion_$198_memory_ptr",
                             "typeString": "struct TwoKeyAcquisitionCampaignERC20.Conversion memory"
                           }
                         },
-                        "id": 2712,
+                        "id": 2710,
                         "isConstant": false,
                         "isLValue": true,
                         "isPure": false,
@@ -2539,7 +2525,7 @@
                         "memberName": "payout",
                         "nodeType": "MemberAccess",
                         "referencedDeclaration": 179,
-                        "src": "2966:8:8",
+                        "src": "2966:8:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -2553,18 +2539,18 @@
                           "typeString": "uint256"
                         }
                       ],
-                      "id": 2710,
+                      "id": 2708,
                       "name": "calculateModeratorFee",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 765,
-                      "src": "2944:21:8",
+                      "referencedDeclaration": 769,
+                      "src": "2944:21:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_view$_t_uint256_$returns$_t_uint256_$",
                         "typeString": "function (uint256) view returns (uint256)"
                       }
                     },
-                    "id": 2713,
+                    "id": 2711,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2572,14 +2558,14 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "2944:31:8",
+                    "src": "2944:31:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "2930:45:8"
+                  "src": "2930:45:7"
                 },
                 {
                   "expression": {
@@ -2587,12 +2573,12 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 2718,
+                        "id": 2716,
                         "name": "fee",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2709,
-                        "src": "3004:3:8",
+                        "referencedDeclaration": 2707,
+                        "src": "3004:3:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -2608,18 +2594,18 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 2715,
+                        "id": 2713,
                         "name": "moderator",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 255,
-                        "src": "2985:9:8",
+                        "src": "2985:9:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
                         }
                       },
-                      "id": 2717,
+                      "id": 2715,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -2627,13 +2613,13 @@
                       "memberName": "transfer",
                       "nodeType": "MemberAccess",
                       "referencedDeclaration": null,
-                      "src": "2985:18:8",
+                      "src": "2985:18:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_transfer_nonpayable$_t_uint256_$returns$__$",
                         "typeString": "function (uint256)"
                       }
                     },
-                    "id": 2719,
+                    "id": 2717,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2641,28 +2627,28 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "2985:23:8",
+                    "src": "2985:23:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 2720,
+                  "id": 2718,
                   "nodeType": "ExpressionStatement",
-                  "src": "2985:23:8"
+                  "src": "2985:23:7"
                 },
                 {
                   "assignments": [
-                    2722
+                    2720
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 2722,
+                      "id": 2720,
                       "name": "payout",
                       "nodeType": "VariableDeclaration",
-                      "scope": 2767,
-                      "src": "3019:14:8",
+                      "scope": 2765,
+                      "src": "3019:14:7",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -2670,10 +2656,10 @@
                         "typeString": "uint256"
                       },
                       "typeName": {
-                        "id": 2721,
+                        "id": 2719,
                         "name": "uint256",
                         "nodeType": "ElementaryTypeName",
-                        "src": "3019:7:8",
+                        "src": "3019:7:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -2683,23 +2669,23 @@
                       "visibility": "internal"
                     }
                   ],
-                  "id": 2725,
+                  "id": 2723,
                   "initialValue": {
                     "argumentTypes": null,
                     "expression": {
                       "argumentTypes": null,
-                      "id": 2723,
+                      "id": 2721,
                       "name": "c",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 2689,
-                      "src": "3036:1:8",
+                      "referencedDeclaration": 2687,
+                      "src": "3036:1:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_struct$_Conversion_$198_memory_ptr",
                         "typeString": "struct TwoKeyAcquisitionCampaignERC20.Conversion memory"
                       }
                     },
-                    "id": 2724,
+                    "id": 2722,
                     "isConstant": false,
                     "isLValue": true,
                     "isPure": false,
@@ -2707,27 +2693,27 @@
                     "memberName": "payout",
                     "nodeType": "MemberAccess",
                     "referencedDeclaration": 179,
-                    "src": "3036:8:8",
+                    "src": "3036:8:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "3019:25:8"
+                  "src": "3019:25:7"
                 },
                 {
                   "assignments": [
-                    2727
+                    2725
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 2727,
+                      "id": 2725,
                       "name": "maxReward",
                       "nodeType": "VariableDeclaration",
-                      "scope": 2767,
-                      "src": "3054:17:8",
+                      "scope": 2765,
+                      "src": "3054:17:7",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -2735,10 +2721,10 @@
                         "typeString": "uint256"
                       },
                       "typeName": {
-                        "id": 2726,
+                        "id": 2724,
                         "name": "uint256",
                         "nodeType": "ElementaryTypeName",
-                        "src": "3054:7:8",
+                        "src": "3054:7:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -2748,21 +2734,21 @@
                       "visibility": "internal"
                     }
                   ],
-                  "id": 2735,
+                  "id": 2733,
                   "initialValue": {
                     "argumentTypes": null,
                     "arguments": [
                       {
                         "argumentTypes": null,
                         "hexValue": "313030",
-                        "id": 2733,
+                        "id": 2731,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": true,
                         "kind": "number",
                         "lValueRequested": false,
                         "nodeType": "Literal",
-                        "src": "3096:3:8",
+                        "src": "3096:3:7",
                         "subdenomination": null,
                         "typeDescriptions": {
                           "typeIdentifier": "t_rational_100_by_1",
@@ -2783,12 +2769,12 @@
                         "arguments": [
                           {
                             "argumentTypes": null,
-                            "id": 2730,
+                            "id": 2728,
                             "name": "payout",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 2722,
-                            "src": "3084:6:8",
+                            "referencedDeclaration": 2720,
+                            "src": "3084:6:7",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -2804,32 +2790,32 @@
                           ],
                           "expression": {
                             "argumentTypes": null,
-                            "id": 2728,
+                            "id": 2726,
                             "name": "maxPi",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
                             "referencedDeclaration": 261,
-                            "src": "3074:5:8",
+                            "src": "3074:5:7",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
                             }
                           },
-                          "id": 2729,
+                          "id": 2727,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "memberName": "mul",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 7364,
-                          "src": "3074:9:8",
+                          "referencedDeclaration": 7283,
+                          "src": "3074:9:7",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                             "typeString": "function (uint256,uint256) pure returns (uint256)"
                           }
                         },
-                        "id": 2731,
+                        "id": 2729,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -2837,27 +2823,27 @@
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "3074:17:8",
+                        "src": "3074:17:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         }
                       },
-                      "id": 2732,
+                      "id": 2730,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "div",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 7378,
-                      "src": "3074:21:8",
+                      "referencedDeclaration": 7297,
+                      "src": "3074:21:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                         "typeString": "function (uint256,uint256) pure returns (uint256)"
                       }
                     },
-                    "id": 2734,
+                    "id": 2732,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2865,14 +2851,14 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "3074:26:8",
+                    "src": "3074:26:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "3054:46:8"
+                  "src": "3054:46:7"
                 },
                 {
                   "expression": {
@@ -2883,12 +2869,12 @@
                         "arguments": [
                           {
                             "argumentTypes": null,
-                            "id": 2744,
+                            "id": 2742,
                             "name": "maxReward",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 2727,
-                            "src": "3212:9:8",
+                            "referencedDeclaration": 2725,
+                            "src": "3212:9:7",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -2907,12 +2893,12 @@
                             "arguments": [
                               {
                                 "argumentTypes": null,
-                                "id": 2741,
+                                "id": 2739,
                                 "name": "fee",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 2709,
-                                "src": "3203:3:8",
+                                "referencedDeclaration": 2707,
+                                "src": "3203:3:7",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_uint256",
                                   "typeString": "uint256"
@@ -2928,32 +2914,32 @@
                               ],
                               "expression": {
                                 "argumentTypes": null,
-                                "id": 2739,
+                                "id": 2737,
                                 "name": "payout",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 2722,
-                                "src": "3192:6:8",
+                                "referencedDeclaration": 2720,
+                                "src": "3192:6:7",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_uint256",
                                   "typeString": "uint256"
                                 }
                               },
-                              "id": 2740,
+                              "id": 2738,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": false,
                               "lValueRequested": false,
                               "memberName": "sub",
                               "nodeType": "MemberAccess",
-                              "referencedDeclaration": 7398,
-                              "src": "3192:10:8",
+                              "referencedDeclaration": 7317,
+                              "src": "3192:10:7",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                                 "typeString": "function (uint256,uint256) pure returns (uint256)"
                               }
                             },
-                            "id": 2742,
+                            "id": 2740,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -2961,27 +2947,27 @@
                             "lValueRequested": false,
                             "names": [],
                             "nodeType": "FunctionCall",
-                            "src": "3192:15:8",
+                            "src": "3192:15:7",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
                             }
                           },
-                          "id": 2743,
+                          "id": 2741,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "memberName": "sub",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 7398,
-                          "src": "3192:19:8",
+                          "referencedDeclaration": 7317,
+                          "src": "3192:19:7",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                             "typeString": "function (uint256,uint256) pure returns (uint256)"
                           }
                         },
-                        "id": 2745,
+                        "id": 2743,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -2989,7 +2975,7 @@
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "3192:30:8",
+                        "src": "3192:30:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -3005,18 +2991,18 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 2736,
+                        "id": 2734,
                         "name": "contractor",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2202,
-                        "src": "3172:10:8",
+                        "referencedDeclaration": 2197,
+                        "src": "3172:10:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
                         }
                       },
-                      "id": 2738,
+                      "id": 2736,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -3024,13 +3010,13 @@
                       "memberName": "transfer",
                       "nodeType": "MemberAccess",
                       "referencedDeclaration": null,
-                      "src": "3172:19:8",
+                      "src": "3172:19:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_transfer_nonpayable$_t_uint256_$returns$__$",
                         "typeString": "function (uint256)"
                       }
                     },
-                    "id": 2746,
+                    "id": 2744,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -3038,15 +3024,15 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "3172:51:8",
+                    "src": "3172:51:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 2747,
+                  "id": 2745,
                   "nodeType": "ExpressionStatement",
-                  "src": "3172:51:8"
+                  "src": "3172:51:7"
                 },
                 {
                   "expression": {
@@ -3057,14 +3043,14 @@
                         "arguments": [
                           {
                             "argumentTypes": null,
-                            "id": 2752,
+                            "id": 2750,
                             "name": "this",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 8353,
-                            "src": "3339:4:8",
+                            "referencedDeclaration": 8270,
+                            "src": "3339:4:7",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_contract$_TwoKeyCampaignETH_$2768",
+                              "typeIdentifier": "t_contract$_TwoKeyCampaignETH_$2766",
                               "typeString": "contract TwoKeyCampaignETH"
                             }
                           }
@@ -3072,24 +3058,24 @@
                         "expression": {
                           "argumentTypes": [
                             {
-                              "typeIdentifier": "t_contract$_TwoKeyCampaignETH_$2768",
+                              "typeIdentifier": "t_contract$_TwoKeyCampaignETH_$2766",
                               "typeString": "contract TwoKeyCampaignETH"
                             }
                           ],
-                          "id": 2751,
+                          "id": 2749,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "lValueRequested": false,
                           "nodeType": "ElementaryTypeNameExpression",
-                          "src": "3331:7:8",
+                          "src": "3331:7:7",
                           "typeDescriptions": {
                             "typeIdentifier": "t_type$_t_address_$",
                             "typeString": "type(address)"
                           },
                           "typeName": "address"
                         },
-                        "id": 2753,
+                        "id": 2751,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -3097,7 +3083,36 @@
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "3331:13:8",
+                        "src": "3331:13:7",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "expression": {
+                          "argumentTypes": null,
+                          "id": 2752,
+                          "name": "c",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 2687,
+                          "src": "3346:1:7",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_struct$_Conversion_$198_memory_ptr",
+                            "typeString": "struct TwoKeyAcquisitionCampaignERC20.Conversion memory"
+                          }
+                        },
+                        "id": 2753,
+                        "isConstant": false,
+                        "isLValue": true,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "memberName": "converter",
+                        "nodeType": "MemberAccess",
+                        "referencedDeclaration": 181,
+                        "src": "3346:11:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -3111,8 +3126,8 @@
                           "name": "c",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 2689,
-                          "src": "3346:1:8",
+                          "referencedDeclaration": 2687,
+                          "src": "3359:1:7",
                           "typeDescriptions": {
                             "typeIdentifier": "t_struct$_Conversion_$198_memory_ptr",
                             "typeString": "struct TwoKeyAcquisitionCampaignERC20.Conversion memory"
@@ -3123,13 +3138,13 @@
                         "isLValue": true,
                         "isPure": false,
                         "lValueRequested": false,
-                        "memberName": "converter",
+                        "memberName": "assetName",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 181,
-                        "src": "3346:11:8",
+                        "referencedDeclaration": 187,
+                        "src": "3359:11:7",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_address",
-                          "typeString": "address"
+                          "typeIdentifier": "t_string_memory",
+                          "typeString": "string memory"
                         }
                       },
                       {
@@ -3140,8 +3155,8 @@
                           "name": "c",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 2689,
-                          "src": "3359:1:8",
+                          "referencedDeclaration": 2687,
+                          "src": "3372:1:7",
                           "typeDescriptions": {
                             "typeIdentifier": "t_struct$_Conversion_$198_memory_ptr",
                             "typeString": "struct TwoKeyAcquisitionCampaignERC20.Conversion memory"
@@ -3152,13 +3167,13 @@
                         "isLValue": true,
                         "isPure": false,
                         "lValueRequested": false,
-                        "memberName": "assetName",
+                        "memberName": "assetContract",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 187,
-                        "src": "3359:11:8",
+                        "referencedDeclaration": 189,
+                        "src": "3372:15:7",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_string_memory",
-                          "typeString": "string memory"
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
                         }
                       },
                       {
@@ -3169,8 +3184,8 @@
                           "name": "c",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 2689,
-                          "src": "3372:1:8",
+                          "referencedDeclaration": 2687,
+                          "src": "3389:1:7",
                           "typeDescriptions": {
                             "typeIdentifier": "t_struct$_Conversion_$198_memory_ptr",
                             "typeString": "struct TwoKeyAcquisitionCampaignERC20.Conversion memory"
@@ -3181,13 +3196,13 @@
                         "isLValue": true,
                         "isPure": false,
                         "lValueRequested": false,
-                        "memberName": "assetContract",
+                        "memberName": "amount",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 189,
-                        "src": "3372:15:8",
+                        "referencedDeclaration": 191,
+                        "src": "3389:8:7",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_address",
-                          "typeString": "address"
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
                         }
                       },
                       {
@@ -3198,8 +3213,8 @@
                           "name": "c",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 2689,
-                          "src": "3389:1:8",
+                          "referencedDeclaration": 2687,
+                          "src": "3399:1:7",
                           "typeDescriptions": {
                             "typeIdentifier": "t_struct$_Conversion_$198_memory_ptr",
                             "typeString": "struct TwoKeyAcquisitionCampaignERC20.Conversion memory"
@@ -3210,41 +3225,12 @@
                         "isLValue": true,
                         "isPure": false,
                         "lValueRequested": false,
-                        "memberName": "amount",
-                        "nodeType": "MemberAccess",
-                        "referencedDeclaration": 191,
-                        "src": "3389:8:8",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_uint256",
-                          "typeString": "uint256"
-                        }
-                      },
-                      {
-                        "argumentTypes": null,
-                        "expression": {
-                          "argumentTypes": null,
-                          "id": 2762,
-                          "name": "c",
-                          "nodeType": "Identifier",
-                          "overloadedDeclarations": [],
-                          "referencedDeclaration": 2689,
-                          "src": "3399:1:8",
-                          "typeDescriptions": {
-                            "typeIdentifier": "t_struct$_Conversion_$198_memory_ptr",
-                            "typeString": "struct TwoKeyAcquisitionCampaignERC20.Conversion memory"
-                          }
-                        },
-                        "id": 2763,
-                        "isConstant": false,
-                        "isLValue": true,
-                        "isPure": false,
-                        "lValueRequested": false,
                         "memberName": "campaignType",
                         "nodeType": "MemberAccess",
                         "referencedDeclaration": 193,
-                        "src": "3399:14:8",
+                        "src": "3399:14:7",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_enum$_CampaignType_$6128",
+                          "typeIdentifier": "t_enum$_CampaignType_$6047",
                           "typeString": "enum TwoKeyTypes.CampaignType"
                         }
                       }
@@ -3272,38 +3258,38 @@
                           "typeString": "uint256"
                         },
                         {
-                          "typeIdentifier": "t_enum$_CampaignType_$6128",
+                          "typeIdentifier": "t_enum$_CampaignType_$6047",
                           "typeString": "enum TwoKeyTypes.CampaignType"
                         }
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 2748,
+                        "id": 2746,
                         "name": "twoKeyEventSource",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2200,
-                        "src": "3303:17:8",
+                        "referencedDeclaration": 2195,
+                        "src": "3303:17:7",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_TwoKeyEventSource_$5145",
+                          "typeIdentifier": "t_contract$_TwoKeyEventSource_$5088",
                           "typeString": "contract TwoKeyEventSource"
                         }
                       },
-                      "id": 2750,
+                      "id": 2748,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "fulfilled",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 5095,
-                      "src": "3303:27:8",
+                      "referencedDeclaration": 5038,
+                      "src": "3303:27:7",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_address_$_t_string_memory_ptr_$_t_address_$_t_uint256_$_t_enum$_CampaignType_$6128_$returns$__$",
+                        "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_address_$_t_string_memory_ptr_$_t_address_$_t_uint256_$_t_enum$_CampaignType_$6047_$returns$__$",
                         "typeString": "function (address,address,string memory,address,uint256,enum TwoKeyTypes.CampaignType) external"
                       }
                     },
-                    "id": 2764,
+                    "id": 2762,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -3311,20 +3297,20 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "3303:111:8",
+                    "src": "3303:111:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 2765,
+                  "id": 2763,
                   "nodeType": "ExpressionStatement",
-                  "src": "3303:111:8"
+                  "src": "3303:111:7"
                 }
               ]
             },
             "documentation": "calculates moderetor fee, pays the moderator, \ncomputes total reward\ntransfer payout to buyer, deducting the fee and the total reward\nasks the campaign to distribute rewards to influencers",
-            "id": 2767,
+            "id": 2765,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -3332,30 +3318,30 @@
             "name": "actuallyFulfilledTwoKeyToken",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2686,
+              "id": 2684,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "2797:2:8"
+              "src": "2797:2:7"
             },
             "payable": false,
             "returnParameters": {
-              "id": 2687,
+              "id": 2685,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "2809:0:8"
+              "src": "2809:0:7"
             },
-            "scope": 2768,
-            "src": "2760:658:8",
+            "scope": 2766,
+            "src": "2760:658:7",
             "stateMutability": "nonpayable",
-            "superFunction": 1011,
+            "superFunction": 1015,
             "visibility": "internal"
           }
         ],
-        "scope": 2769,
-        "src": "103:3996:8"
+        "scope": 2767,
+        "src": "103:3996:7"
       }
     ],
-    "src": "0:4101:8"
+    "src": "0:4101:7"
   },
   "compiler": {
     "name": "solc",
@@ -3363,5 +3349,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
-  "updatedAt": "2018-09-11T07:24:29.987Z"
+  "updatedAt": "2018-09-11T08:41:05.649Z"
 }
