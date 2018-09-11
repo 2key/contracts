@@ -22,13 +22,10 @@ contract TwoKeyAdmin is  Ownable, Destructible, AdminContract {
 	TwoKeyReg private twoKeyReg;
 
 	constructor(
-		address _electorateAdmins,
-		TwoKeyUpgradableExchange _exchange
+		address _electorateAdmins		
 	) Ownable() Destructible() payable public {
 		require(_electorateAdmins != address(0));
-		require(_exchange != address(0));
 		wasReplaced = false;
-		exchange = _exchange;
 		electorateAdmins = _electorateAdmins;	
 	}
 
@@ -48,7 +45,7 @@ contract TwoKeyAdmin is  Ownable, Destructible, AdminContract {
 		newAdminContractObject.transfer(address(this).balance);				
         newAdminContractObject.setTwoKeyEconomy(economy);
 		newAdminContractObject.setTwoKeyReg(twoKeyReg);
-		// newAdminContractObject.setTwoKeyExchange(exchange);
+		newAdminContractObject.setTwoKeyExchange(exchange);
 		// twoKeyEventSource.changeAdmin(_newAdminContract);
 	}
 	
@@ -144,7 +141,7 @@ contract TwoKeyAdmin is  Ownable, Destructible, AdminContract {
     /// @notice Function to set twoKeyExchange contract address 
 	/// @dev We're requiring twoKeyExchange contract address different from address 0 as it is required to be deployed before calling this method
 	/// @param _exchange is address of twoKeyExchange contract address
-	function setTwoKeyExchange(address _exchange) public adminsVotingApproved {
+	function setTwoKeyExchange(address _exchange) public  {
 		require(_exchange != address(0));
     	exchange = TwoKeyUpgradableExchange(exchange);
     	
@@ -198,6 +195,13 @@ contract TwoKeyAdmin is  Ownable, Destructible, AdminContract {
 	/// @return _address is address of twoKeyReg contract
     function getTwoKeyReg () public view returns(address _address)  {
     	return address(twoKeyReg);
+    }
+
+    /// View function - doesn't cost any gas to be executed
+	/// @notice Function to fetch twoKeyUpgradableExchange contract address 
+	/// @return _address is address of twoKeyUpgradableExchange contract
+    function getTwoKeyUpgradableExchange () public view returns(address _exchange)  {
+    	return address(exchange);
     }
     
 } 
