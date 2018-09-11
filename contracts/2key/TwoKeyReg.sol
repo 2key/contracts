@@ -36,12 +36,12 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
    
   }
 
-//  function addTwoKeyEventSource(address _twoKeyEventSource) public onlyOwner {
-//    require(twoKeyEventSource == address(0));
-//    require(_twoKeyEventSource != address(0));
-//
-//    twoKeyEventSource = _twoKeyEventSource;
-//  }
+ // function addTwoKeyEventSource(address _twoKeyEventSource) public onlyOwner {
+ //   require(twoKeyEventSource == address(0));
+ //   require(_twoKeyEventSource != address(0));
+
+ //   twoKeyEventSource = _twoKeyEventSource;
+ // }
 
   /// @notice Method to change the allowed TwoKeyEventSource contract address
   /// @param _twoKeyEventSource new TwoKeyEventSource contract address
@@ -72,7 +72,7 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
   /// @param _contractAddress is address of deployed campaign contract
   /// commented modifier onlyTwoKeyEventSource
   function addWhereContractor(address _userAddress, address _contractAddress) public{
-//    require(_contractAddress != address(0));
+   // require(_contractAddress != address(0));
     userToCampaignsWhereContractor[_userAddress].push(_contractAddress);
   }
   /// Only TwoKeyEventSource contract can issue this calls
@@ -84,6 +84,7 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
     require(_contractAddress != address(0));
     userToCampaignsWhereModerator[_userAddress].push(_contractAddress);
   }
+
   /// Only TwoKeyEventSource contract can issue this calls
   /// @notice Function to add new campaign contract where user is refferer
   /// @dev We're requiring the contract address different address 0 because it needs to be deployed
@@ -139,15 +140,25 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
       require(_userAddress != address(0));
       return userToCampaignsWhereConverter[_userAddress];
   }
+
   /// View function to return address of current active twoKeyEventSource contract
+  /// @notice Function to fetch twoKeyEventSource contract address 
   function getTwoKeyEventSourceAddress() public view returns (address) {
     return twoKeyEventSource;
   }
+
+  /// mapping user's address to user's name 
   mapping(address => string) public owner2name;
+  /// mapping user's name to user's address 
   mapping(bytes32 => address) public name2owner;
 
+  /// @notice Event is emitted when a user's name is changed
   event UserNameChanged(address owner, string name);
 
+  /// @notice Function where new name/address pair is added or an old address is updated with new name
+  /// @dev private function 
+  /// @param _name is name of user
+  /// @param _sender is address of user
   function addNameInternal(string _name, address _sender) private {
     // check if name is taken
     if (name2owner[keccak256(abi.encodePacked(_name))] != 0) {
@@ -163,17 +174,31 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
     emit UserNameChanged(_sender, _name);
   }
 
+  /// @notice Function where only admin can add a name - address pair 
+  /// @param _name is name of user
+  /// @param _sender is address of user
   function addName(string _name, address _sender) onlyAdmin public {
     addNameInternal(_name, _sender);
   }
 
+  /// @notice Function where user can add name to his address 
+  /// @param _name is name of user
   function addNameByUser(string _name) public {
     addNameInternal(_name, msg.sender);
   }
 
+  /// View function - doesn't cost any gas to be executed
+  /// @notice Function to fetch address of the user that corresponds to given name
+  /// @param _name is name of user
+  /// @return address of the user as type address
   function getName2Owner(string _name) public view returns (address) {
     return name2owner[keccak256(abi.encodePacked(_name))];
   }
+
+  /// View function - doesn't cost any gas to be executed
+  /// @notice Function to fetch name that corresponds to the address
+  /// @param _sender is address of user
+  /// @return name of the user as type string
   function getOwner2Name(address _sender) public view returns (string) {
     return owner2name[_sender];
   }

@@ -171,18 +171,6 @@ export class TwoKeyCampaignARC extends TC.TypeChainContract {
         payable: false,
         stateMutability: "nonpayable",
         type: "function"
-      },
-      {
-        constant: false,
-        inputs: [
-          { name: "_from", type: "address" },
-          { name: "_maxReward", type: "uint256" }
-        ],
-        name: "transferRewardsTwoKeyToken",
-        outputs: [],
-        payable: false,
-        stateMutability: "nonpayable",
-        type: "function"
       }
     ];
     super(web3, address, abi);
@@ -298,16 +286,6 @@ export class TwoKeyCampaignARC extends TC.TypeChainContract {
       _to.toString(),
       _value.toString()
     ]);
-  }
-  public transferRewardsTwoKeyTokenTx(
-    _from: BigNumber | string,
-    _maxReward: BigNumber | number
-  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
-    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
-      this,
-      "transferRewardsTwoKeyToken",
-      [_from.toString(), _maxReward.toString()]
-    );
   }
 
   public ApprovalEvent(eventFilter: {

@@ -128,6 +128,8 @@ export default class TwoKeyNetwork {
     });
   }
 
+  /* TRANSFERS */
+
   public getERC20TransferGas(to: string, value: number): Promise<number> {
     this.gas = null;
     return new Promise((resolve, reject) => {
@@ -185,6 +187,25 @@ export default class TwoKeyNetwork {
     });
   }
 
+  /* HANDLE */
+
+  public setHandle(handle: string, gasPrice: number = this.gasPrice): Promise<string> {
+    return this.twoKeyReg.addNameTx(handle, this.address).send({ from: this.address, gasPrice, gas: 2000000 });
+  }
+
+  public getAddressHandle(address: string = this.address): Promise<string> {
+    // return this.twoKeyReg.getOwner2Name(address);
+    return this.twoKeyReg.getName2Owner(address);
+  }
+
+  public async getContractorCampaigns(): Promise<any> {
+    const eventSource = await TwoKeyEventSource.createAndValidate(this.web3, this._getContractDeployedAddress('TwoKeyEventSource'));
+    // return eventSource.CreatedEvent({ _owner: this.address }).get({ fromBlock: 0, toBlock: 'pending' });
+    return eventSource.CreatedEvent({}).get({ fromBlock: 0, toBlock: 'pending' });
+  }
+
+  /* CAMPAIGN */
+
   public estimateSaleCampaign(data: CreateCampaign): Promise<number> {
     return new Promise(async (resolve, reject) => {
       try {
@@ -214,7 +235,7 @@ export default class TwoKeyNetwork {
       }
     });
   }
-
+  // Create Campaign
   public createSaleCampaign(data: CreateCampaign, gasPrice?: number): Promise<string> {
     return new Promise(async (resolve, reject) => {
       try {
@@ -241,14 +262,15 @@ export default class TwoKeyNetwork {
           data.rate,
           data.maxCPA,
         ]);
-        const campaign = new TwoKeyAcquisitionCampaignERC20(this.web3, campaignAddress);
+        const campaign = await TwoKeyAcquisitionCampaignERC20.createAndValidate(this.web3, campaignAddress);
+  
         resolve(campaign.address);
       } catch (err) {
         reject(err);
       }
     });
   }
-
+  // Add Asset ERC20 Contract
   public addAssetContractERC20(campaignAddress: string, erc20: string, gasPrice: number = this.gasPrice): Promise<string> {
     return new Promise(async (resolve, reject) => {
       try {
@@ -279,7 +301,7 @@ export default class TwoKeyNetwork {
 
     });
   }
-
+  // Get Asset ERC20 Contract
   public getAssetContractAddress(campaignAddress: string): Promise<string> {
     return new Promise(async (resolve, reject) => {
       try {
@@ -303,22 +325,7 @@ export default class TwoKeyNetwork {
       }
     });
   }
-
-  public async getContractorCampaigns(): Promise<any> {
-    const eventSource = await TwoKeyEventSource.createAndValidate(this.web3, this._getContractDeployedAddress('TwoKeyEventSource'));
-    // return eventSource.CreatedEvent({ _owner: this.address }).get({ fromBlock: 0, toBlock: 'pending' });
-    return eventSource.CreatedEvent({}).get({ fromBlock: 0, toBlock: 'pending' });
-  }
-
-  public setHandle(handle: string, gasPrice: number = this.gasPrice): Promise<string> {
-    return this.twoKeyReg.addNameTx(handle, this.address).send({ from: this.address, gasPrice, gas: 2000000 });
-  }
-
-  public getAddressHandle(address: string = this.address): Promise<string> {
-    // return this.twoKeyReg.getOwner2Name(address);
-    return this.twoKeyReg.getName2Owner(address);
-  }
-
+  // Set Public Link ()
   public setPublicLink(campaignAddress: string, publicKey: string, gasPrice: number = this.gasPrice): Promise<string> {
     return new Promise(async (resolve, reject) => {
       try {
@@ -343,7 +350,7 @@ export default class TwoKeyNetwork {
       }
     });
   }
-
+  // Join Ofchain
   public joinCampaign(campaignAddress: string, cut: number, fromHash?: string, gasPrice: number = this.gasPrice): Promise<string> {
     // TODO AP Implement method shortUrl
     // If we want to shortLink
@@ -373,6 +380,8 @@ export default class TwoKeyNetwork {
       }
     });
   }
+
+  /* UTILS */
 
   private _fromWei(number: string | number | BigNumber, unit?: string): string {
     return this.web3.fromWei(number, unit);

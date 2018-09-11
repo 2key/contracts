@@ -35,7 +35,7 @@ contract TwoKeyPresellExchange is TwoKeyUpgradableExchange {
 		uint256 _openingTime, uint256 _closingTime, 
 		uint256 _cap,
 		uint256 _rate, address _wallet, ERC20 _token) 
-		TwoKeyUpgradableExchange(_rate, _wallet, _token) public {
+		TwoKeyUpgradableExchange(_rate, _wallet, _token,msg.sender) public {
 
 		require(_whitelist != address(0));
 		

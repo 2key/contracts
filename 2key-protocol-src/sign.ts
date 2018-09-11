@@ -1,6 +1,6 @@
 import eth_util from 'ethereumjs-util';
 import assert from 'assert';
-import crypto from 'crypto-browserify';
+import crypto from 'crypto';
 
 function generatePrivateKey(): Buffer {
   return crypto.randomBytes(32)

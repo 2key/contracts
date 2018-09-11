@@ -25,25 +25,26 @@ contract('TwoKeyAdmin', async (accounts) => {
 
     before(async() => {
           erc20MockContract = await ERC20TokenMock.new();
-          exchangeContract = await TwoKeyExchange.new(1, deployerAddress, erc20MockContract.address);
+         // exchangeContract = await TwoKeyExchange.new(1, deployerAddress, erc20MockContract.address);
     });
   
     //============================================================================================================
     // TEST CASES FOR INITIAL
 
     // Test Case: Passing null_address as ElectorateAdmins Address should revert
-    it('Case 1 : Initial :: Null-Economy-Address-TestCase', async () => {
-          await tryCatch(TwoKeyAdmin.new(null_address, exchangeContract.address), errTypes.anyError); 
+    it('Case 1 : Initial :: Null-ElectorateAdmins-Address-TestCase', async () => {
+          await tryCatch(TwoKeyAdmin.new(null_address), errTypes.anyError); 
     });
 
     // Test Case: Passing null_address as Exchange Address should revert  
     it('Case 2 : Initial :: Null-Exchange-Address-TestCase', async () => {
-          await tryCatch(TwoKeyAdmin.new(deployerAddress, null_address), errTypes.anyError)
+         // await tryCatch(TwoKeyAdmin.new(deployerAddress), errTypes.anyError)
+         //No need of this test now
     });
 
     // Test Case: Passing non null addresses in all three should not revert
     it('Case 3 : Initial :: Non-Null-Parameters-TestCase', async () => {
-          await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+          await TwoKeyAdmin.new(deployerAddress);
     });
 
     //============================================================================================================
@@ -51,20 +52,19 @@ contract('TwoKeyAdmin', async (accounts) => {
 
     // Test Case: Passing null address as admincontract address should revert
     it('Case 4 : Replace :: Passing-Null-Address-TestCase', async () => {
-          adminContract = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+          adminContract = await TwoKeyAdmin.new(deployerAddress);
           
           await tryCatch(adminContract.replaceOneself(null_address), errTypes.anyError); // null address check is required in sol ! (here error is catched due to revert thrown by transfer)
     });
 
     // Test Case: Passing admincontract address which is already replaced once should revert
     it('Case 5 : Replace :: Already-Replaced-AdminContract-TestCase', async () => {
-          adminContract = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+          adminContract = await TwoKeyAdmin.new(deployerAddress);
           economyContract = await TwoKeyEconomy.new(adminContract.address);
           eventContract  =await TwoKeyEventSource.new(adminContract.address);
           regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
-
-          exchangeContract_new = await TwoKeyExchange.new(1, deployerAddress, erc20MockContract.address);
-          adminContract_new = await TwoKeyAdmin.new(deployerAddress, exchangeContract_new.address);
+          //let exchange =  await TwoKeyExchange.new(1, deployerAddress, erc20MockContract.address,adminContract.address);
+          adminContract_new = await TwoKeyAdmin.new(deployerAddress);
           
           await adminContract.replaceOneself(adminContract_new.address);  
           //await adminContract.replaceOneself(adminContract.address);  
@@ -73,12 +73,13 @@ contract('TwoKeyAdmin', async (accounts) => {
 
     // Test Case: Passing admincontract address which is not admin Voting Approved should revert
     it('Case 6 : Replace :: Address-Not-Approved-By-Admin-TestCase', async () => {
-          adminContract = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+          adminContract = await TwoKeyAdmin.new(deployerAddress);
           economyContract = await TwoKeyEconomy.new(adminContract.address);
           eventContract  =await TwoKeyEventSource.new(adminContract.address);
           regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
-          
-          adminContract_new = await TwoKeyAdmin.new(not_admin, exchangeContract.address);
+          //let exchange =  await TwoKeyExchange.new(1, deployerAddress, erc20MockContract.address,adminContract.address);
+
+          adminContract_new = await TwoKeyAdmin.new(not_admin);
           economyContract_new = await TwoKeyEconomy.new(adminContract_new.address);
           eventContract_new  =await TwoKeyEventSource.new(adminContract_new.address);
           regContract_new = await TwoKeyReg.new(eventContract_new.address, adminContract_new.address);
@@ -113,13 +114,13 @@ contract('TwoKeyAdmin', async (accounts) => {
     // });
 
     it('Case 8 : To verify if TwoKeyEconomy is set to new_admin', async () => {
-          adminContract = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+          adminContract = await TwoKeyAdmin.new(deployerAddress);
           economyContract = await TwoKeyEconomy.new(adminContract.address);
           eventContract  = await TwoKeyEventSource.new(adminContract.address);
           regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
 
-          exchangeContract_new = await TwoKeyExchange.new(1, deployerAddress, erc20MockContract.address);
-          adminContract_new = await TwoKeyAdmin.new(deployerAddress, exchangeContract_new.address);
+           // let exchange =  await TwoKeyExchange.new(1, deployerAddress, erc20MockContract.address,adminContract.address);
+          adminContract_new = await TwoKeyAdmin.new(deployerAddress);
 
           await adminContract.replaceOneself(adminContract_new.address); 
           
@@ -128,13 +129,13 @@ contract('TwoKeyAdmin', async (accounts) => {
     });
 
     it('Case 9 : To verify if TwoKeyReg is set to new_admin', async () => {
-          adminContract = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+          adminContract = await TwoKeyAdmin.new(deployerAddress);
           economyContract = await TwoKeyEconomy.new(adminContract.address);
           eventContract  = await TwoKeyEventSource.new(adminContract.address);
           regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
 
-          exchangeContract_new = await TwoKeyExchange.new(1, deployerAddress, erc20MockContract.address);
-          adminContract_new = await TwoKeyAdmin.new(deployerAddress, exchangeContract_new.address);
+//         let exchange =  await TwoKeyExchange.new(1, deployerAddress, erc20MockContract.address,adminContract.address);
+          adminContract_new = await TwoKeyAdmin.new(deployerAddress);
 
           await adminContract.replaceOneself(adminContract_new.address); 
           
@@ -147,17 +148,18 @@ contract('TwoKeyAdmin', async (accounts) => {
     // TEST CASES FOR transferByAdmin
 
     it('Case 10 : transferByAdmins-null-address', async () => {
-          adminContract = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+          adminContract = await TwoKeyAdmin.new(deployerAddress);
           economyContract = await TwoKeyEconomy.new(adminContract.address);
           eventContract  =await TwoKeyEventSource.new(adminContract.address);
           regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
+         // let exchange =  await TwoKeyExchange.new(1, deployerAddress, erc20MockContract.address,adminContract.address);
 
           tokens = new BigNumber(100);
           await tryCatch(adminContract.transferByAdmins(null_address, tokens), errTypes.anyError); 
     });
 
     it('Case 11 : transferByAdmins-null-value', async () => {
-          adminContract = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+          adminContract = await TwoKeyAdmin.new(deployerAddress);
           economyContract = await TwoKeyEconomy.new(adminContract.address);
           eventContract  =await TwoKeyEventSource.new(adminContract.address);
           regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
@@ -168,13 +170,13 @@ contract('TwoKeyAdmin', async (accounts) => {
   
     // Test Case: When adminContract already replaced
     it('Case 12 : transferByAdmins-adminContract-already-replaced', async () => {
-          adminContract = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+          adminContract = await TwoKeyAdmin.new(deployerAddress);
           economyContract = await TwoKeyEconomy.new(adminContract.address);
           eventContract  = await TwoKeyEventSource.new(adminContract.address);
           regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
 
-          exchangeContract_new = await TwoKeyExchange.new(1, deployerAddress, erc20MockContract.address);
-          adminContract_new = await TwoKeyAdmin.new(deployerAddress, exchangeContract_new.address);
+        //  exchangeContract_new = await TwoKeyExchange.new(1, deployerAddress, erc20MockContract.address);
+          adminContract_new = await TwoKeyAdmin.new(deployerAddress);
           economyContract_new = await TwoKeyEconomy.new(adminContract_new.address);
           eventContract_new  = await TwoKeyEventSource.new(adminContract_new.address);
           regContract_new = await TwoKeyReg.new(eventContract_new.address, adminContract_new.address);
@@ -186,12 +188,12 @@ contract('TwoKeyAdmin', async (accounts) => {
     
     // Test Case: When calling address not approved by admin
     it('Case 13 : transferByAdmins-adminContract-not-approved-by-admin', async () => {
-          adminContract = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+          adminContract = await TwoKeyAdmin.new(deployerAddress);
           economyContract = await TwoKeyEconomy.new(adminContract.address);
           eventContract  =await TwoKeyEventSource.new(adminContract.address);
           regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
 
-          adminContract_new = await TwoKeyAdmin.new(not_admin, exchangeContract.address);
+          adminContract_new = await TwoKeyAdmin.new(not_admin);
           economyContract_new = await TwoKeyEconomy.new(adminContract_new.address);
           eventContract_new  =await TwoKeyEventSource.new(adminContract_new.address);
           regContract_new = await TwoKeyReg.new(eventContract_new.address, adminContract_new.address);
@@ -200,7 +202,7 @@ contract('TwoKeyAdmin', async (accounts) => {
     });
 
     it('Case 14 : transferByAdmins', async () => {
-          adminContract = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+          adminContract = await TwoKeyAdmin.new(deployerAddress);
           economyContract = await TwoKeyEconomy.new(adminContract.address);
           eventContract  =await TwoKeyEventSource.new(adminContract.address);
           regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
@@ -264,7 +266,7 @@ contract('TwoKeyAdmin', async (accounts) => {
     // TEST CASES for Transfer Ethers By Admin Method
 
     it('Case 19 : transferEtherByAdmins', async () => {
-          adminContract = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+          adminContract = await TwoKeyAdmin.new(deployerAddress);
           economyContract = await TwoKeyEconomy.new(adminContract.address);
           eventContract  =await TwoKeyEventSource.new(adminContract.address);
           regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
@@ -282,7 +284,7 @@ contract('TwoKeyAdmin', async (accounts) => {
   
     // Test Case: null address 
     it('Case 20 : transferEtherByAdmins - null address', async () => {
-          adminContract = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+          adminContract = await TwoKeyAdmin.new(deployerAddress);
           economyContract = await TwoKeyEconomy.new(adminContract.address);
           eventContract  =await TwoKeyEventSource.new(adminContract.address);
           regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
@@ -294,7 +296,7 @@ contract('TwoKeyAdmin', async (accounts) => {
 
     // Test Case: null value
     it('Case 21 : transferEtherByAdmins - null value', async () => {
-          adminContract = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+          adminContract = await TwoKeyAdmin.new(deployerAddress);
           economyContract = await TwoKeyEconomy.new(adminContract.address);
           eventContract  =await TwoKeyEventSource.new(adminContract.address);
           regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
@@ -308,12 +310,12 @@ contract('TwoKeyAdmin', async (accounts) => {
 
     // Test Case: wasNotReplaced
     it('Case 22 : transferEtherByAdmins - already - replaced', async () => {
-          adminContract = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+          adminContract = await TwoKeyAdmin.new(deployerAddress);
           economyContract = await TwoKeyEconomy.new(adminContract.address);
           eventContract  =await TwoKeyEventSource.new(adminContract.address);
           regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
 
-          adminContract_new = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+          adminContract_new = await TwoKeyAdmin.new(deployerAddress);
           economyContract_new = await TwoKeyEconomy.new(adminContract_new.address);
           eventContract_new  =await TwoKeyEventSource.new(adminContract_new.address);
           regContract_new = await TwoKeyReg.new(eventContract_new.address, adminContract_new.address);
@@ -330,7 +332,7 @@ contract('TwoKeyAdmin', async (accounts) => {
 
      // Test Case: admin not approve
      it('Case 23 : transferEtherByAdmins -not-approved-by-admin', async () => {
-          adminContract = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+          adminContract = await TwoKeyAdmin.new(deployerAddress);
           economyContract = await TwoKeyEconomy.new(adminContract.address);
           eventContract  =await TwoKeyEventSource.new(adminContract.address);
           regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
@@ -349,7 +351,7 @@ contract('TwoKeyAdmin', async (accounts) => {
    // ==================================================================================================
 
     it('Case 24 : payable-function when not replaced', async () => {
-        adminContract = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+        adminContract = await TwoKeyAdmin.new(deployerAddress);
         economyContract = await TwoKeyEconomy.new(adminContract.address);
         eventContract  =await TwoKeyEventSource.new(adminContract.address);
         regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
@@ -362,7 +364,7 @@ contract('TwoKeyAdmin', async (accounts) => {
     });
 
     it('Case 25 : payable-function when replaced', async () => {
-        adminContract = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+        adminContract = await TwoKeyAdmin.new(deployerAddress);
         economyContract = await TwoKeyEconomy.new(adminContract.address);
         eventContract  =await TwoKeyEventSource.new(adminContract.address);
         regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
@@ -382,7 +384,7 @@ contract('TwoKeyAdmin', async (accounts) => {
 
 
     it('Case 26: destroy-function when admin not replaced', async () => {
-        adminContract = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+        adminContract = await TwoKeyAdmin.new(deployerAddress);
         economyContract = await TwoKeyEconomy.new(adminContract.address);
         eventContract  =await TwoKeyEventSource.new(adminContract.address);
         regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
