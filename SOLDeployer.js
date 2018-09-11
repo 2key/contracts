@@ -141,6 +141,7 @@ async function deploy() {
     const now = moment();
     const commit = `SOL Deployed to ${network} ${now.format('lll')}`;
     const tag = `${network}-${now.format('YYYYMMDDHHmmss')}`;
+    console.log(commit);
 
     const deployedHistory = fs.existsSync(deploymentHistoryPath)
       ? JSON.parse(fs.readFileSync(deploymentHistoryPath)) : {};
@@ -273,7 +274,7 @@ async function main() {
         process.exit(1);
       }
       break;
-    case '--test': 
+    case '--test':
       test();
     break;
     case '--generate':
