@@ -85,11 +85,13 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     constructor(address _twoKeyEventSource, address _twoKeyEconomy,
         address _whitelistInfluencer, address _whitelistConverter,
         address _contractor, address _moderator, uint _openingTime, uint _closingTime,
-        uint _expiryConversion, uint _escrowPercentage, uint _rate, uint _maxPi) TwoKeyCampaignARC(_twoKeyEventSource, _contractor)StandardToken()
+        uint _expiryConversion, uint _escrowPercentage, uint _rate, uint _maxPi,
+        address _assetContract) TwoKeyCampaignARC(_twoKeyEventSource, _contractor)StandardToken()
         public {
             require(_twoKeyEconomy != address(0));
             require(_whitelistInfluencer != address(0));
             require(_whitelistConverter != address(0));
+            require(_assetContract != address(0));
             require(_rate > 0);
             require(_maxPi > 0);
 
@@ -97,7 +99,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
             twoKeyEconomy = TwoKeyEconomy(_twoKeyEconomy);
             whitelistInfluencer = TwoKeyWhitelisted(_whitelistInfluencer);
             whitelistConverter = TwoKeyWhitelisted(_whitelistConverter);
-
+            assetContract = _assetContract;
             moderator = _moderator;
             openingTime = _openingTime;
             closingTime = _closingTime;
@@ -110,11 +112,11 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     }
 
 
-    /// @notice Function to add asset contract of specific ERC20
-    /// @param _assetContract of that asset Contract
-    function addAssetContractERC20(address _assetContract) public {
-        assetContract = _assetContract;
-    }
+//    /// @notice Function to add asset contract of specific ERC20
+//    /// @param _assetContract of that asset Contract
+//    function addAssetContractERC20(address _assetContract) public {
+//        assetContract = _assetContract;
+//    }
 
     /// @notice Modifier which is going to check if current time is between opening-closing campaign time
     modifier isOngoing() {
