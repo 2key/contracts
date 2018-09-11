@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 import "../2key/TwoKeyWhitelisted.sol";
 
-contract TwoKeyAcquisitionCampaignERC20Predeply {
+contract TwoKeyAcquisitionCampaignERC20Predeploy {
     TwoKeyWhitelisted whitelistInfluencer;
     TwoKeyWhitelisted whitelistConverter;
 
