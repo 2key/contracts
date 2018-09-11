@@ -20,6 +20,7 @@ const syncTwoKeyNetId = env.SYNC_NET_ID;
 const destinationAddress = env.DESTINATION_ADDRESS;
 const delay = env.TEST_DELAY;
 // const destinationAddress = env.DESTINATION_ADDRESS || '0xd9ce6800b997a0f26faffc0d74405c841dfc64b7'
+console.log(mainNetId);
 
 const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 const bonusOffer = 10;
@@ -143,6 +144,7 @@ describe('TwoKeyProtocol', () => {
       bonusOffer,
       rate,
       maxCPA,
+      erc20address: twoKeyEconomy,
     });
     console.log('TotalGas required', gas);
     return expect(gas).to.exist.to.greaterThan(0);
@@ -157,6 +159,7 @@ describe('TwoKeyProtocol', () => {
       bonusOffer,
       rate,
       maxCPA,
+      erc20address: twoKeyEconomy,
     }, 15000000000);
     console.log('Campaign address', campaign);
     campaignAddress = campaign;
@@ -165,19 +168,27 @@ describe('TwoKeyProtocol', () => {
     // const userCampaigns = await twoKeyProtocol.getContractorCampaigns();
     // console.log('User Campaigns', userCampaigns);
   }).timeout(600000);
-  it('should set ERC20 address', async () => {
-    const address = await twoKeyProtocol.addAssetContractERC20(campaignAddress, twoKeyEconomy);
-    expect(address).to.be.equal(twoKeyEconomy);
-  }).timeout(30000);
-  it('should get ERC20 address', async () => {
-    const address = await twoKeyProtocol.getAssetContractAddress(campaignAddress);
-    expect(address).to.be.equal(twoKeyEconomy);
-  }).timeout(30000);
+  it('should transfer assets to campaign', async () => {
+    await twoKeyProtocol.transferTokens(campaignAddress, 12345);
+    const checkBalance = new Promise((resolve, reject) => {
+      setTimeout(async () => {
+        const res = await twoKeyProtocol.getFungibleInventory(campaignAddress);
+        console.log('Campaign Balance', res);
+        resolve(res)
+      }, 15000);
+      });
+      const balance = await checkBalance;
+      expect(balance).to.be.equal(12345);
+  }).timeout(60000);
+  // it('should add fungible asset', async () => {
+  //   const balance = await twoKeyProtocol.addFungibleInventory(campaignAddress, 12345, twoKeyEconomy);
+  //   expect(balance).to.be.equal(12345);
+  // }).timeout(60000);
   let fMessage;
   it('should create public link for address', async () => {
     try {
       const hash = await twoKeyProtocol.joinCampaign(campaignAddress, 0);
-      console.log('IPFS:', hash);
+      console.log('url:', hash);
       fMessage = hash;
       expect(hash).to.be.a('string');
     } catch (err) {
@@ -187,7 +198,7 @@ describe('TwoKeyProtocol', () => {
   it('should create a join link', async () => {
     // const hash = await twoKeyProtocol.joinCampaign(campaignAddress, 0, fMessage);
     let hash = fMessage;
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < 1; i++) {
       hash = await twoKeyProtocol.joinCampaign(campaignAddress, 0, hash);
       console.log(i + 1, hash.length);
     }

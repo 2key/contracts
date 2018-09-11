@@ -263,67 +263,52 @@ export default class TwoKeyNetwork {
           data.maxCPA,
         ]);
         const campaign = await TwoKeyAcquisitionCampaignERC20.createAndValidate(this.web3, campaignAddress);
-  
+        await this._addCampaignInventoryERC20(campaign, data.erc20address, gasPrice);
         resolve(campaign.address);
       } catch (err) {
         reject(err);
       }
     });
   }
-  // Add Asset ERC20 Contract
-  public addAssetContractERC20(campaignAddress: string, erc20: string, gasPrice: number = this.gasPrice): Promise<string> {
+
+  // Inventory
+  public addFungibleInventory(campaignAddress: string, amount: number, erc20address: string, gasPrice: number = this.gasPrice): Promise<any> {
     return new Promise(async (resolve, reject) => {
       try {
         const campaign = await TwoKeyAcquisitionCampaignERC20.createAndValidate(this.web3, campaignAddress);
-        const currentErc20address = await campaign.getAssetContractAddress;
-        if (parseInt(currentErc20address, 16)) {
-          if (currentErc20address !== erc20) {
-            reject(new Error(`ERC20(${currentErc20address}) already set from this campaign`));
-          } else {
-            resolve(currentErc20address);
-          }
-        } else {
-          const data = {
-            from: this.address,
-            to: campaignAddress,
-            value: '0x0',
-            data: campaign.addAssetContractERC20Tx(erc20).getData()
-          }
-          const gas = await this._estimateTransactionGas(data);
-          await this._checkBalanceBeforeTransaction(gas, gasPrice);
-          const txHash = await campaign.addAssetContractERC20Tx(erc20).send({ from: this.address, gasPrice, gas });
-          await this._waitForTransactionMined(txHash)
-          resolve(erc20);
+        const campaignAssetERC20 = await this._getCampaignInventoryERC20(campaign);
+        if (!parseInt(campaignAssetERC20, 16)) {
+          await this._addCampaignInventoryERC20(campaign, erc20address, gasPrice);
         }
+        const erc20 = await ERC20.createAndValidate(this.web3, erc20address);
+        let txHash = await erc20.approveTx(campaign.address, amount).send({ from: this.address });
+        await this._waitForTransactionMined(txHash);
+        // console.log('ERC20 linked');
+        // const gas = await campaign.addFungibleAssetTx(amount).estimateGas({ from: this.address });
+        // console.log(gas);
+        // await this._checkBalanceBeforeTransaction(gas, gasPrice);
+        txHash = await campaign.addFungibleAssetTx(amount).send({ from: this.address, gas: 70000, gasPrice });
+        await this._waitForTransactionMined(txHash);
+        const balance = await campaign.checkAndUpdateInventoryBalanceTx().send({ from: this.address });
+        const balance2 = await erc20.balanceOf(campaign.address);
+        resolve(balance);
       } catch (err) {
         reject(err);
       }
-
     });
   }
-  // Get Asset ERC20 Contract
-  public getAssetContractAddress(campaignAddress: string): Promise<string> {
-    return new Promise(async (resolve, reject) => {
-      try {
-        const campaign = await TwoKeyAcquisitionCampaignERC20.createAndValidate(this.web3, campaignAddress);
-        const currentErc20address = await campaign.getAssetContractAddress;
-        resolve(currentErc20address);
-      } catch (err) {
-        reject(err);
-      }
-    });
-  }
 
-  public async getFungibleInventory(erc20Address, inventoryAddress): Promise<any> {
-    const erc20 = new ERC20(this.web3, erc20Address);
-    return new Promise(async (resolve, reject) => {
-      try {
-        const inventory = await erc20.balanceOf(inventoryAddress);
-        resolve(inventory.toNumber());
-      } catch (err) {
-        reject(err);
-      }
-    });
+  public async getFungibleInventory(campaign: string | TwoKeyAcquisitionCampaignERC20): Promise<number> {
+    try {
+      const campaignInstance = campaign instanceof TwoKeyAcquisitionCampaignERC20 ? campaign : await TwoKeyAcquisitionCampaignERC20.createAndValidate(this.web3, campaign);
+      const hash = await campaignInstance.checkAndUpdateInventoryBalanceTx().send({ from: this.address });
+      await this._waitForTransactionMined(hash);
+      const balance = await campaignInstance.checkInventoryBalance;
+      console.log('getFungibleInventory', balance.toString());
+      return Promise.resolve(balance.toNumber());
+    } catch (err) {
+      Promise.reject(err);
+    }
   }
   // Set Public Link ()
   public setPublicLink(campaignAddress: string, publicKey: string, gasPrice: number = this.gasPrice): Promise<string> {
@@ -594,5 +579,40 @@ export default class TwoKeyNetwork {
       throw new Error(`Not enough founds. Required: ${transactionFee}. Your balance: ${balance}`);
     }
     return true;
+  }
+
+  // Add Asset ERC20 Contract
+  private _addCampaignInventoryERC20(campaign: string | TwoKeyAcquisitionCampaignERC20, erc20: string, gasPrice: number = this.gasPrice): Promise<string> {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const campaignInstance = campaign instanceof TwoKeyAcquisitionCampaignERC20 ? campaign : await TwoKeyAcquisitionCampaignERC20.createAndValidate(this.web3, campaign);
+        const data = {
+          from: this.address,
+          to: campaignInstance.address,
+          value: '0x0',
+          data: campaignInstance.addAssetContractERC20Tx(erc20).getData()
+        }
+        const gas = await this._estimateTransactionGas(data);
+        await this._checkBalanceBeforeTransaction(gas, gasPrice);
+        const txHash = await campaignInstance.addAssetContractERC20Tx(erc20).send({ from: this.address, gasPrice, gas });
+        await this._waitForTransactionMined(txHash)
+        resolve(erc20);
+      } catch (err) {
+        reject(err);
+      }
+
+    });
+  }
+  // Get Asset ERC20 Contract
+  private _getCampaignInventoryERC20(campaign: string | TwoKeyAcquisitionCampaignERC20): Promise<string> {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const campaignInstance = campaign instanceof TwoKeyAcquisitionCampaignERC20 ? campaign : await TwoKeyAcquisitionCampaignERC20.createAndValidate(this.web3, campaign);
+        const currentErc20address = await campaignInstance.getAssetContractAddress;
+        resolve(currentErc20address);
+      } catch (err) {
+        reject(err);
+      }
+    });
   }
 }
