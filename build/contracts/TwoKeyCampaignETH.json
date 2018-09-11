@@ -892,9 +892,9 @@
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "pragma solidity ^0.4.24;\n\nimport \"./TwoKeyTypes.sol\";\nimport \"./TwoKeyAcquisitionCampaignERC20.sol\";\n\n\ncontract TwoKeyCampaignETH is TwoKeyAcquisitionCampaignERC20 {\n \n\t/*  \n\t    fulfills a fungible asset purchase\n\t    creates the escrow for a fungible asset\n\t    computes the payout in ETH \n\t    transfers to the escrow the asset purchased\n    */\n\n\t// tokenID, asset contract, sufficient\n\t//\n//\tfunction fulfillFungibleETH(\n//\t\taddress _from,\n//\t\tuint256 _amountETH) isOngoing internal {\n//\t\t// TODO: Idea is that payout is msg.value\n//\t\t// Compute for the amount of ether how much tokens can be got by the amount\n//\t\trequire(_amount > 0 && price > 0);\n//\t\tuint256 payout = price.mul(_amount);\n//\t\trequire(msg.value == payout);\n//\t\t//TODO: Someone put 100 eth and he's entitled to X base + Y bonus  = (X+Y) taken from Inventory\n//\t\t//TODO: Take the msg.value, and regarding value I compute number of base and bonus tokens - sum of base and bonus is took out of the twoKeyCampaignInvent\n//\t\tConversion memory c = Conversion(_from, payout, msg.sender, false, false, _assetName, _assetContract, _amount, CampaignType.CPA_FUNGIBLE, now, now + expiryConversion * 1 days);\n//\n//\n//\t\t// move funds\n//\t\t// rename to remove from inventory\n//\t\tcampaignInventoryUnitsBalance = campaignInventoryUnitsBalance - _amount;\n////\t\tremoveFungibleAssets(_tokenID, _assetContract, _amount);\n//\n//\n//\t\t//tokenID can be string specifying the name of token (\"ETH\", \"BTC\",etc)\n//\t\t// value in escrow (msg.value), total amount of tokens\n//\t\ttwoKeyEventSource.escrow(address(this), msg.sender, _assetName, _assetContract, _amount, CampaignType.CPA_FUNGIBLE);\n//\t\tconversions[msg.sender] = c;\n//\t}\n\n    /*  \n\t    fulfills a non fungible asset purchase\n\t    creates the escrow for a fungible asset\n\t    computes the payout in ETH\n\t    transfers to the escrow the asset purchased\n    */\n//\tfunction fulfillNonFungibleETH(address _from, uint256 _tokenID, address _assetContract, uint256 _index) isOngoing internal {\n//\t\taddress assetToken = address(\n//\t      keccak256(abi.encodePacked(_assetContract, _index))\n//\t    );\n//\t\trequire(_index != 0 && price > 0);\n//\t\tuint256 payout = price;\n//\t\trequire(msg.value == payout);\n//\t\tConversion memory c = Conversion(_from, payout, msg.sender, false, false, _tokenID, _assetContract, _index, CampaignType.NonFungible, now, now + expiryConversion * 1 days);\n//\t\ttwoKeyEventSource.escrow(address(this), msg.sender, _tokenID, _assetContract, _index, CampaignType.NonFungible);\n//\t\tconversions[msg.sender] = c;\n//\t}\n\n    /**\n     * calculates moderetor fee, pays the moderator, \n     * computes total reward\n     * transfer payout to buyer, deducting the fee and the total reward\n     * asks the campaign to distribute rewards to influencers\n     */\n\n\tfunction actuallyFulfilledTwoKeyToken() internal {\n\t\tConversion memory c = conversions[msg.sender];\n        c.isFulfilled = true; \n        conversions[msg.sender] = c;\n\t\tuint256 fee = calculateModeratorFee(c.payout);\n        moderator.transfer(fee); \n        uint256 payout = c.payout;\n        uint256 maxReward = maxPi.mul(payout).div(100);\n        \n        // transfer payout - fee - rewards to seller\n        contractor.transfer(payout.sub(fee).sub(maxReward));\n        \n//        transferRewardsTwoKeyToken(c.from, maxReward.mul(rate));\n\t\ttwoKeyEventSource.fulfilled(address(this), c.converter, c.assetName, c.assetContract, c.amount, c.campaignType);\n\t}\n\n\t/**\n  \t * buy product withETH, \n  \t * _from is the influencer from which you received the referral\n  \t * _tokenID is the asset sku\n  \t * _assetContract - erc20 (fungible) or erc721 (non fungible) which represents the class of the asset\n  \t * _amountOrIndex - for erc20 amount in asset class, for erc21 index within asset class\n  \t */\n\n\t/*/// this is going to be in campaign contract\n\tfunction buyFromWithETH(\n\t\taddress _from, \n\t\tCampaignType _campaignType) public payable {\n\t\tif (_campaignType == CampaignType.CPA_FUNGIBLE) {\n\t\t} else if (_campaignType == CampaignType.CPA_NON_FUNGIBLE) {\n//\t\t\tfulfillNonFungibleETH(_from, _tokenID, _assetContract, _amountOrIndex);\n\t\t} \n\t}\n*/\n}\n\n",
-  "sourcePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyCampaignETH.sol",
+  "sourcePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyCampaignETH.sol",
   "ast": {
-    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyCampaignETH.sol",
+    "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyCampaignETH.sol",
     "exportedSymbols": {
       "TwoKeyCampaignETH": [
         2981
@@ -915,7 +915,7 @@
         "src": "0:24:12"
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyTypes.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyTypes.sol",
         "file": "./TwoKeyTypes.sol",
         "id": 2895,
         "nodeType": "ImportDirective",
@@ -926,7 +926,7 @@
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyAcquisitionCampaignERC20.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyAcquisitionCampaignERC20.sol",
         "file": "./TwoKeyAcquisitionCampaignERC20.sol",
         "id": 2896,
         "nodeType": "ImportDirective",
@@ -962,10 +962,10 @@
           2818,
           7321,
           7645,
-          11636,
-          11833,
-          11865,
-          12480
+          11622,
+          11819,
+          11851,
+          12466
         ],
         "contractKind": "contract",
         "documentation": null,
@@ -977,10 +977,10 @@
           7645,
           7321,
           2818,
-          12480,
-          11636,
-          11833,
-          11865
+          12466,
+          11622,
+          11819,
+          11851
         ],
         "name": "TwoKeyCampaignETH",
         "nodeType": "ContractDefinition",
@@ -1050,7 +1050,7 @@
                         "name": "msg",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 14000,
+                        "referencedDeclaration": 13986,
                         "src": "2847:3:12",
                         "typeDescriptions": {
                           "typeIdentifier": "t_magic_message",
@@ -1184,7 +1184,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 14000,
+                          "referencedDeclaration": 13986,
                           "src": "2911:3:12",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -1583,7 +1583,7 @@
                           "lValueRequested": false,
                           "memberName": "mul",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 10221,
+                          "referencedDeclaration": 10207,
                           "src": "3074:9:12",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -1611,7 +1611,7 @@
                       "lValueRequested": false,
                       "memberName": "div",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 10235,
+                      "referencedDeclaration": 10221,
                       "src": "3074:21:12",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -1707,7 +1707,7 @@
                               "lValueRequested": false,
                               "memberName": "sub",
                               "nodeType": "MemberAccess",
-                              "referencedDeclaration": 10255,
+                              "referencedDeclaration": 10241,
                               "src": "3192:10:12",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -1735,7 +1735,7 @@
                           "lValueRequested": false,
                           "memberName": "sub",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 10255,
+                          "referencedDeclaration": 10241,
                           "src": "3192:19:12",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -1822,7 +1822,7 @@
                             "name": "this",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 14113,
+                            "referencedDeclaration": 14099,
                             "src": "3339:4:12",
                             "typeDescriptions": {
                               "typeIdentifier": "t_contract$_TwoKeyCampaignETH_$2981",
@@ -2119,7 +2119,7 @@
     "src": "0:4101:12"
   },
   "legacyAST": {
-    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyCampaignETH.sol",
+    "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyCampaignETH.sol",
     "exportedSymbols": {
       "TwoKeyCampaignETH": [
         2981
@@ -2140,7 +2140,7 @@
         "src": "0:24:12"
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyTypes.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyTypes.sol",
         "file": "./TwoKeyTypes.sol",
         "id": 2895,
         "nodeType": "ImportDirective",
@@ -2151,7 +2151,7 @@
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyAcquisitionCampaignERC20.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyAcquisitionCampaignERC20.sol",
         "file": "./TwoKeyAcquisitionCampaignERC20.sol",
         "id": 2896,
         "nodeType": "ImportDirective",
@@ -2187,10 +2187,10 @@
           2818,
           7321,
           7645,
-          11636,
-          11833,
-          11865,
-          12480
+          11622,
+          11819,
+          11851,
+          12466
         ],
         "contractKind": "contract",
         "documentation": null,
@@ -2202,10 +2202,10 @@
           7645,
           7321,
           2818,
-          12480,
-          11636,
-          11833,
-          11865
+          12466,
+          11622,
+          11819,
+          11851
         ],
         "name": "TwoKeyCampaignETH",
         "nodeType": "ContractDefinition",
@@ -2275,7 +2275,7 @@
                         "name": "msg",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 14000,
+                        "referencedDeclaration": 13986,
                         "src": "2847:3:12",
                         "typeDescriptions": {
                           "typeIdentifier": "t_magic_message",
@@ -2409,7 +2409,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 14000,
+                          "referencedDeclaration": 13986,
                           "src": "2911:3:12",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -2808,7 +2808,7 @@
                           "lValueRequested": false,
                           "memberName": "mul",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 10221,
+                          "referencedDeclaration": 10207,
                           "src": "3074:9:12",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -2836,7 +2836,7 @@
                       "lValueRequested": false,
                       "memberName": "div",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 10235,
+                      "referencedDeclaration": 10221,
                       "src": "3074:21:12",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -2932,7 +2932,7 @@
                               "lValueRequested": false,
                               "memberName": "sub",
                               "nodeType": "MemberAccess",
-                              "referencedDeclaration": 10255,
+                              "referencedDeclaration": 10241,
                               "src": "3192:10:12",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -2960,7 +2960,7 @@
                           "lValueRequested": false,
                           "memberName": "sub",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 10255,
+                          "referencedDeclaration": 10241,
                           "src": "3192:19:12",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -3047,7 +3047,7 @@
                             "name": "this",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 14113,
+                            "referencedDeclaration": 14099,
                             "src": "3339:4:12",
                             "typeDescriptions": {
                               "typeIdentifier": "t_contract$_TwoKeyCampaignETH_$2981",
@@ -3349,5 +3349,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
-  "updatedAt": "2018-09-11T10:36:01.238Z"
+  "updatedAt": "2018-09-11T13:10:29.429Z"
 }

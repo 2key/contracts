@@ -45,9 +45,9 @@ module.exports = function deploy(deployer) {
   if (deployer.network.startsWith('dev') || deployer.network === 'rinkeby-infura') {
     deployer.deploy(ERC20TokenMock)
       .then(() => ERC20TokenMock.deployed())
-      .then(() => deployer.deploy(TwoKeyAdmin, '0xb3FA520368f2Df7BED4dF5185101f303f6c7decc'))
+      .then(() => deployer.deploy(TwoKeyAdmin, '0xb3fa520368f2df7bed4df5185101f303f6c7decc'))
       .then(() => TwoKeyAdmin.deployed())
-      .then(() => deployer.deploy(TwoKeyUpgradableExchange, 1, '0xb3FA520368f2Df7BED4dF5185101f303f6c7decc', ERC20TokenMock.address,TwoKeyAdmin.address))
+      .then(() => deployer.deploy(TwoKeyUpgradableExchange, 1, '0xb3fa520368f2df7bed4df5185101f303f6c7decc', ERC20TokenMock.address,TwoKeyAdmin.address))
       .then(() => TwoKeyUpgradableExchange.deployed())
       .then(() => deployer.deploy(TwoKeyEconomy, TwoKeyAdmin.address))
       .then(() => deployer.deploy(EventSource, TwoKeyAdmin.address))

@@ -271,7 +271,8 @@ export class TwoKeyAcquisitionCampaignERC20 extends TC.TypeChainContract {
           { name: "_expiryConversion", type: "uint256" },
           { name: "_escrowPercentage", type: "uint256" },
           { name: "_rate", type: "uint256" },
-          { name: "_maxPi", type: "uint256" }
+          { name: "_maxPi", type: "uint256" },
+          { name: "_assetContract", type: "address" }
         ],
         payable: false,
         stateMutability: "nonpayable",
@@ -330,15 +331,6 @@ export class TwoKeyAcquisitionCampaignERC20 extends TC.TypeChainContract {
         ],
         name: "Transfer",
         type: "event"
-      },
-      {
-        constant: false,
-        inputs: [{ name: "_assetContract", type: "address" }],
-        name: "addAssetContractERC20",
-        outputs: [],
-        payable: false,
-        stateMutability: "nonpayable",
-        type: "function"
       },
       {
         constant: false,
@@ -712,15 +704,6 @@ export class TwoKeyAcquisitionCampaignERC20 extends TC.TypeChainContract {
       this,
       "increaseApproval",
       [_spender.toString(), _addedValue.toString()]
-    );
-  }
-  public addAssetContractERC20Tx(
-    _assetContract: BigNumber | string
-  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
-    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
-      this,
-      "addAssetContractERC20",
-      [_assetContract.toString()]
     );
   }
   public addFungibleAssetTx(

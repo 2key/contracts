@@ -333,9 +333,9 @@
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "pragma solidity ^0.4.24;\n\nimport \"../openzeppelin-solidity/contracts/ownership/Ownable.sol\";\n\ncontract ITwoKeyReg is Ownable{\n    function addTwoKeyEventSource(address _twoKeyEventSource) public;\n    function changeTwoKeyEventSource(address _twoKeyEventSource) public;\n    function addWhereContractor(address _userAddress, address _contractAddress) public;\n    function addWhereModerator(address _userAddress, address _contractAddress) public;\n    function addWhereReferrer(address _userAddress, address _contractAddress) public;\n    function addWhereConverter(address _userAddress, address _contractAddress) public;\n    function getContractsWhereUserIsContractor(address _userAddress) public view returns (address[]);\n    function getContractsWhereUserIsModerator(address _userAddress) public view returns (address[]);\n    function getContractsWhereUserIsRefferer(address _userAddress) public view returns (address[]);\n    function getContractsWhereUserIsConverter(address _userAddress) public view returns (address[]);\n    function getTwoKeyEventSourceAddress() public view returns (address);\n    function addNameInternal(string _name, address _sender) private;\n    function addName(string _name, address _sender) public;\n    function addNameByUser(string _name) public;\n    function getName2Owner(string _name) public view returns (address);\n    function getOwner2Name(address _sender) public view returns (string);\n}\n",
-  "sourcePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/interfaces/ITwoKeyReg.sol",
+  "sourcePath": "/Users/aydnep/2key/contracts/contracts/interfaces/ITwoKeyReg.sol",
   "ast": {
-    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/interfaces/ITwoKeyReg.sol",
+    "absolutePath": "/Users/aydnep/2key/contracts/contracts/interfaces/ITwoKeyReg.sol",
     "exportedSymbols": {
       "ITwoKeyReg": [
         7963
@@ -356,12 +356,12 @@
         "src": "0:24:34"
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/ownership/Ownable.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/ownership/Ownable.sol",
         "file": "../openzeppelin-solidity/contracts/ownership/Ownable.sol",
         "id": 7852,
         "nodeType": "ImportDirective",
         "scope": 7964,
-        "sourceUnit": 10868,
+        "sourceUnit": 10854,
         "src": "26:66:34",
         "symbolAliases": [],
         "unitAlias": ""
@@ -375,10 +375,10 @@
               "id": 7853,
               "name": "Ownable",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 10867,
+              "referencedDeclaration": 10853,
               "src": "117:7:34",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Ownable_$10867",
+                "typeIdentifier": "t_contract$_Ownable_$10853",
                 "typeString": "contract Ownable"
               }
             },
@@ -388,7 +388,7 @@
           }
         ],
         "contractDependencies": [
-          10867
+          10853
         ],
         "contractKind": "contract",
         "documentation": null,
@@ -396,7 +396,7 @@
         "id": 7963,
         "linearizedBaseContracts": [
           7963,
-          10867
+          10853
         ],
         "name": "ITwoKeyReg",
         "nodeType": "ContractDefinition",
@@ -1663,7 +1663,7 @@
     "src": "0:1421:34"
   },
   "legacyAST": {
-    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/interfaces/ITwoKeyReg.sol",
+    "absolutePath": "/Users/aydnep/2key/contracts/contracts/interfaces/ITwoKeyReg.sol",
     "exportedSymbols": {
       "ITwoKeyReg": [
         7963
@@ -1684,12 +1684,12 @@
         "src": "0:24:34"
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/ownership/Ownable.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/ownership/Ownable.sol",
         "file": "../openzeppelin-solidity/contracts/ownership/Ownable.sol",
         "id": 7852,
         "nodeType": "ImportDirective",
         "scope": 7964,
-        "sourceUnit": 10868,
+        "sourceUnit": 10854,
         "src": "26:66:34",
         "symbolAliases": [],
         "unitAlias": ""
@@ -1703,10 +1703,10 @@
               "id": 7853,
               "name": "Ownable",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 10867,
+              "referencedDeclaration": 10853,
               "src": "117:7:34",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Ownable_$10867",
+                "typeIdentifier": "t_contract$_Ownable_$10853",
                 "typeString": "contract Ownable"
               }
             },
@@ -1716,7 +1716,7 @@
           }
         ],
         "contractDependencies": [
-          10867
+          10853
         ],
         "contractKind": "contract",
         "documentation": null,
@@ -1724,7 +1724,7 @@
         "id": 7963,
         "linearizedBaseContracts": [
           7963,
-          10867
+          10853
         ],
         "name": "ITwoKeyReg",
         "nodeType": "ContractDefinition",
@@ -2996,5 +2996,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
-  "updatedAt": "2018-09-11T10:36:01.320Z"
+  "updatedAt": "2018-09-11T13:10:29.855Z"
 }

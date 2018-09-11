@@ -188,15 +188,6 @@ export class TwoKeyCampaignETH extends TC.TypeChainContract {
         type: "function"
       },
       {
-        constant: false,
-        inputs: [{ name: "_assetContract", type: "address" }],
-        name: "addAssetContractERC20",
-        outputs: [],
-        payable: false,
-        stateMutability: "nonpayable",
-        type: "function"
-      },
-      {
         constant: true,
         inputs: [],
         name: "getContractBalance",
@@ -694,15 +685,6 @@ export class TwoKeyCampaignETH extends TC.TypeChainContract {
       this,
       "decreaseApproval",
       [_spender.toString(), _subtractedValue.toString()]
-    );
-  }
-  public addAssetContractERC20Tx(
-    _assetContract: BigNumber | string
-  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
-    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
-      this,
-      "addAssetContractERC20",
-      [_assetContract.toString()]
     );
   }
   public addFungibleAssetTx(
