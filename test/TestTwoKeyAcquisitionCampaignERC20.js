@@ -155,11 +155,26 @@ contract('TwoKeyAcquisitionCampaignERC20', async (accounts) => {
     });
 
     it("should transfer some amount to an address", async() => {
+
         let balanceBefore = await twoKeyEconomy.balanceOf(accountForAndri);
         console.log("Andrii balance before transfer: " + balanceBefore);
         await twoKeyAdmin.transfer2KeyTokens(twoKeyEconomy.address, accountForAndri, 5000);
         let balanceOfAndri = await twoKeyEconomy.balanceOf(accountForAndri);
-        console.log("Andrii balance after transfer: " + balanceOfAndri)
+        console.log("Andrii balance after transfer: " + balanceOfAndri);
+
+        let balanceOfAdmin = await twoKeyEconomy.balanceOf(twoKeyAdmin.address);
+        console.log(balanceOfAdmin);
+    });
+
+    it("should transfer", async() => {
+        try {
+            await twoKeyEconomy.transfer(accounts[1], 1000, {from: accountForAndri});
+        } catch(error) {
+            console.log(error);
+        }
+
+        let balanceOfAndri = await twoKeyEconomy.balanceOf(accountForAndri);
+        assert.equal(balanceOfAndri, 4000, "should be the same");
     });
 
 
@@ -174,7 +189,7 @@ contract('TwoKeyAcquisitionCampaignERC20', async (accounts) => {
         console.log(balance);
     });
 
-    it("")
+
 
     // it("should have fungible balance after transfered", async() => {
     //     await twoKeyAcquisitionCampaignERC20.addAssetContractERC20(erc20.address);
