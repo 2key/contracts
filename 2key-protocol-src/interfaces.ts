@@ -66,6 +66,7 @@ export interface CreateCampaign {
   bonusOffer?: number,
   rate?: number,
   maxCPA?: number,
+  erc20address: string,
 }
 
 export interface Contract {

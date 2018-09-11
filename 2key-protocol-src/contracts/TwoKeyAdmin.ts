@@ -46,10 +46,7 @@ export class TwoKeyAdmin extends TC.TypeChainContract {
         type: "function"
       },
       {
-        inputs: [
-          { name: "_electorateAdmins", type: "address" },
-          { name: "_exchange", type: "address" }
-        ],
+        inputs: [{ name: "_electorateAdmins", type: "address" }],
         payable: true,
         stateMutability: "payable",
         type: "constructor"
@@ -213,6 +210,15 @@ export class TwoKeyAdmin extends TC.TypeChainContract {
         payable: false,
         stateMutability: "view",
         type: "function"
+      },
+      {
+        constant: true,
+        inputs: [],
+        name: "getTwoKeyUpgradableExchange",
+        outputs: [{ name: "_exchange", type: "address" }],
+        payable: false,
+        stateMutability: "view",
+        type: "function"
       }
     ];
     super(web3, address, abi);
@@ -243,6 +249,10 @@ export class TwoKeyAdmin extends TC.TypeChainContract {
 
   public get getTwoKeyReg(): Promise<string> {
     return TC.promisify(this.rawWeb3Contract.getTwoKeyReg, []);
+  }
+
+  public get getTwoKeyUpgradableExchange(): Promise<string> {
+    return TC.promisify(this.rawWeb3Contract.getTwoKeyUpgradableExchange, []);
   }
 
   public getEtherBalanceOfAnAddress(
