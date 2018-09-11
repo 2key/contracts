@@ -188,8 +188,8 @@ contract TwoKeyAdmin is  Ownable, Destructible, AdminContract {
 
 	}
 
-	function transfer2KeyTokens(address _to, uint _amount) public returns (bool) {
-		bool completed = IERC20(address(economy)).transfer(_to, _amount);
+	function transfer2KeyTokens(address _economy, address _to, uint _amount) public returns (bool) {
+		bool completed = IERC20(address(_economy)).transfer(_to, _amount);
 		return completed;
 	}
 
