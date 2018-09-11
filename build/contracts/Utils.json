@@ -39,14 +39,14 @@
     "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/Utils.sol",
     "exportedSymbols": {
       "Utils": [
-        7609
+        7643
       ]
     },
-    "id": 7610,
+    "id": 7644,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 7587,
+        "id": 7621,
         "literals": [
           "solidity",
           "^",
@@ -62,30 +62,30 @@
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": true,
-        "id": 7609,
+        "id": 7643,
         "linearizedBaseContracts": [
-          7609
+          7643
         ],
         "name": "Utils",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
-              "id": 7607,
+              "id": 7641,
               "nodeType": "Block",
               "src": "289:1153:30",
               "statements": [
                 {
                   "assignments": [
-                    7599
+                    7633
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 7599,
+                      "id": 7633,
                       "name": "sig",
                       "nodeType": "VariableDeclaration",
-                      "scope": 7608,
+                      "scope": 7642,
                       "src": "432:10:30",
                       "stateVariable": false,
                       "storageLocation": "default",
@@ -94,7 +94,7 @@
                         "typeString": "bytes4"
                       },
                       "typeName": {
-                        "id": 7598,
+                        "id": 7632,
                         "name": "bytes4",
                         "nodeType": "ElementaryTypeName",
                         "src": "432:6:30",
@@ -107,7 +107,7 @@
                       "visibility": "internal"
                     }
                   ],
-                  "id": 7605,
+                  "id": 7639,
                   "initialValue": {
                     "argumentTypes": null,
                     "arguments": [
@@ -116,11 +116,11 @@
                         "arguments": [
                           {
                             "argumentTypes": null,
-                            "id": 7602,
+                            "id": 7636,
                             "name": "_method",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 7591,
+                            "referencedDeclaration": 7625,
                             "src": "462:7:30",
                             "typeDescriptions": {
                               "typeIdentifier": "t_bytes_memory_ptr",
@@ -135,18 +135,18 @@
                               "typeString": "bytes memory"
                             }
                           ],
-                          "id": 7601,
+                          "id": 7635,
                           "name": "keccak256",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 13899,
+                          "referencedDeclaration": 13947,
                           "src": "452:9:30",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_sha3_pure$__$returns$_t_bytes32_$",
                             "typeString": "function () pure returns (bytes32)"
                           }
                         },
-                        "id": 7603,
+                        "id": 7637,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -168,7 +168,7 @@
                           "typeString": "bytes32"
                         }
                       ],
-                      "id": 7600,
+                      "id": 7634,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -181,7 +181,7 @@
                       },
                       "typeName": "bytes4"
                     },
-                    "id": 7604,
+                    "id": 7638,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -202,7 +202,7 @@
                   "externalReferences": [
                     {
                       "sig": {
-                        "declaration": 7599,
+                        "declaration": 7633,
                         "isOffset": false,
                         "isSlot": false,
                         "src": "637:3:30",
@@ -211,7 +211,7 @@
                     },
                     {
                       "_val": {
-                        "declaration": 7593,
+                        "declaration": 7627,
                         "isOffset": false,
                         "isSlot": false,
                         "src": "722:4:30",
@@ -220,7 +220,7 @@
                     },
                     {
                       "answer": {
-                        "declaration": 7596,
+                        "declaration": 7630,
                         "isOffset": false,
                         "isSlot": false,
                         "src": "1300:6:30",
@@ -229,7 +229,7 @@
                     },
                     {
                       "c": {
-                        "declaration": 7589,
+                        "declaration": 7623,
                         "isOffset": false,
                         "isSlot": false,
                         "src": "871:1:30",
@@ -237,7 +237,7 @@
                       }
                     }
                   ],
-                  "id": 7606,
+                  "id": 7640,
                   "nodeType": "InlineAssembly",
                   "operations": "{\n    let ptr := mload(0x40)\n    mstore(ptr, sig)\n    mstore(add(ptr, 0x04), _val)\n    let result := call(15000, c, 0, ptr, 0x24, ptr, 0x20)\n    if eq(result, 0)\n    {\n        revert(0, 0)\n    }\n    answer := mload(ptr)\n    mstore(0x40, add(ptr, 0x24))\n}",
                   "src": "481:961:30"
@@ -245,7 +245,7 @@
               ]
             },
             "documentation": "Method implementation which is going to call function from another method and return value",
-            "id": 7608,
+            "id": 7642,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -253,15 +253,15 @@
             "name": "call_return",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7594,
+              "id": 7628,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7589,
+                  "id": 7623,
                   "name": "c",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7608,
+                  "scope": 7642,
                   "src": "218:9:30",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -270,7 +270,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7588,
+                    "id": 7622,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "218:7:30",
@@ -284,10 +284,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7591,
+                  "id": 7625,
                   "name": "_method",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7608,
+                  "scope": 7642,
                   "src": "229:13:30",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -296,7 +296,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 7590,
+                    "id": 7624,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "229:5:30",
@@ -310,10 +310,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7593,
+                  "id": 7627,
                   "name": "_val",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7608,
+                  "scope": 7642,
                   "src": "244:9:30",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -322,7 +322,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7592,
+                    "id": 7626,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
                     "src": "244:4:30",
@@ -339,15 +339,15 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 7597,
+              "id": 7631,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7596,
+                  "id": 7630,
                   "name": "answer",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7608,
+                  "scope": 7642,
                   "src": "276:11:30",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -356,7 +356,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7595,
+                    "id": 7629,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
                     "src": "276:4:30",
@@ -371,14 +371,14 @@
               ],
               "src": "275:13:30"
             },
-            "scope": 7609,
+            "scope": 7643,
             "src": "197:1245:30",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 7610,
+        "scope": 7644,
         "src": "76:1368:30"
       }
     ],
@@ -388,14 +388,14 @@
     "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/Utils.sol",
     "exportedSymbols": {
       "Utils": [
-        7609
+        7643
       ]
     },
-    "id": 7610,
+    "id": 7644,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 7587,
+        "id": 7621,
         "literals": [
           "solidity",
           "^",
@@ -411,30 +411,30 @@
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": true,
-        "id": 7609,
+        "id": 7643,
         "linearizedBaseContracts": [
-          7609
+          7643
         ],
         "name": "Utils",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
-              "id": 7607,
+              "id": 7641,
               "nodeType": "Block",
               "src": "289:1153:30",
               "statements": [
                 {
                   "assignments": [
-                    7599
+                    7633
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 7599,
+                      "id": 7633,
                       "name": "sig",
                       "nodeType": "VariableDeclaration",
-                      "scope": 7608,
+                      "scope": 7642,
                       "src": "432:10:30",
                       "stateVariable": false,
                       "storageLocation": "default",
@@ -443,7 +443,7 @@
                         "typeString": "bytes4"
                       },
                       "typeName": {
-                        "id": 7598,
+                        "id": 7632,
                         "name": "bytes4",
                         "nodeType": "ElementaryTypeName",
                         "src": "432:6:30",
@@ -456,7 +456,7 @@
                       "visibility": "internal"
                     }
                   ],
-                  "id": 7605,
+                  "id": 7639,
                   "initialValue": {
                     "argumentTypes": null,
                     "arguments": [
@@ -465,11 +465,11 @@
                         "arguments": [
                           {
                             "argumentTypes": null,
-                            "id": 7602,
+                            "id": 7636,
                             "name": "_method",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 7591,
+                            "referencedDeclaration": 7625,
                             "src": "462:7:30",
                             "typeDescriptions": {
                               "typeIdentifier": "t_bytes_memory_ptr",
@@ -484,18 +484,18 @@
                               "typeString": "bytes memory"
                             }
                           ],
-                          "id": 7601,
+                          "id": 7635,
                           "name": "keccak256",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 13899,
+                          "referencedDeclaration": 13947,
                           "src": "452:9:30",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_sha3_pure$__$returns$_t_bytes32_$",
                             "typeString": "function () pure returns (bytes32)"
                           }
                         },
-                        "id": 7603,
+                        "id": 7637,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -517,7 +517,7 @@
                           "typeString": "bytes32"
                         }
                       ],
-                      "id": 7600,
+                      "id": 7634,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -530,7 +530,7 @@
                       },
                       "typeName": "bytes4"
                     },
-                    "id": 7604,
+                    "id": 7638,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -551,7 +551,7 @@
                   "externalReferences": [
                     {
                       "sig": {
-                        "declaration": 7599,
+                        "declaration": 7633,
                         "isOffset": false,
                         "isSlot": false,
                         "src": "637:3:30",
@@ -560,7 +560,7 @@
                     },
                     {
                       "_val": {
-                        "declaration": 7593,
+                        "declaration": 7627,
                         "isOffset": false,
                         "isSlot": false,
                         "src": "722:4:30",
@@ -569,7 +569,7 @@
                     },
                     {
                       "answer": {
-                        "declaration": 7596,
+                        "declaration": 7630,
                         "isOffset": false,
                         "isSlot": false,
                         "src": "1300:6:30",
@@ -578,7 +578,7 @@
                     },
                     {
                       "c": {
-                        "declaration": 7589,
+                        "declaration": 7623,
                         "isOffset": false,
                         "isSlot": false,
                         "src": "871:1:30",
@@ -586,7 +586,7 @@
                       }
                     }
                   ],
-                  "id": 7606,
+                  "id": 7640,
                   "nodeType": "InlineAssembly",
                   "operations": "{\n    let ptr := mload(0x40)\n    mstore(ptr, sig)\n    mstore(add(ptr, 0x04), _val)\n    let result := call(15000, c, 0, ptr, 0x24, ptr, 0x20)\n    if eq(result, 0)\n    {\n        revert(0, 0)\n    }\n    answer := mload(ptr)\n    mstore(0x40, add(ptr, 0x24))\n}",
                   "src": "481:961:30"
@@ -594,7 +594,7 @@
               ]
             },
             "documentation": "Method implementation which is going to call function from another method and return value",
-            "id": 7608,
+            "id": 7642,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -602,15 +602,15 @@
             "name": "call_return",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7594,
+              "id": 7628,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7589,
+                  "id": 7623,
                   "name": "c",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7608,
+                  "scope": 7642,
                   "src": "218:9:30",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -619,7 +619,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7588,
+                    "id": 7622,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "218:7:30",
@@ -633,10 +633,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7591,
+                  "id": 7625,
                   "name": "_method",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7608,
+                  "scope": 7642,
                   "src": "229:13:30",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -645,7 +645,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 7590,
+                    "id": 7624,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "229:5:30",
@@ -659,10 +659,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7593,
+                  "id": 7627,
                   "name": "_val",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7608,
+                  "scope": 7642,
                   "src": "244:9:30",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -671,7 +671,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7592,
+                    "id": 7626,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
                     "src": "244:4:30",
@@ -688,15 +688,15 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 7597,
+              "id": 7631,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7596,
+                  "id": 7630,
                   "name": "answer",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7608,
+                  "scope": 7642,
                   "src": "276:11:30",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -705,7 +705,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7595,
+                    "id": 7629,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
                     "src": "276:4:30",
@@ -720,14 +720,14 @@
               ],
               "src": "275:13:30"
             },
-            "scope": 7609,
+            "scope": 7643,
             "src": "197:1245:30",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 7610,
+        "scope": 7644,
         "src": "76:1368:30"
       }
     ],
@@ -739,5 +739,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
-  "updatedAt": "2018-09-07T21:11:56.410Z"
+  "updatedAt": "2018-09-07T21:27:19.435Z"
 }

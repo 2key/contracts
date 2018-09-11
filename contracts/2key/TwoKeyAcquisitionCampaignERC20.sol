@@ -598,5 +598,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
 
         emit Fulfilled(customer, units[customer]);
     }
-
+//    function getConstantInfo() public view returns (string,string,uint,uint,uint,address,string,uint) {
+//        return (name,symbol,cost,bounty,quota,contractor,ipfs_hash,unit_decimals);
+//    }
 }
