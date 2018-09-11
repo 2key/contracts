@@ -132,9 +132,9 @@ async function deploy() {
     }
     console.log(process.argv);
     const local = process.argv[2].includes('local');
-    if (!local) {
-      await test();
-    }
+    // if (!local) {
+    //   await test();
+    // }
 
     const networks = process.argv[2].split(',');
     const network = networks.join('/');
