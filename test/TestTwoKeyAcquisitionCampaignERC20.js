@@ -148,6 +148,12 @@ contract('TwoKeyAcquisitionCampaignERC20', async (accounts) => {
         assert.equal(balance, 0, "balance is not well updated");
     });
 
+    it("should have 1B balance on TwoKeyAdmin", async() => {
+       let balance = await twoKeyEconomy.balanceOf(twoKeyAdmin.address);
+       assert.equal(balance.c[0], 1000000000, "should be 1 mil");
+       console.log(balance);
+    });
+
     it("should transfer some amount to an address", async() => {
         let balanceBefore = await twoKeyEconomy.balanceOf(accountForAndri);
         console.log("Andrii balance before transfer: " + balanceBefore);
