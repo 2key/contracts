@@ -16,7 +16,7 @@ contract TwoKeyEconomy is RBACWithAdmin, StandardToken, Ownable {
  		require(_twoKeyAdmin != address(0));
     TwoKeyAdmin admin ;
     admin = TwoKeyAdmin(_twoKeyAdmin);
-    totalSupply_= 1000000000000000000000000000;
+    totalSupply_= 1000000000;
     balances[_twoKeyAdmin] = totalSupply_;
     admin.setTwoKeyEconomy(address(this));
   }

@@ -39,6 +39,7 @@ contract('TwoKeyAcquisitionCampaignERC20', async (accounts) => {
     const contractor = accounts[2];
     const moderator = accounts[1];
     const campaignCreator = accounts[3];
+    const accountForAndri = accounts[5];
     const userAddress = accounts[7];
     const escrowPrecentage = 10;
     const rate = 2;
@@ -69,8 +70,9 @@ contract('TwoKeyAcquisitionCampaignERC20', async (accounts) => {
         /*
             Singleton area (one per TwoKeyNetwork)
          */
-        upgradeableExchange = await TwoKeyUpgradableExchange.new(100, walletExchange, erc20.address);
-        twoKeyAdmin = await TwoKeyAdmin.new(electorateAdmins, upgradeableExchange.address);
+        twoKeyAdmin = await TwoKeyAdmin.new(electorateAdmins);
+        upgradeableExchange = await TwoKeyUpgradableExchange.new(100, walletExchange, erc20.address, twoKeyAdmin.address);
+
         twoKeyEconomy = await TwoKeyEconomy.new(twoKeyAdmin.address);
         twoKeyEventSource = await TwoKeyEventSource.new(twoKeyAdmin.address);
 
@@ -96,6 +98,7 @@ contract('TwoKeyAcquisitionCampaignERC20', async (accounts) => {
             escrowPrecentage,
             rate,
             maxPi,
+            twoKeyEconomy.address,
             {
                 from: campaignCreator,
                 gas: '8000000'
@@ -121,15 +124,15 @@ contract('TwoKeyAcquisitionCampaignERC20', async (accounts) => {
         console.log("===============================================================================================");
     });
 
-    it("should add asset contract to the campaign", async() => {
-       await twoKeyAcquisitionCampaignERC20.addAssetContractERC20(erc20.address);
-
-       let assetContract = await twoKeyAcquisitionCampaignERC20.getAssetContractAddress();
-
-       assert.equal(erc20.address, assetContract, "asset contract is not added successfully");
-       console.log("Asset contract added to campaign");
-
-    });
+    // it("should add asset contract to the campaign", async() => {
+    //    await twoKeyAcquisitionCampaignERC20.addAssetContractERC20(erc20.address);
+    //
+    //    let assetContract = await twoKeyAcquisitionCampaignERC20.getAssetContractAddress();
+    //
+    //    assert.equal(erc20.address, assetContract, "asset contract is not added successfully");
+    //    console.log("Asset contract added to campaign");
+    //
+    // });
 
     it("should accept ether sent to contract", async() => {
         let txHash = await twoKeyAcquisitionCampaignERC20.sendTransaction({from: coinbase, value: 1000});
@@ -145,71 +148,92 @@ contract('TwoKeyAcquisitionCampaignERC20', async (accounts) => {
         assert.equal(balance, 0, "balance is not well updated");
     });
 
-
-    it("should have fungible balance after transfered", async() => {
-        await twoKeyAcquisitionCampaignERC20.addAssetContractERC20(erc20.address);
-        let some_address = accounts[4];
-        let some_address2 = accounts[5];
-
-
-        // Transfer some amount of ERC20 to 2 random addresses
-        await erc20.transfer(some_address, 200, {
-            from: coinbase
-        });
-        await erc20.transfer(some_address2, 1000, {
-            from:coinbase
-        });
-
-        // Approve TwoKeyAcquisitionCampaign contract to get from that addresses tokens
-        await erc20.approve(twoKeyAcquisitionCampaignERC20.address, 200, {
-            from:some_address
-        });
-        await erc20.approve(twoKeyAcquisitionCampaignERC20.address, 1000, {
-            from: some_address2
-        });
-
-        // call the addFungibleAsset methods
-        await twoKeyAcquisitionCampaignERC20.addFungibleAsset(200, {from: some_address});
-
-        // validate is balance well updated
-        let balance = await twoKeyAcquisitionCampaignERC20.getContractBalance();
-        assert.equal(balance, 200, "balance is not well updated");
-
-
-        // call again addFungibleAsset methods to check if it works as expected
-        await twoKeyAcquisitionCampaignERC20.addFungibleAsset(1000, {from: some_address2});
-        balance = await twoKeyAcquisitionCampaignERC20.getContractBalance();
-
-        // final check for the balance
-        assert.equal(balance, 1200, "balance is not well updated after 2 incoming transfers");
+    it("should transfer some amount to an address", async() => {
+        let balanceBefore = await twoKeyEconomy.balanceOf(accountForAndri);
+        console.log("Andrii balance before transfer: " + balanceBefore);
+        await twoKeyAdmin.transfer2KeyTokens(twoKeyEconomy.address, accountForAndri, 5000);
+        let balanceOfAndri = await twoKeyEconomy.balanceOf(accountForAndri);
+        console.log("Andrii balance after transfer: " + balanceOfAndri)
     });
 
 
-    it("should transfer fungible assets to another address", async() => {
-        await twoKeyAcquisitionCampaignERC20.transferFungibleAsset(accounts[6], 500);
-        let balance = await twoKeyAcquisitionCampaignERC20.getContractBalance();
-        assert.equal(balance, 700, "balance should be 700");
+    it("should transfer funds to contract" ,async() => {
+        await twoKeyAdmin.transfer2KeyTokens(twoKeyEconomy.address, twoKeyAcquisitionCampaignERC20.address, 1000);
+        await twoKeyAcquisitionCampaignERC20.checkAndUpdateInventoryBalance();
+        let balance  = await twoKeyAcquisitionCampaignERC20.checkInventoryBalance();
+
+
+
+        // let balance = await twoKeyEconomy.balanceOf(twoKeyAcquisitionCampaignERC20.address);
+        console.log(balance);
     });
 
-    it("should transfer some balance from TwoKeyEconomy to an address", async() => {
-        await twoKeyEconomy.transfer(userAddress, 5000, {from : coinbase});
+    it("")
 
-        let balance = await twoKeyEconomy.balanceOf(userAddress);
-        assert.equal(balance, 5000, "balance is not well updated");
-    });
-
-    it("should buy with 2key tokens", async() => {
-        await twoKeyEconomy.approve(twoKeyAcquisitionCampaignERC20.address, 2000, {from: userAddress});
-        await twoKeyAcquisitionCampaignERC20.buyFromWithTwoKey(userAddress, assetName, erc20.address, 2000, {from: userAddress});
-
-        let balance = await twoKeyEconomy.balanceOf(twoKeyAcquisitionCampaignERC20.address);
-        assert.equal(balance, 2000, "balance is not well updated");
-    });
-
-    it("should return balanceOf our contract in ERC20 contract", async() => {
-        let balanceOfERC20 = await twoKeyAcquisitionCampaignERC20.checkInventoryBalance();
-        assert.equal(balanceOfERC20, 700, "balance should be 700");
-    })
+    // it("should have fungible balance after transfered", async() => {
+    //     await twoKeyAcquisitionCampaignERC20.addAssetContractERC20(erc20.address);
+    //     let some_address = accounts[4];
+    //     let some_address2 = accounts[5];
+    //
+    //
+    //     // Transfer some amount of ERC20 to 2 random addresses
+    //     await erc20.transfer(some_address, 200, {
+    //         from: coinbase
+    //     });
+    //     await erc20.transfer(some_address2, 1000, {
+    //         from:coinbase
+    //     });
+    //
+    //     // Approve TwoKeyAcquisitionCampaign contract to get from that addresses tokens
+    //     await erc20.approve(twoKeyAcquisitionCampaignERC20.address, 200, {
+    //         from:some_address
+    //     });
+    //     await erc20.approve(twoKeyAcquisitionCampaignERC20.address, 1000, {
+    //         from: some_address2
+    //     });
+    //
+    //     // call the addFungibleAsset methods
+    //     await twoKeyAcquisitionCampaignERC20.addFungibleAsset(200, {from: some_address});
+    //
+    //     // validate is balance well updated
+    //     let balance = await twoKeyAcquisitionCampaignERC20.getContractBalance();
+    //     assert.equal(balance, 200, "balance is not well updated");
+    //
+    //
+    //     // call again addFungibleAsset methods to check if it works as expected
+    //     await twoKeyAcquisitionCampaignERC20.addFungibleAsset(1000, {from: some_address2});
+    //     balance = await twoKeyAcquisitionCampaignERC20.getContractBalance();
+    //
+    //     // final check for the balance
+    //     assert.equal(balance, 1200, "balance is not well updated after 2 incoming transfers");
+    // });
+    //
+    //
+    // it("should transfer fungible assets to another address", async() => {
+    //     await twoKeyAcquisitionCampaignERC20.transferFungibleAsset(accounts[6], 500);
+    //     let balance = await twoKeyAcquisitionCampaignERC20.getContractBalance();
+    //     assert.equal(balance, 700, "balance should be 700");
+    // });
+    //
+    // it("should transfer some balance from TwoKeyEconomy to an address", async() => {
+    //     await twoKeyEconomy.transfer(userAddress, 5000, {from : coinbase});
+    //
+    //     let balance = await twoKeyEconomy.balanceOf(userAddress);
+    //     assert.equal(balance, 5000, "balance is not well updated");
+    // });
+    //
+    // it("should buy with 2key tokens", async() => {
+    //     await twoKeyEconomy.approve(twoKeyAcquisitionCampaignERC20.address, 2000, {from: userAddress});
+    //     await twoKeyAcquisitionCampaignERC20.buyFromWithTwoKey(userAddress, assetName, erc20.address, 2000, {from: userAddress});
+    //
+    //     let balance = await twoKeyEconomy.balanceOf(twoKeyAcquisitionCampaignERC20.address);
+    //     assert.equal(balance, 2000, "balance is not well updated");
+    // });
+    //
+    // it("should return balanceOf our contract in ERC20 contract", async() => {
+    //     let balanceOfERC20 = await twoKeyAcquisitionCampaignERC20.checkInventoryBalance();
+    //     assert.equal(balanceOfERC20, 700, "balance should be 700");
+    // })
 
 
 });
