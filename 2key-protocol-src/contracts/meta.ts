@@ -410,7 +410,13 @@ export default { ERC20: { networks: {} },
      networks: {} },
   TwoKeyAdmin:
    { networks:
-      { '4':
+      { '3':
+         { events: {},
+           links: {},
+           address: '0x4b260bea84fff124defdf6dd9fc9b15a86d3ce48',
+           transactionHash:
+            '0x655dd6578615b3962f6622a001dfea6eec95be47ec547e281093f0a61538c483' },
+        '4':
          { events: {},
            links: {},
            address: '0x39992845da789e253ebdf765624d565dc1c26760',
@@ -424,7 +430,13 @@ export default { ERC20: { networks: {} },
             '0xbcf9f79d08fd7f7a25959588ecabc1e84e6c8e383f7185233dcecc893dfbf725' } } },
   TwoKeyEconomy:
    { networks:
-      { '4':
+      { '3':
+         { events: {},
+           links: {},
+           address: '0xedd11138d75cf59fb7473d0e60a82dd46129975b',
+           transactionHash:
+            '0x5d3e9120611a18045a2fde689ab796b2f10a2f862b7c0643af53a4b0b4f19224' },
+        '4':
          { events: {},
            links: {},
            address: '0xad0e675fc846471159c13b1ae14fa8094f747379',
@@ -438,7 +450,13 @@ export default { ERC20: { networks: {} },
             '0x73d68a6430df22f7c8a49b822b47378d155b56a8e3f9fcee7ec2279ae61ec1a5' } } },
   TwoKeyEventSource:
    { networks:
-      { '4':
+      { '3':
+         { events: {},
+           links: {},
+           address: '0x1b2f34267a5da581a46e74a2b793fa0b85f2c204',
+           transactionHash:
+            '0xab5fd8fed2950e301e7b8ba17787f7bbb85c33ab59f6f22258a99ed119104a0b' },
+        '4':
          { events: {},
            links: {},
            address: '0xa520c3f51d5dd45155810be29e31cd6764bee1c4',
@@ -453,7 +471,13 @@ export default { ERC20: { networks: {} },
   TwoKeyPlasmaEvents: { networks: {} },
   TwoKeyReg:
    { networks:
-      { '4':
+      { '3':
+         { events: {},
+           links: {},
+           address: '0x9db088771195799fde71ec7b69409f5d710d18b2',
+           transactionHash:
+            '0xc90b01599379b3daef682a40c0d8869603868c915a1495a0353371d9b66676ba' },
+        '4':
          { events: {},
            links: {},
            address: '0x0353327336e78f9feb6627697be686dc04d40678',
