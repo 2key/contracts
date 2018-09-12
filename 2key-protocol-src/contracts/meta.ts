@@ -427,7 +427,13 @@ export default { ERC20: { networks: {} },
      networks: {} },
   TwoKeyAdmin:
    { networks:
-      { '8086':
+      { '3':
+         { events: {},
+           links: {},
+           address: '0x321d3ae1e74e7124465fb84754e890a5851faec0',
+           transactionHash:
+            '0x811a71e82b8790049baea65d9f5ed0a78bafe6dafb44d43af5d09ee5060dea30' },
+        '8086':
          { events: {},
            links: {},
            address: '0x592face38b25181046d759bb1354dbaeca8eee16',
@@ -441,7 +447,13 @@ export default { ERC20: { networks: {} },
             '0xc2aa5711f3812ed0848df8e386fab5f1c5fe8700270851a124f11c93793dfada' } } },
   TwoKeyEconomy:
    { networks:
-      { '8086':
+      { '3':
+         { events: {},
+           links: {},
+           address: '0x91978a891644f7b570bd49fd134578cd2366f01a',
+           transactionHash:
+            '0x24348c3984ef29d0c462942f69ec74b38aa397f22160fbc1464e81935d466ed6' },
+        '8086':
          { events: {},
            links: {},
            address: '0x6e3bbb8761e83454d6ffa4c00c15efcbb7046b07',
@@ -455,7 +467,13 @@ export default { ERC20: { networks: {} },
             '0xf21901132a42e1b16e9844100de0e6baba0998c8442c6cacb05d7de1f38c0f5f' } } },
   TwoKeyEventSource:
    { networks:
-      { '8086':
+      { '3':
+         { events: {},
+           links: {},
+           address: '0x1e78200cf3627e7204deeb2c08efd8ca5063c279',
+           transactionHash:
+            '0x6789521cba9f043770a0198fd8c98e510650682ffe18d7a2d013c058ea7b5c75' },
+        '8086':
          { events: {},
            links: {},
            address: '0x9b8838193d66cdc0db09104b4d83ef0aafe45bd8',
@@ -470,7 +488,13 @@ export default { ERC20: { networks: {} },
   TwoKeyPlasmaEvents: { networks: {} },
   TwoKeyReg:
    { networks:
-      { '8086':
+      { '3':
+         { events: {},
+           links: {},
+           address: '0xba76d4c52efbc7e43ad39d43f913593e26d7351e',
+           transactionHash:
+            '0x2f3647fb10f9f2c32879181e76be859559e5417581eba490c9fb67a6a5060573' },
+        '8086':
          { events: {},
            links: {},
            address: '0x5848aa0a994a34a2dc0bfa3f77c36c4cb1521366',
