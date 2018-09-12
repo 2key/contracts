@@ -513,6 +513,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
                     //          require(bounty_cut > 0);
                     if (influencer2cut[new_address] == 0) {
                         influencer2cut[new_address] = uint256(bounty_cut);
+                        emit Fulfilled(new_address, uint256(bounty_cut));
                     } else {
                         require(influencer2cut[new_address] == uint256(bounty_cut));
                     }
