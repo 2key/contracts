@@ -122,7 +122,7 @@ export default class TwoKeyNetwork {
                     resolve({
                         balance: {
                             ETH: parseFloat(eth),
-                            total: parseFloat(this._fromWei(total.toString())),
+                            total: parseFloat(this.fromWei(total.toString())),
                             '2KEY': parseFloat(token),
                         },
                         local_address: this.address,
@@ -150,7 +150,7 @@ export default class TwoKeyNetwork {
     public getETHTransferGas(to: string, value: number): Promise<number> {
         this.gas = null;
         return new Promise((resolve, reject) => {
-            this.web3.eth.estimateGas({to, value: this._toWei(value, 'ether').toString()}, (err, res) => {
+            this.web3.eth.estimateGas({to, value: this.toWei(value, 'ether').toString()}, (err, res) => {
                 if (err) {
                     reject(err);
                 } else {
@@ -166,11 +166,11 @@ export default class TwoKeyNetwork {
             const balance = parseFloat(await this._getEthBalance(this.address));
             const tokenBalance = parseFloat(await this._getTokenBalance(this.address));
             const gasRequired = await this.getERC20TransferGas(to, value);
-            const etherRequired = parseFloat(this._fromWei(gasPrice * gasRequired, 'ether'));
+            const etherRequired = parseFloat(this.fromWei(gasPrice * gasRequired, 'ether'));
             if (tokenBalance < value || balance < etherRequired) {
                 Promise.reject(new Error(`Not enough founds on ${this.address}, required: [ETH: ${etherRequired}, 2KEY: ${value}], balance: [ETH: ${balance}, 2KEY: ${tokenBalance}]`));
             }
-            const params = {from: this.address, gasLimit: this._toHex(this.gas), gasPrice};
+            const params = {from: this.address, gasLimit: this.toHex(this.gas), gasPrice};
             // return this.twoKeyAdmin.transfer2KeyTokensTx(this.twoKeyEconomy.address, to, value).send(params);
             return this.twoKeyEconomy.transferTx(to, value).send(params);
         } catch (err) {
@@ -182,15 +182,15 @@ export default class TwoKeyNetwork {
         try {
             const balance = parseFloat(await this._getEthBalance(this.address));
             const gasRequired = await this.getETHTransferGas(to, value);
-            const totalValue = value + parseFloat(this._fromWei(gasPrice * gasRequired, 'ether'));
+            const totalValue = value + parseFloat(this.fromWei(gasPrice * gasRequired, 'ether'));
             if (totalValue > balance) {
                 Promise.reject(new Error(`Not enough founds on ${this.address} reuired ${value}, balance: ${balance}`));
             }
             const params = {
                 to,
                 gasPrice,
-                gasLimit: this._toHex(this.gas),
-                value: this._toWei(value, 'ether').toString(),
+                gasLimit: this.toHex(this.gas),
+                value: this.toWei(value, 'ether').toString(),
                 from: this.address
             }
             return new Promise((resolve, reject) => {
@@ -461,15 +461,15 @@ export default class TwoKeyNetwork {
 
     /* UTILS */
 
-    private _fromWei(number: string | number | BigNumber, unit?: string): string {
+    public fromWei(number: string | number | BigNumber, unit?: string): string {
         return this.web3.fromWei(number, unit);
     }
 
-    private _toWei(number: string | number | BigNumber, unit?: string): number | BigNumber {
+    public toWei(number: string | number | BigNumber, unit?: string): number | BigNumber {
         return this.web3.toWei(number, unit);
     }
 
-    private _toHex(data: any): string {
+    public toHex(data: any): string {
         return this.web3.toHex(data);
     }
 
@@ -496,7 +496,7 @@ export default class TwoKeyNetwork {
                 if (err) {
                     reject(err);
                 } else {
-                    resolve(this._fromWei(res.toString(), 'ether'));
+                    resolve(this.fromWei(res.toString(), 'ether'));
                 }
             })
         })
@@ -671,7 +671,7 @@ export default class TwoKeyNetwork {
 
     private async _checkBalanceBeforeTransaction(gasRequired: number, gasPrice: number): Promise<boolean> {
         const balance = parseFloat(await this._getEthBalance(this.address));
-        const transactionFee = parseFloat(this._fromWei(gasPrice || this.gasPrice * gasRequired, 'ether'));
+        const transactionFee = parseFloat(this.fromWei(gasPrice || this.gasPrice * gasRequired, 'ether'));
 
         if (transactionFee > balance) {
             throw new Error(`Not enough founds. Required: ${transactionFee}. Your balance: ${balance}`);
