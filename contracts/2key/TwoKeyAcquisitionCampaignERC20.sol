@@ -562,15 +562,19 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
         require(assetContract.call(bytes4(keccak256("transfer(address,uint256)")),msg.sender,_units));
     }
 
-    // Internal /  private functions cannot be payable.
-    function buyFrom(address _from)  private {
-        require(_from != address(0));
-        address _to = msg.sender;
-        if (balanceOf(_to) == 0) {
-            transferFrom(_from, _to, 1);
-        }
+    function buySign(bytes sig) public payable {
+        transferSig(sig);
         buyProduct();
     }
+    // Internal /  private functions cannot be payable.
+//    function buyFrom(address _from)  private {
+//        require(_from != address(0));
+//        address _to = msg.sender;
+//        if (balanceOf(_to) == 0) {
+//            transferFrom(_from, _to, 1);
+//        }
+//        buyProduct();
+//    }
 
     function updateRefchainRewardsAndConverterProceeds(uint256 _units, uint256 _bounty) public payable {
         // buy coins with cut

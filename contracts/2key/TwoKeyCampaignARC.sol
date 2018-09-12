@@ -103,7 +103,7 @@ contract TwoKeyCampaignARC is StandardToken {
 		if (transferQuota(_to, _value)) {
 			if (received_from[_to] == 0) {
 				// inform the 2key admin contract, once, that an influencer has joined
-				twoKeyEventSource.joined(address(this), msg.sender, _to);
+//				twoKeyEventSource.joined(address(this), msg.sender, _to);
 			}
 			received_from[_to] = msg.sender;
 			return true;

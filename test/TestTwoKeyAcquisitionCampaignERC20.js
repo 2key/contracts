@@ -191,6 +191,9 @@ contract('TwoKeyAcquisitionCampaignERC20', async (accounts) => {
     //
     // });
     it("should get public link key", async() => {
+        await twoKeyAcquisitionCampaignERC20.transfer(accounts[2], 5000);
+        // let bal = await twoKeyAcquisitionCampaignERC20.balanceOf(accounts[2]);
+        // assert.equal(bal, 5000);
         await twoKeyAcquisitionCampaignERC20.setPublicLinkKey(accounts[1], {from: accounts[2]});
         let key = await twoKeyAcquisitionCampaignERC20.public_link_key.call(accounts[2]);
         assert.equal(key, accounts[1], "keys are not equal");
