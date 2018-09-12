@@ -41,14 +41,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
         uint256 closingTime;
     }
 
-    string public name;
-    string public ipfs_hash;
-    string public symbol;
-    uint8 public decimals = 0;  // ARCs are not divisable
-    uint256 public cost; // Cost of product in wei
-    uint256 public bounty; // Cost of product in wei
-//    uint256 public quota;  // maximal tokens that can be passed in transferFrom
-    uint256 unit_decimals;  // units being sold can be fractional (for example tokens in ERC20)
+
 
     mapping (address => Conversion) public conversions;
     mapping(address => uint256) public influencer2cut;
@@ -82,12 +75,21 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     uint256 escrowPercentage; /// percentage of payout to. be paid for moderator for escrow
     uint256 maxPi;
 
+    string public name;
+    string public ipfs_hash; // rename to description
+    string public symbol;
+    uint8 public decimals = 0;  // ARCs are not divisable
+    uint256 public bounty; // Bounty is actually bonus percentage in ETH
+    //    uint256 public quota;  // maximal tokens that can be passed in transferFrom
+    uint256 unit_decimals;  // units being sold can be fractional (for example tokens in ERC20)
 
+
+    // Remove contractor from constructor it's the message sender
     constructor(address _twoKeyEventSource, address _twoKeyEconomy,
         address _whitelistInfluencer, address _whitelistConverter,
-        address _contractor, address _moderator, uint _openingTime, uint _closingTime,
+        address _moderator, uint _openingTime, uint _closingTime,
         uint _expiryConversion, uint _escrowPercentage, uint _rate, uint _maxPi,
-        address _assetContract) TwoKeyCampaignARC(_twoKeyEventSource, _contractor)StandardToken()
+        address _assetContract) TwoKeyCampaignARC(_twoKeyEventSource)StandardToken()
         public {
             require(_twoKeyEconomy != address(0));
             require(_whitelistInfluencer != address(0));
@@ -96,7 +98,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
             require(_rate > 0);
             require(_maxPi > 0);
 
-
+            contractor = msg.sender;
             twoKeyEconomy = TwoKeyEconomy(_twoKeyEconomy);
             whitelistInfluencer = TwoKeyWhitelisted(_whitelistInfluencer);
             whitelistConverter = TwoKeyWhitelisted(_whitelistConverter);
@@ -109,7 +111,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
             maxPi = _maxPi;
 
             // Emit event that TwoKeyCampaign is created
-            twoKeyEventSource.created(address(this), contractor);
+            twoKeyEventSource.created(address(this),contractor);
     }
 
 
@@ -374,10 +376,10 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
 
     /// @notice Function to return constantss
     function getConstantInfo() public view returns (uint256,uint256,uint256,uint256) {
-        return (cost,bounty,quota,unit_decimals);
+        return (price,bounty,quota,unit_decimals);
     }
 //    function getConstantInfo() public view returns (string,string,uint256,uint256,uint256,address,string,uint256) {
-//        return (name,symbol,cost,bounty,quota,contractor,ipfs_hash,unit_decimals);
+//        return (name,symbol,price,bounty,quota,contractor,ipfs_hash,unit_decimals);
 //    }
 
     //===================================================================================================
@@ -392,10 +394,10 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
 //        return public_link_key[_address];
 //    }
 
+    /// At the begining only contractor can call this method bcs he is the only one who has arcs
 
     function setPublicLinkKey(address _public_link_key) public {
-        /// TODO: Resolve how initial supply of ARCs is distributed since no one owns them and this method will be never executable then
-//        require(balanceOf(msg.sender) > 0);
+        require(balanceOf(msg.sender) > 0);
         require(public_link_key[msg.sender] == address(0));
         public_link_key[msg.sender] = _public_link_key;
     }
@@ -513,7 +515,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
                     //          require(bounty_cut > 0);
                     if (influencer2cut[new_address] == 0) {
                         influencer2cut[new_address] = uint256(bounty_cut);
-                        emit Fulfilled(new_address, uint256(bounty_cut));
                     } else {
                         require(influencer2cut[new_address] == uint256(bounty_cut));
                     }
@@ -546,11 +547,13 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
         //    require(idx == sig.length);
     }
 
+    // We receive ether
+    // How can I get bonus percentage?
     function buyProduct() public payable {
         unit_decimals = 18; // uint256(erc20_token_sell_contract.decimals());
         // cost is the cost of a single token. Each token has 10**decimals units
         // TODO: Compute valid base units and bonus units per the msg.value and token price and bonus percentage
-        uint256 _units = msg.value.mul(10**unit_decimals).div(cost);
+        uint256 _units = msg.value.mul(10**unit_decimals).div(price);
         // bounty is the cost of a single token. Compute the bounty for the units
         // we are buying
         // TODO: Replace bounty with new parameter maxReferralReward
@@ -563,19 +566,23 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
         require(assetContract.call(bytes4(keccak256("transfer(address,uint256)")),msg.sender,_units));
     }
 
+    /// With this method we're moving arcs and buying the product (ETH)
     function buySign(bytes sig) public payable {
         transferSig(sig);
         buyProduct();
     }
+
     // Internal /  private functions cannot be payable.
-//    function buyFrom(address _from)  private {
-//        require(_from != address(0));
-//        address _to = msg.sender;
-//        if (balanceOf(_to) == 0) {
-//            transferFrom(_from, _to, 1);
-//        }
-//        buyProduct();
-//    }
+    // If we have arcs and want to buy from someone we call this
+    // If you don't have signature call this method
+    function buyFrom(address _from)  private {
+        require(_from != address(0));
+        address _to = msg.sender;
+        if (balanceOf(_to) == 0) {
+            transferFrom(_from, _to, 1);
+        }
+        buyProduct();
+    }
 
     function updateRefchainRewardsAndConverterProceeds(uint256 _units, uint256 _bounty) public payable {
         // buy coins with cut

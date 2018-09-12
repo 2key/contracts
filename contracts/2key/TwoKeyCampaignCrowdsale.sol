@@ -21,7 +21,6 @@ contract TwoKeyCampaignCrowdsale is TwoKeyAcquisitionCampaignERC20 {
 		address _whitelistInfluencer,
 		address _whitelistConverter,
 
-		address _contractor,
 		address _moderator,
 
 
@@ -36,7 +35,6 @@ contract TwoKeyCampaignCrowdsale is TwoKeyAcquisitionCampaignERC20 {
 		_economy,
 		_whitelistInfluencer,
 		_whitelistConverter,
-		_contractor,
 		_moderator,
 		_start,
 		_duration,

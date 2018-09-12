@@ -89,7 +89,6 @@ contract('TwoKeyAcquisitionCampaignERC20', async (accounts) => {
             whitelistInfluencer.address,
             whitelistConverter.address,
 
-            contractor, //Address of the user
             moderator, //Address of the moderator - it's a contract that works (operates) as admin of whitelists contracts
 
             openingTime,
@@ -191,13 +190,18 @@ contract('TwoKeyAcquisitionCampaignERC20', async (accounts) => {
     //
     // });
     it("should get public link key", async() => {
-        await twoKeyAcquisitionCampaignERC20.transfer(accounts[2], 5000);
-        // let bal = await twoKeyAcquisitionCampaignERC20.balanceOf(accounts[2]);
-        // assert.equal(bal, 5000);
-        await twoKeyAcquisitionCampaignERC20.setPublicLinkKey(accounts[1], {from: accounts[2]});
-        let key = await twoKeyAcquisitionCampaignERC20.public_link_key.call(accounts[2]);
-        assert.equal(key, accounts[1], "keys are not equal");
-    })
+        await twoKeyAcquisitionCampaignERC20.setPublicLinkKey(userAddress, {from: campaignCreator});
+        let key = await twoKeyAcquisitionCampaignERC20.public_link_key.call(campaignCreator);
+        assert.equal(key, userAddress, "keys are not equal");
+    });
+
+    it("should have initial balance of total supply", async() => {
+        let balance = await twoKeyAcquisitionCampaignERC20.balanceOf(campaignCreator);
+        console.log("Initial balance of campaignCreator(contractor) is : " + balance);
+    });
+
+
+
 
     // it("should have fungible balance after transfered", async() => {
     //     await twoKeyAcquisitionCampaignERC20.addAssetContractERC20(erc20.address);

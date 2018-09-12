@@ -20,7 +20,6 @@ contract TwoKeyCampaignETHCrowdsale is TwoKeyCampaignETH {
 		address _whitelistInfluencer,
 		address _whitelistConverter,
 
-		address _contractor,
 		address _moderator,
 
 
@@ -35,7 +34,6 @@ contract TwoKeyCampaignETHCrowdsale is TwoKeyCampaignETH {
 		_economy,
 		_whitelistInfluencer,
 		_whitelistConverter,
-		_contractor,
 		_moderator,
 		_start,
 		_duration,

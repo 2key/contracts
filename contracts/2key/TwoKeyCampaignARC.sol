@@ -8,9 +8,10 @@ import './TwoKeyEventSource.sol';
 contract TwoKeyCampaignARC is StandardToken {
 
 	using SafeMath for uint256;
-
+	address contractor;
 	uint256 totalSupply_ = 1000000;
 
+	/// TODO: I can make this tokens to be owned by the deployer - contractor (arcs)
 	// balance of TwoKeyToken for each influencer that they can withdraw
 	mapping(address => uint256) internal referrerBalances2KEY;
 	mapping(address => uint256) internal referrerBalancesETH;
@@ -20,8 +21,8 @@ contract TwoKeyCampaignARC is StandardToken {
 
 
 	TwoKeyEventSource twoKeyEventSource;
-	address contractor;
 
+	// Add quota to constructor
 	uint256 public quota;  // maximal ARC tokens that can be passed in transferFrom
 
 	// referral graph, who did you receive the referral from
@@ -29,10 +30,10 @@ contract TwoKeyCampaignARC is StandardToken {
 
 
 
-	constructor(address _twoKeyEventSource, address _contractor) StandardToken() public {
+	constructor(address _twoKeyEventSource) StandardToken() public {
 		require(_twoKeyEventSource != address(0));
-		contractor = _contractor;
 		twoKeyEventSource = TwoKeyEventSource(_twoKeyEventSource);
+		balances[msg.sender] = totalSupply_;
 	}
 
 	/**
