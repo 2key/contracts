@@ -48,7 +48,7 @@ function free_take(my_address: string, f_address: string, f_secret? :string, p_m
   assert.ok(sig.v === 27 || sig.v === 28, 'unknown sig.v');
 
   sig = Buffer.concat([sig.r, sig.s, Buffer.from([sig.v])]);
-  
+
   // TODO: Fix this
   // @ts-ignore: custom toString() implementation
   m += sig.toString('hex');
@@ -56,8 +56,8 @@ function free_take(my_address: string, f_address: string, f_secret? :string, p_m
   return m;
 }
 
-function free_join(my_address, public_address, f_address, f_secret, p_message, fcut) {
-  let cut = fcut;
+function free_join(my_address, public_address, f_address, f_secret, p_message, cut) {
+  // let cut = fcut;
   // Input:
   //   my_address - I'm an influencer that wants to generate my own link
   //   public_address - the public address of my private key
@@ -154,7 +154,7 @@ function validate_join(firtsPublicKey, f_address, f_secret, pMessage) {
     s = Buffer.from(s, 'hex');
     p_message = p_message.slice(32 * 2);
     // let v = p_message.slice(0, 1 * 2);
-    
+
     // TODO: Ask @Udi about this line
     // @ts-ignore: custom toString() implementation
     const [v] = Buffer.from(p_message.slice(0, 1 * 2), 'hex')[0];

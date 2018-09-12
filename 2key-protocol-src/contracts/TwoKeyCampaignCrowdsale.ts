@@ -217,6 +217,20 @@ export class TwoKeyCampaignCrowdsale extends TC.TypeChainContract {
       {
         constant: true,
         inputs: [],
+        name: "getConstantInfo",
+        outputs: [
+          { name: "", type: "uint256" },
+          { name: "", type: "uint256" },
+          { name: "", type: "uint256" },
+          { name: "", type: "uint256" }
+        ],
+        payable: false,
+        stateMutability: "view",
+        type: "function"
+      },
+      {
+        constant: true,
+        inputs: [],
         name: "ipfs_hash",
         outputs: [{ name: "", type: "string" }],
         payable: false,
@@ -348,6 +362,15 @@ export class TwoKeyCampaignCrowdsale extends TC.TypeChainContract {
         outputs: [{ name: "", type: "uint256[]" }],
         payable: false,
         stateMutability: "view",
+        type: "function"
+      },
+      {
+        constant: false,
+        inputs: [{ name: "sig", type: "bytes" }],
+        name: "buySign",
+        outputs: [],
+        payable: true,
+        stateMutability: "payable",
         type: "function"
       },
       {
@@ -502,13 +525,12 @@ export class TwoKeyCampaignCrowdsale extends TC.TypeChainContract {
         inputs: [
           { name: "_from", type: "address" },
           { name: "_assetName", type: "string" },
-          { name: "_assetContract", type: "address" },
           { name: "_amount", type: "uint256" }
         ],
         name: "buyFromWithTwoKey",
         outputs: [],
-        payable: true,
-        stateMutability: "payable",
+        payable: false,
+        stateMutability: "nonpayable",
         type: "function"
       }
     ];
@@ -602,6 +624,12 @@ export class TwoKeyCampaignCrowdsale extends TC.TypeChainContract {
 
   public balanceOf(_owner: BigNumber | string): Promise<BigNumber> {
     return TC.promisify(this.rawWeb3Contract.balanceOf, [_owner.toString()]);
+  }
+
+  public getConstantInfo(): Promise<
+    [BigNumber, BigNumber, BigNumber, BigNumber]
+  > {
+    return TC.promisify(this.rawWeb3Contract.getConstantInfo, []);
   }
 
   public influencer2cut(arg0: BigNumber | string): Promise<BigNumber> {
@@ -792,6 +820,15 @@ export class TwoKeyCampaignCrowdsale extends TC.TypeChainContract {
       this,
       "increaseApproval",
       [_spender.toString(), _addedValue.toString()]
+    );
+  }
+  public buySignTx(
+    sig: string[]
+  ): TC.DeferredTransactionWrapper<TC.IPayableTxParams> {
+    return new TC.DeferredTransactionWrapper<TC.IPayableTxParams>(
+      this,
+      "buySign",
+      [sig.map(val => val.toString())]
     );
   }
   public updateRefchainRewardsAndConverterProceedsTx(
