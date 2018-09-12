@@ -139,14 +139,14 @@
     "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/interfaces/ITwoKeyWhitelisted.sol",
     "exportedSymbols": {
       "ITwoKeyWhitelisted": [
-        8029
+        8037
       ]
     },
-    "id": 8030,
+    "id": 8038,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 7996,
+        "id": 8004,
         "literals": [
           "solidity",
           "^",
@@ -159,10 +159,10 @@
       {
         "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/ownership/Ownable.sol",
         "file": "../openzeppelin-solidity/contracts/ownership/Ownable.sol",
-        "id": 7997,
+        "id": 8005,
         "nodeType": "ImportDirective",
-        "scope": 8030,
-        "sourceUnit": 10899,
+        "scope": 8038,
+        "sourceUnit": 10907,
         "src": "26:66:35",
         "symbolAliases": [],
         "unitAlias": ""
@@ -173,31 +173,31 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 7998,
+              "id": 8006,
               "name": "Ownable",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 10898,
+              "referencedDeclaration": 10906,
               "src": "125:7:35",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Ownable_$10898",
+                "typeIdentifier": "t_contract$_Ownable_$10906",
                 "typeString": "contract Ownable"
               }
             },
-            "id": 7999,
+            "id": 8007,
             "nodeType": "InheritanceSpecifier",
             "src": "125:7:35"
           }
         ],
         "contractDependencies": [
-          10898
+          10906
         ],
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 8029,
+        "id": 8037,
         "linearizedBaseContracts": [
-          8029,
-          10898
+          8037,
+          10906
         ],
         "name": "ITwoKeyWhitelisted",
         "nodeType": "ContractDefinition",
@@ -205,7 +205,7 @@
           {
             "body": null,
             "documentation": null,
-            "id": 8006,
+            "id": 8014,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -213,15 +213,15 @@
             "name": "isWhitelisted",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 8002,
+              "id": 8010,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8001,
+                  "id": 8009,
                   "name": "_beneficiary",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8006,
+                  "scope": 8014,
                   "src": "161:20:35",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -230,7 +230,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 8000,
+                    "id": 8008,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "161:7:35",
@@ -247,15 +247,15 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 8005,
+              "id": 8013,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8004,
+                  "id": 8012,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8006,
+                  "scope": 8014,
                   "src": "203:4:35",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -264,7 +264,7 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 8003,
+                    "id": 8011,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "203:4:35",
@@ -279,85 +279,9 @@
               ],
               "src": "202:6:35"
             },
-            "scope": 8029,
+            "scope": 8037,
             "src": "138:71:35",
             "stateMutability": "view",
-            "superFunction": null,
-            "visibility": "public"
-          },
-          {
-            "body": null,
-            "documentation": null,
-            "id": 8013,
-            "implemented": false,
-            "isConstructor": false,
-            "isDeclaredConst": false,
-            "modifiers": [
-              {
-                "arguments": null,
-                "id": 8011,
-                "modifierName": {
-                  "argumentTypes": null,
-                  "id": 8010,
-                  "name": "onlyOwner",
-                  "nodeType": "Identifier",
-                  "overloadedDeclarations": [],
-                  "referencedDeclaration": 10846,
-                  "src": "267:9:35",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_modifier$__$",
-                    "typeString": "modifier ()"
-                  }
-                },
-                "nodeType": "ModifierInvocation",
-                "src": "267:9:35"
-              }
-            ],
-            "name": "addToWhitelist",
-            "nodeType": "FunctionDefinition",
-            "parameters": {
-              "id": 8009,
-              "nodeType": "ParameterList",
-              "parameters": [
-                {
-                  "constant": false,
-                  "id": 8008,
-                  "name": "_beneficiary",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 8013,
-                  "src": "238:20:35",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_address",
-                    "typeString": "address"
-                  },
-                  "typeName": {
-                    "id": 8007,
-                    "name": "address",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "238:7:35",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_address",
-                      "typeString": "address"
-                    }
-                  },
-                  "value": null,
-                  "visibility": "internal"
-                }
-              ],
-              "src": "237:22:35"
-            },
-            "payable": false,
-            "returnParameters": {
-              "id": 8012,
-              "nodeType": "ParameterList",
-              "parameters": [],
-              "src": "276:0:35"
-            },
-            "scope": 8029,
-            "src": "214:63:35",
-            "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           },
@@ -378,7 +302,83 @@
                   "name": "onlyOwner",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 10846,
+                  "referencedDeclaration": 10854,
+                  "src": "267:9:35",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_modifier$__$",
+                    "typeString": "modifier ()"
+                  }
+                },
+                "nodeType": "ModifierInvocation",
+                "src": "267:9:35"
+              }
+            ],
+            "name": "addToWhitelist",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 8017,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8016,
+                  "name": "_beneficiary",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8021,
+                  "src": "238:20:35",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 8015,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "238:7:35",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "237:22:35"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 8020,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "276:0:35"
+            },
+            "scope": 8037,
+            "src": "214:63:35",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          },
+          {
+            "body": null,
+            "documentation": null,
+            "id": 8029,
+            "implemented": false,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [
+              {
+                "arguments": null,
+                "id": 8027,
+                "modifierName": {
+                  "argumentTypes": null,
+                  "id": 8026,
+                  "name": "onlyOwner",
+                  "nodeType": "Identifier",
+                  "overloadedDeclarations": [],
+                  "referencedDeclaration": 10854,
                   "src": "343:9:35",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
@@ -392,15 +392,15 @@
             "name": "addManyToWhitelist",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 8017,
+              "id": 8025,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8016,
+                  "id": 8024,
                   "name": "_beneficiaries",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8021,
+                  "scope": 8029,
                   "src": "310:24:35",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -410,7 +410,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 8014,
+                      "id": 8022,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
                       "src": "310:7:35",
@@ -419,7 +419,7 @@
                         "typeString": "address"
                       }
                     },
-                    "id": 8015,
+                    "id": 8023,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "310:9:35",
@@ -436,12 +436,12 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 8020,
+              "id": 8028,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "352:0:35"
             },
-            "scope": 8029,
+            "scope": 8037,
             "src": "282:71:35",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -450,21 +450,21 @@
           {
             "body": null,
             "documentation": null,
-            "id": 8028,
+            "id": 8036,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
             "modifiers": [
               {
                 "arguments": null,
-                "id": 8026,
+                "id": 8034,
                 "modifierName": {
                   "argumentTypes": null,
-                  "id": 8025,
+                  "id": 8033,
                   "name": "onlyOwner",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 10846,
+                  "referencedDeclaration": 10854,
                   "src": "416:9:35",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
@@ -478,15 +478,15 @@
             "name": "removeFromWhitelist",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 8024,
+              "id": 8032,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8023,
+                  "id": 8031,
                   "name": "_beneficiary",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8028,
+                  "scope": 8036,
                   "src": "387:20:35",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -495,7 +495,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 8022,
+                    "id": 8030,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "387:7:35",
@@ -512,19 +512,19 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 8027,
+              "id": 8035,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "425:0:35"
             },
-            "scope": 8029,
+            "scope": 8037,
             "src": "358:68:35",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 8030,
+        "scope": 8038,
         "src": "94:334:35"
       }
     ],
@@ -534,14 +534,14 @@
     "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/interfaces/ITwoKeyWhitelisted.sol",
     "exportedSymbols": {
       "ITwoKeyWhitelisted": [
-        8029
+        8037
       ]
     },
-    "id": 8030,
+    "id": 8038,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 7996,
+        "id": 8004,
         "literals": [
           "solidity",
           "^",
@@ -554,10 +554,10 @@
       {
         "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/ownership/Ownable.sol",
         "file": "../openzeppelin-solidity/contracts/ownership/Ownable.sol",
-        "id": 7997,
+        "id": 8005,
         "nodeType": "ImportDirective",
-        "scope": 8030,
-        "sourceUnit": 10899,
+        "scope": 8038,
+        "sourceUnit": 10907,
         "src": "26:66:35",
         "symbolAliases": [],
         "unitAlias": ""
@@ -568,31 +568,31 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 7998,
+              "id": 8006,
               "name": "Ownable",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 10898,
+              "referencedDeclaration": 10906,
               "src": "125:7:35",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Ownable_$10898",
+                "typeIdentifier": "t_contract$_Ownable_$10906",
                 "typeString": "contract Ownable"
               }
             },
-            "id": 7999,
+            "id": 8007,
             "nodeType": "InheritanceSpecifier",
             "src": "125:7:35"
           }
         ],
         "contractDependencies": [
-          10898
+          10906
         ],
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 8029,
+        "id": 8037,
         "linearizedBaseContracts": [
-          8029,
-          10898
+          8037,
+          10906
         ],
         "name": "ITwoKeyWhitelisted",
         "nodeType": "ContractDefinition",
@@ -600,7 +600,7 @@
           {
             "body": null,
             "documentation": null,
-            "id": 8006,
+            "id": 8014,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -608,15 +608,15 @@
             "name": "isWhitelisted",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 8002,
+              "id": 8010,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8001,
+                  "id": 8009,
                   "name": "_beneficiary",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8006,
+                  "scope": 8014,
                   "src": "161:20:35",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -625,7 +625,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 8000,
+                    "id": 8008,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "161:7:35",
@@ -642,15 +642,15 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 8005,
+              "id": 8013,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8004,
+                  "id": 8012,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8006,
+                  "scope": 8014,
                   "src": "203:4:35",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -659,7 +659,7 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 8003,
+                    "id": 8011,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "203:4:35",
@@ -674,85 +674,9 @@
               ],
               "src": "202:6:35"
             },
-            "scope": 8029,
+            "scope": 8037,
             "src": "138:71:35",
             "stateMutability": "view",
-            "superFunction": null,
-            "visibility": "public"
-          },
-          {
-            "body": null,
-            "documentation": null,
-            "id": 8013,
-            "implemented": false,
-            "isConstructor": false,
-            "isDeclaredConst": false,
-            "modifiers": [
-              {
-                "arguments": null,
-                "id": 8011,
-                "modifierName": {
-                  "argumentTypes": null,
-                  "id": 8010,
-                  "name": "onlyOwner",
-                  "nodeType": "Identifier",
-                  "overloadedDeclarations": [],
-                  "referencedDeclaration": 10846,
-                  "src": "267:9:35",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_modifier$__$",
-                    "typeString": "modifier ()"
-                  }
-                },
-                "nodeType": "ModifierInvocation",
-                "src": "267:9:35"
-              }
-            ],
-            "name": "addToWhitelist",
-            "nodeType": "FunctionDefinition",
-            "parameters": {
-              "id": 8009,
-              "nodeType": "ParameterList",
-              "parameters": [
-                {
-                  "constant": false,
-                  "id": 8008,
-                  "name": "_beneficiary",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 8013,
-                  "src": "238:20:35",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_address",
-                    "typeString": "address"
-                  },
-                  "typeName": {
-                    "id": 8007,
-                    "name": "address",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "238:7:35",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_address",
-                      "typeString": "address"
-                    }
-                  },
-                  "value": null,
-                  "visibility": "internal"
-                }
-              ],
-              "src": "237:22:35"
-            },
-            "payable": false,
-            "returnParameters": {
-              "id": 8012,
-              "nodeType": "ParameterList",
-              "parameters": [],
-              "src": "276:0:35"
-            },
-            "scope": 8029,
-            "src": "214:63:35",
-            "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           },
@@ -773,7 +697,83 @@
                   "name": "onlyOwner",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 10846,
+                  "referencedDeclaration": 10854,
+                  "src": "267:9:35",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_modifier$__$",
+                    "typeString": "modifier ()"
+                  }
+                },
+                "nodeType": "ModifierInvocation",
+                "src": "267:9:35"
+              }
+            ],
+            "name": "addToWhitelist",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 8017,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8016,
+                  "name": "_beneficiary",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8021,
+                  "src": "238:20:35",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 8015,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "238:7:35",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "237:22:35"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 8020,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "276:0:35"
+            },
+            "scope": 8037,
+            "src": "214:63:35",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          },
+          {
+            "body": null,
+            "documentation": null,
+            "id": 8029,
+            "implemented": false,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [
+              {
+                "arguments": null,
+                "id": 8027,
+                "modifierName": {
+                  "argumentTypes": null,
+                  "id": 8026,
+                  "name": "onlyOwner",
+                  "nodeType": "Identifier",
+                  "overloadedDeclarations": [],
+                  "referencedDeclaration": 10854,
                   "src": "343:9:35",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
@@ -787,15 +787,15 @@
             "name": "addManyToWhitelist",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 8017,
+              "id": 8025,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8016,
+                  "id": 8024,
                   "name": "_beneficiaries",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8021,
+                  "scope": 8029,
                   "src": "310:24:35",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -805,7 +805,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 8014,
+                      "id": 8022,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
                       "src": "310:7:35",
@@ -814,7 +814,7 @@
                         "typeString": "address"
                       }
                     },
-                    "id": 8015,
+                    "id": 8023,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "310:9:35",
@@ -831,12 +831,12 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 8020,
+              "id": 8028,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "352:0:35"
             },
-            "scope": 8029,
+            "scope": 8037,
             "src": "282:71:35",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -845,21 +845,21 @@
           {
             "body": null,
             "documentation": null,
-            "id": 8028,
+            "id": 8036,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
             "modifiers": [
               {
                 "arguments": null,
-                "id": 8026,
+                "id": 8034,
                 "modifierName": {
                   "argumentTypes": null,
-                  "id": 8025,
+                  "id": 8033,
                   "name": "onlyOwner",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 10846,
+                  "referencedDeclaration": 10854,
                   "src": "416:9:35",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
@@ -873,15 +873,15 @@
             "name": "removeFromWhitelist",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 8024,
+              "id": 8032,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8023,
+                  "id": 8031,
                   "name": "_beneficiary",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8028,
+                  "scope": 8036,
                   "src": "387:20:35",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -890,7 +890,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 8022,
+                    "id": 8030,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "387:7:35",
@@ -907,19 +907,19 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 8027,
+              "id": 8035,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "425:0:35"
             },
-            "scope": 8029,
+            "scope": 8037,
             "src": "358:68:35",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 8030,
+        "scope": 8038,
         "src": "94:334:35"
       }
     ],
@@ -931,5 +931,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
-  "updatedAt": "2018-09-12T11:39:21.239Z"
+  "updatedAt": "2018-09-12T11:47:25.708Z"
 }

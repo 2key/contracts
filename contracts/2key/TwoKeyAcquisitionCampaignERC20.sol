@@ -424,7 +424,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
         return cuts;
     }
 
-    function transferSig(bytes sig) public {
+    function transferSig(bytes sig) public returns (address, uint){
         // move ARCs based on signature information
         // if version=1, with_cut is true then sig also include the cut (percentage) each influencer takes from the bounty
         // the cut is stored in influencer2cut
@@ -514,6 +514,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
                     if (influencer2cut[new_address] == 0) {
                         influencer2cut[new_address] = uint256(bounty_cut);
                         emit Fulfilled(new_address, uint256(bounty_cut));
+                    return (new_address,bounty_cut);
                     } else {
                         require(influencer2cut[new_address] == uint256(bounty_cut));
                     }
