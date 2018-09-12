@@ -262,7 +262,9 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     }
 
     /// Is there a need to put assetContract as parameter , address _assetContract also assetName
-    function buyFromWithTwoKey(address _from, string _assetName, uint256 _amount) public payable {
+    /// Also, this function don't need to be payable, we're sending two key tokens here, not eth
+    /// (It was payable)
+    function buyFromWithTwoKey(address _from, string _assetName, uint256 _amount) public {
         fulfillFungibleTwoKeyToken(_from, _assetName, _amount);
     }
 
@@ -386,8 +388,14 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     // this is the public part of this secret
     mapping(address => address)  public public_link_key;
 
+//    function getPublicLinkKey(address _address) public view returns (address) {
+//        return public_link_key[_address];
+//    }
+
+
     function setPublicLinkKey(address _public_link_key) public {
-        require(balanceOf(msg.sender) > 0);
+        /// TODO: Resolve how initial supply of ARCs is distributed since no one owns them and this method will be never executable then
+//        require(balanceOf(msg.sender) > 0);
         require(public_link_key[msg.sender] == address(0));
         public_link_key[msg.sender] = _public_link_key;
     }
@@ -554,8 +562,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
         require(assetContract.call(bytes4(keccak256("transfer(address,uint256)")),msg.sender,_units));
     }
 
-    // Should be payable but internal functions can't be payable
-    function buyFrom(address _from) private {
+    // Internal /  private functions cannot be payable.
+    function buyFrom(address _from)  private {
         require(_from != address(0));
         address _to = msg.sender;
         if (balanceOf(_to) == 0) {

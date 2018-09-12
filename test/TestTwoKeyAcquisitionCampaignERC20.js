@@ -182,14 +182,19 @@ contract('TwoKeyAcquisitionCampaignERC20', async (accounts) => {
         await twoKeyAdmin.transfer2KeyTokens(twoKeyEconomy.address, twoKeyAcquisitionCampaignERC20.address, 1000);
         await twoKeyAcquisitionCampaignERC20.checkAndUpdateInventoryBalance();
         let balance  = await twoKeyAcquisitionCampaignERC20.checkInventoryBalance();
-
-
-
-        // let balance = await twoKeyEconomy.balanceOf(twoKeyAcquisitionCampaignERC20.address);
+        
         console.log(balance);
     });
 
-
+    // it("should fullFill with TwoKey", async() => {
+    //     await twoKeyAdmin.transfer2KeyTokens(twoKeyEconomy.address, accounts[5], 5000);
+    //
+    // });
+    it("should get public link key", async() => {
+        await twoKeyAcquisitionCampaignERC20.setPublicLinkKey(accounts[1], {from: accounts[2]});
+        let key = await twoKeyAcquisitionCampaignERC20.public_link_key.call(accounts[2]);
+        assert.equal(key, accounts[1], "keys are not equal");
+    })
 
     // it("should have fungible balance after transfered", async() => {
     //     await twoKeyAcquisitionCampaignERC20.addAssetContractERC20(erc20.address);
