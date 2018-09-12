@@ -17,6 +17,47 @@
     },
     {
       "constant": true,
+      "inputs": [
+        {
+          "name": "_operator",
+          "type": "address"
+        },
+        {
+          "name": "_role",
+          "type": "string"
+        }
+      ],
+      "name": "checkRole",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_operator",
+          "type": "address"
+        },
+        {
+          "name": "_role",
+          "type": "string"
+        }
+      ],
+      "name": "hasRole",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
       "inputs": [],
       "name": "rate",
       "outputs": [
@@ -58,6 +99,20 @@
       "type": "function"
     },
     {
+      "constant": true,
+      "inputs": [],
+      "name": "ROLE_CONTROLLER",
+      "outputs": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
       "constant": false,
       "inputs": [
         {
@@ -81,6 +136,24 @@
       "type": "function"
     },
     {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "addr",
+          "type": "address"
+        },
+        {
+          "name": "roleName",
+          "type": "string"
+        }
+      ],
+      "name": "adminRemoveRole",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
       "constant": true,
       "inputs": [],
       "name": "owner",
@@ -88,6 +161,66 @@
         {
           "name": "",
           "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "addr",
+          "type": "address"
+        },
+        {
+          "name": "roleName",
+          "type": "string"
+        }
+      ],
+      "name": "adminAddRole",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "getAdminRole",
+      "outputs": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "onlyControllerRole",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "ROLE_ADMIN",
+      "outputs": [
+        {
+          "name": "",
+          "type": "string"
         }
       ],
       "payable": false,
@@ -106,6 +239,20 @@
       "outputs": [],
       "payable": true,
       "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "getControllerRole",
+      "outputs": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -173,6 +320,40 @@
       "inputs": [
         {
           "indexed": true,
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "role",
+          "type": "string"
+        }
+      ],
+      "name": "RoleAdded",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "role",
+          "type": "string"
+        }
+      ],
+      "name": "RoleRemoved",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
           "name": "previousOwner",
           "type": "address"
         }
@@ -229,20 +410,20 @@
   "deployedBytecode": "0x",
   "sourceMap": "",
   "deployedSourceMap": "",
-  "source": "pragma solidity ^0.4.24;\n\nimport '../openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol';\nimport './TwoKeyUpgradableExchange.sol';\n\ncontract TwoKeyFixedRateExchange is TwoKeyUpgradableExchange  {\n\n\n\n\n}",
-  "sourcePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyFixedRateExchange.sol",
+  "source": "pragma solidity ^0.4.24;\n\nimport '../openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol';\nimport './TwoKeyUpgradableExchange.sol';\n\ncontract TwoKeyFixedRateExchange is TwoKeyUpgradableExchange  {\n}",
+  "sourcePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyFixedRateExchange.sol",
   "ast": {
-    "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyFixedRateExchange.sol",
+    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyFixedRateExchange.sol",
     "exportedSymbols": {
       "TwoKeyFixedRateExchange": [
-        6084
+        6123
       ]
     },
-    "id": 6085,
+    "id": 6124,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 6079,
+        "id": 6118,
         "literals": [
           "solidity",
           "^",
@@ -250,27 +431,27 @@
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:24:20"
+        "src": "0:24:19"
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
         "file": "../openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
-        "id": 6080,
+        "id": 6119,
         "nodeType": "ImportDirective",
-        "scope": 6085,
-        "sourceUnit": 9097,
-        "src": "26:68:20",
+        "scope": 6124,
+        "sourceUnit": 9231,
+        "src": "26:68:19",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyUpgradableExchange.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyUpgradableExchange.sol",
         "file": "./TwoKeyUpgradableExchange.sol",
-        "id": 6081,
+        "id": 6120,
         "nodeType": "ImportDirective",
-        "scope": 6085,
-        "sourceUnit": 7524,
-        "src": "95:40:20",
+        "scope": 6124,
+        "sourceUnit": 7599,
+        "src": "95:40:19",
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -280,57 +461,61 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 6082,
+              "id": 6121,
               "name": "TwoKeyUpgradableExchange",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 7523,
-              "src": "173:24:20",
+              "referencedDeclaration": 7598,
+              "src": "173:24:19",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_TwoKeyUpgradableExchange_$7523",
+                "typeIdentifier": "t_contract$_TwoKeyUpgradableExchange_$7598",
                 "typeString": "contract TwoKeyUpgradableExchange"
               }
             },
-            "id": 6083,
+            "id": 6122,
             "nodeType": "InheritanceSpecifier",
-            "src": "173:24:20"
+            "src": "173:24:19"
           }
         ],
         "contractDependencies": [
-          7523,
-          9096,
-          10800
+          319,
+          7598,
+          8932,
+          9230,
+          10934
         ],
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 6084,
+        "id": 6123,
         "linearizedBaseContracts": [
-          6084,
-          7523,
-          10800,
-          9096
+          6123,
+          7598,
+          319,
+          8932,
+          10934,
+          9230
         ],
         "name": "TwoKeyFixedRateExchange",
         "nodeType": "ContractDefinition",
         "nodes": [],
-        "scope": 6085,
-        "src": "137:69:20"
+        "scope": 6124,
+        "src": "137:65:19"
       }
     ],
-    "src": "0:206:20"
+    "src": "0:202:19"
   },
   "legacyAST": {
-    "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyFixedRateExchange.sol",
+    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyFixedRateExchange.sol",
     "exportedSymbols": {
       "TwoKeyFixedRateExchange": [
-        6084
+        6123
       ]
     },
-    "id": 6085,
+    "id": 6124,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 6079,
+        "id": 6118,
         "literals": [
           "solidity",
           "^",
@@ -338,27 +523,27 @@
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:24:20"
+        "src": "0:24:19"
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
         "file": "../openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol",
-        "id": 6080,
+        "id": 6119,
         "nodeType": "ImportDirective",
-        "scope": 6085,
-        "sourceUnit": 9097,
-        "src": "26:68:20",
+        "scope": 6124,
+        "sourceUnit": 9231,
+        "src": "26:68:19",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/TwoKeyUpgradableExchange.sol",
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyUpgradableExchange.sol",
         "file": "./TwoKeyUpgradableExchange.sol",
-        "id": 6081,
+        "id": 6120,
         "nodeType": "ImportDirective",
-        "scope": 6085,
-        "sourceUnit": 7524,
-        "src": "95:40:20",
+        "scope": 6124,
+        "sourceUnit": 7599,
+        "src": "95:40:19",
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -368,44 +553,48 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 6082,
+              "id": 6121,
               "name": "TwoKeyUpgradableExchange",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 7523,
-              "src": "173:24:20",
+              "referencedDeclaration": 7598,
+              "src": "173:24:19",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_TwoKeyUpgradableExchange_$7523",
+                "typeIdentifier": "t_contract$_TwoKeyUpgradableExchange_$7598",
                 "typeString": "contract TwoKeyUpgradableExchange"
               }
             },
-            "id": 6083,
+            "id": 6122,
             "nodeType": "InheritanceSpecifier",
-            "src": "173:24:20"
+            "src": "173:24:19"
           }
         ],
         "contractDependencies": [
-          7523,
-          9096,
-          10800
+          319,
+          7598,
+          8932,
+          9230,
+          10934
         ],
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 6084,
+        "id": 6123,
         "linearizedBaseContracts": [
-          6084,
-          7523,
-          10800,
-          9096
+          6123,
+          7598,
+          319,
+          8932,
+          10934,
+          9230
         ],
         "name": "TwoKeyFixedRateExchange",
         "nodeType": "ContractDefinition",
         "nodes": [],
-        "scope": 6085,
-        "src": "137:69:20"
+        "scope": 6124,
+        "src": "137:65:19"
       }
     ],
-    "src": "0:206:20"
+    "src": "0:202:19"
   },
   "compiler": {
     "name": "solc",
@@ -413,5 +602,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
-  "updatedAt": "2018-09-09T08:41:36.607Z"
+  "updatedAt": "2018-09-12T09:58:06.460Z"
 }

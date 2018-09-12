@@ -6,6 +6,7 @@ import '../openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import './TwoKeyEconomy.sol';
 import './TwoKeyUpgradableExchange.sol';
 import "../interfaces/IAdminContract.sol";
+import "../interfaces/IERC20.sol";
 import "./TwoKeyEventSource.sol";
 import "./TwoKeyReg.sol";
 
@@ -187,6 +188,11 @@ contract TwoKeyAdmin is  Ownable, Destructible, AdminContract {
 
 	}
 
+	function transfer2KeyTokens(address _economy, address _to, uint _amount) public returns (bool) {
+		bool completed = IERC20(address(_economy)).transfer(_to, _amount);
+		return completed;
+	}
+
     // modifier for admin call check
 	//<TBD> may be owner
 	
@@ -203,5 +209,7 @@ contract TwoKeyAdmin is  Ownable, Destructible, AdminContract {
     function getTwoKeyUpgradableExchange () public view returns(address _exchange)  {
     	return address(exchange);
     }
+
+
     
 } 

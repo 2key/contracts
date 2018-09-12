@@ -43,6 +43,12 @@ module.exports = {
       gas: 7000000,
       gasPrice: 50000000000,
     },
+    staging: {
+      provider: () => new HDWalletProvider(mnemonic, 'https://ropsten.infura.io/v3/71d39c30bc984e8a8a0d8adca84620ad'),
+      network_id: '*',
+      gas: 7000000,
+      gasPrice: 50000000000,
+    },
     'kovan': {
         provider: () => new HDWalletProvider(mnemonic, 'https://kovan.infura.io/6rAARDbMXpJlwODa2kbk'),
         network_id: '42',

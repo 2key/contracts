@@ -46,10 +46,7 @@ export class TwoKeyAdmin extends TC.TypeChainContract {
         type: "function"
       },
       {
-        inputs: [
-          { name: "_electorateAdmins", type: "address" },
-          { name: "_exchange", type: "address" }
-        ],
+        inputs: [{ name: "_electorateAdmins", type: "address" }],
         payable: true,
         stateMutability: "payable",
         type: "constructor"
@@ -206,10 +203,32 @@ export class TwoKeyAdmin extends TC.TypeChainContract {
         type: "function"
       },
       {
+        constant: false,
+        inputs: [
+          { name: "_economy", type: "address" },
+          { name: "_to", type: "address" },
+          { name: "_amount", type: "uint256" }
+        ],
+        name: "transfer2KeyTokens",
+        outputs: [{ name: "", type: "bool" }],
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "function"
+      },
+      {
         constant: true,
         inputs: [],
         name: "getTwoKeyReg",
         outputs: [{ name: "_address", type: "address" }],
+        payable: false,
+        stateMutability: "view",
+        type: "function"
+      },
+      {
+        constant: true,
+        inputs: [],
+        name: "getTwoKeyUpgradableExchange",
+        outputs: [{ name: "_exchange", type: "address" }],
         payable: false,
         stateMutability: "view",
         type: "function"
@@ -243,6 +262,10 @@ export class TwoKeyAdmin extends TC.TypeChainContract {
 
   public get getTwoKeyReg(): Promise<string> {
     return TC.promisify(this.rawWeb3Contract.getTwoKeyReg, []);
+  }
+
+  public get getTwoKeyUpgradableExchange(): Promise<string> {
+    return TC.promisify(this.rawWeb3Contract.getTwoKeyUpgradableExchange, []);
   }
 
   public getEtherBalanceOfAnAddress(
@@ -381,6 +404,17 @@ export class TwoKeyAdmin extends TC.TypeChainContract {
       this,
       "setTwoKeyReg",
       [_address.toString()]
+    );
+  }
+  public transfer2KeyTokensTx(
+    _economy: BigNumber | string,
+    _to: BigNumber | string,
+    _amount: BigNumber | number
+  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
+    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
+      this,
+      "transfer2KeyTokens",
+      [_economy.toString(), _to.toString(), _amount.toString()]
     );
   }
 

@@ -88,14 +88,14 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
 
 const runProcess = (app, args) => new Promise((resolve, reject) => {
   console.log('Run process', app, args && args.join(' '));
-  const proc = childProcess.spawn(app, args);
-  proc.stdout.on('data', (data) => {
-    console.log(data.toString('utf8'));
-  });
-  proc.stderr.on('data', (data) => {
-    console.log(data.toString('utf8'));
-    reject(data);
-  });
+  const proc = childProcess.spawn(app, args, { stdio: [process.stdin, process.stdout, process.stderr] });
+  // proc.stdout.on('data', (data) => {
+  //   console.log(data.toString('utf8'));
+  // });
+  // proc.stderr.on('data', (data) => {
+  //   console.log(data.toString('utf8'));
+  //   reject(data);
+  // });
   proc.on('close', async (code) => {
     console.log('process exit with code', code);
     if (code === 0) {
@@ -158,6 +158,7 @@ async function deploy() {
       await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--network', networks[i]].concat(process.argv.slice(3)));
       /* eslint-enable no-await-in-loop */
     }
+    console.log(commit);
     const sessionDeployedContracts = await getCurrentDeployedAddresses();
     const lastDeployed = Object.keys(deployedHistory).filter(key => key !== 'initial').sort((a, b) => {
       if (a > b) {
@@ -273,7 +274,7 @@ async function main() {
         process.exit(1);
       }
       break;
-    case '--test': 
+    case '--test':
       test();
     break;
     case '--generate':

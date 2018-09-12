@@ -20,6 +20,30 @@ export class TwoKeyPresellExchange extends TC.TypeChainContract {
       },
       {
         constant: true,
+        inputs: [
+          { name: "_operator", type: "address" },
+          { name: "_role", type: "string" }
+        ],
+        name: "checkRole",
+        outputs: [],
+        payable: false,
+        stateMutability: "view",
+        type: "function"
+      },
+      {
+        constant: true,
+        inputs: [
+          { name: "_operator", type: "address" },
+          { name: "_role", type: "string" }
+        ],
+        name: "hasRole",
+        outputs: [{ name: "", type: "bool" }],
+        payable: false,
+        stateMutability: "view",
+        type: "function"
+      },
+      {
+        constant: true,
         inputs: [],
         name: "rate",
         outputs: [{ name: "", type: "uint256" }],
@@ -64,6 +88,15 @@ export class TwoKeyPresellExchange extends TC.TypeChainContract {
         type: "function"
       },
       {
+        constant: true,
+        inputs: [],
+        name: "ROLE_CONTROLLER",
+        outputs: [{ name: "", type: "string" }],
+        payable: false,
+        stateMutability: "view",
+        type: "function"
+      },
+      {
         constant: false,
         inputs: [{ name: "_tokenAmount", type: "uint256" }],
         name: "sellTokens",
@@ -82,10 +115,43 @@ export class TwoKeyPresellExchange extends TC.TypeChainContract {
         type: "function"
       },
       {
+        constant: false,
+        inputs: [
+          { name: "addr", type: "address" },
+          { name: "roleName", type: "string" }
+        ],
+        name: "adminRemoveRole",
+        outputs: [],
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "function"
+      },
+      {
         constant: true,
         inputs: [],
         name: "owner",
         outputs: [{ name: "", type: "address" }],
+        payable: false,
+        stateMutability: "view",
+        type: "function"
+      },
+      {
+        constant: false,
+        inputs: [
+          { name: "addr", type: "address" },
+          { name: "roleName", type: "string" }
+        ],
+        name: "adminAddRole",
+        outputs: [],
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "function"
+      },
+      {
+        constant: true,
+        inputs: [],
+        name: "getAdminRole",
+        outputs: [{ name: "", type: "string" }],
         payable: false,
         stateMutability: "view",
         type: "function"
@@ -100,12 +166,39 @@ export class TwoKeyPresellExchange extends TC.TypeChainContract {
         type: "function"
       },
       {
+        constant: true,
+        inputs: [],
+        name: "onlyControllerRole",
+        outputs: [{ name: "", type: "bool" }],
+        payable: false,
+        stateMutability: "view",
+        type: "function"
+      },
+      {
+        constant: true,
+        inputs: [],
+        name: "ROLE_ADMIN",
+        outputs: [{ name: "", type: "string" }],
+        payable: false,
+        stateMutability: "view",
+        type: "function"
+      },
+      {
         constant: false,
         inputs: [{ name: "_beneficiary", type: "address" }],
         name: "buyTokens",
         outputs: [],
         payable: true,
         stateMutability: "payable",
+        type: "function"
+      },
+      {
+        constant: true,
+        inputs: [],
+        name: "getControllerRole",
+        outputs: [{ name: "", type: "string" }],
+        payable: false,
+        stateMutability: "view",
         type: "function"
       },
       {
@@ -150,6 +243,24 @@ export class TwoKeyPresellExchange extends TC.TypeChainContract {
           { indexed: false, name: "amount", type: "uint256" }
         ],
         name: "TokenSell",
+        type: "event"
+      },
+      {
+        anonymous: false,
+        inputs: [
+          { indexed: true, name: "operator", type: "address" },
+          { indexed: false, name: "role", type: "string" }
+        ],
+        name: "RoleAdded",
+        type: "event"
+      },
+      {
+        anonymous: false,
+        inputs: [
+          { indexed: true, name: "operator", type: "address" },
+          { indexed: false, name: "role", type: "string" }
+        ],
+        name: "RoleRemoved",
         type: "event"
       },
       {
@@ -226,12 +337,32 @@ export class TwoKeyPresellExchange extends TC.TypeChainContract {
     return TC.promisify(this.rawWeb3Contract.wallet, []);
   }
 
+  public get ROLE_CONTROLLER(): Promise<string> {
+    return TC.promisify(this.rawWeb3Contract.ROLE_CONTROLLER, []);
+  }
+
   public get owner(): Promise<string> {
     return TC.promisify(this.rawWeb3Contract.owner, []);
   }
 
+  public get getAdminRole(): Promise<string> {
+    return TC.promisify(this.rawWeb3Contract.getAdminRole, []);
+  }
+
   public get openingTime(): Promise<BigNumber> {
     return TC.promisify(this.rawWeb3Contract.openingTime, []);
+  }
+
+  public get onlyControllerRole(): Promise<boolean> {
+    return TC.promisify(this.rawWeb3Contract.onlyControllerRole, []);
+  }
+
+  public get ROLE_ADMIN(): Promise<string> {
+    return TC.promisify(this.rawWeb3Contract.ROLE_ADMIN, []);
+  }
+
+  public get getControllerRole(): Promise<string> {
+    return TC.promisify(this.rawWeb3Contract.getControllerRole, []);
   }
 
   public get token(): Promise<string> {
@@ -240,6 +371,26 @@ export class TwoKeyPresellExchange extends TC.TypeChainContract {
 
   public get capReached(): Promise<boolean> {
     return TC.promisify(this.rawWeb3Contract.capReached, []);
+  }
+
+  public checkRole(
+    _operator: BigNumber | string,
+    _role: string
+  ): Promise<void> {
+    return TC.promisify(this.rawWeb3Contract.checkRole, [
+      _operator.toString(),
+      _role.toString()
+    ]);
+  }
+
+  public hasRole(
+    _operator: BigNumber | string,
+    _role: string
+  ): Promise<boolean> {
+    return TC.promisify(this.rawWeb3Contract.hasRole, [
+      _operator.toString(),
+      _role.toString()
+    ]);
   }
 
   public upgradeTx(
@@ -263,6 +414,26 @@ export class TwoKeyPresellExchange extends TC.TypeChainContract {
       this,
       "renounceOwnership",
       []
+    );
+  }
+  public adminRemoveRoleTx(
+    addr: BigNumber | string,
+    roleName: string
+  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
+    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
+      this,
+      "adminRemoveRole",
+      [addr.toString(), roleName.toString()]
+    );
+  }
+  public adminAddRoleTx(
+    addr: BigNumber | string,
+    roleName: string
+  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
+    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
+      this,
+      "adminAddRole",
+      [addr.toString(), roleName.toString()]
     );
   }
   public buyTokensTx(
@@ -311,6 +482,28 @@ export class TwoKeyPresellExchange extends TC.TypeChainContract {
         beneficiary?: BigNumber | string | Array<BigNumber | string>;
       }
     >(this, "TokenSell", eventFilter);
+  }
+  public RoleAddedEvent(eventFilter: {
+    operator?: BigNumber | string | Array<BigNumber | string>;
+  }): TC.DeferredEventWrapper<
+    { operator: BigNumber | string; role: string },
+    { operator?: BigNumber | string | Array<BigNumber | string> }
+  > {
+    return new TC.DeferredEventWrapper<
+      { operator: BigNumber | string; role: string },
+      { operator?: BigNumber | string | Array<BigNumber | string> }
+    >(this, "RoleAdded", eventFilter);
+  }
+  public RoleRemovedEvent(eventFilter: {
+    operator?: BigNumber | string | Array<BigNumber | string>;
+  }): TC.DeferredEventWrapper<
+    { operator: BigNumber | string; role: string },
+    { operator?: BigNumber | string | Array<BigNumber | string> }
+  > {
+    return new TC.DeferredEventWrapper<
+      { operator: BigNumber | string; role: string },
+      { operator?: BigNumber | string | Array<BigNumber | string> }
+    >(this, "RoleRemoved", eventFilter);
   }
   public OwnershipRenouncedEvent(eventFilter: {
     previousOwner?: BigNumber | string | Array<BigNumber | string>;
