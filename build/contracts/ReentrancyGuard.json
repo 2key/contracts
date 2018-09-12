@@ -11,14 +11,14 @@
     "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/ReentrancyGuard.sol",
     "exportedSymbols": {
       "ReentrancyGuard": [
-        8404
+        8432
       ]
     },
-    "id": 8405,
+    "id": 8433,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 8376,
+        "id": 8404,
         "literals": [
           "solidity",
           "^",
@@ -34,19 +34,19 @@
         "contractKind": "contract",
         "documentation": "@title Helps contracts guard against reentrancy attacks.\n@author Remco Bloemen <remco@2π.com>, Eenae <alexey@mixbytes.io>\n@dev If you mark a function `nonReentrant`, you should also\nmark it `external`.",
         "fullyImplemented": true,
-        "id": 8404,
+        "id": 8432,
         "linearizedBaseContracts": [
-          8404
+          8432
         ],
         "name": "ReentrancyGuard",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "constant": true,
-            "id": 8379,
+            "id": 8407,
             "name": "REENTRANCY_GUARD_FREE",
             "nodeType": "VariableDeclaration",
-            "scope": 8404,
+            "scope": 8432,
             "src": "441:47:43",
             "stateVariable": true,
             "storageLocation": "default",
@@ -55,7 +55,7 @@
               "typeString": "uint256"
             },
             "typeName": {
-              "id": 8377,
+              "id": 8405,
               "name": "uint",
               "nodeType": "ElementaryTypeName",
               "src": "441:4:43",
@@ -67,7 +67,7 @@
             "value": {
               "argumentTypes": null,
               "hexValue": "31",
-              "id": 8378,
+              "id": 8406,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -86,10 +86,10 @@
           },
           {
             "constant": true,
-            "id": 8382,
+            "id": 8410,
             "name": "REENTRANCY_GUARD_LOCKED",
             "nodeType": "VariableDeclaration",
-            "scope": 8404,
+            "scope": 8432,
             "src": "536:49:43",
             "stateVariable": true,
             "storageLocation": "default",
@@ -98,7 +98,7 @@
               "typeString": "uint256"
             },
             "typeName": {
-              "id": 8380,
+              "id": 8408,
               "name": "uint",
               "nodeType": "ElementaryTypeName",
               "src": "536:4:43",
@@ -110,7 +110,7 @@
             "value": {
               "argumentTypes": null,
               "hexValue": "32",
-              "id": 8381,
+              "id": 8409,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -129,10 +129,10 @@
           },
           {
             "constant": false,
-            "id": 8385,
+            "id": 8413,
             "name": "reentrancyLock",
             "nodeType": "VariableDeclaration",
-            "scope": 8404,
+            "scope": 8432,
             "src": "657:51:43",
             "stateVariable": true,
             "storageLocation": "default",
@@ -141,7 +141,7 @@
               "typeString": "uint256"
             },
             "typeName": {
-              "id": 8383,
+              "id": 8411,
               "name": "uint",
               "nodeType": "ElementaryTypeName",
               "src": "657:4:43",
@@ -152,11 +152,11 @@
             },
             "value": {
               "argumentTypes": null,
-              "id": 8384,
+              "id": 8412,
               "name": "REENTRANCY_GUARD_FREE",
               "nodeType": "Identifier",
               "overloadedDeclarations": [],
-              "referencedDeclaration": 8379,
+              "referencedDeclaration": 8407,
               "src": "687:21:43",
               "typeDescriptions": {
                 "typeIdentifier": "t_uint256",
@@ -167,7 +167,7 @@
           },
           {
             "body": {
-              "id": 8402,
+              "id": 8430,
               "nodeType": "Block",
               "src": "1114:156:43",
               "statements": [
@@ -181,18 +181,18 @@
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
-                        "id": 8390,
+                        "id": 8418,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
                           "argumentTypes": null,
-                          "id": 8388,
+                          "id": 8416,
                           "name": "reentrancyLock",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 8385,
+                          "referencedDeclaration": 8413,
                           "src": "1128:14:43",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
@@ -203,11 +203,11 @@
                         "operator": "==",
                         "rightExpression": {
                           "argumentTypes": null,
-                          "id": 8389,
+                          "id": 8417,
                           "name": "REENTRANCY_GUARD_FREE",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 8379,
+                          "referencedDeclaration": 8407,
                           "src": "1146:21:43",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
@@ -228,21 +228,21 @@
                           "typeString": "bool"
                         }
                       ],
-                      "id": 8387,
+                      "id": 8415,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        14038,
-                        14039
+                        14066,
+                        14067
                       ],
-                      "referencedDeclaration": 14038,
+                      "referencedDeclaration": 14066,
                       "src": "1120:7:43",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 8391,
+                    "id": 8419,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -256,25 +256,25 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 8392,
+                  "id": 8420,
                   "nodeType": "ExpressionStatement",
                   "src": "1120:48:43"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 8395,
+                    "id": 8423,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 8393,
+                      "id": 8421,
                       "name": "reentrancyLock",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 8385,
+                      "referencedDeclaration": 8413,
                       "src": "1174:14:43",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -285,11 +285,11 @@
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "id": 8394,
+                      "id": 8422,
                       "name": "REENTRANCY_GUARD_LOCKED",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 8382,
+                      "referencedDeclaration": 8410,
                       "src": "1191:23:43",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -302,30 +302,30 @@
                       "typeString": "uint256"
                     }
                   },
-                  "id": 8396,
+                  "id": 8424,
                   "nodeType": "ExpressionStatement",
                   "src": "1174:40:43"
                 },
                 {
-                  "id": 8397,
+                  "id": 8425,
                   "nodeType": "PlaceholderStatement",
                   "src": "1220:1:43"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 8400,
+                    "id": 8428,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 8398,
+                      "id": 8426,
                       "name": "reentrancyLock",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 8385,
+                      "referencedDeclaration": 8413,
                       "src": "1227:14:43",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -336,11 +336,11 @@
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "id": 8399,
+                      "id": 8427,
                       "name": "REENTRANCY_GUARD_FREE",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 8379,
+                      "referencedDeclaration": 8407,
                       "src": "1244:21:43",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -353,18 +353,18 @@
                       "typeString": "uint256"
                     }
                   },
-                  "id": 8401,
+                  "id": 8429,
                   "nodeType": "ExpressionStatement",
                   "src": "1227:38:43"
                 }
               ]
             },
             "documentation": "@dev Prevents a contract from calling itself, directly or indirectly.\nIf you mark a function `nonReentrant`, you should also\nmark it `external`. Calling one `nonReentrant` function from\nanother is not supported. Instead, you can implement a\n`private` function doing the actual work, and an `external`\nwrapper marked as `nonReentrant`.",
-            "id": 8403,
+            "id": 8431,
             "name": "nonReentrant",
             "nodeType": "ModifierDefinition",
             "parameters": {
-              "id": 8386,
+              "id": 8414,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1111:2:43"
@@ -373,7 +373,7 @@
             "visibility": "internal"
           }
         ],
-        "scope": 8405,
+        "scope": 8433,
         "src": "250:1023:43"
       }
     ],
@@ -383,14 +383,14 @@
     "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/ReentrancyGuard.sol",
     "exportedSymbols": {
       "ReentrancyGuard": [
-        8404
+        8432
       ]
     },
-    "id": 8405,
+    "id": 8433,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 8376,
+        "id": 8404,
         "literals": [
           "solidity",
           "^",
@@ -406,19 +406,19 @@
         "contractKind": "contract",
         "documentation": "@title Helps contracts guard against reentrancy attacks.\n@author Remco Bloemen <remco@2π.com>, Eenae <alexey@mixbytes.io>\n@dev If you mark a function `nonReentrant`, you should also\nmark it `external`.",
         "fullyImplemented": true,
-        "id": 8404,
+        "id": 8432,
         "linearizedBaseContracts": [
-          8404
+          8432
         ],
         "name": "ReentrancyGuard",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "constant": true,
-            "id": 8379,
+            "id": 8407,
             "name": "REENTRANCY_GUARD_FREE",
             "nodeType": "VariableDeclaration",
-            "scope": 8404,
+            "scope": 8432,
             "src": "441:47:43",
             "stateVariable": true,
             "storageLocation": "default",
@@ -427,7 +427,7 @@
               "typeString": "uint256"
             },
             "typeName": {
-              "id": 8377,
+              "id": 8405,
               "name": "uint",
               "nodeType": "ElementaryTypeName",
               "src": "441:4:43",
@@ -439,7 +439,7 @@
             "value": {
               "argumentTypes": null,
               "hexValue": "31",
-              "id": 8378,
+              "id": 8406,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -458,10 +458,10 @@
           },
           {
             "constant": true,
-            "id": 8382,
+            "id": 8410,
             "name": "REENTRANCY_GUARD_LOCKED",
             "nodeType": "VariableDeclaration",
-            "scope": 8404,
+            "scope": 8432,
             "src": "536:49:43",
             "stateVariable": true,
             "storageLocation": "default",
@@ -470,7 +470,7 @@
               "typeString": "uint256"
             },
             "typeName": {
-              "id": 8380,
+              "id": 8408,
               "name": "uint",
               "nodeType": "ElementaryTypeName",
               "src": "536:4:43",
@@ -482,7 +482,7 @@
             "value": {
               "argumentTypes": null,
               "hexValue": "32",
-              "id": 8381,
+              "id": 8409,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -501,10 +501,10 @@
           },
           {
             "constant": false,
-            "id": 8385,
+            "id": 8413,
             "name": "reentrancyLock",
             "nodeType": "VariableDeclaration",
-            "scope": 8404,
+            "scope": 8432,
             "src": "657:51:43",
             "stateVariable": true,
             "storageLocation": "default",
@@ -513,7 +513,7 @@
               "typeString": "uint256"
             },
             "typeName": {
-              "id": 8383,
+              "id": 8411,
               "name": "uint",
               "nodeType": "ElementaryTypeName",
               "src": "657:4:43",
@@ -524,11 +524,11 @@
             },
             "value": {
               "argumentTypes": null,
-              "id": 8384,
+              "id": 8412,
               "name": "REENTRANCY_GUARD_FREE",
               "nodeType": "Identifier",
               "overloadedDeclarations": [],
-              "referencedDeclaration": 8379,
+              "referencedDeclaration": 8407,
               "src": "687:21:43",
               "typeDescriptions": {
                 "typeIdentifier": "t_uint256",
@@ -539,7 +539,7 @@
           },
           {
             "body": {
-              "id": 8402,
+              "id": 8430,
               "nodeType": "Block",
               "src": "1114:156:43",
               "statements": [
@@ -553,18 +553,18 @@
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
-                        "id": 8390,
+                        "id": 8418,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
                           "argumentTypes": null,
-                          "id": 8388,
+                          "id": 8416,
                           "name": "reentrancyLock",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 8385,
+                          "referencedDeclaration": 8413,
                           "src": "1128:14:43",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
@@ -575,11 +575,11 @@
                         "operator": "==",
                         "rightExpression": {
                           "argumentTypes": null,
-                          "id": 8389,
+                          "id": 8417,
                           "name": "REENTRANCY_GUARD_FREE",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 8379,
+                          "referencedDeclaration": 8407,
                           "src": "1146:21:43",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
@@ -600,21 +600,21 @@
                           "typeString": "bool"
                         }
                       ],
-                      "id": 8387,
+                      "id": 8415,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        14038,
-                        14039
+                        14066,
+                        14067
                       ],
-                      "referencedDeclaration": 14038,
+                      "referencedDeclaration": 14066,
                       "src": "1120:7:43",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 8391,
+                    "id": 8419,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -628,25 +628,25 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 8392,
+                  "id": 8420,
                   "nodeType": "ExpressionStatement",
                   "src": "1120:48:43"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 8395,
+                    "id": 8423,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 8393,
+                      "id": 8421,
                       "name": "reentrancyLock",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 8385,
+                      "referencedDeclaration": 8413,
                       "src": "1174:14:43",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -657,11 +657,11 @@
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "id": 8394,
+                      "id": 8422,
                       "name": "REENTRANCY_GUARD_LOCKED",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 8382,
+                      "referencedDeclaration": 8410,
                       "src": "1191:23:43",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -674,30 +674,30 @@
                       "typeString": "uint256"
                     }
                   },
-                  "id": 8396,
+                  "id": 8424,
                   "nodeType": "ExpressionStatement",
                   "src": "1174:40:43"
                 },
                 {
-                  "id": 8397,
+                  "id": 8425,
                   "nodeType": "PlaceholderStatement",
                   "src": "1220:1:43"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 8400,
+                    "id": 8428,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 8398,
+                      "id": 8426,
                       "name": "reentrancyLock",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 8385,
+                      "referencedDeclaration": 8413,
                       "src": "1227:14:43",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -708,11 +708,11 @@
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "id": 8399,
+                      "id": 8427,
                       "name": "REENTRANCY_GUARD_FREE",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 8379,
+                      "referencedDeclaration": 8407,
                       "src": "1244:21:43",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -725,18 +725,18 @@
                       "typeString": "uint256"
                     }
                   },
-                  "id": 8401,
+                  "id": 8429,
                   "nodeType": "ExpressionStatement",
                   "src": "1227:38:43"
                 }
               ]
             },
             "documentation": "@dev Prevents a contract from calling itself, directly or indirectly.\nIf you mark a function `nonReentrant`, you should also\nmark it `external`. Calling one `nonReentrant` function from\nanother is not supported. Instead, you can implement a\n`private` function doing the actual work, and an `external`\nwrapper marked as `nonReentrant`.",
-            "id": 8403,
+            "id": 8431,
             "name": "nonReentrant",
             "nodeType": "ModifierDefinition",
             "parameters": {
-              "id": 8386,
+              "id": 8414,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1111:2:43"
@@ -745,7 +745,7 @@
             "visibility": "internal"
           }
         ],
-        "scope": 8405,
+        "scope": 8433,
         "src": "250:1023:43"
       }
     ],
@@ -757,5 +757,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
-  "updatedAt": "2018-09-11T14:46:51.716Z"
+  "updatedAt": "2018-09-12T09:01:11.638Z"
 }
