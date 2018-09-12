@@ -143,7 +143,7 @@ contract TwoKeyAdmin is  Ownable, Destructible, AdminContract {
 	/// @param _exchange is address of twoKeyExchange contract address
 	function setTwoKeyExchange(address _exchange) public  {
 		require(_exchange != address(0));
-    	exchange = TwoKeyUpgradableExchange(exchange);
+    	exchange = TwoKeyUpgradableExchange(_exchange);
     	
     }
 

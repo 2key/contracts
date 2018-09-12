@@ -9,6 +9,7 @@ import "./RBACWithAdmin.sol";
 contract TwoKeyUpgradableExchange is Crowdsale, Ownable,RBACWithAdmin {
 
 	address filler;
+	address test;
 
 	event TokenSell(address indexed purchaser, address indexed beneficiary, uint256 value, uint256 amount);
 
@@ -23,10 +24,12 @@ contract TwoKeyUpgradableExchange is Crowdsale, Ownable,RBACWithAdmin {
 		TwoKeyAdmin admin ;
     	admin = TwoKeyAdmin(_twoKeyAdmin);
     	admin.setTwoKeyExchange(address(this));	
+    	test=this	;
 	}
 
 	function sellTokens(uint256 _tokenAmount) public onlyAlive payable {
-		require(token.allowance(this, msg.sender) >= _tokenAmount);
+		//require(token.allowance(this, msg.sender) >= _tokenAmount);
+		require(token.allowance(msg.sender, this) >= _tokenAmount);
 		require(token.transferFrom(msg.sender, this, _tokenAmount));
 
 		uint256 weiAmount = _getWeiAmount(_tokenAmount);
@@ -34,11 +37,16 @@ contract TwoKeyUpgradableExchange is Crowdsale, Ownable,RBACWithAdmin {
 	    weiRaised = weiRaised.sub(weiAmount);
 	    msg.sender.transfer(weiAmount);
 
-	    emit TokenSell(msg.sender, wallet, weiAmount, _tokenAmount);
+	  //  emit TokenSell(msg.sender, wallet, weiAmount, _tokenAmount);
 	}
 
 	function _getWeiAmount(uint256 _tokenAmount) internal view returns (uint256) {
 	    return _tokenAmount.div(rate);
+	}
+
+
+		function _getWTest() public view returns (uint256) {
+	    return token.allowance(msg.sender,this);
 	}
 	
 	function upgrade(address _to) public onlyAlive onlyOwner {
