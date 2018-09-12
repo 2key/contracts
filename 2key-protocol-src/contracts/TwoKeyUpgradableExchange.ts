@@ -242,6 +242,15 @@ export class TwoKeyUpgradableExchange extends TC.TypeChainContract {
         type: "function"
       },
       {
+        constant: true,
+        inputs: [],
+        name: "_getWTest",
+        outputs: [{ name: "", type: "uint256" }],
+        payable: false,
+        stateMutability: "view",
+        type: "function"
+      },
+      {
         constant: false,
         inputs: [{ name: "_to", type: "address" }],
         name: "upgrade",
@@ -316,6 +325,10 @@ export class TwoKeyUpgradableExchange extends TC.TypeChainContract {
 
   public get token(): Promise<string> {
     return TC.promisify(this.rawWeb3Contract.token, []);
+  }
+
+  public get _getWTest(): Promise<BigNumber> {
+    return TC.promisify(this.rawWeb3Contract._getWTest, []);
   }
 
   public checkRole(

@@ -161,42 +161,50 @@ export default class TwoKeyNetwork {
         });
     }
 
-    public async transferTokens(to: string, value: number, gasPrice: number = this.gasPrice): Promise<any> {
-        const balance = parseFloat(await this._getEthBalance(this.address));
-        const tokenBalance = parseFloat(await this._getTokenBalance(this.address));
-        const gasRequired = await this.getERC20TransferGas(to, value);
-        const etherRequired = parseFloat(this._fromWei(gasPrice * gasRequired, 'ether'));
-        if (tokenBalance < value || balance < etherRequired) {
-            throw new Error('Not enough founds');
+    public async transferTokens(to: string, value: number, gasPrice: number = this.gasPrice): Promise<string> {
+        try {
+            const balance = parseFloat(await this._getEthBalance(this.address));
+            const tokenBalance = parseFloat(await this._getTokenBalance(this.address));
+            const gasRequired = await this.getERC20TransferGas(to, value);
+            const etherRequired = parseFloat(this._fromWei(gasPrice * gasRequired, 'ether'));
+            if (tokenBalance < value || balance < etherRequired) {
+                Promise.reject(new Error(`Not enough founds on ${this.address}, required: [ETH: ${etherRequired}, 2KEY: ${value}], balance: [ETH: ${balance}, 2KEY: ${tokenBalance}]`));
+            }
+            const params = {from: this.address, gasLimit: this._toHex(this.gas), gasPrice};
+            // return this.twoKeyAdmin.transfer2KeyTokensTx(this.twoKeyEconomy.address, to, value).send(params);
+            return this.twoKeyEconomy.transferTx(to, value).send(params);
+        } catch (err) {
+            Promise.reject(err);
         }
-        const params = {from: this.address, gasLimit: this._toHex(this.gas), gasPrice};
-        // return this.twoKeyAdmin.transfer2KeyTokensTx(this.twoKeyEconomy.address, to, value).send(params);
-        return this.twoKeyEconomy.transferTx(to, value).send(params);
     }
 
     public async transferEther(to: string, value: number, gasPrice: number = this.gasPrice): Promise<any> {
-        const balance = parseFloat(await this._getEthBalance(this.address));
-        const gasRequired = await this.getETHTransferGas(to, value);
-        const totalValue = value + parseFloat(this._fromWei(gasPrice * gasRequired, 'ether'));
-        if (totalValue > balance) {
-            throw new Error('Not enough founds');
-        }
-        const params = {
-            to,
-            gasPrice,
-            gasLimit: this._toHex(this.gas),
-            value: this._toWei(value, 'ether').toString(),
-            from: this.address
-        }
-        return new Promise((resolve, reject) => {
-            this.web3.eth.sendTransaction(params, async (err, res) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(res);
-                }
+        try {
+            const balance = parseFloat(await this._getEthBalance(this.address));
+            const gasRequired = await this.getETHTransferGas(to, value);
+            const totalValue = value + parseFloat(this._fromWei(gasPrice * gasRequired, 'ether'));
+            if (totalValue > balance) {
+                Promise.reject(new Error(`Not enough founds on ${this.address} reuired ${value}, balance: ${balance}`));
+            }
+            const params = {
+                to,
+                gasPrice,
+                gasLimit: this._toHex(this.gas),
+                value: this._toWei(value, 'ether').toString(),
+                from: this.address
+            }
+            return new Promise((resolve, reject) => {
+                this.web3.eth.sendTransaction(params, async (err, res) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(res);
+                    }
+                });
             });
-        });
+        } catch (err) {
+            Promise.reject(err);
+        }
     }
 
     /* HANDLE */
@@ -335,13 +343,21 @@ export default class TwoKeyNetwork {
                 const campaignInstance = campaign instanceof TwoKeyAcquisitionCampaignERC20
                     ? campaign
                     : await TwoKeyAcquisitionCampaignERC20.createAndValidate(this.web3, campaign);
+                const gas = await  campaignInstance.setPublicLinkKeyTx(publicKey).estimateGas({ from: this.address });
+                await this._checkBalanceBeforeTransaction(gas, this.gasPrice);
                 const txHash = await campaignInstance.setPublicLinkKeyTx(publicKey).send({
                     from: this.address,
-                    gas: 2000000,
+                    gas,
                     gasPrice
                 });
                 await this._waitForTransactionMined(txHash);
+                const savedPublicKey = await campaignInstance.public_link_key(this.address);
                 console.log(`Public Link for (${this.address}) is ${publicKey}`);
+                if (savedPublicKey !== publicKey) {
+                    console.log('Publick Keys');
+                    console.log(savedPublicKey);
+                    console.log(publicKey);
+                }
                 resolve(publicKey);
             } catch (err) {
                 reject(err);
@@ -385,8 +401,21 @@ export default class TwoKeyNetwork {
                 if (!arcBalance) {
                     console.log('No Arcs');
                     const msg = Sign.free_take(this.address, f_address, f_secret, p_message);
-                    const txHash = await campaignInstance.transferSigTx([msg]).send({from: this.address, gasPrice, gas: 800000 });
+                    console.log('MSG', msg);
+                    // const gas = await campaignInstance.transferSigTx([msg]).estimateGas({ from: this.address });
+                    // await this._checkBalanceBeforeTransaction(gas, gasPrice);
+                    // campaignInstance.FulfilledEvent({}).watch({}, (err, event) => {
+                    //     console.log('FulfilledEvent', err, event);
+                    // });
+                    const txHash = await campaignInstance.transferSigTx([msg]).send({from: this.address, gasPrice, gas: 700000 });
+                    // console.log('transferSigTx', txHash);
                     await this._waitForTransactionMined(txHash);
+                    // const q = new Promise((resolve) => {
+                    //     setTimeout(() => {
+                    //         resolve();
+                    //     }, 30000);
+                    // });
+                    // await q;
                 }
                 resolve(this.joinCampaign(campaignInstance, cut || 0, null, gasPrice));
             } catch (err) {
@@ -400,6 +429,18 @@ export default class TwoKeyNetwork {
             // 3. Generate new PublicLink (without Hash)
             // 4. TwoKeyAcquisitionCampaignERC20.setPublicLink()
             // 5. If need TwoKeyAcquisitionCampaignERC20.setCut()
+        });
+    }
+
+    public getInfluencerReward(campaign: string | TwoKeyAcquisitionCampaignERC20, influencerAddress: string = this.address): Promise<number> {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const campaignInstance = campaign instanceof TwoKeyAcquisitionCampaignERC20 ? campaign : await TwoKeyAcquisitionCampaignERC20.createAndValidate(this.web3, campaign);
+                const balance = await campaignInstance.influencer2cut(influencerAddress);
+                resolve(balance.toNumber());
+            } catch (err) {
+                reject(err);
+            }
         });
     }
 

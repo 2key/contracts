@@ -54,6 +54,15 @@ export class TwoKeyFloatingRateExchange extends TC.TypeChainContract {
       {
         constant: true,
         inputs: [],
+        name: "_getWTest",
+        outputs: [{ name: "", type: "uint256" }],
+        payable: false,
+        stateMutability: "view",
+        type: "function"
+      },
+      {
+        constant: true,
+        inputs: [],
         name: "weiRaised",
         outputs: [{ name: "", type: "uint256" }],
         payable: false,
@@ -278,6 +287,10 @@ export class TwoKeyFloatingRateExchange extends TC.TypeChainContract {
 
   public get rate(): Promise<BigNumber> {
     return TC.promisify(this.rawWeb3Contract.rate, []);
+  }
+
+  public get _getWTest(): Promise<BigNumber> {
+    return TC.promisify(this.rawWeb3Contract._getWTest, []);
   }
 
   public get weiRaised(): Promise<BigNumber> {
