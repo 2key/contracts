@@ -17,6 +17,18 @@ export class IERC20 extends TC.TypeChainContract {
         payable: false,
         stateMutability: "view",
         type: "function"
+      },
+      {
+        constant: false,
+        inputs: [
+          { name: "_to", type: "address" },
+          { name: "_value", type: "uint256" }
+        ],
+        name: "transfer",
+        outputs: [{ name: "", type: "bool" }],
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "function"
       }
     ];
     super(web3, address, abi);
@@ -39,5 +51,15 @@ export class IERC20 extends TC.TypeChainContract {
 
   public balanceOf(whom: BigNumber | string): Promise<BigNumber> {
     return TC.promisify(this.rawWeb3Contract.balanceOf, [whom.toString()]);
+  }
+
+  public transferTx(
+    _to: BigNumber | string,
+    _value: BigNumber | number
+  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
+    return new TC.DeferredTransactionWrapper<TC.ITxParams>(this, "transfer", [
+      _to.toString(),
+      _value.toString()
+    ]);
   }
 }

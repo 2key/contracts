@@ -203,6 +203,19 @@ export class TwoKeyAdmin extends TC.TypeChainContract {
         type: "function"
       },
       {
+        constant: false,
+        inputs: [
+          { name: "_economy", type: "address" },
+          { name: "_to", type: "address" },
+          { name: "_amount", type: "uint256" }
+        ],
+        name: "transfer2KeyTokens",
+        outputs: [{ name: "", type: "bool" }],
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "function"
+      },
+      {
         constant: true,
         inputs: [],
         name: "getTwoKeyReg",
@@ -391,6 +404,17 @@ export class TwoKeyAdmin extends TC.TypeChainContract {
       this,
       "setTwoKeyReg",
       [_address.toString()]
+    );
+  }
+  public transfer2KeyTokensTx(
+    _economy: BigNumber | string,
+    _to: BigNumber | string,
+    _amount: BigNumber | number
+  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
+    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
+      this,
+      "transfer2KeyTokens",
+      [_economy.toString(), _to.toString(), _amount.toString()]
     );
   }
 
