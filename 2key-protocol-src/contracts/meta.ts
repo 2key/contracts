@@ -379,7 +379,13 @@ export default { ERC20: { networks: {} },
           stateMutability: 'payable',
           type: 'function' } ],
      networks:
-      { '8086':
+      { '4':
+         { events: {},
+           links: {},
+           address: '0x625235c31250bbd821c4b727b8a5c728c1370246',
+           transactionHash:
+            '0x070d0c1b185fd7aff67bc6d4bdf0095f2bfced19d5083c79be9dc6f159721b7e' },
+        '8086':
          { events: {},
            links: {},
            address: '0x6e2cdb2188665a83143eb837a9120295f8bbe2b9',
@@ -404,7 +410,13 @@ export default { ERC20: { networks: {} },
      networks: {} },
   TwoKeyAdmin:
    { networks:
-      { '8086':
+      { '4':
+         { events: {},
+           links: {},
+           address: '0x39992845da789e253ebdf765624d565dc1c26760',
+           transactionHash:
+            '0x0ba54166ff035136e2badad4358f931e17689a9ec4d5938553f12bc7e94f4af7' },
+        '8086':
          { events: {},
            links: {},
            address: '0xcd581c1e9742b5e6dd7f4b6923fa06b05676703d',
@@ -412,7 +424,13 @@ export default { ERC20: { networks: {} },
             '0xbcf9f79d08fd7f7a25959588ecabc1e84e6c8e383f7185233dcecc893dfbf725' } } },
   TwoKeyEconomy:
    { networks:
-      { '8086':
+      { '4':
+         { events: {},
+           links: {},
+           address: '0xad0e675fc846471159c13b1ae14fa8094f747379',
+           transactionHash:
+            '0x7b4a63f77499c00504f46431dfb0feda47b5ff5426f99d9e8cb2db0db8bdf335' },
+        '8086':
          { events: {},
            links: {},
            address: '0x27d1a10e4a3d8fc5e754c6c3997a131e30f9e21d',
@@ -420,7 +438,13 @@ export default { ERC20: { networks: {} },
             '0x73d68a6430df22f7c8a49b822b47378d155b56a8e3f9fcee7ec2279ae61ec1a5' } } },
   TwoKeyEventSource:
    { networks:
-      { '8086':
+      { '4':
+         { events: {},
+           links: {},
+           address: '0xa520c3f51d5dd45155810be29e31cd6764bee1c4',
+           transactionHash:
+            '0xadba4e4f03e9a783e50f3a1d8e1ac23f0c4b5d54ad6539e0a2b58533837e647d' },
+        '8086':
          { events: {},
            links: {},
            address: '0x63b5dd0b83d230cb59d7a66779b47ab5b3aede00',
@@ -429,7 +453,13 @@ export default { ERC20: { networks: {} },
   TwoKeyPlasmaEvents: { networks: {} },
   TwoKeyReg:
    { networks:
-      { '8086':
+      { '4':
+         { events: {},
+           links: {},
+           address: '0x0353327336e78f9feb6627697be686dc04d40678',
+           transactionHash:
+            '0x43a0af4e18040610f0b7047820c909c4215bf89c3e27c6873e410db868c099d5' },
+        '8086':
          { events: {},
            links: {},
            address: '0x54635e24549aa71cd81cc8289a41ff77c55db8cc',
