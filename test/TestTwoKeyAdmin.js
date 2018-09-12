@@ -63,7 +63,7 @@ contract('TwoKeyAdmin', async (accounts) => {
           economyContract = await TwoKeyEconomy.new(adminContract.address);
           eventContract  =await TwoKeyEventSource.new(adminContract.address);
           regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
-          //let exchange =  await TwoKeyExchange.new(1, deployerAddress, erc20MockContract.address,adminContract.address);
+          let exchange =  await TwoKeyExchange.new(1, deployerAddress, erc20MockContract.address,adminContract.address);
           adminContract_new = await TwoKeyAdmin.new(deployerAddress);
           
           await adminContract.replaceOneself(adminContract_new.address);  
@@ -337,7 +337,7 @@ contract('TwoKeyAdmin', async (accounts) => {
           eventContract  =await TwoKeyEventSource.new(adminContract.address);
           regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
 
-          adminContract_new = await TwoKeyAdmin.new(not_admin, exchangeContract.address);
+          adminContract_new = await TwoKeyAdmin.new(not_admin);
           economyContract_new = await TwoKeyEconomy.new(adminContract_new.address);
           eventContract_new  =await TwoKeyEventSource.new(adminContract_new.address);
           regContract_new = await TwoKeyReg.new(eventContract_new.address, adminContract_new.address);
@@ -369,7 +369,7 @@ contract('TwoKeyAdmin', async (accounts) => {
         eventContract  =await TwoKeyEventSource.new(adminContract.address);
         regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
      
-        adminContract_new = await TwoKeyAdmin.new(deployerAddress, exchangeContract.address);
+        adminContract_new = await TwoKeyAdmin.new(deployerAddress);
 
         await adminContract.replaceOneself(adminContract_new.address);
 
