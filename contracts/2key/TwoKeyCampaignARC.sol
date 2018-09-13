@@ -22,7 +22,6 @@ contract TwoKeyCampaignARC is StandardToken {
 
 	TwoKeyEventSource twoKeyEventSource;
 
-	// Add quota to constructor
 	uint256 public quota;  // maximal ARC tokens that can be passed in transferFrom
 
 	// referral graph, who did you receive the referral from
