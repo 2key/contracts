@@ -14,8 +14,8 @@ const whitelist = require('./ContractDeploymentWhiteList.json');
 const readdir = util.promisify(fs.readdir);
 const buildPath = path.join(__dirname, 'build', 'contracts');
 const buildBackupPath = path.join(__dirname, 'build', 'contracts.bak');
-const buildArchPath = path.join(__dirname, 'build', 'contracts.tar.gz');
 const twoKeyProtocolDir = path.join(__dirname, '2key-protocol-src');
+const buildArchPath = path.join(twoKeyProtocolDir, 'contracts.tar.gz');
 const twoKeyProtocolLibDir = path.join(__dirname, 'build', '2key-protocol-npm');
 
 const deploymentHistoryPath = path.join(__dirname, 'history.json');
@@ -150,7 +150,7 @@ async function deploy() {
     if (fs.existsSync(buildArchPath)) {
       fstream.Reader({ path: buildArchPath })
         .pipe(zlib.Gunzip())
-        .pipe(tar.Unpack())
+        .pipe(new tar.Unpack())
         .pipe(fstream.Writer({ path: buildPath, type: 'Directory' }));
     }
 
@@ -227,7 +227,7 @@ async function deploy() {
 
     // TODO: Archive build
     fstream.Reader({ path: buildPath, type: 'Directory' })
-      .pipe(tar.Pack())
+      .pipe(new tar.Pack())
       .pipe(zlib.Gzip())
       .pipe(fstream.Writer({ path: buildArchPath }))
 
