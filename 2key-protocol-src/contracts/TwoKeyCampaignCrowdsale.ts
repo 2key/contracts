@@ -66,15 +66,6 @@ export class TwoKeyCampaignCrowdsale extends TC.TypeChainContract {
       },
       {
         constant: true,
-        inputs: [],
-        name: "cost",
-        outputs: [{ name: "", type: "uint256" }],
-        payable: false,
-        stateMutability: "view",
-        type: "function"
-      },
-      {
-        constant: true,
         inputs: [
           { name: "c", type: "address" },
           { name: "_method", type: "bytes" },
@@ -438,7 +429,6 @@ export class TwoKeyCampaignCrowdsale extends TC.TypeChainContract {
           { name: "_economy", type: "address" },
           { name: "_whitelistInfluencer", type: "address" },
           { name: "_whitelistConverter", type: "address" },
-          { name: "_contractor", type: "address" },
           { name: "_moderator", type: "address" },
           { name: "_start", type: "uint256" },
           { name: "_duration", type: "uint256" },
@@ -554,10 +544,6 @@ export class TwoKeyCampaignCrowdsale extends TC.TypeChainContract {
 
   public get name(): Promise<string> {
     return TC.promisify(this.rawWeb3Contract.name, []);
-  }
-
-  public get cost(): Promise<BigNumber> {
-    return TC.promisify(this.rawWeb3Contract.cost, []);
   }
 
   public get totalSupply(): Promise<BigNumber> {

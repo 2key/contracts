@@ -237,7 +237,6 @@ export default class TwoKeyNetwork {
                     this.twoKeyEconomy.address,
                     // Fake WhiteListConverter address
                     this.twoKeyEconomy.address,
-                    data.contractor || this.address,
                     data.moderator || this.address,
                     data.openingTime,
                     data.closingTime,
@@ -270,7 +269,6 @@ export default class TwoKeyNetwork {
                     this.twoKeyEconomy.address,
                     whitelistInfluencerAddress,
                     whitelistConverterAddress,
-                    data.contractor || this.address,
                     data.moderator || this.address,
                     data.openingTime,
                     data.closingTime,
@@ -407,7 +405,7 @@ export default class TwoKeyNetwork {
                     // campaignInstance.FulfilledEvent({}).watch({}, (err, event) => {
                     //     console.log('FulfilledEvent', err, event);
                     // });
-                    const txHash = await campaignInstance.transferSigTx([msg]).send({from: this.address, gasPrice, gas: 700000 });
+                    const txHash = await campaignInstance.transferSigTx([msg]).send({ from: this.address, gasPrice, gas: 7000000 });
                     // console.log('transferSigTx', txHash);
                     await this._waitForTransactionMined(txHash);
                     // const q = new Promise((resolve) => {

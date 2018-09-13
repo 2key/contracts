@@ -52,7 +52,7 @@ console.log(contractsMeta.TwoKeyEconomy.networks[mainNetId].address);
 const web3 = {
     deployer: () => createWeb3(env.MNEMONIC_DEPLOYER, rpcUrl),
     aydnep: () => createWeb3(env.MNEMONIC_AYDNEP, rpcUrl),
-    gmail: () => createWeb3(env.MNEMONIC_AYDNEP, rpcUrl),
+    gmail: () => createWeb3(env.MNEMONIC_GMAIL, rpcUrl),
     test4: () => createWeb3(env.MNEMONIC_TEST4, rpcUrl),
 };
 console.log('MNEMONICS');
@@ -237,25 +237,25 @@ describe('TwoKeyProtocol', () => {
         throw err
       }
     }).timeout(30000);
-    it('should create a join link', async () => {
-        twoKeyProtocol = new TwoKeyProtocol({
-            web3: web3.gmail(),
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-        });
+    // it('should create a join link', async () => {
+    //     twoKeyProtocol = new TwoKeyProtocol({
+    //         web3: web3.gmail(),
+    //         networks: {
+    //             mainNetId,
+    //             syncTwoKeyNetId,
+    //         },
+    //     });
 
-        let hash = refLink;
-      // for (let i = 0; i < 1; i++) {
-        hash = await twoKeyProtocol.joinCampaign(campaignAddress, 3, hash);
-        // console.log(i + 1, hash.length);
-      // }
-      console.log(hash);
-      console.log(hash.length);
-      refLink = hash;
-      expect(hash).to.be.a('string');
-    });
+    //     let hash = refLink;
+    //   // for (let i = 0; i < 1; i++) {
+    //     hash = await twoKeyProtocol.joinCampaign(campaignAddress, 3, hash);
+    //     // console.log(i + 1, hash.length);
+    //   // }
+    //   console.log(hash);
+    //   console.log(hash.length);
+    //   refLink = hash;
+    //   expect(hash).to.be.a('string');
+    // });
     it('should cut link', async () => {
         twoKeyProtocol = new TwoKeyProtocol({
             web3: web3.test4(),
@@ -269,10 +269,10 @@ describe('TwoKeyProtocol', () => {
         console.log('Cutted Link', refLink);
         expect(hash).to.be.a('string');
     }).timeout(300000);
-    it('should show influencer cut', async () => {
-        const cut = await twoKeyProtocol.getInfluencerReward(campaignAddress, env.GMAIL_ADDRESS);
-        console.log('Influencer CUT', env.GMAIL_ADDRESS, cut);
-    }).timeout(15000);
+    // it('should show influencer cut', async () => {
+    //     const cut = await twoKeyProtocol.getInfluencerReward(campaignAddress, env.GMAIL_ADDRESS);
+    //     console.log('Influencer CUT', env.GMAIL_ADDRESS, cut);
+    // }).timeout(15000);
     it('should print after all tests', (done) => {
         setTimeout(async () => {
             const business = await twoKeyProtocol.getBalance(twoKeyAdmin);

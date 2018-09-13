@@ -66,15 +66,6 @@ export class TwoKeyCampaignETH extends TC.TypeChainContract {
       },
       {
         constant: true,
-        inputs: [],
-        name: "cost",
-        outputs: [{ name: "", type: "uint256" }],
-        payable: false,
-        stateMutability: "view",
-        type: "function"
-      },
-      {
-        constant: true,
         inputs: [
           { name: "c", type: "address" },
           { name: "_method", type: "bytes" },
@@ -520,10 +511,6 @@ export class TwoKeyCampaignETH extends TC.TypeChainContract {
 
   public get name(): Promise<string> {
     return TC.promisify(this.rawWeb3Contract.name, []);
-  }
-
-  public get cost(): Promise<BigNumber> {
-    return TC.promisify(this.rawWeb3Contract.cost, []);
   }
 
   public get totalSupply(): Promise<BigNumber> {
