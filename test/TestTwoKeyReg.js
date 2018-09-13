@@ -21,7 +21,7 @@ contract('TwoKeyReg', async (accounts) => {
 
     before(async() => {
         erc20MockContract = await ERC20TokenMock.new();
-        //exchangeContarct = await TwoKeyExchange.new(1, deployerAddress, erc20MockContract.address);
+        //exchangeContarct = await TwoKeyUpgradableExchange.new(1, deployerAddress, erc20MockContract.address);
         adminContract = await TwoKeyAdmin.new(deployerAddress); 
         eventSourceContract = await TwoKeyEventSource.new(adminContract.address);
     });

@@ -19,10 +19,11 @@ contract TwoKeyUpgradableExchange is Crowdsale, Ownable, RBACWithAdmin {
 		_;
 	}
 
+	TwoKeyAdmin admin;
+
 	constructor(uint256 _rate, address _wallet, ERC20 _token, address _twoKeyAdmin) RBACWithAdmin(_twoKeyAdmin)
 		Crowdsale(_rate, _wallet, _token) Ownable() public {
 		require(_twoKeyAdmin != address(0));
-		TwoKeyAdmin admin;
     	admin = TwoKeyAdmin(_twoKeyAdmin);
     	admin.setTwoKeyExchange(address(this));	
     	

@@ -217,18 +217,26 @@ contract('TwoKeyAcquisitionCampaignERC20', async (accounts) => {
 
     let var1, var2;
 
-    it("should execute ", async() => {
+    it("should be the same addresses ", async() => {
         let pk = generatePrivateKey();
         let public_address = privateToPublic(pk);
         const private_key = pk.toString('hex');
-        await twoKeyAcquisitionCampaignERC20.setPublicLinkKey(`0x${public_address}`, {from: campaignCreator});
-        let res = await twoKeyAcquisitionCampaignERC20.public_link_key.call(campaignCreator);
+
+
+        let cutBefore = await twoKeyAcquisitionCampaignERC20.influencer2cut.call(campaignConverter);
+        console.log("CUT BEFORE : " + cutBefore);
+        await twoKeyAcquisitionCampaignERC20.setPubLinkWithCut(`0x${public_address}`, 10, {from: campaignConverter});
+        let res = await twoKeyAcquisitionCampaignERC20.public_link_key.call(campaignConverter);
+        let cut = await twoKeyAcquisitionCampaignERC20.influencer2cut.call(campaignConverter);
+
+        console.log("CUT AFTER : " + cut);
         assert.equal(res, `0x${public_address}`, "they are not equal");
 
         var1 = private_key;
         var2 = "";
         console.log(res);
     });
+
 
     it("should join off chain", async() => {
         let pk = generatePrivateKey();

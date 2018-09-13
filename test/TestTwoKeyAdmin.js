@@ -76,7 +76,7 @@ contract('TwoKeyAdmin', async (accounts) => {
           economyContract = await TwoKeyEconomy.new(adminContract.address);
           eventContract  =await TwoKeyEventSource.new(adminContract.address);
           regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
-          //let exchange =  await TwoKeyExchange.new(1, deployerAddress, erc20MockContract.address,adminContract.address);
+          //let exchange =  await TwoKeyUpgradableExchange.new(1, deployerAddress, erc20MockContract.address,adminContract.address);
 
           adminContract_new = await TwoKeyAdmin.new(not_admin);
           economyContract_new = await TwoKeyEconomy.new(adminContract_new.address);
