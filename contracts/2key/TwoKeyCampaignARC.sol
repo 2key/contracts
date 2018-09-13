@@ -30,9 +30,10 @@ contract TwoKeyCampaignARC is StandardToken {
 
 
 
-	constructor(address _twoKeyEventSource) StandardToken() public {
+	constructor(address _twoKeyEventSource, uint256 _quota) StandardToken() public {
 		require(_twoKeyEventSource != address(0));
 		twoKeyEventSource = TwoKeyEventSource(_twoKeyEventSource);
+		quota = _quota;
 		balances[msg.sender] = totalSupply_;
 	}
 
@@ -85,7 +86,7 @@ contract TwoKeyCampaignARC is StandardToken {
 		if (transferFromQuota(_from, _to, _value)) {
 			if (received_from[_to] == 0) {
 				// inform the 2key admin contract, once, that an influencer has joined
-				twoKeyEventSource.joined(address(this), _from, _to);
+//				twoKeyEventSource.joined(address(this), _from, _to);
 			}
 			received_from[_to] = _from;
 			return true;

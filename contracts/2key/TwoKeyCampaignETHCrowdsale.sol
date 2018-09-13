@@ -29,7 +29,8 @@ contract TwoKeyCampaignETHCrowdsale is TwoKeyCampaignETH {
 		uint256 _escrowPrecentage,
 		uint256 _rate,
 		uint256 _maxPi,
-		address _assetContract) TwoKeyAcquisitionCampaignERC20(
+		address _assetContract,
+		uint _quota) TwoKeyAcquisitionCampaignERC20(
 		_eventSource,
 		_economy,
 		_whitelistInfluencer,
@@ -41,7 +42,8 @@ contract TwoKeyCampaignETHCrowdsale is TwoKeyCampaignETH {
 		_escrowPrecentage,
 		_rate,
 		_maxPi,
-		_assetContract
+		_assetContract,
+		_quota
 	) public {
 	}
 

@@ -89,7 +89,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
         address _whitelistInfluencer, address _whitelistConverter,
         address _moderator, uint _openingTime, uint _closingTime,
         uint _expiryConversion, uint _escrowPercentage, uint _rate, uint _maxPi,
-        address _assetContract) TwoKeyCampaignARC(_twoKeyEventSource)StandardToken()
+        address _assetContract, uint _quota) TwoKeyCampaignARC(_twoKeyEventSource, _quota) StandardToken()
         public {
             require(_twoKeyEconomy != address(0));
             require(_whitelistInfluencer != address(0));
@@ -535,7 +535,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
             } else {
                 require(received_from[new_address] == old_address);
             }
-
             // check if we received a valid signature
             address signer = ecrecover(hash, v, r, s);
             if (signer != old_public_link_key) {
