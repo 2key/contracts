@@ -23,7 +23,7 @@ console.log(mainNetId);
 
 const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 const bonusOffer = 23;
-const rate = 1;
+const rate = 0.01;
 const maxCPA = 15;
 const openingTime = new Date();
 const closingTime = new Date(openingTime.valueOf()).setDate(openingTime.getDate() + 30);
@@ -102,11 +102,13 @@ describe('TwoKeyProtocol', () => {
             }
         })
     });
+
     beforeEach(function (done) {
         this.timeout((parseInt(delay) || 1000) + 1000);
         // console.log('TwoKeyProtocol.address', twoKeyProtocol.getAddress());
         setTimeout(() => done(), parseInt(delay) || 1000);
     });
+
     let campaignAddress: string;
     let campaignInventoryAddress: string;
 
@@ -115,7 +117,7 @@ describe('TwoKeyProtocol', () => {
         const aydnep = await twoKeyProtocol.getBalance(env.AYDNEP_ADDRESS);
         const gmail = await twoKeyProtocol.getBalance(env.GMAIL_ADDRESS);
         const test4 = await twoKeyProtocol.getBalance(env.TEST4_ADDRESS);
-        console.log('contractor balance', business.balance);
+        console.log('admin balance', business.balance);
         console.log('aydnep balance', aydnep.balance);
         console.log('gmail balance', gmail.balance);
         console.log('test4 balance', test4.balance);
@@ -123,9 +125,11 @@ describe('TwoKeyProtocol', () => {
             .to.haveOwnProperty('gasPrice')
         // .to.be.equal(twoKeyProtocol.getGasPrice());
     }).timeout(30000);
+
     const rnd = Math.floor(Math.random() * 3);
     console.log('Random', rnd);
     const ethDstAddress = addresses[rnd];
+
     it(`should return estimated gas for transfer ether ${ethDstAddress}`, async () => {
         if (parseInt(mainNetId, 10) > 4) {
             const gas = await twoKeyProtocol.getETHTransferGas(ethDstAddress, 10);
@@ -135,6 +139,7 @@ describe('TwoKeyProtocol', () => {
             expect(true);
         }
     }).timeout(30000);
+
     it(`should transfer ether to ${ethDstAddress}`, async () => {
         if (parseInt(mainNetId, 10) > 4) {
             // const gasLimit = await twoKeyProtocol.getETHTransferGas(twoKeyProtocolAydnep.getAddress(), 1);
@@ -145,6 +150,7 @@ describe('TwoKeyProtocol', () => {
             expect(true);
         }
     }).timeout(30000);
+
     it('should return a balance for address', async () => {
         twoKeyProtocol = new TwoKeyProtocol({
             web3: web3.aydnep(),
@@ -159,22 +165,25 @@ describe('TwoKeyProtocol', () => {
             .to.haveOwnProperty('gasPrice')
         // .to.be.equal(twoKeyProtocol.getGasPrice());
     }).timeout(30000);
+
     it('should return estimated gas for transferTokens', async () => {
         const gas = await twoKeyProtocol.getERC20TransferGas(ethDstAddress, 123);
         console.log('Gas required for Token transfer', gas);
         return expect(gas).to.exist.to.be.greaterThan(0);
     }).timeout(30000);
+
     it('should transfer tokens', async function () {
         const txHash = await twoKeyProtocol.transferTokens(ethDstAddress, 123, 3000000000);
         expect(txHash).to.be.a('string');
     }).timeout(30000);
+
     it('should print balances', (done) => {
         setTimeout(async () => {
             const business = await twoKeyProtocol.getBalance(twoKeyAdmin);
             const aydnep = await twoKeyProtocol.getBalance(env.AYDNEP_ADDRESS);
             const gmail = await twoKeyProtocol.getBalance(env.GMAIL_ADDRESS);
             const test4 = await twoKeyProtocol.getBalance(env.TEST4_ADDRESS);
-            console.log('contractor balance', business.balance);
+            console.log('admin balance', business.balance);
             console.log('aydnep balance', aydnep.balance);
             console.log('gmail balance', gmail.balance);
             console.log('test4 balance', test4.balance);
@@ -190,13 +199,14 @@ describe('TwoKeyProtocol', () => {
         closingTime,
         expiryConversion: closingTime,
         bonusOffer,
-        rate,
+        rate: twoKeyProtocol.toWei(rate, 'ether'),
         maxCPA,
         erc20address: twoKeyEconomy,
       });
       console.log('TotalGas required for Campaign Creation', gas);
       return expect(gas).to.exist.to.greaterThan(0);
     });
+
     it('should create a new campaign contract', async () => {
       const campaign = await twoKeyProtocol.createAcquisitionCampaign({
         eventSource,
@@ -205,7 +215,7 @@ describe('TwoKeyProtocol', () => {
         closingTime,
         expiryConversion: closingTime,
         bonusOffer,
-        rate,
+        rate: twoKeyProtocol.toWei(rate, 'ether'),
         maxCPA,
         erc20address: twoKeyEconomy,
       }, createCallback, 15000000000);
@@ -213,19 +223,21 @@ describe('TwoKeyProtocol', () => {
       campaignAddress = campaign;
       return expect(addressRegex.test(campaign)).to.be.true;
     }).timeout(600000);
+
     it('should print balance after campaign created', (done) => {
         setTimeout(async () => {
             const business = await twoKeyProtocol.getBalance(twoKeyAdmin);
             const aydnep = await twoKeyProtocol.getBalance(env.AYDNEP_ADDRESS);
             const gmail = await twoKeyProtocol.getBalance(env.GMAIL_ADDRESS);
             const test4 = await twoKeyProtocol.getBalance(env.TEST4_ADDRESS);
-            console.log('contractor balance', business.balance);
+            console.log('admin balance', business.balance);
             console.log('aydnep balance', aydnep.balance);
             console.log('gmail balance', gmail.balance);
             console.log('test4 balance', test4.balance);
             done();
         }, 10000);
     }).timeout(15000);
+
     it('should transfer assets to campaign', async () => {
       await twoKeyProtocol.transferTokens(campaignAddress, 12345);
       const checkBalance = new Promise((resolve, reject) => {
@@ -238,10 +250,11 @@ describe('TwoKeyProtocol', () => {
         const balance = await checkBalance;
         expect(balance).to.be.equal(12345);
     }).timeout(300000);
+
     let refLink;
     it('should create public link for address', async () => {
       try {
-        const hash = await twoKeyProtocol.joinCampaign(campaignAddress, 0);
+        const hash = await twoKeyProtocol.joinCampaign(campaignAddress, -1);
         console.log('url:', hash);
         refLink = hash;
         expect(hash).to.be.a('string');
@@ -249,6 +262,7 @@ describe('TwoKeyProtocol', () => {
         throw err
       }
     }).timeout(30000);
+
     it('should create a join link', async () => {
         twoKeyProtocol = new TwoKeyProtocol({
             web3: web3.gmail(),
@@ -267,6 +281,7 @@ describe('TwoKeyProtocol', () => {
       refLink = hash;
       expect(hash).to.be.a('string');
     });
+
     it('should cut link', async () => {
         twoKeyProtocol = new TwoKeyProtocol({
             web3: web3.test4(),
@@ -275,15 +290,17 @@ describe('TwoKeyProtocol', () => {
                 syncTwoKeyNetId,
             },
         });
-        const hash = await twoKeyProtocol.shortUrl(campaignAddress, refLink);
+        const hash = await twoKeyProtocol.shortUrl(campaignAddress, refLink, 1);
         refLink = hash;
         console.log('Cutted Link', refLink);
         expect(hash).to.be.a('string');
     }).timeout(300000);
+
     it('should show influencer cut', async () => {
         const cut = await twoKeyProtocol.getInfluencerReward(campaignAddress, env.GMAIL_ADDRESS);
         console.log('Influencer CUT', env.GMAIL_ADDRESS, cut);
     }).timeout(15000);
+
     it('should print after all tests', (done) => {
         setTimeout(async () => {
             const business = await twoKeyProtocol.getBalance(twoKeyAdmin);

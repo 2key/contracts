@@ -402,6 +402,18 @@ export class TwoKeyCampaignETHCrowdsale extends TC.TypeChainContract {
         type: "function"
       },
       {
+        constant: false,
+        inputs: [
+          { name: "_public_link_key", type: "address" },
+          { name: "cut", type: "uint256" }
+        ],
+        name: "setPubLinkWithCut",
+        outputs: [],
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "function"
+      },
+      {
         constant: true,
         inputs: [{ name: "", type: "address" }],
         name: "conversions",
@@ -832,6 +844,16 @@ export class TwoKeyCampaignETHCrowdsale extends TC.TypeChainContract {
       this,
       "updateRefchainRewardsAndConverterProceeds",
       [_units.toString(), _bounty.toString()]
+    );
+  }
+  public setPubLinkWithCutTx(
+    _public_link_key: BigNumber | string,
+    cut: BigNumber | number
+  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
+    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
+      this,
+      "setPubLinkWithCut",
+      [_public_link_key.toString(), cut.toString()]
     );
   }
   public cancelAssetTwoKeyTx(

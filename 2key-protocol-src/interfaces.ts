@@ -62,9 +62,9 @@ export interface AcquisitionCampaign {
   openingTime: number, // Timestamp
   closingTime: number, // Timestamp
   expiryConversion: number, // Timestamp
-  bonusOffer?: number,
-  rate?: number,
-  maxCPA?: number,
+  bonusOffer: number,
+  rate: BigNumber,
+  maxCPA: number,
   erc20address: string,
   quota?: number,
 }

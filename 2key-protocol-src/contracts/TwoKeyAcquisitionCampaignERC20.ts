@@ -464,6 +464,18 @@ export class TwoKeyAcquisitionCampaignERC20 extends TC.TypeChainContract {
       },
       {
         constant: false,
+        inputs: [
+          { name: "_public_link_key", type: "address" },
+          { name: "cut", type: "uint256" }
+        ],
+        name: "setPubLinkWithCut",
+        outputs: [],
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "function"
+      },
+      {
+        constant: false,
         inputs: [{ name: "_public_link_key", type: "address" }],
         name: "setPublicLinkKey",
         outputs: [],
@@ -805,6 +817,16 @@ export class TwoKeyAcquisitionCampaignERC20 extends TC.TypeChainContract {
       this,
       "redeemTwoKeyToken",
       [_amount.toString()]
+    );
+  }
+  public setPubLinkWithCutTx(
+    _public_link_key: BigNumber | string,
+    cut: BigNumber | number
+  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
+    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
+      this,
+      "setPubLinkWithCut",
+      [_public_link_key.toString(), cut.toString()]
     );
   }
   public setPublicLinkKeyTx(

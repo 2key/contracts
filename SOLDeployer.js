@@ -1,6 +1,10 @@
 const fs = require('fs');
 const path = require('path');
 const util = require('util');
+const tar = require('tar');
+const fstream = require('fstream');
+const zlib = require('zlib');
+const rimraf = require('rimraf');
 // const compressor = require('node-minify');
 const simpleGit = require('simple-git/promise');
 const childProcess = require('child_process');
@@ -9,6 +13,8 @@ const whitelist = require('./ContractDeploymentWhiteList.json');
 
 const readdir = util.promisify(fs.readdir);
 const buildPath = path.join(__dirname, 'build', 'contracts');
+const buildBackupPath = path.join(__dirname, 'build', 'contracts.bak');
+const buildArchPath = path.join(__dirname, 'build', 'contracts.tar.gz');
 const twoKeyProtocolDir = path.join(__dirname, '2key-protocol-src');
 const twoKeyProtocolLibDir = path.join(__dirname, 'build', '2key-protocol-npm');
 
@@ -136,6 +142,18 @@ async function deploy() {
       await test();
     }
 
+    // TODO: Add build/contracts backup
+
+    if (fs.existsSync(buildPath)) {
+      fs.renameSync(buildPath, buildBackupPath);
+    }
+    if (fs.existsSync(buildArchPath)) {
+      fstream.Reader({ path: buildArchPath })
+        .pipe(zlib.Gunzip())
+        .pipe(tar.Unpack())
+        .pipe(fstream.Writer({ path: buildPath, type: 'Directory' }));
+    }
+
     const networks = process.argv[2].split(',');
     const network = networks.join('/');
     const now = moment();
@@ -206,6 +224,22 @@ async function deploy() {
     if (!local) {
       await runProcess(path.join(__dirname, 'node_modules/.bin/webpack'));
     }
+
+    // TODO: Archive build
+    fstream.Reader({ path: buildPath, type: 'Directory' })
+      .pipe(tar.Pack())
+      .pipe(zlib.Gzip())
+      .pipe(fstream.Writer({ path: buildArchPath }))
+
+    const rmDir = new Promise((resolve) => {
+      rimraf(buildPath, () => {
+        resolve();
+      })
+    });
+
+    await rmDir;
+    fs.renameSync(buildBackupPath, buildPath);
+
     contractsStatus = await contractsGit.status();
     twoKeyProtocolStatus = await twoKeyProtocolLibGit.status();
     console.log(commit, tag);
