@@ -48,6 +48,10 @@ console.log(mainNetId);
 console.log(contractsMeta.TwoKeyEventSource.networks[mainNetId].address);
 console.log(contractsMeta.TwoKeyEconomy.networks[mainNetId].address);
 
+const createCallback = (name: string, mined: boolean, transactionResult: string): void => {
+    console.log(`Contract ${name} ${mined ? `deployed with address ${transactionResult}` : `placed to EVM. Hash ${transactionResult}`}`);
+}
+
 // let web3 = createWeb3(mnemonic, rpcUrl);
 const web3 = {
     deployer: () => createWeb3(env.MNEMONIC_DEPLOYER, rpcUrl),
@@ -198,7 +202,7 @@ describe('TwoKeyProtocol', () => {
         rate,
         maxCPA,
         erc20address: twoKeyEconomy,
-      }, 15000000000);
+      }, createCallback, 15000000000);
       console.log('Campaign address', campaign);
       campaignAddress = campaign;
       return expect(addressRegex.test(campaign)).to.be.true;
@@ -237,25 +241,25 @@ describe('TwoKeyProtocol', () => {
         throw err
       }
     }).timeout(30000);
-    // it('should create a join link', async () => {
-    //     twoKeyProtocol = new TwoKeyProtocol({
-    //         web3: web3.gmail(),
-    //         networks: {
-    //             mainNetId,
-    //             syncTwoKeyNetId,
-    //         },
-    //     });
+    it('should create a join link', async () => {
+        twoKeyProtocol = new TwoKeyProtocol({
+            web3: web3.gmail(),
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+        });
 
-    //     let hash = refLink;
-    //   // for (let i = 0; i < 1; i++) {
-    //     hash = await twoKeyProtocol.joinCampaign(campaignAddress, 3, hash);
-    //     // console.log(i + 1, hash.length);
-    //   // }
-    //   console.log(hash);
-    //   console.log(hash.length);
-    //   refLink = hash;
-    //   expect(hash).to.be.a('string');
-    // });
+        let hash = refLink;
+      // for (let i = 0; i < 1; i++) {
+        hash = await twoKeyProtocol.joinCampaign(campaignAddress, 3, hash);
+        // console.log(i + 1, hash.length);
+      // }
+      console.log(hash);
+      console.log(hash.length);
+      refLink = hash;
+      expect(hash).to.be.a('string');
+    });
     // it('should cut link', async () => {
     //     twoKeyProtocol = new TwoKeyProtocol({
     //         web3: web3.test4(),

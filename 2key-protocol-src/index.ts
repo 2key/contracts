@@ -17,6 +17,7 @@ import {
     CreateCampaign,
     Contract,
     RawTransaction,
+    CreateCampignProgress,
 } from './interfaces';
 import Sign from './sign';
 import sign from "./sign";
@@ -256,12 +257,12 @@ export default class TwoKeyNetwork {
     }
 
     // Create Campaign
-    public createSaleCampaign(data: CreateCampaign, gasPrice?: number): Promise<string> {
+    public createSaleCampaign(data: CreateCampaign, progressCallback?: CreateCampignProgress, gasPrice?: number): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
                 const gasRequired = await this.estimateSaleCampaign(data);
                 await this._checkBalanceBeforeTransaction(gasRequired, gasPrice || this.gasPrice);
-                const predeployAddress = await this._createContract(solidityContracts.TwoKeyAcquisitionCampaignERC20Predeploy, gasPrice);
+                const predeployAddress = await this._createContract(solidityContracts.TwoKeyAcquisitionCampaignERC20Predeploy, gasPrice, null, progressCallback);
                 const predeployInstance = await TwoKeyAcquisitionCampaignERC20Predeploy.createAndValidate(this.web3, predeployAddress);
                 const [whitelistInfluencerAddress, whitelistConverterAddress] = await predeployInstance.getAddresses();
                 const campaignAddress = await this._createContract(solidityContracts.TwoKeyAcquisitionCampaignERC20, gasPrice, [
@@ -277,7 +278,7 @@ export default class TwoKeyNetwork {
                     data.rate,
                     data.maxCPA,
                     data.erc20address,
-                ]);
+                ], progressCallback);
                 const campaign = await TwoKeyAcquisitionCampaignERC20.createAndValidate(this.web3, campaignAddress);
                 // await this._addCampaignInventoryERC20(campaign, data.erc20address, gasPrice);
                 resolve(campaign.address);
@@ -288,41 +289,35 @@ export default class TwoKeyNetwork {
     }
 
     // Inventory
-    public addFungibleInventory(campaignAddress: string, amount: number, erc20address: string, gasPrice: number = this.gasPrice): Promise<any> {
-        return new Promise(async (resolve, reject) => {
-            try {
-                const campaign = await TwoKeyAcquisitionCampaignERC20.createAndValidate(this.web3, campaignAddress);
-                const campaignAssetERC20 = await this._getCampaignInventoryERC20(campaign);
-                // if (!parseInt(campaignAssetERC20, 16)) {
-                //   await this._addCampaignInventoryERC20(campaign, erc20address, gasPrice);
-                // }
-                const erc20 = await ERC20.createAndValidate(this.web3, erc20address);
-                let txHash = await erc20.approveTx(campaign.address, amount).send({from: this.address});
-                await this._waitForTransactionMined(txHash);
-                // console.log('ERC20 linked');
-                // const gas = await campaign.addFungibleAssetTx(amount).estimateGas({ from: this.address });
-                // console.log(gas);
-                // await this._checkBalanceBeforeTransaction(gas, gasPrice);
-                txHash = await campaign.addFungibleAssetTx(amount).send({from: this.address, gas: 70000, gasPrice});
-                await this._waitForTransactionMined(txHash);
-                const balance = await campaign.checkAndUpdateInventoryBalanceTx().send({from: this.address});
-                const balance2 = await erc20.balanceOf(campaign.address);
-                resolve(balance);
-            } catch (err) {
-                reject(err);
-            }
-        });
-    }
+    // public addFungibleInventory(campaignAddress: string, amount: number, erc20address: string, gasPrice: number = this.gasPrice): Promise<any> {
+    //     return new Promise(async (resolve, reject) => {
+    //         try {
+    //             const campaign = await TwoKeyAcquisitionCampaignERC20.createAndValidate(this.web3, campaignAddress);
+    //             const campaignAssetERC20 = await this._getCampaignInventoryERC20(campaign);
+    //             // if (!parseInt(campaignAssetERC20, 16)) {
+    //             //   await this._addCampaignInventoryERC20(campaign, erc20address, gasPrice);
+    //             // }
+    //             const erc20 = await ERC20.createAndValidate(this.web3, erc20address);
+    //             let txHash = await erc20.approveTx(campaign.address, amount).send({from: this.address});
+    //             await this._waitForTransactionMined(txHash);
+    //             // console.log('ERC20 linked');
+    //             // const gas = await campaign.addFungibleAssetTx(amount).estimateGas({ from: this.address });
+    //             // console.log(gas);
+    //             // await this._checkBalanceBeforeTransaction(gas, gasPrice);
+    //             txHash = await campaign.addFungibleAssetTx(amount).send({from: this.address, gas: 70000, gasPrice});
+    //             await this._waitForTransactionMined(txHash);
+    //             const balance = await campaign.checkAndUpdateInventoryBalanceTx().send({from: this.address});
+    //             const balance2 = await erc20.balanceOf(campaign.address);
+    //             resolve(balance);
+    //         } catch (err) {
+    //             reject(err);
+    //         }
+    //     });
+    // }
 
     public async getFungibleInventory(campaign: string | TwoKeyAcquisitionCampaignERC20): Promise<number> {
         try {
             const campaignInstance = campaign instanceof TwoKeyAcquisitionCampaignERC20 ? campaign : await TwoKeyAcquisitionCampaignERC20.createAndValidate(this.web3, campaign);
-            // const checkAdnUpdate = new Promise<string>((cResolve, cReject) => {
-            //   campaignInstance.checkAndUpdateInventoryBalanceTx().send({ from: this.address }).then((res) => {
-            //       console.log(res);
-            //       // cResolve(res);
-            //     }).catch((cReject));
-            // });
             const hash = await campaignInstance.checkAndUpdateInventoryBalanceTx().send({from: this.address});
             console.log('checkAndUpdateInventoryBalance', hash);
             await this._waitForTransactionMined(hash);
@@ -405,8 +400,19 @@ export default class TwoKeyNetwork {
                     // campaignInstance.FulfilledEvent({}).watch({}, (err, event) => {
                     //     console.log('FulfilledEvent', err, event);
                     // });
-                    const txHash = await campaignInstance.transferSigTx([msg]).send({ from: this.address, gasPrice, gas: 7000000 });
-                    // console.log('transferSigTx', txHash);
+                    // const web3Campaign = this.web3.eth.contract(solidityContracts.TwoKeyAcquisitionCampaignERC20.abi).at(campaignAddress);
+                    // const p = new Promise((resolve, reject) => {
+                    //     web3Campaign.transferSig(msg, { from: this.address, gasPrice, gas: 7000000 }, (err, res) => {
+                    //         if (err) {
+                    //             reject(err);
+                    //         } else {
+                    //             resolve(res);
+                    //         }
+                    //     });
+                    // });
+                    // const txHash = (await p).toString();
+                    const txHash = await campaignInstance.transferSigTx([msg]).send({ from: this.address, gasPrice, gas: 70000000 });
+                    console.log('transferSigTx', txHash);
                     await this._waitForTransactionMined(txHash);
                     // const q = new Promise((resolve) => {
                     //     setTimeout(() => {
@@ -536,9 +542,9 @@ export default class TwoKeyNetwork {
         });
     }
 
-    private _createContract(contract: Contract, gasPrice: number = this.gasPrice, params?: any[]): Promise<string> {
+    private _createContract(contract: Contract, gasPrice: number = this.gasPrice, params?: any[], progressCallback?: CreateCampignProgress): Promise<string> {
         return new Promise(async (resolve, reject) => {
-            const {abi, bytecode: data} = contract;
+            const { abi, bytecode: data, name } = contract;
             const gas = await this._estimateSubcontractGas(contract, params);
             const createParams = params ? [...params, {data, from: this.address, gas, gasPrice}] : [{
                 data,
@@ -551,10 +557,13 @@ export default class TwoKeyNetwork {
                     reject(err);
                 } else {
                     if (res.address) {
+                        if (progressCallback) {
+                            progressCallback(name, true, res.address);
+                        }
                         resolve(res.address);
-                    } // else {
-                    // console.log('Transaction Hash:', res.transactionHash);
-                    // }
+                    } else if (progressCallback) {
+                        progressCallback(name, false, res.transactionHash);
+                    }
                 }
             });
         });

@@ -68,9 +68,9 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
             // contracts[contractName] = whitelist[contractName].deployed
             //   ? { abi, networks } : { abi, networks, bytecode };
             contracts[contractName] = whitelist[contractName].singletone
-              ? { networks } : { bytecode, abi, networks };
+              ? { networks, name: contractName } : { bytecode, abi, networks, name: contractName };
             json[contractName] = whitelist[contractName].singletone
-              ? { networks, abi } : { bytecode, abi, networks };
+              ? { networks, abi, name: contractName } : { bytecode, abi, networks, name: contractName };
           }
         });
         console.log('Writing meta.ts...');

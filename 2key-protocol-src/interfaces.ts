@@ -68,7 +68,11 @@ export interface CreateCampaign {
   erc20address: string,
 }
 
+export interface CreateCampignProgress {
+  (contract: string, mined: boolean, transactionResult: string): void;
+}
 export interface Contract {
+  name: string,
   abi: any,
   bytecode: string,
 }
