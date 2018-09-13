@@ -177,7 +177,7 @@ describe('TwoKeyProtocol', () => {
     }).timeout(15000);
 
     it('should calculate gas for campaign contract creation', async () => {
-      const gas = await twoKeyProtocol.estimateSaleCampaign({
+      const gas = await twoKeyProtocol.estimateAcquisitionCampaign({
         eventSource,
         twoKeyEconomy,
         openingTime: openingTime.getTime(),
@@ -192,7 +192,7 @@ describe('TwoKeyProtocol', () => {
       return expect(gas).to.exist.to.greaterThan(0);
     })
     it('should create a new campaign contract', async () => {
-      const campaign = await twoKeyProtocol.createSaleCampaign({
+      const campaign = await twoKeyProtocol.createAcquisitionCampaign({
         eventSource,
         twoKeyEconomy,
         openingTime: openingTime.getTime(),

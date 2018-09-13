@@ -14,7 +14,7 @@ import {
     TwoKeyInit,
     BalanceMeta,
     Transaction,
-    CreateCampaign,
+    AcquisitionCampaign,
     Contract,
     RawTransaction,
     CreateCampignProgress,
@@ -227,7 +227,7 @@ export default class TwoKeyNetwork {
 
     /* CAMPAIGN */
 
-    public estimateSaleCampaign(data: CreateCampaign): Promise<number> {
+    public estimateAcquisitionCampaign(data: AcquisitionCampaign): Promise<number> {
         return new Promise(async (resolve, reject) => {
             try {
                 const predeployGas = await this._estimateSubcontractGas(solidityContracts.TwoKeyAcquisitionCampaignERC20Predeploy);
@@ -257,10 +257,10 @@ export default class TwoKeyNetwork {
     }
 
     // Create Campaign
-    public createSaleCampaign(data: CreateCampaign, progressCallback?: CreateCampignProgress, gasPrice?: number): Promise<string> {
+    public createAcquisitionCampaign(data: AcquisitionCampaign, progressCallback?: CreateCampignProgress, gasPrice?: number): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
-                const gasRequired = await this.estimateSaleCampaign(data);
+                const gasRequired = await this.estimateAcquisitionCampaign(data);
                 await this._checkBalanceBeforeTransaction(gasRequired, gasPrice || this.gasPrice);
                 const predeployAddress = await this._createContract(solidityContracts.TwoKeyAcquisitionCampaignERC20Predeploy, gasPrice, null, progressCallback);
                 const predeployInstance = await TwoKeyAcquisitionCampaignERC20Predeploy.createAndValidate(this.web3, predeployAddress);
