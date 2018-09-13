@@ -8,9 +8,10 @@ import './TwoKeyEventSource.sol';
 contract TwoKeyCampaignARC is StandardToken {
 
 	using SafeMath for uint256;
-
+	address contractor;
 	uint256 totalSupply_ = 1000000;
 
+	/// TODO: I can make this tokens to be owned by the deployer - contractor (arcs)
 	// balance of TwoKeyToken for each influencer that they can withdraw
 	mapping(address => uint256) internal referrerBalances2KEY;
 	mapping(address => uint256) internal referrerBalancesETH;
@@ -20,8 +21,8 @@ contract TwoKeyCampaignARC is StandardToken {
 
 
 	TwoKeyEventSource twoKeyEventSource;
-	address contractor;
 
+	// Add quota to constructor
 	uint256 public quota;  // maximal ARC tokens that can be passed in transferFrom
 
 	// referral graph, who did you receive the referral from
@@ -29,10 +30,11 @@ contract TwoKeyCampaignARC is StandardToken {
 
 
 
-	constructor(address _twoKeyEventSource, address _contractor) StandardToken() public {
+	constructor(address _twoKeyEventSource, uint256 _quota) StandardToken() public {
 		require(_twoKeyEventSource != address(0));
-		contractor = _contractor;
 		twoKeyEventSource = TwoKeyEventSource(_twoKeyEventSource);
+		quota = _quota;
+		balances[msg.sender] = totalSupply_;
 	}
 
 	/**
@@ -84,7 +86,7 @@ contract TwoKeyCampaignARC is StandardToken {
 		if (transferFromQuota(_from, _to, _value)) {
 			if (received_from[_to] == 0) {
 				// inform the 2key admin contract, once, that an influencer has joined
-				twoKeyEventSource.joined(address(this), _from, _to);
+//				twoKeyEventSource.joined(address(this), _from, _to);
 			}
 			received_from[_to] = _from;
 			return true;
@@ -103,7 +105,7 @@ contract TwoKeyCampaignARC is StandardToken {
 		if (transferQuota(_to, _value)) {
 			if (received_from[_to] == 0) {
 				// inform the 2key admin contract, once, that an influencer has joined
-				twoKeyEventSource.joined(address(this), msg.sender, _to);
+//				twoKeyEventSource.joined(address(this), msg.sender, _to);
 			}
 			received_from[_to] = msg.sender;
 			return true;

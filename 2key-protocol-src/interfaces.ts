@@ -55,10 +55,9 @@ export interface RawTransaction {
   data?: string;
 }
 
-export interface CreateCampaign {
+export interface AcquisitionCampaign {
   eventSource: string, // Address of TwoKeyEvent source
   twoKeyEconomy: string, // Address of TwoKeyEconomy
-  contractor?: string, // Address of the user
   moderator?: string, // Address of the moderator - it's a contract that works (operates) as admin of whitelists contracts
   openingTime: number, // Timestamp
   closingTime: number, // Timestamp
@@ -69,7 +68,11 @@ export interface CreateCampaign {
   erc20address: string,
 }
 
+export interface CreateCampignProgress {
+  (contract: string, mined: boolean, transactionResult: string): void;
+}
 export interface Contract {
+  name: string,
   abi: any,
   bytecode: string,
 }

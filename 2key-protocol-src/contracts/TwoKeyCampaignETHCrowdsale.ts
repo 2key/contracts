@@ -66,15 +66,6 @@ export class TwoKeyCampaignETHCrowdsale extends TC.TypeChainContract {
       },
       {
         constant: true,
-        inputs: [],
-        name: "cost",
-        outputs: [{ name: "", type: "uint256" }],
-        payable: false,
-        stateMutability: "view",
-        type: "function"
-      },
-      {
-        constant: true,
         inputs: [
           { name: "c", type: "address" },
           { name: "_method", type: "bytes" },
@@ -217,6 +208,20 @@ export class TwoKeyCampaignETHCrowdsale extends TC.TypeChainContract {
       {
         constant: true,
         inputs: [],
+        name: "getConstantInfo",
+        outputs: [
+          { name: "", type: "uint256" },
+          { name: "", type: "uint256" },
+          { name: "", type: "uint256" },
+          { name: "", type: "uint256" }
+        ],
+        payable: false,
+        stateMutability: "view",
+        type: "function"
+      },
+      {
+        constant: true,
+        inputs: [],
         name: "ipfs_hash",
         outputs: [{ name: "", type: "string" }],
         payable: false,
@@ -303,6 +308,19 @@ export class TwoKeyCampaignETHCrowdsale extends TC.TypeChainContract {
         type: "function"
       },
       {
+        constant: false,
+        inputs: [
+          { name: "_from", type: "address" },
+          { name: "_assetName", type: "string" },
+          { name: "_amount", type: "uint256" }
+        ],
+        name: "buyFromWithTwoKey",
+        outputs: [],
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "function"
+      },
+      {
         constant: true,
         inputs: [],
         name: "quota",
@@ -352,13 +370,8 @@ export class TwoKeyCampaignETHCrowdsale extends TC.TypeChainContract {
       },
       {
         constant: false,
-        inputs: [
-          { name: "_from", type: "address" },
-          { name: "_assetName", type: "string" },
-          { name: "_assetContract", type: "address" },
-          { name: "_amount", type: "uint256" }
-        ],
-        name: "buyFromWithTwoKey",
+        inputs: [{ name: "sig", type: "bytes" }],
+        name: "buySign",
         outputs: [],
         payable: true,
         stateMutability: "payable",
@@ -429,7 +442,6 @@ export class TwoKeyCampaignETHCrowdsale extends TC.TypeChainContract {
           { name: "_economy", type: "address" },
           { name: "_whitelistInfluencer", type: "address" },
           { name: "_whitelistConverter", type: "address" },
-          { name: "_contractor", type: "address" },
           { name: "_moderator", type: "address" },
           { name: "_start", type: "uint256" },
           { name: "_duration", type: "uint256" },
@@ -520,10 +532,6 @@ export class TwoKeyCampaignETHCrowdsale extends TC.TypeChainContract {
     return TC.promisify(this.rawWeb3Contract.name, []);
   }
 
-  public get cost(): Promise<BigNumber> {
-    return TC.promisify(this.rawWeb3Contract.cost, []);
-  }
-
   public get totalSupply(): Promise<BigNumber> {
     return TC.promisify(this.rawWeb3Contract.totalSupply, []);
   }
@@ -588,6 +596,12 @@ export class TwoKeyCampaignETHCrowdsale extends TC.TypeChainContract {
 
   public balanceOf(_owner: BigNumber | string): Promise<BigNumber> {
     return TC.promisify(this.rawWeb3Contract.balanceOf, [_owner.toString()]);
+  }
+
+  public getConstantInfo(): Promise<
+    [BigNumber, BigNumber, BigNumber, BigNumber]
+  > {
+    return TC.promisify(this.rawWeb3Contract.getConstantInfo, []);
   }
 
   public influencer2cut(arg0: BigNumber | string): Promise<BigNumber> {
@@ -752,6 +766,17 @@ export class TwoKeyCampaignETHCrowdsale extends TC.TypeChainContract {
       [_amount.toString()]
     );
   }
+  public buyFromWithTwoKeyTx(
+    _from: BigNumber | string,
+    _assetName: string,
+    _amount: BigNumber | number
+  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
+    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
+      this,
+      "buyFromWithTwoKey",
+      [_from.toString(), _assetName.toString(), _amount.toString()]
+    );
+  }
   public setPublicLinkKeyTx(
     _public_link_key: BigNumber | string
   ): TC.DeferredTransactionWrapper<TC.ITxParams> {
@@ -780,21 +805,13 @@ export class TwoKeyCampaignETHCrowdsale extends TC.TypeChainContract {
       [_spender.toString(), _addedValue.toString()]
     );
   }
-  public buyFromWithTwoKeyTx(
-    _from: BigNumber | string,
-    _assetName: string,
-    _assetContract: BigNumber | string,
-    _amount: BigNumber | number
+  public buySignTx(
+    sig: string[]
   ): TC.DeferredTransactionWrapper<TC.IPayableTxParams> {
     return new TC.DeferredTransactionWrapper<TC.IPayableTxParams>(
       this,
-      "buyFromWithTwoKey",
-      [
-        _from.toString(),
-        _assetName.toString(),
-        _assetContract.toString(),
-        _amount.toString()
-      ]
+      "buySign",
+      [sig.map(val => val.toString())]
     );
   }
   public updateRefchainRewardsAndConverterProceedsTx(

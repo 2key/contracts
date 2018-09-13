@@ -73,6 +73,20 @@
     {
       "constant": true,
       "inputs": [],
+      "name": "_getWTest",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
       "name": "weiRaised",
       "outputs": [
         {
@@ -430,14 +444,14 @@
     "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyFloatingRateExchange.sol",
     "exportedSymbols": {
       "TwoKeyFloatingRateExchange": [
-        6147
+        6137
       ]
     },
-    "id": 6148,
+    "id": 6138,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 6125,
+        "id": 6115,
         "literals": [
           "solidity",
           "^",
@@ -450,10 +464,10 @@
       {
         "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyUpgradableExchange.sol",
         "file": "./TwoKeyUpgradableExchange.sol",
-        "id": 6126,
+        "id": 6116,
         "nodeType": "ImportDirective",
-        "scope": 6148,
-        "sourceUnit": 7599,
+        "scope": 6138,
+        "sourceUnit": 7600,
         "src": "26:40:20",
         "symbolAliases": [],
         "unitAlias": ""
@@ -464,46 +478,46 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 6127,
+              "id": 6117,
               "name": "TwoKeyUpgradableExchange",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 7598,
+              "referencedDeclaration": 7599,
               "src": "107:24:20",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_TwoKeyUpgradableExchange_$7598",
+                "typeIdentifier": "t_contract$_TwoKeyUpgradableExchange_$7599",
                 "typeString": "contract TwoKeyUpgradableExchange"
               }
             },
-            "id": 6128,
+            "id": 6118,
             "nodeType": "InheritanceSpecifier",
             "src": "107:24:20"
           }
         ],
         "contractDependencies": [
           319,
-          7598,
-          8932,
-          9230,
-          10934
+          7599,
+          8933,
+          9231,
+          10935
         ],
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 6147,
+        "id": 6137,
         "linearizedBaseContracts": [
-          6147,
-          7598,
+          6137,
+          7599,
           319,
-          8932,
-          10934,
-          9230
+          8933,
+          10935,
+          9231
         ],
         "name": "TwoKeyFloatingRateExchange",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
-              "id": 6145,
+              "id": 6135,
               "nodeType": "Block",
               "src": "189:48:20",
               "statements": [
@@ -517,18 +531,18 @@
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
-                        "id": 6138,
+                        "id": 6128,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
                           "argumentTypes": null,
-                          "id": 6136,
+                          "id": 6126,
                           "name": "_newRate",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 6130,
+                          "referencedDeclaration": 6120,
                           "src": "201:8:20",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
@@ -540,7 +554,7 @@
                         "rightExpression": {
                           "argumentTypes": null,
                           "hexValue": "30",
-                          "id": 6137,
+                          "id": 6127,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
@@ -569,21 +583,21 @@
                           "typeString": "bool"
                         }
                       ],
-                      "id": 6135,
+                      "id": 6125,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        14070,
-                        14071
+                        14071,
+                        14072
                       ],
-                      "referencedDeclaration": 14070,
+                      "referencedDeclaration": 14071,
                       "src": "193:7:20",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 6139,
+                    "id": 6129,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -597,25 +611,25 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 6140,
+                  "id": 6130,
                   "nodeType": "ExpressionStatement",
                   "src": "193:21:20"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 6143,
+                    "id": 6133,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 6141,
+                      "id": 6131,
                       "name": "rate",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 9019,
+                      "referencedDeclaration": 9020,
                       "src": "218:4:20",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -626,11 +640,11 @@
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "id": 6142,
+                      "id": 6132,
                       "name": "_newRate",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 6130,
+                      "referencedDeclaration": 6120,
                       "src": "225:8:20",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -643,28 +657,28 @@
                       "typeString": "uint256"
                     }
                   },
-                  "id": 6144,
+                  "id": 6134,
                   "nodeType": "ExpressionStatement",
                   "src": "218:15:20"
                 }
               ]
             },
             "documentation": null,
-            "id": 6146,
+            "id": 6136,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
             "modifiers": [
               {
                 "arguments": null,
-                "id": 6133,
+                "id": 6123,
                 "modifierName": {
                   "argumentTypes": null,
-                  "id": 6132,
+                  "id": 6122,
                   "name": "onlyOwner",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 10882,
+                  "referencedDeclaration": 10883,
                   "src": "179:9:20",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
@@ -678,15 +692,15 @@
             "name": "setRate",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 6131,
+              "id": 6121,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6130,
+                  "id": 6120,
                   "name": "_newRate",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6146,
+                  "scope": 6136,
                   "src": "154:16:20",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -695,7 +709,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 6129,
+                    "id": 6119,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "154:7:20",
@@ -712,19 +726,19 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 6134,
+              "id": 6124,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "189:0:20"
             },
-            "scope": 6147,
+            "scope": 6137,
             "src": "137:100:20",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 6148,
+        "scope": 6138,
         "src": "68:173:20"
       }
     ],
@@ -734,14 +748,14 @@
     "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyFloatingRateExchange.sol",
     "exportedSymbols": {
       "TwoKeyFloatingRateExchange": [
-        6147
+        6137
       ]
     },
-    "id": 6148,
+    "id": 6138,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 6125,
+        "id": 6115,
         "literals": [
           "solidity",
           "^",
@@ -754,10 +768,10 @@
       {
         "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/TwoKeyUpgradableExchange.sol",
         "file": "./TwoKeyUpgradableExchange.sol",
-        "id": 6126,
+        "id": 6116,
         "nodeType": "ImportDirective",
-        "scope": 6148,
-        "sourceUnit": 7599,
+        "scope": 6138,
+        "sourceUnit": 7600,
         "src": "26:40:20",
         "symbolAliases": [],
         "unitAlias": ""
@@ -768,46 +782,46 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 6127,
+              "id": 6117,
               "name": "TwoKeyUpgradableExchange",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 7598,
+              "referencedDeclaration": 7599,
               "src": "107:24:20",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_TwoKeyUpgradableExchange_$7598",
+                "typeIdentifier": "t_contract$_TwoKeyUpgradableExchange_$7599",
                 "typeString": "contract TwoKeyUpgradableExchange"
               }
             },
-            "id": 6128,
+            "id": 6118,
             "nodeType": "InheritanceSpecifier",
             "src": "107:24:20"
           }
         ],
         "contractDependencies": [
           319,
-          7598,
-          8932,
-          9230,
-          10934
+          7599,
+          8933,
+          9231,
+          10935
         ],
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 6147,
+        "id": 6137,
         "linearizedBaseContracts": [
-          6147,
-          7598,
+          6137,
+          7599,
           319,
-          8932,
-          10934,
-          9230
+          8933,
+          10935,
+          9231
         ],
         "name": "TwoKeyFloatingRateExchange",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
-              "id": 6145,
+              "id": 6135,
               "nodeType": "Block",
               "src": "189:48:20",
               "statements": [
@@ -821,18 +835,18 @@
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
-                        "id": 6138,
+                        "id": 6128,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
                           "argumentTypes": null,
-                          "id": 6136,
+                          "id": 6126,
                           "name": "_newRate",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 6130,
+                          "referencedDeclaration": 6120,
                           "src": "201:8:20",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
@@ -844,7 +858,7 @@
                         "rightExpression": {
                           "argumentTypes": null,
                           "hexValue": "30",
-                          "id": 6137,
+                          "id": 6127,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
@@ -873,21 +887,21 @@
                           "typeString": "bool"
                         }
                       ],
-                      "id": 6135,
+                      "id": 6125,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        14070,
-                        14071
+                        14071,
+                        14072
                       ],
-                      "referencedDeclaration": 14070,
+                      "referencedDeclaration": 14071,
                       "src": "193:7:20",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 6139,
+                    "id": 6129,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -901,25 +915,25 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 6140,
+                  "id": 6130,
                   "nodeType": "ExpressionStatement",
                   "src": "193:21:20"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 6143,
+                    "id": 6133,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 6141,
+                      "id": 6131,
                       "name": "rate",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 9019,
+                      "referencedDeclaration": 9020,
                       "src": "218:4:20",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -930,11 +944,11 @@
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "id": 6142,
+                      "id": 6132,
                       "name": "_newRate",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 6130,
+                      "referencedDeclaration": 6120,
                       "src": "225:8:20",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -947,28 +961,28 @@
                       "typeString": "uint256"
                     }
                   },
-                  "id": 6144,
+                  "id": 6134,
                   "nodeType": "ExpressionStatement",
                   "src": "218:15:20"
                 }
               ]
             },
             "documentation": null,
-            "id": 6146,
+            "id": 6136,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
             "modifiers": [
               {
                 "arguments": null,
-                "id": 6133,
+                "id": 6123,
                 "modifierName": {
                   "argumentTypes": null,
-                  "id": 6132,
+                  "id": 6122,
                   "name": "onlyOwner",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 10882,
+                  "referencedDeclaration": 10883,
                   "src": "179:9:20",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
@@ -982,15 +996,15 @@
             "name": "setRate",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 6131,
+              "id": 6121,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6130,
+                  "id": 6120,
                   "name": "_newRate",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6146,
+                  "scope": 6136,
                   "src": "154:16:20",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -999,7 +1013,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 6129,
+                    "id": 6119,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "154:7:20",
@@ -1016,19 +1030,19 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 6134,
+              "id": 6124,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "189:0:20"
             },
-            "scope": 6147,
+            "scope": 6137,
             "src": "137:100:20",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 6148,
+        "scope": 6138,
         "src": "68:173:20"
       }
     ],
@@ -1040,5 +1054,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
-  "updatedAt": "2018-09-12T09:58:06.460Z"
+  "updatedAt": "2018-09-13T10:17:05.993Z"
 }

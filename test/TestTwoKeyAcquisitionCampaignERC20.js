@@ -1,8 +1,7 @@
-const { increaseTime, latestTime, duration } = require("./utils");
+const { increaseTime, latestTime, duration, free_take, free_join, privateToPublic, validate_join, generatePrivateKey } = require("./utils");
 require('truffle-test-utils').init();
 const _ = require('lodash');
 const BigNumber = web3.BigNumber;
-
 const HOUR = 3600;
 
 /// contracts
@@ -36,16 +35,17 @@ contract('TwoKeyAcquisitionCampaignERC20', async (accounts) => {
 
 
     const coinbase = accounts[0];
-    const contractor = accounts[2];
     const moderator = accounts[1];
     const campaignCreator = accounts[3];
+    const campaignReferrer = accounts[4];
+    const campaignConverter = accounts[6];
     const accountForAndri = accounts[5];
     const userAddress = accounts[7];
     const escrowPrecentage = 10;
     const rate = 2;
     const maxPi = 15;
     const assetName = "TestingTokenERC20";
-
+    const quota = 5;
 
     const electorateAdmins = accounts[4];
     const walletExchange = accounts[5];
@@ -89,7 +89,6 @@ contract('TwoKeyAcquisitionCampaignERC20', async (accounts) => {
             whitelistInfluencer.address,
             whitelistConverter.address,
 
-            contractor, //Address of the user
             moderator, //Address of the moderator - it's a contract that works (operates) as admin of whitelists contracts
 
             openingTime,
@@ -99,6 +98,7 @@ contract('TwoKeyAcquisitionCampaignERC20', async (accounts) => {
             rate,
             maxPi,
             twoKeyEconomy.address,
+            quota,
             {
                 from: campaignCreator,
                 gas: '8000000'
@@ -190,11 +190,86 @@ contract('TwoKeyAcquisitionCampaignERC20', async (accounts) => {
     //     await twoKeyAdmin.transfer2KeyTokens(twoKeyEconomy.address, accounts[5], 5000);
     //
     // });
-    it("should get public link key", async() => {
-        await twoKeyAcquisitionCampaignERC20.setPublicLinkKey(accounts[1], {from: accounts[2]});
-        let key = await twoKeyAcquisitionCampaignERC20.public_link_key.call(accounts[2]);
-        assert.equal(key, accounts[1], "keys are not equal");
-    })
+    // it("should get public link key", async() => {
+    //     await twoKeyAcquisitionCampaignERC20.setPublicLinkKey(userAddress, {from: campaignCreator});
+    //     let key = await twoKeyAcquisitionCampaignERC20.public_link_key.call(campaignCreator);
+    //     assert.equal(key, userAddress, "keys are not equal");
+    // });
+
+    it("should have initial balance of total supply", async() => {
+        let balance = await twoKeyAcquisitionCampaignERC20.balanceOf(campaignCreator);
+        console.log("Initial balance of campaignCreator(contractor) is : " + balance);
+    });
+
+    // it("should transfer some arcs to another addresses", async() => {
+    //     let rec = await twoKeyAcquisitionCampaignERC20.received_from.call(campaignReferrer);
+    //     console.log("Recieved from: " + rec);
+    //     let balance = await twoKeyAcquisitionCampaignERC20.balanceOf(campaignReferrer);
+    //     console.log("Balance before: " + balance)
+    //     await twoKeyAcquisitionCampaignERC20.transfer(campaignReferrer, 1, {from: campaignCreator});
+    // });
+
+
+    it("should have 1 arc on this address" , async() => {
+       let balance = await twoKeyAcquisitionCampaignERC20.balanceOf(campaignReferrer);
+       console.log("Balance after: " + balance);
+    });
+
+    let var1, var2;
+
+    it("should execute ", async() => {
+        let pk = generatePrivateKey();
+        let public_address = privateToPublic(pk);
+        const private_key = pk.toString('hex');
+        await twoKeyAcquisitionCampaignERC20.setPublicLinkKey(`0x${public_address}`, {from: campaignCreator});
+        let res = await twoKeyAcquisitionCampaignERC20.public_link_key.call(campaignCreator);
+        assert.equal(res, `0x${public_address}`, "they are not equal");
+
+        var1 = private_key;
+        var2 = "";
+        console.log(res);
+    });
+
+    it("should join off chain", async() => {
+        let pk = generatePrivateKey();
+        let public_address = privateToPublic(pk);
+        const private_key = pk.toString('hex');
+
+        let link = free_join(campaignReferrer, public_address, campaignCreator, var1, var2, 3);
+        console.log("Link generated: " + link);
+
+        let msg = free_take(campaignConverter, campaignReferrer, private_key, link);
+
+        console.log("Msg generated: " + msg);
+
+        let balConv = await twoKeyAcquisitionCampaignERC20.balanceOf(campaignConverter);
+        let balRef = await twoKeyAcquisitionCampaignERC20.balanceOf(campaignReferrer);
+        let balCreator = await twoKeyAcquisitionCampaignERC20.balanceOf(campaignCreator);
+
+        console.log("Balance of creator before: " + balCreator);
+        console.log("Balance of converter before: " + balConv);
+        console.log("Balance of referrer before: " + balRef);
+
+        let trnx = await twoKeyAcquisitionCampaignERC20.transferSig(msg, {from: campaignConverter});
+        // console.log(trnx.logs);
+
+        let balConvAfter = await twoKeyAcquisitionCampaignERC20.balanceOf(campaignConverter);
+        let balRefAfter = await twoKeyAcquisitionCampaignERC20.balanceOf(campaignReferrer);
+        let balCreatorAfter = await twoKeyAcquisitionCampaignERC20.balanceOf(campaignCreator);
+
+        console.log("Balance of creator after: " + balCreatorAfter);
+        console.log("Balance of converter after: " +balConvAfter);
+        console.log("Balance of ref after: " + balRefAfter);
+
+        console.log("CAMPAIGN CREATOR: "  + campaignCreator);
+        console.log("CAMPAIGN REFERRER: " + campaignReferrer);
+        console.log("CAMPAIGN CONVERTER : " + campaignConverter);
+
+
+    });
+
+
+
 
     // it("should have fungible balance after transfered", async() => {
     //     await twoKeyAcquisitionCampaignERC20.addAssetContractERC20(erc20.address);
