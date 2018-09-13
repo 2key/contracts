@@ -16,7 +16,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
 
     event Fulfilled(address indexed to, uint256 units);
     event Rewarded(address indexed to, uint256 amount);
-
+    event Print(address indexed one, address indexed two);
     /// @notice Event which will be emitted when conversion expire
     event Expired(address indexed _contract);
     /// @notice Event which will be emitted when fallback function is executed
@@ -532,6 +532,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
             // assume users can take ARCs only once... this could be changed
             if (received_from[new_address] == 0) {
                 transferFrom(old_address, new_address, 1);
+                emit Print(old_address, new_address);
             } else {
                 require(received_from[new_address] == old_address);
             }

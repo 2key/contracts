@@ -45,7 +45,7 @@ contract('TwoKeyAcquisitionCampaignERC20', async (accounts) => {
     const rate = 2;
     const maxPi = 15;
     const assetName = "TestingTokenERC20";
-    const quota = 1;
+    const quota = 5;
 
     const electorateAdmins = accounts[4];
     const walletExchange = accounts[5];
@@ -201,13 +201,13 @@ contract('TwoKeyAcquisitionCampaignERC20', async (accounts) => {
         console.log("Initial balance of campaignCreator(contractor) is : " + balance);
     });
 
-    it("should transfer some arcs to another addresses", async() => {
-        let rec = await twoKeyAcquisitionCampaignERC20.received_from.call(campaignReferrer);
-        console.log("Recieved from: " + rec);
-        let balance = await twoKeyAcquisitionCampaignERC20.balanceOf(campaignReferrer);
-        console.log("Balance before: " + balance)
-        await twoKeyAcquisitionCampaignERC20.transfer(campaignReferrer, 1, {from: campaignCreator});
-    });
+    // it("should transfer some arcs to another addresses", async() => {
+    //     let rec = await twoKeyAcquisitionCampaignERC20.received_from.call(campaignReferrer);
+    //     console.log("Recieved from: " + rec);
+    //     let balance = await twoKeyAcquisitionCampaignERC20.balanceOf(campaignReferrer);
+    //     console.log("Balance before: " + balance)
+    //     await twoKeyAcquisitionCampaignERC20.transfer(campaignReferrer, 1, {from: campaignCreator});
+    // });
 
 
     it("should have 1 arc on this address" , async() => {
@@ -217,7 +217,7 @@ contract('TwoKeyAcquisitionCampaignERC20', async (accounts) => {
 
     let var1, var2;
 
-    it("should execute transfersig", async() => {
+    it("should execute ", async() => {
         let pk = generatePrivateKey();
         let public_address = privateToPublic(pk);
         const private_key = pk.toString('hex');
@@ -242,7 +242,29 @@ contract('TwoKeyAcquisitionCampaignERC20', async (accounts) => {
 
         console.log("Msg generated: " + msg);
 
-        await twoKeyAcquisitionCampaignERC20.transferSig(msg, {from: campaignConverter});
+        let balConv = await twoKeyAcquisitionCampaignERC20.balanceOf(campaignConverter);
+        let balRef = await twoKeyAcquisitionCampaignERC20.balanceOf(campaignReferrer);
+        let balCreator = await twoKeyAcquisitionCampaignERC20.balanceOf(campaignCreator);
+
+        console.log("Balance of creator before: " + balCreator);
+        console.log("Balance of converter before: " + balConv);
+        console.log("Balance of referrer before: " + balRef);
+
+        let trnx = await twoKeyAcquisitionCampaignERC20.transferSig(msg, {from: campaignConverter});
+        // console.log(trnx.logs);
+
+        let balConvAfter = await twoKeyAcquisitionCampaignERC20.balanceOf(campaignConverter);
+        let balRefAfter = await twoKeyAcquisitionCampaignERC20.balanceOf(campaignReferrer);
+        let balCreatorAfter = await twoKeyAcquisitionCampaignERC20.balanceOf(campaignCreator);
+
+        console.log("Balance of creator after: " + balCreatorAfter);
+        console.log("Balance of converter after: " +balConvAfter);
+        console.log("Balance of ref after: " + balRefAfter);
+
+        console.log("CAMPAIGN CREATOR: "  + campaignCreator);
+        console.log("CAMPAIGN REFERRER: " + campaignReferrer);
+        console.log("CAMPAIGN CONVERTER : " + campaignConverter);
+
 
     });
 
