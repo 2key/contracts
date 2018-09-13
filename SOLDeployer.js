@@ -25,10 +25,10 @@ const twoKeyProtocolLibGit = simpleGit(twoKeyProtocolLibDir);
 
 async function handleExit(p) {
   console.log(p);
-  if (p !== 0 && (process.argv[2] !== '--migrate' && process.argv[2] !== '--test')) {
-    await contractsGit.reset('hard');
-    await twoKeyProtocolLibGit.reset('hard');
-  }
+  // if (p !== 0 && (process.argv[2] !== '--migrate' && process.argv[2] !== '--test')) {
+  //   await contractsGit.reset('hard');
+  //   await twoKeyProtocolLibGit.reset('hard');
+  // }
   process.exit();
 }
 
@@ -46,7 +46,7 @@ const getCurrentDeployedAddresses = () => new Promise((resolve) => {
       const l = files.length;
       for (let i = 0; i < l; i += 1) {
         const {
-          networks, contractName, bytecode, abi,
+          networks, contractName, bytecode, abi
         } = JSON.parse(fs.readFileSync(path.join(buildPath, files[i])));
         if (Object.keys(networks).length) {
           contracts[contractName] = networks;
@@ -61,22 +61,23 @@ const getCurrentDeployedAddresses = () => new Promise((resolve) => {
 
 const archiveBuild = () => new Promise(async (resolve, reject) => {
   try {
-  // TODO: Archive build
+    // TODO: Archive build
     console.log('Archive', buildPath, buildArchPath);
-  fstream.Reader({ path: buildPath, type: 'Directory' })
-    .pipe(new tar.Pack())
-    .pipe(zlib.Gzip())
-    .pipe(fstream.Writer({ path: buildArchPath }))
+    if (fs.existsSync(buildPath)) {
+      tar.c({gzip: true, sync: true}, [buildPath]).pipe(fs.createWriteStream(buildArchPath));
 
-  const rmDir = new Promise((resolve) => {
-    rimraf(buildPath, () => {
-      resolve();
-    })
-  });
+      const rmDir = new Promise((resolve) => {
+        rimraf(buildPath, () => {
+          resolve();
+        })
+      });
 
-  await rmDir;
-  fs.renameSync(buildBackupPath, buildPath);
-  resolve();
+      await rmDir;
+      if (fs.existsSync(buildBackupPath)) {
+        fs.renameSync(buildBackupPath, buildPath);
+      }
+    }
+    resolve();
   } catch (err) {
     reject(err);
   }
@@ -90,19 +91,19 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
       try {
         files.forEach((file) => {
           const {
-            networks, contractName, bytecode, abi,
+            networks, contractName, bytecode, abi
           } = JSON.parse(fs.readFileSync(path.join(buildPath, file)));
           if (whitelist[contractName]) {
             // contracts[contractName] = whitelist[contractName].deployed
             //   ? { abi, networks } : { abi, networks, bytecode };
             contracts[contractName] = whitelist[contractName].singletone
-              ? { networks, name: contractName } : { bytecode, abi, networks, name: contractName };
+              ? {networks, name: contractName} : {bytecode, abi, networks, name: contractName};
             json[contractName] = whitelist[contractName].singletone
-              ? { networks, abi, name: contractName } : { bytecode, abi, networks, name: contractName };
+              ? {networks, abi, name: contractName} : {bytecode, abi, networks, name: contractName};
           }
         });
         console.log('Writing meta.ts...');
-        fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts/meta.ts'), `export default ${util.inspect(contracts, { depth: 10 })}`);
+        fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts/meta.ts'), `export default ${util.inspect(contracts, {depth: 10})}`);
         console.log('Writing contracts.json...');
         fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts.json'), JSON.stringify(json, null, 2));
         console.log('Done');
@@ -116,7 +117,7 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
 
 const runProcess = (app, args) => new Promise((resolve, reject) => {
   console.log('Run process', app, args && args.join(' '));
-  const proc = childProcess.spawn(app, args, { stdio: [process.stdin, process.stdout, process.stderr] });
+  const proc = childProcess.spawn(app, args, {stdio: [process.stdin, process.stdout, process.stderr]});
   // proc.stdout.on('data', (data) => {
   //   console.log(data.toString('utf8'));
   // });
@@ -170,9 +171,7 @@ async function deploy() {
       fs.renameSync(buildPath, buildBackupPath);
     }
     if (fs.existsSync(buildArchPath)) {
-      fstream.Reader({ path: buildArchPath })
-        .pipe(zlib.Gunzip())
-        .pipe(new tar.Unpack())
+      tar.x({ gzip: true, sync: true })
         .pipe(fstream.Writer({ path: buildPath, type: 'Directory' }));
     }
 
@@ -188,7 +187,7 @@ async function deploy() {
     if (Object.keys(artifacts).length) {
       if (!Object.keys(deployedHistory).length) {
         deployedHistory.initial = {
-          contracts: artifacts,
+          contracts: artifacts
         };
       }
     }
@@ -203,18 +202,19 @@ async function deploy() {
     const lastDeployed = Object.keys(deployedHistory).filter(key => key !== 'initial').sort((a, b) => {
       if (a > b) {
         return 1;
-      } if (b > a) {
+      }
+      if (b > a) {
         return -1;
       }
       return 0;
     }).pop();
     const deployedUpdates = {
-      contracts: {},
+      contracts: {}
     };
     Object.keys(sessionDeployedContracts).forEach((contract) => {
       if (!lastDeployed || !lastDeployed[contract]
         || !Object.keys(lastDeployed[contract].networks).length) {
-        deployedUpdates.contracts[contract] = { ...sessionDeployedContracts[contract] };
+        deployedUpdates.contracts[contract] = {...sessionDeployedContracts[contract]};
       } else if (lastDeployed[contract] && Object.keys(lastDeployed[contract].networks).length) {
         Object.keys(lastDeployed[contract].networks).forEach((net) => {
           if (sessionDeployedContracts[contract].networks
@@ -228,8 +228,8 @@ async function deploy() {
               ...sessionDeployedContracts[contract],
               networks: {
                 ...deployedUpdates.contracts[contract].networks,
-                [net]: sessionDeployedContracts[contract].networks[net],
-              },
+                [net]: sessionDeployedContracts[contract].networks[net]
+              }
             };
           }
         });
@@ -319,7 +319,7 @@ async function main() {
       break;
     case '--test':
       test();
-    break;
+      break;
     case '--generate':
       generateSOLInterface();
       break;
