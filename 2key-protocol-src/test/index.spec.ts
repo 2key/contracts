@@ -256,23 +256,23 @@ describe('TwoKeyProtocol', () => {
     //   refLink = hash;
     //   expect(hash).to.be.a('string');
     // });
-    it('should cut link', async () => {
-        twoKeyProtocol = new TwoKeyProtocol({
-            web3: web3.test4(),
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-        });
-        const hash = await twoKeyProtocol.shortUrl(campaignAddress, refLink);
-        refLink = hash;
-        console.log('Cutted Link', refLink);
-        expect(hash).to.be.a('string');
-    }).timeout(300000);
-    // it('should show influencer cut', async () => {
-    //     const cut = await twoKeyProtocol.getInfluencerReward(campaignAddress, env.GMAIL_ADDRESS);
-    //     console.log('Influencer CUT', env.GMAIL_ADDRESS, cut);
-    // }).timeout(15000);
+    // it('should cut link', async () => {
+    //     twoKeyProtocol = new TwoKeyProtocol({
+    //         web3: web3.test4(),
+    //         networks: {
+    //             mainNetId,
+    //             syncTwoKeyNetId,
+    //         },
+    //     });
+    //     const hash = await twoKeyProtocol.shortUrl(campaignAddress, refLink);
+    //     refLink = hash;
+    //     console.log('Cutted Link', refLink);
+    //     expect(hash).to.be.a('string');
+    // }).timeout(300000);
+    it('should show influencer cut', async () => {
+        const cut = await twoKeyProtocol.getInfluencerReward(campaignAddress, env.GMAIL_ADDRESS);
+        console.log('Influencer CUT', env.GMAIL_ADDRESS, cut);
+    }).timeout(15000);
     it('should print after all tests', (done) => {
         setTimeout(async () => {
             const business = await twoKeyProtocol.getBalance(twoKeyAdmin);
