@@ -59,6 +59,28 @@ const getCurrentDeployedAddresses = () => new Promise((resolve) => {
   }
 });
 
+const archiveBuild = () => new Promise(async (resolve, reject) => {
+  try {
+  // TODO: Archive build
+    console.log('Archive', buildPath, buildArchPath);
+  fstream.Reader({ path: buildPath, type: 'Directory' })
+    .pipe(new tar.Pack())
+    .pipe(zlib.Gzip())
+    .pipe(fstream.Writer({ path: buildArchPath }))
+
+  const rmDir = new Promise((resolve) => {
+    rimraf(buildPath, () => {
+      resolve();
+    })
+  });
+
+  await rmDir;
+  fs.renameSync(buildBackupPath, buildPath);
+  resolve();
+  } catch (err) {
+    reject(err);
+  }
+});
 
 const generateSOLInterface = () => new Promise((resolve, reject) => {
   if (fs.existsSync(buildPath)) {
@@ -225,20 +247,7 @@ async function deploy() {
       await runProcess(path.join(__dirname, 'node_modules/.bin/webpack'));
     }
 
-    // TODO: Archive build
-    fstream.Reader({ path: buildPath, type: 'Directory' })
-      .pipe(new tar.Pack())
-      .pipe(zlib.Gzip())
-      .pipe(fstream.Writer({ path: buildArchPath }))
-
-    const rmDir = new Promise((resolve) => {
-      rimraf(buildPath, () => {
-        resolve();
-      })
-    });
-
-    await rmDir;
-    fs.renameSync(buildBackupPath, buildPath);
+    await archiveBuild();
 
     contractsStatus = await contractsGit.status();
     twoKeyProtocolStatus = await twoKeyProtocolLibGit.status();
@@ -313,6 +322,9 @@ async function main() {
     break;
     case '--generate':
       generateSOLInterface();
+      break;
+    case '--archive':
+      archiveBuild();
       break;
     default:
       deploy();
