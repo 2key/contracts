@@ -58,14 +58,14 @@
       "type": "function"
     }
   ],
-  "bytecode": "0x6080604052610143806100136000396000f30060806040526004361061004c576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff16806360fe47b11461004e5780636d4ce63c1461006e575b005b61006c60048036038101908080359060200190929190505050610099565b005b34801561007a57600080fd5b5061008361010e565b6040518082815260200191505060405180910390f35b806000819055507fcc9d847ba10dcd14a97c82e34eddd0f93ea7a927fb7d6e00da2ca1b26c5823ae3082604051808373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018281526020019250505060405180910390a150565b600080549050905600a165627a7a7230582004ab14193552f07b1b548895158d98f017a186084c19b0f1430daf1116036eaf0029",
-  "deployedBytecode": "0x60806040526004361061004c576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff16806360fe47b11461004e5780636d4ce63c1461006e575b005b61006c60048036038101908080359060200190929190505050610099565b005b34801561007a57600080fd5b5061008361010e565b6040518082815260200191505060405180910390f35b806000819055507fcc9d847ba10dcd14a97c82e34eddd0f93ea7a927fb7d6e00da2ca1b26c5823ae3082604051808373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018281526020019250505060405180910390a150565b600080549050905600a165627a7a7230582004ab14193552f07b1b548895158d98f017a186084c19b0f1430daf1116036eaf0029",
+  "bytecode": "0x6080604052610143806100136000396000f30060806040526004361061004c576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff16806360fe47b11461004e5780636d4ce63c1461006e575b005b61006c60048036038101908080359060200190929190505050610099565b005b34801561007a57600080fd5b5061008361010e565b6040518082815260200191505060405180910390f35b806000819055507fcc9d847ba10dcd14a97c82e34eddd0f93ea7a927fb7d6e00da2ca1b26c5823ae3082604051808373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018281526020019250505060405180910390a150565b600080549050905600a165627a7a72305820aaed1cd66c84b63f1e7fadd5b1703ee38c0da7bb4e57747bc2780923c434a2520029",
+  "deployedBytecode": "0x60806040526004361061004c576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff16806360fe47b11461004e5780636d4ce63c1461006e575b005b61006c60048036038101908080359060200190929190505050610099565b005b34801561007a57600080fd5b5061008361010e565b6040518082815260200191505060405180910390f35b806000819055507fcc9d847ba10dcd14a97c82e34eddd0f93ea7a927fb7d6e00da2ca1b26c5823ae3082604051808373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018281526020019250505060405180910390a150565b600080549050905600a165627a7a72305820aaed1cd66c84b63f1e7fadd5b1703ee38c0da7bb4e57747bc2780923c434a2520029",
   "sourceMap": "26:371:0:-;;;;;;;;;",
   "deployedSourceMap": "26:371:0:-;;;;;;;;;;;;;;;;;;;;;;;;;;;161:108;;;;;;;;;;;;;;;;;;;;;;;;;;276:79;;8:9:-1;5:2;;;30:1;27;20:12;5:2;276:79:0;;;;;;;;;;;;;;;;;;;;;;;161:108;223:1;210:10;:14;;;;239:23;253:4;260:1;239:23;;;;;;;;;;;;;;;;;;;;;;;;;;;;161:108;:::o;276:79::-;312:7;338:10;;331:17;;276:79;:::o",
   "source": "pragma solidity ^0.4.24;\n\ncontract BasicStorage {\n\n    uint256 storedData;\n\n    event Store(address a, uint256 _d);\n\n    constructor() public payable {\n\n    }\n\n\tfunction set(uint256 x) public payable {\n        storedData = x;\n        emit Store(address(this), x);\n    }\n    \n\tfunction get() view public returns (uint256) {\n        return storedData;\n    }\n\n    function() public payable {\n\n    }\n}",
-  "sourcePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/BasicStorage.sol",
+  "sourcePath": "/Users/aydnep/2key/contracts/contracts/2key/BasicStorage.sol",
   "ast": {
-    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/BasicStorage.sol",
+    "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/BasicStorage.sol",
     "exportedSymbols": {
       "BasicStorage": [
         43
@@ -292,7 +292,7 @@
                             "name": "this",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 14081,
+                            "referencedDeclaration": 14067,
                             "src": "253:4:0",
                             "typeDescriptions": {
                               "typeIdentifier": "t_contract$_BasicStorage_$43",
@@ -567,7 +567,7 @@
     "src": "0:397:0"
   },
   "legacyAST": {
-    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/BasicStorage.sol",
+    "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/BasicStorage.sol",
     "exportedSymbols": {
       "BasicStorage": [
         43
@@ -794,7 +794,7 @@
                             "name": "this",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 14081,
+                            "referencedDeclaration": 14067,
                             "src": "253:4:0",
                             "typeDescriptions": {
                               "typeIdentifier": "t_contract$_BasicStorage_$43",
@@ -1074,5 +1074,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
-  "updatedAt": "2018-09-13T10:17:05.939Z"
+  "updatedAt": "2018-09-13T10:24:51.097Z"
 }

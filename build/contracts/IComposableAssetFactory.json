@@ -350,9 +350,9 @@
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "pragma solidity ^0.4.24;\n\nimport \"../2key/RBACWithAdmin.sol\";\nimport \"../openzeppelin-solidity/contracts/math/SafeMath.sol\";\n\ncontract IComposableAssetFactory is RBACWithAdmin{\n\n    modifier isOngoing() {\n        _;\n    }\n\n    constructor(uint256 _openingTime, uint256 _closingTime) RBACWithAdmin(address(0)) public{\n\n    }\n    function addFungibleAsset(uint256 _tokenID, address _assetContract, uint256 _amount) public returns (bool);\n\n    function addNonFungibleAsset(uint256 _tokenID, address _assetContract, uint256 _index) public returns (bool);\n\n    function moveFungibleAsset(address _to, uint256 _tokenID, address _assetContract, uint256 _amount) internal returns (bool);\n\n    function moveNonFungibleAsset(address _to, uint256 _tokenID, uint256 _assetTokenID) internal returns (bool);\n\n    function transferFungibleAsset(address _to, uint256 _tokenID, address _assetContract, uint256 _amount)  public returns (bool);\n\n    function transferNonFungibleAsset(address _to, uint256 _tokenID, address _assetContract, uint256 _assetTokenID) internal returns (bool);\n\n    function expireFungible(address _to, uint256 _tokenID, address _assetContract, uint256 _amount) public returns (bool);\n\n    function expireNonFungible(address _to, uint256 _tokenID, address _assetContract, uint256 _assetTokenID) public returns (bool);\n}\n",
-  "sourcePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/interfaces/IComposableAssetFactory.sol",
+  "sourcePath": "/Users/aydnep/2key/contracts/contracts/interfaces/IComposableAssetFactory.sol",
   "ast": {
-    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/interfaces/IComposableAssetFactory.sol",
+    "absolutePath": "/Users/aydnep/2key/contracts/contracts/interfaces/IComposableAssetFactory.sol",
     "exportedSymbols": {
       "IComposableAssetFactory": [
         7898
@@ -373,7 +373,7 @@
         "src": "0:24:32"
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/RBACWithAdmin.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/RBACWithAdmin.sol",
         "file": "../2key/RBACWithAdmin.sol",
         "id": 7779,
         "nodeType": "ImportDirective",
@@ -384,12 +384,12 @@
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/math/SafeMath.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/math/SafeMath.sol",
         "file": "../openzeppelin-solidity/contracts/math/SafeMath.sol",
         "id": 7780,
         "nodeType": "ImportDirective",
         "scope": 7899,
-        "sourceUnit": 10349,
+        "sourceUnit": 10335,
         "src": "62:62:32",
         "symbolAliases": [],
         "unitAlias": ""
@@ -417,7 +417,7 @@
         ],
         "contractDependencies": [
           319,
-          8933
+          8919
         ],
         "contractKind": "contract",
         "documentation": null,
@@ -426,7 +426,7 @@
         "linearizedBaseContracts": [
           7898,
           319,
-          8933
+          8919
         ],
         "name": "IComposableAssetFactory",
         "nodeType": "ContractDefinition",
@@ -1839,7 +1839,7 @@
     "src": "0:1327:32"
   },
   "legacyAST": {
-    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/interfaces/IComposableAssetFactory.sol",
+    "absolutePath": "/Users/aydnep/2key/contracts/contracts/interfaces/IComposableAssetFactory.sol",
     "exportedSymbols": {
       "IComposableAssetFactory": [
         7898
@@ -1860,7 +1860,7 @@
         "src": "0:24:32"
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/RBACWithAdmin.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/2key/RBACWithAdmin.sol",
         "file": "../2key/RBACWithAdmin.sol",
         "id": 7779,
         "nodeType": "ImportDirective",
@@ -1871,12 +1871,12 @@
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/openzeppelin-solidity/contracts/math/SafeMath.sol",
+        "absolutePath": "/Users/aydnep/2key/contracts/contracts/openzeppelin-solidity/contracts/math/SafeMath.sol",
         "file": "../openzeppelin-solidity/contracts/math/SafeMath.sol",
         "id": 7780,
         "nodeType": "ImportDirective",
         "scope": 7899,
-        "sourceUnit": 10349,
+        "sourceUnit": 10335,
         "src": "62:62:32",
         "symbolAliases": [],
         "unitAlias": ""
@@ -1904,7 +1904,7 @@
         ],
         "contractDependencies": [
           319,
-          8933
+          8919
         ],
         "contractKind": "contract",
         "documentation": null,
@@ -1913,7 +1913,7 @@
         "linearizedBaseContracts": [
           7898,
           319,
-          8933
+          8919
         ],
         "name": "IComposableAssetFactory",
         "nodeType": "ContractDefinition",
@@ -3331,5 +3331,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
-  "updatedAt": "2018-09-13T10:17:06.018Z"
+  "updatedAt": "2018-09-13T10:24:51.970Z"
 }

@@ -1,7 +1,8 @@
 import ipfsAPI from 'ipfs-api';
 import {BigNumber} from 'bignumber.js';
 import solidityContracts from './contracts/meta';
-import {ERC20} from './contracts/ERC20';
+import { promisify } from './contracts/typechain-runtime';
+import { ERC20 } from './contracts/ERC20';
 import {TwoKeyEconomy} from './contracts/TwoKeyEconomy';
 import {TwoKeyAdmin} from './contracts/TwoKeyAdmin';
 import {TwoKeyEventSource} from './contracts/TwoKeyEventSource';
@@ -246,6 +247,7 @@ export default class TwoKeyNetwork {
                     data.rate,
                     data.maxCPA,
                     data.erc20address,
+                    data.quota || 5,
                 ]);
                 // console.log('TwoKeyAcquisitionCampaignERC20', campaignGas);
                 const totalGas = predeployGas * 2 + campaignGas;
@@ -278,9 +280,12 @@ export default class TwoKeyNetwork {
                     data.rate,
                     data.maxCPA,
                     data.erc20address,
+                    data.quota || 5,
                 ], progressCallback);
                 const campaign = await TwoKeyAcquisitionCampaignERC20.createAndValidate(this.web3, campaignAddress);
                 // await this._addCampaignInventoryERC20(campaign, data.erc20address, gasPrice);
+                const balance = await campaign.balanceOf(this.address);
+                console.log('CONTRACTOR BALANCE of ARCS', balance.toNumber());
                 resolve(campaign.address);
             } catch (err) {
                 reject(err);
@@ -319,10 +324,10 @@ export default class TwoKeyNetwork {
         try {
             const campaignInstance = campaign instanceof TwoKeyAcquisitionCampaignERC20 ? campaign : await TwoKeyAcquisitionCampaignERC20.createAndValidate(this.web3, campaign);
             const hash = await campaignInstance.checkAndUpdateInventoryBalanceTx().send({from: this.address});
-            console.log('checkAndUpdateInventoryBalance', hash);
+            // console.log('checkAndUpdateInventoryBalance', hash);
             await this._waitForTransactionMined(hash);
             const balance = await campaignInstance.checkInventoryBalance;
-            console.log('getFungibleInventory', balance, balance.toString());
+            // console.log('getFungibleInventory', balance, balance.toString());
             return Promise.resolve(balance.toNumber());
         } catch (err) {
             Promise.reject(err);
@@ -368,9 +373,11 @@ export default class TwoKeyNetwork {
             try {
                 let new_message;
                 if (referralLink) {
-                    const {f_address, f_secret, p_message} = this._getUrlParams(referralLink);
+                    const { f_address, f_secret, p_message } = this._getUrlParams(referralLink);
+                    console.log('New link for', this.address, f_address, f_secret, p_message);
                     new_message = Sign.free_join(this.address, public_address, f_address, f_secret, p_message, cut);
                 } else {
+                    // TODO: AP if called from shortUrl with cut need to set cut somehow
                     await this.setPublicLink(campaign, `0x${public_address}`, gasPrice);
                 }
                 resolve(`f_address=${this.address}&f_secret=${private_key}&p_message=${new_message || ''}`);
@@ -390,38 +397,37 @@ export default class TwoKeyNetwork {
             }
             try {
                 const campaignInstance = await TwoKeyAcquisitionCampaignERC20.createAndValidate(this.web3, campaignAddress);
-                const arcBalance = (await campaignInstance.balanceOf(this.address)).toNumber();
+                let arcBalance = (await campaignInstance.balanceOf(this.address)).toNumber();
                 if (!arcBalance) {
-                    console.log('No Arcs');
+                    console.log('No Arcs', arcBalance);
                     const msg = Sign.free_take(this.address, f_address, f_secret, p_message);
-                    console.log('MSG', msg);
+                    // msg = msg.slice(2, msg.length);
+                    // console.log(f_address, f_secret, p_message);
+                    // console.log('MSG', msg.match(/.{1,2}/g));
                     // const gas = await campaignInstance.transferSigTx([msg]).estimateGas({ from: this.address });
-                    // await this._checkBalanceBeforeTransaction(gas, gasPrice);
-                    // campaignInstance.FulfilledEvent({}).watch({}, (err, event) => {
-                    //     console.log('FulfilledEvent', err, event);
-                    // });
-                    // const web3Campaign = this.web3.eth.contract(solidityContracts.TwoKeyAcquisitionCampaignERC20.abi).at(campaignAddress);
-                    // const p = new Promise((resolve, reject) => {
-                    //     web3Campaign.transferSig(msg, { from: this.address, gasPrice, gas: 7000000 }, (err, res) => {
-                    //         if (err) {
-                    //             reject(err);
-                    //         } else {
-                    //             resolve(res);
-                    //         }
-                    //     });
-                    // });
-                    // const txHash = (await p).toString();
-                    const txHash = await campaignInstance.transferSigTx([msg]).send({ from: this.address, gasPrice, gas: 70000000 });
+                    const data = this.web3.eth.contract(solidityContracts.TwoKeyAcquisitionCampaignERC20.abi).at(campaignInstance.address).transferSig.getData(msg);
+                    const gas = await this._estimateTransactionGas({ data, from: this.address, to: campaignInstance.address });
+                    console.log('Gas required for transferSig', gas);
+                    await this._checkBalanceBeforeTransaction(gas, gasPrice);
+                    campaignInstance.FulfilledEvent({}).watch({}, (err, event) => {
+                        console.log('FulfilledEvent', err, event);
+                    });
+
+                    // const txHash = await campaignInstance.transferSigTx(msg.match(/.{1,2}/g)).send({ from: this.address, gasPrice, gas: 7000000 });
+                    const txHash = await promisify(
+                        this.web3.eth.contract(solidityContracts.TwoKeyAcquisitionCampaignERC20.abi).at(campaignInstance.address).transferSig,
+                        [msg, { from: this.address, gasPrice, gas }],
+                    );
                     console.log('transferSigTx', txHash);
                     await this._waitForTransactionMined(txHash);
-                    // const q = new Promise((resolve) => {
-                    //     setTimeout(() => {
-                    //         resolve();
-                    //     }, 30000);
-                    // });
-                    // await q;
+                    arcBalance = (await campaignInstance.balanceOf(this.address)).toNumber();
                 }
-                resolve(this.joinCampaign(campaignInstance, cut || 0, null, gasPrice));
+                if (arcBalance) {
+                    console.log('Setting new public link');
+                    resolve(this.joinCampaign(campaignInstance, cut || 0, null, gasPrice));
+                } else {
+                    reject(new Error('Link is broken!'));
+                }
             } catch (err) {
                 reject(err);
             }
@@ -571,7 +577,7 @@ export default class TwoKeyNetwork {
 
     private _estimateSubcontractGas(contract: Contract, params?: any[]): Promise<number> {
         return new Promise(async (resolve, reject) => {
-            const {abi, bytecode: data} = contract;
+            const { abi, bytecode: data } = contract;
             const estimateParams = params ? [...params, {data, from: this.address}] : [{data, from: this.address}];
             this.web3.eth.estimateGas({
                 data: this.web3.eth.contract(abi).new.getData(...estimateParams),

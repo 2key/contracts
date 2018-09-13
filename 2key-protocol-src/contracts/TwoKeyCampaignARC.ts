@@ -94,7 +94,10 @@ export class TwoKeyCampaignARC extends TC.TypeChainContract {
         type: "function"
       },
       {
-        inputs: [{ name: "_twoKeyEventSource", type: "address" }],
+        inputs: [
+          { name: "_twoKeyEventSource", type: "address" },
+          { name: "_quota", type: "uint256" }
+        ],
         payable: false,
         stateMutability: "nonpayable",
         type: "constructor"

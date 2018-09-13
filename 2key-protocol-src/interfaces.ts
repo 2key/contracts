@@ -66,6 +66,7 @@ export interface AcquisitionCampaign {
   rate?: number,
   maxCPA?: number,
   erc20address: string,
+  quota?: number,
 }
 
 export interface CreateCampignProgress {

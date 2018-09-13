@@ -111,11 +111,15 @@ describe('TwoKeyProtocol', () => {
     let campaignInventoryAddress: string;
 
     it('should return a balance for address', async () => {
-        const deployer = await twoKeyProtocol.getBalance();
-        const balance = await twoKeyProtocol.getBalance(destinationAddress);
-        console.log('Balance user', balance.balance);
-        console.log('Balance deployer', deployer.balance);
-        return expect(balance).to.exist
+        const business = await twoKeyProtocol.getBalance(twoKeyAdmin);
+        const aydnep = await twoKeyProtocol.getBalance(env.AYDNEP_ADDRESS);
+        const gmail = await twoKeyProtocol.getBalance(env.GMAIL_ADDRESS);
+        const test4 = await twoKeyProtocol.getBalance(env.TEST4_ADDRESS);
+        console.log('contractor balance', business.balance);
+        console.log('aydnep balance', aydnep.balance);
+        console.log('gmail balance', gmail.balance);
+        console.log('test4 balance', test4.balance);
+        return expect(aydnep).to.exist
             .to.haveOwnProperty('gasPrice')
         // .to.be.equal(twoKeyProtocol.getGasPrice());
     }).timeout(30000);
@@ -167,11 +171,13 @@ describe('TwoKeyProtocol', () => {
     it('should print balances', (done) => {
         setTimeout(async () => {
             const business = await twoKeyProtocol.getBalance(twoKeyAdmin);
-            const aydnep = await twoKeyProtocol.getBalance(addresses[0]);
-            const randomAccount = await twoKeyProtocol.getBalance(ethDstAddress);
-            console.log('BUSINESS balance', business.balance);
-            console.log('DESTINATION balance', aydnep.balance);
-            console.log('RANDOM balance', randomAccount.balance);
+            const aydnep = await twoKeyProtocol.getBalance(env.AYDNEP_ADDRESS);
+            const gmail = await twoKeyProtocol.getBalance(env.GMAIL_ADDRESS);
+            const test4 = await twoKeyProtocol.getBalance(env.TEST4_ADDRESS);
+            console.log('contractor balance', business.balance);
+            console.log('aydnep balance', aydnep.balance);
+            console.log('gmail balance', gmail.balance);
+            console.log('test4 balance', test4.balance);
             done();
         }, 10000);
     }).timeout(15000);
@@ -190,7 +196,7 @@ describe('TwoKeyProtocol', () => {
       });
       console.log('TotalGas required for Campaign Creation', gas);
       return expect(gas).to.exist.to.greaterThan(0);
-    })
+    });
     it('should create a new campaign contract', async () => {
       const campaign = await twoKeyProtocol.createAcquisitionCampaign({
         eventSource,
@@ -210,11 +216,13 @@ describe('TwoKeyProtocol', () => {
     it('should print balance after campaign created', (done) => {
         setTimeout(async () => {
             const business = await twoKeyProtocol.getBalance(twoKeyAdmin);
-            const aydnep = await twoKeyProtocol.getBalance('0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7');
-            const randomAccount = await twoKeyProtocol.getBalance('0xec8b6aaee825e0bbc812ca13e1b4f4b038154688');
-            console.log('BUSINESS balance', business.balance);
-            console.log('DESTINATION balance', aydnep.balance);
-            console.log('RANDOM balance', randomAccount.balance);
+            const aydnep = await twoKeyProtocol.getBalance(env.AYDNEP_ADDRESS);
+            const gmail = await twoKeyProtocol.getBalance(env.GMAIL_ADDRESS);
+            const test4 = await twoKeyProtocol.getBalance(env.TEST4_ADDRESS);
+            console.log('contractor balance', business.balance);
+            console.log('aydnep balance', aydnep.balance);
+            console.log('gmail balance', gmail.balance);
+            console.log('test4 balance', test4.balance);
             done();
         }, 10000);
     }).timeout(15000);
@@ -250,29 +258,28 @@ describe('TwoKeyProtocol', () => {
             },
         });
 
-        let hash = refLink;
+        // let hash = refLink;
       // for (let i = 0; i < 1; i++) {
-        hash = await twoKeyProtocol.joinCampaign(campaignAddress, 3, hash);
+        const hash = await twoKeyProtocol.joinCampaign(campaignAddress, 3, refLink);
         // console.log(i + 1, hash.length);
       // }
       console.log(hash);
-      console.log(hash.length);
       refLink = hash;
       expect(hash).to.be.a('string');
     });
-    // it('should cut link', async () => {
-    //     twoKeyProtocol = new TwoKeyProtocol({
-    //         web3: web3.test4(),
-    //         networks: {
-    //             mainNetId,
-    //             syncTwoKeyNetId,
-    //         },
-    //     });
-    //     const hash = await twoKeyProtocol.shortUrl(campaignAddress, refLink);
-    //     refLink = hash;
-    //     console.log('Cutted Link', refLink);
-    //     expect(hash).to.be.a('string');
-    // }).timeout(300000);
+    it('should cut link', async () => {
+        twoKeyProtocol = new TwoKeyProtocol({
+            web3: web3.test4(),
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+        });
+        const hash = await twoKeyProtocol.shortUrl(campaignAddress, refLink);
+        refLink = hash;
+        console.log('Cutted Link', refLink);
+        expect(hash).to.be.a('string');
+    }).timeout(300000);
     it('should show influencer cut', async () => {
         const cut = await twoKeyProtocol.getInfluencerReward(campaignAddress, env.GMAIL_ADDRESS);
         console.log('Influencer CUT', env.GMAIL_ADDRESS, cut);
@@ -280,11 +287,13 @@ describe('TwoKeyProtocol', () => {
     it('should print after all tests', (done) => {
         setTimeout(async () => {
             const business = await twoKeyProtocol.getBalance(twoKeyAdmin);
-            const aydnep = await twoKeyProtocol.getBalance('0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7');
-            const randomAccount = await twoKeyProtocol.getBalance('0xec8b6aaee825e0bbc812ca13e1b4f4b038154688');
-            console.log('BUSINESS balance', business.balance);
-            console.log('DESTINATION balance', aydnep.balance);
-            console.log('RANDOM balance', randomAccount.balance);
+            const aydnep = await twoKeyProtocol.getBalance(env.AYDNEP_ADDRESS);
+            const gmail = await twoKeyProtocol.getBalance(env.GMAIL_ADDRESS);
+            const test4 = await twoKeyProtocol.getBalance(env.TEST4_ADDRESS);
+            console.log('contractor balance', business.balance);
+            console.log('aydnep balance', aydnep.balance);
+            console.log('gmail balance', gmail.balance);
+            console.log('test4 balance', test4.balance);
             done();
         }, 10000);
     }).timeout(15000);

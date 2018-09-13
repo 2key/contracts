@@ -457,6 +457,15 @@ export class TwoKeyCampaignETH extends TC.TypeChainContract {
       },
       {
         anonymous: false,
+        inputs: [
+          { indexed: true, name: "one", type: "address" },
+          { indexed: true, name: "two", type: "address" }
+        ],
+        name: "Print",
+        type: "event"
+      },
+      {
+        anonymous: false,
         inputs: [{ indexed: true, name: "_contract", type: "address" }],
         name: "Expired",
         type: "event"
@@ -844,6 +853,24 @@ export class TwoKeyCampaignETH extends TC.TypeChainContract {
       { to: BigNumber | string; amount: BigNumber | number },
       { to?: BigNumber | string | Array<BigNumber | string> }
     >(this, "Rewarded", eventFilter);
+  }
+  public PrintEvent(eventFilter: {
+    one?: BigNumber | string | Array<BigNumber | string>;
+    two?: BigNumber | string | Array<BigNumber | string>;
+  }): TC.DeferredEventWrapper<
+    { one: BigNumber | string; two: BigNumber | string },
+    {
+      one?: BigNumber | string | Array<BigNumber | string>;
+      two?: BigNumber | string | Array<BigNumber | string>;
+    }
+  > {
+    return new TC.DeferredEventWrapper<
+      { one: BigNumber | string; two: BigNumber | string },
+      {
+        one?: BigNumber | string | Array<BigNumber | string>;
+        two?: BigNumber | string | Array<BigNumber | string>;
+      }
+    >(this, "Print", eventFilter);
   }
   public ExpiredEvent(eventFilter: {
     _contract?: BigNumber | string | Array<BigNumber | string>;

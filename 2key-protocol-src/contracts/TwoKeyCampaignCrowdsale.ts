@@ -436,7 +436,8 @@ export class TwoKeyCampaignCrowdsale extends TC.TypeChainContract {
           { name: "_escrowPrecentage", type: "uint256" },
           { name: "_rate", type: "uint256" },
           { name: "_maxPi", type: "uint256" },
-          { name: "_assetContract", type: "address" }
+          { name: "_assetContract", type: "address" },
+          { name: "_quota", type: "uint256" }
         ],
         payable: false,
         stateMutability: "nonpayable",
@@ -459,6 +460,15 @@ export class TwoKeyCampaignCrowdsale extends TC.TypeChainContract {
           { indexed: false, name: "amount", type: "uint256" }
         ],
         name: "Rewarded",
+        type: "event"
+      },
+      {
+        anonymous: false,
+        inputs: [
+          { indexed: true, name: "one", type: "address" },
+          { indexed: true, name: "two", type: "address" }
+        ],
+        name: "Print",
         type: "event"
       },
       {
@@ -883,6 +893,24 @@ export class TwoKeyCampaignCrowdsale extends TC.TypeChainContract {
       { to: BigNumber | string; amount: BigNumber | number },
       { to?: BigNumber | string | Array<BigNumber | string> }
     >(this, "Rewarded", eventFilter);
+  }
+  public PrintEvent(eventFilter: {
+    one?: BigNumber | string | Array<BigNumber | string>;
+    two?: BigNumber | string | Array<BigNumber | string>;
+  }): TC.DeferredEventWrapper<
+    { one: BigNumber | string; two: BigNumber | string },
+    {
+      one?: BigNumber | string | Array<BigNumber | string>;
+      two?: BigNumber | string | Array<BigNumber | string>;
+    }
+  > {
+    return new TC.DeferredEventWrapper<
+      { one: BigNumber | string; two: BigNumber | string },
+      {
+        one?: BigNumber | string | Array<BigNumber | string>;
+        two?: BigNumber | string | Array<BigNumber | string>;
+      }
+    >(this, "Print", eventFilter);
   }
   public ExpiredEvent(eventFilter: {
     _contract?: BigNumber | string | Array<BigNumber | string>;
