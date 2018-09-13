@@ -1,8 +1,7 @@
-const { increaseTime, latestTime, duration } = require("./utils");
+const { increaseTime, latestTime, duration, free_take, free_join, privateToPublic, validate_join, generatePrivateKey } = require("./utils");
 require('truffle-test-utils').init();
 const _ = require('lodash');
 const BigNumber = web3.BigNumber;
-
 const HOUR = 3600;
 
 /// contracts
@@ -36,9 +35,10 @@ contract('TwoKeyAcquisitionCampaignERC20', async (accounts) => {
 
 
     const coinbase = accounts[0];
-    const contractor = accounts[2];
     const moderator = accounts[1];
     const campaignCreator = accounts[3];
+    const campaignReferrer = accounts[4];
+    const campaignConverter = accounts[6];
     const accountForAndri = accounts[5];
     const userAddress = accounts[7];
     const escrowPrecentage = 10;
@@ -98,6 +98,7 @@ contract('TwoKeyAcquisitionCampaignERC20', async (accounts) => {
             rate,
             maxPi,
             twoKeyEconomy.address,
+            1,
             {
                 from: campaignCreator,
                 gas: '8000000'
@@ -189,15 +190,60 @@ contract('TwoKeyAcquisitionCampaignERC20', async (accounts) => {
     //     await twoKeyAdmin.transfer2KeyTokens(twoKeyEconomy.address, accounts[5], 5000);
     //
     // });
-    it("should get public link key", async() => {
-        await twoKeyAcquisitionCampaignERC20.setPublicLinkKey(userAddress, {from: campaignCreator});
-        let key = await twoKeyAcquisitionCampaignERC20.public_link_key.call(campaignCreator);
-        assert.equal(key, userAddress, "keys are not equal");
-    });
+    // it("should get public link key", async() => {
+    //     await twoKeyAcquisitionCampaignERC20.setPublicLinkKey(userAddress, {from: campaignCreator});
+    //     let key = await twoKeyAcquisitionCampaignERC20.public_link_key.call(campaignCreator);
+    //     assert.equal(key, userAddress, "keys are not equal");
+    // });
 
     it("should have initial balance of total supply", async() => {
         let balance = await twoKeyAcquisitionCampaignERC20.balanceOf(campaignCreator);
         console.log("Initial balance of campaignCreator(contractor) is : " + balance);
+    });
+
+    it("should transfer some arcs to another addresses", async() => {
+        let rec = await twoKeyAcquisitionCampaignERC20.received_from.call(campaignReferrer);
+        console.log("Recieved from: " + rec);
+        let balance = await twoKeyAcquisitionCampaignERC20.balanceOf(campaignReferrer);
+        console.log("Balance before: " + balance)
+        await twoKeyAcquisitionCampaignERC20.transfer(campaignReferrer, 1, {from: campaignCreator});
+    });
+
+
+    it("should have 1 arc on this address" , async() => {
+       let balance = await twoKeyAcquisitionCampaignERC20.balanceOf(campaignReferrer);
+       console.log("Balance after: " + balance);
+    });
+
+    let var1, var2;
+
+    it("should execute transfersig", async() => {
+        let pk = generatePrivateKey();
+        let public_address = privateToPublic(pk);
+        const private_key = pk.toString('hex');
+        await twoKeyAcquisitionCampaignERC20.setPublicLinkKey(`0x${public_address}`, {from: campaignCreator});
+        let res = await twoKeyAcquisitionCampaignERC20.public_link_key.call(campaignCreator);
+        assert.equal(res, `0x${public_address}`, "they are not equal");
+
+        var1 = private_key;
+        var2 = "";
+        console.log(res);
+    });
+
+    it("should join off chain", async() => {
+        let pk = generatePrivateKey();
+        let public_address = privateToPublic(pk);
+        const private_key = pk.toString('hex');
+
+        let link = free_join(campaignReferrer, public_address, campaignCreator, var1, var2, 3);
+        console.log("Link generated: " + link);
+
+        let msg = free_take(campaignConverter, campaignReferrer, private_key, link);
+
+        console.log("Msg generated: " + msg);
+
+        await twoKeyAcquisitionCampaignERC20.transferSig(msg, {from: campaignConverter});
+
     });
 
 
