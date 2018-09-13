@@ -394,8 +394,12 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
 //        return public_link_key[_address];
 //    }
 
-    /// At the begining only contractor can call this method bcs he is the only one who has arcs
+    function setPubLinkWithCut(address _public_link_key, uint256 cut) {
+        setPublicLinkKey(_public_link_key);
+        setCut(cut);
+    }
 
+    /// At the begining only contractor can call this method bcs he is the only one who has arcs
     function setPublicLinkKey(address _public_link_key) public {
         require(balanceOf(msg.sender) > 0);
         require(public_link_key[msg.sender] == address(0));
@@ -426,6 +430,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
         return cuts;
     }
 
+
+    /// @notice Transfersig method
     function transferSig(bytes sig) public {
         // move ARCs based on signature information
         // if version=1, with_cut is true then sig also include the cut (percentage) each influencer takes from the bounty

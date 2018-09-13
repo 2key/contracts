@@ -9,16 +9,21 @@ const BigNumber = web3.BigNumber;
    contract('TwoKeyUpgradableExchange', async (accounts) => {
         let tryCatch = require("./exceptions.js").tryCatch;
         let errTypes = require("./exceptions.js").errTypes;
+        let adminContract;
+        let exchangeContarct;
         let erc20MockContract;
         let deployerAddress = '0xb3FA520368f2Df7BED4dF5185101f303f6c7decc';
         const null_address = '0x0000000000000000000000000000000000000000';   
-        before(async() => {
+     
 
-             erc20MockContract = await ERC20TokenMock.new();
+        before(async() => {
+              erc20MockContract = await ERC20TokenMock.new();
+              // adminContract = await TwoKeyAdmin.new(deployerAddress); 
+            //  economyContract = await TwoKeyEconomy.new(adminContract.address);
         });
 
 
-        it('Case 1 : TwokeyAdmin should be assigned as Admin Role for TwoKeyUpgradableExchange', async () => {
+      it('Case 1 : TwokeyAdmin should be assigned as Admin Role for TwoKeyUpgradableExchange', async () => {
 
               let adminContract = await TwoKeyAdmin.new(deployerAddress); 
               let exchange =  await TwoKeyExchange.new(1, deployerAddress, erc20MockContract.address,adminContract.address);
@@ -48,135 +53,94 @@ const BigNumber = web3.BigNumber;
          let exchange =  await TwoKeyExchange.new(1, deployerAddress, erc20MockContract.address,adminContract.address);
           let exchangeFromAdmin= await adminContract.getTwoKeyUpgradableExchange();
 
-          assert.equal(exchange.address, exchangeFromAdmin, 'TwoKeyAdmin should have two key economy object');
+          assert.equal(exchange.address, exchangeFromAdmin, 'TwoKeyAdmin should have two key exchange object');
       });  
-         it('Case 5 : Sell Token', async () => {
-            //await tryCatch(TwoKeyExchange.new(1, null_address, erc20MockContract.address,adminContract.address), errTypes.anyError)
-             // let exchange = await TwoKeyExchange.new(1, adminContract.address, economyContract.address,adminContract.address);
+      
+ 
+      // it('Case 5 : Sell Token Positive Test Case', async () => {
 
-            //  let balance =economyContract.balanceOf(accounts[0]);
-             // let balance2 =economyContract.balanceOf(adminContract);
+      //   let adminContract = await TwoKeyAdmin.new(deployerAddress);
+      //   let mockToken = await ERC20TokenMock.new();                         // 1000000 - total supply - 10^6
+      //   let exchange = await TwoKeyExchange.new(1, deployerAddress, mockToken.address,adminContract.address);
+        
+      //   //await exchange.send("1000000000");                                // 1000000000 - 10^9
+      //   let initialBalance = await mockToken.balanceOf(accounts[0]);      // 1000000 - 10^6 --- tokens
+        
+      //   await mockToken.increaseApproval(exchange.address,initialBalance);
+      //   await exchange.buyTokens(accounts[0], {value: 1000});                          //contractInstance.methods.mymethod(param).send({from:account, value:wei})
+      //   // await exchange.buyTokens(accounts[0]).send({value:100000});                       //contractInstance.methods.mymethod(param).send({from: address, value: web3.utils.toWei( value, 'ether')})
+
+      //   let initialBalanceAfter = await mockToken.balanceOf(accounts[0]);      // 1000000 - 10^6 --- tokens
+
+      //   //let tokens = await mockToken.balanceOf(accounts[0]);
+      //   //await exchange.sellTokens(10000);                              
+
+      //   let weiRaised = await exchange.getWeiRaised();
+      //   //let amt = await exchange.getAmount();                             // 10000 - 10^4  
+      //   //let leftOverBalance = await mockToken.balanceOf(accounts[0]);     // 1000000 - 10^6
+      //   //let expected = initialBalance - sellTokens;   
+      //   await exchange.setValuess();                    // 999000
+      //   let token = await exchange.getTokenVall();
+      //   let value = await exchange.getValueVall();
+      //   let to = await exchange.getToVall();
+
+      //   assert.equal(true, false,"\n to: "+to+"\nValue: "+value+"\n Token: "+token+"\n initialBalance: "+initialBalance+"\n initialBalanceAfter: "+initialBalanceAfter+"\nweiRaised: "+weiRaised);
+      //   // assert.equal(true, false,"\nweiRaised: "+weiRaised+ "\n sellTokens: "+sellTokens+ "\namt: "+amt+"\n leftOverBalance: " + leftOverBalance + "\n expected: " + expected);
+      //   // assert.equal(leftOverBalance, expected,  'After sellTokens remaining balance should be :' + leftOverBalance);
+      // });
+
+      it('Case 6 : Sell Token negative Test Case  Should Give Error if Allowace not Approved', async () => {
+
               let adminContract = await TwoKeyAdmin.new(deployerAddress);
-             let economy = await ERC20TokenMock.new();
-           
-         
-             let exchange = await TwoKeyExchange.new(1, deployerAddress, economy.address,adminContract.address);
-               //let x= JSON.stringify(balance);
-         
-                //let x2 = JSON.stringify(balance2);
-            let initialBalance = await economy.balanceOf(accounts[0]);
-            let sellTokens= initialBalance/10;
-            await exchange.sellTokens(sellTokens);
-            let initialBalance2 = await economy.balanceOf(accounts[0]);
-
-         // assert.equal(true, false,  "balance : " +  x + " x2 : " + x2  + balance2);
-          assert.equal(true, false,  initialBalance + "sellTokens : " + sellTokens  + " initialBalance2 : " + initialBalance2);
-       });
+              let mockToken = await ERC20TokenMock.new();
+              let exchange = await TwoKeyExchange.new(1, deployerAddress, mockToken.address,adminContract.address);
+              await exchange.send("1000000000");
+              let initialBalance = await mockToken.balanceOf(accounts[0]);
+              await tryCatch(exchange.sellTokens(), errTypes.anyError);
+             
+    });
 
 
-       /* 
+    it('Case 7 : Sell Token negative Test Case  Should Give Error if Wallet Holder Does not have token balance', async () => {
 
-        it('Case 3 : TwoKeyAdmin account should be assigned Initial Balance', async () => {
-              let economy = await TwoKeyEconomy.new(adminContract.address);
-              const notExpected =  0; 
-              let initialBalance = await economy.balanceOf(adminContract.address);
-              assert.notEqual(initialBalance, notExpected, 'Two Key Admin  should have '+ initialBalance+   ' Coins initially ' );
-        });
+              let adminContract = await TwoKeyAdmin.new(deployerAddress);
+              let mockToken = await ERC20TokenMock.new();
+              let exchange = await TwoKeyExchange.new(1, deployerAddress, mockToken.address,adminContract.address);
+              await exchange.send("1000000000");
+              let initialBalance = await mockToken.balanceOf(accounts[0]);
+              await tryCatch(exchange.sellTokens(), errTypes.anyError);
+             
+    });
 
-        it('Case 4 : Deployer account should not be assigned Initial Balance', async () => {
-              let economy = await TwoKeyEconomy.new(adminContract.address);
-              const expected =  0; 
-              let initialBalance = await economy.balanceOf(accounts[0]);
-              assert.equal(initialBalance, expected, 'Deployer account should have '+ 0 +   ' Coins initially ' );
-        });
+     it('Case 8 : Sell Token negative Test Case  Should Give Error if Only Alive is False', async () => {
 
-        it('Case 5 : TwoKeyAdmin account initial balance positive testCase', async () => {
-              let economy = await TwoKeyEconomy.new(adminContract.address);
-                
-              let expected =  await economy.totalSupply();
-              let expected_string = JSON.stringify(expected);
-                
-              let initialBalance = await economy.balanceOf(adminContract.address);
-              let initialBalance_string = JSON.stringify(initialBalance);
-                
-              assert.equal(expected_string, initialBalance_string, 'TwoKeyAdmin should have '+ expected+   ' Coins initially');
-        });
+              let adminContract = await TwoKeyAdmin.new(deployerAddress);
+              let mockToken = await ERC20TokenMock.new(); //from: deployerAddress
+              let exchange = await TwoKeyExchange.new(1, deployerAddress, mockToken.address,adminContract.address);
+              await exchange.send("1000000000");
+              let initialBalance = await mockToken.balanceOf(accounts[0]);
 
-        it('Case 6 : TwoKeyAdmin account initial balance negative testCase', async () => {
-              let economy = await TwoKeyEconomy.new(adminContract.address);
-              const expected =  await economy.totalSupply();
-              const not_expected = expected / 10;
+            adminContract_new = await TwoKeyAdmin.new(deployerAddress);
+            economyContract_new = await TwoKeyEconomy.new(adminContract_new.address);
+           // eventContract_new  =await TwoKeyEventSource.new(adminContract_new.address);
+            //regContract_new = await TwoKeyReg.new(eventContract_new.address, adminContract_new.address);
+            exchangeContract_new =  await TwoKeyExchange.new(1, deployerAddress, erc20MockContract.address, adminContract_new.address);
 
-              let initialBalance = await economy.balanceOf(adminContract.address);
-              assert.notEqual(initialBalance, not_expected, 'TwoKeyAdmin should have '+ expected + '  Coins initially');
-        });
+          await adminContract.upgradeEconomyExchangeByAdmins(exchangeContract_new.address);  
 
-        it('Case 7 : totalSupply positive test case', async () => {
-              let economy = await TwoKeyEconomy.new(adminContract.address);
-                
-              const expected = totalSupply;
-              
-              let _totalSupply = await economy.totalSupply();
-              
-              assert.equal (_totalSupply, expected, 'Owner should have '+ expected+  ' Total Supply');
-        });
+              await tryCatch(exchange.sellTokens(), errTypes.anyError);
+             
+    });
 
-        it('Case 8 : token name positive test case', async () => {
-              let economy = await TwoKeyEconomy.new(adminContract.address);
-              const expected =  tokenName;
+   it('Case 9 : Sell Token negative Test Case  Should Give Error Wallet has less Wei than Token Price', async () => {
 
-              let name = await economy.getTokenName();
-              assert.equal(name, expected, 'Owner should have '+ expected + ' Token name');
-        });  
-
-        it('Case 9 : token name negative test case', async () => {
-              let economy = await TwoKeyEconomy.new(adminContract.address);
-              const notExpected =  "xxxx";
-
-              let name = await economy.getTokenName();
-              assert.notEqual(name, notExpected, 'Owner should not have '+ notExpected+ ' as token name');
-        });  
-
-        it('Case 10 : symbol positive test case', async () => {
-              let economy = await TwoKeyEconomy.new(adminContract.address);
-              const expected = symbol;
-
-              let symbol_val = await economy.getTokenSymbol();
-
-              assert.equal(symbol_val, expected, 'Owner should have '+ expected+ ' as Token symbol');
-        });  
-
-        it('Case 11 : symbol negative test case', async () => {
-              let economy = await TwoKeyEconomy.new(adminContract.address);
-              const notExpected =  "xxxx";
-
-              let symbol = await economy.getTokenSymbol();
-              assert.notEqual(symbol, notExpected, 'Owner should not have '+ notExpected + 'as Token symbol');
-        });  
-
-        it('Case 12 : decimals positive test case', async () => {
-              let economy = await TwoKeyEconomy.new(adminContract.address);
-              const expected = decimals;
-
-              let decimal = await economy.getTokenDecimals();
-
-              assert.equal(decimal, expected, 'Owner should have '+ expected+   'Token decimals');
-        });  
-
-        it('Case 13 : decimals negative test case', async () => {
-              let economy = await TwoKeyEconomy.new(adminContract.address);
-              const notExpected =  10;
-
-              let totalSupply = await economy.totalSupply();
-              assert.notEqual(totalSupply, notExpected, 'Owner should not have '+ notExpected + ' Total Supply');
-        });  
-
-        it('Case 14 : TwoKeyAdmin should have TwoKeyEconomy object', async () => {
-              let economy = await TwoKeyEconomy.new(adminContract.address);
-              let economyFromAdmin= await adminContract.getTwoKeyEconomy();
-
-              assert.equal(economy.address, economyFromAdmin, 'TwoKeyAdmin should have two key economy object');
-        });*/  
+              let adminContract = await TwoKeyAdmin.new(deployerAddress);
+              let mockToken = await ERC20TokenMock.new();
+              let exchange = await TwoKeyExchange.new(1, deployerAddress, mockToken.address,adminContract.address);
+              let initialBalance = await mockToken.balanceOf(accounts[0]);
+              await tryCatch(exchange.sellTokens(), errTypes.anyError);
+             
+    });
        
 });
 
