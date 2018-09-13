@@ -64,7 +64,7 @@ const archiveBuild = () => new Promise(async (resolve, reject) => {
     // TODO: Archive build
     console.log('Archive', buildPath, buildArchPath);
     if (fs.existsSync(buildPath)) {
-      tar.c({gzip: true, sync: true}, [buildPath]).pipe(fs.createWriteStream(buildArchPath));
+      tar.c({gzip: true, sync: true}, ['build/contracts']).pipe(fs.createWriteStream(buildArchPath));
 
       const rmDir = new Promise((resolve) => {
         rimraf(buildPath, () => {
