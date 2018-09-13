@@ -45,7 +45,7 @@ contract('TwoKeyAcquisitionCampaignERC20', async (accounts) => {
     const rate = 2;
     const maxPi = 15;
     const assetName = "TestingTokenERC20";
-
+    const quota = 1;
 
     const electorateAdmins = accounts[4];
     const walletExchange = accounts[5];
@@ -98,7 +98,7 @@ contract('TwoKeyAcquisitionCampaignERC20', async (accounts) => {
             rate,
             maxPi,
             twoKeyEconomy.address,
-            1,
+            quota,
             {
                 from: campaignCreator,
                 gas: '8000000'
