@@ -21,7 +21,7 @@ const BigNumber = web3.BigNumber;
 
         before(async() => {
               erc20MockContract = await ERC20TokenMock.new();
-            //  exchangeContarct = await TwoKeyExchange.new(1, deployerAdrress, erc20MockContract.address);
+            //  exchangeContarct = await TwoKeyUpgradableExchange.new(1, deployerAdrress, erc20MockContract.address);
               adminContract = await TwoKeyAdmin.new(deployerAdrress); 
         });
 

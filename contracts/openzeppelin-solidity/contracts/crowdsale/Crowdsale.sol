@@ -50,6 +50,8 @@ contract Crowdsale {
     uint256 amount
   );
 
+  event Msg(address indexed _to, uint value, address indexed token);
+
   /**
    * @param _rate Number of token units a buyer gets per wei
    * @param _wallet Address where collected funds will be forwarded to
@@ -85,12 +87,13 @@ contract Crowdsale {
     uint256 weiAmount = msg.value;
     _preValidatePurchase(_beneficiary, weiAmount);
 
+
     // calculate token amount to be created
     uint256 tokens = _getTokenAmount(weiAmount);
 
     // update state
     weiRaised = weiRaised.add(weiAmount);
-
+    emit Msg(_beneficiary, tokens, token);
     _processPurchase(_beneficiary, tokens);
     emit TokenPurchase(
       msg.sender,
