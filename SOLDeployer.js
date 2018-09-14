@@ -2,8 +2,6 @@ const fs = require('fs');
 const path = require('path');
 const util = require('util');
 const tar = require('tar');
-const fstream = require('fstream');
-const zlib = require('zlib');
 const rimraf = require('rimraf');
 // const compressor = require('node-minify');
 const simpleGit = require('simple-git/promise');
@@ -92,8 +90,7 @@ const restoreFromArchive = () => {
     fs.renameSync(buildPath, buildBackupPath);
   }
   if (fs.existsSync(buildArchPath)) {
-    tar.x({ gzip: true, sync: true, cwd: path.join(__dirname, 'build') })
-      .pipe(fstream.Writer({ path: buildPath, type: 'Directory' }));
+    tar.x({ gzip: true, sync: true, cwd: path.join(__dirname, 'build') });
   }
 };
 
