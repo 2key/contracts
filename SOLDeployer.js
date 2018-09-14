@@ -23,10 +23,10 @@ const twoKeyProtocolLibGit = simpleGit(twoKeyProtocolLibDir);
 
 async function handleExit(p) {
   console.log(p);
-  // if (p !== 0 && (process.argv[2] !== '--migrate' && process.argv[2] !== '--test')) {
-  //   await contractsGit.reset('hard');
-  //   await twoKeyProtocolLibGit.reset('hard');
-  // }
+  if (p !== 0 && (process.argv[2] !== '--migrate' && process.argv[2] !== '--test')) {
+    await contractsGit.reset('hard');
+    await twoKeyProtocolLibGit.reset('hard');
+  }
   process.exit();
 }
 
@@ -85,14 +85,24 @@ const archiveBuild = () => new Promise(async (resolve, reject) => {
   }
 });
 
-const restoreFromArchive = () => {
-  if (fs.existsSync(buildPath)) {
-    fs.renameSync(buildPath, buildBackupPath);
+const restoreFromArchive = () => new Promise(async (resolve, reject) => {
+  try {
+    if (fs.existsSync(buildPath)) {
+      console.log('Backup current artifacts to', buildBackupPath);
+      if (fs.existsSync(buildBackupPath)) {
+        await rmDir(buildBackupPath);
+      }
+      fs.renameSync(buildPath, buildBackupPath);
+    }
+    if (fs.existsSync(buildArchPath)) {
+      console.log('Excracting', buildArchPath)
+      tar.x({file: buildArchPath, gzip: true, sync: true, cwd: path.join(__dirname, 'build')});
+    }
+    resolve()
+  } catch (e) {
+    reject(e);
   }
-  if (fs.existsSync(buildArchPath)) {
-    tar.x({ gzip: true, sync: true, cwd: path.join(__dirname, 'build') });
-  }
-};
+});
 
 const generateSOLInterface = () => new Promise((resolve, reject) => {
   if (fs.existsSync(buildPath)) {
@@ -170,7 +180,7 @@ async function deploy() {
     }
 
     // TODO: Add build/contracts backup
-    restoreFromArchive();
+    await restoreFromArchive();
 
     const networks = process.argv[2].split(',');
     const network = networks.join('/');
@@ -322,6 +332,9 @@ async function main() {
       break;
     case '--archive':
       archiveBuild();
+      break;
+    case '--extract':
+      restoreFromArchive();
       break;
     default:
       deploy();
