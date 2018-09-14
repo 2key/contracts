@@ -59,20 +59,24 @@ const getCurrentDeployedAddresses = () => new Promise((resolve) => {
   }
 });
 
+const rmDir = (dir) => new Promise((resolve) => {
+  rimraf(dir, () => {
+    resolve();
+  })
+});
+
+
 const archiveBuild = () => new Promise(async (resolve, reject) => {
   try {
-    // TODO: Archive build
     console.log('Archive', buildPath, buildArchPath);
     if (fs.existsSync(buildPath)) {
-      tar.c({gzip: true, sync: true}, ['build/contracts']).pipe(fs.createWriteStream(buildArchPath));
+      tar.c({
+        gzip: true, sync: true, cwd: path.join(__dirname, 'build')
+      }, ['contracts'])
+        .pipe(fs.createWriteStream(buildArchPath));
 
-      const rmDir = new Promise((resolve) => {
-        rimraf(buildPath, () => {
-          resolve();
-        })
-      });
 
-      await rmDir;
+      await rmDir(buildPath);
       if (fs.existsSync(buildBackupPath)) {
         fs.renameSync(buildBackupPath, buildPath);
       }
@@ -82,6 +86,16 @@ const archiveBuild = () => new Promise(async (resolve, reject) => {
     reject(err);
   }
 });
+
+const restoreFromArchive = () => {
+  if (fs.existsSync(buildPath)) {
+    fs.renameSync(buildPath, buildBackupPath);
+  }
+  if (fs.existsSync(buildArchPath)) {
+    tar.x({ gzip: true, sync: true, cwd: path.join(__dirname, 'build') })
+      .pipe(fstream.Writer({ path: buildPath, type: 'Directory' }));
+  }
+};
 
 const generateSOLInterface = () => new Promise((resolve, reject) => {
   if (fs.existsSync(buildPath)) {
@@ -118,13 +132,6 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
 const runProcess = (app, args) => new Promise((resolve, reject) => {
   console.log('Run process', app, args && args.join(' '));
   const proc = childProcess.spawn(app, args, {stdio: [process.stdin, process.stdout, process.stderr]});
-  // proc.stdout.on('data', (data) => {
-  //   console.log(data.toString('utf8'));
-  // });
-  // proc.stderr.on('data', (data) => {
-  //   console.log(data.toString('utf8'));
-  //   reject(data);
-  // });
   proc.on('close', async (code) => {
     console.log('process exit with code', code);
     if (code === 0) {
@@ -166,14 +173,7 @@ async function deploy() {
     }
 
     // TODO: Add build/contracts backup
-
-    if (fs.existsSync(buildPath)) {
-      fs.renameSync(buildPath, buildBackupPath);
-    }
-    if (fs.existsSync(buildArchPath)) {
-      tar.x({ gzip: true, sync: true })
-        .pipe(fstream.Writer({ path: buildPath, type: 'Directory' }));
-    }
+    restoreFromArchive();
 
     const networks = process.argv[2].split(',');
     const network = networks.join('/');
@@ -246,7 +246,7 @@ async function deploy() {
     if (!local) {
       await runProcess(path.join(__dirname, 'node_modules/.bin/webpack'));
     }
-
+    // TODO: Archive build
     await archiveBuild();
 
     contractsStatus = await contractsGit.status();
