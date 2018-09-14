@@ -6,10 +6,10 @@ const nodeExternals = require('webpack-node-externals');
 const libraryName = 'twokey-protocol';
 
 const config = {
-  entry: './2key-protocol-src/index.ts',
+  entry: './2key-protocol/src/index.ts',
   devtool: 'source-map',
   output: {
-    path: path.join(__dirname, 'build', '2key-protocol-npm'),
+    path: path.join(__dirname, '2key-protocol', 'dist'),
     filename: 'index.js',
     library: libraryName,
     libraryTarget: 'umd',
