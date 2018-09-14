@@ -465,6 +465,7 @@ export class TwoKeyAcquisitionCampaignERC20 extends TC.TypeChainContract {
       {
         constant: false,
         inputs: [
+          { name: "sig", type: "bytes" },
           { name: "_public_link_key", type: "address" },
           { name: "cut", type: "uint256" }
         ],
@@ -820,13 +821,18 @@ export class TwoKeyAcquisitionCampaignERC20 extends TC.TypeChainContract {
     );
   }
   public setPubLinkWithCutTx(
+    sig: string[],
     _public_link_key: BigNumber | string,
     cut: BigNumber | number
   ): TC.DeferredTransactionWrapper<TC.ITxParams> {
     return new TC.DeferredTransactionWrapper<TC.ITxParams>(
       this,
       "setPubLinkWithCut",
-      [_public_link_key.toString(), cut.toString()]
+      [
+        sig.map(val => val.toString()),
+        _public_link_key.toString(),
+        cut.toString()
+      ]
     );
   }
   public setPublicLinkKeyTx(
