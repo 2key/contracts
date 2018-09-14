@@ -176,14 +176,14 @@ async function deploy() {
     }
     console.log(process.argv);
     const local = process.argv[2].includes('local');
-    // if (!local) {
-    //   await test();
-    // }
+    if (!local) {
+      await test();
+    }
 
     // TODO: Add build/contracts backup
     await restoreFromArchive();
-    console.log( fs.existsSync(buildPath));
-    console.log(fs.readdirSync(buildPath));
+    // console.log( fs.existsSync(buildPath));
+    // console.log(fs.readdirSync(buildPath));
 
     const networks = process.argv[2].split(',');
     const network = networks.join('/');
