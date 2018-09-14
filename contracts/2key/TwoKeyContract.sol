@@ -92,13 +92,16 @@ contract TwoKeyContract is StandardToken, Ownable {
    * @param _value uint256 the amount of tokens to be transferred
    */
   function transferFromQuota(address _from, address _to, uint256 _value) public returns (bool) {
-    require(_to != address(0));
-    require(_value <= balances[_from]);
-    require(_value <= allowed[_from][msg.sender]);
+    require(_to != address(0), '_to already has ARCs');
+    require(_value <= balances[_from], '_from does not have enough ARCs');
+    require(_value <= allowed[_from][msg.sender], 'sender not allowed');
 
     balances[_from] = balances[_from].sub(_value);
-    balances[_to] = balances[_to].add(_value * quota);
-    totalSupply_ = totalSupply_ + _value * (quota - 1);
+//    uint256 v = _value.mul(quota);
+//    uint256 w = balanceOf(_to);
+//    uint256 x = w.add(v);
+    balances[_to] = balances[_to].add(_value.mul(quota));
+    totalSupply_ = totalSupply_.add(_value.mul(quota.sub(1)));
     allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
     emit Transfer(_from, _to, _value);
     return true;
@@ -111,8 +114,8 @@ contract TwoKeyContract is StandardToken, Ownable {
    * @param _value uint256 the amount of tokens to be transferred
    */
   function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
-    require(received_from[_to] == 0);
-    require(_from != address(0));
+    require(received_from[_to] == 0, '_to already has ARCs');
+    require(_from != address(0), '_from does not have ARCs');
     allowed[_from][msg.sender] = 1;
     if (transferFromQuota(_from, _to, _value)) {
       if (received_from[_to] == 0) {
