@@ -414,7 +414,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
         require(cut <= 100 || cut == 255);
          require(influencer2cut[msg.sender] == 0);
         if (cut <= 100) {
-            cut++;
+//            cut++;
         }
         influencer2cut[msg.sender] = cut;
     }
