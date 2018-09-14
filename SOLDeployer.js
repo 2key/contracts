@@ -66,8 +66,8 @@ const rmDir = (dir) => new Promise((resolve) => {
 
 const archiveBuild = () => new Promise(async (resolve, reject) => {
   try {
-    console.log('Archive', buildPath, buildArchPath);
     if (fs.existsSync(buildPath)) {
+      console.log('Archiving current artifacts to', buildArchPath);
       tar.c({
         gzip: true, sync: true, cwd: path.join(__dirname, 'build')
       }, ['contracts'])
@@ -76,6 +76,7 @@ const archiveBuild = () => new Promise(async (resolve, reject) => {
 
       await rmDir(buildPath);
       if (fs.existsSync(buildBackupPath)) {
+        console.log('Restoring artifacts from backup', buildBackupPath);
         fs.renameSync(buildBackupPath, buildPath);
       }
     }
