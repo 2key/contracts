@@ -12,9 +12,9 @@ const whitelist = require('./ContractDeploymentWhiteList.json');
 const readdir = util.promisify(fs.readdir);
 const buildPath = path.join(__dirname, 'build', 'contracts');
 const buildBackupPath = path.join(__dirname, 'build', 'contracts.bak');
-const twoKeyProtocolDir = path.join(__dirname, '2key-protocol-src');
+const twoKeyProtocolDir = path.join(__dirname, '2key-protocol', 'src');
 const buildArchPath = path.join(twoKeyProtocolDir, 'contracts.tar.gz');
-const twoKeyProtocolLibDir = path.join(__dirname, 'build', '2key-protocol-npm');
+const twoKeyProtocolLibDir = path.join(__dirname, '2key-protocol', 'dist');
 
 const deploymentHistoryPath = path.join(__dirname, 'history.json');
 
@@ -168,7 +168,8 @@ async function deploy() {
     await twoKeyProtocolLibGit.reset('hard');
     twoKeyProtocolStatus = await twoKeyProtocolLibGit.status();
     const localChanges = contractsStatus.files
-      .filter(item => !(item.path.includes('build/2key-protocol-npm')
+      // .filter(item => !(item.path.includes('2key-protocol-npm')
+      .filter(item => !(item.path.includes('dist')
         || (process.env.NODE_ENV === 'development' && item.path.includes(process.argv[1].split('/').pop()))));
     if (contractsStatus.behind || localChanges.length) {
       console.log('You have unsynced changes!', localChanges);
@@ -289,7 +290,7 @@ async function deploy() {
 const test = () => new Promise(async (resolve, reject) => {
   // const testsPath = path.join(twoKeyProtocolDir, 'test');
   try {
-    await runProcess('node', ['-r', 'dotenv/config', './node_modules/.bin/mocha', '--exit', '--bail', '-r', 'ts-node/register', '2key-protocol-src/**/*.spec.ts']);
+    await runProcess('node', ['-r', 'dotenv/config', './node_modules/.bin/mocha', '--exit', '--bail', '-r', 'ts-node/register', '2key-protocol/**/*.spec.ts']);
     resolve();
   } catch (err) {
     reject(err);

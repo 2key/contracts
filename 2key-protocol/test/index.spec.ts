@@ -6,13 +6,14 @@ import ProviderEngine from 'web3-provider-engine';
 import RpcSubprovider from 'web3-provider-engine/subproviders/rpc';
 import WSSubprovider from 'web3-provider-engine/subproviders/websocket';
 import WalletSubprovider from 'ethereumjs-wallet/provider-engine';
-import TwoKeyProtocol from '../index';
-import contractsMeta from '../contracts/meta';
+// import { TwoKeyProtocol } from '../src/index';
+import { TwoKeyProtocol } from '../src';
+import contractsMeta from '../src/contracts/meta';
 import createWeb3 from './_web3';
 
 const {env} = process;
 
-const artifacts = require('../contracts.json');
+const artifacts = require('../src/contracts.json');
 const rpcUrl = env.RCP_URL;
 const mainNetId = env.MAIN_NET_ID;
 const syncTwoKeyNetId = env.SYNC_NET_ID;
@@ -263,6 +264,15 @@ describe('TwoKeyProtocol', () => {
       }
     }).timeout(30000);
 
+    it('should get public link for address', async () => {
+        try {
+            const publicLink = await twoKeyProtocol.getPublicLink(campaignAddress);
+            expect(parseInt(publicLink, 16)).to.be.greaterThan(0);
+        } catch (e) {
+            throw e;
+        }
+    }).timeout(10000);
+
     it('should create a join link', async () => {
         twoKeyProtocol = new TwoKeyProtocol({
             web3: web3.gmail(),
@@ -296,10 +306,27 @@ describe('TwoKeyProtocol', () => {
         expect(hash).to.be.a('string');
     }).timeout(300000);
 
+    it('should get public link for address', async () => {
+        try {
+            const publicLink = await twoKeyProtocol.getPublicLink(campaignAddress);
+            expect(parseInt(publicLink, 16)).to.be.greaterThan(0);
+        } catch (e) {
+            throw e;
+        }
+    }).timeout(10000);
+
     it('should show influencer cut', async () => {
-        const cut = await twoKeyProtocol.getInfluencerReward(campaignAddress, env.GMAIL_ADDRESS);
-        console.log('Influencer CUT', env.GMAIL_ADDRESS, cut);
+        const gmailCut = await twoKeyProtocol.getReferrerCut(campaignAddress, env.GMAIL_ADDRESS);
+        const test4Cut = await twoKeyProtocol.getReferrerCut(campaignAddress, env.TEST4_ADDRESS);
+        console.log('Influencer CUT', env.GMAIL_ADDRESS, gmailCut);
+        console.log('Influencer CUT', env.TEST4_ADDRESS, test4Cut);
     }).timeout(15000);
+
+    it('should buy some tokens', async () => {
+        const txHash = await twoKeyProtocol.buyCampaignAssetsWithETH(campaignAddress, 0.05, refLink);
+        console.log(txHash);
+        expect(txHash).to.be.a('string');
+    }).timeout(30000);
 
     it('should print after all tests', (done) => {
         setTimeout(async () => {
@@ -307,6 +334,8 @@ describe('TwoKeyProtocol', () => {
             const aydnep = await twoKeyProtocol.getBalance(env.AYDNEP_ADDRESS);
             const gmail = await twoKeyProtocol.getBalance(env.GMAIL_ADDRESS);
             const test4 = await twoKeyProtocol.getBalance(env.TEST4_ADDRESS);
+            const res = await twoKeyProtocol.getFungibleInventory(campaignAddress);
+            console.log('Campaign Balance', res);
             console.log('contractor balance', business.balance);
             console.log('aydnep balance', aydnep.balance);
             console.log('gmail balance', gmail.balance);

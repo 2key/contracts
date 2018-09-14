@@ -394,7 +394,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
 //        return public_link_key[_address];
 //    }
 
-    function setPubLinkWithCut(address _public_link_key, uint256 cut) {
+    function setPubLinkWithCut(bytes sig, address _public_link_key, uint256 cut) {
+        transferSig(sig);
         setPublicLinkKey(_public_link_key);
         setCut(cut);
     }
@@ -411,9 +412,9 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
         // the value 255 is used to signal equal partition with other influencers
         // A sender can set the value only once in a contract
         require(cut <= 100 || cut == 255);
-        require(influencer2cut[msg.sender] == 0);
+         require(influencer2cut[msg.sender] == 0);
         if (cut <= 100) {
-            cut++;
+//            cut++;
         }
         influencer2cut[msg.sender] = cut;
     }

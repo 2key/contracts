@@ -4,7 +4,7 @@
 import { BigNumber } from "bignumber.js";
 import * as TC from "./typechain-runtime";
 
-export class Crowdsale extends TC.TypeChainContract {
+export class CappedCrowdsale extends TC.TypeChainContract {
   public readonly rawWeb3Contract: any;
 
   public constructor(web3: any, address: string | BigNumber) {
@@ -13,6 +13,15 @@ export class Crowdsale extends TC.TypeChainContract {
         constant: true,
         inputs: [],
         name: "rate",
+        outputs: [{ name: "", type: "uint256" }],
+        payable: false,
+        stateMutability: "view",
+        type: "function"
+      },
+      {
+        constant: true,
+        inputs: [],
+        name: "cap",
         outputs: [{ name: "", type: "uint256" }],
         payable: false,
         stateMutability: "view",
@@ -37,6 +46,15 @@ export class Crowdsale extends TC.TypeChainContract {
         type: "function"
       },
       {
+        constant: false,
+        inputs: [{ name: "_beneficiary", type: "address" }],
+        name: "buyTokens",
+        outputs: [],
+        payable: true,
+        stateMutability: "payable",
+        type: "function"
+      },
+      {
         constant: true,
         inputs: [],
         name: "token",
@@ -46,11 +64,7 @@ export class Crowdsale extends TC.TypeChainContract {
         type: "function"
       },
       {
-        inputs: [
-          { name: "_rate", type: "uint256" },
-          { name: "_wallet", type: "address" },
-          { name: "_token", type: "address" }
-        ],
+        inputs: [{ name: "_cap", type: "uint256" }],
         payable: false,
         stateMutability: "nonpayable",
         type: "constructor"
@@ -68,12 +82,22 @@ export class Crowdsale extends TC.TypeChainContract {
         type: "event"
       },
       {
-        constant: false,
-        inputs: [{ name: "_beneficiary", type: "address" }],
-        name: "buyTokens",
-        outputs: [],
-        payable: true,
-        stateMutability: "payable",
+        anonymous: false,
+        inputs: [
+          { indexed: true, name: "_to", type: "address" },
+          { indexed: false, name: "value", type: "uint256" },
+          { indexed: true, name: "token", type: "address" }
+        ],
+        name: "Msg",
+        type: "event"
+      },
+      {
+        constant: true,
+        inputs: [],
+        name: "capReached",
+        outputs: [{ name: "", type: "bool" }],
+        payable: false,
+        stateMutability: "view",
         type: "function"
       }
     ];
@@ -83,8 +107,8 @@ export class Crowdsale extends TC.TypeChainContract {
   static async createAndValidate(
     web3: any,
     address: string | BigNumber
-  ): Promise<Crowdsale> {
-    const contract = new Crowdsale(web3, address);
+  ): Promise<CappedCrowdsale> {
+    const contract = new CappedCrowdsale(web3, address);
     const code = await TC.promisify(web3.eth.getCode, [address]);
 
     // in case of missing smartcontract, code can be equal to "0x0" or "0x" depending on exact web3 implementation
@@ -99,6 +123,10 @@ export class Crowdsale extends TC.TypeChainContract {
     return TC.promisify(this.rawWeb3Contract.rate, []);
   }
 
+  public get cap(): Promise<BigNumber> {
+    return TC.promisify(this.rawWeb3Contract.cap, []);
+  }
+
   public get weiRaised(): Promise<BigNumber> {
     return TC.promisify(this.rawWeb3Contract.weiRaised, []);
   }
@@ -109,6 +137,10 @@ export class Crowdsale extends TC.TypeChainContract {
 
   public get token(): Promise<string> {
     return TC.promisify(this.rawWeb3Contract.token, []);
+  }
+
+  public get capReached(): Promise<boolean> {
+    return TC.promisify(this.rawWeb3Contract.capReached, []);
   }
 
   public buyTokensTx(
@@ -148,5 +180,31 @@ export class Crowdsale extends TC.TypeChainContract {
         beneficiary?: BigNumber | string | Array<BigNumber | string>;
       }
     >(this, "TokenPurchase", eventFilter);
+  }
+  public MsgEvent(eventFilter: {
+    _to?: BigNumber | string | Array<BigNumber | string>;
+    token?: BigNumber | string | Array<BigNumber | string>;
+  }): TC.DeferredEventWrapper<
+    {
+      _to: BigNumber | string;
+      value: BigNumber | number;
+      token: BigNumber | string;
+    },
+    {
+      _to?: BigNumber | string | Array<BigNumber | string>;
+      token?: BigNumber | string | Array<BigNumber | string>;
+    }
+  > {
+    return new TC.DeferredEventWrapper<
+      {
+        _to: BigNumber | string;
+        value: BigNumber | number;
+        token: BigNumber | string;
+      },
+      {
+        _to?: BigNumber | string | Array<BigNumber | string>;
+        token?: BigNumber | string | Array<BigNumber | string>;
+      }
+    >(this, "Msg", eventFilter);
   }
 }

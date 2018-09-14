@@ -4,7 +4,7 @@
 import { BigNumber } from "bignumber.js";
 import * as TC from "./typechain-runtime";
 
-export class TwoKeyCampaignCrowdsale extends TC.TypeChainContract {
+export class TwoKeyAcquisitionCampaignERC20 extends TC.TypeChainContract {
   public readonly rawWeb3Contract: any;
 
   public constructor(web3: any, address: string | BigNumber) {
@@ -52,19 +52,6 @@ export class TwoKeyCampaignCrowdsale extends TC.TypeChainContract {
         type: "function"
       },
       {
-        constant: false,
-        inputs: [
-          { name: "_tokenID", type: "uint256" },
-          { name: "_assetContract", type: "address" },
-          { name: "_amount", type: "uint256" }
-        ],
-        name: "transferAssetTwoKeyToken",
-        outputs: [],
-        payable: false,
-        stateMutability: "nonpayable",
-        type: "function"
-      },
-      {
         constant: true,
         inputs: [
           { name: "c", type: "address" },
@@ -84,15 +71,6 @@ export class TwoKeyCampaignCrowdsale extends TC.TypeChainContract {
         outputs: [{ name: "", type: "uint256" }],
         payable: false,
         stateMutability: "view",
-        type: "function"
-      },
-      {
-        constant: false,
-        inputs: [{ name: "sig", type: "bytes" }],
-        name: "transferSig",
-        outputs: [],
-        payable: false,
-        stateMutability: "nonpayable",
         type: "function"
       },
       {
@@ -128,15 +106,6 @@ export class TwoKeyCampaignCrowdsale extends TC.TypeChainContract {
       },
       {
         constant: true,
-        inputs: [],
-        name: "getAssetContractAddress",
-        outputs: [{ name: "", type: "address" }],
-        payable: false,
-        stateMutability: "view",
-        type: "function"
-      },
-      {
-        constant: true,
         inputs: [{ name: "", type: "address" }],
         name: "public_link_key",
         outputs: [{ name: "", type: "address" }],
@@ -158,15 +127,6 @@ export class TwoKeyCampaignCrowdsale extends TC.TypeChainContract {
         type: "function"
       },
       {
-        constant: true,
-        inputs: [],
-        name: "checkInventoryBalance",
-        outputs: [{ name: "", type: "uint256" }],
-        payable: false,
-        stateMutability: "view",
-        type: "function"
-      },
-      {
         constant: false,
         inputs: [
           { name: "_spender", type: "address" },
@@ -180,41 +140,9 @@ export class TwoKeyCampaignCrowdsale extends TC.TypeChainContract {
       },
       {
         constant: true,
-        inputs: [],
-        name: "getContractBalance",
-        outputs: [{ name: "", type: "uint256" }],
-        payable: false,
-        stateMutability: "view",
-        type: "function"
-      },
-      {
-        constant: true,
         inputs: [{ name: "_owner", type: "address" }],
         name: "balanceOf",
         outputs: [{ name: "", type: "uint256" }],
-        payable: false,
-        stateMutability: "view",
-        type: "function"
-      },
-      {
-        constant: false,
-        inputs: [{ name: "_amount", type: "uint256" }],
-        name: "addFungibleAsset",
-        outputs: [{ name: "", type: "bool" }],
-        payable: false,
-        stateMutability: "nonpayable",
-        type: "function"
-      },
-      {
-        constant: true,
-        inputs: [],
-        name: "getConstantInfo",
-        outputs: [
-          { name: "", type: "uint256" },
-          { name: "", type: "uint256" },
-          { name: "", type: "uint256" },
-          { name: "", type: "uint256" }
-        ],
         payable: false,
         stateMutability: "view",
         type: "function"
@@ -247,15 +175,6 @@ export class TwoKeyCampaignCrowdsale extends TC.TypeChainContract {
         type: "function"
       },
       {
-        constant: false,
-        inputs: [],
-        name: "buyProduct",
-        outputs: [],
-        payable: true,
-        stateMutability: "payable",
-        type: "function"
-      },
-      {
         constant: true,
         inputs: [{ name: "", type: "address" }],
         name: "influencer2cut",
@@ -278,60 +197,11 @@ export class TwoKeyCampaignCrowdsale extends TC.TypeChainContract {
       },
       {
         constant: true,
-        inputs: [{ name: "_from", type: "address" }],
-        name: "checkAmountAddressSent",
-        outputs: [{ name: "", type: "uint256" }],
-        payable: false,
-        stateMutability: "view",
-        type: "function"
-      },
-      {
-        constant: false,
-        inputs: [
-          { name: "_converter", type: "address" },
-          { name: "_assetContract", type: "address" },
-          { name: "_amount", type: "uint256" }
-        ],
-        name: "expireEscrow",
-        outputs: [{ name: "", type: "bool" }],
-        payable: false,
-        stateMutability: "nonpayable",
-        type: "function"
-      },
-      {
-        constant: false,
-        inputs: [{ name: "_amount", type: "uint256" }],
-        name: "redeemTwoKeyToken",
-        outputs: [],
-        payable: false,
-        stateMutability: "nonpayable",
-        type: "function"
-      },
-      {
-        constant: true,
         inputs: [],
         name: "quota",
         outputs: [{ name: "", type: "uint256" }],
         payable: false,
         stateMutability: "view",
-        type: "function"
-      },
-      {
-        constant: false,
-        inputs: [{ name: "_public_link_key", type: "address" }],
-        name: "setPublicLinkKey",
-        outputs: [],
-        payable: false,
-        stateMutability: "nonpayable",
-        type: "function"
-      },
-      {
-        constant: false,
-        inputs: [],
-        name: "checkAndUpdateInventoryBalance",
-        outputs: [{ name: "", type: "uint256" }],
-        payable: false,
-        stateMutability: "nonpayable",
         type: "function"
       },
       {
@@ -348,24 +218,6 @@ export class TwoKeyCampaignCrowdsale extends TC.TypeChainContract {
       },
       {
         constant: true,
-        inputs: [{ name: "last_influencer", type: "address" }],
-        name: "getCuts",
-        outputs: [{ name: "", type: "uint256[]" }],
-        payable: false,
-        stateMutability: "view",
-        type: "function"
-      },
-      {
-        constant: false,
-        inputs: [{ name: "sig", type: "bytes" }],
-        name: "buySign",
-        outputs: [],
-        payable: true,
-        stateMutability: "payable",
-        type: "function"
-      },
-      {
-        constant: true,
         inputs: [
           { name: "_owner", type: "address" },
           { name: "_spender", type: "address" }
@@ -374,30 +226,6 @@ export class TwoKeyCampaignCrowdsale extends TC.TypeChainContract {
         outputs: [{ name: "", type: "uint256" }],
         payable: false,
         stateMutability: "view",
-        type: "function"
-      },
-      {
-        constant: false,
-        inputs: [
-          { name: "_units", type: "uint256" },
-          { name: "_bounty", type: "uint256" }
-        ],
-        name: "updateRefchainRewardsAndConverterProceeds",
-        outputs: [],
-        payable: true,
-        stateMutability: "payable",
-        type: "function"
-      },
-      {
-        constant: false,
-        inputs: [
-          { name: "_public_link_key", type: "address" },
-          { name: "cut", type: "uint256" }
-        ],
-        name: "setPubLinkWithCut",
-        outputs: [],
-        payable: false,
-        stateMutability: "nonpayable",
         type: "function"
       },
       {
@@ -422,30 +250,16 @@ export class TwoKeyCampaignCrowdsale extends TC.TypeChainContract {
         type: "function"
       },
       {
-        constant: false,
         inputs: [
-          { name: "_converter", type: "address" },
-          { name: "_assetName", type: "string" },
-          { name: "_assetContract", type: "address" },
-          { name: "_amount", type: "uint256" }
-        ],
-        name: "cancelAssetTwoKey",
-        outputs: [{ name: "", type: "bool" }],
-        payable: false,
-        stateMutability: "nonpayable",
-        type: "function"
-      },
-      {
-        inputs: [
-          { name: "_eventSource", type: "address" },
-          { name: "_economy", type: "address" },
+          { name: "_twoKeyEventSource", type: "address" },
+          { name: "_twoKeyEconomy", type: "address" },
           { name: "_whitelistInfluencer", type: "address" },
           { name: "_whitelistConverter", type: "address" },
           { name: "_moderator", type: "address" },
-          { name: "_start", type: "uint256" },
-          { name: "_duration", type: "uint256" },
+          { name: "_openingTime", type: "uint256" },
+          { name: "_closingTime", type: "uint256" },
           { name: "_expiryConversion", type: "uint256" },
-          { name: "_escrowPrecentage", type: "uint256" },
+          { name: "_escrowPercentage", type: "uint256" },
           { name: "_rate", type: "uint256" },
           { name: "_maxPi", type: "uint256" },
           { name: "_assetContract", type: "address" },
@@ -520,16 +334,29 @@ export class TwoKeyCampaignCrowdsale extends TC.TypeChainContract {
       },
       {
         constant: false,
-        inputs: [
-          { name: "_from", type: "address" },
-          { name: "_tokenID", type: "uint256" },
-          { name: "_assetContract", type: "address" },
-          { name: "_amountOrIndex", type: "uint256" }
-        ],
-        name: "buyFromWithTwoKey",
-        outputs: [],
-        payable: true,
-        stateMutability: "payable",
+        inputs: [{ name: "_amount", type: "uint256" }],
+        name: "addFungibleAsset",
+        outputs: [{ name: "", type: "bool" }],
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "function"
+      },
+      {
+        constant: true,
+        inputs: [],
+        name: "checkInventoryBalance",
+        outputs: [{ name: "", type: "uint256" }],
+        payable: false,
+        stateMutability: "view",
+        type: "function"
+      },
+      {
+        constant: false,
+        inputs: [],
+        name: "checkAndUpdateInventoryBalance",
+        outputs: [{ name: "", type: "uint256" }],
+        payable: false,
+        stateMutability: "nonpayable",
         type: "function"
       },
       {
@@ -544,6 +371,166 @@ export class TwoKeyCampaignCrowdsale extends TC.TypeChainContract {
         payable: false,
         stateMutability: "nonpayable",
         type: "function"
+      },
+      {
+        constant: false,
+        inputs: [
+          { name: "_tokenID", type: "uint256" },
+          { name: "_assetContract", type: "address" },
+          { name: "_amount", type: "uint256" }
+        ],
+        name: "transferAssetTwoKeyToken",
+        outputs: [],
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "function"
+      },
+      {
+        constant: false,
+        inputs: [
+          { name: "_converter", type: "address" },
+          { name: "_assetName", type: "string" },
+          { name: "_assetContract", type: "address" },
+          { name: "_amount", type: "uint256" }
+        ],
+        name: "cancelAssetTwoKey",
+        outputs: [{ name: "", type: "bool" }],
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "function"
+      },
+      {
+        constant: false,
+        inputs: [
+          { name: "_converter", type: "address" },
+          { name: "_assetContract", type: "address" },
+          { name: "_amount", type: "uint256" }
+        ],
+        name: "expireEscrow",
+        outputs: [{ name: "", type: "bool" }],
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "function"
+      },
+      {
+        constant: false,
+        inputs: [{ name: "_amount", type: "uint256" }],
+        name: "redeemTwoKeyToken",
+        outputs: [],
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "function"
+      },
+      {
+        constant: true,
+        inputs: [{ name: "_from", type: "address" }],
+        name: "checkAmountAddressSent",
+        outputs: [{ name: "", type: "uint256" }],
+        payable: false,
+        stateMutability: "view",
+        type: "function"
+      },
+      {
+        constant: true,
+        inputs: [],
+        name: "getContractBalance",
+        outputs: [{ name: "", type: "uint256" }],
+        payable: false,
+        stateMutability: "view",
+        type: "function"
+      },
+      {
+        constant: true,
+        inputs: [],
+        name: "getAssetContractAddress",
+        outputs: [{ name: "", type: "address" }],
+        payable: false,
+        stateMutability: "view",
+        type: "function"
+      },
+      {
+        constant: true,
+        inputs: [],
+        name: "getConstantInfo",
+        outputs: [
+          { name: "", type: "uint256" },
+          { name: "", type: "uint256" },
+          { name: "", type: "uint256" },
+          { name: "", type: "uint256" }
+        ],
+        payable: false,
+        stateMutability: "view",
+        type: "function"
+      },
+      {
+        constant: false,
+        inputs: [
+          { name: "sig", type: "bytes" },
+          { name: "_public_link_key", type: "address" },
+          { name: "cut", type: "uint256" }
+        ],
+        name: "setPubLinkWithCut",
+        outputs: [],
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "function"
+      },
+      {
+        constant: false,
+        inputs: [{ name: "_public_link_key", type: "address" }],
+        name: "setPublicLinkKey",
+        outputs: [],
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "function"
+      },
+      {
+        constant: true,
+        inputs: [{ name: "last_influencer", type: "address" }],
+        name: "getCuts",
+        outputs: [{ name: "", type: "uint256[]" }],
+        payable: false,
+        stateMutability: "view",
+        type: "function"
+      },
+      {
+        constant: false,
+        inputs: [{ name: "sig", type: "bytes" }],
+        name: "transferSig",
+        outputs: [],
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "function"
+      },
+      {
+        constant: false,
+        inputs: [],
+        name: "buyProduct",
+        outputs: [],
+        payable: true,
+        stateMutability: "payable",
+        type: "function"
+      },
+      {
+        constant: false,
+        inputs: [{ name: "sig", type: "bytes" }],
+        name: "buySign",
+        outputs: [],
+        payable: true,
+        stateMutability: "payable",
+        type: "function"
+      },
+      {
+        constant: false,
+        inputs: [
+          { name: "_units", type: "uint256" },
+          { name: "_bounty", type: "uint256" }
+        ],
+        name: "updateRefchainRewardsAndConverterProceeds",
+        outputs: [],
+        payable: true,
+        stateMutability: "payable",
+        type: "function"
       }
     ];
     super(web3, address, abi);
@@ -552,8 +539,8 @@ export class TwoKeyCampaignCrowdsale extends TC.TypeChainContract {
   static async createAndValidate(
     web3: any,
     address: string | BigNumber
-  ): Promise<TwoKeyCampaignCrowdsale> {
-    const contract = new TwoKeyCampaignCrowdsale(web3, address);
+  ): Promise<TwoKeyAcquisitionCampaignERC20> {
+    const contract = new TwoKeyAcquisitionCampaignERC20(web3, address);
     const code = await TC.promisify(web3.eth.getCode, [address]);
 
     // in case of missing smartcontract, code can be equal to "0x0" or "0x" depending on exact web3 implementation
@@ -576,18 +563,6 @@ export class TwoKeyCampaignCrowdsale extends TC.TypeChainContract {
     return TC.promisify(this.rawWeb3Contract.decimals, []);
   }
 
-  public get getAssetContractAddress(): Promise<string> {
-    return TC.promisify(this.rawWeb3Contract.getAssetContractAddress, []);
-  }
-
-  public get checkInventoryBalance(): Promise<BigNumber> {
-    return TC.promisify(this.rawWeb3Contract.checkInventoryBalance, []);
-  }
-
-  public get getContractBalance(): Promise<BigNumber> {
-    return TC.promisify(this.rawWeb3Contract.getContractBalance, []);
-  }
-
   public get ipfs_hash(): Promise<string> {
     return TC.promisify(this.rawWeb3Contract.ipfs_hash, []);
   }
@@ -602,6 +577,18 @@ export class TwoKeyCampaignCrowdsale extends TC.TypeChainContract {
 
   public get quota(): Promise<BigNumber> {
     return TC.promisify(this.rawWeb3Contract.quota, []);
+  }
+
+  public get checkInventoryBalance(): Promise<BigNumber> {
+    return TC.promisify(this.rawWeb3Contract.checkInventoryBalance, []);
+  }
+
+  public get getContractBalance(): Promise<BigNumber> {
+    return TC.promisify(this.rawWeb3Contract.getContractBalance, []);
+  }
+
+  public get getAssetContractAddress(): Promise<string> {
+    return TC.promisify(this.rawWeb3Contract.getAssetContractAddress, []);
   }
 
   public units(arg0: BigNumber | string): Promise<BigNumber> {
@@ -634,26 +621,8 @@ export class TwoKeyCampaignCrowdsale extends TC.TypeChainContract {
     return TC.promisify(this.rawWeb3Contract.balanceOf, [_owner.toString()]);
   }
 
-  public getConstantInfo(): Promise<
-    [BigNumber, BigNumber, BigNumber, BigNumber]
-  > {
-    return TC.promisify(this.rawWeb3Contract.getConstantInfo, []);
-  }
-
   public influencer2cut(arg0: BigNumber | string): Promise<BigNumber> {
     return TC.promisify(this.rawWeb3Contract.influencer2cut, [arg0.toString()]);
-  }
-
-  public checkAmountAddressSent(_from: BigNumber | string): Promise<BigNumber> {
-    return TC.promisify(this.rawWeb3Contract.checkAmountAddressSent, [
-      _from.toString()
-    ]);
-  }
-
-  public getCuts(last_influencer: BigNumber | string): Promise<BigNumber[]> {
-    return TC.promisify(this.rawWeb3Contract.getCuts, [
-      last_influencer.toString()
-    ]);
   }
 
   public allowance(
@@ -686,6 +655,24 @@ export class TwoKeyCampaignCrowdsale extends TC.TypeChainContract {
     return TC.promisify(this.rawWeb3Contract.conversions, [arg0.toString()]);
   }
 
+  public checkAmountAddressSent(_from: BigNumber | string): Promise<BigNumber> {
+    return TC.promisify(this.rawWeb3Contract.checkAmountAddressSent, [
+      _from.toString()
+    ]);
+  }
+
+  public getConstantInfo(): Promise<
+    [BigNumber, BigNumber, BigNumber, BigNumber]
+  > {
+    return TC.promisify(this.rawWeb3Contract.getConstantInfo, []);
+  }
+
+  public getCuts(last_influencer: BigNumber | string): Promise<BigNumber[]> {
+    return TC.promisify(this.rawWeb3Contract.getCuts, [
+      last_influencer.toString()
+    ]);
+  }
+
   public approveTx(
     _spender: BigNumber | string,
     _value: BigNumber | number
@@ -703,26 +690,6 @@ export class TwoKeyCampaignCrowdsale extends TC.TypeChainContract {
       this,
       "transferQuota",
       [_to.toString(), _value.toString()]
-    );
-  }
-  public transferAssetTwoKeyTokenTx(
-    _tokenID: BigNumber | number,
-    _assetContract: BigNumber | string,
-    _amount: BigNumber | number
-  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
-    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
-      this,
-      "transferAssetTwoKeyToken",
-      [_tokenID.toString(), _assetContract.toString(), _amount.toString()]
-    );
-  }
-  public transferSigTx(
-    sig: string[]
-  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
-    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
-      this,
-      "transferSig",
-      [sig.map(val => val.toString())]
     );
   }
   public transferFromTx(
@@ -757,6 +724,25 @@ export class TwoKeyCampaignCrowdsale extends TC.TypeChainContract {
       [_spender.toString(), _subtractedValue.toString()]
     );
   }
+  public transferTx(
+    _to: BigNumber | string,
+    _value: BigNumber | number
+  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
+    return new TC.DeferredTransactionWrapper<TC.ITxParams>(this, "transfer", [
+      _to.toString(),
+      _value.toString()
+    ]);
+  }
+  public increaseApprovalTx(
+    _spender: BigNumber | string,
+    _addedValue: BigNumber | number
+  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
+    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
+      this,
+      "increaseApproval",
+      [_spender.toString(), _addedValue.toString()]
+    );
+  }
   public addFungibleAssetTx(
     _amount: BigNumber | number
   ): TC.DeferredTransactionWrapper<TC.ITxParams> {
@@ -766,21 +752,53 @@ export class TwoKeyCampaignCrowdsale extends TC.TypeChainContract {
       [_amount.toString()]
     );
   }
-  public buyProductTx(): TC.DeferredTransactionWrapper<TC.IPayableTxParams> {
-    return new TC.DeferredTransactionWrapper<TC.IPayableTxParams>(
+  public checkAndUpdateInventoryBalanceTx(): TC.DeferredTransactionWrapper<
+    TC.ITxParams
+  > {
+    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
       this,
-      "buyProduct",
+      "checkAndUpdateInventoryBalance",
       []
     );
   }
-  public transferTx(
-    _to: BigNumber | string,
-    _value: BigNumber | number
+  public buyFromWithTwoKeyTx(
+    _from: BigNumber | string,
+    _assetName: string,
+    _amount: BigNumber | number
   ): TC.DeferredTransactionWrapper<TC.ITxParams> {
-    return new TC.DeferredTransactionWrapper<TC.ITxParams>(this, "transfer", [
-      _to.toString(),
-      _value.toString()
-    ]);
+    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
+      this,
+      "buyFromWithTwoKey",
+      [_from.toString(), _assetName.toString(), _amount.toString()]
+    );
+  }
+  public transferAssetTwoKeyTokenTx(
+    _tokenID: BigNumber | number,
+    _assetContract: BigNumber | string,
+    _amount: BigNumber | number
+  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
+    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
+      this,
+      "transferAssetTwoKeyToken",
+      [_tokenID.toString(), _assetContract.toString(), _amount.toString()]
+    );
+  }
+  public cancelAssetTwoKeyTx(
+    _converter: BigNumber | string,
+    _assetName: string,
+    _assetContract: BigNumber | string,
+    _amount: BigNumber | number
+  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
+    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
+      this,
+      "cancelAssetTwoKey",
+      [
+        _converter.toString(),
+        _assetName.toString(),
+        _assetContract.toString(),
+        _amount.toString()
+      ]
+    );
   }
   public expireEscrowTx(
     _converter: BigNumber | string,
@@ -802,6 +820,21 @@ export class TwoKeyCampaignCrowdsale extends TC.TypeChainContract {
       [_amount.toString()]
     );
   }
+  public setPubLinkWithCutTx(
+    sig: string[],
+    _public_link_key: BigNumber | string,
+    cut: BigNumber | number
+  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
+    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
+      this,
+      "setPubLinkWithCut",
+      [
+        sig.map(val => val.toString()),
+        _public_link_key.toString(),
+        cut.toString()
+      ]
+    );
+  }
   public setPublicLinkKeyTx(
     _public_link_key: BigNumber | string
   ): TC.DeferredTransactionWrapper<TC.ITxParams> {
@@ -811,23 +844,20 @@ export class TwoKeyCampaignCrowdsale extends TC.TypeChainContract {
       [_public_link_key.toString()]
     );
   }
-  public checkAndUpdateInventoryBalanceTx(): TC.DeferredTransactionWrapper<
-    TC.ITxParams
-  > {
-    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
-      this,
-      "checkAndUpdateInventoryBalance",
-      []
-    );
-  }
-  public increaseApprovalTx(
-    _spender: BigNumber | string,
-    _addedValue: BigNumber | number
+  public transferSigTx(
+    sig: string[]
   ): TC.DeferredTransactionWrapper<TC.ITxParams> {
     return new TC.DeferredTransactionWrapper<TC.ITxParams>(
       this,
-      "increaseApproval",
-      [_spender.toString(), _addedValue.toString()]
+      "transferSig",
+      [sig.map(val => val.toString())]
+    );
+  }
+  public buyProductTx(): TC.DeferredTransactionWrapper<TC.IPayableTxParams> {
+    return new TC.DeferredTransactionWrapper<TC.IPayableTxParams>(
+      this,
+      "buyProduct",
+      []
     );
   }
   public buySignTx(
@@ -847,50 +877,6 @@ export class TwoKeyCampaignCrowdsale extends TC.TypeChainContract {
       this,
       "updateRefchainRewardsAndConverterProceeds",
       [_units.toString(), _bounty.toString()]
-    );
-  }
-  public setPubLinkWithCutTx(
-    _public_link_key: BigNumber | string,
-    cut: BigNumber | number
-  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
-    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
-      this,
-      "setPubLinkWithCut",
-      [_public_link_key.toString(), cut.toString()]
-    );
-  }
-  public cancelAssetTwoKeyTx(
-    _converter: BigNumber | string,
-    _assetName: string,
-    _assetContract: BigNumber | string,
-    _amount: BigNumber | number
-  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
-    return new TC.DeferredTransactionWrapper<TC.ITxParams>(
-      this,
-      "cancelAssetTwoKey",
-      [
-        _converter.toString(),
-        _assetName.toString(),
-        _assetContract.toString(),
-        _amount.toString()
-      ]
-    );
-  }
-  public buyFromWithTwoKeyTx(
-    _from: BigNumber | string,
-    _tokenID: BigNumber | number,
-    _assetContract: BigNumber | string,
-    _amountOrIndex: BigNumber | number
-  ): TC.DeferredTransactionWrapper<TC.IPayableTxParams> {
-    return new TC.DeferredTransactionWrapper<TC.IPayableTxParams>(
-      this,
-      "buyFromWithTwoKey",
-      [
-        _from.toString(),
-        _tokenID.toString(),
-        _assetContract.toString(),
-        _amountOrIndex.toString()
-      ]
     );
   }
 

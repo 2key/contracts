@@ -201,13 +201,7 @@ contract('TwoKeyAcquisitionCampaignERC20', async (accounts) => {
         console.log("Initial balance of campaignCreator(contractor) is : " + balance);
     });
 
-    // it("should transfer some arcs to another addresses", async() => {
-    //     let rec = await twoKeyAcquisitionCampaignERC20.received_from.call(campaignReferrer);
-    //     console.log("Recieved from: " + rec);
-    //     let balance = await twoKeyAcquisitionCampaignERC20.balanceOf(campaignReferrer);
-    //     console.log("Balance before: " + balance)
-    //     await twoKeyAcquisitionCampaignERC20.transfer(campaignReferrer, 1, {from: campaignCreator});
-    // });
+
 
 
     it("should have 1 arc on this address" , async() => {
@@ -223,11 +217,11 @@ contract('TwoKeyAcquisitionCampaignERC20', async (accounts) => {
         const private_key = pk.toString('hex');
 
 
-        let cutBefore = await twoKeyAcquisitionCampaignERC20.influencer2cut.call(campaignConverter);
+        let cutBefore = await twoKeyAcquisitionCampaignERC20.influencer2cut.call(campaignCreator);
         console.log("CUT BEFORE : " + cutBefore);
-        await twoKeyAcquisitionCampaignERC20.setPubLinkWithCut(`0x${public_address}`, 10, {from: campaignConverter});
-        let res = await twoKeyAcquisitionCampaignERC20.public_link_key.call(campaignConverter);
-        let cut = await twoKeyAcquisitionCampaignERC20.influencer2cut.call(campaignConverter);
+        await twoKeyAcquisitionCampaignERC20.setPubLinkWithCut(`0x${public_address}`, 10, {from: campaignCreator});
+        let res = await twoKeyAcquisitionCampaignERC20.public_link_key.call(campaignCreator);
+        let cut = await twoKeyAcquisitionCampaignERC20.influencer2cut.call(campaignCreator);
 
         console.log("CUT AFTER : " + cut);
         assert.equal(res, `0x${public_address}`, "they are not equal");

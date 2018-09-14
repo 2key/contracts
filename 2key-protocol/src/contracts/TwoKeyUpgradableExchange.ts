@@ -4,20 +4,11 @@
 import { BigNumber } from "bignumber.js";
 import * as TC from "./typechain-runtime";
 
-export class TwoKeyPresellExchange extends TC.TypeChainContract {
+export class TwoKeyUpgradableExchange extends TC.TypeChainContract {
   public readonly rawWeb3Contract: any;
 
   public constructor(web3: any, address: string | BigNumber) {
     const abi = [
-      {
-        constant: false,
-        inputs: [{ name: "_to", type: "address" }],
-        name: "upgrade",
-        outputs: [],
-        payable: false,
-        stateMutability: "nonpayable",
-        type: "function"
-      },
       {
         constant: true,
         inputs: [
@@ -54,25 +45,7 @@ export class TwoKeyPresellExchange extends TC.TypeChainContract {
       {
         constant: true,
         inputs: [],
-        name: "cap",
-        outputs: [{ name: "", type: "uint256" }],
-        payable: false,
-        stateMutability: "view",
-        type: "function"
-      },
-      {
-        constant: true,
-        inputs: [],
         name: "weiRaised",
-        outputs: [{ name: "", type: "uint256" }],
-        payable: false,
-        stateMutability: "view",
-        type: "function"
-      },
-      {
-        constant: true,
-        inputs: [],
-        name: "closingTime",
         outputs: [{ name: "", type: "uint256" }],
         payable: false,
         stateMutability: "view",
@@ -94,15 +67,6 @@ export class TwoKeyPresellExchange extends TC.TypeChainContract {
         outputs: [{ name: "", type: "string" }],
         payable: false,
         stateMutability: "view",
-        type: "function"
-      },
-      {
-        constant: false,
-        inputs: [{ name: "_tokenAmount", type: "uint256" }],
-        name: "sellTokens",
-        outputs: [],
-        payable: true,
-        stateMutability: "payable",
         type: "function"
       },
       {
@@ -159,15 +123,6 @@ export class TwoKeyPresellExchange extends TC.TypeChainContract {
       {
         constant: true,
         inputs: [],
-        name: "openingTime",
-        outputs: [{ name: "", type: "uint256" }],
-        payable: false,
-        stateMutability: "view",
-        type: "function"
-      },
-      {
-        constant: true,
-        inputs: [],
         name: "onlyControllerRole",
         outputs: [{ name: "", type: "bool" }],
         payable: false,
@@ -181,15 +136,6 @@ export class TwoKeyPresellExchange extends TC.TypeChainContract {
         outputs: [{ name: "", type: "string" }],
         payable: false,
         stateMutability: "view",
-        type: "function"
-      },
-      {
-        constant: false,
-        inputs: [{ name: "_beneficiary", type: "address" }],
-        name: "buyTokens",
-        outputs: [],
-        payable: true,
-        stateMutability: "payable",
         type: "function"
       },
       {
@@ -221,13 +167,10 @@ export class TwoKeyPresellExchange extends TC.TypeChainContract {
       },
       {
         inputs: [
-          { name: "_whitelist", type: "address" },
-          { name: "_openingTime", type: "uint256" },
-          { name: "_closingTime", type: "uint256" },
-          { name: "_cap", type: "uint256" },
           { name: "_rate", type: "uint256" },
           { name: "_wallet", type: "address" },
-          { name: "_token", type: "address" }
+          { name: "_token", type: "address" },
+          { name: "_twoKeyAdmin", type: "address" }
         ],
         payable: false,
         stateMutability: "nonpayable",
@@ -290,12 +233,40 @@ export class TwoKeyPresellExchange extends TC.TypeChainContract {
         type: "event"
       },
       {
-        constant: true,
-        inputs: [],
-        name: "capReached",
-        outputs: [{ name: "", type: "bool" }],
+        anonymous: false,
+        inputs: [
+          { indexed: true, name: "_to", type: "address" },
+          { indexed: false, name: "value", type: "uint256" },
+          { indexed: true, name: "token", type: "address" }
+        ],
+        name: "Msg",
+        type: "event"
+      },
+      {
+        constant: false,
+        inputs: [{ name: "_tokenAmount", type: "uint256" }],
+        name: "sellTokens",
+        outputs: [],
+        payable: true,
+        stateMutability: "payable",
+        type: "function"
+      },
+      {
+        constant: false,
+        inputs: [{ name: "_to", type: "address" }],
+        name: "upgrade",
+        outputs: [],
         payable: false,
-        stateMutability: "view",
+        stateMutability: "nonpayable",
+        type: "function"
+      },
+      {
+        constant: false,
+        inputs: [{ name: "_beneficiary", type: "address" }],
+        name: "buyTokens",
+        outputs: [],
+        payable: true,
+        stateMutability: "payable",
         type: "function"
       }
     ];
@@ -305,8 +276,8 @@ export class TwoKeyPresellExchange extends TC.TypeChainContract {
   static async createAndValidate(
     web3: any,
     address: string | BigNumber
-  ): Promise<TwoKeyPresellExchange> {
-    const contract = new TwoKeyPresellExchange(web3, address);
+  ): Promise<TwoKeyUpgradableExchange> {
+    const contract = new TwoKeyUpgradableExchange(web3, address);
     const code = await TC.promisify(web3.eth.getCode, [address]);
 
     // in case of missing smartcontract, code can be equal to "0x0" or "0x" depending on exact web3 implementation
@@ -321,16 +292,8 @@ export class TwoKeyPresellExchange extends TC.TypeChainContract {
     return TC.promisify(this.rawWeb3Contract.rate, []);
   }
 
-  public get cap(): Promise<BigNumber> {
-    return TC.promisify(this.rawWeb3Contract.cap, []);
-  }
-
   public get weiRaised(): Promise<BigNumber> {
     return TC.promisify(this.rawWeb3Contract.weiRaised, []);
-  }
-
-  public get closingTime(): Promise<BigNumber> {
-    return TC.promisify(this.rawWeb3Contract.closingTime, []);
   }
 
   public get wallet(): Promise<string> {
@@ -349,10 +312,6 @@ export class TwoKeyPresellExchange extends TC.TypeChainContract {
     return TC.promisify(this.rawWeb3Contract.getAdminRole, []);
   }
 
-  public get openingTime(): Promise<BigNumber> {
-    return TC.promisify(this.rawWeb3Contract.openingTime, []);
-  }
-
   public get onlyControllerRole(): Promise<boolean> {
     return TC.promisify(this.rawWeb3Contract.onlyControllerRole, []);
   }
@@ -367,10 +326,6 @@ export class TwoKeyPresellExchange extends TC.TypeChainContract {
 
   public get token(): Promise<string> {
     return TC.promisify(this.rawWeb3Contract.token, []);
-  }
-
-  public get capReached(): Promise<boolean> {
-    return TC.promisify(this.rawWeb3Contract.capReached, []);
   }
 
   public checkRole(
@@ -393,22 +348,6 @@ export class TwoKeyPresellExchange extends TC.TypeChainContract {
     ]);
   }
 
-  public upgradeTx(
-    _to: BigNumber | string
-  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
-    return new TC.DeferredTransactionWrapper<TC.ITxParams>(this, "upgrade", [
-      _to.toString()
-    ]);
-  }
-  public sellTokensTx(
-    _tokenAmount: BigNumber | number
-  ): TC.DeferredTransactionWrapper<TC.IPayableTxParams> {
-    return new TC.DeferredTransactionWrapper<TC.IPayableTxParams>(
-      this,
-      "sellTokens",
-      [_tokenAmount.toString()]
-    );
-  }
   public renounceOwnershipTx(): TC.DeferredTransactionWrapper<TC.ITxParams> {
     return new TC.DeferredTransactionWrapper<TC.ITxParams>(
       this,
@@ -436,15 +375,6 @@ export class TwoKeyPresellExchange extends TC.TypeChainContract {
       [addr.toString(), roleName.toString()]
     );
   }
-  public buyTokensTx(
-    _beneficiary: BigNumber | string
-  ): TC.DeferredTransactionWrapper<TC.IPayableTxParams> {
-    return new TC.DeferredTransactionWrapper<TC.IPayableTxParams>(
-      this,
-      "buyTokens",
-      [_beneficiary.toString()]
-    );
-  }
   public transferOwnershipTx(
     _newOwner: BigNumber | string
   ): TC.DeferredTransactionWrapper<TC.ITxParams> {
@@ -452,6 +382,31 @@ export class TwoKeyPresellExchange extends TC.TypeChainContract {
       this,
       "transferOwnership",
       [_newOwner.toString()]
+    );
+  }
+  public sellTokensTx(
+    _tokenAmount: BigNumber | number
+  ): TC.DeferredTransactionWrapper<TC.IPayableTxParams> {
+    return new TC.DeferredTransactionWrapper<TC.IPayableTxParams>(
+      this,
+      "sellTokens",
+      [_tokenAmount.toString()]
+    );
+  }
+  public upgradeTx(
+    _to: BigNumber | string
+  ): TC.DeferredTransactionWrapper<TC.ITxParams> {
+    return new TC.DeferredTransactionWrapper<TC.ITxParams>(this, "upgrade", [
+      _to.toString()
+    ]);
+  }
+  public buyTokensTx(
+    _beneficiary: BigNumber | string
+  ): TC.DeferredTransactionWrapper<TC.IPayableTxParams> {
+    return new TC.DeferredTransactionWrapper<TC.IPayableTxParams>(
+      this,
+      "buyTokens",
+      [_beneficiary.toString()]
     );
   }
 
@@ -561,5 +516,31 @@ export class TwoKeyPresellExchange extends TC.TypeChainContract {
         beneficiary?: BigNumber | string | Array<BigNumber | string>;
       }
     >(this, "TokenPurchase", eventFilter);
+  }
+  public MsgEvent(eventFilter: {
+    _to?: BigNumber | string | Array<BigNumber | string>;
+    token?: BigNumber | string | Array<BigNumber | string>;
+  }): TC.DeferredEventWrapper<
+    {
+      _to: BigNumber | string;
+      value: BigNumber | number;
+      token: BigNumber | string;
+    },
+    {
+      _to?: BigNumber | string | Array<BigNumber | string>;
+      token?: BigNumber | string | Array<BigNumber | string>;
+    }
+  > {
+    return new TC.DeferredEventWrapper<
+      {
+        _to: BigNumber | string;
+        value: BigNumber | number;
+        token: BigNumber | string;
+      },
+      {
+        _to?: BigNumber | string | Array<BigNumber | string>;
+        token?: BigNumber | string | Array<BigNumber | string>;
+      }
+    >(this, "Msg", eventFilter);
   }
 }
