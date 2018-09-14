@@ -53,8 +53,7 @@ contract TwoKeyUpgradableExchange is Crowdsale, Ownable, RBACWithAdmin {
     /// @param _tokenAmount is amount of tokens
     /// @return Value of tokens in Wei
 	function _getWeiAmount(uint256 _tokenAmount) internal view returns (uint256) {
-	   // return _tokenAmount.div(rate);
-	   return _tokenAmount;
+	   return _tokenAmount.div(rate);
 	}
 
 	/// @notice Function where only admin can upgrade exchange contract with new exchange contract. 
@@ -77,4 +76,8 @@ contract TwoKeyUpgradableExchange is Crowdsale, Ownable, RBACWithAdmin {
 		super.buyTokens(_beneficiary);
 	}
 
+	function getFiller() view public returns(address) {
+		return filler;	
+	}
+	
 }

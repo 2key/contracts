@@ -26,7 +26,8 @@ contract('TwoKeyReg', async (accounts) => {
         eventSourceContract = await TwoKeyEventSource.new(adminContract.address);
     });
 
-  it('Case 1 getAddress Positive Test Case', async () => {
+  /// getName method will work fine when address is known
+  it('Case 1 getName Positive Test Case', async () => {
         let regContract = await TwoKeyReg.new(eventSourceContract.address, adminContract.address);
         let address = accounts[0];
         let name = 'account0-0';
@@ -40,7 +41,8 @@ contract('TwoKeyReg', async (accounts) => {
         assert.equal(name, test_name, 'name stored for address is wrong');
   });
 
-  it('Case 2 getAddress Negative Test Case', async () => {
+  /// getName method will not get the desired value if  name is fetched from random address
+  it('Case 2 getName Negative Test Case', async () => {
         let regContract = await TwoKeyReg.new(eventSourceContract.address, adminContract.address);
         let address = accounts[0];
         let name = 'account0-0';
@@ -53,7 +55,8 @@ contract('TwoKeyReg', async (accounts) => {
         assert.notEqual(name, test_name, 'name stored for address is wrong');
   });
 
-  it('Case 3 getName Positive Test Case', async () => {
+  /// get address will work fine when name is know
+  it('Case 3 getAddress Positive Test Case', async () => {
         let regContract = await TwoKeyReg.new(eventSourceContract.address, adminContract.address);
         let address = accounts[0];
         let name = 'account0-0';
@@ -65,7 +68,8 @@ contract('TwoKeyReg', async (accounts) => {
         assert.equal(address, test_address, 'address stored for name not the same as address retrieved');
   });
 
-  it('Case 4 getName Negative Test Case', async () => {
+  /// get address will give undesired result when name is unknown
+  it('Case 4 getAddress Negative Test Case', async () => {
         let regContract = await TwoKeyReg.new(eventSourceContract.address, adminContract.address);
         let address = accounts[0];
         let name = 'account0-0';
@@ -77,6 +81,7 @@ contract('TwoKeyReg', async (accounts) => {
         assert.notEqual(address, test_address, 'address stored for name not the same as address retrieved');
   });
   
+  /// New Name should be added to an Old Address
   it('Case 5 New Name should be added to an Old Address', async () => {
         let regContract = await TwoKeyReg.new(eventSourceContract.address, adminContract.address);
         let address = accounts[0];
@@ -92,6 +97,7 @@ contract('TwoKeyReg', async (accounts) => {
         assert.equal(new_name, test_name, 'name stored for address is wrong'); 
   });
 
+  /// New Name should be added to a New Address
   it('Case 6 New Name should be added to a New Address', async () => {
         let regContract = await TwoKeyReg.new(eventSourceContract.address, adminContract.address);
         let address = accounts[0];
@@ -111,6 +117,7 @@ contract('TwoKeyReg', async (accounts) => {
         assert.equal(new_name, test_name, 'name stored for address is wrong'); 
   }); 
 
+  /// Old Name should not be added to an Old Address
   it('Case 7 Old Name should not be added to an Old Address', async () => {
         let regContract = await TwoKeyReg.new(eventSourceContract.address, adminContract.address);
         let address = accounts[0];
@@ -127,6 +134,7 @@ contract('TwoKeyReg', async (accounts) => {
         assert.equal(name, test_name, 'name stored for address is wrong'); 
   });
 
+  /// Old Name should not be added to a New Address
   it('Case 8 Old Name should not be added to a New Address', async () => {
         let regContract = await TwoKeyReg.new(eventSourceContract.address, adminContract.address);
         let address = accounts[0];
@@ -145,6 +153,7 @@ contract('TwoKeyReg', async (accounts) => {
         assert.equal(name, test_name, 'name stored for address is wrong');
   });
 
+  /// Non-Admin should not call methods which have onlyAdmin modifier
   it('Case 9 Non-Admin should not call methods which have onlyAdmin modifier', async () => {
         let regContract = await TwoKeyReg.new(eventSourceContract.address, adminContract.address);
         let address = accounts[0];

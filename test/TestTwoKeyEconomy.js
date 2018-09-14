@@ -25,7 +25,7 @@ const BigNumber = web3.BigNumber;
               adminContract = await TwoKeyAdmin.new(deployerAdrress); 
         });
 
-
+        /// TwokeyAdmin should be assigned as Admin Role for TwoKeyEconomy
         it('Case 1 : TwokeyAdmin should be assigned as Admin Role for TwoKeyEconomy', async () => {
               let economy = await TwoKeyEconomy.new(adminContract.address);
               let isAdmin = await economy.hasRole(adminContract.address, "admin");
@@ -33,12 +33,14 @@ const BigNumber = web3.BigNumber;
             
         });
 
+        /// Any accont holder other than the TwokeyAdmin should not be assigned as Admin Role for TwoKeyEconomy
         it('Case 2 : Any accont holder other than the TwokeyAdmin should not be assigned as Admin Role for TwoKeyEconomy ', async () => {
               let economy = await TwoKeyEconomy.new(adminContract.address);
               let isAdmin = await economy.hasRole(accounts[0], "admin");
               assert.notEqual(isAdmin, true, "should not be the admin");
         });
 
+        /// TwoKeyAdmin account should be assigned Initial Balance
         it('Case 3 : TwoKeyAdmin account should be assigned Initial Balance', async () => {
               let economy = await TwoKeyEconomy.new(adminContract.address);
               const notExpected =  0; 
@@ -46,6 +48,7 @@ const BigNumber = web3.BigNumber;
               assert.notEqual(initialBalance, notExpected, 'Two Key Admin  should have '+ initialBalance+   ' Coins initially ' );
         });
 
+        /// Deployer account should not be assigned Initial Balance
         it('Case 4 : Deployer account should not be assigned Initial Balance', async () => {
               let economy = await TwoKeyEconomy.new(adminContract.address);
               const expected =  0; 
@@ -53,6 +56,7 @@ const BigNumber = web3.BigNumber;
               assert.equal(initialBalance, expected, 'Deployer account should have '+ 0 +   ' Coins initially ' );
         });
 
+        /// TwoKeyAdmin account initial balance positive testCase
         it('Case 5 : TwoKeyAdmin account initial balance positive testCase', async () => {
               let economy = await TwoKeyEconomy.new(adminContract.address);
                 
@@ -65,6 +69,7 @@ const BigNumber = web3.BigNumber;
               assert.equal(expected_string, initialBalance_string, 'TwoKeyAdmin should have '+ expected+   ' Coins initially');
         });
 
+        /// TwoKeyAdmin account initial balance negative testCase
         it('Case 6 : TwoKeyAdmin account initial balance negative testCase', async () => {
               let economy = await TwoKeyEconomy.new(adminContract.address);
               const expected =  await economy.totalSupply();
@@ -74,6 +79,7 @@ const BigNumber = web3.BigNumber;
               assert.notEqual(initialBalance, not_expected, 'TwoKeyAdmin should have '+ expected + '  Coins initially');
         });
 
+        /// totalSupply positive test case
         it('Case 7 : totalSupply positive test case', async () => {
               let economy = await TwoKeyEconomy.new(adminContract.address);
                 
@@ -84,6 +90,7 @@ const BigNumber = web3.BigNumber;
               assert.equal (_totalSupply, expected, 'Owner should have '+ expected+  ' Total Supply');
         });
 
+        /// token name positive test case
         it('Case 8 : token name positive test case', async () => {
               let economy = await TwoKeyEconomy.new(adminContract.address);
               const expected =  tokenName;
@@ -92,6 +99,7 @@ const BigNumber = web3.BigNumber;
               assert.equal(name, expected, 'Owner should have '+ expected + ' Token name');
         });  
 
+        /// token name negative test case
         it('Case 9 : token name negative test case', async () => {
               let economy = await TwoKeyEconomy.new(adminContract.address);
               const notExpected =  "xxxx";
@@ -100,6 +108,7 @@ const BigNumber = web3.BigNumber;
               assert.notEqual(name, notExpected, 'Owner should not have '+ notExpected+ ' as token name');
         });  
 
+        /// symbol positive test case
         it('Case 10 : symbol positive test case', async () => {
               let economy = await TwoKeyEconomy.new(adminContract.address);
               const expected = symbol;
@@ -109,6 +118,7 @@ const BigNumber = web3.BigNumber;
               assert.equal(symbol_val, expected, 'Owner should have '+ expected+ ' as Token symbol');
         });  
 
+        /// symbol negative test case
         it('Case 11 : symbol negative test case', async () => {
               let economy = await TwoKeyEconomy.new(adminContract.address);
               const notExpected =  "xxxx";
@@ -117,6 +127,7 @@ const BigNumber = web3.BigNumber;
               assert.notEqual(symbol, notExpected, 'Owner should not have '+ notExpected + 'as Token symbol');
         });  
 
+        /// decimals positive test case
         it('Case 12 : decimals positive test case', async () => {
               let economy = await TwoKeyEconomy.new(adminContract.address);
               const expected = decimals;
@@ -126,6 +137,7 @@ const BigNumber = web3.BigNumber;
               assert.equal(decimal, expected, 'Owner should have '+ expected+   'Token decimals');
         });  
 
+        /// decimals negative test case
         it('Case 13 : decimals negative test case', async () => {
               let economy = await TwoKeyEconomy.new(adminContract.address);
               const notExpected =  10;
@@ -134,6 +146,7 @@ const BigNumber = web3.BigNumber;
               assert.notEqual(totalSupply, notExpected, 'Owner should not have '+ notExpected + ' Total Supply');
         });  
 
+        /// TwoKeyAdmin should have TwoKeyEconomy object
         it('Case 14 : TwoKeyAdmin should have TwoKeyEconomy object', async () => {
               let economy = await TwoKeyEconomy.new(adminContract.address);
               let economyFromAdmin= await adminContract.getTwoKeyEconomy();
