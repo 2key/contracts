@@ -65,8 +65,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     TwoKeyWhitelisted whitelistInfluencer;
     TwoKeyWhitelisted whitelistConverter;
 
-
-    uint price; /// There's single price for the unit ERC20
+    /// TODO: Difference between price&rate
+    uint price = 1; /// There's single price for the unit ERC20
     uint256 rate; /// rate of conversion from TwoKey to ETH
     uint openingTime;
     uint closingTime;
@@ -560,7 +560,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
         unit_decimals = 18; // uint256(erc20_token_sell_contract.decimals());
         // cost is the cost of a single token. Each token has 10**decimals units
         // TODO: Compute valid base units and bonus units per the msg.value and token price and bonus percentage
-        uint256 _units = msg.value.mul(10**unit_decimals).div(price);
+        uint256 _units = msg.value.mul(10**unit_decimals).div(rate);
         // bounty is the cost of a single token. Compute the bounty for the units
         // we are buying
         // TODO: Replace bounty with new parameter maxReferralReward
