@@ -48,7 +48,7 @@ export class TwoKeyProtocol {
     private ipfs: any;
     private address: string;
     private gasPrice: number;
-    private totalSupply: BigNumber;
+    private totalSupply: string;
     private gas: number;
     private networks: EhtereumNetworks;
     private contracts: ContractsAdressess;
@@ -106,7 +106,7 @@ export class TwoKeyProtocol {
         return this.gasPrice;
     }
 
-    public getTotalSupply(): BigNumber {
+    public getTotalSupply(): string {
         return this.totalSupply;
     }
 
@@ -131,7 +131,7 @@ export class TwoKeyProtocol {
                     resolve({
                         balance: {
                             ETH: parseFloat(eth),
-                            total: parseFloat(this.fromWei(total.toString())),
+                            total: parseFloat(total),
                             '2KEY': parseFloat(token),
                         },
                         local_address: this.address,
@@ -147,7 +147,7 @@ export class TwoKeyProtocol {
     public getERC20TransferGas(to: string, value: number): Promise<number> {
         this.gas = null;
         return new Promise((resolve, reject) => {
-            this.twoKeyAdmin.transfer2KeyTokensTx(this.twoKeyEconomy.address, to, value).estimateGas({from: this.address})
+            this.twoKeyEconomy.transferTx(to, this.toWei(value, 'ether')).estimateGas({from: this.address})
                 .then(res => {
                     this.gas = res;
                     resolve(this.gas);
@@ -159,7 +159,7 @@ export class TwoKeyProtocol {
     public getETHTransferGas(to: string, value: number): Promise<number> {
         this.gas = null;
         return new Promise((resolve, reject) => {
-            this.web3.eth.estimateGas({to, value: this.toWei(value, 'ether').toString()}, (err, res) => {
+            this.web3.eth.estimateGas({ to, value: this.toWei(value, 'ether').toString() }, (err, res) => {
                 if (err) {
                     reject(err);
                 } else {
@@ -181,7 +181,7 @@ export class TwoKeyProtocol {
             }
             const params = {from: this.address, gasLimit: this.toHex(this.gas), gasPrice};
             // return this.twoKeyAdmin.transfer2KeyTokensTx(this.twoKeyEconomy.address, to, value).send(params);
-            return this.twoKeyEconomy.transferTx(to, value).send(params);
+            return this.twoKeyEconomy.transferTx(to, this.toWei(value, 'ether')).send(params);
         } catch (err) {
             Promise.reject(err);
         }
@@ -253,7 +253,7 @@ export class TwoKeyProtocol {
                     data.closingTime,
                     data.expiryConversion,
                     data.bonusOffer,
-                    data.rate,
+                    this.toWei(data.rate, 'ether'),
                     data.maxCPA,
                     data.erc20address,
                     data.quota || 5,
@@ -286,7 +286,7 @@ export class TwoKeyProtocol {
                     data.closingTime,
                     data.expiryConversion,
                     data.bonusOffer,
-                    data.rate,
+                    this.toWei(data.rate, 'ether'),
                     data.maxCPA,
                     data.erc20address,
                     data.quota || 5,
@@ -332,9 +332,9 @@ export class TwoKeyProtocol {
             const hash = await campaignInstance.checkAndUpdateInventoryBalanceTx().send({from: this.address});
             // console.log('checkAndUpdateInventoryBalance', hash);
             await this._waitForTransactionMined(hash);
-            const balance = await campaignInstance.checkInventoryBalance;
+            const balance = parseFloat(this.fromWei(await campaignInstance.checkInventoryBalance));
             // console.log('getFungibleInventory', balance, balance.toString());
-            return Promise.resolve(balance.toNumber());
+            return Promise.resolve(balance);
         } catch (err) {
             Promise.reject(err);
         }
@@ -355,8 +355,8 @@ export class TwoKeyProtocol {
     public async getReferrerCut(campaign: string | TwoKeyAcquisitionCampaignERC20, address: string = this.address): Promise<number> {
         try {
             const campaignInstance = await this._getCampaignInstance(campaign);
-            const cut = await campaignInstance.influencer2cut(address);
-            return Promise.resolve(cut.toNumber());
+            const cut = (await campaignInstance.influencer2cut(address)).toNumber();
+            return Promise.resolve(cut);
         } catch (e) {
             Promise.reject(e);
         }
@@ -393,7 +393,6 @@ export class TwoKeyProtocol {
                     console.log('New link for', this.address, f_address, f_secret, p_message);
                     new_message = Sign.free_join(this.address, public_address, f_address, f_secret, p_message, cut);
                 } else {
-                    // TODO: AP if called from shortUrl with cut need to set cut somehow
                     await this.setPublicLink(campaign, `0x${public_address}`, gasPrice);
                 }
                 resolve(`f_address=${this.address}&f_secret=${private_key}&p_message=${new_message || ''}`);
@@ -413,13 +412,15 @@ export class TwoKeyProtocol {
             }
             try {
                 const campaignInstance = await TwoKeyAcquisitionCampaignERC20.createAndValidate(this.web3, campaignAddress);
-                let arcBalance = (await campaignInstance.balanceOf(this.address)).toNumber();
+                let arcBalance = parseFloat(this.fromWei(await campaignInstance.balanceOf(this.address)));
                 const {public_address, private_key} = generatePublicMeta();
                 const publicLink = `0x${public_address}`;
                 if (!arcBalance) {
                     console.log('No Arcs', arcBalance);
                     const msg = Sign.free_take(this.address, f_address, f_secret, p_message);
-                    const data = this.web3.eth.contract(solidityContracts.TwoKeyAcquisitionCampaignERC20.abi).at(campaignInstance.address).setPubLinkWithCut.getData(msg, publicLink, cut);
+                    const data = this.web3.eth.contract(solidityContracts.TwoKeyAcquisitionCampaignERC20.abi)
+                        .at(campaignInstance.address).setPubLinkWithCut
+                        .getData(msg, publicLink, cut);
                     const gas = await this._estimateTransactionGas({
                         data,
                         from: this.address,
@@ -427,14 +428,13 @@ export class TwoKeyProtocol {
                     });
                     console.log('Gas required for setPubLinkWithCut', gas);
                     await this._checkBalanceBeforeTransaction(gas, gasPrice);
-
                     const txHash = await promisify(
                         this.web3.eth.contract(solidityContracts.TwoKeyAcquisitionCampaignERC20.abi).at(campaignInstance.address).setPubLinkWithCut,
                         [msg, publicLink, cut, {from: this.address, gasPrice, gas}],
                     );
                     console.log('setPubLinkWithCut', txHash);
                     await this._waitForTransactionMined(txHash);
-                    arcBalance = (await campaignInstance.balanceOf(this.address)).toNumber();
+                    arcBalance = parseFloat(this.fromWei(await campaignInstance.balanceOf(this.address)));
                 }
                 if (arcBalance) {
                     resolve(`f_address=${this.address}&f_secret=${private_key}&p_message=`)
@@ -464,31 +464,40 @@ export class TwoKeyProtocol {
             }
             const campaignInstance = await this._getCampaignInstance(campaign);
             const balance = (await campaignInstance.balanceOf(this.address)).toNumber();
-            console.log('Converter ARCS', balance);
             if (!balance) {
+                console.log('No ARCS call buySign');
                 const msg = Sign.free_take(this.address, f_address, f_secret, p_message);
-                const data = this.web3.eth.contract(solidityContracts.TwoKeyAcquisitionCampaignERC20.abi).at(campaignInstance.address).transferSig.getData(msg);
+                const data = this.web3.eth.contract(solidityContracts.TwoKeyAcquisitionCampaignERC20.abi).at(campaignInstance.address).buySign.getData(msg);
                 const gas = await this._estimateTransactionGas({
                     data,
                     from: this.address,
-                    to: campaignInstance.address
+                    to: campaignInstance.address,
+                    value: this.toWei(amount, 'ether')
                 });
-                console.log('Gas required for transferSig', gas);
+                console.log('Gas required for buySign', gas);
                 await this._checkBalanceBeforeTransaction(gas, gasPrice);
                 const txHash = await promisify(
-                    this.web3.eth.contract(solidityContracts.TwoKeyAcquisitionCampaignERC20.abi).at(campaignInstance.address).transferSig,
-                    [msg, {from: this.address, gasPrice, gas}],
+                    this.web3.eth.contract(solidityContracts.TwoKeyAcquisitionCampaignERC20.abi).at(campaignInstance.address).buySign,
+                    [msg, {from: this.address, gasPrice, gas, value: this.toWei(amount, 'ether')}],
                 );
                 await this._waitForTransactionMined(txHash);
+                resolve(txHash);
+            } else {
+                console.log('Converter ARCS', balance);
+                // campaignInstance.balanceOf(this.address);
+                // const msg = Sign.free_take(this.address, f_address, f_secret, p_message);
+                // const gas = await campaignInstance.buyProductTx().estimateGas({ from: this.address, value: this.toWei(amount, 'ether') });
+                // console.log('Gas required for buyTx', gas);
+                // await this._checkBalanceBeforeTransaction(gas, gasPrice);
+                const txHash = await campaignInstance.buyProductTx().send({
+                    from: this.address,
+                    value: this.toWei(amount, 'ether'),
+                    gasPrice,
+                    gas: 7000000
+                });
+                await this._waitForTransactionMined(txHash);
+                resolve(txHash);
             }
-            // campaignInstance.balanceOf(this.address);
-            // const msg = Sign.free_take(this.address, f_address, f_secret, p_message);
-            // const gas = await campaignInstance.buyProductTx().estimateGas({ from: this.address, value: this.toWei(amount, 'ether') });
-            // console.log('Gas required for buyTx', gas);
-            // await this._checkBalanceBeforeTransaction(gas, gasPrice);
-            const txHash = await campaignInstance.buyProductTx().send({from: this.address, value: this.toWei(amount, 'ether'), gasPrice, gas: 7000000 });
-            await this._waitForTransactionMined(txHash);
-            resolve(txHash);
         });
     }
 
@@ -540,7 +549,7 @@ export class TwoKeyProtocol {
             return new Promise(async (resolve, reject) => {
                 try {
                     const erc20 = await ERC20.createAndValidate(this.web3, erc20address);
-                    const balance = (await erc20.balanceOf(address)).toString();
+                    const balance = this.fromWei(await erc20.balanceOf(address));
                     resolve(balance);
                 } catch (e) {
                     reject(e);
@@ -550,7 +559,7 @@ export class TwoKeyProtocol {
         return new Promise((resolve, reject) => {
             this.twoKeyEconomy.balanceOf(address)
                 .then(res => {
-                    resolve(res.toString())
+                    resolve(this.fromWei(res))
                 })
                 .catch(reject);
         });
@@ -561,7 +570,7 @@ export class TwoKeyProtocol {
             return new Promise(async (resolve, reject) => {
                 try {
                     const erc20 = await ERC20.createAndValidate(this.web3, erc20address);
-                    const balance = (await erc20.totalSupply).toString();
+                    const balance = this.fromWei(await erc20.totalSupply);
                     resolve(balance);
                 } catch (e) {
                     reject(e);
@@ -574,8 +583,8 @@ export class TwoKeyProtocol {
         return new Promise((resolve, reject) => {
             this.twoKeyEconomy.totalSupply
                 .then(res => {
-                    this.totalSupply = res;
-                    resolve(this.totalSupply.toString());
+                    this.totalSupply = this.fromWei(res);
+                    resolve(this.totalSupply);
                 })
                 .catch(reject);
         });

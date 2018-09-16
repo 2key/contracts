@@ -51,7 +51,7 @@ export interface RawTransaction {
   gas?: number;
   gasPrice?: number;
   to: string;
-  value?: string;
+  value?: string | BigNumber;
   data?: string;
 }
 
@@ -63,7 +63,7 @@ export interface AcquisitionCampaign {
   closingTime: number, // Timestamp
   expiryConversion: number, // Timestamp
   bonusOffer: number,
-  rate: BigNumber,
+  rate: number,
   maxCPA: number,
   erc20address: string,
   quota?: number,

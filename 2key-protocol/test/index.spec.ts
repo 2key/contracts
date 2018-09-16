@@ -1,12 +1,5 @@
 import {expect} from 'chai';
 import 'mocha';
-import bip39 from 'bip39';
-import hdkey from 'ethereumjs-wallet/hdkey';
-import ProviderEngine from 'web3-provider-engine';
-import RpcSubprovider from 'web3-provider-engine/subproviders/rpc';
-import WSSubprovider from 'web3-provider-engine/subproviders/websocket';
-import WalletSubprovider from 'ethereumjs-wallet/provider-engine';
-// import { TwoKeyProtocol } from '../src/index';
 import { TwoKeyProtocol } from '../src';
 import contractsMeta from '../src/contracts/meta';
 import createWeb3 from './_web3';
@@ -60,10 +53,10 @@ const web3 = {
     gmail: () => createWeb3(env.MNEMONIC_GMAIL, rpcUrl),
     test4: () => createWeb3(env.MNEMONIC_TEST4, rpcUrl),
 };
-console.log('MNEMONICS');
-Object.keys(env).filter(key => key.includes('MNEMONIC')).forEach((key) => {
-    console.log(env[key]);
-});
+// console.log('MNEMONICS');
+// Object.keys(env).filter(key => key.includes('MNEMONIC')).forEach((key) => {
+//     console.log(env[key]);
+// });
 
 const addresses = [env.AYDNEP_ADDRESS, env.GMAIL_ADDRESS, env.TEST4_ADDRESS];
 
@@ -82,11 +75,11 @@ describe('TwoKeyProtocol', () => {
                         syncTwoKeyNetId,
                     },
                 });
-                const {balance} = await twoKeyProtocol.getBalance(destinationAddress);
+                const {balance} = await twoKeyProtocol.getBalance(env.AYDNEP_ADDRESS);
                 if (balance['2KEY'] <= 20000) {
                     console.log('NO BALANCE at aydnep account');
                     const admin = web3.deployer().eth.contract(artifacts.TwoKeyAdmin.abi).at(artifacts.TwoKeyAdmin.networks[mainNetId].address);
-                    admin.transfer2KeyTokens(twoKeyEconomy, destinationAddress, 50000, { from: env.DEPLOYER_ADDRESS, gas: 7000000 },  (err, res) => {
+                    admin.transfer2KeyTokens(twoKeyEconomy, destinationAddress, twoKeyProtocol.toWei(50000, 'ether'), { from: env.DEPLOYER_ADDRESS, gas: 7000000 },  (err, res) => {
                         if (err) {
                             reject(err);
                         } else {
@@ -122,6 +115,7 @@ describe('TwoKeyProtocol', () => {
         console.log('aydnep balance', aydnep.balance);
         console.log('gmail balance', gmail.balance);
         console.log('test4 balance', test4.balance);
+        console.log(twoKeyProtocol.toWei(1000000, 'ether'));
         return expect(aydnep).to.exist
             .to.haveOwnProperty('gasPrice')
         // .to.be.equal(twoKeyProtocol.getGasPrice());
@@ -200,7 +194,8 @@ describe('TwoKeyProtocol', () => {
         closingTime,
         expiryConversion: closingTime,
         bonusOffer,
-        rate: twoKeyProtocol.toWei(rate, 'ether'),
+        rate,
+        // rate: twoKeyProtocol.toWei(rate, 'ether'),
         maxCPA,
         erc20address: twoKeyEconomy,
       });
@@ -216,7 +211,8 @@ describe('TwoKeyProtocol', () => {
         closingTime,
         expiryConversion: closingTime,
         bonusOffer,
-        rate: twoKeyProtocol.toWei(rate, 'ether'),
+        rate,
+        // rate: twoKeyProtocol.toWei(rate, 'ether'),
         maxCPA,
         erc20address: twoKeyEconomy,
       }, createCallback, 15000000000);
@@ -323,7 +319,7 @@ describe('TwoKeyProtocol', () => {
     }).timeout(15000);
 
     it('should buy some tokens', async () => {
-        const txHash = await twoKeyProtocol.buyCampaignAssetsWithETH(campaignAddress, 0.05, refLink);
+        const txHash = await twoKeyProtocol.buyCampaignAssetsWithETH(campaignAddress, 1, refLink);
         console.log(txHash);
         expect(txHash).to.be.a('string');
     }).timeout(30000);
