@@ -150,7 +150,7 @@ contract('TwoKeyAcquisitionCampaignERC20', async (accounts) => {
 
     it("should have 1B balance on TwoKeyAdmin", async() => {
        let balance = await twoKeyEconomy.balanceOf(twoKeyAdmin.address);
-       assert.equal(balance.c[0], 1000000000, "should be 1 mil");
+       assert.equal(balance.c[0], 10000000000, "should be 1 mil");
        console.log(balance);
     });
 
@@ -183,7 +183,7 @@ contract('TwoKeyAcquisitionCampaignERC20', async (accounts) => {
         await twoKeyAcquisitionCampaignERC20.checkAndUpdateInventoryBalance();
         let balance  = await twoKeyAcquisitionCampaignERC20.checkInventoryBalance();
         
-        console.log(balance);
+        console.log("Inventory balance: " + balance);
     });
 
     // it("should fullFill with TwoKey", async() => {
@@ -219,13 +219,12 @@ contract('TwoKeyAcquisitionCampaignERC20', async (accounts) => {
 
         let cutBefore = await twoKeyAcquisitionCampaignERC20.influencer2cut.call(campaignCreator);
         console.log("CUT BEFORE : " + cutBefore);
-        await twoKeyAcquisitionCampaignERC20.setPubLinkWithCut(`0x${public_address}`, 10, {from: campaignCreator});
+        await twoKeyAcquisitionCampaignERC20.setPubLinkWithCut(`0x${public_address}`,20, {from: campaignCreator});
         let res = await twoKeyAcquisitionCampaignERC20.public_link_key.call(campaignCreator);
         let cut = await twoKeyAcquisitionCampaignERC20.influencer2cut.call(campaignCreator);
 
-        console.log("CUT AFTER : " + cut);
         assert.equal(res, `0x${public_address}`, "they are not equal");
-
+        assert.equal(cut, 21, "cuts should be equal");
         var1 = private_key;
         var2 = "";
         console.log(res);
@@ -251,8 +250,9 @@ contract('TwoKeyAcquisitionCampaignERC20', async (accounts) => {
         console.log("Balance of creator before: " + balCreator);
         console.log("Balance of converter before: " + balConv);
         console.log("Balance of referrer before: " + balRef);
-
-        let trnx = await twoKeyAcquisitionCampaignERC20.transferSig(msg, {from: campaignConverter});
+        let balance = await twoKeyAcquisitionCampaignERC20.balanceOf(campaignConverter);
+        console.log("Balance of converter : " + balance);
+        let trnx = await twoKeyAcquisitionCampaignERC20.joinAndBuy(msg, {from: campaignConverter, value: 1});
         // console.log(trnx.logs);
 
         let balConvAfter = await twoKeyAcquisitionCampaignERC20.balanceOf(campaignConverter);
