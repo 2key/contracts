@@ -332,6 +332,13 @@ export class TwoKeyProtocol {
 
     // Join Ofchain
     public joinCampaign(campaign: any, cut: number, referralLink?: string, gasPrice: number = this.gasPrice): Promise<string> {
+        // TODO: AP to get current referral Reward:
+        // call campaignContracts.contractor => owner
+        // cut first address from p_message slice(0,40)
+        // compare first_address with owner if !equal call campaignContracts.getCuts => cuts
+        // do some magic with cuts https://github.com/2key/web3-alpha/blob/develop/app/javascripts/app.js#L1240
+        // result of magic will be maximum possible reward for me
+        // then i can join with percent of this reward
         const {public_address, private_key} = generatePublicMeta();
         return new Promise(async (resolve, reject) => {
             try {

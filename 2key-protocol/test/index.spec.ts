@@ -44,7 +44,7 @@ console.log(contractsMeta.TwoKeyEconomy.networks[mainNetId].address);
 
 const createCallback = (name: string, mined: boolean, transactionResult: string): void => {
     console.log(`Contract ${name} ${mined ? `deployed with address ${transactionResult}` : `placed to EVM. Hash ${transactionResult}`}`);
-}
+};
 
 // let web3 = createWeb3(mnemonic, rpcUrl);
 const web3 = {
@@ -79,10 +79,11 @@ describe('TwoKeyProtocol', () => {
                 if (balance['2KEY'] <= 20000) {
                     console.log('NO BALANCE at aydnep account');
                     const admin = web3.deployer().eth.contract(artifacts.TwoKeyAdmin.abi).at(artifacts.TwoKeyAdmin.networks[mainNetId].address);
-                    admin.transfer2KeyTokens(twoKeyEconomy, destinationAddress, twoKeyProtocol.toWei(50000, 'ether'), { from: env.DEPLOYER_ADDRESS, gas: 7000000 },  (err, res) => {
+                    admin.transfer2KeyTokens(twoKeyEconomy, destinationAddress, twoKeyProtocol.toWei(100000, 'ether'), { from: env.DEPLOYER_ADDRESS, gas: 7000000, gasPrice: 5000000000 },  (err, res) => {
                         if (err) {
                             reject(err);
                         } else {
+                            console.log('Send Tokens', res);
                             setTimeout(() => {
                                 resolve(res);
                             }, 10000);
