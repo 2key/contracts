@@ -8,7 +8,7 @@ import './TwoKeyEventSource.sol';
 contract TwoKeyCampaignARC is StandardToken {
 
 	using SafeMath for uint256;
-	address contractor;
+	address public contractor;
 	uint256 totalSupply_ = 1000000;
 
 	/// TODO: I can make this tokens to be owned by the deployer - contractor (arcs)
