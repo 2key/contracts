@@ -46,6 +46,20 @@ export interface Transaction {
 	s?: string;
 }
 
+export interface TransactionReceipt {
+	blockHash: string;
+	blockNumber: number;
+    transactionHash: string;
+	transactionIndex: number;
+	from: string;
+	to: string | null;
+    cumulativeGasUsed: number;
+    gasUsed: number;
+    contractAddress: string | null;
+    logs: any[];
+    status: string;
+}
+
 export interface RawTransaction {
   from?: string;
   gas?: number;

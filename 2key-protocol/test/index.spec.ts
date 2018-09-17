@@ -220,7 +220,7 @@ describe('TwoKeyProtocol', () => {
       console.log('Campaign address', campaign);
       campaignAddress = campaign;
       return expect(addressRegex.test(campaign)).to.be.true;
-    }).timeout(600000);
+    }).timeout(1200000);
 
     it('should print balance after campaign created', (done) => {
         setTimeout(async () => {

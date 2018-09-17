@@ -7,6 +7,7 @@ import {
     TwoKeyInit,
     BalanceMeta,
     Transaction,
+    TransactionReceipt,
     AcquisitionCampaign,
     Contract,
     RawTransaction,
@@ -250,10 +251,15 @@ export class TwoKeyProtocol {
             try {
                 const gasRequired = await this.estimateAcquisitionCampaign(data);
                 await this._checkBalanceBeforeTransaction(gasRequired, gasPrice || this.gasPrice);
-                const predeployAddress = await this._createContract(contractsMeta.TwoKeyAcquisitionCampaignERC20Predeploy, gasPrice, null, progressCallback);
-                const predeployInstance = await this._createAndValidate('TwoKeyAcquisitionCampaignERC20Predeploy', predeployAddress);
+                let txHash = await this._createContract(contractsMeta.TwoKeyAcquisitionCampaignERC20Predeploy, gasPrice, null, progressCallback);
+                const predeployReceipt = await this._waitForTransactionMined(txHash);
+                if (progressCallback) {
+                    progressCallback('TwoKeyAcquisitionCampaignERC20Predeploy', true, predeployReceipt.contractAddress);
+                }
+                const predeployInstance = await this._createAndValidate('TwoKeyAcquisitionCampaignERC20Predeploy', predeployReceipt.contractAddress);
+                // const predeployInstance = await this._createAndValidate('TwoKeyAcquisitionCampaignERC20Predeploy', predeployAddress);
                 const [whitelistInfluencerAddress, whitelistConverterAddress] = await promisify(predeployInstance.getAddresses, []);
-                const campaignAddress = await this._createContract(contractsMeta.TwoKeyAcquisitionCampaignERC20, gasPrice, [
+                txHash = await this._createContract(contractsMeta.TwoKeyAcquisitionCampaignERC20, gasPrice, [
                     this._getContractDeployedAddress('TwoKeyEventSource'),
                     this.twoKeyEconomy.address,
                     whitelistInfluencerAddress,
@@ -268,7 +274,11 @@ export class TwoKeyProtocol {
                     data.erc20address,
                     data.quota || 5,
                 ], progressCallback);
-                resolve(campaignAddress);
+                const campaignReceipt = await this._waitForTransactionMined(txHash);
+                if (progressCallback) {
+                    progressCallback('TwoKeyAcquisitionCampaignERC20', true, campaignReceipt.contractAddress);
+                }
+                resolve(campaignReceipt.contractAddress);
             } catch (err) {
                 reject(err);
             }
@@ -565,6 +575,7 @@ export class TwoKeyProtocol {
                         resolve(res.address);
                     } else if (progressCallback) {
                         progressCallback(name, false, res.transactionHash);
+                        resolve(res.transactionHash);
                     }
                 }
             });
@@ -624,7 +635,7 @@ export class TwoKeyProtocol {
     //     });
     // }
 
-    private _waitForTransactionMined(txHash: string, timeout: number = 60000): Promise<boolean> {
+    private _waitForTransactionMined(txHash: string, timeout: number = 60000): Promise<TransactionReceipt> {
         return new Promise((resolve, reject) => {
             let fallbackTimer;
             let interval;
@@ -650,7 +661,8 @@ export class TwoKeyProtocol {
                         clearInterval(interval);
                         interval = null;
                     }
-                    resolve(true);
+                    const txReceipt = await promisify(this.web3.eth.getTransactionReceipt, [txHash]);
+                    resolve(txReceipt);
                 }
             }, 1000);
         });
