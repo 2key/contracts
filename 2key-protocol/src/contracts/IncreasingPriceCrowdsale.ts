@@ -121,6 +121,16 @@ export class IncreasingPriceCrowdsale extends TC.TypeChainContract {
         type: "event"
       },
       {
+        anonymous: false,
+        inputs: [
+          { indexed: true, name: "_to", type: "address" },
+          { indexed: false, name: "value", type: "uint256" },
+          { indexed: true, name: "token", type: "address" }
+        ],
+        name: "Msg",
+        type: "event"
+      },
+      {
         constant: true,
         inputs: [],
         name: "getCurrentRate",
@@ -225,5 +235,31 @@ export class IncreasingPriceCrowdsale extends TC.TypeChainContract {
         beneficiary?: BigNumber | string | Array<BigNumber | string>;
       }
     >(this, "TokenPurchase", eventFilter);
+  }
+  public MsgEvent(eventFilter: {
+    _to?: BigNumber | string | Array<BigNumber | string>;
+    token?: BigNumber | string | Array<BigNumber | string>;
+  }): TC.DeferredEventWrapper<
+    {
+      _to: BigNumber | string;
+      value: BigNumber | number;
+      token: BigNumber | string;
+    },
+    {
+      _to?: BigNumber | string | Array<BigNumber | string>;
+      token?: BigNumber | string | Array<BigNumber | string>;
+    }
+  > {
+    return new TC.DeferredEventWrapper<
+      {
+        _to: BigNumber | string;
+        value: BigNumber | number;
+        token: BigNumber | string;
+      },
+      {
+        _to?: BigNumber | string | Array<BigNumber | string>;
+        token?: BigNumber | string | Array<BigNumber | string>;
+      }
+    >(this, "Msg", eventFilter);
   }
 }
