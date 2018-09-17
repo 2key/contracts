@@ -64,7 +64,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
 
     /// TODO: Difference between price&rate
     uint pricePerUnitInETH = 1; /// There's single price for the unit ERC20
-    uint256 rate; /// rate of conversion from TwoKey to ETH
+    uint256 public rate = 1; /// rate of conversion from TwoKey to ETH
+    //TODO:Where we get RATE?
     uint openingTime;
     uint closingTime;
     address moderator;
@@ -78,7 +79,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     uint8 public decimals = 0;  // ARCs are not divisable
     uint256 public maxReferralRewardPercent = 10; // maxRefferalRewardPercent is actually bonus percentage in ETH
     uint maxConverterBonusPercent; //translates to discount - we can add this to constructor
-    // TODO: =====================================================
+
     /*
      Someone buys with 100 ETH
      Price per unit in ETH is 0.01
@@ -87,10 +88,10 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
      maxConverterBonusPercent means that the converter will bi eligible to get 140 ETH worth of tokens which still cost 0.01 ETH
      14000 tokens
      100 / 14000 = .007142857 - actual price per token with the bonus
-     (0.01 - .007142857) / 0.01  = .2857143 - this is the actual discount
+     (0.01 - .007142857) / 0.01  = .2857143 - this itruffs the actual discount
     */
 
-    uint256 unit_decimals;  // units being sold can be fractional (for example tokens in ERC20)
+    uint256 unit_decimals = 10;  // units being sold can be fractional (for example tokens in ERC20)
 
 
     // Remove contractor from constructor it's the message sender
@@ -399,8 +400,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     // this is the public part of this secret
     mapping(address => address)  public public_link_key;
 
-    function setPubLinkWithCut(bytes sig, address _public_link_key, uint256 cut) {
-        transferSig(sig);
+    function setPubLinkWithCut(address _public_link_key, uint256 cut) {
+//        transferSig(sig);
         setPublicLinkKey(_public_link_key);
         setCut(cut);
     }
@@ -575,11 +576,12 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     */
 
     ///update value with msg.value
-    function buyProduct(uint value) internal {
+    function buyProduct(uint value, address sender)  {
         unit_decimals = 18; // uint256(erc20_token_sell_contract.decimals());
         // cost is the cost of a single token. Each token has 10**decimals units
         // TODO: Compute valid base units and bonus units per the msg.value and token price and bonus percentage
-        uint256 _units = msg.value.mul(10**unit_decimals).div(rate);
+//        uint256 _units = value.mul(10**unit_decimals).div(rate);
+        uint _units = 100;
         // we are buying
         // TODO: Replace bounty with new parameter maxReferralReward
         uint256 _bounty = maxReferralRewardPercent.mul(_units).div(10**unit_decimals);
@@ -588,7 +590,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
         // then this conversionReward = 10ETH
         // TODO: this function has to be part of conversion
         updateRefchainRewardsAndConverterProceeds(_units, _bounty);
-        require(assetContract.call(bytes4(keccak256("transfer(address,uint256)")),msg.sender,_units));
+        require(assetContract.call(bytes4(keccak256("transfer(address,uint256)")), sender, _units));
     }
 
     /// With this method we're moving arcs and buying the product (ETH)
@@ -596,14 +598,14 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
         ///Signature includes our information which goes to Ethereum
         transferSig(sig);
 
-        buyProduct(msg.value);
+        buyProduct(msg.value, msg.sender);
     }
 
 
-    function buy() public payable{
-        require(public_link_key[msg.sender] != address(0));
-        buyProduct(msg.value);
-    }
+//    function buy() public payable{
+//        require(public_link_key[msg.sender] != address(0));
+//        buyProduct(msg.value);
+//    }
 
     // Internal /  private functions cannot be payable.
     // If we have arcs and want to buy from someone we call this
