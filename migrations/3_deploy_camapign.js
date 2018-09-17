@@ -10,6 +10,7 @@ module.exports = function deploy(deployer) {
     if (deployer.network.startsWith('dev') || deployer.network === 'rinkeby-infura') {
         deployer.deploy(TwoKeyWhitelistedInfluencer)
             .then(() => deployer.deploy(TwoKeyWhitelistedConverter))
+            .then(() => deployer.deploy(ERC20TokenMock))
             .then(() => deployer.deploy(TwoKeyAcquisitionCampaignERC20, EventSource.address, TwoKeyEconomy.address, TwoKeyWhitelistedInfluencer.address,
                 TwoKeyWhitelistedConverter.address,
                 '0xb3fa520368f2df7bed4df5185101f303f6c7decc', 12345,12345,12345,12345,12345,12345, ERC20TokenMock.address, 5))
