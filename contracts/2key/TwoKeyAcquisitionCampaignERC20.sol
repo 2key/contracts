@@ -634,11 +634,13 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
 
         // distribute bounty to influencers
         uint256 total_bounty = 0;
+        uint max_referral_reward = _bounty.mul(maxReferralRewardPercent).div(100);
         for (uint i = 0; i < influencers.length; i++) {
             uint256 b;
             if (i == influencers.length -1) {  // if its the last influencer then all the bounty goes to it.
                 b = _bounty;
-            } else {
+            }
+            else {
                 uint256 cut = influencer2cut[influencers[i]];
                 //        emit Log("CUT", influencer, cut);
                 if (cut > 0 && cut <= 101) {
@@ -647,6 +649,10 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
                     b = _bounty.div(influencers.length -i);
                 }
             }
+            if(b > max_referral_reward) {
+                b = max_referral_reward;
+            }
+
             referrerBalancesETH[influencers[i]] = referrerBalancesETH[influencers[i]].add(b);
             emit Rewarded(influencers[i], b);
             total_bounty = total_bounty.add(b);
@@ -659,7 +665,4 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
 
         emit Fulfilled(customer, units[customer]);
     }
-//    function getConstantInfo() public view returns (string,string,uint,uint,uint,address,string,uint) {
-//        return (name,symbol,cost,bounty,quota,contractor,ipfs_hash,unit_decimals);
-//    }
 }
