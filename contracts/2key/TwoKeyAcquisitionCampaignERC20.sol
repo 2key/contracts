@@ -16,10 +16,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
 
     event Fulfilled(address indexed to, uint256 units);
     event Rewarded(address indexed to, uint256 amount);
-    event Print(address indexed one, address indexed two);
-    /// @notice Event which will be emitted when conversion expire
     event Expired(address indexed _contract);
-    /// @notice Event which will be emitted when fallback function is executed
     event ReceivedEther(address _sender, uint value);
 
 
@@ -66,7 +63,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     TwoKeyWhitelisted whitelistConverter;
 
     /// TODO: Difference between price&rate
-    uint price = 1; /// There's single price for the unit ERC20
+    uint pricePerUnitInETH = 1; /// There's single price for the unit ERC20
     uint256 rate; /// rate of conversion from TwoKey to ETH
     uint openingTime;
     uint closingTime;
@@ -79,8 +76,20 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     string public ipfs_hash; // rename to description
     string public symbol;
     uint8 public decimals = 0;  // ARCs are not divisable
-    uint256 public bounty; // Bounty is actually bonus percentage in ETH
-    //    uint256 public quota;  // maximal tokens that can be passed in transferFrom
+    uint256 public maxReferralRewardPercent; // maxRefferalRewardPercent is actually bonus percentage in ETH
+    uint maxConverterBonusPercent; //translates to discount - we can add this to constructor
+    // TODO: =====================================================
+    /*
+     Someone buys with 100 ETH
+     Price per unit in ETH is 0.01
+     maxConverterBonusPercent is 40%
+     In this campaign each converter gets maximum
+     maxConverterBonusPercent means that the converter will bi eligible to get 140 ETH worth of tokens which still cost 0.01 ETH
+     14000 tokens
+     100 / 14000 = .007142857 - actual price per token with the bonus
+     (0.01 - .007142857) / 0.01  = .2857143 - this is the actual discount
+    */
+
     uint256 unit_decimals;  // units being sold can be fractional (for example tokens in ERC20)
 
 
@@ -222,14 +231,14 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     /// no need to put assetContract to param since it's now state variable
     function fulfillFungibleTwoKeyToken(address _from, string _assetName, uint256 _amount)  internal {
         require(_amount > 0);
-        require(price > 0);
+        require(pricePerUnitInETH > 0);
         //        uint256 payout = price.mul(_amount).mul(rate);
 
         /// Make sure that the payment has been sent
         require(twoKeyEconomy.transferFrom(msg.sender, this, _amount));
 
         /// _amount*rate = value of put TwoKey tokens in ETH / (divided) by price in ETH of the ERC20
-        uint _units = (_amount*rate) / price;
+        uint _units = (_amount*rate) / pricePerUnitInETH;
 
         Conversion memory c = Conversion(_from, _amount, msg.sender, false, false, _assetName, assetContract, _units, CampaignType.CPA_FUNGIBLE, now, now + expiryConversion * 10 minutes);
         // move funds
@@ -376,7 +385,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
 
     /// @notice Function to return constantss
     function getConstantInfo() public view returns (uint256,uint256,uint256,uint256) {
-        return (price,bounty,quota,unit_decimals);
+        return (pricePerUnitInETH, maxReferralRewardPercent,quota,unit_decimals);
     }
 //    function getConstantInfo() public view returns (string,string,uint256,uint256,uint256,address,string,uint256) {
 //        return (name,symbol,price,bounty,quota,contractor,ipfs_hash,unit_decimals);
@@ -390,17 +399,13 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     // this is the public part of this secret
     mapping(address => address)  public public_link_key;
 
-//    function getPublicLinkKey(address _address) public view returns (address) {
-//        return public_link_key[_address];
-//    }
-
     function setPubLinkWithCut(bytes sig, address _public_link_key, uint256 cut) {
         transferSig(sig);
         setPublicLinkKey(_public_link_key);
         setCut(cut);
     }
 
-    /// At the begining only contractor can call this method bcs he is the only one who has arcs
+    /// At the beginning only contractor can call this method bcs he is the only one who has arcs
     function setPublicLinkKey(address _public_link_key) public {
         require(balanceOf(msg.sender) > 0);
         require(public_link_key[msg.sender] == address(0));
@@ -412,7 +417,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
         // the value 255 is used to signal equal partition with other influencers
         // A sender can set the value only once in a contract
         require(cut <= 100 || cut == 255);
-         require(influencer2cut[msg.sender] == 0);
+        require(influencer2cut[msg.sender] == 0);
         if (cut <= 100) {
 //            cut++;
         }
@@ -433,6 +438,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
 
 
     /// @notice Transfersig method
+    /// TODO: Who's signature is this??
     function transferSig(bytes sig) public {
         // move ARCs based on signature information
         // if version=1, with_cut is true then sig also include the cut (percentage) each influencer takes from the bounty
@@ -539,7 +545,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
             // assume users can take ARCs only once... this could be changed
             if (received_from[new_address] == 0) {
                 transferFrom(old_address, new_address, 1);
-                emit Print(old_address, new_address);
             } else {
                 require(received_from[new_address] == old_address);
             }
@@ -556,15 +561,26 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
 
     // We receive ether
     // How can I get bonus percentage?
-    function buyProduct() public payable {
+    /*
+        We put Ether (converter sends ether)
+        We compute tokens
+        We create conversion object
+        we can't do anything until converter is whitelisted
+        Then we need another function that requires converter to be whitelisted and should do the following:
+            - Compute referral rewards and distribute then
+            - Compute and distribute moderation fees then
+            - Generate lock-up contracts for tokens then
+            - Move tokens to lock-up contracts then
+            - Send remaining ether to contractor
+    */
+    function buyProduct()  payable {
         unit_decimals = 18; // uint256(erc20_token_sell_contract.decimals());
         // cost is the cost of a single token. Each token has 10**decimals units
         // TODO: Compute valid base units and bonus units per the msg.value and token price and bonus percentage
         uint256 _units = msg.value.mul(10**unit_decimals).div(rate);
-        // bounty is the cost of a single token. Compute the bounty for the units
         // we are buying
         // TODO: Replace bounty with new parameter maxReferralReward
-        uint256 _bounty = bounty.mul(_units).div(10**unit_decimals);
+        uint256 _bounty = maxReferralRewardPercent.mul(_units).div(10**unit_decimals);
         // TODO replace _bounty with this conversion reward
         // Example; MaxReferralReward = 10% then msg.value = 100ETH
         // then this conversionReward = 10ETH
@@ -574,15 +590,23 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     }
 
     /// With this method we're moving arcs and buying the product (ETH)
-    function buySign(bytes sig) public payable {
+    function joinAndBuy(bytes sig) public payable {
+        ///TODO: ========================= ASK UDI IF THIS IS OLD / NEW SIGNATURE PROVIDED =========================
         transferSig(sig);
+        buyProduct();
+    }
+
+
+    function buy() public {
+        require(public_link_key[msg.sender] != address(0));
         buyProduct();
     }
 
     // Internal /  private functions cannot be payable.
     // If we have arcs and want to buy from someone we call this
     // If you don't have signature call this method
-    function buyFrom(address _from)  private {
+    // We don't want someone to buy something without being invited to participate
+    function buyFrom(address _from) private {
         require(_from != address(0));
         address _to = msg.sender;
         if (balanceOf(_to) == 0) {
@@ -608,12 +632,11 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
         // distribute bounty to influencers
         uint256 total_bounty = 0;
         for (uint i = 0; i < influencers.length; i++) {
-            address influencer = influencers[i];  // influencers is in reverse order
             uint256 b;
             if (i == influencers.length -1) {  // if its the last influencer then all the bounty goes to it.
                 b = _bounty;
             } else {
-                uint256 cut = influencer2cut[influencer];
+                uint256 cut = influencer2cut[influencers[i]];
                 //        emit Log("CUT", influencer, cut);
                 if (cut > 0 && cut <= 101) {
                     b = _bounty.mul(cut.sub(1)).div(100);
@@ -621,8 +644,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
                     b = _bounty.div(influencers.length -i);
                 }
             }
-            referrerBalancesETH[influencer] = referrerBalancesETH[influencer].add(b);
-            emit Rewarded(influencer, b);
+            referrerBalancesETH[influencers[i]] = referrerBalancesETH[influencers[i]].add(b);
+            emit Rewarded(influencers[i], b);
             total_bounty = total_bounty.add(b);
             _bounty = _bounty.sub(b);
         }
