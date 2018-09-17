@@ -119,13 +119,13 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
             // contracts[contractName] = whitelist[contractName].deployed
             //   ? { abi, networks } : { abi, networks, bytecode };
             contracts[contractName] = whitelist[contractName].singletone
-              ? {networks, name: contractName} : {bytecode, abi, networks, name: contractName};
+              ? {networks, abi, name: contractName} : {bytecode, abi, name: contractName};
             json[contractName] = whitelist[contractName].singletone
-              ? {networks, abi, name: contractName} : {bytecode, abi, networks, name: contractName};
+              ? {networks, abi, name: contractName} : {bytecode, abi, name: contractName};
           }
         });
-        console.log('Writing meta.ts...');
-        fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts/meta.ts'), `export default ${util.inspect(contracts, {depth: 10})}`);
+        console.log('Writing contracts.ts...');
+        fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts.ts'), `export default ${util.inspect(contracts, {depth: 10})}`);
         console.log('Writing contracts.json...');
         fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts.json'), JSON.stringify(json, null, 2));
         console.log('Done');
@@ -251,7 +251,7 @@ async function deploy() {
       fs.writeFileSync(deploymentHistoryPath, JSON.stringify(deployedHistory, null, 2));
     }
     await generateSOLInterface();
-    await runProcess(path.join(__dirname, 'node_modules/.bin/typechain'), ['--force', '--outDir', path.join(twoKeyProtocolDir, 'contracts'), `${buildPath}/*.json`]);
+    // await runProcess(path.join(__dirname, 'node_modules/.bin/typechain'), ['--force', '--outDir', path.join(twoKeyProtocolDir, 'contracts'), `${buildPath}/*.json`]);
     if (!local) {
       await runProcess(path.join(__dirname, 'node_modules/.bin/webpack'));
     }
@@ -320,7 +320,7 @@ async function main() {
           /* eslint-enable no-await-in-loop */
         }
         await generateSOLInterface();
-        await runProcess(path.join(__dirname, 'node_modules/.bin/typechain'), ['--force', '--outDir', path.join(twoKeyProtocolDir, 'contracts'), `${buildPath}/*.json`]);
+        // await runProcess(path.join(__dirname, 'node_modules/.bin/typechain'), ['--force', '--outDir', path.join(twoKeyProtocolDir, 'contracts'), `${buildPath}/*.json`]);
         process.exit(0);
       } catch (err) {
         process.exit(1);

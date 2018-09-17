@@ -1,7 +1,7 @@
 import {expect} from 'chai';
 import 'mocha';
 import { TwoKeyProtocol } from '../src';
-import contractsMeta from '../src/contracts/meta';
+import contractsMeta from '../src/contracts';
 import createWeb3 from './_web3';
 
 const {env} = process;
@@ -168,7 +168,7 @@ describe('TwoKeyProtocol', () => {
     }).timeout(30000);
 
     it('should transfer tokens', async function () {
-        const txHash = await twoKeyProtocol.transferTokens(ethDstAddress, 123, 3000000000);
+        const txHash = await twoKeyProtocol.transfer2KEYTokens(ethDstAddress, 123, 3000000000);
         expect(txHash).to.be.a('string');
     }).timeout(30000);
 
@@ -236,10 +236,10 @@ describe('TwoKeyProtocol', () => {
     }).timeout(15000);
 
     it('should transfer assets to campaign', async () => {
-      await twoKeyProtocol.transferTokens(campaignAddress, 12345);
+      await twoKeyProtocol.transfer2KEYTokens(campaignAddress, 12345);
       const checkBalance = new Promise((resolve, reject) => {
         setTimeout(async () => {
-          const res = await twoKeyProtocol.getFungibleInventory(campaignAddress);
+          const res = await twoKeyProtocol.checkAndUpdateFungibleInventory(campaignAddress);
           console.log('Campaign Balance', res);
           resolve(res)
         }, 15000);
@@ -330,7 +330,7 @@ describe('TwoKeyProtocol', () => {
             const aydnep = await twoKeyProtocol.getBalance(env.AYDNEP_ADDRESS);
             const gmail = await twoKeyProtocol.getBalance(env.GMAIL_ADDRESS);
             const test4 = await twoKeyProtocol.getBalance(env.TEST4_ADDRESS);
-            const res = await twoKeyProtocol.getFungibleInventory(campaignAddress);
+            const res = await twoKeyProtocol.checkAndUpdateFungibleInventory(campaignAddress);
             console.log('Campaign Balance', res);
             console.log('contractor balance', business.balance);
             console.log('aydnep balance', aydnep.balance);
