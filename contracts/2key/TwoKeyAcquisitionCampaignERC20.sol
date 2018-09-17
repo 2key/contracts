@@ -76,7 +76,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     string public ipfs_hash; // rename to description
     string public symbol;
     uint8 public decimals = 0;  // ARCs are not divisable
-    uint256 public maxReferralRewardPercent; // maxRefferalRewardPercent is actually bonus percentage in ETH
+    uint256 public maxReferralRewardPercent = 10; // maxRefferalRewardPercent is actually bonus percentage in ETH
     uint maxConverterBonusPercent; //translates to discount - we can add this to constructor
     // TODO: =====================================================
     /*
@@ -419,7 +419,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
         require(cut <= 100 || cut == 255);
         require(influencer2cut[msg.sender] == 0);
         if (cut <= 100) {
-//            cut++;
+            cut++;
         }
         influencer2cut[msg.sender] = cut;
     }
@@ -573,7 +573,9 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
             - Move tokens to lock-up contracts then
             - Send remaining ether to contractor
     */
-    function buyProduct()  payable {
+
+    ///update value with msg.value
+    function buyProduct(uint value) internal {
         unit_decimals = 18; // uint256(erc20_token_sell_contract.decimals());
         // cost is the cost of a single token. Each token has 10**decimals units
         // TODO: Compute valid base units and bonus units per the msg.value and token price and bonus percentage
@@ -591,29 +593,30 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
 
     /// With this method we're moving arcs and buying the product (ETH)
     function joinAndBuy(bytes sig) public payable {
-        ///TODO: ========================= ASK UDI IF THIS IS OLD / NEW SIGNATURE PROVIDED =========================
+        ///Signature includes our information which goes to Ethereum
         transferSig(sig);
-        buyProduct();
+
+        buyProduct(msg.value);
     }
 
 
-    function buy() public {
+    function buy() public payable{
         require(public_link_key[msg.sender] != address(0));
-        buyProduct();
+        buyProduct(msg.value);
     }
 
     // Internal /  private functions cannot be payable.
     // If we have arcs and want to buy from someone we call this
     // If you don't have signature call this method
     // We don't want someone to buy something without being invited to participate
-    function buyFrom(address _from) private {
-        require(_from != address(0));
-        address _to = msg.sender;
-        if (balanceOf(_to) == 0) {
-            transferFrom(_from, _to, 1);
-        }
-        buyProduct();
-    }
+//    function buyFrom(address _from) private {
+//        require(_from != address(0));
+//        address _to = msg.sender;
+//        if (balanceOf(_to) == 0) {
+//            transferFrom(_from, _to, 1);
+//        }
+//        buyProduct();
+//    }
 
     function updateRefchainRewardsAndConverterProceeds(uint256 _units, uint256 _bounty) public payable {
         // buy coins with cut
@@ -639,7 +642,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
                 uint256 cut = influencer2cut[influencers[i]];
                 //        emit Log("CUT", influencer, cut);
                 if (cut > 0 && cut <= 101) {
-                    b = _bounty.mul(cut.sub(1)).div(100);
+                    b = _bounty.mul(cut.sub(1)).mul(maxReferralRewardPercent).div(10000);
                 } else {  // cut == 0 or 255 indicates equal particine of the bounty
                     b = _bounty.div(influencers.length -i);
                 }
