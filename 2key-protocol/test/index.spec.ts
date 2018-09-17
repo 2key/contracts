@@ -319,7 +319,7 @@ describe('TwoKeyProtocol', () => {
     }).timeout(15000);
 
     it('should buy some tokens', async () => {
-        const txHash = await twoKeyProtocol.buyCampaignAssetsWithETH(campaignAddress, 1, refLink);
+        const txHash = await twoKeyProtocol.buyCampaignAssetsWithETH(campaignAddress, 0.05, refLink);
         console.log(txHash);
         expect(txHash).to.be.a('string');
     }).timeout(30000);

@@ -405,12 +405,18 @@ export default { ERC20: { networks: {}, name: 'ERC20' },
           stateMutability: 'payable',
           type: 'function' } ],
      networks:
-      { '8086':
+      { '4':
          { events: {},
            links: {},
-           address: '0x2d2da3f4a83e5a9e95dc5a043005bbbac5f8484b',
+           address: '0x34580fd0616366a30ce477bbe240c8ca9fbc7ca6',
            transactionHash:
-            '0xb0a35d98b2d2029ddfa0bdd1780bea9288d72bdca939434529f6e823bf2c27bf' } },
+            '0x3b4d39d9c88a0f09929c9e889f432eb6b2099275a090fed2f59785975ad5a7bf' },
+        '8086':
+         { events: {},
+           links: {},
+           address: '0xf28ca87ac47ad073da0dbca65ea9ff1ec689f030',
+           transactionHash:
+            '0xfe5bf2d52575697cbef32ee47ea65561ee981bb87050175fb8864b6ebf1acac9' } },
      name: 'TwoKeyAcquisitionCampaignERC20' },
   TwoKeyAcquisitionCampaignERC20Predeploy:
    { bytecode:
@@ -432,38 +438,86 @@ export default { ERC20: { networks: {}, name: 'ERC20' },
      name: 'TwoKeyAcquisitionCampaignERC20Predeploy' },
   TwoKeyAdmin:
    { networks:
-      { '8086':
+      { '3':
          { events: {},
            links: {},
-           address: '0x218c98405eed9b5dc7b5fa8a76b88ff2bb907c7a',
+           address: '0x9feafa02ad28958d7b89e50795cac2c03df2c753',
            transactionHash:
-            '0x70a1013a0e51387f22989951d76fb8e6f823337e2f44c10f071dddc8bce0bf90' } },
+            '0xbe330f7cb40ee904427975bcdc7d8c76747257a01d150bfe7ca80f589b66896c' },
+        '4':
+         { events: {},
+           links: {},
+           address: '0x57d0c1232a683b39c2a5ab4bf6e167406593f256',
+           transactionHash:
+            '0xdb9862ab7802b6da19eb01b20a236e5bf3e5400885ae22d16671b87c81707b10' },
+        '8086':
+         { events: {},
+           links: {},
+           address: '0x321d3ae1e74e7124465fb84754e890a5851faec0',
+           transactionHash:
+            '0x65aaf7b85cdd8d94afd42b20df7a6d695bbc00943d7542a3d7218252dd3c0b59' } },
      name: 'TwoKeyAdmin' },
   TwoKeyEconomy:
    { networks:
-      { '8086':
+      { '3':
          { events: {},
            links: {},
-           address: '0x1b2f34267a5da581a46e74a2b793fa0b85f2c204',
+           address: '0x2dbaebdbde6d50a39ec7de822416d53659eaea05',
            transactionHash:
-            '0xebbd5a514d156e06052f826ff5fe209731845edf558a0274753c2031719c5b32' } },
+            '0xa64366d51cdf2d72b6738dd5825d806e3338f97364cfeb509f201370525bae4c' },
+        '4':
+         { events: {},
+           links: {},
+           address: '0x0528c5762688024bc9f0cf22be60402d6ddad0a0',
+           transactionHash:
+            '0xe495000809ea41f2fba444bb98725b47deff0f026ebf38561eef8e30e37b8fc8' },
+        '8086':
+         { events: {},
+           links: {},
+           address: '0x91978a891644f7b570bd49fd134578cd2366f01a',
+           transactionHash:
+            '0x676a7970a38d2bb17a329e30e9c92d84c4af80e418873e08ab68b5b1626ac2ba' } },
      name: 'TwoKeyEconomy' },
   TwoKeyEventSource:
    { networks:
-      { '8086':
+      { '3':
          { events: {},
            links: {},
-           address: '0x9db088771195799fde71ec7b69409f5d710d18b2',
+           address: '0xbe6dc72e9cd2b5410008c22bf9a2ff18637b001b',
            transactionHash:
-            '0x77d75b98822854131a9a0318e42f9f653f2ebffff5b61168d21c3d1b53f7d8b6' } },
+            '0x98d58d59f9bd990eeea2ca4a555a5ca7418c6e10d7247a4fd326e756df3fe5a2' },
+        '4':
+         { events: {},
+           links: {},
+           address: '0xc4329e8b9c816bbdf66338c5368b24c123d1c995',
+           transactionHash:
+            '0xce2449a039f88e66477eebd113bd2795872099d2baec5af6e261da2a70a312dd' },
+        '8086':
+         { events: {},
+           links: {},
+           address: '0x1e78200cf3627e7204deeb2c08efd8ca5063c279',
+           transactionHash:
+            '0x15b3f65f270989c3f70d1271b9fbe92ecb91e7b6b01d8c0e138b74ee4d49a5c4' } },
      name: 'TwoKeyEventSource' },
   TwoKeyPlasmaEvents: { networks: {}, name: 'TwoKeyPlasmaEvents' },
   TwoKeyReg:
    { networks:
-      { '8086':
+      { '3':
          { events: {},
            links: {},
-           address: '0xa06ca82764ed77f6ddfe3a843499d30ea33bec10',
+           address: '0x4144ad40c91db12b9fde21bb667d1fe5240f1738',
            transactionHash:
-            '0x0e5d3a91a61238e8144546c1a9c0921425e8ba15b61cac67b2ff04365651d758' } },
+            '0xe489111dce40eca5fdb29ec85ee36682531d6d415deba703b3a740c1afe5b6fe' },
+        '4':
+         { events: {},
+           links: {},
+           address: '0xea2d5cfa933de86249074ec5a1256fc24ac14b4d',
+           transactionHash:
+            '0xbbbdc2de175eb2e28a4230089b890028d7603dfea176d85a0595236693335096' },
+        '8086':
+         { events: {},
+           links: {},
+           address: '0xba76d4c52efbc7e43ad39d43f913593e26d7351e',
+           transactionHash:
+            '0xe55eeca519c41da5089c20883510c2ea6179d32dd43c395a19279145505dccc8' } },
      name: 'TwoKeyReg' } }

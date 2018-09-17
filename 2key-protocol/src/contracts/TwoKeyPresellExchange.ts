@@ -136,15 +136,6 @@ export class TwoKeyPresellExchange extends TC.TypeChainContract {
         type: "function"
       },
       {
-        constant: true,
-        inputs: [],
-        name: "getFiller",
-        outputs: [{ name: "", type: "address" }],
-        payable: false,
-        stateMutability: "view",
-        type: "function"
-      },
-      {
         constant: false,
         inputs: [
           { name: "addr", type: "address" },
@@ -362,10 +353,6 @@ export class TwoKeyPresellExchange extends TC.TypeChainContract {
 
   public get owner(): Promise<string> {
     return TC.promisify(this.rawWeb3Contract.owner, []);
-  }
-
-  public get getFiller(): Promise<string> {
-    return TC.promisify(this.rawWeb3Contract.getFiller, []);
   }
 
   public get getAdminRole(): Promise<string> {
