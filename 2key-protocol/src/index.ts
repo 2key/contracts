@@ -21,11 +21,8 @@ import {
     CreateCampignProgress,
 } from './interfaces';
 import Sign from './sign';
-import {rejects} from "assert";
-// import HDWalletProvider from './HDWalletProvider';
 
 const contracts = require('./contracts.json');
-// console.log(Sign);
 // const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 
 const TwoKeyDefaults = {
@@ -43,15 +40,15 @@ const generatePublicMeta = (): { private_key: string, public_address: string } =
 };
 
 export class TwoKeyProtocol {
-    private web3: any;
+    private readonly web3: any;
     private syncWeb3: any;
     private ipfs: any;
-    private address: string;
+    private readonly address: string;
     private gasPrice: number;
     private totalSupply: string;
     private gas: number;
     private networks: EhtereumNetworks;
-    private contracts: ContractsAdressess;
+    private readonly contracts: ContractsAdressess;
     private twoKeyEconomy: TwoKeyEconomy;
     private twoKeyReg: TwoKeyReg;
     private twoKeyAdmin: TwoKeyAdmin;
@@ -67,7 +64,7 @@ export class TwoKeyProtocol {
             networks,
         } = initValues;
         if (!web3) {
-            throw new Error('Web3 instanse required!');
+            throw new Error('Web3 instance required!');
         }
         if (!web3.eth.defaultAccount) {
             throw new Error('defaultAccount required!');
@@ -193,7 +190,7 @@ export class TwoKeyProtocol {
             const gasRequired = await this.getETHTransferGas(to, value);
             const totalValue = value + parseFloat(this.fromWei(gasPrice * gasRequired, 'ether'));
             if (totalValue > balance) {
-                Promise.reject(new Error(`Not enough founds on ${this.address} reuired ${value}, balance: ${balance}`));
+                Promise.reject(new Error(`Not enough founds on ${this.address} required ${value}, balance: ${balance}`));
             }
             const params = {
                 to,
@@ -201,7 +198,7 @@ export class TwoKeyProtocol {
                 gasLimit: this.toHex(this.gas),
                 value: this.toWei(value, 'ether').toString(),
                 from: this.address
-            }
+            };
             return new Promise((resolve, reject) => {
                 this.web3.eth.sendTransaction(params, async (err, res) => {
                     if (err) {
@@ -214,23 +211,6 @@ export class TwoKeyProtocol {
         } catch (err) {
             Promise.reject(err);
         }
-    }
-
-    /* HANDLE */
-
-    public setHandle(handle: string, gasPrice: number = this.gasPrice): Promise<string> {
-        return this.twoKeyReg.addNameTx(handle, this.address).send({from: this.address, gasPrice, gas: 2000000});
-    }
-
-    public getAddressHandle(address: string = this.address): Promise<string> {
-        // return this.twoKeyReg.getOwner2Name(address);
-        return this.twoKeyReg.getName2Owner(address);
-    }
-
-    public async getContractorCampaigns(): Promise<any> {
-        const eventSource = await TwoKeyEventSource.createAndValidate(this.web3, this._getContractDeployedAddress('TwoKeyEventSource'));
-        // return eventSource.CreatedEvent({ _owner: this.address }).get({ fromBlock: 0, toBlock: 'pending' });
-        return eventSource.CreatedEvent({}).get({fromBlock: 0, toBlock: 'pending'});
     }
 
     /* CAMPAIGN */
@@ -395,7 +375,8 @@ export class TwoKeyProtocol {
                 } else {
                     await this.setPublicLink(campaign, `0x${public_address}`, gasPrice);
                 }
-                resolve(`f_address=${this.address}&f_secret=${private_key}&p_message=${new_message || ''}`);
+                const raw = `f_address=${this.address}&f_secret=${private_key}&p_message=${new_message || ''}`;
+                resolve(raw);
                 // resolve('hash');
             } catch (err) {
                 reject(err);
@@ -484,11 +465,6 @@ export class TwoKeyProtocol {
                 resolve(txHash);
             } else {
                 console.log('Converter ARCS', balance);
-                // campaignInstance.balanceOf(this.address);
-                // const msg = Sign.free_take(this.address, f_address, f_secret, p_message);
-                // const gas = await campaignInstance.buyProductTx().estimateGas({ from: this.address, value: this.toWei(amount, 'ether') });
-                // console.log('Gas required for buyTx', gas);
-                // await this._checkBalanceBeforeTransaction(gas, gasPrice);
                 const txHash = await campaignInstance.buyProductTx().send({
                     from: this.address,
                     value: this.toWei(amount, 'ether'),
@@ -657,30 +633,30 @@ export class TwoKeyProtocol {
         });
     }
 
-    private _getNonce(): Promise<number> {
-        return new Promise((resolve, reject) => {
-            this.web3.eth.getTransactionCount(this.address, 'pending', (err, res) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    // console.log('NONCE', res, this.address);
-                    resolve(res);
-                }
-            });
-        });
-    }
+    // private _getNonce(): Promise<number> {
+    //     return new Promise((resolve, reject) => {
+    //         this.web3.eth.getTransactionCount(this.address, 'pending', (err, res) => {
+    //             if (err) {
+    //                 reject(err);
+    //             } else {
+    //                 // console.log('NONCE', res, this.address);
+    //                 resolve(res);
+    //             }
+    //         });
+    //     });
+    // }
 
-    private _getBlock(block: string | number): Promise<Transaction> {
-        return new Promise((resolve, reject) => {
-            this.web3.eth.getBlock(block, (err, res) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(res);
-                }
-            });
-        });
-    }
+    // private _getBlock(block: string | number): Promise<Transaction> {
+    //     return new Promise((resolve, reject) => {
+    //         this.web3.eth.getBlock(block, (err, res) => {
+    //             if (err) {
+    //                 reject(err);
+    //             } else {
+    //                 resolve(res);
+    //             }
+    //         });
+    //     });
+    // }
 
     private _waitForTransactionMined(txHash: string, timeout: number = 60000): Promise<boolean> {
         return new Promise((resolve, reject) => {
@@ -714,25 +690,25 @@ export class TwoKeyProtocol {
         });
     }
 
-    private _ipfsAdd(data: any): Promise<string> {
-        return new Promise((resolve, reject) => {
-            this.ipfs.add([Buffer.from(JSON.stringify(data))], (err, res) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(res[0].hash);
-                }
-            });
-        })
-    }
+    // private _ipfsAdd(data: any): Promise<string> {
+    //     return new Promise((resolve, reject) => {
+    //         this.ipfs.add([Buffer.from(JSON.stringify(data))], (err, res) => {
+    //             if (err) {
+    //                 reject(err);
+    //             } else {
+    //                 resolve(res[0].hash);
+    //             }
+    //         });
+    //     })
+    // }
 
     private _getUrlParams(url: string): any {
         let hashes = url.slice(url.indexOf('?') + 1).split('&');
         let params = {};
         hashes.map(hash => {
-            let [key, val] = hash.split('=')
+            let [key, val] = hash.split('=');
             params[key] = decodeURIComponent(val);
-        })
+        });
         return params;
     }
 
@@ -747,9 +723,8 @@ export class TwoKeyProtocol {
     }
 
     private async _getCampaignInstance(campaign: string | TwoKeyAcquisitionCampaignERC20) {
-        const campaignInstance = campaign instanceof TwoKeyAcquisitionCampaignERC20
+        return campaign instanceof TwoKeyAcquisitionCampaignERC20
             ? campaign
             : await TwoKeyAcquisitionCampaignERC20.createAndValidate(this.web3, campaign);
-        return campaignInstance;
     }
 }
