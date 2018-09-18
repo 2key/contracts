@@ -106,21 +106,29 @@ describe('TwoKeyProtocol', () => {
 
     let campaignAddress: string;
     let campaignInventoryAddress: string;
+    let aydnepBalance;
 
     it('should return a balance for address', async () => {
         const business = await twoKeyProtocol.getBalance(twoKeyAdmin);
-        const aydnep = await twoKeyProtocol.getBalance(env.AYDNEP_ADDRESS);
+        aydnepBalance = await twoKeyProtocol.getBalance(env.AYDNEP_ADDRESS);
         const gmail = await twoKeyProtocol.getBalance(env.GMAIL_ADDRESS);
         const test4 = await twoKeyProtocol.getBalance(env.TEST4_ADDRESS);
         console.log('admin balance', business.balance);
-        console.log('aydnep balance', aydnep.balance);
+        console.log('aydnep balance', aydnepBalance.balance);
         console.log('gmail balance', gmail.balance);
         console.log('test4 balance', test4.balance);
         console.log(twoKeyProtocol.toWei(1000000, 'ether'));
-        return expect(aydnep).to.exist
+        return expect(aydnepBalance).to.exist
             .to.haveOwnProperty('gasPrice')
         // .to.be.equal(twoKeyProtocol.getGasPrice());
     }).timeout(30000);
+
+    it('should save balance to ipfs', () => {
+       return twoKeyProtocol.ipfsAdd(aydnepBalance).then((hash) => {
+         console.log('IPFS hash', hash);
+         expect(hash).to.be.a('string');
+       });
+    });
 
     const rnd = Math.floor(Math.random() * 3);
     console.log('Random', rnd);
@@ -189,8 +197,6 @@ describe('TwoKeyProtocol', () => {
 
     it('should calculate gas for campaign contract creation', async () => {
       const gas = await twoKeyProtocol.estimateAcquisitionCampaign({
-        eventSource,
-        twoKeyEconomy,
         openingTime: openingTime.getTime(),
         closingTime,
         expiryConversion: closingTime,
@@ -206,8 +212,6 @@ describe('TwoKeyProtocol', () => {
 
     it('should create a new campaign contract', async () => {
       const campaign = await twoKeyProtocol.createAcquisitionCampaign({
-        eventSource,
-        twoKeyEconomy,
         openingTime: openingTime.getTime(),
         closingTime,
         expiryConversion: closingTime,

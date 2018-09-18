@@ -70,8 +70,6 @@ export interface RawTransaction {
 }
 
 export interface AcquisitionCampaign {
-  eventSource: string, // Address of TwoKeyEvent source
-  twoKeyEconomy: string, // Address of TwoKeyEconomy
   moderator?: string, // Address of the moderator - it's a contract that works (operates) as admin of whitelists contracts
   openingTime: number, // Timestamp
   closingTime: number, // Timestamp

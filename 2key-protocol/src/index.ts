@@ -112,6 +112,18 @@ export class TwoKeyProtocol {
         return this.address;
     }
 
+    public ipfsAdd(data: any): Promise<string> {
+        return new Promise((resolve, reject) => {
+            this.ipfs.pin.add([Buffer.from(JSON.stringify(data))], (err, res) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(res[0].hash);
+                }
+            });
+        })
+    }
+
     public getBalance(address: string = this.address, erc20address?: string): Promise<BalanceMeta> {
         const promises = [
             this._getEthBalance(address),
@@ -667,18 +679,6 @@ export class TwoKeyProtocol {
             }, 1000);
         });
     }
-
-    // private _ipfsAdd(data: any): Promise<string> {
-    //     return new Promise((resolve, reject) => {
-    //         this.ipfs.add([Buffer.from(JSON.stringify(data))], (err, res) => {
-    //             if (err) {
-    //                 reject(err);
-    //             } else {
-    //                 resolve(res[0].hash);
-    //             }
-    //         });
-    //     })
-    // }
 
     private _getUrlParams(url: string): any {
         let hashes = url.slice(url.indexOf('?') + 1).split('&');
