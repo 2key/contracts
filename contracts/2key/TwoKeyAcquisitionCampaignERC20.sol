@@ -598,6 +598,17 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
 
         //TODO either send tokens directly to converter for testing,then later actually create lockup contracts and send tokens to them
 
+        //lockup contracts:
+        /*
+        1. basetokens get sent to 1 lockup contract
+        2. bonus tokens are separated to 6 equal portions and sent to 6 lockup contracts.
+        3. a lockupcontract has the converter as beneficiary, and a vesting date in which the converter is allowed to pull the tokens to any other address
+        4. only other function of the lockupcontract is that the contractor may up to 1 time only, delay the vesting date of the tokens, by no more then maxVestingDaysDelay (param should be in campaign contract),
+        and only if the vesting date has not yet arrived.
+
+
+        */
+
         //this is if we want a simple test without lockup contracts
         require(assetContract.call(bytes4(keccak256("transfer(address,uint256)")), converterAddress, _units));
 
