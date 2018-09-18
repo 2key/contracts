@@ -211,6 +211,7 @@ contract('TwoKeyAcquisitionCampaignERC20', async (accounts) => {
 
     let var1, var2;
 
+
     it("should be the same addresses ", async() => {
         let pk = generatePrivateKey();
         let public_address = privateToPublic(pk);
@@ -230,7 +231,7 @@ contract('TwoKeyAcquisitionCampaignERC20', async (accounts) => {
         console.log(res);
     });
 
-
+    //TODO: EITAN & ANDRI GO through exact flow for this
     it("should join off chain", async() => {
         let pk = generatePrivateKey();
         let public_address = privateToPublic(pk);
