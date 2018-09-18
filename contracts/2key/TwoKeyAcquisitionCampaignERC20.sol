@@ -25,7 +25,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
 
     /// Structure which will represent conversion
     struct Conversion {
-        address from;
+        address contractor;
         uint256 payout;
         address converter;
         bool isFulfilled;
