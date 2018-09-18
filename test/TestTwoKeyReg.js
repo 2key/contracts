@@ -1,7 +1,7 @@
 
 const TwoKeyAdmin = artifacts.require("TwoKeyAdmin");
 const TwoKeyExchange = artifacts.require("TwoKeyUpgradableExchange");
-const ERC20TokenMock = artifacts.require('ERC20TokenMock');
+const TwoKeyEconomy = artifacts.require('TwoKeyEconomy');
 const TwoKeyEventSource = artifacts.require("TwoKeyEventSource");
 const TwoKeyReg = artifacts.require("TwoKeyReg");
 
@@ -11,18 +11,17 @@ contract('TwoKeyReg', async (accounts) => {
 
     let adminContract;
     let exchangeContarct;
-    let erc20MockContract;
+    let economyContract;
     let deployerAddress = '0xb3FA520368f2Df7BED4dF5185101f303f6c7decc';
     const null_address = '0x0000000000000000000000000000000000000000';   
     const tokenName = 'TwoKeyEconomy';
-    const  symbol = '2Key';
-    const  decimals = 18;
+    const symbol = '2Key';
+    const decimals = 18;
     const totalSupply = 1000000000000000000000000000;  
 
     before(async() => {
-        erc20MockContract = await ERC20TokenMock.new();
-        //exchangeContarct = await TwoKeyUpgradableExchange.new(1, deployerAddress, erc20MockContract.address);
         adminContract = await TwoKeyAdmin.new(deployerAddress); 
+        economyContract = await TwoKeyEconomy.new(adminContract.address);
         eventSourceContract = await TwoKeyEventSource.new(adminContract.address);
     });
 

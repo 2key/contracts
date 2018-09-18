@@ -2,7 +2,6 @@
 const TwoKeyAdmin = artifacts.require("TwoKeyAdmin");
 const TwoKeyEconomy = artifacts.require("TwoKeyEconomy");
 const TwoKeyExchange = artifacts.require("TwoKeyUpgradableExchange");
-const ERC20TokenMock = artifacts.require('ERC20TokenMock');
 
 const BigNumber = web3.BigNumber;
 
@@ -10,18 +9,14 @@ const BigNumber = web3.BigNumber;
 
         let adminContract;
         let exchangeContarct;
-        let erc20MockContract;
         let deployerAdrress = '0xb3FA520368f2Df7BED4dF5185101f303f6c7decc';
         const null_address = '0x0000000000000000000000000000000000000000';   
         const tokenName = 'TwoKeyEconomy';
         const  symbol = '2Key';
         const  decimals = 18;
-        const totalSupply = 1000000000000000000000000000;  
-
+        const totalSupply = 1000000000000000000000000;
 
         before(async() => {
-              erc20MockContract = await ERC20TokenMock.new();
-            //  exchangeContarct = await TwoKeyUpgradableExchange.new(1, deployerAdrress, erc20MockContract.address);
               adminContract = await TwoKeyAdmin.new(deployerAdrress); 
         });
 
@@ -30,7 +25,6 @@ const BigNumber = web3.BigNumber;
               let economy = await TwoKeyEconomy.new(adminContract.address);
               let isAdmin = await economy.hasRole(adminContract.address, "admin");
               assert.equal(isAdmin, true, "should be the admin");
-            
         });
 
         /// Any accont holder other than the TwokeyAdmin should not be assigned as Admin Role for TwoKeyEconomy
@@ -84,7 +78,6 @@ const BigNumber = web3.BigNumber;
               let economy = await TwoKeyEconomy.new(adminContract.address);
                 
               const expected = totalSupply;
-              
               let _totalSupply = await economy.totalSupply();
               
               assert.equal (_totalSupply, expected, 'Owner should have '+ expected+  ' Total Supply');
