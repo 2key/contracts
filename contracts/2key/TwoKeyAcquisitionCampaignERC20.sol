@@ -76,7 +76,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     string public ipfs_hash; // rename to description
     string public symbol;
     uint8 public decimals = 0;  // ARCs are not divisable //TODO: Check if can be deleted
-    uint256 public maxReferralRewardPercent = 10; // maxRefferalRewardPercent is actually bonus percentage in ETH
+    uint256 public maxReferralRewardPercent; // maxRefferalRewardPercent is actually bonus percentage in ETH
     uint maxConverterBonusPercent; //translates to discount - we can add this to constructor
 
     /*

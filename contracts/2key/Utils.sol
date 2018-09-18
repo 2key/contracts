@@ -2,7 +2,6 @@ pragma solidity ^0.4.24;
 
 // Contract which is going to hold util functions
 contract Utils {
-
     /// Method implementation which is going to call function from another method and return value
     function call_return(address c, bytes _method, uint _val) public view returns (uint answer) {
         // https://medium.com/@blockchain101/calling-the-function-of-another-contract-in-solidity-f9edfa921f4c
