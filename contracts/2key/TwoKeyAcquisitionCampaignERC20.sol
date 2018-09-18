@@ -56,7 +56,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     /// asset name is short name of the asset for example "2key"
     string assetName;
 
-    uint converterProceeds;
+    uint contractorProceeds;
 
     TwoKeyEconomy twoKeyEconomy;
     TwoKeyWhitelisted whitelistInfluencer;
@@ -71,7 +71,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     address moderator;
     uint256 expiryConversion; /// how long will hold asset in escrow
     uint256 escrowPercentage; /// percentage of payout to. be paid for moderator for escrow
-    uint256 maxPi;
 
     string public name;
     string public ipfs_hash; // rename to description
@@ -98,7 +97,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     constructor(address _twoKeyEventSource, address _twoKeyEconomy,
         address _whitelistInfluencer, address _whitelistConverter,
         address _moderator, uint _openingTime, uint _closingTime,
-        uint _expiryConversion, uint _escrowPercentage, uint _rate, uint _maxPi,
+        uint _expiryConversion, uint _escrowPercentage, uint _rate, uint _maxReferralRewardPercent,
         address _assetContract, uint _quota) TwoKeyCampaignARC(_twoKeyEventSource, _quota) StandardToken()
         public {
             require(_twoKeyEconomy != address(0));
@@ -106,7 +105,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
             require(_whitelistConverter != address(0));
             require(_assetContract != address(0));
             require(_rate > 0);
-            require(_maxPi > 0);
+            require(_maxReferralRewardPercent > 0);
 
             contractor = msg.sender;
             twoKeyEconomy = TwoKeyEconomy(_twoKeyEconomy);
@@ -118,7 +117,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
             closingTime = _closingTime;
             expiryConversion = _expiryConversion;
             escrowPercentage = _escrowPercentage;
-            maxPi = _maxPi;
+            maxReferralRewardPercent = _maxReferralRewardPercent;
 
             // Emit event that TwoKeyCampaign is created
             twoKeyEventSource.created(address(this),contractor);
@@ -191,94 +190,13 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
         return balance;
     }
 
-    /// @notice Move some amount of ERC20 from our campaignInventoryUnitsBalance to someone
-    /// @dev internal function
-    /// @param _to address we're sending the amount of ERC20
-    /// @param _amount is the amount of ERC20's we're going to transfer
-    /// @return true if successful, otherwise reverts
-    function moveFungibleAsset(address _to, uint256 _amount) internal returns (bool) {
-        require(campaignInventoryUnitsBalance >= _amount);
-        require(
-            assetContract.call(
-                bytes4(keccak256(abi.encodePacked("transfer(address,uint256)"))),
-                _to, _amount
-            )
-        );
-        campaignInventoryUnitsBalance = campaignInventoryUnitsBalance - _amount;
-        return true;
-    }
 
-    // transfer an amount of erc20 from our catalogue to someone
-    // This should be called when conversion is executed
-
-    /// @notice Function which will transfer fungible assets from contract to someone
-    /// @param _to is the address we're sending the fungible assets
-    /// @param _amount is the amount of ERC20 we're going to transfer
-    /// @return true if trasaction completes otherwise transaction will revert
-    function transferFungibleAsset(address _to, uint256 _amount) internal returns (bool) {
-        return moveFungibleAsset(_to, _amount);
-    }
 
     // TODO: Udis code which sends rewards etc get it
     // TODO: Expiry of conversion event (Two-steps for conversion user puts in ether, and converter being approved by KYC)
     // TODO: When conversion happens, there's timeout where converter can be approved, otherwise everything's transfered to contractor
 
-    /// @notice Function where user puts TwoKey to the contract
-    /// @dev we calculate how many ERC20s he can get and initiate the conversion
-    /// @dev function is internal, meaning can't be called outside of the contract
-    /// @param _from (??)
-    /// @param _assetName is the name of unit (erc20)
-    /// @param _amount is the amount of twoKey tokens we are transferring
-    /// no need to put assetContract to param since it's now state variable
-    function fulfillFungibleTwoKeyToken(address _from, string _assetName, uint256 _amount)  internal {
-        require(_amount > 0);
-        require(pricePerUnitInETH > 0);
-        //        uint256 payout = price.mul(_amount).mul(rate);
 
-        /// Make sure that the payment has been sent
-        require(twoKeyEconomy.transferFrom(msg.sender, this, _amount));
-
-        /// _amount*rate = value of put TwoKey tokens in ETH / (divided) by price in ETH of the ERC20
-        uint _units = (_amount*rate) / pricePerUnitInETH;
-
-        Conversion memory c = Conversion(_from, _amount, msg.sender, false, false, _assetName, assetContract, _units, CampaignType.CPA_FUNGIBLE, now, now + expiryConversion * 10 minutes);
-        // move funds
-        campaignInventoryUnitsBalance = campaignInventoryUnitsBalance - _units;
-//        twoKeyEventSource.escrow(address(this), msg.sender, _assetName, _assetContract, units, CampaignType.CPA_FUNGIBLE);
-        conversions[msg.sender] = c;
-    }
-
-    function fulfillFungibleETH(
-        address _from,
-        uint256 _amountETH
-    ) isOngoing internal {
-//        uint _amount = msg.value;
-        // TODO: Idea is that payout is msg.value
-        // Compute for the amount of ether how much tokens can be got by the amount
-        require(msg.value > 0);
-        //        require(price > 0);
-        uint payout = 1;
-        //        uint256 payout = price.mul(_amount);
-        require(msg.value == payout);
-        //TODO: Someone put 100 eth and he's entitled to X base + Y bonus  = (X+Y) taken from Inventory
-        //TODO: Take the msg.value, and regarding value I compute number of base and bonus tokens - sum of base and bonus is took out of the twoKeyCampaignInvent
-        Conversion memory c = Conversion(_from, payout, msg.sender, false, false, assetName, assetContract, msg.value, CampaignType.CPA_FUNGIBLE, now, now + expiryConversion * 1 days);
-
-
-        // move funds
-        campaignInventoryUnitsBalance = campaignInventoryUnitsBalance - msg.value;
-
-        // value in escrow (msg.value), total amount of tokens
-        //        twoKeyEventSource.escrow(address(this), msg.sender, _assetName, _assetContract, _amount, CampaignType.CPA_FUNGIBLE);
-        conversions[msg.sender] = c;
-    }
-
-    /// Is there a need to put assetContract as parameter , address _assetContract also assetName
-    /// Also, this function don't need to be payable, we're sending two key tokens here, not eth
-    /// (It was payable)
-    function buyFromWithTwoKey(address _from, string _assetName, uint256 _amount) public {
-        fulfillFungibleTwoKeyToken(_from, _assetName, _amount);
-    }
 
     /**
      * given the total payout, calculates the moderator fee
@@ -294,10 +212,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     }
 
 
-    function transferAssetTwoKeyToken(uint256 _tokenID, address _assetContract, uint256 _amount) isWhitelistedConverter didConverterConvert public {
-        actuallyFulfilledTwoKeyToken();
-        require(transferFungibleAsset(msg.sender, _amount));
-    }
+
 
 
     function cancelledEscrow(address _converter, address _assetContract, uint256 _amount) internal {
@@ -329,23 +244,14 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
         return true;
     }
 
-    function actuallyFulfilledTwoKeyToken() internal {
-        Conversion memory c = conversions[msg.sender];
-        c.isFulfilled = true;
-        conversions[msg.sender] = c;
-        uint256 fee = calculateModeratorFee(c.payout);
 
-        require(twoKeyEconomy.transfer(moderator, fee.mul(rate)));
 
-        uint256 payout = c.payout;
-        uint256 maxReward = maxPi.mul(payout).div(100);
-
-        // transfer payout - fee - rewards to seller
-        require(twoKeyEconomy.transfer(contractor, (payout.sub(fee).sub(maxReward)).mul(rate)));
-
-//        transferRewardsTwoKeyToken(c.from, maxReward.mul(rate));
-        //        twoKeyEventSource.fulfilled(address(this), c.converter, c.tokenID, c.assetContract, c.indexOrAmount, c.campaignType);
-    }
+    /// Is there a need to put assetContract as parameter , address _assetContract also assetName
+    /// Also, this function don't need to be payable, we're sending two key tokens here, not eth
+    /// (It was payable)
+    //    function buyFromWithTwoKey(address _from, string _assetName, uint256 _amount) public {
+    //        fulfillFungibleTwoKeyToken(_from, _assetName, _amount);
+    //    }
 
     // @notice Function where an influencer that wishes to cash an _amount of 2key from the campaign can do it
     function redeemTwoKeyToken(uint256 _amount) public {
@@ -354,16 +260,17 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
         twoKeyEconomy.transferFrom(this, msg.sender, _amount);
     }
 
-    /// @notice (Fallback)Payable function which will accept all transactions which are sending ether to contract
-    /// @dev we require that msg.value is greater than 0
-    /// @dev function will update the mapping balances where we're mapping how much ether has been sent to contract from specified address
-    /// @dev will emit an event with address and value sent
-    function () external payable {
-        require(msg.value > 0);
-        balancesConvertersETH[msg.sender] += msg.value;
-        //        fulfillFungibleETH(from, msg.value);
-        emit ReceivedEther(msg.sender, msg.value);
-    }
+//TODO: DELETE
+//    /// @notice (Fallback)Payable function which will accept all transactions which are sending ether to contract
+//    /// @dev we require that msg.value is greater than 0
+//    /// @dev function will update the mapping balances where we're mapping how much ether has been sent to contract from specified address
+//    /// @dev will emit an event with address and value sent
+//    function () external payable {
+//        require(msg.value > 0);
+//        balancesConvertersETH[msg.sender] += msg.value;
+//        //        fulfillFungibleETH(from, msg.value);
+//        emit ReceivedEther(msg.sender, msg.value);
+//    }
 
     /// @notice Function to check how much eth has been sent to contract from address
     /// @param _from is the address we'd like to check balance
@@ -392,9 +299,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
 //        return (name,symbol,price,bounty,quota,contractor,ipfs_hash,unit_decimals);
 //    }
 
-    //===================================================================================================
-    //========================      FROM HERE UDI'S CODE     ============================================
-    //===================================================================================================
+
 
     // the 2key link generated by the owner of this contract contains a secret which is a private key,
     // this is the public part of this secret
@@ -558,14 +463,19 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
         //    require(idx == sig.length);
     }
 
+    //=====================
+    //ENTRY POINT CONVERSION:
+
+    /// With this method we're moving arcs and buying the product (ETH)
     // We receive ether
     // How can I get bonus percentage?
     /*
-        We put Ether (converter sends ether)
-        We compute tokens
-        We create conversion object
-        we can't do anything until converter is whitelisted
-        Then we need another function that requires converter to be whitelisted and should do the following:
+        (1) We put Ether (converter sends ether)
+        (2) We compute tokens
+        (2) We create conversion object
+        (2) we can't do anything until converter is whitelisted
+
+        (3) Then we need another function that requires converter to be whitelisted and should do the following:
             - Compute referral rewards and distribute then
             - Compute and distribute moderation fees then
             - Generate lock-up contracts for tokens then
@@ -573,41 +483,146 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
             - Send remaining ether to contractor
     */
 
+    //******************************************************
+    //(1) ENTRY POINTS
+    //TODO: andrii if user wants to convert with metamask, they need to choose metamask before you call create their sig and call this function
+    function joinAndConvert(bytes sig) public payable {
+        /*
+        sig is the signature
+        */
+        ///Signature includes our information which goes to Ethereum
+        require(msg.value >= minContribution); //TODO add this field
+
+    transferSig(sig);
+        createConversion(msg.value, msg.sender);
+    }
+
+    function convert() public payable{
+        require(msg.value >= minContribution); //TODO add this field
+
+        require(public_link_key[msg.sender] != address(0));
+        createConversion(msg.value, msg.sender);
+    }
+
+    //TODO: for paying with external address, the user needs to transfer an ARC to the external address, and then we can call the public default payable
+    function () external payable{
+        require(msg.value >= minContribution); //TODO add this field
+
+        require(balanceOf(msg.sender) > 0);
+        createConversion(msg.value, msg.sender);
+    }
+
+
+    //******************************************************
+    //(2) CONVERSION 1st STEP
+
     /// @notice Function to buy product
     /// @param value is amount of ether sent
     /// @param sender is the sender who's buying
-    function buyProduct(uint value, address sender)  {
-        unit_decimals = 18; // uint256(erc20_token_sell_contract.decimals());
+    function createConversion(uint conversionAmountETH, address converterAddress) isOngoing private {
+        /*
+        (2) We get the ETH amount
+        (3) we compute tokens = base + bonus tokens
+        (2) We create conversion object
+        (2) we can't do anything until converter is whitelisted
 
-//        Each token has 10**decimals units
+
+        */
+        unit_decimals = uint256(assetContract.decimals());  //18; //
+
+        //TODO: calculate this from the conversionAmountETH and maxConverterBonusPercent
+        baseTokensForConverter = ?
+        bonusTokensForConverter = ?
+        _units = baseTokensForConverter + bonusTokensForConverter;
+
+        //        Each token has 10**decimals units
         // TODO: Compute valid base units and bonus units per the msg.value and token price and bonus percentage
-//        uint256 _units = value.mul(10**unit_decimals).div(rate);
-        uint _units = 1000;
+        ???? uint256 _units = value.mul(10**unit_decimals).div(rate);
+        //uint _units = 1000;
         // we are buying
-        uint256 maxReferralReward = maxReferralRewardPercent.mul(_units).div(10**unit_decimals);
+
+        uint256 maxReferralRewardETH = maxReferralRewardPercent.mul(_units).div(10**unit_decimals);
+        uint256 moderatorFeeETH = calculateModeratorFee(c.payout);
+
+        uint256 contractorProceeds = conversionAmountETH - maxReferralRewardETH - moderatorFeeETH;
+
+        //TODO: what's from?
+        //TODO: add moderatorFee, baseTokensAmount, bonusTokensAmount, TotalTokensAmount
+        Conversion memory c = Conversion(_from, contractorProceeds, converterAddress, false, false, assetName, assetContract, conversionAmountETH, CampaignType.CPA_FUNGIBLE, now, now + expiryConversion * 1 days);
+
+        // move funds
+        campaignInventoryUnitsBalance = campaignInventoryUnitsBalance - _units;
+
+        // value in escrow (msg.value), total amount of tokens
+        //        twoKeyEventSource.escrow(address(this), msg.sender, _assetName, _assetContract, _amount, CampaignType.CPA_FUNGIBLE);
+        conversions[converterAddress] = c;
+
+
+    }
+
+
+    //******************************************************
+    //(3) CONVERSION 2nd STEP
+    //actually third step after the moderator/contractor approved the converter in the white list
+
+    function executeConversion() isWhitelistedConverter didConverterConvert public {
+        performConversion();
+        //require(transferFungibleAsset(msg.sender, _amount));
+    }
+
+    function performConversion() internal {
+        /*
+         (3) Then we need another function that requires converter to be whitelisted and should do the following:
+            - Compute referral rewards and distribute then
+            - Compute and distribute moderation fees then
+            - Generate lock-up contracts for tokens then
+            - Move tokens to lock-up contracts then
+            - Send remaining ether to contractor
+
+        */
+
+        Conversion memory c = conversions[msg.sender];
+        conversions[msg.sender] = c;
+
         // Example; MaxReferralReward = 10% then msg.value = 100ETH
         // then this conversionReward = 10ETH
         // TODO: this function has to be part of conversion
-        updateRefchainRewardsAndConverterProceeds(_units, maxReferralReward);
-        require(assetContract.call(bytes4(keccak256("transfer(address,uint256)")), sender, _units));
+
+        updateRefchainRewards(_units, maxReferralReward);
+
+        //TODO distribute refchainRewards
+
+        //TODO distribute moderator fee
+
+        //TODO distribute contractor proceeds
+
+        //TODO either send tokens directly to converter for testing,then later actually create lockup contracts and send tokens to them
+
+        //this is if we want a simple test without lockup contracts
+        require(assetContract.call(bytes4(keccak256("transfer(address,uint256)")), converterAddress, _units));
+
+
+
+
+        //uint256 fee = calculateModeratorFee(c.payout);  //TODO take fee from conversion object since we already computed it.
+
+        //require(twoKeyEconomy.transfer(moderator, fee.mul(rate)));
+
+        //uint256 payout = c.payout;
+        //uint256 maxReward = maxReferralRewardPercent.mul(payout).div(100);
+
+        // transfer payout - fee - rewards to seller
+        //require(twoKeyEconomy.transfer(contractor, (payout.sub(fee).sub(maxReward)).mul(rate)));
+
+        //        transferRewardsTwoKeyToken(c.from, maxReward.mul(rate));
+        //        twoKeyEventSource.fulfilled(address(this), c.converter, c.tokenID, c.assetContract, c.indexOrAmount, c.campaignType);
+
+        c.isFulfilled = true;
+
     }
 
-    /// With this method we're moving arcs and buying the product (ETH)
-    function joinAndBuy(bytes sig) public payable {
-        ///Signature includes our information which goes to Ethereum
-        transferSig(sig);
-
-        buyProduct(msg.value, msg.sender);
-    }
-
-
-//    function buy() public payable{
-//        require(public_link_key[msg.sender] != address(0));
-//        buyProduct(msg.value, msg.sender);
-//    }
-
-
-    function updateRefchainRewardsAndConverterProceeds(uint256 _units, uint256 _bounty) public payable {
+    //TODO: refactor to take into account bonus + base tokens added to _units
+    function updateRefchainRewards(uint256 _units, uint256 _bounty) public payable {
         // buy coins with cut
         // low level product purchase function
         address customer = msg.sender;
@@ -619,7 +634,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
         require(_units > 0);
         require(_total_units >= _units);
         address[] memory influencers = getInfluencers(customer);
-//        uint n_influencers = influencers.length;
+        //        uint n_influencers = influencers.length;
 
         // distribute bounty to influencers
         uint256 total_bounty = 0;
@@ -648,10 +663,57 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
             _bounty = _bounty.sub(b);
         }
 
-        // all that is left from the cost is given to the owner for selling the product
-        converterProceeds = converterProceeds.add(msg.value).sub(total_bounty); // TODO we want the cost of a token to be fixed?
         units[customer] = units[customer].add(_units);
 
         emit Fulfilled(customer, units[customer]);
     }
+
+
+
+
+    /// Is there a need to put assetContract as parameter , address _assetContract also assetName
+    /// Also, this function don't need to be payable, we're sending two key tokens here, not eth
+    /// (It was payable)
+    //    function buyFromWithTwoKey(address _from, string _assetName, uint256 _amount) public {
+    //        fulfillFungibleTwoKeyToken(_from, _assetName, _amount);
+    //    }
+
+    /// @notice Move some amount of ERC20 from our campaignInventoryUnitsBalance to someone
+    /// @dev internal function
+    /// @param _to address we're sending the amount of ERC20
+    /// @param _amount is the amount of ERC20's we're going to transfer
+    /// @return true if successful, otherwise reverts
+    function moveFungibleAsset(address _to, uint256 _amount) internal returns (bool) {
+        require(campaignInventoryUnitsBalance >= _amount);
+        require(
+            assetContract.call(
+                bytes4(keccak256(abi.encodePacked("transfer(address,uint256)"))),
+                _to, _amount
+            )
+        );
+        campaignInventoryUnitsBalance = campaignInventoryUnitsBalance - _amount;
+        return true;
+    }
+
+    // transfer an amount of erc20 from our catalogue to someone
+    // This should be called when conversion is executed
+
+    /// @notice Function which will transfer fungible assets from contract to someone
+    /// @param _to is the address we're sending the fungible assets
+    /// @param _amount is the amount of ERC20 we're going to transfer
+    /// @return true if trasaction completes otherwise transaction will revert
+    function transferFungibleAsset(address _to, uint256 _amount) internal returns (bool) {
+        return moveFungibleAsset(_to, _amount);
+    }
+
+
+
+
+
+
+
+
+
+
+
 }

@@ -349,13 +349,22 @@ How to deploy contracts to any network except local dev
 * Commit your changes
 * Make sure that you on same branches in contracts and 2key-protocol submodule (./build/2key-protocol)
 * run ```node SOLDeployer.js {netowrk} {truffle params if needed}```
+* run ```yarn run deploy {network} {truffle params if needed}```
 * wait until process finish
 * check both repos contracts and 2key-protocol should have same tags
+
 
 
 # Docker testnet
 
 You need docker installed on your machine [See here](https://www.docker.com)
+
+```
+npm run geth:stop
+rm -rf ./build/geth.dev
+npm run geth
+```
+
 
 Chaindata stored in ```./build/geth.dev``` you can remove it if need clean
 To run docker
