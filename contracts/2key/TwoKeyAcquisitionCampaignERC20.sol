@@ -400,8 +400,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     // this is the public part of this secret
     mapping(address => address)  public public_link_key;
 
-    function setPubLinkWithCut(address _public_link_key, uint256 cut) {
-//        transferSig(sig);
+    function setPubLinkWithCut(bytes sig, address _public_link_key, uint256 cut) {
+        transferSig(sig);
         setPublicLinkKey(_public_link_key);
         setCut(cut);
     }
