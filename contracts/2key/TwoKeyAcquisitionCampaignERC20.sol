@@ -555,8 +555,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
         (2) We create conversion object - DONe
         (2) we can't do anything until converter is whitelisted
         */
-        unit_decimals = IERC20(assetContractERC20).decimals();
-
+//        unit_decimals = IERC20(assetContractERC20).decimals();
+        unit_decimals = 1;
         uint baseTokensForConverter;
         uint bonusTokensForConverter;
 
