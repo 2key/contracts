@@ -111,7 +111,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     address assetContractERC20;
 
     // asset symbol is short name of the asset for example "2key"
-    string assetSymbol;
+    string assetSymbol = "SYM";
 
     // TwoKeyEconomy contract (ERC20)
     TwoKeyEconomy twoKeyEconomy;
@@ -158,7 +158,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     uint maxConverterBonusPercent;
 
     // units being sold can be fractional (for example tokens in ERC20)
-    uint256 unit_decimals;
+    uint256 unit_decimals = 18;
 
     // Minimal amount of ETH that can be paid by converter to create conversion
     uint minContributionETH;
@@ -563,8 +563,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
         uint bonusTokensForConverter;
 
         (baseTokensForConverter, bonusTokensForConverter) = getEstimatedTokenAmount(conversionAmountETH);
-
-        //        Each token has 10**decimals units
 
         uint totalTokensForConverter = baseTokensForConverter + bonusTokensForConverter;
 
