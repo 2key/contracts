@@ -841,8 +841,4 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
 
         return (baseTokensForConverter, bonusTokensForConverter);
     }
-
-
-
-
 }
