@@ -254,6 +254,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
             pricePerUnitInETH = _pricePerUnitInETH;
             minContributionETH = _minContributionETH;
             maxContributionETH = _maxContributionETH;
+
+//            setAssetContractAttributes();
             // Emit event that TwoKeyCampaign is created
             twoKeyEventSource.created(address(this),contractor);
     }
@@ -548,15 +550,15 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     /// @notice Function to create conversion
     /// @param conversionAmountETH is actually the msg.value (amount of ether)
     /// @param converterAddress is actually the msg.sender (Address of one who's executing conversion)
-    function createConversion(uint conversionAmountETH, address converterAddress) isOngoing private {
+    /// isOngoing
+    function createConversion(uint conversionAmountETH, address converterAddress) private {
         /*
         (2) We get the ETH amount -DONE
         (3) we compute tokens = base + bonus tokens - DONE
         (2) We create conversion object - DONe
         (2) we can't do anything until converter is whitelisted
         */
-//        unit_decimals = IERC20(assetContractERC20).decimals();
-        unit_decimals = 1;
+
         uint baseTokensForConverter;
         uint bonusTokensForConverter;
 
@@ -826,6 +828,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     /// @return balance of ERC20 we have in our contract
     function getAndUpdateInventoryBalance() public returns (uint) {
         uint balance = getInventoryBalance();
+        setAssetContractAttributes();
         campaignInventoryUnitsBalance = balance;
         return balance;
     }
@@ -838,6 +841,11 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
         uint baseTokensForConverter = conversionAmountETH.mul(pricePerUnitInETH);
         uint bonusTokensForConverter = baseTokensForConverter.mul(maxConverterBonusPercent).div(100);
         return (baseTokensForConverter, bonusTokensForConverter);
+    }
 
+    /// @notice Function which will act as a setter and will be called once during deployment
+    function setAssetContractAttributes() private {
+        assetSymbol = IERC20(assetContractERC20).getTokenSymbol();
+        unit_decimals = IERC20(assetContractERC20).getDecimals();
     }
 }
