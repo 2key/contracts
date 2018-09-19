@@ -16,7 +16,7 @@ import {
 } from './interfaces';
 import Sign from './sign';
 
-function promisify(func: any, args: any): Promise<any> {
+export function promisify(func: any, args: any): Promise<any> {
     return new Promise((res, rej) => {
         func(...args, (err: any, data: any) => {
             if (err) return rej(err);
@@ -24,6 +24,46 @@ function promisify(func: any, args: any): Promise<any> {
         });
     });
 }
+
+function getTransactionReceiptMined(txHash: string | string[], interval: number = 500, timeout: number = 60000): Promise<TransactionReceipt | TransactionReceipt[]> {
+    const self = this;
+    let fallback;
+    const transactionReceiptAsync = function(resolve, reject) {
+        if (!fallback) {
+            setTimeout(() => {
+               reject('Timed out');
+            }, timeout);
+        }
+        self.getTransactionReceipt(txHash, (error, receipt) => {
+            if (error) {
+                if (fallback) {
+                    clearTimeout(fallback);
+                    fallback = null;
+                }
+                reject(error);
+            } else if (receipt == null) {
+                setTimeout(
+                    () => transactionReceiptAsync(resolve, reject),
+                    interval);
+            } else {
+                if (fallback) {
+                    clearTimeout(fallback);
+                    fallback = null;
+                }
+                resolve(receipt);
+            }
+        });
+    };
+
+    if (Array.isArray(txHash)) {
+        return Promise.all(txHash.map(
+            oneTxHash => self.getTransactionReceiptMined(oneTxHash, interval)));
+    } else if (typeof txHash === "string") {
+        return new Promise(transactionReceiptAsync);
+    } else {
+        throw new Error("Invalid Type: " + txHash);
+    }
+};
 
 // const contracts = require('./contracts.json');
 // const addressRegex = /^0x[a-fA-F0-9]{40}$/;
@@ -85,6 +125,7 @@ export class TwoKeyProtocol {
             }
         }
         this.web3.eth.defaultBlock = 'pending';
+        this.web3.eth.getTransactionReceiptMined = getTransactionReceiptMined;
         this.twoKeyEconomy = this.web3.eth.contract(contractsMeta.TwoKeyEconomy.abi).at(this._getContractDeployedAddress('TwoKeyEconomy'));
         // this.twoKeyReg = this.web3.eth.contract(solidityContracts.TwoKeyReg.abi).at(this._getContractDeployedAddress('TwoKeyReg'));
 
@@ -112,6 +153,12 @@ export class TwoKeyProtocol {
     public getAddress(): string {
         return this.address;
     }
+
+    public getTransactionReceiptMined(txHash: string | string[], interval?: number, timeout?: number): Promise<TransactionReceipt | TransactionReceipt[]> {
+        return this.web3.eth.getTransactionReceiptMined(txHash, interval, timeout);
+    }
+
+
 
     public async ipfsAdd(data: any): Promise<string> {
         return new Promise<string>(async (resolve, reject) => {
@@ -274,11 +321,12 @@ export class TwoKeyProtocol {
                 const gasRequired = await this.estimateAcquisitionCampaign(data);
                 await this._checkBalanceBeforeTransaction(gasRequired, gasPrice || this.gasPrice);
                 let txHash = await this._createContract(contractsMeta.TwoKeyAcquisitionCampaignERC20Predeploy, gasPrice, null, progressCallback);
-                const predeployReceipt = await this._waitForTransactionMined(txHash);
+                const predeployReceipt = await this.getTransactionReceiptMined(txHash);
+                let contractAddress = Array.isArray(predeployReceipt) ? predeployReceipt[0].contractAddress : predeployReceipt.contractAddress;
                 if (progressCallback) {
-                    progressCallback('TwoKeyAcquisitionCampaignERC20Predeploy', true, predeployReceipt.contractAddress);
+                    progressCallback('TwoKeyAcquisitionCampaignERC20Predeploy', true, contractAddress);
                 }
-                const predeployInstance = await this._createAndValidate('TwoKeyAcquisitionCampaignERC20Predeploy', predeployReceipt.contractAddress);
+                const predeployInstance = await this._createAndValidate('TwoKeyAcquisitionCampaignERC20Predeploy', contractAddress);
                 // const predeployInstance = await this._createAndValidate('TwoKeyAcquisitionCampaignERC20Predeploy', predeployAddress);
                 const [converterWhitelistAddress, referrerWhitelistAddress] = await promisify(predeployInstance.getAddresses, []);
                 txHash = await this._createContract(contractsMeta.TwoKeyAcquisitionCampaignERC20, gasPrice, [
@@ -299,18 +347,12 @@ export class TwoKeyProtocol {
                     this.toWei(data.maxContributionETH, 'ether'),
                     data.conversionQuota || 5,
                 ], progressCallback);
-                const campaignReceipt = await this._waitForTransactionMined(txHash);
+                const campaignReceipt = await this.getTransactionReceiptMined(txHash);
+                contractAddress = Array.isArray(campaignReceipt) ? campaignReceipt[0].contractAddress : campaignReceipt.contractAddress
                 if (progressCallback) {
-                    progressCallback('TwoKeyAcquisitionCampaignERC20', true, campaignReceipt.contractAddress);
+                    progressCallback('TwoKeyAcquisitionCampaignERC20', true, contractAddress);
                 }
-                // const campaignInstance = await this._getAcquisitionCampaignInstance(campaignReceipt.contractAddress);
-                // const gas = await promisify(campaignInstance.setAssetContractAttributes.estimateGas, [{ from: this.address }]);
-                // console.log('setAssetContractAttributes', gas);
-                // txHash = await promisify(campaignInstance.setAssetContractAttributes, [{ from: this.address, gas, gasPrice }]);
-                // await this._waitForTransactionMined(txHash);
-                // const [decimals, assetSymbol] = await promisify(campaignInstance.getAssetDecimals, []);
-                // console.log('ERC20 decimals', decimals, assetSymbol);
-                resolve(campaignReceipt.contractAddress);
+                resolve(contractAddress);
             } catch (err) {
                 reject(err);
             }
@@ -322,7 +364,7 @@ export class TwoKeyProtocol {
         try {
             const campaignInstance = await this._getAcquisitionCampaignInstance(campaign);
             const hash = await promisify(campaignInstance.getAndUpdateInventoryBalance, [{ from: this.address }]);
-            await this._waitForTransactionMined(hash);
+            await this.getTransactionReceiptMined(hash);
             const balance = parseFloat(this.fromWei(await promisify(campaignInstance.getInventoryBalance, [])));
             return Promise.resolve(balance);
         } catch (err) {
@@ -364,9 +406,9 @@ export class TwoKeyProtocol {
                     gas,
                     gasPrice
                 }]);
-                await this._waitForTransactionMined(txHash);
-                const [decimals, assetSymbol] = await promisify(campaignInstance.getAssetDecimals, []);
-                console.log('Campaign Asset Info', decimals.toNumber(), assetSymbol);
+                await this.getTransactionReceiptMined(txHash);
+                // const [decimals, assetSymbol] = await promisify(campaignInstance.getAssetDecimals, []);
+                // console.log('Campaign Asset Info', decimals.toNumber(), assetSymbol);
                 resolve(publicKey);
             } catch (err) {
                 reject(err);
@@ -424,7 +466,7 @@ export class TwoKeyProtocol {
                     console.log(enough);
                     const txHash = await promisify(campaignInstance.joinAndSetPublicLinkWithCut, [msg, publicLink, cut, { from: this.address, gasPrice, gas }]);
                     console.log('setPubLinkWithCut', txHash);
-                    await this._waitForTransactionMined(txHash);
+                    await this.getTransactionReceiptMined(txHash);
                     arcBalance = parseFloat(this.fromWei(await promisify(campaignInstance.balanceOf, [this.address])));
                 }
                 if (arcBalance) {
@@ -454,6 +496,12 @@ export class TwoKeyProtocol {
                 reject('Broken Link');
             }
             const campaignInstance = await this._getAcquisitionCampaignInstance(campaign);
+            const [assetSymbol, decimals] = await promisify(campaignInstance.getContractAttributes, []);
+            console.log('Campaign Asset Info', decimals.toNumber(), assetSymbol);
+            const [basicTokens, bonusTokens] = await promisify(campaignInstance.getEstimatedTokenAmount, [this.toWei(amount, 'ether')]);
+            console.log(basicTokens.toNumber(), bonusTokens.toNumber(), typeof bonusTokens);
+            console.log('Tokens', this.fromWei(basicTokens, 'ether'), this.fromWei(bonusTokens, 'ether'));
+
             const balance = (await promisify(campaignInstance.balanceOf, [this.address])).toNumber();
             if (!balance) {
                 console.log('No ARCS call buySign');
@@ -462,7 +510,7 @@ export class TwoKeyProtocol {
                 console.log('Gas required for buySign', gas);
                 await this._checkBalanceBeforeTransaction(gas, gasPrice);
                 const txHash = await promisify(campaignInstance.joinAndConvert, [msg, {from: this.address, gasPrice, gas, value: this.toWei(amount, 'ether')}]);
-                await this._waitForTransactionMined(txHash);
+                await this.getTransactionReceiptMined(txHash);
                 resolve(txHash);
             } else {
                 console.log('Converter ARCS', balance);
@@ -476,7 +524,7 @@ export class TwoKeyProtocol {
                 console.log('Gas required for buyProduct', gas);
                 await this._checkBalanceBeforeTransaction(gas, gasPrice);
                 const txHash = await promisify(campaignInstance.convert, [{from: this.address, gasPrice, gas: 7000000, value: this.toWei(amount, 'ether')}]);
-                await this._waitForTransactionMined(txHash);
+                await this.getTransactionReceiptMined(txHash);
                 resolve(txHash);
             }
         });
@@ -668,39 +716,6 @@ export class TwoKeyProtocol {
     //         });
     //     });
     // }
-
-    private _waitForTransactionMined(txHash: string, timeout: number = 60000): Promise<TransactionReceipt> {
-        return new Promise((resolve, reject) => {
-            let fallbackTimer;
-            let interval;
-            fallbackTimer = setTimeout(() => {
-                if (interval) {
-                    clearInterval(interval);
-                    interval = null;
-                }
-                if (fallbackTimer) {
-                    clearTimeout(fallbackTimer);
-                    fallbackTimer = null;
-                }
-                reject();
-            }, timeout);
-            interval = setInterval(async () => {
-                let tx = await this._getTransaction(txHash);
-                if (tx.blockNumber) {
-                    if (fallbackTimer) {
-                        clearTimeout(fallbackTimer);
-                        fallbackTimer = null;
-                    }
-                    if (interval) {
-                        clearInterval(interval);
-                        interval = null;
-                    }
-                    const txReceipt = await promisify(this.web3.eth.getTransactionReceipt, [txHash]);
-                    resolve(txReceipt);
-                }
-            }, 1000);
-        });
-    }
 
     private _getUrlParams(url: string): any {
         let hashes = url.slice(url.indexOf('?') + 1).split('&');

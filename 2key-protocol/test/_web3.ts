@@ -23,7 +23,7 @@ export default function(mnemonic, rpcUrl): any {
 
   const engine = new ProviderEngine();
   // const mainProvider = new WSSubprovider({ rpcUrl: 'ws://18.233.2.70:8501' })
-  const mainProvider = new WSSubprovider({ rpcUrl });
+  const mainProvider = rpcUrl.startsWith('http') ? new RpcSubprovider({ rpcUrl }) : new WSSubprovider({ rpcUrl });
   engine.addProvider(new WalletSubprovider(wallet, {}));
   engine.addProvider(mainProvider);
 

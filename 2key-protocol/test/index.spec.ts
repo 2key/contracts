@@ -1,6 +1,6 @@
 import {expect} from 'chai';
 import 'mocha';
-import {TwoKeyProtocol} from '../src';
+import {TwoKeyProtocol, promisify} from '../src';
 import contractsMeta from '../src/contracts';
 import createWeb3 from './_web3';
 
@@ -82,14 +82,13 @@ describe('TwoKeyProtocol', () => {
                 if (balance['2KEY'] <= 20000) {
                     console.log('NO BALANCE at aydnep account');
                     const admin = web3.deployer().eth.contract(contractsMeta.TwoKeyAdmin.abi).at(contractsMeta.TwoKeyAdmin.networks[mainNetId].address);
-                    admin.transfer2KeyTokens(twoKeyEconomy, destinationAddress, twoKeyProtocol.toWei(100000, 'ether'), { from: env.DEPLOYER_ADDRESS, gas: 7000000, gasPrice: 5000000000 },  (err, res) => {
+                    admin.transfer2KeyTokens(twoKeyEconomy, destinationAddress, twoKeyProtocol.toWei(100000, 'ether'), { from: env.DEPLOYER_ADDRESS, gas: 7000000, gasPrice: 5000000000 },  async (err, res) => {
                         if (err) {
                             reject(err);
                         } else {
                             console.log('Send Tokens', res);
-                            setTimeout(() => {
-                                resolve(res);
-                            }, 10000);
+                            const receipt = await twoKeyProtocol.getTransactionReceiptMined(res);
+                            resolve(receipt);
                         }
                     });
                 } else {
@@ -109,6 +108,7 @@ describe('TwoKeyProtocol', () => {
 
     let campaignAddress: string;
     let aydnepBalance;
+    let txHash;
 
     it('should return a balance for address', async () => {
         const business = await twoKeyProtocol.getBalance(twoKeyAdmin);
@@ -147,9 +147,11 @@ describe('TwoKeyProtocol', () => {
     it(`should transfer ether to ${ethDstAddress}`, async () => {
         if (parseInt(mainNetId, 10) > 4) {
             // const gasLimit = await twoKeyProtocol.getETHTransferGas(twoKeyProtocolAydnep.getAddress(), 1);
-            const txHash = await twoKeyProtocol.transferEther(ethDstAddress, 10, 3000000000);
+            txHash = await twoKeyProtocol.transferEther(ethDstAddress, 10, 3000000000);
             console.log('Transfer Ether', txHash, typeof txHash);
-            expect(txHash).to.exist.to.be.a('string');
+            const receipt = await twoKeyProtocol.getTransactionReceiptMined(txHash);
+            const status = Array.isArray(receipt) ? receipt[0].status : receipt.status;
+            expect(status).to.be.equal('0x1');
         } else {
             expect(true);
         }
@@ -177,8 +179,11 @@ describe('TwoKeyProtocol', () => {
     }).timeout(30000);
 
     it('should transfer tokens', async function () {
-        const txHash = await twoKeyProtocol.transfer2KEYTokens(ethDstAddress, 123, 3000000000);
-        expect(txHash).to.be.a('string');
+        txHash = await twoKeyProtocol.transfer2KEYTokens(ethDstAddress, 123, 3000000000);
+        console.log('Transfer 2Key Tokens', txHash, typeof txHash);
+        const receipt = await twoKeyProtocol.getTransactionReceiptMined(txHash);
+        const status = Array.isArray(receipt) ? receipt[0].status : receipt.status;
+        expect(status).to.be.equal('0x1');
     }).timeout(30000);
 
     it('should print balances', (done) => {
@@ -247,15 +252,10 @@ describe('TwoKeyProtocol', () => {
     }).timeout(15000);
 
     it('should transfer assets to campaign', async () => {
-        await twoKeyProtocol.transfer2KEYTokens(campaignAddress, 12345);
-        const checkBalance = new Promise((resolve, reject) => {
-            setTimeout(async () => {
-                const res = await twoKeyProtocol.checkAndUpdateAcquisitionInventoryBalance(campaignAddress);
-                console.log('Campaign Balance', res);
-                resolve(res)
-            }, 15000);
-        });
-        const balance = await checkBalance;
+        txHash = await twoKeyProtocol.transfer2KEYTokens(campaignAddress, 12345);
+        await twoKeyProtocol.getTransactionReceiptMined(txHash);
+        const balance = await twoKeyProtocol.checkAndUpdateAcquisitionInventoryBalance(campaignAddress);
+        console.log('Campaign Balance', balance);
         expect(balance).to.be.equal(12345);
     }).timeout(300000);
 

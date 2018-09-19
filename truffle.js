@@ -22,7 +22,7 @@ module.exports = {
       host: 'localhost',
       port: 8500,
       network_id: '*', // Match any network id
-      gas: 7000000,
+      gas: 8000000,
       gasPrice: 2000000000,
     },
     'dev-local': {
@@ -34,19 +34,19 @@ module.exports = {
     'dev-2key': {
       provider: () => new HDWalletProvider(mnemonic, 'http://18.233.2.70:8500'),
       network_id: '*', // Match any network id
-      gas: 7000000,
+      gas: 8000000,
       gasPrice: 5000000000,
     },
     'rinkeby-infura': {
       provider: () => new HDWalletProvider(mnemonic, 'https://rinkeby.infura.io/v3/904c762bd6984606bf8ae7f30d7cb28c\n'),
       network_id: '4',
-      gas: 7000000,
+      gas: 8000000,
       gasPrice: 50000000000,
     },
     staging: {
       provider: () => new HDWalletProvider(mnemonic, 'https://ropsten.infura.io/v3/71d39c30bc984e8a8a0d8adca84620ad'),
       network_id: '*',
-      gas: 7000000,
+      gas: 8000000,
       gasPrice: 50000000000,
     },
     'kovan': {
