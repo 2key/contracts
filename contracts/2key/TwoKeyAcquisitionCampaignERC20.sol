@@ -66,7 +66,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     event ReceivedEther(address _sender, uint value);
 
 
-
     // ==============================================================================================================
     // =============================TWO KEY ACQUISITION CAMPAIGN STATE VARIABLES=====================================
     // ==============================================================================================================
@@ -540,6 +539,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
 
         require(balanceOf(msg.sender) > 0);
         createConversion(msg.value, msg.sender);
+
     }
 
     //******************************************************
@@ -553,8 +553,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
         (2) We create conversion object - DONe
         (2) we can't do anything until converter is whitelisted
         */
-
-
         unit_decimals = IERC20(assetContractERC20).decimals();
 
         uint baseTokensForConverter;
@@ -571,16 +569,15 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
 
         uint256 contractorProceeds = conversionAmountETH - maxReferralRewardETH - moderatorFeeETH;
 
-        //TODO: add moderatorFee, baseTokensAmount, bonusTokensAmount, TotalTokensAmount
         Conversion memory c = Conversion(contractor, contractorProceeds, converterAddress, false, false, false, assetSymbol, assetContractERC20, conversionAmountETH, CampaignType.CPA_FUNGIBLE, now, now + expiryConversion * 1 days);
 
+        emit ReceivedEther(converterAddress, conversionAmountETH);
         // move funds
-        campaignInventoryUnitsBalance = campaignInventoryUnitsBalance - totalTokensForConverter;
+        // campaignInventoryUnitsBalance = campaignInventoryUnitsBalance - totalTokensForConverter;
 
         // value in escrow (msg.value), total amount of tokens
-        //        twoKeyEventSource.escrow(address(this), msg.sender, _assetName, _assetContract, _amount, CampaignType.CPA_FUNGIBLE);
+        // twoKeyEventSource.escrow(address(this), msg.sender, _assetName, _assetContract, _amount, CampaignType.CPA_FUNGIBLE);
         conversions[converterAddress] = c;
-
 
     }
 
