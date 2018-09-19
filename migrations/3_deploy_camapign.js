@@ -13,7 +13,7 @@ module.exports = function deploy(deployer) {
             .then(() => deployer.deploy(ERC20TokenMock))
             .then(() => deployer.deploy(TwoKeyAcquisitionCampaignERC20, EventSource.address, TwoKeyEconomy.address, TwoKeyWhitelistedInfluencer.address,
                 TwoKeyWhitelistedConverter.address,
-                '0xb3fa520368f2df7bed4df5185101f303f6c7decc', TwoKeyEconomy.address,
+                '0xb3fa520368f2df7bed4df5185101f303f6c7decc', ERC20TokenMock.address,
                 12345,12345,12345,12345,12345,12345,12345,12345,12345,12345))
             .then(() => true);
     }
