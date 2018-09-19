@@ -7,6 +7,7 @@ import "./TwoKeyEventSource.sol";
 import "./TwoKeyWhitelisted.sol";
 import './TwoKeyEconomy.sol';
 import "./TwoKeySignedContract.sol";
+import "../interfaces/IERC20.sol";
 import "./Utils.sol";
 
 /// @author Nikola Madjarevic
@@ -121,6 +122,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
 
     // Contract representing whitelisted converter
     TwoKeyWhitelisted converterWhitelist;
+
+    IERC20 fungibleInterface;
 
     // There's single price for the unit ERC20 (Should be in WEI)
     uint256 pricePerUnitInETH = 1;
@@ -560,12 +563,10 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
         (3) we compute tokens = base + bonus tokens
         (2) We create conversion object
         (2) we can't do anything until converter is whitelisted
-
-
         */
-        unit_decimals = 1;
-        //TODO: add decimals method to interface of ERC20 so we can call that method to get decimals
-//        unit_decimals = uint256(assetContractERC20.decimals());
+
+
+        unit_decimals = IERC20(assetContractERC20).decimals();
 
         uint baseTokensForConverter;
         uint bonusTokensForConverter;
