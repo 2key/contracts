@@ -527,7 +527,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     }
 
     function convert() public payable{
-        require(msg.value >= minContributionETH); //TODO add this field
+        require(msg.value >= minContributionETH);
         require(msg.value <= maxContributionETH);
         require(publicLinkKey[msg.sender] != address(0));
         createConversion(msg.value, msg.sender);
@@ -535,7 +535,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
 
     //TODO: for paying with external address, the user needs to transfer an ARC to the external address, and then we can call the public default payable
     function () external payable{
-        require(msg.value >= minContributionETH); //TODO add this field
+        require(msg.value >= minContributionETH);
 
         require(balanceOf(msg.sender) > 0);
         createConversion(msg.value, msg.sender);
@@ -837,7 +837,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     function getEstimatedTokenAmount(uint conversionAmountETH) public view returns (uint,uint) {
         uint baseTokensForConverter = conversionAmountETH.mul(pricePerUnitInETH);
         uint bonusTokensForConverter = baseTokensForConverter.mul(maxConverterBonusPercent).div(100);
-
         return (baseTokensForConverter, bonusTokensForConverter);
+
     }
 }
