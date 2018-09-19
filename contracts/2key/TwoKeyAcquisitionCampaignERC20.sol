@@ -838,8 +838,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     /// @param conversionAmountETH is amount of eth in conversion
     /// @return tuple containing (base,bonus)
     function getEstimatedTokenAmount(uint conversionAmountETH) public view returns (uint,uint) {
-        uint baseTokensForConverter = conversionAmountETH.mul(pricePerUnitInETH).div(unit_decimals);
-        uint bonusTokensForConverter = baseTokensForConverter.mul(maxConverterBonusPercent).div(100).div(unit_decimals);
+        uint baseTokensForConverter = conversionAmountETH.div(unit_decimals).mul(pricePerUnitInETH.div(unit_decimals));
+        uint bonusTokensForConverter = baseTokensForConverter.mul(maxConverterBonusPercent).div(100);
         return (baseTokensForConverter, bonusTokensForConverter);
     }
 
