@@ -4,7 +4,7 @@ pragma solidity ^0.4.24;
 contract IERC20 {
     function balanceOf(address whom) view public returns (uint);
     function transfer(address _to, uint256 _value) public returns (bool);
-    function decimals() view public returns (uint8);
+    function decimals() view public returns (uint);
     function symbol() view public returns (string);
     function name() view public returns (string);
 }

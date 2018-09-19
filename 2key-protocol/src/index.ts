@@ -88,7 +88,7 @@ export class TwoKeyProtocol {
     private ipfs: any;
     private readonly address: string;
     private gasPrice: number;
-    private totalSupply: string;
+    private totalSupply: number;
     private gas: number;
     private networks: EhtereumNetworks;
     private readonly contracts: ContractsAdressess;
@@ -142,7 +142,7 @@ export class TwoKeyProtocol {
         return this.gasPrice;
     }
 
-    public getTotalSupply(): string {
+    public getTotalSupply(): number {
         return this.totalSupply;
     }
 
@@ -189,12 +189,12 @@ export class TwoKeyProtocol {
                 .then(([eth, token, total, gasPrice]) => {
                     resolve({
                         balance: {
-                            ETH: parseFloat(eth),
-                            total: parseFloat(total),
-                            '2KEY': parseFloat(token),
+                            ETH: eth,
+                            total: total,
+                            '2KEY': token,
                         },
                         local_address: this.address,
-                        gasPrice: parseFloat(gasPrice),
+                        gasPrice: gasPrice,
                     });
                 })
                 .catch(reject)
@@ -233,10 +233,10 @@ export class TwoKeyProtocol {
 
     public async transfer2KEYTokens(to: string, value: number, gasPrice: number = this.gasPrice): Promise<string> {
         try {
-            const balance = parseFloat(await this._getEthBalance(this.address));
-            const tokenBalance = parseFloat(await this._getTokenBalance(this.address));
+            const balance = await this._getEthBalance(this.address);
+            const tokenBalance = await this._getTokenBalance(this.address);
             const gasRequired = await this.getERC20TransferGas(to, value);
-            const etherRequired = parseFloat(this.fromWei(gasPrice * gasRequired, 'ether'));
+            const etherRequired = this.fromWei(gasPrice * gasRequired, 'ether');
             if (tokenBalance < value || balance < etherRequired) {
                 Promise.reject(new Error(`Not enough founds on ${this.address}, required: [ETH: ${etherRequired}, 2KEY: ${value}], balance: [ETH: ${balance}, 2KEY: ${tokenBalance}]`));
             }
@@ -250,9 +250,9 @@ export class TwoKeyProtocol {
 
     public async transferEther(to: string, value: number, gasPrice: number = this.gasPrice): Promise<any> {
         try {
-            const balance = parseFloat(await this._getEthBalance(this.address));
+            const balance = await this._getEthBalance(this.address);
             const gasRequired = await this.getETHTransferGas(to, value);
-            const totalValue = value + parseFloat(this.fromWei(gasPrice * gasRequired, 'ether'));
+            const totalValue = value + this.fromWei(gasPrice * gasRequired, 'ether');
             if (totalValue > balance) {
                 Promise.reject(new Error(`Not enough founds on ${this.address} required ${value}, balance: ${balance}`));
             }
@@ -365,7 +365,7 @@ export class TwoKeyProtocol {
             const campaignInstance = await this._getAcquisitionCampaignInstance(campaign);
             const hash = await promisify(campaignInstance.getAndUpdateInventoryBalance, [{ from: this.address }]);
             await this.getTransactionReceiptMined(hash);
-            const balance = parseFloat(this.fromWei(await promisify(campaignInstance.getInventoryBalance, [])));
+            const balance = this.fromWei(await promisify(campaignInstance.getInventoryBalance, []));
             return Promise.resolve(balance);
         } catch (err) {
             Promise.reject(err);
@@ -454,7 +454,7 @@ export class TwoKeyProtocol {
             }
             try {
                 const campaignInstance = await this._getAcquisitionCampaignInstance(campaignAddress);
-                let arcBalance = parseFloat(this.fromWei(await promisify(campaignInstance.balanceOf, [this.address])));
+                let arcBalance = this.fromWei(await promisify(campaignInstance.balanceOf, [this.address]));
                 const {public_address, private_key} = generatePublicMeta();
                 const publicLink = `0x${public_address}`;
                 if (!arcBalance) {
@@ -467,7 +467,7 @@ export class TwoKeyProtocol {
                     const txHash = await promisify(campaignInstance.joinAndSetPublicLinkWithCut, [msg, publicLink, cut, { from: this.address, gasPrice, gas }]);
                     console.log('setPubLinkWithCut', txHash);
                     await this.getTransactionReceiptMined(txHash);
-                    arcBalance = parseFloat(this.fromWei(await promisify(campaignInstance.balanceOf, [this.address])));
+                    arcBalance = this.fromWei(await promisify(campaignInstance.balanceOf, [this.address]));
                 }
                 if (arcBalance) {
                     resolve(`f_address=${this.address}&f_secret=${private_key}&p_message=`)
@@ -498,9 +498,9 @@ export class TwoKeyProtocol {
             const campaignInstance = await this._getAcquisitionCampaignInstance(campaign);
             const [assetSymbol, decimals] = await promisify(campaignInstance.getContractAttributes, []);
             console.log('Campaign Asset Info', decimals.toNumber(), assetSymbol);
-            const [basicTokens, bonusTokens] = await promisify(campaignInstance.getEstimatedTokenAmount, [this.toWei(amount, 'ether')]);
-            console.log(basicTokens.toNumber(), bonusTokens.toNumber(), typeof bonusTokens);
-            console.log('Tokens', this.fromWei(basicTokens, 'ether'), this.fromWei(bonusTokens, 'ether'));
+            const [basicTokens, bonusTokens, unit_decimals] = await promisify(campaignInstance.getEstimatedTokenAmount, [this.toWei(amount, 'ether')]);
+            // console.log(basicTokens.toNumber(), bonusTokens.toNumber(), unit_decimals);
+            console.log('Tokens', this.fromWei(basicTokens).toString(), this.fromWei(bonusTokens).toString());
 
             const balance = (await promisify(campaignInstance.balanceOf, [this.address])).toNumber();
             if (!balance) {
@@ -532,8 +532,12 @@ export class TwoKeyProtocol {
 
     /* UTILS */
 
-    public fromWei(number: string | number | BigNumber, unit?: string): string {
-        return this.web3.fromWei(number, unit);
+    public fromWei(number: string | number | BigNumber, unit?: string): number {
+        const result = this.web3.fromWei(number, unit);
+        if (result instanceof BigNumber) {
+            return result.toNumber();
+        }
+        return parseFloat(result);
     }
 
     public toWei(number: string | number | BigNumber, unit?: string): BigNumber {
@@ -548,20 +552,20 @@ export class TwoKeyProtocol {
         return this.contracts ? this.contracts[contract] : contractsMeta[contract].networks[this.networks.mainNetId].address
     }
 
-    private _getGasPrice(): Promise<string> {
+    private _getGasPrice(): Promise<number> {
         return new Promise((resolve, reject) => {
             this.web3.eth.getGasPrice((err, res) => {
                 if (err) {
                     reject(err);
                 } else {
                     this.gasPrice = res.toNumber();
-                    resolve(res.toString());
+                    resolve(this.gasPrice);
                 }
             });
         });
     }
 
-    private _getEthBalance(address: string): Promise<string> {
+    private _getEthBalance(address: string): Promise<number> {
         return new Promise((resolve, reject) => {
             this.web3.eth.getBalance(address, this.web3.eth.defaultBlock, (err, res) => {
                 if (err) {
@@ -573,7 +577,7 @@ export class TwoKeyProtocol {
         })
     }
 
-    private _getTokenBalance(address: string, erc20address?: string): Promise<string> {
+    private _getTokenBalance(address: string, erc20address?: string): Promise<number> {
         if (erc20address) {
             return new Promise(async (resolve, reject) => {
                 try {
@@ -597,7 +601,7 @@ export class TwoKeyProtocol {
         });
     }
 
-    private _getTotalSupply(erc20address?: string): Promise<string> {
+    private _getTotalSupply(erc20address?: string): Promise<number> {
         if (erc20address) {
             return new Promise(async (resolve, reject) => {
                 try {
@@ -610,7 +614,7 @@ export class TwoKeyProtocol {
             });
         }
         if (this.totalSupply) {
-            return Promise.resolve(this.totalSupply.toString());
+            return Promise.resolve(this.totalSupply);
         }
         return new Promise((resolve, reject) => {
             this.twoKeyEconomy.totalSupply((err, res) => {
@@ -731,8 +735,8 @@ export class TwoKeyProtocol {
         if (!this.gasPrice) {
             await this._getGasPrice();
         }
-        const balance = parseFloat(await this._getEthBalance(this.address));
-        const transactionFee = parseFloat(this.fromWei((gasPrice || this.gasPrice) * gasRequired, 'ether'));
+        const balance = await this._getEthBalance(this.address);
+        const transactionFee = this.fromWei((gasPrice || this.gasPrice) * gasRequired, 'ether');
         console.log(`${this.address}, ${balance} (${transactionFee}), gasPrice: ${(gasPrice || this.gasPrice)}`);
         if (transactionFee > balance) {
             throw new Error(`Not enough founds. Required: ${transactionFee}. Your balance: ${balance},`);

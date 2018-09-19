@@ -158,7 +158,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     uint maxConverterBonusPercent;
 
     // units being sold can be fractional (for example tokens in ERC20)
-    uint8 unit_decimals;
+    uint unit_decimals;
 
     // Minimal amount of ETH that can be paid by converter to create conversion
     uint minContributionETH;
@@ -838,8 +838,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     /// @param conversionAmountETH is amount of eth in conversion
     /// @return tuple containing (base,bonus)
     function getEstimatedTokenAmount(uint conversionAmountETH) public view returns (uint,uint) {
-        uint baseTokensForConverter = conversionAmountETH.div(unit_decimals).mul(pricePerUnitInETH.div(unit_decimals));
-        uint bonusTokensForConverter = baseTokensForConverter.mul(maxConverterBonusPercent.div(unit_decimals)).div(100);
+        uint baseTokensForConverter = conversionAmountETH.mul(10**unit_decimals).div(pricePerUnitInETH);
+        uint bonusTokensForConverter = baseTokensForConverter.mul(maxConverterBonusPercent).div(100).div(10**unit_decimals);
         return (baseTokensForConverter, bonusTokensForConverter);
     }
 
