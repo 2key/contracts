@@ -517,20 +517,16 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     //******************************************************
     //(1) ENTRY POINTS
     //TODO: andrii if user wants to convert with metamask, they need to choose metamask before you call create their sig and call this function
-    function joinAndConvert(bytes sig) public payable {
-        /*
-        sig is the signature
-        */
-        ///Signature includes our information which goes to Ethereum
-        require(msg.value >= minContributionETH); //TODO add this field
-
-        distributeArcsBasedOnSignature(sig);
+    function joinAndConvert(bytes signature) public payable {
+        require(msg.value >= minContributionETH);
+        require(msg.value <= maxContributionETH);
+        distributeArcsBasedOnSignature(signature);
         createConversion(msg.value, msg.sender);
     }
 
     function convert() public payable{
         require(msg.value >= minContributionETH); //TODO add this field
-
+        require(msg.value <= maxContributionETH);
         require(publicLinkKey[msg.sender] != address(0));
         createConversion(msg.value, msg.sender);
     }
