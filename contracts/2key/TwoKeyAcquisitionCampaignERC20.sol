@@ -80,8 +80,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
         bool isFulfilled; // Conversion finished (processed)
         bool isCancelledByConverter; // Canceled by converter
         bool isRejectedByModerator; // Rejected by moderator
-        string assetName; // Name of ERC20 token we're selling in our campaign (we can get that from contract address)
-        address assetContract; // Address of ERC20 token we're selling in our campaign
+        string assetSymbol; // Name of ERC20 token we're selling in our campaign (we can get that from contract address)
+        address assetContractERC20; // Address of ERC20 token we're selling in our campaign
         uint256 conversionAmount; // Amount for conversion (In ETH)
         CampaignType campaignType; // Enumerator representing type of campaign (This one is however acquisition)
         uint256 campaignStartTime; // When campaign actually starts
@@ -548,9 +548,9 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     /// @notice Function to buy product
     function createConversion(uint conversionAmountETH, address converterAddress) isOngoing private {
         /*
-        (2) We get the ETH amount
-        (3) we compute tokens = base + bonus tokens
-        (2) We create conversion object
+        (2) We get the ETH amount -DONE
+        (3) we compute tokens = base + bonus tokens - DONE
+        (2) We create conversion object - DONe
         (2) we can't do anything until converter is whitelisted
         */
 
