@@ -22,17 +22,17 @@ contract TwoKeyCampaignARC is StandardToken {
 
 	TwoKeyEventSource twoKeyEventSource;
 
-	uint256 public quota;  // maximal ARC tokens that can be passed in transferFrom
+	uint256 public conversionQuota;  // maximal ARC tokens that can be passed in transferFrom
 
 	// referral graph, who did you receive the referral from
 	mapping(address => address) public received_from;
 
 
 
-	constructor(address _twoKeyEventSource, uint256 _quota) StandardToken() public {
+	constructor(address _twoKeyEventSource, uint256 _conversionQuota) StandardToken() public {
 		require(_twoKeyEventSource != address(0));
 		twoKeyEventSource = TwoKeyEventSource(_twoKeyEventSource);
-		quota = _quota;
+		conversionQuota = _conversionQuota;
 		balances[msg.sender] = totalSupply_;
 	}
 
@@ -47,8 +47,8 @@ contract TwoKeyCampaignARC is StandardToken {
 
 		// SafeMath.sub will throw if there is not enough balance.
 		balances[msg.sender] = balances[msg.sender].sub(_value);
-		balances[_to] = balances[_to].add(_value * quota);
-		totalSupply_ = totalSupply_.add(_value.mul(quota - 1));
+		balances[_to] = balances[_to].add(_value * conversionQuota);
+		totalSupply_ = totalSupply_.add(_value.mul(conversionQuota - 1));
 		emit Transfer(msg.sender, _to, _value);
 		return true;
 	}
@@ -65,8 +65,8 @@ contract TwoKeyCampaignARC is StandardToken {
 		require(_value <= allowed[_from][msg.sender]);
 
 		balances[_from] = balances[_from].sub(_value);
-		balances[_to] = balances[_to].add(_value * quota);
-		totalSupply_ = totalSupply_.add(_value.mul(quota - 1));
+		balances[_to] = balances[_to].add(_value * conversionQuota);
+		totalSupply_ = totalSupply_.add(_value.mul(conversionQuota - 1));
 		allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
 		emit Transfer(_from, _to, _value);
 		return true;

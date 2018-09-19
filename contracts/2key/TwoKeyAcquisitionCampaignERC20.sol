@@ -12,7 +12,32 @@ import "./Utils.sol";
 /// @author Nikola Madjarevic
 /// Contract which will represent campaign for the fungible assets
 contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils {
+    /*  Questions:
+            1. Should mapping where we store conversions by address be public?
+            2. Maybe we can even remove assetName and whenever we need it, we can call view function for IERC20 and check it's value
+            3. ARCS can't be divided, do we need to specify somewhere that decimals for arcs are equal to 0?
+            4. uint256 unit_decimals;  // units being sold can be fractional (for example tokens in ERC20) (Udi) (Do we need this as global var?)
 
+
+        Contract changes:
+            1. Rename in conversion payout --> contractorProceeds
+            2. Add 1 more attribute to Conversion object called 'isRejectedByModerator'
+            3. Rename isCancelled --> isCancelledByConvertor
+            4. openingTime --> campaignStartTime
+            5. closingTime --> campaignEndTime
+            6. influencer2cut --> referrer2cut (to be more explicit)
+            7. referrer2cut mapping is not anymore public (We'll add getter where only msg.sender can get his conversion)
+            8. assetContract --> assetContractERC20
+            9. whitelisted contracts -> referrerWhitelist, converterWhitelist
+           10. Removed 'contractorProceeds' variable
+           11. escrowPercentage --> moderatorFeePercentage
+           12. removed 'name' variable
+           13. removed 'ipfsHash' variable
+           14. add publicMetaHash, privateMetaHash
+           15. Remove 'symbol' variable since it's the same as assetName
+           16. Rename assetName --> assetSymbol
+           17. Rename quota --> conversionQuota
+    */
 
     event Fulfilled(address indexed to, uint256 units);
     event Rewarded(address indexed to, uint256 amount);
@@ -25,59 +50,88 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
 
     /// Structure which will represent conversion
     struct Conversion {
-        address contractor;
-        uint256 payout;
-        address converter;
-        bool isFulfilled;
-        bool isCancelled;
-        string assetName;
-        address assetContract;
-        uint256 amount;
-        CampaignType campaignType;
-        uint256 openingTime;
-        uint256 closingTime;
+        address contractor; // Contractor (creator) of campaign
+        uint256 contractorProceeds; // How much contractor will receive for this conversion
+        address converter; // Converter is one who's buying tokens
+        bool isFulfilled; // Conversion finished (processed)
+        bool isCancelledByConverter; // Canceled by converter
+        bool isRejectedByModerator; // Rejected by moderator
+        string assetName; // Name of ERC20 token we're selling in our campaign (we can get that from contract address)
+        address assetContract; // Address of ERC20 token we're selling in our campaign
+        uint256 conversionAmount; // Amount for conversion (In ETH)
+        CampaignType campaignType; // Enumerator representing type of campaign (This one is however acquisition)
+        uint256 campaignStartTime; // When campaign actually starts
+        uint256 campaignEndTime; // When campaign actually ends
     }
 
 
-
+    // Mapping conversion to user address
     mapping (address => Conversion) public conversions;
-    mapping(address => uint256) public influencer2cut;
+
+    // Mapping representing how much are cuts in percent(0-100) for referrer address
+    mapping(address => uint256) referrer2cut;
 
     /// Amount converter put to the contract in Ether
     mapping (address => uint) balancesConvertersETH;
-    mapping(address => uint256) public units; // number of units bought
 
-    /// Balance will represent how many that tokens (erc20) we have on our Campaign
+    // Number of units (ERC20 tokens) bought
+    mapping(address => uint256) public units;
+
+    // Balance will represent how many that tokens (erc20) we have on our Campaign
     uint campaignInventoryUnitsBalance;
 
-    /// asset contract is address of that ERC20 inventory
-    address assetContract;
+    // Asset contract is address of ERC20 inventory
+    address assetContractERC20;
 
-    /// asset name is short name of the asset for example "2key"
-    string assetName;
+    // asset symbol is short name of the asset for example "2key"
+    string assetSymbol;
 
-    uint contractorProceeds;
-
+    // TwoKeyEconomy contract (ERC20)
     TwoKeyEconomy twoKeyEconomy;
-    TwoKeyWhitelisted whitelistInfluencer;
-    TwoKeyWhitelisted whitelistConverter;
 
-    /// TODO: Difference between price&rate
-    uint pricePerUnitInETH = 1; /// There's single price for the unit ERC20
-    uint256 public rate = 1; /// rate of conversion from TwoKey to ETH
-    //TODO:Where we get RATE?
-    uint openingTime;
-    uint closingTime;
+    // Contract representing whitelisted referrer
+    TwoKeyWhitelisted referrerWhitelist;
+
+    // Contract representing whitelisted converter
+    TwoKeyWhitelisted converterWhitelist;
+
+    // There's single price for the unit ERC20 (Should be in WEI)
+    uint256 pricePerUnitInETH = 1;
+
+    // Rate of conversion from TwoKey to ETC
+    uint256 public rate = 1;
+
+    // Time when campaign start
+    uint256 campaignStartTime;
+
+    // Time when campaign ends
+    uint256 campaignEndTime;
+
+    // Address of moderator
     address moderator;
-    uint256 expiryConversion; /// how long will hold asset in escrow
-    uint256 escrowPercentage; /// percentage of payout to. be paid for moderator for escrow
 
-    string public name;
-    string public ipfs_hash; // rename to description
-    string public symbol;
-    uint8 public decimals = 0;  // ARCs are not divisable //TODO: Check if can be deleted
-    uint256 public maxReferralRewardPercent; // maxRefferalRewardPercent is actually bonus percentage in ETH
-    uint maxConverterBonusPercent; //translates to discount - we can add this to constructor
+    // How long convertor can be pending before it will be automatically rejected and funds will be returned to convertor
+    uint256 expiryConversion;
+
+    // How long will hold asset in escrow
+    uint256 moderatorFeePercentage;
+
+    // Ipfs hash of json campaign object
+    string public publicMetaHash;
+
+    // Ipfs hash of json sensitive (contractor) information
+    string privateMetaHash;
+
+    // maxRefferalRewardPercent is actually bonus percentage in ETH
+    uint256 public maxReferralRewardPercent;
+
+    //translates to discount - we can add this to constructor
+    uint maxConverterBonusPercent;
+
+    uint256 unit_decimals;  // units being sold can be fractional (for example tokens in ERC20)
+
+    uint minContributionETH;
+    uint maxContributionETH;
 
     /*
      Someone buys with 100 ETH
@@ -90,15 +144,15 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
      (0.01 - .007142857) / 0.01  = .2857143 - this itruffs the actual discount
     */
 
-    uint256 unit_decimals;  // units being sold can be fractional (for example tokens in ERC20)
 
 
     // Remove contractor from constructor it's the message sender
     constructor(address _twoKeyEventSource, address _twoKeyEconomy,
-        address _whitelistInfluencer, address _whitelistConverter,
-        address _moderator, uint _openingTime, uint _closingTime,
-        uint _expiryConversion, uint _escrowPercentage, uint _rate, uint _maxReferralRewardPercent,
-        address _assetContract, uint _quota) TwoKeyCampaignARC(_twoKeyEventSource, _quota) StandardToken()
+        address _converterWhitelist, address _referrerWhitelist,
+        address _moderator, address _assetContractERC20, uint _campaignStartTime, uint _campaignEndTime,
+        uint _expiryConversion, uint _moderatorFeePercentage, uint _maxReferralRewardPercent, uint _maxConverterBonusPercent,
+        uint _pricePerUnitInEth, uint _minContributionETH, uint _maxContributionETH,
+        uint _conversionQuota) TwoKeyCampaignARC(_twoKeyEventSource, _conversionQuota) StandardToken()
         public {
             require(_twoKeyEconomy != address(0));
             require(_whitelistInfluencer != address(0));
@@ -109,16 +163,20 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
 
             contractor = msg.sender;
             twoKeyEconomy = TwoKeyEconomy(_twoKeyEconomy);
-            whitelistInfluencer = TwoKeyWhitelisted(_whitelistInfluencer);
-            whitelistConverter = TwoKeyWhitelisted(_whitelistConverter);
-            assetContract = _assetContract;
+            referrerWhitelist = TwoKeyWhitelisted(_whitelistInfluencer);
+            converterWhitelist = TwoKeyWhitelisted(_whitelistConverter);
             moderator = _moderator;
-            openingTime = _openingTime;
-            closingTime = _closingTime;
+            assetContractERC20 = _assetContractERC20;
+            campaignStartTime = _openingTime;
+            campaignEndTime = _closingTime;
             expiryConversion = _expiryConversion;
-            escrowPercentage = _escrowPercentage;
+            moderatorFeePercentage = _moderatorFeePercentage;
             maxReferralRewardPercent = _maxReferralRewardPercent;
+            maxConverterBonusPercent = _maxConverterBonusPercent;
 
+            pricePerUnitInETH = _pricePerUnitInETH;
+            minContributionETH = _minContributionETH;
+            maxContributionETH = _maxContributionETH;
             // Emit event that TwoKeyCampaign is created
             twoKeyEventSource.created(address(this),contractor);
     }
@@ -126,25 +184,25 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
 
     /// @notice Modifier which is going to check if current time is between opening-closing campaign time
     modifier isOngoing() {
-        require(block.timestamp >= openingTime && block.timestamp <= closingTime);
+        require(block.timestamp >= campaignStartTime && block.timestamp <= campaignEndTime);
         _;
     }
 
     /// @notice Modifier which is going to check if campaign is closed (if time is greater then closing time)
     modifier isClosed() {
-        require(now > closingTime);
+        require(now > campaignEndTime);
         _;
     }
 
     /// @notice Modifier to check is the influencer eligible for participation in campaign
     modifier isWhiteListedInfluencer() {
-        require(whitelistInfluencer.isWhitelisted(msg.sender));
+        require(referrerWhitelist.isWhitelisted(msg.sender));
         _;
     }
 
     /// @notice Modifier to check is the converter eligible for participation in conversion
     modifier isWhitelistedConverter() {
-        require(whitelistConverter.isWhitelisted(msg.sender));
+        require(converterWhitelist.isWhitelisted(msg.sender));
         _;
     }
 
@@ -163,7 +221,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     /// @return true if successful, otherwise transaction will revert
     function addFungibleAsset(uint256 _amount) public returns (bool) {
         require(
-            assetContract.call(
+            assetContractERC20.call(
                 bytes4(keccak256("transferFrom(address,address,uint256)")),
                 msg.sender,
                 address(this),
@@ -178,7 +236,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     /// @dev we're using Utils contract and fetching the balance of this contract address
     /// @return balance value as uint
     function checkInventoryBalance() public view returns (uint) {
-        uint balance = Utils.call_return(assetContract,"balanceOf(address)",uint(this));
+        uint balance = Utils.call_return(assetContractERC20,"balanceOf(address)",uint(this));
         return balance;
     }
 
@@ -204,8 +262,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
      * @return moderator fee
      */
     function calculateModeratorFee(uint256 _payout) internal view returns (uint256)  {
-        if (escrowPercentage > 0) { // send the fee to moderator
-            uint256 fee = _payout.mul(escrowPercentage).div(100);
+        if (moderatorFeePercentage > 0) { // send the fee to moderator
+            uint256 fee = _payout.mul(moderatorFeePercentage).div(100);
             return fee;
         }
         return 0;
@@ -277,12 +335,12 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     /// @notice View function to fetch the address of asset contract
     /// @return address of that asset contract
     function getAssetContractAddress() public view returns(address) {
-        return assetContract;
+        return assetContractERC20;
     }
 
     /// @notice Function to return constantss
     function getConstantInfo() public view returns (uint256,uint256,uint256,uint256) {
-        return (pricePerUnitInETH, maxReferralRewardPercent,quota,unit_decimals);
+        return (pricePerUnitInETH, maxReferralRewardPercent, conversionQuota,unit_decimals);
     }
 
     // the 2key link generated by the owner of this contract contains a secret which is a private key,
@@ -306,11 +364,11 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
         // the value 255 is used to signal equal partition with other influencers
         // A sender can set the value only once in a contract
         require(cut <= 100 || cut == 255);
-        require(influencer2cut[msg.sender] == 0);
+        require(referrer2cut[msg.sender] == 0);
         if (cut <= 100) {
             cut++;
         }
-        influencer2cut[msg.sender] = cut;
+        referrer2cut[msg.sender] = cut;
     }
 
 
@@ -319,9 +377,9 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
         uint256[] memory cuts = new uint256[](influencers.length + 1);
         for (uint i = 0; i < influencers.length; i++) {
             address influencer = influencers[i];
-            cuts[i] = influencer2cut[influencer];
+            cuts[i] = referrer2cut[influencer];
         }
-        cuts[influencers.length] = influencer2cut[last_influencer];
+        cuts[influencers.length] = referrer2cut[last_influencer];
         return cuts;
     }
 
@@ -414,10 +472,10 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
                 //        if (with_cut)
                 {
                     //          require(bounty_cut > 0);
-                    if (influencer2cut[new_address] == 0) {
-                        influencer2cut[new_address] = uint256(bounty_cut);
+                    if (referrer2cut[new_address] == 0) {
+                        referrer2cut[new_address] = uint256(bounty_cut);
                     } else {
-                        require(influencer2cut[new_address] == uint256(bounty_cut));
+                        require(referrer2cut[new_address] == uint256(bounty_cut));
                     }
                     hash = keccak256(abi.encodePacked(bounty_cut, new_public_key, new_address));
                 }
@@ -512,7 +570,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
 
 
         */
-        unit_decimals = uint256(assetContract.decimals());  //18; //
+        unit_decimals = uint256(assetContractERC20.decimals());  //18; //
 
         //TODO: calculate this from the conversionAmountETH and maxConverterBonusPercent
 //        baseTokensForConverter = ?
@@ -532,7 +590,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
 
         //TODO: what's from?
         //TODO: add moderatorFee, baseTokensAmount, bonusTokensAmount, TotalTokensAmount
-        Conversion memory c = Conversion(_from, contractorProceeds, converterAddress, false, false, assetName, assetContract, conversionAmountETH, CampaignType.CPA_FUNGIBLE, now, now + expiryConversion * 1 days);
+        Conversion memory c = Conversion(_from, contractorProceeds, converterAddress, false, false, assetSymbol, assetContractERC20, conversionAmountETH, CampaignType.CPA_FUNGIBLE, now, now + expiryConversion * 1 days);
 
         // move funds
         campaignInventoryUnitsBalance = campaignInventoryUnitsBalance - _units;
@@ -594,7 +652,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
         */
 
         //this is if we want a simple test without lockup contracts
-        require(assetContract.call(bytes4(keccak256("transfer(address,uint256)")), converterAddress, _units));
+        require(assetContractERC20.call(bytes4(keccak256("transfer(address,uint256)")), converterAddress, _units));
 
 
 
@@ -640,7 +698,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
                 b = _bounty;
             }
             else {
-                uint256 cut = influencer2cut[influencers[i]];
+                uint256 cut = referrer2cut[influencers[i]];
                 //        emit Log("CUT", influencer, cut);
                 if (cut > 0 && cut <= 101) {
                     b = _bounty.mul(cut.sub(1)).mul(maxReferralRewardPercent).div(10000);
@@ -686,7 +744,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     function moveFungibleAsset(address _to, uint256 _amount) internal returns (bool) {
         require(campaignInventoryUnitsBalance >= _amount);
         require(
-            assetContract.call(
+            assetContractERC20.call(
                 bytes4(keccak256(abi.encodePacked("transfer(address,uint256)"))),
                 _to, _amount
             )
