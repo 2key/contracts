@@ -525,6 +525,8 @@ export class TwoKeyProtocol {
                 await this._checkBalanceBeforeTransaction(gas, gasPrice);
                 const txHash = await promisify(campaignInstance.convert, [{from: this.address, gasPrice, gas: 7000000, value: this.toWei(amount, 'ether')}]);
                 await this.getTransactionReceiptMined(txHash);
+                const conversions = await promisify(campaignInstance.conversions, [this.address]);
+                console.log(conversions);
                 resolve(txHash);
             }
         });
