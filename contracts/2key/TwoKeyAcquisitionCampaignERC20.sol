@@ -543,6 +543,16 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
         createConversion(msg.value, msg.sender);
     }
 
+    /// @notice Function which will calculate the base amount, bonus amount
+    /// @param conversionAmountETH is amount of eth in conversion
+    /// @return tuple containing (base,bonus)
+    function getEstimatedTokenAmount(uint conversionAmountETH) public view returns (uint,uint) {
+        uint baseTokensForConverter = conversionAmountETH.mul(pricePerUnitInETH);
+        uint bonusTokensForConverter = baseTokensForConverter.mul(maxConverterBonusPercent).div(100);
+
+        return (baseTokensForConverter, bonusTokensForConverter);
+    }
+
 
     //******************************************************
     //(2) CONVERSION 1st STEP
@@ -560,16 +570,17 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
         unit_decimals = 1;
         //TODO: add decimals method to interface of ERC20 so we can call that method to get decimals
 //        unit_decimals = uint256(assetContractERC20.decimals());
-        //TODO:
-        //TODO: calculate this from the conversionAmountETH and maxConverterBonusPercent
-        uint baseTokensForConverter = conversionAmountETH.mul(pricePerUnitInETH);
-        uint bonusTokensForConverter = baseTokensForConverter.mul(maxConverterBonusPercent).div(100);
 
-        uint _units = baseTokensForConverter + bonusTokensForConverter;
+        uint baseTokensForConverter;
+        uint bonusTokensForConverter;
+
+        (baseTokensForConverter, bonusTokensForConverter) = getEstimatedTokenAmount(conversionAmountETH);
 
         //        Each token has 10**decimals units
 
-        uint256 maxReferralRewardETH = maxReferralRewardPercent.mul(_units).div(10**unit_decimals);
+        uint totalTokensForConverter = baseTokensForConverter + bonusTokensForConverter;
+
+        uint256 maxReferralRewardETH = maxReferralRewardPercent.mul(totalTokensForConverter).div(10**unit_decimals);
         uint256 moderatorFeeETH = calculateModeratorFee(c.contractorProceeds);
 
         uint256 contractorProceeds = conversionAmountETH - maxReferralRewardETH - moderatorFeeETH;
@@ -579,7 +590,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
         Conversion memory c = Conversion(contractor, contractorProceeds, converterAddress, false, false, false, assetSymbol, assetContractERC20, conversionAmountETH, CampaignType.CPA_FUNGIBLE, now, now + expiryConversion * 1 days);
 
         // move funds
-        campaignInventoryUnitsBalance = campaignInventoryUnitsBalance - _units;
+        campaignInventoryUnitsBalance = campaignInventoryUnitsBalance - totalTokensForConverter;
 
         // value in escrow (msg.value), total amount of tokens
         //        twoKeyEventSource.escrow(address(this), msg.sender, _assetName, _assetContract, _amount, CampaignType.CPA_FUNGIBLE);
