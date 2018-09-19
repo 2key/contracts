@@ -303,11 +303,13 @@ export class TwoKeyProtocol {
                 if (progressCallback) {
                     progressCallback('TwoKeyAcquisitionCampaignERC20', true, campaignReceipt.contractAddress);
                 }
-                const campaignInstance = await this._getAcquisitionCampaignInstance(campaignReceipt.contractAddress);
-                const gas = await promisify(campaignInstance.setAssetContractAttributes.estimateGas, [{ from: this.address }]);
-                console.log('setAssetContractAttributes', gas);
-                txHash = await promisify(campaignInstance.setAssetContractAttributes, [{ from: this.address, gas, gasPrice }]);
-                await this._waitForTransactionMined(txHash);
+                // const campaignInstance = await this._getAcquisitionCampaignInstance(campaignReceipt.contractAddress);
+                // const gas = await promisify(campaignInstance.setAssetContractAttributes.estimateGas, [{ from: this.address }]);
+                // console.log('setAssetContractAttributes', gas);
+                // txHash = await promisify(campaignInstance.setAssetContractAttributes, [{ from: this.address, gas, gasPrice }]);
+                // await this._waitForTransactionMined(txHash);
+                // const [decimals, assetSymbol] = await promisify(campaignInstance.getAssetDecimals, []);
+                // console.log('ERC20 decimals', decimals, assetSymbol);
                 resolve(campaignReceipt.contractAddress);
             } catch (err) {
                 reject(err);
@@ -363,6 +365,8 @@ export class TwoKeyProtocol {
                     gasPrice
                 }]);
                 await this._waitForTransactionMined(txHash);
+                const [decimals, assetSymbol] = await promisify(campaignInstance.getAssetDecimals, []);
+                console.log('Campaign Asset Info', decimals.toNumber(), assetSymbol);
                 resolve(publicKey);
             } catch (err) {
                 reject(err);

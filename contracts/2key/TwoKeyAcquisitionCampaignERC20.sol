@@ -111,7 +111,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     address assetContractERC20;
 
     // asset symbol is short name of the asset for example "2key"
-    string assetSymbol = "SYM";
+    string assetSymbol;
 
     // TwoKeyEconomy contract (ERC20)
     TwoKeyEconomy twoKeyEconomy;
@@ -125,7 +125,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     IERC20 fungibleInterface;
 
     // There's single price for the unit ERC20 (Should be in WEI)
-    uint256 pricePerUnitInETH = 1;
+    uint256 pricePerUnitInETH;
 
     // Rate of conversion from TwoKey to ETC
     uint256 public rate = 1;
@@ -158,7 +158,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     uint maxConverterBonusPercent;
 
     // units being sold can be fractional (for example tokens in ERC20)
-    uint256 unit_decimals = 18;
+    uint8 unit_decimals;
 
     // Minimal amount of ETH that can be paid by converter to create conversion
     uint minContributionETH;
@@ -255,9 +255,12 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
             minContributionETH = _minContributionETH;
             maxContributionETH = _maxContributionETH;
 
-//            setAssetContractAttributes();
             // Emit event that TwoKeyCampaign is created
             twoKeyEventSource.created(address(this),contractor);
+            // Set unit_decimals from assetContractERC20
+//            unit_decimals = IERC20(assetContractERC20).decimals();
+            // Set Token Symbol from assetContractERC20
+//            assetSymbol = IERC20(assetContractERC20).symbol();
     }
 
     // TODO: Udis code which sends rewards etc get it
@@ -292,6 +295,9 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
             )
         );
         campaignInventoryUnitsBalance += _amount;
+        if (unit_decimals == 0) {
+            setAssetContractAttributes();
+        }
         return true;
     }
 
@@ -357,7 +363,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
 
         // Here we're checking that msg.sender have not previously joined
         require(publicLinkKey[msg.sender] == address(0));
-
         publicLinkKey[msg.sender] = _public_link_key;
     }
 
@@ -827,6 +832,9 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     function getAndUpdateInventoryBalance() public returns (uint) {
         uint balance = getInventoryBalance();
         campaignInventoryUnitsBalance = balance;
+        if (unit_decimals == 0) {
+            setAssetContractAttributes();
+        }
         return balance;
     }
 
@@ -842,7 +850,12 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
 
     /// @notice Function which will act as a setter and will be called once during deployment
     function setAssetContractAttributes() private {
-        assetSymbol = IERC20(assetContractERC20).getTokenSymbol();
-        unit_decimals = IERC20(assetContractERC20).getDecimals();
+        assetSymbol = IERC20(assetContractERC20).symbol();
+        unit_decimals = IERC20(assetContractERC20).decimals();
+    }
+
+    function getAssetDecimals() public view returns (uint8, string) {
+        return (unit_decimals, assetSymbol);
+//        return IERC20(assetContractERC20).decimals();
     }
 }
