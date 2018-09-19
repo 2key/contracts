@@ -6,10 +6,10 @@ import "./TwoKeyAcquisitionCampaignERC20.sol";
 
 contract TwoKeyCampaignETH is TwoKeyAcquisitionCampaignERC20 {
  
-	/*  
+	/*
 	    fulfills a fungible asset purchase
 	    creates the escrow for a fungible asset
-	    computes the payout in ETH 
+	    computes the payout in ETH
 	    transfers to the escrow the asset purchased
     */
 
@@ -40,7 +40,7 @@ contract TwoKeyCampaignETH is TwoKeyAcquisitionCampaignERC20 {
 //		conversions[msg.sender] = c;
 //	}
 
-    /*  
+    /*
 	    fulfills a non fungible asset purchase
 	    creates the escrow for a fungible asset
 	    computes the payout in ETH
@@ -59,30 +59,30 @@ contract TwoKeyCampaignETH is TwoKeyAcquisitionCampaignERC20 {
 //	}
 
     /**
-     * calculates moderetor fee, pays the moderator, 
+     * calculates moderetor fee, pays the moderator,
      * computes total reward
      * transfer payout to buyer, deducting the fee and the total reward
      * asks the campaign to distribute rewards to influencers
      */
 
-	function actuallyFulfilledTwoKeyToken() internal {
-		Conversion memory c = conversions[msg.sender];
-        c.isFulfilled = true; 
-        conversions[msg.sender] = c;
-		uint256 fee = calculateModeratorFee(c.payout);
-        moderator.transfer(fee); 
-        uint256 payout = c.payout;
-        uint256 maxReward = maxPi.mul(payout).div(100);
-        
-        // transfer payout - fee - rewards to seller
-        contractor.transfer(payout.sub(fee).sub(maxReward));
-        
-//        transferRewardsTwoKeyToken(c.from, maxReward.mul(rate));
-		twoKeyEventSource.fulfilled(address(this), c.converter, c.assetName, c.assetContract, c.amount, c.campaignType);
-	}
+//	function actuallyFulfilledTwoKeyToken() internal {
+//		Conversion memory c = conversions[msg.sender];
+//        c.isFulfilled = true;
+//        conversions[msg.sender] = c;
+//		uint256 fee = calculateModeratorFee(c.payout);
+//        moderator.transfer(fee);
+//        uint256 payout = c.payout;
+//        uint256 maxReward = maxPi.mul(payout).div(100);
+//
+//        // transfer payout - fee - rewards to seller
+//        contractor.transfer(payout.sub(fee).sub(maxReward));
+//
+////        transferRewardsTwoKeyToken(c.from, maxReward.mul(rate));
+//		twoKeyEventSource.fulfilled(address(this), c.converter, c.assetName, c.assetContract, c.amount, c.campaignType);
+//	}
 
 	/**
-  	 * buy product withETH, 
+  	 * buy product withETH,
   	 * _from is the influencer from which you received the referral
   	 * _tokenID is the asset sku
   	 * _assetContract - erc20 (fungible) or erc721 (non fungible) which represents the class of the asset
@@ -91,12 +91,12 @@ contract TwoKeyCampaignETH is TwoKeyAcquisitionCampaignERC20 {
 
 	/*/// this is going to be in campaign contract
 	function buyFromWithETH(
-		address _from, 
+		address _from,
 		CampaignType _campaignType) public payable {
 		if (_campaignType == CampaignType.CPA_FUNGIBLE) {
 		} else if (_campaignType == CampaignType.CPA_NON_FUNGIBLE) {
 //			fulfillNonFungibleETH(_from, _tokenID, _assetContract, _amountOrIndex);
-		} 
+		}
 	}
 */
 }
