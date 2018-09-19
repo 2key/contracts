@@ -545,7 +545,9 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     //******************************************************
     //(2) CONVERSION 1st STEP
 
-    /// @notice Function to buy product
+    /// @notice Function to create conversion
+    /// @param conversionAmountETH is actually the msg.value (amount of ether)
+    /// @param converterAddress is actually the msg.sender (Address of one who's executing conversion)
     function createConversion(uint conversionAmountETH, address converterAddress) isOngoing private {
         /*
         (2) We get the ETH amount -DONE
