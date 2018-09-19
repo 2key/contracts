@@ -257,9 +257,23 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
             twoKeyEventSource.created(address(this),contractor);
     }
 
+    // TODO: Udis code which sends rewards etc get it
+    // TODO: Expiry of conversion event (Two-steps for conversion user puts in ether, and converter being approved by KYC)
+    // TODO: When conversion happens, there's timeout where converter can be approved, otherwise everything's transfered to contractor
 
 
-
+    /**
+     * given the total payout, calculates the moderator fee
+     * @param  _payout total payout for escrow
+     * @return moderator fee
+     */
+    function calculateModeratorFee(uint256 _payout) internal view returns (uint256)  {
+        if (moderatorFeePercentage > 0) { // send the fee to moderator
+            uint256 fee = _payout.mul(moderatorFeePercentage).div(100);
+            return fee;
+        }
+        return 0;
+    }
 
     /// @notice Method to add fungible asset to our contract
     /// @dev When user calls this method, he just says the actual amount of ERC20 he'd like to transfer to us
@@ -276,43 +290,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
         );
         campaignInventoryUnitsBalance += _amount;
         return true;
-    }
-
-    /// @notice Function to check balance of the ERC20 inventory (view - no gas needed to call this function)
-    /// @dev we're using Utils contract and fetching the balance of this contract address
-    /// @return balance value as uint
-    function getInventoryBalance() public view returns (uint) {
-        uint balance = Utils.call_return(assetContractERC20,"balanceOf(address)",uint(this));
-        return balance;
-    }
-
-    /// @notice Function which will check the balance and automatically update the balance in our contract regarding balance response
-    /// @return balance of ERC20 we have in our contract
-    function getAndUpdateInventoryBalance() public returns (uint) {
-        uint balance = getInventoryBalance();
-        campaignInventoryUnitsBalance = balance;
-        return balance;
-    }
-
-
-
-    // TODO: Udis code which sends rewards etc get it
-    // TODO: Expiry of conversion event (Two-steps for conversion user puts in ether, and converter being approved by KYC)
-    // TODO: When conversion happens, there's timeout where converter can be approved, otherwise everything's transfered to contractor
-
-
-
-    /**
-     * given the total payout, calculates the moderator fee
-     * @param  _payout total payout for escrow
-     * @return moderator fee
-     */
-    function calculateModeratorFee(uint256 _payout) internal view returns (uint256)  {
-        if (moderatorFeePercentage > 0) { // send the fee to moderator
-            uint256 fee = _payout.mul(moderatorFeePercentage).div(100);
-            return fee;
-        }
-        return 0;
     }
 
 
@@ -363,67 +340,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
         referrerBalances2KEY[msg.sender] = referrerBalances2KEY[msg.sender].sub(_amount);
         twoKeyEconomy.transferFrom(this, msg.sender, _amount);
     }
-
-
-    /// @notice Function to check how much eth has been sent to contract from address
-    /// @param _from is the address we'd like to check balance
-    /// @return amount of ether sent to contract from the specified address
-    function getAmountAddressSent(address _from) public view returns (uint) {
-        return balancesConvertersETH[_from];
-    }
-
-    /// @notice Function to check contract balance of specified ERC20 tokens
-    /// @return balance
-    function getContractBalance() public view returns(uint) {
-        return campaignInventoryUnitsBalance;
-    }
-
-    /// @notice View function to fetch the address of asset contract
-    /// @return address of that asset contract
-    function getAssetContractAddress() public view returns(address) {
-        return assetContractERC20;
-    }
-
-    /// @notice Function to return constantss
-    function getConstantInfo() public view returns (uint256,uint256,uint256,uint256) {
-        return (pricePerUnitInETH, maxReferralRewardPercent, conversionQuota,unit_decimals);
-    }
-
-    /// @notice Function where we can get publicLinkKey for msg.sender [GETTER]
-    /// @return public link key
-    function getPublicLinkKey() public view returns (address) {
-        require(publicLinkKey[msg.sender] != address(0)); // This means public link key is not set
-        return publicLinkKey[msg.sender];
-    }
-
-    /// @notice Function which acts like getter for all cuts in array
-    /// @param last_influencer is the last influencer
-    /// @return array of integers containing cuts respectively
-    function getReferrerCuts(address last_influencer) public view returns (uint256[]) {
-        address[] memory influencers = getInfluencers(last_influencer);
-        uint256[] memory cuts = new uint256[](influencers.length + 1);
-        for (uint i = 0; i < influencers.length; i++) {
-            address influencer = influencers[i];
-            cuts[i] = referrer2cut[influencer];
-        }
-        cuts[influencers.length] = referrer2cut[last_influencer];
-        return cuts;
-    }
-
-    function getMaxReferralRewardPercent() public view returns (uint256) {
-        return maxReferralRewardPercent;
-    }
-
-    /// @notice This is acting as a getter for referrer2cut
-    /// @dev Transaction will revert if msg.sender is not present in mapping
-    /// @return cut value / otherwise reverts
-    function getReferrerCut() public view returns(uint256) {
-        require(referrer2cut[msg.sender] != 0);
-        return referrer2cut[msg.sender] - 1;
-    }
-
-
-
 
     function joinAndSetPublicLinkWithCut(bytes signature, address _public_link_key, uint256 cut) {
         distributeArcsBasedOnSignature(signature);
@@ -609,7 +525,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
         ///Signature includes our information which goes to Ethereum
         require(msg.value >= minContribution); //TODO add this field
 
-    distributeArcsBasedOnSignature(sig);
+        distributeArcsBasedOnSignature(sig);
         createConversion(msg.value, msg.sender);
     }
 
@@ -647,8 +563,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
         unit_decimals = uint256(assetContractERC20.decimals());  //18; //
 
         //TODO: calculate this from the conversionAmountETH and maxConverterBonusPercent
-//        baseTokensForConverter = ?
-//        bonusTokensForConverter = ?
+        //        baseTokensForConverter = ?
+        //        bonusTokensForConverter = ?
         _units = baseTokensForConverter + bonusTokensForConverter;
 
         //        Each token has 10**decimals units
@@ -837,6 +753,93 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     function transferFungibleAsset(address _to, uint256 _amount) internal returns (bool) {
         return moveFungibleAsset(_to, _amount);
     }
+
+
+
+
+    // ==============================================================================================================
+    // =============================TWO KEY ACQUISITION CAMPAIGN GETTERS=============================================
+    // ==============================================================================================================
+
+
+    /// @notice Function to check how much eth has been sent to contract from address
+    /// @param _from is the address we'd like to check balance
+    /// @return amount of ether sent to contract from the specified address
+    function getAmountAddressSent(address _from) public view returns (uint) {
+        return balancesConvertersETH[_from];
+    }
+
+    /// @notice Function to check contract balance of specified ERC20 tokens
+    /// @return balance
+    function getContractBalance() public view returns(uint) {
+        return campaignInventoryUnitsBalance;
+    }
+
+    /// @notice View function to fetch the address of asset contract
+    /// @return address of that asset contract
+    function getAssetContractAddress() public view returns(address) {
+        return assetContractERC20;
+    }
+
+    /// @notice Function to return constantss
+    function getConstantInfo() public view returns (uint256,uint256,uint256,uint256) {
+        return (pricePerUnitInETH, maxReferralRewardPercent, conversionQuota,unit_decimals);
+    }
+
+    /// @notice Function where we can get publicLinkKey for msg.sender [GETTER]
+    /// @return public link key
+    function getPublicLinkKey() public view returns (address) {
+        require(publicLinkKey[msg.sender] != address(0)); // This means public link key is not set
+        return publicLinkKey[msg.sender];
+    }
+
+    /// @notice Function which acts like getter for all cuts in array
+    /// @param last_influencer is the last influencer
+    /// @return array of integers containing cuts respectively
+    function getReferrerCuts(address last_influencer) public view returns (uint256[]) {
+        address[] memory influencers = getInfluencers(last_influencer);
+        uint256[] memory cuts = new uint256[](influencers.length + 1);
+        for (uint i = 0; i < influencers.length; i++) {
+            address influencer = influencers[i];
+            cuts[i] = referrer2cut[influencer];
+        }
+        cuts[influencers.length] = referrer2cut[last_influencer];
+        return cuts;
+    }
+
+    /// @notice Function which returns value of maxReferralRewardPercent
+    /// @return value of maxReferralRewardPercent as uint256
+    function getMaxReferralRewardPercent() public view returns (uint256) {
+        return maxReferralRewardPercent;
+    }
+
+    /// @notice This is acting as a getter for referrer2cut
+    /// @dev Transaction will revert if msg.sender is not present in mapping
+    /// @return cut value / otherwise reverts
+    function getReferrerCut() public view returns(uint256) {
+        require(referrer2cut[msg.sender] != 0);
+        return referrer2cut[msg.sender] - 1;
+    }
+
+
+    /// @notice Function to check balance of the ERC20 inventory (view - no gas needed to call this function)
+    /// @dev we're using Utils contract and fetching the balance of this contract address
+    /// @return balance value as uint
+    function getInventoryBalance() public view returns (uint) {
+        uint balance = Utils.call_return(assetContractERC20,"balanceOf(address)",uint(this));
+        return balance;
+    }
+
+    /// @notice Function which will check the balance and automatically update the balance in our contract regarding balance response
+    /// @return balance of ERC20 we have in our contract
+    function getAndUpdateInventoryBalance() public returns (uint) {
+        uint balance = getInventoryBalance();
+        campaignInventoryUnitsBalance = balance;
+        return balance;
+    }
+
+
+
 
 
 }
