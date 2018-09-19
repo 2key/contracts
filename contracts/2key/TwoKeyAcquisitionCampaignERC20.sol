@@ -255,7 +255,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
             minContributionETH = _minContributionETH;
             maxContributionETH = _maxContributionETH;
 
-            // Emit event that TwoKeyCampaign is created
+            setAssetContractAttributes();
+        // Emit event that TwoKeyCampaign is created
             twoKeyEventSource.created(address(this),contractor);
             // Set unit_decimals from assetContractERC20
 //            unit_decimals = IERC20(assetContractERC20).decimals();
@@ -560,7 +561,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
         (2) We create conversion object - DONe
         (2) we can't do anything until converter is whitelisted
         */
-        setAssetContractAttributes();
 
         uint baseTokensForConverter;
         uint bonusTokensForConverter;
@@ -847,5 +847,9 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     function setAssetContractAttributes() private {
         assetSymbol = IERC20(assetContractERC20).symbol();
         unit_decimals = IERC20(assetContractERC20).decimals();
+    }
+
+    function getContractAttributes() public view returns (string, uint) {
+        return (assetSymbol,decimals);
     }
 }
