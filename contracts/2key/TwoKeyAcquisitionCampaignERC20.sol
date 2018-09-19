@@ -542,17 +542,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
         createConversion(msg.value, msg.sender);
     }
 
-    /// @notice Function which will calculate the base amount, bonus amount
-    /// @param conversionAmountETH is amount of eth in conversion
-    /// @return tuple containing (base,bonus)
-    function getEstimatedTokenAmount(uint conversionAmountETH) public view returns (uint,uint) {
-        uint baseTokensForConverter = conversionAmountETH.mul(pricePerUnitInETH);
-        uint bonusTokensForConverter = baseTokensForConverter.mul(maxConverterBonusPercent).div(100);
-
-        return (baseTokensForConverter, bonusTokensForConverter);
-    }
-
-
     //******************************************************
     //(2) CONVERSION 1st STEP
 
@@ -582,7 +571,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
 
         uint256 contractorProceeds = conversionAmountETH - maxReferralRewardETH - moderatorFeeETH;
 
-        //TODO: what's from?
         //TODO: add moderatorFee, baseTokensAmount, bonusTokensAmount, TotalTokensAmount
         Conversion memory c = Conversion(contractor, contractorProceeds, converterAddress, false, false, false, assetSymbol, assetContractERC20, conversionAmountETH, CampaignType.CPA_FUNGIBLE, now, now + expiryConversion * 1 days);
 
@@ -843,6 +831,16 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
         return balance;
     }
 
+
+    /// @notice Function which will calculate the base amount, bonus amount
+    /// @param conversionAmountETH is amount of eth in conversion
+    /// @return tuple containing (base,bonus)
+    function getEstimatedTokenAmount(uint conversionAmountETH) public view returns (uint,uint) {
+        uint baseTokensForConverter = conversionAmountETH.mul(pricePerUnitInETH);
+        uint bonusTokensForConverter = baseTokensForConverter.mul(maxConverterBonusPercent).div(100);
+
+        return (baseTokensForConverter, bonusTokensForConverter);
+    }
 
 
 
