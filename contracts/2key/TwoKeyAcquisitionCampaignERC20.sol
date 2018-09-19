@@ -828,7 +828,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     /// @return balance of ERC20 we have in our contract
     function getAndUpdateInventoryBalance() public returns (uint) {
         uint balance = getInventoryBalance();
-        setAssetContractAttributes();
         campaignInventoryUnitsBalance = balance;
         return balance;
     }
