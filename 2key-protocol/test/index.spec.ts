@@ -17,13 +17,14 @@ console.log(mainNetId);
 
 const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 const maxConverterBonusPercent = 23;
-const pricePerUnitInETH = 0.01;
+const pricePerUnitInETH = 0.1;
 const maxReferralRewardPercent = 15;
 const moderatorFeePercentage = 1;
 const minContributionETH = 1;
 const maxContributionETH = 10;
-const campaignStartTime = new Date();
-const campaignEndTime = new Date(campaignStartTime.valueOf()).setDate(campaignStartTime.getDate() + 30);
+const now = new Date();
+const campaignStartTime = new Date(now.valueOf()).setDate(now.getDate() - 30);
+const campaignEndTime = new Date(now.valueOf()).setDate(now.getDate() + 30);
 const twoKeyEconomy = contractsMeta.TwoKeyEconomy.networks[mainNetId].address;
 const twoKeyAdmin = contractsMeta.TwoKeyAdmin.networks[mainNetId].address;
 
@@ -197,7 +198,7 @@ describe('TwoKeyProtocol', () => {
 
     it('should calculate gas for campaign contract creation', async () => {
         const gas = await twoKeyProtocol.estimateAcquisitionCampaign({
-            campaignStartTime: campaignStartTime.getTime(),
+            campaignStartTime,
             campaignEndTime,
             expiryConversion: 1000 * 60 * 60 * 24,
             maxConverterBonusPercent,
@@ -214,7 +215,7 @@ describe('TwoKeyProtocol', () => {
 
     it('should create a new campaign contract', async () => {
         const campaign = await twoKeyProtocol.createAcquisitionCampaign({
-            campaignStartTime: campaignStartTime.getTime(),
+            campaignStartTime,
             campaignEndTime,
             expiryConversion: 1000 * 60 * 60 * 24,
             maxConverterBonusPercent,

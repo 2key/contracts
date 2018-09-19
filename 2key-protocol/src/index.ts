@@ -247,8 +247,8 @@ export class TwoKeyProtocol {
                     `0x${public_address2}`,
                     data.moderator || this.address,
                     data.assetContractERC20,
-                    data.campaignStartTime,
-                    data.campaignEndTime,
+                    data.campaignStartTime / 1000,
+                    data.campaignEndTime / 1000,
                     data.expiryConversion,
                     this.toWei(data.moderatorFeePercentage, 'ether'),
                     this.toWei(data.maxReferralRewardPercent, 'ether'),
@@ -288,8 +288,8 @@ export class TwoKeyProtocol {
                     referrerWhitelistAddress,
                     data.moderator || this.address,
                     data.assetContractERC20,
-                    data.campaignStartTime,
-                    data.campaignEndTime,
+                    data.campaignStartTime / 1000,
+                    data.campaignEndTime / 1000,
                     data.expiryConversion,
                     this.toWei(data.moderatorFeePercentage, 'ether'),
                     this.toWei(data.maxReferralRewardPercent, 'ether'),
@@ -303,6 +303,11 @@ export class TwoKeyProtocol {
                 if (progressCallback) {
                     progressCallback('TwoKeyAcquisitionCampaignERC20', true, campaignReceipt.contractAddress);
                 }
+                const campaignInstance = await this._getAcquisitionCampaignInstance(campaignReceipt.contractAddress);
+                const gas = await promisify(campaignInstance.setAssetContractAttributes.estimateGas, [{ from: this.address }]);
+                console.log('setAssetContractAttributes', gas);
+                txHash = await promisify(campaignInstance.setAssetContractAttributes, [{ from: this.address, gas, gasPrice }]);
+                await this._waitForTransactionMined(txHash);
                 resolve(campaignReceipt.contractAddress);
             } catch (err) {
                 reject(err);
