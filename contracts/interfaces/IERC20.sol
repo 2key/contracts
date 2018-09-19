@@ -6,5 +6,5 @@ contract IERC20 {
     function transfer(address _to, uint256 _value) public returns (bool);
     function decimals() view public returns (uint8);
     function symbol() view public returns (string);
-    function getName() view public returns (string);
+    function name() view public returns (string);
 }
