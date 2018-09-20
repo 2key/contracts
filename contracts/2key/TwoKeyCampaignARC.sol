@@ -59,7 +59,7 @@ contract TwoKeyCampaignARC is StandardToken {
 	   * @param _to address The address which you want to transfer to
 	   * @param _value uint256 the amount of tokens to be transferred
 	   */
-	function transferFromQuota(address _from, address _to, uint256 _value) public returns (bool) {
+	function transferFromQuota(address _from, address _to, uint256 _value) private returns (bool) {
 		require(_to != address(0));
 		require(_value <= balances[_from]);
 		require(_value <= allowed[_from][msg.sender]);
@@ -78,8 +78,9 @@ contract TwoKeyCampaignARC is StandardToken {
 	   * @param _to address The address which you want to transfer to
 	   * @param _value uint256 the amount of tokens to be transferred
 	   */
-	function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
-		require(received_from[_to] == 0);
+	function transferFrom(address _from, address _to, uint256 _value) private returns (bool) {
+		require(_value == 1);
+		require(received_from[_to] == 0); // This line makes us sure we're in the tree
 		require(_from != address(0));
 		allowed[_from][msg.sender] = 1;
 		if (transferFromQuota(_from, _to, _value)) {
