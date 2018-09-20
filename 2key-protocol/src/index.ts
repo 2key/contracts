@@ -488,6 +488,26 @@ export class TwoKeyProtocol {
         });
     }
 
+
+    public joinAcquisitionCampaignAndShareARC(campaignAddress: string, referralLink: string, recipient: string, gasPrice: number = this.gasPrice): Promise<string> {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const {f_address, f_secret, p_message} = this._getUrlParams(referralLink);
+                if (!f_address || !f_secret) {
+                    reject('Broken Link');
+                }
+                const msg = Sign.free_take(this.address, f_address, f_secret, p_message);
+                const campaignInstance = await this._getAcquisitionCampaignInstance(campaignAddress);
+                const gas = await promisify(campaignInstance.joinAndShareARC.estimateGas, [msg, recipient, { from: this.address }]);
+                await this._checkBalanceBeforeTransaction(gas, gasPrice);
+                const txHash = await promisify(campaignInstance.joinAndShareARC, [msg, recipient, { from: this.address, gas, gasPrice }]);
+                resolve(txHash);
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
+
     /* PARTICIPATE */
     public joinAcquisitionCampaignAndConvert(campaign: any, amount: number, referralLink: string, gasPrice: number = this.gasPrice): Promise<string> {
         return new Promise(async (resolve, reject) => {
@@ -506,7 +526,7 @@ export class TwoKeyProtocol {
             if (!balance) {
                 console.log('No ARCS call buySign');
                 const msg = Sign.free_take(this.address, f_address, f_secret, p_message);
-                const gas = await promisify(campaignInstance.joinAndConvert.estimateGas, [msg, { from: this.address }]);
+                const gas = await promisify(campaignInstance.joinAndConvert.estimateGas, [msg, { from: this.address, value: this.toWei(amount, 'ether') }]);
                 console.log('Gas required for buySign', gas);
                 await this._checkBalanceBeforeTransaction(gas, gasPrice);
                 const txHash = await promisify(campaignInstance.joinAndConvert, [msg, {from: this.address, gasPrice, gas, value: this.toWei(amount, 'ether')}]);
@@ -525,11 +545,31 @@ export class TwoKeyProtocol {
                 await this._checkBalanceBeforeTransaction(gas, gasPrice);
                 const txHash = await promisify(campaignInstance.convert, [{from: this.address, gasPrice, gas: 7000000, value: this.toWei(amount, 'ether')}]);
                 await this.getTransactionReceiptMined(txHash);
-                const conversions = await promisify(campaignInstance.conversions, [this.address]);
-                console.log(conversions);
+                const conversions = await this.getAquisitionConverterConversion(campaignInstance);
+                const conversion: any = {};
+                Object.keys(conversions).forEach((key) => {
+                    if (typeof (conversions[key]) === 'object') {
+                        conversion[key] = this.fromWei(conversions[key]);
+                    } else {
+                        conversion[key] = conversions[key];
+                    }
+                });
+                console.log(conversion);
                 resolve(txHash);
             }
         });
+    }
+
+    public getAquisitionConverterConversion(campaign: any, address: string = this.address): Promise<any> {
+        return new Promise<any>(async (resolve, reject) => {
+            try {
+                const campaignInstance = await this._getAcquisitionCampaignInstance(campaign);
+                const conversion = await promisify(campaignInstance.conversions, [address]);
+                resolve(conversion);
+            } catch (e) {
+                reject(e);
+            }
+        })
     }
 
     /* UTILS */
