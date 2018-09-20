@@ -56,6 +56,7 @@ module.exports = function deploy(deployer) {
         // .then(() => adminInstance.setTwoKeyExchange(TwoKeyUpgradableExchange.address))
         .then(() => deployer.deploy(TwoKeyReg, EventSource.address, TwoKeyAdmin.address))
         .then(() => TwoKeyReg.deployed())
+        .then(() => adminInstance.setSingletones(TwoKeyEconomy.address, TwoKeyUpgradableExchange.address, TwoKeyReg.address))
         .then(() => true)
         .catch((err) => {
             console.log('\x1b[31m', 'Error:', err.message, '\x1b[0m');

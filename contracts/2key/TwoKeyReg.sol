@@ -31,9 +31,7 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
     require(_twoKeyEventSource != address(0));
     require(_twoKeyAdmin != address(0));
     twoKeyEventSource = _twoKeyEventSource;
-    twoKeyAdminContract = TwoKeyAdmin( _twoKeyAdmin);
-    twoKeyAdminContract.setTwoKeyReg(address(this));
-   
+    twoKeyAdminContract = TwoKeyAdmin( _twoKeyAdmin);   
   }
 
  // function addTwoKeyEventSource(address _twoKeyEventSource) public onlyOwner {
@@ -50,6 +48,7 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
 
     twoKeyEventSource = _twoKeyEventSource;
   }
+  
   /*
     Those mappings are for the fetching data about in what contracts user participates in which role
   */

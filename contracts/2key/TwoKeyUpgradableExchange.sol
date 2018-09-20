@@ -8,8 +8,8 @@ import "./RBACWithAdmin.sol";
 
 contract TwoKeyUpgradableExchange is Crowdsale, Ownable, RBACWithAdmin {
 
-	address filler;
-	
+	TwoKeyUpgradableExchange filler;
+
 	/// @notice Event is emitted when a user sell his tokens
 	event TokenSell(address indexed purchaser, address indexed beneficiary, uint256 value, uint256 amount);
 
@@ -25,7 +25,7 @@ contract TwoKeyUpgradableExchange is Crowdsale, Ownable, RBACWithAdmin {
 		Crowdsale(_rate, _wallet, _token) Ownable() public {
 		require(_twoKeyAdmin != address(0));
     	admin = TwoKeyAdmin(_twoKeyAdmin);
-    	admin.setTwoKeyExchange(address(this));	
+    	// admin.setTwoKeyExchange(address(this));	
     	
 	}
 
@@ -33,7 +33,7 @@ contract TwoKeyUpgradableExchange is Crowdsale, Ownable, RBACWithAdmin {
 	/// @dev This method is called only when alive (i.e. not upgraded to newExchange)
     /// @param _tokenAmount is amount of tokens to sell
 	function sellTokens(uint256 _tokenAmount) public onlyAlive payable {
-		//require(token.allowance(this, msg.sender) >= _tokenAmount);
+		// require(token.allowance(this, msg.sender) >= _tokenAmount);
 		require(token.allowance(msg.sender, this) >= _tokenAmount);
 		require(token.transferFrom(msg.sender, this, _tokenAmount));
 
@@ -60,7 +60,7 @@ contract TwoKeyUpgradableExchange is Crowdsale, Ownable, RBACWithAdmin {
     /// @dev This method is called only when alive (i.e. not upgraded to newExchange) and by admin
     /// @param _to is address of New Exchange Contract
 	function upgrade(address _to) public onlyAlive onlyAdmin{
-		filler = _to;		// check if the address is exchange contract address -- add typecast
+		filler = TwoKeyUpgradableExchange(_to);		// check if the address is exchange contract address -- add typecast
 	}
 
     /// @notice It is a payable fallback method that will transfer payable amount to new Exchange if it is upgraded, else will be stored in the existing exchange as its balance
