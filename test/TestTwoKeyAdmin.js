@@ -14,8 +14,8 @@ contract('TwoKeyAdmin', async (accounts) => {
     let economyContract;
     let regContract;
     let eventContract;
-    let deployerAddress = '0xb3FA520368f2Df7BED4dF5185101f303f6c7decc';
-    let not_admin = '0x22d491bde2303f2f43325b2108d26f1eaba1e32b';
+    let deployerAddress = '0xb3fa520368f2df7bed4df5185101f303f6c7decc'; // '0xb3FA520368f2Df7BED4dF5185101f303f6c7decc';
+    let not_admin = '0x22d491bde2303f2f43325b2108d26f1eaba1e32b'; 
     const null_address = '0x0000000000000000000000000000000000000000';   
     const BigNumber = web3.BigNumber;
 
@@ -42,6 +42,7 @@ contract('TwoKeyAdmin', async (accounts) => {
               await tryCatch(adminContract.replaceOneself(null_address), errTypes.anyError); // null address check is required in sol ! (here error is catched due to revert thrown by transfer)
         });
 
+
         /// Test Case: Passing admincontract address which is already replaced once should revert
         it('Case 4 : Replace :: Already-Replaced-AdminContract-TestCase', async () => {
               adminContract = await TwoKeyAdmin.new(deployerAddress);
@@ -49,11 +50,15 @@ contract('TwoKeyAdmin', async (accounts) => {
               eventContract  =await TwoKeyEventSource.new(adminContract.address);
               regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
               exchangeContract =  await TwoKeyExchange.new(1, deployerAddress, economyContract.address,adminContract.address);
+              await adminContract.setSingletones(economyContract.address, exchangeContract.address, regContract.address, eventContract.address);
 
               adminContract_new = await TwoKeyAdmin.new(deployerAddress);
+              await adminContract_new.addPreviousAdmin(adminContract.address);
 
               await adminContract.replaceOneself(adminContract_new.address);  
+              await tryCatch(adminContract.replaceOneself(adminContract_new.address), errTypes.anyError);  
         });
+
 
         /// Test Case: Passing admincontract address which is not admin Voting Approved should revert
         it('Case 5 : Replace :: Address-Not-Approved-By-Admin-TestCase', async () => {
@@ -62,11 +67,14 @@ contract('TwoKeyAdmin', async (accounts) => {
               eventContract  =await TwoKeyEventSource.new(adminContract.address);
               regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
               exchangeContract =  await TwoKeyExchange.new(1, deployerAddress, economyContract.address,adminContract.address);
+              await adminContract.setSingletones(economyContract.address, exchangeContract.address, regContract.address, eventContract.address);
               
               adminContract_new = await TwoKeyAdmin.new(not_admin);
               economyContract_new = await TwoKeyEconomy.new(adminContract_new.address);
               eventContract_new  =await TwoKeyEventSource.new(adminContract_new.address);
               regContract_new = await TwoKeyReg.new(eventContract_new.address, adminContract_new.address);
+              exchangeContract_new =  await TwoKeyExchange.new(1, deployerAddress, economyContract_new.address,adminContract_new.address);
+              await adminContract_new.setSingletones(economyContract_new.address, exchangeContract_new.address, regContract_new.address, eventContract_new.address);
 
               await tryCatch(adminContract_new.replaceOneself(adminContract.address), errTypes.anyError);  
         });
@@ -78,12 +86,10 @@ contract('TwoKeyAdmin', async (accounts) => {
               eventContract  =await TwoKeyEventSource.new(adminContract.address);
               regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
               exchangeContract =  await TwoKeyExchange.new(1, deployerAddress, economyContract.address,adminContract.address);
+              await adminContract.setSingletones(economyContract.address, exchangeContract.address, regContract.address, eventContract.address);
 
               adminContract_new = await TwoKeyAdmin.new(deployerAddress);
-              // economyContract_new = await TwoKeyEconomy.new(adminContract.address);
-              // eventContract_new  =await TwoKeyEventSource.new(adminContract.address);
-              // regContract_new = await TwoKeyReg.new(eventContract.address, adminContract.address);
-              // exchangeContract_new =  await TwoKeyExchange.new(1, deployerAddress, economyContract.address,adminContract_new.address);
+              await adminContract_new.addPreviousAdmin(adminContract.address);
               
               const adminContract_balance1 = await economyContract.balanceOf(adminContract.address);
               const adminContract_balance1_string = JSON.stringify(adminContract_balance1);
@@ -97,7 +103,6 @@ contract('TwoKeyAdmin', async (accounts) => {
               const adminContract_balance2_string = JSON.stringify(adminContract_balance2); 
 
               assert.equal(adminContract_balance1.c[0], adminContract_new_balance.c[0], "New Admin should have 1e+24 tokens");
-              //assert.equal(adminContract_balance2, 0, "Old admin contract balance should be zero after replace")
         });
 
         /// To verify if TwoKeyEconomy is set to new_admin
@@ -107,9 +112,15 @@ contract('TwoKeyAdmin', async (accounts) => {
               eventContract  = await TwoKeyEventSource.new(adminContract.address);
               regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
               exchangeContract =  await TwoKeyExchange.new(1, deployerAddress, economyContract.address,adminContract.address);
+              await adminContract.setSingletones(economyContract.address, exchangeContract.address, regContract.address, eventContract.address);
 
               adminContract_new = await TwoKeyAdmin.new(deployerAddress);
+              await adminContract_new.addPreviousAdmin(adminContract.address);
+
               await adminContract.replaceOneself(adminContract_new.address); 
+
+              let economyObj = await adminContract_new.getTwoKeyEconomy();
+              assert.equal(economyContract.address, economyObj, "TwoKeyReg Addresses should match");
         });
 
         /// To verify if TwoKeyReg is set to new_admin
@@ -119,16 +130,17 @@ contract('TwoKeyAdmin', async (accounts) => {
               eventContract  = await TwoKeyEventSource.new(adminContract.address);
               regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
               exchangeContract =  await TwoKeyExchange.new(1, deployerAddress, economyContract.address,adminContract.address);
+              await adminContract.setSingletones(economyContract.address, exchangeContract.address, regContract.address, eventContract.address);
 
               adminContract_new = await TwoKeyAdmin.new(deployerAddress);
+              await adminContract_new.addPreviousAdmin(adminContract.address);
               await adminContract.replaceOneself(adminContract_new.address); 
               
               let regObj = await adminContract_new.getTwoKeyReg();
               assert.equal(regContract.address, regObj, "TwoKeyReg Addresses should match"); 
         });
 
-
-        //===================================================================================
+        // ===================================================================================
         // TEST CASES FOR transferByAdmin
 
         /// Passing null address to transferByAdmin method should give an error
@@ -138,6 +150,7 @@ contract('TwoKeyAdmin', async (accounts) => {
               eventContract  =await TwoKeyEventSource.new(adminContract.address);
               regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
               exchangeContract =  await TwoKeyExchange.new(1, deployerAddress, economyContract.address,adminContract.address);
+              await adminContract.setSingletones(economyContract.address, exchangeContract.address, regContract.address, eventContract.address);
 
               tokens = new BigNumber(100);
               await tryCatch(adminContract.transferByAdmins(null_address, tokens), errTypes.anyError); 
@@ -149,6 +162,7 @@ contract('TwoKeyAdmin', async (accounts) => {
               economyContract = await TwoKeyEconomy.new(adminContract.address);
               eventContract  =await TwoKeyEventSource.new(adminContract.address);
               regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
+              await adminContract.setSingletones(economyContract.address, exchangeContract.address, regContract.address, eventContract.address);
 
               tokens = new BigNumber(0);
               await tryCatch(adminContract.transferByAdmins(deployerAddress, 0), errTypes.anyError); 
@@ -161,12 +175,10 @@ contract('TwoKeyAdmin', async (accounts) => {
               eventContract  = await TwoKeyEventSource.new(adminContract.address);
               regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
               exchangeContract =  await TwoKeyExchange.new(1, deployerAddress, economyContract.address, adminContract.address);
+              await adminContract.setSingletones(economyContract.address, exchangeContract.address, regContract.address, eventContract.address);
 
               adminContract_new = await TwoKeyAdmin.new(deployerAddress);
-              economyContract_new = await TwoKeyEconomy.new(adminContract_new.address);
-              eventContract_new  = await TwoKeyEventSource.new(adminContract_new.address);
-              regContract_new = await TwoKeyReg.new(eventContract_new.address, adminContract_new.address);
-              exchangeContract_new = await TwoKeyExchange.new(1, deployerAddress, economyContract.address, adminContract_new.address);
+              await adminContract_new.addPreviousAdmin(adminContract.address);
 
               await adminContract.replaceOneself(adminContract_new.address);
               await tryCatch(adminContract.transferByAdmins(deployerAddress, 1000), errTypes.anyError);
@@ -178,11 +190,15 @@ contract('TwoKeyAdmin', async (accounts) => {
               economyContract = await TwoKeyEconomy.new(adminContract.address);
               eventContract  =await TwoKeyEventSource.new(adminContract.address);
               regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
+              exchangeContract =  await TwoKeyExchange.new(1, deployerAddress, economyContract.address, adminContract.address);
+              await adminContract.setSingletones(economyContract.address, exchangeContract.address, regContract.address, eventContract.address);
 
               adminContract_new = await TwoKeyAdmin.new(not_admin);
               economyContract_new = await TwoKeyEconomy.new(adminContract_new.address);
               eventContract_new  =await TwoKeyEventSource.new(adminContract_new.address);
               regContract_new = await TwoKeyReg.new(eventContract_new.address, adminContract_new.address);
+              exchangeContract_new =  await TwoKeyExchange.new(1, deployerAddress, economyContract_new.address, adminContract_new.address);
+              await adminContract_new.setSingletones(economyContract_new.address, exchangeContract_new.address, regContract_new.address, eventContract_new.address);
           
               await tryCatch(adminContract_new.transferByAdmins(deployerAddress, 100), errTypes.anyError); // revert is due to incorrect params
         });
@@ -193,6 +209,8 @@ contract('TwoKeyAdmin', async (accounts) => {
               economyContract = await TwoKeyEconomy.new(adminContract.address);
               eventContract  =await TwoKeyEventSource.new(adminContract.address);
               regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
+              exchangeContract =  await TwoKeyExchange.new(1, deployerAddress, economyContract.address, adminContract.address);
+              await adminContract.setSingletones(economyContract.address, exchangeContract.address, regContract.address, eventContract.address);
 
               address = not_admin;
               await adminContract.transferByAdmins(address, 1000);
@@ -210,12 +228,14 @@ contract('TwoKeyAdmin', async (accounts) => {
               eventContract  =await TwoKeyEventSource.new(adminContract.address);
               regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
               exchangeContract =  await TwoKeyExchange.new(1, deployerAddress, economyContract.address, adminContract.address);
+              await adminContract.setSingletones(economyContract.address, exchangeContract.address, regContract.address, eventContract.address);
 
               adminContract_new = await TwoKeyAdmin.new(deployerAddress);
               economyContract_new = await TwoKeyEconomy.new(adminContract_new.address);
               eventContract_new  =await TwoKeyEventSource.new(adminContract_new.address);
               regContract_new = await TwoKeyReg.new(eventContract_new.address, adminContract_new.address);
               exchangeContract_new =  await TwoKeyExchange.new(1, deployerAddress, economyContract.address, adminContract_new.address);
+              await adminContract_new.setSingletones(economyContract_new.address, exchangeContract_new.address, regContract_new.address, eventContract_new.address);
 
               await adminContract.upgradeEconomyExchangeByAdmins(exchangeContract_new.address);   
         });
@@ -226,7 +246,8 @@ contract('TwoKeyAdmin', async (accounts) => {
               economyContract = await TwoKeyEconomy.new(adminContract.address);
               eventContract  =await TwoKeyEventSource.new(adminContract.address);
               regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
-              // exchangeContract =  await TwoKeyExchange.new(1, deployerAddress, economyContract.address, adminContract.address);
+              exchangeContract =  await TwoKeyExchange.new(1, deployerAddress, economyContract.address, adminContract.address);
+              await adminContract.setSingletones(economyContract.address, exchangeContract.address, regContract.address, eventContract.address);
 
               await tryCatch(adminContract.upgradeEconomyExchangeByAdmins(null_address), errTypes.anyError);
         });
@@ -238,8 +259,10 @@ contract('TwoKeyAdmin', async (accounts) => {
               eventContract  =await TwoKeyEventSource.new(adminContract.address);
               regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
               exchangeContract =  await TwoKeyExchange.new(1, deployerAddress, economyContract.address, adminContract.address);
+              await adminContract.setSingletones(economyContract.address, exchangeContract.address, regContract.address, eventContract.address);
 
               adminContract_new = await TwoKeyAdmin.new(deployerAddress);
+              await adminContract_new.addPreviousAdmin(adminContract.address);
               await adminContract.replaceOneself(adminContract_new.address);
         
               exchangeContract_new =  await TwoKeyExchange.new(1, deployerAddress, economyContract.address, adminContract_new.address);
@@ -253,12 +276,14 @@ contract('TwoKeyAdmin', async (accounts) => {
               eventContract  =await TwoKeyEventSource.new(adminContract.address);
               regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
               exchangeContract =  await TwoKeyExchange.new(1, deployerAddress, economyContract.address, adminContract.address);
+              await adminContract.setSingletones(economyContract.address, exchangeContract.address, regContract.address, eventContract.address);
 
               adminContract_new = await TwoKeyAdmin.new(not_admin);
               economyContract_new = await TwoKeyEconomy.new(adminContract_new.address);
               eventContract_new  =await TwoKeyEventSource.new(adminContract_new.address);
               regContract_new = await TwoKeyReg.new(eventContract_new.address, adminContract_new.address);
               exchangeContract_new =  await TwoKeyExchange.new(1, not_admin, economyContract.address, adminContract_new.address);
+              await adminContract_new.setSingletones(economyContract_new.address, exchangeContract_new.address, regContract_new.address, eventContract_new.address);
 
               await tryCatch(adminContract_new.upgradeEconomyExchangeByAdmins(exchangeContract_new.address), errTypes.anyError);
         });
@@ -273,6 +298,7 @@ contract('TwoKeyAdmin', async (accounts) => {
               eventContract  =await TwoKeyEventSource.new(adminContract.address);
               exchangeContract =  await TwoKeyExchange.new(1, deployerAddress, economyContract.address, adminContract.address);
               regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
+              await adminContract.setSingletones(economyContract.address, exchangeContract.address, regContract.address, eventContract.address);
         
               let address = not_admin;
               let amount = 10000;
@@ -294,6 +320,8 @@ contract('TwoKeyAdmin', async (accounts) => {
               economyContract = await TwoKeyEconomy.new(adminContract.address);
               eventContract  =await TwoKeyEventSource.new(adminContract.address);
               regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
+              exchangeContract =  await TwoKeyExchange.new(1, deployerAddress, economyContract.address, adminContract.address);
+              await adminContract.setSingletones(economyContract.address, exchangeContract.address, regContract.address, eventContract.address);
 
               const ethers = 10;
               await tryCatch(adminContract.transferEtherByAdmins(null_address, ethers), errTypes.anyError);
@@ -305,6 +333,8 @@ contract('TwoKeyAdmin', async (accounts) => {
               economyContract = await TwoKeyEconomy.new(adminContract.address);
               eventContract  =await TwoKeyEventSource.new(adminContract.address);
               regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
+              exchangeContract =  await TwoKeyExchange.new(1, deployerAddress, economyContract.address, adminContract.address);
+              await adminContract.setSingletones(economyContract.address, exchangeContract.address, regContract.address, eventContract.address);
 
               let address = not_admin;
        
@@ -319,13 +349,11 @@ contract('TwoKeyAdmin', async (accounts) => {
               eventContract  =await TwoKeyEventSource.new(adminContract.address);
               regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
               exchangeContract =  await TwoKeyExchange.new(1, deployerAddress, economyContract.address, adminContract.address);
-
+              await adminContract.setSingletones(economyContract.address, exchangeContract.address, regContract.address, eventContract.address);
+              
               adminContract_new = await TwoKeyAdmin.new(deployerAddress);
-              economyContract_new = await TwoKeyEconomy.new(adminContract_new.address);
-              eventContract_new  =await TwoKeyEventSource.new(adminContract_new.address);
-              regContract_new = await TwoKeyReg.new(eventContract_new.address, adminContract_new.address);
-              exchangeContract_new =  await TwoKeyExchange.new(1, deployerAddress, economyContract.address, adminContract_new.address);
 
+              await adminContract_new.addPreviousAdmin(adminContract.address);
               await adminContract.replaceOneself(adminContract_new.address);
               address = not_admin; 
               const ethers = 1000; 
@@ -338,18 +366,22 @@ contract('TwoKeyAdmin', async (accounts) => {
               economyContract = await TwoKeyEconomy.new(adminContract.address);
               eventContract  =await TwoKeyEventSource.new(adminContract.address);
               regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
+              exchangeContract =  await TwoKeyExchange.new(1, deployerAddress, economyContract.address, adminContract.address);
+              await adminContract.setSingletones(economyContract.address, exchangeContract.address, regContract.address, eventContract.address);
 
               adminContract_new = await TwoKeyAdmin.new(not_admin);
               economyContract_new = await TwoKeyEconomy.new(adminContract_new.address);
               eventContract_new  =await TwoKeyEventSource.new(adminContract_new.address);
               regContract_new = await TwoKeyReg.new(eventContract_new.address, adminContract_new.address);
+              exchangeContract_new =  await TwoKeyExchange.new(1, not_admin, economyContract.address, adminContract_new.address);
+              await adminContract_new.setSingletones(economyContract_new.address, exchangeContract_new.address, regContract_new.address, eventContract_new.address);
 
               let address = not_admin; 
               const ethers = 1000; 
               await tryCatch(adminContract_new.transferEtherByAdmins(address, ethers), errTypes.anyError); // param issue
         });
        
-        // // ==================================================================================================
+        // ==================================================================================================
 
         /// Payable value will be added to the existing contract when not replaced 
         it('Case 23 : payable-function when not replaced', async () => {
@@ -357,6 +389,8 @@ contract('TwoKeyAdmin', async (accounts) => {
               economyContract = await TwoKeyEconomy.new(adminContract.address);
               eventContract  =await TwoKeyEventSource.new(adminContract.address);
               regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
+              exchangeContract =  await TwoKeyExchange.new(1, deployerAddress, economyContract.address, adminContract.address);
+              await adminContract.setSingletones(economyContract.address, exchangeContract.address, regContract.address, eventContract.address);
 
               await adminContract.send("1000");
               let bal = await adminContract.getEtherBalanceOfAnAddress(adminContract.address);
@@ -370,8 +404,10 @@ contract('TwoKeyAdmin', async (accounts) => {
               eventContract  =await TwoKeyEventSource.new(adminContract.address);
               regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
               exchangeContract =  await TwoKeyExchange.new(1, deployerAddress, economyContract.address, adminContract.address);
+              await adminContract.setSingletones(economyContract.address, exchangeContract.address, regContract.address, eventContract.address);
            
               adminContract_new = await TwoKeyAdmin.new(deployerAddress);
+              await adminContract_new.addPreviousAdmin(adminContract.address);
               await adminContract.replaceOneself(adminContract_new.address);
               await adminContract.send("1000");
 
@@ -384,19 +420,21 @@ contract('TwoKeyAdmin', async (accounts) => {
 
         /// Destroy method when admin not replaced
         it('Case 25: destroy-function when admin not replaced', async () => {
-            adminContract = await TwoKeyAdmin.new(deployerAddress);
-            economyContract = await TwoKeyEconomy.new(adminContract.address);
-            eventContract  =await TwoKeyEventSource.new(adminContract.address);
-            regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
+              adminContract = await TwoKeyAdmin.new(deployerAddress);
+              economyContract = await TwoKeyEconomy.new(adminContract.address);
+              eventContract  =await TwoKeyEventSource.new(adminContract.address);
+              regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
+              exchangeContract =  await TwoKeyExchange.new(1, deployerAddress, economyContract.address, adminContract.address);
+              await adminContract.setSingletones(economyContract.address, exchangeContract.address, regContract.address, eventContract.address);
          
-            const deployerAddressBal1 = await adminContract.getEtherBalanceOfAnAddress(deployerAddress);  // 0
-            await adminContract.send("10000");
-            const adminBal = await adminContract.getEtherBalanceOfAnAddress(adminContract.address); // 10000
+              const deployerAddressBal1 = await adminContract.getEtherBalanceOfAnAddress(deployerAddress);  // 0
+              await adminContract.send("10000");
+              const adminBal = await adminContract.getEtherBalanceOfAnAddress(adminContract.address); // 10000
 
-            await adminContract.destroy();
-            let admin_bal = await adminContract.getEtherBalanceOfAnAddress(adminContract.address); // 0
+              await adminContract.destroy();
+              let admin_bal = await adminContract.getEtherBalanceOfAnAddress(adminContract.address); // 0
             
-            assert.equal(adminBal, 10000, "Admin contract should have 10000 ethers before destroyed");
-            assert.equal(admin_bal, 0, "Admin contract should have 0 ethers after destroyed");
+              assert.equal(adminBal, 10000, "Admin contract should have 10000 ethers before destroyed");
+              assert.equal(admin_bal, 0, "Admin contract should have 0 ethers after destroyed");
         });
 });

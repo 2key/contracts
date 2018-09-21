@@ -14,23 +14,20 @@ contract('TwoKeyReg', async (accounts) => {
     let economyContract;
     let deployerAddress = '0xb3FA520368f2Df7BED4dF5185101f303f6c7decc';
     const null_address = '0x0000000000000000000000000000000000000000';   
-    const tokenName = 'TwoKeyEconomy';
-    const symbol = '2Key';
-    const decimals = 18;
-    const totalSupply = 1000000000000000000000000000;  
-
-    before(async() => {
-        adminContract = await TwoKeyAdmin.new(deployerAddress); 
-        economyContract = await TwoKeyEconomy.new(adminContract.address);
-        eventSourceContract = await TwoKeyEventSource.new(adminContract.address);
-    });
 
   /// getName method will work fine when address is known
   it('Case 1 getName Positive Test Case', async () => {
+
+        adminContract = await TwoKeyAdmin.new(deployerAddress); 
+        economyContract = await TwoKeyEconomy.new(adminContract.address);
+        eventSourceContract = await TwoKeyEventSource.new(adminContract.address);
+        exchangeContarct = await TwoKeyExchange.new(1, deployerAddress, economyContract.address,adminContract.address);
+
         let regContract = await TwoKeyReg.new(eventSourceContract.address, adminContract.address);
         let address = accounts[0];
         let name = 'account0-0';
-        
+            
+        await adminContract.setSingletones(economyContract.address,exchangeContarct.address,regContract.address, eventSourceContract.address);
         await adminContract.addNameToReg(name, address);
 
         let test_address = await regContract.getName2Owner(name);
@@ -42,11 +39,19 @@ contract('TwoKeyReg', async (accounts) => {
 
   /// getName method will not get the desired value if  name is fetched from random address
   it('Case 2 getName Negative Test Case', async () => {
+
+        adminContract = await TwoKeyAdmin.new(deployerAddress); 
+        economyContract = await TwoKeyEconomy.new(adminContract.address);
+        eventSourceContract = await TwoKeyEventSource.new(adminContract.address);
+        exchangeContarct = await TwoKeyExchange.new(1, deployerAddress, economyContract.address,adminContract.address);
+
+
         let regContract = await TwoKeyReg.new(eventSourceContract.address, adminContract.address);
         let address = accounts[0];
         let name = 'account0-0';
         let random_address = '0x22d491bde2303f2f43325b2108d26f1eaba1e32b';
         
+        await adminContract.setSingletones(economyContract.address,exchangeContarct.address,regContract.address, eventSourceContract.address);
         await adminContract.addNameToReg(name, address); 
 
         let test_name = await regContract.getOwner2Name(random_address);
@@ -56,11 +61,18 @@ contract('TwoKeyReg', async (accounts) => {
 
   /// get address will work fine when name is know
   it('Case 3 getAddress Positive Test Case', async () => {
+      
+        adminContract = await TwoKeyAdmin.new(deployerAddress); 
+        economyContract = await TwoKeyEconomy.new(adminContract.address);
+        eventSourceContract = await TwoKeyEventSource.new(adminContract.address);
+        exchangeContarct = await TwoKeyExchange.new(1, deployerAddress, economyContract.address,adminContract.address);
+
         let regContract = await TwoKeyReg.new(eventSourceContract.address, adminContract.address);
         let address = accounts[0];
         let name = 'account0-0';
         let random_name = 'new-name';
 
+        await adminContract.setSingletones(economyContract.address,exchangeContarct.address,regContract.address, eventSourceContract.address);
         await adminContract.addNameToReg(name, address); 
 
         let test_address = await regContract.getName2Owner(name);
@@ -69,11 +81,18 @@ contract('TwoKeyReg', async (accounts) => {
 
   /// get address will give undesired result when name is unknown
   it('Case 4 getAddress Negative Test Case', async () => {
+
+        adminContract = await TwoKeyAdmin.new(deployerAddress); 
+        economyContract = await TwoKeyEconomy.new(adminContract.address);
+        eventSourceContract = await TwoKeyEventSource.new(adminContract.address);
+        exchangeContarct = await TwoKeyExchange.new(1, deployerAddress, economyContract.address,adminContract.address);
+
         let regContract = await TwoKeyReg.new(eventSourceContract.address, adminContract.address);
         let address = accounts[0];
         let name = 'account0-0';
         let random_name = 'new-name';
 
+        await adminContract.setSingletones(economyContract.address,exchangeContarct.address,regContract.address, eventSourceContract.address);
         await adminContract.addNameToReg(name, address); 
 
         let test_address = await regContract.getName2Owner(random_name);
@@ -82,10 +101,18 @@ contract('TwoKeyReg', async (accounts) => {
   
   /// New Name should be added to an Old Address
   it('Case 5 New Name should be added to an Old Address', async () => {
+    
+        adminContract = await TwoKeyAdmin.new(deployerAddress); 
+        economyContract = await TwoKeyEconomy.new(adminContract.address);
+        eventSourceContract = await TwoKeyEventSource.new(adminContract.address);
+        exchangeContarct = await TwoKeyExchange.new(1, deployerAddress, economyContract.address,adminContract.address);
+
+
         let regContract = await TwoKeyReg.new(eventSourceContract.address, adminContract.address);
         let address = accounts[0];
         let name = 'account0-0';
 
+       await adminContract.setSingletones(economyContract.address,exchangeContarct.address,regContract.address, eventSourceContract.address);
         await adminContract.addNameToReg(name, address);
 
         let new_name = 'new-account';
@@ -98,10 +125,17 @@ contract('TwoKeyReg', async (accounts) => {
 
   /// New Name should be added to a New Address
   it('Case 6 New Name should be added to a New Address', async () => {
+    
+        adminContract = await TwoKeyAdmin.new(deployerAddress); 
+        economyContract = await TwoKeyEconomy.new(adminContract.address);
+        eventSourceContract = await TwoKeyEventSource.new(adminContract.address);
+        exchangeContarct = await TwoKeyExchange.new(1, deployerAddress, economyContract.address,adminContract.address);
+
         let regContract = await TwoKeyReg.new(eventSourceContract.address, adminContract.address);
         let address = accounts[0];
         let name = 'account0-0';
 
+        await adminContract.setSingletones(economyContract.address,exchangeContarct.address,regContract.address, eventSourceContract.address);
         await adminContract.addNameToReg(name, address);
 
         let new_name = 'new-account';
@@ -118,10 +152,17 @@ contract('TwoKeyReg', async (accounts) => {
 
   /// Old Name should not be added to an Old Address
   it('Case 7 Old Name should not be added to an Old Address', async () => {
+    
+        adminContract = await TwoKeyAdmin.new(deployerAddress); 
+        economyContract = await TwoKeyEconomy.new(adminContract.address);
+        eventSourceContract = await TwoKeyEventSource.new(adminContract.address);
+        exchangeContarct = await TwoKeyExchange.new(1, deployerAddress, economyContract.address,adminContract.address);
+
         let regContract = await TwoKeyReg.new(eventSourceContract.address, adminContract.address);
         let address = accounts[0];
         let name = 'account0-0';
 
+        await adminContract.setSingletones(economyContract.address,exchangeContarct.address,regContract.address, eventSourceContract.address);
         await adminContract.addNameToReg(name, address);
 
         await tryCatch(adminContract.addNameToReg(name, address), errTypes.anyError);
@@ -135,10 +176,17 @@ contract('TwoKeyReg', async (accounts) => {
 
   /// Old Name should not be added to a New Address
   it('Case 8 Old Name should not be added to a New Address', async () => {
+    
+        adminContract = await TwoKeyAdmin.new(deployerAddress); 
+        economyContract = await TwoKeyEconomy.new(adminContract.address);
+        eventSourceContract = await TwoKeyEventSource.new(adminContract.address);
+        exchangeContarct = await TwoKeyExchange.new(1, deployerAddress, economyContract.address,adminContract.address);
+
         let regContract = await TwoKeyReg.new(eventSourceContract.address, adminContract.address);
         let address = accounts[0];
         let name = 'account0-0';
 
+        await adminContract.setSingletones(economyContract.address,exchangeContarct.address,regContract.address, eventSourceContract.address);
         await adminContract.addNameToReg(name, address);
 
         let new_address = '0x22d491bde2303f2f43325b2108d26f1eaba1e32b';
@@ -154,6 +202,11 @@ contract('TwoKeyReg', async (accounts) => {
 
   /// Non-Admin should not call methods which have onlyAdmin modifier
   it('Case 9 Non-Admin should not call methods which have onlyAdmin modifier', async () => {
+        adminContract = await TwoKeyAdmin.new(deployerAddress); 
+        economyContract = await TwoKeyEconomy.new(adminContract.address);
+        eventSourceContract = await TwoKeyEventSource.new(adminContract.address);
+        exchangeContarct = await TwoKeyExchange.new(1, deployerAddress, economyContract.address,adminContract.address);
+
         let regContract = await TwoKeyReg.new(eventSourceContract.address, adminContract.address);
         let address = accounts[0];
         let name = 'account0-0';

@@ -3,6 +3,7 @@ const TwoKeyAdmin = artifacts.require("TwoKeyAdmin");
 const TwoKeyEconomy = artifacts.require("TwoKeyEconomy");
 const TwoKeyExchange = artifacts.require("TwoKeyUpgradableExchange");
 
+
 const BigNumber = web3.BigNumber;
 
    contract('TestTwoKeyEconomy', async (accounts) => {
@@ -137,15 +138,6 @@ const BigNumber = web3.BigNumber;
 
               let totalSupply = await economy.totalSupply();
               assert.notEqual(totalSupply, notExpected, 'Owner should not have '+ notExpected + ' Total Supply');
-        });  
-
-        /// TwoKeyAdmin should have TwoKeyEconomy object
-        it('Case 14 : TwoKeyAdmin should have TwoKeyEconomy object', async () => {
-              let economy = await TwoKeyEconomy.new(adminContract.address);
-              let economyFromAdmin= await adminContract.getTwoKeyEconomy();
-
-              assert.equal(economy.address, economyFromAdmin, 'TwoKeyAdmin should have two key economy object');
-        });  
-       
+        });         
 });
 

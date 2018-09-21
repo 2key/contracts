@@ -15,21 +15,21 @@ import "./TwoKeyReg.sol";
 contract TwoKeyAdmin is  Ownable, Destructible, AdminContract {
 
 	TwoKeyEconomy private twoKeyEconomy;
-	address private electorateAdmins;
 	TwoKeyUpgradableExchange private twokeyUpgradableExchange;
-	address private newTwoKeyAdminAddress;
-	bool private wasReplaced; 
-	TwoKeyEventSource twoKeyEventSource;
+	TwoKeyEventSource private twoKeyEventSource;
 	TwoKeyReg private twoKeyReg;
+	TwoKeyAdmin private previousAdmin;
 
-	address public setEconomySender;
+	address private electorateAdmins;
+	address private newTwoKeyAdminAddress;
+	bool private wasReplaced;
 
 	constructor(
 		address _electorateAdmins		
 	) Ownable() Destructible() payable public {
 		require(_electorateAdmins != address(0));
 		wasReplaced = false;
-		electorateAdmins = _electorateAdmins;	
+		electorateAdmins = _electorateAdmins;
 	}
 
     
@@ -40,21 +40,21 @@ contract TwoKeyAdmin is  Ownable, Destructible, AdminContract {
 		uint balanceOfOldAdmin = twoKeyEconomy.balanceOf(address(this));
 		TwoKeyAdmin newAdminContractObject = TwoKeyAdmin(_newAdminContract);
 		newTwoKeyAdminAddress = _newAdminContract;
-		wasReplaced = true;
 		twoKeyEconomy.transfer(_newAdminContract, balanceOfOldAdmin);
 		string memory admin = twoKeyEconomy.getAdminRole();
 		twoKeyEconomy.adminAddRole(_newAdminContract, admin);
 		newAdminContractObject.transfer(address(this).balance);
-		newAdminContractObject.setSingletones(twoKeyEconomy, twokeyUpgradableExchange, twoKeyReg);
-		newAdminContractObject.setAdminForEvent(_newAdminContract);
-		// twoKeyEventSource.changeAdmin(_newAdminContract);
-	}
-	
-	function setAdminForEvent(address _newAdminContract) public {
-		address newAdmin = TwoKeyEventSource(_newAdminContract);
-		twoKeyEventSource.changeAdmin(newAdmin);
+		newAdminContractObject.setSingletones(twoKeyEconomy, twokeyUpgradableExchange, twoKeyReg, twoKeyEventSource);
+		wasReplaced = true;
+		twoKeyEventSource.changeAdmin(_newAdminContract);
 	}
 
+	/// @notice Function to add the address of previous active admin contract
+	/// @param _previousAdmin is address of previous active admin contract
+	function addPreviousAdmin(address _previousAdmin) adminsVotingApproved {
+		require(_previousAdmin != address(0));
+		previousAdmin = TwoKeyAdmin(_previousAdmin);
+	}
 
     /// @notice Function where only elected admin can transfer tokens to an address
     /// @dev We're recuring to address different from address 0 and token amount greator than 0
@@ -100,6 +100,11 @@ contract TwoKeyAdmin is  Ownable, Destructible, AdminContract {
 	}
 
 	// modifiers
+    /// @notice Modifier will revert if calling address is not owner or previous active admin contract
+	modifier onlyAuthorizedAdmins() {
+		require((msg.sender == owner) || (msg.sender == address(previousAdmin)));
+	   _;
+	}
 
     /// @notice Modifier will revert if calling address is not a member of electorateAdmins 
 	modifier adminsVotingApproved() {
@@ -143,16 +148,25 @@ contract TwoKeyAdmin is  Ownable, Destructible, AdminContract {
     	twoKeyReg.addName(_name, _addr);
     }
     
-	function updateExchange() public  adminsVotingApproved{
-		//TODO: use for upgrade exchange
+    /// @notice Function to update twoKeyUpgradableExchange contract address
+	/// @param _exchange is address of new twoKeyUpgradableExchange contract
+	function updateExchange(address _exchange) public  adminsVotingApproved {
+		require (_exchange != address(0));
+		twokeyUpgradableExchange = TwoKeyUpgradableExchange(_exchange);
 	}
 
-	function updateRegistry() public adminsVotingApproved{
-		//TODO upgrade registry
+    /// @notice Function to update twoKeyRegistry contract address
+	/// @param _reg is address of new twoKeyRegistry contract
+	function updateRegistry(address _reg) public adminsVotingApproved {
+		require (_reg != address(0));
+		twoKeyReg = TwoKeyReg(_reg);		
 	}
 
-	function updateEventSource() public adminsVotingApproved{
-		//TODO upgrade eventsource
+    /// @notice Function to update twoKeyEventSource contract address
+	/// @param _eventSource is address of new twoKeyEventSource contract
+	function updateEventSource(address _eventSource) public adminsVotingApproved {
+		require (_eventSource != address(0));
+		twoKeyEventSource = TwoKeyEventSource(_eventSource);
 	}
 
  	/// @notice Function to set Singletones contract address 
@@ -160,21 +174,24 @@ contract TwoKeyAdmin is  Ownable, Destructible, AdminContract {
 	/// @param _economy is address of twoKeyEconomy contract address
 	/// @param _exchange is address of twoKeyExchange contract address
 	/// @param _reg is address of twoKeyReg contract address
-    function setSingletones(address _economy, address _exchange, address _reg) public wasNotReplaced onlyOwner {
+    function setSingletones(address _economy, address _exchange, address _reg, address _eventSource) public onlyAuthorizedAdmins {
 		//this is only for first time deployment of admin contract and other singletons
-		//TODO: in first time deployment, no need for adminsVotingApproved
 		require(twoKeyEconomy == address(0));
 		require(twoKeyReg == address(0));
 		require(twokeyUpgradableExchange == address(0));
+		require(twoKeyEventSource == address(0));
 
 		require(_economy != address(0));
     	require(_exchange != address(0));
     	require(_reg != address(0));
+    	require(_eventSource != address(0));
+
 		twoKeyReg = TwoKeyReg(_reg);
     	twokeyUpgradableExchange = TwoKeyUpgradableExchange(_exchange);
 		twoKeyEconomy = TwoKeyEconomy(_economy);
+		twoKeyEventSource = TwoKeyEventSource(_eventSource);
     }
-    
+
     /// View function - doesn't cost any gas to be executed
 	/// @notice Function to get Ether Balance of given address 
 	/// @param _addr is address of user
@@ -182,11 +199,6 @@ contract TwoKeyAdmin is  Ownable, Destructible, AdminContract {
 	function getEtherBalanceOfAnAddress(address _addr) public view returns (uint256){
 		return address(_addr).balance;
 	}
-	
-	function getEcoSender () public view returns(address) {
-		return setEconomySender;
-	}
-	
 	
 	/// View function - doesn't cost any gas to be executed
 	/// @notice Function to fetch twoKeyEconomy contract address 
@@ -214,7 +226,5 @@ contract TwoKeyAdmin is  Ownable, Destructible, AdminContract {
     function getTwoKeyUpgradableExchange () public view returns(address _exchange)  {
     	return address(twokeyUpgradableExchange);
     }
-
-
     
 } 
