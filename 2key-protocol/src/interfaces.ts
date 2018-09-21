@@ -2,19 +2,29 @@ import {BigNumber} from 'bignumber.js';
 import Web3 from 'web3';
 
 interface Balance {
-    ETH: number,
-    total: number,
-    '2KEY': number,
-};
+    ETH: number | string | BigNumber,
+    total: number | string | BigNumber,
+    '2KEY': number | string | BigNumber,
+}
 
 export interface BalanceMeta {
     balance: Balance,
     local_address: string,
-    gasPrice: number,
+    gasPrice: number | string | BigNumber,
 }
 
 export interface ContractsAdressess {
     TwoKeyEconomy?: string
+}
+
+export interface BalanceNormalized {
+    balance: {
+        ETH: string | number,
+        total: string | number,
+        '2KEY': string | number,
+    },
+    local_address: string,
+    gasPrice: string | number,
 }
 
 export interface EhtereumNetworks {
@@ -76,13 +86,13 @@ export interface AcquisitionCampaign {
     campaignStartTime: number, // Timestamp
     campaignEndTime: number, // Timestamp
     expiryConversion: number, // Timestamp
-    moderatorFeePercentage: number,
-    maxReferralRewardPercent: number,
-    maxConverterBonusPercent: number,
-    pricePerUnitInETH: number,
-    minContributionETH: number,
-    maxContributionETH: number,
-    conversionQuota?: number,
+    moderatorFeePercentageWei: number | string | BigNumber,
+    maxReferralRewardPercentWei: number | string | BigNumber,
+    maxConverterBonusPercentWei: number | string | BigNumber,
+    pricePerUnitInETHWei: number | string | BigNumber,
+    minContributionETHWei: number | string | BigNumber,
+    maxContributionETHWei: number | string | BigNumber,
+    referrerQuota?: number,
 }
 
 export interface CreateCampignProgress {
