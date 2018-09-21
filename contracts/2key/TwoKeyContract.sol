@@ -195,7 +195,7 @@ contract TwoKeyContract is StandardToken, Ownable {
   // low level product purchase function
   function buyProduct() public payable;
 
-  function getInfluencers(address customer) private view returns (address[]) {
+  function getInfluencers(address customer) public view returns (address[]) {
     // build a list of all influencers from converter back to to contractor
     // dont count the conveter and contractr themselves
     address influencer = customer;
@@ -417,6 +417,6 @@ contract TwoKeyPresellContract is TwoKeyContract {
     emit Log1('going to transfer', _units);
 
 //    erc20_token_sell_contract.transfer(msg.sender, _units);  // TODO is this dangerous!?
-    require(erc20_token_sell_contract.call(bytes4(keccak256("transfer(address,uint256)")),msg.sender,_units));
+    require(address(erc20_token_sell_contract).call(bytes4(keccak256("transfer(address,uint256)")),msg.sender,_units));
   }
 }
