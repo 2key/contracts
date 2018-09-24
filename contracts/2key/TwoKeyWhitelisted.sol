@@ -9,9 +9,6 @@ import '../openzeppelin-solidity/contracts/ownership/Ownable.sol';
 
 contract TwoKeyWhitelisted is Ownable {
 
-  string constant MODERATOR = "moderator";
-
-
   mapping(address => bool) public whitelist;
 
   constructor() Ownable() public {
