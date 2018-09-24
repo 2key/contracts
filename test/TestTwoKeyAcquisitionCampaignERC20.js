@@ -154,7 +154,7 @@ uint _conversionQuota
 
     it("should add twoKeyAcquisitionCampaign", async() => {
         await whitelists.addTwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20.address);
-    })
+    });
 
     // it("should add asset contract to the campaign", async() => {
     //    await twoKeyAcquisitionCampaignERC20.addAssetContractERC20(erc20.address);
