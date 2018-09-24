@@ -56,7 +56,7 @@ function free_take(my_address: string, f_address: string, f_secret? :string, p_m
   return m;
 }
 
-function free_join(my_address, public_address, f_address, f_secret, p_message, cut) {
+function free_join(my_address: string, public_address: string, f_address: string, f_secret: string, p_message: string, rCut: number): string {
   // let cut = fcut;
   // Input:
   //   my_address - I'm an influencer that wants to generate my own link
@@ -72,6 +72,7 @@ function free_join(my_address, public_address, f_address, f_secret, p_message, c
   const msg1 = Buffer.from(my_address.slice(2), 'hex'); // skip 0x
   let msg = Buffer.concat([msg0, msg1]); // compact msg (as is done in sha3 inside solidity)
   // if not using version prefix to the message:
+  let cut: any = rCut;
   if (cut == null) {
     cut = 255; // equal partition
   }
@@ -100,6 +101,27 @@ function free_join(my_address, public_address, f_address, f_secret, p_message, c
     m = f_address.slice(2) + m;
   }
   return m;
+}
+
+function free_join_take(my_address: string, public_address: string, f_address: string, f_secret: string, p_message: string, cut?: number): string {
+    // using information in the signed link (f_address,f_secret,p_message)
+    // return a new message that can be passed to the transferSig method of the contract
+    // to move ARCs arround in the current. For example:
+    //   campaign_contract.transferSig(free_take (my_address,f_address,f_secret,p_message))
+    // unlike free_take, this function will give information to transferSig so in the future, if I want,
+    // I can also become an influencer
+    //
+    // my_address - I'm a new influencer or a converter
+    // public_address - the public key of my secret that I will put in a link that I will generate
+    // f_address - previous influencer
+    // f_secret - the secret of the parent (contractor or previous influencer) is passed in the 2key link
+    // p_message - the message built by previous influencers
+    // cut - this should be a number between 0 and 255.
+    //   value from 1 to 101 are translated to percentage in the contract by removing 1.
+    //   all other values are used to say use default behaviour
+    let m = free_join(my_address, public_address, f_address, f_secret, p_message, cut);
+    m += my_address.slice(2) + public_address;
+    return `0x${m}`;
 }
 
 function validate_join(firtsPublicKey: string, f_address: string, f_secret: string, pMessage: string): string[] {
@@ -194,6 +216,7 @@ function validate_join(firtsPublicKey: string, f_address: string, f_secret: stri
 export default {
   free_take,
   free_join,
+  free_join_take,
   privateToPublic,
   validate_join,
   generatePrivateKey,

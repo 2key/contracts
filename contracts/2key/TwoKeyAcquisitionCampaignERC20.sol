@@ -312,18 +312,10 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         twoKeyEconomy.transferFrom(this, msg.sender, _amount);
     }
 
-    //TODO: Remove last two params
-    function joinAndSetPublicLinkWithCut(bytes signature, address _public_link_key, uint256 cut) {
-        distributeArcsBasedOnSignature(signature);
-        setPublicLinkKey(_public_link_key);
-        setCut(cut);
-    }
-
     // TODO: we need method joinAndShareARC to different address
     // Scenario where you join by yourself
     function joinAndShareARC(bytes signature, address receiver) public {
         distributeArcsBasedOnSignature(signature);
-//        transfer(receiver, 1);
         transferFrom(msg.sender, receiver, 1);
     }
 
@@ -512,7 +504,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     //******************************************************
     //(1) ENTRY POINTS
     //TODO: andrii if user wants to convert with metamask, they need to choose metamask before you call create their sig and call this function
-    //Write call free_take before calling this @Andri
     function joinAndConvert(bytes signature) public payable {
         require(msg.value >= minContributionETH);
         require(msg.value <= maxContributionETH);
@@ -530,6 +521,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     //TODO: for paying with external address, the user needs to transfer an ARC to the external address, and then we can call the public default payable
     function() external payable {
         require(msg.value >= minContributionETH);
+        require(msg.value <= maxContributionETH);
         require(balanceOf(msg.sender) > 0);
         createConversion(msg.value, msg.sender);
     }
