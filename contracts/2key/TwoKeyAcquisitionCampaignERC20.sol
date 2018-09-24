@@ -330,10 +330,10 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     /// At the beginning only contractor can call this method bcs he is the only one who has arcs
     function setPublicLinkKey(address _public_link_key) public {
         // Here we're requiring that msg.sender has arcs
-        require(balanceOf(msg.sender) > 0);
+        require(balanceOf(msg.sender) > 0,'no ARCs');
 
         // Here we're checking that msg.sender have not previously joined
-        require(publicLinkKey[msg.sender] == address(0));
+        require(publicLinkKey[msg.sender] == address(0),'public link key already defined');
         publicLinkKey[msg.sender] = _public_link_key;
     }
 
@@ -353,6 +353,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     /// @param sig is the signature generated on frontend side
     function distributeArcsBasedOnSignature(bytes sig) public {
         // move ARCs based on signature information
+
         // if version=1, with_cut is true then sig also include the cut (percentage) each influencer takes from the bounty
         // the cut is stored in influencer2cut
         uint idx = 0;
@@ -371,7 +372,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         //    }
 
         address old_address;
-        if (idx + 20 <= sig.length) {
+        if (idx+20 <= sig.length) {
             idx += 20;
             assembly
             {
@@ -380,7 +381,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         }
 
         address old_public_link_key = publicLinkKey[old_address];
-        require(old_public_link_key != address(0));
+        require(old_public_link_key != address(0),'no public link key');
 
         while (idx + 65 <= sig.length) {
             // The signature format is a compact form of:
@@ -407,11 +408,13 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
                 v := mload(add(sig, idx))
             }
 
+            // idx was increased by 65
+
             bytes32 hash;
             address new_public_key;
             address new_address;
             //      if (idx + (with_cut ? 41 : 40) < sig.length) {
-            if (idx + 41 < sig.length) {// its  a < and not a <= because we don't want this to be the final iteration for the converter
+            if (idx + 41 <= sig.length) {  // its  a < and not a <= because we dont want this to be the final iteration for the converter
                 uint8 bounty_cut;
                 //        if (with_cut)
                 {
@@ -420,8 +423,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
                     {
                         bounty_cut := mload(add(sig, idx))
                     }
-                    require(bounty_cut > 0);
-                    // 0 and 255 are used to indicate default (equal part) behaviour
+                    require(bounty_cut > 0,'bounty should be 1..101 or 255');  // 0 and 255 are used to indicate default (equal part) behaviour
                 }
 
                 idx += 20;
@@ -437,20 +439,36 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
                 }
 
                 //        if (with_cut)
-                {
-                    //          require(bounty_cut > 0);
-                    if (referrer2cut[new_address] == 0) {
-                        referrer2cut[new_address] = uint256(bounty_cut);
-                    } else {
-                        require(referrer2cut[new_address] == uint256(bounty_cut));
-                    }
-                    hash = keccak256(abi.encodePacked(bounty_cut, new_public_key, new_address));
+                //        {
+                //          require(bounty_cut > 0);
+
+                // update (only once) the cut used by each influencer
+                // we will need this in case one of the influencers will want to start his own off-chain link
+                if (referrer2cut[new_address] == 0) {
+                    referrer2cut[new_address] = uint256(bounty_cut);
+                } else {
+                    require(referrer2cut[new_address] == uint256(bounty_cut),'bounty cut can not be modified');
                 }
-                //        else {
-                //          hash = keccak256(abi.encodePacked(new_public_key, new_address));
+
+                // update (only once) the public address used by each influencer
+                // we will need this in case one of the influencers will want to start his own off-chain link
+                if (publicLinkKey[new_address] == 0) {
+                    publicLinkKey[new_address] = new_public_key;
+                } else {
+                    require(publicLinkKey[new_address] == new_public_key,'public key can not be modified');
+                }
+
+                hash = keccak256(abi.encodePacked(bounty_cut, new_public_key, new_address));
                 //        }
+
+                // check if we exactly reached the end of the signature. this can only happen if the signature
+                // was generated with free_take_join and in this case the last part of the signature must have been
+                // generated by the caller of this method
+                if (idx == sig.length) {
+                    require(new_address == msg.sender,'only the last in the link can call transferSig');
+                }
             } else {
-                require(idx == sig.length);
+                // handle short signatures generated with free_take
                 // signed message for the last step is the address of the converter
                 new_address = msg.sender;
                 hash = keccak256(abi.encodePacked(new_address));
@@ -459,17 +477,16 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
             if (received_from[new_address] == 0) {
                 transferFrom(old_address, new_address, 1);
             } else {
-                require(received_from[new_address] == old_address);
+                require(received_from[new_address] == old_address,'only tree ARCs allowed');
             }
+
             // check if we received a valid signature
             address signer = ecrecover(hash, v, r, s);
-            if (signer != old_public_link_key) {
-                revert();
-            }
+            require (signer == old_public_link_key, 'illegal signature');
             old_public_link_key = new_public_key;
             old_address = new_address;
         }
-        //    require(idx == sig.length);
+        require(idx == sig.length,'illegal message size');
     }
 
     //=====================
