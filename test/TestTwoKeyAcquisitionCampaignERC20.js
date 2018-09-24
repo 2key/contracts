@@ -24,8 +24,7 @@ contract('TwoKeyAcquisitionCampaignERC20', async (accounts) => {
 // ===============================================================================================
 // Variables we're going to use in tests, predefined
 
-    let whitelistReferrer,
-        whitelistConverter, 
+    let whitelists,
         twoKeyEventSource,
         twoKeyEconomy,
         twoKeyAcquisitionCampaignERC20,
@@ -100,15 +99,13 @@ uint _conversionQuota
             Subcontracts required for TwoKeyCampaign
          */
 
-        whitelistReferrer = await TwoKeyWhitelisted.new();
-        whitelistConverter = await TwoKeyWhitelisted.new();
+        whitelists = await TwoKeyWhitelisted.new();
 
-        twoKeyAcquisitionCampaignERC20.estimateGas()
+
         twoKeyAcquisitionCampaignERC20 = await TwoKeyAcquisitionCampaignERC20.new(
             twoKeyEventSource.address,
             twoKeyEconomy.address,
-            whitelistConverter.address,
-            whitelistReferrer.address,
+            whitelists.address,
             moderator,
             erc20.address,
             campaignStartTime,
@@ -140,8 +137,7 @@ uint _conversionQuota
         console.log("[TwoKeyUpgradebleExchange] : " + upgradeableExchange.address);
         console.log("[TwoKeyAdmin] : " + twoKeyAdmin.address);
         console.log("[TwoKeyEventSource] : " + twoKeyEventSource.address);
-        console.log("[TwoKeyWhitelistConverter] : " + whitelistConverter.address);
-        console.log("[TwoKeyWhiteListInfluencer] : " + whitelistReferrer.address);
+        console.log("[Whitelists] : " + whitelists.address);
         console.log("[TwoKeyAcquisitionCampaignERC20] : " + twoKeyAcquisitionCampaignERC20.address);
         console.log("===============================================================================================");
     });
