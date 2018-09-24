@@ -152,6 +152,10 @@ uint _conversionQuota
        assert.equal(unit_decimals, 18, "there's something wrong, unit_decimals should be 18");
     });
 
+    it("should add twoKeyAcquisitionCampaign", async() => {
+        await whitelists.addTwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20.address);
+    })
+
     // it("should add asset contract to the campaign", async() => {
     //    await twoKeyAcquisitionCampaignERC20.addAssetContractERC20(erc20.address);
     //
