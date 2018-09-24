@@ -100,7 +100,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     address assetContractERC20;
 
     // asset symbol is short name of the asset for example "2key"
-    string assetSymbol;
+
 
     // TwoKeyEconomy contract (ERC20)
     TwoKeyEconomy twoKeyEconomy;
@@ -108,7 +108,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     // Contract representing whitelisted referrers and converters
     TwoKeyWhitelisted whitelists;
 
-    IERC20 fungibleInterface;
 
     // There's single price for the unit ERC20 (Should be in WEI)
     uint256 pricePerUnitInETH;
@@ -142,9 +141,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
 
     //translates to discount - we can add this to constructor
     uint maxConverterBonusPercent;
-
-    // units being sold can be fractional (for example tokens in ERC20)
-    uint unit_decimals;
 
     // Minimal amount of ETH that can be paid by converter to create conversion
     uint minContributionETH;
@@ -234,20 +230,13 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         minContributionETH = _minContributionETH;
         maxContributionETH = _maxContributionETH;
 
-        setAssetContractAttributes();
+//        setAssetContractAttributes();
         // Emit event that TwoKeyCampaign is created
         twoKeyEventSource.created(address(this), contractor);
-        // Set unit_decimals from assetContractERC20
-        //            unit_decimals = IERC20(assetContractERC20).decimals();
-        // Set Token Symbol from assetContractERC20
-        //            assetSymbol = IERC20(assetContractERC20).symbol();
+
     }
 
-    /// @notice Function which will act as a setter and will be called once during deployment
-    function setAssetContractAttributes() private {
-        assetSymbol = IERC20(assetContractERC20).symbol();
-        unit_decimals = IERC20(assetContractERC20).decimals();
-    }
+
 
     // TODO: Udis code which sends rewards etc get it
     // TODO: Expiry of conversion event (Two-steps for conversion user puts in ether, and converter being approved by KYC)
@@ -260,6 +249,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
      * @return moderator fee
      */
     function calculateModeratorFee(uint256 _conversionAmountETH) internal view returns (uint256)  {
+        uint unit_decimals = IERC20(assetContractERC20).decimals();
         if (moderatorFeePercentage > 0) {// send the fee to moderator
             uint256 fee = _conversionAmountETH.mul(moderatorFeePercentage).div(100).div(10 ** unit_decimals);
             return fee;
@@ -554,14 +544,14 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         // TODO: contractorProceedsETH = 100ETH - 10ETH - 1ETH
         // TODO: need additional variable for current2KeyPriceInETH() (now we can use pricePerUnitInETH)
         // TODO: all fees and ref rewards distribute in 2Key
-
+        uint unit_decimals = IERC20(assetContractERC20).decimals();
         uint256 maxReferralRewardETH = conversionAmountETH.mul(maxReferralRewardPercent).div(100).div(10 ** unit_decimals);
 //        uint256 maxReferralRewardETH = totalTokensForConverter.mul(maxReferralRewardPercent).div(100).div(10 ** unit_decimals);
         //        uint256 moderatorFeeETH = calculateModeratorFee(c.contractorProceeds);
         uint256 moderatorFeeETH = calculateModeratorFee(conversionAmountETH);
 
         uint256 contractorProceeds = conversionAmountETH - maxReferralRewardETH - moderatorFeeETH;
-
+        string memory assetSymbol = IERC20(assetContractERC20).symbol();
 //        whitelists.createConversion(contractor, contractorProceeds, converterAddress, false, false, false, assetSymbol, assetContractERC20, conversionAmountETH, expiryConversion);
 
         emit ReceivedEther(converterAddress, conversionAmountETH);
@@ -570,7 +560,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
 
         // value in escrow (msg.value), total amount of tokens
         // twoKeyEventSource.escrow(address(this), msg.sender, _assetName, _assetContract, _amount, CampaignType.CPA_FUNGIBLE);
-
 
     }
 
@@ -765,8 +754,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     }
 
     /// @notice Function to return constantss
-    function getConstantInfo() public view returns (uint256, uint256, uint256, uint256) {
-        return (pricePerUnitInETH, maxReferralRewardPercent, conversionQuota, unit_decimals);
+    function getConstantInfo() public view returns (uint256, uint256, uint256) {
+        return (pricePerUnitInETH, maxReferralRewardPercent, conversionQuota);
     }
 
     /// @notice Function where we can get publicLinkKey for msg.sender [GETTER]
@@ -827,12 +816,18 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     /// @param conversionAmountETH is amount of eth in conversion
     /// @return tuple containing (base,bonus)
     function getEstimatedTokenAmount(uint conversionAmountETH) public view returns (uint, uint) {
+        uint unit_decimals = IERC20(assetContractERC20).decimals();
         uint baseTokensForConverter = conversionAmountETH.mul(10 ** unit_decimals).div(pricePerUnitInETH);
         uint bonusTokensForConverter = baseTokensForConverter.mul(maxConverterBonusPercent).div(100).div(10 ** unit_decimals);
         return (baseTokensForConverter, bonusTokensForConverter);
     }
 
-    function getContractAttributes() public view returns (string, uint) {
-        return (assetSymbol, unit_decimals);
+    function getSymbol() public view returns (string) {
+        return IERC20(assetContractERC20).symbol();
     }
+
+    function getDecimals() public view returns (uint) {
+        return IERC20(assetContractERC20).decimals();
+    }
+
 }
