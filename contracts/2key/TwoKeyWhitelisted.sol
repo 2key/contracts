@@ -3,6 +3,7 @@ pragma solidity ^0.4.24;
 
 import '../openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import "./TwoKeyTypes.sol";
+import "../interfaces/ITwoKeyAcquisitionCampaignERC20.sol";
 
 
 // adapted from: 
@@ -12,6 +13,13 @@ contract TwoKeyWhitelisted is Ownable, TwoKeyTypes {
 
     // Mapping conversion to user address
     mapping(address => Conversion) public conversions;
+
+
+    address twoKeyAcquisitionCampaignERC20;
+
+    function addTwoKeyAcquisitionCampaignERC20(address _twoKeyAcquisitionCampaignERC20) {
+        twoKeyAcquisitionCampaignERC20 = _twoKeyAcquisitionCampaignERC20;
+    }
 
     /// Structure which will represent conversion
     struct Conversion {
@@ -139,23 +147,25 @@ contract TwoKeyWhitelisted is Ownable, TwoKeyTypes {
         require(now > c.campaignEndTime);
     }
 
-
     function createConversion(
             address _contractor,
             uint256 _contractorProceeds,
             address _converterAddress,
-            bool _isFulfilled,
-            bool _isCancelledByConverter,
-            bool _isRejectedByModerator,
-            string _assetSymbol,
-            address _assetContractERC20,
+//            bool _isFulfilled,
+//            bool _isCancelledByConverter,
+//            bool _isRejectedByModerator,
+//            string _assetSymbol,
+//            address _assetContractERC20,
             uint256 _conversionAmount,
             uint256 expiryConversion) public {
 
-        Conversion memory c = Conversion(_contractor, _contractorProceeds, _converterAddress, _isFulfilled,
-            _isCancelledByConverter, _isRejectedByModerator, _assetSymbol, _assetContractERC20, _conversionAmount, CampaignType.CPA_FUNGIBLE, now, now + expiryConversion * 1 days);
+        address _assetContractERC20 = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).getAssetContractAddress();
+        string memory _assetSymbol = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).getSymbol();
+        Conversion memory c = Conversion(_contractor, _contractorProceeds, _converterAddress, false, false, false, _assetSymbol, _assetContractERC20, _conversionAmount, CampaignType.CPA_FUNGIBLE, now, now + expiryConversion * 1 days);
         conversions[_converterAddress] = c;
     }
+
+
 
 
 

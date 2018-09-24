@@ -552,7 +552,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
 
         uint256 contractorProceeds = conversionAmountETH - maxReferralRewardETH - moderatorFeeETH;
         string memory assetSymbol = IERC20(assetContractERC20).symbol();
-//        whitelists.createConversion(contractor, contractorProceeds, converterAddress, false, false, false, assetSymbol, assetContractERC20, conversionAmountETH, expiryConversion);
+
+        whitelists.createConversion(contractor, contractorProceeds, converterAddress, conversionAmountETH, expiryConversion);
 
         emit ReceivedEther(converterAddress, conversionAmountETH);
         // move funds
@@ -829,5 +830,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     function getDecimals() public view returns (uint) {
         return IERC20(assetContractERC20).decimals();
     }
+
 
 }
