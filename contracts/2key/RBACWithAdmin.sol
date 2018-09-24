@@ -20,7 +20,15 @@ contract RBACWithAdmin is RBAC {
    * A constant role name for indicating admins.
    */
   string public constant ROLE_ADMIN = "admin";
-  string public constant ROLE_CONTROLLER = "controller"; 
+  string public constant ROLE_CONTROLLER = "controller";
+
+
+    //TODO: As far as I can remember this are roles we have (??)
+  string public constant ROLE_CONTRACTOR = "contractor";
+  string public constant ROLE_MODERATOR = "moderator";
+  string public constant ROLE_REFERRER = "referrer";
+  string public constant ROLE_CONVERTER = "converter";
+
   address private adminAddress;
   /**
    * @dev modifier to scope access to admins
