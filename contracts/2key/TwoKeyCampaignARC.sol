@@ -151,7 +151,7 @@ contract TwoKeyCampaignARC is StandardToken {
 //
 //	}
 
-	function getInfluencers(address customer) internal view returns (address[]) {
+	function getInfluencers(address customer) public view returns (address[]) {
 		// build a list of all influencers from converter back to to contractor
 		// dont count the conveter and contractr themselves
 		address influencer = customer;
