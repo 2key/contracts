@@ -141,6 +141,17 @@ uint _conversionQuota
         console.log("[TwoKeyAcquisitionCampaignERC20] : " + twoKeyAcquisitionCampaignERC20.address);
         console.log("===============================================================================================");
     });
+
+    it("should get assetSymbol", async() => {
+       let symbol = await twoKeyAcquisitionCampaignERC20.getSymbol();
+       assert.equal(symbol, "TOKENMOCK", "there's something wrong");
+    });
+
+    it("should get decimals", async() => {
+       let unit_decimals = await twoKeyAcquisitionCampaignERC20.getDecimals();
+       assert.equal(unit_decimals, 18, "there's something wrong, unit_decimals should be 18");
+    });
+
     // it("should add asset contract to the campaign", async() => {
     //    await twoKeyAcquisitionCampaignERC20.addAssetContractERC20(erc20.address);
     //
