@@ -1,7 +1,6 @@
 pragma solidity ^0.4.24;
 
 import "../openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "./TwoKeyTypes.sol";
 import "./TwoKeyCampaignARC.sol";
 import "./TwoKeyEventSource.sol";
 import "./TwoKeyWhitelisted.sol";
@@ -9,10 +8,12 @@ import "./TwoKeyEconomy.sol";
 import "./TwoKeySignedContract.sol";
 import "../interfaces/IERC20.sol";
 import "./Utils.sol";
+import "./TwoKeyTypes.sol";
+
 
 /// @author Nikola Madjarevic
 /// Contract which will represent campaign for the fungible assets
-contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils {
+contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes {
 
     /// Using safemath to avoid overflows during math operations
     using SafeMath for uint256;
@@ -77,24 +78,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     // =============================TWO KEY ACQUISITION CAMPAIGN STATE VARIABLES=====================================
     // ==============================================================================================================
 
-    /// Structure which will represent conversion
-    struct Conversion {
-        address contractor; // Contractor (creator) of campaign
-        uint256 contractorProceeds; // How much contractor will receive for this conversion
-        address converter; // Converter is one who's buying tokens
-        bool isFulfilled; // Conversion finished (processed)
-        bool isCancelledByConverter; // Canceled by converter
-        bool isRejectedByModerator; // Rejected by moderator
-        string assetSymbol; // Name of ERC20 token we're selling in our campaign (we can get that from contract address)
-        address assetContractERC20; // Address of ERC20 token we're selling in our campaign
-        uint256 conversionAmount; // Amount for conversion (In ETH)
-        CampaignType campaignType; // Enumerator representing type of campaign (This one is however acquisition)
-        uint256 campaignStartTime; // When campaign actually starts
-        uint256 campaignEndTime; // When campaign actually ends
-    }
-
-    // Mapping conversion to user address
-    mapping(address => Conversion) public conversions;
 
     // Mapping representing how much are cuts in percent(0-100) for referrer address
     mapping(address => uint256) referrer2cut;
@@ -122,11 +105,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     // TwoKeyEconomy contract (ERC20)
     TwoKeyEconomy twoKeyEconomy;
 
-    // Contract representing whitelisted referrer
-    TwoKeyWhitelisted referrerWhitelist;
-
-    // Contract representing whitelisted converter
-    TwoKeyWhitelisted converterWhitelist;
+    // Contract representing whitelisted referrers and converters
+    TwoKeyWhitelisted whitelists;
 
     IERC20 fungibleInterface;
 
@@ -206,23 +186,18 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
 
     /// @notice Modifier to check is the influencer eligible for participation in campaign
     modifier isWhiteListedInfluencer() {
-        require(referrerWhitelist.isWhitelisted(msg.sender));
+        require(whitelists.isWhitelistedReferrer(msg.sender));
         _;
     }
 
     /// @notice Modifier to check is the converter eligible for participation in conversion
     modifier isWhitelistedConverter() {
-        require(converterWhitelist.isWhitelisted(msg.sender));
+        require(whitelists.isWhitelistedConverter(msg.sender));
         _;
     }
 
 
-    /// @notice Modifier to check if the Converter did the conversion
-    modifier didConverterConvert() {
-        Conversion memory c = conversions[msg.sender];
-        require(!c.isFulfilled && !c.isCancelledByConverter);
-        _;
-    }
+
 
 
 
@@ -232,22 +207,20 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     // ==============================================================================================================
 
     constructor(address _twoKeyEventSource, address _twoKeyEconomy,
-        address _converterWhitelist, address _referrerWhitelist,
+        address _whitelists,
         address _moderator, address _assetContractERC20, uint _campaignStartTime, uint _campaignEndTime,
         uint _expiryConversion, uint _moderatorFeePercentage, uint _maxReferralRewardPercent, uint _maxConverterBonusPercent,
         uint _pricePerUnitInETH, uint _minContributionETH, uint _maxContributionETH,
         uint _conversionQuota) TwoKeyCampaignARC(_twoKeyEventSource, _conversionQuota) StandardToken()
     public {
         require(_twoKeyEconomy != address(0));
-        require(_converterWhitelist != address(0));
-        require(_referrerWhitelist != address(0));
+        require(_whitelists != address(0));
         require(_assetContractERC20 != address(0));
         require(_maxReferralRewardPercent > 0);
 
         contractor = msg.sender;
         twoKeyEconomy = TwoKeyEconomy(_twoKeyEconomy);
-        referrerWhitelist = TwoKeyWhitelisted(_referrerWhitelist);
-        converterWhitelist = TwoKeyWhitelisted(_converterWhitelist);
+        whitelists = TwoKeyWhitelisted(_whitelists);
         moderator = _moderator;
         assetContractERC20 = _assetContractERC20;
         campaignStartTime = _campaignStartTime;
@@ -313,35 +286,27 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
 
 
     function cancelledEscrow(address _converter, address _assetContract, uint256 _amount) internal {
-        Conversion memory c = conversions[_converter];
-        c.isCancelledByConverter = true;
-        conversions[_converter] = c;
+        uint contractorProceeds = whitelists.supportForCanceledEscrow(_converter);
         addUnitsToInventory(_amount);
-        require(twoKeyEconomy.transfer(_converter, (c.contractorProceeds).mul(rate)));
+        require(twoKeyEconomy.transfer(_converter, contractorProceeds.mul(rate)));
     }
 
 
     function cancelAssetTwoKey(address _converter, string _assetName, address _assetContract, uint256 _amount) public returns (bool) {
-        Conversion memory c = conversions[_converter];
-        require(!c.isCancelledByConverter && !c.isFulfilled && !c.isRejectedByModerator);
+        whitelists.supportForCancelAssetTwoKey(_converter);
         cancelledEscrow(_converter, _assetContract, _amount);
         twoKeyEventSource.cancelled(address(this), _converter, _assetName, _assetContract, _amount, CampaignType.CPA_FUNGIBLE);
-
         return true;
     }
 
 
     //onlyRole(ROLE_CONTROLLER) - comment
     function expireEscrow(address _converter, address _assetContract, uint256 _amount) public returns (bool) {
-        Conversion memory c = conversions[_converter];
-        require(!c.isCancelledByConverter && !c.isFulfilled && !c.isRejectedByModerator);
-        require(now > c.campaignEndTime);
+        whitelists.supportForExpireEscrow(_converter);
         cancelledEscrow(_converter, _assetContract, _amount);
         emit Expired(address(this));
         return true;
     }
-
-
 
     /// Is there a need to put assetContract as parameter , address _assetContract also assetName
     /// Also, this function don't need to be payable, we're sending two key tokens here, not eth
@@ -597,7 +562,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
 
         uint256 contractorProceeds = conversionAmountETH - maxReferralRewardETH - moderatorFeeETH;
 
-        Conversion memory c = Conversion(contractor, contractorProceeds, converterAddress, false, false, false, assetSymbol, assetContractERC20, conversionAmountETH, CampaignType.CPA_FUNGIBLE, now, now + expiryConversion * 1 days);
+//        whitelists.createConversion(contractor, contractorProceeds, converterAddress, false, false, false, assetSymbol, assetContractERC20, conversionAmountETH, expiryConversion);
 
         emit ReceivedEther(converterAddress, conversionAmountETH);
         // move funds
@@ -605,7 +570,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
 
         // value in escrow (msg.value), total amount of tokens
         // twoKeyEventSource.escrow(address(this), msg.sender, _assetName, _assetContract, _amount, CampaignType.CPA_FUNGIBLE);
-        conversions[converterAddress] = c;
+
 
     }
 
@@ -614,7 +579,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
     //(3) CONVERSION 2nd STEP
     //actually third step after the moderator/contractor approved the converter in the white list
 
-    function executeConversion() isWhitelistedConverter didConverterConvert public {
+    function executeConversion() isWhitelistedConverter public {
+        whitelists.didConverterConvert();
         // TODO: convert ETH to 2Key for moderator and referrers
         performConversion();
         //require(transferFungibleAsset(msg.sender, _amount));
@@ -631,8 +597,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
 
         */
 
-        Conversion memory c = conversions[msg.sender];
-        conversions[msg.sender] = c;
+//        Conversion memory c = conversions[msg.sender];
+//        conversions[msg.sender] = c;
 
         address _converterAddress;
         // Example; MaxReferralReward = 10% then msg.value = 100ETH
@@ -677,7 +643,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes, Utils
         //        transferRewardsTwoKeyToken(c.from, maxReward.mul(rate));
         //        twoKeyEventSource.fulfilled(address(this), c.converter, c.tokenID, c.assetContract, c.indexOrAmount, c.campaignType);
 
-        c.isFulfilled = true;
+//        c.isFulfilled = true;
 
     }
 
