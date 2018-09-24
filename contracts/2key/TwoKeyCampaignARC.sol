@@ -78,7 +78,7 @@ contract TwoKeyCampaignARC is StandardToken {
 	   * @param _to address The address which you want to transfer to
 	   * @param _value uint256 the amount of tokens to be transferred
 	   */
-	function transferFrom(address _from, address _to, uint256 _value) private returns (bool) {
+	function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
 		require(_value == 1);
 		require(received_from[_to] == 0); // This line makes us sure we're in the tree
 		require(_from != address(0));
