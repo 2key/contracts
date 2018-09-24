@@ -849,4 +849,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     }
 
 
+    function getAddressOfWhitelisted() public view returns (address) {
+        return address(whitelists);
+    }
+
 }
