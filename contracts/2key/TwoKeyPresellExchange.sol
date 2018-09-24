@@ -7,7 +7,6 @@ import '../openzeppelin-solidity/contracts/token/ERC20/TokenVesting.sol';
 import './TwoKeyUpgradableExchange.sol';
 import './TwoKeyWhitelisted.sol';
 
-
 contract TwoKeyPresellExchange is TwoKeyUpgradableExchange {
 	// bonus precentage
 	// time locked base to some time after presell
@@ -17,9 +16,9 @@ contract TwoKeyPresellExchange is TwoKeyUpgradableExchange {
 	uint256 public openingTime;
   	uint256 public closingTime;
   	uint256 public cap;
-
+	//TODO: Do we check here if referrer or converter is whitelisted (I've set referrer)
 	modifier onlyIfWhitelisted() {
-	    whitelist.isWhitelisted(msg.sender);
+	    whitelist.isWhitelistedReferrer(msg.sender);
 	    _;
 	}
 
