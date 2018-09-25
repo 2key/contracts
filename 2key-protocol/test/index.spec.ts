@@ -326,11 +326,15 @@ describe('TwoKeyProtocol', () => {
                 syncTwoKeyNetId,
             },
         });
+        let maxReward = await twoKeyProtocol.getEstimatedMaximumReferralReward(campaignAddress, refLink);
+        console.log(`Estimated maximum referral reward: ${maxReward}%`);
         const hash = await twoKeyProtocol.joinAcquisitionCampaignAndSetPublicLinkWithCut(campaignAddress, refLink, 33);
         refLink = hash;
         console.log('3) test4 Cutted REFLINK', refLink);
         const cut = await twoKeyProtocol.getAcquisitionReferrerCut(campaignAddress);
         console.log('Referrer CUT', env.TEST4_ADDRESS, cut);
+        maxReward = await twoKeyProtocol.getEstimatedMaximumReferralReward(campaignAddress, refLink);
+        console.log(`Estimated maximum referral reward: ${maxReward}%`);
         expect(hash).to.be.a('string');
     }).timeout(300000);
 
@@ -402,6 +406,8 @@ describe('TwoKeyProtocol', () => {
                 syncTwoKeyNetId,
             },
         });
+        const refReward = await twoKeyProtocol.getEstimatedMaximumReferralReward(campaignAddress, refLink);
+        console.log(`Max estimated referral reward: ${refReward}%`);
         txHash = await twoKeyProtocol.joinAcquisitionCampaignAndShareARC(campaignAddress, refLink, env.GMAIL2_ADDRESS);
         console.log(txHash);
         const receipt = await twoKeyProtocol.getTransactionReceiptMined(txHash);

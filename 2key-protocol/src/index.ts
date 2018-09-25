@@ -66,6 +66,25 @@ function getTransactionReceiptMined(txHash: string | string[], interval: number 
     }
 };
 
+
+function calcFromCuts(cuts: number[], maxPi: number) {
+    let referrerRewardPercent: number = maxPi;
+    // we have all the cuts up to us. calculate our maximal bounty
+    for (let i = 0; i < cuts.length; i++) {
+        let cut = cuts[i];
+
+        // calculate bounty after taking the part for the i-th influencer
+        if ((0 < cut) && (cut <= 101)) {
+            cut--;
+            referrerRewardPercent *= (100. - cut) / 100.
+        } else {  // cut = 0 or 255 inidicate equal divistion down stream
+            let n = cuts.length - i + 1; // how many influencers including us will split the bounty
+            referrerRewardPercent *= (n - 1.) / n
+        }
+    }
+    return referrerRewardPercent;
+}
+
 // const contracts = require('./contracts.json');
 // const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 
@@ -160,8 +179,6 @@ export class TwoKeyProtocol {
         return this.web3.eth.getTransactionReceiptMined(txHash, interval, timeout);
     }
 
-
-
     public async ipfsAdd(data: any): Promise<string> {
         return new Promise<string>(async (resolve, reject) => {
             try {
@@ -201,18 +218,6 @@ export class TwoKeyProtocol {
             } catch (e) {
                 reject(e);
             }
-                // .then(([eth, token, total, gasPrice]) => {
-                //     resolve({
-                //         balance: {
-                //             ETH: 1,
-                //             total: 1,
-                //             '2KEY': 1,
-                //         },
-                //         local_address: 'this.address',
-                //         gasPrice: 1,
-                //     });
-                // })
-                // .catch(reject)
         });
     }
 
@@ -248,10 +253,10 @@ export class TwoKeyProtocol {
 
     public async transfer2KEYTokens(to: string, value: number | string | BigNumber, gasPrice: number = this.gasPrice): Promise<string> {
         try {
-            // const balance = await this._getEthBalance(this.address);
+            // const balance = parseFloat(this.fromWei(await this._getEthBalance(this.address)).toString());
             // const tokenBalance = await this._getTokenBalance(this.address);
             const gas = await this.getERC20TransferGas(to, value);
-            // const etherRequired = this.fromWei(gasPrice * gas, 'ether');
+            // const etherRequired = parseFloat(this.fromWei(gasPrice * gas, 'ether').toString());
             // if (tokenBalance < value || balance < etherRequired) {
             //     Promise.reject(new Error(`Not enough founds on ${this.address}, required: [ETH: ${etherRequired}, 2KEY: ${value}], balance: [ETH: ${balance}, 2KEY: ${tokenBalance}]`));
             // }
@@ -265,9 +270,9 @@ export class TwoKeyProtocol {
 
     public async transferEther(to: string, value: number | string | BigNumber, gasPrice: number = this.gasPrice): Promise<any> {
         try {
-            // const balance = await this._getEthBalance(this.address);
+            // const balance = parseFloat(this.fromWei(await this._getEthBalance(this.address)).toString());
             const gas = await this.getETHTransferGas(to, value);
-            // const totalValue = value + this.fromWei(gasPrice * gas, 'ether');
+            // const totalValue = value + parseFloat(this.fromWei(gasPrice * gas, 'ether').toString());
             // if (totalValue > balance) {
             //     Promise.reject(new Error(`Not enough founds on ${this.address} required ${value}, balance: ${balance}`));
             // }
@@ -391,10 +396,10 @@ export class TwoKeyProtocol {
     }
 
     // Get Public Link
-    public async getAcquisitionPublicLinkKey(campaign: any): Promise<string> {
+    public async getAcquisitionPublicLinkKey(campaign: any, address: string = this.address): Promise<string> {
         try {
             const campaignInstance = await this._getAcquisitionCampaignInstance(campaign);
-            const publicLink = await promisify(campaignInstance.getPublicLinkKey, []);
+            const publicLink = await promisify(campaignInstance.publicLinkKey, [address]);
             return Promise.resolve(publicLink);
 
         } catch (e) {
@@ -434,15 +439,53 @@ export class TwoKeyProtocol {
         });
     }
 
+    // TODO: AP to get current referral Reward:
+    // call campaignContracts.contractor => owner
+    // cut first address from p_message slice(0,40)
+    // compare first_address with owner if !equal call campaignContracts.getCuts => cuts
+    // do some magic with cuts https://github.com/2key/web3-alpha/blob/develop/app/javascripts/app.js#L1240
+    // result of magic will be maximum possible reward for me
+    // then i can join with percent of this reward
+
+    public getEstimatedMaximumReferralReward(campaign: any, referralLink?: string): Promise<number> {
+        return new Promise(async (resolve, reject) => {
+            try {
+                if (!referralLink) {
+                    const cut = await this.getAcquisitionReferrerCut(campaign);
+                    resolve(cut);
+                } else {
+                    const campaignInstance = await this._getAcquisitionCampaignInstance(campaign);
+                    const contractorAddress = await promisify(campaignInstance.getContractorAddress, []);
+                    const { f_address, f_secret, p_message } = this._getUrlParams(referralLink);
+                    const contractConstants = (await promisify(campaignInstance.getConstantInfo, []));
+                    const decimals = contractConstants[3].toNumber();
+                    const maxReferralRewardPercent = new BigNumber(contractConstants[1]).div(10**decimals).toNumber();
+                    if (f_address === contractorAddress) {
+                        resolve(maxReferralRewardPercent);
+                        return;
+                    }
+                    const firstAddressInChain = p_message ? `0x${p_message.substring(0, 40)}` : f_address;
+                    console.log('RefCHAIN', contractorAddress, f_address, firstAddressInChain);
+                    let cuts: number[];
+                    const firstPublicLink = await promisify(campaignInstance.publicLinkKey, [firstAddressInChain]);
+                    if (firstAddressInChain === contractorAddress) {
+                        console.log('First public Link', firstPublicLink);
+                        cuts = Sign.validate_join(firstPublicLink, f_address, f_secret, p_message);
+                    } else {
+                        cuts = (await promisify(campaignInstance.getReferrerCuts, [firstAddressInChain])).map(cut => cut.toNumber());
+                        cuts = cuts.concat(Sign.validate_join(firstPublicLink, f_address, f_secret, p_message));
+                    }
+                    console.log('CUTS', cuts);
+                    const estimatedMaxReferrerRewardPercent = calcFromCuts(cuts, maxReferralRewardPercent);
+                    resolve(estimatedMaxReferrerRewardPercent);
+                }
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
     // Join Offchain
     public joinAcquisitionCampaign(campaign: any, cut: number, referralLink?: string, gasPrice: number = this.gasPrice): Promise<string> {
-        // TODO: AP to get current referral Reward:
-        // call campaignContracts.contractor => owner
-        // cut first address from p_message slice(0,40)
-        // compare first_address with owner if !equal call campaignContracts.getCuts => cuts
-        // do some magic with cuts https://github.com/2key/web3-alpha/blob/develop/app/javascripts/app.js#L1240
-        // result of magic will be maximum possible reward for me
-        // then i can join with percent of this reward
         const {public_address, private_key} = generatePublicMeta();
         return new Promise(async (resolve, reject) => {
             try {
@@ -508,6 +551,10 @@ export class TwoKeyProtocol {
                 }
                 const campaignInstance = await this._getAcquisitionCampaignInstance(campaignAddress);
                 const arcBalance = parseFloat((await promisify(campaignInstance.balanceOf, [this.address])).toString());
+                const prevChain = await promisify(campaignInstance.received_from, [recipient]);
+                if (parseInt(prevChain, 16)) {
+                    reject(new Error('User already in chain'));
+                }
 
                 if (!arcBalance) {
                     const {public_address} = generatePublicMeta();
@@ -541,7 +588,7 @@ export class TwoKeyProtocol {
             const campaignInstance = await this._getAcquisitionCampaignInstance(campaign);
 
             const prevChain = await promisify(campaignInstance.received_from, [this.address]);
-            console.log('Previous referrer', prevChain);
+            // console.log('Previous referrer', prevChain, parseInt(prevChain, 16));
             //
             // const balance = parseFloat((await promisify(campaignInstance.balanceOf, [this.address])).toString());
             if (!parseInt(prevChain, 16)) {
@@ -555,7 +602,7 @@ export class TwoKeyProtocol {
                 await this.getTransactionReceiptMined(txHash);
                 resolve(txHash);
             } else {
-                console.log('Previous referrer', prevChain);
+                console.log('Previous referrer', prevChain, value);
                 const gas = await promisify(campaignInstance.convert.estimateGas, [{ from: this.address, value }]);
                 console.log('Gas required for convert', gas);
                 await this._checkBalanceBeforeTransaction(gas, gasPrice);

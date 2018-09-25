@@ -124,7 +124,8 @@ function free_join_take(my_address: string, public_address: string, f_address: s
     return `0x${m}`;
 }
 
-function validate_join(firtsPublicKey: string, f_address: string, f_secret: string, pMessage: string): string[] {
+function validate_join(firtsPublicKey: string, f_address: string, f_secret: string, pMessage: string): number[] {
+  console.log('Validate join', firtsPublicKey, f_address, f_secret, pMessage);
   let first_public_key: any = firtsPublicKey;
   let p_message = pMessage;
   const bounty_cuts = [];
@@ -175,11 +176,9 @@ function validate_join(firtsPublicKey: string, f_address: string, f_secret: stri
     let s: any = p_message.slice(0, 32 * 2);
     s = Buffer.from(s, 'hex');
     p_message = p_message.slice(32 * 2);
-    // let v = p_message.slice(0, 1 * 2);
+    let v: any = p_message.slice(0, 1 * 2);
 
-    // TODO: Ask @Udi about this line
-    // @ts-ignore: custom toString() implementation
-    const [v] = Buffer.from(p_message.slice(0, 1 * 2), 'hex')[0];
+    v = Buffer.from(p_message.slice(0, 1 * 2), 'hex')[0];
     assert.ok(v === 27 || v === 28, 'unknown sig.v');
     p_message = p_message.slice(1 * 2);
 
