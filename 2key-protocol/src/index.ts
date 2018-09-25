@@ -75,7 +75,8 @@ function calcFromCuts(cuts: number[], maxPi: number) {
 
         // calculate bounty after taking the part for the i-th influencer
         if ((0 < cut) && (cut <= 101)) {
-            cut--;
+            // TODO: Andrii check this method
+            // cut--;
             referrerRewardPercent *= (100. - cut) / 100.
         } else {  // cut = 0 or 255 inidicate equal divistion down stream
             let n = cuts.length - i + 1; // how many influencers including us will split the bounty
