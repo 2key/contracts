@@ -314,7 +314,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
 
     function joinAndShareARC(bytes signature, address receiver) public {
         distributeArcsBasedOnSignature(signature);
-        transferFrom(msg.sender, receiver, 1);
+//        transferFrom(msg.sender, receiver, 1);
+        transfer(receiver, 1);
     }
 
     /// At the beginning only contractor can call this method bcs he is the only one who has arcs

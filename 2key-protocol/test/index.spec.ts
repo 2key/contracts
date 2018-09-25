@@ -156,12 +156,12 @@ describe('TwoKeyProtocol', () => {
         // .to.be.equal(twoKeyProtocol.getGasPrice());
     }).timeout(30000);
 
-    // it('should save balance to ipfs', () => {
-    //     return twoKeyProtocol.ipfsAdd(aydnepBalance).then((hash) => {
-    //         console.log('IPFS hash', hash);
-    //         expect(hash).to.be.a('string');
-    //     });
-    // });
+    it('should save balance to ipfs', () => {
+        return twoKeyProtocol.ipfsAdd(aydnepBalance).then((hash) => {
+            console.log('IPFS hash', hash);
+            expect(hash).to.be.a('string');
+        });
+    });
 
     const rnd = Math.floor(Math.random() * 8);
     console.log('Random', rnd);

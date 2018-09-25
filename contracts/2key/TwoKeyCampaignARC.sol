@@ -72,6 +72,12 @@ contract TwoKeyCampaignARC is StandardToken {
 		return true;
 	}
 
+	// TODO: Nikola: allow this method only for contractor (allow to contractor | moderator) to add|remove arcs from any users
+	// function removeArcsFromUser(address user) {}
+
+	// TODO: Nikola: implement addArcsToUser allowed only for a contractor
+	// function addArcsToUser(address user) {}
+	
 	/**
 	   * @dev Transfer tokens from one address to another
 	   * @param _from address The address which you want to send tokens from

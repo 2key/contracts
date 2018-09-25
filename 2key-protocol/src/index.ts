@@ -76,7 +76,7 @@ function calcFromCuts(cuts: number[], maxPi: number) {
         // calculate bounty after taking the part for the i-th influencer
         if ((0 < cut) && (cut <= 101)) {
             // TODO: Andrii check this method
-            // cut--;
+            cut--;
             referrerRewardPercent *= (100. - cut) / 100.
         } else {  // cut = 0 or 255 inidicate equal divistion down stream
             let n = cuts.length - i + 1; // how many influencers including us will split the bounty
@@ -494,12 +494,12 @@ export class TwoKeyProtocol {
                 if (referralLink) {
                     const {f_address, f_secret, p_message} = this._getUrlParams(referralLink);
                     console.log('New link for', this.address, f_address, f_secret, p_message);
-                    new_message = Sign.free_join(this.address, public_address, f_address, f_secret, p_message, cut);
+                    new_message = Sign.free_join(this.address, public_address, f_address, f_secret, p_message, cut + 1);
                 } else {
                     await this.setAcquisitionPublicLinkKey(campaign, `0x${public_address}`, gasPrice);
                 }
                 const raw = `f_address=${this.address}&f_secret=${private_key}&p_message=${new_message || ''}`;
-                const ipfsConnected = await this._checkIPFS();
+                // const ipfsConnected = await this._checkIPFS();
                 resolve(raw);
                 // resolve('hash');
             } catch (err) {
@@ -522,7 +522,7 @@ export class TwoKeyProtocol {
 
                 if (!arcBalance) {
                     console.log('No Arcs', arcBalance, 'Call Free Join Take');
-                    const signature = Sign.free_join_take(this.address, public_address, f_address, f_secret, p_message, cut);
+                    const signature = Sign.free_join_take(this.address, public_address, f_address, f_secret, p_message, cut + 1);
                     const gas = await promisify(campaignInstance.distributeArcsBasedOnSignature.estimateGas, [signature, { from: this.address }]);
                     console.log('Gas required for setPubLinkWithCut', gas);
                     await this._checkBalanceBeforeTransaction(gas, gasPrice);
