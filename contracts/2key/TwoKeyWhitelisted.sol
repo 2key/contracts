@@ -9,19 +9,33 @@ import "../interfaces/ITwoKeyAcquisitionCampaignERC20.sol";
 // adapted from: 
 // https://openzeppelin.org/api/docs/crowdsale_validation_WhitelistedCrowdsale.html
 
+//TODO: replace Ownable with RBAC
 contract TwoKeyWhitelisted is Ownable, TwoKeyTypes {
-
-    // Mapping conversion to user address
-    mapping(address => Conversion) public conversions;
-
-
+    //TODO: Add getter for conversions with modifier only
+    //TODO: add separated lists of approved, pending, rejected, cancelled
+    //TODO: See if possible to jsonify conversion into string
+    /*
+      TODO: Add approve function functions to move conversions from
+                pending -> rejected
+                pending -> approved
+                pending -> canceled
+                pending -> expired (?)
+                rejected -> approved
+                This functions (ending approved) can then call the executeConversion in the contract
+    */
+    // Mapping conversion to converter address
+    mapping(address => Conversion[]) public conversions;
+    // converter --> string (json) of static fields which doesn't change
+    // string (json) of static fields which doesn't change --> object containing all the fields
     address twoKeyAcquisitionCampaignERC20;
 
-    function addTwoKeyAcquisitionCampaignERC20(address _twoKeyAcquisitionCampaignERC20) {
+    function setTwoKeyAcquisitionCampaignERC20(address _twoKeyAcquisitionCampaignERC20) public {
+        require(twoKeyAcquisitionCampaignERC20 == address(0));
         twoKeyAcquisitionCampaignERC20 = _twoKeyAcquisitionCampaignERC20;
+        // get asset name, address, price, etc all we need
     }
-
     /// Structure which will represent conversion
+    /// TODO: add to conversion object : internalId(uint) (comes from frontend) (can be set after)
     struct Conversion {
         address contractor; // Contractor (creator) of campaign
         uint256 contractorProceeds; // How much contractor will receive for this conversion
@@ -33,11 +47,12 @@ contract TwoKeyWhitelisted is Ownable, TwoKeyTypes {
         address assetContractERC20; // Address of ERC20 token we're selling in our campaign
         uint256 conversionAmount; // Amount for conversion (In ETH)
         CampaignType campaignType; // Enumerator representing type of campaign (This one is however acquisition)
-        uint256 campaignStartTime; // When campaign actually starts
-        uint256 campaignEndTime; // When campaign actually ends
+        uint256 conversionCreatedAt; // When conversion is created
+        uint256 conversionExpiresAt; // When conversion expires
     }
 
     modifier onlyTwoKeyAcquisitionCampaign() {
+        require(msg.sender == twoKeyAcquisitionCampaignERC20);
         _;
     }
 
@@ -128,7 +143,7 @@ contract TwoKeyWhitelisted is Ownable, TwoKeyTypes {
     */
 
     // TODO: Here we'll add modifier so all this methods can be called only by twoKeyAcquisitionCampaign
-    function supportForCanceledEscrow(address _converter) public returns (uint256){
+    function supportForCanceledEscrow(address _converter) public onlyTwoKeyAcquisitionCampaign returns (uint256){
         Conversion memory c = conversions[_converter];
         c.isCancelledByConverter = true;
         conversions[_converter] = c;
@@ -136,18 +151,18 @@ contract TwoKeyWhitelisted is Ownable, TwoKeyTypes {
         return (c.contractorProceeds);
     }
 
-    function supportForCancelAssetTwoKey(address _converter) public view{
+    function supportForCancelAssetTwoKey(address _converter) public onlyTwoKeyAcquisitionCampaign view{
         Conversion memory c = conversions[_converter];
         require(!c.isCancelledByConverter && !c.isFulfilled && !c.isRejectedByModerator);
     }
 
-    function supportForExpireEscrow(address _converter) public view {
+    function supportForExpireEscrow(address _converter) public onlyTwoKeyAcquisitionCampaign view {
         Conversion memory c = conversions[_converter];
         require(!c.isCancelledByConverter && !c.isFulfilled && !c.isRejectedByModerator);
         require(now > c.campaignEndTime);
     }
 
-    function createConversion(
+    function supportForCreateConversion(
             address _contractor,
             uint256 _contractorProceeds,
             address _converterAddress,
@@ -157,13 +172,14 @@ contract TwoKeyWhitelisted is Ownable, TwoKeyTypes {
 //            string _assetSymbol,
 //            address _assetContractERC20,
             uint256 _conversionAmount,
-            uint256 expiryConversion) public {
-
+            uint256 expiryConversion) public onlyTwoKeyAcquisitionCampaign {
+        // these are going to be global variables
         address _assetContractERC20 = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).getAssetContractAddress();
         string memory _assetSymbol = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).getSymbol();
-        Conversion memory c = Conversion(_contractor, _contractorProceeds, _converterAddress, false, false, false, _assetSymbol, _assetContractERC20, _conversionAmount, CampaignType.CPA_FUNGIBLE, now, now + expiryConversion * 1 days);
+        Conversion memory c = Conversion(_contractor, _contractorProceeds, _converterAddress, false, false, false, _assetSymbol, _assetContractERC20, _conversionAmount, CampaignType.CPA_FUNGIBLE, now, now + expiryConversion * (1 hours));
         conversions[_converterAddress] = c;
     }
+
 
 
 
