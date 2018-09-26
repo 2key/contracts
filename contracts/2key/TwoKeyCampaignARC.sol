@@ -90,11 +90,27 @@ contract TwoKeyCampaignARC is StandardToken {
 		emit Transfer(_from, _to, _value);
 		return true;
 	}
+	/// @notice Function where contractor or moderator can take arcs from user (remove)
+	/// @dev only contractor or moderator can call this function, otherwise it will revert
+	/// @param _user is the address of user we're taking arcs from
+	/// @param _arcsAmount is the amount of arcs we're taking from the user
+	function removeArcsFromUser(address _user, uint _arcsAmount) public onlyContractorOrModerator {
+		require(_user != address(0));
+		require(_arcsAmount > 0);
+		if(balances[_user] < _arcsAmount) {
+			balances[_user] = 0;
+		} else {
+			balances[_user].sub(_arcsAmount);
+		}
+		//Get back this arcs to contractor or otherwise remove from totalSupply
+		balances[contractor].add(_arcsAmount);
+	}
 
-	// TODO: Nikola: allow this method only for contractor (allow to contractor | moderator) to add|remove arcs from any users
-	// function removeArcsFromUser(address user, uint arcsNumber) {}
-
-    function addArcsToUser(address _user, uint _arcsAmount) public onlyContractor {
+	/// @notice Function where contractor or moderator can give arcs to user
+	/// @dev only contractor or moderator can call this function, otherwise it will revert
+	/// @param _user is the address of the user who are we willing to give arcs
+	/// @param _arcsAmount is the value how many arcs we're giving him
+    function addArcsToUser(address _user, uint _arcsAmount) public onlyContractorOrModerator {
        require(_user != address(0));
        require(_arcsAmount > 0);
        balances[_user].add(_arcsAmount);
