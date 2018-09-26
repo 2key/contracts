@@ -23,16 +23,11 @@ module.exports = function deploy(deployer) {
     if (deployer.network.startsWith('dev') || deployer.network === 'rinkeby-infura') {
         deployer.deploy(TwoKeyWhitelists)
             .then(() => TwoKeyWhitelists.deployed())
-            .then(function(instance) {
-                whitelistsInstance = instance;
-            })
-            // .then(() => deployer.deploy(TwoKeyWhitelistedConverter))
             .then(() => deployer.deploy(ERC20TokenMock))
             .then(() => deployer.deploy(TwoKeyAcquisitionCampaignERC20, EventSource.address, TwoKeyEconomy.address, TwoKeyWhitelists.address,
                 '0xb3fa520368f2df7bed4df5185101f303f6c7decc', ERC20TokenMock.address,
                 12345,15345,12345,5,5,5,5,12,15,1))
             .then(() => TwoKeyAcquisitionCampaignERC20.deployed())
-            .then(() => whitelistsInstance.addTwoKeyAcquisitionCampaignERC20(TwoKeyAcquisitionCampaignERC20.address))
             .then(() => true);
     }
 };
