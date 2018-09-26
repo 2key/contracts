@@ -121,9 +121,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     // Time when campaign ends
     uint256 campaignEndTime;
 
-    // Address of moderator
-    address moderator;
-
     // How long convertor can be pending before it will be automatically rejected and funds will be returned to convertor (hours)
     uint256 expiryConversionInHours;
 
@@ -191,11 +188,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         require(whitelists.isWhitelistedConverter(msg.sender));
         _;
     }
-
-
-
-
-
 
 
     // ==============================================================================================================

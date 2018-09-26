@@ -8,13 +8,17 @@ import './TwoKeyEventSource.sol';
 contract TwoKeyCampaignARC is StandardToken {
 
 	using SafeMath for uint256;
+
+
 	address public contractor;
+    address moderator;
+
+
 	uint256 totalSupply_ = 1000000;
 
 	// balance of TwoKeyToken for each influencer that they can withdraw
 	mapping(address => uint256) internal referrerBalances2KEY;
 	mapping(address => uint256) internal referrerBalancesETH;
-
 
 
 	TwoKeyEventSource twoKeyEventSource;
@@ -25,8 +29,26 @@ contract TwoKeyCampaignARC is StandardToken {
 	mapping(address => address) public received_from;
 
 
+    // ==================================================================================================================================
+    // @notice Modifier which allows only contractor to call methods
+    modifier onlyContractor() {
+        require(msg.sender == contractor);
+        _;
+    }
+    // @notice Modifier which allows only moderator to call methods
+    modifier onlyModerator() {
+        require(msg.sender == moderator);
+        _;
+    }
+    // @notice Modifier which allows only contractor or moderator to call methods
+    modifier onlyContractorOrModerator() {
+        require(msg.sender == contractor || msg.sender == moderator);
+        _;
+    }
+    // ==================================================================================================================================
 
-	constructor(address _twoKeyEventSource, uint256 _conversionQuota) StandardToken() public {
+
+    constructor(address _twoKeyEventSource, uint256 _conversionQuota) StandardToken() public {
 		require(_twoKeyEventSource != address(0));
 		twoKeyEventSource = TwoKeyEventSource(_twoKeyEventSource);
 		conversionQuota = _conversionQuota;
@@ -73,7 +95,12 @@ contract TwoKeyCampaignARC is StandardToken {
 	// function removeArcsFromUser(address user, uint arcsNumber) {}
 
 	// TODO: Nikola: implement addArcsToUser allowed only for a contractor
-	// function addArcsToUser(address user, uint arcsNumber) {}
+	 function addArcsToUser(address _user, uint _arcsAmount) public onlyContractor {
+        require(_user != address(0));
+        require(_arcsAmount > 0);
+        balances[_user].add(_arcsAmount);
+        totalSupply_.add(_arcsAmount);
+     }
 	
 	/**
 	   * @dev Transfer tokens from one address to another
