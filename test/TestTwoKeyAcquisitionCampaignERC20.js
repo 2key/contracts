@@ -1,4 +1,4 @@
-const { increaseTime, latestTime, duration, free_take, free_join, privateToPublic, validate_join, generatePrivateKey } = require("./utils");
+const { increaseTime, latestTime, duration, free_join, free_join_take, privateToPublic, validate_join, generatePrivateKey } = require("./utils");
 require('truffle-test-utils').init();
 const _ = require('lodash');
 const BigNumber = web3.BigNumber;
@@ -142,6 +142,10 @@ uint _conversionQuota
         console.log("===============================================================================================");
     });
 
+    it("should add twoKeyAcquisitionCampaign", async() => {
+        await whitelists.addTwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20.address);
+    });
+
     it("should get assetSymbol", async() => {
        let symbol = await twoKeyAcquisitionCampaignERC20.getSymbol();
        assert.equal(symbol, "TOKENMOCK", "there's something wrong");
@@ -152,9 +156,57 @@ uint _conversionQuota
        assert.equal(unit_decimals, 18, "there's something wrong, unit_decimals should be 18");
     });
 
-    it("should add twoKeyAcquisitionCampaign", async() => {
-        await whitelists.addTwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20.address);
+
+    it("should not fail", async() => {
+        let conv = await whitelists.conversions(coinbase);
+        console.log(conv);
+
     });
+
+    // //TODO: EITAN & ANDRI GO through exact flow for this
+    // it("should join off chain", async() => {
+    //     let pk = generatePrivateKey();
+    //     let public_address = privateToPublic(pk);
+    //     const private_key = pk.toString('hex');
+    //
+    //     console.log("Private key = " + private_key);
+    //     let link = free_join(campaignReferrer, public_address, campaignCreator, private_key, "", 3);
+    //     console.log("Link generated: " + link);
+    //
+    //     let msg = free_join_take(campaignConverter, public_address, private_key, link);
+    //
+    //     console.log("Msg generated: " + msg);
+    //
+    //     let balConv = await twoKeyAcquisitionCampaignERC20.balanceOf(campaignConverter);
+    //     let balRef = await twoKeyAcquisitionCampaignERC20.balanceOf(campaignReferrer);
+    //     let balCreator = await twoKeyAcquisitionCampaignERC20.balanceOf(campaignCreator);
+    //
+    //     console.log("Balance of creator before: " + balCreator);
+    //     console.log("Balance of converter before: " + balConv);
+    //     console.log("Balance of referrer before: " + balRef);
+    //     let balance = await twoKeyAcquisitionCampaignERC20.balanceOf(campaignConverter);
+    //     console.log("Balance of converter : " + balance);
+    //     let trnx = await twoKeyAcquisitionCampaignERC20.joinAndConvert(msg, {from: campaignConverter, value: 10});
+    //     // console.log(trnx.logs);
+    //
+    //     let balConvAfter = await twoKeyAcquisitionCampaignERC20.balanceOf(campaignConverter);
+    //     let balRefAfter = await twoKeyAcquisitionCampaignERC20.balanceOf(campaignReferrer);
+    //     let balCreatorAfter = await twoKeyAcquisitionCampaignERC20.balanceOf(campaignCreator);
+    //
+    //     console.log("Balance of creator after: " + balCreatorAfter);
+    //     console.log("Balance of converter after: " +balConvAfter);
+    //     console.log("Balance of ref after: " + balRefAfter);
+    //
+    //     console.log("CAMPAIGN CREATOR: "  + campaignCreator);
+    //     console.log("CAMPAIGN REFERRER: " + campaignReferrer);
+    //     console.log("CAMPAIGN CONVERTER : " + campaignConverter);
+    //
+    //
+    // });
+    //
+    //
+    //
+
 
     // it("should add asset contract to the campaign", async() => {
     //    await twoKeyAcquisitionCampaignERC20.addAssetContractERC20(erc20.address);
