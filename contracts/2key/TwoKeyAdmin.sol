@@ -14,6 +14,9 @@ import "./TwoKeyReg.sol";
 
 contract TwoKeyAdmin is  Ownable, Destructible, AdminContract {
 
+
+	// TODO: Add permission modifiers to all functions @Amit
+
 	TwoKeyEconomy private twoKeyEconomy;
 	TwoKeyUpgradableExchange private twokeyUpgradableExchange;
 	TwoKeyEventSource private twoKeyEventSource;
