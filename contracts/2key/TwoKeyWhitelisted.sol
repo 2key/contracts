@@ -24,7 +24,7 @@ contract TwoKeyWhitelisted is Ownable, TwoKeyTypes {
                 This functions (ending approved) can then call the executeConversion in the contract
     */
     // Mapping conversion to converter address
-    mapping(address => Conversion[]) public conversions;
+    mapping(address => Conversion) public conversions;
     // converter --> string (json) of static fields which doesn't change
     // string (json) of static fields which doesn't change --> object containing all the fields
     address twoKeyAcquisitionCampaignERC20;
@@ -159,7 +159,7 @@ contract TwoKeyWhitelisted is Ownable, TwoKeyTypes {
     function supportForExpireEscrow(address _converter) public onlyTwoKeyAcquisitionCampaign view {
         Conversion memory c = conversions[_converter];
         require(!c.isCancelledByConverter && !c.isFulfilled && !c.isRejectedByModerator);
-        require(now > c.campaignEndTime);
+        require(now > c.conversionExpiresAt);
     }
 
     function supportForCreateConversion(
