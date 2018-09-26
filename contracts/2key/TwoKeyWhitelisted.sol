@@ -142,7 +142,6 @@ contract TwoKeyWhitelisted is Ownable, TwoKeyTypes {
     ====================================================================================================================
     */
 
-    // TODO: Here we'll add modifier so all this methods can be called only by twoKeyAcquisitionCampaign
     function supportForCanceledEscrow(address _converter) public onlyTwoKeyAcquisitionCampaign returns (uint256){
         Conversion memory c = conversions[_converter];
         c.isCancelledByConverter = true;
