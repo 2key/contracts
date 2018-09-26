@@ -11,13 +11,10 @@ contract TwoKeyCampaignARC is StandardToken {
 	address public contractor;
 	uint256 totalSupply_ = 1000000;
 
-	/// TODO: I can make this tokens to be owned by the deployer - contractor (arcs)
 	// balance of TwoKeyToken for each influencer that they can withdraw
 	mapping(address => uint256) internal referrerBalances2KEY;
 	mapping(address => uint256) internal referrerBalancesETH;
 
-
-//	mapping(address => uint256) internal xbalancesTwoKey;
 
 
 	TwoKeyEventSource twoKeyEventSource;
