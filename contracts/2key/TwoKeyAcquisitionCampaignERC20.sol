@@ -124,8 +124,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     // Address of moderator
     address moderator;
 
-    // How long convertor can be pending before it will be automatically rejected and funds will be returned to convertor
-    uint256 expiryConversion;
+    // How long convertor can be pending before it will be automatically rejected and funds will be returned to convertor (hours)
+    uint256 expiryConversionInHours;
 
     // How long will hold asset in escrow
     uint256 moderatorFeePercentage;
@@ -217,11 +217,12 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         contractor = msg.sender;
         twoKeyEconomy = TwoKeyEconomy(_twoKeyEconomy);
         whitelists = TwoKeyWhitelisted(_whitelists);
+        whitelists.setTwoKeyAcquisitionCampaignERC20(address(this));
         moderator = _moderator;
         assetContractERC20 = _assetContractERC20;
         campaignStartTime = _campaignStartTime;
         campaignEndTime = _campaignEndTime;
-        expiryConversion = _expiryConversion;
+        expiryConversionInHours = _expiryConversion;
         moderatorFeePercentage = _moderatorFeePercentage;
         maxReferralRewardPercent = _maxReferralRewardPercent;
         maxConverterBonusPercent = _maxConverterBonusPercent;
@@ -314,8 +315,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
 
     function joinAndShareARC(bytes signature, address receiver) public {
         distributeArcsBasedOnSignature(signature);
-//        transferFrom(msg.sender, receiver, 1);
-        transfer(receiver, 1);
+        transferFrom(msg.sender, receiver, 1);
     }
 
     /// At the beginning only contractor can call this method bcs he is the only one who has arcs
@@ -559,9 +559,9 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         uint256 moderatorFeeETH = calculateModeratorFee(conversionAmountETH);
 
         uint256 contractorProceeds = conversionAmountETH - maxReferralRewardETH - moderatorFeeETH;
-        string memory assetSymbol = IERC20(assetContractERC20).symbol();
+//        string memory assetSymbol = IERC20(assetContractERC20).symbol();
 
-        whitelists.createConversion(contractor, contractorProceeds, converterAddress, conversionAmountETH, expiryConversion);
+        whitelists.supportForCreateConversion(contractor, contractorProceeds, converterAddress, conversionAmountETH, expiryConversionInHours);
 
         emit ReceivedEther(converterAddress, conversionAmountETH);
         // move funds
@@ -796,7 +796,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         return referrer2cut[msg.sender] - 1;
     }
 
-
     /// @notice Function to check balance of the ERC20 inventory (view - no gas needed to call this function)
     /// @dev we're using Utils contract and fetching the balance of this contract address
     /// @return balance value as uint
@@ -813,7 +812,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         return balance;
     }
 
-
     /// @notice Function which will calculate the base amount, bonus amount
     /// @param conversionAmountETH is amount of eth in conversion
     /// @return tuple containing (base,bonus)
@@ -824,11 +822,9 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         return (baseTokensForConverter, bonusTokensForConverter);
     }
 
-    // TODO: Nikola add description for method and specify where it used
     function getSymbol() public view returns (string) {
         return IERC20(assetContractERC20).symbol();
     }
-
 
     function getAddressOfWhitelisted() public view returns (address) {
         return address(whitelists);
@@ -837,4 +833,21 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     function getContractorAddress() public view returns (address) {
         return contractor;
     }
+
+    //onlyContractor
+    function setPublicMetaHash(string _publicMetaHash) public {
+        require(msg.sender == contractor);
+        publicMetaHash = _publicMetaHash;
+    }
+    //onlyContractor
+    function setPrivateMetaHash(string _privateMetaHash) public {
+        require(msg.sender == contractor);
+        privateMetaHash = _privateMetaHash;
+    }
+
+    function getPrivateMetaHash() public view returns (string) {
+        require(msg.sender == contractor);
+        return privateMetaHash;
+    }
+
 }
