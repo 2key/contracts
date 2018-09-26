@@ -21,8 +21,6 @@ contract RBACWithAdmin is RBAC {
    */
   string public constant ROLE_ADMIN = "admin";
 
-    // TODO: Finish this include this 4 roles delete controller @nikola
-    //TODO: As far as I can remember this are roles we have (??)
   string public constant ROLE_CONTRACTOR = "contractor";
   string public constant ROLE_MODERATOR = "moderator";
   string public constant ROLE_REFERRER = "referrer";
