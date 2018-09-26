@@ -94,7 +94,6 @@ contract TwoKeyCampaignARC is StandardToken {
 	// TODO: Nikola: allow this method only for contractor (allow to contractor | moderator) to add|remove arcs from any users
 	// function removeArcsFromUser(address user, uint arcsNumber) {}
 
-	// TODO: Nikola: implement addArcsToUser allowed only for a contractor
 	 function addArcsToUser(address _user, uint _arcsAmount) public onlyContractor {
         require(_user != address(0));
         require(_arcsAmount > 0);
