@@ -209,7 +209,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         contractor = msg.sender;
         twoKeyEconomy = TwoKeyEconomy(_twoKeyEconomy);
         whitelists = TwoKeyWhitelisted(_whitelists);
-        whitelists.setTwoKeyAcquisitionCampaignERC20(address(this));
+        whitelists.setTwoKeyAcquisitionCampaignERC20(address(this), _moderator, contractor);
         moderator = _moderator;
         assetContractERC20 = _assetContractERC20;
         campaignStartTime = _campaignStartTime;
@@ -223,7 +223,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         minContributionETH = _minContributionETH;
         maxContributionETH = _maxContributionETH;
 
-//        setAssetContractAttributes();
         // Emit event that TwoKeyCampaign is created
         twoKeyEventSource.created(address(this), contractor);
 
@@ -268,7 +267,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     }
 
 
-    function cancelledEscrow(address _converter, address _assetContract, uint256 _amount) internal {
+    function cancelledEscrow(address _converter, uint256 _amount) internal {
         uint contractorProceeds = whitelists.supportForCanceledEscrow(_converter);
         addUnitsToInventory(_amount);
         require(twoKeyEconomy.transfer(_converter, contractorProceeds.mul(rate)));
@@ -525,13 +524,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     /// @param converterAddress is actually the msg.sender (Address of one who's executing conversion)
     /// isOngoing
     function createConversion(uint conversionAmountETH, address converterAddress) private {
-        /*
-        (2) We get the ETH amount -DONE
-        (3) we compute tokens = base + bonus tokens - DONE
-        (2) We create conversion object - DONe
-        (2) we can't do anything until converter is whitelisted
-        */
-
         uint baseTokensForConverter;
         uint bonusTokensForConverter;
 
@@ -539,24 +531,16 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
 
         uint totalTokensForConverter = baseTokensForConverter + bonusTokensForConverter;
 
-        // TODO: converter 100ETH, maxRefRewPercent = 10%, ModeratorFee = 1%, =>
-        // TODO: maxRefRewETH = 10ETH, moderatorFeeETH = 1ETH
-        // TODO: contractorProceedsETH = 100ETH - 10ETH - 1ETH
-        // TODO: need additional variable for current2KeyPriceInETH() (now we can use pricePerUnitInETH)
-        // TODO: all fees and ref rewards distribute in 2Key
         uint unit_decimals = IERC20(assetContractERC20).decimals();
         uint256 maxReferralRewardETH = conversionAmountETH.mul(maxReferralRewardPercent).div(100).div(10 ** unit_decimals);
-//        uint256 maxReferralRewardETH = totalTokensForConverter.mul(maxReferralRewardPercent).div(100).div(10 ** unit_decimals);
-        //        uint256 moderatorFeeETH = calculateModeratorFee(c.contractorProceeds);
         uint256 moderatorFeeETH = calculateModeratorFee(conversionAmountETH);
 
         uint256 contractorProceeds = conversionAmountETH - maxReferralRewardETH - moderatorFeeETH;
-//        string memory assetSymbol = IERC20(assetContractERC20).symbol();
 
         whitelists.supportForCreateConversion(contractor, contractorProceeds, converterAddress, conversionAmountETH, expiryConversionInHours);
 
         emit ReceivedEther(converterAddress, conversionAmountETH);
-        // move funds
+
         // campaignInventoryUnitsBalance = campaignInventoryUnitsBalance - totalTokensForConverter;
 
         // value in escrow (msg.value), total amount of tokens

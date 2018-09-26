@@ -4,13 +4,15 @@ pragma solidity ^0.4.24;
 import '../openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import "./TwoKeyTypes.sol";
 import "../interfaces/ITwoKeyAcquisitionCampaignERC20.sol";
+import "./RBACWithAdmin.sol";
+import "./TwoKeyConversionStates.sol";
 
 
 // adapted from: 
 // https://openzeppelin.org/api/docs/crowdsale_validation_WhitelistedCrowdsale.html
 
 //TODO: replace Ownable with RBAC
-contract TwoKeyWhitelisted is Ownable, TwoKeyTypes {
+contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
     //TODO: Add getter for conversions with modifier only
     //TODO: add separated lists of approved, pending, rejected, cancelled
     //TODO: See if possible to jsonify conversion into string
@@ -24,14 +26,32 @@ contract TwoKeyWhitelisted is Ownable, TwoKeyTypes {
                 This functions (ending approved) can then call the executeConversion in the contract
     */
     // Mapping conversion to converter address
-    mapping(address => Conversion) public conversions;
+    mapping(address => Conversion[]) public conversions;
     // converter --> string (json) of static fields which doesn't change
     // string (json) of static fields which doesn't change --> object containing all the fields
-    address twoKeyAcquisitionCampaignERC20;
 
-    function setTwoKeyAcquisitionCampaignERC20(address _twoKeyAcquisitionCampaignERC20) public {
+    address twoKeyAcquisitionCampaignERC20;
+    address moderator;
+    address contractor;
+
+    address assetContractERC20;
+    string assetSymbol;
+    uint assetUnitDecimals;
+
+
+
+    bytes[] hashesOfPendingConversions;
+    bytes[] hashesOfApprovedConversions;
+    bytes[] hashesOfRejectedConversions;
+    bytes[] hashesOfExpiredConversions;
+
+
+
+    function setTwoKeyAcquisitionCampaignERC20(address _twoKeyAcquisitionCampaignERC20, address _moderator, address _contractor) public {
         require(twoKeyAcquisitionCampaignERC20 == address(0));
         twoKeyAcquisitionCampaignERC20 = _twoKeyAcquisitionCampaignERC20;
+        moderator = _moderator;
+        contractor = _contractor;
         // get asset name, address, price, etc all we need
     }
     /// Structure which will represent conversion
@@ -61,7 +81,7 @@ contract TwoKeyWhitelisted is Ownable, TwoKeyTypes {
     mapping(address => bool) public whitelistedConverter;
 
 
-    constructor() Ownable() public {
+    constructor() public {
 
     }
 
@@ -76,14 +96,14 @@ contract TwoKeyWhitelisted is Ownable, TwoKeyTypes {
      * @dev Adds single address to whitelist.
      * @param _beneficiary Address to be added to the whitelist
      */
-    function addToWhitelistReferrer(address _beneficiary) public onlyOwner {
+    function addToWhitelistReferrer(address _beneficiary) public {
         whitelistedReferrer[_beneficiary] = true;
     }
     /**
      * @dev Adds list of addresses to whitelist. Not overloaded due to limitations with truffle testing.
      * @param _beneficiaries Addresses to be added to the whitelis
      */
-    function addManyToWhitelistReferrer(address[] _beneficiaries) public onlyOwner {
+    function addManyToWhitelistReferrer(address[] _beneficiaries) public {
         for (uint256 i = 0; i < _beneficiaries.length; i++) {
             whitelistedReferrer[_beneficiaries[i]] = true;
         }
@@ -92,7 +112,7 @@ contract TwoKeyWhitelisted is Ownable, TwoKeyTypes {
      * @dev Removes single address from whitelist.
      * @param _beneficiary Address to be removed to the whitelist
      */
-    function removeFromWhitelistReferrer(address _beneficiary) public onlyOwner {
+    function removeFromWhitelistReferrer(address _beneficiary) public {
         whitelistedReferrer[_beneficiary] = false;
     }
 
@@ -108,14 +128,14 @@ contract TwoKeyWhitelisted is Ownable, TwoKeyTypes {
      * @dev Adds single address to whitelist.
      * @param _beneficiary Address to be added to the whitelist
      */
-    function addToWhitelistConverter(address _beneficiary) public onlyOwner {
+    function addToWhitelistConverter(address _beneficiary) public {
         whitelistedConverter[_beneficiary] = true;
     }
     /**
      * @dev Adds list of addresses to whitelist. Not overloaded due to limitations with truffle testing.
      * @param _beneficiaries Addresses to be added to the whitelis
      */
-    function addManyToWhitelistConverter(address[] _beneficiaries) public onlyOwner {
+    function addManyToWhitelistConverter(address[] _beneficiaries) public {
         for (uint256 i = 0; i < _beneficiaries.length; i++) {
             whitelistedConverter[_beneficiaries[i]] = true;
         }
@@ -124,7 +144,7 @@ contract TwoKeyWhitelisted is Ownable, TwoKeyTypes {
      * @dev Removes single address from whitelist.
      * @param _beneficiary Address to be removed to the whitelist
      */
-    function removeFromWhitelistConverter(address _beneficiary) public onlyOwner {
+    function removeFromWhitelistConverter(address _beneficiary) public {
         whitelistedConverter[_beneficiary] = false;
     }
 
