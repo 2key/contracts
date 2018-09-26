@@ -20,9 +20,8 @@ contract RBACWithAdmin is RBAC {
    * A constant role name for indicating admins.
    */
   string public constant ROLE_ADMIN = "admin";
-  string public constant ROLE_CONTROLLER = "controller";
 
-
+    // TODO: Finish this include this 4 roles delete controller @nikola
     //TODO: As far as I can remember this are roles we have (??)
   string public constant ROLE_CONTRACTOR = "contractor";
   string public constant ROLE_MODERATOR = "moderator";
@@ -34,11 +33,33 @@ contract RBACWithAdmin is RBAC {
    * @dev modifier to scope access to admins
    * // reverts
    */
-  modifier onlyAdmin()
-  {
+  modifier onlyAdmin() {
     checkRole(msg.sender, ROLE_ADMIN);
     _;
   }
+    // @notice Modifier which will revert if msg.sender is not contractor
+    modifier onlyContractor() {
+        checkRole(msg.sender, ROLE_CONTRACTOR);
+        _;
+    }
+
+    // @notice Modifier which will revert if msg.sender is not moderator
+    modifier onlyModerator() {
+        checkRole(msg.sender, ROLE_MODERATOR);
+        _;
+    }
+
+    // @notice Modifier which will revert if msg.sender is not referrer
+    modifier onlyReferrer() {
+        checkRole(msg.sender, ROLE_REFERRER);
+        _;
+    }
+
+    // @notice Modifier which will revert if msg.sender is not converter
+    modifier onlyConverter() {
+        checkRole(msg.sender, ROLE_CONVERTER);
+        _;
+    }
 
   /**
    * @dev constructor. Sets msg.sender as admin by default
@@ -65,6 +86,7 @@ contract RBACWithAdmin is RBAC {
     addRole(addr, roleName);
   }
 
+
   /**
    * @dev remove a role from an address
    * @param addr address
@@ -77,17 +99,21 @@ contract RBACWithAdmin is RBAC {
     removeRole(addr, roleName);
   }
 
-  /// @notice Function will revert if user doesn't have controller role
-  /// @return bool returns true if user has controller role.
-  function onlyControllerRole() public view returns (bool) {
-    checkRole(msg.sender, ROLE_CONTROLLER);
-    return true;
-  }
+
 
   function getAdminRole() public view returns (string) {
     return ROLE_ADMIN;
   }
-  function getControllerRole() public view returns (string) {
-    return ROLE_CONTROLLER;
+  function getContractorRole() public view returns (string) {
+      return ROLE_CONTRACTOR;
+  }
+  function getConverterRole() public view returns (string) {
+      return ROLE_CONVERTER;
+  }
+  function getModeratorRole() public view returns (string) {
+      return ROLE_MODERATOR;
+  }
+  function getReferrerRole() public view returns (string) {
+      return ROLE_REFERRER;
   }
 }
