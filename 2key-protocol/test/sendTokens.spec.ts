@@ -50,8 +50,8 @@ const sendTokens: any = new Promise(async (resolve, reject) => {
     }
 });
 
-describe('TwoKeyProtocol', () => {
-    it('should transfer tokens', async () => {
+describe('TwoKeyProtocol ROPSTEN', () => {
+    it('ROPSTEN: should transfer tokens', async () => {
         const receipt = await sendTokens;
         expect(receipt.status).to.be.equal('0x1');
     }).timeout(600000);
