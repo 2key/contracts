@@ -703,7 +703,8 @@ export class TwoKeyProtocol {
                 total: toNum ? this._normalizeNumber(meta.balance.total, inWei) : this._normalizeString(meta.balance.total, inWei)
             },
             local_address: meta.local_address,
-            gasPrice: toNum ? this._normalizeNumber(meta.gasPrice, inWei) : this._normalizeString(meta.gasPrice, inWei),
+            // gasPrice: toNum ? this._normalizeNumber(meta.gasPrice, inWei) : this._normalizeString(meta.gasPrice, inWei),
+            gasPrice: toNum ? this._normalizeNumber(meta.gasPrice, false) : this._normalizeString(meta.gasPrice, false),
         }
     }
 
