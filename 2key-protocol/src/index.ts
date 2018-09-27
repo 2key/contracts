@@ -490,8 +490,6 @@ export class TwoKeyProtocol {
                     reject('Broken Link');
                 }
                 const from = this.eventsAddress;
-                const code = await promisify(this.web3.eth.getCode, [this.twoKeyEventContract.address]);
-                console.log('twoKeyEventContract Code', code);
                 const txHash = await promisify(this.twoKeyEventContract.joined, [campaignAddress, f_address, this.address, { from }]);
                 resolve(txHash);
             } catch (e) {
