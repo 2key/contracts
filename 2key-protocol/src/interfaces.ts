@@ -1,5 +1,4 @@
 import {BigNumber} from 'bignumber.js';
-import Web3 from 'web3';
 
 interface Balance {
     ETH: number | string | BigNumber,
@@ -33,11 +32,14 @@ export interface EhtereumNetworks {
 }
 
 export interface TwoKeyInit {
-    web3: Web3,
+    web3: any,
+    address: string,
     ipfsIp?: string,
     ipfsPort?: string | number,
     contracts?: ContractsAdressess,
     networks?: EhtereumNetworks,
+    eventsNetUrl?: string,
+    reportKey?: string,
 }
 
 export interface Transaction {
@@ -103,4 +105,16 @@ export interface Contract {
     name: string,
     abi: any,
     bytecode: string,
+}
+
+export interface ContractEvent {
+    address: string,
+    args: any,
+    blockHash: string,
+    blockNumber: number,
+    logIndex: number,
+    event: string,
+    removed: boolean,
+    transactionIndex: number,
+    transactionHash: string,
 }
