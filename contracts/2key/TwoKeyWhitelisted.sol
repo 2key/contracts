@@ -26,7 +26,7 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
                 This functions (ending approved) can then call the executeConversion in the contract
     */
     // Mapping conversion to converter address
-    mapping(address => Conversion[]) public conversions;
+    mapping(address => Conversion) public conversions;
     // converter --> string (json) of static fields which doesn't change
     // string (json) of static fields which doesn't change --> object containing all the fields
 
@@ -57,6 +57,7 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
     /// Structure which will represent conversion
     /// TODO: add to conversion object : internalId(uint) (comes from frontend) (can be set after)
     struct Conversion {
+//        uint internalId; // internal id of conversion
         address contractor; // Contractor (creator) of campaign
         uint256 contractorProceeds; // How much contractor will receive for this conversion
         address converter; // Converter is one who's buying tokens

@@ -276,7 +276,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
 
     function cancelAssetTwoKey(address _converter, string _assetName, address _assetContract, uint256 _amount) public returns (bool) {
         whitelists.supportForCancelAssetTwoKey(_converter);
-        cancelledEscrow(_converter, _assetContract, _amount);
+        cancelledEscrow(_converter, _amount);
         twoKeyEventSource.cancelled(address(this), _converter, _assetName, _assetContract, _amount, CampaignType.CPA_FUNGIBLE);
         return true;
     }
@@ -285,7 +285,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     //onlyRole(ROLE_CONTROLLER) - comment
     function expireEscrow(address _converter, address _assetContract, uint256 _amount) public returns (bool) {
         whitelists.supportForExpireEscrow(_converter);
-        cancelledEscrow(_converter, _assetContract, _amount);
+        cancelledEscrow(_converter, _amount);
         emit Expired(address(this));
         return true;
     }
