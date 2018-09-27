@@ -50,7 +50,7 @@ const createCallback = (name: string, mined: boolean, transactionResult: string)
 };
 
 // let web3 = createWeb3(mnemonic, rpcUrl);
-const web3 = {
+const web3switcher = {
     deployer: () => createWeb3(env.MNEMONIC_DEPLOYER, rpcUrl),
     aydnep: () => createWeb3(env.MNEMONIC_AYDNEP, rpcUrl),
     gmail: () => createWeb3(env.MNEMONIC_GMAIL, rpcUrl),
@@ -65,6 +65,14 @@ const web3 = {
 // Object.keys(env).filter(key => key.includes('MNEMONIC')).forEach((key) => {
 //     console.log(env[key]);
 // });
+
+const eventEmited = (error, event) => {
+    if (error) {
+        console.log('Event error', error);
+    } else {
+        console.log('2Key Event', event);
+    }
+};
 
 const addresses = [env.AYDNEP_ADDRESS, env.GMAIL_ADDRESS, env.TEST4_ADDRESS, env.RENATA_ADDRESS, env.UPORT_ADDRESS, env.GMAIL2_ADDRESS, env.AYDNEP2_ADDRESS, env.TEST_ADDRESS];
 
@@ -100,8 +108,10 @@ describe('TwoKeyProtocol', () => {
         this.timeout(30000);
         return new Promise(async (resolve, reject) => {
             try {
+                const { web3, address } = web3switcher.deployer();
                 twoKeyProtocol = new TwoKeyProtocol({
-                    web3: web3.deployer(),
+                    web3,
+                    address,
                     networks: {
                         mainNetId,
                         syncTwoKeyNetId,
@@ -164,7 +174,7 @@ describe('TwoKeyProtocol', () => {
     });
 
     const rnd = Math.floor(Math.random() * 8);
-    console.log('Random', rnd);
+    console.log('Random', rnd, addresses[rnd]);
     const ethDstAddress = addresses[rnd];
 
     it(`should return estimated gas for transfer ether ${ethDstAddress}`, async () => {
@@ -183,7 +193,7 @@ describe('TwoKeyProtocol', () => {
             txHash = await twoKeyProtocol.transferEther(ethDstAddress, twoKeyProtocol.toWei(10, 'ether'), 3000000000);
             console.log('Transfer Ether', txHash, typeof txHash);
             const receipt = await twoKeyProtocol.getTransactionReceiptMined(txHash);
-            const status = Array.isArray(receipt) ? receipt[0].status : receipt.status;
+            const status = receipt && receipt.status;
             expect(status).to.be.equal('0x1');
         } else {
             expect(true);
@@ -191,8 +201,10 @@ describe('TwoKeyProtocol', () => {
     }).timeout(30000);
 
     it('should return a balance for address', async () => {
+        const { web3, address } = web3switcher.aydnep();
         twoKeyProtocol = new TwoKeyProtocol({
-            web3: web3.aydnep(),
+            web3,
+            address,
             networks: {
                 mainNetId,
                 syncTwoKeyNetId,
@@ -215,28 +227,28 @@ describe('TwoKeyProtocol', () => {
         txHash = await twoKeyProtocol.transfer2KEYTokens(ethDstAddress, twoKeyProtocol.toWei(123, 'ether'), 3000000000);
         console.log('Transfer 2Key Tokens', txHash, typeof txHash);
         const receipt = await twoKeyProtocol.getTransactionReceiptMined(txHash);
-        const status = Array.isArray(receipt) ? receipt[0].status : receipt.status;
+        const status = receipt && receipt.status;
         expect(status).to.be.equal('0x1');
     }).timeout(30000);
 
     it('should print balances', printBalances).timeout(15000);
 
-    it('should calculate gas for campaign contract creation', async () => {
-        const gas = await twoKeyProtocol.estimateAcquisitionCampaign({
-            campaignStartTime,
-            campaignEndTime,
-            expiryConversion: 1000 * 60 * 60 * 24,
-            maxConverterBonusPercentWei: twoKeyProtocol.toWei(maxConverterBonusPercent, 'ether'),
-            pricePerUnitInETHWei: twoKeyProtocol.toWei(pricePerUnitInETH, 'ether'),
-            maxReferralRewardPercentWei: twoKeyProtocol.toWei(maxReferralRewardPercent, 'ether'),
-            assetContractERC20: twoKeyEconomy,
-            moderatorFeePercentageWei: twoKeyProtocol.toWei(moderatorFeePercentage, 'ether'),
-            minContributionETHWei: twoKeyProtocol.toWei(minContributionETH, 'ether'),
-            maxContributionETHWei: twoKeyProtocol.toWei(maxContributionETH, 'ether'),
-        });
-        console.log('TotalGas required for Campaign Creation', gas);
-        return expect(gas).to.exist.to.greaterThan(0);
-    });
+    // it('should calculate gas for campaign contract creation', async () => {
+    //     const gas = await twoKeyProtocol.estimateAcquisitionCampaign({
+    //         campaignStartTime,
+    //         campaignEndTime,
+    //         expiryConversion: 1000 * 60 * 60 * 24,
+    //         maxConverterBonusPercentWei: twoKeyProtocol.toWei(maxConverterBonusPercent, 'ether'),
+    //         pricePerUnitInETHWei: twoKeyProtocol.toWei(pricePerUnitInETH, 'ether'),
+    //         maxReferralRewardPercentWei: twoKeyProtocol.toWei(maxReferralRewardPercent, 'ether'),
+    //         assetContractERC20: twoKeyEconomy,
+    //         moderatorFeePercentageWei: twoKeyProtocol.toWei(moderatorFeePercentage, 'ether'),
+    //         minContributionETHWei: twoKeyProtocol.toWei(minContributionETH, 'ether'),
+    //         maxContributionETHWei: twoKeyProtocol.toWei(maxContributionETH, 'ether'),
+    //     });
+    //     console.log('TotalGas required for Campaign Creation', gas);
+    //     return expect(gas).to.exist.to.greaterThan(0);
+    // });
 
     it('should create a new campaign contract', async () => {
         const campaign = await twoKeyProtocol.createAcquisitionCampaign({
@@ -256,7 +268,7 @@ describe('TwoKeyProtocol', () => {
         return expect(addressRegex.test(campaign)).to.be.true;
     }).timeout(1200000);
 
-    it('should print balance after campaign created', printBalances).timeout(15000);
+    // it('should print balance after campaign created', printBalances).timeout(15000);
 
     it('should transfer assets to campaign', async () => {
         txHash = await twoKeyProtocol.transfer2KEYTokens(campaignAddress, twoKeyProtocol.toWei(1234, 'ether'));
@@ -289,23 +301,26 @@ describe('TwoKeyProtocol', () => {
     }).timeout(10000);
 
     it('should create a join link', async () => {
+        const { web3, address } = web3switcher.gmail();
         twoKeyProtocol = new TwoKeyProtocol({
-            web3: web3.gmail(),
+            web3,
+            address,
             networks: {
                 mainNetId,
                 syncTwoKeyNetId,
             },
         });
-
         const hash = await twoKeyProtocol.joinAcquisitionCampaign(campaignAddress, 50, refLink);
         console.log('2) gmail offchain REFLINK', hash);
         refLink = hash;
         expect(hash).to.be.a('string');
-    });
+    }).timeout(30000);
 
     it('should cut link', async () => {
+        const { web3, address } = web3switcher.test4();
         twoKeyProtocol = new TwoKeyProtocol({
-            web3: web3.test4(),
+            web3,
+            address,
             networks: {
                 mainNetId,
                 syncTwoKeyNetId,
@@ -331,8 +346,10 @@ describe('TwoKeyProtocol', () => {
     }).timeout(30000);
 
     it('should joinOffchain after cut', async () => {
+        const { web3, address } = web3switcher.renata();
         twoKeyProtocol = new TwoKeyProtocol({
-            web3: web3.renata(),
+            web3,
+            address,
             networks: {
                 mainNetId,
                 syncTwoKeyNetId,
@@ -346,8 +363,10 @@ describe('TwoKeyProtocol', () => {
     }).timeout(300000);
 
     it('should buy some tokens from uport', async () => {
+        const { web3, address } = web3switcher.uport();
         twoKeyProtocol = new TwoKeyProtocol({
-            web3: web3.uport(),
+            web3,
+            address,
             networks: {
                 mainNetId,
                 syncTwoKeyNetId,
@@ -364,19 +383,24 @@ describe('TwoKeyProtocol', () => {
         txHash = await twoKeyProtocol.joinAcquisitionCampaignAndShareARC(campaignAddress, refLink, env.GMAIL2_ADDRESS);
         console.log(txHash);
         const receipt = await twoKeyProtocol.getTransactionReceiptMined(txHash);
-        const status = Array.isArray(receipt) ? receipt[0].status : receipt.status;
+        const status = receipt && receipt.status;
         expect(status).to.be.equal('0x1');
     }).timeout(30000);
 
     it('should buy some tokens from gmail2', async () => {
+        const { web3, address } = web3switcher.gmail2();
         twoKeyProtocol = new TwoKeyProtocol({
-            web3: web3.gmail2(),
+            web3,
+            address,
             networks: {
                 mainNetId,
                 syncTwoKeyNetId,
             },
         });
+        const arcs = await twoKeyProtocol.getBalanceOfArcs(campaignAddress);
+        console.log('GMAIL2 ARCS', arcs);
         txHash = await twoKeyProtocol.transferEther(campaignAddress, twoKeyProtocol.toWei(minContributionETH * 1.1, 'ether'));
+        console.log('HASH', txHash);
         await twoKeyProtocol.getTransactionReceiptMined(txHash);
         const conversion = await twoKeyProtocol.getAquisitionConverterConversion(campaignAddress);
         console.log(conversion);
@@ -384,8 +408,10 @@ describe('TwoKeyProtocol', () => {
     }).timeout(30000);
 
     it('should transfer arcs from new user to test', async () => {
+        const { web3, address } = web3switcher.aydnep2();
         twoKeyProtocol = new TwoKeyProtocol({
-            web3: web3.aydnep2(),
+            web3,
+            address,
             networks: {
                 mainNetId,
                 syncTwoKeyNetId,
@@ -396,13 +422,15 @@ describe('TwoKeyProtocol', () => {
         txHash = await twoKeyProtocol.joinAcquisitionCampaignAndShareARC(campaignAddress, refLink, env.TEST_ADDRESS);
         console.log(txHash);
         const receipt = await twoKeyProtocol.getTransactionReceiptMined(txHash);
-        const status = Array.isArray(receipt) ? receipt[0].status : receipt.status;
+        const status = receipt && receipt.status;
         expect(status).to.be.equal('0x1');
     }).timeout(30000);
 
     it('should buy some tokens from test', async () => {
+        const { web3, address } = web3switcher.test();
         twoKeyProtocol = new TwoKeyProtocol({
-            web3: web3.test(),
+            web3,
+            address,
             networks: {
                 mainNetId,
                 syncTwoKeyNetId,
