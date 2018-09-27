@@ -27,6 +27,7 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
     */
     // Mapping conversion to converter address
     mapping(address => Conversion) public conversions;
+
     // converter --> string (json) of static fields which doesn't change
     // string (json) of static fields which doesn't change --> object containing all the fields
 
@@ -199,6 +200,15 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
         Conversion memory c = Conversion(_contractor, _contractorProceeds, _converterAddress, false, false, false, _assetSymbol, _assetContractERC20, _conversionAmount, CampaignType.CPA_FUNGIBLE, now, now + expiryConversion * (1 hours));
         conversions[_converterAddress] = c;
     }
+
+    function hashValues(address converter, uint conversionCreatedAt, uint conversionAmountETHWei) public view returns (bytes32) {
+        bytes32 hash = sha256(converter, conversionCreatedAt,conversionAmountETHWei);
+        return hash;
+    }
+
+    /*
+    Add mapping address => bytes32[] so we can know all campaigns for the user
+    */
 
 
 
