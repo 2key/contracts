@@ -25,8 +25,15 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
                 rejected -> approved
                 This functions (ending approved) can then call the executeConversion in the contract
     */
-    // Mapping conversion to converter address
-    mapping(address => Conversion) public conversions;
+
+    mapping(address => bytes[]) public conversions;
+
+    bytes[] hashesOfPendingConversions;
+    bytes[] hashesOfApprovedConversions;
+    bytes[] hashesOfRejectedConversions;
+    bytes[] hashesOfExpiredConversions;
+
+    mapping(bytes => Conversion) bytesToConversion;
 
     // converter --> string (json) of static fields which doesn't change
     // string (json) of static fields which doesn't change --> object containing all the fields
@@ -38,13 +45,6 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
     address assetContractERC20;
     string assetSymbol;
     uint assetUnitDecimals;
-
-
-
-    bytes[] hashesOfPendingConversions;
-    bytes[] hashesOfApprovedConversions;
-    bytes[] hashesOfRejectedConversions;
-    bytes[] hashesOfExpiredConversions;
 
 
 
@@ -155,8 +155,8 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
     */
 
     /// @notice Will throw if not
-    function didConverterConvert() public view {
-        Conversion memory c = conversions[msg.sender];
+    function didConverterConvert(bytes bytesRepresentationOfConversion) public view {
+        Conversion memory c = bytesToConversion[bytesRepresentationOfConversion];
         require(!c.isFulfilled && !c.isCancelledByConverter);
     }
 
@@ -164,21 +164,21 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
     ====================================================================================================================
     */
 
-    function supportForCanceledEscrow(address _converter) public onlyTwoKeyAcquisitionCampaign returns (uint256){
-        Conversion memory c = conversions[_converter];
+    function supportForCanceledEscrow(bytes _bytesRepresentationOfConversion) public onlyTwoKeyAcquisitionCampaign returns (uint256){
+        Conversion memory c = bytesToConversion[_bytesRepresentationOfConversion];
         c.isCancelledByConverter = true;
-        conversions[_converter] = c;
+        bytesToConversion[_bytesRepresentationOfConversion] = c;
 
         return (c.contractorProceeds);
     }
 
-    function supportForCancelAssetTwoKey(address _converter) public onlyTwoKeyAcquisitionCampaign view{
-        Conversion memory c = conversions[_converter];
+    function supportForCancelAssetTwoKey(bytes _bytesRepresentationOfConversion) public view onlyTwoKeyAcquisitionCampaign{
+        Conversion memory c = bytesToConversion[_bytesRepresentationOfConversion];
         require(!c.isCancelledByConverter && !c.isFulfilled && !c.isRejectedByModerator);
     }
 
-    function supportForExpireEscrow(address _converter) public onlyTwoKeyAcquisitionCampaign view {
-        Conversion memory c = conversions[_converter];
+    function supportForExpireEscrow(bytes _bytesRepresentationOfConversion) public view onlyTwoKeyAcquisitionCampaign {
+        Conversion memory c = bytesToConversion[_bytesRepresentationOfConversion];
         require(!c.isCancelledByConverter && !c.isFulfilled && !c.isRejectedByModerator);
         require(now > c.conversionExpiresAt);
     }
@@ -193,22 +193,91 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
 //            string _assetSymbol,
 //            address _assetContractERC20,
             uint256 _conversionAmount,
-            uint256 expiryConversion) public onlyTwoKeyAcquisitionCampaign {
+            uint256 expiryConversion) public onlyTwoKeyAcquisitionCampaign returns(bytes) {
         // these are going to be global variables
         address _assetContractERC20 = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).getAssetContractAddress();
         string memory _assetSymbol = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).getSymbol();
         Conversion memory c = Conversion(_contractor, _contractorProceeds, _converterAddress, false, false, false, _assetSymbol, _assetContractERC20, _conversionAmount, CampaignType.CPA_FUNGIBLE, now, now + expiryConversion * (1 hours));
-        conversions[_converterAddress] = c;
+
+
+        bytes memory bytesRepresentation = encode(_converterAddress,now, now + expiryConversion * (1 hours));
+
+
+        conversions[_converterAddress].push(bytesRepresentation);
+        bytesToConversion[bytesRepresentation] = c;
+        hashesOfPendingConversions.push(bytesRepresentation);
+        return bytesRepresentation;
     }
 
-    function hashValues(address converter, uint conversionCreatedAt, uint conversionAmountETHWei) public view returns (bytes32) {
-        bytes32 hash = sha256(converter, conversionCreatedAt,conversionAmountETHWei);
-        return hash;
+    function encode(address converter, uint conversionCreatedAt, uint conversionAmountETH) public view returns(bytes) {
+        return abi.encodePacked(converter, conversionCreatedAt, conversionAmountETH);
     }
 
-    /*
-    Add mapping address => bytes32[] so we can know all campaigns for the user
-    */
+
+    function moveFromPendingToRejected(bytes bytesRepresentationOfConversion) public {
+        uint index = 0;
+        // finding this conversion in the array
+        for(uint i=0; i<hashesOfPendingConversions.length; i++) {
+            if(keccak256(hashesOfPendingConversions[i]) == keccak256(bytesRepresentationOfConversion)) {
+                index=1;
+            }
+            if(index == 1) {
+                hashesOfPendingConversions[i] = hashesOfPendingConversions[i+1];
+            }
+        }
+        // if we didin't find it, return
+        if(index == 0) {
+            return;
+        }
+
+        hashesOfPendingConversions.length--;
+        delete hashesOfPendingConversions[hashesOfPendingConversions.length -1];
+
+        // move to pendingConversions
+        hashesOfPendingConversions.push(bytesRepresentationOfConversion);
+    }
+
+
+//    function changeStateOfConversion(bytes[] _currentState, bytes[] _newState, bytes bytesRepresentationOfConversion) {
+//        uint index = 0;
+//
+//        for(uint i=0; i< _currentState.length; i++) {
+//            if(_currentState[i] == bytesRepresentationOfConversion) {
+//                index = 1;
+//            }
+//
+//            if(index == 1) {
+//                _currentState[i] = _currentState[i+1];
+//            }
+//        }
+//
+//        if(index == 0) {
+//            return;
+//        }
+//
+//        _currentState.length --;
+//        delete _currentState[_currentState.length -1];
+//
+//        _newState.push(bytesRepresentationOfConversion);
+//
+//    }
+
+
+    //    function getPendingConversions() public view returns (bytes[]) {
+//        return hashesOfPendingConversions;
+//    }
+//
+//    function getApprovedConversions() public view returns (bytes[]) {
+//        return hashesOfApprovedConversions;
+//    }
+//
+//    function getRejectedConversions() public view returns (bytes[]) {
+//        return hashesOfRejectedConversions;
+//    }
+//
+//    function getExpiredConversions() public view returns (bytes[]) {
+//        return hashesOfExpiredConversions;
+//    }
 
 
 
