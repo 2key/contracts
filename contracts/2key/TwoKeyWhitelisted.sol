@@ -234,8 +234,53 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
         delete hashesOfPendingConversions[hashesOfPendingConversions.length -1];
 
         // move to pendingConversions
-        hashesOfPendingConversions.push(bytesRepresentationOfConversion);
+        hashesOfRejectedConversions.push(bytesRepresentationOfConversion);
     }
+
+    function moveFromPendingToApproved(bytes bytesRepresentationOfConversion) public {
+        uint index = 0;
+
+        for(uint i=0; i<hashesOfPendingConversions.length; i++) {
+            if(keccak256(hashesOfPendingConversions[i]) == keccak256(bytesRepresentationOfConversion)) {
+                index = 1;
+            }
+            if(index == 1) {
+                hashesOfPendingConversions[i] = hashesOfPendingConversions[i+1];
+            }
+        }
+        if(index == 0) {
+            return;
+        }
+
+        hashesOfPendingConversions.length--;
+        delete hashesOfPendingConversions[hashesOfPendingConversions.length -1];
+
+        hashesOfApprovedConversions.push(bytesRepresentationOfConversion);
+    }
+
+    function moveFromPendingToExpired(bytes bytesRepresentationOfConversion) public {
+        uint index = 0;
+
+        for(uint i=0; i<hashesOfPendingConversions.length; i++) {
+            if(keccak256(hashesOfPendingConversions[i]) == keccak256(bytesRepresentationOfConversion)) {
+                index = 1;
+            }
+            if(index == 1) {
+                hashesOfPendingConversions[i] = hashesOfPendingConversions[i+1];
+            }
+        }
+        if(index == 0) {
+            return;
+        }
+
+        hashesOfPendingConversions.length--;
+        delete hashesOfPendingConversions[hashesOfPendingConversions.length -1];
+
+        hashesOfExpiredConversions.push(bytesRepresentationOfConversion);
+    }
+
+
+
 
 
 //    function changeStateOfConversion(bytes[] _currentState, bytes[] _newState, bytes bytesRepresentationOfConversion) {
