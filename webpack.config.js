@@ -20,6 +20,7 @@ const config = {
       {
         test: /(\.tsx|\.ts)$/,
         loader: 'ts-loader',
+        exclude: /test/,
       },
     ],
   },

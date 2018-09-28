@@ -290,7 +290,8 @@ async function deploy() {
 const test = () => new Promise(async (resolve, reject) => {
   // const testsPath = path.join(twoKeyProtocolDir, 'test');
   try {
-    await runProcess('node', ['-r', 'dotenv/config', './node_modules/.bin/mocha', '--exit', '--bail', '-r', 'ts-node/register', '2key-protocol/**/*.spec.ts']);
+    // await runProcess('node', ['-r', 'dotenv/config', './node_modules/.bin/mocha', '--exit', '--bail', '-r', 'ts-node/register', '2key-protocol/**/*.spec.ts']);
+    await runProcess('node', ['-r', 'dotenv/config', './node_modules/.bin/mocha', '--exit', '--bail', '-r', 'ts-node/register', '2key-protocol/test/index.spec.ts']);
     resolve();
   } catch (err) {
     reject(err);
