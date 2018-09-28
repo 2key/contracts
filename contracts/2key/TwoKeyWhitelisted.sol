@@ -214,7 +214,7 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
     }
 
 
-    function moveFromPendingToRejected(bytes bytesRepresentationOfConversion) public {
+    function moveFromPendingToRejected(bytes bytesRepresentationOfConversion) public onlyTwoKeyAcquisitionCampaign{
         uint index = 0;
         // finding this conversion in the array
         for(uint i=0; i<hashesOfPendingConversions.length; i++) {
@@ -237,7 +237,7 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
         hashesOfRejectedConversions.push(bytesRepresentationOfConversion);
     }
 
-    function moveFromPendingToApproved(bytes bytesRepresentationOfConversion) public {
+    function moveFromPendingToApproved(bytes bytesRepresentationOfConversion) public onlyTwoKeyAcquisitionCampaign {
         uint index = 0;
 
         for(uint i=0; i<hashesOfPendingConversions.length; i++) {
@@ -258,7 +258,7 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
         hashesOfApprovedConversions.push(bytesRepresentationOfConversion);
     }
 
-    function moveFromPendingToExpired(bytes bytesRepresentationOfConversion) public {
+    function moveFromPendingToExpired(bytes bytesRepresentationOfConversion) public onlyTwoKeyAcquisitionCampaign {
         uint index = 0;
 
         for(uint i=0; i<hashesOfPendingConversions.length; i++) {
@@ -279,7 +279,7 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
         hashesOfExpiredConversions.push(bytesRepresentationOfConversion);
     }
 
-    function moveFromRejectedToApproved(bytes bytesRepresentationOfConversion) public {
+    function moveFromRejectedToApproved(bytes bytesRepresentationOfConversion) public onlyTwoKeyAcquisitionCampaign {
         uint index = 0;
 
         for(uint i=0; i<hashesOfRejectedConversions.length; i++) {
