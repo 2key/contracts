@@ -279,6 +279,28 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
         hashesOfExpiredConversions.push(bytesRepresentationOfConversion);
     }
 
+    function moveFromRejectedToApproved(bytes bytesRepresentationOfConversion) public {
+        uint index = 0;
+
+        for(uint i=0; i<hashesOfRejectedConversions.length; i++) {
+            if(keccak256(hashesOfRejectedConversions[i]) == keccak256(bytesRepresentationOfConversion)) {
+                index = 1;
+            }
+
+            if(index == 1) {
+                hashesOfRejectedConversions[i] = hashesOfRejectedConversions[i+1];
+            }
+        }
+
+        if(index == 0) {
+            return;
+        }
+
+        hashesOfRejectedConversions.length--;
+        delete hashesOfRejectedConversions[hashesOfRejectedConversions.length -1];
+
+        hashesOfApprovedConversions.push(bytesRepresentationOfConversion);
+    }
 
 
 
