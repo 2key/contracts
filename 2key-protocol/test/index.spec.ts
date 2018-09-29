@@ -338,12 +338,12 @@ describe('TwoKeyProtocol', () => {
         expect(hash).to.be.a('string');
     }).timeout(300000);
 
-    it('should buy some tokens', async () => {
-        console.log('4) buy from test4 REFLINK', refLink);
-        const txHash = await twoKeyProtocol.joinAcquisitionCampaignAndConvert(campaignAddress, twoKeyProtocol.toWei(minContributionETH, 'ether'), refLink);
-        console.log(txHash);
-        expect(txHash).to.be.a('string');
-    }).timeout(30000);
+    // it('should buy some tokens', async () => {
+    //     console.log('4) buy from test4 REFLINK', refLink);
+    //     const txHash = await twoKeyProtocol.joinAcquisitionCampaignAndConvert(campaignAddress, twoKeyProtocol.toWei(minContributionETH, 'ether'), refLink);
+    //     console.log(txHash);
+    //     expect(txHash).to.be.a('string');
+    // }).timeout(30000);
 
     it('should joinOffchain after cut', async () => {
         const { web3, address } = web3switcher.renata();
@@ -362,6 +362,7 @@ describe('TwoKeyProtocol', () => {
         expect(hash).to.be.a('string');
     }).timeout(300000);
 
+    /*
     it('should buy some tokens from uport', async () => {
         const { web3, address } = web3switcher.uport();
         twoKeyProtocol = new TwoKeyProtocol({
@@ -442,6 +443,6 @@ describe('TwoKeyProtocol', () => {
         console.log(conversion);
         expect(conversion[2]).to.be.equal(twoKeyProtocol.getAddress());
     }).timeout(30000);
-
+    */
     it('should print after all tests', printBalances).timeout(15000);
 });

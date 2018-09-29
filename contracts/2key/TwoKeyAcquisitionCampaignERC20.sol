@@ -223,7 +223,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         pricePerUnitInETH = _pricePerUnitInETH;
         minContributionETH = _minContributionETH;
         maxContributionETH = _maxContributionETH;
-
+        setERC20Attributes();
         // Emit event that TwoKeyCampaign is created
         twoKeyEventSource.created(address(this), contractor);
 

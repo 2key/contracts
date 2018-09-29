@@ -456,6 +456,7 @@ export class TwoKeyProtocol {
                     const {f_address, f_secret, p_message} = this._getUrlParams(referralLink);
                     const contractConstants = (await promisify(campaignInstance.getConstantInfo, []));
                     const decimals = contractConstants[3].toNumber();
+                    console.log('Decimals', decimals);
                     const maxReferralRewardPercent = new BigNumber(contractConstants[1]).div(10 ** decimals).toNumber();
                     if (f_address === contractorAddress) {
                         resolve(maxReferralRewardPercent);
@@ -472,7 +473,7 @@ export class TwoKeyProtocol {
                         cuts = (await promisify(campaignInstance.getReferrerCuts, [firstAddressInChain])).map(cut => cut.toNumber());
                         cuts = cuts.concat(Sign.validate_join(firstPublicLink, f_address, f_secret, p_message));
                     }
-                    console.log('CUTS', cuts);
+                    console.log('CUTS', cuts, maxReferralRewardPercent);
                     const estimatedMaxReferrerRewardPercent = calcFromCuts(cuts, maxReferralRewardPercent);
                     resolve(estimatedMaxReferrerRewardPercent);
                 }
