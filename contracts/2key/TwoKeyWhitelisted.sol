@@ -13,18 +13,6 @@ import "./TwoKeyConversionStates.sol";
 
 //TODO: replace Ownable with RBAC
 contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
-    //TODO: Add getter for conversions with modifier only
-    //TODO: add separated lists of approved, pending, rejected, cancelled
-    //TODO: See if possible to jsonify conversion into string
-    /*
-      TODO: Add approve function functions to move conversions from
-                pending -> rejected
-                pending -> approved
-                pending -> canceled
-                pending -> expired (?)
-                rejected -> approved
-                This functions (ending approved) can then call the executeConversion in the contract
-    */
 
     mapping(address => bytes[]) public conversions;
 
@@ -35,8 +23,6 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
 
     mapping(bytes => Conversion) bytesToConversion;
 
-    // converter --> string (json) of static fields which doesn't change
-    // string (json) of static fields which doesn't change --> object containing all the fields
 
     address twoKeyAcquisitionCampaignERC20;
     address moderator;
@@ -56,7 +42,6 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
         // get asset name, address, price, etc all we need
     }
     /// Structure which will represent conversion
-    /// TODO: add to conversion object : internalId(uint) (comes from frontend) (can be set after)
     struct Conversion {
 //        uint internalId; // internal id of conversion
         address contractor; // Contractor (creator) of campaign
