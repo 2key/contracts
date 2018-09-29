@@ -7,6 +7,7 @@ const rimraf = require('rimraf');
 const simpleGit = require('simple-git/promise');
 const childProcess = require('child_process');
 const moment = require('moment');
+const ledgerProvider = require('./LedgerProvider');
 const whitelist = require('./ContractDeploymentWhiteList.json');
 
 const readdir = util.promisify(fs.readdir);
@@ -23,7 +24,7 @@ const twoKeyProtocolLibGit = simpleGit(twoKeyProtocolLibDir);
 
 async function handleExit(p) {
   console.log(p);
-  if (p !== 0 && (process.argv[2] !== '--migrate' && process.argv[2] !== '--test')) {
+  if (p !== 0 && (process.argv[2] !== '--migrate' && process.argv[2] !== '--test' && process.argv[2] !== '--ledger')) {
     await contractsGit.reset('hard');
     await twoKeyProtocolLibGit.reset('hard');
   }
@@ -338,6 +339,9 @@ async function main() {
       break;
     case '--extract':
       restoreFromArchive();
+      break;
+    case '--ledger':
+      ledgerProvider('https://ropsten.infura.io/v3/71d39c30bc984e8a8a0d8adca84620ad', { networkId: 3 })
       break;
     default:
       deploy();
