@@ -3,7 +3,9 @@ const {deserializeHex} = require("./helpers/deserialize.js");
 
 
 contract('TestTwoKeyWhitelisted', async (accounts) => {
-
+	/*
+	 For testing TwoKeyWhitelisted contract we need deployed TwoKeyAcquisitionCampaignERC20.sol contract
+	 */
 	let whitelistedContract;
 
 	before(async () => {
@@ -20,5 +22,6 @@ contract('TestTwoKeyWhitelisted', async (accounts) => {
 	   let decoded = deserializeHex(encoded);
 	   console.log(decoded);
     });
+
 
 });
