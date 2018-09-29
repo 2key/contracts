@@ -52,6 +52,7 @@ module.exports = {
     staging: {
       provider: () => LedgerProvider(`https://ropsten.infura.io/v3/${infuraApiKey}`, {
         networkId: 3,
+        // https://github.com/LedgerHQ/ledgerjs/issues/200
         path: "44'/60'/0'/0",
         askConfirm: true,
         accountsLength: 1,

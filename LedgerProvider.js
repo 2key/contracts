@@ -9,8 +9,8 @@ const createLedgerSubprovider = require('@ledgerhq/web3-subprovider').default;
 
 module.exports = function (rpcUrl, options) {
   const getTransport = async () => {
-    let transport = await TransportNodeJs.create();
-    transport.setDebugMode(true);
+    const transport = await TransportNodeJs.create();
+    transport.setDebugMode(Boolean(process.env.DEBUG));
     return transport;
   };
   const ledger = createLedgerSubprovider(getTransport, options);
@@ -19,9 +19,5 @@ module.exports = function (rpcUrl, options) {
   engine.addProvider(new FiltersSubprovider());
   engine.addProvider(new ProviderSubprovider(new Web3.providers.HttpProvider(rpcUrl)));
   engine.start();
-  const web3 = new Web3(engine);
-  web3.eth.getAccounts((err, res) => {
-    console.log('ACCOUNT', err, res);
-  });
   return engine;
 }

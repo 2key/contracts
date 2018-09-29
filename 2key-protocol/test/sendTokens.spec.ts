@@ -2,9 +2,10 @@ import {expect} from 'chai';
 import 'mocha';
 import {TwoKeyProtocol, promisify} from '../src';
 import contractsMeta from '../src/contracts';
-import createWeb3 from './_web3';
+import createWeb3, { ledgerWeb3 } from './_web3';
 
 const rpcUrl = 'wss://ropsten.infura.io/ws';
+// const rpcUrl = 'wss://ropsten.infura.io/ws';
 const mainNetId = 3;
 const syncTwoKeyNetId = 47;
 const destinationAddress = '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7';
@@ -20,7 +21,8 @@ console.log(contractsMeta.TwoKeyEconomy.networks[mainNetId].address);
 
 const sendTokens: any = new Promise(async (resolve, reject) => {
     try {
-        const { web3, address } = createWeb3('laundry version question endless august scatter desert crew memory toy attract cruel', rpcUrl);
+        // const { web3, address } = createWeb3('laundry version question endless august scatter desert crew memory toy attract cruel', rpcUrl);
+        const { web3, address } = await ledgerWeb3(rpcUrl, 3);
         const twoKeyProtocol = new TwoKeyProtocol({
             web3,
             address,
