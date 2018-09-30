@@ -271,24 +271,24 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     }
 
 
-    function cancelledEscrow(address _converter, bytes bytesRepresentationOfConversion, uint256 _amount) internal {
-        uint contractorProceeds = whitelists.supportForCanceledEscrow(bytesRepresentationOfConversion);
+    function cancelledEscrow(address converter, uint256 _amount) internal {
+        uint contractorProceeds = whitelists.supportForCanceledEscrow(converter);
         addUnitsToInventory(_amount);
-        require(twoKeyEconomy.transfer(_converter, contractorProceeds.mul(rate)));
+        require(twoKeyEconomy.transfer(converter, contractorProceeds.mul(rate)));
     }
 
 
-    function cancelAssetTwoKey(bytes bytesRepresentationOfConversion, address _converter, string _assetName, address _assetContract, uint256 _amount) public returns (bool) {
-        whitelists.supportForCancelAssetTwoKey(bytesRepresentationOfConversion);
-        cancelledEscrow(_converter, bytesRepresentationOfConversion, _amount);
+    function cancelAssetTwoKey(address _converter, string _assetName, address _assetContract, uint256 _amount) public returns (bool) {
+        whitelists.supportForCancelAssetTwoKey(_converter);
+        cancelledEscrow(_converter, _amount);
         twoKeyEventSource.cancelled(address(this), _converter, _assetName, _assetContract, _amount, CampaignType.CPA_FUNGIBLE);
         return true;
     }
 
 
-    function expireEscrow(address _converter, bytes bytesRepresentationOfConversion, uint256 _amount) public returns (bool) {
-        whitelists.supportForExpireEscrow(bytesRepresentationOfConversion);
-        cancelledEscrow(_converter, bytesRepresentationOfConversion, _amount);
+    function expireEscrow(address _converter, uint256 _amount) public returns (bool) {
+        whitelists.supportForExpireEscrow(_converter);
+        cancelledEscrow(_converter, _amount);
         emit Expired(address(this));
         return true;
     }
@@ -497,20 +497,18 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     //******************************************************
     //(1) ENTRY POINTS
     //TODO: andrii if user wants to convert with metamask, they need to choose metamask before you call create their sig and call this function
-    function joinAndConvert(bytes signature) public payable returns(bytes) {
+    function joinAndConvert(bytes signature) public payable {
         require(msg.value >= minContributionETH);
         require(msg.value <= maxContributionETH);
         distributeArcsBasedOnSignature(signature);
-        bytes memory bytesRepresentationOfConversion = createConversion(msg.value, msg.sender);
-        return bytesRepresentationOfConversion;
+        createConversion(msg.value, msg.sender);
     }
 
-    function convert() public payable returns(bytes) {
+    function convert() public payable  {
         require(msg.value >= minContributionETH);
         require(msg.value <= maxContributionETH);
         require(received_from[msg.sender] != address(0));
-        bytes memory bytesRepresentationOfConversion = createConversion(msg.value, msg.sender);
-        return bytesRepresentationOfConversion;
+        createConversion(msg.value, msg.sender);
     }
 
     //TODO: for paying with external address, the user needs to transfer an ARC to the external address, and then we can call the public default payable
@@ -518,7 +516,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         require(msg.value >= minContributionETH);
         require(msg.value <= maxContributionETH);
         require(balanceOf(msg.sender) > 0);
-        bytes memory bytesRepresentationOfConversion = createConversion(msg.value, msg.sender);
+        createConversion(msg.value, msg.sender);
     }
 
     //******************************************************
@@ -528,7 +526,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     /// @param conversionAmountETH is actually the msg.value (amount of ether)
     /// @param converterAddress is actually the msg.sender (Address of one who's executing conversion)
     /// isOngoing
-    function createConversion(uint conversionAmountETH, address converterAddress) private returns (bytes) {
+    function createConversion(uint conversionAmountETH, address converterAddress) {
         uint baseTokensForConverter;
         uint bonusTokensForConverter;
 
@@ -541,11 +539,10 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
 
         uint256 contractorProceeds = conversionAmountETH - maxReferralRewardETH - moderatorFeeETH;
 
-        bytes memory bytesRepresentationOfConversion = whitelists.supportForCreateConversion(contractor, contractorProceeds, converterAddress, conversionAmountETH, expiryConversionInHours);
+        whitelists.supportForCreateConversion(contractor, contractorProceeds, converterAddress, conversionAmountETH, expiryConversionInHours);
 
         emit ReceivedEther(converterAddress, conversionAmountETH);
 
-        return bytesRepresentationOfConversion;
     }
 
 
@@ -553,8 +550,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     //(3) CONVERSION 2nd STEP
     //actually third step after the moderator/contractor approved the converter in the white list
 
-    function executeConversion(bytes bytesRepresentationOfConversion) isWhitelistedConverter public {
-        whitelists.didConverterConvert(bytesRepresentationOfConversion);
+    function executeConversion(address _converter) isWhitelistedConverter public {
+        whitelists.didConverterConvert(_converter);
 //         TODO: convert ETH to 2Key for moderator and referrers
         performConversion();
         //require(transferFungibleAsset(msg.sender, _amount));
