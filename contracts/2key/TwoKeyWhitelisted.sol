@@ -31,7 +31,10 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
     uint assetUnitDecimals;
 
 
-
+    /// @notice Method which will be called inside constructor of TwoKeyAcquisitionCampaignERC20
+    /// @param _twoKeyAcquisitionCampaignERC20 is the address of TwoKeyAcquisitionCampaignERC20 contract
+    /// @param _moderator is the address of the moderator
+    /// @param _contractor is the address of the contractor
     function setTwoKeyAcquisitionCampaignERC20(address _twoKeyAcquisitionCampaignERC20, address _moderator, address _contractor) public {
         require(twoKeyAcquisitionCampaignERC20 == address(0));
         twoKeyAcquisitionCampaignERC20 = _twoKeyAcquisitionCampaignERC20;
@@ -55,13 +58,16 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
         uint256 conversionExpiresAt; // When conversion expires
     }
 
+    /// @notice Modifier which allows only TwoKeyAcquisitionCampaign to issue calls
     modifier onlyTwoKeyAcquisitionCampaign() {
         require(msg.sender == twoKeyAcquisitionCampaignERC20);
         _;
     }
 
-
+    //mapping containing if address of referrer is whitelisted
     mapping(address => bool) public whitelistedReferrer;
+
+    //mapping containing if addresses of converter is whitelisted
     mapping(address => bool) public whitelistedConverter;
 
 
@@ -136,7 +142,9 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
     ====================================================================================================================
     */
 
-    /// @notice Will throw if not
+    /// @notice Function which checks if converter has converted
+    /// @dev will throw if not
+    /// @param converterAddress is the address of converter
     function didConverterConvert(address converterAddress) public view {
         Conversion memory c = conversions[converterAddress];
         require(!c.isFulfilled && !c.isCancelledByConverter);
@@ -154,17 +162,28 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
         return (c.contractorProceeds);
     }
 
+
     function supportForCancelAssetTwoKey(address _converterAddress) public view onlyTwoKeyAcquisitionCampaign{
         Conversion memory c = conversions[_converterAddress];
         require(!c.isCancelledByConverter && !c.isFulfilled && !c.isRejectedByModerator);
     }
 
+    /// @notice Function which will support checking if escrow is expired
+    /// @dev only contract TwoKeyAcquisitionCampaign can call this method
+    /// @param _converterAddress is the address of the converter
     function supportForExpireEscrow(address _converterAddress) public view onlyTwoKeyAcquisitionCampaign {
         Conversion memory c = conversions[_converterAddress];
         require(!c.isCancelledByConverter && !c.isFulfilled && !c.isRejectedByModerator);
         require(now > c.conversionExpiresAt);
     }
 
+    /// @notice Support function to create conversion
+    /// @dev This function can only be called from TwoKeyAcquisitionCampaign contract address
+    /// @param _contractor is the address of campaign contractor
+    /// @param _contractorProceeds is the amount which goes to contractor
+    /// @param _converterAddress is the address of the converter
+    /// @param _conversionAmount is the amount for conversion in ETH
+    /// @param expiryConversion is the length of conversion
     function supportForCreateConversion(
             address _contractor,
             uint256 _contractorProceeds,
@@ -185,28 +204,45 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
         addressesOfPendingConverters.push(_converterAddress);
     }
 
-    function encodeConversion(address converter, uint conversionCreatedAt, uint conversionAmountETH) public view returns(bytes) {
+    /// @notice Function to encode provided parameters into bytes
+    /// @param converter is address of converter
+    /// @param conversionCreatedAt is timestamp when conversion is created
+    /// @param conversionAmountETH is the amount of conversion in ETH
+    /// @return bytes containing all this data concatenated and encoded into hex
+    function encodeParams(address converter, uint conversionCreatedAt, uint conversionAmountETH) public view returns(bytes) {
         return abi.encodePacked(converter, conversionCreatedAt, conversionAmountETH);
     }
 
     function getEncodedConversion(address converter) public view returns (bytes) {
         Conversion memory _conversion = conversions[converter];
-        bytes memory encoded = encodeConversion(_conversion.converter, _conversion.conversionCreatedAt, _conversion.conversionAmount);
+        bytes memory encoded = encodeParams(_conversion.converter, _conversion.conversionCreatedAt, _conversion.conversionAmount);
         return encoded;
     }
 
+    /// @notice Function to retrieve all converters who's conversions are pending
+    /// @dev it's a view function, doesn't consume any gas
+    /// @return array of addresses of pending converters
     function getPendingConverters() public view returns (address[]) {
         return addressesOfPendingConverters;
     }
 
+    /// @notice Function to retrieve all converters who's conversions are rejected
+    /// @dev it's a view function, doesn't consume any gas
+    /// @return array of addresses of rejected converters
     function getRejectedConverters() public view returns (address[]) {
         return addressesOfRejectedConverters;
     }
 
+    /// @notice Function to retrieve all converters who's conversions are approved
+    /// @dev it's a view function, doesn't consume any gas
+    /// @return array of addresses of approved converters
     function getApprovedConverters() public view returns (address[]) {
         return addressesOfApprovedConverters;
     }
 
+    /// @notice Function to retrieve all converters who's conversions are expired
+    /// @dev it's a view function, doesn't consume any gas
+    /// @return array of addresses of expired converters
     function getExpiredConverters() public view returns (address[]) {
         return addressesOfExpiredConverters;
     }
