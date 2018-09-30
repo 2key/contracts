@@ -226,7 +226,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         setERC20Attributes();
         // Emit event that TwoKeyCampaign is created
         twoKeyEventSource.created(address(this), contractor);
-
     }
 
 

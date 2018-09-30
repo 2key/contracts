@@ -117,7 +117,7 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
     }
     /**
      * @dev Adds list of addresses to whitelist. Not overloaded due to limitations with truffle testing.
-     * @param _beneficiaries Addresses to be added to the whitelis
+     * @param _beneficiaries Addresses to be added to the whitelist
      */
     function addManyToWhitelistConverter(address[] _beneficiaries) public {
         for (uint256 i = 0; i < _beneficiaries.length; i++) {
@@ -185,10 +185,15 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
         addressesOfPendingConverters.push(_converterAddress);
     }
 
-    function encode(address converter, uint conversionCreatedAt, uint conversionAmountETH) public view returns(bytes) {
+    function encodeConversion(address converter, uint conversionCreatedAt, uint conversionAmountETH) public view returns(bytes) {
         return abi.encodePacked(converter, conversionCreatedAt, conversionAmountETH);
     }
 
+    function getEncodedConversion(address converter) public view returns (bytes) {
+        Conversion memory _conversion = conversions[converter];
+        bytes memory encoded = encodeConversion(_conversion.converter, _conversion.conversionCreatedAt, _conversion.conversionAmount);
+        return encoded;
+    }
 
     function getPendingConverters() public view returns (address[]) {
         return addressesOfPendingConverters;
