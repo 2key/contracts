@@ -285,12 +285,8 @@ export class TwoKeyProtocol {
     public transferEther(to: string, value: number | string | BigNumber, gasPrice: number = this.gasPrice): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
-                console.log(this.address);
-                console.log(this.eventsAddress);
-                console.log(to, value);
                 // const balance = parseFloat(this.fromWei(await this._getEthBalance(this.address)).toString());
                 const gas = await this.getETHTransferGas(to, value);
-                console.log(gas);
                 // const totalValue = value + parseFloat(this.fromWei(gasPrice * gas, 'ether').toString());
                 // if (totalValue > balance) {
                 //     Promise.reject(new Error(`Not enough founds on ${this.address} required ${value}, balance: ${balance}`));
