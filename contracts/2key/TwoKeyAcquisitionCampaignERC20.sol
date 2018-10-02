@@ -21,7 +21,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     // ==============================================================================================================
     // =====================================TWO KEY ACQUISITION CAMPAIGN EVENTS======================================
     // ==============================================================================================================
-    event UpdatedDataStr(uint timestamp, string value);
+    event UpdatedPublicMetaHash(uint timestamp, string value);
     event UpdatedData(uint timestamp, uint value, string action);
     event Fulfilled(address indexed to, uint256 units);
     event Rewarded(address indexed to, uint256 amount);
@@ -563,7 +563,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         */
 
         //this is if we want a simple test without lockup contracts
-        require(assetContractERC20.call(bytes4(keccak256("transfer(address,uint256)")), _converterAddress, _units));
+//        require(assetContractERC20.call(bytes4(keccak256("transfer(address,uint256)")), _converterAddress, _units));
 
 
         //uint256 fee = calculateModeratorFee(c.payout);  //TODO take fee from conversion object since we already computed it.
@@ -758,7 +758,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         return (baseTokensForConverter, bonusTokensForConverter);
     }
 
-    function getAddressOfWhitelisted() public view returns (address) {
+    function getAddressOfWhitelistedContract() public view returns (address) {
         return address(whitelists);
     }
 
@@ -766,19 +766,17 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         return contractor;
     }
 
-    //onlyContractor
-    function setPublicMetaHash(string _publicMetaHash) public {
+    function setPublicMetaHash(string _publicMetaHash) public onlyContractor{
         require(msg.sender == contractor);
         publicMetaHash = _publicMetaHash;
     }
 
-    //onlyContractor
-    function setPrivateMetaHash(string _privateMetaHash) public {
+    function setPrivateMetaHash(string _privateMetaHash) public onlyContractor {
         require(msg.sender == contractor);
         privateMetaHash = _privateMetaHash;
     }
 
-    function getPrivateMetaHash() public view returns (string) {
+    function getPrivateMetaHash() public view onlyContractor returns (string) {
         require(msg.sender == contractor);
         return privateMetaHash;
     }
@@ -801,7 +799,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
 
     function updateIpfsHashPublicMeta(string value) public onlyContractor {
         publicMetaHash = value;
-        emit UpdatedDataStr(block.timestamp, value);
+        emit UpdatedPublicMetaHash(block.timestamp, value);
     }
 
 
