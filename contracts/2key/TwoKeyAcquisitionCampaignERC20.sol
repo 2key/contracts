@@ -798,11 +798,11 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         maxReferralRewardPercent = value;
         emit UpdatedData(block.timestamp, value, "Updated maxReferralRewardPercent");
     }
-
-    function updateIpfsHashPublicMeta(string value) public onlyContractor {
-        publicMetaHash = value;
-        emit UpdatedDataStr(block.timestamp, value);
-    }
+//
+//    function updateIpfsHashPublicMeta(string value) public onlyContractor {
+//        publicMetaHash = value;
+//        emit UpdatedDataStr(block.timestamp, value);
+//    }
 
 
 //
