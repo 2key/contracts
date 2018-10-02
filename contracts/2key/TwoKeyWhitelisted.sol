@@ -14,7 +14,7 @@ import "./TwoKeyConversionStates.sol";
 contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
 
     mapping(address => Conversion) public conversions;
-
+    //TODO: In case someone adds more money to update
     // Same conversion can appear only in once of this 4 arrays at a time
     address[] addressesOfPendingConverters;
     address[] addressesOfApprovedConverters;
@@ -47,13 +47,14 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
         address contractor; // Contractor (creator) of campaign
         uint256 contractorProceeds; // How much contractor will receive for this conversion
         address converter; // Converter is one who's buying tokens
-//        bool isFulfilled; // Conversion finished (processed)
-//        bool isCancelledByConverter; // Canceled by converter
-//        bool isRejectedByModerator; // Rejected by moderator
         ConversionState state;
         string assetSymbol; // Name of ERC20 token we're selling in our campaign (we can get that from contract address)
         address assetContractERC20; // Address of ERC20 token we're selling in our campaign
         uint256 conversionAmount; // Amount for conversion (In ETH)
+        uint256 maxReferralRewardETHWei;
+        uint256 moderatorFeeETHWei;
+        uint256 baseTokenUnits;
+        uint256 bonusTokenUnits;
         CampaignType campaignType; // Enumerator representing type of campaign (This one is however acquisition)
         uint256 conversionCreatedAt; // When conversion is created
         uint256 conversionExpiresAt; // When conversion expires
@@ -195,11 +196,19 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
             uint256 _contractorProceeds,
             address _converterAddress,
             uint256 _conversionAmount,
+            uint256 _maxReferralRewardETHWei,
+            uint256 _moderatorFeeETHWei,
+            uint256 baseTokensForConverterUnits,
+            uint256 bonusTokensForConverterUnits,
             uint256 expiryConversion) public onlyTwoKeyAcquisitionCampaign {
         // these are going to be global variables
         address _assetContractERC20 = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).getAssetContractAddress();
         string memory _assetSymbol = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).getSymbol();
-        Conversion memory c = Conversion(_contractor, _contractorProceeds, _converterAddress, ConversionState.PENDING, _assetSymbol, _assetContractERC20, _conversionAmount, CampaignType.CPA_FUNGIBLE, now, now + expiryConversion * (1 hours));
+        Conversion memory c = Conversion(_contractor, _contractorProceeds, _converterAddress,
+            ConversionState.PENDING, _assetSymbol, _assetContractERC20, _conversionAmount,
+            _maxReferralRewardETHWei, _moderatorFeeETHWei, baseTokensForConverterUnits,
+            bonusTokensForConverterUnits, CampaignType.CPA_FUNGIBLE,
+            now, now + expiryConversion * (1 hours));
 
         conversions[_converterAddress] = c;
         addressesOfPendingConverters.push(_converterAddress);

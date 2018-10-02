@@ -18,7 +18,10 @@ contract TwoKeyCampaignARC is StandardToken {
 
 	// balance of TwoKeyToken for each influencer that they can withdraw
 	mapping(address => uint256) internal referrerBalances2KEY;
-	mapping(address => uint256) internal referrerBalancesETH;
+	mapping(address => uint256) internal referrerBalancesETHWei;
+
+    // Total earnings for referrers
+    mapping(address => uint256) internal referrerTotalEarnings2KEY;
 
 
 	TwoKeyEventSource twoKeyEventSource;
@@ -196,7 +199,7 @@ contract TwoKeyCampaignARC is StandardToken {
 //
 //	}
 
-	function getInfluencers(address customer) public view returns (address[]) {
+	function getReferrers(address customer) public view returns (address[]) {
 		// build a list of all influencers from converter back to to contractor
 		// dont count the conveter and contractr themselves
 		address influencer = customer;

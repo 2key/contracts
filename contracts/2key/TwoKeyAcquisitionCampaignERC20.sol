@@ -39,6 +39,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     /// Amount converter put to the contract in Ether
     mapping(address => uint) balancesConvertersETH;
 
+
+
     // Number of units (ERC20 tokens) bought
     mapping(address => uint256) public units;
 
@@ -62,9 +64,10 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     // Contract representing whitelisted referrers and converters
     TwoKeyWhitelisted whitelists;
 
+    uint256 contractorBalance;
 
     // There's single price for the unit ERC20 (Should be in WEI)
-    uint256 pricePerUnitInETH;
+    uint256 pricePerUnitInETHWei;
 
     // Rate of conversion from TwoKey to ETC
     uint256 public rate = 1;
@@ -102,10 +105,9 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     uint unit_decimals;
     string symbol;
 
-
+    // Add this 4 params to constructor
     uint tokenDistributionDate; // January 1st 2019
     uint maxDistributionDateShiftInDays; // 180 days
-
     uint bonusTokensVestingMonths; // 6 months
     uint bonusTokensVestingStartShiftInDaysFromDistributionDate; // 180 days
 
@@ -170,7 +172,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         maxReferralRewardPercent = _maxReferralRewardPercent;
         maxConverterBonusPercent = _maxConverterBonusPercent;
 
-        pricePerUnitInETH = _pricePerUnitInETH;
+        pricePerUnitInETHWei = _pricePerUnitInETH;
         minContributionETH = _minContributionETH;
         maxContributionETH = _maxContributionETH;
         setERC20Attributes();
@@ -475,22 +477,31 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     /// @param conversionAmountETH is actually the msg.value (amount of ether)
     /// @param converterAddress is actually the msg.sender (Address of one who's executing conversion)
     /// isOngoing
-    function createConversion(uint conversionAmountETH, address converterAddress) {
-        uint baseTokensForConverter;
-        uint bonusTokensForConverter;
+    function createConversion(uint conversionAmountETHWei, address converterAddress) {
 
-        (baseTokensForConverter, bonusTokensForConverter) = getEstimatedTokenAmount(conversionAmountETH);
+        uint baseTokensForConverterUnits;
+        uint bonusTokensForConverterUnits;
 
-        uint totalTokensForConverter = baseTokensForConverter + bonusTokensForConverter;
+        (baseTokensForConverterUnits, bonusTokensForConverterUnits) = getEstimatedTokenAmount(conversionAmountETHWei);
 
-        uint256 maxReferralRewardETH = conversionAmountETH.mul(maxReferralRewardPercent).div(100).div(10 ** unit_decimals);
-        uint256 moderatorFeeETH = calculateModeratorFee(conversionAmountETH);
+        uint totalTokensForConverterUnits = baseTokensForConverterUnits + bonusTokensForConverterUnits;
 
-        uint256 contractorProceeds = conversionAmountETH - maxReferralRewardETH - moderatorFeeETH;
+        uint256 _total_units = getInventoryBalance();
+        require(_total_units >= totalTokensForConverterUnits);
 
-        whitelists.supportForCreateConversion(contractor, contractorProceeds, converterAddress, conversionAmountETH, expiryConversionInHours);
+        units[converterAddress] = units[converterAddress].add(totalTokensForConverterUnits);
 
-        emit ReceivedEther(converterAddress, conversionAmountETH);
+        uint256 maxReferralRewardETHWei = conversionAmountETHWei.mul(maxReferralRewardPercent).div(100);
+        uint256 moderatorFeeETHWei = calculateModeratorFee(conversionAmountETHWei);
+
+        uint256 contractorProceedsETHWei = conversionAmountETHWei - maxReferralRewardETHWei - moderatorFeeETHWei;
+
+        whitelists.supportForCreateConversion(contractor, contractorProceedsETHWei, converterAddress,
+            conversionAmountETHWei, maxReferralRewardETHWei, moderatorFeeETHWei,
+            baseTokensForConverterUnits,bonusTokensForConverterUnits,
+            expiryConversionInHours);
+
+        emit ReceivedEther(converterAddress, conversionAmountETHWei);
     }
 
 
@@ -501,30 +512,34 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     function executeConversion(address _converter) isWhitelistedConverter public {
         whitelists.didConverterConvert(_converter);
 //         TODO: convert ETH to 2Key for moderator and referrers
-        performConversion();
+        performConversion(_converter);
         //require(transferFungibleAsset(msg.sender, _amount));
     }
 
-    function performConversion() internal {
+    function performConversion(address _converter) internal {
         /*
          (3) Then we need another function that requires converter to be whitelisted and should do the following:
-            - Compute referral rewards and distribute then
+            - Compute referral rewards and distribute then updateRefchainRewards
             - Compute and distribute moderation fees then
             - Generate lock-up contracts for tokens then
             - Move tokens to lock-up contracts then
             - Send remaining ether to contractor
+        */
+
+        /*
+            - first get the conversion for the _converter address
+            - get _maxReferralRewardETHWei from conversion object in wei and distribute
+            - put _maxReferralRewardETHWei inside updateRefchainRewards
 
         */
 
-//        Conversion memory c = conversions[msg.sender];
-//        conversions[msg.sender] = c;
 
         address _converterAddress;
         // Example; MaxReferralReward = 10% then msg.value = 100ETH
         // then this conversionReward = 10ETH
-        // TODO: this function has to be part of conversion
-        uint _units = 1;
-//        updateRefchainRewards(_units, maxReferralRewardPercent);
+        // uint _units = 1;
+
+        updateRefchainRewards(_maxReferralRewardETHWei);
 
         //TODO distribute refchainRewards
 
@@ -576,58 +591,41 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         // transfer payout - fee - rewards to seller
         //require(twoKeyEconomy.transfer(contractor, (payout.sub(fee).sub(maxReward)).mul(rate)));
 
-        //        transferRewardsTwoKeyToken(c.from, maxReward.mul(rate));
-        //        twoKeyEventSource.fulfilled(address(this), c.converter, c.tokenID, c.assetContract, c.indexOrAmount, c.campaignType);
+        //transferRewardsTwoKeyToken(c.from, maxReward.mul(rate));
+        //twoKeyEventSource.fulfilled(address(this), c.converter, c.tokenID, c.assetContract, c.indexOrAmount, c.campaignType);
 
-//        c.isFulfilled = true;
+        //c.isFulfilled = true;
 
     }
 
     //TODO: refactor to take into account bonus + base tokens added to _units
-    function updateRefchainRewards(uint256 _units, uint256 _bounty) public payable {
-        // buy coins with cut
-        // low level product purchase function
-        address customer = msg.sender;
-        uint256 customer_balance = balanceOf(customer);
-        require(customer_balance > 0);
+    function updateRefchainRewards(uint256 _maxReferralRewardETHWei, address _converter) internal {
+        require(_maxReferralRewardETHWei > 0);
+        address converter = _converter;
+        address[] memory influencers = getReferrers(converter);
 
-        uint256 _total_units = getInventoryBalance();
-
-        require(_units > 0);
-        require(_total_units >= _units);
-        address[] memory influencers = getInfluencers(customer);
-        //        uint n_influencers = influencers.length;
-
-        // distribute bounty to influencers
         uint256 total_bounty = 0;
-        uint max_referral_reward = _bounty.mul(maxReferralRewardPercent).div(100);
         for (uint i = 0; i < influencers.length; i++) {
             uint256 b;
             if (i == influencers.length - 1) {// if its the last influencer then all the bounty goes to it.
-                b = _bounty;
+                b = _maxReferralRewardETHWei;
             }
             else {
                 uint256 cut = referrer2cut[influencers[i]];
-                //        emit Log("CUT", influencer, cut);
                 if (cut > 0 && cut <= 101) {
-                    b = _bounty.mul(cut.sub(1)).mul(maxReferralRewardPercent).div(10000);
+                    b = _maxReferralRewardETHWei.mul(cut.sub(1)).div(100);
                 } else {// cut == 0 or 255 indicates equal particine of the bounty
-                    b = _bounty.div(influencers.length - i);
+                    b = _maxReferralRewardETHWei.div(influencers.length - i);
                 }
             }
-            if (b > max_referral_reward) {
-                b = max_referral_reward;
-            }
-
-            referrerBalancesETH[influencers[i]] = referrerBalancesETH[influencers[i]].add(b);
+            referrerBalancesETHWei[influencers[i]] = referrerBalancesETHWei[influencers[i]].add(b);
             emit Rewarded(influencers[i], b);
             total_bounty = total_bounty.add(b);
-            _bounty = _bounty.sub(b);
+            _maxReferralRewardETHWei = _maxReferralRewardETHWei.sub(b);
         }
 
-        units[customer] = units[customer].add(_units);
-
-        emit Fulfilled(customer, units[customer]);
+        contractorBalance = contractorBalance.add(_maxReferralRewardETHWei);
+//        emit Fulfilled(customer, units[customer]);
     }
 
 
@@ -677,7 +675,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
 
 
     // ==============================================================================================================
-    // =============================TWO KEY ACQUISITION CAMPAIGN GETTERS=============================================
+    // =================TWO KEY ACQUISITION CAMPAIGN GETTERS, SETTERS AND HELPER METHODS=============================
     // ==============================================================================================================
 
 
@@ -702,14 +700,14 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
 
     /// @notice Function to return constantss
     function getConstantInfo() public view returns (uint256, uint256, uint256, uint256) {
-        return (pricePerUnitInETH, maxReferralRewardPercent, conversionQuota, unit_decimals);
+        return (pricePerUnitInETHWei, maxReferralRewardPercent, conversionQuota, unit_decimals);
     }
 
     /// @notice Function which acts like getter for all cuts in array
     /// @param last_influencer is the last influencer
     /// @return array of integers containing cuts respectively
     function getReferrerCuts(address last_influencer) public view returns (uint256[]) {
-        address[] memory influencers = getInfluencers(last_influencer);
+        address[] memory influencers = getReferrers(last_influencer);
         uint256[] memory cuts = new uint256[](influencers.length + 1);
         for (uint i = 0; i < influencers.length; i++) {
             address influencer = influencers[i];
@@ -752,10 +750,10 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     /// @notice Function which will calculate the base amount, bonus amount
     /// @param conversionAmountETH is amount of eth in conversion
     /// @return tuple containing (base,bonus)
-    function getEstimatedTokenAmount(uint conversionAmountETH) public view returns (uint, uint) {
-        uint baseTokensForConverter = conversionAmountETH.mul(10 ** unit_decimals).div(pricePerUnitInETH);
-        uint bonusTokensForConverter = baseTokensForConverter.mul(maxConverterBonusPercent).div(100).div(10 ** unit_decimals);
-        return (baseTokensForConverter, bonusTokensForConverter);
+    function getEstimatedTokenAmount(uint conversionAmountETHWei) public view returns (uint, uint) {
+        uint baseTokensForConverterUnits = conversionAmountETHWei.mul(10 ** unit_decimals).div(pricePerUnitInETHWei);
+        uint bonusTokensForConverterUnits = baseTokensForConverter.mul(maxConverterBonusPercent).div(100).div(10 ** unit_decimals);
+        return (baseTokensForConverterUnits, bonusTokensForConverterUnits);
     }
 
     function getAddressOfWhitelistedContract() public view returns (address) {
@@ -797,40 +795,48 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         emit UpdatedData(block.timestamp, value, "Updated maxReferralRewardPercent");
     }
 
-    function updateIpfsHashPublicMeta(string value) public onlyContractor {
-        publicMetaHash = value;
-        emit UpdatedPublicMetaHash(block.timestamp, value);
-    }
-
-
+//    function updateIpfsHashPublicMeta(string value) public onlyContractor {
+//        publicMetaHash = value;
+//        emit UpdatedPublicMetaHash(block.timestamp, value);
+//    }
 //
 //    // Add other getters and modifiers
 //    function getPendingConvertersFromWhitelist() public view onlyContractorOrModerator returns (address[]) {
-//        return whitelists.getPendingConverters();
+//        address[] memory pendingConverters = whitelists.getPendingConverters();
+//        return pendingConverters;
 //    }
 //
 //    function getRejectedConvertersFromWhitelist() public view onlyContractorOrModerator returns (address[]) {
-//        return whitelists.getRejectedConverters();
+//        address[] memory rejectedConverters = whitelists.getRejectedConverters();
+//        return rejectedConverters;
 //    }
 //
 //    function getApprovedConvertersFromWhitelist() public view onlyContractorOrModerator returns (address[]) {
-//        return whitelists.getApprovedConverters();
+//        address[] memory approvedConverters = whitelists.getApprovedConverters();
+//        return approvedConverters;
 //    }
 //
 //    function getExpiredConvertersFromWhitelist() public view onlyContractorOrModerator returns (address[]) {
-//        return whitelists.getExpiredConverters();
+//        address[] memory expiredConverters = whitelists.getExpiredConverters();
+//        return expiredConverters;
 //    }
 
-//
-//
+    // Moderator or contractor can approve an address as converter
+    // The address can be approved if rejected or pending
+    // Can only be rejected if it is pending
+
+    function rejectAddress(address _pendingAddress) public onlyContractorOrModerator {
+        if(whitelists.isAddressPending(_pendingAddress) == true) {
+
+        }
+    }
+
 //    function whitelistAddressAsConverter(address _converterAddress) public onlyContractorOrModerator {
 //        if(whitelists.isAddressPending(_converterAddress) == true) {
 //            whitelists.addToWhitelistConverter(_converterAddress);
 //        }
 //    }
 
-    // Moderator or contractor can approve an address as converter
-    // The address can be approved if rejected or pending
-    // Can only be rejected if it is pending
+
 
 }
