@@ -11,11 +11,12 @@ import "./TwoKeyConversionStates.sol";
 // adapted from: 
 // https://openzeppelin.org/api/docs/crowdsale_validation_WhitelistedCrowdsale.html
 
-//TODO: replace Ownable with RBAC
 contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
 
     mapping(address => Conversion) public conversions;
 
+    // Same conversion can appear only once in this 4 arrays
+    // Update object enum
     address[] addressesOfPendingConverters;
     address[] addressesOfApprovedConverters;
     address[] addressesOfRejectedConverters;
@@ -47,9 +48,10 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
         address contractor; // Contractor (creator) of campaign
         uint256 contractorProceeds; // How much contractor will receive for this conversion
         address converter; // Converter is one who's buying tokens
-        bool isFulfilled; // Conversion finished (processed)
-        bool isCancelledByConverter; // Canceled by converter
-        bool isRejectedByModerator; // Rejected by moderator
+//        bool isFulfilled; // Conversion finished (processed)
+//        bool isCancelledByConverter; // Canceled by converter
+//        bool isRejectedByModerator; // Rejected by moderator
+        ConversionState state;
         string assetSymbol; // Name of ERC20 token we're selling in our campaign (we can get that from contract address)
         address assetContractERC20; // Address of ERC20 token we're selling in our campaign
         uint256 conversionAmount; // Amount for conversion (In ETH)
@@ -147,7 +149,8 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
     /// @param converterAddress is the address of converter
     function didConverterConvert(address converterAddress) public view {
         Conversion memory c = conversions[converterAddress];
-        require(!c.isFulfilled && !c.isCancelledByConverter);
+        require(c.state != ConversionState.FULFILLED);
+        require(c.state != ConversionState.CANCELLED);
     }
 
     /*
@@ -156,7 +159,7 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
 
     function supportForCanceledEscrow(address _converterAddress) public onlyTwoKeyAcquisitionCampaign returns (uint256){
         Conversion memory c = conversions[_converterAddress];
-        c.isCancelledByConverter = true;
+        c.state = ConversionState.CANCELLED;
         conversions[_converterAddress] = c;
 
         return (c.contractorProceeds);
@@ -165,7 +168,9 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
 
     function supportForCancelAssetTwoKey(address _converterAddress) public view onlyTwoKeyAcquisitionCampaign{
         Conversion memory c = conversions[_converterAddress];
-        require(!c.isCancelledByConverter && !c.isFulfilled && !c.isRejectedByModerator);
+        require(c.state != ConversionState.CANCELLED);
+        require(c.state != ConversionState.FULFILLED);
+        require(c.state != ConversionState.REJECTED);
     }
 
     /// @notice Function which will support checking if escrow is expired
@@ -173,7 +178,9 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
     /// @param _converterAddress is the address of the converter
     function supportForExpireEscrow(address _converterAddress) public view onlyTwoKeyAcquisitionCampaign {
         Conversion memory c = conversions[_converterAddress];
-        require(!c.isCancelledByConverter && !c.isFulfilled && !c.isRejectedByModerator);
+        require(c.state != ConversionState.CANCELLED);
+        require(c.state != ConversionState.FULFILLED);
+        require(c.state != ConversionState.REJECTED);
         require(now > c.conversionExpiresAt);
     }
 
@@ -188,17 +195,12 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
             address _contractor,
             uint256 _contractorProceeds,
             address _converterAddress,
-//            bool _isFulfilled,
-//            bool _isCancelledByConverter,
-//            bool _isRejectedByModerator,
-//            string _assetSymbol,
-//            address _assetContractERC20,
             uint256 _conversionAmount,
             uint256 expiryConversion) public onlyTwoKeyAcquisitionCampaign {
         // these are going to be global variables
         address _assetContractERC20 = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).getAssetContractAddress();
         string memory _assetSymbol = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).getSymbol();
-        Conversion memory c = Conversion(_contractor, _contractorProceeds, _converterAddress, false, false, false, _assetSymbol, _assetContractERC20, _conversionAmount, CampaignType.CPA_FUNGIBLE, now, now + expiryConversion * (1 hours));
+        Conversion memory c = Conversion(_contractor, _contractorProceeds, _converterAddress, ConversionState.PENDING, _assetSymbol, _assetContractERC20, _conversionAmount, CampaignType.CPA_FUNGIBLE, now, now + expiryConversion * (1 hours));
 
         conversions[_converterAddress] = c;
         addressesOfPendingConverters.push(_converterAddress);
@@ -222,32 +224,39 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
     /// @notice Function to retrieve all converters who's conversions are pending
     /// @dev it's a view function, doesn't consume any gas
     /// @return array of addresses of pending converters
-    function getPendingConverters() public view returns (address[]) {
+    function getPendingConverters() public view onlyTwoKeyAcquisitionCampaign returns (address[]) {
         return addressesOfPendingConverters;
     }
 
     /// @notice Function to retrieve all converters who's conversions are rejected
     /// @dev it's a view function, doesn't consume any gas
     /// @return array of addresses of rejected converters
-    function getRejectedConverters() public view returns (address[]) {
+    function getRejectedConverters() public view onlyTwoKeyAcquisitionCampaign returns (address[]) {
         return addressesOfRejectedConverters;
     }
 
     /// @notice Function to retrieve all converters who's conversions are approved
     /// @dev it's a view function, doesn't consume any gas
     /// @return array of addresses of approved converters
-    function getApprovedConverters() public view returns (address[]) {
+    function getApprovedConverters() public view onlyTwoKeyAcquisitionCampaign returns (address[]) {
         return addressesOfApprovedConverters;
     }
 
     /// @notice Function to retrieve all converters who's conversions are expired
     /// @dev it's a view function, doesn't consume any gas
     /// @return array of addresses of expired converters
-    function getExpiredConverters() public view returns (address[]) {
+    function getExpiredConverters() public view onlyTwoKeyAcquisitionCampaign returns (address[]) {
         return addressesOfExpiredConverters;
     }
 
-
-
+//    function isAddressPending(address _pendingAddress) public view returns (bool) {
+//        require(_pendingAddress != address(0));
+//        for(uint i=0; i<addressesOfPendingConverters.length; i++) {
+//            if(_pendingAddress == addressesOfPendingConverters[i]) {
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
 
 }

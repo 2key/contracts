@@ -5,7 +5,6 @@ import "./TwoKeyCampaignARC.sol";
 import "./TwoKeyEventSource.sol";
 import "./TwoKeyWhitelisted.sol";
 import "./TwoKeyEconomy.sol";
-import "./TwoKeySignedContract.sol";
 import "../interfaces/IERC20.sol";
 import "./Utils.sol";
 import "./TwoKeyTypes.sol";
@@ -18,57 +17,12 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     /// Using safemath to avoid overflows during math operations
     using SafeMath for uint256;
 
-    /*  Questions:
-            1. Should mapping where we store conversions by address be public? (getter for msg.sender only for now)
-            2. Maybe we can even remove assetName and whenever we need it,
-                we can call view function for IERC20 and check it's value
-            3. ARCS can't be divided, do we need to specify somewhere that decimals for arcs are equal to 0?
-            4. uint256 unit_decimals;  // units being sold can be fractional
-                (for example tokens in ERC20) (Udi) (Do we need this as global var?)
-            5. Does mapping publicLinkKey need to allow only msg.sender to read his key or anyone
-                can access it (it can be public that's Q)?
-            6. getReferrerCuts private? getReferrerCuts? If you're the contractor or moderator you can get all data, otherwise you can get yours cut
-        Contract changes:
-            1. Rename in conversion payout --> contractorProceeds
-            2. Add 1 more attribute to Conversion object called 'isRejectedByModerator'
-            3. Rename isCancelled --> isCancelledByConvertor
-            4. openingTime --> campaignStartTime
-            5. closingTime --> campaignEndTime
-            6. influencer2cut --> referrer2cut (to be more explicit)
-            7. referrer2cut mapping is not anymore public (We'll add getter where only
-                msg.sender can get his conversion)
-            8. assetContract --> assetContractERC20
-            9. whitelisted contracts -> referrerWhitelist, converterWhitelist
-           10. Removed 'contractorProceeds' variable
-           11. escrowPercentage --> moderatorFeePercentage
-           12. removed 'name' variable
-           13. removed 'ipfsHash' variable
-           14. add publicMetaHash, privateMetaHash
-           15. Remove 'symbol' variable since it's the same as assetName
-           16. Rename assetName --> assetSymbol
-           17. Rename quota --> conversionQuota
-           18. Rename addFungibleAsset --> addUnitsToInventory
-           19. Modified constructor + order in constructor of params + added some new params
-           20. Rename public_link_key --> publicLinkKey
-           21. Modified publicLinkKey is not 'public' anymore
-           22. checkAndUpdateInventoryBalance -> getAndUpdateInventoryBalance
-           23. checkInventoryBalance -> getInventoryBalance
-           24. Reorganize code that we have it in areas like 'PARAMS - STATE',
-            'CONSTRUCTOR','METHODS', 'GETTERS', 'SETTERS', etc.
-           25. Add some getters (for cut, publink etc)
-           26. joinAndSetPublicLinkWithCut -> add distributeArcsBasedOnSignature
-           27. tranferSig --> distributeArcsBasedOnSignature
-           28. getCut --> getReferrerCuts
-           29. Add getEstimatedTokenAmount function to calculate baseAssetAmount and bonusAssetAmount
-           30. Add setAssetContractAttributes method for inheriting decimals and symbol from assetContractERC20
-           31. Add getContractAttributes method to get assetSymbol and assetDecimals
-    */
-
 
     // ==============================================================================================================
     // =====================================TWO KEY ACQUISITION CAMPAIGN EVENTS======================================
     // ==============================================================================================================
-
+    event UpdatedDataStr(uint timestamp, string value);
+    event UpdatedData(uint timestamp, uint value, string action);
     event Fulfilled(address indexed to, uint256 units);
     event Rewarded(address indexed to, uint256 amount);
     event Expired(address indexed _contract);
@@ -147,17 +101,13 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
 
     uint unit_decimals;
     string symbol;
-    /*
-     Someone buys with 100 ETH
-     Price per unit in ETH is 0.01
-     maxConverterBonusPercent is 40%
-     In this campaign each converter gets maximum
-     maxConverterBonusPercent means that the converter will bi eligible to get 140 ETH worth of tokens which still cost 0.01 ETH
-     14000 tokens
-     100 / 14000 = .007142857 - actual price per token with the bonus
-     (0.01 - .007142857) / 0.01  = .2857143 - this itruffs the actual discount
-    */
 
+
+    uint tokenDistributionDate; // January 1st 2019
+    uint maxDistributionDateShiftInDays; // 180 days
+
+    uint bonusTokensVestingMonths; // 6 months
+    uint bonusTokensVestingStartShiftInDaysFromDistributionDate; // 180 days
 
 
 
@@ -541,7 +491,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         whitelists.supportForCreateConversion(contractor, contractorProceeds, converterAddress, conversionAmountETH, expiryConversionInHours);
 
         emit ReceivedEther(converterAddress, conversionAmountETH);
-
     }
 
 
@@ -575,7 +524,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         // then this conversionReward = 10ETH
         // TODO: this function has to be part of conversion
         uint _units = 1;
-        updateRefchainRewards(_units, maxReferralRewardPercent);
+//        updateRefchainRewards(_units, maxReferralRewardPercent);
 
         //TODO distribute refchainRewards
 
@@ -593,6 +542,23 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         4. only other function of the lockupcontract is that the contractor may up to 1 time only, delay the vesting date of the tokens, by no more then maxVestingDaysDelay (param should be in campaign contract),
         and only if the vesting date has not yet arrived.
 
+        EXAMPLE LOCKUP:
+            -lockup contract has converter and contractor
+            -lockup contract has balance of tokens (ERC20)
+            -we have vesting date in lockup contract
+            -lockup contract allows only converter to transfer the tokens only after vesting date
+            -contractor can change the vesting date up to once by no more than "max vesting date days shift" (param)
+
+        uint tokenDistributionDate; // January 1st 2019
+        uint maxDistributionDateShiftInDays; // 180 days
+
+        (tokenDistributionDate,maxDistributionDateShiftInDays,baseTokens, converter, contractor) -- constructor of lockup contract
+
+        uint bonusTokensVestingMonths; // 6 months
+        uint bonusTokensVestingStartShiftInDaysFromDistributionDate; // 180 days
+
+        bonusTokensVestingMonths*(tokenDistributionDate + bonusTokensVestingStartShiftInDaysFromDistributionDate, maxDistributionDateShiftInDays,
+        bonusTokens/bonusTokensVestingMonths, converter, contractor)
 
         */
 
@@ -805,6 +771,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         require(msg.sender == contractor);
         publicMetaHash = _publicMetaHash;
     }
+
     //onlyContractor
     function setPrivateMetaHash(string _privateMetaHash) public {
         require(msg.sender == contractor);
@@ -816,5 +783,56 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         return privateMetaHash;
     }
 
+
+    function updateMinContribution(uint value) public onlyContractor {
+        minContributionETH = value;
+        emit UpdatedData(block.timestamp, value, "Updated maxContribution");
+    }
+
+    function updateMaxContribution(uint value) public onlyContractor {
+        maxContributionETH = value;
+        emit UpdatedData(block.timestamp, value, "Updated maxContribution");
+    }
+
+    function updateMaxReferralRewardPercent(uint value) public onlyContractor {
+        maxReferralRewardPercent = value;
+        emit UpdatedData(block.timestamp, value, "Updated maxReferralRewardPercent");
+    }
+
+    function updateIpfsHashPublicMeta(string value) public onlyContractor {
+        publicMetaHash = value;
+        emit UpdatedDataStr(block.timestamp, value);
+    }
+
+
+//
+//    // Add other getters and modifiers
+//    function getPendingConvertersFromWhitelist() public view onlyContractorOrModerator returns (address[]) {
+//        return whitelists.getPendingConverters();
+//    }
+//
+//    function getRejectedConvertersFromWhitelist() public view onlyContractorOrModerator returns (address[]) {
+//        return whitelists.getRejectedConverters();
+//    }
+//
+//    function getApprovedConvertersFromWhitelist() public view onlyContractorOrModerator returns (address[]) {
+//        return whitelists.getApprovedConverters();
+//    }
+//
+//    function getExpiredConvertersFromWhitelist() public view onlyContractorOrModerator returns (address[]) {
+//        return whitelists.getExpiredConverters();
+//    }
+
+//
+//
+//    function whitelistAddressAsConverter(address _converterAddress) public onlyContractorOrModerator {
+//        if(whitelists.isAddressPending(_converterAddress) == true) {
+//            whitelists.addToWhitelistConverter(_converterAddress);
+//        }
+//    }
+
+    // Moderator or contractor can approve an address as converter
+    // The address can be approved if rejected or pending
+    // Can only be rejected if it is pending
 
 }
