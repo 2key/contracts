@@ -321,8 +321,8 @@ export class TwoKeyProtocol {
                     // Fake WhiteListConverter address
                     data.moderator || this.address,
                     data.assetContractERC20,
-                    data.campaignStartTime / 1000,
-                    data.campaignEndTime / 1000,
+                    data.campaignStartTime,
+                    data.campaignEndTime,
                     data.expiryConversion,
                     data.moderatorFeePercentageWei,
                     data.maxReferralRewardPercentWei,
@@ -361,8 +361,8 @@ export class TwoKeyProtocol {
                     whitelistsAddress,
                     data.moderator || this.address,
                     data.assetContractERC20,
-                    data.campaignStartTime / 1000,
-                    data.campaignEndTime / 1000,
+                    data.campaignStartTime,
+                    data.campaignEndTime,
                     data.expiryConversion,
                     data.moderatorFeePercentageWei,
                     data.maxReferralRewardPercentWei,
@@ -779,11 +779,11 @@ export class TwoKeyProtocol {
     private _createContract(contract: Contract, gasPrice: number = this.gasPrice, params?: any[], progressCallback?: CreateCampignProgress): Promise<string> {
         return new Promise(async (resolve, reject) => {
             const {abi, bytecode: data, name} = contract;
-            const gas = await this._estimateSubcontractGas(contract, params);
-            const createParams = params ? [...params, {data, from: this.address, gas, gasPrice}] : [{
+            console.log(name, ':', params);
+            // const gas = await this._estimateSubcontractGas(contract, params);
+            const createParams = params ? [...params, {data, from: this.address }] : [{
                 data,
                 from: this.address,
-                gas,
                 gasPrice
             }];
             this.web3.eth.contract(abi).new(...createParams, (err, res) => {

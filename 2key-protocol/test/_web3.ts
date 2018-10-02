@@ -1,5 +1,6 @@
 import Web3 from 'web3';
 import bip39 from 'bip39';
+import * as eth_wallet from 'ethereumjs-wallet';
 import hdkey from 'ethereumjs-wallet/hdkey';
 import ProviderEngine from 'web3-provider-engine';
 import RpcSubprovider from 'web3-provider-engine/subproviders/rpc';
@@ -56,9 +57,15 @@ export function ledgerWeb3(rpcUrl: string, networkId?: number, path?: string): P
     });
 }
 
-export default function (mnemonic: string, rpcUrl: string): EthereumWeb3 {
-    const hdwallet = hdkey.fromMasterSeed(bip39.mnemonicToSeed(mnemonic));
-    const wallet = hdwallet.derivePath('m/44\'/60\'/0\'/0/' + 0).getWallet();
+export default function (mnemonic: string, rpcUrl: string, pk?: string): EthereumWeb3 {
+    let wallet;
+    if (pk) {
+        const private_key = Buffer.from(pk, 'hex');
+        wallet = eth_wallet.fromPrivateKey(private_key);
+    } else {
+        const hdwallet = hdkey.fromMasterSeed(bip39.mnemonicToSeed(mnemonic));
+        wallet = hdwallet.derivePath('m/44\'/60\'/0\'/0/' + 0).getWallet();
+    }
 
     const engine = new ProviderEngine();
     const mainProvider = rpcUrl.startsWith('http') ? new RpcSubprovider({rpcUrl}) : new WSSubprovider({rpcUrl});

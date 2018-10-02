@@ -23,8 +23,8 @@ const moderatorFeePercentage = 1;
 const minContributionETH = 1;
 const maxContributionETH = 10;
 const now = new Date();
-const campaignStartTime = new Date(now.valueOf()).setDate(now.getDate() - 30);
-const campaignEndTime = new Date(now.valueOf()).setDate(now.getDate() + 30);
+const campaignStartTime = Math.round(new Date(now.valueOf()).setDate(now.getDate() - 30) / 1000);
+const campaignEndTime = Math.round(new Date(now.valueOf()).setDate(now.getDate() + 30) / 1000);
 const twoKeyEconomy = contractsMeta.TwoKeyEconomy.networks[mainNetId].address;
 const twoKeyAdmin = contractsMeta.TwoKeyAdmin.networks[mainNetId].address;
 
@@ -52,7 +52,7 @@ const createCallback = (name: string, mined: boolean, transactionResult: string)
 // let web3 = createWeb3(mnemonic, rpcUrl);
 const web3switcher = {
     deployer: () => createWeb3(env.MNEMONIC_DEPLOYER, rpcUrl),
-    aydnep: () => createWeb3(env.MNEMONIC_AYDNEP, rpcUrl),
+    aydnep: () => createWeb3(env.MNEMONIC_AYDNEP, rpcUrl, '9125720a89c9297cde4a3cfc92f233da5b22f868b44f78171354d4e0f7fe74ec'),
     gmail: () => createWeb3(env.MNEMONIC_GMAIL, rpcUrl),
     test4: () => createWeb3(env.MNEMONIC_TEST4, rpcUrl),
     renata: () => createWeb3(env.MNEMONIC_RENATA, rpcUrl),
@@ -118,10 +118,12 @@ describe('TwoKeyProtocol', () => {
                     },
                 });
                 const {balance} = twoKeyProtocol.balanceFromWeiString(await twoKeyProtocol.getBalance(env.AYDNEP_ADDRESS), true);
+                const { balance: adminBalance } = twoKeyProtocol.balanceFromWeiString(await twoKeyProtocol.getBalance(), true);
+                console.log(adminBalance);
                 if (parseFloat(balance['2KEY'].toString()) <= 20000) {
                     console.log('NO BALANCE at aydnep account');
                     const admin = web3.eth.contract(contractsMeta.TwoKeyAdmin.abi).at(contractsMeta.TwoKeyAdmin.networks[mainNetId].address);
-                    admin.transfer2KeyTokens(twoKeyEconomy, destinationAddress, twoKeyProtocol.toWei(100000, 'ether'), { from: env.DEPLOYER_ADDRESS, gas: 7000000, gasPrice: 5000000000 },  async (err, res) => {
+                    admin.transfer2KeyTokens(twoKeyEconomy, destinationAddress, twoKeyProtocol.toWei(100000, 'ether'), { from: env.DEPLOYER_ADDRESS },  async (err, res) => {
                         if (err) {
                             reject(err);
                         } else {
