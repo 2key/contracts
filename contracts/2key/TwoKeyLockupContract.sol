@@ -9,7 +9,7 @@ contract TwoKeyLockupContract {
     uint contractor;
 
 
-    constructor(uint _tokenDitributionDate, uint _maxDistributionDateShiftInDays, uint _baseTokens, uint _converter, uint _contractor) {
+    constructor(uint _tokenDistributionDate, uint _maxDistributionDateShiftInDays, uint _baseTokens, uint _converter, uint _contractor) {
         tokenDistributionDate = _tokenDistributionDate;
         maxDistributionDateShiftInDays = _maxDistributionDateShiftInDays;
         baseTokens = _baseTokens;
