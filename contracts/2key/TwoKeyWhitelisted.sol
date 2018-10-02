@@ -15,8 +15,7 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
 
     mapping(address => Conversion) public conversions;
 
-    // Same conversion can appear only once in this 4 arrays
-    // Update object enum
+    // Same conversion can appear only in once of this 4 arrays at a time
     address[] addressesOfPendingConverters;
     address[] addressesOfApprovedConverters;
     address[] addressesOfRejectedConverters;
@@ -249,14 +248,24 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
         return addressesOfExpiredConverters;
     }
 
-//    function isAddressPending(address _pendingAddress) public view returns (bool) {
-//        require(_pendingAddress != address(0));
-//        for(uint i=0; i<addressesOfPendingConverters.length; i++) {
-//            if(_pendingAddress == addressesOfPendingConverters[i]) {
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
+    function isAddressPending(address _pendingAddress) public view returns (bool) {
+        require(_pendingAddress != address(0));
+        for(uint i=0; i<addressesOfPendingConverters.length; i++) {
+            if(_pendingAddress == addressesOfPendingConverters[i]) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function isAddressRejected(address _rejectedAddress) public view returns (bool) {
+        require(_rejectedAddress != address(0));
+        for(uint i=0; i<addressesOfRejectedConverters.length; i++) {
+            if(_rejectedAddress == addressesOfRejectedConverters[i]) {
+                return true;
+            }
+        }
+        return false;
+    }
 
 }
