@@ -193,12 +193,12 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
 
     /**
      * given the total payout, calculates the moderator fee
-     * @param  _conversionAmountETH total payout for escrow
+     * @param  _conversionAmountETHWei total payout for escrow
      * @return moderator fee
      */
-    function calculateModeratorFee(uint256 _conversionAmountETH) internal view returns (uint256)  {
+    function calculateModeratorFee(uint256 _conversionAmountETHWei) internal view returns (uint256)  {
         if (moderatorFeePercentage > 0) {// send the fee to moderator
-            uint256 fee = _conversionAmountETH.mul(moderatorFeePercentage).div(100).div(10 ** unit_decimals);
+            uint256 fee = _conversionAmountETHWei.mul(moderatorFeePercentage).div(100).div(10 ** unit_decimals);
             return fee;
         }
         return 0;
@@ -474,7 +474,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     //(2) CONVERSION 1st STEP
 
     /// @notice Function to create conversion
-    /// @param conversionAmountETH is actually the msg.value (amount of ether)
+    /// @param conversionAmountETHWei is actually the msg.value (amount of ether)
     /// @param converterAddress is actually the msg.sender (Address of one who's executing conversion)
     /// isOngoing
     function createConversion(uint conversionAmountETHWei, address converterAddress) {
@@ -539,7 +539,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         // then this conversionReward = 10ETH
         // uint _units = 1;
 
-        updateRefchainRewards(_maxReferralRewardETHWei);
+//        updateRefchainRewards(_maxReferralRewardETHWei);
 
         //TODO distribute refchainRewards
 
@@ -748,11 +748,11 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     }
 
     /// @notice Function which will calculate the base amount, bonus amount
-    /// @param conversionAmountETH is amount of eth in conversion
+    /// @param conversionAmountETHWei is amount of eth in conversion
     /// @return tuple containing (base,bonus)
     function getEstimatedTokenAmount(uint conversionAmountETHWei) public view returns (uint, uint) {
         uint baseTokensForConverterUnits = conversionAmountETHWei.mul(10 ** unit_decimals).div(pricePerUnitInETHWei);
-        uint bonusTokensForConverterUnits = baseTokensForConverter.mul(maxConverterBonusPercent).div(100).div(10 ** unit_decimals);
+        uint bonusTokensForConverterUnits = baseTokensForConverterUnits.mul(maxConverterBonusPercent).div(100).div(10 ** unit_decimals);
         return (baseTokensForConverterUnits, bonusTokensForConverterUnits);
     }
 
@@ -825,11 +825,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     // The address can be approved if rejected or pending
     // Can only be rejected if it is pending
 
-    function rejectAddress(address _pendingAddress) public onlyContractorOrModerator {
-        if(whitelists.isAddressPending(_pendingAddress) == true) {
 
-        }
-    }
 
 //    function whitelistAddressAsConverter(address _converterAddress) public onlyContractorOrModerator {
 //        if(whitelists.isAddressPending(_converterAddress) == true) {
