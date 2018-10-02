@@ -248,6 +248,9 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
         return addressesOfExpiredConverters;
     }
 
+    /// @notice Function to check if address is in pending array of converters
+    /// @param _pendingAddress is the address we're searching for
+    /// @return true if found, otherwise false
     function isAddressPending(address _pendingAddress) public view returns (bool) {
         require(_pendingAddress != address(0));
         for(uint i=0; i<addressesOfPendingConverters.length; i++) {
@@ -258,6 +261,10 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
         return false;
     }
 
+
+    /// @notice Function to check if address is in rejected array of converters
+    /// @param _rejectedAddress is the address we're searching for
+    /// @return true if found, otherwise false
     function isAddressRejected(address _rejectedAddress) public view returns (bool) {
         require(_rejectedAddress != address(0));
         for(uint i=0; i<addressesOfRejectedConverters.length; i++) {
