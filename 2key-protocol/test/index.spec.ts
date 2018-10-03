@@ -48,18 +48,46 @@ console.log(contractsMeta.TwoKeyEconomy.networks[mainNetId].address);
 const createCallback = (name: string, mined: boolean, transactionResult: string): void => {
     console.log(`Contract ${name} ${mined ? `deployed with address ${transactionResult}` : `placed to EVM. Hash ${transactionResult}`}`);
 };
+/*
+
+    "0xb3fa520368f2df7bed4df5185101f303f6c7decc": { "balance": "0x1337000000000000000000" },
+    "0xffcf8fdee72ac11b5c542428b35eef5769c409f0": { "balance": "0x1337000000000000000000" },
+    "0x22d491bde2303f2f43325b2108d26f1eaba1e32b": { "balance": "0x1337000000000000000000" },
+    "0xe11ba2b4d45eaed5996cd0823791e0c93114882d": { "balance": "0x1337000000000000000000" },
+    "0xd03ea8624c8c5987235048901fb614fdca89b117": { "balance": "0x1337000000000000000000" },
+    "0x95ced938f7991cd0dfcb48f0a06a40fa1af46ebc": { "balance": "0x1337000000000000000000" },
+    "0x3e5e9111ae8eb78fe1cc3bb8915d5d461f3ef9a9": { "balance": "0x1337000000000000000000" },
+    "0x28a8746e75304c0780e011bed21c72cd78cd535e": { "balance": "0x1337000000000000000000" },
+    "0xaca94ef8bd5ffee41947b4585a84bda5a3d3da6e": { "balance": "0x1337000000000000000000" },
+    "0x1df62f291b2e969fb0849d99d9ce41e2f137006e": { "balance": "0x1337000000000000000000" },
+    "0x610bb1573d1046fcb8a70bbbd395754cd57c2b60": { "balance": "0x1337000000000000000000" },
+
+
+6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1 0xb3fa520368f2df7bed4df5185101f303f6c7decc
+9125720a89c9297cde4a3cfc92f233da5b22f868b44f78171354d4e0f7fe74ec 0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7
+6370fd033278c143179d81c5526140625662b8daa446c22ee2d73db3707e620c 0xffcf8fdee72ac11b5c542428b35eef5769c409f0
+646f1ce2fdad0e6deeeb5c7e8e5543bdde65e86029e2fd9fc169899c440a7913 0x22d491bde2303f2f43325b2108d26f1eaba1e32b
+add53f9a7e588d003326d1cbf9e4a43c061aadd9bc938c843a79e7b4fd2ad743 0xe11ba2b4d45eaed5996cd0823791e0c93114882d
+395df67f0c2d2d9fe1ad08d1bc8b6627011959b79c53d7dd6a3536a33ab8a4fd 0xd03ea8624c8c5987235048901fb614fdca89b117
+e485d098507f54e7733a205420dfddbe58db035fa577fc294ebd14db90767a52 0x95ced938f7991cd0dfcb48f0a06a40fa1af46ebc
+a453611d9419d0e56f499079478fd72c37b251a94bfde4d19872c44cf65386e3 0x3e5e9111ae8eb78fe1cc3bb8915d5d461f3ef9a9
+829e924fdf021ba3dbbc4225edfece9aca04b929d6e75613329ca6f1d31c0bb4 0x28a8746e75304c0780e011bed21c72cd78cd535e
+
+b0057716d5917badaf911b193b12b910811c1497b5bada8d7711f758981c3773 0xaca94ef8bd5ffee41947b4585a84bda5a3d3da6e
+77c5495fbb039eed474fc940f29955ed0531693cc9212911efd35dff0373153f 0x1df62f291b2e969fb0849d99d9ce41e2f137006e
+*/
 
 // let web3 = createWeb3(mnemonic, rpcUrl);
 const web3switcher = {
-    deployer: () => createWeb3(env.MNEMONIC_DEPLOYER, rpcUrl),
+    deployer: () => createWeb3(env.MNEMONIC_DEPLOYER, rpcUrl, '6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1'),
     aydnep: () => createWeb3(env.MNEMONIC_AYDNEP, rpcUrl, '9125720a89c9297cde4a3cfc92f233da5b22f868b44f78171354d4e0f7fe74ec'),
-    gmail: () => createWeb3(env.MNEMONIC_GMAIL, rpcUrl),
-    test4: () => createWeb3(env.MNEMONIC_TEST4, rpcUrl),
-    renata: () => createWeb3(env.MNEMONIC_RENATA, rpcUrl),
-    uport: () => createWeb3(env.MNEMONIC_UPORT, rpcUrl),
-    gmail2: () => createWeb3(env.MNEMONIC_GMAIL2, rpcUrl),
-    aydnep2: () => createWeb3(env.MNEMONIC_AYDNEP2, rpcUrl),
-    test: () => createWeb3(env.MNEMONIC_TEST, rpcUrl),
+    gmail: () => createWeb3(env.MNEMONIC_GMAIL, rpcUrl, '6370fd033278c143179d81c5526140625662b8daa446c22ee2d73db3707e620c'),
+    test4: () => createWeb3(env.MNEMONIC_TEST4, rpcUrl, '646f1ce2fdad0e6deeeb5c7e8e5543bdde65e86029e2fd9fc169899c440a7913'),
+    renata: () => createWeb3(env.MNEMONIC_RENATA, rpcUrl, 'add53f9a7e588d003326d1cbf9e4a43c061aadd9bc938c843a79e7b4fd2ad743'),
+    uport: () => createWeb3(env.MNEMONIC_UPORT, rpcUrl, '395df67f0c2d2d9fe1ad08d1bc8b6627011959b79c53d7dd6a3536a33ab8a4fd'),
+    gmail2: () => createWeb3(env.MNEMONIC_GMAIL2, rpcUrl, 'e485d098507f54e7733a205420dfddbe58db035fa577fc294ebd14db90767a52'),
+    aydnep2: () => createWeb3(env.MNEMONIC_AYDNEP2, rpcUrl, 'a453611d9419d0e56f499079478fd72c37b251a94bfde4d19872c44cf65386e3'),
+    test: () => createWeb3(env.MNEMONIC_TEST, rpcUrl, '829e924fdf021ba3dbbc4225edfece9aca04b929d6e75613329ca6f1d31c0bb4'),
 };
 // console.log('MNEMONICS');
 // Object.keys(env).filter(key => key.includes('MNEMONIC')).forEach((key) => {
@@ -173,7 +201,7 @@ describe('TwoKeyProtocol', () => {
             console.log('IPFS hash', hash);
             expect(hash).to.be.a('string');
         });
-    });
+    }).timeout(30000);
 
     const rnd = Math.floor(Math.random() * 8);
     console.log('Random', rnd, addresses[rnd]);
