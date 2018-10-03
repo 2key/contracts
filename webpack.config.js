@@ -12,7 +12,7 @@ const config = {
     path: path.join(__dirname, '2key-protocol', 'dist'),
     filename: 'index.js',
     library: libraryName,
-    libraryTarget: 'umd',
+    libraryTarget: 'commonjs2',
     umdNamedDefine: true,
   },
   module: {

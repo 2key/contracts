@@ -1,10 +1,15 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "moduleResolution": "node",
+    "target": "es2015",
     "module": "commonjs",
     "sourceMap": true,
     "declaration": true,
-    "outDir": "./dist",
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "declarationDir": "./types",
+    "outDir": "./",
     "esModuleInterop": true,
     "removeComments": true,
     "lib": [
@@ -17,8 +22,7 @@
     ]
   },
   "include": [
-    "2key-protocol",
-    "./node_mobules/web3-typescript-typings/index.d.ts"
+    "2key-protocol/src"
   ],
   "exclude": [
     "node_modules"
