@@ -30,6 +30,13 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
     string assetSymbol;
     uint assetUnitDecimals;
 
+    uint tokenDistributionDate; // January 1st 2019
+    uint maxDistributionDateShiftInDays; // 180 days
+    uint bonusTokensVestingMonths; // 6 months
+    uint bonusTokensVestingStartShiftInDaysFromDistributionDate; // 180 days
+
+
+
 
     /// @notice Method which will be called inside constructor of TwoKeyAcquisitionCampaignERC20
     /// @param _twoKeyAcquisitionCampaignERC20 is the address of TwoKeyAcquisitionCampaignERC20 contract
@@ -42,6 +49,7 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
         contractor = _contractor;
         // get asset name, address, price, etc all we need
     }
+
     /// Structure which will represent conversion
     struct Conversion {
         address contractor; // Contractor (creator) of campaign
@@ -66,6 +74,11 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
         _;
     }
 
+    modifier onlyContractorOrModerator() {
+        require(msg.sender == contractor || msg.sender == moderator);
+        _;
+    }
+
     //mapping containing if address of referrer is whitelisted
     mapping(address => bool) public whitelistedReferrer;
 
@@ -73,8 +86,14 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
     mapping(address => bool) public whitelistedConverter;
 
 
-    constructor() public {
-
+    constructor(uint _tokenDistributionDate, // January 1st 2019
+        uint _maxDistributionDateShiftInDays, // 180 days
+        uint _bonusTokensVestingMonths, // 6 months
+        uint _bonusTokensVestingStartShiftInDaysFromDistributionDate) public {
+        tokenDistributionDate = _tokenDistributionDate;
+        maxDistributionDateShiftInDays = _maxDistributionDateShiftInDays;
+        bonusTokensVestingMonths = _bonusTokensVestingMonths;
+        bonusTokensVestingStartShiftInDaysFromDistributionDate = _bonusTokensVestingStartShiftInDaysFromDistributionDate;
     }
 
     /*
@@ -232,28 +251,28 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
     /// @notice Function to retrieve all converters who's conversions are pending
     /// @dev it's a view function, doesn't consume any gas
     /// @return array of addresses of pending converters
-    function getPendingConverters() public view onlyTwoKeyAcquisitionCampaign returns (address[]) {
+    function getPendingConverters() public view onlyContractorOrModerator returns (address[]) {
         return addressesOfPendingConverters;
     }
 
     /// @notice Function to retrieve all converters who's conversions are rejected
     /// @dev it's a view function, doesn't consume any gas
     /// @return array of addresses of rejected converters
-    function getRejectedConverters() public view onlyTwoKeyAcquisitionCampaign returns (address[]) {
+    function getRejectedConverters() public view onlyContractorOrModerator returns (address[]) {
         return addressesOfRejectedConverters;
     }
 
     /// @notice Function to retrieve all converters who's conversions are approved
     /// @dev it's a view function, doesn't consume any gas
     /// @return array of addresses of approved converters
-    function getApprovedConverters() public view onlyTwoKeyAcquisitionCampaign returns (address[]) {
+    function getApprovedConverters() public view onlyContractorOrModerator returns (address[]) {
         return addressesOfApprovedConverters;
     }
 
     /// @notice Function to retrieve all converters who's conversions are expired
     /// @dev it's a view function, doesn't consume any gas
     /// @return array of addresses of expired converters
-    function getExpiredConverters() public view onlyTwoKeyAcquisitionCampaign returns (address[]) {
+    function getExpiredConverters() public view onlyContractorOrModerator returns (address[]) {
         return addressesOfExpiredConverters;
     }
 
@@ -282,6 +301,11 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
             }
         }
         return false;
+    }
+
+    function conversionGetter(address _converter) public view onlyTwoKeyAcquisitionCampaign returns (uint) {
+        Conversion memory conversion = conversions[_converter];
+        return conversion.maxReferralRewardETHWei;
     }
 
 }

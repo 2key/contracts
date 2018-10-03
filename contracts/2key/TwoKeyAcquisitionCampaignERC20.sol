@@ -105,13 +105,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     uint unit_decimals;
     string symbol;
 
-    // Add this 4 params to constructor
-    uint tokenDistributionDate; // January 1st 2019
-    uint maxDistributionDateShiftInDays; // 180 days
-    uint bonusTokensVestingMonths; // 6 months
-    uint bonusTokensVestingStartShiftInDaysFromDistributionDate; // 180 days
-
-
 
     // ==============================================================================================================
     // ============================ TWO KEY ACQUISITION CAMPAIGN MODIFIERS ==========================================
@@ -152,10 +145,10 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         address _moderator, address _assetContractERC20, uint _campaignStartTime, uint _campaignEndTime,
         uint _expiryConversion, uint _moderatorFeePercentage, uint _maxReferralRewardPercent, uint _maxConverterBonusPercent,
         uint _pricePerUnitInETH, uint _minContributionETH, uint _maxContributionETH,
-        uint _conversionQuota) TwoKeyCampaignARC(_twoKeyEventSource, _conversionQuota) StandardToken()
+        uint _conversionQuota)
+        TwoKeyCampaignARC(_twoKeyEventSource, _conversionQuota) StandardToken()
     public {
         require(_twoKeyEconomy != address(0));
-        require(_whitelists != address(0));
         require(_assetContractERC20 != address(0));
         require(_maxReferralRewardPercent > 0);
 
@@ -175,6 +168,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         pricePerUnitInETHWei = _pricePerUnitInETH;
         minContributionETH = _minContributionETH;
         maxContributionETH = _maxContributionETH;
+
         setERC20Attributes();
         // Emit event that TwoKeyCampaign is created
         twoKeyEventSource.created(address(this), contractor);
@@ -185,6 +179,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         unit_decimals = IERC20(assetContractERC20).decimals();
         symbol = IERC20(assetContractERC20).symbol();
     }
+
 
     // TODO: Udis code which sends rewards etc get it
     // TODO: Expiry of conversion event (Two-steps for conversion user puts in ether, and converter being approved by KYC)
@@ -795,31 +790,11 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         emit UpdatedData(block.timestamp, value, "Updated maxReferralRewardPercent");
     }
 
-//    function updateIpfsHashPublicMeta(string value) public onlyContractor {
-//        publicMetaHash = value;
-//        emit UpdatedPublicMetaHash(block.timestamp, value);
-//    }
-//
-//    // Add other getters and modifiers
-//    function getPendingConvertersFromWhitelist() public view onlyContractorOrModerator returns (address[]) {
-//        address[] memory pendingConverters = whitelists.getPendingConverters();
-//        return pendingConverters;
-//    }
-//
-//    function getRejectedConvertersFromWhitelist() public view onlyContractorOrModerator returns (address[]) {
-//        address[] memory rejectedConverters = whitelists.getRejectedConverters();
-//        return rejectedConverters;
-//    }
-//
-//    function getApprovedConvertersFromWhitelist() public view onlyContractorOrModerator returns (address[]) {
-//        address[] memory approvedConverters = whitelists.getApprovedConverters();
-//        return approvedConverters;
-//    }
-//
-//    function getExpiredConvertersFromWhitelist() public view onlyContractorOrModerator returns (address[]) {
-//        address[] memory expiredConverters = whitelists.getExpiredConverters();
-//        return expiredConverters;
-//    }
+    function updateIpfsHashPublicMeta(string value) public onlyContractor {
+        publicMetaHash = value;
+        emit UpdatedPublicMetaHash(block.timestamp, value);
+    }
+
 
     // Moderator or contractor can approve an address as converter
     // The address can be approved if rejected or pending
