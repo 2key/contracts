@@ -62,6 +62,7 @@ export default function (mnemonic: string, rpcUrl: string, pk?: string): Ethereu
     if (pk) {
         const private_key = Buffer.from(pk, 'hex');
         wallet = eth_wallet.fromPrivateKey(private_key);
+        console.log('FROM PK', wallet);
     } else {
         const hdwallet = hdkey.fromMasterSeed(bip39.mnemonicToSeed(mnemonic));
         wallet = hdwallet.derivePath('m/44\'/60\'/0\'/0/' + 0).getWallet();

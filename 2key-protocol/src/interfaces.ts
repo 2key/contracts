@@ -1,22 +1,82 @@
 import {BigNumber} from 'bignumber.js';
 
-interface Balance {
+export interface ITwoKeyBase {
+    readonly web3: any;
+    readonly syncWeb3: any;
+    readonly ipfs: any;
+    readonly address: string;
+    readonly networks: IEhtereumNetworks;
+    readonly contracts: IContractsAdressess;
+    readonly twoKeyEconomy: any;
+    readonly twoKeyEventContract: any;
+    readonly eventsAddress: string;
+    readonly _setGasPrice: (number) => void,
+    readonly _getGasPrice: () => number,
+    readonly _setTotalSupply: (number) => void,
+}
+
+export interface ITwoKeyHelpers {
+    _normalizeString: (value: number | string | BigNumber, inWei: boolean) => string,
+    _normalizeNumber: (value: number | string | BigNumber, inWei: boolean) => number,
+    _getContractDeployedAddress: (contract: string) => string,
+    _getGasPrice: () => Promise<number | string | BigNumber>,
+    _getEthBalance: (address: string) => Promise<number | string | BigNumber>,
+    _getTokenBalance: (address: string, erc20address?: string) => Promise<number | string | BigNumber>,
+    _getTotalSupply: (erc20address?: string) => Promise<number | string | BigNumber>,
+    _getTransaction: (txHash: string) => Promise<ITransaction>,
+    _createContract: (contract: IContract, gasPrice?: number, params?: any[], progressCallback?: ICreateCampignProgress) => Promise<string>,
+    _estimateSubcontractGas: (contract: IContract, params?: any[]) => Promise<number>,
+    _estimateTransactionGas: (data: IRawTransaction) => Promise<number>,
+    _getUrlParams: (url: string) => any,
+    _checkBalanceBeforeTransaction: (gasRequired: number, gasPrice: number) => Promise<boolean>,
+    _getAcquisitionCampaignInstance: (campaign: any) => Promise<any>,
+    _createAndValidate: (contractName: string, address: string) => Promise<any>,
+    _checkIPFS: () => Promise<boolean>,
+}
+
+export interface ITwoKeyAcquisitionCampaign {
+    estimateCreation: (data: IAcquisitionCampaign) => Promise<number>,
+    create: (data: IAcquisitionCampaign, progressCallback?: ICreateCampignProgress, gasPrice?: number) => Promise<string>,
+    checkInventoryBalance: (campaign: any) => Promise<number>,
+    getPublicLinkKey: (campaign: any, address?: string) => Promise<string>,
+    getReferrerCut: (campaign: any) => Promise<number>,
+    setAcquisitionPublicLinkKey: (campaign: any, publicKey: string, gasPrice?: number) => Promise<string>,
+    getEstimatedMaximumReferralReward: (campaign: any, referralLink?: string) => Promise<number>,
+    emitAcquisitionCampaignJoinEvent: (campaignAddress: string, referralLink: string) => Promise<string>,
+    join: (campaign: any, cut: number, referralLink?: string, gasPrice?: number) => Promise<string>,
+    joinAndSetPublicLinkWithCut: (campaignAddress: string, referralLink: string, cut?: number, gasPrice?: number) => Promise<string>,
+    joinAndShareARC: (campaignAddress: string, referralLink: string, recipient: string, gasPrice?: number) => Promise<string>,
+    joinAndConvert: (campaign: any, value: number | string | BigNumber, referralLink: string, gasPrice?: number) => Promise<string>,
+    getAquisitionConverterConversion: (campaign: any, address?: string) => Promise<any>,
+}
+
+export interface ITWoKeyUtils {
+    ipfsAdd: (data: any) => Promise<string>,
+    fromWei: (number: number | string | BigNumber, unit?: string) => string | BigNumber,
+    toWei: (number: string | number | BigNumber, unit?: string) => BigNumber,
+    toHex: (data: any) => string,
+    getBalanceOfArcs: (campaign: any, address?: string) => Promise<number>,
+    balanceFromWeiString: (meta: BalanceMeta, inWei?: boolean, toNum?: boolean) => IBalanceNormalized,
+    getTransactionReceiptMined: (txHash: string, web3?: any, interval?: number, timeout?: number) => Promise<ITransactionReceipt>
+}
+
+interface IBalance {
     ETH: number | string | BigNumber,
     total: number | string | BigNumber,
     '2KEY': number | string | BigNumber,
 }
 
 export interface BalanceMeta {
-    balance: Balance,
+    balance: IBalance,
     local_address: string,
     gasPrice: number | string | BigNumber,
 }
 
-export interface ContractsAdressess {
+export interface IContractsAdressess {
     TwoKeyEconomy?: string
 }
 
-export interface BalanceNormalized {
+export interface IBalanceNormalized {
     balance: {
         ETH: string | number,
         total: string | number,
@@ -26,23 +86,23 @@ export interface BalanceNormalized {
     gasPrice: string | number,
 }
 
-export interface EhtereumNetworks {
+export interface IEhtereumNetworks {
     mainNetId: number | string,
     syncTwoKeyNetId: number | string,
 }
 
-export interface TwoKeyInit {
+export interface ITwoKeyInit {
     web3: any,
     address: string,
     ipfsIp?: string,
     ipfsPort?: string | number,
-    contracts?: ContractsAdressess,
-    networks?: EhtereumNetworks,
+    contracts?: IContractsAdressess,
+    networks?: IEhtereumNetworks,
     eventsNetUrl?: string,
     reportKey?: string,
 }
 
-export interface Transaction {
+export interface ITransaction {
     hash: string;
     nonce: number;
     blockHash: string;
@@ -59,7 +119,7 @@ export interface Transaction {
     s?: string;
 }
 
-export interface TransactionReceipt {
+export interface ITransactionReceipt {
     blockHash: string;
     blockNumber: number;
     transactionHash: string;
@@ -73,7 +133,7 @@ export interface TransactionReceipt {
     status: string;
 }
 
-export interface RawTransaction {
+export interface IRawTransaction {
     from?: string;
     gas?: number;
     gasPrice?: number;
@@ -82,7 +142,7 @@ export interface RawTransaction {
     data?: string;
 }
 
-export interface AcquisitionCampaign {
+export interface IAcquisitionCampaign {
     moderator?: string, // Address of the moderator - it's a contract that works (operates) as admin of whitelists contracts
     assetContractERC20: string,
     campaignStartTime: number, // Timestamp
@@ -97,17 +157,17 @@ export interface AcquisitionCampaign {
     referrerQuota?: number,
 }
 
-export interface CreateCampignProgress {
+export interface ICreateCampignProgress {
     (contract: string, mined: boolean, transactionResult: string): void;
 }
 
-export interface Contract {
+export interface IContract {
     name: string,
     abi: any,
     bytecode: string,
 }
 
-export interface ContractEvent {
+export interface IContractEvent {
     address: string,
     args: any,
     blockHash: string,
