@@ -345,12 +345,13 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
         uint _baseTokenUnits;
         uint _bonusTokenUnits;
 
-        (_maxReferralRewardETHWei, _moderatorFee, _baseTokenUnits, _bonusTokenUnits) = getConversionAttributes(_converter);
+        Conversion memory conversion = conversions[_converter];
 
-        ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateRefchainRewards(_maxReferralRewardETHWei, _converter);
+
+        ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateRefchainRewards(conversion.maxReferralRewardETHWei, _converter);
 
         /// Transfer fee to moderator balance
-        moderator.transfer(_moderatorFee);
+        moderator.transfer(conversion.moderatorFeeETHWei);
 
 
 
