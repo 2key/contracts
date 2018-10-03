@@ -1,17 +1,19 @@
 pragma solidity ^0.4.24;
-
-
 import '../openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import "./TwoKeyTypes.sol";
 import "../interfaces/ITwoKeyAcquisitionCampaignERC20.sol";
 import "./RBACWithAdmin.sol";
 import "./TwoKeyConversionStates.sol";
+import "./TwoKeyLockupContract.sol";
+import "../openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 
 // adapted from: 
 // https://openzeppelin.org/api/docs/crowdsale_validation_WhitelistedCrowdsale.html
 
-contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
+contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
+
+    using SafeMath for uint256;
 
     mapping(address => Conversion) public conversions;
     // Same conversion can appear only in once of this 4 arrays at a time
@@ -35,6 +37,8 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
     uint bonusTokensVestingStartShiftInDaysFromDistributionDate; // 180 days
 
 
+    uint moderatorBalanceETHWei;
+    uint moderatorTotalEarningsETHWei;
 
 
     /// @notice Method which will be called inside constructor of TwoKeyAcquisitionCampaignERC20
@@ -52,7 +56,7 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
     /// Structure which will represent conversion
     struct Conversion {
         address contractor; // Contractor (creator) of campaign
-        uint256 contractorProceeds; // How much contractor will receive for this conversion
+        uint256 contractorProceedsETHWei; // How much contractor will receive for this conversion
         address converter; // Converter is one who's buying tokens
         ConversionState state;
         string assetSymbol; // Name of ERC20 token we're selling in our campaign (we can get that from contract address)
@@ -185,7 +189,7 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
         c.state = ConversionState.CANCELLED;
         conversions[_converterAddress] = c;
 
-        return (c.contractorProceeds);
+        return (c.contractorProceedsETHWei);
     }
 
 
@@ -339,19 +343,36 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
             - Move tokens to lock-up contracts then
             - Send remaining ether to contractor
         */
-
-        uint _maxReferralRewardETHWei;
-        uint _moderatorFee;
-        uint _baseTokenUnits;
-        uint _bonusTokenUnits;
-
         Conversion memory conversion = conversions[_converter];
 
 
         ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateRefchainRewards(conversion.maxReferralRewardETHWei, _converter);
 
-        /// Transfer fee to moderator balance
-        moderator.transfer(conversion.moderatorFeeETHWei);
+        // update moderator balances
+        moderatorBalanceETHWei = moderatorBalanceETHWei.add(conversion.moderatorFeeETHWei);
+        moderatorTotalEarningsETHWei = moderatorTotalEarningsETHWei.add(conversion.moderatorFeeETHWei);
+
+
+        TwoKeyLockupContract firstLockUp = new TwoKeyLockupContract(tokenDistributionDate, maxDistributionDateShiftInDays,
+                            conversion.baseTokenUnits, _converter, conversion.contractor);
+
+
+        ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).moveFungibleAsset(address(firstLockUp), conversion.baseTokenUnits);
+
+        uint bonusAmountSplited = conversion.bonusTokenUnits / bonusTokensVestingMonths;
+        address [] memory lockupContracts=  new address[](bonusTokensVestingMonths);
+
+        for(uint i=0; i<bonusTokensVestingMonths; i++) {
+            TwoKeyLockupContract lockup = new TwoKeyLockupContract(tokenDistributionDate +
+                                    bonusTokensVestingStartShiftInDaysFromDistributionDate + i*(30 days), maxDistributionDateShiftInDays, bonusAmountSplited,
+                                    _converter, conversion.contractor);
+            ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).moveFungibleAsset(address(lockup), bonusAmountSplited);
+
+            lockupContracts[i] = lockup;
+        }
+
+        ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateContractorProceeds(conversion.contractorProceedsETHWei);
+        conversion.state = ConversionState.FULFILLED;
 
 
 
@@ -403,5 +424,7 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
         //c.isFulfilled = true;
 
     }
+
+
 
 }

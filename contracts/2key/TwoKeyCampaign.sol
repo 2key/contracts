@@ -10,7 +10,7 @@ contract A {
 //import './TwoKeyEventSource.sol';
 //import './TwoKeyCampaignARC.sol';
 //import "./TwoKeyCampaignInventory.sol";
-//import "./TwoKeyWhitelisted.sol";
+//import "./TwoKeyConversionHandler.sol";
 //
 ///// TODO: method to set contractor public key  (when user create campaign we generate a link)
 ///// TODO: Somehow to check if contractor public key is set

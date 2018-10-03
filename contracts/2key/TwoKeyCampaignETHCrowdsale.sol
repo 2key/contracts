@@ -6,7 +6,7 @@ import './TwoKeyCampaignETH.sol';
 import './TwoKeyReg.sol';
 import './TwoKeyEconomy.sol';
 import './TwoKeyEventSource.sol';
-import "./TwoKeyWhitelisted.sol";
+import "./TwoKeyConversionHandler.sol";
 import "./TwoKeyCampaignInventory.sol";
 
 /// TODO : Do we need crowdsale contract?

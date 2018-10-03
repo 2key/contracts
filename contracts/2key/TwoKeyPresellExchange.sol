@@ -5,14 +5,14 @@ import '../openzeppelin-solidity/contracts/crowdsale/validation/CappedCrowdsale.
 import '../openzeppelin-solidity/contracts/crowdsale/validation/WhitelistedCrowdsale.sol';
 import '../openzeppelin-solidity/contracts/token/ERC20/TokenVesting.sol';
 import './TwoKeyUpgradableExchange.sol';
-import './TwoKeyWhitelisted.sol';
+import './TwoKeyConversionHandler.sol';
 
 contract TwoKeyPresellExchange is TwoKeyUpgradableExchange {
 	// bonus precentage
 	// time locked base to some time after presell
 	// after release of base + 2 month, bonus spread over 10 months
 
-	TwoKeyWhitelisted whitelist;
+	TwoKeyConversionHandler whitelist;
 	uint256 public openingTime;
   	uint256 public closingTime;
   	uint256 public cap;
@@ -30,7 +30,7 @@ contract TwoKeyPresellExchange is TwoKeyUpgradableExchange {
 	    return weiRaised >= cap;
 	}
 
-	constructor(TwoKeyWhitelisted _whitelist,
+	constructor(TwoKeyConversionHandler _whitelist,
 		uint256 _openingTime, uint256 _closingTime, 
 		uint256 _cap,
 		uint256 _rate, address _wallet, ERC20 _token) 

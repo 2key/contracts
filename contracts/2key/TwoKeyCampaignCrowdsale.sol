@@ -8,7 +8,7 @@ import './TwoKeyReg.sol';
 import './TwoKeyEconomy.sol';
 import './TwoKeyEventSource.sol';
 import './TwoKeyTypes.sol';
-import "./TwoKeyWhitelisted.sol";
+import "./TwoKeyConversionHandler.sol";
 import "./TwoKeyCampaignInventory.sol";
 
 contract TwoKeyCampaignCrowdsale is TwoKeyAcquisitionCampaignERC20 {
