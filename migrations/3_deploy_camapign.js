@@ -19,7 +19,6 @@ const ERC20TokenMock = artifacts.require('ERC20TokenMock');
 
 
 module.exports = function deploy(deployer) {
-    var whitelistsInstance;
     if (deployer.network.startsWith('dev') || deployer.network === 'rinkeby-infura') {
         deployer.deploy(TwoKeyConversionHandler,1012019,180,6,180)
             .then(() => TwoKeyConversionHandler.deployed())
