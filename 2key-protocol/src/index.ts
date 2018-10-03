@@ -25,11 +25,11 @@ import AcquisitionCampaign from './acquisition';
 // const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 
 const TwoKeyDefaults = {
-    ipfsIp: '192.168.47.100',
+    ipfsIp: '37.57.185.107',
     ipfsPort: '5001',
     mainNetId: 3,
     syncTwoKeyNetId: 17,
-    twoKeySyncUrl: 'http://192.168.47.100:18545'
+    twoKeySyncUrl: 'http://astring.aydnep.com.ua:18545'
 };
 
 export class TwoKeyProtocol {

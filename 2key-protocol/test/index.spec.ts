@@ -219,13 +219,13 @@ describe('TwoKeyProtocol', () => {
         // .to.be.equal(twoKeyProtocol.getGasPrice());
     }).timeout(30000);
 
-    it('should return estimated gas for transferTokens', async () => {
+    it('should return estimated gas for transfer2KeyTokens', async () => {
         const gas = await twoKeyProtocol.getERC20TransferGas(ethDstAddress, twoKeyProtocol.Utils.toWei(123, 'ether'));
         console.log('Gas required for Token transfer', gas);
         return expect(gas).to.exist.to.be.greaterThan(0);
     }).timeout(30000);
 
-    it('should transfer tokens', async function () {
+    it('should transfer 2KeyTokens', async function () {
         txHash = await twoKeyProtocol.transfer2KEYTokens(ethDstAddress, twoKeyProtocol.Utils.toWei(123, 'ether'), 3000000000);
         console.log('Transfer 2Key Tokens', txHash, typeof txHash);
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
@@ -235,7 +235,7 @@ describe('TwoKeyProtocol', () => {
 
     it('should print balances', printBalances).timeout(15000);
 
-    // it('should calculate gas for campaign contract creation', async () => {
+    // it('should calculate gas for campaign Acquisition Contract creation', async () => {
     //     const gas = await twoKeyProtocol.AcquisitionCampaign.estimateCreation({
     //         campaignStartTime,
     //         campaignEndTime,
@@ -252,7 +252,7 @@ describe('TwoKeyProtocol', () => {
     //     return expect(gas).to.exist.to.greaterThan(0);
     // });
 
-    it('should create a new campaign contract', async () => {
+    it('should create a new campaign Acquisition Contract', async () => {
         const campaign = await twoKeyProtocol.AcquisitionCampaign.create({
             campaignStartTime,
             campaignEndTime,
