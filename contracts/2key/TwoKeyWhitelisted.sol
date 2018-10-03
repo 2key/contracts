@@ -14,7 +14,6 @@ import "./TwoKeyConversionStates.sol";
 contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
 
     mapping(address => Conversion) public conversions;
-    //TODO: In case someone adds more money to update
     // Same conversion can appear only in once of this 4 arrays at a time
     address[] addressesOfPendingConverters;
     address[] addressesOfApprovedConverters;
@@ -76,6 +75,11 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
 
     modifier onlyContractorOrModerator() {
         require(msg.sender == contractor || msg.sender == moderator);
+        _;
+    }
+
+    modifier onlyWhitelistedConverter() {
+        require(isWhitelistedConverter(msg.sender) == true);
         _;
     }
 
@@ -303,9 +307,100 @@ contract TwoKeyWhitelisted is TwoKeyTypes, TwoKeyConversionStates {
         return false;
     }
 
-    function conversionGetter(address _converter) public view onlyTwoKeyAcquisitionCampaign returns (uint) {
+    function getConversionAttributes(address _converter) public view onlyTwoKeyAcquisitionCampaign returns (uint,uint,uint,uint) {
         Conversion memory conversion = conversions[_converter];
-        return conversion.maxReferralRewardETHWei;
+        return (conversion.maxReferralRewardETHWei, conversion.moderatorFeeETHWei,
+        conversion.baseTokenUnits, conversion.bonusTokenUnits);
+    }
+
+
+    function fullFillConversion(address _converter) public onlyTwoKeyAcquisitionCampaign {
+        Conversion memory conversion = conversions[_converter];
+        conversion.state = ConversionState.FULFILLED;
+        conversions[_converter] = conversion;
+    }
+
+
+    //******************************************************
+    //(3) CONVERSION 2nd STEP
+    //actually third step after the moderator/contractor approved the converter in the white list
+
+    function executeConversion(address _converter) onlyWhitelistedConverter public {
+        didConverterConvert(_converter);
+        performConversion(_converter);
+    }
+
+    function performConversion(address _converter) internal {
+        /*
+         Then we need another function that requires converter to be whitelisted and should do the following:
+            - Compute referral rewards and distribute then updateRefchainRewards
+            - Compute and distribute moderation fees then
+            - Generate lock-up contracts for tokens then
+            - Move tokens to lock-up contracts then
+            - Send remaining ether to contractor
+        */
+
+        uint _maxReferralRewardETHWei;
+        uint _moderatorFee;
+        uint _baseTokenUnits;
+        uint _bonusTokenUnits;
+
+        (_maxReferralRewardETHWei, _moderatorFee, _baseTokenUnits, _bonusTokenUnits) = getConversionAttributes(_converter);
+
+        ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateRefchainRewards(_maxReferralRewardETHWei, _converter);
+
+        /// Transfer fee to moderator balance
+        moderator.transfer(_moderatorFee);
+
+
+
+        //lockup contracts:
+        /*
+        1. basetokens get sent to 1 lockup contract
+        2. bonus tokens are separated to 6 equal portions and sent to 6 lockup contracts.
+        3. a lockupcontract has the converter as beneficiary, and a vesting date in which the converter is allowed to pull the tokens to any other address
+        4. only other function of the lockupcontract is that the contractor may up to 1 time only, delay the vesting date of the tokens, by no more then maxVestingDaysDelay (param should be in campaign contract),
+        and only if the vesting date has not yet arrived.
+
+        EXAMPLE LOCKUP:
+            -lockup contract has converter and contractor
+            -lockup contract has balance of tokens (ERC20)
+            -we have vesting date in lockup contract
+            -lockup contract allows only converter to transfer the tokens only after vesting date
+            -contractor can change the vesting date up to once by no more than "max vesting date days shift" (param)
+
+        uint tokenDistributionDate; // January 1st 2019
+        uint maxDistributionDateShiftInDays; // 180 days
+
+        (tokenDistributionDate,maxDistributionDateShiftInDays,baseTokens, converter, contractor) -- constructor of lockup contract
+
+        uint bonusTokensVestingMonths; // 6 months
+        uint bonusTokensVestingStartShiftInDaysFromDistributionDate; // 180 days
+
+        bonusTokensVestingMonths*(tokenDistributionDate + bonusTokensVestingStartShiftInDaysFromDistributionDate, maxDistributionDateShiftInDays,
+        bonusTokens/bonusTokensVestingMonths, converter, contractor)
+
+        */
+
+        //this is if we want a simple test without lockup contracts
+        //        require(assetContractERC20.call(bytes4(keccak256("transfer(address,uint256)")), _converterAddress, _units));
+
+
+        //uint256 fee = calculateModeratorFee(c.payout);  //TODO take fee from conversion object since we already computed it.
+
+        //require(twoKeyEconomy.transfer(moderator, fee.mul(rate)));
+
+        //uint256 payout = c.payout;
+        //uint256 maxReward = maxReferralRewardPercent.mul(payout).div(100);
+
+        // transfer payout - fee - rewards to seller
+        //require(twoKeyEconomy.transfer(contractor, (payout.sub(fee).sub(maxReward)).mul(rate)));
+
+        //transferRewardsTwoKeyToken(c.from, maxReward.mul(rate));
+        //twoKeyEventSource.fulfilled(address(this), c.converter, c.tokenID, c.assetContract, c.indexOrAmount, c.campaignType);
+
+        //c.isFulfilled = true;
+
     }
 
 }

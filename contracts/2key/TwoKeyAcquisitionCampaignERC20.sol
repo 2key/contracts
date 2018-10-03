@@ -14,7 +14,7 @@ import "./TwoKeyTypes.sol";
 /// Contract which will represent campaign for the fungible assets
 contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes {
 
-    /// Using safemath to avoid overflows during math operations
+    // Using safemath to avoid overflows during math operations
     using SafeMath for uint256;
 
 
@@ -39,7 +39,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     /// Amount converter put to the contract in Ether
     mapping(address => uint) balancesConvertersETH;
 
-
+    mapping(address => uint) balances;
 
     // Number of units (ERC20 tokens) bought
     mapping(address => uint256) public units;
@@ -129,11 +129,12 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         _;
     }
 
-    /// @notice Modifier to check is the converter eligible for participation in conversion
-    modifier isWhitelistedConverter() {
-        require(whitelists.isWhitelistedConverter(msg.sender));
+    modifier onlyTwoKeyWhitelisted() {
+        require(msg.sender == address(whitelists));
         _;
     }
+
+
 
 
     // ==============================================================================================================
@@ -151,11 +152,12 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         require(_twoKeyEconomy != address(0));
         require(_assetContractERC20 != address(0));
         require(_maxReferralRewardPercent > 0);
+        require(_whitelists != address(0));
 
         contractor = msg.sender;
         twoKeyEconomy = TwoKeyEconomy(_twoKeyEconomy);
         whitelists = TwoKeyWhitelisted(_whitelists);
-        whitelists.setTwoKeyAcquisitionCampaignERC20(address(this), _moderator, contractor);
+//        whitelists.setTwoKeyAcquisitionCampaignERC20(address(this), _moderator, contractor);
         moderator = _moderator;
         assetContractERC20 = _assetContractERC20;
         campaignStartTime = _campaignStartTime;
@@ -500,101 +502,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     }
 
 
-    //******************************************************
-    //(3) CONVERSION 2nd STEP
-    //actually third step after the moderator/contractor approved the converter in the white list
-
-    function executeConversion(address _converter) isWhitelistedConverter public {
-        whitelists.didConverterConvert(_converter);
-//         TODO: convert ETH to 2Key for moderator and referrers
-        performConversion(_converter);
-        //require(transferFungibleAsset(msg.sender, _amount));
-    }
-
-    function performConversion(address _converter) internal {
-        /*
-         (3) Then we need another function that requires converter to be whitelisted and should do the following:
-            - Compute referral rewards and distribute then updateRefchainRewards
-            - Compute and distribute moderation fees then
-            - Generate lock-up contracts for tokens then
-            - Move tokens to lock-up contracts then
-            - Send remaining ether to contractor
-        */
-
-        /*
-            - first get the conversion for the _converter address
-            - get _maxReferralRewardETHWei from conversion object in wei and distribute
-            - put _maxReferralRewardETHWei inside updateRefchainRewards
-
-        */
-
-
-        address _converterAddress;
-        // Example; MaxReferralReward = 10% then msg.value = 100ETH
-        // then this conversionReward = 10ETH
-        // uint _units = 1;
-
-//        updateRefchainRewards(_maxReferralRewardETHWei);
-
-        //TODO distribute refchainRewards
-
-        //TODO distribute moderator fee
-
-        //TODO distribute contractor proceeds
-
-        //TODO either send tokens directly to converter for testing,then later actually create lockup contracts and send tokens to them
-
-        //lockup contracts:
-        /*
-        1. basetokens get sent to 1 lockup contract
-        2. bonus tokens are separated to 6 equal portions and sent to 6 lockup contracts.
-        3. a lockupcontract has the converter as beneficiary, and a vesting date in which the converter is allowed to pull the tokens to any other address
-        4. only other function of the lockupcontract is that the contractor may up to 1 time only, delay the vesting date of the tokens, by no more then maxVestingDaysDelay (param should be in campaign contract),
-        and only if the vesting date has not yet arrived.
-
-        EXAMPLE LOCKUP:
-            -lockup contract has converter and contractor
-            -lockup contract has balance of tokens (ERC20)
-            -we have vesting date in lockup contract
-            -lockup contract allows only converter to transfer the tokens only after vesting date
-            -contractor can change the vesting date up to once by no more than "max vesting date days shift" (param)
-
-        uint tokenDistributionDate; // January 1st 2019
-        uint maxDistributionDateShiftInDays; // 180 days
-
-        (tokenDistributionDate,maxDistributionDateShiftInDays,baseTokens, converter, contractor) -- constructor of lockup contract
-
-        uint bonusTokensVestingMonths; // 6 months
-        uint bonusTokensVestingStartShiftInDaysFromDistributionDate; // 180 days
-
-        bonusTokensVestingMonths*(tokenDistributionDate + bonusTokensVestingStartShiftInDaysFromDistributionDate, maxDistributionDateShiftInDays,
-        bonusTokens/bonusTokensVestingMonths, converter, contractor)
-
-        */
-
-        //this is if we want a simple test without lockup contracts
-//        require(assetContractERC20.call(bytes4(keccak256("transfer(address,uint256)")), _converterAddress, _units));
-
-
-        //uint256 fee = calculateModeratorFee(c.payout);  //TODO take fee from conversion object since we already computed it.
-
-        //require(twoKeyEconomy.transfer(moderator, fee.mul(rate)));
-
-        //uint256 payout = c.payout;
-        //uint256 maxReward = maxReferralRewardPercent.mul(payout).div(100);
-
-        // transfer payout - fee - rewards to seller
-        //require(twoKeyEconomy.transfer(contractor, (payout.sub(fee).sub(maxReward)).mul(rate)));
-
-        //transferRewardsTwoKeyToken(c.from, maxReward.mul(rate));
-        //twoKeyEventSource.fulfilled(address(this), c.converter, c.tokenID, c.assetContract, c.indexOrAmount, c.campaignType);
-
-        //c.isFulfilled = true;
-
-    }
-
     //TODO: refactor to take into account bonus + base tokens added to _units
-    function updateRefchainRewards(uint256 _maxReferralRewardETHWei, address _converter) internal {
+    function updateRefchainRewards(uint256 _maxReferralRewardETHWei, address _converter) public onlyTwoKeyWhitelisted {
         require(_maxReferralRewardETHWei > 0);
         address converter = _converter;
         address[] memory influencers = getReferrers(converter);
@@ -794,20 +703,5 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         publicMetaHash = value;
         emit UpdatedPublicMetaHash(block.timestamp, value);
     }
-
-
-    // Moderator or contractor can approve an address as converter
-    // The address can be approved if rejected or pending
-    // Can only be rejected if it is pending
-
-
-
-//    function whitelistAddressAsConverter(address _converterAddress) public onlyContractorOrModerator {
-//        if(whitelists.isAddressPending(_converterAddress) == true) {
-//            whitelists.addToWhitelistConverter(_converterAddress);
-//        }
-//    }
-
-
 
 }
