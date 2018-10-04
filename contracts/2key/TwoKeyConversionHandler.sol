@@ -8,7 +8,7 @@ import "./TwoKeyLockupContract.sol";
 import "../openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "./TwoKeyConverterStates.sol";
 
-//TODO: Add comments above all new added methods
+
 // adapted from: 
 // https://openzeppelin.org/api/docs/crowdsale_validation_WhitelistedCrowdsale.html
 
@@ -24,6 +24,13 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     // Mapping where we will store converter address as the key, and as the value we will save the state of his conversion
     mapping(address => ConversionState) converterToConversionState;
 
+    mapping(address => address[]) converterToLockupContracts;
+
+    /*
+        TODO: Move from acquisitioncampaign when update all events to TwoKeyEventSource and call them from there
+        TODO: Add comments above all new added methods
+        TODO: add method to get lockup contracts
+    */
 
     address twoKeyAcquisitionCampaignERC20;
     address moderator;
@@ -262,9 +269,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     }
 
 
-
-
-
     function getConversionAttributes(address _converter) public view onlyTwoKeyAcquisitionCampaign returns (uint,uint,uint,uint) {
         Conversion memory conversion = conversions[_converter];
         return (conversion.maxReferralRewardETHWei, conversion.moderatorFeeETHWei,
@@ -399,35 +403,40 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         }
     }
 
+    //TODO: Return string not state
     function getConverterConversionState(address _converter) public view returns (ConversionState) {
         return converterToConversionState[_converter];
     }
 
-    function isConverterApproved(address _converter) onlyContractorOrModerator public view returns (bool) {
+    function isConverterApproved(address _converter) public view onlyContractorOrModerator returns (bool) {
         if(converterToConversionState[_converter] == ConversionState.APPROVED) {
             return true;
         }
         return false;
     }
-    function isConverterRejected(address _converter) onlyContractorOrModerator public view returns (bool) {
+
+    function isConverterRejected(address _converter) public view onlyContractorOrModerator returns (bool) {
         if(converterToConversionState[_converter] == ConversionState.REJECTED) {
             return true;
         }
         return false;
     }
-    function isConverterCancelled(address _converter) onlyContractorOrModerator public view returns (bool) {
+
+    function isConverterCancelled(address _converter) public view onlyContractorOrModerator returns (bool) {
         if(converterToConversionState[_converter] == ConversionState.CANCELLED) {
             return true;
         }
         return false;
     }
-    function isConverterFulfilled(address _converter) onlyContractorOrModerator public view returns (bool) {
+
+    function isConverterFulfilled(address _converter) public view onlyContractorOrModerator returns (bool) {
         if(converterToConversionState[_converter] == ConversionState.FULFILLED) {
             return true;
         }
         return false;
     }
-    function isConverterPending(address _converter) onlyContractorOrModerator public view returns (bool) {
+
+    function isConverterPending(address _converter) public view onlyContractorOrModerator returns (bool) {
         if(converterToConversionState[_converter] == ConversionState.PENDING) {
             return true;
         }
@@ -438,35 +447,43 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         return converterToConversionState[msg.sender];
     }
 
-    function getAllPendingConverters() public view returns (address[]) {
+    function getAllPendingConverters() public view onlyContractorOrModerator returns (address[]) {
         bytes32 key = bytes32("PENDING");
         address[] memory pendingConverters = conversionStateToConverters[key];
         return pendingConverters;
     }
 
-    function getAllRejectedConverters() public view returns(address[]) {
+    function getAllRejectedConverters() public view onlyContractorOrModerator returns(address[]) {
         bytes32 key = bytes32("REJECTED");
         address[] memory rejectedConverters = conversionStateToConverters[key];
         return rejectedConverters;
     }
 
-    function getAllApprovedConverters() public view returns(address[]) {
+    function getAllApprovedConverters() public view onlyContractorOrModerator returns(address[]) {
         bytes32 key = bytes32("APPROVED");
         address[] memory approvedConverters = conversionStateToConverters[key];
         return approvedConverters;
     }
 
-    function getAllCancelledConverters() public view returns(address[]) {
+    function getAllCancelledConverters() public view onlyContractorOrModerator returns(address[]) {
         bytes32 key = bytes32("CANCELLED");
         address[] memory cancelledConverters = conversionStateToConverters[key];
         return cancelledConverters;
     }
 
-    function getAllFulfilledConverters() public view returns(address[]) {
+    function getAllFulfilledConverters() public view onlyContractorOrModerator returns(address[]) {
         bytes32 key = bytes32("FULFILLED");
         address[] memory fulfilledConverters = conversionStateToConverters[key];
         return fulfilledConverters;
     }
+
+    function updateConverterStates(address[] approvedConverters, address[] rejectedConverters) {
+        /*
+            TODO: Go through the addresses and check if they're eligible to be approved (only pending/rejected)
+            Rejected can only become from pending
+        */
+    }
+
 
     //TODO: Finish method to push to conversionState if not existing
 //    function pushToConversionStateIfNotExisting(string state, address converter) {

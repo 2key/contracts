@@ -681,7 +681,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         return privateMetaHash;
     }
 
-
     function updateMinContribution(uint value) public onlyContractor {
         minContributionETH = value;
         emit UpdatedData(block.timestamp, value, "Updated maxContribution");
