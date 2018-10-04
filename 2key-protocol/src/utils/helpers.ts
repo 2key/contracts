@@ -1,13 +1,13 @@
-import contractsMeta from "./contracts";
+import contractsMeta from "../contracts";
 import {BigNumber} from "bignumber.js";
-import {promisify} from "./utils";
+import {promisify} from "./index";
 import {
     IContract,
     ICreateCampignProgress,
     IRawTransaction,
     ITransaction,
     ITwoKeyBase
-} from "./interfaces";
+} from "../interfaces";
 
 export default class Helpers {
     readonly base: ITwoKeyBase;

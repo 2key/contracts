@@ -17,15 +17,15 @@ import {
     ITwoKeyHelpers,
     ITWoKeyUtils, ITwoKeyBase, ITwoKeyAcquisitionCampaign,
 } from './interfaces';
-import Sign from './sign';
-import Utils, {promisify} from './utils';
-import Helpers from './helpers';
+import Sign from './utils/sign';
+import Index, {promisify} from './utils';
+import Helpers from './utils/helpers';
 import AcquisitionCampaign from './acquisition';
 
 // const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 
 const TwoKeyDefaults = {
-    ipfsIp: '37.57.185.107',
+    ipfsIp: '192.168.47.100',
     ipfsPort: '5001',
     mainNetId: 3,
     syncTwoKeyNetId: 17,
@@ -114,7 +114,7 @@ export class TwoKeyProtocol {
         };
 
         this.Helpers = new Helpers(twoKeyBase);
-        this.Utils = new Utils(twoKeyBase, this.Helpers);
+        this.Utils = new Index(twoKeyBase, this.Helpers);
         this.AcquisitionCampaign = new AcquisitionCampaign(twoKeyBase, this.Helpers, this.Utils);
     }
 

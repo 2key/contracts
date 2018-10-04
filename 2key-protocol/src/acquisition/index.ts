@@ -1,8 +1,8 @@
-import {IAcquisitionCampaign, ICreateCampignProgress, ITwoKeyBase, ITwoKeyHelpers, ITWoKeyUtils} from "./interfaces";
-import contractsMeta from "./contracts";
-import {promisify} from "./utils";
+import {IAcquisitionCampaign, ICreateCampignProgress, ITwoKeyBase, ITwoKeyHelpers, ITWoKeyUtils} from "../interfaces";
+import contractsMeta from "../contracts";
+import {promisify} from "../utils/index";
 import {BigNumber} from "bignumber.js";
-import Sign from "./sign";
+import Sign from "../utils/sign";
 
 function calcFromCuts(cuts: number[], maxPi: number) {
     let referrerRewardPercent: number = maxPi;

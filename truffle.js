@@ -41,7 +41,7 @@ module.exports = {
     'dev-ap': {
       provider: () => new HDWalletProvider(mnemonic, 'http://astring.aydnep.com.ua:8545'),
       // provider: () => new PKProvider(['d718529bf9e0a5365e3a3545b66a612ff29be12aba366b6e6e919bef1d3b83e2'], 'http://astring.aydnep.com.ua:8545'),
-      network_id: 8086, // Match any network id
+      network_id: 8087, // Match any network id
       gas: 7888888,
       gasPrice: 2000000000
     },

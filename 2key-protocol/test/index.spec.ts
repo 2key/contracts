@@ -7,7 +7,7 @@ import createWeb3 from './_web3';
 const {env} = process;
 
 // const artifacts = require('../src/contracts.json');
-const rpcUrl = env.RCP_URL;
+const rpcUrl = env.RPC_URL;
 const mainNetId = env.MAIN_NET_ID;
 const syncTwoKeyNetId = env.SYNC_NET_ID;
 const destinationAddress = env.AYDNEP_ADDRESS;

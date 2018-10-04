@@ -1,5 +1,5 @@
 # Build Geth in a stock Go builder container
-FROM ethereum/client-go:v1.8.11
+FROM ethereum/client-go:v1.8.16
 
 RUN apk add --no-cache bash gawk sed grep bc coreutils
 

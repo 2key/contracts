@@ -5,7 +5,7 @@ import {
     IBalanceNormalized,
     ITransactionReceipt,
     ITwoKeyBase, ITwoKeyHelpers,
-} from './interfaces';
+} from '../interfaces';
 
 export function promisify(func: any, args: any): Promise<any> {
     return new Promise((res, rej) => {
@@ -16,7 +16,7 @@ export function promisify(func: any, args: any): Promise<any> {
     });
 }
 
-export default class Utils {
+export default class Index {
     private readonly base: ITwoKeyBase;
     private readonly helpers: ITwoKeyHelpers;
 
