@@ -33,6 +33,7 @@ contract TwoKeyLockupContract {
 
     function transferFungibleAsset(address _assetContractERC20, address _to, uint256 _amount) public onlyContractor returns (bool) {
         require(tokens >= _amount);
+        require(block.timestamp > tokenDistributionDate);i
         require(
             _assetContractERC20.call(
                 bytes4(keccak256(abi.encodePacked("transfer(address,uint256)"))),
