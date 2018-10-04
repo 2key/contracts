@@ -17,14 +17,15 @@ contract TwoKeyLockupContract {
     constructor(uint _tokenDistributionDate, uint _maxDistributionDateShiftInDays, uint _tokens, address _converter, address _contractor) {
         tokenDistributionDate = _tokenDistributionDate;
         maxDistributionDateShiftInDays = _maxDistributionDateShiftInDays;
-        tokens = _tokens;
+        converter = _converter;
+        converter = _converter;
         converter = _converter;
         contractor = _contractor;
     }
 
     function changeTokenDistributionDate(uint _newDate) public onlyContractor {
         require(changed == false);
-        require(_newDate - (maxDistributionDateShiftInDays * (1days)) <= tokenDistributionDate);
+        require(_newDate - (maxDistributionDateShiftInDays * (1 days)) <= tokenDistributionDate);
         changed = true;
         tokenDistributionDate = _newDate;
     }
