@@ -2,6 +2,7 @@
 require('babel-register');
 // https://github.com/trufflesuite/truffle-hdwallet-provider
 const HDWalletProvider = require('truffle-hdwallet-provider');
+const PKProvider = require('truffle-hdwallet-provider-privkey');
 // const HDWalletProvider = require('./WalletProvider');
 const LedgerProvider = require('./LedgerProvider');
 
@@ -39,7 +40,8 @@ module.exports = {
     },
     'dev-ap': {
       provider: () => new HDWalletProvider(mnemonic, 'http://astring.aydnep.com.ua:8545'),
-      network_id: 8086, // Match any network id
+      // provider: () => new PKProvider(['d718529bf9e0a5365e3a3545b66a612ff29be12aba366b6e6e919bef1d3b83e2'], 'http://astring.aydnep.com.ua:8545'),
+      network_id: 8087, // Match any network id
       gas: 7888888,
       gasPrice: 2000000000
     },
@@ -88,6 +90,15 @@ module.exports = {
       network_id: 42,
       gas: 7000000,
       gasPrice: 3000000000
+    },
+    'plasma-local': {
+      // host: 'localhost',
+      // port: 8545,
+      provider: () => new HDWalletProvider(mnemonic, 'http://localhost:18545'),
+      network_id: 17, // Match any network id
+      gas: 7000000,
+      gasPrice: 1
+      // gasPrice: 2000000000
     },
     'plasma-ap': {
       // host: 'localhost',

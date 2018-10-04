@@ -57,12 +57,12 @@ but here, we're just running a simulator that starts a new chain just for our us
 deploy the contracts
 
 ```angular2html
-truffle migrate --reset # need to be done every time after starting ganaches 
+truffle migrate --reset # need to be done every time after starting ganaches
 ```
 
 ### running local web App
 ```angular2html
-npm run dev 
+npm run dev
 ```
 node.js is the javascript engine from chrome changed to become a full language in which you can use javascript for backend as well.
 npm is the package manager of node.
@@ -112,7 +112,7 @@ npm run dev  2>1 > /dev/null &
 Now on your local machine open [http://localhost:8080](http://localhost:8080)
 
 Or you can run firefox on the AWS EC2 instance itself.
-First install X11 server on your local machine. Follow instructions at 
+First install X11 server on your local machine. Follow instructions at
 https://www.xquartz.org/.
 Next connect to the AWS EC2 instance with this ssh command
 ```
@@ -247,9 +247,9 @@ enter password
 
 # Local Development Environment
 
-Use Node.js v9.11.1 to be compatible with truffle that we used so far. 
+Use Node.js v9.11.1 to be compatible with truffle that we used so far.
 
-## Geth 
+## Geth
 
 Run in folder containing `contracts`.
 
@@ -271,7 +271,7 @@ To run geth in docker please follow next steps:
 * First time run takes some time to generate all neccessary data
 * All steps before valid only for unix based OS if you have Windows based ping Adnrii Pindiura for a help
 
-## Remix 
+## Remix
 
 Browser-based IDE - works in Safari and Chrome on MacOSX
 
@@ -279,13 +279,13 @@ Browser-based IDE - works in Safari and Chrome on MacOSX
 
 Use the the `http`  to work with Geth.
 
-In the **Run** tab, select Provider to be *Web3 Provider*. 
+In the **Run** tab, select Provider to be *Web3 Provider*.
 
 ## ABI and Bytecode
 
 After compiling contract, click on **Details** to copy them manually
 
-## Remixd 
+## Remixd
 
 Connect Remix to local files.
 
@@ -297,9 +297,9 @@ Run with:
 
     remixd -s contracts
 
-## Open Local Files in Remix 
+## Open Local Files in Remix
 
-In Remix, in the top left corner, click the link icon to connect to Remixd. 
+In Remix, in the top left corner, click the link icon to connect to Remixd.
 
 In the left sidebar, all your files appear under `localhost`. Editing can be done either in IDE or in Remix. There is no `save` action in Remix, so files are updated immediately in the file system.
 
@@ -344,11 +344,10 @@ Enter into geth console:
 
 How to deploy contracts to any network except local dev
 
-* Change truffle-template.js and add your configuration
-* Edit whitelist.json
+* Change truffle.js and add your configuration
+* Edit ContractDeploymentWhiteList.json
 * Commit your changes
-* Make sure that you on same branches in contracts and 2key-protocol submodule (./build/2key-protocol)
-* run ```node SOLDeployer.js {netowrk} {truffle params if needed}```
+* Make sure that you on same branches in contracts and 2key-protocol submodule (./2key-protocol/dist)
 * run ```yarn run deploy {network} {truffle params if needed}```
 * wait until process finish
 * check both repos contracts and 2key-protocol should have same tags

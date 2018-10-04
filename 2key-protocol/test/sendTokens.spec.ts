@@ -1,6 +1,6 @@
 import {expect} from 'chai';
 import 'mocha';
-import {TwoKeyProtocol, promisify} from '../src';
+import {TwoKeyProtocol} from '../src';
 import contractsMeta from '../src/contracts';
 import createWeb3, { ledgerWeb3 } from './_web3';
 
@@ -31,16 +31,16 @@ const sendTokens: any = new Promise(async (resolve, reject) => {
                 syncTwoKeyNetId,
             },
         });
-        const {balance} = twoKeyProtocol.balanceFromWeiString(await twoKeyProtocol.getBalance(destinationAddress), true);
+        const {balance} = twoKeyProtocol.Utils.balanceFromWeiString(await twoKeyProtocol.getBalance(destinationAddress), true);
         if (parseFloat(balance['2KEY'].toString()) <= 20000 || process.env.FORCE) {
             console.log('NO BALANCE at aydnep account');
             const admin = web3.eth.contract(contractsMeta.TwoKeyAdmin.abi).at(contractsMeta.TwoKeyAdmin.networks[mainNetId].address);
-            admin.transfer2KeyTokens(twoKeyEconomy, destinationAddress, twoKeyProtocol.toWei(100000, 'ether'), { from: address, gas: 7000000, gasPrice: 5000000000 },  async (err, res) => {
+            admin.transfer2KeyTokens(twoKeyEconomy, destinationAddress, twoKeyProtocol.Utils.toWei(100000, 'ether'), { from: address, gas: 7000000, gasPrice: 5000000000 },  async (err, res) => {
                 if (err) {
                     reject(err);
                 } else {
                     console.log('Send Tokens', res);
-                    const receipt = await twoKeyProtocol.getTransactionReceiptMined(res);
+                    const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(res);
                     resolve(receipt);
                 }
             });

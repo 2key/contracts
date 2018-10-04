@@ -107,6 +107,7 @@ const restoreFromArchive = () => new Promise(async (resolve, reject) => {
 });
 
 const generateSOLInterface = () => new Promise((resolve, reject) => {
+  console.log('Generating abi');
   if (fs.existsSync(buildPath)) {
     const contracts = {};
     const json = {};
@@ -115,7 +116,7 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
         files.forEach((file) => {
           const {
             networks, contractName, bytecode, abi
-          } = JSON.parse(fs.readFileSync(path.join(buildPath, file)));
+          } = JSON.parse(fs.readFileSync(path.join(buildPath, file), { encoding: 'utf-8' }));
           if (whitelist[contractName]) {
             // contracts[contractName] = whitelist[contractName].deployed
             //   ? { abi, networks } : { abi, networks, bytecode };

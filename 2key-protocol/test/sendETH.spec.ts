@@ -5,7 +5,7 @@ import createWeb3 from './_web3';
 
 const { env } = process;
 
-const rpcUrl = env.RCP_URL;
+const rpcUrl = env.RPC_URL;
 const mainNetId = env.MAIN_NET_ID;
 const syncTwoKeyNetId = env.SYNC_NET_ID;
 
@@ -24,9 +24,10 @@ const sendETH: any = (recipient) => new Promise(async (resolve, reject) => {
                 },
             });
         }
-        const txHash = await twoKeyProtocol.transferEther(recipient, twoKeyProtocol.toWei(10, 'ether'));
+        // console.log(twoKeyProtocol);
+        const txHash = await twoKeyProtocol.transferEther(recipient, twoKeyProtocol.Utils.toWei(10, 'ether'));
         console.log(`${recipient}: ${txHash}`);
-        const receipt = await twoKeyProtocol.getTransactionReceiptMined(txHash);
+        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         console.log(`${receipt.status}`);
         resolve(receipt);
     } catch (err) {
