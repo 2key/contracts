@@ -6,6 +6,7 @@ import "./RBACWithAdmin.sol";
 import "./TwoKeyConversionStates.sol";
 import "./TwoKeyLockupContract.sol";
 import "../openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "./TwoKeyConverterStates.sol";
 
 
 // adapted from: 
@@ -17,11 +18,12 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
 
     mapping(address => Conversion) public conversions;
     // Same conversion can appear only in once of this 4 arrays at a time
-    address[] addressesOfPendingConverters;
-    address[] addressesOfApprovedConverters;
-    address[] addressesOfRejectedConverters;
-    address[] addressesOfExpiredConverters;
-    address[] addressesOfFulfilledConverters;
+
+    // Mapping where we will store as the key state of conversion, and as value, there'll be all converters which conversions are in that state
+    mapping(bytes32 => address[]) conversionStateToConverters;
+    // Mapping where we will store converter address as the key, and as the value we will save the state of his conversion
+    mapping(address => ConversionState) converterToConversionState;
+
 
     address twoKeyAcquisitionCampaignERC20;
     address moderator;
@@ -239,7 +241,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
             now, now + expiryConversion * (1 hours));
 
         conversions[_converterAddress] = c;
-        addressesOfPendingConverters.push(_converterAddress);
     }
 
     /// @notice Function to encode provided parameters into bytes
@@ -257,60 +258,9 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         return encoded;
     }
 
-    /// @notice Function to retrieve all converters who's conversions are pending
-    /// @dev it's a view function, doesn't consume any gas
-    /// @return array of addresses of pending converters
-    function getPendingConverters() public view onlyContractorOrModerator returns (address[]) {
-        return addressesOfPendingConverters;
-    }
-
-    /// @notice Function to retrieve all converters who's conversions are rejected
-    /// @dev it's a view function, doesn't consume any gas
-    /// @return array of addresses of rejected converters
-    function getRejectedConverters() public view onlyContractorOrModerator returns (address[]) {
-        return addressesOfRejectedConverters;
-    }
-
-    /// @notice Function to retrieve all converters who's conversions are approved
-    /// @dev it's a view function, doesn't consume any gas
-    /// @return array of addresses of approved converters
-    function getApprovedConverters() public view onlyContractorOrModerator returns (address[]) {
-        return addressesOfApprovedConverters;
-    }
-
-    /// @notice Function to retrieve all converters who's conversions are expired
-    /// @dev it's a view function, doesn't consume any gas
-    /// @return array of addresses of expired converters
-    function getExpiredConverters() public view onlyContractorOrModerator returns (address[]) {
-        return addressesOfExpiredConverters;
-    }
-
-    /// @notice Function to check if address is in pending array of converters
-    /// @param _pendingAddress is the address we're searching for
-    /// @return true if found, otherwise false
-    function isAddressPending(address _pendingAddress) public view returns (bool) {
-        require(_pendingAddress != address(0));
-        for(uint i=0; i<addressesOfPendingConverters.length; i++) {
-            if(_pendingAddress == addressesOfPendingConverters[i]) {
-                return true;
-            }
-        }
-        return false;
-    }
 
 
-    /// @notice Function to check if address is in rejected array of converters
-    /// @param _rejectedAddress is the address we're searching for
-    /// @return true if found, otherwise false
-    function isAddressRejected(address _rejectedAddress) public view returns (bool) {
-        require(_rejectedAddress != address(0));
-        for(uint i=0; i<addressesOfRejectedConverters.length; i++) {
-            if(_rejectedAddress == addressesOfRejectedConverters[i]) {
-                return true;
-            }
-        }
-        return false;
-    }
+
 
     function getConversionAttributes(address _converter) public view onlyTwoKeyAcquisitionCampaign returns (uint,uint,uint,uint) {
         Conversion memory conversion = conversions[_converter];
@@ -426,45 +376,59 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         //c.isFulfilled = true;
 
     }
-    /// @notice Function where moderator or contractor can approve converter
-    /// @dev in order to do that converter must be in pending or rejected state
-    /// @param _converter is the address for the converter we're willing to approve
-    /// @return Returns true if approved successfully otherwise will return false
-    function approveConverter(address _converter) public onlyContractorOrModerator returns(bool) {
-        if(isAddressPending(_converter)) {
-            uint index = 0;
-            for(uint i=0; i<addressesOfPendingConverters.length; i++) {
-                if(addressesOfPendingConverters[i] == _converter) {
-                    index = 1;
-                }
-                if(index == 1) {
-                    addressesOfPendingConverters[i] = addressesOfPendingConverters[i+1];
-                }
-            }
-            delete addressesOfPendingConverters[addressesOfPendingConverters.length -1];
-            addressesOfPendingConverters.length--;
-            addressesOfApprovedConverters.push(_converter);
-            return true;
-        } else if(isAddressRejected(_converter)) {
-            uint index1 = 0;
-            for(uint j=0; j<addressesOfRejectedConverters.length; j++) {
-                if(addressesOfRejectedConverters[j] == _converter) {
-                    index1 = 1;
-                }
-                if(index1 == 1) {
-                    addressesOfRejectedConverters[j] = addressesOfRejectedConverters[j+1];
-                }
-            }
-            delete addressesOfRejectedConverters[addressesOfRejectedConverters.length -1];
-            addressesOfRejectedConverters.length--;
-            addressesOfApprovedConverters.push(_converter);
+
+
+    function convertConverterStateToBytes(ConversionState state) public view returns (bytes32) {
+        if(ConversionState.APPROVED == state) {
+            return bytes32("APPROVED");
+        }
+        if(ConversionState.REJECTED == state) {
+            return bytes32("REJECTED");
+        }
+        if(ConversionState.CANCELLED == state) {
+            return bytes32("CANCELLED");
+        }
+        if(ConversionState.PENDING == state) {
+            return bytes32("PENDING");
+        }
+        if(ConversionState.FULFILLED == state) {
+            return bytes32("FULFILLED");
+        }
+    }
+
+    function getConverterConversionState(address _converter) public view returns (ConversionState) {
+        return converterToConversionState[_converter];
+    }
+
+    function isConverterApproved(address _converter) public view returns (bool) {
+        if(converterToConversionState[_converter] == ConversionState.APPROVED) {
             return true;
         }
         return false;
     }
-
-
-
-
+    function isConverterRejected(address _converter) public view returns (bool) {
+        if(converterToConversionState[_converter] == ConversionState.REJECTED) {
+            return true;
+        }
+        return false;
+    }
+    function isConverterCancelled(address _converter) public view returns (bool) {
+        if(converterToConversionState[_converter] == ConversionState.CANCELLED) {
+            return true;
+        }
+        return false;
+    }
+    function isConverterFulfilled(address _converter) public view returns (bool) {
+        if(converterToConversionState[_converter] == ConversionState.FULFILLED) {
+            return true;
+        }
+        return false;
+    }
+    function isConverterPending(address _converter) public view returns (bool) {
+        if(converterToConversionState[_converter] == ConversionState.PENDING) {
+            return true;
+        }
+        return false;
+    }
 
 }
