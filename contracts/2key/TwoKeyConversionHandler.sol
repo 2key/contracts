@@ -8,7 +8,7 @@ import "./TwoKeyLockupContract.sol";
 import "../openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "./TwoKeyConverterStates.sol";
 
-
+//TODO: Add comments above all new added methods
 // adapted from: 
 // https://openzeppelin.org/api/docs/crowdsale_validation_WhitelistedCrowdsale.html
 
