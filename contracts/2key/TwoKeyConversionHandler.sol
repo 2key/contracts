@@ -431,4 +431,36 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         return false;
     }
 
+    function getAllPendingConverters() public view returns (address[]) {
+        bytes32 key = bytes32("PENDING");
+        address[] memory pendingConverters = conversionStateToConverters[key];
+        return pendingConverters;
+    }
+
+    function getAllRejectedConverters() public view returns(address[]) {
+        bytes32 key = bytes32("REJECTED");
+        address[] memory rejectedConverters = conversionStateToConverters[key];
+        return rejectedConverters;
+    }
+
+    function getAllApprovedConverters() public view returns(address[]) {
+        bytes32 key = bytes32("APPROVED");
+        address[] memory approvedConverters = conversionStateToConverters[key];
+        return approvedConverters;
+    }
+
+    function getAllCancelledConverters() public view returns(address[]) {
+        bytes32 key = bytes32("CANCELLED");
+        address[] memory cancelledConverters = conversionStateToConverters[key];
+        return cancelledConverters;
+    }
+
+    function getAllFulfilledConverters() public view returns(address[]) {
+        bytes32 key = bytes32("FULFILLED");
+        address[] memory fulfilledConverters = conversionStateToConverters[key];
+        return fulfilledConverters;
+    }
+
+
+
 }
