@@ -29,5 +29,18 @@ contract TwoKeyLockupContract {
         changed = true;
         tokenDistributionDate = _newDate;
     }
-    //TODO: Add function to change distribution date, only once
+    //TODO: Add only Converter can transfer tokens from this contract after vesting date
+
+    function transferFungibleAsset(address _assetContractERC20, address _to, uint256 _amount) public onlyContractor returns (bool) {
+        require(tokens >= _amount);
+        require(
+            _assetContractERC20.call(
+                bytes4(keccak256(abi.encodePacked("transfer(address,uint256)"))),
+                _to, _amount
+            )
+        );
+        tokens = tokens - _amount;
+        return true;
+    }
+
 }
