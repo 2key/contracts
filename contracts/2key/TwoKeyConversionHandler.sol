@@ -241,6 +241,9 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
             now, now + expiryConversion * (1 hours));
 
         conversions[_converterAddress] = c;
+        converterToConversionState[_converterAddress] = ConversionState.PENDING;
+
+
     }
 
     /// @notice Function to encode provided parameters into bytes
@@ -400,35 +403,39 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         return converterToConversionState[_converter];
     }
 
-    function isConverterApproved(address _converter) public view returns (bool) {
+    function isConverterApproved(address _converter) onlyContractorOrModerator public view returns (bool) {
         if(converterToConversionState[_converter] == ConversionState.APPROVED) {
             return true;
         }
         return false;
     }
-    function isConverterRejected(address _converter) public view returns (bool) {
+    function isConverterRejected(address _converter) onlyContractorOrModerator public view returns (bool) {
         if(converterToConversionState[_converter] == ConversionState.REJECTED) {
             return true;
         }
         return false;
     }
-    function isConverterCancelled(address _converter) public view returns (bool) {
+    function isConverterCancelled(address _converter) onlyContractorOrModerator public view returns (bool) {
         if(converterToConversionState[_converter] == ConversionState.CANCELLED) {
             return true;
         }
         return false;
     }
-    function isConverterFulfilled(address _converter) public view returns (bool) {
+    function isConverterFulfilled(address _converter) onlyContractorOrModerator public view returns (bool) {
         if(converterToConversionState[_converter] == ConversionState.FULFILLED) {
             return true;
         }
         return false;
     }
-    function isConverterPending(address _converter) public view returns (bool) {
+    function isConverterPending(address _converter) onlyContractorOrModerator public view returns (bool) {
         if(converterToConversionState[_converter] == ConversionState.PENDING) {
             return true;
         }
         return false;
+    }
+
+    function getMyConversionStatus() public view returns (ConversionState) {
+        return converterToConversionState[msg.sender];
     }
 
     function getAllPendingConverters() public view returns (address[]) {
@@ -461,6 +468,8 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         return fulfilledConverters;
     }
 
-
-
+    //TODO: Finish method to push to conversionState if not existing
+//    function pushToConversionStateIfNotExisting(string state, address converter) {
+//        address[] memory addressesOfSelectedState =
+//    }
 }
