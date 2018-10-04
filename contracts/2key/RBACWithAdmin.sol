@@ -16,17 +16,18 @@ import '../openzeppelin-solidity/contracts/access/rbac/RBAC.sol';
  * This is just an example for example's sake.
  */
 contract RBACWithAdmin is RBAC {
+
   /**
    * A constant role name for indicating admins.
    */
   string public constant ROLE_ADMIN = "admin";
-
   string public constant ROLE_CONTRACTOR = "contractor";
   string public constant ROLE_MODERATOR = "moderator";
   string public constant ROLE_REFERRER = "referrer";
   string public constant ROLE_CONVERTER = "converter";
 
   address private adminAddress;
+
   /**
    * @dev modifier to scope access to admins
    * // reverts
@@ -59,10 +60,18 @@ contract RBACWithAdmin is RBAC {
         _;
     }
 
+    // @notice Modifier which will revert if msg.sender is neither moderator nor admin
+    modifier onlyAdminOrModerator() { 
+      if (hasRole(msg.sender, ROLE_MODERATOR) == false)
+        checkRole(msg.sender, ROLE_ADMIN);
+      _; 
+
+    }
+    
   /**
    * @dev constructor. Sets msg.sender as admin by default
    */
- constructor(address _twoKeyAdmin)
+  constructor(address _twoKeyAdmin)
     public
   {
     if (_twoKeyAdmin == address(0)) {
@@ -72,6 +81,7 @@ contract RBACWithAdmin is RBAC {
     }
     addRole(adminAddress, ROLE_ADMIN);
   }
+
   /**
    * @dev add a role to an address
    * @param addr address
@@ -83,7 +93,6 @@ contract RBACWithAdmin is RBAC {
   {
     addRole(addr, roleName);
   }
-
 
   /**
    * @dev remove a role from an address
@@ -97,20 +106,36 @@ contract RBACWithAdmin is RBAC {
     removeRole(addr, roleName);
   }
 
-
+  /**
+   * @dev update a role from an address
+   * @param from address
+   * @param to address
+   * @param roleName the name of the role
+   */
+  function adminUpdateRole(address from, address to, string roleName)
+    onlyAdmin
+    public
+  {
+    removeRole(from, roleName);
+    addRole(to, roleName);
+  }
 
   function getAdminRole() public view returns (string) {
     return ROLE_ADMIN;
   }
+
   function getContractorRole() public view returns (string) {
       return ROLE_CONTRACTOR;
   }
+
   function getConverterRole() public view returns (string) {
       return ROLE_CONVERTER;
   }
+
   function getModeratorRole() public view returns (string) {
       return ROLE_MODERATOR;
   }
+
   function getReferrerRole() public view returns (string) {
       return ROLE_REFERRER;
   }

@@ -14,8 +14,11 @@ contract('TwoKeyAdmin', async (accounts) => {
     let economyContract;
     let regContract;
     let eventContract;
-    let deployerAddress = '0xb3fa520368f2df7bed4df5185101f303f6c7decc'; // '0xb3FA520368f2Df7BED4dF5185101f303f6c7decc';
+    let deployerAddress = accounts[0]; // '0xb3FA520368f2Df7BED4dF5185101f303f6c7decc';
     let not_admin = '0x22d491bde2303f2f43325b2108d26f1eaba1e32b'; 
+    let acc2 = '0x95ced938f7991cd0dfcb48f0a06a40fa1af46ebc';
+    let moderator_addr = '0x3e5e9111ae8eb78fe1cc3bb8915d5d461f3ef9a9'; 
+              
     const null_address = '0x0000000000000000000000000000000000000000';   
     const BigNumber = web3.BigNumber;
 
@@ -437,4 +440,174 @@ contract('TwoKeyAdmin', async (accounts) => {
               assert.equal(adminBal, 10000, "Admin contract should have 10000 ethers before destroyed");
               assert.equal(admin_bal, 0, "Admin contract should have 0 ethers after destroyed");
         });
+
+        // ==========================================================================================================
+
+        /// Positive scenario
+        it('Case 26 : Add Moderator Positive', async () => {
+              adminContract = await TwoKeyAdmin.new(deployerAddress);
+              economyContract = await TwoKeyEconomy.new(adminContract.address);
+              eventContract  =await TwoKeyEventSource.new(adminContract.address);
+              regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
+              exchangeContract =  await TwoKeyExchange.new(1, deployerAddress, economyContract.address, adminContract.address);
+              await adminContract.setSingletones(economyContract.address, exchangeContract.address, regContract.address, eventContract.address);
+         
+              let moderator_addr = '0x3e5e9111ae8eb78fe1cc3bb8915d5d461f3ef9a9'; 
+              await adminContract.addModeratorForReg(moderator_addr, {from: deployerAddress});
+
+              let moderator = await regContract.getModeratorRole();
+
+              let test_moderator = await regContract.hasRole(moderator_addr, moderator);
+              assert.equal(test_moderator, true, "Moderator not added!"); 
+        });
+
+        /// When already replaced
+        it('Case 27 : Should not Add Moderator by admin when Admin already replaced', async () => {
+              adminContract = await TwoKeyAdmin.new(deployerAddress);
+              economyContract = await TwoKeyEconomy.new(adminContract.address);
+              eventContract  =await TwoKeyEventSource.new(adminContract.address);
+              regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
+              exchangeContract =  await TwoKeyExchange.new(1, deployerAddress, economyContract.address, adminContract.address);
+              await adminContract.setSingletones(economyContract.address, exchangeContract.address, regContract.address, eventContract.address);
+           
+              adminContract_new = await TwoKeyAdmin.new(deployerAddress);
+              await adminContract_new.addPreviousAdmin(adminContract.address, {from: deployerAddress});
+              await adminContract.replaceOneself(adminContract_new.address, {from: deployerAddress});
+
+              await tryCatch(adminContract.addModeratorForReg(moderator_addr, {from: deployerAddress}), errTypes.anyError);
+        });
+
+        /// when not approved by admin
+        it('Case 28 : Should not add Moderator when caller is not approved by admin', async () => {
+              adminContract = await TwoKeyAdmin.new(deployerAddress);
+              economyContract = await TwoKeyEconomy.new(adminContract.address);
+              eventContract  =await TwoKeyEventSource.new(adminContract.address);
+              regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
+              exchangeContract =  await TwoKeyExchange.new(1, deployerAddress, economyContract.address, adminContract.address);
+              await adminContract.setSingletones(economyContract.address, exchangeContract.address, regContract.address, eventContract.address);
+
+              await tryCatch(adminContract.addModeratorForReg(moderator_addr, {from: not_admin}), errTypes.anyError);
+
+        });
+
+        /// Remove Moderator Role by Admin - positive scenario
+        it('Case 29 : Remove Moderator Role by Admin', async () => {
+              adminContract = await TwoKeyAdmin.new(deployerAddress);
+              economyContract = await TwoKeyEconomy.new(adminContract.address);
+              eventContract  =await TwoKeyEventSource.new(adminContract.address);
+              regContract = await TwoKeyReg.new(eventContract.address, adminContract.address);
+              exchangeContract =  await TwoKeyExchange.new(1, deployerAddress, economyContract.address, adminContract.address);
+              await adminContract.setSingletones(economyContract.address, exchangeContract.address, regContract.address, eventContract.address);
+
+              let moderator = await regContract.getModeratorRole();
+
+              await adminContract.addModeratorForReg(moderator_addr, {from: deployerAddress});
+              let test_moderator = await regContract.hasRole(moderator_addr, moderator);
+              assert.equal(test_moderator, true, "Moderator did not matched!");
+              
+              await adminContract.removeModeratorForReg(moderator_addr, {from: deployerAddress});
+              test_moderator = await regContract.hasRole(moderator_addr, moderator);
+              assert.notEqual(test_moderator, moderator_addr, "Moderator should not matched!");
+        });
+
+        /// when already replaced
+        it('Case 30 : Should not remove Moderator Role by Admin when admin is already replaced', async () => {
+              adminContract = await TwoKeyAdmin.new(deployerAddress); 
+              economyContract = await TwoKeyEconomy.new(adminContract.address);
+              eventSourceContract = await TwoKeyEventSource.new(adminContract.address);
+              exchangeContarct = await TwoKeyExchange.new(1, deployerAddress, economyContract.address,adminContract.address);
+              let regContract = await TwoKeyReg.new(eventSourceContract.address, adminContract.address);
+              await adminContract.setSingletones(economyContract.address,exchangeContarct.address,regContract.address, eventSourceContract.address);
+
+              let moderator = await regContract.getModeratorRole();
+
+              await adminContract.addModeratorForReg(moderator_addr, {from: deployerAddress});
+              let test_moderator = await regContract.hasRole(moderator_addr, moderator);
+              assert.equal(test_moderator, true, "Moderator did not matched!");
+              
+              adminContract_new = await TwoKeyAdmin.new(deployerAddress);
+              await adminContract_new.addPreviousAdmin(adminContract.address, {from:deployerAddress});
+              await adminContract.replaceOneself(adminContract_new.address, {from: deployerAddress});
+
+              await tryCatch(adminContract.removeModeratorForReg(moderator_addr, {from: deployerAddress}), errTypes.anyError);       
+        });
+
+        /// when not approved by admin
+        it('Case 31 : Should not remove moderator Role when caller is not approved by admin', async () => {
+              adminContract = await TwoKeyAdmin.new(deployerAddress); 
+              economyContract = await TwoKeyEconomy.new(adminContract.address);
+              eventSourceContract = await TwoKeyEventSource.new(adminContract.address);
+              exchangeContarct = await TwoKeyExchange.new(1, deployerAddress, economyContract.address,adminContract.address);
+              let regContract = await TwoKeyReg.new(eventSourceContract.address, adminContract.address);
+              await adminContract.setSingletones(economyContract.address,exchangeContarct.address,regContract.address, eventSourceContract.address);
+         
+              let moderator = await regContract.getModeratorRole();
+
+              await adminContract.addModeratorForReg(moderator_addr, {from: deployerAddress});
+              let test_moderator = await regContract.hasRole(moderator_addr, moderator);
+              assert.equal(test_moderator, true, "Moderator did not matched!");
+              
+              await tryCatch(adminContract.removeModeratorForReg(moderator_addr, {from: not_admin}), errTypes.anyError);       
+        });
+
+        /// positive scenario
+        it('Case 32 : Update Moderator Role by Admin', async () => {
+              adminContract = await TwoKeyAdmin.new(deployerAddress); 
+              economyContract = await TwoKeyEconomy.new(adminContract.address);
+              eventSourceContract = await TwoKeyEventSource.new(adminContract.address);
+              exchangeContarct = await TwoKeyExchange.new(1, deployerAddress, economyContract.address,adminContract.address);
+              let regContract = await TwoKeyReg.new(eventSourceContract.address, adminContract.address);
+              await adminContract.setSingletones(economyContract.address,exchangeContarct.address,regContract.address, eventSourceContract.address);
+
+              let moderator = await regContract.getModeratorRole();
+              
+              await adminContract.addModeratorForReg(moderator_addr, {from: deployerAddress});
+              let test_moderator = await regContract.hasRole(moderator_addr, moderator);
+              assert.equal(test_moderator, true, "Moderator did not matched!");
+              
+              await adminContract.updateModeratorForReg(moderator_addr, acc2, {from: deployerAddress});
+              test_moderator = await regContract.hasRole(acc2, moderator);
+              assert.equal(test_moderator, true, "Moderator did not matched!");
+        });
+
+        /// when already replaced
+        it('Case 33 : Should not update moderator role by Admin when admin is already replaced', async () => {
+              adminContract = await TwoKeyAdmin.new(deployerAddress); 
+              economyContract = await TwoKeyEconomy.new(adminContract.address);
+              eventSourceContract = await TwoKeyEventSource.new(adminContract.address);
+              exchangeContarct = await TwoKeyExchange.new(1, deployerAddress, economyContract.address,adminContract.address);
+              let regContract = await TwoKeyReg.new(eventSourceContract.address, adminContract.address);
+              await adminContract.setSingletones(economyContract.address,exchangeContarct.address,regContract.address, eventSourceContract.address);
+
+              let moderator = await regContract.getModeratorRole();
+
+              await adminContract.addModeratorForReg(moderator_addr, {from: deployerAddress});
+              let test_moderator = await regContract.hasRole(moderator_addr, moderator);
+              assert.equal(test_moderator, true, "Moderator did not matched!");
+              
+              adminContract_new = await TwoKeyAdmin.new(deployerAddress);
+              await adminContract_new.addPreviousAdmin(adminContract.address, {from: deployerAddress});
+              await adminContract.replaceOneself(adminContract_new.address, {from: deployerAddress});
+              
+              await tryCatch(adminContract.updateModeratorForReg(moderator_addr, acc2, {from: deployerAddress}), errTypes.anyError);
+        });
+
+        /// when not approved by admin
+        it('Case 34 : Should not Update Moderator Role if caller is not approved by admin', async () => {
+              adminContract = await TwoKeyAdmin.new(deployerAddress); 
+              economyContract = await TwoKeyEconomy.new(adminContract.address);
+              eventSourceContract = await TwoKeyEventSource.new(adminContract.address);
+              exchangeContarct = await TwoKeyExchange.new(1, deployerAddress, economyContract.address,adminContract.address);
+              let regContract = await TwoKeyReg.new(eventSourceContract.address, adminContract.address);
+              await adminContract.setSingletones(economyContract.address,exchangeContarct.address,regContract.address, eventSourceContract.address);
+
+              let moderator = await regContract.getModeratorRole();
+              
+              await adminContract.addModeratorForReg(moderator_addr, {from: deployerAddress});
+              let test_moderator = await regContract.hasRole(moderator_addr, moderator);
+              assert.equal(test_moderator, true, "Moderator did not matched!");
+              
+              await tryCatch(adminContract.updateModeratorForReg(moderator_addr, acc2, {from: not_admin}), errTypes.anyError);
+        });
+
 });

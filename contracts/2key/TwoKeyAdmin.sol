@@ -27,6 +27,28 @@ contract TwoKeyAdmin is  Ownable, Destructible, AdminContract {
 	address private newTwoKeyAdminAddress;
 	bool private wasReplaced;
 
+	/*
+	* Modifiers
+	*/
+
+    /// @notice Modifier will revert if calling address is not owner or previous active admin contract
+	modifier onlyAuthorizedAdmins() {
+		require((msg.sender == owner) || (msg.sender == address(previousAdmin)));
+	   _;
+	}
+
+    /// @notice Modifier will revert if calling address is not a member of electorateAdmins 
+	modifier adminsVotingApproved() {
+		require(msg.sender == electorateAdmins);
+	    _;
+	}
+
+    /// @notice Modifier will revert if contract is already replaced 
+	modifier wasNotReplaced() {
+		require(!wasReplaced);
+		_;
+	}
+
 	constructor(
 		address _electorateAdmins		
 	) Ownable() Destructible() payable public {
@@ -102,23 +124,32 @@ contract TwoKeyAdmin is  Ownable, Destructible, AdminContract {
 			selfdestruct(newTwoKeyAdminAddress);
 	}
 
-	// modifiers
-    /// @notice Modifier will revert if calling address is not owner or previous active admin contract
-	modifier onlyAuthorizedAdmins() {
-		require((msg.sender == owner) || (msg.sender == address(previousAdmin)));
-	   _;
+	/// @notice Function to add moderator
+	/// @param _address is address of moderator
+	function addModeratorForReg(address _address) public wasNotReplaced adminsVotingApproved {
+		require (_address != address(0));		
+		string memory moderator = twoKeyReg.getModeratorRole();
+		twoKeyReg.adminAddRole(_address, moderator);
+	}
+	
+	/// @notice Function to remove moderator
+	/// @param _address is address of moderator
+	function removeModeratorForReg(address _address) public wasNotReplaced adminsVotingApproved {
+		require (_address != address(0));		
+		string memory moderator = twoKeyReg.getModeratorRole();
+		require(twoKeyReg.hasRole(_address, moderator) == true);
+		twoKeyReg.adminRemoveRole(_address, moderator);
 	}
 
-    /// @notice Modifier will revert if calling address is not a member of electorateAdmins 
-	modifier adminsVotingApproved() {
-		require(msg.sender == electorateAdmins);
-	    _;
-	}
-
-    /// @notice Modifier will revert if contract is already replaced 
-	modifier wasNotReplaced() {
-		require(!wasReplaced);
-		_;
+	/// @notice Method to update moderator
+	/// @param _moderator is address of current moderator
+	/// @param _newModerator is address of new moderator
+	function updateModeratorForReg(address _moderator, address _newModerator) public wasNotReplaced adminsVotingApproved {
+		require (_moderator != address(0));		
+		require (_newModerator != address(0));		
+		string memory moderator = twoKeyReg.getModeratorRole();
+		if(twoKeyReg.hasRole(_moderator, moderator))
+			twoKeyReg.adminUpdateRole(_moderator, _newModerator, moderator);	
 	}
 
     /// @notice Function to whitelist address as an authorized user for twoKeyEventSource contract
@@ -195,6 +226,12 @@ contract TwoKeyAdmin is  Ownable, Destructible, AdminContract {
 		twoKeyEventSource = TwoKeyEventSource(_eventSource);
     }
 
+
+    function transfer2KeyTokens(address _economy, address _to, uint _amount) public returns (bool) {
+		bool completed = IERC20(address(_economy)).transfer(_to, _amount);
+		return completed;
+	}
+
     /// View function - doesn't cost any gas to be executed
 	/// @notice Function to get Ether Balance of given address 
 	/// @param _addr is address of user
@@ -209,12 +246,6 @@ contract TwoKeyAdmin is  Ownable, Destructible, AdminContract {
     function getTwoKeyEconomy () public view returns(address _economy)  {
     	return address(twoKeyEconomy);
     }
-
-
-	function transfer2KeyTokens(address _economy, address _to, uint _amount) public returns (bool) {
-		bool completed = IERC20(address(_economy)).transfer(_to, _amount);
-		return completed;
-	}
 	
 	/// View function - doesn't cost any gas to be executed
 	/// @notice Function to fetch twoKeyReg contract address 
