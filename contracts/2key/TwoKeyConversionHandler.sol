@@ -375,6 +375,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateContractorProceeds(conversion.contractorProceedsETHWei);
         conversion.state = ConversionState.FULFILLED;
 
+        conversions[_converter] = conversion;
 
 
         //lockup contracts:
@@ -429,7 +430,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     /// @dev in order to do that converter must be in pending or rejected state
     /// @param _converter is the address for the converter we're willing to approve
     /// @return Returns true if approved successfully otherwise will return false
-    function approveConverter(address _converter) public onlyContractorOrModerator returns(bool) {
+    function approveConverter(address _converter) public onlyContractorOrModerator sreturns(bool) {
         if(isAddressPending(_converter)) {
             uint index = 0;
             for(uint i=0; i<addressesOfPendingConverters.length; i++) {
