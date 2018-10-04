@@ -21,7 +21,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     address[] addressesOfApprovedConverters;
     address[] addressesOfRejectedConverters;
     address[] addressesOfExpiredConverters;
-
+    address[] addressesOfFulfilledConverters;
 
     address twoKeyAcquisitionCampaignERC20;
     address moderator;
@@ -81,6 +81,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         require(msg.sender == contractor || msg.sender == moderator);
         _;
     }
+
 
     modifier onlyWhitelistedConverter() {
         require(isWhitelistedConverter(msg.sender) == true);
@@ -424,6 +425,44 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         //c.isFulfilled = true;
 
     }
+    /// @notice Function where moderator or contractor can approve converter
+    /// @dev in order to do that converter must be in pending or rejected state
+    /// @param _converter is the address for the converter we're willing to approve
+    /// @return Returns true if approved successfully otherwise will return false
+    function approveConverter(address _converter) public onlyContractorOrModerator returns(bool) {
+        if(isAddressPending(_converter)) {
+            uint index = 0;
+            for(uint i=0; i<addressesOfPendingConverters.length; i++) {
+                if(addressesOfPendingConverters[i] == _converter) {
+                    index = 1;
+                }
+                if(index == 1) {
+                    addressesOfPendingConverters[i] = addressesOfPendingConverters[i+1];
+                }
+            }
+            delete addressesOfPendingConverters[addressesOfPendingConverters.length -1];
+            addressesOfPendingConverters.length--;
+            addressesOfApprovedConverters.push(_converter);
+            return true;
+        } else if(isAddressRejected(_converter)) {
+            uint index1 = 0;
+            for(uint j=0; j<addressesOfRejectedConverters.length; j++) {
+                if(addressesOfRejectedConverters[j] == _converter) {
+                    index1 = 1;
+                }
+                if(index1 == 1) {
+                    addressesOfRejectedConverters[j] = addressesOfRejectedConverters[j+1];
+                }
+            }
+            delete addressesOfRejectedConverters[addressesOfRejectedConverters.length -1];
+            addressesOfRejectedConverters.length--;
+            addressesOfApprovedConverters.push(_converter);
+            return true;
+        }
+        return false;
+    }
+
+
 
 
 
