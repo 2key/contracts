@@ -87,7 +87,7 @@ export class TwoKeyProtocol {
         eventsEngine.start();
         this.syncWeb3 = new Web3(eventsEngine);
         this.eventsAddress = `0x${eventsWallet.getAddress().toString('hex')}`;
-        // this.twoKeyEventContract = this.syncWeb3.eth.contract(contractsMeta.TwoKeyPlasmaEvents.abi).at(contractsMeta.TwoKeyPlasmaEvents.networks[this.networks.syncTwoKeyNetId].address);
+        this.twoKeyEventContract = this.syncWeb3.eth.contract(contractsMeta.TwoKeyPlasmaEvents.abi).at(contractsMeta.TwoKeyPlasmaEvents.networks[this.networks.syncTwoKeyNetId].address);
 
         if (!web3) {
             throw new Error('Web3 instance required!');
@@ -96,7 +96,7 @@ export class TwoKeyProtocol {
         this.web3.eth.defaultBlock = 'pending';
         this.address = address;
         this.twoKeyEconomy = this.web3.eth.contract(contractsMeta.TwoKeyEconomy.abi).at(contractsMeta.TwoKeyEconomy.networks[this.networks.mainNetId].address);
-        // this.ipfs = ipfsAPI(ipfsIp, ipfsPort, {protocol: 'http'});
+        this.ipfs = ipfsAPI(ipfsIp, ipfsPort, {protocol: 'http'});
 
         const twoKeyBase: ITwoKeyBase = {
             web3: this.web3,

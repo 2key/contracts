@@ -35,7 +35,7 @@ module.exports = {
         'dev-local': {
             provider: () => new HDWalletProvider(mnemonic, 'http://localhost:8545'),
             network_id: '*', // Match any network id
-            gas: 7888888,
+            gas: 8000000,
             gasPrice: 2000000000
         },
         'dev-ap': {
