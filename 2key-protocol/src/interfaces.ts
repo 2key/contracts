@@ -155,6 +155,10 @@ export interface IAcquisitionCampaign {
     minContributionETHWei: number | string | BigNumber,
     maxContributionETHWei: number | string | BigNumber,
     referrerQuota?: number,
+    tokenDistributionDate: number,
+    maxDistributionDateShiftInDays: number,
+    bonusTokensVestingMonths: number,
+    bonusTokensVestingStartShiftInDaysFromDistributionDate: number
 }
 
 export interface ICreateCampignProgress {

@@ -303,6 +303,10 @@ describe('TwoKeyProtocol', () => {
             moderatorFeePercentageWei: twoKeyProtocol.Utils.toWei(moderatorFeePercentage, 'ether'),
             minContributionETHWei: twoKeyProtocol.Utils.toWei(minContributionETH, 'ether'),
             maxContributionETHWei: twoKeyProtocol.Utils.toWei(maxContributionETH, 'ether'),
+            tokenDistributionDate: 12345678,
+            maxDistributionDateShiftInDays: 180,
+            bonusTokensVestingMonths: 6,
+            bonusTokensVestingStartShiftInDaysFromDistributionDate: 180
         }, createCallback, 15000000000);
         console.log('Campaign address', campaign);
         campaignAddress = campaign;

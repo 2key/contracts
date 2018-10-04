@@ -46,7 +46,13 @@ export default class AcquisitionCampaign {
         return new Promise(async (resolve, reject) => {
             try {
                 const {public_address} = generatePublicMeta();
-                const predeployGas = await this.helpers._estimateSubcontractGas(contractsMeta.TwoKeyWhitelisted);
+                const predeployGas = await this.helpers._estimateSubcontractGas(contractsMeta.TwoKeyConversionHandler,
+                    [
+                        data.tokenDistributionDate,
+                        data.maxDistributionDateShiftInDays,
+                        data.bonusTokensVestingMonths,
+                        data.bonusTokensVestingStartShiftInDaysFromDistributionDate,
+                    ]);
                 const campaignGas = await this.helpers._estimateSubcontractGas(contractsMeta.TwoKeyAcquisitionCampaignERC20, [
                     this.helpers._getContractDeployedAddress('TwoKeyEventSource'),
                     this.base.twoKeyEconomy.address,
@@ -81,11 +87,11 @@ export default class AcquisitionCampaign {
             try {
                 // const gasRequired = await this.estimateCreation(data);
                 // await this._checkBalanceBeforeTransaction(gasRequired, gasPrice || this.gasPrice);
-                let txHash = await this.helpers._createContract(contractsMeta.TwoKeyWhitelisted, gasPrice, null, progressCallback);
+                let txHash = await this.helpers._createContract(contractsMeta.TwoKeyConversionHandler, gasPrice, null, progressCallback);
                 const predeployReceipt = await this.utils.getTransactionReceiptMined(txHash);
                 const whitelistsAddress = predeployReceipt && predeployReceipt.contractAddress;
                 if (progressCallback) {
-                    progressCallback('TwoKeyWhitelisted', true, whitelistsAddress);
+                    progressCallback('TwoKeyConversionHandler', true, whitelistsAddress);
                 }
                 // const whitelistsInstance = this.web3.eth.contract(contractsMeta.TwoKeyWhitelisted.abi).at(whitelistsAddress);
 
@@ -235,6 +241,7 @@ export default class AcquisitionCampaign {
         return new Promise(async (resolve, reject) => {
             try {
                 let new_message;
+                console.log("referral link is : ===> " + referralLink);
                 if (referralLink) {
                     const {f_address, f_secret, p_message} = this.helpers._getUrlParams(referralLink);
                     const campaignAddress = typeof (campaign) === 'string' ? campaign
@@ -389,8 +396,8 @@ export default class AcquisitionCampaign {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
                 const whitelistsAddress = await promisify(campaignInstance.getAddressOfWhitelisted, []);
                 console.log('WhiteListsAddress', whitelistsAddress);
-                const whitelistsInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyWhitelisted.abi).at(whitelistsAddress);
-                const conversion = await promisify(whitelistsInstance.conversions, [this.base.address]);
+                const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(whitelistsAddress);
+                const conversion = await promisify(conversionHandlerInstance.conversions, [this.base.address]);
                 // const conversion = await promisify(campaignInstance.conversions, [address]);
                 resolve(conversion);
             } catch (e) {
