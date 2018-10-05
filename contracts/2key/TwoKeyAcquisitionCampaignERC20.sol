@@ -154,7 +154,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         contractor = msg.sender;
         twoKeyEconomy = TwoKeyEconomy(_twoKeyEconomy);
         conversionHandler = TwoKeyConversionHandler(_whitelists);
-        conversionHandler.setTwoKeyAcquisitionCampaignERC20(address(this), _moderator, contractor, _assetContractERC20);
         moderator = _moderator;
         assetContractERC20 = _assetContractERC20;
         campaignStartTime = _campaignStartTime;
@@ -169,8 +168,11 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         maxContributionETH = _maxContributionETH;
 
         setERC20Attributes();
+        conversionHandler.setTwoKeyAcquisitionCampaignERC20(address(this), _moderator, contractor, _assetContractERC20, symbol);
+
         // Emit event that TwoKeyCampaign is created
         twoKeyEventSource.created(address(this), contractor);
+
     }
 
 
