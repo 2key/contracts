@@ -176,7 +176,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     }
 
 
-    function setERC20Attributes() public {
+    function setERC20Attributes() internal {
         unit_decimals = IERC20(assetContractERC20).decimals();
         symbol = IERC20(assetContractERC20).symbol();
     }
