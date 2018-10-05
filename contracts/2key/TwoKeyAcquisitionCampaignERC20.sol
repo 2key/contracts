@@ -179,12 +179,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         symbol = IERC20(assetContractERC20).symbol();
     }
 
-
-    // TODO: Udis code which sends rewards etc get it
-    // TODO: Expiry of conversion event (Two-steps for conversion user puts in ether, and converter being approved by KYC)
-    // TODO: When conversion happens, there's timeout where converter can be approved, otherwise everything's transfered to contractor
-
-
     /**
      * given the total payout, calculates the moderator fee
      * @param  _conversionAmountETHWei total payout for escrow
@@ -519,7 +513,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
                 }
             }
             referrerBalancesETHWei[influencers[i]] = referrerBalancesETHWei[influencers[i]].add(b);
-            //TODO: Update referral total rewards
+            //Updating total earning
+            referrerTotalEarnings2KEY[influencers[i]] = referrerTotalEarnings2KEY[influencers[i]].add(b);
             emit Rewarded(influencers[i], b);
             total_bounty = total_bounty.add(b);
             _maxReferralRewardETHWei = _maxReferralRewardETHWei.sub(b);
