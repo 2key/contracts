@@ -2,11 +2,11 @@
 require('babel-register');
 // https://github.com/trufflesuite/truffle-hdwallet-provider
 const HDWalletProvider = require('truffle-hdwallet-provider');
-const PKProvider = require('truffle-hdwallet-provider-privkey');
 // const HDWalletProvider = require('./WalletProvider');
 const LedgerProvider = require('./LedgerProvider');
 
 const mnemonic = 'laundry version question endless august scatter desert crew memory toy attract cruel';
+const mnemonic_private = 'north depend loyal purpose because theme funny script debris divert kitchen junk diary angry method';
 // make sure you have Ether on rinkeby address 0xb3fa520368f2df7bed4df5185101f303f6c7decc
 const infuraApiKey = '71d39c30bc984e8a8a0d8adca84620ad';
 
@@ -33,9 +33,16 @@ module.exports = {
       gasPrice: 2000000000
     },
     'dev-local': {
-      provider: () => new HDWalletProvider(mnemonic, 'http://localhost:8547'),
-      network_id: '*', // Match any network id
+      provider: new HDWalletProvider(mnemonic, 'http://localhost:8545'),
+      network_id: 8086, // Match any network id
       gas: 8000000,
+      gasPrice: 2000000000
+    },
+    'dev-private': {
+      provider: () => new HDWalletProvider(mnemonic_private, 'http://192.168.47.101:28545'),
+      // provider: () => new PKProvider(['d718529bf9e0a5365e3a3545b66a612ff29be12aba366b6e6e919bef1d3b83e2'], 'http://astring.aydnep.com.ua:8545'),
+      network_id: 8087, // Match any network id
+      gas: 7888888,
       gasPrice: 2000000000
     },
     'dev-ap': {

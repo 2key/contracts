@@ -6,7 +6,7 @@ export interface ITwoKeyBase {
     readonly ipfs: any;
     readonly address: string;
     readonly networks: IEhtereumNetworks;
-    readonly contracts: IContractsAdressess;
+    readonly contracts: IContractsAddresses;
     readonly twoKeyEconomy: any;
     readonly twoKeyEventContract: any;
     readonly eventsAddress: string;
@@ -24,7 +24,7 @@ export interface ITwoKeyHelpers {
     _getTokenBalance: (address: string, erc20address?: string) => Promise<number | string | BigNumber>,
     _getTotalSupply: (erc20address?: string) => Promise<number | string | BigNumber>,
     _getTransaction: (txHash: string) => Promise<ITransaction>,
-    _createContract: (contract: IContract, gasPrice?: number, params?: any[], progressCallback?: ICreateCampignProgress) => Promise<string>,
+    _createContract: (contract: IContract, gasPrice?: number, params?: any[], progressCallback?: ICreateCampaignProgress) => Promise<string>,
     _estimateSubcontractGas: (contract: IContract, params?: any[]) => Promise<number>,
     _estimateTransactionGas: (data: IRawTransaction) => Promise<number>,
     _getUrlParams: (url: string) => any,
@@ -36,7 +36,7 @@ export interface ITwoKeyHelpers {
 
 export interface ITwoKeyAcquisitionCampaign {
     estimateCreation: (data: IAcquisitionCampaign) => Promise<number>,
-    create: (data: IAcquisitionCampaign, progressCallback?: ICreateCampignProgress, gasPrice?: number) => Promise<string>,
+    create: (data: IAcquisitionCampaign, progressCallback?: ICreateCampaignProgress, gasPrice?: number) => Promise<string>,
     checkInventoryBalance: (campaign: any) => Promise<number>,
     getPublicLinkKey: (campaign: any, address?: string) => Promise<string>,
     getReferrerCut: (campaign: any) => Promise<number>,
@@ -47,7 +47,7 @@ export interface ITwoKeyAcquisitionCampaign {
     joinAndSetPublicLinkWithCut: (campaignAddress: string, referralLink: string, cut?: number, gasPrice?: number) => Promise<string>,
     joinAndShareARC: (campaignAddress: string, referralLink: string, recipient: string, gasPrice?: number) => Promise<string>,
     joinAndConvert: (campaign: any, value: number | string | BigNumber, referralLink: string, gasPrice?: number) => Promise<string>,
-    getAquisitionConverterConversion: (campaign: any, address?: string) => Promise<any>,
+    getAcquisitionConverterConversion: (campaign: any, address?: string) => Promise<any>,
 }
 
 export interface ITWoKeyUtils {
@@ -72,7 +72,7 @@ export interface BalanceMeta {
     gasPrice: number | string | BigNumber,
 }
 
-export interface IContractsAdressess {
+export interface IContractsAddresses {
     TwoKeyEconomy?: string
 }
 
@@ -96,7 +96,7 @@ export interface ITwoKeyInit {
     address: string,
     ipfsIp?: string,
     ipfsPort?: string | number,
-    contracts?: IContractsAdressess,
+    contracts?: IContractsAddresses,
     networks?: IEhtereumNetworks,
     eventsNetUrl?: string,
     reportKey?: string,
@@ -161,7 +161,7 @@ export interface IAcquisitionCampaign {
     bonusTokensVestingStartShiftInDaysFromDistributionDate: number
 }
 
-export interface ICreateCampignProgress {
+export interface ICreateCampaignProgress {
     (contract: string, mined: boolean, transactionResult: string): void;
 }
 

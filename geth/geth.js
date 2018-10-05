@@ -10,6 +10,7 @@ if (process.argv.length < 3) {
   process.exit(1);
 }
 
+// const datadir = path.join(os.tmpdir(), 'geth.dev');
 const datadir = path.join(__dirname, '../build', 'geth.dev');
 const docker = new Docker({ socketPath: process.platform === 'win32' ? 'npipe:////./pipe/docker_engine' : '/var/run/docker.sock' });
 
@@ -87,6 +88,7 @@ async function start() {
     '--rpc',
     '--rpcapi',
     'db,personal,eth,net,web3,debug,txpool,miner',
+    // 'db,web3,eth,net,personal,parity,parity_set,traces,rpc,parity_accounts,txpool,miner',
     '--rpccorsdomain',
     '*',
     '--rpcaddr=0.0.0.0',
@@ -116,6 +118,9 @@ async function start() {
     '0,1,2,3,4,5,6,7,8,9,10,11',
     '--password',
     '/opt/geth/passwords',
+    // '--verbosity',
+    // '5',
+    // 'console',
   ];
   if (!fs.existsSync(datadir)) {
     fs.mkdirSync(datadir);

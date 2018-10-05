@@ -10,7 +10,7 @@ import * as eth_wallet from 'ethereumjs-wallet';
 import contractsMeta from './contracts';
 import {
     IEhtereumNetworks,
-    IContractsAdressess,
+    IContractsAddresses,
     ITwoKeyInit,
     BalanceMeta,
     IContractEvent,
@@ -25,7 +25,8 @@ import AcquisitionCampaign from './acquisition';
 // const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 
 const TwoKeyDefaults = {
-    ipfsIp: '192.168.47.100',
+    // ipfsIp: '192.168.47.100',
+    ipfsIp: '37.57.185.107',
     ipfsPort: '5001',
     mainNetId: 3,
     syncTwoKeyNetId: 17,
@@ -41,7 +42,7 @@ export class TwoKeyProtocol {
     public totalSupply: number;
     public gas: number;
     private readonly networks: IEhtereumNetworks;
-    private readonly contracts: IContractsAdressess;
+    private readonly contracts: IContractsAddresses;
     private readonly twoKeyEconomy: any;
     private readonly twoKeyEventContract: any;
     private twoKeyEvents: any;

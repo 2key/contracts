@@ -154,7 +154,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         contractor = msg.sender;
         twoKeyEconomy = TwoKeyEconomy(_twoKeyEconomy);
         conversionHandler = TwoKeyConversionHandler(_whitelists);
-        whitelists.setTwoKeyAcquisitionCampaignERC20(address(this), _moderator, contractor);
+        conversionHandler.setTwoKeyAcquisitionCampaignERC20(address(this), _moderator, contractor);
         moderator = _moderator;
         assetContractERC20 = _assetContractERC20;
         campaignStartTime = _campaignStartTime;

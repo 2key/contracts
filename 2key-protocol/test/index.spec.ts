@@ -207,12 +207,12 @@ describe('TwoKeyProtocol', () => {
         // .to.be.equal(twoKeyProtocol.getGasPrice());
     }).timeout(30000);
 
-    // it('should save balance to ipfs', () => {
-    //     return twoKeyProtocol.Utils.ipfsAdd(aydnepBalance).then((hash) => {
-    //         console.log('IPFS hash', hash);
-    //         expect(hash).to.be.a('string');
-    //     });
-    // }).timeout(30000);
+    it('should save balance to ipfs', () => {
+        return twoKeyProtocol.Utils.ipfsAdd(aydnepBalance).then((hash) => {
+            console.log('IPFS hash', hash);
+            expect(hash).to.be.a('string');
+        });
+    }).timeout(30000);
 
     const rnd = Math.floor(Math.random() * 8);
     console.log('Random', rnd, addresses[rnd]);
@@ -385,7 +385,7 @@ describe('TwoKeyProtocol', () => {
 
     // it('should buy some tokens', async () => {
     //     console.log('4) buy from test4 REFLINK', refLink);
-    //     const txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.toWei(minContributionETH, 'ether'), refLink);
+    //     const txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETH, 'ether'), refLink);
     //     console.log(txHash);
     //     expect(txHash).to.be.a('string');
     // }).timeout(30000);
@@ -448,7 +448,7 @@ describe('TwoKeyProtocol', () => {
         txHash = await twoKeyProtocol.transferEther(campaignAddress, twoKeyProtocol.toWei(minContributionETH * 1.1, 'ether'));
         console.log('HASH', txHash);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-        const conversion = await twoKeyProtocol.getAquisitionConverterConversion(campaignAddress);
+        const conversion = await twoKeyProtocol.getAcquisitionConverterConversion(campaignAddress);
         console.log(conversion);
         expect(conversion[2]).to.be.equal(twoKeyProtocol.getAddress());
     }).timeout(30000);
@@ -484,7 +484,7 @@ describe('TwoKeyProtocol', () => {
         });
         txHash = await twoKeyProtocol.transferEther(campaignAddress, twoKeyProtocol.toWei(minContributionETH * 1.1, 'ether'));
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-        const conversion = await twoKeyProtocol.getAquisitionConverterConversion(campaignAddress);
+        const conversion = await twoKeyProtocol.getAcquisitionConverterConversion(campaignAddress);
         console.log(conversion);
         expect(conversion[2]).to.be.equal(twoKeyProtocol.getAddress());
     }).timeout(30000);

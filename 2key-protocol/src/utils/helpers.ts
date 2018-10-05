@@ -3,7 +3,7 @@ import {BigNumber} from "bignumber.js";
 import {promisify} from "./index";
 import {
     IContract,
-    ICreateCampignProgress,
+    ICreateCampaignProgress,
     IRawTransaction,
     ITransaction,
     ITwoKeyBase
@@ -90,7 +90,7 @@ export default class Helpers {
         });
     }
 
-    _createContract(contract: IContract, gasPrice: number = this.gasPrice, params?: any[], progressCallback?: ICreateCampignProgress): Promise<string> {
+    _createContract(contract: IContract, gasPrice: number = this.gasPrice, params?: any[], progressCallback?: ICreateCampaignProgress): Promise<string> {
         return new Promise(async (resolve, reject) => {
             const {abi, bytecode: data, name} = contract;
             console.log(name, ':', params);

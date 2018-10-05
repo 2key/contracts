@@ -1,4 +1,4 @@
-import {IAcquisitionCampaign, ICreateCampignProgress, ITwoKeyBase, ITwoKeyHelpers, ITWoKeyUtils} from "../interfaces";
+import {IAcquisitionCampaign, ICreateCampaignProgress, ITwoKeyBase, ITwoKeyHelpers, ITWoKeyUtils} from "../interfaces";
 import contractsMeta from "../contracts";
 import {promisify} from "../utils/index";
 import {BigNumber} from "bignumber.js";
@@ -82,7 +82,7 @@ export default class AcquisitionCampaign {
     }
 
     // Create Campaign
-    public create(data: IAcquisitionCampaign, progressCallback?: ICreateCampignProgress, gasPrice?: number): Promise<string> {
+    public create(data: IAcquisitionCampaign, progressCallback?: ICreateCampaignProgress, gasPrice?: number): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
                 // const gasRequired = await this.estimateCreation(data);
@@ -348,49 +348,58 @@ export default class AcquisitionCampaign {
     /* PARTICIPATE */
     public joinAndConvert(campaign: any, value: number | string | BigNumber, referralLink: string, gasPrice: number = this.base._getGasPrice()): Promise<string> {
         return new Promise(async (resolve, reject) => {
-            const {f_address, f_secret, p_message} = this.helpers._getUrlParams(referralLink);
-            if (!f_address || !f_secret) {
-                reject('Broken Link');
-            }
-            const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
+            try {
+                const {f_address, f_secret, p_message} = this.helpers._getUrlParams(referralLink);
+                if (!f_address || !f_secret) {
+                    reject('Broken Link');
+                }
+                const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
 
-            const prevChain = await promisify(campaignInstance.received_from, [this.base.address]);
-            // console.log('Previous referrer', prevChain, parseInt(prevChain, 16));
-            //
-            // const balance = parseFloat((await promisify(campaignInstance.balanceOf, [this.address])).toString());
-            if (!parseInt(prevChain, 16)) {
-                console.log('No ARCS call Free Join Take');
-                const {public_address} = generatePublicMeta();
-                const signature = Sign.free_join_take(this.base.address, public_address, f_address, f_secret, p_message);
-                const gas = await promisify(campaignInstance.joinAndConvert.estimateGas, [signature, {
-                    from: this.base.address,
-                    value
-                }]);
-                console.log('Gas required for joinAndConvert', gas);
-                await this.helpers._checkBalanceBeforeTransaction(gas, gasPrice);
-                const txHash = await promisify(campaignInstance.joinAndConvert, [signature, {
-                    from: this.base.address,
-                    gasPrice,
-                    gas,
-                    value
-                }]);
-                await this.utils.getTransactionReceiptMined(txHash);
-                resolve(txHash);
-            } else {
-                console.log('Previous referrer', prevChain, value);
-                const gas = await promisify(campaignInstance.convert.estimateGas, [{from: this.base.address, value}]);
-                console.log('Gas required for convert', gas);
-                await this.helpers._checkBalanceBeforeTransaction(gas, gasPrice);
-                const txHash = await promisify(campaignInstance.convert, [{from: this.base.address, gasPrice, gas, value}]);
-                await this.utils.getTransactionReceiptMined(txHash);
-                const conversions = await this.getAquisitionConverterConversion(campaignInstance);
-                console.log(conversions);
-                resolve(txHash);
+                const prevChain = await promisify(campaignInstance.received_from, [this.base.address]);
+                // console.log('Previous referrer', prevChain, parseInt(prevChain, 16));
+                //
+                // const balance = parseFloat((await promisify(campaignInstance.balanceOf, [this.address])).toString());
+                if (!parseInt(prevChain, 16)) {
+                    console.log('No ARCS call Free Join Take');
+                    const {public_address} = generatePublicMeta();
+                    const signature = Sign.free_join_take(this.base.address, public_address, f_address, f_secret, p_message);
+                    const gas = await promisify(campaignInstance.joinAndConvert.estimateGas, [signature, {
+                        from: this.base.address,
+                        value
+                    }]);
+                    console.log('Gas required for joinAndConvert', gas);
+                    await this.helpers._checkBalanceBeforeTransaction(gas, gasPrice);
+                    const txHash = await promisify(campaignInstance.joinAndConvert, [signature, {
+                        from: this.base.address,
+                        gasPrice,
+                        gas,
+                        value
+                    }]);
+                    await this.utils.getTransactionReceiptMined(txHash);
+                    resolve(txHash);
+                } else {
+                    console.log('Previous referrer', prevChain, value);
+                    // const gas = await promisify(campaignInstance.convert.estimateGas, [{from: this.base.address, value}]);
+                    // console.log('Gas required for convert', gas);
+                    // await this.helpers._checkBalanceBeforeTransaction(gas, gasPrice);
+                    const txHash = await promisify(campaignInstance.convert, [{
+                        from: this.base.address,
+                        gasPrice,
+                        value
+                    }]);
+                    // await this.utils.getTransactionReceiptMined(txHash);
+                    // const conversions = await this.getAcquisitionConverterConversion(campaignInstance);
+                    // console.log(conversions);
+                    resolve(txHash);
+                }
+            } catch (e) {
+                console.log('joinAndConvert ERROR', e.toString());
+                reject(e);
             }
         });
     }
 
-    public getAquisitionConverterConversion(campaign: any, address: string = this.base.address): Promise<any> {
+    public getAcquisitionConverterConversion(campaign: any, address: string = this.base.address): Promise<any> {
         return new Promise<any>(async (resolve, reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
