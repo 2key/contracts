@@ -407,7 +407,7 @@ describe('TwoKeyProtocol', () => {
         expect(hash).to.be.a('string');
     }).timeout(300000);
 
-    /*
+
     it('should buy some tokens from uport', async () => {
         const { web3, address } = web3switcher.uport();
         twoKeyProtocol = new TwoKeyProtocol({
@@ -419,7 +419,7 @@ describe('TwoKeyProtocol', () => {
             },
         });
         console.log('6) uport buy from REFLINK', refLink);
-        const txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.toWei(minContributionETH * 1.5, 'ether'), refLink);
+        const txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETH * 1.5, 'ether'), refLink);
         console.log(txHash);
         expect(txHash).to.be.a('string');
     }).timeout(30000);
@@ -443,14 +443,15 @@ describe('TwoKeyProtocol', () => {
                 syncTwoKeyNetId,
             },
         });
-        const arcs = await twoKeyProtocol.getBalanceOfArcs(campaignAddress);
+        //TODO: Move getBalanceOfArcs from Utils to AcquisitionCampaign
+        const arcs = await twoKeyProtocol.Utils.getBalanceOfArcs(campaignAddress);
         console.log('GMAIL2 ARCS', arcs);
-        txHash = await twoKeyProtocol.transferEther(campaignAddress, twoKeyProtocol.toWei(minContributionETH * 1.1, 'ether'));
+        txHash = await twoKeyProtocol.transferEther(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETH * 1.1, 'ether'));
         console.log('HASH', txHash);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-        const conversion = await twoKeyProtocol.getAcquisitionConverterConversion(campaignAddress);
+        const conversion = await twoKeyProtocol.AcquisitionCampaign.getAcquisitionConverterConversion(campaignAddress);
         console.log(conversion);
-        expect(conversion[2]).to.be.equal(twoKeyProtocol.getAddress());
+        expect(conversion[2]).to.be.equal(twoKeyProtocol.address);
     }).timeout(30000);
 
     it('should transfer arcs from new user to test', async () => {
@@ -463,7 +464,7 @@ describe('TwoKeyProtocol', () => {
                 syncTwoKeyNetId,
             },
         });
-        const refReward = await twoKeyProtocol.getEstimatedMaximumReferralReward(campaignAddress, refLink);
+        const refReward = await twoKeyProtocol.AcquisitionCampaign.getEstimatedMaximumReferralReward(campaignAddress, refLink);
         console.log(`Max estimated referral reward: ${refReward}%`);
         txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndShareARC(campaignAddress, refLink, env.TEST_ADDRESS);
         console.log(txHash);
@@ -482,12 +483,13 @@ describe('TwoKeyProtocol', () => {
                 syncTwoKeyNetId,
             },
         });
-        txHash = await twoKeyProtocol.transferEther(campaignAddress, twoKeyProtocol.toWei(minContributionETH * 1.1, 'ether'));
+        txHash = await twoKeyProtocol.transferEther(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETH * 1.1, 'ether'));
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-        const conversion = await twoKeyProtocol.getAcquisitionConverterConversion(campaignAddress);
+        const conversion = await twoKeyProtocol.AcquisitionCampaign.getAcquisitionConverterConversion(campaignAddress);
         console.log(conversion);
-        expect(conversion[2]).to.be.equal(twoKeyProtocol.getAddress());
+        // expect(conversion).to.exist;
+        expect(conversion[2]).to.be.equal(twoKeyProtocol.address);
     }).timeout(30000);
-    */
+
     it('should print after all tests', printBalances).timeout(15000);
 });
