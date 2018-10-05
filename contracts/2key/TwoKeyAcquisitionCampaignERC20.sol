@@ -649,7 +649,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     }
 
     /// @notice View function - contractor getter
-    /// @returns address of contractor
+    /// @return address of contractor
     function getContractorAddress() public view returns (address) {
         return contractor;
     }
@@ -664,7 +664,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
 
     /// @notice Getter for privateMetaHash
     /// @dev only Contractor can call this method, otherwise function will revert
-    /// @returns string representation of private metadata hash
+    /// @return string representation of private metadata hash
     function getPrivateMetaHash() public view onlyContractor returns (string) {
         return privateMetaHash;
     }
