@@ -89,7 +89,7 @@ contract TwoKeySignedContract is TwoKeyContract {
           {
             bounty_cut := mload(add(sig, idx))
           }
-          require(bounty_cut > 0,'bounty should be 1..101 or 255');  // 0 and 255 are used to indicate default (equal part) behaviour
+          require(bounty_cut > 0,'bounty/weight not defined (1..255)');  // 255 are used to indicate default (equal part) behaviour
         }
 
         idx += 20;
@@ -120,6 +120,9 @@ contract TwoKeySignedContract is TwoKeyContract {
         // we will need this in case one of the influencers will want to start his own off-chain link
         if (public_link_key[new_address] == 0) {
           public_link_key[new_address] = new_public_key;
+          if (eventSource != address(0)) {
+            eventSource.setPublicLinkKey(new_address, new_public_key);
+          }
         } else {
           require(public_link_key[new_address] == new_public_key,'public key can not be modified');
         }
