@@ -7,6 +7,8 @@ import "./TwoKeyConversionStates.sol";
 import "./TwoKeyLockupContract.sol";
 import "../openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "./TwoKeyConverterStates.sol";
+import "../interfaces/IERC20.sol";
+
 
 
 // adapted from: 
@@ -54,11 +56,12 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     /// @param _twoKeyAcquisitionCampaignERC20 is the address of TwoKeyAcquisitionCampaignERC20 contract
     /// @param _moderator is the address of the moderator
     /// @param _contractor is the address of the contractor
-    function setTwoKeyAcquisitionCampaignERC20(address _twoKeyAcquisitionCampaignERC20, address _moderator, address _contractor) public {
+    function setTwoKeyAcquisitionCampaignERC20(address _twoKeyAcquisitionCampaignERC20, address _moderator, address _contractor, address _assetContractERC20) public {
         require(twoKeyAcquisitionCampaignERC20 == address(0));
         twoKeyAcquisitionCampaignERC20 = _twoKeyAcquisitionCampaignERC20;
         moderator = _moderator;
         contractor = _contractor;
+        assetContractERC20 =_assetContractERC20;
         // get asset name, address, price, etc all we need
     }
 
@@ -239,18 +242,15 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
             uint256 bonusTokensForConverterUnits,
             uint256 expiryConversion) public onlyTwoKeyAcquisitionCampaign {
         // these are going to be global variables
-        address _assetContractERC20 = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).getAssetContractAddress();
-        string memory _assetSymbol = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).getSymbol();
+        string memory _assetSymbol = IERC20(assetContractERC20).symbol();
         Conversion memory c = Conversion(_contractor, _contractorProceeds, _converterAddress,
-            ConversionState.PENDING, _assetSymbol, _assetContractERC20, _conversionAmount,
+            ConversionState.PENDING, _assetSymbol, assetContractERC20, _conversionAmount,
             _maxReferralRewardETHWei, _moderatorFeeETHWei, baseTokensForConverterUnits,
             bonusTokensForConverterUnits, CampaignType.CPA_FUNGIBLE,
-            now, now + expiryConversion * (1 hours));
+            now, now + expiryConversion * (1 hours)); // commented *(1hours)
 
         conversions[_converterAddress] = c;
         converterToConversionState[_converterAddress] = ConversionState.PENDING;
-
-
     }
 
     /// @notice Function to encode provided parameters into bytes
@@ -482,6 +482,14 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
             TODO: Go through the addresses and check if they're eligible to be approved (only pending/rejected)
             Rejected can only become from pending
         */
+    }
+
+    function getAcquisitionAddress() public view returns (address) {
+        return twoKeyAcquisitionCampaignERC20;
+    }
+
+    function getAssetContractData() public view returns (string) {
+        return IERC20(assetContractERC20).symbol();
     }
 
 

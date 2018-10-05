@@ -379,6 +379,7 @@ export default class AcquisitionCampaign {
                     resolve(txHash);
                 } else {
                     console.log('Previous referrer', prevChain, value);
+                    console.log(await this.getAssetContractData(campaignInstance));
                     // const gas = await promisify(campaignInstance.convert.estimateGas, [{from: this.base.address, value}]);
                     // console.log('Gas required for convert', gas);
                     // await this.helpers._checkBalanceBeforeTransaction(gas, gasPrice);
@@ -403,9 +404,9 @@ export default class AcquisitionCampaign {
         return new Promise<any>(async (resolve, reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-                const whitelistsAddress = await promisify(campaignInstance.getAddressOfWhitelisted, []);
-                console.log('WhiteListsAddress', whitelistsAddress);
-                const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(whitelistsAddress);
+                const conversionHandler = await promisify(campaignInstance.getTwoKeyConversionHandlerAddress, []);
+                console.log('WhiteListsAddress', conversionHandler);
+                const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandler);
                 const conversion = await promisify(conversionHandlerInstance.conversions, [this.base.address]);
                 // const conversion = await promisify(campaignInstance.conversions, [address]);
                 resolve(conversion);
@@ -414,4 +415,33 @@ export default class AcquisitionCampaign {
             }
         })
     }
+
+    public getTwoKeyConversionHandlerAddress(campaign: any) : Promise<string> {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
+                const conversionHandler = await promisify(campaignInstance.getTwoKeyConversionHandlerAddress, []);
+                resolve(conversionHandler);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+    public getAssetContractData(campaign: any): Promise<any> {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
+                const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
+                const assetContractData = await promisify(conversionHandlerInstance.getAssetContractData, []);
+                // const assetContractData = await promisify(conversionHandlerInstance.getAssetContractData, []);
+                console.log(assetContractData);
+                resolve(assetContractData)
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+
 }

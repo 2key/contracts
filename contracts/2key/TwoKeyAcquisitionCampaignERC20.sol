@@ -154,7 +154,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         contractor = msg.sender;
         twoKeyEconomy = TwoKeyEconomy(_twoKeyEconomy);
         conversionHandler = TwoKeyConversionHandler(_whitelists);
-        conversionHandler.setTwoKeyAcquisitionCampaignERC20(address(this), _moderator, contractor);
+        conversionHandler.setTwoKeyAcquisitionCampaignERC20(address(this), _moderator, contractor, _assetContractERC20);
         moderator = _moderator;
         assetContractERC20 = _assetContractERC20;
         campaignStartTime = _campaignStartTime;
@@ -495,7 +495,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
             baseTokensForConverterUnits,bonusTokensForConverterUnits,
             expiryConversionInHours);
 
-        emit ReceivedEther(converterAddress, conversionAmountETHWei);
+//        emit ReceivedEther(converterAddress, conversionAmountETHWei);
     }
 
 
@@ -594,11 +594,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         return campaignInventoryUnitsBalance;
     }
 
-    /// @notice View function to fetch the address of asset contract
-    /// @return address of that asset contract
-    function getAssetContractAddress() public view returns (address) {
-        return assetContractERC20;
-    }
 
     /// @notice Function to return constantss
     function getConstantInfo() public view returns (uint256, uint256, uint256, uint256) {
@@ -658,10 +653,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         return (baseTokensForConverterUnits, bonusTokensForConverterUnits);
     }
 
-    function getAddressOfWhitelistedContract() public view returns (address) {
-        return address(conversionHandler);
-    }
-
     function getContractorAddress() public view returns (address) {
         return contractor;
     }
@@ -705,5 +696,10 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         contractorTotalProceeds.add(value);
         contractorBalance.add(value);
     }
+
+    function getTwoKeyConversionHandlerAddress() public view returns (address) {
+        return conversionHandler;
+    }
+
 
 }

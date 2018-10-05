@@ -48,6 +48,8 @@ export interface ITwoKeyAcquisitionCampaign {
     joinAndShareARC: (campaignAddress: string, referralLink: string, recipient: string, gasPrice?: number) => Promise<string>,
     joinAndConvert: (campaign: any, value: number | string | BigNumber, referralLink: string, gasPrice?: number) => Promise<string>,
     getAcquisitionConverterConversion: (campaign: any, address?: string) => Promise<any>,
+    getTwoKeyConversionHandlerAddress: (campaign: any) => Promise<string>,
+    getAssetContractData: (campaign: any) => Promise<any>,
 }
 
 export interface ITWoKeyUtils {
