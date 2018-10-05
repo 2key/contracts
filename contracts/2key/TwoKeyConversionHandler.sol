@@ -318,7 +318,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).moveFungibleAsset(address(firstLockUp), conversion.baseTokenUnits);
 
         uint bonusAmountSplited = conversion.bonusTokenUnits / bonusTokensVestingMonths;
-        address [] memory lockupContracts=  new address[](bonusTokensVestingMonths);
+        address [] memory lockupContracts=  new address[](bonusTokensVestingMonths + 1);
 
         for(uint i=0; i<bonusTokensVestingMonths; i++) {
             TwoKeyLockupContract lockup = new TwoKeyLockupContract(tokenDistributionDate +
@@ -328,12 +328,13 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
 
             lockupContracts[i] = lockup;
         }
+        lockupContracts[lockupContracts.length - 1] = firstLockUp;
 
         ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateContractorProceeds(conversion.contractorProceedsETHWei);
         conversion.state = ConversionState.FULFILLED;
 
         conversions[_converter] = conversion;
-
+        converterToLockupContracts[_converter] = lockupContracts;
 
         //lockup contracts:
         /*
@@ -402,10 +403,20 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
             return bytes32("FULFILLED");
         }
     }
-
-    //TODO: Return string not state
-    function getConverterConversionState(address _converter) public view returns (ConversionState) {
-        return converterToConversionState[_converter];
+    `
+    function getConverterConversionState(address _converter) public view returns (string) {
+        ConversionState memory state = converterToConversionState[_converter];
+        if(state == ConversionState.APPROVED) {
+            return "APPROVED";
+        } else if(state == ConversionState.REJECTED) {
+            return "REJECTED";
+        } else if(state == ConversionState.CANCELLED) {
+            return "CANCELLED";
+        } else if(state == ConversionState.FULFILLED) {
+            return "FULFILLED";
+        } else if(state == ConversionState.PENDING) {
+            return "PENDING";
+        }
     }
 
     function isConverterApproved(address _converter) public view onlyContractorOrModerator returns (bool) {
