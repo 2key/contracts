@@ -293,14 +293,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     }
 
     function performConversion(address _converter) internal {
-        /*
-         Then we need another function that requires converter to be whitelisted and should do the following:
-            - Compute referral rewards and distribute then updateRefchainRewards
-            - Compute and distribute moderation fees then
-            - Generate lock-up contracts for tokens then
-            - Move tokens to lock-up contracts then
-            - Send remaining ether to contractor
-        */
         Conversion memory conversion = conversions[_converter];
 
 
