@@ -395,7 +395,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
             return bytes32("FULFILLED");
         }
     }
-    `
+
     function getConverterConversionState(address _converter) public view returns (string) {
         ConversionState memory state = converterToConversionState[_converter];
         if(state == ConversionState.APPROVED) {
