@@ -491,5 +491,18 @@ describe('TwoKeyProtocol', () => {
         expect(conversion[2]).to.be.equal(twoKeyProtocol.address);
     }).timeout(30000);
 
+    it('should approve converter for conversion' , async() => {
+        console.log("Test where contractor / moderator can approve converter to execute conversion");
+        const { web3, address } = web3switcher.aydnep();
+        twoKeyProtocol = new TwoKeyProtocol({
+            web3,
+            address,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+        });
+
+    });
     it('should print after all tests', printBalances).timeout(15000);
 });
