@@ -11,6 +11,10 @@ contract TwoKeySignedContract is TwoKeyContract {
     require(balanceOf(owner_influencer) > 0,'no ARCs');
     require(public_link_key[owner_influencer] == address(0),'public link key already defined');
     public_link_key[owner_influencer] = _public_link_key;
+
+    if (eventSource != address(0)) {
+      eventSource.setPublicLinkKey(owner_influencer, _public_link_key);
+    }
   }
 
   function transferSig(bytes sig) public {

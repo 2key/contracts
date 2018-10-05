@@ -2,12 +2,29 @@ pragma solidity ^0.4.24; //We have to specify what version of compiler this code
 import "../openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 contract TwoKeyPlasmaEvents is Ownable {
-    // TODO make sure the owner is really using a secret private key
 
+    // REPLICATE INFO FROM REAL NETWORK
+    // the backend "inspector" process listen to events in the real network and write them here
+    // TODO make sure the owner is really using a secret private key
+    mapping(address => bool) public verifiedUsers;
+    mapping(address => mapping(address => address))  public public_link_key;
+    function setPublicLinkKey(address c, address owner, address _public_link_key) onlyOwner public {
+        //  this method is called by the inspector backend process everytime it sees an event that
+        // setPublicLinkKey was called on a campaign contract
+        // NOTE c, owner is the address on the real network, not on plasma
+        public_link_key[c][owner] = _public_link_key;
+    }
+    function verifiedUser(address owner) onlyOwner public {
+        //  this method is called by the inspector backend process everytime it sees an event UserNameChanged coming
+        // from TwoKeyReg contract in the real network
+        // NOTE owner is the address on the real network, not on plasma
+        verifiedUsers[owner] = true;
+    }
+
+    ///
 
     mapping(address => mapping(address => mapping(address => bool))) public visits;
     mapping(address => mapping(address => address[])) public visits_list;
-    mapping(address => bool) public verifiedUsers;
     mapping(address => address) public plasma2ethereum;
 
     // Its better if dApp handles created contract by itself
@@ -16,23 +33,14 @@ contract TwoKeyPlasmaEvents is Ownable {
     //    verifiedCampaigns[c] = owner;
     //  }
 
-    function verifiedUser(address owner) onlyOwner public {
-        verifiedUsers[owner] = true;
-    }
 
     event Visited(address indexed to, address indexed c, address from);  // the to is a plasma address, you should look it up in plasma2ethereum
     event Joined(address indexed _campaign, address indexed _from, address indexed _to);
 
-    function toString(address x) public pure returns (string) {
-        bytes memory b = new bytes(20);
-        for (uint i = 0; i < 20; i++)
-            b[i] = byte(uint8(uint(x) / (2**(8*(19 - i)))));
-        return string(b);
-    }
+
     function add_plasma2ethereum(bytes sig) public {
         // Its better if dApp handles created contract by itself
         //    require(verifiedCampaigns[c] != address(0));
-//        bytes32 hash = keccak256(abi.encodePacked(toString(msg.sender)));
         bytes32 hash = keccak256(keccak256(abi.encodePacked("bytes binding to plasma address")),keccak256(abi.encodePacked(msg.sender)));
         require (sig.length == 65, 'bad signature length');
         // The signature format is a compact form of:
@@ -63,6 +71,14 @@ contract TwoKeyPlasmaEvents is Ownable {
         plasma2ethereum[msg.sender] = eth_address;
     }
 
+    function visited_sign(address c, bytes sign, bytes ipfs) public {
+        // TODO caller must send sign it got from the 2key-link
+        // sign contains the "from" and at the tip of sign you should put your own plasma address (msg.sender)
+        // TODO  validate that the last address in sign is equal to msg.sender
+
+        // TODO keep table of all 2keylinks of all contracts
+    }
+
     function visited(address from, address c) public {
         address to = msg.sender;
         //    require(verifiedUsers[to]);  // TODO we want to use verified users BUT without gas
@@ -79,6 +95,8 @@ contract TwoKeyPlasmaEvents is Ownable {
     function joined(address _campaign, address _from, address _to) public {
         // TODO replace to with sig?
         //    require(verifiedUsers[to]);  // TODO we want to use verified users BUT without gas
+        // TODO do we want to enforce visited first
+        // TODO _to should be msg.sender
         emit Joined(_campaign, _from, _to);
     }
 
@@ -86,4 +104,7 @@ contract TwoKeyPlasmaEvents is Ownable {
     function get_visits_list(address from, address c) public view returns (address[]) {
         return visits_list[c][from];
     }
+
+    // TODO similar method of get_visits_list for joins
+
 }
