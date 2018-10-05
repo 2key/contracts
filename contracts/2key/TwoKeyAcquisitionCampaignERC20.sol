@@ -648,50 +648,73 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         return (baseTokensForConverterUnits, bonusTokensForConverterUnits);
     }
 
+    /// @notice View function - contractor getter
+    /// @returns address of contractor
     function getContractorAddress() public view returns (address) {
         return contractor;
     }
 
-    function setPublicMetaHash(string _publicMetaHash) public onlyContractor{
-        require(msg.sender == contractor);
-        publicMetaHash = _publicMetaHash;
-    }
 
+    /// @notice Setter for privateMetaHash
+    /// @dev only Contractor can call this method, otherwise function will revert
+    /// @param _privateMetaHash is string representation of private metadata hash
     function setPrivateMetaHash(string _privateMetaHash) public onlyContractor {
-        require(msg.sender == contractor);
         privateMetaHash = _privateMetaHash;
     }
 
+    /// @notice Getter for privateMetaHash
+    /// @dev only Contractor can call this method, otherwise function will revert
+    /// @returns string representation of private metadata hash
     function getPrivateMetaHash() public view onlyContractor returns (string) {
-        require(msg.sender == contractor);
         return privateMetaHash;
     }
 
-    function updateMinContribution(uint value) public onlyContractor {
+    /*
+      ================================== PUT /campaign ======================================
+    */
+
+    /// @notice Option to update MinContributionETH
+    /// @dev only Contractor can call this method, otherwise it will revert - emits Event when updated
+    /// @param value is the new value we are going to set for minContributionETH
+    function updateMinContributionETH(uint value) public onlyContractor {
         minContributionETH = value;
         emit UpdatedData(block.timestamp, value, "Updated maxContribution");
     }
 
-    function updateMaxContribution(uint value) public onlyContractor {
+    /// @notice Option to update maxContributionETH
+    /// @dev only Contractor can call this method, otherwise it will revert - emits Event when updated
+    /// @param value is the new maxContribution value
+    function updateMaxContributionETH(uint value) public onlyContractor {
         maxContributionETH = value;
         emit UpdatedData(block.timestamp, value, "Updated maxContribution");
     }
 
+    /// @notice Option to update maxReferralRewardPercent
+    /// @dev only Contractor can call this method, otherwise it will revert - emits Event when updated
+    /// @param value is the new referral percent value
     function updateMaxReferralRewardPercent(uint value) public onlyContractor {
         maxReferralRewardPercent = value;
         emit UpdatedData(block.timestamp, value, "Updated maxReferralRewardPercent");
     }
 
-    function updateIpfsHashPublicMeta(string value) public onlyContractor {
+    /// @notice Option to update /set publicMetaHash
+    /// @dev only Contractor can call this function, otherwise it will revert - emits Event when set/updated
+    /// @param value is the value for the publicMetaHash
+    function updateOrSetIpfsHashPublicMeta(string value) public onlyContractor {
         publicMetaHash = value;
         emit UpdatedPublicMetaHash(block.timestamp, value);
     }
 
+    /// @notice Option to update contractor proceeds
+    /// @dev can be called only from TwoKeyConversionHandler contract
+    /// @param value it the value we'd like to add to total contractor proceeds and contractor balance
     function updateContractorProceeds(uint value) public onlyTwoKeyConversionHandler {
         contractorTotalProceeds.add(value);
         contractorBalance.add(value);
     }
 
+    /// @notice getter for address of conversion handler
+    /// @return address representing conversionHandler contract
     function getTwoKeyConversionHandlerAddress() public view returns (address) {
         return conversionHandler;
     }
