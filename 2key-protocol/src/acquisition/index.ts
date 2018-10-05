@@ -379,7 +379,6 @@ export default class AcquisitionCampaign {
                     resolve(txHash);
                 } else {
                     console.log('Previous referrer', prevChain, value);
-                    console.log(await this.getAssetContractData(campaignInstance));
                     // const gas = await promisify(campaignInstance.convert.estimateGas, [{from: this.base.address, value}]);
                     // console.log('Gas required for convert', gas);
                     // await this.helpers._checkBalanceBeforeTransaction(gas, gasPrice);
