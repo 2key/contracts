@@ -441,6 +441,4 @@ export default class AcquisitionCampaign {
             }
         })
     }
-
-
 }
