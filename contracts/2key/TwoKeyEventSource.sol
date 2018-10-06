@@ -14,6 +14,7 @@ contract TwoKeyEventSource is TwoKeyTypes {
     event Fulfilled(address indexed _campaign, address indexed _converter, uint256 indexed _tokenID, address _childContractID, uint256 _indexOrAmount, CampaignType _type);
     event Cancelled(address indexed _campaign, address indexed _converter, uint256 indexed _tokenID, address _childContractID, uint256 _indexOrAmount, CampaignType _type);
     event Code(bytes32 _code, uint256 _index);
+    event PublicLinkKey(address campaign, address owner, address key);
 
 
 
@@ -53,7 +54,7 @@ contract TwoKeyEventSource is TwoKeyTypes {
         bytes memory code = GetCode.at(msg.sender);
         bytes32 cc = keccak256(abi.encodePacked(code));
         emit Code(cc,1);
-//        require(canEmit[cc] == true);
+// TODO  fails     require(canEmit[cc] == true);
         _;
     }
 
@@ -128,31 +129,43 @@ contract TwoKeyEventSource is TwoKeyTypes {
     }
 
     /// @dev Only allowed contracts can call this function ---> means can emit events
+    // TODO use msg.sender instead of _campaign
     function created(address _campaign, address _owner) public onlyAllowedContracts{
     	emit Created(_campaign, _owner);
     }
 
     /// @dev Only allowed contracts can call this function ---> means can emit events
-    function joined(address _campaign, address _from, address _to) public onlyAllowedContracts{
+    // TODO use msg.sender instead of _campaign
+    function joined(address _campaign, address _from, address _to) public onlyAllowedContracts {
     	emit Joined(_campaign, _from, _to);
     }
 
+    function setPublicLinkKey(address _owner, address _public_key) public
+// TODO revert   onlyAllowedContracts
+    {
+        emit PublicLinkKey(msg.sender, _owner, _public_key);
+    }
+
     /// @dev Only allowed contracts can call this function ---> means can emit events
+    // TODO use msg.sender instead of _campaign
     function escrow(address _campaign, address _converter, uint256 _tokenID, address _childContractID, uint256 _indexOrAmount, CampaignType _type) public onlyAllowedContracts{
     	emit Escrow(_campaign, _converter, _tokenID, _childContractID, _indexOrAmount, _type);
     }
 
     /// @dev Only allowed contracts can call this function ---> means can emit events
+    // TODO use msg.sender instead of _campaign
     function rewarded(address _campaign, address _to, uint256 _amount) public onlyAllowedContracts {
     	emit Rewarded(_campaign, _to, _amount);
 	}
 
     /// @dev Only allowed contracts can call this function ---> means can emit events
+    // TODO use msg.sender instead of _campaign
 	function fulfilled(address  _campaign, address _converter, uint256 _tokenID, address _childContractID, uint256 _indexOrAmount, CampaignType _type) public onlyAllowedContracts {
 		emit Fulfilled(_campaign, _converter, _tokenID, _childContractID, _indexOrAmount, _type);
 	}
 
     /// @dev Only allowed contracts can call this function ---> means can emit events
+    // TODO use msg.sender instead of _campaign
 	function cancelled(address  _campaign, address _converter, uint256 _tokenID, address _childContractID, uint256 _indexOrAmount, CampaignType _type) public onlyAllowedContracts{
 		emit Cancelled(_campaign, _converter, _tokenID, _childContractID, _indexOrAmount, _type);
 	}
