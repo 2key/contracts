@@ -1,4 +1,11 @@
-import {IAcquisitionCampaign, ICreateCampaignProgress, ITwoKeyBase, ITwoKeyHelpers, ITWoKeyUtils} from '../interfaces';
+import {
+    IAcquisitionCampaign,
+    IAcquisitionCampaignMeta,
+    ICreateCampaignProgress,
+    ITwoKeyBase,
+    ITwoKeyHelpers,
+    ITWoKeyUtils
+} from '../interfaces';
 import {BigNumber} from 'bignumber.js';
 import contractsMeta from '../contracts';
 import {promisify} from '../utils';
@@ -81,7 +88,7 @@ export default class AcquisitionCampaign {
     }
 
     // Create Campaign
-    public create(data: IAcquisitionCampaign, progressCallback?: ICreateCampaignProgress, gasPrice?: number, interval: number = 500, timeout: number = 60000): Promise<string> {
+    public create(data: IAcquisitionCampaign, progressCallback?: ICreateCampaignProgress, gasPrice?: number, interval: number = 500, timeout: number = 60000): Promise<IAcquisitionCampaignMeta> {
         return new Promise(async (resolve, reject) => {
             try {
                 // const gasRequired = await this.estimateCreation(data);
@@ -116,7 +123,15 @@ export default class AcquisitionCampaign {
                 if (progressCallback) {
                     progressCallback('TwoKeyAcquisitionCampaignERC20', true, campaignAddress);
                 }
-                resolve(campaignAddress);
+                const campaignPublicLinkKey = await this.join(campaignAddress, -1, undefined, gasPrice);
+                if (progressCallback) {
+                    progressCallback('SetPublicLinkKey', true, txHash);
+                }
+                resolve({
+                    campaignAddress,
+                    conversionHandlerAddress: whitelistsAddress,
+                    campaignPublicLinkKey,
+                });
             } catch (err) {
                 reject(err);
             }
@@ -186,7 +201,7 @@ export default class AcquisitionCampaign {
         });
     }
 
-    public emitAcquisitionCampaignJoinEvent(campaignAddress: string, referralLink: string): Promise<string> {
+    public emitJoinEvent(campaignAddress: string, referralLink: string): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
                 const {f_address, f_secret} = await this.helpers._getOffchainDataFromIPFSHash(referralLink);
@@ -204,7 +219,7 @@ export default class AcquisitionCampaign {
 
     /* LINKS */
     // Set Public Link
-    public setAcquisitionPublicLinkKey(campaign: any, publicKey: string, gasPrice: number = this.base._getGasPrice()): Promise<string> {
+    public setPublicLinkKey(campaign: any, publicKey: string, gasPrice: number = this.base._getGasPrice()): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
@@ -215,6 +230,8 @@ export default class AcquisitionCampaign {
                     gas,
                     gasPrice
                 }]);
+
+                // TODO: Call TwoKeyPlasmaEvents.setPublicLinkKey
                 await this.utils.getTransactionReceiptMined(txHash);
                 resolve(publicKey);
             } catch (err) {
@@ -245,12 +262,12 @@ export default class AcquisitionCampaign {
                     const { f_address, f_secret, p_message } = await this.helpers._getOffchainDataFromIPFSHash(referralLink);
                     const campaignAddress = typeof (campaign) === 'string' ? campaign
                         : (await this.helpers._getAcquisitionCampaignInstance(campaign)).address;
-                    const txHash = await this.emitAcquisitionCampaignJoinEvent(campaignAddress, referralLink);
+                    const txHash = await this.emitJoinEvent(campaignAddress, referralLink);
                     console.log('JOIN EVENT', txHash);
                     console.log('New link for', this.base.address, f_address, f_secret, p_message);
                     new_message = Sign.free_join(this.base.address, public_address, f_address, f_secret, p_message, cut + 1);
                 } else {
-                    await this.setAcquisitionPublicLinkKey(campaign, `0x${public_address}`, gasPrice);
+                    await this.setPublicLinkKey(campaign, `0x${public_address}`, gasPrice);
                 }
                 const linkObject =  new_message
                     ? { f_address: this.base.address, f_secret: private_key, p_message: new_message }
@@ -397,7 +414,7 @@ export default class AcquisitionCampaign {
     }
 
     /* HELPERS */
-    public getAcquisitionConverterConversion(campaign: any, address: string = this.base.address): Promise<any> {
+    public getConverterConversion(campaign: any, address: string = this.base.address): Promise<any> {
         return new Promise<any>(async (resolve, reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);

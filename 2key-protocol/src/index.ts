@@ -15,12 +15,13 @@ import {
     BalanceMeta,
     IContractEvent,
     ITwoKeyHelpers,
-    ITWoKeyUtils, ITwoKeyBase, ITwoKeyAcquisitionCampaign,
+    ITWoKeyUtils, ITwoKeyBase, ITwoKeyAcquisitionCampaign, IERC20,
 } from './interfaces';
 import Sign from './utils/sign';
 import Index, {promisify} from './utils';
 import Helpers from './utils/helpers';
 import AcquisitionCampaign from './acquisition';
+import ERC20 from './erc20';
 
 // const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 
@@ -47,6 +48,7 @@ export class TwoKeyProtocol {
     private readonly twoKeyEventContract: any;
     private twoKeyEvents: any;
     private readonly eventsAddress: string;
+    public readonly  ERC20: IERC20;
     public readonly Utils: ITWoKeyUtils;
     private readonly Helpers: ITwoKeyHelpers;
     public readonly AcquisitionCampaign: ITwoKeyAcquisitionCampaign;
@@ -115,6 +117,7 @@ export class TwoKeyProtocol {
         };
 
         this.Helpers = new Helpers(twoKeyBase);
+        this.ERC20 = new ERC20(twoKeyBase, this.Helpers);
         this.Utils = new Index(twoKeyBase, this.Helpers);
         this.AcquisitionCampaign = new AcquisitionCampaign(twoKeyBase, this.Helpers, this.Utils);
     }

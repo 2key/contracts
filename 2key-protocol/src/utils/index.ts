@@ -16,7 +16,7 @@ export function promisify(func: any, args: any): Promise<any> {
     });
 }
 
-export default class Index {
+export default class Utils {
     private readonly base: ITwoKeyBase;
     private readonly helpers: ITwoKeyHelpers;
 

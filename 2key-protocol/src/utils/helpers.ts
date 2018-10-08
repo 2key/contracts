@@ -75,7 +75,7 @@ export default class Helpers {
     _getTokenBalance(address: string, erc20address: string = this.base.twoKeyEconomy.address): Promise<number | string | BigNumber> {
         return new Promise(async (resolve, reject) => {
             try {
-                const erc20 = await this._createAndValidate('ERC20', erc20address);
+                const erc20 = await this._createAndValidate('ERC20full', erc20address);
                 const balance = await promisify(erc20.balanceOf, [address]);
 
                 resolve(balance);
@@ -88,7 +88,7 @@ export default class Helpers {
     _getTotalSupply(erc20address: string = this.base.twoKeyEconomy.address): Promise<number | string | BigNumber> {
         return new Promise(async (resolve, reject) => {
             try {
-                const erc20 = await this._createAndValidate('ERC20', erc20address);
+                const erc20 = await this._createAndValidate('ERC20full', erc20address);
                 const totalSupply = await promisify(erc20.totalSupply, []);
                 this.base._setTotalSupply(totalSupply);
                 resolve(totalSupply);
@@ -218,6 +218,12 @@ export default class Helpers {
         return campaign.address
             ? campaign
             : await this._createAndValidate('TwoKeyAcquisitionCampaignERC20', campaign);
+    }
+
+    async _getERC20Instance(erc20: any): Promise<any> {
+        return erc20.address
+            ? erc20
+            : await this._createAndValidate('ERC20full', erc20);
     }
 
     async _createAndValidate(

@@ -258,6 +258,12 @@ describe('TwoKeyProtocol', () => {
         // .to.be.equal(twoKeyProtocol.getGasPrice());
     }).timeout(30000);
 
+    it('should show token symbol of economy', async () => {
+        const tokenSymbol = await twoKeyProtocol.ERC20.getERC20Symbol(twoKeyEconomy)
+        console.log(tokenSymbol);
+        expect(tokenSymbol).to.be.equal('2Key');
+    }).timeout(10000);
+
     it('should return estimated gas for transfer2KeyTokens', async () => {
         const gas = await twoKeyProtocol.getERC20TransferGas(ethDstAddress, twoKeyProtocol.Utils.toWei(123, 'ether'));
         console.log('Gas required for Token transfer', gas);
@@ -290,6 +296,7 @@ describe('TwoKeyProtocol', () => {
     //     console.log('TotalGas required for Campaign Creation', gas);
     //     return expect(gas).to.exist.to.greaterThan(0);
     // });
+    let refLink;
 
     it('should create a new campaign Acquisition Contract', async () => {
         const campaign = await twoKeyProtocol.AcquisitionCampaign.create({
@@ -309,8 +316,9 @@ describe('TwoKeyProtocol', () => {
             bonusTokensVestingStartShiftInDaysFromDistributionDate: 180
         }, createCallback, undefined, 500, 600000);
         console.log('Campaign address', campaign);
-        campaignAddress = campaign;
-        return expect(addressRegex.test(campaign)).to.be.true;
+        campaignAddress = campaign.campaignAddress;
+        refLink = campaign.campaignPublicLinkKey;
+        return expect(addressRegex.test(campaignAddress)).to.be.true;
     }).timeout(1200000);
 
     // it('should print balance after campaign created', printBalances).timeout(15000);
@@ -323,17 +331,17 @@ describe('TwoKeyProtocol', () => {
         expect(parseFloat(balance)).to.be.equal(1234);
     }).timeout(300000);
 
-    let refLink;
-    it('should create public link for address', async () => {
-        try {
-            const hash = await twoKeyProtocol.AcquisitionCampaign.join(campaignAddress, -1);
-            console.log('1) converter REFLINK:', hash);
-            refLink = hash;
-            expect(hash).to.be.a('string');
-        } catch (err) {
-            throw err
-        }
-    }).timeout(30000);
+    // Implemented in AcquisitionCampaign.create
+    // it('should create public link for address', async () => {
+    //     try {
+    //         const hash = await twoKeyProtocol.AcquisitionCampaign.join(campaignAddress, -1);
+    //         console.log('1) converter REFLINK:', hash);
+    //         refLink = hash;
+    //         expect(hash).to.be.a('string');
+    //     } catch (err) {
+    //         throw err
+    //     }
+    // }).timeout(30000);
 
     it('should get user public link', async () => {
         try {
@@ -449,7 +457,7 @@ describe('TwoKeyProtocol', () => {
         txHash = await twoKeyProtocol.transferEther(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETH * 1.1, 'ether'));
         console.log('HASH', txHash);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-        const conversion = await twoKeyProtocol.AcquisitionCampaign.getAcquisitionConverterConversion(campaignAddress);
+        const conversion = await twoKeyProtocol.AcquisitionCampaign.getConverterConversion(campaignAddress);
         console.log(conversion);
         expect(conversion[2]).to.be.equal(twoKeyProtocol.address);
     }).timeout(30000);
@@ -485,7 +493,7 @@ describe('TwoKeyProtocol', () => {
         });
         txHash = await twoKeyProtocol.transferEther(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETH * 1.1, 'ether'));
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-        const conversion = await twoKeyProtocol.AcquisitionCampaign.getAcquisitionConverterConversion(campaignAddress);
+        const conversion = await twoKeyProtocol.AcquisitionCampaign.getConverterConversion(campaignAddress);
         console.log(conversion);
         // expect(conversion).to.exist;
         expect(conversion[2]).to.be.equal(twoKeyProtocol.address);

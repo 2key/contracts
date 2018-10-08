@@ -30,6 +30,7 @@ export interface ITwoKeyHelpers {
     _getUrlParams: (url: string) => any,
     _checkBalanceBeforeTransaction: (gasRequired: number, gasPrice: number) => Promise<boolean>,
     _getAcquisitionCampaignInstance: (campaign: any) => Promise<any>,
+    _getERC20Instance: (erc20: any) => Promise<any>,
     _createAndValidate: (contractName: string, address: string) => Promise<any>,
     _checkIPFS: () => Promise<boolean>,
     _ipfsAdd: (data: any) => Promise<string>,
@@ -38,20 +39,24 @@ export interface ITwoKeyHelpers {
 
 export interface ITwoKeyAcquisitionCampaign {
     estimateCreation: (data: IAcquisitionCampaign) => Promise<number>,
-    create: (data: IAcquisitionCampaign, progressCallback?: ICreateCampaignProgress, gasPrice?: number, interval?: number, timeout?: number) => Promise<string>,
+    create: (data: IAcquisitionCampaign, progressCallback?: ICreateCampaignProgress, gasPrice?: number, interval?: number, timeout?: number) => Promise<IAcquisitionCampaignMeta>,
     checkInventoryBalance: (campaign: any) => Promise<number>,
     getPublicLinkKey: (campaign: any, address?: string) => Promise<string>,
     getReferrerCut: (campaign: any) => Promise<number>,
-    setAcquisitionPublicLinkKey: (campaign: any, publicKey: string, gasPrice?: number) => Promise<string>,
+    setPublicLinkKey: (campaign: any, publicKey: string, gasPrice?: number) => Promise<string>,
     getEstimatedMaximumReferralReward: (campaign: any, referralLink?: string) => Promise<number>,
-    emitAcquisitionCampaignJoinEvent: (campaignAddress: string, referralLink: string) => Promise<string>,
+    emitJoinEvent: (campaignAddress: string, referralLink: string) => Promise<string>,
     join: (campaign: any, cut: number, referralLink?: string, gasPrice?: number) => Promise<string>,
     joinAndSetPublicLinkWithCut: (campaignAddress: string, referralLink: string, cut?: number, gasPrice?: number) => Promise<string>,
     joinAndShareARC: (campaignAddress: string, referralLink: string, recipient: string, gasPrice?: number) => Promise<string>,
     joinAndConvert: (campaign: any, value: number | string | BigNumber, referralLink: string, gasPrice?: number) => Promise<string>,
-    getAcquisitionConverterConversion: (campaign: any, address?: string) => Promise<any>,
+    getConverterConversion: (campaign: any, address?: string) => Promise<any>,
     getTwoKeyConversionHandlerAddress: (campaign: any) => Promise<string>,
     getAssetContractData: (campaign: any) => Promise<any>,
+}
+
+export interface IERC20 {
+    getERC20Symbol: (erc20: any) => Promise<string>,
 }
 
 export interface ITWoKeyUtils {
@@ -77,6 +82,12 @@ export interface BalanceMeta {
 
 export interface IContractsAddresses {
     TwoKeyEconomy?: string
+}
+
+export interface IAcquisitionCampaignMeta {
+    campaignAddress: string,
+    conversionHandlerAddress: string,
+    campaignPublicLinkKey: string
 }
 
 export interface IBalanceNormalized {
