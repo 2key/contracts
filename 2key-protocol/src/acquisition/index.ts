@@ -91,20 +91,24 @@ export default class AcquisitionCampaign {
     public create(data: IAcquisitionCampaign, progressCallback?: ICreateCampaignProgress, gasPrice?: number, interval: number = 500, timeout: number = 60000): Promise<IAcquisitionCampaignMeta> {
         return new Promise(async (resolve, reject) => {
             try {
-                // const gasRequired = await this.estimateCreation(data);
-                // await this._checkBalanceBeforeTransaction(gasRequired, gasPrice || this.gasPrice);
-                let txHash = await this.helpers._createContract(contractsMeta.TwoKeyConversionHandler, gasPrice, null, progressCallback);
-                const predeployReceipt = await this.utils.getTransactionReceiptMined(txHash, this.base.web3, interval, timeout);
-                const whitelistsAddress = predeployReceipt && predeployReceipt.contractAddress;
-                if (progressCallback) {
-                    progressCallback('TwoKeyConversionHandler', true, whitelistsAddress);
+                let txHash: string;
+                let conversionHandlerAddress: string;
+                if (!data.conversionHandlerAddress) {
+                    txHash = await this.helpers._createContract(contractsMeta.TwoKeyConversionHandler, gasPrice, null, progressCallback);
+                    const predeployReceipt = await this.utils.getTransactionReceiptMined(txHash, this.base.web3, interval, timeout);
+                    conversionHandlerAddress = predeployReceipt && predeployReceipt.contractAddress;
+                    if (progressCallback) {
+                        progressCallback('TwoKeyConversionHandler', true, conversionHandlerAddress);
+                    }
+                } else {
+                    conversionHandlerAddress = data.conversionHandlerAddress;
                 }
                 // const whitelistsInstance = this.web3.eth.contract(contractsMeta.TwoKeyWhitelisted.abi).at(whitelistsAddress);
 
                 txHash = await this.helpers._createContract(contractsMeta.TwoKeyAcquisitionCampaignERC20, gasPrice, [
                     this.helpers._getContractDeployedAddress('TwoKeyEventSource'),
                     this.base.twoKeyEconomy.address,
-                    whitelistsAddress,
+                    conversionHandlerAddress,
                     data.moderator || this.base.address,
                     data.assetContractERC20,
                     data.campaignStartTime,
@@ -125,11 +129,11 @@ export default class AcquisitionCampaign {
                 }
                 const campaignPublicLinkKey = await this.join(campaignAddress, -1, undefined, gasPrice);
                 if (progressCallback) {
-                    progressCallback('SetPublicLinkKey', true, txHash);
+                    progressCallback('SetPublicLinkKey', true, campaignPublicLinkKey);
                 }
                 resolve({
                     campaignAddress,
-                    conversionHandlerAddress: whitelistsAddress,
+                    conversionHandlerAddress,
                     campaignPublicLinkKey,
                 });
             } catch (err) {
@@ -223,12 +227,12 @@ export default class AcquisitionCampaign {
         return new Promise(async (resolve, reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-                const gas = await promisify(campaignInstance.setPublicLinkKey.estimateGas, [publicKey, {from: this.base.address}]);
-                await this.helpers._checkBalanceBeforeTransaction(gas, this.base._getGasPrice());
+                // const gas = await promisify(campaignInstance.setPublicLinkKey.estimateGas, [publicKey, {from: this.base.address}]);
+                // await this.helpers._checkBalanceBeforeTransaction(gas, this.base._getGasPrice());
                 const txHash = await promisify(campaignInstance.setPublicLinkKey, [publicKey, {
                     from: this.base.address,
-                    gas,
-                    gasPrice
+                    gasPrice,
+                    // gas,
                 }]);
 
                 // TODO: Call TwoKeyPlasmaEvents.setPublicLinkKey
@@ -272,7 +276,7 @@ export default class AcquisitionCampaign {
                 const linkObject =  new_message
                     ? { f_address: this.base.address, f_secret: private_key, p_message: new_message }
                     : { f_address: this.base.address, f_secret: private_key };
-                const link = await this.helpers._ipfsAdd(linkObject);
+                const link = await this.utils.ipfsAdd(linkObject);
                 console.log('LINK', link);
                 // const raw = `f_address=${this.base.address}&f_secret=${private_key}&p_message=${new_message || ''}`;
                 // const ipfsConnected = await this._checkIPFS();
@@ -299,21 +303,21 @@ export default class AcquisitionCampaign {
                 if (!arcBalance) {
                     console.log('No Arcs', arcBalance, 'Call Free Join Take');
                     const signature = Sign.free_join_take(this.base.address, public_address, f_address, f_secret, p_message, cut + 1);
-                    const gas = await promisify(campaignInstance.distributeArcsBasedOnSignature.estimateGas, [signature, {from: this.base.address}]);
-                    console.log('Gas required for setPubLinkWithCut', gas);
-                    await this.helpers._checkBalanceBeforeTransaction(gas, gasPrice);
+                    // const gas = await promisify(campaignInstance.distributeArcsBasedOnSignature.estimateGas, [signature, {from: this.base.address}]);
+                    // console.log('Gas required for setPubLinkWithCut', gas);
+                    // await this.helpers._checkBalanceBeforeTransaction(gas, gasPrice);
                     // console.log(enough);
                     const txHash = await promisify(campaignInstance.distributeArcsBasedOnSignature, [signature, {
                         from: this.base.address,
                         gasPrice,
-                        gas
+                        // gas
                     }]);
                     console.log('setPubLinkWithCut', txHash);
                     await this.utils.getTransactionReceiptMined(txHash);
                     arcBalance = parseFloat((await promisify(campaignInstance.balanceOf, [this.base.address])).toString());
                 }
                 if (arcBalance) {
-                    const link = await this.helpers._ipfsAdd({ f_address: this.base.address, f_secret: private_key });
+                    const link = await this.utils.ipfsAdd({ f_address: this.base.address, f_secret: private_key });
                     resolve(link);
                     // resolve(`f_address=${this.base.address}&f_secret=${private_key}&p_message=`);
                 } else {
@@ -340,16 +344,16 @@ export default class AcquisitionCampaign {
                     console.log('No ARCS call Free Join Take');
                     const {public_address} = generatePublicMeta();
                     const signature = Sign.free_join_take(this.base.address, public_address, f_address, f_secret, p_message);
-                    const gas = await promisify(campaignInstance.joinAndConvert.estimateGas, [signature, {
-                        from: this.base.address,
-                        value
-                    }]);
-                    console.log('Gas required for joinAndConvert', gas);
-                    await this.helpers._checkBalanceBeforeTransaction(gas, gasPrice);
+                    // const gas = await promisify(campaignInstance.joinAndConvert.estimateGas, [signature, {
+                    //     from: this.base.address,
+                    //     value
+                    // }]);
+                    // console.log('Gas required for joinAndConvert', gas);
+                    // await this.helpers._checkBalanceBeforeTransaction(gas, gasPrice);
                     const txHash = await promisify(campaignInstance.joinAndConvert, [signature, {
                         from: this.base.address,
                         gasPrice,
-                        gas,
+                        // gas,
                         value
                     }]);
                     await this.utils.getTransactionReceiptMined(txHash);
@@ -390,17 +394,12 @@ export default class AcquisitionCampaign {
                     console.log('joinAndShareARC call Free Join Take');
                     const signature = Sign.free_join_take(this.base.address, public_address, f_address, f_secret, p_message);
                     console.log(signature, recipient);
-                    const gas = await promisify(campaignInstance.joinAndShareARC.estimateGas, [signature, recipient, {from: this.base.address}]);
-                    console.log('Gas for joinAndShareARC', gas);
-                    await this.helpers._checkBalanceBeforeTransaction(gas, gasPrice);
                     const txHash = await promisify(campaignInstance.joinAndShareARC, [signature, recipient, {
                         from: this.base.address,
                         gasPrice
                     }]);
                     resolve(txHash);
                 } else {
-                    const gas = await promisify(campaignInstance.transfer.estimateGas, [recipient, 1, {from: this.base.address}]);
-                    console.log('Gas for transfer ARC', gas);
                     const txHash = await promisify(campaignInstance.transfer, [recipient, 1, {
                         from: this.base.address,
                         gasPrice

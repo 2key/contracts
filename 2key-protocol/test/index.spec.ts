@@ -3,6 +3,7 @@ import 'mocha';
 import {TwoKeyProtocol} from '../src';
 import contractsMeta from '../src/contracts';
 import createWeb3 from './_web3';
+import Sign from '../src/utils/sign';
 
 const {env} = process;
 
@@ -14,7 +15,6 @@ const destinationAddress = env.AYDNEP_ADDRESS;
 const delay = env.TEST_DELAY;
 // const destinationAddress = env.DESTINATION_ADDRESS || '0xd9ce6800b997a0f26faffc0d74405c841dfc64b7'
 console.log(mainNetId);
-
 const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 const maxConverterBonusPercent = 23;
 const pricePerUnitInETH = 0.1;
@@ -155,6 +155,7 @@ describe('TwoKeyProtocol', () => {
                         mainNetId,
                         syncTwoKeyNetId,
                     },
+                    plasmaPK: Sign.generatePrivateKey().toString('hex'),
                 });
                 const {balance} = twoKeyProtocol.Utils.balanceFromWeiString(await twoKeyProtocol.getBalance(env.AYDNEP_ADDRESS), true);
                 const { balance: adminBalance } = twoKeyProtocol.Utils.balanceFromWeiString(await twoKeyProtocol.getBalance(contractsMeta.TwoKeyAdmin.networks[mainNetId].address), true);
@@ -250,6 +251,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
+            plasmaPK: Sign.generatePrivateKey().toString('hex'),
         });
         const balance = twoKeyProtocol.Utils.balanceFromWeiString(await twoKeyProtocol.getBalance(), true);
         console.log('SWITCH USER', balance.balance);
@@ -362,6 +364,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
+            plasmaPK: Sign.generatePrivateKey().toString('hex'),
         });
         const hash = await twoKeyProtocol.AcquisitionCampaign.join(campaignAddress, 50, refLink);
         console.log('2) gmail offchain REFLINK', hash);
@@ -378,6 +381,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
+            plasmaPK: Sign.generatePrivateKey().toString('hex'),
         });
         let maxReward = await twoKeyProtocol.AcquisitionCampaign.getEstimatedMaximumReferralReward(campaignAddress, refLink);
         console.log(`Estimated maximum referral reward: ${maxReward}%`);
@@ -407,6 +411,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
+            plasmaPK: Sign.generatePrivateKey().toString('hex'),
         });
         const hash = await twoKeyProtocol.AcquisitionCampaign.join(campaignAddress, 20, refLink);
         // const hash = await twoKeyProtocol.AcquisitionCampaign.joinAndSetPublicLinkWithCut(campaignAddress, refLink, 1);
@@ -425,6 +430,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
+            plasmaPK: Sign.generatePrivateKey().toString('hex'),
         });
         console.log('6) uport buy from REFLINK', refLink);
         const txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETH * 1.5, 'ether'), refLink);
@@ -450,6 +456,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
+            plasmaPK: Sign.generatePrivateKey().toString('hex'),
         });
         //TODO: Move getBalanceOfArcs from Utils to AcquisitionCampaign
         const arcs = await twoKeyProtocol.Utils.getBalanceOfArcs(campaignAddress);
@@ -471,6 +478,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
+            plasmaPK: Sign.generatePrivateKey().toString('hex'),
         });
         const refReward = await twoKeyProtocol.AcquisitionCampaign.getEstimatedMaximumReferralReward(campaignAddress, refLink);
         console.log(`Max estimated referral reward: ${refReward}%`);
@@ -490,6 +498,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
+            plasmaPK: Sign.generatePrivateKey().toString('hex'),
         });
         txHash = await twoKeyProtocol.transferEther(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETH * 1.1, 'ether'));
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
@@ -509,6 +518,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
+            plasmaPK: Sign.generatePrivateKey().toString('hex'),
         });
 
     });

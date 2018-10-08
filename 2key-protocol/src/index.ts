@@ -36,7 +36,7 @@ const TwoKeyDefaults = {
 
 export class TwoKeyProtocol {
     private readonly web3: any;
-    private readonly syncWeb3: any;
+    private readonly plasmaWeb3: any;
     private readonly ipfs: any;
     public readonly address: string;
     public gasPrice: number;
@@ -65,7 +65,7 @@ export class TwoKeyProtocol {
             ipfsPort = TwoKeyDefaults.ipfsPort,
             contracts,
             networks,
-            reportKey = Sign.generatePrivateKey().toString('hex'),
+            plasmaPK,
         } = initValues;
         if (contracts) {
             this.contracts = contracts;
@@ -79,18 +79,18 @@ export class TwoKeyProtocol {
         }
 
         // init 2KeySyncNet Client
-        const private_key = Buffer.from(reportKey, 'hex');
+        const private_key = Buffer.from(plasmaPK, 'hex');
         const eventsWallet = eth_wallet.fromPrivateKey(private_key);
 
-        const eventsEngine = new ProviderEngine();
-        const eventsProvider = eventsNetUrl.startsWith('http') ? new RpcSubprovider({rpcUrl: eventsNetUrl}) : new WSSubprovider({rpcUrl: eventsNetUrl});
-        eventsEngine.addProvider(new WalletSubprovider(eventsWallet, {}));
-        eventsEngine.addProvider(eventsProvider);
+        const plasmaEngine = new ProviderEngine();
+        const plasmaProvider = eventsNetUrl.startsWith('http') ? new RpcSubprovider({rpcUrl: eventsNetUrl}) : new WSSubprovider({rpcUrl: eventsNetUrl});
+        plasmaEngine.addProvider(new WalletSubprovider(eventsWallet, {}));
+        plasmaEngine.addProvider(plasmaProvider);
 
-        eventsEngine.start();
-        this.syncWeb3 = new Web3(eventsEngine);
+        plasmaEngine.start();
+        this.plasmaWeb3 = new Web3(plasmaEngine);
         this.eventsAddress = `0x${eventsWallet.getAddress().toString('hex')}`;
-        this.twoKeyEventContract = this.syncWeb3.eth.contract(contractsMeta.TwoKeyPlasmaEvents.abi).at(contractsMeta.TwoKeyPlasmaEvents.networks[this.networks.syncTwoKeyNetId].address);
+        this.twoKeyEventContract = this.plasmaWeb3.eth.contract(contractsMeta.TwoKeyPlasmaEvents.abi).at(contractsMeta.TwoKeyPlasmaEvents.networks[this.networks.syncTwoKeyNetId].address);
 
         if (!web3) {
             throw new Error('Web3 instance required!');
@@ -103,7 +103,7 @@ export class TwoKeyProtocol {
 
         const twoKeyBase: ITwoKeyBase = {
             web3: this.web3,
-            syncWeb3: this.syncWeb3,
+            plasmaWeb3: this.plasmaWeb3,
             ipfs: this.ipfs,
             address: this.address,
             networks: this.networks,

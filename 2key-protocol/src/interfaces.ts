@@ -2,7 +2,7 @@ import {BigNumber} from 'bignumber.js';
 
 export interface ITwoKeyBase {
     readonly web3: any;
-    readonly syncWeb3: any;
+    readonly plasmaWeb3: any;
     readonly ipfs: any;
     readonly address: string;
     readonly networks: IEhtereumNetworks;
@@ -33,7 +33,6 @@ export interface ITwoKeyHelpers {
     _getERC20Instance: (erc20: any) => Promise<any>,
     _createAndValidate: (contractName: string, address: string) => Promise<any>,
     _checkIPFS: () => Promise<boolean>,
-    _ipfsAdd: (data: any) => Promise<string>,
     _getOffchainDataFromIPFSHash: (hash: string) => Promise<IOffchainData>,
 }
 
@@ -60,6 +59,7 @@ export interface IERC20 {
 }
 
 export interface ITWoKeyUtils {
+    ipfsAdd: (data: any) => Promise<string>,
     fromWei: (number: number | string | BigNumber, unit?: string) => string | BigNumber,
     toWei: (number: string | number | BigNumber, unit?: string) => BigNumber,
     toHex: (data: any) => string,
@@ -113,7 +113,7 @@ export interface ITwoKeyInit {
     contracts?: IContractsAddresses,
     networks?: IEhtereumNetworks,
     eventsNetUrl?: string,
-    reportKey?: string,
+    plasmaPK: string,
 }
 
 export interface ITransaction {
@@ -158,6 +158,7 @@ export interface IRawTransaction {
 
 export interface IAcquisitionCampaign {
     moderator?: string, // Address of the moderator - it's a contract that works (operates) as admin of whitelists contracts
+    conversionHandlerAddress?: string,
     assetContractERC20: string,
     campaignStartTime: number, // Timestamp
     campaignEndTime: number, // Timestamp

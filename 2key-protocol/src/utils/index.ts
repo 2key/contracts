@@ -25,6 +25,23 @@ export default class Utils {
         this.helpers = helpers;
     }
     /* UTILS */
+    ipfsAdd(data: any): Promise<string> {
+        return new Promise<string>(async (resolve, reject) => {
+            try {
+                const dataString = JSON.stringify(data);
+                // console.log('Raw length', dataString.length);
+                // const compressed = LZString.compressToUint8Array(dataString);
+                // const compressed = LZString.compress(dataString);
+                // console.log('Compressed length', compressed.length, compressed);
+                // console.log('Compressed length', compressed.length);
+                const [pinned]= await promisify(this.base.ipfs.add, [[Buffer.from(dataString)], { pin: true }]);
+                // const pin = await promisify(this.base.ipfs.pin.add, [hash[0].hash]);
+                resolve(pinned.hash);
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
 
     public fromWei(number: number | string | BigNumber, unit?: string): string | BigNumber {
         return this.base.web3.fromWei(number, unit);

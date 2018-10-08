@@ -251,24 +251,6 @@ export default class Helpers {
         });
     }
 
-    _ipfsAdd(data: any): Promise<string> {
-        return new Promise<string>(async (resolve, reject) => {
-            try {
-                const dataString = JSON.stringify(data);
-                // console.log('Raw length', dataString.length);
-                // const compressed = LZString.compressToUint8Array(dataString);
-                // const compressed = LZString.compress(dataString);
-                // console.log('Compressed length', compressed.length, compressed);
-                // console.log('Compressed length', compressed.length);
-                const [pinned]= await promisify(this.base.ipfs.add, [[Buffer.from(dataString)], { pin: true }]);
-                // const pin = await promisify(this.base.ipfs.pin.add, [hash[0].hash]);
-                resolve(pinned.hash);
-            } catch (e) {
-                reject(e);
-            }
-        });
-    }
-
     _getOffchainDataFromIPFSHash(hash: string): Promise<IOffchainData> {
         return new Promise<IOffchainData>(async (resolve, reject) => {
             try {
@@ -282,7 +264,6 @@ export default class Helpers {
                 // console.log('RAW', raw);
                 // const offchainObj = JSON.parse(raw);
                 // console.log('OFFCHAIN OBJECT', raw, offchainObj);
-                console.log(hash, '>>', offchainObj);
                 resolve(offchainObj);
             } catch (e) {
                 reject(e);
