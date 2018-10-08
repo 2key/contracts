@@ -268,11 +268,11 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     }
 
 
-    function getConversionAttributes(address _converter) public view onlyTwoKeyAcquisitionCampaign returns (uint,uint,uint,uint) {
-        Conversion memory conversion = conversions[_converter];
-        return (conversion.maxReferralRewardETHWei, conversion.moderatorFeeETHWei,
-        conversion.baseTokenUnits, conversion.bonusTokenUnits);
-    }
+//    function getConversionAttributes(address _converter) public view onlyTwoKeyAcquisitionCampaign returns (uint,uint,uint,uint) {
+//        Conversion memory conversion = conversions[_converter];
+//        return (conversion.maxReferralRewardETHWei, conversion.moderatorFeeETHWei,
+//        conversion.baseTokenUnits, conversion.bonusTokenUnits);
+//    }
 
 
     function fullFillConversion(address _converter) public onlyTwoKeyAcquisitionCampaign {
@@ -326,53 +326,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
 
         conversions[_converter] = conversion;
         converterToLockupContracts[_converter] = lockupContracts;
-
-        //lockup contracts:
-        /*
-        1. basetokens get sent to 1 lockup contract
-        2. bonus tokens are separated to 6 equal portions and sent to 6 lockup contracts.
-        3. a lockupcontract has the converter as beneficiary, and a vesting date in which the converter is allowed to pull the tokens to any other address
-        4. only other function of the lockupcontract is that the contractor may up to 1 time only, delay the vesting date of the tokens, by no more then maxVestingDaysDelay (param should be in campaign contract),
-        and only if the vesting date has not yet arrived.
-
-        EXAMPLE LOCKUP:
-            -lockup contract has converter and contractor
-            -lockup contract has balance of tokens (ERC20)
-            -we have vesting date in lockup contract
-            -lockup contract allows only converter to transfer the tokens only after vesting date
-            -contractor can change the vesting date up to once by no more than "max vesting date days shift" (param)
-
-        uint tokenDistributionDate; // January 1st 2019
-        uint maxDistributionDateShiftInDays; // 180 days
-
-        (tokenDistributionDate,maxDistributionDateShiftInDays,baseTokens, converter, contractor) -- constructor of lockup contract
-
-        uint bonusTokensVestingMonths; // 6 months
-        uint bonusTokensVestingStartShiftInDaysFromDistributionDate; // 180 days
-
-        bonusTokensVestingMonths*(tokenDistributionDate + bonusTokensVestingStartShiftInDaysFromDistributionDate, maxDistributionDateShiftInDays,
-        bonusTokens/bonusTokensVestingMonths, converter, contractor)
-
-        */
-
-        //this is if we want a simple test without lockup contracts
-        //        require(assetContractERC20.call(bytes4(keccak256("transfer(address,uint256)")), _converterAddress, _units));
-
-
-        //uint256 fee = calculateModeratorFee(c.payout);  //TODO take fee from conversion object since we already computed it.
-
-        //require(twoKeyEconomy.transfer(moderator, fee.mul(rate)));
-
-        //uint256 payout = c.payout;
-        //uint256 maxReward = maxReferralRewardPercent.mul(payout).div(100);
-
-        // transfer payout - fee - rewards to seller
-        //require(twoKeyEconomy.transfer(contractor, (payout.sub(fee).sub(maxReward)).mul(rate)));
-
-        //transferRewardsTwoKeyToken(c.from, maxReward.mul(rate));
-        //twoKeyEventSource.fulfilled(address(this), c.converter, c.tokenID, c.assetContract, c.indexOrAmount, c.campaignType);
-
-        //c.isFulfilled = true;
 
     }
 
@@ -445,9 +398,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         return false;
     }
 
-    function getMyConversionStatus() public view returns (ConversionState) {
-        return converterToConversionState[msg.sender];
-    }
 
     function getAllPendingConverters() public view onlyContractorOrModerator returns (address[]) {
         bytes32 key = bytes32("PENDING");
@@ -496,5 +446,10 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         } else {
             revert();
         }
+    }
+
+    //TODO: Check level of security (modifier) who can call this?
+    function getLockupContractsForConverter(address _converter) public view onlyContractorOrModerator returns (address[]){
+        return converterToLockupContracts[_converter];
     }
 }
