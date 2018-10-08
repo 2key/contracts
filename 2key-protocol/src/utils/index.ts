@@ -26,23 +26,6 @@ export default class Index {
     }
     /* UTILS */
 
-    public async ipfsAdd(data: any): Promise<string> {
-        return new Promise<string>(async (resolve, reject) => {
-            try {
-                const dataString = JSON.stringify(data);
-                console.log('Raw length', dataString.length);
-                // const arr = LZString.compressToUint8Array(dataString);
-                const compressed = LZString.compress(dataString);
-                console.log('Compressed length', compressed.length);
-                const hash = await promisify(this.base.ipfs.add, [[Buffer.from(compressed)]]);
-                const pin = await promisify(this.base.ipfs.pin.add, [hash[0].hash]);
-                resolve(pin[0].hash);
-            } catch (e) {
-                reject(e);
-            }
-        });
-    }
-
     public fromWei(number: number | string | BigNumber, unit?: string): string | BigNumber {
         return this.base.web3.fromWei(number, unit);
     }

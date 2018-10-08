@@ -32,6 +32,8 @@ export interface ITwoKeyHelpers {
     _getAcquisitionCampaignInstance: (campaign: any) => Promise<any>,
     _createAndValidate: (contractName: string, address: string) => Promise<any>,
     _checkIPFS: () => Promise<boolean>,
+    _ipfsAdd: (data: any) => Promise<string>,
+    _getOffchainDataFromIPFSHash: (hash: string) => Promise<IOffchainData>,
 }
 
 export interface ITwoKeyAcquisitionCampaign {
@@ -53,7 +55,6 @@ export interface ITwoKeyAcquisitionCampaign {
 }
 
 export interface ITWoKeyUtils {
-    ipfsAdd: (data: any) => Promise<string>,
     fromWei: (number: number | string | BigNumber, unit?: string) => string | BigNumber,
     toWei: (number: string | number | BigNumber, unit?: string) => BigNumber,
     toHex: (data: any) => string,
@@ -183,4 +184,10 @@ export interface IContractEvent {
     removed: boolean,
     transactionIndex: number,
     transactionHash: string,
+}
+
+export interface IOffchainData {
+    f_address: string,
+    f_secret: string,
+    p_message?: string,
 }

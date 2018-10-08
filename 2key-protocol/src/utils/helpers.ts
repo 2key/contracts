@@ -1,13 +1,33 @@
-import contractsMeta from "../contracts";
-import {BigNumber} from "bignumber.js";
-import {promisify} from "./index";
+import {BigNumber} from 'bignumber.js';
+import LZString from 'lz-string';
+import contractsMeta from '../contracts';
+import {promisify} from './index';
 import {
     IContract,
     ICreateCampaignProgress,
     IRawTransaction,
     ITransaction,
-    ITwoKeyBase
-} from "../interfaces";
+    ITwoKeyBase,
+    IOffchainData,
+} from '../interfaces';
+
+function toBuffer(ab: Uint8Array): Buffer {
+    const buffer = new Buffer(ab.byteLength);
+    const l = buffer.length;
+    for (let i = 0; i < l; i++) {
+        buffer[i] = ab[i];
+    }
+    return buffer
+}
+
+function toUint8Array(buffer: Buffer): Uint8Array {
+    const ab = new Uint8Array(buffer.length);
+    const l = buffer.length;
+    for (let i = 0; i < l; i++) {
+        ab[i] = buffer[i];
+    }
+    return ab;
+}
 
 export default class Helpers {
     readonly base: ITwoKeyBase;
@@ -219,6 +239,44 @@ export default class Helpers {
             try {
                 const ipfs = await promisify(this.base.ipfs.id, []);
                 resolve(Boolean(ipfs && ipfs.id));
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
+
+    _ipfsAdd(data: any): Promise<string> {
+        return new Promise<string>(async (resolve, reject) => {
+            try {
+                const dataString = JSON.stringify(data);
+                // console.log('Raw length', dataString.length);
+                // const compressed = LZString.compressToUint8Array(dataString);
+                // const compressed = LZString.compress(dataString);
+                // console.log('Compressed length', compressed.length, compressed);
+                // console.log('Compressed length', compressed.length);
+                const [pinned]= await promisify(this.base.ipfs.add, [[Buffer.from(dataString)], { pin: true }]);
+                // const pin = await promisify(this.base.ipfs.pin.add, [hash[0].hash]);
+                resolve(pinned.hash);
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
+
+    _getOffchainDataFromIPFSHash(hash: string): Promise<IOffchainData> {
+        return new Promise<IOffchainData>(async (resolve, reject) => {
+            try {
+                const offchainObj = JSON.parse((await promisify(this.base.ipfs.cat, [hash])).toString());
+                // console.log('GETOFFCHAIN', hash, compressed);
+                // const ab = new Uint8Array(compressed);
+                // console.log(ab);
+                // const raw = LZString.decompress(compressed);
+                // const raw = LZString.decompressFromUint8Array(toUint8Array(compressed));
+                // const raw = LZString.decompressFromUint8Array(ab);
+                // console.log('RAW', raw);
+                // const offchainObj = JSON.parse(raw);
+                // console.log('OFFCHAIN OBJECT', raw, offchainObj);
+                resolve(offchainObj);
             } catch (e) {
                 reject(e);
             }

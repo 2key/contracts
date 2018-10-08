@@ -1,8 +1,8 @@
-import {IAcquisitionCampaign, ICreateCampaignProgress, ITwoKeyBase, ITwoKeyHelpers, ITWoKeyUtils} from "../interfaces";
-import contractsMeta from "../contracts";
-import {promisify} from "../utils/index";
-import {BigNumber} from "bignumber.js";
-import Sign from "../utils/sign";
+import {IAcquisitionCampaign, ICreateCampaignProgress, ITwoKeyBase, ITwoKeyHelpers, ITWoKeyUtils} from '../interfaces';
+import {BigNumber} from 'bignumber.js';
+import contractsMeta from '../contracts';
+import {promisify} from '../utils';
+import Sign from '../utils/sign';
 
 function calcFromCuts(cuts: number[], maxPi: number) {
     let referrerRewardPercent: number = maxPi;
@@ -27,8 +27,7 @@ function generatePublicMeta(): { private_key: string, public_address: string } {
     let public_address = Sign.privateToPublic(pk);
     const private_key = pk.toString('hex');
     return {private_key, public_address};
-};
-
+}
 
 export default class AcquisitionCampaign {
     private readonly base: ITwoKeyBase;
@@ -137,18 +136,6 @@ export default class AcquisitionCampaign {
         }
     }
 
-    // Get Public Link
-    public async getPublicLinkKey(campaign: any, address: string = this.base.address): Promise<string> {
-        try {
-            const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-            const publicLink = await promisify(campaignInstance.publicLinkKey, [address]);
-            return Promise.resolve(publicLink);
-
-        } catch (e) {
-            Promise.reject(e)
-        }
-    }
-
     public async getReferrerCut(campaign: any): Promise<number> {
         try {
             const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
@@ -157,26 +144,6 @@ export default class AcquisitionCampaign {
         } catch (e) {
             Promise.reject(e);
         }
-    }
-
-    // Set Public Link
-    public setAcquisitionPublicLinkKey(campaign: any, publicKey: string, gasPrice: number = this.base._getGasPrice()): Promise<string> {
-        return new Promise(async (resolve, reject) => {
-            try {
-                const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-                const gas = await promisify(campaignInstance.setPublicLinkKey.estimateGas, [publicKey, {from: this.base.address}]);
-                await this.helpers._checkBalanceBeforeTransaction(gas, this.base._getGasPrice());
-                const txHash = await promisify(campaignInstance.setPublicLinkKey, [publicKey, {
-                    from: this.base.address,
-                    gas,
-                    gasPrice
-                }]);
-                await this.utils.getTransactionReceiptMined(txHash);
-                resolve(publicKey);
-            } catch (err) {
-                reject(err);
-            }
-        });
     }
 
     // Estimate referral maximum reward
@@ -189,7 +156,7 @@ export default class AcquisitionCampaign {
                 } else {
                     const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
                     const contractorAddress = await promisify(campaignInstance.getContractorAddress, []);
-                    const {f_address, f_secret, p_message} = this.helpers._getUrlParams(referralLink);
+                    const {f_address, f_secret, p_message} = await this.helpers._getOffchainDataFromIPFSHash(referralLink);
                     const contractConstants = (await promisify(campaignInstance.getConstantInfo, []));
                     const decimals = contractConstants[3].toNumber();
                     console.log('Decimals', decimals);
@@ -222,7 +189,7 @@ export default class AcquisitionCampaign {
     public emitAcquisitionCampaignJoinEvent(campaignAddress: string, referralLink: string): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
-                const {f_address, f_secret} = this.helpers._getUrlParams(referralLink);
+                const {f_address, f_secret} = await this.helpers._getOffchainDataFromIPFSHash(referralLink);
                 if (!f_address || !f_secret) {
                     reject('Broken Link');
                 }
@@ -235,15 +202,49 @@ export default class AcquisitionCampaign {
         });
     }
 
+    /* LINKS */
+    // Set Public Link
+    public setAcquisitionPublicLinkKey(campaign: any, publicKey: string, gasPrice: number = this.base._getGasPrice()): Promise<string> {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
+                const gas = await promisify(campaignInstance.setPublicLinkKey.estimateGas, [publicKey, {from: this.base.address}]);
+                await this.helpers._checkBalanceBeforeTransaction(gas, this.base._getGasPrice());
+                const txHash = await promisify(campaignInstance.setPublicLinkKey, [publicKey, {
+                    from: this.base.address,
+                    gas,
+                    gasPrice
+                }]);
+                await this.utils.getTransactionReceiptMined(txHash);
+                resolve(publicKey);
+            } catch (err) {
+                reject(err);
+            }
+        });
+    }
+
+    // Get Public Link
+    public async getPublicLinkKey(campaign: any, address: string = this.base.address): Promise<string> {
+        try {
+            const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
+            const publicLink = await promisify(campaignInstance.publicLinkKey, [address]);
+            return Promise.resolve(publicLink);
+
+        } catch (e) {
+            Promise.reject(e)
+        }
+    }
+
     // Join Offchain
     public join(campaign: any, cut: number, referralLink?: string, gasPrice: number = this.base._getGasPrice()): Promise<string> {
         const {public_address, private_key} = generatePublicMeta();
         return new Promise(async (resolve, reject) => {
             try {
                 let new_message;
-                console.log("referral link is : ===> " + referralLink);
                 if (referralLink) {
-                    const {f_address, f_secret, p_message} = this.helpers._getUrlParams(referralLink);
+                    const offchainData = await this.helpers._getOffchainDataFromIPFSHash(referralLink);
+                    console.log('>>>>', referralLink, offchainData);
+                    const { f_address, f_secret, p_message } = offchainData;
                     const campaignAddress = typeof (campaign) === 'string' ? campaign
                         : (await this.helpers._getAcquisitionCampaignInstance(campaign)).address;
                     const txHash = await this.emitAcquisitionCampaignJoinEvent(campaignAddress, referralLink);
@@ -253,9 +254,14 @@ export default class AcquisitionCampaign {
                 } else {
                     await this.setAcquisitionPublicLinkKey(campaign, `0x${public_address}`, gasPrice);
                 }
-                const raw = `f_address=${this.base.address}&f_secret=${private_key}&p_message=${new_message || ''}`;
+                const linkObject =  new_message
+                    ? { f_address: this.base.address, f_secret: private_key, p_message: new_message }
+                    : { f_address: this.base.address, f_secret: private_key };
+                const link = await this.helpers._ipfsAdd(linkObject);
+                console.log('LINK', link);
+                // const raw = `f_address=${this.base.address}&f_secret=${private_key}&p_message=${new_message || ''}`;
                 // const ipfsConnected = await this._checkIPFS();
-                resolve(raw);
+                resolve(link);
                 // resolve('hash');
             } catch (err) {
                 reject(err);
@@ -266,7 +272,7 @@ export default class AcquisitionCampaign {
     // ShortUrl
     public joinAndSetPublicLinkWithCut(campaignAddress: string, referralLink: string, cut?: number, gasPrice: number = this.base._getGasPrice()): Promise<string> {
         return new Promise(async (resolve, reject) => {
-            const {f_address, f_secret, p_message} = this.helpers._getUrlParams(referralLink);
+            const {f_address, f_secret, p_message} = await this.helpers._getOffchainDataFromIPFSHash(referralLink);
             if (!f_address || !f_secret) {
                 reject('Broken Link');
             }
@@ -292,7 +298,9 @@ export default class AcquisitionCampaign {
                     arcBalance = parseFloat((await promisify(campaignInstance.balanceOf, [this.base.address])).toString());
                 }
                 if (arcBalance) {
-                    resolve(`f_address=${this.base.address}&f_secret=${private_key}&p_message=`)
+                    const link = await this.helpers._ipfsAdd({ f_address: this.base.address, f_secret: private_key });
+                    resolve(link);
+                    // resolve(`f_address=${this.base.address}&f_secret=${private_key}&p_message=`);
                 } else {
                     reject(new Error('Link is broken!'));
                 }
@@ -302,11 +310,56 @@ export default class AcquisitionCampaign {
         });
     }
 
+    /* PARTICIPATE */
+    public joinAndConvert(campaign: any, value: number | string | BigNumber, referralLink: string, gasPrice: number = this.base._getGasPrice()): Promise<string> {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const {f_address, f_secret, p_message} = await this.helpers._getOffchainDataFromIPFSHash(referralLink);
+                if (!f_address || !f_secret) {
+                    reject('Broken Link');
+                }
+                const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
+
+                const prevChain = await promisify(campaignInstance.received_from, [this.base.address]);
+                if (!parseInt(prevChain, 16)) {
+                    console.log('No ARCS call Free Join Take');
+                    const {public_address} = generatePublicMeta();
+                    const signature = Sign.free_join_take(this.base.address, public_address, f_address, f_secret, p_message);
+                    const gas = await promisify(campaignInstance.joinAndConvert.estimateGas, [signature, {
+                        from: this.base.address,
+                        value
+                    }]);
+                    console.log('Gas required for joinAndConvert', gas);
+                    await this.helpers._checkBalanceBeforeTransaction(gas, gasPrice);
+                    const txHash = await promisify(campaignInstance.joinAndConvert, [signature, {
+                        from: this.base.address,
+                        gasPrice,
+                        gas,
+                        value
+                    }]);
+                    await this.utils.getTransactionReceiptMined(txHash);
+                    resolve(txHash);
+                } else {
+                    console.log('Previous referrer', prevChain, value);
+                    const txHash = await promisify(campaignInstance.convert, [{
+                        from: this.base.address,
+                        gasPrice,
+                        value
+                    }]);
+                    resolve(txHash);
+                }
+            } catch (e) {
+                console.log('joinAndConvert ERROR', e.toString());
+                reject(e);
+            }
+        });
+    }
+
     // Send ARCS to other account
     public joinAndShareARC(campaignAddress: string, referralLink: string, recipient: string, gasPrice: number = this.base._getGasPrice()): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
-                const {f_address, f_secret, p_message} = this.helpers._getUrlParams(referralLink);
+                const {f_address, f_secret, p_message} = await this.helpers._getOffchainDataFromIPFSHash(referralLink);
                 if (!f_address || !f_secret) {
                     reject('Broken Link');
                 }
@@ -345,60 +398,7 @@ export default class AcquisitionCampaign {
         });
     }
 
-    /* PARTICIPATE */
-    public joinAndConvert(campaign: any, value: number | string | BigNumber, referralLink: string, gasPrice: number = this.base._getGasPrice()): Promise<string> {
-        return new Promise(async (resolve, reject) => {
-            try {
-                const {f_address, f_secret, p_message} = this.helpers._getUrlParams(referralLink);
-                if (!f_address || !f_secret) {
-                    reject('Broken Link');
-                }
-                const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-
-                const prevChain = await promisify(campaignInstance.received_from, [this.base.address]);
-                // console.log('Previous referrer', prevChain, parseInt(prevChain, 16));
-                //
-                // const balance = parseFloat((await promisify(campaignInstance.balanceOf, [this.address])).toString());
-                if (!parseInt(prevChain, 16)) {
-                    console.log('No ARCS call Free Join Take');
-                    const {public_address} = generatePublicMeta();
-                    const signature = Sign.free_join_take(this.base.address, public_address, f_address, f_secret, p_message);
-                    const gas = await promisify(campaignInstance.joinAndConvert.estimateGas, [signature, {
-                        from: this.base.address,
-                        value
-                    }]);
-                    console.log('Gas required for joinAndConvert', gas);
-                    await this.helpers._checkBalanceBeforeTransaction(gas, gasPrice);
-                    const txHash = await promisify(campaignInstance.joinAndConvert, [signature, {
-                        from: this.base.address,
-                        gasPrice,
-                        gas,
-                        value
-                    }]);
-                    await this.utils.getTransactionReceiptMined(txHash);
-                    resolve(txHash);
-                } else {
-                    console.log('Previous referrer', prevChain, value);
-                    // const gas = await promisify(campaignInstance.convert.estimateGas, [{from: this.base.address, value}]);
-                    // console.log('Gas required for convert', gas);
-                    // await this.helpers._checkBalanceBeforeTransaction(gas, gasPrice);
-                    const txHash = await promisify(campaignInstance.convert, [{
-                        from: this.base.address,
-                        gasPrice,
-                        value
-                    }]);
-                    // await this.utils.getTransactionReceiptMined(txHash);
-                    // const conversions = await this.getAcquisitionConverterConversion(campaignInstance);
-                    // console.log(conversions);
-                    resolve(txHash);
-                }
-            } catch (e) {
-                console.log('joinAndConvert ERROR', e.toString());
-                reject(e);
-            }
-        });
-    }
-
+    /* HELPERS */
     public getAcquisitionConverterConversion(campaign: any, address: string = this.base.address): Promise<any> {
         return new Promise<any>(async (resolve, reject) => {
             try {
