@@ -38,7 +38,7 @@ export interface ITwoKeyHelpers {
 
 export interface ITwoKeyAcquisitionCampaign {
     estimateCreation: (data: IAcquisitionCampaign) => Promise<number>,
-    create: (data: IAcquisitionCampaign, progressCallback?: ICreateCampaignProgress, gasPrice?: number) => Promise<string>,
+    create: (data: IAcquisitionCampaign, progressCallback?: ICreateCampaignProgress, gasPrice?: number, interval?: number, timeout?: number) => Promise<string>,
     checkInventoryBalance: (campaign: any) => Promise<number>,
     getPublicLinkKey: (campaign: any, address?: string) => Promise<string>,
     getReferrerCut: (campaign: any) => Promise<number>,

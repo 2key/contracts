@@ -307,7 +307,7 @@ describe('TwoKeyProtocol', () => {
             maxDistributionDateShiftInDays: 180,
             bonusTokensVestingMonths: 6,
             bonusTokensVestingStartShiftInDaysFromDistributionDate: 180
-        }, createCallback, 15000000000);
+        }, createCallback, undefined, 500, 600000);
         console.log('Campaign address', campaign);
         campaignAddress = campaign;
         return expect(addressRegex.test(campaign)).to.be.true;

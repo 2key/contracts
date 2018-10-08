@@ -81,13 +81,13 @@ export default class AcquisitionCampaign {
     }
 
     // Create Campaign
-    public create(data: IAcquisitionCampaign, progressCallback?: ICreateCampaignProgress, gasPrice?: number): Promise<string> {
+    public create(data: IAcquisitionCampaign, progressCallback?: ICreateCampaignProgress, gasPrice?: number, interval: number = 500, timeout: number = 60000): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
                 // const gasRequired = await this.estimateCreation(data);
                 // await this._checkBalanceBeforeTransaction(gasRequired, gasPrice || this.gasPrice);
                 let txHash = await this.helpers._createContract(contractsMeta.TwoKeyConversionHandler, gasPrice, null, progressCallback);
-                const predeployReceipt = await this.utils.getTransactionReceiptMined(txHash);
+                const predeployReceipt = await this.utils.getTransactionReceiptMined(txHash, this.base.web3, interval, timeout);
                 const whitelistsAddress = predeployReceipt && predeployReceipt.contractAddress;
                 if (progressCallback) {
                     progressCallback('TwoKeyConversionHandler', true, whitelistsAddress);
@@ -111,7 +111,7 @@ export default class AcquisitionCampaign {
                     data.maxContributionETHWei,
                     data.referrerQuota || 5,
                 ], progressCallback);
-                const campaignReceipt = await this.utils.getTransactionReceiptMined(txHash);
+                const campaignReceipt = await this.utils.getTransactionReceiptMined(txHash, this.base.web3, interval, timeout);
                 const campaignAddress = campaignReceipt && campaignReceipt.contractAddress;
                 if (progressCallback) {
                     progressCallback('TwoKeyAcquisitionCampaignERC20', true, campaignAddress);
@@ -242,9 +242,7 @@ export default class AcquisitionCampaign {
             try {
                 let new_message;
                 if (referralLink) {
-                    const offchainData = await this.helpers._getOffchainDataFromIPFSHash(referralLink);
-                    console.log('>>>>', referralLink, offchainData);
-                    const { f_address, f_secret, p_message } = offchainData;
+                    const { f_address, f_secret, p_message } = await this.helpers._getOffchainDataFromIPFSHash(referralLink);
                     const campaignAddress = typeof (campaign) === 'string' ? campaign
                         : (await this.helpers._getAcquisitionCampaignInstance(campaign)).address;
                     const txHash = await this.emitAcquisitionCampaignJoinEvent(campaignAddress, referralLink);

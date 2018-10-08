@@ -276,6 +276,7 @@ export default class Helpers {
                 // console.log('RAW', raw);
                 // const offchainObj = JSON.parse(raw);
                 // console.log('OFFCHAIN OBJECT', raw, offchainObj);
+                console.log(hash, '>>', offchainObj);
                 resolve(offchainObj);
             } catch (e) {
                 reject(e);
