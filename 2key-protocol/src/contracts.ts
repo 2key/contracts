@@ -577,9 +577,9 @@ export default { ERC20:
         '8086':
          { events: {},
            links: {},
-           address: '0x8b47fcb513b8b627995f7cf7a8e643e8427f1fb4',
+           address: '0xfaa99d6caf5df1af8426d2bfb5bf83ccb7ed0552',
            transactionHash:
-            '0xbd5407cb083a6aeb0818572dd363237b2089eee21293cc5bb799c90e5bdc3cdc' } },
+            '0xcd81526b9ea356c563aa50601a556e53802c1b23aa2c5838bf03445c9e66dada' } },
      abi:
       [ { constant: false,
           inputs: [],
@@ -1090,9 +1090,9 @@ export default { ERC20:
         '8086':
          { events: {},
            links: {},
-           address: '0xf1cce3837b7f5b19067db5bb9a60074f58b962f8',
+           address: '0x622e96748f1ff2bffad72d94f766d5b4c477b706',
            transactionHash:
-            '0x0a4ac9e92b0177d46289b7f724c58ffe89db6a74357f30369798cec8644e0bfa' } },
+            '0x109d93d2b9895e808e4bd214d03f5515d0c5e91d8ca9b5129dd255c72ab6a279' } },
      abi:
       [ { constant: true,
           inputs: [],
@@ -1391,9 +1391,9 @@ export default { ERC20:
         '8086':
          { events: {},
            links: {},
-           address: '0x7f1797ada9b7caa0f0f3a36082e0f866297c85e0',
+           address: '0xf86337c0ffc4afb993fc352d2605e70cbaa284db',
            transactionHash:
-            '0x21b2e08efcd28e22fbd34d6af5f8c9975156921f6fc3a508112b02fc4855cd91' } },
+            '0x5c48132011966c022132e54468665871f70896ab1312a7fa5afe69f2146d0296' } },
      abi:
       [ { inputs: [ { name: '_twoKeyAdminAddress', type: 'address' } ],
           payable: false,
@@ -1731,9 +1731,9 @@ export default { ERC20:
         '8086':
          { events: {},
            links: {},
-           address: '0xfaa99d6caf5df1af8426d2bfb5bf83ccb7ed0552',
+           address: '0x197569f4db4a0a6adca9f79a490488b30fdefb6d',
            transactionHash:
-            '0xd726eebb096e8db399e2987ec4b7868ff421ad70e740487b52fca7166e2d3922' } },
+            '0xb8126622efcc4e2319b27b69e51e4ad732dbf64e590514cfc965d3e9d275d62a' } },
      abi:
       [ { constant: true,
           inputs: [],
