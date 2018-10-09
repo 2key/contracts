@@ -454,13 +454,39 @@ export default class AcquisitionCampaign {
         })
     }
 
-    public getAllPendingConverters(campaign: any): Promise<any> {
+    public getAllPendingConverters(campaign: any): Promise<string[]> {
         return new Promise(async(resolve, reject) => {
             try {
                 const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
                 const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
                 const pendingConverters = await promisify(conversionHandlerInstance.getAllPendingConverters, [{from: this.base.address}]);
                 resolve(pendingConverters);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+    public approveConverter(campaign: any, converter: string): Promise<string> {
+        return new Promise(async(resolve, reject) => {
+            try {
+                const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
+                const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
+                const txHash = await promisify(conversionHandlerInstance.approveConverter, [converter, {from: this.base.address}]);
+                resolve(txHash);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+    public getApprovedConverters(campaign: any) : Promise<string[]> {
+        return new Promise(async(resolve, reject) => {
+            try {
+                const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
+                const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
+                const converters = await promisify(conversionHandlerInstance.getAllApprovedConverters, [{from: this.base.address}]);
+                resolve(converters);
             } catch (e) {
                 reject(e);
             }

@@ -551,7 +551,13 @@ describe('TwoKeyProtocol', () => {
             },
             plasmaPK: Sign.generatePrivateKey().toString('hex'),
         });
+        txHash = await twoKeyProtocol.AcquisitionCampaign.approveConverter(campaignAddress,env.TEST4_ADDRESS);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        const allApproved = await twoKeyProtocol.AcquisitionCampaign.getApprovedConverters(campaignAddress);
+        console.log("Approved addresses: " , allApproved);
 
-    });
+    }).timeout(30000);
+
+
     it('should print after all tests', printBalances).timeout(15000);
 });
