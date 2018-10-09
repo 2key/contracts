@@ -511,7 +511,27 @@ describe('TwoKeyProtocol', () => {
 
     it("should return all pending converters", async() => {
         const contractorAddress = await twoKeyProtocol.AcquisitionCampaign.getAssetContractData(campaignAddress);
-        console.log("Contractor address: " + contractorAddress);
+        console.log('Contractor address:', contractorAddress, 'Current web3 address:', twoKeyProtocol.address);
+
+        console.log("Test where we'll fetch all pending converters");
+        const addresses = await twoKeyProtocol.AcquisitionCampaign.getAllPendingConverters(campaignAddress);
+        console.log(addresses);
+    }).timeout(30000);
+
+    it("should return all pending converters from contractor", async() => {
+        const { web3, address } = web3switcher.aydnep();
+        twoKeyProtocol = new TwoKeyProtocol({
+            web3,
+            address,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            plasmaPK: Sign.generatePrivateKey().toString('hex'),
+        });
+
+        const contractorAddress = await twoKeyProtocol.AcquisitionCampaign.getAssetContractData(campaignAddress);
+        console.log('Contractor address:', contractorAddress, 'Current web3 address:', twoKeyProtocol.address);
 
         console.log("Test where we'll fetch all pending converters");
         const addresses = await twoKeyProtocol.AcquisitionCampaign.getAllPendingConverters(campaignAddress);

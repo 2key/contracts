@@ -46,6 +46,7 @@ export default class AcquisitionCampaign {
         this.helpers = helpers;
         this.utils = utils;
     }
+
     /* ACQUISITION CAMPAIGN */
 
     public estimateCreation(data: IAcquisitionCampaign): Promise<number> {

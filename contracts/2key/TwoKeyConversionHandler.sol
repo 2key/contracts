@@ -10,7 +10,7 @@ import "./TwoKeyConverterStates.sol";
 
 
 
-// adapted from: 
+// adapted from:
 // https://openzeppelin.org/api/docs/crowdsale_validation_WhitelistedCrowdsale.html
 
 contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
@@ -89,7 +89,8 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     }
 
     modifier onlyContractorOrModerator() {
-        require(msg.sender == contractor || msg.sender == moderator);
+        require(msg.sender == contractor);
+//        require(msg.sender == contractor || msg.sender == moderator);
         _;
     }
 

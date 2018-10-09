@@ -122,6 +122,34 @@ export class TwoKeyProtocol {
         this.AcquisitionCampaign = new AcquisitionCampaign(twoKeyBase, this.Helpers, this.Utils);
     }
 
+    public static AcquisitionCampaign = {
+        visit: (campaignAddress: string, refLink: string, web3: any, eventsNetUrl: string = TwoKeyDefaults.twoKeySyncUrl): Promise<string> =>
+        new Promise<string>(async (resolve, reject) => {
+            try {
+                if (!campaignAddress) {
+                    reject('No campaign specified!');
+                    return;
+                }
+                if (!refLink) {
+                    reject('No referrer link!');
+                    return;
+                }
+                if (!web3) {
+                    reject('No web3 instance!');
+                    return;
+                }
+                let plasmaWeb3;
+                if (typeof web3 === 'string') {
+
+                } else if (web3.currentProvider) {
+
+                }
+            } catch (e) {
+                reject(e);
+            }
+        }),
+    };
+
     public getBalance(address: string = this.address, erc20address?: string): Promise<BalanceMeta> {
         const promises = [
             this.Helpers._getEthBalance(address),
