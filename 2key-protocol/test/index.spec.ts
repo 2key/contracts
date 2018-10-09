@@ -510,9 +510,6 @@ describe('TwoKeyProtocol', () => {
 
 
     it("should return all pending converters", async() => {
-        const contractorAddress = await twoKeyProtocol.AcquisitionCampaign.getAssetContractData(campaignAddress);
-        console.log('Contractor address:', contractorAddress, 'Current web3 address:', twoKeyProtocol.address);
-
         console.log("Test where we'll fetch all pending converters");
         const addresses = await twoKeyProtocol.AcquisitionCampaign.getAllPendingConverters(campaignAddress);
         console.log(addresses);
@@ -529,9 +526,6 @@ describe('TwoKeyProtocol', () => {
             },
             plasmaPK: Sign.generatePrivateKey().toString('hex'),
         });
-
-        const contractorAddress = await twoKeyProtocol.AcquisitionCampaign.getAssetContractData(campaignAddress);
-        console.log('Contractor address:', contractorAddress, 'Current web3 address:', twoKeyProtocol.address);
 
         console.log("Test where we'll fetch all pending converters");
         const addresses = await twoKeyProtocol.AcquisitionCampaign.getAllPendingConverters(campaignAddress);
@@ -556,6 +550,8 @@ describe('TwoKeyProtocol', () => {
         const allApproved = await twoKeyProtocol.AcquisitionCampaign.getApprovedConverters(campaignAddress);
         console.log("Approved addresses: " , allApproved);
 
+        const allPendingAfterApproved = await twoKeyProtocol.AcquisitionCampaign.getAllPendingConverters(campaignAddress);
+        console.log("All pending after approval: " + allPendingAfterApproved);
     }).timeout(30000);
 
 

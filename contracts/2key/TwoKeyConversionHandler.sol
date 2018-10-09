@@ -264,38 +264,38 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     }
 
 
-//    function convertConverterStateToBytes(ConversionState state) public view returns (bytes32) {
-//        if(ConversionState.APPROVED == state) {
-//            return bytes32("APPROVED");
-//        }
-//        if(ConversionState.REJECTED == state) {
-//            return bytes32("REJECTED");
-//        }
-//        if(ConversionState.CANCELLED == state) {
-//            return bytes32("CANCELLED");
-//        }
-//        if(ConversionState.PENDING == state) {
-//            return bytes32("PENDING");
-//        }
-//        if(ConversionState.FULFILLED == state) {
-//            return bytes32("FULFILLED");
-//        }
-//    }
-
-    function getConverterConversionState(address _converter) public view returns (string) {
-        ConversionState state = converterToConversionState[_converter];
-        if(state == ConversionState.APPROVED) {
-            return "APPROVED";
-        } else if(state == ConversionState.REJECTED) {
-            return "REJECTED";
-        } else if(state == ConversionState.CANCELLED) {
-            return "CANCELLED";
-        } else if(state == ConversionState.FULFILLED) {
-            return "FULFILLED";
-        } else if(state == ConversionState.PENDING) {
-            return "PENDING";
+    function convertConverterStateToBytes(ConversionState state) public view returns (bytes32) {
+        if(ConversionState.APPROVED == state) {
+            return bytes32("APPROVED");
+        }
+        if(ConversionState.REJECTED == state) {
+            return bytes32("REJECTED");
+        }
+        if(ConversionState.CANCELLED == state) {
+            return bytes32("CANCELLED");
+        }
+        if(ConversionState.PENDING == state) {
+            return bytes32("PENDING");
+        }
+        if(ConversionState.FULFILLED == state) {
+            return bytes32("FULFILLED");
         }
     }
+
+//    function getConverterConversionState(address _converter) public view returns (string) {
+//        ConversionState state = converterToConversionState[_converter];
+//        if(state == ConversionState.APPROVED) {
+//            return "APPROVED";
+//        } else if(state == ConversionState.REJECTED) {
+//            return "REJECTED";
+//        } else if(state == ConversionState.CANCELLED) {
+//            return "CANCELLED";
+//        } else if(state == ConversionState.FULFILLED) {
+//            return "FULFILLED";
+//        } else if(state == ConversionState.PENDING) {
+//            return "PENDING";
+//        }
+//    }
 
     function isConverterApproved(address _converter) public onlyContractorOrModerator view  returns (bool) {
         if(converterToConversionState[_converter] == ConversionState.APPROVED) {
@@ -361,11 +361,11 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
 
 
     function approveConverter(address _converter) public onlyContractorOrModerator {
-        if(converterToConversionState[_converter] == ConversionState.PENDING ||
-        converterToConversionState[_converter] == ConversionState.REJECTED) {
-            converterToConversionState[_converter] = ConversionState.APPROVED;
-            conversionStateToConverters[bytes32("APPROVED")].push(_converter);
-            //TODO: move from array of rejected/pending to approved
+        if(converterToConversionState[_converter] == ConversionState.PENDING) {
+            moveFromPendingOrRejectedToApproved(_converter);
+        }
+        else if(converterToConversionState[_converter] == ConversionState.REJECTED) {
+        moveFromPendingOrRejectedToApproved(_converter);
         } else {
             revert();
         }
@@ -376,7 +376,23 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         return converterToLockupContracts[_converter];
     }
 
-    function getContractor() public view returns (address) {
-        return contractor;
+
+    function moveFromPendingOrRejectedToApproved(address _converter) private {
+        ConversionState state = converterToConversionState[_converter];
+        bytes32 key = convertConverterStateToBytes(state);
+        address[] memory pending = conversionStateToConverters[key];
+        for(uint i=0; i< pending.length; i++) {
+            if(pending[i] == _converter) {
+                // Means we have found it in array of pending addresses
+                converterToConversionState[_converter] = ConversionState.APPROVED;
+                conversionStateToConverters[bytes32("APPROVED")].push(_converter);
+                //assigning the value of last element
+                pending[i] = pending[pending.length-1];
+                delete pending[pending.length-1];
+                conversionStateToConverters[key] = pending;
+                conversionStateToConverters[key].length--;
+                break;
+            }
+        }
     }
 }
