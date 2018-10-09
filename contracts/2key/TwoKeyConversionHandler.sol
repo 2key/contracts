@@ -263,23 +263,23 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     }
 
 
-    function convertConverterStateToBytes(ConversionState state) public view returns (bytes32) {
-        if(ConversionState.APPROVED == state) {
-            return bytes32("APPROVED");
-        }
-        if(ConversionState.REJECTED == state) {
-            return bytes32("REJECTED");
-        }
-        if(ConversionState.CANCELLED == state) {
-            return bytes32("CANCELLED");
-        }
-        if(ConversionState.PENDING == state) {
-            return bytes32("PENDING");
-        }
-        if(ConversionState.FULFILLED == state) {
-            return bytes32("FULFILLED");
-        }
-    }
+//    function convertConverterStateToBytes(ConversionState state) public view returns (bytes32) {
+//        if(ConversionState.APPROVED == state) {
+//            return bytes32("APPROVED");
+//        }
+//        if(ConversionState.REJECTED == state) {
+//            return bytes32("REJECTED");
+//        }
+//        if(ConversionState.CANCELLED == state) {
+//            return bytes32("CANCELLED");
+//        }
+//        if(ConversionState.PENDING == state) {
+//            return bytes32("PENDING");
+//        }
+//        if(ConversionState.FULFILLED == state) {
+//            return bytes32("FULFILLED");
+//        }
+//    }
 
     function getConverterConversionState(address _converter) public view returns (string) {
         ConversionState state = converterToConversionState[_converter];
