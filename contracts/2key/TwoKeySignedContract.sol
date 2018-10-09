@@ -116,9 +116,6 @@ contract TwoKeySignedContract is TwoKeyContract {
         // we will need this in case one of the influencers will want to start his own off-chain link
         if (public_link_key[new_address] == 0) {
           public_link_key[new_address] = new_public_key;
-          if (eventSource != address(0)) {
-            eventSource.setPublicLinkKey(new_address, new_public_key);
-          }
         } else {
           require(public_link_key[new_address] == new_public_key,'public key can not be modified');
         }

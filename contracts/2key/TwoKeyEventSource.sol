@@ -139,7 +139,7 @@ contract TwoKeyEventSource is TwoKeyTypes {
     function joined(address _campaign, address _from, address _to) public onlyAllowedContracts {
     	emit Joined(_campaign, _from, _to);
     }
-    
+
     /// @dev Only allowed contracts can call this function ---> means can emit events
     // TODO use msg.sender instead of _campaign
     function escrow(address _campaign, address _converter, uint256 _tokenID, address _childContractID, uint256 _indexOrAmount, CampaignType _type) public onlyAllowedContracts{
