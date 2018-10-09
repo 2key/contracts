@@ -469,7 +469,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     /// @param converterAddress is actually the msg.sender (Address of one who's executing conversion)
     /// isOngoing
     function createConversion(uint conversionAmountETHWei, address converterAddress) {
-
         uint baseTokensForConverterUnits;
         uint bonusTokensForConverterUnits;
 

@@ -18,7 +18,7 @@ contract TwoKeyPresellExchange is TwoKeyUpgradableExchange {
   	uint256 public cap;
 	//TODO: Do we check here if referrer or converter is whitelisted (I've set referrer)
 	modifier onlyIfWhitelisted() {
-	    whitelist.isWhitelistedReferrer(msg.sender);
+//	    whitelist.isWhitelistedReferrer(msg.sender);
 	    _;
 	}
 
