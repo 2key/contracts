@@ -92,16 +92,14 @@ export default class AcquisitionCampaign {
         return new Promise(async (resolve, reject) => {
             try {
                 let txHash: string;
-                let conversionHandlerAddress: string;
-                if (!data.conversionHandlerAddress) {
+                let conversionHandlerAddress = data.conversionHandlerAddress;
+                if (!conversionHandlerAddress) {
                     txHash = await this.helpers._createContract(contractsMeta.TwoKeyConversionHandler, gasPrice, null, progressCallback);
                     const predeployReceipt = await this.utils.getTransactionReceiptMined(txHash, this.base.web3, interval, timeout);
                     conversionHandlerAddress = predeployReceipt && predeployReceipt.contractAddress;
                     if (progressCallback) {
                         progressCallback('TwoKeyConversionHandler', true, conversionHandlerAddress);
                     }
-                } else {
-                    conversionHandlerAddress = data.conversionHandlerAddress;
                 }
                 // const whitelistsInstance = this.web3.eth.contract(contractsMeta.TwoKeyWhitelisted.abi).at(whitelistsAddress);
 
