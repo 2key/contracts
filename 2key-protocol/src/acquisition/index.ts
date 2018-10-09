@@ -446,7 +446,6 @@ export default class AcquisitionCampaign {
                 const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
                 const assetContractData = await promisify(conversionHandlerInstance.getContractor, []);
                 // const assetContractData = await promisify(conversionHandlerInstance.getAssetContractData, []);
-                console.log(assetContractData);
                 resolve(assetContractData)
             } catch (e) {
                 reject(e);

@@ -332,7 +332,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     }
 
     //isConverterPending
-    function getAllPendingConverters() public view  returns (address[]) {
+    function getAllPendingConverters() public view onlyContractorOrModerator returns (address[]) {
         return conversionStateToConverters[bytes32("PENDING")];
     }
 
