@@ -444,7 +444,7 @@ export default class AcquisitionCampaign {
             try {
                 const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
                 const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
-                const assetContractData = await promisify(conversionHandlerInstance.getAssetContractData, []);
+                const assetContractData = await promisify(conversionHandlerInstance.getContractor, []);
                 // const assetContractData = await promisify(conversionHandlerInstance.getAssetContractData, []);
                 console.log(assetContractData);
                 resolve(assetContractData)
@@ -469,16 +469,4 @@ export default class AcquisitionCampaign {
         })
     }
 
-    // public isConverterPending(campaign: any): Promise<any> {
-    //     return new Promise(async(resolve, reject) => {
-    //         try{
-    //             const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
-    //             const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
-    //             const isConverterPending = await promisify(conversionHandlerInstance.isConverterPending, []);
-    //
-    //         } catch (e) {
-    //             reject(e);
-    //         }
-    //     })
-    // }
 }

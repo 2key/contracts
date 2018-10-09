@@ -508,7 +508,11 @@ describe('TwoKeyProtocol', () => {
         expect(conversion[2]).to.be.equal(twoKeyProtocol.address);
     }).timeout(30000);
 
+
     it("should return all pending converters", async() => {
+        const contractorAddress = await twoKeyProtocol.AcquisitionCampaign.getAssetContractData(campaignAddress);
+        console.log("Contractor address: " + contractorAddress);
+
         console.log("Test where we'll fetch all pending converters");
         const addresses = await twoKeyProtocol.AcquisitionCampaign.getAllPendingConverters(campaignAddress);
         console.log(addresses);

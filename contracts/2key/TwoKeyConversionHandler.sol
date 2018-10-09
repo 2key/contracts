@@ -375,4 +375,8 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     function getLockupContractsForConverter(address _converter) public view onlyContractorOrModerator returns (address[]){
         return converterToLockupContracts[_converter];
     }
+
+    function getContractor() public view returns (address) {
+        return contractor;
+    }
 }
