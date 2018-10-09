@@ -171,7 +171,7 @@ async function deploy() {
     twoKeyProtocolStatus = await twoKeyProtocolLibGit.status();
     const localChanges = contractsStatus.files
       // .filter(item => !(item.path.includes('2key-protocol-npm')
-      .filter(item => !(item.path.includes('dist')
+      .filter(item => !(item.path.includes('dist') || item.path.includes('contracts.ts') || item.path.includes('contracts.json')
         || (process.env.NODE_ENV === 'development' && item.path.includes(process.argv[1].split('/').pop()))));
     if (contractsStatus.behind || localChanges.length) {
       console.log('You have unsynced changes!', localChanges);
