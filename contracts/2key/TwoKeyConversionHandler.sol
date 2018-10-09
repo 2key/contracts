@@ -10,7 +10,7 @@ import "./TwoKeyConverterStates.sol";
 
 
 
-// adapted from:
+// adapted from: 
 // https://openzeppelin.org/api/docs/crowdsale_validation_WhitelistedCrowdsale.html
 
 contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
@@ -84,13 +84,12 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
 
     /// @notice Modifier which allows only TwoKeyAcquisitionCampaign to issue calls
     modifier onlyTwoKeyAcquisitionCampaign() {
-        require(msg.sender == twoKeyAcquisitionCampaignERC20);
+        require(msg.sender == address(twoKeyAcquisitionCampaignERC20));
         _;
     }
 
-    modifier onlyContractorOrModerator() {
-        require(msg.sender == contractor);
-//        require(msg.sender == contractor || msg.sender == moderator);
+    modifier onlyContractorOrModerator {
+        require(msg.sender == address(contractor) || msg.sender == address(moderator));
         _;
     }
 
@@ -99,6 +98,8 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         require(converterToConversionState[msg.sender] == ConversionState.APPROVED);
         _;
     }
+
+
 
 
     constructor(uint _tokenDistributionDate, // January 1st 2019
@@ -110,7 +111,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         bonusTokensVestingMonths = _bonusTokensVestingMonths;
         bonusTokensVestingStartShiftInDaysFromDistributionDate = _bonusTokensVestingStartShiftInDaysFromDistributionDate;
     }
-
 
     /*
     ====================================================================================================================
@@ -297,7 +297,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         }
     }
 
-    function isConverterApproved(address _converter) public view onlyContractorOrModerator returns (bool) {
+    function isConverterApproved(address _converter) public onlyContractorOrModerator view  returns (bool) {
         if(converterToConversionState[_converter] == ConversionState.APPROVED) {
             return true;
         }
@@ -332,9 +332,8 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         return false;
     }
 
-    //isConverterPending
     function getAllPendingConverters() public view onlyContractorOrModerator returns (address[]) {
-        return conversionStateToConverters[bytes32("PENDING")];
+        return (conversionStateToConverters[bytes32("PENDING")]);
     }
 
     function getAllRejectedConverters() public view onlyContractorOrModerator returns(address[]) {

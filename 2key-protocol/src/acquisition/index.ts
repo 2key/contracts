@@ -459,9 +459,7 @@ export default class AcquisitionCampaign {
             try {
                 const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
                 const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
-                const pendingConverters = await promisify(conversionHandlerInstance.getAllPendingConverters, []);
-
-                console.log(pendingConverters);
+                const pendingConverters = await promisify(conversionHandlerInstance.getAllPendingConverters, [{from: this.base.address}]);
                 resolve(pendingConverters);
             } catch (e) {
                 reject(e);
