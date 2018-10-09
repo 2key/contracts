@@ -9,7 +9,7 @@ export interface ITwoKeyBase {
     readonly contracts: IContractsAddresses;
     readonly twoKeyEconomy: any;
     readonly twoKeyEventContract: any;
-    readonly eventsAddress: string;
+    readonly plasmaAddress: string;
     readonly _setGasPrice: (number) => void,
     readonly _getGasPrice: () => number,
     readonly _setTotalSupply: (number) => void,
@@ -51,10 +51,12 @@ export interface ITwoKeyAcquisitionCampaign {
     joinAndConvert: (campaign: any, value: number | string | BigNumber, referralLink: string, gasPrice?: number) => Promise<string>,
     getConverterConversion: (campaign: any, address?: string) => Promise<any>,
     getTwoKeyConversionHandlerAddress: (campaign: any) => Promise<string>,
-    getAssetContractData: (campaign: any) => Promise<any>,
+    // getAssetContractData: (campaign: any) => Promise<any>,
     getAllPendingConverters: (campaign: any) => Promise<string[]>,
     approveConverter: (campaign: any, converter: string) => Promise<string>,
     getApprovedConverters: (campaign: any) => Promise<string[]>,
+    visit: (campaignAddress: string, referralLink: string) => Promise<string>,
+    isAddressJoined: (campaign: any) => Promise<boolean>,
 }
 
 export interface IERC20 {
@@ -109,8 +111,8 @@ export interface IEhtereumNetworks {
 }
 
 export interface ITwoKeyInit {
-    web3: any,
-    address: string,
+    web3?: any,
+    address?: string,
     ipfsIp?: string,
     ipfsPort?: string | number,
     contracts?: IContractsAddresses,
@@ -205,4 +207,9 @@ export interface IOffchainData {
     f_address: string,
     f_secret: string,
     p_message?: string,
+}
+
+export interface IOffchainSignedKeypair {
+    private_key: string,
+    public_address: string,
 }

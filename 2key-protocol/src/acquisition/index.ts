@@ -211,7 +211,7 @@ export default class AcquisitionCampaign {
                 if (!f_address || !f_secret) {
                     reject('Broken Link');
                 }
-                const from = this.base.eventsAddress;
+                const from = this.base.plasmaAddress;
                 const txHash = await promisify(this.base.twoKeyEventContract.joined, [campaignAddress, f_address, this.base.address, {from}]);
                 resolve(txHash);
             } catch (e) {
@@ -221,6 +221,27 @@ export default class AcquisitionCampaign {
     }
 
     /* LINKS */
+    // Visit link
+    public visit(campaignAddress: string, referralLink: string): Promise<string> {
+        return new Promise<string>(async (resolve, reject) => {
+            try {
+                const { f_address, f_secret, p_message } = await this.helpers._getOffchainDataFromIPFSHash(referralLink);
+                const sig = Sign.free_take(this.base.plasmaAddress, f_address, f_secret, p_message);
+                const txHash = await promisify(this.base.twoKeyEventContract.visited, [
+                    campaignAddress,
+                    sig,
+                    { from: this.base.plasmaAddress }
+                ]);
+                await this.utils.getTransactionReceiptMined(txHash, this.base.plasmaWeb3);
+                resolve(txHash);
+                // Sign.getSignedKeys(this.base.plasmaWeb3, campaignAddress, this.base.plasmaAddress)
+                // this.base.twoKeyEventContract
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
+
     // Set Public Link
     public setPublicLinkKey(campaign: any, publicKey: string, gasPrice: number = this.base._getGasPrice()): Promise<string> {
         return new Promise(async (resolve, reject) => {
@@ -412,6 +433,17 @@ export default class AcquisitionCampaign {
     }
 
     /* HELPERS */
+    public isAddressJoined(campaign: any): Promise<boolean> {
+        return new Promise<boolean>(async (resolve, reject) => {
+            try {
+                const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
+                resolve(await promisify(campaignInstance.getAddressJoinedStatus, [{ from: this.base.address }]));
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
+
     public getConverterConversion(campaign: any, address: string = this.base.address): Promise<any> {
         return new Promise<any>(async (resolve, reject) => {
             try {

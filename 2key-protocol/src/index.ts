@@ -47,7 +47,7 @@ export class TwoKeyProtocol {
     private readonly twoKeyEconomy: any;
     private readonly twoKeyEventContract: any;
     private twoKeyEvents: any;
-    private readonly eventsAddress: string;
+    private readonly plasmaAddress: string;
     public readonly  ERC20: IERC20;
     public readonly Utils: ITWoKeyUtils;
     private readonly Helpers: ITwoKeyHelpers;
@@ -89,16 +89,16 @@ export class TwoKeyProtocol {
 
         plasmaEngine.start();
         this.plasmaWeb3 = new Web3(plasmaEngine);
-        this.eventsAddress = `0x${eventsWallet.getAddress().toString('hex')}`;
+        this.plasmaAddress = `0x${eventsWallet.getAddress().toString('hex')}`;
         this.twoKeyEventContract = this.plasmaWeb3.eth.contract(contractsMeta.TwoKeyPlasmaEvents.abi).at(contractsMeta.TwoKeyPlasmaEvents.networks[this.networks.syncTwoKeyNetId].address);
 
-        if (!web3) {
-            throw new Error('Web3 instance required!');
+        if (web3) {
+            this.web3 = new Web3(web3.currentProvider);
+            this.web3.eth.defaultBlock = 'pending';
+            this.address = address;
+            this.twoKeyEconomy = this.web3.eth.contract(contractsMeta.TwoKeyEconomy.abi).at(contractsMeta.TwoKeyEconomy.networks[this.networks.mainNetId].address);
         }
-        this.web3 = new Web3(web3.currentProvider);
-        this.web3.eth.defaultBlock = 'pending';
-        this.address = address;
-        this.twoKeyEconomy = this.web3.eth.contract(contractsMeta.TwoKeyEconomy.abi).at(contractsMeta.TwoKeyEconomy.networks[this.networks.mainNetId].address);
+
         this.ipfs = ipfsAPI(ipfsIp, ipfsPort, {protocol: 'http'});
 
         const twoKeyBase: ITwoKeyBase = {
@@ -110,7 +110,7 @@ export class TwoKeyProtocol {
             contracts: this.contracts,
             twoKeyEconomy: this.twoKeyEconomy,
             twoKeyEventContract: this.twoKeyEventContract,
-            eventsAddress: this.eventsAddress,
+            plasmaAddress: this.plasmaAddress,
             _getGasPrice: this._getGasPrice,
             _setGasPrice: this._setGasPrice,
             _setTotalSupply: this._setTotalSupply,
@@ -121,34 +121,6 @@ export class TwoKeyProtocol {
         this.Utils = new Index(twoKeyBase, this.Helpers);
         this.AcquisitionCampaign = new AcquisitionCampaign(twoKeyBase, this.Helpers, this.Utils);
     }
-
-    public static AcquisitionCampaign = {
-        visit: (campaignAddress: string, refLink: string, web3: any, eventsNetUrl: string = TwoKeyDefaults.twoKeySyncUrl): Promise<string> =>
-        new Promise<string>(async (resolve, reject) => {
-            try {
-                if (!campaignAddress) {
-                    reject('No campaign specified!');
-                    return;
-                }
-                if (!refLink) {
-                    reject('No referrer link!');
-                    return;
-                }
-                if (!web3) {
-                    reject('No web3 instance!');
-                    return;
-                }
-                let plasmaWeb3;
-                if (typeof web3 === 'string') {
-
-                } else if (web3.currentProvider) {
-
-                }
-            } catch (e) {
-                reject(e);
-            }
-        }),
-    };
 
     public getBalance(address: string = this.address, erc20address?: string): Promise<BalanceMeta> {
         const promises = [

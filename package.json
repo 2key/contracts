@@ -11,7 +11,8 @@
     "geth:reset": "node geth/geth.js reset",
     "devnet": "node ethereum.js",
     "test": "node -r dotenv/config ./node_modules/.bin/mocha --exit --bail -r ts-node/register 2key-protocol/test/index.spec.ts",
-    "test:one": "node -r dotenv/config ./node_modules/.bin/mocha --exit --bail -r ts-node/register"
+    "test:one": "node -r dotenv/config ./node_modules/.bin/mocha --exit --bail -r ts-node/register",
+    "ts-node": "ts-node -r dotenv/config"
   },
   "author": "Douglas von Kohorn",
   "license": "MIT",
@@ -81,6 +82,7 @@
     "crypto": "1.0.1",
     "d3": "3.5.17",
     "dockerode": "2.5.5",
+    "eth-sig-util": "2.1.0",
     "ethereumjs-abi": "0.6.5",
     "ethereumjs-tx": "1.3.7",
     "ethereumjs-util": "5.2.0",

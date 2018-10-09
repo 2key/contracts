@@ -157,6 +157,13 @@ describe('TwoKeyProtocol', () => {
                     },
                     plasmaPK: Sign.generatePrivateKey().toString('hex'),
                 });
+                // twoKeyProtocol = new TwoKeyProtocol({
+                //     networks: {
+                //         mainNetId,
+                //         syncTwoKeyNetId,
+                //     },
+                //     plasmaPK: Sign.generatePrivateKey().toString('hex'),
+                // });
                 const {balance} = twoKeyProtocol.Utils.balanceFromWeiString(await twoKeyProtocol.getBalance(env.AYDNEP_ADDRESS), true);
                 const { balance: adminBalance } = twoKeyProtocol.Utils.balanceFromWeiString(await twoKeyProtocol.getBalance(contractsMeta.TwoKeyAdmin.networks[mainNetId].address), true);
                 console.log(adminBalance);
@@ -366,6 +373,7 @@ describe('TwoKeyProtocol', () => {
             },
             plasmaPK: Sign.generatePrivateKey().toString('hex'),
         });
+        console.log('isUserJoined', await twoKeyProtocol.AcquisitionCampaign.isAddressJoined(campaignAddress));
         const hash = await twoKeyProtocol.AcquisitionCampaign.join(campaignAddress, 50, refLink);
         console.log('2) gmail offchain REFLINK', hash);
         refLink = hash;
@@ -373,6 +381,19 @@ describe('TwoKeyProtocol', () => {
     }).timeout(30000);
 
     it('should cut link', async () => {
+        // twoKeyProtocol = new TwoKeyProtocol({
+        //     networks: {
+        //         mainNetId,
+        //         syncTwoKeyNetId,
+        //     },
+        //     plasmaPK: Sign.generatePrivateKey().toString('hex'),
+        // });
+        // const callback = (err, res) => {
+        //     console.log('PlasmaEvent', err, res);
+        // };
+        // twoKeyProtocol.subscribe2KeyEvents(callback);
+        // await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, refLink);
+        // twoKeyProtocol.unsubscribe2KeyEvents();
         const { web3, address } = web3switcher.test4();
         twoKeyProtocol = new TwoKeyProtocol({
             web3,
@@ -383,10 +404,12 @@ describe('TwoKeyProtocol', () => {
             },
             plasmaPK: Sign.generatePrivateKey().toString('hex'),
         });
+        console.log('isUserJoined', await twoKeyProtocol.AcquisitionCampaign.isAddressJoined(campaignAddress));
         let maxReward = await twoKeyProtocol.AcquisitionCampaign.getEstimatedMaximumReferralReward(campaignAddress, refLink);
         console.log(`Estimated maximum referral reward: ${maxReward}%`);
         const hash = await twoKeyProtocol.AcquisitionCampaign.joinAndSetPublicLinkWithCut(campaignAddress, refLink, 33);
         refLink = hash;
+        console.log('isUserJoined', await twoKeyProtocol.AcquisitionCampaign.isAddressJoined(campaignAddress));
         console.log('3) test4 Cutted REFLINK', refLink);
         const cut = await twoKeyProtocol.AcquisitionCampaign.getReferrerCut(campaignAddress);
         console.log('Referrer CUT', env.TEST4_ADDRESS, cut);
