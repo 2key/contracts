@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import 'mocha';
 import { TwoKeyProtocol } from '../src';
 import createWeb3 from './_web3';
+import Sign from '../src/utils/sign';
 
 const { env } = process;
 
@@ -22,6 +23,7 @@ const sendETH: any = (recipient) => new Promise(async (resolve, reject) => {
                     mainNetId,
                     syncTwoKeyNetId,
                 },
+                plasmaPK: Sign.generatePrivateKey().toString('hex'),
             });
         }
         // console.log(twoKeyProtocol);

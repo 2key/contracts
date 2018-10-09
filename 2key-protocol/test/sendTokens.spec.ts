@@ -3,6 +3,7 @@ import 'mocha';
 import {TwoKeyProtocol} from '../src';
 import contractsMeta from '../src/contracts';
 import createWeb3, { ledgerWeb3 } from './_web3';
+import Sign from '../src/utils/sign';
 
 const rpcUrl = 'wss://ropsten.infura.io/ws';
 // const rpcUrl = 'wss://ropsten.infura.io/ws';
@@ -30,6 +31,7 @@ const sendTokens: any = new Promise(async (resolve, reject) => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
+            plasmaPK: Sign.generatePrivateKey().toString('hex'),
         });
         const {balance} = twoKeyProtocol.Utils.balanceFromWeiString(await twoKeyProtocol.getBalance(destinationAddress), true);
         if (parseFloat(balance['2KEY'].toString()) <= 20000 || process.env.FORCE) {
