@@ -624,9 +624,9 @@ export default { ERC20full:
         '8086':
          { events: {},
            links: {},
-           address: '0xa8a1281ab7ce9669cfb4ea3dd326939a52a43cdd',
+           address: '0xfaa99d6caf5df1af8426d2bfb5bf83ccb7ed0552',
            transactionHash:
-            '0xb11a50f91abad86d81377f345ec94e55e7852771345d31219552449c8ff39b69' } },
+            '0xcd81526b9ea356c563aa50601a556e53802c1b23aa2c5838bf03445c9e66dada' } },
      abi:
       [ { constant: false,
           inputs: [],
@@ -1049,9 +1049,9 @@ export default { ERC20full:
         '8086':
          { events: {},
            links: {},
-           address: '0xa1b080c47ef3d558132fa37496e1d298b21bf945',
+           address: '0x622e96748f1ff2bffad72d94f766d5b4c477b706',
            transactionHash:
-            '0xcfc6d020d3060d885b4bd244d572af657b5ba00bcdf1cbb591bfa3743d02e9b7' } },
+            '0x109d93d2b9895e808e4bd214d03f5515d0c5e91d8ca9b5129dd255c72ab6a279' } },
      abi:
       [ { constant: true,
           inputs: [],
@@ -1350,9 +1350,9 @@ export default { ERC20full:
         '8086':
          { events: {},
            links: {},
-           address: '0x1a6b9cf99e97f2e63f4c872494835f7228bc2d8d',
+           address: '0xf86337c0ffc4afb993fc352d2605e70cbaa284db',
            transactionHash:
-            '0xe099c7abfd2a32533ac2e82161b84b234f93818cbd7b106e77bdcd37ffb34b91' } },
+            '0x5c48132011966c022132e54468665871f70896ab1312a7fa5afe69f2146d0296' } },
      abi:
       [ { inputs: [ { name: '_twoKeyAdminAddress', type: 'address' } ],
           payable: false,
@@ -1554,9 +1554,9 @@ export default { ERC20full:
       { '17':
          { events: {},
            links: {},
-           address: '0x8b47fcb513b8b627995f7cf7a8e643e8427f1fb4',
+           address: '0xf86337c0ffc4afb993fc352d2605e70cbaa284db',
            transactionHash:
-            '0xee6b308a68e9b4e7fa2d7d621f7b1980db894a8844ab320713fac1ba1fbd5ff1' },
+            '0x59062db0d61d61359148ac72910de55a78f9767eb2f3870fd65ffeaf691c2f05' },
         '47':
          { events: {},
            links: {},
@@ -1730,9 +1730,9 @@ export default { ERC20full:
         '8086':
          { events: {},
            links: {},
-           address: '0xfbd3ed5a6f7126fa4312a52953d250444abe20c4',
+           address: '0x197569f4db4a0a6adca9f79a490488b30fdefb6d',
            transactionHash:
-            '0xb4cdd2f39a251e71f46f7a2c6a6bc86da5abffc8b4dfbf633ae1a0ed6f7e5929' } },
+            '0xb8126622efcc4e2319b27b69e51e4ad732dbf64e590514cfc965d3e9d275d62a' } },
      abi:
       [ { constant: true,
           inputs: [],
