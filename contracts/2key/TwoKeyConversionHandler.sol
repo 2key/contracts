@@ -182,6 +182,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
 
         conversions[_converterAddress] = c;
         converterToConversionState[_converterAddress] = ConversionState.PENDING;
+        conversionStateToConverters[bytes32("PENDING")].push(_converterAddress);
     }
 
     /// @notice Function to encode provided parameters into bytes

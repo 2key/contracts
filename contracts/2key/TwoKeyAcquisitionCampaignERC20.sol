@@ -176,7 +176,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     }
 
 
-    function setERC20Attributes() public {
+    /// Maybe remove function and just assign this 2 methods in constructor
+    function setERC20Attributes() private {
         unit_decimals = IERC20(assetContractERC20).decimals();
         symbol = IERC20(assetContractERC20).symbol();
     }
