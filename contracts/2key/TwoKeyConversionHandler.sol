@@ -337,7 +337,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     }
 
     function getAllRejectedConverters() public view onlyContractorOrModerator returns(address[]) {
-        return conversionStateToConverters[bytes32("REJECTED")]
+        return conversionStateToConverters[bytes32("REJECTED")];
     }
 
     function getAllApprovedConverters() public view onlyContractorOrModerator returns(address[]) {
