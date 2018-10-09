@@ -333,33 +333,23 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
 
 
     function getAllPendingConverters() public view onlyContractorOrModerator returns (address[]) {
-        bytes32 key = bytes32("PENDING");
-        address[] memory pendingConverters = conversionStateToConverters[key];
-        return pendingConverters;
+        return conversionStateToConverters[bytes32("PENDING")];
     }
 
     function getAllRejectedConverters() public view onlyContractorOrModerator returns(address[]) {
-        bytes32 key = bytes32("REJECTED");
-        address[] memory rejectedConverters = conversionStateToConverters[key];
-        return rejectedConverters;
+        return conversionStateToConverters[bytes32("REJECTED")]
     }
 
     function getAllApprovedConverters() public view onlyContractorOrModerator returns(address[]) {
-        bytes32 key = bytes32("APPROVED");
-        address[] memory approvedConverters = conversionStateToConverters[key];
-        return approvedConverters;
+        return conversionStateToConverters[bytes32("APPROVED")];
     }
 
     function getAllCancelledConverters() public view onlyContractorOrModerator returns(address[]) {
-        bytes32 key = bytes32("CANCELLED");
-        address[] memory cancelledConverters = conversionStateToConverters[key];
-        return cancelledConverters;
+        return conversionStateToConverters[bytes32("CANCELLED")];
     }
 
     function getAllFulfilledConverters() public view onlyContractorOrModerator returns(address[]) {
-        bytes32 key = bytes32("FULFILLED");
-        address[] memory fulfilledConverters = conversionStateToConverters[key];
-        return fulfilledConverters;
+        return conversionStateToConverters[bytes32("FULFILLED")];
     }
 
 //    function updateConverterStates(address[] approvedConverters, address[] rejectedConverters) {
