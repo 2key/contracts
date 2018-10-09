@@ -16,7 +16,7 @@ export default class ERC20 {
         return new Promise<string>(async (resolve, reject) => {
             try {
                 const erc20Instance = await this.helpers._getERC20Instance(erc20);
-                const symbol = await promisify(erc20Instance.symbol, []);
+                const symbol = await promisify(erc20Instance.symbol, [{ from: this.base.address }]);
                 resolve(symbol);
             } catch (e) {
                 reject(e);

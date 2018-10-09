@@ -89,7 +89,7 @@ export default class Helpers {
         return new Promise(async (resolve, reject) => {
             try {
                 const erc20 = await this._createAndValidate('ERC20full', erc20address);
-                const totalSupply = await promisify(erc20.totalSupply, []);
+                const totalSupply = await promisify(erc20.totalSupply, [{ from: this.base.address }]);
                 this.base._setTotalSupply(totalSupply);
                 resolve(totalSupply);
             } catch (e) {

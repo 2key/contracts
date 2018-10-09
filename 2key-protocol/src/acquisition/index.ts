@@ -147,7 +147,7 @@ export default class AcquisitionCampaign {
             const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
             const hash = await promisify(campaignInstance.getAndUpdateInventoryBalance, [{from: this.base.address}]);
             await this.utils.getTransactionReceiptMined(hash);
-            const balance = await promisify(campaignInstance.getInventoryBalance, []);
+            const balance = await promisify(campaignInstance.getInventoryBalance, [{ from: this.base.address }]);
             return Promise.resolve(balance);
         } catch (err) {
             Promise.reject(err);
@@ -173,9 +173,9 @@ export default class AcquisitionCampaign {
                     resolve(cut);
                 } else {
                     const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-                    const contractorAddress = await promisify(campaignInstance.getContractorAddress, []);
+                    const contractorAddress = await promisify(campaignInstance.getContractorAddress, [{ from: this.base.address }]);
                     const {f_address, f_secret, p_message} = await this.helpers._getOffchainDataFromIPFSHash(referralLink);
-                    const contractConstants = (await promisify(campaignInstance.getConstantInfo, []));
+                    const contractConstants = (await promisify(campaignInstance.getConstantInfo, [{ from: this.base.address }]));
                     const decimals = contractConstants[3].toNumber();
                     console.log('Decimals', decimals);
                     const maxReferralRewardPercent = new BigNumber(contractConstants[1]).div(10 ** decimals).toNumber();
@@ -416,7 +416,7 @@ export default class AcquisitionCampaign {
         return new Promise<any>(async (resolve, reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-                const conversionHandler = await promisify(campaignInstance.getTwoKeyConversionHandlerAddress, []);
+                const conversionHandler = await promisify(campaignInstance.getTwoKeyConversionHandlerAddress, [{ from: this.base.address }]);
                 console.log('WhiteListsAddress', conversionHandler);
                 const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandler);
                 const conversion = await promisify(conversionHandlerInstance.conversions, [this.base.address]);
@@ -432,7 +432,7 @@ export default class AcquisitionCampaign {
         return new Promise(async (resolve, reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-                const conversionHandler = await promisify(campaignInstance.getTwoKeyConversionHandlerAddress, []);
+                const conversionHandler = await promisify(campaignInstance.getTwoKeyConversionHandlerAddress, [{ from: this.base.address }]);
                 resolve(conversionHandler);
             } catch (e) {
                 reject(e);
@@ -445,7 +445,7 @@ export default class AcquisitionCampaign {
             try {
                 const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
                 const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
-                const assetContractData = await promisify(conversionHandlerInstance.getContractor, []);
+                const assetContractData = await promisify(conversionHandlerInstance.getContractor, [{ from: this.base.address }]);
                 // const assetContractData = await promisify(conversionHandlerInstance.getAssetContractData, []);
                 resolve(assetContractData)
             } catch (e) {
