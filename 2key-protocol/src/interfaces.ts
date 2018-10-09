@@ -57,6 +57,7 @@ export interface ITwoKeyAcquisitionCampaign {
     getApprovedConverters: (campaign: any) => Promise<string[]>,
     visit: (campaignAddress: string, referralLink: string) => Promise<string>,
     isAddressJoined: (campaign: any) => Promise<boolean>,
+    executeConversion: (campaign: any, converter: string) => Promise<string>,
 }
 
 export interface IERC20 {

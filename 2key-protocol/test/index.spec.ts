@@ -577,6 +577,21 @@ describe('TwoKeyProtocol', () => {
         console.log("All pending after approval: " + allPendingAfterApproved);
     }).timeout(30000);
 
+    it('should execute conversion', async() => {
+        const { web3, address } = web3switcher.test4();
+        twoKeyProtocol = new TwoKeyProtocol({
+            web3,
+            address,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            plasmaPK: Sign.generatePrivateKey().toString('hex'),
+        });
 
+        txHash = await twoKeyProtocol.AcquisitionCampaign.executeConversion(campaignAddress, env.TEST4_ADDRESS);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        console.log(txHash);
+    }).timeout(30000);
     it('should print after all tests', printBalances).timeout(15000);
 });

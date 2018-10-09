@@ -7,7 +7,7 @@ import {
     ITWoKeyUtils
 } from '../interfaces';
 import {BigNumber} from 'bignumber.js';
-import contractsMeta from '../contracts';
+import contractsMeta, {default as contracts} from '../contracts';
 import {promisify} from '../utils';
 import Sign from '../utils/sign';
 
@@ -520,6 +520,20 @@ export default class AcquisitionCampaign {
                 const converters = await promisify(conversionHandlerInstance.getAllApprovedConverters, [{from: this.base.address}]);
                 resolve(converters);
             } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+    public executeConversion(campaign:any, converter:string) : Promise<string> {
+        return new Promise(async(resolve, reject) => {
+            try {
+                const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
+                const conversionHandlerInstance = this.base.web3.eth.contract(contracts.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
+
+                const txHash = await promisify(conversionHandlerInstance.executeConversion,[converter, {from: this.base.address}]);
+                resolve(txHash);
+            } catch(e) {
                 reject(e);
             }
         })
