@@ -453,4 +453,19 @@ export default class AcquisitionCampaign {
             }
         })
     }
+
+    public getAllPendingConverters(campaign: any): Promise<any> {
+        return new Promise(async(resolve, reject) => {
+            try {
+                const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
+                const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
+                const pendingConverters = await promisify(conversionHandlerInstance.getAllPendingConverters, []);
+
+                console.log(pendingConverters);
+                resolve(pendingConverters);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
 }

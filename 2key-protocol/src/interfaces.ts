@@ -52,6 +52,7 @@ export interface ITwoKeyAcquisitionCampaign {
     getConverterConversion: (campaign: any, address?: string) => Promise<any>,
     getTwoKeyConversionHandlerAddress: (campaign: any) => Promise<string>,
     getAssetContractData: (campaign: any) => Promise<any>,
+    getAllPendingConverters: (campaign: any) => Promise<any>,
 }
 
 export interface IERC20 {

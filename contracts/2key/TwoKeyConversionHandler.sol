@@ -22,6 +22,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
 
     // Mapping where we will store as the key state of conversion, and as value, there'll be all converters which conversions are in that state
     mapping(bytes32 => address[]) conversionStateToConverters;
+
     // Mapping where we will store converter address as the key, and as the value we will save the state of his conversion
     mapping(address => ConversionState) converterToConversionState;
 
@@ -29,7 +30,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
 
     /*
         TODO: Move from acquisitioncampaign when update all events to TwoKeyEventSource and call them from there
-        TODO: Add comments above all new added methods
         TODO: add method to get lockup contracts
     */
 
@@ -94,16 +94,10 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     }
 
 
-    modifier onlyWhitelistedConverter() {
-        require(isWhitelistedConverter(msg.sender) == true);
+    modifier onlyApprovedConverter() {
+        require(converterToConversionState[msg.sender] == ConversionState.APPROVED);
         _;
     }
-
-    //mapping containing if address of referrer is whitelisted
-    mapping(address => bool) public whitelistedReferrer;
-
-    //mapping containing if addresses of converter is whitelisted
-    mapping(address => bool) public whitelistedConverter;
 
 
     constructor(uint _tokenDistributionDate, // January 1st 2019
@@ -116,68 +110,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         bonusTokensVestingStartShiftInDaysFromDistributionDate = _bonusTokensVestingStartShiftInDaysFromDistributionDate;
     }
 
-    /*
-    ==============================CONVERTER WHITELIST FUNCTIONS=========================================================
-    */
-    function isWhitelistedReferrer(address _beneficiary) public view returns(bool) {
-        return(whitelistedReferrer[_beneficiary]);
-    }
-
-    /*
-     * @dev Adds single address to whitelist.
-     * @param _beneficiary Address to be added to the whitelist
-     */
-    function addToWhitelistReferrer(address _beneficiary) public {
-        whitelistedReferrer[_beneficiary] = true;
-    }
-    /**
-     * @dev Adds list of addresses to whitelist. Not overloaded due to limitations with truffle testing.
-     * @param _beneficiaries Addresses to be added to the whitelis
-     */
-    function addManyToWhitelistReferrer(address[] _beneficiaries) public {
-        for (uint256 i = 0; i < _beneficiaries.length; i++) {
-            whitelistedReferrer[_beneficiaries[i]] = true;
-        }
-    }
-    /**
-     * @dev Removes single address from whitelist.
-     * @param _beneficiary Address to be removed to the whitelist
-     */
-    function removeFromWhitelistReferrer(address _beneficiary) public {
-        whitelistedReferrer[_beneficiary] = false;
-    }
-
-    /*
-    ===========================CONVERTER WHITELIST FUNCTIONS============================================================
-    */
-
-    function isWhitelistedConverter(address _beneficiary) public view returns(bool) {
-        return(whitelistedConverter[_beneficiary]);
-    }
-
-    /*
-     * @dev Adds single address to whitelist.
-     * @param _beneficiary Address to be added to the whitelist
-     */
-    function addToWhitelistConverter(address _beneficiary) public {
-        whitelistedConverter[_beneficiary] = true;
-    }
-    /**
-     * @dev Adds list of addresses to whitelist. Not overloaded due to limitations with truffle testing.
-     * @param _beneficiaries Addresses to be added to the whitelist
-     */
-    function addManyToWhitelistConverter(address[] _beneficiaries) public {
-        for (uint256 i = 0; i < _beneficiaries.length; i++) {
-            whitelistedConverter[_beneficiaries[i]] = true;
-        }
-    }
-    /**
-     * @dev Removes single address from whitelist.
-     * @param _beneficiary Address to be removed to the whitelist
-     */
-    function removeFromWhitelistConverter(address _beneficiary) public {
-        whitelistedConverter[_beneficiary] = false;
-    }
 
     /*
     ====================================================================================================================
@@ -286,7 +218,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     //(3) CONVERSION 2nd STEP
     //actually third step after the moderator/contractor approved the converter in the white list
 
-    function executeConversion(address _converter) onlyWhitelistedConverter public {
+    function executeConversion(address _converter) onlyApprovedConverter public {
         didConverterConvert(_converter);
         performConversion(_converter);
     }
