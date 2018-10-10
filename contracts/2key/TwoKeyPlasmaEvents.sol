@@ -54,8 +54,9 @@ contract TwoKeyPlasmaEvents {
 // TODO    mapping(address => bytes[]) public sign_list;
 
     function add_plasma2ethereum(bytes sig, bool with_prefix) public {
-        // Its better if dApp handles created contract by itself
-        //    require(verifiedCampaigns[c] != address(0));
+        // add an entry connecting msg.sender to the ethereum address that was used to sign sig.
+        // see setup_demo.js on how to generate sig
+        // with_prefix should be true when using web3.eth.sign/getSign and false when using eth_signTypedData/ecsign
         bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to plasma address")),keccak256(abi.encodePacked(msg.sender))));
         if (with_prefix) {
             bytes memory prefix = "\x19Ethereum Signed Message:\n32";
