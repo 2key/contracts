@@ -361,6 +361,9 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
 //    }
 
 
+    /// @notice Function where we are approving converter
+    /// @dev only moderator or contractor can call this method
+    /// @param _converter is the address of converter
     function approveConverter(address _converter) public onlyContractorOrModerator {
         if(converterToConversionState[_converter] == ConversionState.PENDING) {
             moveFromPendingOrRejectedToApproved(_converter);
@@ -378,7 +381,9 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     }
 
 
-
+    /// @notice Function where we can change state of converter to Approved
+    /// @dev Converter can only be approved if his previous state is pending or rejected
+    /// @param _converter is the address of converter
     function moveFromPendingOrRejectedToApproved(address _converter) private {
         ConversionState state = converterToConversionState[_converter];
         bytes32 key = convertConverterStateToBytes(state);
