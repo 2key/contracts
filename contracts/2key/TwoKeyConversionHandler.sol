@@ -404,8 +404,9 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     /// @dev private function, will be executed in another one
     /// @param _converter is the address of converter
     function moveFromPendingToRejectedState(address _converter) private {
-        ConversionState state = converterToConversionState[_converter];
-        bytes32 key = convertConverterStateToBytes(state);
+//        ConversionState state = converterToConversionState[_converter];
+//        bytes32 key = convertConverterStateToBytes(state);
+        bytes32 key = bytes32("PENDING");
         address[] memory pending = conversionStateToConverters[key];
         for(uint i=0; i< pending.length; i++) {
             if(pending[i] == _converter) {

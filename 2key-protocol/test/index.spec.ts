@@ -582,8 +582,10 @@ describe('TwoKeyProtocol', () => {
         const allApproved = await twoKeyProtocol.AcquisitionCampaign.getApprovedConverters(campaignAddress);
         console.log("Approved addresses: " , allApproved);
 
+        expect(allApproved[0]).to.be.equal(env.TEST4_ADDRESS);
         const allPendingAfterApproved = await twoKeyProtocol.AcquisitionCampaign.getAllPendingConverters(campaignAddress);
         console.log("All pending after approval: " + allPendingAfterApproved);
+        expect(allPendingAfterApproved.length).to.be.equal(3);
     }).timeout(30000);
 
     it('should reject converter for conversion', async() => {
