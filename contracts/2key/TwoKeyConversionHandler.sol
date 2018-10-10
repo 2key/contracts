@@ -333,37 +333,47 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         return false;
     }
 
+    /// @notice Function to get all pending converters
+    /// @dev view function - no gas cost & only Contractor or Moderator can call this function - otherwise will revert
+    /// @return array of pending converter addresses
     function getAllPendingConverters() public view onlyContractorOrModerator returns (address[]) {
         return (conversionStateToConverters[bytes32("PENDING")]);
     }
 
+    /// @notice Function to get all rejected converters
+    /// @dev view function - no gas cost & only Contractor or Moderator can call this function - otherwise will revert
+    /// @return array of rejected converter addresses
     function getAllRejectedConverters() public view onlyContractorOrModerator returns(address[]) {
         return conversionStateToConverters[bytes32("REJECTED")];
     }
 
+    /// @notice Function to get all approved converters
+    /// @dev view function - no gas cost & only Contractor or Moderator can call this function - otherwise will revert
+    /// @return array of approved converter addresses
     function getAllApprovedConverters() public view onlyContractorOrModerator returns(address[]) {
         return conversionStateToConverters[bytes32("APPROVED")];
     }
 
+    /// @notice Function to get all cancelled converters
+    /// @dev view function - no gas cost & only Contractor or Moderator can call this function - otherwise will revert
+    /// @return array of cancelled converter addresses
     function getAllCancelledConverters() public view onlyContractorOrModerator returns(address[]) {
         return conversionStateToConverters[bytes32("CANCELLED")];
     }
 
+    /// @notice Function to get all fulfilled converters
+    /// @dev view function - no gas cost & only Contractor or Moderator can call this function - otherwise will revert
+    /// @return array of fulfilled converter addresses
     function getAllFulfilledConverters() public view onlyContractorOrModerator returns(address[]) {
         return conversionStateToConverters[bytes32("FULFILLED")];
     }
 
-//    function updateConverterStates(address[] approvedConverters, address[] rejectedConverters) {
-//        /*
-//            TODO: Go through the addresses and check if they're eligible to be approved (only pending/rejected)
-//            Rejected can only become from pending
-//        */
-//    }
-
-
-
 
     //TODO: Check level of security (modifier) who can call this?
+    /// @notice Function to get array of lockup contract addresses for converter
+    /// @dev only contractor or moderator can call this function
+    /// @param _converter is the address of converter
+    /// @return array of addresses
     function getLockupContractsForConverter(address _converter) public view onlyContractorOrModerator returns (address[]){
         return converterToLockupContracts[_converter];
     }
