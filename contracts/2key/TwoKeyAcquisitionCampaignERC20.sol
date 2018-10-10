@@ -55,9 +55,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     // Asset contract is address of ERC20 inventory
     address assetContractERC20;
 
-    // asset symbol is short name of the asset for example "2key"
-
-
     // TwoKeyEconomy contract (ERC20)
     TwoKeyEconomy twoKeyEconomy;
 

@@ -95,7 +95,7 @@ export default class AcquisitionCampaign {
                 let txHash: string;
                 let conversionHandlerAddress = data.conversionHandlerAddress;
                 if (!conversionHandlerAddress) {
-                    txHash = await this.helpers._createContract(contractsMeta.TwoKeyConversionHandler, gasPrice, null, progressCallback);
+                    txHash = await this.helpers._createContract(contractsMeta.TwoKeyConversionHandler, gasPrice, [data.tokenDistributionDate, data.maxDistributionDateShiftInDays, data.bonusTokensVestingMonths, data.bonusTokensVestingStartShiftInDaysFromDistributionDate], progressCallback);
                     const predeployReceipt = await this.utils.getTransactionReceiptMined(txHash, this.base.web3, interval, timeout);
                     conversionHandlerAddress = predeployReceipt && predeployReceipt.contractAddress;
                     if (progressCallback) {
