@@ -589,9 +589,15 @@ describe('TwoKeyProtocol', () => {
             plasmaPK: Sign.generatePrivateKey().toString('hex'),
         });
 
-        const result = await twoKeyProtocol.AcquisitionCampaign.executeConversion(campaignAddress, env.TEST4_ADDRESS);
-        // await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-        console.log("Returned numbers are: " + result);
+        const txHash = await twoKeyProtocol.AcquisitionCampaign.executeConversion(campaignAddress, env.TEST4_ADDRESS);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(30000);
+
     it('should print after all tests', printBalances).timeout(15000);
+
+
+    it('should return two variables', async() => {
+        const result = await twoKeyProtocol.AcquisitionCampaign.checkData(campaignAddress, env.TEST4_ADDRESS);
+        console.log(result);
+    }).timeout(30000);
 });

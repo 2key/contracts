@@ -220,15 +220,16 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     //(3) CONVERSION 2nd STEP
     //actually third step after the moderator/contractor approved the converter in the white list
     //onlyApprovedConverter
-    function executeConversion(address _converter) public onlyApprovedConverter returns (uint, uint) {
+    function executeConversion(address _converter) public onlyApprovedConverter {
         didConverterConvert(_converter);
-        uint bonus;
-        uint vestingMonths;
-        (bonus, vestingMonths) = performConversion(_converter);
-        return (bonus, vestingMonths);
+        performConversion(_converter);
     }
 
-    function performConversion(address _converter) internal returns (uint,uint){
+    function checkData(address _converter) public view returns (uint, uint) {
+        Conversion memory conversion = conversions[_converter];
+        return (conversion.bonusTokenUnits, bonusTokensVestingMonths);
+    }
+    function performConversion(address _converter) internal {
         Conversion memory conversion = conversions[_converter];
 
         ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateRefchainRewards(conversion.maxReferralRewardETHWei, _converter);
@@ -243,7 +244,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
 
 //
         ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).moveFungibleAsset(address(firstLockUp), conversion.baseTokenUnits);
-        return (conversion.bonusTokenUnits, bonusTokensVestingMonths);
+//        return (conversion.bonusTokenUnits, bonusTokensVestingMonths);
 //        uint bonusAmountSplited = conversion.bonusTokenUnits / bonusTokensVestingMonths;
         address [] memory lockupContracts=  new address[](bonusTokensVestingMonths + 1);
 
