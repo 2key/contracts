@@ -264,7 +264,9 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         converterToLockupContracts[_converter] = lockupContracts;
     }
 
-
+    /// @notice Function to convert converter state to it's bytes representation (Maybe we don't even need it)
+    /// @param state is conversion state
+    /// @return bytes32 (hex) representation of state
     function convertConverterStateToBytes(ConversionState state) public view returns (bytes32) {
         if(ConversionState.APPROVED == state) {
             return bytes32("APPROVED");
@@ -298,6 +300,10 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
 //        }
 //    }
 
+    /// @notice Function to check whether converter is approved or not
+    /// @dev only contractor or moderator are eligible to call this function
+    /// @param _converter is the address of converter
+    /// @return true if yes, otherwise false
     function isConverterApproved(address _converter) public onlyContractorOrModerator view  returns (bool) {
         if(converterToConversionState[_converter] == ConversionState.APPROVED) {
             return true;
@@ -305,6 +311,10 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         return false;
     }
 
+    /// @notice Function to check whether converter is rejected or not
+    /// @dev only contractor or moderator are eligible to call this function
+    /// @param _converter is the address of converter
+    /// @return true if yes, otherwise false
     function isConverterRejected(address _converter) public view onlyContractorOrModerator returns (bool) {
         if(converterToConversionState[_converter] == ConversionState.REJECTED) {
             return true;
@@ -312,13 +322,20 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         return false;
     }
 
+    /// @notice Function to check whether converter is cancelled or not
+    /// @dev only contractor or moderator are eligible to call this function
+    /// @param _converter is the address of converter
+    /// @return true if yes, otherwise false
     function isConverterCancelled(address _converter) public view onlyContractorOrModerator returns (bool) {
         if(converterToConversionState[_converter] == ConversionState.CANCELLED) {
             return true;
         }
         return false;
     }
-
+    /// @notice Function to check whether converter is fulfilled or not
+    /// @dev only contractor or moderator are eligible to call this function
+    /// @param _converter is the address of converter
+    /// @return true if yes, otherwise false
     function isConverterFulfilled(address _converter) public view onlyContractorOrModerator returns (bool) {
         if(converterToConversionState[_converter] == ConversionState.FULFILLED) {
             return true;
@@ -326,6 +343,10 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         return false;
     }
 
+    /// @notice Function to check whether converter is pending or not
+    /// @dev only contractor or moderator are eligible to call this function
+    /// @param _converter is the address of converter
+    /// @return true if yes, otherwise false
     function isConverterPending(address _converter) public view onlyContractorOrModerator returns (bool) {
         if(converterToConversionState[_converter] == ConversionState.PENDING) {
             return true;
