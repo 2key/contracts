@@ -60,6 +60,7 @@ export interface ITwoKeyAcquisitionCampaign {
     isAddressJoined: (campaign: any) => Promise<boolean>,
     executeConversion: (campaign: any, converter: string) => Promise<string>,
     checkData: (campaign: any, converter: string) => Promise<string[]>,
+    getLockupContractsForConverter: (campaign: any, converter: string) => Promise<string[]>,
 }
 
 export interface IERC20 {

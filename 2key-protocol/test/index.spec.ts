@@ -593,11 +593,28 @@ describe('TwoKeyProtocol', () => {
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(30000);
 
+
+    it('should return addresses of lockup contracts for contractor', async() => {
+        const { web3, address } = web3switcher.aydnep();
+        twoKeyProtocol = new TwoKeyProtocol({
+            web3,
+            address,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            plasmaPK: Sign.generatePrivateKey().toString('hex'),
+        });
+        const addresses = await twoKeyProtocol.AcquisitionCampaign.getLockupContractsForConverter(campaignAddress, env.TEST4_ADDRESS);
+        console.log("Lockup contracts addresses : " + addresses);
+    }).timeout(30000);
     it('should print after all tests', printBalances).timeout(15000);
 
 
-    it('should return two variables', async() => {
-        const result = await twoKeyProtocol.AcquisitionCampaign.checkData(campaignAddress, env.TEST4_ADDRESS);
-        console.log(result);
-    }).timeout(30000);
+    // it('should return two variables', async() => {
+    //     const result = await twoKeyProtocol.AcquisitionCampaign.checkData(campaignAddress, env.TEST4_ADDRESS);
+    //     console.log(result);
+    // }).timeout(30000);
+
+
 });

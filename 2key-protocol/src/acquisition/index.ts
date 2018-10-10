@@ -553,4 +553,16 @@ export default class AcquisitionCampaign {
         });
     }
 
+    public getLockupContractsForConverter(campaign:any, converter:string) : Promise<string[]> {
+        return new Promise(async(resolve, reject) => {
+           try {
+               const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
+               const conversionHandlerInstance = this.base.web3.eth.contract(contracts.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
+               const lockupContractAddresses = await promisify(conversionHandlerInstance.getLockupContractsForConverter, [converter, {from: this.base.address}]);
+               resolve(lockupContractAddresses);
+           } catch (e) {
+               reject(e);
+           }
+        });
+    }
 }
