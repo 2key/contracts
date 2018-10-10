@@ -525,14 +525,15 @@ export default class AcquisitionCampaign {
         })
     }
 
-    public executeConversion(campaign:any, converter:string) : Promise<string> {
+    public executeConversion(campaign:any, converter:string) : Promise<string[]> {
         return new Promise(async(resolve, reject) => {
             try {
                 const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
                 const conversionHandlerInstance = this.base.web3.eth.contract(contracts.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
 
-                const txHash = await promisify(conversionHandlerInstance.executeConversion,[converter, {from: this.base.address}]);
-                resolve(txHash);
+                // const txHash = await promisify(conversionHandlerInstance.executeConversion,[converter, {from: this.base.address}]);
+                const results = await promisify(conversionHandlerInstance.executeConversion,[converter, {from: this.base.address}]);
+                resolve(results);
             } catch(e) {
                 reject(e);
             }

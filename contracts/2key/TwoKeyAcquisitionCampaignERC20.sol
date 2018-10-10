@@ -722,11 +722,10 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     }
 
     function getAddressJoinedStatus() public view returns (bool) {
-        bool isAddressJoined = msg.sender == address(contractor)
-            || msg.sender == address(moderator)
-            || received_from[msg.sender] != address(0)
-            || balanceOf(msg.sender) > 0
-            || publicLinkKey[msg.sender] != address(0);
-        return isAddressJoined;
+        if(msg.sender == address(contractor) || msg.sender == address(moderator) || received_from[msg.sender] != address(0)
+            || balanceOf(msg.sender) > 0 || publicLinkKey[msg.sender] != address(0)) {
+            return true;
+        }
+        return false;
     }
 }

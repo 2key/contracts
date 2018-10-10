@@ -219,15 +219,17 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     //******************************************************
     //(3) CONVERSION 2nd STEP
     //actually third step after the moderator/contractor approved the converter in the white list
-
-    function executeConversion(address _converter) onlyApprovedConverter public {
+    //onlyApprovedConverter
+    function executeConversion(address _converter) public onlyApprovedConverter returns (uint, uint) {
         didConverterConvert(_converter);
-        performConversion(_converter);
+        uint bonus;
+        uint vestingMonths;
+        (bonus, vestingMonths) = performConversion(_converter);
+        return (bonus, vestingMonths);
     }
 
-    function performConversion(address _converter) internal {
+    function performConversion(address _converter) internal returns (uint,uint){
         Conversion memory conversion = conversions[_converter];
-
 
         ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateRefchainRewards(conversion.maxReferralRewardETHWei, _converter);
 
@@ -239,27 +241,27 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         TwoKeyLockupContract firstLockUp = new TwoKeyLockupContract(tokenDistributionDate, maxDistributionDateShiftInDays,
                             conversion.baseTokenUnits, _converter, conversion.contractor);
 
-
+//
         ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).moveFungibleAsset(address(firstLockUp), conversion.baseTokenUnits);
-
-        uint bonusAmountSplited = conversion.bonusTokenUnits / bonusTokensVestingMonths;
+        return (conversion.bonusTokenUnits, bonusTokensVestingMonths);
+//        uint bonusAmountSplited = conversion.bonusTokenUnits / bonusTokensVestingMonths;
         address [] memory lockupContracts=  new address[](bonusTokensVestingMonths + 1);
 
-        for(uint i=0; i<bonusTokensVestingMonths; i++) {
-            TwoKeyLockupContract lockup = new TwoKeyLockupContract(tokenDistributionDate +
-                                    bonusTokensVestingStartShiftInDaysFromDistributionDate + i*(30 days), maxDistributionDateShiftInDays, bonusAmountSplited,
-                                    _converter, conversion.contractor);
-            ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).moveFungibleAsset(address(lockup), bonusAmountSplited);
-
-            lockupContracts[i] = lockup;
-        }
-        lockupContracts[lockupContracts.length - 1] = firstLockUp;
-
-        ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateContractorProceeds(conversion.contractorProceedsETHWei);
-        conversion.state = ConversionState.FULFILLED;
-
-        conversions[_converter] = conversion;
-        converterToLockupContracts[_converter] = lockupContracts;
+//        for(uint i=0; i<bonusTokensVestingMonths; i++) {
+//            TwoKeyLockupContract lockup = new TwoKeyLockupContract(tokenDistributionDate +
+//                                    bonusTokensVestingStartShiftInDaysFromDistributionDate + i*(30 days), maxDistributionDateShiftInDays, bonusAmountSplited,
+//                                    _converter, conversion.contractor);
+//            ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).moveFungibleAsset(address(lockup), bonusAmountSplited);
+//
+//            lockupContracts[i] = lockup;
+//        }
+//        lockupContracts[lockupContracts.length - 1] = firstLockUp;
+//
+//        ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateContractorProceeds(conversion.contractorProceedsETHWei);
+//        conversion.state = ConversionState.FULFILLED;
+//
+//        conversions[_converter] = conversion;
+//        converterToLockupContracts[_converter] = lockupContracts;
 
     }
 
@@ -365,7 +367,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
             moveFromPendingOrRejectedToApproved(_converter);
         }
         else if(converterToConversionState[_converter] == ConversionState.REJECTED) {
-        moveFromPendingOrRejectedToApproved(_converter);
+            moveFromPendingOrRejectedToApproved(_converter);
         } else {
             revert();
         }

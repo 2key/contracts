@@ -589,9 +589,9 @@ describe('TwoKeyProtocol', () => {
             plasmaPK: Sign.generatePrivateKey().toString('hex'),
         });
 
-        txHash = await twoKeyProtocol.AcquisitionCampaign.executeConversion(campaignAddress, env.TEST4_ADDRESS);
-        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-        console.log(txHash);
+        const result = await twoKeyProtocol.AcquisitionCampaign.executeConversion(campaignAddress, env.TEST4_ADDRESS);
+        // await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        console.log("Returned numbers are: " + result);
     }).timeout(30000);
     it('should print after all tests', printBalances).timeout(15000);
 });
