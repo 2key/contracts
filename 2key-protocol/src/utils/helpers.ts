@@ -113,9 +113,8 @@ export default class Helpers {
     _createContract(contract: IContract, gasPrice: number = this.gasPrice, params?: any[], progressCallback?: ICreateCampaignProgress): Promise<string> {
         return new Promise(async (resolve, reject) => {
             const {abi, bytecode: data, name} = contract;
-            console.log(name, ':', params);
             // const gas = await this.base._estimateSubcontractGas(contract, params);
-            const createParams = params ? [...params, {data, from: this.base.address}] : [{
+            const createParams = params ? [...params, {data, from: this.base.address, gasPrice}] : [{
                 data,
                 from: this.base.address,
                 gasPrice
@@ -125,9 +124,9 @@ export default class Helpers {
                     reject(err);
                 } else {
                     if (res.address) {
-                        if (progressCallback) {
-                            progressCallback(name, true, res.address);
-                        }
+                        // if (progressCallback) {
+                        //     progressCallback(name, true, res.address);
+                        // }
                         resolve(res.address);
                     } else if (progressCallback) {
                         progressCallback(name, false, res.transactionHash);

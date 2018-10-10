@@ -45,6 +45,7 @@ export class TwoKeyProtocol {
     private readonly networks: IEhtereumNetworks;
     private readonly contracts: IContractsAddresses;
     private readonly twoKeyEconomy: any;
+    private readonly twoKeyReg: any;
     private readonly twoKeyEventContract: any;
     private twoKeyEvents: any;
     private readonly plasmaAddress: string;
@@ -97,6 +98,8 @@ export class TwoKeyProtocol {
             this.web3.eth.defaultBlock = 'pending';
             this.address = address;
             this.twoKeyEconomy = this.web3.eth.contract(contractsMeta.TwoKeyEconomy.abi).at(contractsMeta.TwoKeyEconomy.networks[this.networks.mainNetId].address);
+            this.twoKeyReg = this.web3.eth.contract(contractsMeta.TwoKeyReg.abi).at(contractsMeta.TwoKeyReg.networks[this.networks.mainNetId].address);
+            // this.twoKeyEventSource = this.web3.eth.contract(contractsMeta.TwoKeyEventSource.abi).at(contractsMeta.TwoKeyEventSource.networks[this.networks.mainNetId].address);
         }
 
         this.ipfs = ipfsAPI(ipfsIp, ipfsPort, {protocol: 'http'});
@@ -109,6 +112,7 @@ export class TwoKeyProtocol {
             networks: this.networks,
             contracts: this.contracts,
             twoKeyEconomy: this.twoKeyEconomy,
+            twoKeyReg: this.twoKeyReg,
             twoKeyEventContract: this.twoKeyEventContract,
             plasmaAddress: this.plasmaAddress,
             _getGasPrice: this._getGasPrice,

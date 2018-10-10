@@ -8,6 +8,7 @@ export interface ITwoKeyBase {
     readonly networks: IEhtereumNetworks;
     readonly contracts: IContractsAddresses;
     readonly twoKeyEconomy: any;
+    readonly twoKeyReg: any;
     readonly twoKeyEventContract: any;
     readonly plasmaAddress: string;
     readonly _setGasPrice: (number) => void,
