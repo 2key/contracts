@@ -361,19 +361,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
 //    }
 
 
-    /// @notice Function where we are approving converter
-    /// @dev only moderator or contractor can call this method
-    /// @param _converter is the address of converter
-    function approveConverter(address _converter) public onlyContractorOrModerator {
-        if(converterToConversionState[_converter] == ConversionState.PENDING) {
-            moveFromPendingOrRejectedToApproved(_converter);
-        }
-        else if(converterToConversionState[_converter] == ConversionState.REJECTED) {
-            moveFromPendingOrRejectedToApproved(_converter);
-        } else {
-            revert();
-        }
-    }
+
 
     //TODO: Check level of security (modifier) who can call this?
     function getLockupContractsForConverter(address _converter) public view onlyContractorOrModerator returns (address[]){
@@ -384,7 +372,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     /// @notice Function where we can change state of converter to Approved
     /// @dev Converter can only be approved if his previous state is pending or rejected
     /// @param _converter is the address of converter
-    function moveFromPendingOrRejectedToApproved(address _converter) private {
+    function moveFromPendingOrRejectedToApprovedState(address _converter) private {
         ConversionState state = converterToConversionState[_converter];
         bytes32 key = convertConverterStateToBytes(state);
         address[] memory pending = conversionStateToConverters[key];
@@ -403,9 +391,11 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         }
     }
 
-    function rejectConverter(address _converter) private {
+    /// @notice Function where we're going to move state of conversion from pending to rejected
+    /// @dev private function, will be executed in another one
+    /// @param _converter is the address of converter
+    function moveFromPendingToRejectedState(address _converter) private {
         ConversionState state = converterToConversionState[_converter];
-        require(state == ConversionState.PENDING);
         bytes32 key = bytes32("PENDING");
         address[] memory pendingConverters = conversionStateToConverters[key];
 
@@ -421,5 +411,22 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
                 break;
             }
         }
+    }
+
+    /// @notice Function where we are approving converter
+    /// @dev only moderator or contractor can call this method
+    /// @param _converter is the address of converter
+    function approveConverter(address _converter) public onlyContractorOrModerator {
+        require(converterToConversionState[_converter] == ConversionState.PENDING || converterToConversionState[_converter] == ConversionState.REJECTED);
+        moveFromPendingOrRejectedToApprovedState(_converter);
+
+    }
+
+    /// @notice Function where we can reject converter
+    /// @dev only moderator or contractor can call this function
+    /// @param _converter is the address of converter
+    function rejectConverter(address _converter) public onlyContractorOrModerator {
+        require(converterToConversionState[_converter] == ConversionState.PENDING);
+        moveFromPendingToRejectedState(_converter);
     }
 }
