@@ -369,7 +369,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     }
 
 
-    //TODO: Check level of security (modifier) who can call this?
     /// @notice Function to get array of lockup contract addresses for converter
     /// @dev only contractor or moderator can call this function
     /// @param _converter is the address of converter

@@ -560,9 +560,8 @@ describe('TwoKeyProtocol', () => {
             plasmaPK: Sign.generatePrivateKey().toString('hex'),
         });
 
-        console.log("Test where we'll fetch all pending converters");
         const addresses = await twoKeyProtocol.AcquisitionCampaign.getAllPendingConverters(campaignAddress);
-        console.log(addresses);
+        console.log("Addresses: " + addresses);
     }).timeout(30000);
 
 
@@ -587,6 +586,30 @@ describe('TwoKeyProtocol', () => {
         console.log("All pending after approval: " + allPendingAfterApproved);
     }).timeout(30000);
 
+    it('should reject converter for conversion', async() => {
+        console.log("Test where contractor / moderator can reject converter to execute conversion");
+        // const { web3, address } = web3switcher.aydnep();
+        // twoKeyProtocol = new TwoKeyProtocol({
+        //     web3,
+        //     address,
+        //     networks: {
+        //         mainNetId,
+        //         syncTwoKeyNetId,
+        //     },
+        //     plasmaPK: Sign.generatePrivateKey().toString('hex'),
+        // });
+        txHash = await twoKeyProtocol.AcquisitionCampaign.rejectConverter(campaignAddress, env.TEST_ADDRESS);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+
+        const allRejected = await twoKeyProtocol.AcquisitionCampaign.getAllRejectedConverters(campaignAddress);
+        console.log("Rejected addresses: ", allRejected);
+
+        const allPendingAfterRejected = await twoKeyProtocol.AcquisitionCampaign.getAllPendingConverters(campaignAddress);
+        console.log('All pending after rejection: ', allPendingAfterRejected);
+        expect(allRejected[0]).to.be.equal(env.TEST_ADDRESS);
+        expect(allPendingAfterRejected.length).to.be.equal(2);
+
+    }).timeout(30000);
     it('should execute conversion', async() => {
         const { web3, address } = web3switcher.test4();
         twoKeyProtocol = new TwoKeyProtocol({
@@ -617,6 +640,7 @@ describe('TwoKeyProtocol', () => {
         });
         const addresses = await twoKeyProtocol.AcquisitionCampaign.getLockupContractsForConverter(campaignAddress, env.TEST4_ADDRESS);
         console.log("Lockup contracts addresses : " + addresses);
+        expect(addresses.length).to.be.equal(7);
     }).timeout(30000);
     it('should print after all tests', printBalances).timeout(15000);
 
