@@ -537,6 +537,19 @@ export default class AcquisitionCampaign {
         })
     }
 
+    public rejectConverter(campaign: any, converter: string) : Promise<string> {
+        return new Promise(async(resolve, reject) => {
+            try {
+                const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
+                const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
+                const txHash = await promisify(conversionHandlerInstance.rejectConverter, [converter, {from: this.base.address}]);
+                resolve(txHash);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
     public getApprovedConverters(campaign: any) : Promise<string[]> {
         return new Promise(async(resolve, reject) => {
             try {

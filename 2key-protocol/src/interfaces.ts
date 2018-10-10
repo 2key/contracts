@@ -57,6 +57,7 @@ export interface ITwoKeyAcquisitionCampaign {
     // getAssetContractData: (campaign: any) => Promise<any>,
     getAllPendingConverters: (campaign: any) => Promise<string[]>,
     approveConverter: (campaign: any, converter: string) => Promise<string>,
+    rejectConverter: (campaign: any, converter: string) => Promise<string>,
     getApprovedConverters: (campaign: any) => Promise<string[]>,
     visit: (campaignAddress: string, referralLink: string) => Promise<string>,
     isAddressJoined: (campaign: any) => Promise<boolean>,
