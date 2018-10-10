@@ -40,6 +40,8 @@ export interface ITwoKeyHelpers {
 export interface ITwoKeyAcquisitionCampaign {
     estimateCreation: (data: IAcquisitionCampaign) => Promise<number>,
     create: (data: IAcquisitionCampaign, progressCallback?: ICreateCampaignProgress, gasPrice?: number, interval?: number, timeout?: number) => Promise<IAcquisitionCampaignMeta>,
+    updateOrSetIpfsHashPublicMeta: (campaign: any, hash: string, gasPrice?: number) => Promise<string>,
+    getPublicMetaHash: (campaign: any) => Promise<string>,
     checkInventoryBalance: (campaign: any) => Promise<number>,
     getPublicLinkKey: (campaign: any, address?: string) => Promise<string>,
     getReferrerCut: (campaign: any) => Promise<number>,

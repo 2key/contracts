@@ -28,7 +28,7 @@ export default class Utils {
     ipfsAdd(data: any): Promise<string> {
         return new Promise<string>(async (resolve, reject) => {
             try {
-                const dataString = JSON.stringify(data);
+                const dataString = typeof data === 'string' ? data : JSON.stringify(data);
                 // console.log('Raw length', dataString.length);
                 // const compressed = LZString.compressToUint8Array(dataString);
                 // const compressed = LZString.compress(dataString);

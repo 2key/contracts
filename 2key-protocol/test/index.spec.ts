@@ -306,9 +306,10 @@ describe('TwoKeyProtocol', () => {
     //     return expect(gas).to.exist.to.greaterThan(0);
     // });
     let refLink;
+    let campaignData;
 
     it('should create a new campaign Acquisition Contract', async () => {
-        const campaign = await twoKeyProtocol.AcquisitionCampaign.create({
+        campaignData = {
             campaignStartTime,
             campaignEndTime,
             expiryConversion: 1000 * 60 * 60 * 24,
@@ -323,13 +324,22 @@ describe('TwoKeyProtocol', () => {
             maxDistributionDateShiftInDays: 180,
             bonusTokensVestingMonths: 6,
             bonusTokensVestingStartShiftInDaysFromDistributionDate: 180
-        }, createCallback, undefined, 500, 600000);
+        };
+        const campaign = await twoKeyProtocol.AcquisitionCampaign.create(campaignData, createCallback, undefined, 500, 600000);
         console.log('Campaign address', campaign);
         campaignAddress = campaign.campaignAddress;
         refLink = campaign.campaignPublicLinkKey;
         return expect(addressRegex.test(campaignAddress)).to.be.true;
     }).timeout(1200000);
 
+    it('should save campaign to IPFS', async () => {
+        const hash = await twoKeyProtocol.Utils.ipfsAdd(campaignData);
+        txHash = await twoKeyProtocol.AcquisitionCampaign.updateOrSetIpfsHashPublicMeta(campaignAddress, hash);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        const storedHash = await twoKeyProtocol.AcquisitionCampaign.getPublicMetaHash(campaignAddress);
+        console.log('IPFS:', hash, storedHash);
+        expect(storedHash).to.be.equal(hash);
+    }).timeout(30000);
     // it('should print balance after campaign created', printBalances).timeout(15000);
 
     it('should transfer assets to campaign', async () => {

@@ -141,6 +141,31 @@ export default class AcquisitionCampaign {
         });
     }
 
+    public updateOrSetIpfsHashPublicMeta(campaign: any, hash: string, gasPrice: number = this.base._getGasPrice()): Promise<string> {
+        return new Promise<string>(async (resolve, reject) => {
+            try {
+                const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
+                const txHash = await promisify(campaignInstance.updateOrSetIpfsHashPublicMeta, [hash, { from: this.base.address, gasPrice }]);
+                resolve(txHash);
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
+
+
+    public getPublicMetaHash(campaign: any): Promise<string> {
+        return new Promise<string>(async (resolve, reject) => {
+            try {
+                const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
+                const ipfsHash = await promisify(campaignInstance.publicMetaHash, [{ from: this.base.address }]);
+                resolve(ipfsHash);
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
+
     // Inventory
     public async checkInventoryBalance(campaign: any): Promise<number> {
         try {
