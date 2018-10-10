@@ -590,16 +590,6 @@ describe('TwoKeyProtocol', () => {
 
     it('should reject converter for conversion', async() => {
         console.log("Test where contractor / moderator can reject converter to execute conversion");
-        // const { web3, address } = web3switcher.aydnep();
-        // twoKeyProtocol = new TwoKeyProtocol({
-        //     web3,
-        //     address,
-        //     networks: {
-        //         mainNetId,
-        //         syncTwoKeyNetId,
-        //     },
-        //     plasmaPK: Sign.generatePrivateKey().toString('hex'),
-        // });
         txHash = await twoKeyProtocol.AcquisitionCampaign.rejectConverter(campaignAddress, env.TEST_ADDRESS);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
 

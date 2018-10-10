@@ -435,7 +435,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     /// @notice Function where we can reject converter
     /// @dev only moderator or contractor can call this function
     /// @param _converter is the address of converter
-    // onlyContractorOrModerator
     function rejectConverter(address _converter) public onlyContractorOrModerator  {
         require(converterToConversionState[_converter] == ConversionState.PENDING);
         moveFromPendingToRejectedState(_converter);
