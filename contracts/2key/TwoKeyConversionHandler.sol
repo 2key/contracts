@@ -405,17 +405,17 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     /// @param _converter is the address of converter
     function moveFromPendingToRejectedState(address _converter) private {
         ConversionState state = converterToConversionState[_converter];
-        bytes32 key = bytes32("PENDING");
-        address[] memory pendingConverters = conversionStateToConverters[key];
-
-        for(uint i=0; i<pendingConverters.length; i++) {
-            if(pendingConverters[i] == _converter) {
+        bytes32 key = convertConverterStateToBytes(state);
+        address[] memory pending = conversionStateToConverters[key];
+        for(uint i=0; i< pending.length; i++) {
+            if(pending[i] == _converter) {
+                // Means we have found it in array of pending addresses
                 converterToConversionState[_converter] = ConversionState.REJECTED;
                 conversionStateToConverters[bytes32("REJECTED")].push(_converter);
-
-                pendingConverters[i] = pendingConverters[pendingConverters.length-1];
-                delete pendingConverters[pendingConverters.length];
-                conversionStateToConverters[key] = pendingConverters;
+                //assigning the value of last element
+                pending[i] = pending[pending.length-1];
+                delete pending[pending.length-1];
+                conversionStateToConverters[key] = pending;
                 conversionStateToConverters[key].length--;
                 break;
             }
@@ -434,7 +434,8 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     /// @notice Function where we can reject converter
     /// @dev only moderator or contractor can call this function
     /// @param _converter is the address of converter
-    function rejectConverter(address _converter) public onlyContractorOrModerator {
+    // onlyContractorOrModerator
+    function rejectConverter(address _converter) public onlyContractorOrModerator  {
         require(converterToConversionState[_converter] == ConversionState.PENDING);
         moveFromPendingToRejectedState(_converter);
     }
