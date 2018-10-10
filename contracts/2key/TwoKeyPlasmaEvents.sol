@@ -1,7 +1,6 @@
 pragma solidity ^0.4.24; //We have to specify what version of compiler this code will use
 
 contract TwoKeyPlasmaEvents {
-
     // REPLICATE INFO FROM ETHEREUM NETWORK
 
     // every event we generate contains both the campaign address and the address of the contractor of that campaign
@@ -54,10 +53,15 @@ contract TwoKeyPlasmaEvents {
     mapping(address => mapping(address => mapping(address => address[]))) public visits_list;
 // TODO    mapping(address => bytes[]) public sign_list;
 
-    function add_plasma2ethereum(bytes sig) public {
+    function add_plasma2ethereum(bytes sig, bool with_prefix) public {
         // Its better if dApp handles created contract by itself
         //    require(verifiedCampaigns[c] != address(0));
         bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to plasma address")),keccak256(abi.encodePacked(msg.sender))));
+        if (with_prefix) {
+            bytes memory prefix = "\x19Ethereum Signed Message:\n32";
+            hash = sha3(prefix, hash);
+        }
+
         require (sig.length == 65, 'bad signature length');
         // The signature format is a compact form of:
         //   {bytes32 r}{bytes32 s}{uint8 v}
@@ -82,6 +86,8 @@ contract TwoKeyPlasmaEvents {
         {
             v := mload(add(sig, idx))
         }
+        if (v <= 1) v += 27;
+        require(v==27 || v==28,'bad sig v');
 
         address eth_address = ecrecover(hash, v, r, s);
         plasma2ethereum[msg.sender] = eth_address;
@@ -107,6 +113,8 @@ contract TwoKeyPlasmaEvents {
     }
 
     function visited(address c, address contractor, bytes sig) public {
+        // c - addresss of the contract on ethereum
+        // contractor - is the ethereum address of the contractor who created c. a dApp can read this information for free from ethereum.
         // caller must use the 2key-link and put his plasma address at the end using free_take
         // sig contains the "from" and at the tip of sig you should put your own plasma address (msg.sender)
 
@@ -154,6 +162,8 @@ contract TwoKeyPlasmaEvents {
             {
                 v := mload(add(sig, idx))
             }
+            if (v <= 1) v += 27;
+            require(v==27 || v==28,'bad sig v');
 
             // idx was increased by 65
 
