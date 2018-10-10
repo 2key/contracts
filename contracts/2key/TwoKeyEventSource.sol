@@ -14,7 +14,7 @@ contract TwoKeyEventSource is TwoKeyTypes {
     event Rewarded(address indexed _campaign, address indexed _to, uint256 _amount);
     event Fulfilled(address indexed _campaign, address indexed _converter, string indexed assetName, address _childContractID, uint256 _indexOrAmount, CampaignType _type);
     event Cancelled(address indexed _campaign, address indexed _converter, string indexed assetName, address _childContractID, uint256 _indexOrAmount, CampaignType _type);
-    /// event Convert (?)
+    event Rejected(address indexed _campaign, address indexed _converter);
 
 
     ///Address of the contract admin - interface

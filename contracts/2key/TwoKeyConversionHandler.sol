@@ -378,6 +378,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     }
 
 
+
     function moveFromPendingOrRejectedToApproved(address _converter) private {
         ConversionState state = converterToConversionState[_converter];
         bytes32 key = convertConverterStateToBytes(state);
@@ -391,6 +392,26 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
                 pending[i] = pending[pending.length-1];
                 delete pending[pending.length-1];
                 conversionStateToConverters[key] = pending;
+                conversionStateToConverters[key].length--;
+                break;
+            }
+        }
+    }
+
+    function rejectConverter(address _converter) private {
+        ConversionState state = converterToConversionState[_converter];
+        require(state == ConversionState.PENDING);
+        bytes32 key = bytes32("PENDING");
+        address[] memory pendingConverters = conversionStateToConverters[key];
+
+        for(uint i=0; i<pendingConverters.length; i++) {
+            if(pendingConverters[i] == _converter) {
+                converterToConversionState[_converter] = ConversionState.REJECTED;
+                conversionStateToConverters[bytes32("REJECTED")].push(_converter);
+
+                pendingConverters[i] = pendingConverters[pendingConverters.length-1];
+                delete pendingConverters[pendingConverters.length];
+                conversionStateToConverters[key] = pendingConverters;
                 conversionStateToConverters[key].length--;
                 break;
             }
