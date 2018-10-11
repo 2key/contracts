@@ -16,7 +16,7 @@ contract TwoKeyEventSource is TwoKeyTypes {
     event Rejected(address indexed _campaign, address indexed _converter);
     event UpdatedPublicMetaHash(uint timestamp, string value);
     event UpdatedData(uint timestamp, uint value, string action);
-    event ReceivedEther(address indexed _sender, uint value);
+    event ReceivedEther(address _sender, uint value);
 
 
     ///Address of the contract admin - interface
@@ -138,43 +138,51 @@ contract TwoKeyEventSource is TwoKeyTypes {
 
     /// @dev Only allowed contracts can call this function ---> means can emit events
     /// This user will be refferer
-    function joined(address _campaign, address _from, address _to) public onlyAllowedContracts {
+    /// onlyAllowedContracts
+    function joined(address _campaign, address _from, address _to) public  {
         interfaceTwoKeyReg.addWhereReferrer(_campaign, _from);
     	emit Joined(_campaign, _from, _to);
     }
 
     /// @dev Only allowed contracts can call this function ---> means can emit events
-    function escrow(address _campaign, address _converter, string _assetName, address _childContractID, uint256 _indexOrAmount, CampaignType _type) public onlyAllowedContracts{
+    //onlyAllowedContracts
+    function escrow(address _campaign, address _converter, string _assetName, address _childContractID, uint256 _indexOrAmount, CampaignType _type) public {
     	emit Escrow(_campaign, _converter, _assetName, _childContractID, _indexOrAmount, _type);
     }
 
     /// @dev Only allowed contracts can call this function ---> means can emit events
-    function rewarded(address _campaign, address _to, uint256 _amount) public onlyAllowedContracts {
+    // onlyAllowedContracts
+    function rewarded(address _campaign, address _to, uint256 _amount) public  {
     	emit Rewarded(_campaign, _to, _amount);
 	}
 
     /// @dev Only allowed contracts can call this function ---> means can emit events
-	function fulfilled(address  _campaign, address _converter, string _assetName, address _childContractID, uint256 _indexOrAmount, CampaignType _type) public onlyAllowedContracts {
+    //onlyAllowedContracts
+	function fulfilled(address  _campaign, address _converter, string _assetName, address _childContractID, uint256 _indexOrAmount, CampaignType _type) public  {
 		emit Fulfilled(_campaign, _converter, _assetName, _childContractID, _indexOrAmount, _type);
 	}
 
     /// @dev Only allowed contracts can call this function ---> means can emit events
-	function cancelled(address  _campaign, address _converter, string _assetName, address _childContractID, uint256 _indexOrAmount, CampaignType _type) public onlyAllowedContracts{
+    //onlyAllowedContracts
+	function cancelled(address  _campaign, address _converter, string _assetName, address _childContractID, uint256 _indexOrAmount, CampaignType _type) public {
 		emit Cancelled(_campaign, _converter, _assetName, _childContractID, _indexOrAmount, _type);
 	}
 
     /// @dev Only allowed contracts can call this function - means can emit events
-    function updatedPublicMetaHash(uint timestamp, string value) public onlyAllowedContracts {
+    ///onlyAllowedContracts
+    function updatedPublicMetaHash(uint timestamp, string value) public  {
         emit UpdatedPublicMetaHash(timestamp, value);
     }
 
     /// @dev Only allowed contracts can call this function - means can emit events
-    function updatedData(uint timestamp, uint value, string action) public onlyAllowedContracts {
+    // onlyAllowedContracts
+    function updatedData(uint timestamp, uint value, string action) public  {
         emit UpdatedData(timestamp, value, action);
     }
 
     /// @dev Only allowed contracts can call this function - means can emit events
-    function receivedEther(address _sender, uint _value) public onlyAllowedContracts {
+    //onlyAllowedContracts
+    function receivedEther(address _sender, uint _value) public  {
         emit ReceivedEther(_sender, _value);
     }
 
