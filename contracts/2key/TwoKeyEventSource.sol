@@ -10,12 +10,13 @@ contract TwoKeyEventSource is TwoKeyTypes {
     /// Events
     event Created(address indexed _campaign, address indexed _owner);
     event Joined(address indexed _campaign, address indexed _from, address indexed _to);
-    event Escrow(address indexed _campaign, address indexed _converter, string assetName, address _childContractID, uint256 _indexOrAmount, CampaignType _type);
+    event Escrow(address indexed _campaign, address indexed _converter, string indexed assetName, address _childContractID, uint256 _indexOrAmount, CampaignType _type);
     event Rewarded(address indexed _campaign, address indexed _to, uint256 _amount);
     event Fulfilled(address indexed _campaign, address indexed _converter, string indexed assetName, address _childContractID, uint256 _indexOrAmount, CampaignType _type);
     event Cancelled(address indexed _campaign, address indexed _converter, string indexed assetName, address _childContractID, uint256 _indexOrAmount, CampaignType _type);
     event Rejected(address indexed _campaign, address indexed _converter);
-
+    event UpdatedPublicMetaHash(uint timestamp, string value);
+    event UpdatedData(uint timestamp, uint value, string action);
 
     ///Address of the contract admin - interface
     TwoKeyAdmin twoKeyAdmin;
@@ -159,6 +160,21 @@ contract TwoKeyEventSource is TwoKeyTypes {
 	function cancelled(address  _campaign, address _converter, string _assetName, address _childContractID, uint256 _indexOrAmount, CampaignType _type) public onlyAllowedContracts{
 		emit Cancelled(_campaign, _converter, _assetName, _childContractID, _indexOrAmount, _type);
 	}
+
+    /// @dev Only allowed contracts can call this function - means can emit events
+    function updatedPublicMetaHash(uint timestamp, string value) public onlyAllowedContracts {
+        emit UpdatedPublicMetaHash(timestamp, value);
+    }
+
+    /// @dev Only allowed contracts can call this function - means can emit events
+    function updatedData(uint timestamp, uint value, string action) public onlyAllowedContracts {
+        emit UpdatedData(timestamp, value, action);
+    }
+
+
+
+
+
 
 
     function getAdmin() public view returns (address) {
