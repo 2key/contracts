@@ -544,13 +544,13 @@ describe('TwoKeyProtocol', () => {
     }).timeout(30000);
 
 
-    it("should return all pending converters", async() => {
+    it('should return all pending converters', async() => {
         console.log("Test where we'll fetch all pending converters");
         const addresses = await twoKeyProtocol.AcquisitionCampaign.getAllPendingConverters(campaignAddress);
         console.log(addresses);
     }).timeout(30000);
 
-    it("should return all pending converters from contractor", async() => {
+    it('should return all pending converters from contractor', async() => {
         const { web3, address } = web3switcher.aydnep();
         twoKeyProtocol = new TwoKeyProtocol({
             web3,
@@ -568,7 +568,7 @@ describe('TwoKeyProtocol', () => {
 
 
     it('should approve converter for conversion' , async() => {
-        console.log("Test where contractor / moderator can approve converter to execute conversion");
+        console.log('Test where contractor / moderator can approve converter to execute conversion');
         const { web3, address } = web3switcher.aydnep();
         twoKeyProtocol = new TwoKeyProtocol({
             web3,
@@ -582,11 +582,11 @@ describe('TwoKeyProtocol', () => {
         txHash = await twoKeyProtocol.AcquisitionCampaign.approveConverter(campaignAddress,env.TEST4_ADDRESS);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const allApproved = await twoKeyProtocol.AcquisitionCampaign.getApprovedConverters(campaignAddress);
-        console.log("Approved addresses: " , allApproved);
+        console.log('Approved addresses: ' , allApproved);
 
         expect(allApproved[0]).to.be.equal(env.TEST4_ADDRESS);
         const allPendingAfterApproved = await twoKeyProtocol.AcquisitionCampaign.getAllPendingConverters(campaignAddress);
-        console.log("All pending after approval: " + allPendingAfterApproved);
+        console.log('All pending after approval: ' + allPendingAfterApproved);
         expect(allPendingAfterApproved.length).to.be.equal(3);
     }).timeout(30000);
 
@@ -604,6 +604,41 @@ describe('TwoKeyProtocol', () => {
         expect(allPendingAfterRejected.length).to.be.equal(2);
 
     }).timeout(30000);
+
+    it('should cancel conversion', async() => {
+        const { web3, address } = web3switcher.gmail2();
+        twoKeyProtocol = new TwoKeyProtocol({
+            web3,
+            address,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            plasmaPK: Sign.generatePrivateKey().toString('hex'),
+        });
+
+        txHash = await twoKeyProtocol.AcquisitionCampaign.cancelConverter(campaignAddress);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+
+    }).timeout(30000);
+
+    it('should get all pending converters after', async() => {
+        const { web3, address } = web3switcher.aydnep();
+        twoKeyProtocol = new TwoKeyProtocol({
+            web3,
+            address,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            plasmaPK: Sign.generatePrivateKey().toString('hex'),
+        });
+
+        const allPending = await twoKeyProtocol.AcquisitionCampaign.getAllPendingConverters(campaignAddress);
+        console.log('All pending after cancellation: ', allPending);
+        expect(allPending.length).to.be.equal(1);
+    }).timeout(30000);
+
     it('should execute conversion', async() => {
         const { web3, address } = web3switcher.test4();
         twoKeyProtocol = new TwoKeyProtocol({
@@ -633,7 +668,7 @@ describe('TwoKeyProtocol', () => {
             plasmaPK: Sign.generatePrivateKey().toString('hex'),
         });
         const addresses = await twoKeyProtocol.AcquisitionCampaign.getLockupContractsForConverter(campaignAddress, env.TEST4_ADDRESS);
-        console.log("Lockup contracts addresses : " + addresses);
+        console.log('Lockup contracts addresses : ' + addresses);
         expect(addresses.length).to.be.equal(7);
     }).timeout(30000);
     it('should print after all tests', printBalances).timeout(15000);

@@ -16,6 +16,8 @@ contract TwoKeyEventSource is TwoKeyTypes {
     event Rejected(address indexed _campaign, address indexed _converter);
     event UpdatedPublicMetaHash(uint timestamp, string value);
     event UpdatedData(uint timestamp, uint value, string action);
+    event ReceivedEther(address indexed _sender, uint value);
+
 
     ///Address of the contract admin - interface
 //    TwoKeyAdmin twoKeyAdmin;
@@ -169,6 +171,11 @@ contract TwoKeyEventSource is TwoKeyTypes {
     /// @dev Only allowed contracts can call this function - means can emit events
     function updatedData(uint timestamp, uint value, string action) public onlyAllowedContracts {
         emit UpdatedData(timestamp, value, action);
+    }
+
+    /// @dev Only allowed contracts can call this function - means can emit events
+    function receivedEther(address _sender, uint _value) public onlyAllowedContracts {
+        emit ReceivedEther(_sender, _value);
     }
 
 
