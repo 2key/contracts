@@ -2,7 +2,6 @@ pragma solidity ^0.4.24;
 
 import './TwoKeyTypes.sol';
 import "./GetCode.sol";
-import "./TwoKeyAdmin.sol";
 import "../interfaces/ITwoKeyReg.sol";
 
 contract TwoKeyEventSource is TwoKeyTypes {
@@ -19,7 +18,8 @@ contract TwoKeyEventSource is TwoKeyTypes {
     event UpdatedData(uint timestamp, uint value, string action);
 
     ///Address of the contract admin - interface
-    TwoKeyAdmin twoKeyAdmin;
+//    TwoKeyAdmin twoKeyAdmin;
+    address twoKeyAdmin;
 
     /// Interface representing TwoKeyReg contract (Reducing gas usage that's why interface instead of contract instance)
     ITwoKeyReg interfaceTwoKeyReg;
@@ -58,7 +58,7 @@ contract TwoKeyEventSource is TwoKeyTypes {
     /// @notice Constructor during deployment of contract we need to set an admin address (means TwoKeyAdmin needs to be previously deployed)
     /// @param _twoKeyAdminAddress is the address of TwoKeyAdmin contract previously deployed
     constructor(address _twoKeyAdminAddress) public {
-        twoKeyAdmin = TwoKeyAdmin(_twoKeyAdminAddress);
+        twoKeyAdmin = _twoKeyAdminAddress;
     }
 
     /// TODO: Put in constructor because of security issues (?)
@@ -119,7 +119,7 @@ contract TwoKeyEventSource is TwoKeyTypes {
     /// @param _newAdminAddress is the address of new admin
     /// @dev think about some security layer here
     function changeAdmin(address _newAdminAddress) public onlyAdmin {
-        twoKeyAdmin = TwoKeyAdmin(_newAdminAddress);
+        twoKeyAdmin = _newAdminAddress;
     }
 
     function checkCanEmit(bytes _contractCode) public view returns (bool) {
@@ -170,11 +170,6 @@ contract TwoKeyEventSource is TwoKeyTypes {
     function updatedData(uint timestamp, uint value, string action) public onlyAllowedContracts {
         emit UpdatedData(timestamp, value, action);
     }
-
-
-
-
-
 
 
     function getAdmin() public view returns (address) {
