@@ -32,11 +32,11 @@ const config = {
   plugins: [
     new UglifyJsPlugin({
       sourceMap: false,
-      uglifyOptions: {
-        compress: {
-          drop_console: true,
-        }
-      }
+      // uglifyOptions: {
+      //   compress: {
+      //     drop_console: true,
+      //   }
+      // }
     }),
     new ProgressBarPlugin(),
   ],

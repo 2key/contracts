@@ -9,23 +9,24 @@ const rpcUrl = env.RPC_URL;
 const mainNetId = env.MAIN_NET_ID;
 const syncTwoKeyNetId = env.SYNC_NET_ID;
 
-let twoKeyProtocol;
+// let twoKeyProtocol;
 
-const { web3, address } = createWeb3(env.MNEMONIC_DEPLOYER, rpcUrl);
-twoKeyProtocol = new TwoKeyProtocol({
-    web3,
-    address,
-    networks: {
-        mainNetId,
-        syncTwoKeyNetId,
-    },
-    plasmaPK: Sign.generatePrivateKey().toString('hex'),
-});
+const { web3 } = createWeb3(env.MNEMONIC_DEPLOYER, rpcUrl);
+const { web3: plasmaWeb3 } = createWeb3(env.MNEMONIC_DEPLOYER, 'ws://astring.aydnep.com.ua:18546');
+// twoKeyProtocol = new TwoKeyProtocol({
+//     web3,
+//     address,
+//     networks: {
+//         mainNetId,
+//         syncTwoKeyNetId,
+//     },
+//     plasmaPK: Sign.generatePrivateKey().toString('hex'),
+// });
 
 const eventsInstance = web3.eth.contract(contractsMeta.TwoKeyEventSource.abi).at(contractsMeta.TwoKeyEventSource.networks[mainNetId].address);
 const events = eventsInstance.allEvents();
 
-const plasmaInstance = web3.eth.contract(contractsMeta.TwoKeyPlasmaEvents.abi).at(contractsMeta.TwoKeyPlasmaEvents.networks[syncTwoKeyNetId].address);
+const plasmaInstance = plasmaWeb3.eth.contract(contractsMeta.TwoKeyPlasmaEvents.abi).at(contractsMeta.TwoKeyPlasmaEvents.networks[syncTwoKeyNetId].address);
 const plasma = plasmaInstance.allEvents();
 
 

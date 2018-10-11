@@ -323,7 +323,9 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
             assembly
             {
                 v := mload(add(sig, idx))
+
             }
+            //TODO: copy updated code from Udi (validate v value)
 
             // idx was increased by 65
 
@@ -673,7 +675,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     /// @param value is the value for the publicMetaHash
     function updateOrSetIpfsHashPublicMeta(string value) public onlyContractor {
         publicMetaHash = value;
-        twoKeyEventSource.updatedPublicMetaHash(block.timestamp, value);
+//        twoKeyEventSource.updatedPublicMetaHash(block.timestamp, value);
     }
 
     /// @notice Option to update contractor proceeds

@@ -227,7 +227,8 @@ function sign_plasma2eteherum(plasma_address:string, my_address:string, web3: an
         if (!web3 || !web3.currentProvider) {
             reject('No web3 instance');
         }
-        const { isMetamask } = web3.currentProvider;
+        const { isMetaMask } = web3.currentProvider;
+        console.log('METAMASK', isMetaMask);
         function cb(err, result) {
             if (err) {
                 console.log('Error in sign_plasma2eteherum ' + err);
@@ -239,12 +240,12 @@ function sign_plasma2eteherum(plasma_address:string, my_address:string, web3: an
                 const sig = typeof result != 'string' ? result.result : result;
                 resolve({
                     sig,
-                    with_prefix: !isMetamask,
+                    with_prefix: !Boolean(isMetaMask),
                 })
             }
         }
 
-        if (isMetamask) {
+        if (isMetaMask) {
             // metamask uses  web3.eth.sign to sign transaction and not for arbitrary messages
             // instead use https://medium.com/metamask/scaling-web3-with-signtypeddata-91d6efc8b290
             web3.currentProvider.sendAsync({
@@ -270,7 +271,7 @@ function sign_me(my_address: string, contractAddress: string, i: number, web3: a
         if (!web3 || !web3.currentProvider) {
             reject('No web3 instance');
         }
-        const { isMetamask } = web3.currentProvider;
+        const { isMetaMask } = web3.currentProvider;
         function cb(err, result) {
             if (err) {
                 console.log('Error ' + err);
@@ -284,7 +285,7 @@ function sign_me(my_address: string, contractAddress: string, i: number, web3: a
             }
         }
 
-        if (isMetamask) {
+        if (isMetaMask) {
             // metamask uses  web3.eth.sign to sign transaction and not for arbitrary messages
             // instead use https://medium.com/metamask/scaling-web3-with-signtypeddata-91d6efc8b290
             const msgParams = [
