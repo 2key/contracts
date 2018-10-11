@@ -225,10 +225,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         performConversion(_converter);
     }
 
-    function checkData(address _converter) public view returns (uint, uint) {
-        Conversion memory conversion = conversions[_converter];
-        return (conversion.bonusTokenUnits, bonusTokensVestingMonths);
-    }
     function performConversion(address _converter) internal {
         Conversion memory conversion = conversions[_converter];
 
