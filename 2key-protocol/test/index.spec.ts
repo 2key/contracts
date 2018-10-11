@@ -385,6 +385,7 @@ describe('TwoKeyProtocol', () => {
             },
             plasmaPK: Sign.generatePrivateKey().toString('hex'),
         });
+        await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, refLink);
         console.log('isUserJoined', await twoKeyProtocol.AcquisitionCampaign.isAddressJoined(campaignAddress));
         const hash = await twoKeyProtocol.AcquisitionCampaign.join(campaignAddress, 50, refLink);
         console.log('2) gmail offchain REFLINK', hash);
@@ -404,7 +405,7 @@ describe('TwoKeyProtocol', () => {
         //     console.log('PlasmaEvent', err, res);
         // };
         // twoKeyProtocol.subscribe2KeyEvents(callback);
-        // await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, refLink);
+        await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, refLink);
         // twoKeyProtocol.unsubscribe2KeyEvents();
         const { web3, address } = web3switcher.test4();
         twoKeyProtocol = new TwoKeyProtocol({
