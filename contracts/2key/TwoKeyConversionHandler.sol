@@ -208,18 +208,13 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
 //        conversion.baseTokenUnits, conversion.bonusTokenUnits);
 //    }
 
+    //TODO: Check on status call but no more need for this function
+//    function fullFillConversion(address _converter) public onlyTwoKeyAcquisitionCampaign {
+//        Conversion memory conversion = conversions[_converter];
+//        conversion.state = ConversionState.FULFILLED;
+//        conversions[_converter] = conversion;
+//    }
 
-    function fullFillConversion(address _converter) public onlyTwoKeyAcquisitionCampaign {
-        Conversion memory conversion = conversions[_converter];
-        conversion.state = ConversionState.FULFILLED;
-        conversions[_converter] = conversion;
-    }
-
-
-    //******************************************************
-    //(3) CONVERSION 2nd STEP
-    //actually third step after the moderator/contractor approved the converter in the white list
-    //onlyApprovedConverter
     function executeConversion(address _converter) public onlyApprovedConverter {
         didConverterConvert(_converter);
         performConversion(_converter);
@@ -376,7 +371,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     /// @return array of cancelled converter addresses
     function getAllCancelledConverters() public view onlyContractorOrModerator returns(address[]) {
         return conversionStateToConverters[bytes32("CANCELLED")];
-    }
+    }s
 
     /// @notice Function to get all fulfilled converters
     /// @dev view function - no gas cost & only Contractor or Moderator can call this function - otherwise will revert
