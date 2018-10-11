@@ -34,7 +34,6 @@ export interface ITwoKeyHelpers {
     _getERC20Instance: (erc20: any) => Promise<any>,
     _createAndValidate: (contractName: string, address: string) => Promise<any>,
     _checkIPFS: () => Promise<boolean>,
-    _getOffchainDataFromIPFSHash: (hash: string) => Promise<IOffchainData>,
 }
 
 export interface ITwoKeyAcquisitionCampaign {
@@ -73,6 +72,7 @@ export interface IERC20 {
 
 export interface ITWoKeyUtils {
     ipfsAdd: (data: any) => Promise<string>,
+    getOffchainDataFromIPFSHash: (hash: string) => Promise<IOffchainData>,
     fromWei: (number: number | string | BigNumber, unit?: string) => string | BigNumber,
     toWei: (number: string | number | BigNumber, unit?: string) => BigNumber,
     toHex: (data: any) => string,
@@ -213,6 +213,7 @@ export interface IContractEvent {
 }
 
 export interface IOffchainData {
+    campaign: string,
     f_address: string,
     f_secret: string,
     p_message?: string,
