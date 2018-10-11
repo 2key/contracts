@@ -9,7 +9,7 @@ export interface ITwoKeyBase {
     readonly contracts: IContractsAddresses;
     readonly twoKeyEconomy: any;
     readonly twoKeyReg: any;
-    readonly twoKeyEventContract: any;
+    readonly twoKeyPlasmaEvents: any;
     readonly plasmaAddress: string;
     readonly _setGasPrice: (number) => void,
     readonly _getGasPrice: () => number,
@@ -125,6 +125,7 @@ export interface ITwoKeyInit {
     ipfsPort?: string | number,
     contracts?: IContractsAddresses,
     networks?: IEhtereumNetworks,
+    rpcUrl?: string,
     eventsNetUrl?: string,
     plasmaPK: string,
 }
@@ -217,7 +218,12 @@ export interface IOffchainData {
     p_message?: string,
 }
 
-export interface IOffchainSignedKeypair {
+export interface IPlasmaSignature {
+    sig: string,
+    with_prefix: boolean,
+}
+
+export interface ISignedKeys {
     private_key: string,
     public_address: string,
 }

@@ -147,6 +147,15 @@ describe('TwoKeyProtocol', () => {
         this.timeout(30000);
         return new Promise(async (resolve, reject) => {
             try {
+                twoKeyProtocol = new TwoKeyProtocol({
+                    networks: {
+                        mainNetId,
+                        syncTwoKeyNetId,
+                    },
+                    rpcUrl,
+                    plasmaPK: Sign.generatePrivateKey().toString('hex'),
+                });
+
                 const { web3, address } = web3switcher.deployer();
                 twoKeyProtocol = new TwoKeyProtocol({
                     web3,
@@ -157,13 +166,6 @@ describe('TwoKeyProtocol', () => {
                     },
                     plasmaPK: Sign.generatePrivateKey().toString('hex'),
                 });
-                // twoKeyProtocol = new TwoKeyProtocol({
-                //     networks: {
-                //         mainNetId,
-                //         syncTwoKeyNetId,
-                //     },
-                //     plasmaPK: Sign.generatePrivateKey().toString('hex'),
-                // });
                 const {balance} = twoKeyProtocol.Utils.balanceFromWeiString(await twoKeyProtocol.getBalance(env.AYDNEP_ADDRESS), true);
                 const { balance: adminBalance } = twoKeyProtocol.Utils.balanceFromWeiString(await twoKeyProtocol.getBalance(contractsMeta.TwoKeyAdmin.networks[mainNetId].address), true);
                 console.log(adminBalance);

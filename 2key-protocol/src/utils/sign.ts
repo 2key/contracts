@@ -2,7 +2,7 @@ import eth_util from 'ethereumjs-util';
 import assert from 'assert';
 import crypto from 'crypto';
 import sigUtil from 'eth-sig-util';
-import {IOffchainSignedKeypair} from '../interfaces';
+import {IPlasmaSignature, ISignedKeys} from "../interfaces";
 
 function generatePrivateKey(): Buffer {
     return crypto.randomBytes(32)
@@ -214,44 +214,151 @@ function validate_join(firtsPublicKey: string, f_address: string, f_secret: stri
     return bounty_cuts;
 }
 
-function getSignedKeys(web3: any, campaignAddress: string, my_address: string): IOffchainSignedKeypair {
-    let i = 1;
-    let ii = i.toString(16);
-    let msg = '0xdeadbeef' + campaignAddress.slice(2) + my_address.slice(2) + ii;
-    let private_key: string;
-    // if (plasma_address) {
-    //     let msgParams = [
-    //         {
-    //             type: 'bytes',      // Any valid solidity type
-    //             name: 'binding to plasma address',     // Any string label you want
-    //             value: plasma_address  // The value to sign
-    //         }
-    //     ]
-    //     web3.currentProvider.sendAsync({
-    //         method: 'eth_signTypedData',
-    //         params: [msgParams, my_address],
-    //         from: my_address,
-    //     }, (err, res) => {
-    //         if (err) {
-    //             reject(err);
-    //         } else {
-    //             const sig = (typeof res == 'string') ? res : res.result;
-    //             let recovered = sigUtil.recoverTypedSignature({
-    //                 data: msgParams,
-    //                 sig,
-    //             })
-    //         }
-    //     });
-    //
-    // } else {
-    msg = web3.sha3(msg);
-    private_key = web3.sha3(web3.eth.sign(my_address, msg));
-    private_key = private_key.slice(2, 2 + 32 * 2);
-    // }
-    return {
-        private_key,
-        public_address: privateToPublic(Buffer.from(private_key, 'hex')),
-    };
+function sign_plasma2eteherum(plasma_address:string, my_address:string, web3: any): Promise<IPlasmaSignature> {
+    const msgParams = [
+        {
+            type: 'bytes',      // Any valid solidity type
+            name: 'binding to plasma address',     // Any string label you want
+            value: plasma_address  // The value to sign
+        }
+    ];
+
+    return new Promise((resolve, reject) => {
+        if (!web3 || !web3.currentProvider) {
+            reject('No web3 instance');
+        }
+        const { isMetamask } = web3.currentProvider;
+        function cb(err, result) {
+            if (err) {
+                console.log('Error in sign_plasma2eteherum ' + err);
+                reject(err)
+            } else if (!result) {
+                console.log('Error in sign_plasma2eteherum no result');
+                reject()
+            } else {
+                const sig = typeof result != 'string' ? result.result : result;
+                resolve({
+                    sig,
+                    with_prefix: !isMetamask,
+                })
+            }
+        }
+
+        if (isMetamask) {
+            // metamask uses  web3.eth.sign to sign transaction and not for arbitrary messages
+            // instead use https://medium.com/metamask/scaling-web3-with-signtypeddata-91d6efc8b290
+            web3.currentProvider.sendAsync({
+                method: 'eth_signTypedData',
+                params: [msgParams, my_address],
+                from: my_address,
+            }, cb)
+        } else {
+            let msg = sigUtil.typedSignatureHash(msgParams);
+            // console.log(msg);
+            if (web3.eth.getSign) {
+                web3.eth.getSign(my_address, msg, cb)
+            } else {
+                // TODO Crazy bug in Web3 in doc it is said that msg should come first https://github.com/ethereum/wiki/wiki/JavaScript-API#web3ethsign
+                web3.eth.sign(my_address, msg, cb)
+            }
+        }
+    })
+}
+
+function sign_me(my_address: string, contractAddress: string, i: number, web3: any): Promise<string> {
+    return new Promise((resolve, reject) => {
+        if (!web3 || !web3.currentProvider) {
+            reject('No web3 instance');
+        }
+        const { isMetamask } = web3.currentProvider;
+        function cb(err, result) {
+            if (err) {
+                console.log('Error ' + err);
+                reject(err)
+            } else {
+                const signedPK = typeof result == 'string' ? result : result.result;
+                // private_key = web3.sha3(private_key)
+                // private_key = private_key.slice(2, 2 + 32 * 2)  // skip the 0x at the begining of signature
+                // private_key = Buffer.from(private_key, 'hex')
+                resolve(signedPK)
+            }
+        }
+
+        if (isMetamask) {
+            // metamask uses  web3.eth.sign to sign transaction and not for arbitrary messages
+            // instead use https://medium.com/metamask/scaling-web3-with-signtypeddata-91d6efc8b290
+            const msgParams = [
+                {
+                    type: 'string',      // Any valid solidity type
+                    name: 'contract address',     // Any string label you want
+                    value: contractAddress  // The value to sign
+                },
+                {
+                    type: 'string',
+                    name: 'my address',
+                    value: my_address
+                },
+                {
+                    type: 'uint32',
+                    name: 'nonce',
+                    value: i
+                },
+            ];
+            web3.currentProvider.sendAsync({
+                method: 'eth_signTypedData',
+                params: [msgParams, my_address],
+                from: my_address,
+            }, cb);
+
+        } else {
+            let ii = i.toString(16);
+            let msg = '0xdeadbeef' + contractAddress.slice(2) + my_address.slice(2) + ii;
+            msg = web3.sha3(msg);
+
+            if (web3.eth.getSign) {
+                web3.eth.getSign(my_address, msg, cb);
+            } else {
+                // TODO Crazy bug in Web3 in doc it is said that msg should come first https://github.com/ethereum/wiki/wiki/JavaScript-API#web3ethsign
+                web3.eth.sign(my_address, msg, cb);
+            }
+        }
+    })
+}
+
+function generateSignatureKeys (
+    my_address: string,
+    plasma_address: string,
+    contractAddress: string,
+    web3: any,
+): Promise<ISignedKeys> {
+    // my_address - return my link and update contract with my public key if necessary (no previous link allowed if I have ARCs)
+    // c - contract
+    // f_address, f_secret, p_message - previous link (optional if I alredy have ARCs)
+    // cut 1..101 or 255 or null
+
+    return new Promise<ISignedKeys>(async (resolve, reject) => {
+        if (!web3 || !web3.currentProvider) {
+            reject('No web3 instance');
+        }
+        try {
+            // generate random private key exactly as in app.js
+            // in the full dApp we need to generate a deterministic private_key when there is no previous link
+
+            // For convenience, make sure we can later recompute the private key it (instead of storing it)
+            // so derive the private key from my own ethereum private key (of course without risking it in any way)
+            const i = 1;
+            const s = await sign_me(my_address, contractAddress, i, web3);
+            let private_key = web3.sha3(s);
+            private_key = private_key.slice(2, 2 + 32 * 2);
+            const public_address = privateToPublic(Buffer.from(private_key, 'hex'));
+            resolve({
+                private_key,
+                public_address,
+            })
+        } catch (e) {
+            reject(e);
+        }
+    });
 }
 
 export default {
@@ -261,5 +368,6 @@ export default {
     privateToPublic,
     validate_join,
     generatePrivateKey,
-    getSignedKeys,
+    sign_plasma2eteherum,
+    generateSignatureKeys,
 };

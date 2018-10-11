@@ -145,7 +145,10 @@ export default class AcquisitionCampaign {
         return new Promise<string>(async (resolve, reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-                const txHash = await promisify(campaignInstance.updateOrSetIpfsHashPublicMeta, [hash, { from: this.base.address, gasPrice }]);
+                const txHash = await promisify(campaignInstance.updateOrSetIpfsHashPublicMeta, [hash, {
+                    from: this.base.address,
+                    gasPrice
+                }]);
                 resolve(txHash);
             } catch (e) {
                 reject(e);
@@ -158,7 +161,7 @@ export default class AcquisitionCampaign {
         return new Promise<string>(async (resolve, reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-                const ipfsHash = await promisify(campaignInstance.publicMetaHash, [{ from: this.base.address }]);
+                const ipfsHash = await promisify(campaignInstance.publicMetaHash, [{from: this.base.address}]);
                 resolve(ipfsHash);
             } catch (e) {
                 reject(e);
@@ -172,7 +175,7 @@ export default class AcquisitionCampaign {
             const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
             const hash = await promisify(campaignInstance.getAndUpdateInventoryBalance, [{from: this.base.address}]);
             await this.utils.getTransactionReceiptMined(hash);
-            const balance = await promisify(campaignInstance.getInventoryBalance, [{ from: this.base.address }]);
+            const balance = await promisify(campaignInstance.getInventoryBalance, [{from: this.base.address}]);
             return Promise.resolve(balance);
         } catch (err) {
             Promise.reject(err);
@@ -198,9 +201,9 @@ export default class AcquisitionCampaign {
                     resolve(cut);
                 } else {
                     const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-                    const contractorAddress = await promisify(campaignInstance.getContractorAddress, [{ from: this.base.address }]);
+                    const contractorAddress = await promisify(campaignInstance.getContractorAddress, [{from: this.base.address}]);
                     const {f_address, f_secret, p_message} = await this.helpers._getOffchainDataFromIPFSHash(referralLink);
-                    const contractConstants = (await promisify(campaignInstance.getConstantInfo, [{ from: this.base.address }]));
+                    const contractConstants = (await promisify(campaignInstance.getConstantInfo, [{from: this.base.address}]));
                     const decimals = contractConstants[3].toNumber();
                     console.log('Decimals', decimals);
                     const maxReferralRewardPercent = new BigNumber(contractConstants[1]).div(10 ** decimals).toNumber();
@@ -232,13 +235,7 @@ export default class AcquisitionCampaign {
     public emitJoinEvent(campaignAddress: string, referralLink: string): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
-                const {f_address, f_secret} = await this.helpers._getOffchainDataFromIPFSHash(referralLink);
-                if (!f_address || !f_secret) {
-                    reject('Broken Link');
-                }
-                const from = this.base.plasmaAddress;
-                const txHash = await promisify(this.base.twoKeyEventContract.joined, [campaignAddress, f_address, this.base.address, {from}]);
-                resolve(txHash);
+
             } catch (e) {
                 reject(e);
             }
@@ -246,21 +243,22 @@ export default class AcquisitionCampaign {
     }
 
     /* LINKS */
+
     // Visit link
     public visit(campaignAddress: string, referralLink: string): Promise<string> {
         return new Promise<string>(async (resolve, reject) => {
             try {
-                const { f_address, f_secret, p_message } = await this.helpers._getOffchainDataFromIPFSHash(referralLink);
+                const {f_address, f_secret, p_message} = await this.helpers._getOffchainDataFromIPFSHash(referralLink);
                 const sig = Sign.free_take(this.base.plasmaAddress, f_address, f_secret, p_message);
-                const txHash = await promisify(this.base.twoKeyEventContract.visited, [
+                const txHash = await promisify(this.base.twoKeyPlasmaEvents.visited, [
                     campaignAddress,
                     sig,
-                    { from: this.base.plasmaAddress }
+                    {from: this.base.plasmaAddress}
                 ]);
                 await this.utils.getTransactionReceiptMined(txHash, this.base.plasmaWeb3);
                 resolve(txHash);
                 // Sign.getSignedKeys(this.base.plasmaWeb3, campaignAddress, this.base.plasmaAddress)
-                // this.base.twoKeyEventContract
+                // this.base.twoKeyPlasmaEvents
             } catch (e) {
                 reject(e);
             }
@@ -268,20 +266,28 @@ export default class AcquisitionCampaign {
     }
 
     // Set Public Link
-    public setPublicLinkKey(campaign: any, publicKey: string, gasPrice: number = this.base._getGasPrice()): Promise<string> {
+    public setPublicLinkKey(campaign: any, publicKey: string, cut: number, gasPrice: number = this.base._getGasPrice()): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
+                const contractor = await promisify(campaignInstance.getContractorAddress, [{from: this.base.address}]);
+                console.log('CONTRACTOR', contractor);
                 // const gas = await promisify(campaignInstance.setPublicLinkKey.estimateGas, [publicKey, {from: this.base.address}]);
                 // await this.helpers._checkBalanceBeforeTransaction(gas, this.base._getGasPrice());
-                const txHash = await promisify(campaignInstance.setPublicLinkKey, [publicKey, {
-                    from: this.base.address,
-                    gasPrice,
-                    // gas,
-                }]);
-
-                // TODO: Call TwoKeyPlasmaEvents.setPublicLinkKey
-                await this.utils.getTransactionReceiptMined(txHash);
+                const [mainTxHash, plasmaTxHash] = await Promise.all([
+                    promisify(campaignInstance.setPublicLinkKey, [publicKey, {
+                        from: this.base.address,
+                        gasPrice,
+                        // gas,
+                    }]),
+                    promisify(this.base.twoKeyPlasmaEvents.setPublicLinkKey, [campaignInstance.address,
+                        contractor, this.base.address, this.base.plasmaAddress, {from: this.base.plasmaAddress}
+                    ]),
+                ]);
+                await Promise.all([this.utils.getTransactionReceiptMined(mainTxHash), this.utils.getTransactionReceiptMined(plasmaTxHash, this.base.plasmaWeb3)]);
+                if (cut > -1) {
+                    await promisify(campaignInstance.setCut, [cut, {from: this.base.address}]);
+                }
                 resolve(publicKey);
             } catch (err) {
                 reject(err);
@@ -303,24 +309,33 @@ export default class AcquisitionCampaign {
 
     // Join Offchain
     public join(campaign: any, cut: number, referralLink?: string, gasPrice: number = this.base._getGasPrice()): Promise<string> {
-        const {public_address, private_key} = generatePublicMeta();
         return new Promise(async (resolve, reject) => {
+            const campaignAddress = typeof (campaign) === 'string' ? campaign
+                : (await this.helpers._getAcquisitionCampaignInstance(campaign)).address;
+
+            if (this.base.address !== this.base.plasmaAddress) {
+                const {sig, with_prefix} = await Sign.sign_plasma2eteherum(this.base.plasmaAddress, this.base.address, this.base.web3);
+                console.log('PLASMA2ETHEREUM', sig, with_prefix);
+                const txHash = await promisify(this.base.twoKeyPlasmaEvents.add_plasma2ethereum, [sig, with_prefix, {from: this.base.plasmaAddress, gas: 150000, gasPrice: 0 }]);
+                console.log('TXHASH', txHash);
+                await this.utils.getTransactionReceiptMined(txHash, this.base.plasmaWeb3, 500, 300000);
+            }
+            const {public_address, private_key} = await Sign.generateSignatureKeys(this.base.address, this.base.plasmaAddress, campaignAddress, this.base.web3);
+
             try {
                 let new_message;
                 if (referralLink) {
-                    const { f_address, f_secret, p_message } = await this.helpers._getOffchainDataFromIPFSHash(referralLink);
-                    const campaignAddress = typeof (campaign) === 'string' ? campaign
-                        : (await this.helpers._getAcquisitionCampaignInstance(campaign)).address;
-                    const txHash = await this.emitJoinEvent(campaignAddress, referralLink);
-                    console.log('JOIN EVENT', txHash);
+                    const {f_address, f_secret, p_message} = await this.helpers._getOffchainDataFromIPFSHash(referralLink);
+                    // const txHash = await this.emitJoinEvent(campaignAddress, referralLink);
+                    // console.log('JOIN EVENT', txHash);
                     console.log('New link for', this.base.address, f_address, f_secret, p_message);
                     new_message = Sign.free_join(this.base.address, public_address, f_address, f_secret, p_message, cut + 1);
                 } else {
-                    await this.setPublicLinkKey(campaign, `0x${public_address}`, gasPrice);
+                    await this.setPublicLinkKey(campaign, `0x${public_address}`, cut, gasPrice);
                 }
-                const linkObject =  new_message
-                    ? { f_address: this.base.address, f_secret: private_key, p_message: new_message }
-                    : { f_address: this.base.address, f_secret: private_key };
+                const linkObject = new_message
+                    ? {f_address: this.base.address, f_secret: private_key, p_message: new_message}
+                    : {f_address: this.base.address, f_secret: private_key};
                 const link = await this.utils.ipfsAdd(linkObject);
                 console.log('LINK', link);
                 // const raw = `f_address=${this.base.address}&f_secret=${private_key}&p_message=${new_message || ''}`;
@@ -328,6 +343,7 @@ export default class AcquisitionCampaign {
                 resolve(link);
                 // resolve('hash');
             } catch (err) {
+                console.log('ERRORORRR', err, err.toString());
                 reject(err);
             }
         });
@@ -362,7 +378,7 @@ export default class AcquisitionCampaign {
                     arcBalance = parseFloat((await promisify(campaignInstance.balanceOf, [this.base.address])).toString());
                 }
                 if (arcBalance) {
-                    const link = await this.utils.ipfsAdd({ f_address: this.base.address, f_secret: private_key });
+                    const link = await this.utils.ipfsAdd({f_address: this.base.address, f_secret: private_key});
                     resolve(link);
                     // resolve(`f_address=${this.base.address}&f_secret=${private_key}&p_message=`);
                 } else {
@@ -462,7 +478,7 @@ export default class AcquisitionCampaign {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-                resolve(await promisify(campaignInstance.getAddressJoinedStatus, [{ from: this.base.address }]));
+                resolve(await promisify(campaignInstance.getAddressJoinedStatus, [{from: this.base.address}]));
             } catch (e) {
                 reject(e);
             }
@@ -473,7 +489,7 @@ export default class AcquisitionCampaign {
         return new Promise<any>(async (resolve, reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-                const conversionHandler = await promisify(campaignInstance.getTwoKeyConversionHandlerAddress, [{ from: this.base.address }]);
+                const conversionHandler = await promisify(campaignInstance.getTwoKeyConversionHandlerAddress, [{from: this.base.address}]);
                 console.log('WhiteListsAddress', conversionHandler);
                 const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandler);
                 const conversion = await promisify(conversionHandlerInstance.conversions, [this.base.address]);
@@ -485,11 +501,11 @@ export default class AcquisitionCampaign {
         })
     }
 
-    public getTwoKeyConversionHandlerAddress(campaign: any) : Promise<string> {
+    public getTwoKeyConversionHandlerAddress(campaign: any): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-                const conversionHandler = await promisify(campaignInstance.getTwoKeyConversionHandlerAddress, [{ from: this.base.address }]);
+                const conversionHandler = await promisify(campaignInstance.getTwoKeyConversionHandlerAddress, [{from: this.base.address}]);
                 resolve(conversionHandler);
             } catch (e) {
                 reject(e);
@@ -512,7 +528,7 @@ export default class AcquisitionCampaign {
     // }
 
     public getAllPendingConverters(campaign: any): Promise<string[]> {
-        return new Promise(async(resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             try {
                 const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
                 const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
@@ -525,7 +541,7 @@ export default class AcquisitionCampaign {
     }
 
     public approveConverter(campaign: any, converter: string): Promise<string> {
-        return new Promise(async(resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             try {
                 const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
                 const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
@@ -537,8 +553,8 @@ export default class AcquisitionCampaign {
         })
     }
 
-    public rejectConverter(campaign: any, converter: string) : Promise<string> {
-        return new Promise(async(resolve, reject) => {
+    public rejectConverter(campaign: any, converter: string): Promise<string> {
+        return new Promise(async (resolve, reject) => {
             try {
                 const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
                 const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
@@ -550,8 +566,8 @@ export default class AcquisitionCampaign {
         })
     }
 
-    public getApprovedConverters(campaign: any) : Promise<string[]> {
-        return new Promise(async(resolve, reject) => {
+    public getApprovedConverters(campaign: any): Promise<string[]> {
+        return new Promise(async (resolve, reject) => {
             try {
                 const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
                 const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
@@ -563,12 +579,12 @@ export default class AcquisitionCampaign {
         })
     }
 
-    public getAllRejectedConverters(campaign:any) : Promise<string[]> {
-        return new Promise(async(resolve, reject) => {
-            try{
+    public getAllRejectedConverters(campaign: any): Promise<string[]> {
+        return new Promise(async (resolve, reject) => {
+            try {
                 const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
                 const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
-                const rejectedConverters = await promisify(conversionHandlerInstance.getAllRejectedConverters,[{from: this.base.address}]);
+                const rejectedConverters = await promisify(conversionHandlerInstance.getAllRejectedConverters, [{from: this.base.address}]);
                 resolve(rejectedConverters);
             } catch (e) {
                 reject(e);
@@ -576,44 +592,44 @@ export default class AcquisitionCampaign {
         })
     }
 
-    public executeConversion(campaign:any, converter:string) : Promise<string> {
-        return new Promise(async(resolve, reject) => {
+    public executeConversion(campaign: any, converter: string): Promise<string> {
+        return new Promise(async (resolve, reject) => {
             try {
                 const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
                 const conversionHandlerInstance = this.base.web3.eth.contract(contracts.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
 
-                const txHash = await promisify(conversionHandlerInstance.executeConversion,[converter, {from: this.base.address}]);
+                const txHash = await promisify(conversionHandlerInstance.executeConversion, [converter, {from: this.base.address}]);
                 console.log(txHash);
                 resolve(txHash);
-            } catch(e) {
+            } catch (e) {
                 reject(e);
             }
         })
     }
 
-    public checkData(campaign:any, converter:string) : Promise<string[]> {
-        return new Promise(async(resolve,reject) => {
-           try {
-               const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
-               const conversionHandlerInstance = this.base.web3.eth.contract(contracts.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
-               const results = await promisify(conversionHandlerInstance.checkData,[converter, {from: this.base.address}]);
-               resolve(results);
-           } catch(e){
-               reject(e);
-           }
+    public checkData(campaign: any, converter: string): Promise<string[]> {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
+                const conversionHandlerInstance = this.base.web3.eth.contract(contracts.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
+                const results = await promisify(conversionHandlerInstance.checkData, [converter, {from: this.base.address}]);
+                resolve(results);
+            } catch (e) {
+                reject(e);
+            }
         });
     }
 
-    public getLockupContractsForConverter(campaign:any, converter:string) : Promise<string[]> {
-        return new Promise(async(resolve, reject) => {
-           try {
-               const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
-               const conversionHandlerInstance = this.base.web3.eth.contract(contracts.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
-               const lockupContractAddresses = await promisify(conversionHandlerInstance.getLockupContractsForConverter, [converter, {from: this.base.address}]);
-               resolve(lockupContractAddresses);
-           } catch (e) {
-               reject(e);
-           }
+    public getLockupContractsForConverter(campaign: any, converter: string): Promise<string[]> {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
+                const conversionHandlerInstance = this.base.web3.eth.contract(contracts.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
+                const lockupContractAddresses = await promisify(conversionHandlerInstance.getLockupContractsForConverter, [converter, {from: this.base.address}]);
+                resolve(lockupContractAddresses);
+            } catch (e) {
+                reject(e);
+            }
         });
     }
 }

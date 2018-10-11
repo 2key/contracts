@@ -31,7 +31,8 @@ const TwoKeyDefaults = {
     ipfsPort: '5001',
     mainNetId: 3,
     syncTwoKeyNetId: 17,
-    twoKeySyncUrl: 'http://astring.aydnep.com.ua:18545'
+    twoKeySyncUrl: 'http://astring.aydnep.com.ua:18545',
+    twoKeyMainUrl: 'http://localhost:8585'
 };
 
 export class TwoKeyProtocol {
@@ -46,7 +47,7 @@ export class TwoKeyProtocol {
     private readonly contracts: IContractsAddresses;
     private readonly twoKeyEconomy: any;
     private readonly twoKeyReg: any;
-    private readonly twoKeyEventContract: any;
+    private readonly twoKeyPlasmaEvents: any;
     private twoKeyEvents: any;
     private readonly plasmaAddress: string;
     public readonly  ERC20: IERC20;
@@ -61,6 +62,7 @@ export class TwoKeyProtocol {
         const {
             web3,
             address,
+            rpcUrl,
             eventsNetUrl = TwoKeyDefaults.twoKeySyncUrl,
             ipfsIp = TwoKeyDefaults.ipfsIp,
             ipfsPort = TwoKeyDefaults.ipfsPort,
@@ -91,7 +93,7 @@ export class TwoKeyProtocol {
         plasmaEngine.start();
         this.plasmaWeb3 = new Web3(plasmaEngine);
         this.plasmaAddress = `0x${eventsWallet.getAddress().toString('hex')}`;
-        this.twoKeyEventContract = this.plasmaWeb3.eth.contract(contractsMeta.TwoKeyPlasmaEvents.abi).at(contractsMeta.TwoKeyPlasmaEvents.networks[this.networks.syncTwoKeyNetId].address);
+        this.twoKeyPlasmaEvents = this.plasmaWeb3.eth.contract(contractsMeta.TwoKeyPlasmaEvents.abi).at(contractsMeta.TwoKeyPlasmaEvents.networks[this.networks.syncTwoKeyNetId].address);
 
         if (web3) {
             this.web3 = new Web3(web3.currentProvider);
@@ -100,6 +102,15 @@ export class TwoKeyProtocol {
             this.twoKeyEconomy = this.web3.eth.contract(contractsMeta.TwoKeyEconomy.abi).at(contractsMeta.TwoKeyEconomy.networks[this.networks.mainNetId].address);
             this.twoKeyReg = this.web3.eth.contract(contractsMeta.TwoKeyReg.abi).at(contractsMeta.TwoKeyReg.networks[this.networks.mainNetId].address);
             // this.twoKeyEventSource = this.web3.eth.contract(contractsMeta.TwoKeyEventSource.abi).at(contractsMeta.TwoKeyEventSource.networks[this.networks.mainNetId].address);
+        } else if (rpcUrl) {
+            const mainEngine = new ProviderEngine();
+            this.web3 = new Web3(mainEngine);
+            const mainProvider = rpcUrl.startsWith('http') ? new RpcSubprovider({rpcUrl}) : new WSSubprovider({rpcUrl});
+            // mainEngine.addProvider(new WalletSubprovider(eventsWallet, {}));
+            mainEngine.addProvider(mainProvider);
+            mainEngine.start();
+        } else {
+            throw new Error('No web3 instance');
         }
 
         this.ipfs = ipfsAPI(ipfsIp, ipfsPort, {protocol: 'http'});
@@ -113,7 +124,7 @@ export class TwoKeyProtocol {
             contracts: this.contracts,
             twoKeyEconomy: this.twoKeyEconomy,
             twoKeyReg: this.twoKeyReg,
-            twoKeyEventContract: this.twoKeyEventContract,
+            twoKeyPlasmaEvents: this.twoKeyPlasmaEvents,
             plasmaAddress: this.plasmaAddress,
             _getGasPrice: this._getGasPrice,
             _setGasPrice: this._setGasPrice,
@@ -152,7 +163,7 @@ export class TwoKeyProtocol {
     }
 
     public subscribe2KeyEvents(callback: (error: any, event: IContractEvent) => void) {
-        this.twoKeyEvents = this.twoKeyEventContract.allEvents({fromBlock: 0, toBlock: 'pending'});
+        this.twoKeyEvents = this.twoKeyPlasmaEvents.allEvents({fromBlock: 0, toBlock: 'pending'});
         this.twoKeyEvents.watch(callback);
     }
 
