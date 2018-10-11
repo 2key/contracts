@@ -333,7 +333,7 @@ export default class AcquisitionCampaign {
 
             if (this.base.address !== this.base.plasmaAddress) {
                 const {sig, with_prefix} = await Sign.sign_plasma2eteherum(this.base.plasmaAddress, this.base.address, this.base.web3);
-                console.log('Signature', sig, with_prefix, this.base.web3.currentProvider.isMetaMask);
+                console.log('Signature', sig, with_prefix, this.base.address, this.base.plasmaAddress);
                 const txHash = await promisify(this.base.twoKeyPlasmaEvents.add_plasma2ethereum, [sig, with_prefix, {from: this.base.plasmaAddress, gasPrice: 0 }]);
                 await this.utils.getTransactionReceiptMined(txHash, this.base.plasmaWeb3, 500, 300000);
                 const stored_ethereum_address = await promisify(this.base.twoKeyPlasmaEvents.plasma2ethereum, [this.base.plasmaAddress]);
