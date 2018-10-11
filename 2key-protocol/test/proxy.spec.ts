@@ -25,8 +25,16 @@ twoKeyProtocol = new TwoKeyProtocol({
 const eventsInstance = web3.eth.contract(contractsMeta.TwoKeyEventSource.abi).at(contractsMeta.TwoKeyEventSource.networks[mainNetId].address);
 const events = eventsInstance.allEvents();
 
+const plasmaInstance = web3.eth.contract(contractsMeta.TwoKeyPlasmaEvents.abi).at(contractsMeta.TwoKeyPlasmaEvents.networks[syncTwoKeyNetId].address);
+const plasma = plasmaInstance.allEvents();
+
+
 events.watch((err, res) => {
-    console.log('Event:', err, res);
+    console.log('TwoKeyEventSource:', err, res);
+});
+
+plasma.watch((err, res) => {
+    console.log('TwoKeyPlasmaEvents:', err, res);
 });
 
 console.log('Press any key to exit');
