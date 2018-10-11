@@ -371,7 +371,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     /// @return array of cancelled converter addresses
     function getAllCancelledConverters() public view onlyContractorOrModerator returns(address[]) {
         return conversionStateToConverters[bytes32("CANCELLED")];
-    }s
+    }
 
     /// @notice Function to get all fulfilled converters
     /// @dev view function - no gas cost & only Contractor or Moderator can call this function - otherwise will revert
