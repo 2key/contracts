@@ -208,27 +208,18 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
 //        conversion.baseTokenUnits, conversion.bonusTokenUnits);
 //    }
 
+    //TODO: Check on status call but no more need for this function
+//    function fullFillConversion(address _converter) public onlyTwoKeyAcquisitionCampaign {
+//        Conversion memory conversion = conversions[_converter];
+//        conversion.state = ConversionState.FULFILLED;
+//        conversions[_converter] = conversion;
+//    }
 
-    function fullFillConversion(address _converter) public onlyTwoKeyAcquisitionCampaign {
-        Conversion memory conversion = conversions[_converter];
-        conversion.state = ConversionState.FULFILLED;
-        conversions[_converter] = conversion;
-    }
-
-
-    //******************************************************
-    //(3) CONVERSION 2nd STEP
-    //actually third step after the moderator/contractor approved the converter in the white list
-    //onlyApprovedConverter
     function executeConversion(address _converter) public onlyApprovedConverter {
         didConverterConvert(_converter);
         performConversion(_converter);
     }
 
-    function checkData(address _converter) public view returns (uint, uint) {
-        Conversion memory conversion = conversions[_converter];
-        return (conversion.bonusTokenUnits, bonusTokensVestingMonths);
-    }
     function performConversion(address _converter) internal {
         Conversion memory conversion = conversions[_converter];
 

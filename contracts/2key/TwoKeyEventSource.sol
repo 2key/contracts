@@ -2,7 +2,6 @@ pragma solidity ^0.4.24;
 
 import './TwoKeyTypes.sol';
 import "./GetCode.sol";
-import "./TwoKeyAdmin.sol";
 import "../interfaces/ITwoKeyReg.sol";
 
 contract TwoKeyEventSource is TwoKeyTypes {
@@ -10,15 +9,17 @@ contract TwoKeyEventSource is TwoKeyTypes {
     /// Events
     event Created(address indexed _campaign, address indexed _owner);
     event Joined(address indexed _campaign, address indexed _from, address indexed _to);
-    event Escrow(address indexed _campaign, address indexed _converter, string assetName, address _childContractID, uint256 _indexOrAmount, CampaignType _type);
+    event Escrow(address indexed _campaign, address indexed _converter, string indexed assetName, address _childContractID, uint256 _indexOrAmount, CampaignType _type);
     event Rewarded(address indexed _campaign, address indexed _to, uint256 _amount);
     event Fulfilled(address indexed _campaign, address indexed _converter, string indexed assetName, address _childContractID, uint256 _indexOrAmount, CampaignType _type);
     event Cancelled(address indexed _campaign, address indexed _converter, string indexed assetName, address _childContractID, uint256 _indexOrAmount, CampaignType _type);
     event Rejected(address indexed _campaign, address indexed _converter);
-
+    event UpdatedPublicMetaHash(uint timestamp, string value);
+    event UpdatedData(uint timestamp, uint value, string action);
 
     ///Address of the contract admin - interface
-    TwoKeyAdmin twoKeyAdmin;
+//    TwoKeyAdmin twoKeyAdmin;
+    address twoKeyAdmin;
 
     /// Interface representing TwoKeyReg contract (Reducing gas usage that's why interface instead of contract instance)
     ITwoKeyReg interfaceTwoKeyReg;
@@ -57,7 +58,7 @@ contract TwoKeyEventSource is TwoKeyTypes {
     /// @notice Constructor during deployment of contract we need to set an admin address (means TwoKeyAdmin needs to be previously deployed)
     /// @param _twoKeyAdminAddress is the address of TwoKeyAdmin contract previously deployed
     constructor(address _twoKeyAdminAddress) public {
-        twoKeyAdmin = TwoKeyAdmin(_twoKeyAdminAddress);
+        twoKeyAdmin = _twoKeyAdminAddress;
     }
 
     /// TODO: Put in constructor because of security issues (?)
@@ -118,7 +119,7 @@ contract TwoKeyEventSource is TwoKeyTypes {
     /// @param _newAdminAddress is the address of new admin
     /// @dev think about some security layer here
     function changeAdmin(address _newAdminAddress) public onlyAdmin {
-        twoKeyAdmin = TwoKeyAdmin(_newAdminAddress);
+        twoKeyAdmin = _newAdminAddress;
     }
 
     function checkCanEmit(bytes _contractCode) public view returns (bool) {
@@ -159,6 +160,16 @@ contract TwoKeyEventSource is TwoKeyTypes {
 	function cancelled(address  _campaign, address _converter, string _assetName, address _childContractID, uint256 _indexOrAmount, CampaignType _type) public onlyAllowedContracts{
 		emit Cancelled(_campaign, _converter, _assetName, _childContractID, _indexOrAmount, _type);
 	}
+
+    /// @dev Only allowed contracts can call this function - means can emit events
+    function updatedPublicMetaHash(uint timestamp, string value) public onlyAllowedContracts {
+        emit UpdatedPublicMetaHash(timestamp, value);
+    }
+
+    /// @dev Only allowed contracts can call this function - means can emit events
+    function updatedData(uint timestamp, uint value, string action) public onlyAllowedContracts {
+        emit UpdatedData(timestamp, value, action);
+    }
 
 
     function getAdmin() public view returns (address) {
