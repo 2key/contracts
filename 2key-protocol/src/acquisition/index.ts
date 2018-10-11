@@ -298,7 +298,7 @@ export default class AcquisitionCampaign {
                         // gas,
                     }]),
                     promisify(this.base.twoKeyPlasmaEvents.setPublicLinkKey, [campaignInstance.address,
-                        contractor, this.base.address, publicKey, {from: this.base.plasmaAddress, gasPrice: 0}
+                        contractor, this.base.address, publicKey, {from: this.base.plasmaAddress, gas: 300000, gasPrice: 0}
                     ]),
                 ]);
                 await Promise.all([this.utils.getTransactionReceiptMined(mainTxHash), this.utils.getTransactionReceiptMined(plasmaTxHash, this.base.plasmaWeb3)]);
@@ -333,16 +333,12 @@ export default class AcquisitionCampaign {
 
             if (this.base.address !== this.base.plasmaAddress) {
                 const {sig, with_prefix} = await Sign.sign_plasma2eteherum(this.base.plasmaAddress, this.base.address, this.base.web3);
-                // console.log('PLASMA2ETHEREUM', sig, with_prefix);
-                const txHash = await promisify(this.base.twoKeyPlasmaEvents.add_plasma2ethereum, [sig, with_prefix, {from: this.base.plasmaAddress, gasPrice: 0 }]);
-                // console.log('TXHASH', txHash);
+                const txHash = await promisify(this.base.twoKeyPlasmaEvents.add_plasma2ethereum, [sig, with_prefix, {from: this.base.plasmaAddress, gas: 300000, gasPrice: 0 }]);
                 await this.utils.getTransactionReceiptMined(txHash, this.base.plasmaWeb3, 500, 300000);
-                // const stored_ethereum_address = await promisify(this.base.twoKeyPlasmaEvents.plasma2ethereum, [this.base.plasmaAddress]);
-                // // console.log('ethereum_address='+my_address+' stored_ethereum_address='+stored_ethereum_address)
-                // const stored_plasma_address = await promisify(this.base.twoKeyPlasmaEvents.ethereum2plasma, [this.base.address]);
-                // console.log('STORED', stored_ethereum_address, stored_plasma_address, stored_ethereum_address === this.base.address);
-
-                // console.log('add_plasma2ethereum', receipt)
+                const stored_ethereum_address = await promisify(this.base.twoKeyPlasmaEvents.plasma2ethereum, [this.base.plasmaAddress]);
+                if (stored_ethereum_address !== this.base.address) {
+                    reject(stored_ethereum_address + ' != ' + this.base.address)
+                }
             }
             const {public_address, private_key} = await Sign.generateSignatureKeys(this.base.address, this.base.plasmaAddress, campaignAddress, this.base.web3);
 
@@ -350,8 +346,6 @@ export default class AcquisitionCampaign {
                 let new_message;
                 if (referralLink) {
                     const {f_address, f_secret, p_message} = await this.utils.getOffchainDataFromIPFSHash(referralLink);
-                    // const txHash = await this.emitJoinEvent(campaignAddress, referralLink);
-                    // console.log('JOIN EVENT', txHash);
                     console.log('New link for', this.base.address, f_address, f_secret, p_message);
                     new_message = Sign.free_join(this.base.address, public_address, f_address, f_secret, p_message, cut + 1);
                 } else {
