@@ -621,9 +621,9 @@ export default { ERC20full:
       { '8086':
          { events: {},
            links: {},
-           address: '0x6aa33b4ffed18811cff698407b2306c9bcde53e7',
+           address: '0x176c9d8b35a85506c8e004e7723cb35177f2b2aa',
            transactionHash:
-            '0x24f029d59dfbc1a512e9166782eb3c67c48e022edd8e2d0bccd27e9428b2d25e' } },
+            '0x08a1c7a45f1007aa9de6a29afb55254e659c3134bf82ce94e5ca0ab33f10ec61' } },
      abi:
       [ { constant: false,
           inputs: [],
@@ -1041,9 +1041,9 @@ export default { ERC20full:
       { '8086':
          { events: {},
            links: {},
-           address: '0xa02ec947092382d034516eceb881bd8e740183f2',
+           address: '0x42d41fb624c89dc8262df4fcd4aed83d25a9ed56',
            transactionHash:
-            '0x8448b7742711ad0c56ac6c0e371c6a3c83cebe9d7b4a41021364f11aef6c5f5a' } },
+            '0x929c9ecc4cb09a915950625412ee56b6826043527bc7de0d9f9909e620b49852' } },
      abi:
       [ { constant: true,
           inputs: [],
@@ -1330,9 +1330,9 @@ export default { ERC20full:
       { '8086':
          { events: {},
            links: {},
-           address: '0xf8cb808282b8dd2b7030455bb53f2f2d24ee74d8',
+           address: '0xb1ac7008b041047b741041ce2ac4fae93460736e',
            transactionHash:
-            '0xf9accc0727ebf25786b46734d6941462b5d572b939ff6d79df252cafcefd4976' } },
+            '0x871fe9c696780c3f043fb3147326cee51e8f323ab57e9776fa6eb081bdda21af' } },
      abi:
       [ { inputs: [ { name: '_twoKeyAdminAddress', type: 'address' } ],
           payable: false,
@@ -1711,9 +1711,9 @@ export default { ERC20full:
       { '8086':
          { events: {},
            links: {},
-           address: '0x8bb29ed117c234a8f0dc2ebacf346770ce2e597b',
+           address: '0x228ac61e457d41a8c4ea2613f35d378e78189f96',
            transactionHash:
-            '0xf16dd61d37d8a165694077153a209aa466793ddefdbc51f448b86dac843d3d4e' } },
+            '0xddc75731eb5ff3c499806d18d4ec3652640c45000964c62b2120fb4f9dca344f' } },
      abi:
       [ { constant: true,
           inputs: [],
