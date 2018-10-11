@@ -340,7 +340,7 @@ describe('TwoKeyProtocol', () => {
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const campaignMeta = await twoKeyProtocol.AcquisitionCampaign.getPublicMeta(campaignAddress);
         console.log('IPFS:', hash, campaignMeta);
-        expect(campaignMeta.assetContractERC20).to.be.equal(campaignData.assetContractERC20);
+        expect(campaignMeta.meta.assetContractERC20).to.be.equal(campaignData.assetContractERC20);
     }).timeout(30000);
     // it('should print balance after campaign created', printBalances).timeout(15000);
 

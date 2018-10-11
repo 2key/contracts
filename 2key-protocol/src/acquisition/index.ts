@@ -157,12 +157,15 @@ export default class AcquisitionCampaign {
     }
 
     public getPublicMeta(campaign: any): Promise<any> {
-        return new Promise<string>(async (resolve, reject) => {
+        return new Promise<any>(async (resolve, reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-                const ipfsHash = await promisify(campaignInstance.publicMetaHash, [{from: this.base.address}]);
+                // const contractor = await promisify(campaignInstance.getContractorAddress, [{from: this.base.address}]);
+                // const ipfsHash = await promisify(campaignInstance.publicMetaHash, [{from: this.base.address}]);
+                const isAddressJoined = await this.isAddressJoined(campaignInstance);
+                const ipfsHash = await promisify(campaignInstance.publicMetaHash, []);
                 const meta = JSON.parse((await promisify(this.base.ipfs.cat, [ipfsHash])).toString());
-                resolve(meta);
+                resolve({ meta, isAddressJoined });
             } catch (e) {
                 reject(e);
             }
