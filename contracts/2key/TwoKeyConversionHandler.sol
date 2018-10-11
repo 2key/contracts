@@ -232,7 +232,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         TwoKeyLockupContract firstLockUp = new TwoKeyLockupContract(tokenDistributionDate, maxDistributionDateShiftInDays,
                             conversion.baseTokenUnits, _converter, conversion.contractor);
 
-//
+
         ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).moveFungibleAsset(address(firstLockUp), conversion.baseTokenUnits);
         uint bonusAmountSplited = conversion.bonusTokenUnits / bonusTokensVestingMonths;
         address [] memory lockupContracts=  new address[](bonusTokensVestingMonths + 1);
@@ -482,13 +482,11 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
 
         Conversion memory conversion = conversions[msg.sender];
         ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).sendBackEthWhenConversionCancelled(msg.sender, conversion.conversionAmount);
-//        msg.sender.transfer(conversion.conversionAmount);
     }
 
 
 
 
-    //TODO: Don't return the money when I reject
     //TODO: If the converter is rejected allow him to pull the funds out -- if he do this, conversion goes to cancelled state
     //TODO: Converter can cancel conversion as long it's pending or rejected
 }
