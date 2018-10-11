@@ -649,7 +649,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     /// @param value is the new value we are going to set for minContributionETH
     function updateMinContributionETH(uint value) public onlyContractor {
         minContributionETH = value;
-        emit UpdatedData(block.timestamp, value, "Updated maxContribution");
+        twoKeyEventSource.updatedData(block.timestamp, value, "Updated maxContribution");
     }
 
     /// @notice Option to update maxContributionETH
@@ -657,7 +657,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     /// @param value is the new maxContribution value
     function updateMaxContributionETH(uint value) public onlyContractor {
         maxContributionETH = value;
-        emit UpdatedData(block.timestamp, value, "Updated maxContribution");
+        twoKeyEventSource.updatedData(block.timestamp, value, "Updated maxContribution");
     }
 
     /// @notice Option to update maxReferralRewardPercent
@@ -665,7 +665,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     /// @param value is the new referral percent value
     function updateMaxReferralRewardPercent(uint value) public onlyContractor {
         maxReferralRewardPercent = value;
-        emit UpdatedData(block.timestamp, value, "Updated maxReferralRewardPercent");
+        twoKeyEventSource.updatedData(block.timestamp, value, "Updated maxReferralRewardPercent");
     }
 
     /// @notice Option to update /set publicMetaHash
@@ -673,7 +673,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     /// @param value is the value for the publicMetaHash
     function updateOrSetIpfsHashPublicMeta(string value) public onlyContractor {
         publicMetaHash = value;
-        emit UpdatedPublicMetaHash(block.timestamp, value);
+        twoKeyEventSource.updatedPublicMetaHash(block.timestamp, value);
     }
 
     /// @notice Option to update contractor proceeds
