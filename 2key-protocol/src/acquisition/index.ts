@@ -156,13 +156,13 @@ export default class AcquisitionCampaign {
         });
     }
 
-
-    public getPublicMetaHash(campaign: any): Promise<string> {
+    public getPublicMeta(campaign: any): Promise<any> {
         return new Promise<string>(async (resolve, reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
                 const ipfsHash = await promisify(campaignInstance.publicMetaHash, [{from: this.base.address}]);
-                resolve(ipfsHash);
+                const meta = JSON.parse((await promisify(this.base.ipfs.cat, [ipfsHash])).toString());
+                resolve(meta);
             } catch (e) {
                 reject(e);
             }
@@ -253,7 +253,7 @@ export default class AcquisitionCampaign {
                 const txHash = await promisify(this.base.twoKeyPlasmaEvents.visited, [
                     campaignAddress,
                     sig,
-                    {from: this.base.plasmaAddress}
+                    {from: this.base.plasmaAddress, gas: 300000, gasPrice: 0 }
                 ]);
                 await this.utils.getTransactionReceiptMined(txHash, this.base.plasmaWeb3);
                 resolve(txHash);
@@ -281,7 +281,7 @@ export default class AcquisitionCampaign {
                         // gas,
                     }]),
                     promisify(this.base.twoKeyPlasmaEvents.setPublicLinkKey, [campaignInstance.address,
-                        contractor, this.base.address, this.base.plasmaAddress, {from: this.base.plasmaAddress}
+                        contractor, this.base.address, this.base.plasmaAddress, {from: this.base.plasmaAddress, gas: 300000, gasPrice: 0}
                     ]),
                 ]);
                 await Promise.all([this.utils.getTransactionReceiptMined(mainTxHash), this.utils.getTransactionReceiptMined(plasmaTxHash, this.base.plasmaWeb3)]);
