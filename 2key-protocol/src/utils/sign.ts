@@ -228,6 +228,7 @@ function sign_plasma2eteherum(plasma_address:string, my_address:string, web3: an
             reject('No web3 instance');
         }
         const { isMetaMask } = web3.currentProvider;
+        console.log('METAMASK', isMetaMask);
         function cb(err, result) {
             if (err) {
                 console.log('Error in sign_plasma2eteherum ' + err);
