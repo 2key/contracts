@@ -323,7 +323,9 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
             assembly
             {
                 v := mload(add(sig, idx))
+
             }
+            //TODO: copy updated code from Udi (validate v value)
 
             // idx was increased by 65
 
