@@ -2,7 +2,7 @@ import {BigNumber} from 'bignumber.js';
 import LZString from 'lz-string';
 import {
     BalanceMeta,
-    IBalanceNormalized,
+    IBalanceNormalized, IOffchainData,
     ITransactionReceipt,
     ITwoKeyBase, ITwoKeyHelpers,
 } from '../interfaces';
@@ -25,7 +25,7 @@ export default class Utils {
         this.helpers = helpers;
     }
     /* UTILS */
-    ipfsAdd(data: any): Promise<string> {
+    public ipfsAdd(data: any): Promise<string> {
         return new Promise<string>(async (resolve, reject) => {
             try {
                 const dataString = typeof data === 'string' ? data : JSON.stringify(data);
@@ -42,6 +42,27 @@ export default class Utils {
             }
         });
     }
+
+    public getOffchainDataFromIPFSHash(hash: string): Promise<IOffchainData> {
+        return new Promise<IOffchainData>(async (resolve, reject) => {
+            try {
+                const offchainObj = JSON.parse((await promisify(this.base.ipfs.cat, [hash])).toString());
+                // console.log('GETOFFCHAIN', hash, compressed);
+                // const ab = new Uint8Array(compressed);
+                // console.log(ab);
+                // const raw = LZString.decompress(compressed);
+                // const raw = LZString.decompressFromUint8Array(toUint8Array(compressed));
+                // const raw = LZString.decompressFromUint8Array(ab);
+                // console.log('RAW', raw);
+                // const offchainObj = JSON.parse(raw);
+                // console.log('OFFCHAIN OBJECT', raw, offchainObj);
+                resolve(offchainObj);
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
+
 
     public fromWei(number: number | string | BigNumber, unit?: string): string | BigNumber {
         return this.base.web3.fromWei(number, unit);

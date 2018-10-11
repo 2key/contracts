@@ -205,7 +205,7 @@ export default class AcquisitionCampaign {
                 } else {
                     const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
                     const contractorAddress = await promisify(campaignInstance.getContractorAddress, [{from: this.base.address}]);
-                    const {f_address, f_secret, p_message} = await this.helpers._getOffchainDataFromIPFSHash(referralLink);
+                    const {f_address, f_secret, p_message} = await this.utils.getOffchainDataFromIPFSHash(referralLink);
                     const contractConstants = (await promisify(campaignInstance.getConstantInfo, [{from: this.base.address}]));
                     const decimals = contractConstants[3].toNumber();
                     console.log('Decimals', decimals);
@@ -251,7 +251,7 @@ export default class AcquisitionCampaign {
     public visit(campaignAddress: string, referralLink: string): Promise<string> {
         return new Promise<string>(async (resolve, reject) => {
             try {
-                const {f_address, f_secret, p_message} = await this.helpers._getOffchainDataFromIPFSHash(referralLink);
+                const {f_address, f_secret, p_message} = await this.utils.getOffchainDataFromIPFSHash(referralLink);
                 const sig = Sign.free_take(this.base.plasmaAddress, f_address, f_secret, p_message);
                 const txHash = await promisify(this.base.twoKeyPlasmaEvents.visited, [
                     campaignAddress,
@@ -328,7 +328,7 @@ export default class AcquisitionCampaign {
             try {
                 let new_message;
                 if (referralLink) {
-                    const {f_address, f_secret, p_message} = await this.helpers._getOffchainDataFromIPFSHash(referralLink);
+                    const {f_address, f_secret, p_message} = await this.utils.getOffchainDataFromIPFSHash(referralLink);
                     // const txHash = await this.emitJoinEvent(campaignAddress, referralLink);
                     // console.log('JOIN EVENT', txHash);
                     console.log('New link for', this.base.address, f_address, f_secret, p_message);
@@ -337,8 +337,8 @@ export default class AcquisitionCampaign {
                     await this.setPublicLinkKey(campaign, `0x${public_address}`, cut, gasPrice);
                 }
                 const linkObject = new_message
-                    ? {f_address: this.base.address, f_secret: private_key, p_message: new_message}
-                    : {f_address: this.base.address, f_secret: private_key};
+                    ? { campaign: campaignAddress, f_address: this.base.address, f_secret: private_key, p_message: new_message}
+                    : { campaign: campaignAddress, f_address: this.base.address, f_secret: private_key};
                 const link = await this.utils.ipfsAdd(linkObject);
                 console.log('LINK', link);
                 // const raw = `f_address=${this.base.address}&f_secret=${private_key}&p_message=${new_message || ''}`;
@@ -355,7 +355,7 @@ export default class AcquisitionCampaign {
     // ShortUrl
     public joinAndSetPublicLinkWithCut(campaignAddress: string, referralLink: string, cut?: number, gasPrice: number = this.base._getGasPrice()): Promise<string> {
         return new Promise(async (resolve, reject) => {
-            const {f_address, f_secret, p_message} = await this.helpers._getOffchainDataFromIPFSHash(referralLink);
+            const {f_address, f_secret, p_message} = await this.utils.getOffchainDataFromIPFSHash(referralLink);
             if (!f_address || !f_secret) {
                 reject('Broken Link');
             }
@@ -397,7 +397,7 @@ export default class AcquisitionCampaign {
     public joinAndConvert(campaign: any, value: number | string | BigNumber, referralLink: string, gasPrice: number = this.base._getGasPrice()): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
-                const {f_address, f_secret, p_message} = await this.helpers._getOffchainDataFromIPFSHash(referralLink);
+                const {f_address, f_secret, p_message} = await this.utils.getOffchainDataFromIPFSHash(referralLink);
                 if (!f_address || !f_secret) {
                     reject('Broken Link');
                 }
@@ -442,7 +442,7 @@ export default class AcquisitionCampaign {
     public joinAndShareARC(campaignAddress: string, referralLink: string, recipient: string, gasPrice: number = this.base._getGasPrice()): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
-                const {f_address, f_secret, p_message} = await this.helpers._getOffchainDataFromIPFSHash(referralLink);
+                const {f_address, f_secret, p_message} = await this.utils.getOffchainDataFromIPFSHash(referralLink);
                 if (!f_address || !f_secret) {
                     reject('Broken Link');
                 }
