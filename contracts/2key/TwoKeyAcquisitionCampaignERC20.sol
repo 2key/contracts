@@ -116,13 +116,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         _;
     }
 
-    /// @notice Modifier which is going to check if campaign is closed (if time is greater then closing time)
-    modifier isClosed() {
-        require(now > campaignEndTime);
-        _;
-    }
-
-
     modifier onlyTwoKeyConversionHandler() {
         require(msg.sender == address(conversionHandler));
         _;
@@ -413,28 +406,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         require(idx == sig.length,'illegal message size');
     }
 
-    //=====================
-    //ENTRY POINT CONVERSION:
-
-    /// With this method we're moving arcs and buying the product (ETH)
-    // We receive ether
-    // How can I get bonus percentage?
-    /*
-        (1) We put Ether (converter sends ether)
-        (2) We compute tokens
-        (2) We create conversion object
-        (2) we can't do anything until converter is whitelisted
-
-        (3) Then we need another function that requires converter to be whitelisted and should do the following:
-            - Compute referral rewards and distribute then
-            - Compute and distribute moderation fees then
-            - Generate lock-up contracts for tokens then
-            - Move tokens to lock-up contracts then
-            - Send remaining ether to contractor
-    */
-
     //******************************************************
-    //(1) ENTRY POINTS
     //TODO: andrii if user wants to convert with metamask, they need to choose metamask before you call create their sig and call this function
     function joinAndConvert(bytes signature) public payable {
         require(msg.value >= minContributionETH);
@@ -724,5 +696,9 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
             return true;
         }
         return false;
+    }
+
+    function sendBackEthWhenConversionCancelled(address _cancelledConverter, uint _conversionAmount) public onlyTwoKeyConversionHandler {
+        _cancelledConverter.transfer(_conversionAmount);
     }
 }

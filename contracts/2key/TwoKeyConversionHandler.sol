@@ -30,7 +30,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
 
     /*
         TODO: Move from acquisitioncampaign when update all events to TwoKeyEventSource and call them from there
-        TODO: add method to get lockup contracts
     */
 
     address twoKeyAcquisitionCampaignERC20;
@@ -412,6 +411,29 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         }
     }
 
+    /// @notice Function where we can change state of converter to Approved
+    /// @dev Converter can only be approved if his previous state is pending or rejected
+    /// @param _converter is the address of converter
+    function moveFromPendingOrRejectedToCancelledState(address _converter) private {
+        ConversionState state = converterToConversionState[_converter];
+        bytes32 key = convertConverterStateToBytes(state);
+        address[] memory pending = conversionStateToConverters[key];
+        for(uint i=0; i< pending.length; i++) {
+            if(pending[i] == _converter) {
+                // Means we have found it in array of pending addresses
+                converterToConversionState[_converter] = ConversionState.APPROVED;
+                conversionStateToConverters[bytes32("CANCELLED")].push(_converter);
+                //assigning the value of last element
+                pending[i] = pending[pending.length-1];
+                delete pending[pending.length-1];
+                conversionStateToConverters[key] = pending;
+                conversionStateToConverters[key].length--;
+                break;
+            }
+        }
+    }
+
+
     /// @notice Function where we're going to move state of conversion from pending to rejected
     /// @dev private function, will be executed in another one
     /// @param _converter is the address of converter
@@ -451,4 +473,22 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         require(converterToConversionState[_converter] == ConversionState.PENDING);
         moveFromPendingToRejectedState(_converter);
     }
+
+    // only moderator or contractor also can call this method maybe?
+    function cancelConverter() public {
+        require(converterToConversionState[msg.sender] == ConversionState.REJECTED ||
+        converterToConversionState[msg.sender] == ConversionState.PENDING);
+        moveFromPendingOrRejectedToCancelledState(msg.sender);
+
+        Conversion memory conversion = conversions[msg.sender];
+        ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).sendBackEthWhenConversionCancelled(msg.sender, conversion.conversionAmount);
+//        msg.sender.transfer(conversion.conversionAmount);
+    }
+
+
+
+
+    //TODO: Don't return the money when I reject
+    //TODO: If the converter is rejected allow him to pull the funds out -- if he do this, conversion goes to cancelled state
+    //TODO: Converter can cancel conversion as long it's pending or rejected
 }
