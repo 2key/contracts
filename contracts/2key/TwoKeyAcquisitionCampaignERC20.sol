@@ -675,7 +675,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     /// @param value is the value for the publicMetaHash
     function updateOrSetIpfsHashPublicMeta(string value) public onlyContractor {
         publicMetaHash = value;
-        twoKeyEventSource.updatedPublicMetaHash(block.timestamp, value);
+//        twoKeyEventSource.updatedPublicMetaHash(block.timestamp, value);
     }
 
     /// @notice Option to update contractor proceeds

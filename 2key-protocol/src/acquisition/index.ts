@@ -172,6 +172,19 @@ export default class AcquisitionCampaign {
         });
     }
 
+    public getCampaignFromLink(link: string): Promise<any> {
+        return new Promise<any>(async (resolve, reject) => {
+            try {
+                const { campaign } = await this.utils.getOffchainDataFromIPFSHash(link);
+                await this.visit(campaign, link);
+                const campaignMeta = await this.getPublicMeta(campaign);
+                resolve(campaignMeta);
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
+
     // Inventory
     public async checkInventoryBalance(campaign: any): Promise<number> {
         try {
