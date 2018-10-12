@@ -275,21 +275,21 @@ describe('TwoKeyProtocol', () => {
         expect(tokenSymbol).to.be.equal('2Key');
     }).timeout(10000);
 
-    it('should return estimated gas for transfer2KeyTokens', async () => {
-        const gas = await twoKeyProtocol.getERC20TransferGas(ethDstAddress, twoKeyProtocol.Utils.toWei(123, 'ether'));
-        console.log('Gas required for Token transfer', gas);
-        return expect(gas).to.exist.to.be.greaterThan(0);
-    }).timeout(30000);
+    // it('should return estimated gas for transfer2KeyTokens', async () => {
+    //     const gas = await twoKeyProtocol.getERC20TransferGas(ethDstAddress, twoKeyProtocol.Utils.toWei(123, 'ether'));
+    //     console.log('Gas required for Token transfer', gas);
+    //     return expect(gas).to.exist.to.be.greaterThan(0);
+    // }).timeout(30000);
+    //
+    // it('should transfer 2KeyTokens', async function () {
+    //     txHash = await twoKeyProtocol.transfer2KEYTokens(ethDstAddress, twoKeyProtocol.Utils.toWei(123, 'ether'), 3000000000);
+    //     console.log('Transfer 2Key Tokens', txHash, typeof txHash);
+    //     const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+    //     const status = receipt && receipt.status;
+    //     expect(status).to.be.equal('0x1');
+    // }).timeout(30000);
 
-    it('should transfer 2KeyTokens', async function () {
-        txHash = await twoKeyProtocol.transfer2KEYTokens(ethDstAddress, twoKeyProtocol.Utils.toWei(123, 'ether'), 3000000000);
-        console.log('Transfer 2Key Tokens', txHash, typeof txHash);
-        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-        const status = receipt && receipt.status;
-        expect(status).to.be.equal('0x1');
-    }).timeout(30000);
-
-    it('should print balances', printBalances).timeout(15000);
+    // it('should print balances', printBalances).timeout(15000);
 
     // it('should calculate gas for campaign Acquisition Contract creation', async () => {
     //     const gas = await twoKeyProtocol.AcquisitionCampaign.estimateCreation({
@@ -322,12 +322,13 @@ describe('TwoKeyProtocol', () => {
             moderatorFeePercentageWei: twoKeyProtocol.Utils.toWei(moderatorFeePercentage, 'ether'),
             minContributionETHWei: twoKeyProtocol.Utils.toWei(minContributionETH, 'ether'),
             maxContributionETHWei: twoKeyProtocol.Utils.toWei(maxContributionETH, 'ether'),
+            // tokenDistributionDate: Math.round(Date.now() / 1000),
             tokenDistributionDate: 12345678,
             maxDistributionDateShiftInDays: 180,
             bonusTokensVestingMonths: 6,
             bonusTokensVestingStartShiftInDaysFromDistributionDate: 180
         };
-        const campaign = await twoKeyProtocol.AcquisitionCampaign.create(campaignData, createCallback, undefined, 500, 600000);
+        const campaign = await twoKeyProtocol.AcquisitionCampaign.create(campaignData, createCallback, 150000000000, 500, 600000);
         console.log('Campaign address', campaign);
         campaignAddress = campaign.campaignAddress;
         refLink = campaign.campaignPublicLinkKey;

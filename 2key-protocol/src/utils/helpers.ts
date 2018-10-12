@@ -114,12 +114,9 @@ export default class Helpers {
         return new Promise(async (resolve, reject) => {
             const {abi, bytecode: data, name} = contract;
             // const gas = await this.base._estimateSubcontractGas(contract, params);
-            const createParams = params ? [...params, {data, from: this.base.address, gasPrice}] : [{
-                data,
-                from: this.base.address,
-                gasPrice
-            }];
-            console.log('CREATE CONTRACT', name, params, this.base.address, gasPrice);
+            const createParams = params ? [...params] : [];
+            createParams.push({data, from: this.base.address, gasPrice});
+            console.log('CREATE CONTRACT', name, params, this.base.address, gasPrice, abi);
             this.base.web3.eth.contract(abi).new(...createParams, (err, res) => {
                 if (err) {
                     reject(err);
