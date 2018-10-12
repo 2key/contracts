@@ -186,7 +186,19 @@ export default class AcquisitionCampaign {
     }
 
     // Inventory
-    public async checkInventoryBalance(campaign: any): Promise<number> {
+    public getInventoryBalance(campaign: any): Promise<number | string | BigNumber> {
+        return new Promise<number>(async (resolve, reject) => {
+            try {
+                const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
+                const balance = await promisify(campaignInstance.getInventoryBalance, [{from: this.base.address}]);
+                resolve(balance);
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
+
+    public async checkInventoryBalance(campaign: any): Promise<number | string | BigNumber> {
         try {
             const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
             const hash = await promisify(campaignInstance.getAndUpdateInventoryBalance, [{from: this.base.address}]);
