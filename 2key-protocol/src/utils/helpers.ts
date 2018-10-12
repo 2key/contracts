@@ -119,7 +119,7 @@ export default class Helpers {
                 from: this.base.address,
                 gasPrice
             }];
-            console.log('CREATE CONTRACT', name, createParams);
+            console.log('CREATE CONTRACT', name, params, this.base.address, gasPrice);
             this.base.web3.eth.contract(abi).new(...createParams, (err, res) => {
                 if (err) {
                     reject(err);
