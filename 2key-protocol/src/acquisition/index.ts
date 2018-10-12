@@ -95,6 +95,7 @@ export default class AcquisitionCampaign {
                 let txHash: string;
                 let conversionHandlerAddress = data.conversionHandlerAddress;
                 if (!conversionHandlerAddress) {
+                    console.log([data.tokenDistributionDate, data.maxDistributionDateShiftInDays, data.bonusTokensVestingMonths, data.bonusTokensVestingStartShiftInDaysFromDistributionDate], gasPrice);
                     txHash = await this.helpers._createContract(contractsMeta.TwoKeyConversionHandler, gasPrice, [data.tokenDistributionDate, data.maxDistributionDateShiftInDays, data.bonusTokensVestingMonths, data.bonusTokensVestingStartShiftInDaysFromDistributionDate], progressCallback);
                     const predeployReceipt = await this.utils.getTransactionReceiptMined(txHash, this.base.web3, interval, timeout);
                     conversionHandlerAddress = predeployReceipt && predeployReceipt.contractAddress;
@@ -131,6 +132,7 @@ export default class AcquisitionCampaign {
                     progressCallback('SetPublicLinkKey', true, campaignPublicLinkKey);
                 }
                 resolve({
+                    contractor: this.base.address,
                     campaignAddress,
                     conversionHandlerAddress,
                     campaignPublicLinkKey,

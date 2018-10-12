@@ -99,6 +99,7 @@ export interface IContractsAddresses {
 }
 
 export interface IAcquisitionCampaignMeta {
+    contractor: string,
     campaignAddress: string,
     conversionHandlerAddress: string,
     campaignPublicLinkKey: string
