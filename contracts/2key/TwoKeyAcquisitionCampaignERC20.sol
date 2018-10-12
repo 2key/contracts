@@ -139,7 +139,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         require(_twoKeyEconomy != address(0));
         require(_assetContractERC20 != address(0));
         require(_maxReferralRewardPercent > 0);
-        require(_whitelists != address(0));
+        require(_conversionHandler != address(0));
 
         contractor = msg.sender;
         twoKeyEconomy = TwoKeyEconomy(_twoKeyEconomy);

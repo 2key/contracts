@@ -143,6 +143,18 @@ export default class AcquisitionCampaign {
         });
     }
 
+    public addTwoKeyAcquisitionCampaignToBeEligibleToEmitEvents(campaignAddress: string):  Promise<string> {
+        return new Promise<string> (async(resolve,reject) => {
+           try {
+                const twoKeyAdminInstance = await this.helpers._getTwoKeyAdminInstance(contractsMeta.TwoKeyAdmin.networks[this.base.networks.mainNetId].address);
+                const txHash = await promisify(twoKeyAdminInstance.twoKeyEventSourceAddAuthorizedContracts, [campaignAddress, {from: this.base.address}]);
+                resolve(txHash);
+           } catch (e) {
+               reject(e);
+           }
+        });
+    }
+
     public updateOrSetIpfsHashPublicMeta(campaign: any, hash: string, gasPrice: number = this.base._getGasPrice()): Promise<string> {
         return new Promise<string>(async (resolve, reject) => {
             try {

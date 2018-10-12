@@ -1,15 +1,7 @@
 import {BigNumber} from 'bignumber.js';
-import LZString from 'lz-string';
 import contractsMeta from '../contracts';
 import {promisify} from './index';
-import {
-    IContract,
-    ICreateCampaignProgress,
-    IRawTransaction,
-    ITransaction,
-    ITwoKeyBase,
-    IOffchainData,
-} from '../interfaces';
+import {IContract, ICreateCampaignProgress, IRawTransaction, ITransaction, ITwoKeyBase,} from '../interfaces';
 
 function toBuffer(ab: Uint8Array): Buffer {
     const buffer = new Buffer(ab.byteLength);
@@ -221,6 +213,12 @@ export default class Helpers {
         return erc20.address
             ? erc20
             : await this._createAndValidate('ERC20full', erc20);
+    }
+
+    async _getTwoKeyAdminInstance(twoKeyAdmin: any) : Promise<any> {
+        return twoKeyAdmin.address
+            ? twoKeyAdmin
+            : await this._createAndValidate('TwoKeyAdmin', twoKeyAdmin);
     }
 
     async _createAndValidate(

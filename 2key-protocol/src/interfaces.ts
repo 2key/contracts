@@ -32,6 +32,7 @@ export interface ITwoKeyHelpers {
     _checkBalanceBeforeTransaction: (gasRequired: number, gasPrice: number) => Promise<boolean>,
     _getAcquisitionCampaignInstance: (campaign: any) => Promise<any>,
     _getERC20Instance: (erc20: any) => Promise<any>,
+    _getTwoKeyAdminInstance(twoKeyAdmin: any) : Promise<any>,
     _createAndValidate: (contractName: string, address: string) => Promise<any>,
     _checkIPFS: () => Promise<boolean>,
 }
@@ -65,6 +66,10 @@ export interface ITwoKeyAcquisitionCampaign {
     isAddressJoined: (campaign: any) => Promise<boolean>,
     executeConversion: (campaign: any, converter: string) => Promise<string>,
     getLockupContractsForConverter: (campaign: any, converter: string) => Promise<string[]>,
+}
+ // We need twoKeyAdmin in order to approve twoKeyAcquisitionCampaign to emit events
+export interface ITwoKeyAdmin {
+
 }
 
 export interface IERC20 {
