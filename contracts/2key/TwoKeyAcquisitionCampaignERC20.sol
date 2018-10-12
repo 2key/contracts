@@ -129,7 +129,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     // ==============================================================================================================
 
     constructor(address _twoKeyEventSource, address _twoKeyEconomy,
-        address _whitelists,
+        address _conversionHandler,
         address _moderator, address _assetContractERC20, uint _campaignStartTime, uint _campaignEndTime,
         uint _expiryConversion, uint _moderatorFeePercentage, uint _maxReferralRewardPercent, uint _maxConverterBonusPercent,
         uint _pricePerUnitInETH, uint _minContributionETH, uint _maxContributionETH,
@@ -143,7 +143,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
 
         contractor = msg.sender;
         twoKeyEconomy = TwoKeyEconomy(_twoKeyEconomy);
-        conversionHandler = TwoKeyConversionHandler(_whitelists);
+        conversionHandler = TwoKeyConversionHandler(_conversionHandler);
         moderator = _moderator;
         assetContractERC20 = _assetContractERC20;
         campaignStartTime = _campaignStartTime;

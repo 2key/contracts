@@ -136,6 +136,7 @@ contract TwoKeyAdmin is  Ownable, Destructible, AdminContract {
 		twoKeyEventSource = TwoKeyEventSource(_twoKeyEventSource);
 	}
 
+	/// TODO: Who can call this method???
     /// @notice Function to whitelist contract address for Event Source contract 
 	/// @dev We're requiring contract address different from address 0 as it is required to be deployed before calling this method
 	/// @param _contractAddress is address of a contract

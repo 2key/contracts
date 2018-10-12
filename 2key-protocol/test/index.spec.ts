@@ -630,7 +630,7 @@ describe('TwoKeyProtocol', () => {
 
     }).timeout(30000);
 
-    it('should get all pending converters after', async() => {
+    it('should get all pending converters after cancellation', async() => {
         const { web3, address } = web3switcher.aydnep();
         twoKeyProtocol = new TwoKeyProtocol({
             web3,
