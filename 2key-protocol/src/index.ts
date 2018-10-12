@@ -168,7 +168,21 @@ export class TwoKeyProtocol {
     }
 
     public unsubscribe2KeyEvents() {
-        this.twoKeyEvents.stopWatching();
+        if (this.twoKeyEvents && this.twoKeyEvents.stopWatching) {
+            this.twoKeyEvents.stopWatching();
+        }
+    }
+
+    public getContractorCampaigns(): Promise<string[]> {
+        return new Promise<string[]>(async (resolve, reject) => {
+            try {
+                console.log(this.address);
+                const campaigns = await promisify(this.twoKeyReg.getContractsWhereUserIsContractor, [this.address, { from: this.address}]);
+                resolve(campaigns);
+            } catch (e) {
+                reject(e);
+            }
+        });
     }
 
     /* TRANSFERS */

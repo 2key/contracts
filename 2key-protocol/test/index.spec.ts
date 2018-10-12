@@ -352,6 +352,12 @@ describe('TwoKeyProtocol', () => {
         expect(parseFloat(balance)).to.be.equal(1234);
     }).timeout(300000);
 
+    // it('should show all users campaigns', async () => {
+    //     const campaigns = await twoKeyProtocol.getContractorCampaigns();
+    //     console.log(campaigns);
+    //     expect(campaigns.length).to.be.greaterThan(0);
+    // }).timeout(30000);
+
     // Implemented in AcquisitionCampaign.create
     // it('should create public link for address', async () => {
     //     try {
