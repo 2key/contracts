@@ -621,9 +621,9 @@ export default { ERC20full:
       { '3':
          { events: {},
            links: {},
-           address: '0x09c5ead4b3ae1e093e469cdf4728327b5116ba69',
+           address: '0x465c346ea3ec752215a8b80285489edb1f9e88cc',
            transactionHash:
-            '0xcbf7ab65cf9f8557466ba375d165db2335aade39806eda5f44e0922f638d3e55' },
+            '0x366ebb905996f129cac8159b48ab2a8e951693702c9769a196957f2b48d3d708' },
         '17':
          { events: {},
            links: {},
@@ -1053,9 +1053,9 @@ export default { ERC20full:
       { '3':
          { events: {},
            links: {},
-           address: '0x2b0fb3c124eaad415db9ff5d3732d83fb1fb61c2',
+           address: '0x5215e77bf651b6591989c255f6deda33cbdacde1',
            transactionHash:
-            '0x5ca7ea2e9eabf7852ca997a7615ad8041760f95766594d80496d1a26ae3ff9a7' },
+            '0x95cd0cc573b8d1bea9cecf5b44e55bd28b5d99c65827ceb891ced7a71588930b' },
         '17':
          { events: {},
            links: {},
@@ -1354,9 +1354,9 @@ export default { ERC20full:
       { '3':
          { events: {},
            links: {},
-           address: '0xfbff93a996f62d2942942da7be2b4bb5851418b6',
+           address: '0xd49d3fcd7d35e562660155ebdf571cc212aeb678',
            transactionHash:
-            '0x4e7b2bfa8eb01b21182b5cd33efcb2609c8f4ddb20bd1bcc48f2fe52c3b9c522' },
+            '0xf3db97114297cc499ed1be8a10b4a51c3811fd0e38ba4e3efd3adfc7ebc75859' },
         '17':
          { events: {},
            links: {},
@@ -1623,9 +1623,9 @@ export default { ERC20full:
       { '17':
          { events: {},
            links: {},
-           address: '0xa1ef6d7db0bc711b7c5b0a6947230ac48841a7f8',
+           address: '0x0fb2e72381f928094af9847f730150528464bd30',
            transactionHash:
-            '0x406a96e9e88f56600e520fadf43a41ccccb88bf990b16d0d4efbea99fa353d14' },
+            '0x1cd4a5e4abb2b284d8ad4cb64735bcd324804a1dce60cabdd5dbd44935067021' },
         '47':
          { events: {},
            links: {},
@@ -1753,9 +1753,9 @@ export default { ERC20full:
       { '3':
          { events: {},
            links: {},
-           address: '0x42176b1aa7d6f37d5e1f435b32540481bc0883a6',
+           address: '0xe9d5b2faeea9c0b3885919abe385533a9cfc762d',
            transactionHash:
-            '0x05d3bad0daa805973e7f6633b271171550f58d876af392392465d6fb34c28bcc' },
+            '0xfb5d194d56164aba185614bad6396265efdc426edb87197ab684a54e8a2071de' },
         '17':
          { events: {},
            links: {},
