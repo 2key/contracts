@@ -130,6 +130,7 @@ export interface ITwoKeyInit {
     rpcUrl?: string,
     eventsNetUrl?: string,
     plasmaPK: string,
+    console?: any,
 }
 
 export interface ITransaction {

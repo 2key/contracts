@@ -17,7 +17,6 @@ import {
     ITwoKeyHelpers,
     ITWoKeyUtils, ITwoKeyBase, ITwoKeyAcquisitionCampaign, IERC20,
 } from './interfaces';
-import Sign from './utils/sign';
 import Index, {promisify} from './utils';
 import Helpers from './utils/helpers';
 import AcquisitionCampaign from './acquisition';
@@ -80,6 +79,8 @@ export class TwoKeyProtocol {
                 syncTwoKeyNetId: TwoKeyDefaults.syncTwoKeyNetId,
             }
         }
+
+        global.console = initValues.console || console;
 
         // init 2KeySyncNet Client
         const private_key = Buffer.from(plasmaPK, 'hex');
