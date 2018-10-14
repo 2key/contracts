@@ -98,6 +98,10 @@ export default class AcquisitionCampaign {
                     this.base._log([data.tokenDistributionDate, data.maxDistributionDateShiftInDays, data.bonusTokensVestingMonths, data.bonusTokensVestingStartShiftInDaysFromDistributionDate], gasPrice);
                     txHash = await this.helpers._createContract(contractsMeta.TwoKeyConversionHandler, gasPrice, [data.tokenDistributionDate, data.maxDistributionDateShiftInDays, data.bonusTokensVestingMonths, data.bonusTokensVestingStartShiftInDaysFromDistributionDate], progressCallback);
                     const predeployReceipt = await this.utils.getTransactionReceiptMined(txHash, this.base.web3, interval, timeout);
+                    if (predeployReceipt.status !== '0x1') {
+                        reject(predeployReceipt);
+                        return;
+                    }
                     conversionHandlerAddress = predeployReceipt && predeployReceipt.contractAddress;
                     if (progressCallback) {
                         progressCallback('TwoKeyConversionHandler', true, conversionHandlerAddress);
@@ -123,6 +127,10 @@ export default class AcquisitionCampaign {
                     data.referrerQuota || 5,
                 ], progressCallback);
                 const campaignReceipt = await this.utils.getTransactionReceiptMined(txHash, this.base.web3, interval, timeout);
+                if (campaignReceipt.status !== '0x1') {
+                    reject(campaignReceipt);
+                    return;
+                }
                 const campaignAddress = campaignReceipt && campaignReceipt.contractAddress;
                 if (progressCallback) {
                     progressCallback('TwoKeyAcquisitionCampaignERC20', true, campaignAddress);
