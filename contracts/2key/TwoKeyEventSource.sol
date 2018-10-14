@@ -189,7 +189,7 @@ contract TwoKeyEventSource is TwoKeyTypes {
 
 
     function getAdmin() public view returns (address) {
-        return address(twoKeyAdmin);
+        return twoKeyAdmin;
     }
 
     function checkIsAuthorized(address _subAdmin) public view returns (bool) {
