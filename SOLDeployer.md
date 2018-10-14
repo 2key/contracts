@@ -2,15 +2,17 @@
 
 ### How to deploy contracts to any network except local dev
 
+* Commit your changes
+* Pull changes from remote
 * Make sure that all tests pass (```yarn run test```)
 * Notice that after successful build 2key-protocol version you should run ```yarn run deploy --migrate dev-local``` to overwrite contracts meta 
-* Change truffle.js and add your configuration
+* Change truffle.js and add your configuration (make sure that your network configs have correct rpcUrl and networkIds, also networkId required for ledger provider)
 * Edit ContractDeploymentWhiteList.json
-* Commit your changes
 * Make sure that you on same branches in contracts and 2key-protocol submodule (./2key-protocol/dist)
 * run ```yarn run deploy {comaseparated,networks} {truffle params if needed}```
 * wait until process finish
 * check both repos contracts and 2key-protocol should have same tags
+* notify to #dev channel with builded tag. (update dependency in `web-app/package.json:twokey-protocol`)
 
 ### How to deploy contracts to local dev net without building release
 

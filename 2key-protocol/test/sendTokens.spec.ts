@@ -2,19 +2,19 @@ import {expect} from 'chai';
 import 'mocha';
 import {TwoKeyProtocol} from '../src';
 import contractsMeta from '../src/contracts';
-import createWeb3, { ledgerWeb3 } from './_web3';
+import { ledgerWeb3 } from './_web3';
 import Sign from '../src/utils/sign';
 
-const rpcUrl = 'wss://ropsten.infura.io/ws';
+const rpcUrl = process.env.RINKEBY ? 'wss://rinkeby.infura.io/ws' : 'wss://ropsten.infura.io/ws';
 // const rpcUrl = 'wss://ropsten.infura.io/ws';
-const mainNetId = 3;
-const syncTwoKeyNetId = 47;
+const mainNetId = process.env.RINKEBY ? 4 : 3;
+const syncTwoKeyNetId = 17;
 const destinationAddress = '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7';
 console.log(mainNetId);
 
 const twoKeyEconomy = contractsMeta.TwoKeyEconomy.networks[mainNetId].address;
 
-
+const network = process.env.RINKEBY ? 'RINKEBY' : 'ROPSTEN';
 console.log(rpcUrl);
 console.log(mainNetId);
 console.log(contractsMeta.TwoKeyEventSource.networks[mainNetId].address);
@@ -23,7 +23,7 @@ console.log(contractsMeta.TwoKeyEconomy.networks[mainNetId].address);
 const sendTokens: any = new Promise(async (resolve, reject) => {
     try {
         // const { web3, address } = createWeb3('laundry version question endless august scatter desert crew memory toy attract cruel', rpcUrl);
-        const { web3, address } = await ledgerWeb3(rpcUrl, 3);
+        const { web3, address } = await ledgerWeb3(rpcUrl, mainNetId);
         const twoKeyProtocol = new TwoKeyProtocol({
             web3,
             address,
@@ -54,8 +54,8 @@ const sendTokens: any = new Promise(async (resolve, reject) => {
     }
 });
 
-describe('TwoKeyProtocol ROPSTEN', () => {
-    it('ROPSTEN: should transfer tokens', async () => {
+describe(`TwoKeyProtocol ${network}`, () => {
+    it(`${network}: should transfer tokens`, async () => {
         const receipt = await sendTokens;
         console.log(receipt);
         expect(receipt.status).to.be.equal('0x1');
