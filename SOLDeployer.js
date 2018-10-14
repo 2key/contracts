@@ -203,6 +203,7 @@ async function deploy() {
       }
     }
     const l = networks.length;
+    await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['compile', '--all']);
     for (let i = 0; i < l; i += 1) {
       /* eslint-disable no-await-in-loop */
       await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--network', networks[i]].concat(process.argv.slice(3)));
