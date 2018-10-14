@@ -46,7 +46,7 @@ export interface ITwoKeyAcquisitionCampaign {
     getInventoryBalance: (campaign: any) => Promise<number | string | BigNumber>,
     getPublicLinkKey: (campaign: any, address?: string) => Promise<string>,
     getReferrerCut: (campaign: any) => Promise<number>,
-    setPublicLinkKey: (campaign: any, publicKey: string, gasPrice?: number) => Promise<string>,
+    setPublicLinkKey: (campaign: any, publicKey: string, gasPrice?: number) => Promise<IPublicLinkKey>,
     getEstimatedMaximumReferralReward: (campaign: any, referralLink?: string) => Promise<number>,
     emitJoinEvent: (campaignAddress: string, referralLink: string) => Promise<string>,
     join: (campaign: any, cut: number, referralLink?: string, gasPrice?: number) => Promise<string>,
