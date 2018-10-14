@@ -274,16 +274,6 @@ export default class AcquisitionCampaign {
         });
     }
 
-    public emitJoinEvent(campaignAddress: string, referralLink: string): Promise<string> {
-        return new Promise(async (resolve, reject) => {
-            try {
-
-            } catch (e) {
-                reject(e);
-            }
-        });
-    }
-
     /* LINKS */
 
     // Visit link
@@ -517,10 +507,8 @@ export default class AcquisitionCampaign {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
                 const conversionHandler = await promisify(campaignInstance.getTwoKeyConversionHandlerAddress, [{from: this.base.address}]);
-                console.log('WhiteListsAddress', conversionHandler);
                 const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandler);
                 const conversion = await promisify(conversionHandlerInstance.conversions, [this.base.address]);
-                // const conversion = await promisify(campaignInstance.conversions, [address]);
                 resolve(conversion);
             } catch (e) {
                 reject(e);

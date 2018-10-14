@@ -48,7 +48,6 @@ export interface ITwoKeyAcquisitionCampaign {
     getReferrerCut: (campaign: any) => Promise<number>,
     setPublicLinkKey: (campaign: any, publicKey: string, gasPrice?: number) => Promise<IPublicLinkKey>,
     getEstimatedMaximumReferralReward: (campaign: any, referralLink?: string) => Promise<number>,
-    emitJoinEvent: (campaignAddress: string, referralLink: string) => Promise<string>,
     join: (campaign: any, cut: number, referralLink?: string, gasPrice?: number) => Promise<string>,
     joinAndSetPublicLinkWithCut: (campaignAddress: string, referralLink: string, cut?: number, gasPrice?: number) => Promise<string>,
     joinAndShareARC: (campaignAddress: string, referralLink: string, recipient: string, gasPrice?: number) => Promise<string>,
