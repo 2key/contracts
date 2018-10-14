@@ -114,8 +114,10 @@ export default class Helpers {
                 } else {
                     if (res.address) {
                         resolve(res.address);
-                    } else if (progressCallback) {
-                        progressCallback(name, false, res.transactionHash);
+                    } else {
+                        if (progressCallback) {
+                            progressCallback(name, false, res.transactionHash);
+                        }
                         resolve(res.transactionHash);
                     }
                 }

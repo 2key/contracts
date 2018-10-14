@@ -80,7 +80,10 @@ export class TwoKeyProtocol {
             }
         }
 
-        global.console = initValues.console || console;
+
+        if (initValues.console) {
+            console = initValues.console;
+        }
 
         // init 2KeySyncNet Client
         const private_key = Buffer.from(plasmaPK, 'hex');
