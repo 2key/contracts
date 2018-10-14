@@ -19,6 +19,10 @@
 * ```yarn run deploy --migrate {comaseparated,networks} {truffle params if needed}```
 * enjoy
 
+### Updating Whitelist of contracts
+
+* edit `ContractDeploymentWhiteList.json`
+
 ### SOLDeployer commands
 
 * ```--migrate``` - runs truffle migrate --network with generating ```contracts.ts``` abi interface and without running tests
