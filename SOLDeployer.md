@@ -8,13 +8,13 @@
 * Edit ContractDeploymentWhiteList.json
 * Commit your changes
 * Make sure that you on same branches in contracts and 2key-protocol submodule (./2key-protocol/dist)
-* run ```yarn run deploy {network} {truffle params if needed}```
+* run ```yarn run deploy {comaseparated,networks} {truffle params if needed}```
 * wait until process finish
 * check both repos contracts and 2key-protocol should have same tags
 
 ### How to deploy contracts to local dev net without building release
 
-* ```yarn run deploy --migrate {network} {truffle params if needed}```
+* ```yarn run deploy --migrate {comaseparated,networks} {truffle params if needed}```
 * enjoy
 
 ### SOLDeployer commands

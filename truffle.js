@@ -60,7 +60,7 @@ module.exports = {
     },
     'rinkeby-infura': {
       provider: () => LedgerProvider(`https://rinkeby.infura.io/v3/${infuraApiKey}`, {
-        networkId: 3,
+        networkId: 4,
         // https://github.com/LedgerHQ/ledgerjs/issues/200
         path: "44'/60'/0'/0",
         askConfirm: true,
