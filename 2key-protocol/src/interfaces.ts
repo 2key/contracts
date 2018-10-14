@@ -1,20 +1,20 @@
 import {BigNumber} from 'bignumber.js';
 
 export interface ITwoKeyBase {
-    readonly web3: any;
-    readonly plasmaWeb3: any;
-    readonly ipfs: any;
-    readonly address: string;
-    readonly networks: IEhtereumNetworks;
-    readonly contracts: IContractsAddresses;
-    readonly twoKeyEconomy: any;
-    readonly twoKeyReg: any;
-    readonly twoKeyPlasmaEvents: any;
-    readonly plasmaAddress: string;
-    readonly _setGasPrice: (number) => void,
-    readonly _getGasPrice: () => number,
-    readonly _setTotalSupply: (number) => void,
-    readonly _log: any,
+    web3: any;
+    plasmaWeb3: any;
+    ipfs: any;
+    address: string;
+    networks: IEhtereumNetworks;
+    contracts: IContractsAddresses;
+    twoKeyEconomy: any;
+    twoKeyReg: any;
+    twoKeyPlasmaEvents: any;
+    plasmaAddress: string;
+    _setGasPrice: (number) => void,
+    _getGasPrice: () => number,
+    _setTotalSupply: (number) => void,
+    _log: any,
 }
 
 export interface ITwoKeyHelpers {

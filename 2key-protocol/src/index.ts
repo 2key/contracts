@@ -35,29 +35,33 @@ const TwoKeyDefaults = {
 };
 
 export class TwoKeyProtocol {
-    private readonly web3: any;
-    private readonly plasmaWeb3: any;
-    private readonly ipfs: any;
-    public readonly address: string;
+    private web3: any;
+    private plasmaWeb3: any;
+    private ipfs: any;
+    public address: string;
     public gasPrice: number;
     public totalSupply: number;
     public gas: number;
-    private readonly networks: IEhtereumNetworks;
-    private readonly contracts: IContractsAddresses;
-    private readonly twoKeyEconomy: any;
-    private readonly twoKeyReg: any;
-    private readonly twoKeyPlasmaEvents: any;
+    private networks: IEhtereumNetworks;
+    private contracts: IContractsAddresses;
+    private twoKeyEconomy: any;
+    private twoKeyReg: any;
+    private twoKeyPlasmaEvents: any;
     private twoKeyEvents: any;
-    private readonly plasmaAddress: string;
-    public readonly  ERC20: IERC20;
-    public readonly Utils: ITWoKeyUtils;
-    private readonly Helpers: ITwoKeyHelpers;
-    public readonly AcquisitionCampaign: ITwoKeyAcquisitionCampaign;
-    private readonly _log: any;
+    private plasmaAddress: string;
+    public ERC20: IERC20;
+    public Utils: ITWoKeyUtils;
+    private Helpers: ITwoKeyHelpers;
+    public AcquisitionCampaign: ITwoKeyAcquisitionCampaign;
+    private _log: any;
 
     // private twoKeyReg: any;
 
     constructor(initValues: ITwoKeyInit) {
+        this.init(initValues);
+    }
+
+    public init(initValues: ITwoKeyInit) {
         // init MainNet Client
         const {
             web3,
