@@ -158,10 +158,10 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         maxContributionETH = _maxContributionETH;
 
         setERC20Attributes();
-//        conversionHandler.setTwoKeyAcquisitionCampaignERC20(address(this), _moderator, contractor, _assetContractERC20, symbol);
+        conversionHandler.setTwoKeyAcquisitionCampaignERC20(address(this), _moderator, contractor, _assetContractERC20, symbol);
 
         // Emit event that TwoKeyCampaign is created
-//        twoKeyEventSource.created(address(this), contractor);
+        twoKeyEventSource.created(address(this), contractor);
 
     }
 
