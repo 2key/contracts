@@ -107,19 +107,18 @@ export default class Helpers {
             const {abi, bytecode: data, name} = contract;
             const createParams = params ? [...params] : [];
             createParams.push({data, from: this.base.address, gasPrice});
-            console.log('CREATE CONTRACT', name, params, this.base.address, gasPrice);
+            this.base._log('CREATE CONTRACT', name, params, this.base.address, gasPrice);
             this.base.web3.eth.contract(abi).new(...createParams, (err, res) => {
                 if (err) {
                     reject(err);
                 } else {
-                    if (res.address) {
-                        resolve(res.address);
-                    } else {
-                        if (progressCallback) {
-                            progressCallback(name, false, res.transactionHash);
-                        }
-                        resolve(res.transactionHash);
+                    // if (res.address) {
+                    //     resolve(res.address);
+                    // }
+                    if (progressCallback) {
+                        progressCallback(name, false, res.transactionHash);
                     }
+                    resolve(res.transactionHash);
                 }
             });
         });
@@ -194,7 +193,7 @@ export default class Helpers {
         }
         const balance = this.base.web3.fromWei(await this._getEthBalance(this.base.address), 'ether');
         const transactionFee = this.base.web3.fromWei((gasPrice || this.gasPrice) * gasRequired, 'ether');
-        console.log(`_checkBalanceBeforeTransaction ${this.base.address}, ${balance} (${transactionFee}), gasPrice: ${(gasPrice || this.gasPrice)}`);
+        this.base._log(`_checkBalanceBeforeTransaction ${this.base.address}, ${balance} (${transactionFee}), gasPrice: ${(gasPrice || this.gasPrice)}`);
         if (transactionFee > balance) {
             throw new Error(`Not enough founds. Required: ${transactionFee}. Your balance: ${balance},`);
         }

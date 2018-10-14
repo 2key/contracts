@@ -14,6 +14,7 @@ export interface ITwoKeyBase {
     readonly _setGasPrice: (number) => void,
     readonly _getGasPrice: () => number,
     readonly _setTotalSupply: (number) => void,
+    readonly _log: any,
 }
 
 export interface ITwoKeyHelpers {
@@ -134,7 +135,7 @@ export interface ITwoKeyInit {
     rpcUrl?: string,
     eventsNetUrl?: string,
     plasmaPK: string,
-    console?: any,
+    log?: (any) => void,
 }
 
 export interface ITransaction {

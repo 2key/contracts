@@ -53,6 +53,7 @@ export class TwoKeyProtocol {
     public readonly Utils: ITWoKeyUtils;
     private readonly Helpers: ITwoKeyHelpers;
     public readonly AcquisitionCampaign: ITwoKeyAcquisitionCampaign;
+    private readonly _log: any;
 
     // private twoKeyReg: any;
 
@@ -80,10 +81,7 @@ export class TwoKeyProtocol {
             }
         }
 
-
-        if (initValues.console) {
-            console = initValues.console;
-        }
+        this._log = initValues.log || console.log;
 
         // init 2KeySyncNet Client
         const private_key = Buffer.from(plasmaPK, 'hex');
@@ -133,6 +131,7 @@ export class TwoKeyProtocol {
             _getGasPrice: this._getGasPrice,
             _setGasPrice: this._setGasPrice,
             _setTotalSupply: this._setTotalSupply,
+            _log: this._log,
         };
 
         this.Helpers = new Helpers(twoKeyBase);
@@ -180,7 +179,7 @@ export class TwoKeyProtocol {
     public getContractorCampaigns(): Promise<string[]> {
         return new Promise<string[]>(async (resolve, reject) => {
             try {
-                console.log(this.address);
+                this._log(this.address);
                 const campaigns = await promisify(this.twoKeyReg.getContractsWhereUserIsContractor, [this.address, { from: this.address}]);
                 resolve(campaigns);
             } catch (e) {

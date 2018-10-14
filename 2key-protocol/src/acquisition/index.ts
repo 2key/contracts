@@ -79,7 +79,7 @@ export default class AcquisitionCampaign {
                     data.maxContributionETHWei,
                     data.referrerQuota || 5,
                 ]);
-                console.log('TwoKeyAcquisitionCampaignERC20 gas required', campaignGas);
+                this.base._log('TwoKeyAcquisitionCampaignERC20 gas required', campaignGas);
                 const totalGas = predeployGas + campaignGas;
                 resolve(totalGas);
             } catch (err) {
@@ -95,7 +95,7 @@ export default class AcquisitionCampaign {
                 let txHash: string;
                 let conversionHandlerAddress = data.conversionHandlerAddress;
                 if (!conversionHandlerAddress) {
-                    console.log([data.tokenDistributionDate, data.maxDistributionDateShiftInDays, data.bonusTokensVestingMonths, data.bonusTokensVestingStartShiftInDaysFromDistributionDate], gasPrice);
+                    this.base._log([data.tokenDistributionDate, data.maxDistributionDateShiftInDays, data.bonusTokensVestingMonths, data.bonusTokensVestingStartShiftInDaysFromDistributionDate], gasPrice);
                     txHash = await this.helpers._createContract(contractsMeta.TwoKeyConversionHandler, gasPrice, [data.tokenDistributionDate, data.maxDistributionDateShiftInDays, data.bonusTokensVestingMonths, data.bonusTokensVestingStartShiftInDaysFromDistributionDate], progressCallback);
                     const predeployReceipt = await this.utils.getTransactionReceiptMined(txHash, this.base.web3, interval, timeout);
                     conversionHandlerAddress = predeployReceipt && predeployReceipt.contractAddress;
@@ -247,24 +247,24 @@ export default class AcquisitionCampaign {
                     const {f_address, f_secret, p_message} = await this.utils.getOffchainDataFromIPFSHash(referralLink);
                     const contractConstants = (await promisify(campaignInstance.getConstantInfo, [{from: this.base.address}]));
                     const decimals = contractConstants[3].toNumber();
-                    console.log('Decimals', decimals);
+                    this.base._log('Decimals', decimals);
                     const maxReferralRewardPercent = new BigNumber(contractConstants[1]).div(10 ** decimals).toNumber();
                     if (f_address === contractorAddress) {
                         resolve(maxReferralRewardPercent);
                         return;
                     }
                     const firstAddressInChain = p_message ? `0x${p_message.substring(0, 40)}` : f_address;
-                    console.log('RefCHAIN', contractorAddress, f_address, firstAddressInChain);
+                    this.base._log('RefCHAIN', contractorAddress, f_address, firstAddressInChain);
                     let cuts: number[];
                     const firstPublicLink = await promisify(campaignInstance.publicLinkKey, [firstAddressInChain]);
                     if (firstAddressInChain === contractorAddress) {
-                        console.log('First public Link', firstPublicLink);
+                        this.base._log('First public Link', firstPublicLink);
                         cuts = Sign.validate_join(firstPublicLink, f_address, f_secret, p_message);
                     } else {
                         cuts = (await promisify(campaignInstance.getReferrerCuts, [firstAddressInChain])).map(cut => cut.toNumber());
                         cuts = cuts.concat(Sign.validate_join(firstPublicLink, f_address, f_secret, p_message));
                     }
-                    console.log('CUTS', cuts, maxReferralRewardPercent);
+                    this.base._log('CUTS', cuts, maxReferralRewardPercent);
                     const estimatedMaxReferrerRewardPercent = calcFromCuts(cuts, maxReferralRewardPercent);
                     resolve(estimatedMaxReferrerRewardPercent);
                 }
@@ -344,7 +344,7 @@ export default class AcquisitionCampaign {
 
             if (this.base.address !== this.base.plasmaAddress) {
                 const {sig, with_prefix} = await Sign.sign_plasma2eteherum(this.base.plasmaAddress, this.base.address, this.base.web3);
-                console.log('Signature', sig, with_prefix, this.base.address, this.base.plasmaAddress);
+                this.base._log('Signature', sig, with_prefix, this.base.address, this.base.plasmaAddress);
                 const txHash = await promisify(this.base.twoKeyPlasmaEvents.add_plasma2ethereum, [sig, with_prefix, {from: this.base.plasmaAddress, gasPrice: 0 }]);
                 await this.utils.getTransactionReceiptMined(txHash, this.base.plasmaWeb3, 500, 300000);
                 const stored_ethereum_address = await promisify(this.base.twoKeyPlasmaEvents.plasma2ethereum, [this.base.plasmaAddress]);
@@ -360,7 +360,7 @@ export default class AcquisitionCampaign {
                 if (referralLink) {
                     const {f_address, f_secret, p_message, contractor: campaignContractor } = await this.utils.getOffchainDataFromIPFSHash(referralLink);
                     contractor = campaignContractor;
-                    console.log('New link for', this.base.address, f_address, f_secret, p_message);
+                    this.base._log('New link for', this.base.address, f_address, f_secret, p_message);
                     new_message = Sign.free_join(this.base.address, public_address, f_address, f_secret, p_message, cut + 1);
                 } else {
                     const { contractor: campaignContractor } = await this.setPublicLinkKey(campaign, `0x${public_address}`, cut, gasPrice);
@@ -373,7 +373,7 @@ export default class AcquisitionCampaign {
                 const link = await this.utils.ipfsAdd(linkObject);
                 resolve(link);
             } catch (err) {
-                console.log('ERRORORRR', err, err.toString());
+                this.base._log('ERRORORRR', err, err.toString());
                 reject(err);
             }
         });
@@ -392,13 +392,13 @@ export default class AcquisitionCampaign {
                 const {public_address, private_key} = generatePublicMeta();
 
                 if (!arcBalance) {
-                    console.log('No Arcs', arcBalance, 'Call Free Join Take');
+                    this.base._log('No Arcs', arcBalance, 'Call Free Join Take');
                     const signature = Sign.free_join_take(this.base.address, public_address, f_address, f_secret, p_message, cut + 1);
                     const txHash = await promisify(campaignInstance.distributeArcsBasedOnSignature, [signature, {
                         from: this.base.address,
                         gasPrice,
                     }]);
-                    console.log('setPubLinkWithCut', txHash);
+                    this.base._log('setPubLinkWithCut', txHash);
                     await this.utils.getTransactionReceiptMined(txHash);
                     arcBalance = parseFloat((await promisify(campaignInstance.balanceOf, [this.base.address])).toString());
                 }
@@ -426,7 +426,7 @@ export default class AcquisitionCampaign {
 
                 const prevChain = await promisify(campaignInstance.received_from, [this.base.address]);
                 if (!parseInt(prevChain, 16)) {
-                    console.log('No ARCS call Free Join Take');
+                    this.base._log('No ARCS call Free Join Take');
                     const {public_address} = generatePublicMeta();
                     const signature = Sign.free_join_take(this.base.address, public_address, f_address, f_secret, p_message);
                     const txHash = await promisify(campaignInstance.joinAndConvert, [signature, {
@@ -437,7 +437,7 @@ export default class AcquisitionCampaign {
                     await this.utils.getTransactionReceiptMined(txHash);
                     resolve(txHash);
                 } else {
-                    console.log('Previous referrer', prevChain, value);
+                    this.base._log('Previous referrer', prevChain, value);
                     const txHash = await promisify(campaignInstance.convert, [{
                         from: this.base.address,
                         gasPrice,
@@ -446,7 +446,7 @@ export default class AcquisitionCampaign {
                     resolve(txHash);
                 }
             } catch (e) {
-                console.log('joinAndConvert ERROR', e.toString());
+                this.base._log('joinAndConvert ERROR', e.toString());
                 reject(e);
             }
         });
@@ -469,9 +469,9 @@ export default class AcquisitionCampaign {
 
                 if (!arcBalance) {
                     const {public_address} = generatePublicMeta();
-                    console.log('joinAndShareARC call Free Join Take');
+                    this.base._log('joinAndShareARC call Free Join Take');
                     const signature = Sign.free_join_take(this.base.address, public_address, f_address, f_secret, p_message);
-                    console.log(signature, recipient);
+                    this.base._log(signature, recipient);
                     const txHash = await promisify(campaignInstance.joinAndShareARC, [signature, recipient, {
                         from: this.base.address,
                         gasPrice
@@ -627,7 +627,7 @@ export default class AcquisitionCampaign {
                 const conversionHandlerInstance = this.base.web3.eth.contract(contracts.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
 
                 const txHash = await promisify(conversionHandlerInstance.executeConversion, [converter, {from: this.base.address}]);
-                console.log(txHash);
+                this.base._log(txHash);
                 resolve(txHash);
             } catch (e) {
                 reject(e);
