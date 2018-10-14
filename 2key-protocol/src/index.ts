@@ -58,11 +58,11 @@ export class TwoKeyProtocol {
     // private twoKeyReg: any;
 
     constructor(initValues: ITwoKeyInit) {
-        this.init(initValues);
+        this.setWeb3(initValues);
     }
 
-    public init(initValues: ITwoKeyInit) {
-        // init MainNet Client
+    public setWeb3(initValues: ITwoKeyInit) {
+        // setWeb3 MainNet Client
         const {
             web3,
             address,
@@ -87,7 +87,7 @@ export class TwoKeyProtocol {
 
         this._log = initValues.log || console.log;
 
-        // init 2KeySyncNet Client
+        // setWeb3 2KeySyncNet Client
         const private_key = Buffer.from(plasmaPK, 'hex');
         const eventsWallet = eth_wallet.fromPrivateKey(private_key);
 

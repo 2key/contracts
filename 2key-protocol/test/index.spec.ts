@@ -253,7 +253,7 @@ describe('TwoKeyProtocol', () => {
 
     it('should return a balance for address', async () => {
         const { web3, address } = web3switcher.aydnep();
-        twoKeyProtocol = new TwoKeyProtocol({
+        twoKeyProtocol.setWeb3({
             web3,
             address,
             networks: {
@@ -383,7 +383,7 @@ describe('TwoKeyProtocol', () => {
 
     it('should create a join link', async () => {
         const { web3, address } = web3switcher.gmail();
-        twoKeyProtocol = new TwoKeyProtocol({
+        twoKeyProtocol.setWeb3({
             web3,
             address,
             networks: {
@@ -401,21 +401,10 @@ describe('TwoKeyProtocol', () => {
     }).timeout(30000);
 
     it('should cut link', async () => {
-        // twoKeyProtocol = new TwoKeyProtocol({
-        //     networks: {
-        //         mainNetId,
-        //         syncTwoKeyNetId,
-        //     },
-        //     plasmaPK: Sign.generatePrivateKey().toString('hex'),
-        // });
-        // const callback = (err, res) => {
-        //     console.log('PlasmaEvent', err, res);
-        // };
-        // twoKeyProtocol.subscribe2KeyEvents(callback);
         await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, refLink);
         // twoKeyProtocol.unsubscribe2KeyEvents();
         const { web3, address } = web3switcher.test4();
-        twoKeyProtocol = new TwoKeyProtocol({
+        twoKeyProtocol.setWeb3({
             web3,
             address,
             networks: {
@@ -447,7 +436,7 @@ describe('TwoKeyProtocol', () => {
 
     it('should joinOffchain after cut', async () => {
         const { web3, address } = web3switcher.renata();
-        twoKeyProtocol = new TwoKeyProtocol({
+        twoKeyProtocol.setWeb3({
             web3,
             address,
             networks: {
@@ -466,7 +455,7 @@ describe('TwoKeyProtocol', () => {
 
     it('should buy some tokens from uport', async () => {
         const { web3, address } = web3switcher.uport();
-        twoKeyProtocol = new TwoKeyProtocol({
+        twoKeyProtocol.setWeb3({
             web3,
             address,
             networks: {
@@ -492,7 +481,7 @@ describe('TwoKeyProtocol', () => {
 
     it('should buy some tokens from gmail2', async () => {
         const { web3, address } = web3switcher.gmail2();
-        twoKeyProtocol = new TwoKeyProtocol({
+        twoKeyProtocol.setWeb3({
             web3,
             address,
             networks: {
@@ -514,7 +503,7 @@ describe('TwoKeyProtocol', () => {
 
     it('should transfer arcs from new user to test', async () => {
         const { web3, address } = web3switcher.aydnep2();
-        twoKeyProtocol = new TwoKeyProtocol({
+        twoKeyProtocol.setWeb3({
             web3,
             address,
             networks: {
@@ -534,7 +523,7 @@ describe('TwoKeyProtocol', () => {
 
     it('should buy some tokens from test', async () => {
         const { web3, address } = web3switcher.test();
-        twoKeyProtocol = new TwoKeyProtocol({
+        twoKeyProtocol.setWeb3({
             web3,
             address,
             networks: {
@@ -560,7 +549,7 @@ describe('TwoKeyProtocol', () => {
 
     it('should return all pending converters from contractor', async() => {
         const { web3, address } = web3switcher.aydnep();
-        twoKeyProtocol = new TwoKeyProtocol({
+        twoKeyProtocol.setWeb3({
             web3,
             address,
             networks: {
@@ -578,7 +567,7 @@ describe('TwoKeyProtocol', () => {
     it('should approve converter for conversion' , async() => {
         console.log('Test where contractor / moderator can approve converter to execute conversion');
         const { web3, address } = web3switcher.aydnep();
-        twoKeyProtocol = new TwoKeyProtocol({
+        twoKeyProtocol.setWeb3({
             web3,
             address,
             networks: {
@@ -615,7 +604,7 @@ describe('TwoKeyProtocol', () => {
 
     it('should cancel conversion', async() => {
         const { web3, address } = web3switcher.gmail2();
-        twoKeyProtocol = new TwoKeyProtocol({
+        twoKeyProtocol.setWeb3({
             web3,
             address,
             networks: {
@@ -632,7 +621,7 @@ describe('TwoKeyProtocol', () => {
 
     it('should get all pending converters after cancellation', async() => {
         const { web3, address } = web3switcher.aydnep();
-        twoKeyProtocol = new TwoKeyProtocol({
+        twoKeyProtocol.setWeb3({
             web3,
             address,
             networks: {
@@ -649,7 +638,7 @@ describe('TwoKeyProtocol', () => {
 
     it('should execute conversion', async() => {
         const { web3, address } = web3switcher.test4();
-        twoKeyProtocol = new TwoKeyProtocol({
+        twoKeyProtocol.setWeb3({
             web3,
             address,
             networks: {
@@ -666,7 +655,7 @@ describe('TwoKeyProtocol', () => {
 
     it('should return addresses of lockup contracts for contractor', async() => {
         const { web3, address } = web3switcher.aydnep();
-        twoKeyProtocol = new TwoKeyProtocol({
+        twoKeyProtocol.setWeb3({
             web3,
             address,
             networks: {
