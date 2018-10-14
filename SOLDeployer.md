@@ -3,6 +3,7 @@
 ### How to deploy contracts to any network except local dev
 
 * Make sure that all tests pass (```yarn run test```)
+* Notice that after successful build 2key-protocol version you should run ```yarn run deploy --migrate dev-local``` to overwrite contracts meta 
 * Change truffle.js and add your configuration
 * Edit ContractDeploymentWhiteList.json
 * Commit your changes
