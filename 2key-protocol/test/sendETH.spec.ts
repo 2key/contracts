@@ -1,6 +1,6 @@
-import { expect } from 'chai';
+import {expect} from 'chai';
 import 'mocha';
-import { TwoKeyProtocol } from '../src';
+import {TwoKeyProtocol} from '../src';
 import createWeb3 from './_web3';
 import Sign from '../src/utils/sign';
 
@@ -30,7 +30,7 @@ const sendETH: any = (recipient) => new Promise(async (resolve, reject) => {
         const txHash = await twoKeyProtocol.transferEther(recipient, twoKeyProtocol.Utils.toWei(10, 'ether'));
         console.log(`${recipient}: ${txHash}`);
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-        console.log(`${receipt.status}`);
+        console.log(`Status of transfering ether: ' + ${receipt.status}`);
         resolve(receipt);
     } catch (err) {
         reject(err);
