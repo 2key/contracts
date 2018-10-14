@@ -627,9 +627,9 @@ export default { ERC20full:
         '4':
          { events: {},
            links: {},
-           address: '0xf3917798ba02f6fa074cc963dce1dffcd913bbfd',
+           address: '0x870cc92fcab5716198f49784f9c2af704a03506c',
            transactionHash:
-            '0x74411bfb2c6ddc2e72385c055045fbc2e786b8354c08a5328247c96c975a6390' },
+            '0x01eefbbc7df2a73aa47f50e7559ac17deebaef2ceef8a24ed1bdeaad06d94876' },
         '17':
          { events: {},
            links: {},
@@ -639,9 +639,9 @@ export default { ERC20full:
         '8086':
          { events: {},
            links: {},
-           address: '0xa5e57eac2037ce6c331deb254bbab9da5a264a95',
+           address: '0xfaa99d6caf5df1af8426d2bfb5bf83ccb7ed0552',
            transactionHash:
-            '0x972dc69d8153d9558fec3a22781690b5f1824a3b1f054dc4a060aad5266b9590' } },
+            '0xcd81526b9ea356c563aa50601a556e53802c1b23aa2c5838bf03445c9e66dada' } },
      abi:
       [ { constant: false,
           inputs: [],
@@ -1065,9 +1065,9 @@ export default { ERC20full:
         '4':
          { events: {},
            links: {},
-           address: '0x5215e77bf651b6591989c255f6deda33cbdacde1',
+           address: '0x669d938b2f4eb2e345f2390fb6a3c855d750b20d',
            transactionHash:
-            '0x64a64074de255c2fdf8b44a2a050b235216d07605eb3feb64ec6ab14bfe63988' },
+            '0x6f2f9ccb74c556c4763b1628444490d6dd834b1777765de6e0e1a5710a822f1f' },
         '17':
          { events: {},
            links: {},
@@ -1077,9 +1077,9 @@ export default { ERC20full:
         '8086':
          { events: {},
            links: {},
-           address: '0x9048357d7fce47789026a9e254b5587ad00997d8',
+           address: '0x622e96748f1ff2bffad72d94f766d5b4c477b706',
            transactionHash:
-            '0x26279789d5a35cb040db20e9a4acc3157fbc10e858d9f519c11ac91c0e81654b' } },
+            '0x109d93d2b9895e808e4bd214d03f5515d0c5e91d8ca9b5129dd255c72ab6a279' } },
      abi:
       [ { constant: true,
           inputs: [],
@@ -1372,9 +1372,9 @@ export default { ERC20full:
         '4':
          { events: {},
            links: {},
-           address: '0xe9d5b2faeea9c0b3885919abe385533a9cfc762d',
+           address: '0xeb13f65fe4e3aa4f0b0fc7a7363f3b0e7155717f',
            transactionHash:
-            '0x324024854cd810cfff3d6515a61c099ea53a1dbf0f78f3023fb6de513c77f844' },
+            '0xbbf472341eac68ddd3ee76aca44effa725cedf1677689c379d3df33ea9afc6b4' },
         '17':
          { events: {},
            links: {},
@@ -1384,9 +1384,9 @@ export default { ERC20full:
         '8086':
          { events: {},
            links: {},
-           address: '0x7a256852072f4bd78841d3236c8f5ba623b803ba',
+           address: '0xf86337c0ffc4afb993fc352d2605e70cbaa284db',
            transactionHash:
-            '0x078a4a738cc2c047823a4328c3673e7781c91d6e5ab0155400721ab352a95359' } },
+            '0x5c48132011966c022132e54468665871f70896ab1312a7fa5afe69f2146d0296' } },
      abi:
       [ { inputs: [ { name: '_twoKeyAdminAddress', type: 'address' } ],
           payable: false,
@@ -1777,9 +1777,9 @@ export default { ERC20full:
         '4':
          { events: {},
            links: {},
-           address: '0xe8d06376c14d6330ec11472917fd14a328cf22cb',
+           address: '0x57de1e141ce8f6659c21aba5d22ea8573423e012',
            transactionHash:
-            '0xd343120b3eb589b913cf864a66d8aa611e3b47b6b1356f070893d8f97b6f8d3a' },
+            '0x55f84b5ae22861ea779fb8c4ea7ea2361544d8b8ca52a029141b9d6e424f8a74' },
         '17':
          { events: {},
            links: {},
@@ -1789,9 +1789,9 @@ export default { ERC20full:
         '8086':
          { events: {},
            links: {},
-           address: '0xe3c983363ecfb0fa19f0ef2675aabb1dac0aed40',
+           address: '0x197569f4db4a0a6adca9f79a490488b30fdefb6d',
            transactionHash:
-            '0xe1c7f75c054d10febc2d01904377318c3e55ad4ea8f35687f1092b66d4a68afa' } },
+            '0xb8126622efcc4e2319b27b69e51e4ad732dbf64e590514cfc965d3e9d275d62a' } },
      abi:
       [ { constant: true,
           inputs: [],
