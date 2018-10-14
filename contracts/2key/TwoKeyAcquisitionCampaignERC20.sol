@@ -161,7 +161,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         conversionHandler.setTwoKeyAcquisitionCampaignERC20(address(this), _moderator, contractor, _assetContractERC20, symbol);
 
         // Emit event that TwoKeyCampaign is created
-        twoKeyEventSource.created(address(this), contractor);
+//        twoKeyEventSource.created(address(this), contractor);
 
     }
 

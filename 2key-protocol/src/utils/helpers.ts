@@ -121,8 +121,8 @@ export default class Helpers {
                         if (progressCallback) {
                             progressCallback(name, false, res.transactionHash);
                         }
-                        resolved = true;
                         resolve(res.transactionHash);
+                        resolved = true;
                     }
                 }
             });
