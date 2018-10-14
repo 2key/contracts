@@ -203,11 +203,11 @@ async function deploy() {
       }
     }
     const l = networks.length;
-    Object.keys(whitelist).forEach(key => {
-      if (whitelist[key].singletone) {
-        fs.unlinkSync(path.join(buildPath, `${key}.json`));
-      }
-    });
+    // Object.keys(whitelist).forEach(key => {
+    //   if (whitelist[key].singletone) {
+    //     fs.unlinkSync(path.join(buildPath, `${key}.json`));
+    //   }
+    // });
     // await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['compile', '--all']);
     for (let i = 0; i < l; i += 1) {
       /* eslint-disable no-await-in-loop */
