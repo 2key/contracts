@@ -108,17 +108,21 @@ export default class Helpers {
             const createParams = params ? [...params] : [];
             createParams.push({data, from: this.base.address, gasPrice});
             this.base._log('CREATE CONTRACT', name, params, this.base.address, gasPrice);
+            let resolved: boolean = false;
             this.base.web3.eth.contract(abi).new(...createParams, (err, res) => {
                 if (err) {
                     reject(err);
                 } else {
-                    // if (res.address) {
-                    //     resolve(res.address);
-                    // }
-                    if (progressCallback) {
-                        progressCallback(name, false, res.transactionHash);
+                    if (!resolved) {
+                        // if (res.address) {
+                        //     resolve(res.address);
+                        // }
+                        if (progressCallback) {
+                            progressCallback(name, false, res.transactionHash);
+                        }
+                        resolved = true;
+                        resolve(res.transactionHash);
                     }
-                    resolve(res.transactionHash);
                 }
             });
         });

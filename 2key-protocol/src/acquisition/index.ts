@@ -143,15 +143,15 @@ export default class AcquisitionCampaign {
         });
     }
 
-    public addTwoKeyAcquisitionCampaignToBeEligibleToEmitEvents(campaignAddress: string):  Promise<string> {
-        return new Promise<string> (async(resolve,reject) => {
-           try {
+    public addTwoKeyAcquisitionCampaignToBeEligibleToEmitEvents(campaignAddress: string): Promise<string> {
+        return new Promise<string>(async (resolve, reject) => {
+            try {
                 const twoKeyAdminInstance = await this.helpers._getTwoKeyAdminInstance(contractsMeta.TwoKeyAdmin.networks[this.base.networks.mainNetId].address);
                 const txHash = await promisify(twoKeyAdminInstance.twoKeyEventSourceAddAuthorizedContracts, [campaignAddress, {from: this.base.address}]);
                 resolve(txHash);
-           } catch (e) {
-               reject(e);
-           }
+            } catch (e) {
+                reject(e);
+            }
         });
     }
 
@@ -179,7 +179,7 @@ export default class AcquisitionCampaign {
                 const isAddressJoined = await this.isAddressJoined(campaignInstance);
                 const ipfsHash = await promisify(campaignInstance.publicMetaHash, []);
                 const meta = JSON.parse((await promisify(this.base.ipfs.cat, [ipfsHash])).toString());
-                resolve({ meta, isAddressJoined });
+                resolve({meta, isAddressJoined});
             } catch (e) {
                 reject(e);
             }
@@ -189,7 +189,7 @@ export default class AcquisitionCampaign {
     public getCampaignFromLink(link: string): Promise<any> {
         return new Promise<any>(async (resolve, reject) => {
             try {
-                const { campaign } = await this.utils.getOffchainDataFromIPFSHash(link);
+                const {campaign} = await this.utils.getOffchainDataFromIPFSHash(link);
                 await this.visit(campaign, link);
                 const campaignMeta = await this.getPublicMeta(campaign);
                 resolve(campaignMeta);
@@ -288,7 +288,7 @@ export default class AcquisitionCampaign {
                     campaignAddress,
                     contractor,
                     sig,
-                    {from: this.base.plasmaAddress, gasPrice: 0 }
+                    {from: this.base.plasmaAddress, gasPrice: 0}
                 ]);
                 await this.utils.getTransactionReceiptMined(txHash, this.base.plasmaWeb3);
                 resolve(txHash);
@@ -317,7 +317,7 @@ export default class AcquisitionCampaign {
                 if (cut > -1) {
                     await promisify(campaignInstance.setCut, [cut, {from: this.base.address}]);
                 }
-                resolve({ publicLink, contractor });
+                resolve({publicLink, contractor});
             } catch (err) {
                 reject(err);
             }
@@ -339,34 +339,43 @@ export default class AcquisitionCampaign {
     // Join Offchain
     public join(campaign: any, cut: number, referralLink?: string, gasPrice: number = this.base._getGasPrice()): Promise<string> {
         return new Promise(async (resolve, reject) => {
-            const campaignAddress = typeof (campaign) === 'string' ? campaign
-                : (await this.helpers._getAcquisitionCampaignInstance(campaign)).address;
-
-            if (this.base.address !== this.base.plasmaAddress) {
-                const {sig, with_prefix} = await Sign.sign_plasma2eteherum(this.base.plasmaAddress, this.base.address, this.base.web3);
-                this.base._log('Signature', sig, with_prefix, this.base.address, this.base.plasmaAddress);
-                const txHash = await promisify(this.base.twoKeyPlasmaEvents.add_plasma2ethereum, [sig, with_prefix, {from: this.base.plasmaAddress, gasPrice: 0 }]);
-                await this.utils.getTransactionReceiptMined(txHash, this.base.plasmaWeb3, 500, 300000);
-                const stored_ethereum_address = await promisify(this.base.twoKeyPlasmaEvents.plasma2ethereum, [this.base.plasmaAddress]);
-                if (stored_ethereum_address !== this.base.address) {
-                    reject(stored_ethereum_address + ' != ' + this.base.address)
-                }
-            }
-            const {public_address, private_key} = await Sign.generateSignatureKeys(this.base.address, this.base.plasmaAddress, campaignAddress, this.base.web3);
-
             try {
+                const campaignAddress = typeof (campaign) === 'string' ? campaign
+                    : (await this.helpers._getAcquisitionCampaignInstance(campaign)).address;
+
+                if (this.base.address !== this.base.plasmaAddress) {
+                    const {sig, with_prefix} = await Sign.sign_plasma2eteherum(this.base.plasmaAddress, this.base.address, this.base.web3);
+                    this.base._log('Signature', sig, with_prefix, this.base.address, this.base.plasmaAddress);
+                    const txHash = await promisify(this.base.twoKeyPlasmaEvents.add_plasma2ethereum, [sig, with_prefix, {
+                        from: this.base.plasmaAddress,
+                        gasPrice: 0
+                    }]);
+                    await this.utils.getTransactionReceiptMined(txHash, this.base.plasmaWeb3, 500, 300000);
+                    const stored_ethereum_address = await promisify(this.base.twoKeyPlasmaEvents.plasma2ethereum, [this.base.plasmaAddress]);
+                    if (stored_ethereum_address !== this.base.address) {
+                        reject(stored_ethereum_address + ' != ' + this.base.address)
+                    }
+                }
+
+                const {public_address, private_key} = await Sign.generateSignatureKeys(this.base.address, this.base.plasmaAddress, campaignAddress, this.base.web3);
+
                 let new_message;
                 let contractor;
                 if (referralLink) {
-                    const {f_address, f_secret, p_message, contractor: campaignContractor } = await this.utils.getOffchainDataFromIPFSHash(referralLink);
+                    const {f_address, f_secret, p_message, contractor: campaignContractor} = await this.utils.getOffchainDataFromIPFSHash(referralLink);
                     contractor = campaignContractor;
                     this.base._log('New link for', this.base.address, f_address, f_secret, p_message);
                     new_message = Sign.free_join(this.base.address, public_address, f_address, f_secret, p_message, cut + 1);
                 } else {
-                    const { contractor: campaignContractor } = await this.setPublicLinkKey(campaign, `0x${public_address}`, cut, gasPrice);
+                    const {contractor: campaignContractor} = await this.setPublicLinkKey(campaign, `0x${public_address}`, cut, gasPrice);
                     contractor = campaignContractor;
                 }
-                const linkObject: IOffchainData = { campaign: campaignAddress, contractor, f_address: this.base.address, f_secret: private_key };
+                const linkObject: IOffchainData = {
+                    campaign: campaignAddress,
+                    contractor,
+                    f_address: this.base.address,
+                    f_secret: private_key
+                };
                 if (new_message) {
                     linkObject.p_message = new_message;
                 }
@@ -581,14 +590,14 @@ export default class AcquisitionCampaign {
         })
     }
 
-    public cancelConverter(campaign: any) : Promise<string> {
-        return new Promise(async(resolve, reject) => {
+    public cancelConverter(campaign: any): Promise<string> {
+        return new Promise(async (resolve, reject) => {
             try {
                 const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
                 const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
                 const txHash = await promisify(conversionHandlerInstance.cancelConverter, [{from: this.base.address}]);
                 resolve(txHash);
-            } catch(e) {
+            } catch (e) {
                 reject(e);
             }
         })
