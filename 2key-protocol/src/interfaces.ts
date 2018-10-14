@@ -220,8 +220,14 @@ export interface IContractEvent {
     transactionHash: string,
 }
 
+export interface IPublicLinkKey {
+    contractor: string,
+    publicLink: string,
+}
+
 export interface IOffchainData {
     campaign: string,
+    contractor?: string,
     f_address: string,
     f_secret: string,
     p_message?: string,

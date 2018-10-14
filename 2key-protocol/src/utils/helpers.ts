@@ -105,22 +105,25 @@ export default class Helpers {
     _createContract(contract: IContract, gasPrice: number = this.gasPrice, params?: any[], progressCallback?: ICreateCampaignProgress): Promise<string> {
         return new Promise(async (resolve, reject) => {
             const {abi, bytecode: data, name} = contract;
-            // const gas = await this.base._estimateSubcontractGas(contract, params);
             const createParams = params ? [...params] : [];
             createParams.push({data, from: this.base.address, gasPrice});
-            console.log('CREATE CONTRACT', name, params, this.base.address, gasPrice, abi);
+            console.log('CREATE CONTRACT', name, params, this.base.address, gasPrice);
+            let resolved = false;
             this.base.web3.eth.contract(abi).new(...createParams, (err, res) => {
                 if (err) {
                     reject(err);
                 } else {
                     if (res.address) {
-                        // if (progressCallback) {
-                        //     progressCallback(name, true, res.address);
-                        // }
-                        resolve(res.address);
+                        if (!resolved) {
+                            resolved = true;
+                            resolve(res.address);
+                        }
                     } else if (progressCallback) {
-                        progressCallback(name, false, res.transactionHash);
-                        resolve(res.transactionHash);
+                        if (!resolved) {
+                            progressCallback(name, false, res.transactionHash);
+                            resolved = true;
+                            resolve(res.transactionHash);
+                        }
                     }
                 }
             });

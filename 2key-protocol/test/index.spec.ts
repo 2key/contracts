@@ -147,14 +147,14 @@ describe('TwoKeyProtocol', () => {
         this.timeout(30000);
         return new Promise(async (resolve, reject) => {
             try {
-                twoKeyProtocol = new TwoKeyProtocol({
-                    networks: {
-                        mainNetId,
-                        syncTwoKeyNetId,
-                    },
-                    rpcUrl,
-                    plasmaPK: Sign.generatePrivateKey().toString('hex'),
-                });
+                // twoKeyProtocol = new TwoKeyProtocol({
+                //     networks: {
+                //         mainNetId,
+                //         syncTwoKeyNetId,
+                //     },
+                //     rpcUrl,
+                //     plasmaPK: Sign.generatePrivateKey().toString('hex'),
+                // });
 
                 const { web3, address } = web3switcher.deployer();
                 twoKeyProtocol = new TwoKeyProtocol({
@@ -275,19 +275,19 @@ describe('TwoKeyProtocol', () => {
         expect(tokenSymbol).to.be.equal('2Key');
     }).timeout(10000);
 
-    // it('should return estimated gas for transfer2KeyTokens', async () => {
-    //     const gas = await twoKeyProtocol.getERC20TransferGas(ethDstAddress, twoKeyProtocol.Utils.toWei(123, 'ether'));
-    //     console.log('Gas required for Token transfer', gas);
-    //     return expect(gas).to.exist.to.be.greaterThan(0);
-    // }).timeout(30000);
-    //
-    // it('should transfer 2KeyTokens', async function () {
-    //     txHash = await twoKeyProtocol.transfer2KEYTokens(ethDstAddress, twoKeyProtocol.Utils.toWei(123, 'ether'), 3000000000);
-    //     console.log('Transfer 2Key Tokens', txHash, typeof txHash);
-    //     const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-    //     const status = receipt && receipt.status;
-    //     expect(status).to.be.equal('0x1');
-    // }).timeout(30000);
+    it('should return estimated gas for transfer2KeyTokens', async () => {
+        const gas = await twoKeyProtocol.getERC20TransferGas(ethDstAddress, twoKeyProtocol.Utils.toWei(123, 'ether'));
+        console.log('Gas required for Token transfer', gas);
+        return expect(gas).to.exist.to.be.greaterThan(0);
+    }).timeout(30000);
+
+    it('should transfer 2KeyTokens', async function () {
+        txHash = await twoKeyProtocol.transfer2KEYTokens(ethDstAddress, twoKeyProtocol.Utils.toWei(123, 'ether'), 3000000000);
+        console.log('Transfer 2Key Tokens', txHash, typeof txHash);
+        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        const status = receipt && receipt.status;
+        expect(status).to.be.equal('0x1');
+    }).timeout(30000);
 
     // it('should print balances', printBalances).timeout(15000);
 
