@@ -617,13 +617,7 @@ export default { ERC20full:
           type: 'function' } ],
      name: 'TwoKeyAcquisitionCampaignERC20' },
   TwoKeyAdmin:
-   { networks:
-      { '4':
-         { events: {},
-           links: {},
-           address: '0xd057aaa1db0ccb7931805f21a5dd72ea17dfa52c',
-           transactionHash:
-            '0x7b8e00e8b8c67fc030792738b5694fc9e4cac8c95c9acb5c2a1a5cbdc3ba41bf' } },
+   { networks: {},
      abi:
       [ { constant: false,
           inputs: [],
@@ -1037,13 +1031,7 @@ export default { ERC20full:
           type: 'function' } ],
      name: 'TwoKeyConversionHandler' },
   TwoKeyEconomy:
-   { networks:
-      { '4':
-         { events: {},
-           links: {},
-           address: '0xbd14f169458491cc649ad807caf74e47b439ffba',
-           transactionHash:
-            '0x3f8361db39a64b51e4e814927b47c76fdb847c9befb721265ba9f21e052e532c' } },
+   { networks: {},
      abi:
       [ { constant: true,
           inputs: [],
@@ -1326,13 +1314,7 @@ export default { ERC20full:
           type: 'function' } ],
      name: 'TwoKeyEconomy' },
   TwoKeyEventSource:
-   { networks:
-      { '4':
-         { events: {},
-           links: {},
-           address: '0x595251e6cf95983e62a2a07e3c25bc44b0fd3d46',
-           transactionHash:
-            '0xc9a6b07b50d5792081c2b7530d67498696be6f2210e3973273d21f6625dbfba2' } },
+   { networks: {},
      abi:
       [ { inputs: [ { name: '_twoKeyAdminAddress', type: 'address' } ],
           payable: false,
@@ -1583,13 +1565,7 @@ export default { ERC20full:
           type: 'function' } ],
      name: 'TwoKeyEventSource' },
   TwoKeyPlasmaEvents:
-   { networks:
-      { '17':
-         { events: {},
-           links: {},
-           address: '0x8bff9b233076fb7a18d91ddebdb17139a1680b5f',
-           transactionHash:
-            '0x7b39184b83099d4efdc589d0d2037862236fa426df9c5c2fe9f10e349df1ee05' } },
+   { networks: {},
      abi:
       [ { constant: true,
           inputs:
@@ -1707,13 +1683,7 @@ export default { ERC20full:
           type: 'function' } ],
      name: 'TwoKeyPlasmaEvents' },
   TwoKeyReg:
-   { networks:
-      { '4':
-         { events: {},
-           links: {},
-           address: '0xea983eae7ef3462ee8606160a7f39ed7f34a6a2e',
-           transactionHash:
-            '0x70ff83d5de0ab9d8ab5bf20cb634dcd5931190b19a9af80950f47455d140fff8' } },
+   { networks: {},
      abi:
       [ { constant: true,
           inputs: [],
