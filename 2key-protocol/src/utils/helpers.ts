@@ -113,6 +113,7 @@ export default class Helpers {
                 if (err) {
                     reject(err);
                 } else {
+                    this.base._log(name, res);
                     if (!resolved) {
                         // if (res.address) {
                         //     resolve(res.address);
