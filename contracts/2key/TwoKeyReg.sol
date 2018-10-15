@@ -26,8 +26,8 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
     require(msg.sender == twoKeyEventSource);
     _;
   }
-  /// TODO: (Amit) Put this modifier on methods where required
-  /// Modifier which will allow only 2keyAdmin or maintener to invoke function calls
+
+  /// Modifier which will allow only 2keyAdmin or maintainer to invoke function calls
   modifier onlyTwoKeyAuthorized {
     require(msg.sender == twoKeyAdminContractAddress || msg.sender == maintainer);
     _;
