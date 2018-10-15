@@ -5,10 +5,11 @@ import "./RBACWithAdmin.sol";
 
 contract TwoKeyReg is Ownable, RBACWithAdmin {
 
+
   /// mapping user's address to user's name
-  mapping(address => string) public userAddress2UserName;
+  mapping(address => string) public address2username;
   /// mapping user's name to user's address
-  mapping(bytes32 => address) public userName2UserAddress;
+  mapping(bytes32 => address) public username2address;
 
   mapping(bytes32 => address[]) public username2AddressHistory;
 
@@ -55,6 +56,7 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
 
   /// TODO: Q's:
   /// TODO: Are this mappings going to be public? If yes, we don't need 4 getters for this
+  /// TODO: Maintainer address is never set?
   /// TODO: Event source address should be public, as all other info related to singleton contracts (transparency)
   /// mapping users address to addresses of campaigns where he is contractor
   mapping(address => address[]) public userToCampaignsWhereContractor;
@@ -163,16 +165,16 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
   /// @param _sender is address of user
   function addNameInternal(string _name, address _sender) private {
     // check if name is taken
-    if (userName2UserAddress[keccak256(abi.encodePacked(_name))] != 0) {
+    if (username2address[keccak256(abi.encodePacked(_name))] != 0) {
       revert();
     }
     // remove previous name
-    bytes memory last_name = bytes(userAddress2UserName[_sender]);
+    bytes memory last_name = bytes(address2username[_sender]);
     if (last_name.length != 0) {
-      userName2UserAddress[keccak256(abi.encodePacked(userAddress2UserName[_sender]))] = 0;
+      username2address[keccak256(abi.encodePacked(address2username[_sender]))] = 0;
     }
-    userAddress2UserName[_sender] = _name;
-    userName2UserAddress[keccak256(abi.encodePacked(_name))] = _sender;
+    address2username[_sender] = _name;
+    username2address[keccak256(abi.encodePacked(_name))] = _sender;
     // Add history of changes
     username2AddressHistory[keccak256(abi.encodePacked(_name))].push(_sender);
     emit UserNameChanged(_sender, _name);
@@ -197,7 +199,7 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
   /// @param _name is name of user
   /// @return address of the user as type address
   function getUserName2UserAddress(string _name) public view returns (address) {
-    return userName2UserAddress[keccak256(abi.encodePacked(_name))];
+    return username2address[keccak256(abi.encodePacked(_name))];
   }
 
   /// View function - doesn't cost any gas to be executed
@@ -205,13 +207,13 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
   /// @param _sender is address of user
   /// @return name of the user as type string
   function getUserAddress2UserName(address _sender) public view returns (string) {
-    return userAddress2UserName[_sender];
+    return address2username[_sender];
   }
 
 
   /// Get history of changed addresses
   function getHistoryOfChangedAddresses() public view returns (address[]) {
-    string name = userAddress2UserName[msg.sender];
+    string name = address2username[msg.sender];
     return username2AddressHistory[keccak256(abi.encodePacked(name))];
   }
 }
