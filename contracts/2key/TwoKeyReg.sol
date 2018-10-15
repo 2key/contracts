@@ -76,7 +76,7 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
   /// commented modifier onlyTwoKeyEventSource
 
   //onlyTwoKeyEventSource
-  function addWhereContractor(address _userAddress, address _contractAdsdress) public onlyTwoKeyEventSource {
+  function addWhereContractor(address _userAddress, address _contractAddress) public onlyTwoKeyEventSource {
     require(_contractAddress != address(0));
     userToCampaignsWhereContractor[_userAddress].push(_contractAddress);
   }
@@ -191,6 +191,7 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
     addNameInternal(_name, msg.sender);
   }
 
+
   /// View function - doesn't cost any gas to be executed
   /// @notice Function to fetch address of the user that corresponds to given name
   /// @param _name is name of user
@@ -207,4 +208,10 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
     return userAddress2UserName[_sender];
   }
 
+
+  /// Get history of changed addresses
+  function getHistoryOfChangedAddresses() public view returns (address[]) {
+    string name = userAddress2UserName[msg.sender];
+    return username2AddressHistory[keccak256(abi.encodePacked(name))];
+  }
 }
