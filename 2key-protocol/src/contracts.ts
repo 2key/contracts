@@ -1641,9 +1641,9 @@ export default { ERC20full:
       { '17':
          { events: {},
            links: {},
-           address: '0x0fb2e72381f928094af9847f730150528464bd30',
+           address: '0xef76f99ae04bd968616dac929d58a30c9f22375d',
            transactionHash:
-            '0x1cd4a5e4abb2b284d8ad4cb64735bcd324804a1dce60cabdd5dbd44935067021' },
+            '0xa102df1dae9accad00e2e0c3f46d4647a9b42704942c7ff95afd5f836cb9e5a6' },
         '47':
          { events: {},
            links: {},
