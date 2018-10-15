@@ -298,7 +298,7 @@ describe('TwoKeyProtocol', () => {
     //         expiryConversion: 1000 * 60 * 60 * 24,
     //         maxConverterBonusPercentWei: twoKeyProtocol.toWei(maxConverterBonusPercent, 'ether'),
     //         pricePerUnitInETHWei: twoKeyProtocol.toWei(pricePerUnitInETH, 'ether'),
-    //         maxReferralRewardPercentWei: twoKeyProtocol.toWei(maxReferralRewardPercent, 'ether'),
+    //         maxReferralRewardPercentWei: twoKeyProtocol.toWei(c, 'ether'),
     //         assetContractERC20: twoKeyEconomy,
     //         moderatorFeePercentageWei: twoKeyProtocol.toWei(moderatorFeePercentage, 'ether'),
     //         minContributionETHWei: twoKeyProtocol.toWei(minContributionETH, 'ether'),

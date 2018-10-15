@@ -484,9 +484,4 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).sendBackEthWhenConversionCancelled(msg.sender, conversion.conversionAmount);
     }
 
-
-
-
-    //TODO: If the converter is rejected allow him to pull the funds out -- if he do this, conversion goes to cancelled state
-    //TODO: Converter can cancel conversion as long it's pending or rejected
 }
