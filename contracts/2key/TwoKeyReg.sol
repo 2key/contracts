@@ -27,7 +27,7 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
     _;
   }
 
-  constructor (address _twoKeyEventSource, address _twoKeyAdmin) RBACWithAdmin(_twoKeyAdmin)  public {
+  constructor (address _twoKeyEventSource, address _twoKeyAdmin) RBACWithAdmin(_twoKeyAdmin) public {
     require(_twoKeyEventSource != address(0));
     require(_twoKeyAdmin != address(0));
     twoKeyEventSource = _twoKeyEventSource;
@@ -43,7 +43,8 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
 
   /// @notice Method to change the allowed TwoKeyEventSource contract address
   /// @param _twoKeyEventSource new TwoKeyEventSource contract address
-  function changeTwoKeyEventSource(address _twoKeyEventSource) public onlyOwner {
+  // only admin
+  function changeTwoKeyEventSource(address _twoKeyEventSource) public onlyAdmin {
     require(_twoKeyEventSource != address(0));
 
     twoKeyEventSource = _twoKeyEventSource;
@@ -70,7 +71,9 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
   /// @param _userAddress is address of contractor
   /// @param _contractAddress is address of deployed campaign contract
   /// commented modifier onlyTwoKeyEventSource
-  function addWhereContractor(address _userAddress, address _contractAddress) public{
+
+  //onlyTwoKeyEventSource
+  function addWhereContractor(address _userAddress, address _contractAddress) public onlyTwoKeyEventSource {
    // require(_contractAddress != address(0));
     userToCampaignsWhereContractor[_userAddress].push(_contractAddress);
   }
@@ -146,10 +149,12 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
     return twoKeyEventSource;
   }
 
+  ///TODO: mapping user's address to user's name
+
   /// mapping user's address to user's name 
-  mapping(address => string) public owner2name;
+  mapping(address => string) public userAddress2UserName;
   /// mapping user's name to user's address 
-  mapping(bytes32 => address) public name2owner;
+  mapping(bytes32 => address) public userName2UserAddress;
 
   /// @notice Event is emitted when a user's name is changed
   event UserNameChanged(address owner, string name);
@@ -160,23 +165,23 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
   /// @param _sender is address of user
   function addNameInternal(string _name, address _sender) private {
     // check if name is taken
-    if (name2owner[keccak256(abi.encodePacked(_name))] != 0) {
+    if (userName2UserAddress[keccak256(abi.encodePacked(_name))] != 0) {
       revert();
     }
     // remove previous name
-    bytes memory last_name = bytes(owner2name[_sender]);
+    bytes memory last_name = bytes(userAddress2UserName[_sender]);
     if (last_name.length != 0) {
-      name2owner[keccak256(abi.encodePacked(owner2name[_sender]))] = 0;
+      userName2UserAddress[keccak256(abi.encodePacked(userAddress2UserName[_sender]))] = 0;
     }
-    owner2name[_sender] = _name;
-    name2owner[keccak256(abi.encodePacked(_name))] = _sender;
+    userAddress2UserName[_sender] = _name;
+    userName2UserAddress[keccak256(abi.encodePacked(_name))] = _sender;
     emit UserNameChanged(_sender, _name);
   }
 
   /// @notice Function where only admin can add a name - address pair 
   /// @param _name is name of user
   /// @param _sender is address of user
-  function addName(string _name, address _sender) onlyAdmin public {
+  function addName(string _name, address _sender) onlyAdminOrModerator public {
     addNameInternal(_name, _sender);
   }
 
@@ -190,16 +195,16 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
   /// @notice Function to fetch address of the user that corresponds to given name
   /// @param _name is name of user
   /// @return address of the user as type address
-  function getName2Owner(string _name) public view returns (address) {
-    return name2owner[keccak256(abi.encodePacked(_name))];
+  function getUserName2UserAddress(string _name) public view returns (address) {
+    return userName2UserAddress[keccak256(abi.encodePacked(_name))];
   }
 
   /// View function - doesn't cost any gas to be executed
   /// @notice Function to fetch name that corresponds to the address
   /// @param _sender is address of user
   /// @return name of the user as type string
-  function getOwner2Name(address _sender) public view returns (string) {
-    return owner2name[_sender];
+  function getUserAddress2UserName(address _sender) public view returns (string) {
+    return userAddress2UserName[_sender];
   }
 
 }
