@@ -12,7 +12,8 @@ import "./TwoKeyReg.sol";
 
 // SAFT are to be implemented by transferEtherByAdmins with the amount including the discount, according to the prevailing rate
 
-contract TwoKeyAdmin is  Ownable, Destructible, AdminContract {
+///TODO: Sufficient inheritance of both ownable and destructible, duplicated code
+contract TwoKeyAdmin is Destructible, AdminContract {
 
 	TwoKeyEconomy private twoKeyEconomy;
 	TwoKeyUpgradableExchange private twokeyUpgradableExchange;
