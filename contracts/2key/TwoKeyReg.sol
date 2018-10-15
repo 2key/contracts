@@ -2,9 +2,13 @@ pragma solidity ^0.4.24;
 
 import '../openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import "./RBACWithAdmin.sol";
-import "./TwoKeyAdmin.sol";
 
 contract TwoKeyReg is Ownable, RBACWithAdmin {
+
+  /// mapping user's address to user's name
+  mapping(address => string) public userAddress2UserName;
+  /// mapping user's name to user's address
+  mapping(bytes32 => address) public userName2UserAddress;
 
   /// Address of 2key event source contract which will have permission to write on this contract
   /// (Address is enough, there is no need to spend sufficient gas and instantiate whole contract)
@@ -13,7 +17,7 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
   /// Address for contract maintainer
   address maintainer;
 
-  TwoKeyAdmin twoKeyAdminContract;
+  address twoKeyAdminContractAddress;
 
   /// Modifier which will allow only 2key event source to issue calls on selected methods
   modifier onlyTwoKeyEventSource {
@@ -23,7 +27,7 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
   /// TODO: (Amit) Put this modifier on methods where required
   /// Modifier which will allow only 2keyAdmin or maintener to invoke function calls
   modifier onlyTwoKeyAuthorized {
-    require(msg.sender == address(twoKeyAdminContract) || msg.sender == maintainer);
+    require(msg.sender == twoKeyAdminContractAddress || msg.sender == maintainer);
     _;
   }
 
@@ -31,19 +35,12 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
     require(_twoKeyEventSource != address(0));
     require(_twoKeyAdmin != address(0));
     twoKeyEventSource = _twoKeyEventSource;
-    twoKeyAdminContract = TwoKeyAdmin( _twoKeyAdmin);   
+    twoKeyAdminContractAddress = _twoKeyAdmin;
   }
 
- // function addTwoKeyEventSource(address _twoKeyEventSource) public onlyOwner {
- //   require(twoKeyEventSource == address(0));
- //   require(_twoKeyEventSource != address(0));
-
- //   twoKeyEventSource = _twoKeyEventSource;
- // }
 
   /// @notice Method to change the allowed TwoKeyEventSource contract address
   /// @param _twoKeyEventSource new TwoKeyEventSource contract address
-  // only admin
   function changeTwoKeyEventSource(address _twoKeyEventSource) public onlyAdmin {
     require(_twoKeyEventSource != address(0));
 
@@ -149,12 +146,7 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
     return twoKeyEventSource;
   }
 
-  ///TODO: mapping user's address to user's name
 
-  /// mapping user's address to user's name 
-  mapping(address => string) public userAddress2UserName;
-  /// mapping user's name to user's address 
-  mapping(bytes32 => address) public userName2UserAddress;
 
   /// @notice Event is emitted when a user's name is changed
   event UserNameChanged(address owner, string name);
