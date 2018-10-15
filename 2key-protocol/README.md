@@ -9,6 +9,10 @@
 * run ```yarn run test``` to start tests
 * after all steps passed you can continue with development
 
+### How run Metamask debugger app
+
+* ```yarn start```
+
 ### Folder structure
 
 ```
@@ -30,7 +34,10 @@
 |----dist - submodule that synced with github.com/2key/2key-protocol repo here webpack will build our library
 |----test - tests folder
 |    |----_web3.ts - test helpers to create web3 instance with wallet provider
+|    |----index.html - debugger app with metamask support
 |    |----index.spec.ts - the main test scenario, in feature we need to split this to different cases
+|    |----proxy.spec.ts - proxy for listening plasama event
 |    |----sendETH.spec.ts - test for fullfilling all needed accounts (look at .env file) with 10ETH
 |    |----sendTokens.spec.ts - test for sending truffle2Key tokens to aydnep accounts in staging network
+|    |----webapp.ts - script for debugger app
 ```

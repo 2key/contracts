@@ -119,7 +119,7 @@ module.exports = {
     'plasma-ap': {
       // host: 'localhost',
       // port: 8545,
-      provider: () => new HDWalletProvider(mnemonic, 'http://astring.aydnep.com.ua:18545'),
+      provider: () => new HDWalletProvider(mnemonic, 'http://astring.aydnep.com.ua:38545'),
       network_id: 17, // Match any network id
       gas: 7000000,
       gasPrice: 1

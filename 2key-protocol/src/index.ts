@@ -30,7 +30,7 @@ const TwoKeyDefaults = {
     ipfsPort: '5001',
     mainNetId: 3,
     syncTwoKeyNetId: 17,
-    twoKeySyncUrl: 'http://astring.aydnep.com.ua:18545',
+    twoKeySyncUrl: 'https://astring.aydnep.com.ua:18545',
     twoKeyMainUrl: 'http://localhost:8585'
 };
 
