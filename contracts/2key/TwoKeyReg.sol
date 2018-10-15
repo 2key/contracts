@@ -50,6 +50,7 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
   /*
     Those mappings are for the fetching data about in what contracts user participates in which role
   */
+
   /// mapping users address to addresses of campaigns where he is contractor
   mapping(address => address[]) public userToCampaignsWhereContractor;
 
@@ -71,7 +72,7 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
 
   //onlyTwoKeyEventSource
   function addWhereContractor(address _userAddress, address _contractAddress) public onlyTwoKeyEventSource {
-   // require(_contractAddress != address(0));
+    require(_contractAddress != address(0));
     userToCampaignsWhereContractor[_userAddress].push(_contractAddress);
   }
   /// Only TwoKeyEventSource contract can issue this calls
