@@ -14,14 +14,11 @@ import "./TwoKeyReg.sol";
 
 contract TwoKeyAdmin is  Ownable, Destructible, AdminContract {
 
-
-	// TODO: Add permission modifiers to all functions @Amit
-
 	TwoKeyEconomy private twoKeyEconomy;
 	TwoKeyUpgradableExchange private twokeyUpgradableExchange;
 	TwoKeyEventSource private twoKeyEventSource;
 	TwoKeyReg private twoKeyReg;
-	TwoKeyAdmin private previousAdmin;
+	address private previousAdmin;
 
 	address private electorateAdmins;
 	address private newTwoKeyAdminAddress;
@@ -33,7 +30,7 @@ contract TwoKeyAdmin is  Ownable, Destructible, AdminContract {
 
     /// @notice Modifier will revert if calling address is not owner or previous active admin contract
 	modifier onlyAuthorizedAdmins() {
-		require((msg.sender == owner) || (msg.sender == address(previousAdmin)));
+		require((msg.sender == owner) || (msg.sender == previousAdmin));
 	   _;
 	}
 
@@ -78,7 +75,7 @@ contract TwoKeyAdmin is  Ownable, Destructible, AdminContract {
 	/// @param _previousAdmin is address of previous active admin contract
 	function addPreviousAdmin(address _previousAdmin) adminsVotingApproved {
 		require(_previousAdmin != address(0));
-		previousAdmin = TwoKeyAdmin(_previousAdmin);
+		previousAdmin = _previousAdmin;
 	}
 
     /// @notice Function where only elected admin can transfer tokens to an address
