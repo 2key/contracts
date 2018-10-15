@@ -173,6 +173,8 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
     }
     userAddress2UserName[_sender] = _name;
     userName2UserAddress[keccak256(abi.encodePacked(_name))] = _sender;
+    // Add history of changes
+    username2AddressHistory[keccak256(abi.encodePacked(_name))].push(_sender);
     emit UserNameChanged(_sender, _name);
   }
 
