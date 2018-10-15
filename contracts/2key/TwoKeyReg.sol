@@ -10,9 +10,11 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
   /// mapping user's name to user's address
   mapping(bytes32 => address) public userName2UserAddress;
 
+  mapping(bytes32 => address[]) public username2AddressHistory;
+
   /// Address of 2key event source contract which will have permission to write on this contract
   /// (Address is enough, there is no need to spend sufficient gas and instantiate whole contract)
-  address twoKeyEventSource;
+  address public twoKeyEventSource;
 
   /// Address for contract maintainer
   address maintainer;
@@ -51,6 +53,9 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
     Those mappings are for the fetching data about in what contracts user participates in which role
   */
 
+  /// TODO: Q's:
+  /// TODO: Are this mappings going to be public? If yes, we don't need 4 getters for this
+  /// TODO: Event source address should be public, as all other info related to singleton contracts (transparency)
   /// mapping users address to addresses of campaigns where he is contractor
   mapping(address => address[]) public userToCampaignsWhereContractor;
 
@@ -71,7 +76,7 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
   /// commented modifier onlyTwoKeyEventSource
 
   //onlyTwoKeyEventSource
-  function addWhereContractor(address _userAddress, address _contractAddress) public onlyTwoKeyEventSource {
+  function addWhereContractor(address _userAddress, address _contractAdsdress) public onlyTwoKeyEventSource {
     require(_contractAddress != address(0));
     userToCampaignsWhereContractor[_userAddress].push(_contractAddress);
   }
