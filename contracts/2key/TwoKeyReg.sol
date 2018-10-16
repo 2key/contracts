@@ -84,7 +84,6 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
   /// @param _twoKeyEventSource new TwoKeyEventSource contract address
   function changeTwoKeyEventSource(address _twoKeyEventSource) public onlyAdmin {
     require(_twoKeyEventSource != address(0));
-
     twoKeyEventSource = _twoKeyEventSource;
   }
   
@@ -192,7 +191,7 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
   /// @notice Function where only admin can add a name - address pair 
   /// @param _name is name of user
   /// @param _sender is address of user
-  function addName(string _name, address _sender) onlyTwoKeyMaintainers public {
+  function addName(string _name, address _sender) onlyTwoKeyMaintainer public {
     addNameInternal(_name, _sender);
   }
 
