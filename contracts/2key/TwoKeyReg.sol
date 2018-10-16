@@ -13,7 +13,7 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
   mapping(address => string) public address2username;
   /// mapping user's name to user's address
   mapping(bytes32 => address) public username2currentAddress;
-
+  // mapping username to array of addresses he is using/used
   mapping(bytes32 => address[]) public username2AddressHistory;
 
   /// Address of 2key event source contract which will have permission to write on this contract
@@ -40,7 +40,7 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
     _;
   }
 
-
+  /// Modifier which will allow only 2keyMaintainer to invoke function calls
   modifier onlyTwoKeyMaintainer {
     require(checkIfTwoKeyMaintainerExists(msg.sender));
     _;
