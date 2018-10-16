@@ -3,6 +3,7 @@ pragma solidity ^0.4.24;
 import '../openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import "./RBACWithAdmin.sol";
 
+/// TODO: What happens if user didn't set his username
 contract TwoKeyReg is Ownable, RBACWithAdmin {
 
   /// CAN BE ONLY CHANGED BY THE MAINTAINER OR TWOKEYCONTRACT (3 mappings)
@@ -36,6 +37,12 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
   /// Modifier which will allow only 2keyAdmin or maintainer to invoke function calls
   modifier onlyTwoKeyAuthorized {
     require(msg.sender == twoKeyAdminContractAddress || checkIfTwoKeyMaintainerExists(msg.sender));
+    _;
+  }
+
+
+  modifier onlyTwoKeyMaintainer {
+    require(checkIfTwoKeyMaintainerExists(msg.sender));
     _;
   }
 
@@ -93,6 +100,7 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
 
     userToCampaignsWhereContractor[_userAddress].push(_contractAddress);
   }
+
   /// Only TwoKeyEventSource contract can issue this calls
   /// @notice Function to add new campaign contract where user is moderator
   /// @dev We're requiring the contract address different address 0 because it needs to be deployed
@@ -164,8 +172,6 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
   function getTwoKeyEventSourceAddress() public view returns (address) {
     return twoKeyEventSource;
   }
-
-
 
   /// @notice Event is emitted when a user's name is changed
   event UserNameChanged(address owner, string name);
