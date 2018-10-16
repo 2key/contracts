@@ -6,26 +6,41 @@ import "./RBACWithAdmin.sol";
 /// TODO: What happens if user didn't set his username
 contract TwoKeyReg is Ownable, RBACWithAdmin {
 
-  /// CAN BE ONLY CHANGED BY THE MAINTAINER OR TWOKEYCONTRACT (3 mappings)
+  /// @notice Event is emitted when a user's name is changed
+  event UserNameChanged(address owner, string name);
 
-  // TODO: let the name be initial key wherever we update this mappings
   /// mapping user's address to user's name
   mapping(address => string) public address2username;
   /// mapping user's name to user's address
   mapping(bytes32 => address) public username2currentAddress;
   // mapping username to array of addresses he is using/used
   mapping(bytes32 => address[]) public username2AddressHistory;
+  /*
+  Those mappings are for the fetching data about in what contracts user participates in which role
+  */
+
+  /// mapping users address to addresses of campaigns where he is contractor
+  mapping(address => address[]) userToCampaignsWhereContractor;
+
+  /// mapping users address to addresses of campaigns where he is moderator
+  mapping(address => address[]) userToCampaignsWhereModerator;
+
+  /// mapping users address to addresses of campaigns where he is refferer
+  mapping(address => address[]) userToCampaignsWhereReferrer;
+
+  /// mapping users address to addresses of campaigns where he is converter
+  mapping(address => address[]) userToCampaignsWhereConverter;
 
   /// Address of 2key event source contract which will have permission to write on this contract
   /// (Address is enough, there is no need to spend sufficient gas and instantiate whole contract)
   address public twoKeyEventSource;
-
 
   /// Address for contract maintainer
   /// Should be the array of addresses - will have permission on some of the mappings to update
   address[] maintainers;
 
   address twoKeyAdminContractAddress;
+
 
   /// Modifier which will allow only 2key event source to issue calls on selected methods
   modifier onlyTwoKeyEventSource {
@@ -73,21 +88,7 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
     twoKeyEventSource = _twoKeyEventSource;
   }
   
-  /*
-    Those mappings are for the fetching data about in what contracts user participates in which role
-  */
 
-  /// mapping users address to addresses of campaigns where he is contractor
-  mapping(address => address[]) userToCampaignsWhereContractor;
-
-  /// mapping users address to addresses of campaigns where he is moderator
-  mapping(address => address[]) userToCampaignsWhereModerator;
-
-  /// mapping users address to addresses of campaigns where he is refferer
-  mapping(address => address[]) userToCampaignsWhereReferrer;
-
-  /// mapping users address to addresses of campaigns where he is converter
-  mapping(address => address[]) userToCampaignsWhereConverter;
 
   /// Only TwoKeyEventSource contract can issue this calls
   /// @notice Function to add new campaign contract where user is contractor
@@ -166,8 +167,6 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
       return userToCampaignsWhereConverter[_userAddress];
   }
 
-  /// @notice Event is emitted when a user's name is changed
-  event UserNameChanged(address owner, string name);
 
   /// @notice Function where new name/address pair is added or an old address is updated with new name
   /// @dev private function 
