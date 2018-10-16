@@ -22,7 +22,6 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
 
 
   /// Address for contract maintainer
-  /// TODO: Need to be discussed
   /// Should be the array of addresses - will have permission on some of the mappings to update
   address[] maintainers;
 
@@ -165,12 +164,6 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
   function getContractsWhereUserIsConverter(address _userAddress) public view returns (address[]) {
       require(_userAddress != address(0));
       return userToCampaignsWhereConverter[_userAddress];
-  }
-
-  /// View function to return address of current active twoKeyEventSource contract
-  /// @notice Function to fetch twoKeyEventSource contract address 
-  function getTwoKeyEventSourceAddress() public view returns (address) {
-    return twoKeyEventSource;
   }
 
   /// @notice Event is emitted when a user's name is changed
