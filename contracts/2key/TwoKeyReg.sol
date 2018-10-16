@@ -22,7 +22,7 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
 
   /// Address for contract maintainer
   /// TODO: Need to be discussed
-    /// Should be the array of addresses - will have permission on some of the mappings to update
+  /// Should be the array of addresses - will have permission on some of the mappings to update
   address[] maintainers;
 
   address twoKeyAdminContractAddress;
@@ -46,14 +46,18 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
     twoKeyAdminContractAddress = _twoKeyAdmin;
   }
 
-    function checkIfTwoKeyMaintainerExists(address _maintainer) private view returns (bool) {
-        for(uint i=0; i<maintainers.length; i++) {
-            if(_maintainer == maintainers[i]) {
-                return true;
-            }
-        }
-        return false;
-    }
+
+  /// @notice Function to check if maintainer exists
+  /// @param _maintainer is the address of maintainer we're checking occurence
+  /// @return true if exists otherwise false
+  function checkIfTwoKeyMaintainerExists(address _maintainer) private view returns (bool) {
+      for(uint i=0; i<maintainers.length; i++) {
+          if(_maintainer == maintainers[i]) {
+              return true;
+          }
+      }
+      return false;
+  }
 
   /// @notice Method to change the allowed TwoKeyEventSource contract address
   /// @param _twoKeyEventSource new TwoKeyEventSource contract address
@@ -84,11 +88,9 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
   /// @dev We're requiring the contract address different address 0 because it needs to be deployed
   /// @param _userAddress is address of contractor
   /// @param _contractAddress is address of deployed campaign contract
-  /// commented modifier onlyTwoKeyEventSource
-  // TODO: Make sure that name for this key doesn't exist already, otherwise create new name
-  //onlyTwoKeyEventSource
   function addWhereContractor(address _userAddress, address _contractAddress) public onlyTwoKeyEventSource {
     require(_contractAddress != address(0));
+
     userToCampaignsWhereContractor[_userAddress].push(_contractAddress);
   }
   /// Only TwoKeyEventSource contract can issue this calls
