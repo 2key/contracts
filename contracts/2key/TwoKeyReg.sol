@@ -193,7 +193,7 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
   /// @notice Function where only admin can add a name - address pair 
   /// @param _name is name of user
   /// @param _sender is address of user
-  function addName(string _name, address _sender) onlyAdminOrModerator public {
+  function addName(string _name, address _sender) onlyTwoKeyMaintainers public {
     addNameInternal(_name, _sender);
   }
 
