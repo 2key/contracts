@@ -3,10 +3,12 @@ pragma solidity ^0.4.24;
 import '../openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import '../openzeppelin-solidity/contracts/math/SafeMath.sol';
 
+// Interface for ERC20 token to use method transferFrom
 interface Token {
     function transferFrom(address _from, address _to, uint256 _value) external returns (bool success);
 }
 
+// Contract TokenRecipient
 contract TokenRecipient {
     event ReceivedEther(address sender, uint amount);
     event ReceivedTokens(address _from, uint256 _value, address _token, bytes _extraData);
@@ -29,7 +31,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
 
 	using SafeMath for uint;
 
-
+    //The minimum number of voting members that must be in attendance
     uint256 public minimumQuorum;
     uint256 public debatingPeriodInMinutes;
     Proposal[] public proposals;

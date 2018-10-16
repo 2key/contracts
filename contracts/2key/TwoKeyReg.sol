@@ -7,6 +7,7 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
 
   /// CAN BE ONLY CHANGED BY THE MAINTAINER OR TWOKEYCONTRACT (3 mappings)
 
+  // TODO: let the name be initial key wherever we update this mappings
   /// mapping user's address to user's name
   mapping(address => string) public address2username;
   /// mapping user's name to user's address
@@ -17,6 +18,7 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
   /// Address of 2key event source contract which will have permission to write on this contract
   /// (Address is enough, there is no need to spend sufficient gas and instantiate whole contract)
   address public twoKeyEventSource;
+
 
   /// Address for contract maintainer
   /// TODO: Need to be discussed
@@ -83,7 +85,7 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
   /// @param _userAddress is address of contractor
   /// @param _contractAddress is address of deployed campaign contract
   /// commented modifier onlyTwoKeyEventSource
-
+  // TODO: Make sure that name for this key doesn't exist already, otherwise create new name
   //onlyTwoKeyEventSource
   function addWhereContractor(address _userAddress, address _contractAddress) public onlyTwoKeyEventSource {
     require(_contractAddress != address(0));
