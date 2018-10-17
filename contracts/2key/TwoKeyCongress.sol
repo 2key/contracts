@@ -3,6 +3,7 @@ pragma solidity ^0.4.24;
 import '../openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import '../openzeppelin-solidity/contracts/math/SafeMath.sol';
 
+// TODO: OnlyMember should be actually onlyContract by itself
 // Interface for ERC20 token to use method transferFrom
 interface Token {
     function transferFrom(address _from, address _to, uint256 _value) external returns (bool success);
@@ -33,10 +34,15 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
 
     //The minimum number of voting members that must be in attendance
     uint256 public minimumQuorum;
+    //Period length for voting
     uint256 public debatingPeriodInMinutes;
+    //Array of proposals
     Proposal[] public proposals;
+    //Number of proposals
     uint public numProposals;
+    // Mapping address to memberId
     mapping (address => uint) public memberId;
+    // Array of members
     Member[] public members;
 
     event ProposalAdded(uint proposalID, address recipient, uint amount, string description);
@@ -62,6 +68,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
     struct Member {
         address member;
         string name;
+        string type; // Founder, Board-member
         uint memberSince;
     }
 
@@ -74,6 +81,11 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
     // Modifier that allows only shareholders to vote and create new proposals
     modifier onlyMembers {
         require(memberId[msg.sender] != 0);
+        _;
+    }
+
+    modifier onlyCongress() {
+        require(msg.sender == address(this));
         _;
     }
 
@@ -274,8 +286,8 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
             now > p.minExecutionDate                                            // If it is past the voting deadline
             && !p.executed                                                         // and it has not already been executed
             && p.proposalHash == keccak256(abi.encodePacked(p.recipient, p.amount, transactionBytecode))  // and the supplied code matches the proposal
-            && p.numberOfVotes.mul(100).div(members.length) >= minimumQuorum
-        );                                  // and a minimum quorum has been reached...
+            && p.numberOfVotes.mul(100).div(members.length) >= minimumQuorum // and a minimum quorum has been reached...
+        );
 
         // ...then execute result
         p.executed = true; // Avoid recursive calling

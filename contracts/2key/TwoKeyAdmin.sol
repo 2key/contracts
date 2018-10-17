@@ -20,9 +20,12 @@ contract TwoKeyAdmin is Destructible, AdminContract {
 	TwoKeyReg private twoKeyReg;
 	address private previousAdmin;
 
+	// Idea is that electorateAdmins can't issue the transaction before all members voted
+	// 1 electorate admin is 1 two key congress
 	address private electorateAdmins;
 	address private newTwoKeyAdminAddress;
 	bool private wasReplaced;
+
 
 	/*
 	* Modifiers
