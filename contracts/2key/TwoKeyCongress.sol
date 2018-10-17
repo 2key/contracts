@@ -68,7 +68,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
     struct Member {
         address member;
         string name;
-        string type; // Founder, Board-member
+//        string member_type; // Founder, Board-member
         uint memberSince;
     }
 
