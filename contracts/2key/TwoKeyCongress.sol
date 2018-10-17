@@ -68,7 +68,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
     struct Member {
         address member;
         string name;
-//        string member_type; // Founder, Board-member
+        string member_type; // Founder, Board-member
         uint memberSince;
     }
 
@@ -94,9 +94,9 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
         uint256 _minutesForDebate) Ownable() payable public {
         changeVotingRules(_minimumQuorumForProposals, _minutesForDebate);
         // It is necessary to add an empty first member
-        addMember(0, "");
+        addMember(0, "Eitan", 'board-member');
         // and let's add the founder, to save a step later
-        addMember(owner, 'founder');
+//        addMember(owner, 'founder');
     }
 
     /**
@@ -107,14 +107,14 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
      * @param targetMember ethereum address to be added
      * @param memberName public name for that member
      */
-    function addMember(address targetMember, string memberName) onlyOwner public {
+    function addMember(address targetMember, string memberName, string memberType) onlyOwner public {
         uint id = memberId[targetMember];
         if (id == 0) {
             memberId[targetMember] = members.length;
             id = members.length++;
         }
 
-        members[id] = Member({member: targetMember, memberSince: now, name: memberName});
+        members[id] = Member({member: targetMember, memberSince: now, member_type: memberType, name: memberName});
         emit MembershipChanged(targetMember, true);
     }
 
