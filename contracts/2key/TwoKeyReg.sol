@@ -209,6 +209,9 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
     addNameInternal(_name, msg.sender);
   }
 
+  function addWalletName(string username, address _address, string username_walletname) public onlyTwoKeyMaintainer {
+
+  }
 
   /// View function - doesn't cost any gas to be executed
   /// @notice Function to fetch address of the user that corresponds to given name
