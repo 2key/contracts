@@ -87,6 +87,7 @@ function writeToFile() {
     let nonSingletoneHash = calculateNonSingletoneHash();
 
     let dict = {};
+    dict["networkId"] = networkId;
     dict["singletoneHash"] = singletoneHash;
     dict["nonSingletoneHash"] = nonSingletoneHash;
     dict["singletones"] = singletonesDict;
