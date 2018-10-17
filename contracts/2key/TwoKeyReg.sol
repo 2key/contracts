@@ -3,7 +3,6 @@ pragma solidity ^0.4.24;
 import '../openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import "./RBACWithAdmin.sol";
 
-/// TODO: What happens if user didn't set his username
 contract TwoKeyReg is Ownable, RBACWithAdmin {
 
   /// @notice Event is emitted when a user's name is changed
