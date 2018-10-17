@@ -15,6 +15,15 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
   // mapping username to array of addresses he is using/used
   mapping(bytes32 => address[]) public username2AddressHistory;
   /*
+    mapping address to wallet tag
+    wallet tag = username + '_' + walletname
+  */
+  mapping(address => bytes32) address2walletTag;
+
+  // reverse mapping from walletTag to address
+  mapping(bytes32 => address) walletTag2address;
+
+  /*
   Those mappings are for the fetching data about in what contracts user participates in which role
   */
 
