@@ -27,7 +27,6 @@ contract TokenRecipient {
 
 
 
-
 contract TwoKeyCongress is Ownable, TokenRecipient {
 
 	using SafeMath for uint;
@@ -84,7 +83,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
         _;
     }
 
-    modifier onlyCongress() {
+    modifier onlyTwoKeyCongressWhenConsensysIsReached() {
         require(msg.sender == address(this));
         _;
     }
@@ -94,9 +93,10 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
         uint256 _minutesForDebate) Ownable() payable public {
         changeVotingRules(_minimumQuorumForProposals, _minutesForDebate);
         // It is necessary to add an empty first member
+        addMember(0,'','');
+        // and let's add the board-member, to save a step later
         addMember(0, "Eitan", 'board-member');
-        // and let's add the founder, to save a step later
-//        addMember(owner, 'founder');
+        //        addMember(owner, 'founder');
     }
 
     /**
@@ -107,7 +107,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
      * @param targetMember ethereum address to be added
      * @param memberName public name for that member
      */
-    function addMember(address targetMember, string memberName, string memberType) onlyOwner public {
+    function addMember(address targetMember, string memberName, string memberType) onlyTwoKeyCongressWhenConsensysIsReached public {
         uint id = memberId[targetMember];
         if (id == 0) {
             memberId[targetMember] = members.length;
@@ -125,7 +125,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
      *
      * @param targetMember ethereum address to be removed
      */
-    function removeMember(address targetMember) onlyOwner public {
+    function removeMember(address targetMember) onlyTwoKeyCongressWhenConsensysIsReached public {
         require(memberId[targetMember] != 0);
 
         for (uint i = memberId[targetMember]; i<members.length-1; i++){
@@ -147,7 +147,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
      */
     function changeVotingRules(
         uint256 minimumQuorumForProposals,
-        uint256 minutesForDebate) onlyOwner public {
+        uint256 minutesForDebate) onlyTwoKeyCongressWhenConsensysIsReached public {
         minimumQuorum = minimumQuorumForProposals;
         debatingPeriodInMinutes = minutesForDebate;
 
