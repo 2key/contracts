@@ -209,7 +209,11 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
     addNameInternal(_name, msg.sender);
   }
 
-  function addWalletName(string username, address _address, string username_walletname) public onlyTwoKeyMaintainer {
+  /// @notice Function where TwoKeyMaintainer can add walletname to address
+  /// @param username is the username of the user we want to update map for
+  /// @param _address is the address of the user we want to update map for
+  /// @param _username_walletName is the concatenated username + '_' + walletName, since sending from trusted provider no need to validate
+  function addWalletName(string username, address _address, string _username_walletName) public onlyTwoKeyMaintainer {
 
   }
 
