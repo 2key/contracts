@@ -200,12 +200,14 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
   /// @param _name is name of user
   /// @param _sender is address of user
   function addName(string _name, address _sender) onlyTwoKeyMaintainer public {
+    require(utfStringLength(_name) >= 3 && utfStringLength(_name) <=25);
     addNameInternal(_name, _sender);
   }
 
   /// @notice Function where user can add name to his address 
   /// @param _name is name of user
   function addNameByUser(string _name) public {
+    require(utfStringLength(_name) >= 3 && utfStringLength(_name) <=25);
     addNameInternal(_name, msg.sender);
   }
 
@@ -213,8 +215,12 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
   /// @param username is the username of the user we want to update map for
   /// @param _address is the address of the user we want to update map for
   /// @param _username_walletName is the concatenated username + '_' + walletName, since sending from trusted provider no need to validate
-  function addWalletName(string username, address _address, string _username_walletName) public onlyTwoKeyMaintainer {
+  function addWalletName(string memory username, address _address, string memory _username_walletName) public onlyTwoKeyMaintainer {
+    require(_address != address(0));
+    require(username2currentAddress[keccak256(abi.encodePacked(username))] == _address); // validating that username exists
 
+    address2walletTag[_address] = keccak256(abi.encodePacked(_username_walletName));
+    walletTag2address[keccak256(abi.encodePacked(_username_walletName))] = _address;
   }
 
   /// View function - doesn't cost any gas to be executed
@@ -235,8 +241,34 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
 
 
   /// Get history of changed addresses
+  /// @return array of addresses sorted
   function getHistoryOfChangedAddresses() public view returns (address[]) {
-    string name = address2username[msg.sender];
+    string memory name = address2username[msg.sender];
     return username2AddressHistory[keccak256(abi.encodePacked(name))];
   }
+
+  /// @notice Function to fetch actual length of string
+  /// @param str is the string we'd like to get length of
+  /// @return length of the string
+  function utfStringLength(string str) constant returns (uint length) {
+      uint i=0;
+      bytes memory string_rep = bytes(str);
+
+      while (i<string_rep.length)
+      {
+          if (string_rep[i]>>7==0)
+              i+=1;
+          else if (string_rep[i]>>5==0x6)
+              i+=2;
+          else if (string_rep[i]>>4==0xE)
+              i+=3;
+          else if (string_rep[i]>>3==0x1E)
+              i+=4;
+          else
+          //For safety
+              i+=1;
+          length++;
+      }
+  }
+
 }
