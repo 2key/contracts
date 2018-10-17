@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = './build/contracts/';
 const sha256 = require('js-sha256');
-
+const rhd = require('node-humanhash');
 
 const singletones = [
     "TwoKeyAdmin",
@@ -85,11 +85,23 @@ function writeToFile() {
     readNonSingletones();
     let singletoneHash = calculateSingletoneAddressesHash();
     let nonSingletoneHash = calculateNonSingletoneHash();
+    let humanHashSingletone = rhd.humanizeDigest(singletoneHash);
+    let humanHashNonSingletone = rhd.humanizeDigest(nonSingletoneHash);
 
     let dict = {};
+
     dict["networkId"] = networkId;
-    dict["singletoneHash"] = singletoneHash;
-    dict["nonSingletoneHash"] = nonSingletoneHash;
+    dict["hash"] = {
+        "singletoneHash" : singletoneHash,
+        "nonSingletoneHash" : nonSingletoneHash,
+
+        "humanHash" : {
+            "singletoneHuman" : humanHashSingletone,
+            "nonSingletoneHuman" : humanHashNonSingletone,
+        }
+    }
+    // dict["singletoneHash"] = singletoneHash;
+    // dict["nonSingletoneHash"] = nonSingletoneHash;
     dict["singletones"] = singletonesDict;
     dict["nonSingletones"] = nonSingletonesDict;
 
