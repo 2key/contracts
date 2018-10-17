@@ -65,7 +65,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
     }
 
     struct Member {
-        address member;
+        address memberAddress;
         string name;
         string member_type; // Founder, Board-member
         uint memberSince;
@@ -99,6 +99,15 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
         //        addMember(owner, 'founder');
     }
 
+    function replaceMemberAddress(address _newMemberAddress) public returns (bool) {
+        require(_newMemberAddress != address(0));
+        uint id = memberId[msg.sender];
+        require(id != 0); //requiring that member already exists
+        Member memory _currentMember = members[id];
+        _currentMember.memberAddress = _newMemberAddress;
+        members[id] = _currentMember;
+        return true;
+    }
     /**
      * Add member
      *
@@ -114,7 +123,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
             id = members.length++;
         }
 
-        members[id] = Member({member: targetMember, memberSince: now, member_type: memberType, name: memberName});
+        members[id] = Member({memberAddress: targetMember, memberSince: now, member_type: memberType, name: memberName});
         emit MembershipChanged(targetMember, true);
     }
 
