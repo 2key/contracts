@@ -60,7 +60,7 @@ contract TwoKeyPlasmaEvents {
         bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to plasma address")),keccak256(abi.encodePacked(msg.sender))));
         if (with_prefix) {
             bytes memory prefix = "\x19Ethereum Signed Message:\n32";
-            hash = sha3(prefix, hash);
+            hash = keccak256(abi.encodePacked(prefix, hash));
         }
 
         require (sig.length == 65, 'bad signature length');
@@ -254,8 +254,23 @@ contract TwoKeyPlasmaEvents {
             emit Visited(new_address, c, contractor, old_address);
         }
     }
-    // return a list of plasma address
+
+    // return a list of eth/plasma address that came from "from"
+    // this method converts address in the list from plasma to ether when possible
     function get_visits_list(address from, address c, address contractor) public view returns (address[]) {
-        return visits_list[c][contractor][from];
+        uint n_influencers = visits_list[c][contractor][from].length;
+        if (n_influencers == 0) {
+            return visits_list[c][contractor][from];
+        }
+        address[] memory influencers = new address[](n_influencers);
+        for (uint i = 0; i < n_influencers; i++) {
+            address influencer = visits_list[c][contractor][from][i];
+            if (plasma2ethereum[influencer] != address(0)) {
+                influencers[i] = plasma2ethereum[influencer];
+            } else {
+                influencers[i] = influencer;
+            }
+        }
+        return influencers;
     }
 }
