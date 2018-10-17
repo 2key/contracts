@@ -85,8 +85,8 @@ function writeToFile() {
     readNonSingletones();
     let singletoneHash = calculateSingletoneAddressesHash();
     let nonSingletoneHash = calculateNonSingletoneHash();
-    let humanHashSingletone = rhd.humanizeDigest(singletoneHash);
-    let humanHashNonSingletone = rhd.humanizeDigest(nonSingletoneHash);
+    let humanHashSingletone = rhd.humanizeDigest(singletoneHash,4);
+    let humanHashNonSingletone = rhd.humanizeDigest(nonSingletoneHash,4);
 
     let dict = {};
 
