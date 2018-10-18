@@ -74,18 +74,24 @@ module.exports = {
       gasPrice: 50000000000
     },
     staging: {
-      provider: () => LedgerProvider(`https://ropsten.infura.io/v3/${infuraApiKey}`, {
-        networkId: 3,
-        // https://github.com/LedgerHQ/ledgerjs/issues/200
-        path: "44'/60'/0'/0",
-        askConfirm: true,
-        accountsLength: 1,
-        accountsOffset: 0,
-      }),
-      // provider: () => new HDWalletProvider(mnemonic, 'https://ropsten.infura.io/v3/71d39c30bc984e8a8a0d8adca84620ad'),
+      // provider: () => LedgerProvider(`https://ropsten.infura.io/v3/${infuraApiKey}`, {
+      //   networkId: 3,
+      //   // https://github.com/LedgerHQ/ledgerjs/issues/200
+      //   path: "44'/60'/0'/0",
+      //   askConfirm: true,
+      //   accountsLength: 1,
+      //   accountsOffset: 0,
+      // }),
+      provider: () => new HDWalletProvider(mnemonic, 'https://ropsten.infura.io/v3/71d39c30bc984e8a8a0d8adca84620ad'),
       network_id: 3,
       gas: 8000000,
       gasPrice: 50000000000
+    },
+    'ropsten' : {
+        provider: () => new HDWalletProvider(mnemonic, 'https://ropsten.infura.io/v3/71d39c30bc984e8a8a0d8adca84620ad'),
+        network_id: 3,
+        gas: 8000000,
+        gasPrice: 50000000000
     },
     'staging-2key': {
       provider: () => LedgerProvider('http://18.233.2.70:8500/ropsten', {
