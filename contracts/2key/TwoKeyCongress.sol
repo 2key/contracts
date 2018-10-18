@@ -101,15 +101,15 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
     /// @notice Function where member can replace it's own address
     /// @dev member can change only it's own address
     /// @param _newMemberAddress is the new address we'd like to set for us
-    /// @return true if change is successful otherwise false
-    function replaceMemberAddress(address _newMemberAddress) public returns (bool) {
+    function replaceMemberAddress(address _newMemberAddress) public {
         require(_newMemberAddress != address(0));
         uint id = memberId[msg.sender];
         require(id != 0); //requiring that member already exists
+        memberId[msg.sender] = 0;
+        memberId[_newMemberAddress] = id;
         Member memory _currentMember = members[id];
         _currentMember.memberAddress = _newMemberAddress;
         members[id] = _currentMember;
-        return true;
     }
     /**
      * Add member
@@ -122,7 +122,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
     function addMember(address targetMember, string memberName) internal {
         uint id = memberId[targetMember];
         if (id == 0) {
-            memberId[targetMember] = members.length;
+            memberId[targetMember] = members.length + 1;
             id = members.length++;
         }
 
@@ -284,6 +284,12 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
         description = proposals[proposalNumber].description;
     }
 
+    function getMemberInfo() public view returns (address, string, int, uint) {
+        uint _id = memberId[msg.sender];
+        Member memory member = members[_id];
+        return (member.memberAddress, member.name, member.votingPower, member.memberSince);
+    }
+
     /**
      * Finish vote
      *
@@ -322,4 +328,5 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
     function () payable public {
         
     }
+
 }
