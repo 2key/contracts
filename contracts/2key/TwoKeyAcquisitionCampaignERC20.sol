@@ -14,19 +14,11 @@ import "./TwoKeyTypes.sol";
 /// Contract which will represent campaign for the fungible assets
 contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes {
 
-    // Using safemath to avoid overflows during math operations
-    using SafeMath for uint256;
-
-
     // ==============================================================================================================
     // =====================================TWO KEY ACQUISITION CAMPAIGN EVENTS======================================
     // ==============================================================================================================
-    event UpdatedPublicMetaHash(uint timestamp, string value);
-    event UpdatedData(uint timestamp, uint value, string action);
-    event Fulfilled(address indexed to, uint256 units);
     event Rewarded(address indexed to, uint256 amount);
     event Expired(address indexed _contract);
-    event ReceivedEther(address _sender, uint value);
 
     // ==============================================================================================================
     // =============================TWO KEY ACQUISITION CAMPAIGN STATE VARIABLES=====================================
@@ -209,13 +201,13 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         require(twoKeyEconomy.transfer(converter, contractorProceeds.mul(rate)));
     }
 
-
-    function cancelAssetTwoKey(address _converter, string _assetName, address _assetContract, uint256 _amount) public returns (bool) {
-        conversionHandler.supportForCancelAssetTwoKey(_converter);
-        cancelledEscrow(_converter, _amount);
-        twoKeyEventSource.cancelled(address(this), _converter, _assetName, _assetContract, _amount, CampaignType.CPA_FUNGIBLE);
-        return true;
-    }
+//
+//    function cancelAssetTwoKey(address _converter, string _assetName, address _assetContract, uint256 _amount) public returns (bool) {
+//        conversionHandler.supportForCancelAssetTwoKey(_converter);
+//        cancelledEscrow(_converter, _amount);
+//        twoKeyEventSource.cancelled(address(this), _converter, _assetName, _assetContract, _amount, CampaignType.CPA_FUNGIBLE);
+//        return true;
+//    }
 
 
     function expireEscrow(address _converter, uint256 _amount) public returns (bool) {
@@ -246,9 +238,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
 
     /// At the beginning only contractor can call this method bcs he is the only one who has arcs
     function setPublicLinkKey(address _public_link_key) public {
-        // Here we're requiring that msg.sender has arcs
         require(balanceOf(msg.sender) > 0,'no ARCs');
-
         // Here we're checking that msg.sender have not previously joined
         require(publicLinkKey[msg.sender] == address(0),'public link key already defined');
         publicLinkKey[msg.sender] = _public_link_key;
