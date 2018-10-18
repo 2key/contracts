@@ -122,7 +122,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
     function addMember(address targetMember, string memberName) internal {
         uint id = memberId[targetMember];
         if (id == 0) {
-            memberId[targetMember] = members.length + 1;
+            memberId[targetMember] = members.length;
             id = members.length++;
         }
 
@@ -323,6 +323,10 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
         uint _memberId = memberId[_memberAddress];
         Member memory _member = members[_memberId];
         return _member.votingPower;
+    }
+
+    function getMemberId() public view returns (uint) {
+        return memberId[msg.sender];
     }
 
     function () payable public {
