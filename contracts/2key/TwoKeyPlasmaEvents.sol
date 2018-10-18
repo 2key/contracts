@@ -51,7 +51,8 @@ contract TwoKeyPlasmaEvents {
     mapping(address => mapping(address => mapping(address => address))) public visited_from;
     // campaign,contractor eth-addr=>from eth-addr=>list of to eth or plasma address.
     mapping(address => mapping(address => mapping(address => address[]))) public visits_list;
-// TODO    mapping(address => bytes[]) public sign_list;
+
+    mapping(address => bytes) public visited_sig;
 
     function add_plasma2ethereum(bytes sig, bool with_prefix) public {
         // add an entry connecting msg.sender to the ethereum address that was used to sign sig.
@@ -95,7 +96,7 @@ contract TwoKeyPlasmaEvents {
         ethereum2plasma[eth_address] = msg.sender;
     }
 
-    function _test_path(address c, address contractor, address to) private returns (bool) {
+    function _test_path(address c, address contractor, address to) private view returns (bool) {
         while(to != contractor) {
             if(to == address(0)) {
                 return false;
@@ -105,7 +106,7 @@ contract TwoKeyPlasmaEvents {
         return true;
     }
 
-    function test_path(address c, address contractor, address to) private returns (bool) {
+    function test_path(address c, address contractor, address to) private view returns (bool) {
         if (_test_path(c, contractor, to)) {
             return true;
         }
@@ -119,7 +120,6 @@ contract TwoKeyPlasmaEvents {
         // caller must use the 2key-link and put his plasma address at the end using free_take
         // sig contains the "from" and at the tip of sig you should put your own plasma address (msg.sender)
 
-        // TODO keep table of all 2keylinks of all contracts
 
         // code bellow should be kept identical to transferSig when using free_take
         uint idx = 0;
@@ -224,6 +224,8 @@ contract TwoKeyPlasmaEvents {
             old_address = new_address;
         }
         require(idx == sig.length,'illegal message size');
+
+        visited_sig[old_address] = sig;
     }
 
     function update_public_link_key(address c, address contractor, address new_address, address new_public_key) private {
