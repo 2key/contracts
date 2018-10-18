@@ -21,7 +21,7 @@ const nonSingletones = [
 // If dev-local 8086
 // If rinkeby-infura 4
 
-const networkId = "8086";
+let networkId = "3";
 const plasmaId = "17";
 
 // Iterate through build file and get all singleton contracts name and address
@@ -109,4 +109,24 @@ function writeToFile() {
     fs.writeFileSync("./2key-protocol/contracts_version.json", dictstring);
 }
 
-writeToFile();
+function main() {
+    const command = process.argv[2];
+    if(command != '--network') {
+        console.log('Wrong arguments \nTry running with \'--network {network_name}\'');
+        console.log('Network name can be: ropsten, rinkeby, dev-local');
+        return;
+    }
+    const network = process.argv[3];
+
+    if(network == 'ropsten') {
+        networkId = "3";
+    } else if(network == 'rinkeby') {
+        networkId = "4";
+    } else if(network == 'dev-local') {
+        networkId = "8086";
+    }
+    writeToFile();
+    console.log("Done");
+}
+
+main();
