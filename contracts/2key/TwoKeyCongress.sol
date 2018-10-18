@@ -25,7 +25,8 @@ contract TokenRecipient {
     }
 }
 
-
+//TODO: This contract doesn't need to be ownable, since there's only single deployment stuff and after that everything is up
+// to the members
 
 contract TwoKeyCongress is Ownable, TokenRecipient {
 
@@ -83,19 +84,18 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
         _;
     }
 
-    modifier onlyTwoKeyCongressWhenConsensysIsReached() {
-        require(msg.sender == address(this));
-        _;
-    }
 
     constructor(
         uint256 _minimumQuorumForProposals,
-        uint256 _minutesForDebate) Ownable() payable public {
+        uint256 _minutesForDebate, address[] initialMembers) Ownable() payable public {
         changeVotingRules(_minimumQuorumForProposals, _minutesForDebate);
+        for(uint i=0; i<initialMembers.length; i++) {
+            addMember(initialMembers[i], "Name-blanco", "board-member");
+        }
         // It is necessary to add an empty first member
-        addMember(0,'','');
-        // and let's add the board-member, to save a step later
-        addMember(0, "Eitan", 'board-member');
+//        addMember(0,'','');
+//        // and let's add the board-member, to save a step later
+//        addMember(0, "Eitan", 'board-member');
         //        addMember(owner, 'founder');
     }
 
@@ -120,7 +120,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
      * @param targetMember ethereum address to be added
      * @param memberName public name for that member
      */
-    function addMember(address targetMember, string memberName, string memberType) onlyTwoKeyCongressWhenConsensysIsReached public {
+    function addMember(address targetMember, string memberName, string memberType) internal {
         uint id = memberId[targetMember];
         if (id == 0) {
             memberId[targetMember] = members.length;
@@ -138,7 +138,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
      *
      * @param targetMember ethereum address to be removed
      */
-    function removeMember(address targetMember) onlyTwoKeyCongressWhenConsensysIsReached public {
+    function removeMember(address targetMember) internal {
         require(memberId[targetMember] != 0);
 
         for (uint i = memberId[targetMember]; i<members.length-1; i++){
@@ -160,7 +160,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
      */
     function changeVotingRules(
         uint256 minimumQuorumForProposals,
-        uint256 minutesForDebate) onlyTwoKeyCongressWhenConsensysIsReached public {
+        uint256 minutesForDebate) internal {
         minimumQuorum = minimumQuorumForProposals;
         debatingPeriodInMinutes = minutesForDebate;
 
