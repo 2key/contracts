@@ -1,3 +1,12 @@
+#### @2key/2key-protocol npm package
+
+In order to update npm package run the following: 
+```
+cd 2key-protocol/
+npm version patch
+npm publish
+```
+
 #### Github Pages Site
 https://2key.github.io/contracts/
 
