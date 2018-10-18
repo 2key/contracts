@@ -68,7 +68,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
     struct Member {
         address memberAddress;
         string name;
-        string member_type; // Founder, Board-member
+        int votingPower;
         uint memberSince;
     }
 
@@ -89,9 +89,8 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
         uint256 _minimumQuorumForProposals,
         uint256 _minutesForDebate, address[] initialMembers) Ownable() payable public {
         changeVotingRules(_minimumQuorumForProposals, _minutesForDebate);
-        for(uint i=0; i<initialMembers.length; i++) {
-            addMember(initialMembers[i], "Name-blanco", "board-member");
-        }
+        addMember(initialMembers[0], 'Eitan');
+        addMember(initialMembers[1], 'Kiki');
         // It is necessary to add an empty first member
 //        addMember(0,'','');
 //        // and let's add the board-member, to save a step later
@@ -120,14 +119,14 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
      * @param targetMember ethereum address to be added
      * @param memberName public name for that member
      */
-    function addMember(address targetMember, string memberName, string memberType) internal {
+    function addMember(address targetMember, string memberName) internal {
         uint id = memberId[targetMember];
         if (id == 0) {
             memberId[targetMember] = members.length;
             id = members.length++;
         }
 
-        members[id] = Member({memberAddress: targetMember, memberSince: now, member_type: memberType, name: memberName});
+        members[id] = Member({memberAddress: targetMember, memberSince: now, votingPower: 1, name: memberName});
         emit MembershipChanged(targetMember, true);
     }
 
@@ -266,11 +265,12 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
         p.voted[msg.sender] = true;                     // Set this voter as having voted
         p.numberOfVotes++;
         voteID = p.numberOfVotes;                     // Increase the number of votes
-        p.votes.push(Vote({ inSupport: supportsProposal, voter: msg.sender, justification: justificationText }));                           
+        p.votes.push(Vote({ inSupport: supportsProposal, voter: msg.sender, justification: justificationText }));
+        int votingPower = getMemberVotingPower(msg.sender);
         if (supportsProposal) {                         // If they support the proposal
-            p.currentResult++;                          // Increase score
+            p.currentResult+= votingPower;                          // Increase score
         } else {                                        // If they don't
-            p.currentResult--;                          // Decrease the score
+            p.currentResult-= votingPower;                          // Decrease the score
         }
         // Create a log of this event
         emit Voted(proposalNumber,  supportsProposal, msg.sender, justificationText);
@@ -311,6 +311,12 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
 
         // Fire Events
         emit ProposalTallied(proposalNumber, p.currentResult, p.numberOfVotes, p.proposalPassed);
+    }
+
+    function getMemberVotingPower(address _memberAddress) public view returns (int) {
+        uint _memberId = memberId[_memberAddress];
+        Member memory _member = members[_memberId];
+        return _member.votingPower;
     }
 
     function () payable public {
