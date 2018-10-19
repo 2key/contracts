@@ -12,7 +12,7 @@ contract('TwoKeyCongress', async (accounts) => {
     let congress;
     let transactionBytecode;
     let initialMembers = [accounts[1], accounts[2]];
-    let votingPowers = [1,1]
+    let votingPowers = [1,1];
 
     before(async () => {
         congress = await TwoKeyCongress.new(60, 51, initialMembers,votingPowers);
@@ -48,7 +48,27 @@ contract('TwoKeyCongress', async (accounts) => {
         console.log(afterAllChanges)
     });
 
-    it("should add new proposal for voting", async() => {
+    it("should check if voting rules are set", async() => {
+        let quorum = await congress.minimumQuorum();
+        assert.equal(60,quorum,'quorum should be 60');
+        let votingPeriod = await congress.debatingPeriodInMinutes();
+        assert.equal(votingPeriod, 51, 'debating period not changed');
+    });
+
+
+    it("make a proposal and check it", async () => {
+        await congress.newProposal(
+            storage.address,
+            50,
+            'store something',
+            transactionBytecode, { from: accounts[2] });
+
+        let flag = await congress.checkProposalCode(
+            0,
+            storage.address,
+            50,
+            transactionBytecode.replace());
+        assert.isTrue(flag, 'proposal was not checked');
 
     });
 
