@@ -11,7 +11,7 @@ import "./TwoKeyEventSource.sol";
 import "./TwoKeyReg.sol";
 
 // SAFT are to be implemented by transferEtherByAdmins with the amount including the discount, according to the prevailing rate
-
+/// TODO: Analyze backwards and nonbackwards compatibility when we update contracts
 contract TwoKeyAdmin is Destructible, AdminContract {
 
 	TwoKeyEconomy private twoKeyEconomy;

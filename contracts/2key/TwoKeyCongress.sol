@@ -4,6 +4,9 @@ import '../openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import '../openzeppelin-solidity/contracts/math/SafeMath.sol';
 
 // TODO: OnlyMember should be actually onlyContract by itself
+// TODO: Resolve in tests how to call other methods in the contract (truffle test)
+
+
 // Interface for ERC20 token to use method transferFrom
 interface Token {
     function transferFrom(address _from, address _to, uint256 _value) external returns (bool success);
@@ -87,15 +90,11 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
 
     constructor(
         uint256 _minimumQuorumForProposals,
-        uint256 _minutesForDebate, address[] initialMembers) Ownable() payable public {
+        uint256 _minutesForDebate, address[] initialMembers, int[] votingPowers) Ownable() payable public {
         changeVotingRules(_minimumQuorumForProposals, _minutesForDebate);
-        addMember(initialMembers[0], 'Eitan');
-        addMember(initialMembers[1], 'Kiki');
-        // It is necessary to add an empty first member
-//        addMember(0,'','');
-//        // and let's add the board-member, to save a step later
-//        addMember(0, "Eitan", 'board-member');
-        //        addMember(owner, 'founder');
+        addMember(0,'',0);
+        addMember(initialMembers[0], 'Eitan', votingPowers[0]);
+        addMember(initialMembers[1], 'Kiki', votingPowers[1]);
     }
 
     /// @notice Function where member can replace it's own address
@@ -119,14 +118,14 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
      * @param targetMember ethereum address to be added
      * @param memberName public name for that member
      */
-    function addMember(address targetMember, string memberName) internal {
+    function addMember(address targetMember, string memberName, int _votingPower) internal {
         uint id = memberId[targetMember];
         if (id == 0) {
             memberId[targetMember] = members.length;
             id = members.length++;
         }
 
-        members[id] = Member({memberAddress: targetMember, memberSince: now, votingPower: 1, name: memberName});
+        members[id] = Member({memberAddress: targetMember, memberSince: now, votingPower: _votingPower, name: memberName});
         emit MembershipChanged(targetMember, true);
     }
 
@@ -181,7 +180,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
         uint weiAmount,
         string jobDescription,
         bytes transactionBytecode)
-        onlyMembers public
+        onlyMembers publicc
         returns (uint proposalID)
     {
         proposalID = proposals.length++;
@@ -284,6 +283,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
         description = proposals[proposalNumber].description;
     }
 
+    /// Basic getter function
     function getMemberInfo() public view returns (address, string, int, uint) {
         uint _id = memberId[msg.sender];
         Member memory member = members[_id];
