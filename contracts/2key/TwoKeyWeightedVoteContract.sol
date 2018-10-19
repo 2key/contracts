@@ -16,24 +16,22 @@ contract TwoKeyWeightedVoteContract is TwoKeySignedPresellContract {
   uint public voted_yes;
   uint public voted_no;
 
-  function transferSig(bytes sig) public {
+  function transferSig(bytes sig) public returns (address) {
     // must use a sig which includes a cut (ie by calling free_join_take in sign.js
     require((sig.length-20) % (65+41) == 0, 'signature does not include cut of last vote');
     // validate sig AND populate received_from and influencer2cut
-    super.transferSig(sig);
+    address last_voter = super.transferSig(sig);
 
-    address customer = msg.sender;
+    address[] memory voters = getInfluencers(last_voter);
 
-    address[] memory influencers = getInfluencers(customer);
+    uint n_voters = voters.length;
 
-    uint n_influencers = influencers.length;
-
-    for (uint i = 0; i < n_influencers+1; i++) {
+    for (uint i = 0; i < n_voters+1; i++) {
       address influencer;
-      if (i < n_influencers) {
-        influencer = influencers[i];
+      if (i < n_voters) {
+        influencer = voters[i];
       } else {
-        influencer = customer;
+        influencer = last_voter;
       }
 
       if (voted[influencer]) {
@@ -50,5 +48,7 @@ contract TwoKeyWeightedVoteContract is TwoKeySignedPresellContract {
         } // if cut == 255 then abstain
       }
     }
+
+    return last_voter;
   }
 }

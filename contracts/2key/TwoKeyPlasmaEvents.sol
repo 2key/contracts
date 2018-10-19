@@ -229,10 +229,11 @@ contract TwoKeyPlasmaEvents {
     function update_public_link_key(address c, address contractor, address new_address, address new_public_key) private {
         // update (only once) the public address used by each influencer
         // we will need this in case one of the influencers will want to start his own off-chain link
-        if (public_link_key[c][contractor][new_address] == 0) {
+        address old_address = public_link_key[c][contractor][new_address];
+        if (old_address == address(0)) {
             public_link_key[c][contractor][new_address] = new_public_key;
         } else {
-            require(public_link_key[c][contractor][new_address] == new_public_key,'public key can not be modified');
+            require(old_address == new_public_key,'public key can not be modified');
         }
     }
 

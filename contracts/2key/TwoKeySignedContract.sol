@@ -13,7 +13,7 @@ contract TwoKeySignedContract is TwoKeyContract {
     public_link_key[owner_influencer] = _public_link_key;
   }
 
-  function transferSig(bytes sig) public {
+  function transferSig(bytes sig) public returns (address) {
     // move ARCs based on signature information
 
     // if version=1, with_cut is true then sig also include the cut (percentage) each influencer takes from the bounty
@@ -149,6 +149,8 @@ contract TwoKeySignedContract is TwoKeyContract {
       old_address = new_address;
     }
     require(idx == sig.length,'illegal message size');
+
+    return old_address;
   }
 
   function buySign(bytes sig) public payable {
