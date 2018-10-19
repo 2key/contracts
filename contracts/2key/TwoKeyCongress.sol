@@ -180,7 +180,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
         uint weiAmount,
         string jobDescription,
         bytes transactionBytecode)
-        onlyMembers publicc
+        onlyMembers public
         returns (uint proposalID)
     {
         proposalID = proposals.length++;
