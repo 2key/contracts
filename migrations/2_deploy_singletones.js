@@ -42,7 +42,8 @@ const TwoKeyReg = artifacts.require('TwoKeyReg');
 
 module.exports = function deploy(deployer) {
   var adminInstance;
-  if(deployer.network.startsWith('dev') || deployer.network === 'rinkeby-infura') {
+  if(deployer.network.startsWith('dev') || deployer.network === 'rinkeby-infura' ||
+  deployer.network == 'ropsten') {
     deployer.deploy(TwoKeyAdmin,'0xb3fa520368f2df7bed4df5185101f303f6c7decc')
         .then(() => TwoKeyAdmin.deployed())
         .then(function(instance) {

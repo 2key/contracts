@@ -314,21 +314,26 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
 
         p.proposalPassed = true;
 
-
         // Fire Events
         emit ProposalTallied(proposalNumber, p.currentResult, p.numberOfVotes, p.proposalPassed);
     }
 
+    /// @notice Function getter for voting power for specific member
+    /// @param _memberAddress is the address of the member
+    /// @return integer representing voting power
     function getMemberVotingPower(address _memberAddress) public view returns (int) {
         uint _memberId = memberId[_memberAddress];
         Member memory _member = members[_memberId];
         return _member.votingPower;
     }
 
+    /// @notice Function getter for member id
+    /// @return uint representation of memberId
     function getMemberId() public view returns (uint) {
         return memberId[msg.sender];
     }
 
+    /// @notice Fallback function
     function () payable public {
         
     }

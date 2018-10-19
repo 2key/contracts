@@ -17,8 +17,9 @@ contract('TwoKeyCongress', async (accounts) => {
     before(async () => {
         congress = await TwoKeyCongress.new(60, 51, initialMembers,votingPowers);
         storage = await BasicStorage.new();
-        const sig = web3.sha3("addMember(address,string,string)").slice(0,10);
+        const sig = web3.sha3("addMember(address,string,int)").slice(0,10);
         const arg1 = _.repeat("0", 62) + "20";
+        console.log("ARG1 : " + arg1);
         transactionBytecode = sig + arg1;
     });
   
