@@ -1,4 +1,5 @@
 const Web3 = require('web3');
+const sha3 = require('js-sha3');
 /*
     @Author Nikola Madjarevic
     Javascript library developed with goal to easily generate bytecode for any method you'd like to call
@@ -37,11 +38,12 @@ const sig = ((methodName, methodArgumentsTypes) => {
             signature += methodArgumentsTypes[i].toString()+ ","
         }
     }
-    console.log();
+    signature = sha3.keccak_256(signature).slice(0,10);
+    // console.log(sha3.keccak_256(signature));
     return signature;
 });
 
-export const convertUint = ((value) => {
+const convertUint = ((value) => {
     let numberOfDigits = value.toString().length;
     let arg = "";
     for(let i=0; i< (64- numberOfDigits); i++) {
@@ -51,9 +53,9 @@ export const convertUint = ((value) => {
     return arg;
 });
 
-export const convertAddress = ((value) => {
+const convertAddress = ((value) => {
 
 });
 
 
-console.log(sig("addValues",["address","uint","string"]));
+console.log(sig("addValues",["address","string","int"]));
