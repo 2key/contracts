@@ -4,7 +4,7 @@
 
 pragma solidity ^0.4.24;
 
-import "../../../enigmampc/secret-contracts/contracts/Enigma.sol";
+import "./Enigma.sol"; // ../../../enigmampc/secret-contracts/contracts/
 
 contract TwoKeyVotingContract {
   using SafeMath for uint;
