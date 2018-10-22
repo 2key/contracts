@@ -1,12 +1,26 @@
 pragma solidity ^0.4.24;
 
 import '../openzeppelin-solidity/contracts/ownership/Ownable.sol';
+import './TwoKeyEconomy.sol';
 
 contract TwoKeyReg is Ownable {
   mapping(address => string) public owner2name;
   mapping(bytes32 => address) public name2owner;
 
   event UserNameChanged(address owner, string name);
+
+  TwoKeyEconomy public economy;
+  uint signup_amount;  // the first time a user adds a name she will receive 2key tokens in this amount
+  function setEconomy(address _economy, uint _signup_amount) onlyOwner public {
+    economy = TwoKeyEconomy(_economy);
+    signup_amount = _signup_amount;
+  }
+
+    //  // Initialize all the constants
+//  constructor(address _economy, uint _signup_amount) public {
+//    economy = TwoKeyEconomy(_economy);
+//    signup_amount = _signup_amount;
+//  }
 
   function addNameInternal(string _name, address _sender) private {
     // check if name is taken
@@ -21,6 +35,16 @@ contract TwoKeyReg is Ownable {
     owner2name[_sender] = _name;
     name2owner[keccak256(abi.encodePacked(_name))] = _sender;
     emit UserNameChanged(_sender, _name);
+
+    if (last_name.length == 0  && economy != address(0)) {
+      // first time
+      uint supply = economy.balanceOf(this);
+      if (supply < signup_amount) {
+        signup_amount = supply;
+      }
+      economy.transfer(_sender, signup_amount);
+//      require(address(economy).call(bytes4(keccak256("transfer(address,uint256)")),_sender,signup_amount));
+    }
   }
 
   function addName(string _name, address _sender) onlyOwner public {
