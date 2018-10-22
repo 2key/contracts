@@ -54,10 +54,21 @@ const convertUint = ((value) => {
 });
 
 const convertAddress = ((value) => {
-
+    if(value.length != 42) {
+        return -1;
+    }
+    let prefix = '';
+    for(let i=0; i<24; i++) {
+        prefix +='0';
+    }
+    const convertedAddress = prefix + value.substr(2);
+    return convertedAddress;
 });
 
-
+const convertString = ((value) => {
+    let data = Web3.utils.utf8ToHex(value);
+    return value;
+});
 
 let signature = convertNameAndArgTypes("getVoteCount",["uint"]);
 let arg1 = convertUint(1);
@@ -69,4 +80,5 @@ module.exports = {
     convertNameAndArgTypes,
     convertUint,
     convertAddress,
+    convertString,
 }

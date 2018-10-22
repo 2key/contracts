@@ -39,6 +39,11 @@ const TwoKeyUpgradableExchange = artifacts.require('TwoKeyUpgradableExchange');
 const TwoKeyAdmin = artifacts.require('TwoKeyAdmin');
 const EventSource = artifacts.require('TwoKeyEventSource');
 const TwoKeyReg = artifacts.require('TwoKeyReg');
+const TwoKeyCongress = artifacts.require('TwoKeyCongress');
+
+/*
+    TwoKeyCongress constructor need 2 addresses passed, the best'd be if we get that addresses static and always save the same ones
+ */
 
 module.exports = function deploy(deployer) {
   var adminInstance;
