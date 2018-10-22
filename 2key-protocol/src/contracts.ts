@@ -582,18 +582,18 @@ export default { ERC20full:
      name: 'TwoKeyAcquisitionCampaignERC20' },
   TwoKeyAdmin:
    { networks:
-      { '8086':
+      { '3':
+         { events: {},
+           links: {},
+           address: '0xece71b6666081d29754f6c638dce272dd234c53a',
+           transactionHash:
+            '0x2061626efce85a665465a5fda4dbb9f6184e94fff1c97725ded0a10231095740' },
+        '8086':
          { events: {},
            links: {},
            address: '0x14b7475398d9e2f1b4e3682bebdc1d2d3b27027b',
            transactionHash:
-            '0xf256f17f245518f32bb13495a73e3902e666296adfa7c0e55d1084c0cb1cf12e' },
-        '1539853916445':
-         { events: {},
-           links: {},
-           address: '0x3ddcb58d4e5199bb54f0e9dc2a5ab910c8ecde17',
-           transactionHash:
-            '0xa7bce36c04b91325543afb7fff4c8bc4746f1d27aed20a102b2d3b40dd9c233e' } },
+            '0xf256f17f245518f32bb13495a73e3902e666296adfa7c0e55d1084c0cb1cf12e' } },
      abi:
       [ { constant: false,
           inputs: [],
@@ -1031,18 +1031,18 @@ export default { ERC20full:
      name: 'TwoKeyConversionHandler' },
   TwoKeyEconomy:
    { networks:
-      { '8086':
+      { '3':
+         { events: {},
+           links: {},
+           address: '0xeebd3539f7594555d804fd61aaa0dadbaafe5653',
+           transactionHash:
+            '0x861db2866973b170d27f5ae17f3cf4e2646932d712496a97465aaa8f808df028' },
+        '8086':
          { events: {},
            links: {},
            address: '0x835aaf6ea6b04892915a8299110652e7cc897a4e',
            transactionHash:
-            '0xf0d493fc8dd147fa5d15fdb9dfa465b6bc7258703b5a651275a4996ded30a986' },
-        '1539853916445':
-         { events: {},
-           links: {},
-           address: '0x13331a9e619b4e016f35f29df84c1b14675fe33d',
-           transactionHash:
-            '0x82435ce9ae70f1410c5f79a6e991ea2d59f57813c95e2fad77ecfd24c948bed1' } },
+            '0xf0d493fc8dd147fa5d15fdb9dfa465b6bc7258703b5a651275a4996ded30a986' } },
      abi:
       [ { constant: true,
           inputs: [],
@@ -1336,18 +1336,18 @@ export default { ERC20full:
      name: 'TwoKeyEconomy' },
   TwoKeyEventSource:
    { networks:
-      { '8086':
+      { '3':
+         { events: {},
+           links: {},
+           address: '0x45c38be248ea9d6b2bb0abd34107f9858f1039ad',
+           transactionHash:
+            '0xb1fb391e53dc78abada86048e04938348a5588d074f6d65cbd27ae6c0791f4bf' },
+        '8086':
          { events: {},
            links: {},
            address: '0x5263b6d2b58419dada5312a46be476551c29fd8a',
            transactionHash:
-            '0x12a6931c9f063ca77d102b7eba9f3be51fc749ec5bf4b1a67a4f7a4e55d861a7' },
-        '1539853916445':
-         { events: {},
-           links: {},
-           address: '0xfc4b0b4152fc2dc82a2bbb138769f20d491c1371',
-           transactionHash:
-            '0xe71cf46c7bec8512d7189ac2862b798d2ef2ee8cf6509f5e47e2df736c83cba4' } },
+            '0x12a6931c9f063ca77d102b7eba9f3be51fc749ec5bf4b1a67a4f7a4e55d861a7' } },
      abi:
       [ { inputs: [ { name: '_twoKeyAdminAddress', type: 'address' } ],
           payable: false,
@@ -1602,9 +1602,9 @@ export default { ERC20full:
       { '17':
          { events: {},
            links: {},
-           address: '0x8b47fcb513b8b627995f7cf7a8e643e8427f1fb4',
+           address: '0xf86337c0ffc4afb993fc352d2605e70cbaa284db',
            transactionHash:
-            '0x694ed120ed84950c987cdb06baac83525a8b9d8ba66f86e0aee0db54336c8c1d' } },
+            '0xf23f8ddb0037b118f1acf973b82cef41eed26c10a39da3ed7b819fb3dc85dd66' } },
      abi:
       [ { constant: true,
           inputs:
@@ -1723,18 +1723,18 @@ export default { ERC20full:
      name: 'TwoKeyPlasmaEvents' },
   TwoKeyReg:
    { networks:
-      { '8086':
+      { '3':
+         { events: {},
+           links: {},
+           address: '0x185d76118028a08cef8dc7a7d1a1fdce1a6ad14c',
+           transactionHash:
+            '0xfb9361eee5da08ad67a962ea20f1498b220beafd647a3d50f481bd83571acfc2' },
+        '8086':
          { events: {},
            links: {},
            address: '0xa2ce3ec5cd60f7e2b6f7ac96767bcf3b7d0edf6e',
            transactionHash:
-            '0xb3cee09091b61e9b5d9fc0b5b48350a91d1ef993eb651f31896fe82e6cb7ba10' },
-        '1539853916445':
-         { events: {},
-           links: {},
-           address: '0xdd8d9d14d2fc73d9657458d937b844581e58c571',
-           transactionHash:
-            '0x4e18b724fe1c0a3f71308034959497079ba4da2dee56c781d009e9bc7643182a' } },
+            '0xb3cee09091b61e9b5d9fc0b5b48350a91d1ef993eb651f31896fe82e6cb7ba10' } },
      abi:
       [ { constant: true,
           inputs: [],

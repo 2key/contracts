@@ -29,13 +29,13 @@ let methodArgumentsTypes = [];
 let argumentsValues = [];
 
 
-const sig = ((methodName, methodArgumentsTypes) => {
+const convertNameAndArgTypes = ((methodName, methodArgumentsTypes) => {
     let signature = methodName + "(";
     for(let i=0; i<methodArgumentsTypes.length; i++) {
         if(i == methodArgumentsTypes.length -1) {
             signature += methodArgumentsTypes[i].toString()+")";
         } else {
-            signature += methodArgumentsTypes[i].toString()+ ","
+            signature += methodArgumentsTypes[i].toString()+ ",";
         }
     }
     signature = sha3.keccak_256(signature).slice(0,10);
@@ -58,4 +58,15 @@ const convertAddress = ((value) => {
 });
 
 
-console.log(sig("addValues",["address","string","int"]));
+
+let signature = convertNameAndArgTypes("getVoteCount",["uint"]);
+let arg1 = convertUint(1);
+
+signature = signature + arg1;
+console.log(signature);
+
+module.exports = {
+    convertNameAndArgTypes,
+    convertUint,
+    convertAddress,
+}
