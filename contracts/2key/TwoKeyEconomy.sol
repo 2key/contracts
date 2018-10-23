@@ -9,7 +9,7 @@ import "./TwoKeyAdmin.sol";
 
 contract TwoKeyEconomy is RBACWithAdmin, StandardToken, Ownable {
   string public name = 'TwoKeyEconomy';
-  string public symbol= '2Key';
+  string public symbol= '2KEY';
   uint8 public decimals= 18;
 
   constructor (address _twoKeyAdmin) RBACWithAdmin(_twoKeyAdmin) Ownable() public {
