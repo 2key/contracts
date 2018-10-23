@@ -1,32 +1,9 @@
-const Web3 = require('web3');
+const Web3 = require('./node_modules/web3-eth-abi');
 const sha3 = require('js-sha3');
 /*
     @Author Nikola Madjarevic
     Javascript library developed with goal to easily generate bytecode for any method you'd like to call
  */
-
-/*
-    Example:
-    function doSomething(address x, string y, uint z) {}
-    methodName = "doSomething"
-    methodArgumentsTypes = [address, string, uint]
-    arguments
-*/
-
-/*
-    Will be representing of solidity method we'd like to call
- */
-let methodName;
-
-/*
-    Will be representing all types of parameters we're passing to the method
- */
-let methodArgumentsTypes = [];
-
-/*
-    Will be representing all concrete values of arguments
- */
-let argumentsValues = [];
 
 
 const convertNameAndArgTypes = ((methodName, methodArgumentsTypes) => {
@@ -43,6 +20,7 @@ const convertNameAndArgTypes = ((methodName, methodArgumentsTypes) => {
     return signature;
 });
 
+
 const convertUint = ((value) => {
     let numberOfDigits = value.toString().length;
     let arg = "";
@@ -54,31 +32,24 @@ const convertUint = ((value) => {
 });
 
 const convertAddress = ((value) => {
-    if(value.length != 42) {
-        return -1;
-    }
     let prefix = '';
     for(let i=0; i<24; i++) {
         prefix +='0';
     }
-    const convertedAddress = prefix + value.substr(2);
-    return convertedAddress;
+    return (prefix + value.substr(2));
 });
 
 const convertString = ((value) => {
-    let data = Web3.utils.utf8ToHex(value);
-    return value;
+    let data = Web3.modules('string', value);
+    return data;
 });
 
-let signature = convertNameAndArgTypes("getVoteCount",["uint"]);
-let arg1 = convertUint(1);
+console.log(convertString("marko"));
 
-signature = signature + arg1;
-console.log(signature);
 
 module.exports = {
     convertNameAndArgTypes,
     convertUint,
     convertAddress,
     convertString,
-}
+};

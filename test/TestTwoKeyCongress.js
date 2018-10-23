@@ -1,43 +1,92 @@
 const { increaseTime } = require("./utils");
 require('truffle-test-utils').init();
 const _ = require('lodash');
-
 const HOUR = 3600;
+
+var Web3EthAbi = require('web3-eth-abi');
 
 const TwoKeyCongress = artifacts.require("TwoKeyCongress");
 const BasicStorage = artifacts.require("BasicStorage");
 
 contract('TwoKeyCongress', async (accounts) => {
-
     let congress;
-    let transactionBytecode;
+    //function addMember(address targetMember, string memberName, int _votingPower)
+    let method=  web3.sha3('addMember(address,string,uint256)');
+    console.log("METHOD" + method);
+    let eventSignature = Web3EthAbi.encodeFunctionSignature({
+        name: 'addMember',
+        type: 'function',
+        inputs: [{
+            type: 'address',
+            name: 'targetMember'
+        }, {
+            type: 'string',
+            name: 'memberName'
+        }, {
+            type: 'uint256',
+            name: '_votingPower'
+        }]
+    });
+    console.log("Event signature: " + eventSignature);
+
+    let transactionBytecode = Web3EthAbi.encodeFunctionCall({
+        name: 'addMember',
+        type: 'function',
+        inputs: [{
+            type: 'address',
+            name: 'targetMember'
+        }, {
+            type: 'string',
+            name: 'memberName'
+        }, {
+            type: 'uint256',
+            name: '_votingPower'
+        }]
+    }, ['0xd03ea8624c8c5987235048901fb614fdca89b117', 'Nikola', '5']);
+
+    let transactionBytecode2 = Web3EthAbi.encodeFunctionCall({
+        name: 'removeMember',
+        type: 'function' ,
+        inputs: [{
+            type: 'address',
+            name: 'targetMember'
+        }]
+    }, [accounts[1]]);
+
     let initialMembers = [accounts[1], accounts[2]];
     let votingPowers = [1,1];
 
     before(async () => {
-        congress = await TwoKeyCongress.new(60, 51, initialMembers,votingPowers);
+        congress = await TwoKeyCongress.new(1, 55, initialMembers,votingPowers);
+        // let membersLength = await congress.getMembersLength({from: accounts[4]});
+        // console.log(membersLength);
         storage = await BasicStorage.new();
-
-        const sig = web3.sha3("setX(address)").slice(0,10);
-        // const arg1 = _.repeat("0", 62) + "20";
-        const arg1 = _.repeat("0",24) + accounts[5].toString().substr(2);
-        transactionBytecode = sig + arg1;
-        console.log("transaction bytecode: " + transactionBytecode);
+        console.log(transactionBytecode);
     });
 
+    it("should save data" , async() => {
+        let bytecode = Web3EthAbi.encodeFunctionCall({
+            name: 'myMethod',
+            type: 'function',
+            inputs: [{
+                type: 'uint256',
+                name: 'myNumber'
+            },{
+                type: 'string',
+                name: 'myString'
+            }]
+        }, ['2345675643', 'Hello!']);
+        await storage.callFunction(bytecode);
 
-    it("should execute transaction", async() => {
-       await storage.callFunction(transactionBytecode);
-       let add = await storage.getX();
-       assert.equal(accounts[5],add);
+        let data = await storage.get();
+        console.log(data);
     });
 
+    it("congress owned by creator", async () => {
+        let owner = await congress.owner.call();
+        assert.equal(owner,  accounts[0], 'account creating the contract is the owner');
+    });
 
-    // it("congress owned by creator", async () => {
-    //     let owner = await congress.owner.call();
-    //     assert.equal(owner,  accounts[0], 'account creating the contract is the owner');
-    // });
-    //
     // // test replacing member
     // it("member should be able to replace his own address", async () => {
     //
@@ -58,28 +107,74 @@ contract('TwoKeyCongress', async (accounts) => {
     //     let afterAllChanges = await congress.getMemberInfo({from:accounts[3]});
     //     console.log(afterAllChanges)
     // });
-    //
-    // it("should check if voting rules are set", async() => {
-    //     let quorum = await congress.minimumQuorum();
-    //     assert.equal(60,quorum,'quorum should be 60');
-    //     let votingPeriod = await congress.debatingPeriodInMinutes();
-    //     assert.equal(votingPeriod, 51, 'debating period not changed');
-    // });
-    //
 
-    // it("make a proposal and check it", async () => {
-    //     await congress.newProposal(
-    //         storage.address,
-    //         50,
-    //         'store something',
-    //         transactionBytecode, { from: accounts[2] });
-    //
-    //     let flag = await congress.checkProposalCode(
-    //         0,
-    //         storage.address,
-    //         50,
-    //         transactionBytecode.replace());
-    //     assert.isTrue(flag, 'proposal was not checked');
+    it("should check if voting rules are set", async() => {
+        let quorum = await congress.minimumQuorum();
+        assert.equal(1,quorum,'quorum should be 60');
+        let votingPeriod = await congress.debatingPeriodInMinutes();
+        assert.equal(votingPeriod, 55, 'debating period not changed');
+    });
+
+
+    it("make a proposal and check it", async () => {
+        await congress.newProposal(
+            congress.address,
+            0,
+            'Add new member',
+            transactionBytecode, { from: accounts[2] });
+
+        let flag = await congress.checkProposalCode(
+            0,
+            congress.address,
+            0,
+            transactionBytecode.replace());
+        assert.isTrue(flag, 'proposal was not checked');
+    });
+
+    it("account 5 votes yes", async () => {
+        let v = await congress.vote(0, true, "it is good to keep things", {
+            from: accounts[1]
+        });
+        let [numberOfVotes, currentResult] = await congress.getVoteCount.call(0, {
+            from: accounts[1]
+        });
+        assert.equal(numberOfVotes.toNumber(), 1, 'not one vote');
+        assert.equal(currentResult.toNumber(), 1, 'not one yay');
+    });
+
+    // it("should test test", async() => {
+    //     await congress.callFunction(transactionBytecode);
+    //     let data = await congress.getSomething();
+    //     console.log(data);
+    // })
+    it("advance time and execute proposal", async () => {
+
+        await increaseTime(HOUR);
+
+        await congress.send(10000, {
+            from: accounts[5]
+        });
+
+        await congress.executeProposal(0, transactionBytecode, {
+            from: accounts[5]
+        });
+
+        let data = await congress.getMemberInfo({from: accounts[4]});
+        console.log(data);
+
+
+        let allowedMethods = await congress.getAllowedMethods();
+        console.log(allowedMethods);
+    });
+
+
+    // it("vote yay account 6", async () => {
+    //     let v6 = await congress.vote(0, true, "yes, is good to keep things", {
+    //         from: accounts[2]
+    //     });
+    //     let [num, cur] = await congress.getVoteCount(0);
+    //     assert.equal(num.toNumber(), 2, 'not two votes');
+    //     assert.equal(cur.toNumber(), 2, 'not two yays');
     // });
 
     // it("add account 1 member", async () => {
@@ -122,23 +217,8 @@ contract('TwoKeyCongress', async (accounts) => {
     //     assert.equal(index, 0, 'member was not removed');
     // });
     //
-    // it("voting rules setup", async () => {
-    //     let quorom = await congress.minimumQuorum();
-    //     assert.equal(quorom, 60, 'quorom not changed');
-    //
-    //     let votingPeriod = await congress.debatingPeriodInMinutes();
-    //     assert.equal(votingPeriod, 51, 'debating period not changed');
-    // });
-    //
-    // it("change voting rules", async () => {
-    //     await congress.changeVotingRules(40, 20, { from: accounts[0] });
-    //
-    //     let quorom = await congress.minimumQuorum.call();
-    //     assert.equal(quorom, 40, 'quorom not changed');
-    //
-    //     let votingPeriod = await congress.debatingPeriodInMinutes.call();
-    //     assert.equal(votingPeriod, 20, 'debating period not changed');
-    // });
+
+
     //
     // it("make a proposal and check it", async () => {
     //     await congress.newProposal(
@@ -192,41 +272,7 @@ contract('TwoKeyCongress', async (accounts) => {
     //     assert.equal(name, name6);
     // });
     //
-    // it("account 5 votes yes", async () => {
-    //     let v = await congress.vote(0, true, "it is good to keep things", {
-    //         from: accounts[5]
-    //     });
-    //     let [numberOfVotes, currentResult] = await congress.getVoteCount.call(0, {
-    //         from: accounts[5]
-    //     });
-    //     assert.equal(numberOfVotes.toNumber(), 1, 'not one vote');
-    //     assert.equal(currentResult.toNumber(), 1, 'not one yay');
-    // });
-    //
-    //
-    // it("vote yay account 6", async () => {
-    //     let v6 = await congress.vote(0, true, "yes, is good to keep things", {
-    //         from: accounts[6]
-    //     });
-    //     let [num, cur] = await congress.getVoteCount(0);
-    //     assert.equal(num.toNumber(), 2, 'not two votes');
-    //     assert.equal(cur.toNumber(), 2, 'not two yays');
-    // });
-    //
-    // it("advance time and execute proposal", async () => {
-    //
-    //     await increaseTime(HOUR);
-    //
-    //     await congress.send(80, {
-    //         from: accounts[5]
-    //     })
-    //
-    //     await congress.executeProposal(0, transactionBytecode, {
-    //         from: accounts[8]
-    //     });
-    //
-    //     let storedValue = await storage.get();
-    //
-    //     assert.equal(storedValue.toNumber(), 32, "proposal not executed");
-    // });
+
+
+
 });

@@ -2,36 +2,23 @@ pragma solidity ^0.4.24;
 
 contract BasicStorage {
 
-    uint256 storedData;
-    address x;
+    string str;
+    uint256 number;
 
-    event Store(address a, uint256 _d);
-
-    constructor() public payable {
-
+    function myMethod(uint256 myNumber, string myString) public {
+        number = myNumber;
+        str = myString;
     }
 
-	function set(uint256 x) public payable {
-        storedData = x;
-        emit Store(address(this), x);
+
+    function get() public view returns (uint256, string) {
+        return (number, str);
     }
 
-    function setX(address xx) public {
-        x = xx;
-    }
-
-    function getX() public view returns (address) {
-        return x;
-    }
-
-	function get() view public returns (uint256) {
-        return storedData;
-    }
 
     function callFunction(bytes transactionBytecode) public {
         address(this).call(transactionBytecode);
     }
-    function() public payable {
 
-    }
+
 }

@@ -31,10 +31,13 @@ contract TokenRecipient {
 //TODO: This contract doesn't need to be ownable, since there's only single deployment stuff and after that everything is up
 // to the members
 
+//TODO: Make a whitelist of internal methods which can be called and create a mapping to validate all that methods
+//TODO: After that finalize the method with hashing the string and library will be done and used in TestTwoKeyCongress.js
 contract TwoKeyCongress is Ownable, TokenRecipient {
 
-	using SafeMath for uint;
+    using SafeMath for uint;
 
+    address self;
     //The minimum number of voting members that must be in attendance
     uint256 public minimumQuorum;
     //Period length for voting
@@ -47,6 +50,8 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
     mapping (address => uint) public memberId;
     // Array of members
     Member[] public members;
+    // Array of allowed methods
+    bytes32[] allowedMethods;
 
     event ProposalAdded(uint proposalID, address recipient, uint amount, string description);
     event Voted(uint proposalID, bool position, address voter, string justification);
@@ -71,7 +76,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
     struct Member {
         address memberAddress;
         string name;
-        int votingPower;
+        uint votingPower;
         uint memberSince;
     }
 
@@ -87,15 +92,56 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
         _;
     }
 
+    function onlyAllowedMethods(bytes bytecode) public view returns (bool) {
+        for(uint i=0; i<allowedMethods.length; i++) {
+            if(compare(allowedMethods[i], bytecode)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     constructor(
         uint256 _minimumQuorumForProposals,
-        uint256 _minutesForDebate, address[] initialMembers, int[] votingPowers) Ownable() payable public {
+        uint256 _minutesForDebate, address[] initialMembers, uint[] votingPowers) Ownable() payable public {
         changeVotingRules(_minimumQuorumForProposals, _minutesForDebate);
+        self = address(this);
         addMember(0,'',0);
         addMember(initialMembers[0], 'Eitan', votingPowers[0]);
         addMember(initialMembers[1], 'Kiki', votingPowers[1]);
+
+        // validate some methods
+        hashAllowedMethods("0");
+        hashAllowedMethods("addMember(address,string,uint256)");
+        hashAllowedMethods("removeMember(address)");
     }
+
+    /// @notice Since transaction's bytecode first 10 chars will contain method name and argument types
+    /// @notice This is the way to compare it efficiently
+    /// @dev on contract we will store allowed method name and argument types
+    /// @param x is the already validated method name
+    /// @param y is the bytecode of the transaction
+    /// @return true if same
+    function compare(bytes32 x, bytes y) public pure returns (bool) {
+        for(uint i=0;i<3;i++) {
+            byte a = x[i];
+            byte b = y[i];
+            if(a != b) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+    /// @notice Function to hash allowed method -- will be initiallu
+    function hashAllowedMethods(string nameAndParams) public returns (bytes32) {
+        bytes32 allowed = keccak256(abi.encodePacked(nameAndParams));
+        allowedMethods.push(allowed);
+        return allowed;
+    }
+
 
     /// @notice Function where member can replace it's own address
     /// @dev member can change only it's own address
@@ -110,6 +156,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
         _currentMember.memberAddress = _newMemberAddress;
         members[id] = _currentMember;
     }
+
     /**
      * Add member
      *
@@ -118,7 +165,10 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
      * @param targetMember ethereum address to be added
      * @param memberName public name for that member
      */
-    function addMember(address targetMember, string memberName, int _votingPower) internal {
+    function addMember(address targetMember, string memberName, uint _votingPower) public {
+        if(members.length > 2) {
+            require(msg.sender == self);
+        }
         uint id = memberId[targetMember];
         if (id == 0) {
             memberId[targetMember] = members.length;
@@ -136,7 +186,8 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
      *
      * @param targetMember ethereum address to be removed
      */
-    function removeMember(address targetMember) internal {
+    function removeMember(address targetMember) public {
+        require(msg.sender == self);
         require(memberId[targetMember] != 0);
 
         for (uint i = memberId[targetMember]; i<members.length-1; i++){
@@ -180,9 +231,10 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
         uint weiAmount,
         string jobDescription,
         bytes transactionBytecode)
-        onlyMembers public
-        returns (uint proposalID)
+    onlyMembers public
+    returns (uint proposalID)
     {
+        require(onlyAllowedMethods(transactionBytecode));
         proposalID = proposals.length++;
         Proposal storage p = proposals[proposalID];
         p.recipient = beneficiary;
@@ -216,8 +268,8 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
         uint etherAmount,
         string jobDescription,
         bytes transactionBytecode)
-        onlyMembers public
-        returns (uint proposalID)
+    onlyMembers public
+    returns (uint proposalID)
     {
         return newProposal(beneficiary, etherAmount * 1 ether, jobDescription, transactionBytecode);
     }
@@ -235,8 +287,8 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
         address beneficiary,
         uint weiAmount,
         bytes transactionBytecode)
-        constant public
-        returns (bool codeChecksOut)
+    constant public
+    returns (bool codeChecksOut)
     {
         Proposal storage p = proposals[proposalNumber];
         return p.proposalHash == keccak256(abi.encodePacked(beneficiary, weiAmount, transactionBytecode));
@@ -255,8 +307,8 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
         uint proposalNumber,
         bool supportsProposal,
         string justificationText)
-        onlyMembers public
-        returns (uint256 voteID)
+    onlyMembers public
+    returns (uint256 voteID)
     {
         Proposal storage p = proposals[proposalNumber]; // Get the proposal
         require(now <= p.minExecutionDate);
@@ -265,11 +317,11 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
         p.numberOfVotes++;
         voteID = p.numberOfVotes;                     // Increase the number of votes
         p.votes.push(Vote({ inSupport: supportsProposal, voter: msg.sender, justification: justificationText }));
-        int votingPower = getMemberVotingPower(msg.sender);
+        uint votingPower = getMemberVotingPower(msg.sender);
         if (supportsProposal) {                         // If they support the proposal
-            p.currentResult+= votingPower;                          // Increase score
+            p.currentResult+= int(votingPower);                          // Increase score
         } else {                                        // If they don't
-            p.currentResult-= votingPower;                          // Decrease the score
+            p.currentResult-= int(votingPower);                          // Decrease the score
         }
         // Create a log of this event
         emit Voted(proposalNumber,  supportsProposal, msg.sender, justificationText);
@@ -284,7 +336,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
     }
 
     /// Basic getter function
-    function getMemberInfo() public view returns (address, string, int, uint) {
+    function getMemberInfo() public view returns (address, string, uint, uint) {
         uint _id = memberId[msg.sender];
         Member memory member = members[_id];
         return (member.memberAddress, member.name, member.votingPower, member.memberSince);
@@ -303,15 +355,14 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
 
         require(
             now > p.minExecutionDate                                            // If it is past the voting deadline
-            && !p.executed                                                         // and it has not already been executed
-            && p.proposalHash == keccak256(abi.encodePacked(p.recipient, p.amount, transactionBytecode))  // and the supplied code matches the proposal
-            && p.numberOfVotes.mul(100).div(members.length) >= minimumQuorum // and a minimum quorum has been reached...
+        && !p.executed                                                         // and it has not already been executed
+        && p.proposalHash == keccak256(abi.encodePacked(p.recipient, p.amount, transactionBytecode))  // and the supplied code matches the proposal
+        && p.numberOfVotes.mul(100).div(members.length) >= minimumQuorum // and a minimum quorum has been reached...
         );
 
         // ...then execute result
         p.executed = true; // Avoid recursive calling
         require(p.recipient.call.value(p.amount)(transactionBytecode));
-
         p.proposalPassed = true;
 
         // Fire Events
@@ -321,7 +372,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
     /// @notice Function getter for voting power for specific member
     /// @param _memberAddress is the address of the member
     /// @return integer representing voting power
-    function getMemberVotingPower(address _memberAddress) public view returns (int) {
+    function getMemberVotingPower(address _memberAddress) public view returns (uint) {
         uint _memberId = memberId[_memberAddress];
         Member memory _member = members[_memberId];
         return _member.votingPower;
@@ -335,7 +386,19 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
 
     /// @notice Fallback function
     function () payable public {
-        
+
     }
 
+    function callFunction(bytes bytecode) public {
+        address(this).call(bytecode);
+    }
+
+    function getMembersLength() public view returns (uint) {
+        return members.length;
+    }
+
+    function getAllowedMethods() public view returns (bytes32[]){
+        return allowedMethods;
+    }
 }
+

@@ -330,7 +330,7 @@ async function main() {
         }
         await generateSOLInterface();
         // await runProcess(path.join(__dirname, 'node_modules/.bin/typechain'), ['--force', '--outDir', path.join(twoKeyProtocolDir, 'contracts'), `${buildPath}/*.json`]);
-        process.exit(0);
+          process.exit(0);
       } catch (err) {
         process.exit(1);
       }
