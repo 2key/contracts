@@ -270,7 +270,7 @@ describe('TwoKeyProtocol', () => {
     }).timeout(30000);
 
     it('should show token symbol of economy', async () => {
-        const tokenSymbol = await twoKeyProtocol.ERC20.getERC20Symbol(twoKeyEconomy)
+        const tokenSymbol = await twoKeyProtocol.ERC20.getERC20Symbol(twoKeyEconomy);
         console.log(tokenSymbol);
         expect(tokenSymbol).to.be.equal('2Key');
     }).timeout(10000);

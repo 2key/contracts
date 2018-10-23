@@ -75,7 +75,6 @@ export interface ITwoKeyAdmin {
 export interface IERC20 {
     getERC20Symbol: (erc20: any) => Promise<string>,
 }
-
 export interface ITWoKeyUtils {
     ipfsAdd: (data: any) => Promise<string>,
     getOffchainDataFromIPFSHash: (hash: string) => Promise<IOffchainData>,
@@ -84,7 +83,7 @@ export interface ITWoKeyUtils {
     toHex: (data: any) => string,
     getBalanceOfArcs: (campaign: any, address?: string) => Promise<number>,
     balanceFromWeiString: (meta: BalanceMeta, inWei?: boolean, toNum?: boolean) => IBalanceNormalized,
-    getTransactionReceiptMined: (txHash: string, web3?: any, interval?: number, timeout?: number) => Promise<ITransactionReceipt>
+    getTransactionReceiptMined: (txHash: string, web3?: any, interval?: number, timeout?: number) => Promise<ITransactionReceipt>,
 }
 
 interface IBalance {

@@ -143,7 +143,7 @@ export class TwoKeyProtocol {
         this.Helpers = new Helpers(twoKeyBase);
         this.ERC20 = new ERC20(twoKeyBase, this.Helpers);
         this.Utils = new Index(twoKeyBase, this.Helpers);
-        this.AcquisitionCampaign = new AcquisitionCampaign(twoKeyBase, this.Helpers, this.Utils);
+        this.AcquisitionCampaign = new AcquisitionCampaign(twoKeyBase, this.Helpers, this.Utils, this.ERC20);
     }
 
     public getBalance(address: string = this.address, erc20address?: string): Promise<BalanceMeta> {

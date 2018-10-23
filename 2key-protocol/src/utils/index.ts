@@ -2,7 +2,8 @@ import {BigNumber} from 'bignumber.js';
 import LZString from 'lz-string';
 import {
     BalanceMeta,
-    IBalanceNormalized, IOffchainData,
+    IBalanceNormalized,
+    IOffchainData,
     ITransactionReceipt,
     ITwoKeyBase, ITwoKeyHelpers,
 } from '../interfaces';
@@ -101,7 +102,7 @@ export default class Utils {
         }
     }
 
-    getTransactionReceiptMined(txHash: string, web3: any = this.base.web3, interval: number = 500, timeout: number = 60000): Promise<ITransactionReceipt> {
+    public getTransactionReceiptMined(txHash: string, web3: any = this.base.web3, interval: number = 500, timeout: number = 60000): Promise<ITransactionReceipt> {
         return new Promise(async (resolve, reject) => {
             let txInterval;
             let fallbackTimeout = setTimeout(() => {

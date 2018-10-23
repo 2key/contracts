@@ -1,7 +1,7 @@
 import {
     IAcquisitionCampaign,
     IAcquisitionCampaignMeta,
-    ICreateCampaignProgress, IOffchainData, IPublicLinkKey,
+    ICreateCampaignProgress, IERC20, IOffchainData, IPublicLinkKey,
     ITwoKeyBase,
     ITwoKeyHelpers,
     ITWoKeyUtils
@@ -40,11 +40,13 @@ export default class AcquisitionCampaign {
     private readonly base: ITwoKeyBase;
     private readonly helpers: ITwoKeyHelpers;
     private readonly utils: ITWoKeyUtils;
+    private readonly erc20: IERC20;
 
-    constructor(twoKeyProtocol: ITwoKeyBase, helpers: ITwoKeyHelpers, utils: ITWoKeyUtils) {
+    constructor(twoKeyProtocol: ITwoKeyBase, helpers: ITwoKeyHelpers, utils: ITWoKeyUtils, erc20: IERC20) {
         this.base = twoKeyProtocol;
         this.helpers = helpers;
         this.utils = utils;
+        this.erc20 = erc20;
     }
 
     /* ACQUISITION CAMPAIGN */
@@ -93,6 +95,11 @@ export default class AcquisitionCampaign {
         return new Promise(async (resolve, reject) => {
             try {
                 let txHash: string;
+                const symbol = await this.erc20.getERC20Symbol(data.assetContractERC20);
+                if (!symbol) {
+                    reject('Invalid ERC20 address');
+                    return;
+                }
                 let conversionHandlerAddress = data.conversionHandlerAddress;
                 if (!conversionHandlerAddress) {
                     this.base._log([data.tokenDistributionDate, data.maxDistributionDateShiftInDays, data.bonusTokensVestingMonths, data.bonusTokensVestingStartShiftInDaysFromDistributionDate], gasPrice);
