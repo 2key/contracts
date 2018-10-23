@@ -68,7 +68,7 @@ contract('TwoKeyCongress', async (accounts) => {
     });
 
     it("should save data" , async() => {
-        conosle.log("Testing on basic contract");
+        console.log("Testing on basic contract");
         let bytecode = Web3EthAbi.encodeFunctionCall({
             name: 'myMethod',
             type: 'function',
