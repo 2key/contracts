@@ -54,17 +54,21 @@ contract('TwoKeyCongress', async (accounts) => {
     }, [accounts[1]]);
 
     let initialMembers = [accounts[1], accounts[2]];
-    let votingPowers = [1,1];
+    let votingPowers = [1,2];
 
     before(async () => {
+        console.log("Creating new congress contract");
+        console.log("Initial members are going to be represented by following addresses: " + initialMembers);
+        console.log("Their voting powers will be respectively: "+ votingPowers);
         congress = await TwoKeyCongress.new(1, 55, initialMembers,votingPowers);
         // let membersLength = await congress.getMembersLength({from: accounts[4]});
         // console.log(membersLength);
         storage = await BasicStorage.new();
-        console.log(transactionBytecode);
+        console.log("Transaction bytecode is : " + transactionBytecode);
     });
 
     it("should save data" , async() => {
+        conosle.log("Testing on basic contract");
         let bytecode = Web3EthAbi.encodeFunctionCall({
             name: 'myMethod',
             type: 'function',
