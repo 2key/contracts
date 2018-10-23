@@ -26,8 +26,9 @@ import ERC20 from './erc20';
 
 const TwoKeyDefaults = {
     // ipfsIp: '192.168.47.100',
-    ipfsIp: '37.57.185.107',
-    ipfsPort: '5001',
+    ipfsIp: 'ipfs.aydnep.com.ua',
+    ipfsPort: '15001',
+    ipfsProtocol: 'https',
     mainNetId: 3,
     syncTwoKeyNetId: 17,
     twoKeySyncUrl: 'https://astring.aydnep.com.ua:18545',
@@ -70,6 +71,7 @@ export class TwoKeyProtocol {
             eventsNetUrl = TwoKeyDefaults.twoKeySyncUrl,
             ipfsIp = TwoKeyDefaults.ipfsIp,
             ipfsPort = TwoKeyDefaults.ipfsPort,
+            ipfsProtocol: protocol = TwoKeyDefaults.ipfsProtocol,
             contracts,
             networks,
             plasmaPK,
@@ -119,7 +121,7 @@ export class TwoKeyProtocol {
             throw new Error('No web3 instance');
         }
 
-        this.ipfs = ipfsAPI(ipfsIp, ipfsPort, {protocol: 'http'});
+        this.ipfs = ipfsAPI(ipfsIp, ipfsPort, {protocol});
 
         const twoKeyBase: ITwoKeyBase = {
             web3: this.web3,

@@ -130,6 +130,7 @@ export interface ITwoKeyInit {
     address?: string,
     ipfsIp?: string,
     ipfsPort?: string | number,
+    ipfsProtocol?: string,
     contracts?: IContractsAddresses,
     networks?: IEhtereumNetworks,
     rpcUrl?: string,
