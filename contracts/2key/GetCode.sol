@@ -7,7 +7,7 @@ pragma solidity ^0.4.24;
 /// Took from Solidity official documentation
 /// https://solidity.readthedocs.io/en/latest/assembly.html?highlight=getCode
 library GetCode {
-    function at(address _addr) internal returns (bytes o_code) {
+    function at(address _addr) internal view returns (bytes o_code) {
         assembly {
         // retrieve the size of the code, this needs assembly
             let size := extcodesize(_addr)

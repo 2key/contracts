@@ -52,7 +52,7 @@ contract TwoKeyPlasmaEvents {
     // campaign,contractor eth-addr=>from eth-addr=>list of to eth or plasma address.
     mapping(address => mapping(address => mapping(address => address[]))) public visits_list;
 
-    mapping(address => bytes) public visited_sig;
+    mapping(address => mapping(address => mapping(address => bytes))) public visited_sig;
 
     function add_plasma2ethereum(bytes sig, bool with_prefix) public {
         // add an entry connecting msg.sender to the ethereum address that was used to sign sig.
@@ -223,7 +223,11 @@ contract TwoKeyPlasmaEvents {
         }
         require(idx == sig.length,'illegal message size');
 
-        visited_sig[old_address] = sig;
+        uodate_visited_sig(c, contractor, old_address, sig);
+    }
+
+    function uodate_visited_sig(address c, address contractor, address old_address, bytes sig) private {
+        visited_sig[c][contractor][old_address] = sig;
     }
 
     function update_public_link_key(address c, address contractor, address new_address, address new_public_key) private {

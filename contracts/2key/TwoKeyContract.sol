@@ -4,6 +4,7 @@ import '../openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol';
 import '../openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import './ERC20full.sol';
 import './TwoKeyEventSource.sol';
+import './Call.sol';
 
 /**
  * @title Standard ERC20 token
@@ -327,37 +328,6 @@ contract TwoKeyPresellContract is TwoKeyContract {
 
 //  address dc;
 
-  function call_return(address c, bytes _method, uint _val) private view returns (uint answer) {
-    // https://medium.com/@blockchain101/calling-the-function-of-another-contract-in-solidity-f9edfa921f4c
-//    dc = c;
-    bytes4 sig = bytes4(keccak256(_method));
-    assembly {
-    // move pointer to free memory spot
-      let ptr := mload(0x40)
-    // put function sig at memory spot
-      mstore(ptr,sig)
-    // append argument after function sig
-      mstore(add(ptr,0x04), _val)
-
-      let result := call(  // use WARNING because this should be staticcall BUT geth crash!
-      15000, // gas limit
-      c, // sload(dc_slot),  // to addr. append var to _slot to access storage variable
-      0, // not transfer any ether (comment if using staticcall)
-      ptr, // Inputs are stored at location ptr
-      0x24, // Inputs are 0 bytes long
-      ptr,  //Store output over input
-      0x20) //Outputs are 1 bytes long
-
-      if eq(result, 0) {
-        revert(0, 0)
-      }
-
-      answer := mload(ptr) // Assign output to answer var
-      mstore(0x40,add(ptr,0x24)) // Set storage pointer to new space
-    }
-  }
-
-
   // Initialize all the constants
   constructor(TwoKeyEventSource _eventSource, string _name, string _symbol,
         uint256 _tSupply, uint256 _quota, uint256 _cost, uint256 _bounty,
@@ -385,7 +355,7 @@ contract TwoKeyPresellContract is TwoKeyContract {
     if (_erc20_token_sell_contract != address(0)) {
       // fractional units are determined by the erc20 contract
       erc20_token_sell_contract = _erc20_token_sell_contract;  // ERC20full()
-      unit_decimals = call_return(erc20_token_sell_contract, "decimals()",0);
+      unit_decimals = Call.params0(erc20_token_sell_contract, "decimals()");
 //      emit Log1('start_unit_decimals', unit_decimals); // does not work in constructor on geth
       require(unit_decimals >= 0);
       require(unit_decimals <= 18);
@@ -395,7 +365,7 @@ contract TwoKeyPresellContract is TwoKeyContract {
   function total_units() public view returns (uint256) {
     uint256 _total_units;
 //    _total_units = erc20_token_sell_contract.balanceOf(address(this));
-    _total_units = call_return(erc20_token_sell_contract, "balanceOf(address)",uint(this));
+    _total_units = Call.params1(erc20_token_sell_contract, "balanceOf(address)",uint(this));
     return _total_units;
   }
 
