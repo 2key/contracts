@@ -11,9 +11,11 @@ const BasicStorage = artifacts.require("BasicStorage");
 contract('TwoKeyCongress', async (accounts) => {
     let congress;
     //function addMember(address targetMember, string memberName, int _votingPower)
+
     let method=  web3.sha3('addMember(address,string,uint256)');
     console.log("METHOD" + method);
-    let eventSignature = Web3EthAbi.encodeFunctionSignature({
+
+    let functionSignature = Web3EthAbi.encodeFunctionSignature({
         name: 'addMember',
         type: 'function',
         inputs: [{
@@ -27,7 +29,8 @@ contract('TwoKeyCongress', async (accounts) => {
             name: '_votingPower'
         }]
     });
-    console.log("Event signature: " + eventSignature);
+    console.log("Function signature: " + functionSignature);
+
 
     let transactionBytecode = Web3EthAbi.encodeFunctionCall({
         name: 'addMember',
@@ -44,6 +47,7 @@ contract('TwoKeyCongress', async (accounts) => {
         }]
     }, ['0xd03ea8624c8c5987235048901fb614fdca89b117', 'Nikola', '5']);
 
+
     let transactionBytecode2 = Web3EthAbi.encodeFunctionCall({
         name: 'removeMember',
         type: 'function' ,
@@ -53,8 +57,10 @@ contract('TwoKeyCongress', async (accounts) => {
         }]
     }, [accounts[1]]);
 
+
     let initialMembers = [accounts[1], accounts[2]];
     let votingPowers = [1,2];
+
 
     before(async () => {
         console.log("Creating new congress contract");
@@ -135,7 +141,7 @@ contract('TwoKeyCongress', async (accounts) => {
         assert.isTrue(flag, 'proposal was not checked');
     });
 
-    it("account 5 votes yes", async () => {
+    it("account 1 votes yes", async () => {
         let v = await congress.vote(0, true, "it is good to keep things", {
             from: accounts[1]
         });
@@ -146,11 +152,15 @@ contract('TwoKeyCongress', async (accounts) => {
         assert.equal(currentResult.toNumber(), 1, 'not one yay');
     });
 
-    // it("should test test", async() => {
-    //     await congress.callFunction(transactionBytecode);
-    //     let data = await congress.getSomething();
-    //     console.log(data);
-    // })
+    it('account 2 votes yes', async() => {
+        let v = await congress.vote(0, true, 'yeee', {from : accounts[2]});
+        let [numberOfVotes, currentResult] = await congress.getVoteCount.call(0, {from:accounts[2]});
+
+        assert.equal(numberOfVotes.toNumber(), 2, 'not two votes');
+        assert.equal(currentResult.toNumber(), 3, 'not three');
+    });
+
+
     it("advance time and execute proposal", async () => {
 
         await increaseTime(HOUR);
