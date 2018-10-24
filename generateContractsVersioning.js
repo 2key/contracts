@@ -3,20 +3,24 @@ const path = './build/contracts/';
 const sha256 = require('js-sha256');
 const rhd = require('node-humanhash');
 
+
 const singletones = [
     "TwoKeyAdmin",
     "TwoKeyEconomy",
     "TwoKeyUpgradableExchange",
     "TwoKeyEventSource",
     "TwoKeyReg",
-    "TwoKeyPlasmaEvents"
+    "TwoKeyPlasmaEvents",
+    "TwoKeyCongress"
 ];
+
 
 const nonSingletones = [
     "TwoKeyConversionHandler",
     "ERC20TokenMock",
     "TwoKeyAcquisitionCampaignERC20",
 ];
+
 
 // If dev-local 8086
 // If rinkeby-infura 4
@@ -140,4 +144,4 @@ main();
 
 module.exports = {
     wrapper,
-}
+};

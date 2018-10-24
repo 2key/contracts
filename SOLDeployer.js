@@ -335,7 +335,7 @@ async function main() {
         }
 
         if(flag) {
-            Console.log('Generationg new contracts_version.json file...');
+            Console.log('Generating new contracts_version.json file...');
             versioning.wrapper(4);
         }
         // await runProcess(path.join(_dirname,'generateContractsVersioning.js'), ['--network'], networks[0]);
@@ -362,10 +362,8 @@ async function main() {
     case '--ledger':
       ledgerProvider('https://ropsten.infura.io/v3/71d39c30bc984e8a8a0d8adca84620ad', { networkId: 3 })
       break;
-      case '--ttt':
-          console.log(path.join(_dirname,'generateContractsVersioning.js'));
-            break;
-      default:
+
+    default:
       deploy();
   }
 }
