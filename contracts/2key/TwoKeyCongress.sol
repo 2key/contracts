@@ -112,7 +112,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
         addMember(initialMembers[1], 'Kiki', votingPowers[1]);
 
         // validate some methods
-        hashAllowedMethods("0");
+//        hashAllowedMethods("0");
         hashAllowedMethods("addMember(address,string,uint256)");
         hashAllowedMethods("removeMember(address)");
     }
@@ -201,12 +201,12 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
     /**
      *  Method to add voting for new allowed bytecode
      *  The point is that for anything to be executed has to be voted
-     *  @param bytecode is the new transaction bytecode we'd like to whitelist
+     *  @param functionSignature is the new transaction bytecode we'd like to whitelist
      *  @dev method requires that it's called only by contract
     */
-    function addNewAllowedBytecode(bytes bytecode) public {
+    function addNewAllowedBytecode(bytes32 functionSignature) public {
         require(msg.sender == self);
-        allowedMethods.push(bytecode);
+        allowedMethods.push(bytes32(functionSignature));
     }
     /**
      * Change voting rules
