@@ -1,0 +1,5822 @@
+{
+  "TwoKeyEventSource.json": {
+    "abi ": [
+      {
+        "stateMutability": "nonpayable",
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_twoKeyAdminAddress"
+          }
+        ],
+        "type": "constructor",
+        "payable": false
+      },
+      {
+        "inputs": [
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "_campaign"
+          },
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "_owner"
+          }
+        ],
+        "type": "event",
+        "name": "Created",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "_campaign"
+          },
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "_from"
+          },
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "_to"
+          }
+        ],
+        "type": "event",
+        "name": "Joined",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "_campaign"
+          },
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "_converter"
+          },
+          {
+            "indexed": true,
+            "type": "string",
+            "name": "assetName"
+          },
+          {
+            "indexed": false,
+            "type": "address",
+            "name": "_childContractID"
+          },
+          {
+            "indexed": false,
+            "type": "uint256",
+            "name": "_indexOrAmount"
+          },
+          {
+            "indexed": false,
+            "type": "uint8",
+            "name": "_type"
+          }
+        ],
+        "type": "event",
+        "name": "Escrow",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "_campaign"
+          },
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "_to"
+          },
+          {
+            "indexed": false,
+            "type": "uint256",
+            "name": "_amount"
+          }
+        ],
+        "type": "event",
+        "name": "Rewarded",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "_campaign"
+          },
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "_converter"
+          },
+          {
+            "indexed": true,
+            "type": "string",
+            "name": "assetName"
+          },
+          {
+            "indexed": false,
+            "type": "address",
+            "name": "_childContractID"
+          },
+          {
+            "indexed": false,
+            "type": "uint256",
+            "name": "_indexOrAmount"
+          },
+          {
+            "indexed": false,
+            "type": "uint8",
+            "name": "_type"
+          }
+        ],
+        "type": "event",
+        "name": "Fulfilled",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "_campaign"
+          },
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "_converter"
+          },
+          {
+            "indexed": true,
+            "type": "string",
+            "name": "assetName"
+          },
+          {
+            "indexed": false,
+            "type": "address",
+            "name": "_childContractID"
+          },
+          {
+            "indexed": false,
+            "type": "uint256",
+            "name": "_indexOrAmount"
+          },
+          {
+            "indexed": false,
+            "type": "uint8",
+            "name": "_type"
+          }
+        ],
+        "type": "event",
+        "name": "Cancelled",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "_campaign"
+          },
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "_converter"
+          }
+        ],
+        "type": "event",
+        "name": "Rejected",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "indexed": false,
+            "type": "uint256",
+            "name": "timestamp"
+          },
+          {
+            "indexed": false,
+            "type": "string",
+            "name": "value"
+          }
+        ],
+        "type": "event",
+        "name": "UpdatedPublicMetaHash",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "indexed": false,
+            "type": "uint256",
+            "name": "timestamp"
+          },
+          {
+            "indexed": false,
+            "type": "uint256",
+            "name": "value"
+          },
+          {
+            "indexed": false,
+            "type": "string",
+            "name": "action"
+          }
+        ],
+        "type": "event",
+        "name": "UpdatedData",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "indexed": false,
+            "type": "address",
+            "name": "_sender"
+          },
+          {
+            "indexed": false,
+            "type": "uint256",
+            "name": "value"
+          }
+        ],
+        "type": "event",
+        "name": "ReceivedEther",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_twoKeyReg"
+          }
+        ],
+        "constant": false,
+        "name": "addTwoKeyReg",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_contractAddress"
+          }
+        ],
+        "constant": false,
+        "name": "addContract",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_contractAddress"
+          }
+        ],
+        "constant": false,
+        "name": "removeContract",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_newAddress"
+          }
+        ],
+        "constant": false,
+        "name": "addAuthorizedAddress",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_authorizedAddress"
+          }
+        ],
+        "constant": false,
+        "name": "removeAuthorizedAddress",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "bytes",
+            "name": "_contractCode"
+          },
+          {
+            "type": "uint8",
+            "name": "_campaignType"
+          }
+        ],
+        "constant": false,
+        "name": "addCampaignType",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_newAdminAddress"
+          }
+        ],
+        "constant": false,
+        "name": "changeAdmin",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "bytes",
+            "name": "_contractCode"
+          }
+        ],
+        "constant": true,
+        "name": "checkCanEmit",
+        "outputs": [
+          {
+            "type": "bool",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_campaign"
+          },
+          {
+            "type": "address",
+            "name": "_owner"
+          }
+        ],
+        "constant": false,
+        "name": "created",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_campaign"
+          },
+          {
+            "type": "address",
+            "name": "_from"
+          },
+          {
+            "type": "address",
+            "name": "_to"
+          }
+        ],
+        "constant": false,
+        "name": "joined",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_campaign"
+          },
+          {
+            "type": "address",
+            "name": "_converter"
+          },
+          {
+            "type": "string",
+            "name": "_assetName"
+          },
+          {
+            "type": "address",
+            "name": "_childContractID"
+          },
+          {
+            "type": "uint256",
+            "name": "_indexOrAmount"
+          },
+          {
+            "type": "uint8",
+            "name": "_type"
+          }
+        ],
+        "constant": false,
+        "name": "escrow",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_campaign"
+          },
+          {
+            "type": "address",
+            "name": "_to"
+          },
+          {
+            "type": "uint256",
+            "name": "_amount"
+          }
+        ],
+        "constant": false,
+        "name": "rewarded",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_campaign"
+          },
+          {
+            "type": "address",
+            "name": "_converter"
+          },
+          {
+            "type": "string",
+            "name": "_assetName"
+          },
+          {
+            "type": "address",
+            "name": "_childContractID"
+          },
+          {
+            "type": "uint256",
+            "name": "_indexOrAmount"
+          },
+          {
+            "type": "uint8",
+            "name": "_type"
+          }
+        ],
+        "constant": false,
+        "name": "fulfilled",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_campaign"
+          },
+          {
+            "type": "address",
+            "name": "_converter"
+          },
+          {
+            "type": "string",
+            "name": "_assetName"
+          },
+          {
+            "type": "address",
+            "name": "_childContractID"
+          },
+          {
+            "type": "uint256",
+            "name": "_indexOrAmount"
+          },
+          {
+            "type": "uint8",
+            "name": "_type"
+          }
+        ],
+        "constant": false,
+        "name": "cancelled",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "uint256",
+            "name": "timestamp"
+          },
+          {
+            "type": "string",
+            "name": "value"
+          }
+        ],
+        "constant": false,
+        "name": "updatedPublicMetaHash",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "uint256",
+            "name": "timestamp"
+          },
+          {
+            "type": "uint256",
+            "name": "value"
+          },
+          {
+            "type": "string",
+            "name": "action"
+          }
+        ],
+        "constant": false,
+        "name": "updatedData",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_sender"
+          },
+          {
+            "type": "uint256",
+            "name": "_value"
+          }
+        ],
+        "constant": false,
+        "name": "receivedEther",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "getAdmin",
+        "outputs": [
+          {
+            "type": "address",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_subAdmin"
+          }
+        ],
+        "constant": true,
+        "name": "checkIsAuthorized",
+        "outputs": [
+          {
+            "type": "bool",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      }
+    ],
+    "address": "0x11becee26ddc6333dff03c1cd4d5e29d1f4fc16d"
+  },
+  "TwoKeyEconomy.json": {
+    "abi ": [
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "ROLE_MODERATOR",
+        "outputs": [
+          {
+            "type": "string",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "name",
+        "outputs": [
+          {
+            "type": "string",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "from"
+          },
+          {
+            "type": "address",
+            "name": "to"
+          },
+          {
+            "type": "string",
+            "name": "roleName"
+          }
+        ],
+        "constant": false,
+        "name": "adminUpdateRole",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_spender"
+          },
+          {
+            "type": "uint256",
+            "name": "_value"
+          }
+        ],
+        "constant": false,
+        "name": "approve",
+        "outputs": [
+          {
+            "type": "bool",
+            "name": ""
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_operator"
+          },
+          {
+            "type": "string",
+            "name": "_role"
+          }
+        ],
+        "constant": true,
+        "name": "checkRole",
+        "outputs": [],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "getModeratorRole",
+        "outputs": [
+          {
+            "type": "string",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "totalSupply",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_operator"
+          },
+          {
+            "type": "string",
+            "name": "_role"
+          }
+        ],
+        "constant": true,
+        "name": "hasRole",
+        "outputs": [
+          {
+            "type": "bool",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "getReferrerRole",
+        "outputs": [
+          {
+            "type": "string",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_from"
+          },
+          {
+            "type": "address",
+            "name": "_to"
+          },
+          {
+            "type": "uint256",
+            "name": "_value"
+          }
+        ],
+        "constant": false,
+        "name": "transferFrom",
+        "outputs": [
+          {
+            "type": "bool",
+            "name": ""
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "decimals",
+        "outputs": [
+          {
+            "type": "uint8",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "ROLE_REFERRER",
+        "outputs": [
+          {
+            "type": "string",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "getConverterRole",
+        "outputs": [
+          {
+            "type": "string",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_spender"
+          },
+          {
+            "type": "uint256",
+            "name": "_subtractedValue"
+          }
+        ],
+        "constant": false,
+        "name": "decreaseApproval",
+        "outputs": [
+          {
+            "type": "bool",
+            "name": ""
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "ROLE_CONTRACTOR",
+        "outputs": [
+          {
+            "type": "string",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_owner"
+          }
+        ],
+        "constant": true,
+        "name": "balanceOf",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": false,
+        "name": "renounceOwnership",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "getContractorRole",
+        "outputs": [
+          {
+            "type": "string",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "addr"
+          },
+          {
+            "type": "string",
+            "name": "roleName"
+          }
+        ],
+        "constant": false,
+        "name": "adminRemoveRole",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "owner",
+        "outputs": [
+          {
+            "type": "address",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "symbol",
+        "outputs": [
+          {
+            "type": "string",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_to"
+          },
+          {
+            "type": "uint256",
+            "name": "_value"
+          }
+        ],
+        "constant": false,
+        "name": "transfer",
+        "outputs": [
+          {
+            "type": "bool",
+            "name": ""
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "addr"
+          },
+          {
+            "type": "string",
+            "name": "roleName"
+          }
+        ],
+        "constant": false,
+        "name": "adminAddRole",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "ROLE_CONVERTER",
+        "outputs": [
+          {
+            "type": "string",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "getAdminRole",
+        "outputs": [
+          {
+            "type": "string",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "ROLE_ADMIN",
+        "outputs": [
+          {
+            "type": "string",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_spender"
+          },
+          {
+            "type": "uint256",
+            "name": "_addedValue"
+          }
+        ],
+        "constant": false,
+        "name": "increaseApproval",
+        "outputs": [
+          {
+            "type": "bool",
+            "name": ""
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_owner"
+          },
+          {
+            "type": "address",
+            "name": "_spender"
+          }
+        ],
+        "constant": true,
+        "name": "allowance",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_newOwner"
+          }
+        ],
+        "constant": false,
+        "name": "transferOwnership",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "stateMutability": "nonpayable",
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_twoKeyAdmin"
+          }
+        ],
+        "type": "constructor",
+        "payable": false
+      },
+      {
+        "inputs": [
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "previousOwner"
+          }
+        ],
+        "type": "event",
+        "name": "OwnershipRenounced",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "previousOwner"
+          },
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "newOwner"
+          }
+        ],
+        "type": "event",
+        "name": "OwnershipTransferred",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "owner"
+          },
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "spender"
+          },
+          {
+            "indexed": false,
+            "type": "uint256",
+            "name": "value"
+          }
+        ],
+        "type": "event",
+        "name": "Approval",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "from"
+          },
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "to"
+          },
+          {
+            "indexed": false,
+            "type": "uint256",
+            "name": "value"
+          }
+        ],
+        "type": "event",
+        "name": "Transfer",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "operator"
+          },
+          {
+            "indexed": false,
+            "type": "string",
+            "name": "role"
+          }
+        ],
+        "type": "event",
+        "name": "RoleAdded",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "operator"
+          },
+          {
+            "indexed": false,
+            "type": "string",
+            "name": "role"
+          }
+        ],
+        "type": "event",
+        "name": "RoleRemoved",
+        "anonymous": false
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "getTokenName",
+        "outputs": [
+          {
+            "type": "string",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "getTokenSymbol",
+        "outputs": [
+          {
+            "type": "string",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "getTokenDecimals",
+        "outputs": [
+          {
+            "type": "uint8",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      }
+    ],
+    "address": "0x1fd0eed3fc4a85394f1c1649851471c069395978"
+  },
+  "TwoKeyAdmin.json": {
+    "abi ": [
+      {
+        "inputs": [],
+        "constant": false,
+        "name": "renounceOwnership",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "owner",
+        "outputs": [
+          {
+            "type": "address",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_newOwner"
+          }
+        ],
+        "constant": false,
+        "name": "transferOwnership",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_recipient"
+          }
+        ],
+        "constant": false,
+        "name": "destroyAndSend",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "stateMutability": "payable",
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_electorateAdmins"
+          }
+        ],
+        "type": "constructor",
+        "payable": true
+      },
+      {
+        "stateMutability": "payable",
+        "payable": true,
+        "type": "fallback"
+      },
+      {
+        "inputs": [
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "previousOwner"
+          }
+        ],
+        "type": "event",
+        "name": "OwnershipRenounced",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "previousOwner"
+          },
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "newOwner"
+          }
+        ],
+        "type": "event",
+        "name": "OwnershipTransferred",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_newAdminContract"
+          }
+        ],
+        "constant": false,
+        "name": "replaceOneself",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_previousAdmin"
+          }
+        ],
+        "constant": false,
+        "name": "addPreviousAdmin",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_to"
+          },
+          {
+            "type": "uint256",
+            "name": "_tokens"
+          }
+        ],
+        "constant": false,
+        "name": "transferByAdmins",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "newExchange"
+          }
+        ],
+        "constant": false,
+        "name": "upgradeEconomyExchangeByAdmins",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "to"
+          },
+          {
+            "type": "uint256",
+            "name": "amount"
+          }
+        ],
+        "constant": false,
+        "name": "transferEtherByAdmins",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": false,
+        "name": "destroy",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_address"
+          }
+        ],
+        "constant": false,
+        "name": "addModeratorForReg",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_address"
+          }
+        ],
+        "constant": false,
+        "name": "removeModeratorForReg",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_moderator"
+          },
+          {
+            "type": "address",
+            "name": "_newModerator"
+          }
+        ],
+        "constant": false,
+        "name": "updateModeratorForReg",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_address"
+          }
+        ],
+        "constant": false,
+        "name": "twoKeyEventSourceAddAuthorizedAddress",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_twoKeyEventSource"
+          }
+        ],
+        "constant": false,
+        "name": "addTwoKeyEventSource",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_contractAddress"
+          }
+        ],
+        "constant": false,
+        "name": "twoKeyEventSourceAddAuthorizedContracts",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "string",
+            "name": "_name"
+          },
+          {
+            "type": "address",
+            "name": "_addr"
+          }
+        ],
+        "constant": false,
+        "name": "addNameToReg",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_exchange"
+          }
+        ],
+        "constant": false,
+        "name": "updateExchange",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_reg"
+          }
+        ],
+        "constant": false,
+        "name": "updateRegistry",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_eventSource"
+          }
+        ],
+        "constant": false,
+        "name": "updateEventSource",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_economy"
+          },
+          {
+            "type": "address",
+            "name": "_exchange"
+          },
+          {
+            "type": "address",
+            "name": "_reg"
+          },
+          {
+            "type": "address",
+            "name": "_eventSource"
+          }
+        ],
+        "constant": false,
+        "name": "setSingletones",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_economy"
+          },
+          {
+            "type": "address",
+            "name": "_to"
+          },
+          {
+            "type": "uint256",
+            "name": "_amount"
+          }
+        ],
+        "constant": false,
+        "name": "transfer2KeyTokens",
+        "outputs": [
+          {
+            "type": "bool",
+            "name": ""
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_addr"
+          }
+        ],
+        "constant": true,
+        "name": "getEtherBalanceOfAnAddress",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "getTwoKeyEconomy",
+        "outputs": [
+          {
+            "type": "address",
+            "name": "_economy"
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "getTwoKeyReg",
+        "outputs": [
+          {
+            "type": "address",
+            "name": "_address"
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "getTwoKeyUpgradableExchange",
+        "outputs": [
+          {
+            "type": "address",
+            "name": "_exchange"
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      }
+    ],
+    "address": "0x2e1e05b21a49cc6ff32bd88def571e17a44fc1e8"
+  },
+  "TwoKeyConversionHandler.json": {
+    "abi ": [
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": ""
+          }
+        ],
+        "constant": true,
+        "name": "conversions",
+        "outputs": [
+          {
+            "type": "address",
+            "name": "contractor"
+          },
+          {
+            "type": "uint256",
+            "name": "contractorProceedsETHWei"
+          },
+          {
+            "type": "address",
+            "name": "converter"
+          },
+          {
+            "type": "uint8",
+            "name": "state"
+          },
+          {
+            "type": "string",
+            "name": "assetSymbol"
+          },
+          {
+            "type": "address",
+            "name": "assetContractERC20"
+          },
+          {
+            "type": "uint256",
+            "name": "conversionAmount"
+          },
+          {
+            "type": "uint256",
+            "name": "maxReferralRewardETHWei"
+          },
+          {
+            "type": "uint256",
+            "name": "moderatorFeeETHWei"
+          },
+          {
+            "type": "uint256",
+            "name": "baseTokenUnits"
+          },
+          {
+            "type": "uint256",
+            "name": "bonusTokenUnits"
+          },
+          {
+            "type": "uint8",
+            "name": "campaignType"
+          },
+          {
+            "type": "uint256",
+            "name": "conversionCreatedAt"
+          },
+          {
+            "type": "uint256",
+            "name": "conversionExpiresAt"
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "stateMutability": "nonpayable",
+        "inputs": [
+          {
+            "type": "uint256",
+            "name": "_tokenDistributionDate"
+          },
+          {
+            "type": "uint256",
+            "name": "_maxDistributionDateShiftInDays"
+          },
+          {
+            "type": "uint256",
+            "name": "_bonusTokensVestingMonths"
+          },
+          {
+            "type": "uint256",
+            "name": "_bonusTokensVestingStartShiftInDaysFromDistributionDate"
+          }
+        ],
+        "type": "constructor",
+        "payable": false
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_twoKeyAcquisitionCampaignERC20"
+          },
+          {
+            "type": "address",
+            "name": "_moderator"
+          },
+          {
+            "type": "address",
+            "name": "_contractor"
+          },
+          {
+            "type": "address",
+            "name": "_assetContractERC20"
+          },
+          {
+            "type": "string",
+            "name": "_assetSymbol"
+          }
+        ],
+        "constant": false,
+        "name": "setTwoKeyAcquisitionCampaignERC20",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "converterAddress"
+          }
+        ],
+        "constant": true,
+        "name": "didConverterConvert",
+        "outputs": [],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_converterAddress"
+          }
+        ],
+        "constant": false,
+        "name": "supportForCanceledEscrow",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": ""
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_converterAddress"
+          }
+        ],
+        "constant": true,
+        "name": "supportForCancelAssetTwoKey",
+        "outputs": [],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_converterAddress"
+          }
+        ],
+        "constant": true,
+        "name": "supportForExpireEscrow",
+        "outputs": [],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_contractor"
+          },
+          {
+            "type": "uint256",
+            "name": "_contractorProceeds"
+          },
+          {
+            "type": "address",
+            "name": "_converterAddress"
+          },
+          {
+            "type": "uint256",
+            "name": "_conversionAmount"
+          },
+          {
+            "type": "uint256",
+            "name": "_maxReferralRewardETHWei"
+          },
+          {
+            "type": "uint256",
+            "name": "_moderatorFeeETHWei"
+          },
+          {
+            "type": "uint256",
+            "name": "baseTokensForConverterUnits"
+          },
+          {
+            "type": "uint256",
+            "name": "bonusTokensForConverterUnits"
+          },
+          {
+            "type": "uint256",
+            "name": "expiryConversion"
+          }
+        ],
+        "constant": false,
+        "name": "supportForCreateConversion",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "converter"
+          },
+          {
+            "type": "uint256",
+            "name": "conversionCreatedAt"
+          },
+          {
+            "type": "uint256",
+            "name": "conversionAmountETH"
+          }
+        ],
+        "constant": true,
+        "name": "encodeParams",
+        "outputs": [
+          {
+            "type": "bytes",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "converter"
+          }
+        ],
+        "constant": true,
+        "name": "getEncodedConversion",
+        "outputs": [
+          {
+            "type": "bytes",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_converter"
+          }
+        ],
+        "constant": false,
+        "name": "executeConversion",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "uint8",
+            "name": "state"
+          }
+        ],
+        "constant": true,
+        "name": "convertConverterStateToBytes",
+        "outputs": [
+          {
+            "type": "bytes32",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_converter"
+          }
+        ],
+        "constant": true,
+        "name": "isConverterApproved",
+        "outputs": [
+          {
+            "type": "bool",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_converter"
+          }
+        ],
+        "constant": true,
+        "name": "isConverterRejected",
+        "outputs": [
+          {
+            "type": "bool",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_converter"
+          }
+        ],
+        "constant": true,
+        "name": "isConverterCancelled",
+        "outputs": [
+          {
+            "type": "bool",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_converter"
+          }
+        ],
+        "constant": true,
+        "name": "isConverterFulfilled",
+        "outputs": [
+          {
+            "type": "bool",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_converter"
+          }
+        ],
+        "constant": true,
+        "name": "isConverterPending",
+        "outputs": [
+          {
+            "type": "bool",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "getAllPendingConverters",
+        "outputs": [
+          {
+            "type": "address[]",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "getAllRejectedConverters",
+        "outputs": [
+          {
+            "type": "address[]",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "getAllApprovedConverters",
+        "outputs": [
+          {
+            "type": "address[]",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "getAllCancelledConverters",
+        "outputs": [
+          {
+            "type": "address[]",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "getAllFulfilledConverters",
+        "outputs": [
+          {
+            "type": "address[]",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_converter"
+          }
+        ],
+        "constant": true,
+        "name": "getLockupContractsForConverter",
+        "outputs": [
+          {
+            "type": "address[]",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_converter"
+          }
+        ],
+        "constant": false,
+        "name": "approveConverter",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_converter"
+          }
+        ],
+        "constant": false,
+        "name": "rejectConverter",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": false,
+        "name": "cancelConverter",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      }
+    ],
+    "address": "0x9096284981f015e7416835c7917a8866b9ee1488"
+  },
+  "TwoKeyUpgradableExchange.json": {
+    "abi ": [
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "ROLE_MODERATOR",
+        "outputs": [
+          {
+            "type": "string",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "from"
+          },
+          {
+            "type": "address",
+            "name": "to"
+          },
+          {
+            "type": "string",
+            "name": "roleName"
+          }
+        ],
+        "constant": false,
+        "name": "adminUpdateRole",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_operator"
+          },
+          {
+            "type": "string",
+            "name": "_role"
+          }
+        ],
+        "constant": true,
+        "name": "checkRole",
+        "outputs": [],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "getModeratorRole",
+        "outputs": [
+          {
+            "type": "string",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_operator"
+          },
+          {
+            "type": "string",
+            "name": "_role"
+          }
+        ],
+        "constant": true,
+        "name": "hasRole",
+        "outputs": [
+          {
+            "type": "bool",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "getReferrerRole",
+        "outputs": [
+          {
+            "type": "string",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "rate",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "ROLE_REFERRER",
+        "outputs": [
+          {
+            "type": "string",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "weiRaised",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "wallet",
+        "outputs": [
+          {
+            "type": "address",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "getConverterRole",
+        "outputs": [
+          {
+            "type": "string",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "ROLE_CONTRACTOR",
+        "outputs": [
+          {
+            "type": "string",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": false,
+        "name": "renounceOwnership",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "getContractorRole",
+        "outputs": [
+          {
+            "type": "string",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "addr"
+          },
+          {
+            "type": "string",
+            "name": "roleName"
+          }
+        ],
+        "constant": false,
+        "name": "adminRemoveRole",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "owner",
+        "outputs": [
+          {
+            "type": "address",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "addr"
+          },
+          {
+            "type": "string",
+            "name": "roleName"
+          }
+        ],
+        "constant": false,
+        "name": "adminAddRole",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "ROLE_CONVERTER",
+        "outputs": [
+          {
+            "type": "string",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "getAdminRole",
+        "outputs": [
+          {
+            "type": "string",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "ROLE_ADMIN",
+        "outputs": [
+          {
+            "type": "string",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_newOwner"
+          }
+        ],
+        "constant": false,
+        "name": "transferOwnership",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "token",
+        "outputs": [
+          {
+            "type": "address",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "stateMutability": "nonpayable",
+        "inputs": [
+          {
+            "type": "uint256",
+            "name": "_rate"
+          },
+          {
+            "type": "address",
+            "name": "_wallet"
+          },
+          {
+            "type": "address",
+            "name": "_token"
+          },
+          {
+            "type": "address",
+            "name": "_twoKeyAdmin"
+          }
+        ],
+        "type": "constructor",
+        "payable": false
+      },
+      {
+        "stateMutability": "payable",
+        "payable": true,
+        "type": "fallback"
+      },
+      {
+        "inputs": [
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "purchaser"
+          },
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "beneficiary"
+          },
+          {
+            "indexed": false,
+            "type": "uint256",
+            "name": "value"
+          },
+          {
+            "indexed": false,
+            "type": "uint256",
+            "name": "amount"
+          }
+        ],
+        "type": "event",
+        "name": "TokenSell",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "operator"
+          },
+          {
+            "indexed": false,
+            "type": "string",
+            "name": "role"
+          }
+        ],
+        "type": "event",
+        "name": "RoleAdded",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "operator"
+          },
+          {
+            "indexed": false,
+            "type": "string",
+            "name": "role"
+          }
+        ],
+        "type": "event",
+        "name": "RoleRemoved",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "previousOwner"
+          }
+        ],
+        "type": "event",
+        "name": "OwnershipRenounced",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "previousOwner"
+          },
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "newOwner"
+          }
+        ],
+        "type": "event",
+        "name": "OwnershipTransferred",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "purchaser"
+          },
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "beneficiary"
+          },
+          {
+            "indexed": false,
+            "type": "uint256",
+            "name": "value"
+          },
+          {
+            "indexed": false,
+            "type": "uint256",
+            "name": "amount"
+          }
+        ],
+        "type": "event",
+        "name": "TokenPurchase",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "_to"
+          },
+          {
+            "indexed": false,
+            "type": "uint256",
+            "name": "value"
+          },
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "token"
+          }
+        ],
+        "type": "event",
+        "name": "Msg",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "type": "uint256",
+            "name": "_tokenAmount"
+          }
+        ],
+        "constant": false,
+        "name": "sellTokens",
+        "outputs": [],
+        "stateMutability": "payable",
+        "payable": true,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_to"
+          }
+        ],
+        "constant": false,
+        "name": "upgrade",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_beneficiary"
+          }
+        ],
+        "constant": false,
+        "name": "buyTokens",
+        "outputs": [],
+        "stateMutability": "payable",
+        "payable": true,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "getFiller",
+        "outputs": [
+          {
+            "type": "address",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      }
+    ],
+    "address": "0x629bef857653ae3cc9b72b50fcc4afab977f1b06"
+  },
+  "ERC20TokenMock.json": {
+    "abi ": [
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "name",
+        "outputs": [
+          {
+            "type": "string",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_spender"
+          },
+          {
+            "type": "uint256",
+            "name": "_value"
+          }
+        ],
+        "constant": false,
+        "name": "approve",
+        "outputs": [
+          {
+            "type": "bool",
+            "name": ""
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "totalSupply",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_from"
+          },
+          {
+            "type": "address",
+            "name": "_to"
+          },
+          {
+            "type": "uint256",
+            "name": "_value"
+          }
+        ],
+        "constant": false,
+        "name": "transferFrom",
+        "outputs": [
+          {
+            "type": "bool",
+            "name": ""
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "decimals",
+        "outputs": [
+          {
+            "type": "uint8",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_spender"
+          },
+          {
+            "type": "uint256",
+            "name": "_subtractedValue"
+          }
+        ],
+        "constant": false,
+        "name": "decreaseApproval",
+        "outputs": [
+          {
+            "type": "bool",
+            "name": ""
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_owner"
+          }
+        ],
+        "constant": true,
+        "name": "balanceOf",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "symbol",
+        "outputs": [
+          {
+            "type": "string",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_to"
+          },
+          {
+            "type": "uint256",
+            "name": "_value"
+          }
+        ],
+        "constant": false,
+        "name": "transfer",
+        "outputs": [
+          {
+            "type": "bool",
+            "name": ""
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_spender"
+          },
+          {
+            "type": "uint256",
+            "name": "_addedValue"
+          }
+        ],
+        "constant": false,
+        "name": "increaseApproval",
+        "outputs": [
+          {
+            "type": "bool",
+            "name": ""
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_owner"
+          },
+          {
+            "type": "address",
+            "name": "_spender"
+          }
+        ],
+        "constant": true,
+        "name": "allowance",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "stateMutability": "nonpayable",
+        "inputs": [],
+        "type": "constructor",
+        "payable": false
+      },
+      {
+        "inputs": [
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "owner"
+          },
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "spender"
+          },
+          {
+            "indexed": false,
+            "type": "uint256",
+            "name": "value"
+          }
+        ],
+        "type": "event",
+        "name": "Approval",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "from"
+          },
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "to"
+          },
+          {
+            "indexed": false,
+            "type": "uint256",
+            "name": "value"
+          }
+        ],
+        "type": "event",
+        "name": "Transfer",
+        "anonymous": false
+      }
+    ],
+    "address": "0xb8c8f4ba8b73fb26224322d98799def24c485b49"
+  },
+  "TwoKeyCongress.json": {
+    "abi ": [
+      {
+        "inputs": [
+          {
+            "type": "uint256",
+            "name": ""
+          }
+        ],
+        "constant": true,
+        "name": "proposals",
+        "outputs": [
+          {
+            "type": "address",
+            "name": "recipient"
+          },
+          {
+            "type": "uint256",
+            "name": "amount"
+          },
+          {
+            "type": "string",
+            "name": "description"
+          },
+          {
+            "type": "uint256",
+            "name": "minExecutionDate"
+          },
+          {
+            "type": "bool",
+            "name": "executed"
+          },
+          {
+            "type": "bool",
+            "name": "proposalPassed"
+          },
+          {
+            "type": "uint256",
+            "name": "numberOfVotes"
+          },
+          {
+            "type": "int256",
+            "name": "currentResult"
+          },
+          {
+            "type": "bytes32",
+            "name": "proposalHash"
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": ""
+          }
+        ],
+        "constant": true,
+        "name": "memberId",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "numProposals",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "uint256",
+            "name": ""
+          }
+        ],
+        "constant": true,
+        "name": "members",
+        "outputs": [
+          {
+            "type": "address",
+            "name": "memberAddress"
+          },
+          {
+            "type": "string",
+            "name": "name"
+          },
+          {
+            "type": "uint256",
+            "name": "votingPower"
+          },
+          {
+            "type": "uint256",
+            "name": "memberSince"
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "debatingPeriodInMinutes",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": false,
+        "name": "renounceOwnership",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "minimumQuorum",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "owner",
+        "outputs": [
+          {
+            "type": "address",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_from"
+          },
+          {
+            "type": "uint256",
+            "name": "_value"
+          },
+          {
+            "type": "address",
+            "name": "_token"
+          },
+          {
+            "type": "bytes",
+            "name": "_extraData"
+          }
+        ],
+        "constant": false,
+        "name": "receiveApproval",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_newOwner"
+          }
+        ],
+        "constant": false,
+        "name": "transferOwnership",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "stateMutability": "payable",
+        "inputs": [
+          {
+            "type": "uint256",
+            "name": "_minimumQuorumForProposals"
+          },
+          {
+            "type": "uint256",
+            "name": "_minutesForDebate"
+          },
+          {
+            "type": "address[]",
+            "name": "initialMembers"
+          },
+          {
+            "type": "uint256[]",
+            "name": "votingPowers"
+          }
+        ],
+        "type": "constructor",
+        "payable": true
+      },
+      {
+        "stateMutability": "payable",
+        "payable": true,
+        "type": "fallback"
+      },
+      {
+        "inputs": [
+          {
+            "indexed": false,
+            "type": "uint256",
+            "name": "proposalID"
+          },
+          {
+            "indexed": false,
+            "type": "address",
+            "name": "recipient"
+          },
+          {
+            "indexed": false,
+            "type": "uint256",
+            "name": "amount"
+          },
+          {
+            "indexed": false,
+            "type": "string",
+            "name": "description"
+          }
+        ],
+        "type": "event",
+        "name": "ProposalAdded",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "indexed": false,
+            "type": "uint256",
+            "name": "proposalID"
+          },
+          {
+            "indexed": false,
+            "type": "bool",
+            "name": "position"
+          },
+          {
+            "indexed": false,
+            "type": "address",
+            "name": "voter"
+          },
+          {
+            "indexed": false,
+            "type": "string",
+            "name": "justification"
+          }
+        ],
+        "type": "event",
+        "name": "Voted",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "indexed": false,
+            "type": "uint256",
+            "name": "proposalID"
+          },
+          {
+            "indexed": false,
+            "type": "int256",
+            "name": "result"
+          },
+          {
+            "indexed": false,
+            "type": "uint256",
+            "name": "quorum"
+          },
+          {
+            "indexed": false,
+            "type": "bool",
+            "name": "active"
+          }
+        ],
+        "type": "event",
+        "name": "ProposalTallied",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "indexed": false,
+            "type": "address",
+            "name": "member"
+          },
+          {
+            "indexed": false,
+            "type": "bool",
+            "name": "isMember"
+          }
+        ],
+        "type": "event",
+        "name": "MembershipChanged",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "indexed": false,
+            "type": "uint256",
+            "name": "_newMinimumQuorum"
+          },
+          {
+            "indexed": false,
+            "type": "uint256",
+            "name": "_newDebatingPeriodInMinutes"
+          }
+        ],
+        "type": "event",
+        "name": "ChangeOfRules",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "indexed": false,
+            "type": "address",
+            "name": "sender"
+          },
+          {
+            "indexed": false,
+            "type": "uint256",
+            "name": "amount"
+          }
+        ],
+        "type": "event",
+        "name": "ReceivedEther",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "indexed": false,
+            "type": "address",
+            "name": "_from"
+          },
+          {
+            "indexed": false,
+            "type": "uint256",
+            "name": "_value"
+          },
+          {
+            "indexed": false,
+            "type": "address",
+            "name": "_token"
+          },
+          {
+            "indexed": false,
+            "type": "bytes",
+            "name": "_extraData"
+          }
+        ],
+        "type": "event",
+        "name": "ReceivedTokens",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "previousOwner"
+          }
+        ],
+        "type": "event",
+        "name": "OwnershipRenounced",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "previousOwner"
+          },
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "newOwner"
+          }
+        ],
+        "type": "event",
+        "name": "OwnershipTransferred",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "type": "bytes",
+            "name": "bytecode"
+          }
+        ],
+        "constant": true,
+        "name": "onlyAllowedMethods",
+        "outputs": [
+          {
+            "type": "bool",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "bytes32",
+            "name": "x"
+          },
+          {
+            "type": "bytes",
+            "name": "y"
+          }
+        ],
+        "constant": true,
+        "name": "compare",
+        "outputs": [
+          {
+            "type": "bool",
+            "name": ""
+          }
+        ],
+        "stateMutability": "pure",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "string",
+            "name": "nameAndParams"
+          }
+        ],
+        "constant": false,
+        "name": "hashAllowedMethods",
+        "outputs": [
+          {
+            "type": "bytes32",
+            "name": ""
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_newMemberAddress"
+          }
+        ],
+        "constant": false,
+        "name": "replaceMemberAddress",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "targetMember"
+          },
+          {
+            "type": "string",
+            "name": "memberName"
+          },
+          {
+            "type": "uint256",
+            "name": "_votingPower"
+          }
+        ],
+        "constant": false,
+        "name": "addMember",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "targetMember"
+          }
+        ],
+        "constant": false,
+        "name": "removeMember",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "bytes32",
+            "name": "functionSignature"
+          }
+        ],
+        "constant": false,
+        "name": "addNewAllowedBytecode",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "beneficiary"
+          },
+          {
+            "type": "uint256",
+            "name": "weiAmount"
+          },
+          {
+            "type": "string",
+            "name": "jobDescription"
+          },
+          {
+            "type": "bytes",
+            "name": "transactionBytecode"
+          }
+        ],
+        "constant": false,
+        "name": "newProposal",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": "proposalID"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "beneficiary"
+          },
+          {
+            "type": "uint256",
+            "name": "etherAmount"
+          },
+          {
+            "type": "string",
+            "name": "jobDescription"
+          },
+          {
+            "type": "bytes",
+            "name": "transactionBytecode"
+          }
+        ],
+        "constant": false,
+        "name": "newProposalInEther",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": "proposalID"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "uint256",
+            "name": "proposalNumber"
+          },
+          {
+            "type": "address",
+            "name": "beneficiary"
+          },
+          {
+            "type": "uint256",
+            "name": "weiAmount"
+          },
+          {
+            "type": "bytes",
+            "name": "transactionBytecode"
+          }
+        ],
+        "constant": true,
+        "name": "checkProposalCode",
+        "outputs": [
+          {
+            "type": "bool",
+            "name": "codeChecksOut"
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "uint256",
+            "name": "proposalNumber"
+          },
+          {
+            "type": "bool",
+            "name": "supportsProposal"
+          },
+          {
+            "type": "string",
+            "name": "justificationText"
+          }
+        ],
+        "constant": false,
+        "name": "vote",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": "voteID"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "uint256",
+            "name": "proposalNumber"
+          }
+        ],
+        "constant": true,
+        "name": "getVoteCount",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": "numberOfVotes"
+          },
+          {
+            "type": "int256",
+            "name": "currentResult"
+          },
+          {
+            "type": "string",
+            "name": "description"
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "getMemberInfo",
+        "outputs": [
+          {
+            "type": "address",
+            "name": ""
+          },
+          {
+            "type": "string",
+            "name": ""
+          },
+          {
+            "type": "uint256",
+            "name": ""
+          },
+          {
+            "type": "uint256",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "uint256",
+            "name": "proposalNumber"
+          },
+          {
+            "type": "bytes",
+            "name": "transactionBytecode"
+          }
+        ],
+        "constant": false,
+        "name": "executeProposal",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_memberAddress"
+          }
+        ],
+        "constant": true,
+        "name": "getMemberVotingPower",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "getMemberId",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "getMembersLength",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "getAllowedMethods",
+        "outputs": [
+          {
+            "type": "bytes32[]",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      }
+    ],
+    "address": "0xaf6382ee1438cf6c9d9517741f757c29b27a3fc2"
+  },
+  "Migrations.json": {
+    "abi ": [
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "last_completed_migration",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "owner",
+        "outputs": [
+          {
+            "type": "address",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "stateMutability": "nonpayable",
+        "inputs": [],
+        "type": "constructor",
+        "payable": false
+      },
+      {
+        "inputs": [
+          {
+            "type": "uint256",
+            "name": "completed"
+          }
+        ],
+        "constant": false,
+        "name": "setCompleted",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "new_address"
+          }
+        ],
+        "constant": false,
+        "name": "upgrade",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      }
+    ],
+    "address": "0xebb048a9f65858f68039f5e5088607c36ff91fd3"
+  },
+  "TwoKeyReg.json": {
+    "abi ": [
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "ROLE_MODERATOR",
+        "outputs": [
+          {
+            "type": "string",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "from"
+          },
+          {
+            "type": "address",
+            "name": "to"
+          },
+          {
+            "type": "string",
+            "name": "roleName"
+          }
+        ],
+        "constant": false,
+        "name": "adminUpdateRole",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": ""
+          }
+        ],
+        "constant": true,
+        "name": "address2username",
+        "outputs": [
+          {
+            "type": "string",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_operator"
+          },
+          {
+            "type": "string",
+            "name": "_role"
+          }
+        ],
+        "constant": true,
+        "name": "checkRole",
+        "outputs": [],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "getModeratorRole",
+        "outputs": [
+          {
+            "type": "string",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "bytes32",
+            "name": ""
+          },
+          {
+            "type": "uint256",
+            "name": ""
+          }
+        ],
+        "constant": true,
+        "name": "username2AddressHistory",
+        "outputs": [
+          {
+            "type": "address",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "twoKeyEventSource",
+        "outputs": [
+          {
+            "type": "address",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_operator"
+          },
+          {
+            "type": "string",
+            "name": "_role"
+          }
+        ],
+        "constant": true,
+        "name": "hasRole",
+        "outputs": [
+          {
+            "type": "bool",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "getReferrerRole",
+        "outputs": [
+          {
+            "type": "string",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "ROLE_REFERRER",
+        "outputs": [
+          {
+            "type": "string",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "getConverterRole",
+        "outputs": [
+          {
+            "type": "string",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "ROLE_CONTRACTOR",
+        "outputs": [
+          {
+            "type": "string",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": false,
+        "name": "renounceOwnership",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "getContractorRole",
+        "outputs": [
+          {
+            "type": "string",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "addr"
+          },
+          {
+            "type": "string",
+            "name": "roleName"
+          }
+        ],
+        "constant": false,
+        "name": "adminRemoveRole",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "owner",
+        "outputs": [
+          {
+            "type": "address",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "addr"
+          },
+          {
+            "type": "string",
+            "name": "roleName"
+          }
+        ],
+        "constant": false,
+        "name": "adminAddRole",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "ROLE_CONVERTER",
+        "outputs": [
+          {
+            "type": "string",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "getAdminRole",
+        "outputs": [
+          {
+            "type": "string",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "ROLE_ADMIN",
+        "outputs": [
+          {
+            "type": "string",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "bytes32",
+            "name": ""
+          }
+        ],
+        "constant": true,
+        "name": "username2currentAddress",
+        "outputs": [
+          {
+            "type": "address",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_newOwner"
+          }
+        ],
+        "constant": false,
+        "name": "transferOwnership",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "stateMutability": "nonpayable",
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_twoKeyEventSource"
+          },
+          {
+            "type": "address",
+            "name": "_twoKeyAdmin"
+          }
+        ],
+        "type": "constructor",
+        "payable": false
+      },
+      {
+        "inputs": [
+          {
+            "indexed": false,
+            "type": "address",
+            "name": "owner"
+          },
+          {
+            "indexed": false,
+            "type": "string",
+            "name": "name"
+          }
+        ],
+        "type": "event",
+        "name": "UserNameChanged",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "operator"
+          },
+          {
+            "indexed": false,
+            "type": "string",
+            "name": "role"
+          }
+        ],
+        "type": "event",
+        "name": "RoleAdded",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "operator"
+          },
+          {
+            "indexed": false,
+            "type": "string",
+            "name": "role"
+          }
+        ],
+        "type": "event",
+        "name": "RoleRemoved",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "previousOwner"
+          }
+        ],
+        "type": "event",
+        "name": "OwnershipRenounced",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "previousOwner"
+          },
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "newOwner"
+          }
+        ],
+        "type": "event",
+        "name": "OwnershipTransferred",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_twoKeyEventSource"
+          }
+        ],
+        "constant": false,
+        "name": "changeTwoKeyEventSource",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_userAddress"
+          },
+          {
+            "type": "address",
+            "name": "_contractAddress"
+          }
+        ],
+        "constant": false,
+        "name": "addWhereContractor",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_userAddress"
+          },
+          {
+            "type": "address",
+            "name": "_contractAddress"
+          }
+        ],
+        "constant": false,
+        "name": "addWhereModerator",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_userAddress"
+          },
+          {
+            "type": "address",
+            "name": "_contractAddress"
+          }
+        ],
+        "constant": false,
+        "name": "addWhereReferrer",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_userAddress"
+          },
+          {
+            "type": "address",
+            "name": "_contractAddress"
+          }
+        ],
+        "constant": false,
+        "name": "addWhereConverter",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_userAddress"
+          }
+        ],
+        "constant": true,
+        "name": "getContractsWhereUserIsContractor",
+        "outputs": [
+          {
+            "type": "address[]",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_userAddress"
+          }
+        ],
+        "constant": true,
+        "name": "getContractsWhereUserIsModerator",
+        "outputs": [
+          {
+            "type": "address[]",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_userAddress"
+          }
+        ],
+        "constant": true,
+        "name": "getContractsWhereUserIsReferrer",
+        "outputs": [
+          {
+            "type": "address[]",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_userAddress"
+          }
+        ],
+        "constant": true,
+        "name": "getContractsWhereUserIsConverter",
+        "outputs": [
+          {
+            "type": "address[]",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "string",
+            "name": "_name"
+          },
+          {
+            "type": "address",
+            "name": "_sender"
+          }
+        ],
+        "constant": false,
+        "name": "addName",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "string",
+            "name": "_name"
+          }
+        ],
+        "constant": false,
+        "name": "addNameByUser",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "string",
+            "name": "username"
+          },
+          {
+            "type": "address",
+            "name": "_address"
+          },
+          {
+            "type": "string",
+            "name": "_username_walletName"
+          }
+        ],
+        "constant": false,
+        "name": "addWalletName",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "string",
+            "name": "_name"
+          }
+        ],
+        "constant": true,
+        "name": "getUserName2UserAddress",
+        "outputs": [
+          {
+            "type": "address",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_sender"
+          }
+        ],
+        "constant": true,
+        "name": "getUserAddress2UserName",
+        "outputs": [
+          {
+            "type": "string",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "getHistoryOfChangedAddresses",
+        "outputs": [
+          {
+            "type": "address[]",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "string",
+            "name": "str"
+          }
+        ],
+        "constant": true,
+        "name": "utfStringLength",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": "length"
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      }
+    ],
+    "address": "0xf04dce5404d87c17e2f968696354d8b9c9808e0e"
+  },
+  "TwoKeyAcquisitionCampaignERC20.json": {
+    "abi ": [
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": ""
+          }
+        ],
+        "constant": true,
+        "name": "units",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "publicMetaHash",
+        "outputs": [
+          {
+            "type": "string",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "name",
+        "outputs": [
+          {
+            "type": "string",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_spender"
+          },
+          {
+            "type": "uint256",
+            "name": "_value"
+          }
+        ],
+        "constant": false,
+        "name": "approve",
+        "outputs": [
+          {
+            "type": "bool",
+            "name": ""
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_to"
+          },
+          {
+            "type": "uint256",
+            "name": "_value"
+          }
+        ],
+        "constant": false,
+        "name": "transferQuota",
+        "outputs": [
+          {
+            "type": "bool",
+            "name": ""
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "c"
+          },
+          {
+            "type": "bytes",
+            "name": "_method"
+          },
+          {
+            "type": "uint256",
+            "name": "_val"
+          }
+        ],
+        "constant": true,
+        "name": "call_return",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": "answer"
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "totalSupply",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_from"
+          },
+          {
+            "type": "address",
+            "name": "_to"
+          },
+          {
+            "type": "uint256",
+            "name": "_value"
+          }
+        ],
+        "constant": false,
+        "name": "transferFrom",
+        "outputs": [
+          {
+            "type": "bool",
+            "name": ""
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "rate",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": ""
+          }
+        ],
+        "constant": true,
+        "name": "received_from",
+        "outputs": [
+          {
+            "type": "address",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "decimals",
+        "outputs": [
+          {
+            "type": "uint8",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "maxReferralRewardPercent",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": ""
+          }
+        ],
+        "constant": true,
+        "name": "publicLinkKey",
+        "outputs": [
+          {
+            "type": "address",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_spender"
+          },
+          {
+            "type": "uint256",
+            "name": "_subtractedValue"
+          }
+        ],
+        "constant": false,
+        "name": "decreaseApproval",
+        "outputs": [
+          {
+            "type": "bool",
+            "name": ""
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_owner"
+          }
+        ],
+        "constant": true,
+        "name": "balanceOf",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_user"
+          },
+          {
+            "type": "uint256",
+            "name": "_arcsAmount"
+          }
+        ],
+        "constant": false,
+        "name": "addArcsToUser",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "symbol",
+        "outputs": [
+          {
+            "type": "string",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_to"
+          },
+          {
+            "type": "uint256",
+            "name": "_value"
+          }
+        ],
+        "constant": false,
+        "name": "transfer",
+        "outputs": [
+          {
+            "type": "bool",
+            "name": ""
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_user"
+          },
+          {
+            "type": "uint256",
+            "name": "_arcsAmount"
+          }
+        ],
+        "constant": false,
+        "name": "removeArcsFromUser",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_spender"
+          },
+          {
+            "type": "uint256",
+            "name": "_addedValue"
+          }
+        ],
+        "constant": false,
+        "name": "increaseApproval",
+        "outputs": [
+          {
+            "type": "bool",
+            "name": ""
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_owner"
+          },
+          {
+            "type": "address",
+            "name": "_spender"
+          }
+        ],
+        "constant": true,
+        "name": "allowance",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "customer"
+          }
+        ],
+        "constant": true,
+        "name": "getReferrers",
+        "outputs": [
+          {
+            "type": "address[]",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "conversionQuota",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "contractor",
+        "outputs": [
+          {
+            "type": "address",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "stateMutability": "nonpayable",
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_twoKeyEventSource"
+          },
+          {
+            "type": "address",
+            "name": "_twoKeyEconomy"
+          },
+          {
+            "type": "address",
+            "name": "_conversionHandler"
+          },
+          {
+            "type": "address",
+            "name": "_moderator"
+          },
+          {
+            "type": "address",
+            "name": "_assetContractERC20"
+          },
+          {
+            "type": "uint256",
+            "name": "_campaignStartTime"
+          },
+          {
+            "type": "uint256",
+            "name": "_campaignEndTime"
+          },
+          {
+            "type": "uint256",
+            "name": "_expiryConversion"
+          },
+          {
+            "type": "uint256",
+            "name": "_moderatorFeePercentage"
+          },
+          {
+            "type": "uint256",
+            "name": "_maxReferralRewardPercent"
+          },
+          {
+            "type": "uint256",
+            "name": "_maxConverterBonusPercent"
+          },
+          {
+            "type": "uint256",
+            "name": "_pricePerUnitInETH"
+          },
+          {
+            "type": "uint256",
+            "name": "_minContributionETH"
+          },
+          {
+            "type": "uint256",
+            "name": "_maxContributionETH"
+          },
+          {
+            "type": "uint256",
+            "name": "_conversionQuota"
+          }
+        ],
+        "type": "constructor",
+        "payable": false
+      },
+      {
+        "stateMutability": "payable",
+        "payable": true,
+        "type": "fallback"
+      },
+      {
+        "inputs": [
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "to"
+          },
+          {
+            "indexed": false,
+            "type": "uint256",
+            "name": "amount"
+          }
+        ],
+        "type": "event",
+        "name": "Rewarded",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "_contract"
+          }
+        ],
+        "type": "event",
+        "name": "Expired",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "owner"
+          },
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "spender"
+          },
+          {
+            "indexed": false,
+            "type": "uint256",
+            "name": "value"
+          }
+        ],
+        "type": "event",
+        "name": "Approval",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "from"
+          },
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "to"
+          },
+          {
+            "indexed": false,
+            "type": "uint256",
+            "name": "value"
+          }
+        ],
+        "type": "event",
+        "name": "Transfer",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "type": "uint256",
+            "name": "_amount"
+          }
+        ],
+        "constant": false,
+        "name": "addUnitsToInventory",
+        "outputs": [
+          {
+            "type": "bool",
+            "name": ""
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_converter"
+          },
+          {
+            "type": "uint256",
+            "name": "_amount"
+          }
+        ],
+        "constant": false,
+        "name": "expireEscrow",
+        "outputs": [
+          {
+            "type": "bool",
+            "name": ""
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "uint256",
+            "name": "_amount"
+          }
+        ],
+        "constant": false,
+        "name": "redeemTwoKeyToken",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "bytes",
+            "name": "signature"
+          },
+          {
+            "type": "address",
+            "name": "receiver"
+          }
+        ],
+        "constant": false,
+        "name": "joinAndShareARC",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_public_link_key"
+          }
+        ],
+        "constant": false,
+        "name": "setPublicLinkKey",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "bytes",
+            "name": "sig"
+          }
+        ],
+        "constant": false,
+        "name": "distributeArcsBasedOnSignature",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "bytes",
+            "name": "signature"
+          }
+        ],
+        "constant": false,
+        "name": "joinAndConvert",
+        "outputs": [],
+        "stateMutability": "payable",
+        "payable": true,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": false,
+        "name": "convert",
+        "outputs": [],
+        "stateMutability": "payable",
+        "payable": true,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "uint256",
+            "name": "conversionAmountETHWei"
+          },
+          {
+            "type": "address",
+            "name": "converterAddress"
+          }
+        ],
+        "constant": false,
+        "name": "createConversion",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "uint256",
+            "name": "_maxReferralRewardETHWei"
+          },
+          {
+            "type": "address",
+            "name": "_converter"
+          }
+        ],
+        "constant": false,
+        "name": "updateRefchainRewards",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_to"
+          },
+          {
+            "type": "uint256",
+            "name": "_amount"
+          }
+        ],
+        "constant": false,
+        "name": "moveFungibleAsset",
+        "outputs": [
+          {
+            "type": "bool",
+            "name": ""
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_from"
+          }
+        ],
+        "constant": true,
+        "name": "getAmountAddressSent",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "getContractBalance",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "getConstantInfo",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": ""
+          },
+          {
+            "type": "uint256",
+            "name": ""
+          },
+          {
+            "type": "uint256",
+            "name": ""
+          },
+          {
+            "type": "uint256",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "last_influencer"
+          }
+        ],
+        "constant": true,
+        "name": "getReferrerCuts",
+        "outputs": [
+          {
+            "type": "uint256[]",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "getMaxReferralRewardPercent",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "getReferrerCut",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "getInventoryBalance",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": false,
+        "name": "getAndUpdateInventoryBalance",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": ""
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "uint256",
+            "name": "conversionAmountETHWei"
+          }
+        ],
+        "constant": true,
+        "name": "getEstimatedTokenAmount",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": ""
+          },
+          {
+            "type": "uint256",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "getContractorAddress",
+        "outputs": [
+          {
+            "type": "address",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "string",
+            "name": "_privateMetaHash"
+          }
+        ],
+        "constant": false,
+        "name": "setPrivateMetaHash",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "getPrivateMetaHash",
+        "outputs": [
+          {
+            "type": "string",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "uint256",
+            "name": "value"
+          }
+        ],
+        "constant": false,
+        "name": "updateMinContributionETH",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "uint256",
+            "name": "value"
+          }
+        ],
+        "constant": false,
+        "name": "updateMaxContributionETH",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "uint256",
+            "name": "value"
+          }
+        ],
+        "constant": false,
+        "name": "updateMaxReferralRewardPercent",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "string",
+            "name": "value"
+          }
+        ],
+        "constant": false,
+        "name": "updateOrSetIpfsHashPublicMeta",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "uint256",
+            "name": "value"
+          }
+        ],
+        "constant": false,
+        "name": "updateContractorProceeds",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "getTwoKeyConversionHandlerAddress",
+        "outputs": [
+          {
+            "type": "address",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "getAddressJoinedStatus",
+        "outputs": [
+          {
+            "type": "bool",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_cancelledConverter"
+          },
+          {
+            "type": "uint256",
+            "name": "_conversionAmount"
+          }
+        ],
+        "constant": false,
+        "name": "sendBackEthWhenConversionCancelled",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      }
+    ],
+    "address": "0x8dbcecf4817acf351bb49795bb1013a13584a928"
+  }
+}
