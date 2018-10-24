@@ -20,9 +20,8 @@ contract TwoKeyAdmin is Destructible, AdminContract {
 	TwoKeyReg private twoKeyReg;
 	address private previousAdmin;
 
-	// Idea is that electorateAdmins can't issue the transaction before all members voted
 	// 1 electorate admin is 1 two key congress
-	address private electorateAdmins;
+	address private twoKeyCongress;
 	address private newTwoKeyAdminAddress;
 	bool private wasReplaced;
 
@@ -39,7 +38,7 @@ contract TwoKeyAdmin is Destructible, AdminContract {
 
     /// @notice Modifier will revert if calling address is not a member of electorateAdmins 
 	modifier adminsVotingApproved() {
-		require(msg.sender == electorateAdmins);
+		require(msg.sender == twoKeyCongress);
 	    _;
 	}
 
@@ -54,7 +53,7 @@ contract TwoKeyAdmin is Destructible, AdminContract {
 	) Ownable() Destructible() payable public {
 		require(_electorateAdmins != address(0));
 		wasReplaced = false;
-		electorateAdmins = _electorateAdmins;
+		twoKeyCongress = _electorateAdmins;
 	}
 
     
