@@ -199,6 +199,16 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
     }
 
     /**
+     *  Method to add voting for new allowed bytecode
+     *  The point is that for anything to be executed has to be voted
+     *  @param bytecode is the new transaction bytecode we'd like to whitelist
+     *  @dev method requires that it's called only by contract
+    */
+    function addNewAllowedBytecode(bytes bytecode) public {
+        require(msg.sender == self);
+        allowedMethods.push(bytecode);
+    }
+    /**
      * Change voting rules
      *
      * Make so that proposals need to be discussed for at least `minutesForDebate/60` hours,
@@ -234,7 +244,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
     onlyMembers public
     returns (uint proposalID)
     {
-        require(onlyAllowedMethods(transactionBytecode));
+        require(onlyAllowedMethods(transactionBytecode)); // security layer
         proposalID = proposals.length++;
         Proposal storage p = proposals[proposalID];
         p.recipient = beneficiary;
