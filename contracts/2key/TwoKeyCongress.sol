@@ -113,10 +113,8 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
         addMember(0,'',0);
         addMember(initialMembers[0], 'Eitan', votingPowers[0]);
         addMember(initialMembers[1], 'Kiki', votingPowers[1]);
-
-        addInitialWhitelistedMethods();
-
         initialized = true;
+        addInitialWhitelistedMethods();
     }
 
     /// @notice Function to add initial whitelisted methods during the deployment
