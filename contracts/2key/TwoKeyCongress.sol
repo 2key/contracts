@@ -93,6 +93,9 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
         _;
     }
 
+    /// @notice Function to check if the bytecode of passed method is in the whitelist
+    /// @param bytecode is the bytecode of transaction we'd like to execute
+    /// @return true if whitelisted otherwise false
     function onlyAllowedMethods(bytes bytecode) public view returns (bool) {
         for(uint i=0; i<allowedMethods.length; i++) {
             if(compare(allowedMethods[i], bytecode)) {
@@ -116,6 +119,8 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
         initialized = true;
     }
 
+    /// @notice Function to add initial whitelisted methods during the deployment
+    /// @dev Function is internal, it can't be called outside of the contract
     function addInitialWhitelistedMethods() internal {
         hashAllowedMethods("addMember(address,string,uint256)");
         hashAllowedMethods("removeMember(address)");
@@ -152,7 +157,10 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
     }
 
 
-    /// @notice Function to hash allowed method -- will be initiallu
+    /// @notice Function to hash allowed method
+    /// @param nameAndParams is the name of the function and it's params to hash
+    /// @dev example: 'functionName(address,string)'
+    /// @return hash of allowed methods
     function hashAllowedMethods(string nameAndParams) public returns (bytes32) {
         bytes32 allowed = keccak256(abi.encodePacked(nameAndParams));
         allowedMethods.push(allowed);
@@ -423,15 +431,20 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
 
     }
 
-
+    /// @notice Getter for maximum voting power
+    /// @return maxVotingPower
     function getMaxVotingPower() public view returns (uint) {
         return maxVotingPower;
     }
 
+    /// @notice Getter for length for how many members are currently
+    /// @return length of members
     function getMembersLength() public view returns (uint) {
         return members.length;
     }
 
+    /// @notice Function / Getter for hashes of allowed methods
+    /// @return array of bytes32 hashes
     function getAllowedMethods() public view returns (bytes32[]){
         return allowedMethods;
     }
