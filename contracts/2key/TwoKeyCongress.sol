@@ -104,13 +104,12 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
 
 
     constructor(
-        uint256 _minimumQuorumForProposals,
         uint256 _minutesForDebate, address[] initialMembers, uint[] votingPowers) Ownable() payable public {
-        changeVotingRules(_minimumQuorumForProposals, _minutesForDebate);
+        changeVotingRules(0, _minutesForDebate);
         self = address(this);
         addMember(0,'',0);
         addMember(initialMembers[0], 'Eitan', votingPowers[0]);
-//        addMember(initialMembers[1], 'Kiki', votingPowers[1]);
+        addMember(initialMembers[1], 'Kiki', votingPowers[1]);
 
         addInitialWhitelistedMethods();
 
@@ -192,6 +191,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
             memberId[targetMember] = members.length;
             id = members.length++;
         }
+        minimumQuorum = members.length -1;
         maxVotingPower += _votingPower;
         members[id] = Member({memberAddress: targetMember, memberSince: now, votingPower: _votingPower, name: memberName});
         emit MembershipChanged(targetMember, true);
@@ -215,6 +215,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
             members[i] = members[i+1];
         }
         delete members[members.length-1];
+        minimumQuorum -= 1;
         memberId[targetMember] = 0;
         members.length--;
     }
@@ -388,7 +389,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
             now > p.minExecutionDate                                            // If it is past the voting deadline
         && !p.executed                                                         // and it has not already been executed
         && p.proposalHash == keccak256(abi.encodePacked(p.recipient, p.amount, transactionBytecode))  // and the supplied code matches the proposal
-        && p.numberOfVotes.mul(100).div(members.length) >= minimumQuorum // and a minimum quorum has been reached...
+        && p.numberOfVotes >= minimumQuorum // and a minimum quorum has been reached...
         && uint(p.currentResult) >= maxVotingPower.mul(51).div(100)
         && p.currentResult > 0
         );

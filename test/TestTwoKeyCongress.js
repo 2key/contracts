@@ -59,7 +59,7 @@ contract('TwoKeyCongress', async (accounts) => {
 
 
     let initialMembers = [accounts[1], accounts[2]];
-    let votingPowers = [1,2];
+    let votingPowers = [1,5];
 
 
 
@@ -67,7 +67,7 @@ contract('TwoKeyCongress', async (accounts) => {
         console.log("Creating new congress contract");
         console.log("Initial members are going to be represented by following addresses: " + initialMembers);
         console.log("Their voting powers will be respectively: "+ votingPowers);
-        congress = await TwoKeyCongress.new(1, 55, initialMembers,votingPowers);
+        congress = await TwoKeyCongress.new(55, initialMembers,votingPowers);
         // let membersLength = await congress.getMembersLength({from: accounts[4]});
         // console.log(membersLength);
         storage = await BasicStorage.new();
@@ -78,9 +78,12 @@ contract('TwoKeyCongress', async (accounts) => {
     it('should check max voting power', async() => {
         console.log('Testing max voting power');
         let maxVotingPower = await congress.getMaxVotingPower();
-        console.log("Max voting power : " + maxVotingPower)
-        assert.equal(maxVotingPower.toNumber(),3, 'is not corect');
-    })
+        console.log("Max voting power : " + maxVotingPower);
+
+        assert.equal(maxVotingPower.toNumber(),6, 'is not corect');
+    });
+
+
     it("should save data" , async() => {
         console.log("Testing on basic contract");
         let bytecode = Web3EthAbi.encodeFunctionCall({
@@ -128,7 +131,7 @@ contract('TwoKeyCongress', async (accounts) => {
 
     it("should check if voting rules are set", async() => {
         let quorum = await congress.minimumQuorum();
-        assert.equal(1,quorum,'quorum should be 60');
+        assert.equal(2,quorum,'quorum should be 60');
         let votingPeriod = await congress.debatingPeriodInMinutes();
         assert.equal(votingPeriod, 55, 'debating period not changed');
     });
@@ -165,7 +168,7 @@ contract('TwoKeyCongress', async (accounts) => {
         let [numberOfVotes, currentResult] = await congress.getVoteCount.call(0, {from:accounts[2]});
 
         assert.equal(numberOfVotes.toNumber(), 2, 'not two votes');
-        assert.equal(currentResult.toNumber(), 3, 'not three');
+        assert.equal(currentResult.toNumber(), 6, 'not three');
     });
 
 

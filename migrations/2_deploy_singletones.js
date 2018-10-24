@@ -47,8 +47,8 @@ const TwoKeyCongress = artifacts.require('TwoKeyCongress');
 
 module.exports = function deploy(deployer) {
   var adminInstance;
-  let initialCongressMembers = ['0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f'];
-  let votingPowers = [1];
+  let initialCongressMembers = ['0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f',0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f];
+  let votingPowers = [1,2];
 
   if(deployer.network.startsWith('dev') || deployer.network === 'rinkeby-infura' || deployer.network == 'ropsten') {
     deployer.deploy(TwoKeyAdmin,'0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f')
@@ -56,7 +56,7 @@ module.exports = function deploy(deployer) {
         .then(function(instance) {
             adminInstance = instance;
         })
-        .then(() => deployer.deploy(TwoKeyCongress, 1, 50, initialCongressMembers, votingPowers))
+        .then(() => deployer.deploy(TwoKeyCongress, 50, initialCongressMembers, votingPowers))
         .then(() => deployer.deploy(TwoKeyEconomy, TwoKeyAdmin.address))
         .then(() => deployer.deploy(TwoKeyUpgradableExchange, 1, '0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f', TwoKeyEconomy.address, TwoKeyAdmin.address))
         .then(() => TwoKeyUpgradableExchange.deployed())
