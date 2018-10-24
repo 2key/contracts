@@ -62,6 +62,7 @@ contract('TwoKeyCongress', async (accounts) => {
     let votingPowers = [1,2];
 
 
+
     before(async () => {
         console.log("Creating new congress contract");
         console.log("Initial members are going to be represented by following addresses: " + initialMembers);
@@ -153,11 +154,11 @@ contract('TwoKeyCongress', async (accounts) => {
     });
 
     it('account 2 votes yes', async() => {
-        let v = await congress.vote(0, true, 'yeee', {from : accounts[2]});
+        let v = await congress.vote(0, false, 'yeee', {from : accounts[2]});
         let [numberOfVotes, currentResult] = await congress.getVoteCount.call(0, {from:accounts[2]});
 
         assert.equal(numberOfVotes.toNumber(), 2, 'not two votes');
-        assert.equal(currentResult.toNumber(), 3, 'not three');
+        assert.equal(currentResult.toNumber(), -1, 'not three');
     });
 
 

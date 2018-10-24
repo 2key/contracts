@@ -358,6 +358,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
         && !p.executed                                                         // and it has not already been executed
         && p.proposalHash == keccak256(abi.encodePacked(p.recipient, p.amount, transactionBytecode))  // and the supplied code matches the proposal
         && p.numberOfVotes.mul(100).div(members.length) >= minimumQuorum // and a minimum quorum has been reached...
+        //TODO: What is going to be requirement for currentResult?
         );
 
         // ...then execute result
@@ -389,9 +390,6 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
 
     }
 
-    function callFunction(bytes bytecode) public {
-        address(this).call(bytecode);
-    }
 
     function getMembersLength() public view returns (uint) {
         return members.length;
