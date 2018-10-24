@@ -50,7 +50,7 @@ module.exports = function deploy(deployer) {
   let initialCongressMembers = ['0xb3fa520368f2df7bed4df5185101f303f6c7decc','0xb3fa520368f2df7bed4df5185101f303f6c7decc'];
   let votingPowers = [1,3];
 
-  if(deployer.network.startsWith('dev') || deployer.network === 'rinkeby-infura' || turdeployer.network == 'ropsten') {
+  if(deployer.network.startsWith('dev') || deployer.network === 'rinkeby-infura' || deployer.network == 'ropsten') {
     deployer.deploy(TwoKeyAdmin,'0xb3fa520368f2df7bed4df5185101f303f6c7decc')
         .then(() => TwoKeyAdmin.deployed())
         .then(function(instance) {
