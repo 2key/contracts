@@ -12,7 +12,7 @@ contract('TwoKeyCongress', async (accounts) => {
     let congress;
     //function addMember(address targetMember, string memberName, int _votingPower)
 
-    let method=  web3.sha3('addMember(address,string,uint256)');
+    let method=  web3.sha3('addMember(address,string,uint256)').slice(0,10);
     console.log("METHOD" + method);
 
     let functionSignature = Web3EthAbi.encodeFunctionSignature({
@@ -72,8 +72,15 @@ contract('TwoKeyCongress', async (accounts) => {
         // console.log(membersLength);
         storage = await BasicStorage.new();
         console.log("Transaction bytecode is : " + transactionBytecode);
+
     });
 
+    it('should check max voting power', async() => {
+        console.log('Testing max voting power');
+        let maxVotingPower = await congress.getMaxVotingPower();
+        console.log("Max voting power : " + maxVotingPower)
+        assert.equal(maxVotingPower.toNumber(),3, 'is not corect');
+    })
     it("should save data" , async() => {
         console.log("Testing on basic contract");
         let bytecode = Web3EthAbi.encodeFunctionCall({
@@ -154,11 +161,11 @@ contract('TwoKeyCongress', async (accounts) => {
     });
 
     it('account 2 votes yes', async() => {
-        let v = await congress.vote(0, false, 'yeee', {from : accounts[2]});
+        let v = await congress.vote(0, true, 'yeee', {from : accounts[2]});
         let [numberOfVotes, currentResult] = await congress.getVoteCount.call(0, {from:accounts[2]});
 
         assert.equal(numberOfVotes.toNumber(), 2, 'not two votes');
-        assert.equal(currentResult.toNumber(), -1, 'not three');
+        assert.equal(currentResult.toNumber(), 3, 'not three');
     });
 
 

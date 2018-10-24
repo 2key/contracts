@@ -28,16 +28,17 @@ contract TokenRecipient {
     }
 }
 
-//TODO: This contract doesn't need to be ownable, since there's only single deployment stuff and after that everything is up
-// to the members
 
-//TODO: Make a whitelist of internal methods which can be called and create a mapping to validate all that methods
-//TODO: After that finalize the method with hashing the string and library will be done and used in TestTwoKeyCongress.js
 contract TwoKeyCongress is Ownable, TokenRecipient {
 
     using SafeMath for uint;
 
+    bool initialized;
+
     address self;
+
+    // The maximum voting power containing sum of voting powers of all active members
+    uint256 maxVotingPower;
     //The minimum number of voting members that must be in attendance
     uint256 public minimumQuorum;
     //Period length for voting
@@ -109,13 +110,30 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
         self = address(this);
         addMember(0,'',0);
         addMember(initialMembers[0], 'Eitan', votingPowers[0]);
-        addMember(initialMembers[1], 'Kiki', votingPowers[1]);
+//        addMember(initialMembers[1], 'Kiki', votingPowers[1]);
 
-        // validate some methods
-//        hashAllowedMethods("0");
+        addInitialWhitelistedMethods();
+
+        initialized = true;
+    }
+
+    function addInitialWhitelistedMethods() internal {
         hashAllowedMethods("addMember(address,string,uint256)");
         hashAllowedMethods("removeMember(address)");
+        hashAllowedMethods("replaceOneself(address)");
+        hashAllowedMethods("addPreviousAdmin(address)");
+        hashAllowedMethods("transferByAdmins(address,uint256)");
+        hashAllowedMethods("upgradeEconomyExchangeByAdmins(address)");
+        hashAllowedMethods("transferEtherByAdmins(address,uint256)");
+        hashAllowedMethods("destroy()");
+        hashAllowedMethods("addModeratorForReg(address)");
+        hashAllowedMethods("removeModeratorForReg(address)");
+        hashAllowedMethods("updateModeratorForReg(address,address)");
+        hashAllowedMethods("updateExchange(address)");
+        hashAllowedMethods("updateRegistry(address)");
+        hashAllowedMethods("updateEventSource(address)");
     }
+
 
     /// @notice Since transaction's bytecode first 10 chars will contain method name and argument types
     /// @notice This is the way to compare it efficiently
@@ -166,7 +184,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
      * @param memberName public name for that member
      */
     function addMember(address targetMember, string memberName, uint _votingPower) public {
-        if(members.length > 2) {
+        if(initialized == true) {
             require(msg.sender == self);
         }
         uint id = memberId[targetMember];
@@ -174,7 +192,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
             memberId[targetMember] = members.length;
             id = members.length++;
         }
-
+        maxVotingPower += _votingPower;
         members[id] = Member({memberAddress: targetMember, memberSince: now, votingPower: _votingPower, name: memberName});
         emit MembershipChanged(targetMember, true);
     }
@@ -189,6 +207,9 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
     function removeMember(address targetMember) public {
         require(msg.sender == self);
         require(memberId[targetMember] != 0);
+
+        uint votingPower = getMemberVotingPower(targetMember);
+        maxVotingPower-= votingPower;
 
         for (uint i = memberId[targetMember]; i<members.length-1; i++){
             members[i] = members[i+1];
@@ -368,7 +389,8 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
         && !p.executed                                                         // and it has not already been executed
         && p.proposalHash == keccak256(abi.encodePacked(p.recipient, p.amount, transactionBytecode))  // and the supplied code matches the proposal
         && p.numberOfVotes.mul(100).div(members.length) >= minimumQuorum // and a minimum quorum has been reached...
-        //TODO: What is going to be requirement for currentResult?
+        && uint(p.currentResult) >= maxVotingPower.mul(51).div(100)
+        && p.currentResult > 0
         );
 
         // ...then execute result
@@ -400,6 +422,10 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
 
     }
 
+
+    function getMaxVotingPower() public view returns (uint) {
+        return maxVotingPower;
+    }
 
     function getMembersLength() public view returns (uint) {
         return members.length;
