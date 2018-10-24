@@ -99,9 +99,8 @@ function writeToFile() {
             "singletoneHuman" : humanHashSingletone,
             "nonSingletoneHuman" : humanHashNonSingletone,
         }
-    }
-    // dict["singletoneHash"] = singletoneHash;
-    // dict["nonSingletoneHash"] = nonSingletoneHash;
+    };
+
     dict["singletones"] = singletonesDict;
     dict["nonSingletones"] = nonSingletonesDict;
 
@@ -109,6 +108,14 @@ function writeToFile() {
     fs.writeFileSync("./2key-protocol/contracts_version.json", dictstring);
 }
 
+function wrapper(idOfNetwork) {
+    networkId = idOfNetwork;
+    readSingletones();
+    readNonSingletones();
+    calculateSingletoneAddressesHash();
+    calculateNonSingletoneHash();
+    writeToFile();
+}
 function main() {
     const command = process.argv[2];
     if(command != '--network') {
@@ -130,3 +137,7 @@ function main() {
 }
 
 main();
+
+module.exports = {
+    wrapper,
+}

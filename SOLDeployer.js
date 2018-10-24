@@ -21,6 +21,7 @@ const deploymentHistoryPath = path.join(__dirname, 'history.json');
 
 const contractsGit = simpleGit();
 const twoKeyProtocolLibGit = simpleGit(twoKeyProtocolLibDir);
+const versioning = require('./generateContractsVersioning');
 
 async function handleExit(p) {
   console.log(p);
@@ -320,14 +321,25 @@ async function main() {
   const mode = process.argv[2];
   switch (mode) {
     case '--migrate':
-      try {
+        try {
         const networks = process.argv[3].split(',');
         const l = networks.length;
+        let flag = false;
         for (let i = 0; i < l; i += 1) {
           /* eslint-disable no-await-in-loop */
           await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--network', networks[i]].concat(process.argv.slice(4)));
           /* eslint-enable no-await-in-loop */
+          if(networks[i] === 'rinkeby-infura') {
+              flag = true;
+          }
         }
+
+        if(flag) {
+            Console.log('Generationg new contracts_version.json file...');
+            versioning.wrapper(4);
+        }
+        // await runProcess(path.join(_dirname,'generateContractsVersioning.js'), ['--network'], networks[0]);
+        //   console.log(path.join(_dirname,'generateContractsVersioning.js'), ['--network'], networks[0]);
         await generateSOLInterface();
         // await runProcess(path.join(__dirname, 'node_modules/.bin/typechain'), ['--force', '--outDir', path.join(twoKeyProtocolDir, 'contracts'), `${buildPath}/*.json`]);
           process.exit(0);
@@ -350,7 +362,10 @@ async function main() {
     case '--ledger':
       ledgerProvider('https://ropsten.infura.io/v3/71d39c30bc984e8a8a0d8adca84620ad', { networkId: 3 })
       break;
-    default:
+      case '--ttt':
+          console.log(path.join(_dirname,'generateContractsVersioning.js'));
+            break;
+      default:
       deploy();
   }
 }
