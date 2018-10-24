@@ -48,7 +48,7 @@ contract('TwoKeyCongress', async (accounts) => {
     }, ['0xd03ea8624c8c5987235048901fb614fdca89b117', 'Nikola', '5']);
 
 
-    let transactionBytecode2 = Web3EthAbi.encodeFunctionCall({
+    let transactionBytecode2 = Web3EthAbi.encodeFunctionSignature({
         name: 'removeMember',
         type: 'function' ,
         inputs: [{
