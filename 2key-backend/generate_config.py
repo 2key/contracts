@@ -19,7 +19,7 @@ for contract in os.listdir(directory):
                 contract = contract[0:(len(contract)-5)]
                 abi[contract] = dictdump["abi"]
                 dict[contract] = dictdump["networks"]["4"]["address"]
-                final[contract] = {'abi ' : abi[contract], 'address' : dict[contract]}
+                final[contract] = {'abi' : abi[contract], 'address' : dict[contract]}
 
 
 
