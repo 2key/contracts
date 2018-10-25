@@ -1,5 +1,5 @@
-import {ITwoKeyBase, ITwoKeyHelpers, ITWoKeyUtils} from '../interfaces';
-import { promisify } from '../utils'
+import {ITwoKeyBase, ITwoKeyHelpers} from '../interfaces';
+import {promisify} from '../utils'
 
 export default class ERC20 {
     private readonly base: ITwoKeyBase;
@@ -23,4 +23,18 @@ export default class ERC20 {
             }
         });
     }
+
+    public erc20ApproveAddres(erc20:any, address:string, spenderAddress: string, value:number) : Promise<string> {
+        return new Promise(async (resolve,reject) => {
+            try {
+                const erc20Instance = await this.helpers._getERC20Instance(erc20);
+                const txHash = await promisify(erc20Instance.approve,[spenderAddress,value, {from: this.base.address}]);
+                resolve(txHash);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+
 }

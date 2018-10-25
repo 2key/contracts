@@ -74,6 +74,7 @@ export interface ITwoKeyAdmin {
 
 export interface IERC20 {
     getERC20Symbol: (erc20: any) => Promise<string>,
+    erc20ApproveAddres(erc20:any, address:string, spenderAddress: string, value:number) : Promise<string>,
 }
 export interface ITWoKeyUtils {
     ipfsAdd: (data: any) => Promise<string>,

@@ -1,7 +1,10 @@
 import {
     IAcquisitionCampaign,
     IAcquisitionCampaignMeta,
-    ICreateCampaignProgress, IERC20, IOffchainData, IPublicLinkKey,
+    ICreateCampaignProgress,
+    IERC20,
+    IOffchainData,
+    IPublicLinkKey,
     ITwoKeyBase,
     ITwoKeyHelpers,
     ITWoKeyUtils
@@ -671,5 +674,10 @@ export default class AcquisitionCampaign {
                 reject(e);
             }
         });
+    }
+
+
+    public moveFungibleAsset(campaign: any) : Promise<string> {
+
     }
 }
