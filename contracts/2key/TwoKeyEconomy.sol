@@ -18,26 +18,5 @@ contract TwoKeyEconomy is RBACWithAdmin, StandardToken, Ownable {
     totalSupply_= 1000000000000000000000000;
     balances[_twoKeyAdmin] = totalSupply_;
   }
-  
 
-  /// View function - doesn't cost any gas to be executed
-  /// @notice Function to fetch token name
-  /// @return Token name as type string
-  function getTokenName() public view returns(string) {
-    return name;
-  }
-
-  /// View function - doesn't cost any gas to be executed
-  /// @notice Function to fetch token symbol
-  /// @return Token symbol as type string
-  function getTokenSymbol() public view returns(string) {
-    return symbol;
-  }
-
-  /// View function - doesn't cost any gas to be executed
-  /// @notice Function to fetch decimal value of token
-  /// @return Token decimal as type uint8
-  function getTokenDecimals() public view returns(uint8) {
-    return decimals;
-  }
 }
