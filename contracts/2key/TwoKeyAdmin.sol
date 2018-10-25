@@ -106,8 +106,7 @@ contract TwoKeyAdmin is Destructible, AdminContract {
 		to.transfer(amount);
 	}
 
-	// lifecycle methods
-	/// @notice Function will transfer payable value to new admin contract if admin contract is replaced else will be stored this the exisitng admin contract as it's balance
+	/// @notice Fallback function will transfer payable value to new admin contract if admin contract is replaced else will be stored this the exisitng admin contract as it's balance
 	/// @dev A payable fallback method
 	function() public payable {
 		if (wasReplaced) {
