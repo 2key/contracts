@@ -27,6 +27,7 @@ contract StandardToken is ERC20Basic {
 
   modifier onlyIfNotFrozen {
     require(frozen == false);
+    _;
   }
 
   /**
@@ -165,13 +166,6 @@ contract StandardToken is ERC20Basic {
     return balances[_owner];
   }
 
-
-  function approve(address _spender, uint256 _value) public returns (bool);
-  event Approval(
-    address indexed owner,
-    address indexed spender,
-    uint256 value
-  );
 
 
 }

@@ -7,4 +7,6 @@ contract IERC20 {
     function decimals() view public returns (uint);
     function symbol() view public returns (string);
     function name() view public returns (string);
+    function freezeTransfers() public;
+    function unfreezeTransfers() public;
 }

@@ -75,7 +75,7 @@ contract TwoKeyAdmin is Destructible, AdminContract {
 
 	/// @notice Function to add the address of previous active admin contract
 	/// @param _previousAdmin is address of previous active admin contract
-	function addPreviousAdmin(address _previousAdmin) onlyTwoKeyCongress {
+	function addPreviousAdmin(address _previousAdmin) public onlyTwoKeyCongress {
 		require(_previousAdmin != address(0));
 		previousAdmin = _previousAdmin;
 	}
@@ -224,6 +224,14 @@ contract TwoKeyAdmin is Destructible, AdminContract {
 		twoKeyEconomy = TwoKeyEconomy(_economy);
 		twoKeyEventSource = TwoKeyEventSource(_eventSource);
     }
+
+	function freezeTransfersInEconomy() public onlyTwoKeyCongress {
+		IERC20(address(twoKeyEconomy)).freezeTransfers();
+	}
+
+	function unfreezeTransfersInEconomy() public onlyTwoKeyCongress {
+		IERC20(address(twoKeyEconomy)).unfreezeTransfers();
+	}
 
 
     function transfer2KeyTokens(address _economy, address _to, uint _amount) public returns (bool) {

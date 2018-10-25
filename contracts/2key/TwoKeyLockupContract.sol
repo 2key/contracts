@@ -19,11 +19,10 @@ contract TwoKeyLockupContract {
         require(msg.sender == converter);
         _;
     }
-    constructor(uint _tokenDistributionDate, uint _maxDistributionDateShiftInDays, uint _tokens, address _converter, address _contractor) {
+    constructor(uint _tokenDistributionDate, uint _maxDistributionDateShiftInDays, uint _tokens, address _converter, address _contractor) public {
         tokenDistributionDate = _tokenDistributionDate;
         maxDistributionDateShiftInDays = _maxDistributionDateShiftInDays;
-        converter = _converter;
-        converter = _converter;
+        tokens = _tokens;
         converter = _converter;
         contractor = _contractor;
     }

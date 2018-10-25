@@ -160,7 +160,6 @@ uint _conversionQuota
     it("should not fail", async() => {
         let conv = await whitelists.conversions(coinbase);
         console.log(conv);
-
     });
 
     // //TODO: EITAN & ANDRI GO through exact flow for this

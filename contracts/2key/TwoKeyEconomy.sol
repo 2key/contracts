@@ -29,6 +29,7 @@ contract TwoKeyEconomy is RBACWithAdmin, StandardToken, Ownable {
     modifier onlyTwoKeyAdmin {
         require(msg.sender == twoKeyAdmin);
         require(address(twoKeyAdmin) != 0);
+        _;
     }
 
     constructor (address _twoKeyAdmin) RBACWithAdmin(_twoKeyAdmin) Ownable() public {
