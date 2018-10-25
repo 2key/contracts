@@ -677,7 +677,15 @@ export default class AcquisitionCampaign {
     }
 
 
-    public moveFungibleAsset(campaign: any) : Promise<string> {
-
+    public addFungibleAssetsToInventoryOfCampaign(campaign: any, amount:number) : Promise<string> {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
+                const txHash = await promisify(campaignInstance.addUnitsToInventory, [amount, {from: this.base.address}]);
+                resolve(txHash);
+            } catch (e) {
+                reject(e);
+            }
+        })
     }
 }

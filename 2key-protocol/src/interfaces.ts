@@ -66,6 +66,7 @@ export interface ITwoKeyAcquisitionCampaign {
     isAddressJoined: (campaign: any) => Promise<boolean>,
     executeConversion: (campaign: any, converter: string) => Promise<string>,
     getLockupContractsForConverter: (campaign: any, converter: string) => Promise<string[]>,
+    addFungibleAssetsToInventoryOfCampaign(campaign: any, amount:number) : Promise<string>
 }
  // We need twoKeyAdmin in order to approve twoKeyAcquisitionCampaign to emit events
 export interface ITwoKeyAdmin {
