@@ -13,10 +13,10 @@ contract TwoKeyEconomy is RBACWithAdmin, StandardToken, Ownable {
   uint8 public decimals= 18;
 
   constructor (address _twoKeyAdmin) RBACWithAdmin(_twoKeyAdmin) Ownable() public {
- 		require(_twoKeyAdmin != address(0));
-    TwoKeyAdmin admin = TwoKeyAdmin(_twoKeyAdmin);
-    totalSupply_= 1000000000000000000000000;
-    balances[_twoKeyAdmin] = totalSupply_;
+      require(_twoKeyAdmin != address(0));
+      TwoKeyAdmin admin = TwoKeyAdmin(_twoKeyAdmin);
+      totalSupply_= 1000000000000000000000000;
+      balances[_twoKeyAdmin] = totalSupply_;
   }
 
 }
