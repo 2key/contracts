@@ -251,7 +251,7 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
   /// @notice Function to fetch actual length of string
   /// @param str is the string we'd like to get length of
   /// @return length of the string
-  function utfStringLength(string str) constant returns (uint length) {
+  function utfStringLength(string str) pure returns (uint length) {
       uint i=0;
       bytes memory string_rep = bytes(str);
 
