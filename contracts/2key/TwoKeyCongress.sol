@@ -199,7 +199,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
         }
         minimumQuorum = members.length -1;
         maxVotingPower += _votingPower;
-        members[id] = Member({memberAddress: targetMember, memberSince: now, votingPower: _votingPower, name: memberName});
+        members[id] = Member({memberAddress: targetMember, memberSince: block.timestamp, votingPower: _votingPower, name: memberName});
         emit MembershipChanged(targetMember, true);
     }
 
@@ -279,7 +279,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
         p.amount = weiAmount;
         p.description = jobDescription;
         p.proposalHash = keccak256(abi.encodePacked(beneficiary, weiAmount, transactionBytecode));
-        p.minExecutionDate = now + debatingPeriodInMinutes * 1 minutes;
+        p.minExecutionDate = block.timestamp + debatingPeriodInMinutes * 1 minutes;
         p.executed = false;
         p.proposalPassed = false;
         p.numberOfVotes = 0;
@@ -349,7 +349,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
     returns (uint256 voteID)
     {
         Proposal storage p = proposals[proposalNumber]; // Get the proposal
-        require(now <= p.minExecutionDate);
+        require(block.timestamp <= p.minExecutionDate);
         require(!p.voted[msg.sender]);                  // If has already voted, cancel
         p.voted[msg.sender] = true;                     // Set this voter as having voted
         p.numberOfVotes++;
@@ -392,7 +392,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
         Proposal storage p = proposals[proposalNumber];
 
         require(
-            now > p.minExecutionDate                                            // If it is past the voting deadline
+            block.timestamp > p.minExecutionDate                                            // If it is past the voting deadline
         && !p.executed                                                         // and it has not already been executed
         && p.proposalHash == keccak256(abi.encodePacked(p.recipient, p.amount, transactionBytecode))  // and the supplied code matches the proposal
         && p.numberOfVotes >= minimumQuorum // and a minimum quorum has been reached...
