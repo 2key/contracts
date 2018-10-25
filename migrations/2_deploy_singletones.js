@@ -47,7 +47,7 @@ const TwoKeyCongress = artifacts.require('TwoKeyCongress');
 
 module.exports = function deploy(deployer) {
   var adminInstance;
-  let initialCongressMembers = ['0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f',0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f];
+  let initialCongressMembers = ['0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f','0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f'];
   let votingPowers = [1,2];
 
   if(deployer.network.startsWith('dev') || deployer.network === 'rinkeby-infura' || deployer.network == 'ropsten') {
