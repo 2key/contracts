@@ -44,6 +44,7 @@ contract TwoKeyEconomy is RBACWithAdmin, StandardToken, Ownable {
     function freezeTransfers() public onlyTwoKeyAdmin{
         transfersFrozen = true;
     }
+
     /// @notice TwoKeyAmin is available to unfreeze all transfers on ERC for some period of time
     /// @dev in TwoKeyAdmin only Congress can call this
     function unfreezeTransfers() public onlyTwoKeyAdmin {
