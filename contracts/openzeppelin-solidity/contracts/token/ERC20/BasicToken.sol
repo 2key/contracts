@@ -10,6 +10,7 @@ import "../../math/SafeMath.sol";
  * @dev Basic version of StandardToken, with no allowances.
  */
 contract BasicToken is ERC20Basic {
+
   using SafeMath for uint256;
 
   mapping(address => uint256) internal balances;
@@ -18,6 +19,7 @@ contract BasicToken is ERC20Basic {
   string public name;
   string public symbol;
   uint8 public decimals;
+  bool public frozen = false;
 
   /**
   * @dev Total number of tokens in existence
@@ -49,5 +51,14 @@ contract BasicToken is ERC20Basic {
   function balanceOf(address _owner) public view returns (uint256) {
     return balances[_owner];
   }
+
+
+
+  function approve(address _spender, uint256 _value) public returns (bool);
+  event Approval(
+    address indexed owner,
+    address indexed spender,
+    uint256 value
+  );
 
 }

@@ -9,10 +9,20 @@ import "./TwoKeyAdmin.sol";
 
 contract TwoKeyEconomy is RBACWithAdmin, StandardToken, Ownable {
 
+    /*
+        TwoKeyEconomy inheritance ERC20
+
+                  ERC20Basic (interfaces)
+                      |
+                StandardToken (implementation and variables)
+                      |
+                TwoKeyEconomy (our token)
+
+    */
+
     string public name = 'TwoKeyEconomy';
     string public symbol= '2KEY';
     uint8 public decimals= 18;
-    bool public frozen = false;
 
     constructor (address _twoKeyAdmin) RBACWithAdmin(_twoKeyAdmin) Ownable() public {
         require(_twoKeyAdmin != address(0));

@@ -11,9 +11,23 @@ import "./ERC20.sol";
  * https://github.com/ethereum/EIPs/issues/20
  * Based on code by FirstBlood: https://github.com/Firstbloodio/token/blob/master/smart_contract/FirstBloodToken.sol
  */
-contract StandardToken is ERC20, BasicToken {
+contract StandardToken is ERC20Basic {
+
+  using SafeMath for uint256;
+
+  uint256 internal totalSupply_;
+  string public name;
+  string public symbol;
+  uint8 public decimals;
+  bool public frozen = false;
+
 
   mapping (address => mapping (address => uint256)) internal allowed;
+  mapping(address => uint256) internal balances;
+
+  modifier onlyIfNotFrozen {
+    require(frozen == false);
+  }
 
   /**
    * @dev Transfer tokens from one address to another
@@ -26,7 +40,7 @@ contract StandardToken is ERC20, BasicToken {
     address _to,
     uint256 _value
   )
-    public
+    public onlyIfNotFrozen
     returns (bool)
   {
     require(_value <= balances[_from]);
@@ -119,5 +133,45 @@ contract StandardToken is ERC20, BasicToken {
     emit Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
     return true;
   }
+
+  /**
+  * @dev Total number of tokens in existence
+  */
+  function totalSupply() public view returns (uint256) {
+    return totalSupply_;
+  }
+
+  /**
+  * @dev Transfer token for a specified address
+  * @param _to The address to transfer to.
+  * @param _value The amount to be transferred.
+  */
+  function transfer(address _to, uint256 _value) public onlyIfNotFrozen returns (bool) {
+    require(_value <= balances[msg.sender]);
+    require(_to != address(0));
+
+    balances[msg.sender] = balances[msg.sender].sub(_value);
+    balances[_to] = balances[_to].add(_value);
+    emit Transfer(msg.sender, _to, _value);
+    return true;
+  }
+
+  /**
+  * @dev Gets the balance of the specified address.
+  * @param _owner The address to query the the balance of.
+  * @return An uint256 representing the amount owned by the passed address.
+  */
+  function balanceOf(address _owner) public view returns (uint256) {
+    return balances[_owner];
+  }
+
+
+  function approve(address _spender, uint256 _value) public returns (bool);
+  event Approval(
+    address indexed owner,
+    address indexed spender,
+    uint256 value
+  );
+
 
 }
