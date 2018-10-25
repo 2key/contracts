@@ -37,7 +37,7 @@ contract TwoKeyAdmin is Destructible, AdminContract {
 	}
 
     /// @notice Modifier will revert if calling address is not a member of electorateAdmins 
-	modifier adminsVotingApproved() {
+	modifier onlyTwoKeyCongress() {
 		require(msg.sender == twoKeyCongress);
 	    _;
 	}
@@ -60,7 +60,7 @@ contract TwoKeyAdmin is Destructible, AdminContract {
     /// @notice Function where only elected admin can replace the exisitng admin contract with new admin contract. 
     /// @dev This method is expected to transfer it's current economy to new admin contract
     /// @param _newAdminContract is address of New Admin Contract
-	function replaceOneself(address _newAdminContract) external wasNotReplaced adminsVotingApproved {
+	function replaceOneself(address _newAdminContract) external wasNotReplaced onlyTwoKeyCongress {
 		uint balanceOfOldAdmin = twoKeyEconomy.balanceOf(address(this));
 		TwoKeyAdmin newAdminContractObject = TwoKeyAdmin(_newAdminContract);
 		newTwoKeyAdminAddress = _newAdminContract;
@@ -75,7 +75,7 @@ contract TwoKeyAdmin is Destructible, AdminContract {
 
 	/// @notice Function to add the address of previous active admin contract
 	/// @param _previousAdmin is address of previous active admin contract
-	function addPreviousAdmin(address _previousAdmin) adminsVotingApproved {
+	function addPreviousAdmin(address _previousAdmin) onlyTwoKeyCongress {
 		require(_previousAdmin != address(0));
 		previousAdmin = _previousAdmin;
 	}
@@ -84,7 +84,7 @@ contract TwoKeyAdmin is Destructible, AdminContract {
     /// @dev We're recuring to address different from address 0 and token amount greator than 0
     /// @param _to receiver's address
     /// @param _tokens is token amounts to be transfers
-	function transferByAdmins(address _to, uint256 _tokens) external wasNotReplaced adminsVotingApproved {
+	function transferByAdmins(address _to, uint256 _tokens) external wasNotReplaced onlyTwoKeyCongress {
 		require (_to != address(0) && _tokens > 0);
 		twoKeyEconomy.transfer(_to, _tokens);
 	}
@@ -92,7 +92,7 @@ contract TwoKeyAdmin is Destructible, AdminContract {
     /// @notice Function where only elected admin can upgrade exchange contract address
     /// @dev We're recuring newExchange address different from address 0
     /// @param newExchange is New Upgradable Exchange contract address
-	function upgradeEconomyExchangeByAdmins(address newExchange) external wasNotReplaced adminsVotingApproved {
+	function upgradeEconomyExchangeByAdmins(address newExchange) external wasNotReplaced onlyTwoKeyCongress {
 		require (newExchange != address(0));
 		twokeyUpgradableExchange.upgrade(newExchange);
 	}
@@ -101,7 +101,7 @@ contract TwoKeyAdmin is Destructible, AdminContract {
     /// @dev We're recuring to address different from address 0 and amount greator than 0
     /// @param to receiver's address
     /// @param amount of ethers to be transfers
-	function transferEtherByAdmins(address to, uint256 amount) external wasNotReplaced adminsVotingApproved {
+	function transferEtherByAdmins(address to, uint256 amount) external wasNotReplaced onlyTwoKeyCongress {
 		require(to != address(0)  && amount > 0);
 		to.transfer(amount);
 	}
@@ -116,7 +116,7 @@ contract TwoKeyAdmin is Destructible, AdminContract {
 	}
 
     /// @notice Function will transfer contract balance to owner if contract was never replaced else will transfer the funds to the new Admin contract address  
-	function destroy() public adminsVotingApproved {
+	function destroy() public onlyTwoKeyCongress {
 		if (!wasReplaced)
 			selfdestruct(owner);
 		else
@@ -125,7 +125,7 @@ contract TwoKeyAdmin is Destructible, AdminContract {
 
 	/// @notice Function to add moderator
 	/// @param _address is address of moderator
-	function addModeratorForReg(address _address) public wasNotReplaced adminsVotingApproved {
+	function addModeratorForReg(address _address) public wasNotReplaced onlyTwoKeyCongress {
 		require (_address != address(0));		
 		string memory moderator = twoKeyReg.getModeratorRole();
 		twoKeyReg.adminAddRole(_address, moderator);
@@ -133,7 +133,7 @@ contract TwoKeyAdmin is Destructible, AdminContract {
 	
 	/// @notice Function to remove moderator
 	/// @param _address is address of moderator
-	function removeModeratorForReg(address _address) public wasNotReplaced adminsVotingApproved {
+	function removeModeratorForReg(address _address) public wasNotReplaced onlyTwoKeyCongress {
 		require (_address != address(0));		
 		string memory moderator = twoKeyReg.getModeratorRole();
 		require(twoKeyReg.hasRole(_address, moderator) == true);
@@ -143,7 +143,7 @@ contract TwoKeyAdmin is Destructible, AdminContract {
 	/// @notice Method to update moderator
 	/// @param _moderator is address of current moderator
 	/// @param _newModerator is address of new moderator
-	function updateModeratorForReg(address _moderator, address _newModerator) public wasNotReplaced adminsVotingApproved {
+	function updateModeratorForReg(address _moderator, address _newModerator) public wasNotReplaced onlyTwoKeyCongress {
 		require (_moderator != address(0));		
 		require (_newModerator != address(0));		
 		string memory moderator = twoKeyReg.getModeratorRole();
@@ -184,21 +184,21 @@ contract TwoKeyAdmin is Destructible, AdminContract {
     
     /// @notice Function to update twoKeyUpgradableExchange contract address
 	/// @param _exchange is address of new twoKeyUpgradableExchange contract
-	function updateExchange(address _exchange) public  adminsVotingApproved {
+	function updateExchange(address _exchange) public  onlyTwoKeyCongress {
 		require (_exchange != address(0));
 		twokeyUpgradableExchange = TwoKeyUpgradableExchange(_exchange);
 	}
 
     /// @notice Function to update twoKeyRegistry contract address
 	/// @param _reg is address of new twoKeyRegistry contract
-	function updateRegistry(address _reg) public adminsVotingApproved {
+	function updateRegistry(address _reg) public onlyTwoKeyCongress {
 		require (_reg != address(0));
 		twoKeyReg = TwoKeyReg(_reg);		
 	}
 
     /// @notice Function to update twoKeyEventSource contract address
 	/// @param _eventSource is address of new twoKeyEventSource contract
-	function updateEventSource(address _eventSource) public adminsVotingApproved {
+	function updateEventSource(address _eventSource) public onlyTwoKeyCongress {
 		require (_eventSource != address(0));
 		twoKeyEventSource = TwoKeyEventSource(_eventSource);
 	}
