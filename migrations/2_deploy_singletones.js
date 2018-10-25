@@ -51,7 +51,9 @@ module.exports = function deploy(deployer) {
   let votingPowers = [1,2];
 
   if(deployer.network.startsWith('dev') || deployer.network === 'rinkeby-infura' || deployer.network == 'ropsten') {
-    deployer.deploy(TwoKeyAdmin,'0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f')
+    deployer.deploy(TwoKeyCongress, 50, initialCongressMembers, votingPowers)
+        .then(() => TwoKeyCongress.deployed())
+        .then(() => deployer.deploy(TwoKeyAdmin,TwoKeyCongress.address))
         .then(() => TwoKeyAdmin.deployed())
         .then(function(instance) {
             adminInstance = instance;
