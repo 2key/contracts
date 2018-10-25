@@ -112,13 +112,15 @@ contract TwoKeySignedContract is TwoKeyContract {
           require(influencer2cut[new_address] == uint256(bounty_cut),'bounty cut can not be modified');
         }
 
-        // update (only once) the public address used by each influencer
-        // we will need this in case one of the influencers will want to start his own off-chain link
-        if (public_link_key[new_address] == 0) {
-          public_link_key[new_address] = new_public_key;
-        } else {
-          require(public_link_key[new_address] == new_public_key,'public key can not be modified');
-        }
+        // Updating the public key of influencers is not a good idea because it will require the influencers to use
+        // a deterministic private/public key in the link and this might require user interaction (MetaMask signature)
+//        // update (only once) the public address used by each influencer
+//        // we will need this in case one of the influencers will want to start his own off-chain link
+//        if (public_link_key[new_address] == 0) {
+//          public_link_key[new_address] = new_public_key;
+//        } else {
+//          require(public_link_key[new_address] == new_public_key,'public key can not be modified');
+//        }
 
         hash = keccak256(abi.encodePacked(bounty_cut, new_public_key, new_address));
 //        }

@@ -1,5 +1,7 @@
 pragma solidity ^0.4.24;
 
+import '../openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol';
+
 import '../openzeppelin-solidity/contracts/token/ERC20/ERC20.sol';
 import '../openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import '../openzeppelin-solidity/contracts/math/SafeMath.sol';
@@ -7,22 +9,23 @@ import '../openzeppelin-solidity/contracts/math/SafeMath.sol';
 import './TwoKeyReg.sol';
 import "./GetCode.sol";
 
-contract TwoKeyVoteToken is ERC20, Ownable {
+contract TwoKeyVoteToken is StandardToken, Ownable {
   using SafeMath for uint256;
 
   string public name = 'TwoKeyVote';
   string public symbol = '2KV';
   uint8 public decimals = 18;
 
-  TwoKeyReg public registry;
-  mapping(address => mapping(address => uint256)) internal balances;
-  mapping(address => mapping(address => bool)) internal visited;
-  ///Mapping contract bytecode to boolean if is allowed to transfer tokens
-  mapping(bytes32 => bool) canEmit;
-
-
   constructor() Ownable() public {
+//    totalSupply_ = 1000000000000000000000000000;
+//    balances[msg.sender] = totalSupply_;
   }
+
+  TwoKeyReg public registry;
+  mapping(address => bool) private visited;
+  ///Mapping contract bytecode to boolean if is allowed to transfer tokens
+  mapping(bytes32 => bool) private canEmit;
+
 
   function setRegistry(address _registry) public onlyOwner {
     registry = TwoKeyReg(_registry);
@@ -50,7 +53,6 @@ contract TwoKeyVoteToken is ERC20, Ownable {
     require(allowedContract(), 'onlyAllowedContracts');
     _;
   }
-  event Visited1(address spender, address owner);
 
   /**
   * @dev Gets or Create the balance of the specified address.
@@ -59,17 +61,17 @@ contract TwoKeyVoteToken is ERC20, Ownable {
   */
 
   function checkBalance(address _owner) internal returns (uint256) {
-    if (!visited[msg.sender][_owner]) {
-      visited[msg.sender][_owner] = true;
-      emit Visited1(msg.sender,_owner);
-      bytes memory _name = bytes(registry.owner2name(_owner));
-      if (_name.length != 0) {
-        balances[msg.sender][_owner] = 1000000000000000000;
-      }
+    if (visited[_owner]) {
+      return balances[_owner];
     }
-    return balances[msg.sender][_owner];
+
+    visited[_owner] = true;
+    bytes memory _name = bytes(registry.owner2name(_owner));
+    if (_name.length != 0) {
+      balances[_owner] = 1000000000000000000;
+    }
+    return balances[_owner];
   }
-  event Balance(address spender, address owner, uint256 v);
 
   /**
   * @dev Gets the balance of the specified address.
@@ -77,21 +79,17 @@ contract TwoKeyVoteToken is ERC20, Ownable {
   * @return An uint256 representing the amount owned by the passed address.
   */
   function balanceOf(address _owner) public view returns (uint256) {
-    if (visited[msg.sender][_owner]) {
-      emit Balance(msg.sender,_owner,balances[msg.sender][_owner]);
-      return balances[msg.sender][_owner];
+    if (visited[_owner]) {
+      return balances[_owner];
     } else {
       bytes memory _name = bytes(registry.owner2name(_owner));
       if (_name.length != 0) {
-        emit Balance(msg.sender,_owner,1000000000000000000);
         return 1000000000000000000;
       } else {
-        emit Balance(msg.sender,_owner,0);
         return 0;
       }
     }
   }
-  event Transfer1(address indexed from, address indexed to, uint256 value, address spender);
 
   /**
    * @dev Transfer tokens from one address to another
@@ -112,10 +110,9 @@ contract TwoKeyVoteToken is ERC20, Ownable {
     require(_value <= balance, 'transferFrom balance');
     require(_to != address(0), 'transferFrom zero');
 
-    balances[msg.sender][_from] = balances[msg.sender][_from].sub(_value);
-    balances[msg.sender][_to] = balances[msg.sender][_to].add(_value);
+    balances[_from] = balances[_from].sub(_value);
+    balances[_to] = balances[_to].add(_value);
     emit Transfer(_from, _to, _value);
-    emit Transfer1(_from, _to, _value, msg.sender);
     return true;
   }
 

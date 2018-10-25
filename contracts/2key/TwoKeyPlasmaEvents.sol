@@ -193,7 +193,8 @@ contract TwoKeyPlasmaEvents {
                 {
                     new_public_key := mload(add(sig, idx))
                 }
-                update_public_link_key(c, contractor, new_address, new_public_key);
+                // Updating the public key of influencers is not a good idea because it will require the influencers to use
+//                update_public_link_key(c, contractor, new_address, new_public_key);
                 update_bounty_cut(c, contractor, new_address, bounty_cut);
 
                 hash = keccak256(abi.encodePacked(bounty_cut, new_public_key, new_address));

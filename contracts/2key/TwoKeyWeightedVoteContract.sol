@@ -16,6 +16,8 @@ contract TwoKeyWeightedVoteContract is TwoKeySignedPresellContract {
   uint public nvotes;
   uint public voted_yes;
   uint public voted_no;
+  uint public weighted_yes;
+  uint public weighted_no;
 
   function transferSig(bytes sig) public returns (address) {
     // must use a sig which includes a cut (ie by calling free_join_take in sign.js
@@ -47,44 +49,43 @@ contract TwoKeyWeightedVoteContract is TwoKeySignedPresellContract {
         uint256 weight;
         if (cut <= 101) {
           yes = true;
+          voted_yes++;
           weight = cut-1;
         } else if (154 < cut && cut < 255) {
           yes = false;
+          voted_no++;
           weight = 255-cut;
         } else { // if cut == 255 then abstain
           weight = 0;
         }
 
         if (weight > 0) {
+          uint tokens = weight.mul(cost);
           // make sure weight is not more than number of coins influencer has
           uint _units = Call.params1(erc20_token_sell_contract, "balanceOf(address)",uint(influencer));
-          if (_units < weight) {
-            weight = _units;
+          if (_units < tokens) {
+            tokens = _units;
           }
           // make sure weight is not more than what coins allows owner to take
-          // TODO cause revert
-//          uint _allowance = Call.params2(erc20_token_sell_contract, "allowance(address,address)",uint(influencer),uint(owner));
-//          if (_allowance < weight) {
-//            weight = _allowance;
-//          }
+          uint _allowance = Call.params2(erc20_token_sell_contract, "allowance(address,address)",uint(influencer),uint(owner));
+          if (_allowance < tokens) {
+            tokens = _allowance;
+          }
           // vote
-          if (weight > 0) {
+          if (tokens > 0) {
+            weight = tokens.div(cost);
             if (yes) {
-              voted_yes += weight;
+              weighted_yes += weight;
             } else {
-              voted_no += weight;
+              weighted_no += weight;
             }
             // transfer coins from influncer to owner in the amount of the weight used for voting
-            require(address(erc20_token_sell_contract).call(bytes4(keccak256("transferFrom(address,address,uint256)")),influencer,owner,weight));
+            require(address(erc20_token_sell_contract).call(bytes4(keccak256("transferFrom(address,address,uint256)")),influencer,owner,tokens));
           }
         }
       }
     }
 
     return last_voter;
-  }
-  function voteTokenBalanceOf(address _owner) public view returns (uint256) {
-    // proxy call the balanceOf method because it may give different results depending on who is calling
-    return Call.params1(erc20_token_sell_contract, "balanceOf(address)",uint(_owner));
   }
 }
