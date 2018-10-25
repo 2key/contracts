@@ -134,6 +134,8 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
         hashAllowedMethods("updateExchange(address)");
         hashAllowedMethods("updateRegistry(address)");
         hashAllowedMethods("updateEventSource(address)");
+        hashAllowedMethods("freezeTransfersInEconomy()");
+        hashAllowedMethods("unfreezeTransfersInEconomy()");
     }
 
 

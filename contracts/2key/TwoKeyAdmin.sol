@@ -225,10 +225,12 @@ contract TwoKeyAdmin is Destructible, AdminContract {
 		twoKeyEventSource = TwoKeyEventSource(_eventSource);
     }
 
+	/// @notice Function to freeze all transfers for 2KEY token
 	function freezeTransfersInEconomy() public onlyTwoKeyCongress {
 		IERC20(address(twoKeyEconomy)).freezeTransfers();
 	}
 
+	/// @notice Function to unfreeze all transfers for 2KEY token
 	function unfreezeTransfersInEconomy() public onlyTwoKeyCongress {
 		IERC20(address(twoKeyEconomy)).unfreezeTransfers();
 	}
