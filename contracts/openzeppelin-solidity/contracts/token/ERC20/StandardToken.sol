@@ -1,8 +1,7 @@
 pragma solidity ^0.4.24;
 
-import "./BasicToken.sol";
-import "./ERC20.sol";
-
+import "../../math/SafeMath.sol";
+import "./ERC20Basic.sol";
 
 /**
  * @title Standard ERC20 token
@@ -19,16 +18,10 @@ contract StandardToken is ERC20Basic {
   string public name;
   string public symbol;
   uint8 public decimals;
-  bool public transfersFrozen = false;
-
 
   mapping (address => mapping (address => uint256)) internal allowed;
   mapping(address => uint256) internal balances;
 
-  modifier onlyIfNotFrozen {
-    require(transfersFrozen == false);
-    _;
-  }
 
   /**
    * @dev Transfer tokens from one address to another
@@ -41,7 +34,7 @@ contract StandardToken is ERC20Basic {
     address _to,
     uint256 _value
   )
-    public onlyIfNotFrozen
+    public
     returns (bool)
   {
     require(_value <= balances[_from]);
@@ -147,7 +140,7 @@ contract StandardToken is ERC20Basic {
   * @param _to The address to transfer to.
   * @param _value The amount to be transferred.
   */
-  function transfer(address _to, uint256 _value) public onlyIfNotFrozen returns (bool) {
+  function transfer(address _to, uint256 _value) public returns (bool) {
     require(_value <= balances[msg.sender]);
     require(_to != address(0));
 
@@ -165,7 +158,5 @@ contract StandardToken is ERC20Basic {
   function balanceOf(address _owner) public view returns (uint256) {
     return balances[_owner];
   }
-
-
 
 }

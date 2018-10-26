@@ -1,12 +1,12 @@
 pragma solidity ^0.4.24;
 
-import '../openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol';
 import '../openzeppelin-solidity/contracts/token/ERC20/ERC20.sol';
 import '../openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import "./RBACWithAdmin.sol";
+import "./StandardTokenModified.sol";
 
 
-contract TwoKeyEconomy is RBACWithAdmin, StandardToken, Ownable {
+contract TwoKeyEconomy is RBACWithAdmin, StandardTokenModified, Ownable {
 
     /*
         TwoKeyEconomy inheritance ERC20

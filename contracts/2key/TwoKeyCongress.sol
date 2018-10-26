@@ -117,6 +117,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
         addInitialWhitelistedMethods();
     }
 
+
     /// @notice Function to add initial whitelisted methods during the deployment
     /// @dev Function is internal, it can't be called outside of the contract
     function addInitialWhitelistedMethods() internal {
