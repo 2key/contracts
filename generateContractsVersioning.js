@@ -25,7 +25,7 @@ const nonSingletones = [
 // If dev-local 8086
 // If rinkeby-infura 4
 
-let networkId = "3";
+let networkId = "";
 const plasmaId = "17";
 
 // Iterate through build file and get all singleton contracts name and address
