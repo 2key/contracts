@@ -55,6 +55,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
 
 
     uint256 contractorBalance;
+
     uint256 contractorTotalProceeds;
 
     // There's single price for the unit ERC20 (Should be in WEI)
@@ -115,7 +116,10 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         _;
     }
 
-
+    modifier onlyIfFinalized {
+        require(finalized == true);
+        _;
+    }
 
 
     // ==============================================================================================================

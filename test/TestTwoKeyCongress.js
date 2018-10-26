@@ -7,6 +7,8 @@ var Web3EthAbi = require('web3-eth-abi');
 
 const TwoKeyCongress = artifacts.require("TwoKeyCongress");
 const BasicStorage = artifacts.require("BasicStorage");
+const TwoKeyEconomy = artifacts.require("TwoKeyEconomy");
+
 
 contract('TwoKeyCongress', async (accounts) => {
     let congress;
