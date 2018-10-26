@@ -39,7 +39,7 @@ contract TwoKeyPlasmaEvents {
     // in some cases the plasma address will be the same as the ethereum address and in that case it is not necessary to have an entry
     // the way to know if an address is a plasma address is to look it up in this mapping
     mapping(address => address) public plasma2ethereum;
-    mapping(address => address) public ethereum2plasma;
+    mapping(address => address[]) public ethereum2plasma;
 
     // SOCIAL GRAPH
 
@@ -92,8 +92,10 @@ contract TwoKeyPlasmaEvents {
         require(v==27 || v==28,'bad sig v');
 
         address eth_address = ecrecover(hash, v, r, s);
-        plasma2ethereum[msg.sender] = eth_address;
-        ethereum2plasma[eth_address] = msg.sender;
+        if (plasma2ethereum[msg.sender] != eth_address) {
+            plasma2ethereum[msg.sender] = eth_address;
+            ethereum2plasma[eth_address].push(msg.sender);
+        }
     }
 
     function _test_path(address c, address contractor, address to) private view returns (bool) {
@@ -110,8 +112,12 @@ contract TwoKeyPlasmaEvents {
         if (_test_path(c, contractor, to)) {
             return true;
         }
-
-        return _test_path(c, contractor,  ethereum2plasma[to]);
+        for (uint i = 0; i < ethereum2plasma[to].length; i++) {
+            if (_test_path(c, contractor,  ethereum2plasma[to][i])) {
+                return true;
+            }
+        }
+        return false;
     }
 
     function visited(address c, address contractor, bytes sig) public {
