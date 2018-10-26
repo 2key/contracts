@@ -37,8 +37,7 @@ contract TwoKeyReg is Ownable {
     addNameInternal(_name, msg.sender);
   }
 
-  function addNameAndPlasmaByUser(string _name, bytes sig) public {
-    addNameInternal(_name, msg.sender);
+  function addPlasma2Ethereum(bytes sig) public {
     bytes32 hash = keccak256(abi.encodePacked(msg.sender));
     require (sig.length == 65, 'bad signature length');
     // The signature format is a compact form of:
@@ -68,6 +67,7 @@ contract TwoKeyReg is Ownable {
     require(v==27 || v==28,'bad sig v');
 
     address plasma_address = ecrecover(hash, v, r, s);
+    require(plasma2ethereum[plasma_address] == address(0) || plasma2ethereum[plasma_address] == msg.sender, "cant change plasma=>eth");
     plasma2ethereum[plasma_address] = msg.sender;
   }
 
