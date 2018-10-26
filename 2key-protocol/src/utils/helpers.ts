@@ -1,7 +1,8 @@
 import {BigNumber} from 'bignumber.js';
 import contractsMeta from '../contracts';
 import {promisify} from './index';
-import {IContract, ICreateCampaignProgress, IRawTransaction, ITransaction, ITwoKeyBase,} from '../interfaces';
+import {ICreateCampaignProgress,  ITwoKeyBase} from '../interfaces';
+import {IContract, IRawTransaction, ITransaction} from './interfaces';
 
 function toBuffer(ab: Uint8Array): Buffer {
     const buffer = new Buffer(ab.byteLength);
@@ -81,7 +82,7 @@ export default class Helpers {
         return new Promise(async (resolve, reject) => {
             try {
                 const erc20 = await this._createAndValidate('ERC20full', erc20address);
-                const totalSupply = await promisify(erc20.totalSupply, [{ from: this.base.address }]);
+                const totalSupply = await promisify(erc20.totalSupply, []);
                 this.base._setTotalSupply(totalSupply);
                 resolve(totalSupply);
             } catch (e) {
@@ -102,18 +103,18 @@ export default class Helpers {
         });
     }
 
-    _createContract(contract: IContract, gasPrice: number = this.gasPrice, params?: any[], progressCallback?: ICreateCampaignProgress): Promise<string> {
+    _createContract(contract: IContract, from: string, gasPrice: number = this.gasPrice, params?: any[], progressCallback?: ICreateCampaignProgress): Promise<string> {
         return new Promise(async (resolve, reject) => {
             const {abi, bytecode: data, name} = contract;
             const createParams = params ? [...params] : [];
-            createParams.push({data, from: this.base.address, gasPrice});
-            this.base._log('CREATE CONTRACT', name, params, this.base.address, gasPrice);
+            createParams.push({data, from, gasPrice});
+            this.base._log('CREATE CONTRACT', name, params, from, gasPrice);
             let resolved: boolean = false;
             this.base.web3.eth.contract(abi).new(...createParams, (err, res) => {
                 if (err) {
                     reject(err);
                 } else {
-                    this.base._log(name, res);
+                    // this.base._log(name, res);
                     if (!resolved) {
                         // if (res.address) {
                         //     resolve(res.address);
@@ -129,10 +130,10 @@ export default class Helpers {
         });
     }
 
-    _estimateSubcontractGas(contract: IContract, params?: any[]): Promise<number> {
+    _estimateSubcontractGas(contract: IContract, from: string, params?: any[]): Promise<number> {
         return new Promise(async (resolve, reject) => {
             const {abi, bytecode: data} = contract;
-            const estimateParams = params ? [...params, {data, from: this.base.address}] : [{data, from: this.base.address}];
+            const estimateParams = params ? [...params, {data, from}] : [{data, from}];
             this.base.web3.eth.estimateGas({
                 data: this.base.web3.eth.contract(abi).new.getData(...estimateParams),
             }, (err, res) => {
@@ -192,13 +193,13 @@ export default class Helpers {
         return params;
     }
 
-    async _checkBalanceBeforeTransaction(gasRequired: number, gasPrice: number): Promise<boolean> {
+    async _checkBalanceBeforeTransaction(gasRequired: number, gasPrice: number, from: string): Promise<boolean> {
         if (!this.gasPrice) {
             await this._getGasPrice();
         }
-        const balance = this.base.web3.fromWei(await this._getEthBalance(this.base.address), 'ether');
+        const balance = this.base.web3.fromWei(await this._getEthBalance(from), 'ether');
         const transactionFee = this.base.web3.fromWei((gasPrice || this.gasPrice) * gasRequired, 'ether');
-        this.base._log(`_checkBalanceBeforeTransaction ${this.base.address}, ${balance} (${transactionFee}), gasPrice: ${(gasPrice || this.gasPrice)}`);
+        this.base._log(`_checkBalanceBeforeTransaction ${from}, ${balance} (${transactionFee}), gasPrice: ${(gasPrice || this.gasPrice)}`);
         if (transactionFee > balance) {
             throw new Error(`Not enough founds. Required: ${transactionFee}. Your balance: ${balance},`);
         }

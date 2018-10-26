@@ -2,7 +2,7 @@ import eth_util from 'ethereumjs-util';
 import assert from 'assert';
 import crypto from 'crypto';
 import sigUtil from 'eth-sig-util';
-import {IPlasmaSignature, ISignedKeys} from "../interfaces";
+import {IPlasmaSignature, ISignedKeys} from './interfaces';
 
 function generatePrivateKey(): Buffer {
     return crypto.randomBytes(32)

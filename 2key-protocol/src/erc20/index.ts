@@ -1,10 +1,11 @@
 import {ITwoKeyBase, ITwoKeyHelpers} from '../interfaces';
 import {promisify} from '../utils'
+import { IERC20 } from './interfaces';
 
-export default class ERC20 {
+export default class ERC20 implements IERC20 {
     private readonly base: ITwoKeyBase;
     private readonly helpers: ITwoKeyHelpers;
-    // private readonly utils: ITWoKeyUtils;
+    // private readonly utils: ITwoKeyUtils;
 
     constructor(twoKeyProtocol: ITwoKeyBase, helpers: ITwoKeyHelpers) {
         this.base = twoKeyProtocol;
@@ -16,7 +17,7 @@ export default class ERC20 {
         return new Promise<string>(async (resolve, reject) => {
             try {
                 const erc20Instance = await this.helpers._getERC20Instance(erc20);
-                const symbol = await promisify(erc20Instance.symbol, [{ from: this.base.address }]);
+                const symbol = await promisify(erc20Instance.symbol, []);
                 resolve(symbol);
             } catch (e) {
                 reject(e);
@@ -24,17 +25,17 @@ export default class ERC20 {
         });
     }
 
-    public erc20ApproveAddres(erc20:any, address:string, spenderAddress: string, value:number) : Promise<string> {
+    public erc20ApproveAddress(erc20:any, address:string, spenderAddress: string, value:number, from: string): Promise<string> {
         return new Promise(async (resolve,reject) => {
             try {
                 const erc20Instance = await this.helpers._getERC20Instance(erc20);
-                const txHash = await promisify(erc20Instance.approve,[spenderAddress,value, {from: this.base.address}]);
+                const txHash = await promisify(erc20Instance.approve,[spenderAddress,value, {from}]);
                 resolve(txHash);
             } catch (e) {
                 reject(e);
             }
         })
     }
-
-
 }
+
+export { IERC20 } from './interfaces';

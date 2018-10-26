@@ -2,11 +2,17 @@ import {BigNumber} from 'bignumber.js';
 import LZString from 'lz-string';
 import {
     BalanceMeta,
+    ITwoKeyBase,
+} from '../interfaces';
+import {
+    ITwoKeyUtils,
     IBalanceNormalized,
     IOffchainData,
     ITransactionReceipt,
-    ITwoKeyBase, ITwoKeyHelpers,
-} from '../interfaces';
+    ITwoKeyHelpers,
+    IBalanceFromWeiOpts,
+    ITxReceiptOpts,
+} from './interfaces';
 
 export function promisify(func: any, args: any): Promise<any> {
     return new Promise((res, rej) => {
@@ -17,7 +23,7 @@ export function promisify(func: any, args: any): Promise<any> {
     });
 }
 
-export default class Utils {
+export default class Utils implements ITwoKeyUtils {
     private readonly base: ITwoKeyBase;
     private readonly helpers: ITwoKeyHelpers;
 
@@ -64,12 +70,11 @@ export default class Utils {
         });
     }
 
-
     public fromWei(number: number | string | BigNumber, unit?: string): string | BigNumber {
         return this.base.web3.fromWei(number, unit);
     }
 
-    public toWei(number: string | number | BigNumber, unit?: string): BigNumber {
+    public toWei(number: number | string | BigNumber, unit?: string): BigNumber {
         return this.base.web3.toWei(number, unit);
     }
 
@@ -77,19 +82,7 @@ export default class Utils {
         return this.base.web3.toHex(data);
     }
 
-    public getBalanceOfArcs(campaign: any, address: string = this.base.address): Promise<number> {
-        return new Promise(async (resolve, reject) => {
-            try {
-                const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-                const balance = (await promisify(campaignInstance.balanceOf, [address])).toNumber();
-                resolve(balance);
-            } catch (e) {
-                reject(e);
-            }
-        });
-    }
-
-    public balanceFromWeiString(meta: BalanceMeta, inWei: boolean = false, toNum: boolean = false): IBalanceNormalized {
+    public balanceFromWeiString(meta: BalanceMeta, { inWei, toNum }: IBalanceFromWeiOpts): IBalanceNormalized {
         return {
             balance: {
                 ETH: toNum ? this.helpers._normalizeNumber(meta.balance.ETH, inWei) : this.helpers._normalizeString(meta.balance.ETH, inWei),
@@ -102,7 +95,7 @@ export default class Utils {
         }
     }
 
-    public getTransactionReceiptMined(txHash: string, web3: any = this.base.web3, interval: number = 500, timeout: number = 60000): Promise<ITransactionReceipt> {
+    public getTransactionReceiptMined(txHash: string, { web3 = this.base.web3, timeout = 60000, interval = 500}: ITxReceiptOpts): Promise<ITransactionReceipt> {
         return new Promise(async (resolve, reject) => {
             let txInterval;
             let fallbackTimeout = setTimeout(() => {

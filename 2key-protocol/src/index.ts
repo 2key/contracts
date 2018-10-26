@@ -1,5 +1,4 @@
 import ipfsAPI from 'ipfs-api';
-import {BigNumber} from 'bignumber.js';
 import Web3 from 'web3';
 import ProviderEngine from 'web3-provider-engine';
 import RpcSubprovider from 'web3-provider-engine/subproviders/rpc';
@@ -13,14 +12,18 @@ import {
     IContractsAddresses,
     ITwoKeyInit,
     BalanceMeta,
-    IContractEvent,
     ITwoKeyHelpers,
-    ITWoKeyUtils, ITwoKeyBase, ITwoKeyAcquisitionCampaign, IERC20,
+    ITwoKeyUtils,
+    ITwoKeyBase,
+    ITwoKeyAcquisitionCampaign,
+    IERC20,
+    IContractEvent,
 } from './interfaces';
 import Index, {promisify} from './utils';
 import Helpers from './utils/helpers';
 import AcquisitionCampaign from './acquisition';
 import ERC20 from './erc20';
+import {BigNumber} from "bignumber.js";
 
 // const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 
@@ -39,7 +42,6 @@ export class TwoKeyProtocol {
     private web3: any;
     private plasmaWeb3: any;
     private ipfs: any;
-    public address: string;
     public gasPrice: number;
     public totalSupply: number;
     public gas: number;
@@ -51,7 +53,7 @@ export class TwoKeyProtocol {
     private twoKeyEvents: any;
     private plasmaAddress: string;
     public ERC20: IERC20;
-    public Utils: ITWoKeyUtils;
+    public Utils: ITwoKeyUtils;
     private Helpers: ITwoKeyHelpers;
     public AcquisitionCampaign: ITwoKeyAcquisitionCampaign;
     private _log: any;
@@ -66,7 +68,6 @@ export class TwoKeyProtocol {
         // setWeb3 MainNet Client
         const {
             web3,
-            address,
             rpcUrl,
             eventsNetUrl = TwoKeyDefaults.twoKeySyncUrl,
             ipfsIp = TwoKeyDefaults.ipfsIp,
@@ -106,7 +107,6 @@ export class TwoKeyProtocol {
         if (web3) {
             this.web3 = new Web3(web3.currentProvider);
             this.web3.eth.defaultBlock = 'pending';
-            this.address = address;
             this.twoKeyEconomy = this.web3.eth.contract(contractsMeta.TwoKeyEconomy.abi).at(contractsMeta.TwoKeyEconomy.networks[this.networks.mainNetId].address);
             this.twoKeyReg = this.web3.eth.contract(contractsMeta.TwoKeyReg.abi).at(contractsMeta.TwoKeyReg.networks[this.networks.mainNetId].address);
             // this.twoKeyEventSource = this.web3.eth.contract(contractsMeta.TwoKeyEventSource.abi).at(contractsMeta.TwoKeyEventSource.networks[this.networks.mainNetId].address);
@@ -127,7 +127,6 @@ export class TwoKeyProtocol {
             web3: this.web3,
             plasmaWeb3: this.plasmaWeb3,
             ipfs: this.ipfs,
-            address: this.address,
             networks: this.networks,
             contracts: this.contracts,
             twoKeyEconomy: this.twoKeyEconomy,
@@ -146,7 +145,7 @@ export class TwoKeyProtocol {
         this.AcquisitionCampaign = new AcquisitionCampaign(twoKeyBase, this.Helpers, this.Utils, this.ERC20);
     }
 
-    public getBalance(address: string = this.address, erc20address?: string): Promise<BalanceMeta> {
+    public getBalance(address: string, erc20address?: string): Promise<BalanceMeta> {
         const promises = [
             this.Helpers._getEthBalance(address),
             this.Helpers._getTokenBalance(address, erc20address),
@@ -162,7 +161,7 @@ export class TwoKeyProtocol {
                         '2KEY': token,
                         total
                     },
-                    local_address: this.address,
+                    local_address: address,
                     gasPrice,
                 });
             } catch (e) {
@@ -182,11 +181,10 @@ export class TwoKeyProtocol {
         }
     }
 
-    public getContractorCampaigns(): Promise<string[]> {
+    public getContractorCampaigns(from: string): Promise<string[]> {
         return new Promise<string[]>(async (resolve, reject) => {
             try {
-                this._log(this.address);
-                const campaigns = await promisify(this.twoKeyReg.getContractsWhereUserIsContractor, [this.address, { from: this.address}]);
+                const campaigns = await promisify(this.twoKeyReg.getContractsWhereUserIsContractor, [from, {from}]);
                 resolve(campaigns);
             } catch (e) {
                 reject(e);
@@ -196,11 +194,11 @@ export class TwoKeyProtocol {
 
     /* TRANSFERS */
 
-    public getERC20TransferGas(to: string, value: number | string | BigNumber): Promise<number> {
+    public getERC20TransferGas(to: string, value: number | string | BigNumber, from: string): Promise<number> {
         this.gas = null;
         return new Promise(async (resolve, reject) => {
             try {
-                this.gas = await promisify(this.twoKeyEconomy.transfer.estimateGas, [to, value, {from: this.address}]);
+                this.gas = await promisify(this.twoKeyEconomy.transfer.estimateGas, [to, value, {from}]);
                 resolve(this.gas);
             } catch (e) {
                 reject(e);
@@ -208,11 +206,11 @@ export class TwoKeyProtocol {
         });
     }
 
-    public getETHTransferGas(to: string, value: number | string | BigNumber): Promise<number> {
+    public getETHTransferGas(to: string, value: number | string | BigNumber, from: string): Promise<number> {
         this.gas = null;
         return new Promise(async (resolve, reject) => {
             try {
-                this.gas = await promisify(this.web3.eth.estimateGas, [{to, value, from: this.address}]);
+                this.gas = await promisify(this.web3.eth.estimateGas, [{to, value, from}]);
                 resolve(this.gas);
             } catch (e) {
                 reject(e);
@@ -220,10 +218,10 @@ export class TwoKeyProtocol {
         });
     }
 
-    public transfer2KEYTokens(to: string, value: number | string | BigNumber, gasPrice: number = this.gasPrice): Promise<string> {
+    public transfer2KEYTokens(to: string, value: number | string | BigNumber, from: string, gasPrice: number = this.gasPrice): Promise<string> {
         return new Promise<string>(async (resolve, reject) => {
             try {
-                const params = {from: this.address, gasPrice};
+                const params = {from, gasPrice};
                 const txHash = await promisify(this.twoKeyEconomy.transfer, [to, value, params]);
                 resolve(txHash);
             } catch (err) {
@@ -232,10 +230,10 @@ export class TwoKeyProtocol {
         })
     }
 
-    public transferEther(to: string, value: number | string | BigNumber, gasPrice: number = this.gasPrice): Promise<string> {
+    public transferEther(to: string, value: number | string | BigNumber, from: string, gasPrice: number = this.gasPrice): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
-                const params = {to, gasPrice, value, from: this.address};
+                const params = {to, gasPrice, value, from};
                 const txHash = await promisify(this.web3.eth.sendTransaction, [params]);
                 resolve(txHash);
             } catch (err) {

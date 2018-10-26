@@ -10,15 +10,16 @@ const rpcUrl = env.RPC_URL;
 const mainNetId = env.MAIN_NET_ID;
 const syncTwoKeyNetId = env.SYNC_NET_ID;
 
-let twoKeyProtocol;
+let twoKeyProtocol: TwoKeyProtocol;
+let from: string;
 
 const sendETH: any = (recipient) => new Promise(async (resolve, reject) => {
     try {
         if (!twoKeyProtocol) {
             const {web3, address} = await createWeb3(env.MNEMONIC_DEPLOYER, rpcUrl);
+            from = address;
             twoKeyProtocol = new TwoKeyProtocol({
                 web3,
-                address,
                 networks: {
                     mainNetId,
                     syncTwoKeyNetId,
@@ -27,9 +28,9 @@ const sendETH: any = (recipient) => new Promise(async (resolve, reject) => {
             });
         }
         // console.log(twoKeyProtocol);
-        const txHash = await twoKeyProtocol.transferEther(recipient, twoKeyProtocol.Utils.toWei(10, 'ether'));
+        const txHash = await twoKeyProtocol.transferEther({to: recipient, value: twoKeyProtocol.Utils.toWei({number: 10, unit: 'ether'}), from});
         console.log(`${recipient}: ${txHash}`);
-        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined({txHash});
         console.log(`Status of transfering ether: ' + ${receipt.status}`);
         resolve(receipt);
     } catch (err) {

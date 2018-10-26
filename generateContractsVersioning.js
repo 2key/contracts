@@ -122,18 +122,18 @@ function wrapper(idOfNetwork) {
 }
 function main() {
     const command = process.argv[2];
-    if(command != '--network') {
+    if (command !== '--network') {
         console.log('Wrong arguments \nTry running with \'--network {network_name}\'');
         console.log('Network name can be: ropsten, rinkeby, dev-local');
         return;
     }
     const network = process.argv[3];
 
-    if(network == 'ropsten') {
+    if (network === 'ropsten') {
         networkId = "3";
-    } else if(network == 'rinkeby') {
+    } else if (network === 'rinkeby') {
         networkId = "4";
-    } else if(network == 'dev-local') {
+    } else if(network === 'dev-local') {
         networkId = "8086";
     }
     writeToFile();
