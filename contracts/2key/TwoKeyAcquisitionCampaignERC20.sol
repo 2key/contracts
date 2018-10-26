@@ -96,6 +96,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     uint unit_decimals;
     string symbol;
 
+    // Until contractor set this to be true, no one can withdraw funds etc.
+    bool finalized = false;
 
     // ==============================================================================================================
     // ============================ TWO KEY ACQUISITION CAMPAIGN MODIFIERS ==========================================
@@ -243,6 +245,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         require(publicLinkKey[msg.sender] == address(0),'public link key already defined');
         publicLinkKey[msg.sender] = _public_link_key;
     }
+
 
     function setCut(uint256 cut) private {
         // the sender sets what is the percentage of the bounty s/he will receive when acting as an influencer
@@ -682,6 +685,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         return conversionHandler;
     }
 
+    /// @notice Getter for the address status if it's joined
+    /// @return true / false
     function getAddressJoinedStatus() public view returns (bool) {
         if(msg.sender == address(contractor) || msg.sender == address(moderator) || received_from[msg.sender] != address(0)
             || balanceOf(msg.sender) > 0 || publicLinkKey[msg.sender] != address(0)) {
