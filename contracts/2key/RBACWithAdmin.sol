@@ -32,10 +32,11 @@ contract RBACWithAdmin is RBAC {
    * @dev modifier to scope access to admins
    * // reverts
    */
-  modifier onlyAdmin() {
-    checkRole(msg.sender, ROLE_ADMIN);
-    _;
-  }
+    modifier onlyAdmin() {
+        checkRole(msg.sender, ROLE_ADMIN);
+        _;
+    }
+
     // @notice Modifier which will revert if msg.sender is not contractor
     modifier onlyContractor() {
         checkRole(msg.sender, ROLE_CONTRACTOR);
