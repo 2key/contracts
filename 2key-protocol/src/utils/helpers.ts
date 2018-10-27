@@ -1,7 +1,7 @@
 import {BigNumber} from 'bignumber.js';
 import contractsMeta from '../contracts';
 import {promisify} from './index';
-import {ICreateCampaignProgress,  ITwoKeyBase} from '../interfaces';
+import {ICreateCampaignProgress, ITwoKeyBase, ITwoKeyHelpers} from '../interfaces';
 import {IContract, IRawTransaction, ITransaction} from './interfaces';
 
 function toBuffer(ab: Uint8Array): Buffer {
@@ -22,7 +22,7 @@ function toUint8Array(buffer: Buffer): Uint8Array {
     return ab;
 }
 
-export default class Helpers {
+export default class Helpers implements ITwoKeyHelpers {
     readonly base: ITwoKeyBase;
     gasPrice: number;
 

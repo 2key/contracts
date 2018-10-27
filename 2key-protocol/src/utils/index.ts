@@ -82,7 +82,7 @@ export default class Utils implements ITwoKeyUtils {
         return this.base.web3.toHex(data);
     }
 
-    public balanceFromWeiString(meta: BalanceMeta, { inWei, toNum }: IBalanceFromWeiOpts): IBalanceNormalized {
+    public balanceFromWeiString(meta: BalanceMeta, { inWei, toNum }: IBalanceFromWeiOpts = {}): IBalanceNormalized {
         return {
             balance: {
                 ETH: toNum ? this.helpers._normalizeNumber(meta.balance.ETH, inWei) : this.helpers._normalizeString(meta.balance.ETH, inWei),
@@ -95,7 +95,7 @@ export default class Utils implements ITwoKeyUtils {
         }
     }
 
-    public getTransactionReceiptMined(txHash: string, { web3 = this.base.web3, timeout = 60000, interval = 500}: ITxReceiptOpts): Promise<ITransactionReceipt> {
+    public getTransactionReceiptMined(txHash: string, { web3 = this.base.web3, timeout = 60000, interval = 500}: ITxReceiptOpts = {}): Promise<ITransactionReceipt> {
         return new Promise(async (resolve, reject) => {
             let txInterval;
             let fallbackTimeout = setTimeout(() => {

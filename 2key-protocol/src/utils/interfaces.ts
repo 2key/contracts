@@ -116,8 +116,8 @@ export interface ITwoKeyUtils {
     fromWei: (number: number | string | BigNumber, unit?: string) => string | BigNumber,
     toWei: (number: string | number | BigNumber, unit?: string) => BigNumber,
     toHex: (data: any) => string,
-    balanceFromWeiString: (meta: BalanceMeta, opts: IBalanceFromWeiOpts) => IBalanceNormalized,
-    getTransactionReceiptMined: (txHash: string, opts: ITxReceiptOpts) => Promise<ITransactionReceipt>,
+    balanceFromWeiString: (meta: BalanceMeta, opts?: IBalanceFromWeiOpts) => IBalanceNormalized,
+    getTransactionReceiptMined: (txHash: string, opts?: ITxReceiptOpts) => Promise<ITransactionReceipt>,
 }
 
 export interface IBalanceFromWeiOpts {

@@ -28,9 +28,9 @@ const sendETH: any = (recipient) => new Promise(async (resolve, reject) => {
             });
         }
         // console.log(twoKeyProtocol);
-        const txHash = await twoKeyProtocol.transferEther({to: recipient, value: twoKeyProtocol.Utils.toWei({number: 10, unit: 'ether'}), from});
+        const txHash = await twoKeyProtocol.transferEther(recipient, twoKeyProtocol.Utils.toWei(10, 'ether'), from);
         console.log(`${recipient}: ${txHash}`);
-        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined({txHash});
+        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         console.log(`Status of transfering ether: ' + ${receipt.status}`);
         resolve(receipt);
     } catch (err) {

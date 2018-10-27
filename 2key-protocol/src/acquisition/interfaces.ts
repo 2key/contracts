@@ -40,28 +40,28 @@ export interface IAcquisitionCampaign {
 }
 
 export interface ITwoKeyAcquisitionCampaign {
-    estimateCreation: (params: IEstimateCreation) => Promise<number>,
-    create: (params: ICreate) => Promise<IAcquisitionCampaignMeta>,
-    updateOrSetIpfsHashPublicMeta: (params: IUpdateOrSetIpfsHashPublicMeta) => Promise<string>,
-    getPublicMeta: (params: IGetPublicMeta) => Promise<any>,
+    estimateCreation: (data: IAcquisitionCampaign, from: string) => Promise<number>,
+    create: (data: IAcquisitionCampaign, from: string, opts?: ICreateOpts) => Promise<IAcquisitionCampaignMeta>,
+    updateOrSetIpfsHashPublicMeta: (campaign: any, hash: string, from: string, gasPrice?: number) => Promise<string>,
 
-    checkInventoryBalance: (params: ICampaignData) => Promise<number | string | BigNumber>,
-    getInventoryBalance: (params: ICampaignData) => Promise<number | string | BigNumber>,
-    getPublicLinkKey: (params: ICampaignData) => Promise<string>,
-    getReferrerCut: (params: ICampaignData) => Promise<number>,
-    getConverterConversion: (params: ICampaignData) => Promise<any>,
-    getAllPendingConverters: (params: ICampaignData) => Promise<string[]>,
-    cancelConverter: (params: ICampaignData) => Promise<string>,
-    getApprovedConverters: (params: ICampaignData) => Promise<string[]>,
-    getAllRejectedConverters: (params: ICampaignData) => Promise<string[]>,
-    isAddressJoined: (params: ICampaignData) => Promise<boolean>,
-    getBalanceOfArcs: (params: ICampaignData) => Promise<number>,
+    getPublicMeta: (campaign: any, from?: string) => Promise<any>,
+    checkInventoryBalance: (campaign: any, from: string) => Promise<number | string | BigNumber>,
+    getInventoryBalance: (campaign: any, from: string) => Promise<number | string | BigNumber>,
+    getPublicLinkKey: (campaign: any, from: string) => Promise<string>,
+    getReferrerCut: (campaign: any, from: string) => Promise<number>,
+    getConverterConversion: (campaign: any, from: string) => Promise<any>,
+    getAllPendingConverters: (campaign: any, from: string) => Promise<string[]>,
+    cancelConverter: (campaign: any, from: string) => Promise<string>,
+    getApprovedConverters: (campaign: any, from: string) => Promise<string[]>,
+    getAllRejectedConverters: (campaign: any, from: string) => Promise<string[]>,
+    isAddressJoined: (campaign: any, from: string) => Promise<boolean>,
+    getBalanceOfArcs: (campaign: any, from: string) => Promise<number>,
 
-    setPublicLinkKey: (params: IJoinLink) => Promise<IPublicLinkKey>,
-    getEstimatedMaximumReferralReward: (params: ICampaignData) => Promise<number>,
-    join: (params: IJoinLink) => Promise<string>,
-    joinAndSetPublicLinkWithCut: (params: IJoinLink) => Promise<string>,
-    joinAndShareARC: (params: IShareARC) => Promise<string>,
+    getEstimatedMaximumReferralReward: (campaign: any, from: string, referralLink: string) => Promise<number>,
+    setPublicLinkKey: (campaign: any, from: string, publicLink: string, opts?: IPublicLinkOpts) => Promise<IPublicLinkKey>,
+    join: (campaign: any, from: string, opts?: IJoinLinkOpts) => Promise<string>,
+    joinAndSetPublicLinkWithCut: (campaign: any, from: string, referralLink: string, opts?: IPublicLinkOpts) => Promise<string>,
+    joinAndShareARC: (campaign: any, from: string, referralLink: string, recipient: string, opts?: IPublicLinkOpts) => Promise<string>,
     joinAndConvert: (campaign: any, value: string | number | BigNumber, publicLink: string, from: string, gasPrice?: number) => Promise<string>,
     getTwoKeyConversionHandlerAddress: (campaign: any) => Promise<string>,
     // getAssetContractData: (campaign: any) => Promise<any>,
@@ -73,50 +73,18 @@ export interface ITwoKeyAcquisitionCampaign {
     addFungibleAssetsToInventoryOfCampaign(campaign: any, amount: number, from: string) : Promise<string>,
 }
 
-export interface IJoinLink {
-    campaign: any,
-    publicLink: string | null,
-    from: string,
+export interface IPublicLinkOpts {
     cut?: number,
     gasPrice?: number,
 }
 
-export interface IShareARC extends IJoinLink {
-    recipient: string,
+export interface IJoinLinkOpts extends IPublicLinkOpts{
+    referralLink?: string,
 }
 
-export interface IJoinAndConvert extends IJoinLink {
-    value: number | string | BigNumber,
-}
-
-export interface IEstimateCreation {
-    data: IAcquisitionCampaign,
-    from: string,
-}
-
-export interface ICreate {
-    data: IAcquisitionCampaign,
-    from: string,
+export interface ICreateOpts {
     progressCallback?: ICreateCampaignProgress,
     gasPrice?: number,
     interval?: number,
     timeout?: number
-}
-
-export interface IUpdateOrSetIpfsHashPublicMeta {
-    campaign: any,
-    hash: string,
-    from: string,
-    gasPrice?: number,
-}
-
-export interface IGetPublicMeta {
-    campaign: any,
-    from?: string,
-}
-
-export interface ICampaignData {
-    campaign: any,
-    from: string,
-    referralLink?: string,
 }
