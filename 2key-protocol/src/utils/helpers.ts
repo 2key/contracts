@@ -2,7 +2,7 @@ import {BigNumber} from 'bignumber.js';
 import contractsMeta from '../contracts';
 import {promisify} from './index';
 import {ICreateCampaignProgress, ITwoKeyBase, ITwoKeyHelpers} from '../interfaces';
-import {IContract, IRawTransaction, ITransaction} from './interfaces';
+import {IContract, ICreateContractOpts, IRawTransaction, ITransaction} from './interfaces';
 
 function toBuffer(ab: Uint8Array): Buffer {
     const buffer = new Buffer(ab.byteLength);
@@ -103,7 +103,7 @@ export default class Helpers implements ITwoKeyHelpers {
         });
     }
 
-    _createContract(contract: IContract, from: string, gasPrice: number = this.gasPrice, params?: any[], progressCallback?: ICreateCampaignProgress): Promise<string> {
+    _createContract(contract: IContract, from: string, {gasPrice = this.gasPrice, params, progressCallback}: ICreateContractOpts = {}): Promise<string> {
         return new Promise(async (resolve, reject) => {
             const {abi, bytecode: data, name} = contract;
             const createParams = params ? [...params] : [];

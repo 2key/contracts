@@ -98,7 +98,7 @@ export interface ITwoKeyHelpers {
     _getTokenBalance: (address: string, erc20address?: string) => Promise<number | string | BigNumber>,
     _getTotalSupply: (erc20address?: string) => Promise<number | string | BigNumber>,
     _getTransaction: (txHash: string) => Promise<ITransaction>,
-    _createContract: (contract: IContract, from: string, gasPrice?: number, params?: any[], progressCallback?: ICreateCampaignProgress) => Promise<string>,
+    _createContract: (contract: IContract, from: string, opts?: ICreateContractOpts) => Promise<string>,
     _estimateSubcontractGas: (contract: IContract, from: string, params?: any[]) => Promise<number>,
     _estimateTransactionGas: (data: IRawTransaction) => Promise<number>,
     _getUrlParams: (url: string) => any,
@@ -118,6 +118,12 @@ export interface ITwoKeyUtils {
     toHex: (data: any) => string,
     balanceFromWeiString: (meta: BalanceMeta, opts?: IBalanceFromWeiOpts) => IBalanceNormalized,
     getTransactionReceiptMined: (txHash: string, opts?: ITxReceiptOpts) => Promise<ITransactionReceipt>,
+}
+
+export interface ICreateContractOpts {
+    gasPrice?: number,
+    params?: any[],
+    progressCallback?: ICreateCampaignProgress,
 }
 
 export interface IBalanceFromWeiOpts {

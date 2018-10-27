@@ -113,7 +113,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 let conversionHandlerAddress = data.conversionHandlerAddress;
                 if (!conversionHandlerAddress) {
                     this.base._log([data.tokenDistributionDate, data.maxDistributionDateShiftInDays, data.bonusTokensVestingMonths, data.bonusTokensVestingStartShiftInDaysFromDistributionDate], gasPrice);
-                    txHash = await this.helpers._createContract(contractsMeta.TwoKeyConversionHandler, from, gasPrice, [data.tokenDistributionDate, data.maxDistributionDateShiftInDays, data.bonusTokensVestingMonths, data.bonusTokensVestingStartShiftInDaysFromDistributionDate], progressCallback);
+                    txHash = await this.helpers._createContract(contractsMeta.TwoKeyConversionHandler, from, { gasPrice, params: [data.tokenDistributionDate, data.maxDistributionDateShiftInDays, data.bonusTokensVestingMonths, data.bonusTokensVestingStartShiftInDaysFromDistributionDate], progressCallback});
                     const predeployReceipt = await this.utils.getTransactionReceiptMined(txHash,{ web3: this.base.web3, interval, timeout});
                     if (predeployReceipt.status !== '0x1') {
                         reject(predeployReceipt);
@@ -126,23 +126,27 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 }
                 // const whitelistsInstance = this.web3.eth.contract(contractsMeta.TwoKeyWhitelisted.abi).at(whitelistsAddress);
 
-                txHash = await this.helpers._createContract(contractsMeta.TwoKeyAcquisitionCampaignERC20, from, gasPrice, [
-                    this.helpers._getContractDeployedAddress('TwoKeyEventSource'),
-                    this.base.twoKeyEconomy.address,
-                    conversionHandlerAddress,
-                    data.moderator || from,
-                    data.assetContractERC20,
-                    data.campaignStartTime,
-                    data.campaignEndTime,
-                    data.expiryConversion,
-                    data.moderatorFeePercentageWei,
-                    data.maxReferralRewardPercentWei,
-                    data.maxConverterBonusPercentWei,
-                    data.pricePerUnitInETHWei,
-                    data.minContributionETHWei,
-                    data.maxContributionETHWei,
-                    data.referrerQuota || 5,
-                ], progressCallback);
+                txHash = await this.helpers._createContract(contractsMeta.TwoKeyAcquisitionCampaignERC20, from, {
+                    gasPrice,
+                    params: [
+                        this.helpers._getContractDeployedAddress('TwoKeyEventSource'),
+                        this.base.twoKeyEconomy.address,
+                        conversionHandlerAddress,
+                        data.moderator || from,
+                        data.assetContractERC20,
+                        data.campaignStartTime,
+                        data.campaignEndTime,
+                        data.expiryConversion,
+                        data.moderatorFeePercentageWei,
+                        data.maxReferralRewardPercentWei,
+                        data.maxConverterBonusPercentWei,
+                        data.pricePerUnitInETHWei,
+                        data.minContributionETHWei,
+                        data.maxContributionETHWei,
+                        data.referrerQuota || 5,
+                    ],
+                    progressCallback
+                });
                 const campaignReceipt = await this.utils.getTransactionReceiptMined(txHash, {web3: this.base.web3, interval, timeout});
                 if (campaignReceipt.status !== '0x1') {
                     reject(campaignReceipt);
