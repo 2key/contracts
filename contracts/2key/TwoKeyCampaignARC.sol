@@ -9,20 +9,10 @@ contract TwoKeyCampaignARC is StandardToken {
 
 	using SafeMath for uint256;
 
-
 	address public contractor;
     address moderator;
 
-
 	uint256 totalSupply_ = 1000000;
-
-	// balance of TwoKeyToken for each influencer that they can withdraw
-	mapping(address => uint256) internal referrerBalances2KEY;
-	mapping(address => uint256) internal referrerBalancesETHWei;
-
-    // Total earnings for referrers
-    mapping(address => uint256) internal referrerTotalEarnings2KEY;
-
 
 	TwoKeyEventSource twoKeyEventSource;
 

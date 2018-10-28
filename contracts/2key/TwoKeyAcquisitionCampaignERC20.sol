@@ -9,6 +9,16 @@ import "../interfaces/IERC20.sol";
 import "./Utils.sol";
 import "./TwoKeyTypes.sol";
 
+/*
+    TODO: Payouts for referrers and moderators in TwoKey
+    TODO: Payout for contractor Eth
+    TODO: Payout for converter Eth
+
+    We're storing all balances on contract, and we should just make the method where anyone can withdraw his funds
+
+    If withdraw is in ETHER, then we'll do basic transfer
+    Otherwise we'll send tokens from economy to the user and delete his balances
+*/
 
 /// @author Nikola Madjarevic
 /// Contract which will represent campaign for the fungible assets
@@ -27,6 +37,13 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
 
     // Mapping representing how much are cuts in percent(0-100) for referrer address
     mapping(address => uint256) referrer2cut;
+
+    // balance of TwoKeyToken for each influencer that they can withdraw
+    mapping(address => uint256) internal referrerBalances2KEY;
+    mapping(address => uint256) internal referrerBalancesETHWei;
+
+    // Total earnings for referrers
+    mapping(address => uint256) internal referrerTotalEarnings2KEY;
 
     /// Amount converter put to the contract in Ether
     mapping(address => uint) balancesConvertersETH;
@@ -98,7 +115,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     string symbol;
 
     // Until contractor set this to be true, no one can withdraw funds etc.
-    bool finalized = false;
+//    bool finalized = false;
+//
 
     // ==============================================================================================================
     // ============================ TWO KEY ACQUISITION CAMPAIGN MODIFIERS ==========================================
@@ -116,10 +134,10 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         _;
     }
 
-    modifier onlyIfFinalized {
-        require(finalized == true);
-        _;
-    }
+//    modifier onlyIfFinalized {
+//        require(finalized == true);
+//        _;
+//    }
 
 
     // ==============================================================================================================
@@ -160,7 +178,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
 
         // Emit event that TwoKeyCampaign is created
         twoKeyEventSource.created(address(this), contractor);
-
     }
 
 
