@@ -1,25 +1,18 @@
+import {IERC20, IOffchainData, ITwoKeyBase, ITwoKeyHelpers, ITwoKeyUtils,} from '../interfaces';
 import {
-    IOffchainData,
-    ITwoKeyBase,
-    ITwoKeyHelpers,
-    ITwoKeyUtils,
-    IERC20,
-} from '../interfaces';
-import {
-    ITwoKeyAcquisitionCampaign,
-    IAcquisitionCampaignMeta,
-    IPublicLinkKey,
     IAcquisitionCampaign,
+    IAcquisitionCampaignMeta,
     ICreateOpts,
-    IPublicLinkOpts,
     IJoinLinkOpts,
+    IPublicLinkKey,
+    IPublicLinkOpts,
+    ITwoKeyAcquisitionCampaign,
 } from './interfaces';
 
 import {BigNumber} from 'bignumber.js';
 import contractsMeta, {default as contracts} from '../contracts';
 import {promisify} from '../utils';
 import Sign from '../utils/sign';
-import {ITxReceiptOpts} from "../utils/interfaces";
 
 function calcFromCuts(cuts: number[], maxPi: number) {
     let referrerRewardPercent: number = maxPi;
@@ -607,7 +600,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         })
     }
 
-    public approveConverter(campaign: any, converter: string, from: string): Promise<string> {
+    public approveConverter(campaign: any, converter: string, from: string, gasPrice: number = this.base._getGasPrice()): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
                 const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
@@ -620,7 +613,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         })
     }
 
-    public rejectConverter(campaign: any, converter: string, from: string): Promise<string> {
+    public rejectConverter(campaign: any, converter: string, from: string, gasPrice: number = this.base._getGasPrice()): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
                 const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
@@ -633,7 +626,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         })
     }
 
-    public cancelConverter(campaign: any, from: string): Promise<string> {
+    public cancelConverter(campaign: any, from: string, gasPrice: number = this.base._getGasPrice()): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
                 const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
@@ -672,7 +665,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         })
     }
 
-    public executeConversion(campaign: any, converter: string, from: string): Promise<string> {
+    public executeConversion(campaign: any, converter: string, from: string, gasPrice: number = this.base._getGasPrice()): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
                 const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
@@ -702,7 +695,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     }
 
 
-    public addFungibleAssetsToInventoryOfCampaign(campaign: any, amount: number, from: string) : Promise<string> {
+    public addFungibleAssetsToInventoryOfCampaign(campaign: any, amount: number, from: string, gasPrice: number = this.base._getGasPrice()) : Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
