@@ -247,6 +247,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     //        fulfillFungibleTwoKeyToken(_from, _assetName, _amount);
     //    }
 
+
     // @notice Function where an influencer that wishes to cash an _amount of 2key from the campaign can do it
     function redeemTwoKeyToken(uint256 _amount) public {
         require(referrerBalances2KEY[msg.sender] >= _amount && _amount > 0);

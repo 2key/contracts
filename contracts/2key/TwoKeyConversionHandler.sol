@@ -463,7 +463,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     function approveConverter(address _converter) public onlyContractorOrModerator {
         require(converterToConversionState[_converter] == ConversionState.PENDING || converterToConversionState[_converter] == ConversionState.REJECTED);
         moveFromPendingOrRejectedToApprovedState(_converter);
-
     }
 
     /// @notice Function where we can reject converter
@@ -482,6 +481,14 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
 
         Conversion memory conversion = conversions[msg.sender];
         ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).sendBackEthWhenConversionCancelled(msg.sender, conversion.conversionAmount);
+    }
+
+    function moderatorWithdraw() public {
+        require(msg.sender == moderator); //requiring that moderator is msg.sender
+        uint rate; // How to get rate from twokey to eth
+        uint twoKeyAmount = moderatorBalanceETHWei * rate;
+
+        //Now to implement twoKeyAdmin transfer of this tokens
     }
 
 }
