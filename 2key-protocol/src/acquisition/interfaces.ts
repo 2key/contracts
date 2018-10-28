@@ -1,7 +1,5 @@
 import {BigNumber} from 'bignumber.js';
-import {
-    ICreateCampaignProgress,
-} from '../interfaces';
+import {ICreateCampaignProgress,} from '../interfaces';
 
 export interface IPublicLinkKey {
     contractor: string,
@@ -65,12 +63,12 @@ export interface ITwoKeyAcquisitionCampaign {
     joinAndConvert: (campaign: any, value: string | number | BigNumber, publicLink: string, from: string, gasPrice?: number) => Promise<string>,
     getTwoKeyConversionHandlerAddress: (campaign: any) => Promise<string>,
     // getAssetContractData: (campaign: any) => Promise<any>,
-    approveConverter: (campaign: any, converter: string, from: string) => Promise<string>,
-    rejectConverter: (campaign: any, converter: string, from: string) => Promise<string>,
+    approveConverter: (campaign: any, converter: string, from: string, gasPrice? :number) => Promise<string>,
+    rejectConverter: (campaign: any, converter: string, from: string, gasPrice? :number) => Promise<string>,
     visit: (campaignAddress: string, referralLink: string) => Promise<string>,
-    executeConversion: (campaign: any, converter: string, from: string) => Promise<string>,
+    executeConversion: (campaign: any, converter: string, from: string, gasPrice? :number) => Promise<string>,
     getLockupContractsForConverter: (campaign: any, converter: string, from: string) => Promise<string[]>,
-    addFungibleAssetsToInventoryOfCampaign(campaign: any, amount: number, from: string) : Promise<string>,
+    addFungibleAssetsToInventoryOfCampaign(campaign: any, amount: number, from: string, gasPrice? :number) : Promise<string>,
 }
 
 export interface IPublicLinkOpts {
