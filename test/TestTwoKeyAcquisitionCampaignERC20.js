@@ -5,14 +5,13 @@ const BigNumber = web3.BigNumber;
 const HOUR = 3600;
 
 /// contracts
-const TwoKeyWhitelisted = artifacts.require("TwoKeyWhitelisted");
+const TwoKeyConversionHandler = artifacts.require("TwoKeyConversionHandler");
 const TwoKeyEventSource = artifacts.require("TwoKeyEventSource");
 const TwoKeyEconomy = artifacts.require("TwoKeyEconomy");
 const TwoKeyAcquisitionCampaignERC20 = artifacts.require("TwoKeyAcquisitionCampaignERC20");
 const TwoKeyAdmin = artifacts.require("TwoKeyAdmin");
 const TwoKeyUpgradableExchange = artifacts.require("TwoKeyUpgradableExchange");
 const TwoKeyCampaignARC = artifacts.require("TwoKeyCampaignARC");
-const TwoKeyCampaignInventory = artifacts.require("TwoKeyCampaignInventory.sol");
 
 
 /// tokens
@@ -20,9 +19,6 @@ const StandardToken = artifacts.require("StandardToken");
 const ERC20Mock = artifacts.require("ERC20TokenMock");
 
 contract('TwoKeyAcquisitionCampaignERC20', async (accounts) => {
-
-// ===============================================================================================
-// Variables we're going to use in tests, predefined
 
     let whitelists,
         twoKeyEventSource,
@@ -45,30 +41,8 @@ contract('TwoKeyAcquisitionCampaignERC20', async (accounts) => {
     const electorateAdmins = accounts[4];
     const walletExchange = accounts[5];
 
-// ===============================================================================================
-/*
-address _twoKeyEventSource,
-address _twoKeyEconomy,
-address _converterWhitelist,
-address _referrerWhitelist,
-address _moderator,
-address _assetContractERC20,
-uint _campaignStartTime,
-uint _campaignEndTime,
-uint _expiryConversion,
-uint _moderatorFeePercentage,
-uint _maxReferralRewardPercent,
-uint _maxConverterBonusPercent,
-uint _pricePerUnitInETH,
-uint _minContributionETH,
-uint _maxContributionETH,
-uint _conversionQuota
- */
 
 
-
-// ===============================================================================================
-// Initial setup of contracts which are going to be used in tests
 
     before(async () => {
         // Contractor input addresses
@@ -98,8 +72,6 @@ uint _conversionQuota
         /*
             Subcontracts required for TwoKeyCampaign
          */
-
-        whitelists = await TwoKeyWhitelisted.new();
 
 
         twoKeyAcquisitionCampaignERC20 = await TwoKeyAcquisitionCampaignERC20.new(
