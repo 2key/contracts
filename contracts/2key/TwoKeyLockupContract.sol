@@ -8,6 +8,7 @@ contract TwoKeyLockupContract {
     address converter;
     address contractor;
     bool changed = false;
+    address twoKeyAcquisitionCampaignERC20Address;
 
 
     modifier onlyContractor() {
@@ -19,12 +20,19 @@ contract TwoKeyLockupContract {
         require(msg.sender == converter);
         _;
     }
-    constructor(uint _tokenDistributionDate, uint _maxDistributionDateShiftInDays, uint _tokens, address _converter, address _contractor) public {
+
+    modifier onlyAcquisitionCampaign() {
+        require(msg.sender == twoKeyAcquisitionCampaignERC20Address);
+        _;
+    }
+
+    constructor(uint _tokenDistributionDate, uint _maxDistributionDateShiftInDays, uint _tokens, address _converter, address _contractor, address _acquisitionCampaignERC20Address) public {
         tokenDistributionDate = _tokenDistributionDate;
         maxDistributionDateShiftInDays = _maxDistributionDateShiftInDays;
         tokens = _tokens;
         converter = _converter;
         contractor = _contractor;
+        twoKeyAcquisitionCampaignERC20Address = _acquisitionCampaignERC20Address;
     }
 
     function changeTokenDistributionDate(uint _newDate) public onlyContractor {
@@ -38,10 +46,10 @@ contract TwoKeyLockupContract {
     function transferFungibleAsset(address _assetContractERC20, uint256 _amount) public onlyConverter returns (bool) {
         require(tokens >= _amount);
         require(block.timestamp > tokenDistributionDate);
-            _assetContractERC20.call(
-                bytes4(keccak256(abi.encodePacked("transfer(address,uint256)"))),
-                converter, _amount
-            );
+        _assetContractERC20.call(
+            bytes4(keccak256(abi.encodePacked("transfer(address,uint256)"))),
+            converter, _amount
+        );
         tokens = tokens - _amount;
         return true;
     }
@@ -53,5 +61,14 @@ contract TwoKeyLockupContract {
         return false;
     }
     //TODO: Emit events through TwoKeyEventSource
+
+//    function cancelCampaign() public onlyAcquisitionCampaign {
+//        // Get the tokens back to campaign
+//        _assetContractERC20.call(
+//            bytes4(keccak256(abi.encodePacked("transfer(address,uint256)"))),
+//            twoKeyAcquisitionCampaignERC20Address, tokens
+//        );
+//        selfdestruct(twoKeyAcquisitionCampaignERC20Address);
+//    }
 
 }
