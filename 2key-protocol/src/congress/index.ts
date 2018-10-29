@@ -11,7 +11,4 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
         this.helpers = helpers;
         // this.utils = utils;
     }
-
-
-
 }

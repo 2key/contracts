@@ -1,6 +1,6 @@
 import {ITwoKeyBase, ITwoKeyHelpers} from '../interfaces';
 import {promisify} from '../utils'
-import { IERC20 } from './interfaces';
+import {IERC20} from './interfaces';
 
 export default class ERC20 implements IERC20 {
     private readonly base: ITwoKeyBase;
@@ -23,6 +23,19 @@ export default class ERC20 implements IERC20 {
                 reject(e);
             }
         });
+    }
+
+
+    public getERC20Balance(erc20: any, address: string): Promise<number> {
+        return new Promise<number>(async(resolve,reject) => {
+            try {
+                const erc20Instance = await this.helpers._getERC20Instance(erc20);
+                const balance = await erc20Instance.balanceOf(address);
+                resolve(balance);
+            } catch (e) {
+                reject(e);
+            }
+        })
     }
 
     public erc20ApproveAddress(erc20:any, address:string, spenderAddress: string, value:number, from: string): Promise<string> {
