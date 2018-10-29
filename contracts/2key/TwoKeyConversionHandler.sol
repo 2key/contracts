@@ -99,8 +99,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     }
 
 
-
-
     constructor(uint _tokenDistributionDate, // January 1st 2019
         uint _maxDistributionDateShiftInDays, // 180 days
         uint _bonusTokensVestingMonths, // 6 months
@@ -217,6 +215,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     function executeConversion(address _converter) public onlyApprovedConverter {
         didConverterConvert(_converter);
         performConversion(_converter);
+        moveFromApprovedToFulfilledState(_converter);
     }
 
     function performConversion(address _converter) internal {
@@ -230,7 +229,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
 
 
         TwoKeyLockupContract firstLockUp = new TwoKeyLockupContract(tokenDistributionDate, maxDistributionDateShiftInDays,
-                            conversion.baseTokenUnits, _converter, conversion.contractor);
+                            conversion.baseTokenUnits, _converter, conversion.contractor, twoKeyAcquisitionCampaignERC20);
 
 
         ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).moveFungibleAsset(address(firstLockUp), conversion.baseTokenUnits);
@@ -240,7 +239,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         for(uint i=0; i<bonusTokensVestingMonths; i++) {
             TwoKeyLockupContract lockup = new TwoKeyLockupContract(tokenDistributionDate +
                                     bonusTokensVestingStartShiftInDaysFromDistributionDate + i*(30 days), maxDistributionDateShiftInDays, bonusAmountSplited,
-                                    _converter, conversion.contractor);
+                                    _converter, conversion.contractor, twoKeyAcquisitionCampaignERC20);
             ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).moveFungibleAsset(address(lockup), bonusAmountSplited);
 
             lockupContracts[i] = lockup;
@@ -249,7 +248,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
 
         ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateContractorProceeds(conversion.contractorProceedsETHWei);
         conversion.state = ConversionState.FULFILLED;
-
         conversions[_converter] = conversion;
         converterToLockupContracts[_converter] = lockupContracts;
     }
@@ -388,19 +386,15 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         return converterToLockupContracts[_converter];
     }
 
-
-    /// @notice Function where we can change state of converter to Approved
-    /// @dev Converter can only be approved if his previous state is pending or rejected
-    /// @param _converter is the address of converter
-    function moveFromPendingOrRejectedToApprovedState(address _converter) private {
+    function moveFromStateAToStateB(address _converter, bytes32 destinationState) {
         ConversionState state = converterToConversionState[_converter];
         bytes32 key = convertConverterStateToBytes(state);
         address[] memory pending = conversionStateToConverters[key];
         for(uint i=0; i< pending.length; i++) {
             if(pending[i] == _converter) {
                 // Means we have found it in array of pending addresses
-                converterToConversionState[_converter] = ConversionState.APPROVED;
-                conversionStateToConverters[bytes32("APPROVED")].push(_converter);
+//                converterToConversionState[_converter] = ConversionState.APPROVED;
+                conversionStateToConverters[destinationState].push(_converter);
                 //assigning the value of last element
                 pending[i] = pending[pending.length-1];
                 delete pending[pending.length-1];
@@ -410,27 +404,22 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
             }
         }
     }
+    /// @notice Function where we can change state of converter to Approved
+    /// @dev Converter can only be approved if his previous state is pending or rejected
+    /// @param _converter is the address of converter
+    function moveFromPendingOrRejectedToApprovedState(address _converter) private {
+        bytes32 destination = bytes32("APPROVED");
+        moveFromStateAToStateB(_converter, destination);
+        converterToConversionState[_converter] = ConversionState.APPROVED;
+    }
 
     /// @notice Function where we can change state of converter to Approved
     /// @dev Converter can only be approved if his previous state is pending or rejected
     /// @param _converter is the address of converter
     function moveFromPendingOrRejectedToCancelledState(address _converter) private {
-        ConversionState state = converterToConversionState[_converter];
-        bytes32 key = convertConverterStateToBytes(state);
-        address[] memory pending = conversionStateToConverters[key];
-        for(uint i=0; i< pending.length; i++) {
-            if(pending[i] == _converter) {
-                // Means we have found it in array of pending addresses
-                converterToConversionState[_converter] = ConversionState.APPROVED;
-                conversionStateToConverters[bytes32("CANCELLED")].push(_converter);
-                //assigning the value of last element
-                pending[i] = pending[pending.length-1];
-                delete pending[pending.length-1];
-                conversionStateToConverters[key] = pending;
-                conversionStateToConverters[key].length--;
-                break;
-            }
-        }
+        bytes32 destination = bytes32("CANCELLED");
+        moveFromStateAToStateB(_converter, destination);
+        converterToConversionState[_converter] = ConversionState.CANCELLED;
     }
 
 
@@ -438,23 +427,16 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     /// @dev private function, will be executed in another one
     /// @param _converter is the address of converter
     function moveFromPendingToRejectedState(address _converter) private {
-//        ConversionState state = converterToConversionState[_converter];
-//        bytes32 key = convertConverterStateToBytes(state);
-        bytes32 key = bytes32("PENDING");
-        address[] memory pending = conversionStateToConverters[key];
-        for(uint i=0; i< pending.length; i++) {
-            if(pending[i] == _converter) {
-                // Means we have found it in array of pending addresses
-                converterToConversionState[_converter] = ConversionState.REJECTED;
-                conversionStateToConverters[bytes32("REJECTED")].push(_converter);
-                //assigning the value of last element
-                pending[i] = pending[pending.length-1];
-                delete pending[pending.length-1];
-                conversionStateToConverters[key] = pending;
-                conversionStateToConverters[key].length--;
-                break;
-            }
-        }
+        bytes32 destination = bytes32("REJECTED");
+        moveFromStateAToStateB(_converter, destination);
+        converterToConversionState[_converter] = ConversionState.REJECTED;
+    }
+
+
+    function moveFromApprovedToFulfilledState(address _converter) private {
+        bytes32 destination = bytes32("FULFILLED");
+        moveFromStateAToStateB(_converter, destination);
+        converterToConversionState[_converter] = ConversionState.FULFILLED;
     }
 
     /// @notice Function where we are approving converter
@@ -490,5 +472,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
 
         //Now to implement twoKeyAdmin transfer of this tokens
     }
+
 
 }

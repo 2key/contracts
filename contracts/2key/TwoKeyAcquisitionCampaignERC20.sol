@@ -4,7 +4,6 @@ import "../openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "./TwoKeyCampaignARC.sol";
 import "./TwoKeyEventSource.sol";
 import "./TwoKeyConversionHandler.sol";
-import "./TwoKeyEconomy.sol";
 import "../interfaces/IERC20.sol";
 import "./Utils.sol";
 import "./TwoKeyTypes.sol";
@@ -13,7 +12,7 @@ import "./TwoKeyTypes.sol";
     TODO: Payouts for referrers and moderators in TwoKey
     TODO: Payout for contractor Eth
     TODO: Payout for converter Eth
-
+    TODO: Staking mechanism getting 2key for ether
     We're storing all balances on contract, and we should just make the method where anyone can withdraw his funds
 
     If withdraw is in ETHER, then we'll do basic transfer
@@ -65,7 +64,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     address assetContractERC20;
 
     // TwoKeyEconomy contract (ERC20)
-    TwoKeyEconomy twoKeyEconomy;
+    address twoKeyEconomy;
 
     // Contract representing whitelisted referrers and converters
     TwoKeyConversionHandler conversionHandler;
@@ -77,9 +76,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
 
     // There's single price for the unit ERC20 (Should be in WEI)
     uint256 pricePerUnitInETHWei;
-
-    // Rate of conversion from TwoKey to ETC
-    uint256 public rate = 1;
 
     // Time when campaign start
     uint256 campaignStartTime;
@@ -115,8 +111,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     string symbol;
 
     // Until contractor set this to be true, no one can withdraw funds etc.
-//    bool finalized = false;
-//
+    bool finalized = false;
+
 
     // ==============================================================================================================
     // ============================ TWO KEY ACQUISITION CAMPAIGN MODIFIERS ==========================================
@@ -134,10 +130,10 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         _;
     }
 
-//    modifier onlyIfFinalized {
-//        require(finalized == true);
-//        _;
-//    }
+    modifier onlyIfFinalized {
+        require(finalized == true);
+        _;
+    }
 
 
     // ==============================================================================================================
@@ -158,7 +154,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         require(_conversionHandler != address(0));
 
         contractor = msg.sender;
-        twoKeyEconomy = TwoKeyEconomy(_twoKeyEconomy);
+        twoKeyEconomy = _twoKeyEconomy;
         conversionHandler = TwoKeyConversionHandler(_conversionHandler);
         moderator = _moderator;
         assetContractERC20 = _assetContractERC20;
@@ -218,12 +214,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     }
 
 
-    function cancelledEscrow(address converter, uint256 _amount) internal {
-        uint contractorProceeds = conversionHandler.supportForCanceledEscrow(converter);
-        addUnitsToInventory(_amount);
-        require(twoKeyEconomy.transfer(converter, contractorProceeds.mul(rate)));
-    }
-
 //
 //    function cancelAssetTwoKey(address _converter, string _assetName, address _assetContract, uint256 _amount) public returns (bool) {
 //        conversionHandler.supportForCancelAssetTwoKey(_converter);
@@ -235,7 +225,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
 
     function expireEscrow(address _converter, uint256 _amount) public returns (bool) {
         conversionHandler.supportForExpireEscrow(_converter);
-        cancelledEscrow(_converter, _amount);
+//        cancelledEscrow(_converter, _amount);
         emit Expired(address(this));
         return true;
     }
@@ -247,13 +237,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     //        fulfillFungibleTwoKeyToken(_from, _assetName, _amount);
     //    }
 
-
-    // @notice Function where an influencer that wishes to cash an _amount of 2key from the campaign can do it
-    function redeemTwoKeyToken(uint256 _amount) public {
-        require(referrerBalances2KEY[msg.sender] >= _amount && _amount > 0);
-        referrerBalances2KEY[msg.sender] = referrerBalances2KEY[msg.sender].sub(_amount);
-        twoKeyEconomy.transferFrom(this, msg.sender, _amount);
-    }
 
     function joinAndShareARC(bytes signature, address receiver) public {
         distributeArcsBasedOnSignature(signature);
@@ -430,6 +413,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         require(msg.value <= maxContributionETH);
         distributeArcsBasedOnSignature(signature);
         createConversion(msg.value, msg.sender);
+        balancesConvertersETH[msg.sender] += msg.value;
     }
 
     function convert() public payable  {
@@ -437,6 +421,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         require(msg.value <= maxContributionETH);
         require(received_from[msg.sender] != address(0));
         createConversion(msg.value, msg.sender);
+        balancesConvertersETH[msg.sender] += msg.value;
     }
 
     //TODO: for paying with external address, the user needs to transfer an ARC to the external address, and then we can call the public default payable
@@ -445,6 +430,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         require(msg.value <= maxContributionETH);
         require(balanceOf(msg.sender) > 0);
         createConversion(msg.value, msg.sender);
+        balancesConvertersETH[msg.sender] += msg.value;
     }
 
     //******************************************************
@@ -720,4 +706,11 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     function sendBackEthWhenConversionCancelled(address _cancelledConverter, uint _conversionAmount) public onlyTwoKeyConversionHandler {
         _cancelledConverter.transfer(_conversionAmount);
     }
+
+
+    function sealAndApprove() public onlyContractor {
+        require(finalized = false);
+        finalized = true;
+    }
+
 }
