@@ -721,5 +721,4 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     function isFinalized() public view returns (bool) {
         return finalized;
     }
-
 }
