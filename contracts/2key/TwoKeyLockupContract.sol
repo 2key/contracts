@@ -2,6 +2,7 @@ pragma solidity ^0.4.24;
 
 contract TwoKeyLockupContract {
 
+    address twoKeyConversionHandler;
     uint tokenDistributionDate;
     uint maxDistributionDateShiftInDays;
     uint tokens;
@@ -21,12 +22,14 @@ contract TwoKeyLockupContract {
         _;
     }
 
-    modifier onlyAcquisitionCampaign() {
-        require(msg.sender == twoKeyAcquisitionCampaignERC20Address);
+    modifier onlyTwoKeyConversionHandler() {
+        require(msg.sender == twoKeyConversionHandler);
         _;
     }
 
+
     constructor(uint _tokenDistributionDate, uint _maxDistributionDateShiftInDays, uint _tokens, address _converter, address _contractor, address _acquisitionCampaignERC20Address) public {
+        twoKeyConversionHandler = msg.sender;
         tokenDistributionDate = _tokenDistributionDate;
         maxDistributionDateShiftInDays = _maxDistributionDateShiftInDays;
         tokens = _tokens;
@@ -62,12 +65,12 @@ contract TwoKeyLockupContract {
     }
     //TODO: Emit events through TwoKeyEventSource
 
-    function cancelCampaign() public onlyAcquisitionCampaign {
+    function cancelCampaignAndGetBackTokens(address _assetContractERC20) public onlyTwoKeyConversionHandler {
         require(block.timestamp < tokenDistributionDate);
         // Get the tokens back to campaign
         _assetContractERC20.call(
             bytes4(keccak256(abi.encodePacked("transfer(address,uint256)"))),
-            twoKeyAcquisitionCampaignERC20Address, tokens
+            twoKeyConversionHandler, tokens
         );
         selfdestruct(twoKeyAcquisitionCampaignERC20Address);
     }

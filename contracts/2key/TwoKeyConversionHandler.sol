@@ -28,6 +28,8 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
 
     mapping(address => address[]) converterToLockupContracts;
 
+    address[] allLockUpContracts;
+
     /*
         TODO: Move from acquisitioncampaign when update all events to TwoKeyEventSource and call them from there
     */
@@ -231,6 +233,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         TwoKeyLockupContract firstLockUp = new TwoKeyLockupContract(tokenDistributionDate, maxDistributionDateShiftInDays,
                             conversion.baseTokenUnits, _converter, conversion.contractor, twoKeyAcquisitionCampaignERC20);
 
+        allLockUpContracts.push(address(firstLockUp));
 
         ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).moveFungibleAsset(address(firstLockUp), conversion.baseTokenUnits);
         uint bonusAmountSplited = conversion.bonusTokenUnits / bonusTokensVestingMonths;
@@ -241,7 +244,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
                                     bonusTokensVestingStartShiftInDaysFromDistributionDate + i*(30 days), maxDistributionDateShiftInDays, bonusAmountSplited,
                                     _converter, conversion.contractor, twoKeyAcquisitionCampaignERC20);
             ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).moveFungibleAsset(address(lockup), bonusAmountSplited);
-
+            allLockUpContracts.push(address(lockup));
             lockupContracts[i] = lockup;
         }
         lockupContracts[lockupContracts.length - 1] = firstLockUp;
@@ -392,10 +395,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         address[] memory pending = conversionStateToConverters[key];
         for(uint i=0; i< pending.length; i++) {
             if(pending[i] == _converter) {
-                // Means we have found it in array of pending addresses
-//                converterToConversionState[_converter] = ConversionState.APPROVED;
                 conversionStateToConverters[destinationState].push(_converter);
-                //assigning the value of last element
                 pending[i] = pending[pending.length-1];
                 delete pending[pending.length-1];
                 conversionStateToConverters[key] = pending;
@@ -465,13 +465,11 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).sendBackEthWhenConversionCancelled(msg.sender, conversion.conversionAmount);
     }
 
-    function moderatorWithdraw() public {
-        require(msg.sender == moderator); //requiring that moderator is msg.sender
-        uint rate; // How to get rate from twokey to eth
-        uint twoKeyAmount = moderatorBalanceETHWei * rate;
 
-        //Now to implement twoKeyAdmin transfer of this tokens
+    function cancelAndRejectContract() public onlyTwoKeyAcquisitionCampaign {
+        for(uint i=0; i<allLockUpContracts.length; i++) {
+            TwoKeyLockupContract(allLockUpContracts[i]).cancelCampaignAndGetBackTokens(assetContractERC20);
+        }
     }
-
 
 }
