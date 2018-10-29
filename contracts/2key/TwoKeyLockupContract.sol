@@ -62,13 +62,14 @@ contract TwoKeyLockupContract {
     }
     //TODO: Emit events through TwoKeyEventSource
 
-//    function cancelCampaign() public onlyAcquisitionCampaign {
-//        // Get the tokens back to campaign
-//        _assetContractERC20.call(
-//            bytes4(keccak256(abi.encodePacked("transfer(address,uint256)"))),
-//            twoKeyAcquisitionCampaignERC20Address, tokens
-//        );
-//        selfdestruct(twoKeyAcquisitionCampaignERC20Address);
-//    }
+    function cancelCampaign() public onlyAcquisitionCampaign {
+        require(block.timestamp < tokenDistributionDate);
+        // Get the tokens back to campaign
+        _assetContractERC20.call(
+            bytes4(keccak256(abi.encodePacked("transfer(address,uint256)"))),
+            twoKeyAcquisitionCampaignERC20Address, tokens
+        );
+        selfdestruct(twoKeyAcquisitionCampaignERC20Address);
+    }
 
 }

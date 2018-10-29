@@ -707,7 +707,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         _cancelledConverter.transfer(_conversionAmount);
     }
 
-
     function sealAndApprove() public onlyContractor {
         require(finalized = false);
         finalized = true;
