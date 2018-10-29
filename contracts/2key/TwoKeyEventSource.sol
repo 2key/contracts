@@ -116,10 +116,7 @@ contract TwoKeyEventSource is TwoKeyTypes {
         twoKeyAdmin = _twoKeyAdminAddress;
     }
 
-    /// TODO: Put in constructor because of security issues (?)
-    /// TODO: TwoKeyAdmin is owner
-    /// TODO: Research about synchronization (concurrency)
-    /// TODO: Bytecodes whitelist
+
     function addTwoKeyReg(address _twoKeyReg) public {
         interfaceTwoKeyReg = ITwoKeyReg(_twoKeyReg);
     }
@@ -134,6 +131,7 @@ contract TwoKeyEventSource is TwoKeyTypes {
         canEmit[_contractCode] = true;
     }
 
+
     /// @notice function where admin or any authorized person (will be added if needed) can remove contract (disable permissions to emit Events)
     /// @param _contractAddress is actually the address of contract we'd like to disable
     /// @dev We first fetch bytes32 contract code and then update our mapping
@@ -144,6 +142,7 @@ contract TwoKeyEventSource is TwoKeyTypes {
         canEmit[_contractCode] = false;
     }
 
+
     /// @notice Function where an admin can authorize any other person to modify allowed contracts
     /// @param _newAddress is the address of new modifier contract / account
     /// @dev if only contract can be modifier then we'll add one more validation step
@@ -151,6 +150,7 @@ contract TwoKeyEventSource is TwoKeyTypes {
         require(_newAddress != address(0));
         authorizedSubadmins[_newAddress] = true;
     }
+
 
     /// @notice Function to remove authorization from an modifier
     /// @param _authorizedAddress is the address of modifier
@@ -162,6 +162,7 @@ contract TwoKeyEventSource is TwoKeyTypes {
         authorizedSubadmins[_authorizedAddress] = false;
     }
 
+
     /// @notice Function to map contract code to type of campaign
     /// @dev is contract required to be allowed to emit to even exist in mapping codeToType
     /// @param _contractCode is code od contract
@@ -171,6 +172,7 @@ contract TwoKeyEventSource is TwoKeyTypes {
         codeToType[_contractCode] = _campaignType;
     }
 
+
     /// @notice Function where admin can be changed
     /// @param _newAdminAddress is the address of new admin
     /// @dev think about some security layer here
@@ -178,17 +180,20 @@ contract TwoKeyEventSource is TwoKeyTypes {
         twoKeyAdmin = _newAdminAddress;
     }
 
+
     function checkCanEmit(bytes _contractCode) public view returns (bool) {
         return canEmit[_contractCode];
     }
+
 
     /// @dev Only allowed contracts can call this function ---> means can emit events
     /// This user will be contractor
     /// onlyAllowedContracts commented so Andri can fetch this
     function created(address _campaign, address _owner) public {
-//        interfaceTwoKeyReg.addWhereContractor(_campaign, _owner);
+        interfaceTwoKeyReg.addWhereContractor(_campaign, _owner);
     	emit Created(_campaign, _owner);
     }
+
 
     /// @dev Only allowed contracts can call this function ---> means can emit events
     /// This user will be refferer
@@ -198,11 +203,13 @@ contract TwoKeyEventSource is TwoKeyTypes {
     	emit Joined(_campaign, _from, _to);
     }
 
+
     /// @dev Only allowed contracts can call this function ---> means can emit events
     //onlyAllowedContracts
     function escrow(address _campaign, address _converter, string _assetName, address _childContractID, uint256 _indexOrAmount, CampaignType _type) public {
     	emit Escrow(_campaign, _converter, _assetName, _childContractID, _indexOrAmount, _type);
     }
+
 
     /// @dev Only allowed contracts can call this function ---> means can emit events
     // onlyAllowedContracts
@@ -210,11 +217,13 @@ contract TwoKeyEventSource is TwoKeyTypes {
     	emit Rewarded(_campaign, _to, _amount);
 	}
 
+
     /// @dev Only allowed contracts can call this function ---> means can emit events
     //onlyAllowedContracts
 	function fulfilled(address  _campaign, address _converter, string _assetName, address _childContractID, uint256 _indexOrAmount, CampaignType _type) public  {
 		emit Fulfilled(_campaign, _converter, _assetName, _childContractID, _indexOrAmount, _type);
 	}
+
 
     /// @dev Only allowed contracts can call this function ---> means can emit events
     //onlyAllowedContracts
@@ -222,17 +231,20 @@ contract TwoKeyEventSource is TwoKeyTypes {
 		emit Cancelled(_campaign, _converter, _assetName, _childContractID, _indexOrAmount, _type);
 	}
 
+
     /// @dev Only allowed contracts can call this function - means can emit events
     ///onlyAllowedContracts
     function updatedPublicMetaHash(uint timestamp, string value) public  {
         emit UpdatedPublicMetaHash(timestamp, value);
     }
 
+
     /// @dev Only allowed contracts can call this function - means can emit events
     // onlyAllowedContracts
     function updatedData(uint timestamp, uint value, string action) public  {
         emit UpdatedData(timestamp, value, action);
     }
+
 
     /// @dev Only allowed contracts can call this function - means can emit events
     //onlyAllowedContracts
@@ -244,6 +256,7 @@ contract TwoKeyEventSource is TwoKeyTypes {
     function getAdmin() public view returns (address) {
         return twoKeyAdmin;
     }
+
 
     function checkIsAuthorized(address _subAdmin) public view returns (bool) {
         return authorizedSubadmins[_subAdmin];
