@@ -57,23 +57,20 @@ contract TwoKeyLockupContract {
         return true;
     }
 
-    function areTokensUnlocked() public onlyConverter returns (bool) {
+    function areTokensUnlocked() public view onlyConverter returns (bool) {
         if(block.timestamp > tokenDistributionDate) {
             return true;
         }
         return false;
     }
-    //TODO: Emit events through TwoKeyEventSource
 
 
     function cancelCampaignAndGetBackTokens(address _assetContractERC20) public onlyTwoKeyConversionHandler {
-        // Get the tokens back to campaign
-        _assetContractERC20.call(
+        _assetContractERC20.call( //Send the tokens back to campaign
             bytes4(keccak256(abi.encodePacked("transfer(address,uint256)"))),
             twoKeyAcquisitionCampaignERC20Address, tokens
         );
         selfdestruct(twoKeyAcquisitionCampaignERC20Address);
     }
-//    }
 
 }
