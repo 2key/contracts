@@ -670,7 +670,25 @@ describe('TwoKeyProtocol', () => {
     }).timeout(30000);
     it('should print after all tests', printBalances).timeout(15000);
 
-
+    it('should print balances of ERC20 on lockupContracts', async() => {
+        const { web3, address } = web3switcher.aydnep();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            plasmaPK: Sign.generatePrivateKey().toString('hex'),
+        });
+        const addresses = await twoKeyProtocol.AcquisitionCampaign.getLockupContractsForConverter(campaignAddress, env.TEST4_ADDRESS, from);
+        console.log('Lockup contracts addresses : ' + addresses);
+        for(let i=0; i<addresses.length; i++) {
+            let addressCurrent = addresses[i].toString();
+            let balance = await twoKeyProtocol.ERC20.getERC20Balance(twoKeyEconomy, addressCurrent);
+            console.log("Address: " + addressCurrent + " ----- balance: " + balance);
+        }
+    })
     // it('should return two variables', async() => {
     //     const result = await twoKeyProtocol.AcquisitionCampaign.checkData(campaignAddress, env.TEST4_ADDRESS);
     //     console.log(result);

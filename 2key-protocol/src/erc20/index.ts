@@ -30,7 +30,7 @@ export default class ERC20 implements IERC20 {
         return new Promise<number>(async(resolve,reject) => {
             try {
                 const erc20Instance = await this.helpers._getERC20Instance(erc20);
-                const balance = await erc20Instance.balanceOf(address);
+                const balance = await promisify(erc20Instance.balanceOf, [address]);
                 resolve(balance);
             } catch (e) {
                 reject(e);
