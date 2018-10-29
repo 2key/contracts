@@ -30,10 +30,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
 
     address[] allLockUpContracts;
 
-    /*
-        TODO: Move from acquisitioncampaign when update all events to TwoKeyEventSource and call them from there
-    */
-
     address twoKeyAcquisitionCampaignERC20;
     address moderator;
     address contractor;
@@ -46,7 +42,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     uint maxDistributionDateShiftInDays; // 180 days
     uint bonusTokensVestingMonths; // 6 months
     uint bonusTokensVestingStartShiftInDaysFromDistributionDate; // 180 days
-
 
     uint moderatorBalanceETHWei;
     uint moderatorTotalEarningsETHWei;
@@ -276,20 +271,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         }
     }
 
-//    function getConverterConversionState(address _converter) public view returns (string) {
-//        ConversionState state = converterToConversionState[_converter];
-//        if(state == ConversionState.APPROVED) {
-//            return "APPROVED";
-//        } else if(state == ConversionState.REJECTED) {
-//            return "REJECTED";
-//        } else if(state == ConversionState.CANCELLED) {
-//            return "CANCELLED";
-//        } else if(state == ConversionState.FULFILLED) {
-//            return "FULFILLED";
-//        } else if(state == ConversionState.PENDING) {
-//            return "PENDING";
-//        }
-//    }
 
     /// @notice Function to check whether converter is approved or not
     /// @dev only contractor or moderator are eligible to call this function
@@ -302,6 +283,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         return false;
     }
 
+
     /// @notice Function to check whether converter is rejected or not
     /// @dev only contractor or moderator are eligible to call this function
     /// @param _converter is the address of converter
@@ -313,6 +295,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         return false;
     }
 
+
     /// @notice Function to check whether converter is cancelled or not
     /// @dev only contractor or moderator are eligible to call this function
     /// @param _converter is the address of converter
@@ -323,6 +306,8 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         }
         return false;
     }
+
+
     /// @notice Function to check whether converter is fulfilled or not
     /// @dev only contractor or moderator are eligible to call this function
     /// @param _converter is the address of converter
@@ -334,6 +319,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         return false;
     }
 
+
     /// @notice Function to check whether converter is pending or not
     /// @dev only contractor or moderator are eligible to call this function
     /// @param _converter is the address of converter
@@ -344,6 +330,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         }
         return false;
     }
+
 
     /// @notice Function to get all pending converters
     /// @dev view function - no gas cost & only Contractor or Moderator can call this function - otherwise will revert
@@ -359,6 +346,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         return conversionStateToConverters[bytes32("REJECTED")];
     }
 
+
     /// @notice Function to get all approved converters
     /// @dev view function - no gas cost & only Contractor or Moderator can call this function - otherwise will revert
     /// @return array of approved converter addresses
@@ -366,12 +354,14 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         return conversionStateToConverters[bytes32("APPROVED")];
     }
 
+
     /// @notice Function to get all cancelled converters
     /// @dev view function - no gas cost & only Contractor or Moderator can call this function - otherwise will revert
     /// @return array of cancelled converter addresses
     function getAllCancelledConverters() public view onlyContractorOrModerator returns(address[]) {
         return conversionStateToConverters[bytes32("CANCELLED")];
     }
+
 
     /// @notice Function to get all fulfilled converters
     /// @dev view function - no gas cost & only Contractor or Moderator can call this function - otherwise will revert
@@ -389,7 +379,11 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         return converterToLockupContracts[_converter];
     }
 
-    function moveFromStateAToStateB(address _converter, bytes32 destinationState) {
+
+    /// @notice Function to move converter address from stateA to stateB
+    /// @param _converter is the address of converter
+    /// @param destinationState is the state we'd like to move converter to
+    function moveFromStateAToStateB(address _converter, bytes32 destinationState) internal {
         ConversionState state = converterToConversionState[_converter];
         bytes32 key = convertConverterStateToBytes(state);
         address[] memory pending = conversionStateToConverters[key];
@@ -404,6 +398,8 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
             }
         }
     }
+
+
     /// @notice Function where we can change state of converter to Approved
     /// @dev Converter can only be approved if his previous state is pending or rejected
     /// @param _converter is the address of converter
@@ -412,6 +408,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         moveFromStateAToStateB(_converter, destination);
         converterToConversionState[_converter] = ConversionState.APPROVED;
     }
+
 
     /// @notice Function where we can change state of converter to Approved
     /// @dev Converter can only be approved if his previous state is pending or rejected
@@ -432,12 +429,15 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         converterToConversionState[_converter] = ConversionState.REJECTED;
     }
 
-
+    /// @notice Function where we're going to move state of conversion from approved to fulfilled
+    /// @dev private function, will be executed in another one
+    /// @param _converter is the address of converter
     function moveFromApprovedToFulfilledState(address _converter) private {
         bytes32 destination = bytes32("FULFILLED");
         moveFromStateAToStateB(_converter, destination);
         converterToConversionState[_converter] = ConversionState.FULFILLED;
     }
+
 
     /// @notice Function where we are approving converter
     /// @dev only moderator or contractor can call this method
@@ -447,6 +447,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         moveFromPendingOrRejectedToApprovedState(_converter);
     }
 
+
     /// @notice Function where we can reject converter
     /// @dev only moderator or contractor can call this function
     /// @param _converter is the address of converter
@@ -455,8 +456,9 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         moveFromPendingToRejectedState(_converter);
     }
 
-    // only moderator or contractor also can call this method maybe?
-    function cancelConverter() public {
+
+    /// @notice Function where contractor or moderator can cancel the converter
+    function cancelConverter() public onlyContractorOrModerator{
         require(converterToConversionState[msg.sender] == ConversionState.REJECTED ||
         converterToConversionState[msg.sender] == ConversionState.PENDING);
         moveFromPendingOrRejectedToCancelledState(msg.sender);
