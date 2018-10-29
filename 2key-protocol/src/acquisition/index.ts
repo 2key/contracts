@@ -605,7 +605,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
             try {
                 const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
                 const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
-                const txHash: string = await promisify(conversionHandlerInstance.approveConverter, [converter, {from}]);
+                const txHash: string = await promisify(conversionHandlerInstance.approveConverter, [converter, {from, gasPrice}]);
                 resolve(txHash);
             } catch (e) {
                 reject(e);
@@ -618,7 +618,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
             try {
                 const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
                 const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
-                const txHash: string = await promisify(conversionHandlerInstance.rejectConverter, [converter, {from}]);
+                const txHash: string = await promisify(conversionHandlerInstance.rejectConverter, [converter, {from, gasPrice}]);
                 resolve(txHash);
             } catch (e) {
                 reject(e);
@@ -631,7 +631,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
             try {
                 const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
                 const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
-                const txHash: string = await promisify(conversionHandlerInstance.cancelConverter, [{from}]);
+                const txHash: string = await promisify(conversionHandlerInstance.cancelConverter, [{from, gasPrice}]);
                 resolve(txHash);
             } catch (e) {
                 reject(e);
@@ -671,7 +671,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
                 const conversionHandlerInstance = this.base.web3.eth.contract(contracts.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
 
-                const txHash: string = await promisify(conversionHandlerInstance.executeConversion, [converter, {from}]);
+                const txHash: string = await promisify(conversionHandlerInstance.executeConversion, [converter, {from, gasPrice}]);
                 this.base._log(txHash);
                 resolve(txHash);
             } catch (e) {
@@ -699,7 +699,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         return new Promise(async (resolve, reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-                const txHash: string = await promisify(campaignInstance.addUnitsToInventory, [amount, {from}]);
+                const txHash: string = await promisify(campaignInstance.addUnitsToInventory, [amount, {from, gasPrice}]);
                 resolve(txHash);
             } catch (e) {
                 reject(e);
