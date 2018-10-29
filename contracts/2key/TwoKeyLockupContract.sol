@@ -67,7 +67,6 @@ contract TwoKeyLockupContract {
 
 
     function cancelCampaignAndGetBackTokens(address _assetContractERC20) public onlyTwoKeyConversionHandler {
-        require(block.timestamp < tokenDistributionDate);
         // Get the tokens back to campaign
         _assetContractERC20.call(
             bytes4(keccak256(abi.encodePacked("transfer(address,uint256)"))),
@@ -75,5 +74,6 @@ contract TwoKeyLockupContract {
         );
         selfdestruct(twoKeyAcquisitionCampaignERC20Address);
     }
+//    }
 
 }

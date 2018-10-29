@@ -706,4 +706,17 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
             }
         })
     }
+
+
+    public cancel(campaign: any, from: string): Promise<string> {
+        return new Promise<string>(async (resolve, reject) => {
+            try {
+                const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
+                const txHash: string = await promisify(campaignInstance.cancel,[{from}]);
+                resolve(txHash);
+            } catch(e) {
+                reject(e);
+            }
+        })
+    }
 }

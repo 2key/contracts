@@ -713,7 +713,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
 
 
     function cancel() public onlyContractor {
-        require(block.timestamp > campaignStartTime && block.timestamp < campaignEndTime);
         conversionHandler.cancelAndRejectContract();
         withdrawApproved = false;
         canceled = true;

@@ -68,7 +68,8 @@ export interface ITwoKeyAcquisitionCampaign {
     visit: (campaignAddress: string, referralLink: string) => Promise<string>,
     executeConversion: (campaign: any, converter: string, from: string, gasPrice? :number) => Promise<string>,
     getLockupContractsForConverter: (campaign: any, converter: string, from: string) => Promise<string[]>,
-    addFungibleAssetsToInventoryOfCampaign(campaign: any, amount: number, from: string, gasPrice? :number) : Promise<string>,
+    addFungibleAssetsToInventoryOfCampaign: (campaign: any, amount: number, from: string, gasPrice? :number) => Promise<string>,
+    cancel: (campaign: any, from: string) => Promise<string>,
 }
 
 export interface IPublicLinkOpts {
