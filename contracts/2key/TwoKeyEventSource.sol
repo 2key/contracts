@@ -73,37 +73,36 @@ contract TwoKeyEventSource is TwoKeyTypes {
     );
 
 
-    ///Address of the contract admin - interface
-//    TwoKeyAdmin twoKeyAdmin;
+    // TwoKeyAdmin twoKeyAdmin;
     address twoKeyAdmin;
 
     /// Interface representing TwoKeyReg contract (Reducing gas usage that's why interface instead of contract instance)
     ITwoKeyReg interfaceTwoKeyReg;
 
-    ///Mapping contract bytecode to boolean if is allowed to emit an event
+    /// Mapping contract bytecode to boolean if is allowed to emit an event
     mapping(bytes => bool) canEmit;
 
     /// Mapping contract bytecode to enumerator CampaignType.
     mapping(bytes => CampaignType) codeToType;
 
 
-    ///Mapping an address to boolean if allowed to modify
+    /// Mapping an address to boolean if allowed to modify
     mapping(address => bool) authorizedSubadmins;
 
 
-    ///@notice Modifier which allows only admin to call a function - can be easily modified if there is going to be more admins
+    /// @notice Modifier which allows only admin to call a function - can be easily modified if there is going to be more admins
     modifier onlyAdmin {
         require(msg.sender == address(twoKeyAdmin));
         _;
     }
 
-    ///@notice Modifier which allows all modifiers to update canEmit mapping - ever
+    /// @notice Modifier which allows all modifiers to update canEmit mapping - ever
     modifier onlyAuthorizedSubadmins {
         require(authorizedSubadmins[msg.sender] == true || msg.sender == address(twoKeyAdmin));
         _;
     }
 
-    ///@notice Modifier which will only allow allowed contracts to emit an event
+    /// @notice Modifier which will only allow allowed contracts to emit an event
     modifier onlyAllowedContracts {
         //just to use contract code instead of msg.sender address
         bytes memory code = GetCode.at(msg.sender);
