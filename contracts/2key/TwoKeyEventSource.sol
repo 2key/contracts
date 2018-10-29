@@ -7,16 +7,70 @@ import "../interfaces/ITwoKeyReg.sol";
 contract TwoKeyEventSource is TwoKeyTypes {
 
     /// Events
-    event Created(address indexed _campaign, address indexed _owner);
-    event Joined(address indexed _campaign, address indexed _from, address indexed _to);
-    event Escrow(address indexed _campaign, address indexed _converter, string indexed assetName, address _childContractID, uint256 _indexOrAmount, CampaignType _type);
-    event Rewarded(address indexed _campaign, address indexed _to, uint256 _amount);
-    event Fulfilled(address indexed _campaign, address indexed _converter, string indexed assetName, address _childContractID, uint256 _indexOrAmount, CampaignType _type);
-    event Cancelled(address indexed _campaign, address indexed _converter, string indexed assetName, address _childContractID, uint256 _indexOrAmount, CampaignType _type);
-    event Rejected(address indexed _campaign, address indexed _converter);
-    event UpdatedPublicMetaHash(uint timestamp, string value);
-    event UpdatedData(uint timestamp, uint value, string action);
-    event ReceivedEther(address _sender, uint value);
+    event Created(
+        address indexed _campaign,
+        address indexed _owner
+    );
+
+    event Joined(
+        address indexed _campaign,
+        address indexed _from,
+        address indexed _to
+    );
+
+    event Escrow(
+        address indexed _campaign,
+        address indexed _converter,
+        string indexed assetName,
+        address _childContractID,
+        uint256 _indexOrAmount,
+        CampaignType _type
+    );
+
+    event Rewarded(
+        address indexed _campaign,
+        address indexed _to,
+        uint256 _amount
+    );
+
+    event Fulfilled(
+        address indexed _campaign,
+        address indexed _converter,
+        string indexed assetName,
+        address _childContractID,
+        uint256 _indexOrAmount,
+        CampaignType _type
+    );
+
+    event Cancelled(
+        address indexed _campaign,
+        address indexed _converter,
+        string indexed assetName,
+        address _childContractID,
+        uint256 _indexOrAmount,
+        CampaignType _type
+    );
+
+    event Rejected(
+        address indexed _campaign,
+        address indexed _converter
+    );
+
+    event UpdatedPublicMetaHash(
+        uint timestamp,
+        string value
+    );
+
+    event UpdatedData(
+        uint timestamp,
+        uint value,
+        string action
+    );
+
+    event ReceivedEther(
+        address _sender,
+        uint value
+    );
 
 
     ///Address of the contract admin - interface
