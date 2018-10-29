@@ -5,12 +5,10 @@ import "../openzeppelin-solidity/contracts/token/ERC20/ERC20Basic.sol";
 
 
 /**
- * @title Standard ERC20 token
- *
- * @dev Implementation of the basic standard token.
- * https://github.com/ethereum/EIPs/issues/20
- * Based on code by FirstBlood: https://github.com/Firstbloodio/token/blob/master/smart_contract/FirstBloodToken.sol
- */
+    Implementation of ERC20 token with frozen/unfrozen options
+    Core taken from openzeppelin contracts
+    @author Nikola Madjarevic added frozen transfer options
+*/
 contract StandardTokenModified is ERC20Basic {
 
     using SafeMath for uint256;
