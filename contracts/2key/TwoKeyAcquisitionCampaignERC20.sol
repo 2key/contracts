@@ -111,7 +111,9 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     string symbol;
 
     // Until contractor set this to be true, no one can withdraw funds etc.
-    bool finalized = false;
+    bool withdrawApproved = false;
+
+    bool canceled = false;
 
 
     // ==============================================================================================================
@@ -130,10 +132,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
         _;
     }
 
-    modifier onlyIfFinalized {
-        require(finalized == true);
-        _;
-    }
 
 
     // ==============================================================================================================
@@ -708,17 +706,38 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     }
 
     function sealAndApprove() public onlyContractor {
-        require(finalized = false);
-        finalized = true;
+        require(block.timestamp > campaignStartTime && block.timestamp < campaignEndTime);
+        require(withdrawApproved = false);
+        withdrawApproved = true;
     }
+
 
     function cancel() public onlyContractor {
+        require(block.timestamp > campaignStartTime && block.timestamp < campaignEndTime);
         conversionHandler.cancelAndRejectContract();
-        finalized = false;
+        withdrawApproved = false;
+        canceled = true;
     }
 
+    function isWithdrawApproved() public view returns (bool) {
+        return withdrawApproved;
+    }
 
-    function isFinalized() public view returns (bool) {
-        return finalized;
+    function converterWithdrawEth() public {
+        require(canceled == true);
+        //transfer back funds to converter
+        msg.sender.transfer(balancesConvertersETH[msg.sender]);
+    }
+
+    function contractorWithdrawERC20() public {
+        require(canceled == true);
+        require(msg.sender == contractor);
+        uint amount = getInventoryBalance();
+        require(
+            assetContractERC20.call(
+                bytes4(keccak256(abi.encodePacked("transfer(address,uint256)"))),
+                contractor, amount
+            )
+        );
     }
 }
