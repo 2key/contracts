@@ -120,6 +120,8 @@ function wrapper(idOfNetwork) {
     calculateNonSingletoneHash();
     writeToFile();
 }
+
+
 function main() {
     const command = process.argv[2];
     if (command !== '--network') {
@@ -140,7 +142,7 @@ function main() {
     console.log("Done");
 }
 
-main();
+// main();
 
 module.exports = {
     wrapper,
