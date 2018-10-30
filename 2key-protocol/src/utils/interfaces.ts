@@ -112,8 +112,8 @@ export interface ITwoKeyHelpers {
 export interface ITwoKeyUtils {
     ipfsAdd: (data: any) => Promise<string>,
     getOffchainDataFromIPFSHash: (hash: string) => Promise<IOffchainData>,
-    fromWei: (number: number | string | BigNumber, unit?: string) => string | BigNumber,
-    toWei: (number: string | number | BigNumber, unit?: string) => BigNumber,
+    fromWei: (number: number | string | BigNumber, unit?: string | number) => string | BigNumber,
+    toWei: (number: string | number | BigNumber, unit?: string | number) => BigNumber,
     toHex: (data: any) => string,
     balanceFromWeiString: (meta: BalanceMeta, opts?: IBalanceFromWeiOpts) => IBalanceNormalized,
     getTransactionReceiptMined: (txHash: string, opts?: ITxReceiptOpts) => Promise<ITransactionReceipt>,

@@ -50,6 +50,8 @@ export class TwoKeyProtocol {
     private networks: IEhtereumNetworks;
     private contracts: IContractsAddresses;
     private twoKeyEconomy: any;
+    private twoKeyAdmin: any;
+    private twoKeyCongress: any;
     private twoKeyReg: any;
     private twoKeyPlasmaEvents: any;
     private twoKeyEvents: any;
@@ -110,8 +112,6 @@ export class TwoKeyProtocol {
         if (web3) {
             this.web3 = new Web3(web3.currentProvider);
             this.web3.eth.defaultBlock = 'pending';
-            this.twoKeyEconomy = this.web3.eth.contract(contractsMeta.TwoKeyEconomy.abi).at(contractsMeta.TwoKeyEconomy.networks[this.networks.mainNetId].address);
-            this.twoKeyReg = this.web3.eth.contract(contractsMeta.TwoKeyReg.abi).at(contractsMeta.TwoKeyReg.networks[this.networks.mainNetId].address);
             // this.twoKeyEventSource = this.web3.eth.contract(contractsMeta.TwoKeyEventSource.abi).at(contractsMeta.TwoKeyEventSource.networks[this.networks.mainNetId].address);
         } else if (rpcUrl) {
             const mainEngine = new ProviderEngine();
@@ -123,6 +123,10 @@ export class TwoKeyProtocol {
         } else {
             throw new Error('No web3 instance');
         }
+        this.twoKeyEconomy = this.web3.eth.contract(contractsMeta.TwoKeyEconomy.abi).at(contractsMeta.TwoKeyEconomy.networks[this.networks.mainNetId].address);
+        this.twoKeyReg = this.web3.eth.contract(contractsMeta.TwoKeyReg.abi).at(contractsMeta.TwoKeyReg.networks[this.networks.mainNetId].address);
+        this.twoKeyAdmin = this.web3.eth.contract(contractsMeta.TwoKeyAdmin.abi).at(contractsMeta.TwoKeyAdmin.networks[this.networks.mainNetId].address);
+        this.twoKeyCongress = this.web3.eth.contract(contractsMeta.TwoKeyCongress.abi).at(contractsMeta.TwoKeyCongress.networks[this.networks.mainNetId].address);
 
         this.ipfs = ipfsAPI(ipfsIp, ipfsPort, {protocol});
 

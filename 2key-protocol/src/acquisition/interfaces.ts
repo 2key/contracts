@@ -17,6 +17,12 @@ export interface IAcquisitionCampaignMeta {
     campaignPublicLinkKey: string
 }
 
+export interface ITokenAmount {
+    baseTokens: number,
+    bonusTokens: number,
+    totalTokens: number,
+}
+
 export interface IAcquisitionCampaign {
     moderator?: string, // Address of the moderator - it's a contract that works (operates) as admin of whitelists contracts
     conversionHandlerAddress?: string,
@@ -61,6 +67,7 @@ export interface ITwoKeyAcquisitionCampaign {
     joinAndSetPublicLinkWithCut: (campaign: any, from: string, referralLink: string, opts?: IPublicLinkOpts) => Promise<string>,
     joinAndShareARC: (campaign: any, from: string, referralLink: string, recipient: string, opts?: IPublicLinkOpts) => Promise<string>,
     joinAndConvert: (campaign: any, value: string | number | BigNumber, publicLink: string, from: string, gasPrice?: number) => Promise<string>,
+    getEstimatedTokenAmount: (campaign: any, value: string | number | BigNumber) => Promise<ITokenAmount>,
     getTwoKeyConversionHandlerAddress: (campaign: any) => Promise<string>,
     // getAssetContractData: (campaign: any) => Promise<any>,
     approveConverter: (campaign: any, converter: string, from: string, gasPrice? :number) => Promise<string>,

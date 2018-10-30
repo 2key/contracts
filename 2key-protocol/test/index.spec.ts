@@ -429,6 +429,12 @@ describe('TwoKeyProtocol', () => {
         expect(hash).to.be.a('string');
     }).timeout(300000);
 
+    it('should print amount of tokens that user want to buy', async () => {
+       const tokens = await twoKeyProtocol.AcquisitionCampaign.getEstimatedTokenAmount(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETH, 'ether'));
+       console.log(tokens);
+       expect(tokens.totalTokens).to.gte(0);
+    });
+
     it('should buy some tokens', async () => {
         console.log('4) buy from test4 REFLINK', refLink);
         const txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETH, 'ether'), refLink, from);
