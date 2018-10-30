@@ -113,6 +113,7 @@ library Call {
 
 
     function recoverHash(bytes32 hash, bytes sig, uint idx) pure returns (address) {
+        // same as recoverHash in utils/sign.js
         // The signature format is a compact form of:
         //   {bytes32 r}{bytes32 s}{uint8 v}
         // Compact means, uint8 is not padded to 32 bytes.
@@ -136,9 +137,9 @@ library Call {
         {
             v := mload(add(sig, idx))
         }
-        if (v >= 32) {
+        if (v >= 32) { // handle case when signature was made with ethereum web3.eth.sign or getSign which is for signing ethereum transactions
             v -= 32;
-            bytes memory prefix = "\x19Ethereum Signed Message:\n32";
+            bytes memory prefix = "\x19Ethereum Signed Message:\n32"; // 32 is the number of bytes in the following hash
             hash = keccak256(abi.encodePacked(prefix, hash));
         }
         if (v <= 1) v += 27;
