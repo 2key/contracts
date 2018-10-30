@@ -58,41 +58,8 @@ contract TwoKeyPlasmaEvents {
     function add_plasma2ethereum(bytes sig) public { // , bool with_prefix) public {
         // add an entry connecting msg.sender to the ethereum address that was used to sign sig.
         // see setup_demo.js on how to generate sig
-        // with_prefix should be true when using web3.eth.sign/getSign and false when using eth_signTypedData/ecsign
         bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to plasma address")),keccak256(abi.encodePacked(msg.sender))));
-//        if (with_prefix) {
-//            bytes memory prefix = "\x19Ethereum Signed Message:\n32";
-//            hash = keccak256(abi.encodePacked(prefix, hash));
-//        }
-//
         require (sig.length == 65, 'bad signature length');
-//        // The signature format is a compact form of:
-//        //   {bytes32 r}{bytes32 s}{uint8 v}
-//        // Compact means, uint8 is not padded to 32 bytes.
-//        uint idx = 32;
-//        bytes32 r;
-//        assembly
-//        {
-//            r := mload(add(sig, idx))
-//        }
-//
-//        idx += 32;
-//        bytes32 s;
-//        assembly
-//        {
-//            s := mload(add(sig, idx))
-//        }
-//
-//        idx += 1;
-//        uint8 v;
-//        assembly
-//        {
-//            v := mload(add(sig, idx))
-//        }
-//        if (v <= 1) v += 27;
-//        require(v==27 || v==28,'bad sig v');
-//
-//        address eth_address = ecrecover(hash, v, r, s);
         address eth_address = Call.recoverHash(hash,sig,0);
         if (plasma2ethereum[msg.sender] != eth_address) {
             plasma2ethereum[msg.sender] = eth_address;
@@ -126,7 +93,7 @@ contract TwoKeyPlasmaEvents {
         // c - addresss of the contract on ethereum
         // contractor - is the ethereum address of the contractor who created c. a dApp can read this information for free from ethereum.
         // caller must use the 2key-link and put his plasma address at the end using free_take
-        // sig contains the "from" and at the tip of sig you should put your own plasma address (msg.sender)
+        // sig contains the "from" and at the end of sig you should put your own plasma address (msg.sender) or a signature of cut using it
 
         address old_address;
         assembly

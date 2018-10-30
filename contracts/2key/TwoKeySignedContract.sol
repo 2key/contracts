@@ -15,21 +15,22 @@ contract TwoKeySignedContract is TwoKeyContract {
 
 
   function transferSig(bytes sig) public returns (address[]) {
-    // TODO keep same as code in TwoKeyPlasmaEvents.sol:visited
-    // move ARCs based on signature information
+    // move ARCs and set public_link keys and weights/cuts based on signature information
     // returns the last address in the sig
 
     // sig structure:
+    // 1 byte version 0 or 1
     // 20 bytes are the address of the contractor or the influencer who created sig.
     //  this is the "anchor" of the link
     //  It must have a public key aleady stored for it in public_link_key
     // Begining of a loop on steps in the link:
-    // 65 bytes are step-signature using the secret from previous step
-    // next is the message of the step that is going to be hashed and used to compute the above step-signature.
-    // message length depend on version:
-    //  1 byte cut (percentage) each influencer takes from the bounty. the cut is stored in influencer2cut
-    //  20 bytes address of influencer
-    //  20 bytes public key of the last secret
+    // * 65 bytes are step-signature using the secret from previous step
+    // * message of the step that is going to be hashed and used to compute the above step-signature.
+    //   message length depend on version 41 (version 0) or 86 (version 1):
+    //   * 1 byte cut (percentage) each influencer takes from the bounty. the cut is stored in influencer2cut or weight for voting
+    //   * 20 bytes address of influencer (version 0) or 65 bytes of signature of cut using the influencer address to sign
+    //   * 20 bytes public key of the last secret
+    // In the last step the message can be optional. If it is missing the message used is the address of the sender
     address old_address;
     assembly
     {
