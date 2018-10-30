@@ -721,22 +721,22 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, Utils, TwoKeyTypes
     function isWithdrawApproved() public view returns (bool) {
         return withdrawApproved;
     }
+//
+//    function converterWithdrawEth() public {
+//        require(canceled == true);
+//        //transfer back funds to converter
+//        msg.sender.transfer(balancesConvertersETH[msg.sender]);
+//    }
 
-    function converterWithdrawEth() public {
-        require(canceled == true);
-        //transfer back funds to converter
-        msg.sender.transfer(balancesConvertersETH[msg.sender]);
-    }
-
-    function contractorWithdrawERC20() public {
-        require(canceled == true);
-        require(msg.sender == contractor);
-        uint amount = getInventoryBalance();
-        require(
-            assetContractERC20.call(
-                bytes4(keccak256(abi.encodePacked("transfer(address,uint256)"))),
-                contractor, amount
-            )
-        );
-    }
+//    function contractorWithdrawERC20() public {
+//        require(canceled == true);
+//        require(msg.sender == contractor);
+//        uint amount = getInventoryBalance();
+//        require(
+//            assetContractERC20.call(
+//                bytes4(keccak256(abi.encodePacked("transfer(address,uint256)"))),
+//                contractor, amount
+//            )
+//        );
+//    }
 }

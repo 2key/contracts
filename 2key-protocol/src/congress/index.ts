@@ -26,6 +26,18 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
         })
     }
 
+    public isUserMemberOfCongress(congress:any, member: string, from:string) : Promise<boolean> {
+        return new Promise(async(resolve, reject) => {
+            try {
+                let congressInstance = await this.helpers._getTwoKeyCongressInstance(congress);
+                let isUserMember = await promisify(congressInstance.checkIsMember,[member, {from}]);
+                resolve(isUserMember);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
 
 
 }
