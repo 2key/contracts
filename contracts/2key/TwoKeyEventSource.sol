@@ -190,7 +190,7 @@ contract TwoKeyEventSource is TwoKeyTypes {
     /// This user will be contractor
     /// onlyAllowedContracts commented so Andri can fetch this
     function created(address _campaign, address _owner) public {
-        interfaceTwoKeyReg.addWhereContractor(_campaign, _owner);
+//        interfaceTwoKeyReg.addWhereContractor(_campaign, _owner);
     	emit Created(_campaign, _owner);
     }
 
