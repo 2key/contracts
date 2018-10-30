@@ -152,6 +152,34 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
         })
     }
 
+    /**
+     *
+     * @param congress
+     * @param {number} proposalNumber
+     * @param {string} from
+     * @returns {Promise<any>}
+     */
+    public getVoteCount(congress:any, proposalNumber: number, from:string) : Promise<any> {
+        return new Promise(async(resolve, reject) => {
+            try {
+                let congressInstance = await this.helpers._getTwoKeyCongressInstance(congress);
+                let numberOfVotes;
+                let currentResult;
+                let description;
+
+                [numberOfVotes,currentResult,description] = await promisify(congressInstance.getVoteCount, [{from}]);
+                let obj = {
+                    numberOfVotes: numberOfVotes,
+                    currentResult: currentResult,
+                    description: description
+                };
+                resolve(obj);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
 
 
 
