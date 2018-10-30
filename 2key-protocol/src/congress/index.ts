@@ -163,9 +163,9 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
         return new Promise(async(resolve, reject) => {
             try {
                 let congressInstance = await this.helpers._getTwoKeyCongressInstance(congress);
-                let numberOfVotes;
-                let currentResult;
-                let description;
+                let numberOfVotes,
+                    currentResult,
+                    description;
 
                 [numberOfVotes,currentResult,description] = await promisify(congressInstance.getVoteCount, [{from}]);
                 let obj = {
@@ -179,6 +179,31 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
             }
         })
     }
+
+    public getMemberInfo(congress:any, from: string) : Promise<any> {
+        return new Promise( async(resolve, reject) => {
+            try {
+                let congressInstance = await this.helpers._getTwoKeyCongressInstance(congress);
+                let address,
+                    name,
+                    votingPower,
+                    memberSince;
+
+                [address, name, votingPower,memberSince] = await promisify(congressInstance.getMemberInfo, [{from}]);
+
+                let member = {
+                    memberAddress: address,
+                    memberName: name,
+                    memberVotingPower: votingPower,
+                    memberSince: memberSince
+                };
+                resolve(member);
+            } catch(e) {
+                reject(e);
+            }
+        })
+    }
+
 
 
 
