@@ -76,6 +76,28 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
     /**
      *
      * @param congress
+     * @param {string} beneficiary
+     * @param {number} etherAmount
+     * @param {string} jobDescription
+     * @param {string} transactionBytecode
+     * @param {string} from
+     * @returns {Promise<number>}
+     */
+    public newProposalInEther(congress:any, beneficiary: string, etherAmount: number, jobDescription: string, transactionBytecode: string, from:string) : Promise<number> {
+        return new Promise( async(resolve, reject) => {
+            try {
+                let congressInstance = await this.helpers._getTwoKeyCongressInstance(congress);
+                let proposalId = await promisify(congressInstance.newProposal,[beneficiary,etherAmount,jobDescription,transactionBytecode,{from}]);
+                resolve(proposalId);
+            } catch(e) {
+                reject(e);
+            }
+        });
+    }
+
+    /**
+     *
+     * @param congress
      * @param {string} from
      * @returns {Promise<any>}
      */
