@@ -239,6 +239,7 @@ contract TwoKeyContract is StandardToken, Ownable {
     require(_total_units >= _units);
     address[] memory influencers = getInfluencers(customer);
     uint n_influencers = influencers.length;
+    emit Log1('n_influencers',n_influencers);
 
     // distribute bounty to influencers
     uint256 total_bounty = 0;
