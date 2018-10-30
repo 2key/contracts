@@ -1,6 +1,5 @@
-import {BigNumber} from 'bignumber.js';
-
 export {IERC20} from './erc20/interfaces';
+export {ITwoKeyCongress} from './congress/interfaces';
 export {ITwoKeyAcquisitionCampaign} from './acquisition/interfaces';
 export {ITwoKeyHelpers,ITwoKeyUtils,BalanceMeta,IOffchainData} from './utils/interfaces';
 

@@ -1,7 +1,7 @@
 import {BigNumber} from 'bignumber.js';
 import contractsMeta from '../contracts';
 import {promisify} from './index';
-import {ICreateCampaignProgress, ITwoKeyBase, ITwoKeyHelpers} from '../interfaces';
+import {ITwoKeyBase, ITwoKeyHelpers} from '../interfaces';
 import {IContract, ICreateContractOpts, IRawTransaction, ITransaction} from './interfaces';
 
 function toBuffer(ab: Uint8Array): Buffer {
@@ -210,6 +210,12 @@ export default class Helpers implements ITwoKeyHelpers {
         return campaign.address
             ? campaign
             : await this._createAndValidate('TwoKeyAcquisitionCampaignERC20', campaign);
+    }
+
+    async _getTwoKeyCongressInstance(congress: any): Promise<any> {
+        return congress.address
+            ? congress
+            : await this._createAndValidate('TwoKeyCongress',congress);
     }
 
     async _getERC20Instance(erc20: any): Promise<any> {

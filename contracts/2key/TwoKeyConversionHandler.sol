@@ -458,7 +458,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
 
 
     /// @notice Function where contractor or moderator can cancel the converter
-    function cancelConverter() public onlyContractorOrModerator{
+    function cancelConverter() public {
         require(converterToConversionState[msg.sender] == ConversionState.REJECTED ||
         converterToConversionState[msg.sender] == ConversionState.PENDING);
         moveFromPendingOrRejectedToCancelledState(msg.sender);

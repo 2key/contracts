@@ -412,6 +412,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
         emit ProposalTallied(proposalNumber, p.currentResult, p.numberOfVotes, p.proposalPassed);
     }
 
+
     /// @notice Function getter for voting power for specific member
     /// @param _memberAddress is the address of the member
     /// @return integer representing voting power
@@ -426,6 +427,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
     function getMemberId() public view returns (uint) {
         return memberId[msg.sender];
     }
+
 
     /// @notice to check if an address is member
     /// @param _member is the address we're checking for

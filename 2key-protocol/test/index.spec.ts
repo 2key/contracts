@@ -27,6 +27,7 @@ const campaignStartTime = Math.round(new Date(now.valueOf()).setDate(now.getDate
 const campaignEndTime = Math.round(new Date(now.valueOf()).setDate(now.getDate() + 30) / 1000);
 const twoKeyEconomy = contractsMeta.TwoKeyEconomy.networks[mainNetId].address;
 const twoKeyAdmin = contractsMeta.TwoKeyAdmin.networks[mainNetId].address;
+const twoKeyCongress = contractsMeta.TwoKeyCongress.networks[mainNetId].address;
 
 function makeHandle(max: number = 8): string {
     let text = '';
@@ -709,10 +710,10 @@ describe('TwoKeyProtocol', () => {
             console.log("Address: " + addressCurrent + " ----- balance: " + balance);
         }
     }).timeout(30000);
-    // it('should return two variables', async() => {
-    //     const result = await twoKeyProtocol.AcquisitionCampaign.checkData(campaignAddress, env.TEST4_ADDRESS);
-    //     console.log(result);
-    // }).timeout(30000);
 
+    it('should get all whitelisted methods from congress', async() => {
+        const methods = await twoKeyProtocol.Congress.getAllowedMethods(twoKeyCongress, from);
+        console.log(methods);
+    })
 
 });

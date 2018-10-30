@@ -1,7 +1,5 @@
 import {BigNumber} from 'bignumber.js';
-import {
-    ICreateCampaignProgress,
-} from '../interfaces';
+import {ICreateCampaignProgress,} from '../interfaces';
 
 interface IBalance {
     ETH: number | string | BigNumber,
@@ -106,6 +104,7 @@ export interface ITwoKeyHelpers {
     _getAcquisitionCampaignInstance: (campaign: any) => Promise<any>,
     _getERC20Instance: (erc20: any) => Promise<any>,
     _getTwoKeyAdminInstance(twoKeyAdmin: any) : Promise<any>,
+    _getTwoKeyCongressInstance(congress: any) : Promise<any>,
     _createAndValidate: (contractName: string, address: string) => Promise<any>,
     _checkIPFS: () => Promise<boolean>,
 }

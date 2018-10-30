@@ -8,22 +8,24 @@ import * as eth_wallet from 'ethereumjs-wallet';
 // import ethers from 'ethers';
 import contractsMeta from './contracts';
 import {
-    IEhtereumNetworks,
-    IContractsAddresses,
-    ITwoKeyInit,
     BalanceMeta,
-    ITwoKeyHelpers,
-    ITwoKeyUtils,
-    ITwoKeyBase,
-    ITwoKeyAcquisitionCampaign,
-    IERC20,
     IContractEvent,
+    IContractsAddresses,
+    IEhtereumNetworks,
+    IERC20,
+    ITwoKeyAcquisitionCampaign,
+    ITwoKeyBase,
+    ITwoKeyCongress,
+    ITwoKeyHelpers,
+    ITwoKeyInit,
+    ITwoKeyUtils,
 } from './interfaces';
 import Index, {promisify} from './utils';
 import Helpers from './utils/helpers';
 import AcquisitionCampaign from './acquisition';
 import ERC20 from './erc20';
 import {BigNumber} from "bignumber.js";
+import TwoKeyCongress from "./congress";
 
 // const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 
@@ -56,6 +58,7 @@ export class TwoKeyProtocol {
     public Utils: ITwoKeyUtils;
     private Helpers: ITwoKeyHelpers;
     public AcquisitionCampaign: ITwoKeyAcquisitionCampaign;
+    public Congress: ITwoKeyCongress;
     private _log: any;
 
     // private twoKeyReg: any;
@@ -143,6 +146,7 @@ export class TwoKeyProtocol {
         this.ERC20 = new ERC20(twoKeyBase, this.Helpers);
         this.Utils = new Index(twoKeyBase, this.Helpers);
         this.AcquisitionCampaign = new AcquisitionCampaign(twoKeyBase, this.Helpers, this.Utils, this.ERC20);
+        this.Congress = new TwoKeyCongress(twoKeyBase, this.Helpers, this.Utils);
     }
 
     public getBalance(address: string, erc20address?: string): Promise<BalanceMeta> {
