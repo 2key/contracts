@@ -598,9 +598,9 @@ export default { ERC20full:
         '4':
          { events: {},
            links: {},
-           address: '0x870cc92fcab5716198f49784f9c2af704a03506c',
+           address: '0x863deb964fa119fa79a6545d67ea942c3e11b07d',
            transactionHash:
-            '0x01eefbbc7df2a73aa47f50e7559ac17deebaef2ceef8a24ed1bdeaad06d94876' },
+            '0x2a42a45513ca5dde4a78fc1ffe504547ea2e730501df75de019975afcfcf1e0f' },
         '17':
          { events: {},
            links: {},
@@ -843,7 +843,13 @@ export default { ERC20full:
           type: 'function' } ],
      name: 'TwoKeyAdmin' },
   TwoKeyCongress:
-   { networks: {},
+   { networks:
+      { '4':
+         { events: {},
+           links: {},
+           address: '0x9f482a0b15a1b650466f3324f11697e675601be0',
+           transactionHash:
+            '0x83ab8e4152ed52c53d026fc6325673336b853de36b765cafdac4bc5790e8446e' } },
      abi:
       [ { constant: true,
           inputs: [ { name: '', type: 'uint256' } ],
@@ -1410,9 +1416,9 @@ export default { ERC20full:
         '4':
          { events: {},
            links: {},
-           address: '0x669d938b2f4eb2e345f2390fb6a3c855d750b20d',
+           address: '0xd94849cbe7894862aabf09f74a8c365526453d07',
            transactionHash:
-            '0x6f2f9ccb74c556c4763b1628444490d6dd834b1777765de6e0e1a5710a822f1f' },
+            '0x548746d9a949960a2b9a28442ea3098beb954e26fe533b2a818a228f2a18e112' },
         '17':
          { events: {},
            links: {},
@@ -1734,9 +1740,9 @@ export default { ERC20full:
         '4':
          { events: {},
            links: {},
-           address: '0xeb13f65fe4e3aa4f0b0fc7a7363f3b0e7155717f',
+           address: '0xa079cc1b390b332496536021515bf75e142e1606',
            transactionHash:
-            '0xbbf472341eac68ddd3ee76aca44effa725cedf1677689c379d3df33ea9afc6b4' },
+            '0x60862bca76d261c647067b733db322febacf473480489d0d9cc02951adb881af' },
         '17':
          { events: {},
            links: {},
@@ -2139,9 +2145,9 @@ export default { ERC20full:
         '4':
          { events: {},
            links: {},
-           address: '0x57de1e141ce8f6659c21aba5d22ea8573423e012',
+           address: '0xb80dd974303a900a596c532f7bc44a284e7cfe71',
            transactionHash:
-            '0x55f84b5ae22861ea779fb8c4ea7ea2361544d8b8ca52a029141b9d6e424f8a74' },
+            '0xda3e8aec0ea209b1e4647d6af64f2b34a911f42e96aadd5e82c6d0f41813aad7' },
         '17':
          { events: {},
            links: {},
