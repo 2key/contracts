@@ -427,6 +427,15 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
         return memberId[msg.sender];
     }
 
+    /// @notice to check if an address is member
+    /// @param _member is the address we're checking for
+    function checkIsMember(address _member) public view returns (bool) {
+        if(memberId[_member] == 0) {
+            return false;
+        }
+        return true;
+    }
+
     /// @notice Fallback function
     function () payable public {
 
@@ -449,5 +458,6 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
     function getAllowedMethods() public view returns (bytes32[]){
         return allowedMethods;
     }
+
 }
 
