@@ -2,6 +2,7 @@ import {IERC20, IOffchainData, ITwoKeyBase, ITwoKeyHelpers, ITwoKeyUtils,} from 
 import {
     IAcquisitionCampaign,
     IAcquisitionCampaignMeta,
+    ITokenAmount,
     ICreateOpts,
     IJoinLinkOpts,
     IPublicLinkKey,
@@ -458,6 +459,27 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     }
 
     /* PARTICIPATE */
+    public getEstimatedTokenAmount(campaign: any, value: string | number | BigNumber): Promise<ITokenAmount> {
+        return new Promise<ITokenAmount>(async (resolve, reject) => {
+            try {
+                const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
+                const constants = await promisify(campaignInstance.getConstantInfo, []);
+                let [baseTokens, bonusTokens] = await promisify(campaignInstance.getEstimatedTokenAmount, [value]);
+                baseTokens = this.utils.fromWei(baseTokens, constants[3]);
+                baseTokens = BigNumber.isBigNumber(baseTokens) ? baseTokens.toNumber() : parseFloat(baseTokens);
+                bonusTokens = this.utils.fromWei(bonusTokens, constants[3]);
+                bonusTokens = BigNumber.isBigNumber(bonusTokens) ? bonusTokens.toNumber() : parseFloat(bonusTokens);
+                resolve({
+                    baseTokens,
+                    bonusTokens,
+                    totalTokens: baseTokens + bonusTokens,
+                });
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
+
     public joinAndConvert(campaign: any, value: string | number | BigNumber, publicLink: string, from: string, gasPrice: number = this.base._getGasPrice()): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {

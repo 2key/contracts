@@ -14,6 +14,19 @@ import {
     ITxReceiptOpts,
 } from './interfaces';
 
+const units = {
+    3: 'kwei',
+    6: 'mwei',
+    9: 'gwei',
+    12: 'szabo',
+    15: 'finney',
+    18: 'ether',
+    21: 'kether',
+    24: 'mether',
+    27: 'gether',
+    30: 'tether',
+}
+
 export function promisify(func: any, args: any): Promise<any> {
     return new Promise((res, rej) => {
         func(...args, (err: any, data: any) => {
@@ -70,12 +83,14 @@ export default class Utils implements ITwoKeyUtils {
         });
     }
 
-    public fromWei(number: number | string | BigNumber, unit?: string): string | BigNumber {
-        return this.base.web3.fromWei(number, unit);
+    public fromWei(number: number | string | BigNumber, unit?: string | number): string | BigNumber {
+        const web3Unit = unit && typeof unit === 'string' ? unit : units[unit];
+        return this.base.web3.fromWei(number, web3Unit);
     }
 
-    public toWei(number: number | string | BigNumber, unit?: string): BigNumber {
-        return this.base.web3.toWei(number, unit);
+    public toWei(number: number | string | BigNumber, unit?: string | number): BigNumber {
+        const web3Unit = unit && typeof unit === 'string' ? unit : units[unit];
+        return this.base.web3.toWei(number, web3Unit);
     }
 
     public toHex(data: any): string {
