@@ -180,6 +180,12 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
         })
     }
 
+    /**
+     *
+     * @param congress
+     * @param {string} from
+     * @returns {Promise<any>}
+     */
     public getMemberInfo(congress:any, from: string) : Promise<any> {
         return new Promise( async(resolve, reject) => {
             try {
@@ -203,6 +209,8 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
             }
         })
     }
+
+
 
 
 
