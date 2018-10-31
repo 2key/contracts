@@ -36,7 +36,6 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
     bool initialized;
 
     address self;
-
     // The maximum voting power containing sum of voting powers of all active members
     uint256 maxVotingPower;
     //The minimum number of voting members that must be in attendance
@@ -53,6 +52,8 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
     Member[] public members;
     // Array of allowed methods
     bytes32[] allowedMethods;
+
+    mapping(bytes32 => string) methodHashToMethodName;
 
     event ProposalAdded(uint proposalID, address recipient, uint amount, string description);
     event Voted(uint proposalID, bool position, address voter, string justification);
@@ -165,6 +166,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
     function hashAllowedMethods(string nameAndParams) public returns (bytes32) {
         bytes32 allowed = keccak256(abi.encodePacked(nameAndParams));
         allowedMethods.push(allowed);
+        methodHashToMethodName[allowed] = nameAndParams;
         return allowed;
     }
 
@@ -459,6 +461,10 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
     /// @return array of bytes32 hashes
     function getAllowedMethods() public view returns (bytes32[]){
         return allowedMethods;
+    }
+
+    function getMethodNameFromMethodHash(bytes32 _methodHash) public view returns(string) {
+        return methodHashToMethodName[_methodHash];
     }
 
 }
