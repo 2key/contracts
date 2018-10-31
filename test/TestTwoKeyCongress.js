@@ -2,8 +2,58 @@ const { increaseTime } = require("./utils");
 require('truffle-test-utils').init();
 const _ = require('lodash');
 const HOUR = 3600;
+const encodeParameters = require('./toBytecode');
+
 
 var Web3EthAbi = require('web3-eth-abi');
+
+let method=  web3.sha3('addMember(address,string,uint256)').slice(0,10);
+console.log("METHOD" + method);
+let proposalData;
+let functionSignature = Web3EthAbi.encodeFunctionSignature({
+  name: 'addMember',
+  type: 'function',
+  inputs: [{
+    type: 'address',
+    name: 'targetMember'
+  }, {
+    type: 'string',
+    name: 'memberName'
+  }, {
+    type: 'uint256',
+    name: '_votingPower'
+  }]
+});
+console.log("Function signature: " + functionSignature);
+console.log(functionSignature, method, functionSignature === method);
+const transactionBytecode = Web3EthAbi.encodeFunctionCall({
+  name: 'addMember',
+  type: 'function',
+  inputs: [{
+    type: 'address',
+    name: 'targetMember'
+  }, {
+    type: 'string',
+    name: 'memberName'
+  }, {
+    type: 'uint256',
+    name: '_votingPower'
+  }]
+}, ['0xd03ea8624c8c5987235048901fb614fdca89b117', 'Nikola', '5']);
+const encoodedParams = `${method}${encodeParameters([{
+    type: 'address',
+    name: 'targetMember'
+  }, {
+    type: 'string',
+    name: 'memberName'
+  }, {
+    type: 'uint256',
+    name: '_votingPower'
+  }], ['0xd03ea8624c8c5987235048901fb614fdca89b117', 'Nikola', '5'])}`;
+// const methodBytecode = web3.sha3('addMember("0xd03ea8624c8c5987235048901fb614fdca89b117","Nikola","5")')
+console.log('encoodedParams', encoodedParams);
+console.log('encodeFunctionCall', transactionBytecode);
+console.log(encoodedParams === transactionBytecode);
 
 const TwoKeyCongress = artifacts.require("TwoKeyCongress");
 const BasicStorage = artifacts.require("BasicStorage");
