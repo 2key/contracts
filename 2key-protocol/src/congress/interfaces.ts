@@ -9,4 +9,5 @@ export interface ITwoKeyCongress {
     getVoteCount: (congress:any, proposalNumber: number, from:string) => Promise<any>,
     getMemberInfo: (congress:any, from: string) => Promise<any>,
     getMethodNameFromHash: (congress: any, hash: string, from:string) => Promise<any>,
+    getProposalInformations: (congress: any, proposalId: number, from: string) => Promise<any>,
 }

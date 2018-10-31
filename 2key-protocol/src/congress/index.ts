@@ -217,17 +217,58 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
      * @param {string} from
      * @returns {Promise<any>}
      */
-    public getMethodNameFromHash(congress: any, hash: string, from:string) : Promise<any> {
+    public getMethodNameFromHash(congress: any, hash: string, from: string) : Promise<any> {
         return new Promise( async(resolve,reject) => {
             try {
                 let congressInstance = await this.helpers._getTwoKeyCongressInstance(congress);
                 let methodName = await promisify(congressInstance.getMethodNameFromMethodHash, [hash, {from}]);
                 resolve(methodName);
-            } catch (e){
+            } catch (e) {
                 reject(e);
             }
         })
     }
+
+    //p.amount, p.description, p.minExecutionDate, p.executed, p.numberOfVotes, p.currentResult
+    public getProposalInformations(congress: any, proposalId: number, from: string) : Promise<any> {
+        return new Promise( async(resolve, reject) => {
+            try {
+                let congressInstance = await this.helpers._getTwoKeyCongressInstance(congress);
+                let proposalAmount,
+                    proposalDescription,
+                    proposalExecutionDate,
+                    proposalIsExecuted,
+                    proposalNumberOfVotes,
+                    proposalCurrentResult;
+
+                [
+                    proposalAmount,
+                    proposalDescription,
+                    proposalExecutionDate,
+                    proposalIsExecuted,
+                    proposalNumberOfVotes,
+                    proposalCurrentResult
+                ] = await promisify(congressInstance.getProposalData, [proposalId, {from}]);
+
+                let proposal = {
+                    proposalAmount: proposalAmount,
+                    proposalDescription: proposalDescription,
+                    proposalExecutionDate: proposalExecutionDate,
+                    proposalIsExecuted: proposalIsExecuted,
+                    proposalNumberOfVotes: proposalNumberOfVotes,
+                    proposalCurrentResult: proposalCurrentResult
+                };
+
+                resolve(proposal);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+
+
+
 
 
 }
