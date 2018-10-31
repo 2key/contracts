@@ -210,12 +210,24 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
         })
     }
 
-
-
-
-
-
-
+    /**
+     *
+     * @param congress
+     * @param {string} hash
+     * @param {string} from
+     * @returns {Promise<any>}
+     */
+    public getMethodNameFromHash(congress: any, hash: string, from:string) : Promise<any> {
+        return new Promise( async(resolve,reject) => {
+            try {
+                let congressInstance = await this.helpers._getTwoKeyCongressInstance(congress);
+                let methodName = await promisify(congressInstance.getMethodNameFromMethodHash, [hash, {from}]);
+                resolve(methodName);
+            } catch (e){
+                reject(e);
+            }
+        })
+    }
 
 
 }
