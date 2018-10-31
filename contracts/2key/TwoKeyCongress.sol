@@ -71,6 +71,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
         uint numberOfVotes;
         int currentResult;
         bytes32 proposalHash;
+        bytes transactionBytecode;
         Vote[] votes;
         mapping (address => bool) voted;
     }
@@ -284,6 +285,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
         p.amount = weiAmount;
         p.description = jobDescription;
         p.proposalHash = keccak256(abi.encodePacked(beneficiary, weiAmount, transactionBytecode));
+        p.transactionBytecode = transactionBytecode;
         p.minExecutionDate = block.timestamp + debatingPeriodInMinutes * 1 minutes;
         p.executed = false;
         p.proposalPassed = false;
@@ -463,6 +465,8 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
         return allowedMethods;
     }
 
+    /// @notice Function to fetch method name from method hash
+    /// @return methodname string representation
     function getMethodNameFromMethodHash(bytes32 _methodHash) public view returns(string) {
         return methodHashToMethodName[_methodHash];
     }
@@ -471,9 +475,9 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
     /// @notice Function to get major proposal data
     /// @param proposalId is the id of proposal
     /// @return tuple containing all the data for proposal
-    function getProposalData(uint proposalId) public view returns (uint,string,uint,bool,uint,int) {
+    function getProposalData(uint proposalId) public view returns (uint,string,uint,bool,uint,int,bytes) {
         Proposal memory p = proposals[proposalId];
-        return (p.amount, p.description, p.minExecutionDate, p.executed, p.numberOfVotes, p.currentResult);
+        return (p.amount, p.description, p.minExecutionDate, p.executed, p.numberOfVotes, p.currentResult, p.transactionBytecode);
     }
 
 }
