@@ -19,7 +19,7 @@ const ERC20TokenMock = artifacts.require('ERC20TokenMock');
 
 
 module.exports = function deploy(deployer) {
-    if (deployer.network.startsWith('dev') || deployer.network === 'ropsten' || (deployer.network.startsWith('rinkeby') && !process.env.DEPLOY)) {
+    if (deployer.network.startsWith('dev') || deployer.network === 'ropsten' || (deployer.network.startsWith('rinkeby-test') && !process.env.DEPLOY)) {
         deployer.deploy(TwoKeyConversionHandler,1012019,180,6,180)
             .then(() => TwoKeyConversionHandler.deployed())
             .then(() => deployer.deploy(ERC20TokenMock))
