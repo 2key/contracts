@@ -16,15 +16,13 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
 
     /**
      *
-     * @param congress
      * @param {string} from
      * @returns {Promise<string[]>}
      */
-    public getAllowedMethods(congress:any, from: string) : Promise<string[]> {
+    public getAllowedMethods(from: string) : Promise<string[]> {
         return new Promise(async(resolve,reject) => {
             try {
-                let congressInstance = await this.helpers._getTwoKeyCongressInstance(congress);
-                let allowedMethods = await promisify(congressInstance.getAllowedMethods, [{from}])
+                const allowedMethods = await promisify(this.base.twoKeyCongress.getAllowedMethods, [{from}]);
                 resolve(allowedMethods);
             } catch (e) {
                 reject(e);
@@ -34,16 +32,14 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
 
     /**
      *
-     * @param congress
      * @param {string} member
      * @param {string} from
      * @returns {Promise<boolean>}
      */
-    public isUserMemberOfCongress(congress:any, member: string, from:string) : Promise<boolean> {
+    public isUserMemberOfCongress(member: string, from:string) : Promise<boolean> {
         return new Promise(async(resolve, reject) => {
             try {
-                let congressInstance = await this.helpers._getTwoKeyCongressInstance(congress);
-                let isUserMember = await promisify(congressInstance.checkIsMember,[member, {from}]);
+                const isUserMember = await promisify(this.base.twoKeyCongress.checkIsMember,[member, {from}]);
                 resolve(isUserMember);
             } catch (e) {
                 reject(e);
@@ -53,7 +49,6 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
 
     /**
      *
-     * @param congress
      * @param {string} beneficiary
      * @param {number} weiAmount
      * @param {string} jobDescription
@@ -61,12 +56,11 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
      * @param {string} from
      * @returns {Promise<number>}
      */
-    public submitNewProposal(congress:any, beneficiary: string, weiAmount: number, jobDescription: string, transactionBytecode: string, from:string) : Promise<number> {
+    public submitNewProposal(beneficiary: string, weiAmount: number, jobDescription: string, transactionBytecode: string, from:string) : Promise<number> {
         return new Promise( async(resolve, reject) => {
             try {
-                let congressInstance = await this.helpers._getTwoKeyCongressInstance(congress);
                 const nonce = await this.helpers._getNonce(from);
-                let proposalId = await promisify(congressInstance.newProposal,[beneficiary,weiAmount,jobDescription,transactionBytecode,{from, nonce}]);
+                let proposalId = await promisify(this.base.twoKeyCongress.newProposal,[beneficiary,weiAmount,jobDescription,transactionBytecode,{from, nonce}]);
                 resolve(proposalId);
             } catch(e) {
                 reject(e);
@@ -76,7 +70,6 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
 
     /**
      *
-     * @param congress
      * @param {string} beneficiary
      * @param {number} etherAmount
      * @param {string} jobDescription
@@ -84,12 +77,11 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
      * @param {string} from
      * @returns {Promise<number>}
      */
-    public newProposalInEther(congress:any, beneficiary: string, etherAmount: number, jobDescription: string, transactionBytecode: string, from:string) : Promise<number> {
+    public newProposalInEther(beneficiary: string, etherAmount: number, jobDescription: string, transactionBytecode: string, from:string) : Promise<number> {
         return new Promise( async(resolve, reject) => {
             try {
-                let congressInstance = await this.helpers._getTwoKeyCongressInstance(congress);
                 const nonce = await this.helpers._getNonce(from);
-                let proposalId = await promisify(congressInstance.newProposal,[beneficiary,etherAmount,jobDescription,transactionBytecode,{from, nonce}]);
+                let proposalId = await promisify(this.base.twoKeyCongress.newProposal,[beneficiary,etherAmount,jobDescription,transactionBytecode,{from, nonce}]);
                 resolve(proposalId);
             } catch(e) {
                 reject(e);
@@ -99,11 +91,10 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
 
     /**
      *
-     * @param congress
      * @param {string} from
      * @returns {Promise<any>}
      */
-    public getAllProposals(congress:any, from:string) : Promise<any> {
+    public getAllProposals(from:string) : Promise<any> {
         return new Promise(async(resolve,reject) => {
             try {
 
@@ -115,19 +106,17 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
 
     /**
      *
-     * @param congress
      * @param {number} proposalNumber
      * @param {boolean} supportsProposal
      * @param {string} justificationText
      * @param {string} from
      * @returns {Promise<number>}
      */
-    public vote(congress:any, proposalNumber:number, supportsProposal: boolean, justificationText:string, from:string): Promise<number> {
+    public vote(proposalNumber:number, supportsProposal: boolean, justificationText:string, from:string): Promise<number> {
         return new Promise(async(resolve,reject) => {
             try {
-                let congressInstance = await this.helpers._getTwoKeyCongressInstance(congress);
                 const nonce = await this.helpers._getNonce(from);
-                let voteId = await promisify(congressInstance.vote, [proposalNumber, supportsProposal, justificationText, {from, nonce}]);
+                let voteId = await promisify(this.base.twoKeyCongress.vote, [proposalNumber, supportsProposal, justificationText, {from, nonce}]);
                 resolve(voteId);
             } catch (e) {
                 reject(e);
@@ -137,18 +126,16 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
 
     /**
      *
-     * @param congress
      * @param {number} proposalNumber
      * @param {string} transactionBytecode
      * @param {string} from
      * @returns {Promise<string>}
      */
-    public executeProposal(congress:any, proposalNumber: number, transactionBytecode: string, from: string) : Promise<string> {
+    public executeProposal(proposalNumber: number, transactionBytecode: string, from: string) : Promise<string> {
         return new Promise(async(resolve,reject) => {
             try {
-                let congressInstance = await this.helpers._getTwoKeyCongressInstance(congress);
                 const nonce = await this.helpers._getNonce(from);
-                let txHash = await promisify(congressInstance.executeProposal, [proposalNumber,transactionBytecode, {from, nonce}]);
+                let txHash = await promisify(this.base.twoKeyCongress.executeProposal, [proposalNumber,transactionBytecode, {from, nonce}]);
                 resolve(txHash);
             } catch(e) {
                 reject(e);
@@ -158,20 +145,18 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
 
     /**
      *
-     * @param congress
      * @param {number} proposalNumber
      * @param {string} from
      * @returns {Promise<any>}
      */
-    public getVoteCount(congress:any, proposalNumber: number, from:string) : Promise<any> {
+    public getVoteCount(proposalNumber: number, from:string) : Promise<any> {
         return new Promise(async(resolve, reject) => {
             try {
-                let congressInstance = await this.helpers._getTwoKeyCongressInstance(congress);
                 let numberOfVotes,
                     currentResult,
                     description;
 
-                [numberOfVotes,currentResult,description] = await promisify(congressInstance.getVoteCount, [{from}]);
+                [numberOfVotes,currentResult,description] = await promisify(this.base.twoKeyCongress.getVoteCount, [{from}]);
                 let obj = {
                     numberOfVotes: numberOfVotes,
                     currentResult: currentResult,
@@ -186,20 +171,18 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
 
     /**
      *
-     * @param congress
      * @param {string} from
      * @returns {Promise<any>}
      */
-    public getMemberInfo(congress:any, from: string) : Promise<any> {
+    public getMemberInfo(from: string) : Promise<any> {
         return new Promise( async(resolve, reject) => {
             try {
-                let congressInstance = await this.helpers._getTwoKeyCongressInstance(congress);
                 let address,
                     name,
                     votingPower,
                     memberSince;
 
-                [address, name, votingPower,memberSince] = await promisify(congressInstance.getMemberInfo, [{from}]);
+                [address, name, votingPower,memberSince] = await promisify(this.base.twoKeyCongress.getMemberInfo, [{from}]);
 
                 let member = {
                     memberAddress: address,
@@ -216,7 +199,6 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
 
     /**
      *
-     * @param congress
      * @param {string} hash
      * @param {string} from
      * @returns {Promise<any>}
@@ -224,8 +206,7 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
     public getMethodNameFromHash(congress: any, hash: string, from: string) : Promise<any> {
         return new Promise( async(resolve,reject) => {
             try {
-                let congressInstance = await this.helpers._getTwoKeyCongressInstance(congress);
-                let methodName = await promisify(congressInstance.getMethodNameFromMethodHash, [hash, {from}]);
+                let methodName = await promisify(this.base.twoKeyCongress.getMethodNameFromMethodHash, [hash, {from}]);
                 resolve(methodName);
             } catch (e) {
                 reject(e);
@@ -237,7 +218,6 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
     public getProposalInformations(congress: any, proposalId: number, from: string) : Promise<any> {
         return new Promise( async(resolve, reject) => {
             try {
-                let congressInstance = await this.helpers._getTwoKeyCongressInstance(congress);
                 let proposalAmount,
                     proposalDescription,
                     proposalExecutionDate,
@@ -254,7 +234,7 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
                     proposalNumberOfVotes,
                     proposalCurrentResult,
                     proposalTransactionBytecode
-                ] = await promisify(congressInstance.getProposalData, [proposalId, {from}]);
+                ] = await promisify(this.base.twoKeyCongress.getProposalData, [proposalId, {from}]);
 
                 let proposal = {
                     proposalAmount: proposalAmount,

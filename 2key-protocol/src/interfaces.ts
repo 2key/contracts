@@ -11,6 +11,7 @@ export interface ITwoKeyBase {
     contracts: IContractsAddresses;
     twoKeyEconomy: any;
     twoKeyReg: any;
+    twoKeyCongress: any;
     twoKeyPlasmaEvents: any;
     plasmaAddress: string;
     _setGasPrice: (number) => void,

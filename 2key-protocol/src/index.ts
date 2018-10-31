@@ -138,6 +138,7 @@ export class TwoKeyProtocol {
             contracts: this.contracts,
             twoKeyEconomy: this.twoKeyEconomy,
             twoKeyReg: this.twoKeyReg,
+            twoKeyCongress: this.twoKeyCongress,
             twoKeyPlasmaEvents: this.twoKeyPlasmaEvents,
             plasmaAddress: this.plasmaAddress,
             _getGasPrice: this._getGasPrice,
