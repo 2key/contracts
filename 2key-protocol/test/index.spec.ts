@@ -720,10 +720,4 @@ describe('TwoKeyProtocol', () => {
         const methods = await twoKeyProtocol.Congress.getAllowedMethods(from);
         console.log(methods);
     });
-
-    it('should get all congress members', async() => {
-        const methods = await twoKeyProtocol.Congress.getMembers();
-        console.log(methods);
-    });
-
 });
