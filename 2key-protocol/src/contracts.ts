@@ -598,9 +598,9 @@ export default { ERC20full:
         '4':
          { events: {},
            links: {},
-           address: '0x863deb964fa119fa79a6545d67ea942c3e11b07d',
+           address: '0xfe88456973c0ce6debba59095a85c73e4b70c0d5',
            transactionHash:
-            '0x2a42a45513ca5dde4a78fc1ffe504547ea2e730501df75de019975afcfcf1e0f' },
+            '0x2ff36f409b2d6ab43a16595522a0cd2513213c2d25a91e8ce902060b1f2ce32c' },
         '17':
          { events: {},
            links: {},
@@ -610,9 +610,9 @@ export default { ERC20full:
         '8086':
          { events: {},
            links: {},
-           address: '0xda3856bd6b032518117cb13a49285ef38835a08f',
+           address: '0xfaa99d6caf5df1af8426d2bfb5bf83ccb7ed0552',
            transactionHash:
-            '0xd6797b20d19427ab451c8ec449e3d4ae1855138ed6603c2a65a9901b61d431bc' } },
+            '0xcd81526b9ea356c563aa50601a556e53802c1b23aa2c5838bf03445c9e66dada' } },
      abi:
       [ { constant: false,
           inputs: [],
@@ -847,15 +847,9 @@ export default { ERC20full:
       { '4':
          { events: {},
            links: {},
-           address: '0x9f482a0b15a1b650466f3324f11697e675601be0',
+           address: '0xeaac3422a0cc861b82409e2921887221ed007506',
            transactionHash:
-            '0x83ab8e4152ed52c53d026fc6325673336b853de36b765cafdac4bc5790e8446e' },
-        '8086':
-         { events: {},
-           links: {},
-           address: '0xe3aedd96348a130ec12017e23cb2486c00c0bce9',
-           transactionHash:
-            '0x0c371d3a986e6c29972a752cfff66a028616bfb7ff1acfa86a00ba4062bc7099' } },
+            '0x9bc3b167c8484177151edd710e7c907da10075519b3388326974a97948313df6' } },
      abi:
       [ { constant: true,
           inputs: [ { name: '', type: 'uint256' } ],
@@ -869,7 +863,8 @@ export default { ERC20full:
              { name: 'proposalPassed', type: 'bool' },
              { name: 'numberOfVotes', type: 'uint256' },
              { name: 'currentResult', type: 'int256' },
-             { name: 'proposalHash', type: 'bytes32' } ],
+             { name: 'proposalHash', type: 'bytes32' },
+             { name: 'transactionBytecode', type: 'bytes' } ],
           payable: false,
           stateMutability: 'view',
           type: 'function' },
@@ -1199,7 +1194,8 @@ export default { ERC20full:
              { name: '', type: 'uint256' },
              { name: '', type: 'bool' },
              { name: '', type: 'uint256' },
-             { name: '', type: 'int256' } ],
+             { name: '', type: 'int256' },
+             { name: '', type: 'bytes' } ],
           payable: false,
           stateMutability: 'view',
           type: 'function' } ],
@@ -1442,9 +1438,9 @@ export default { ERC20full:
         '4':
          { events: {},
            links: {},
-           address: '0xd94849cbe7894862aabf09f74a8c365526453d07',
+           address: '0x2838d5cca640b14870e48ff132a571b9711bf30e',
            transactionHash:
-            '0x548746d9a949960a2b9a28442ea3098beb954e26fe533b2a818a228f2a18e112' },
+            '0x09501971abe289bbcfb3456b2007d7aa9dd6318c06d2ea134391bf87db5752b9' },
         '17':
          { events: {},
            links: {},
@@ -1454,9 +1450,9 @@ export default { ERC20full:
         '8086':
          { events: {},
            links: {},
-           address: '0x0b7d588ac8e3e15fc0e7687f7e42569bac8c9a47',
+           address: '0x622e96748f1ff2bffad72d94f766d5b4c477b706',
            transactionHash:
-            '0xac579265c9d1c06142107462dae0b2b8ce3069489fc9804b8ba7faa4bf4a32c9' } },
+            '0x109d93d2b9895e808e4bd214d03f5515d0c5e91d8ca9b5129dd255c72ab6a279' } },
      abi:
       [ { constant: true,
           inputs: [],
@@ -1766,9 +1762,9 @@ export default { ERC20full:
         '4':
          { events: {},
            links: {},
-           address: '0xa079cc1b390b332496536021515bf75e142e1606',
+           address: '0x8046e7a52d4eefe1643bb01cacbf8c04c00a109c',
            transactionHash:
-            '0x60862bca76d261c647067b733db322febacf473480489d0d9cc02951adb881af' },
+            '0x66c696ec16f42a5da40e74494c2e2d445c722a55f3a490f221f933bb102d0bc0' },
         '17':
          { events: {},
            links: {},
@@ -1778,9 +1774,9 @@ export default { ERC20full:
         '8086':
          { events: {},
            links: {},
-           address: '0xdc39648461e4f3d90ad62d2cc67dbd236229b86f',
+           address: '0xf86337c0ffc4afb993fc352d2605e70cbaa284db',
            transactionHash:
-            '0xe0806979716f2bea334e0b2695115f0ce772d0989fbb057b6d2a57ace9265fbf' } },
+            '0x5c48132011966c022132e54468665871f70896ab1312a7fa5afe69f2146d0296' } },
      abi:
       [ { inputs: [ { name: '_twoKeyAdminAddress', type: 'address' } ],
           payable: false,
@@ -2035,9 +2031,9 @@ export default { ERC20full:
       { '17':
          { events: {},
            links: {},
-           address: '0x6615cfa5d861430cfe998c6fa1989229cce344a4',
+           address: '0x835aaf6ea6b04892915a8299110652e7cc897a4e',
            transactionHash:
-            '0x6a406046349afec6287d32cf306ead92d20fe28496900eab20a8d8f66daab629' },
+            '0x0fe46cca03d4f3881596b030332e00e4f1418cec117dbe29c95afba6bcf26b39' },
         '47':
          { events: {},
            links: {},
@@ -2171,9 +2167,9 @@ export default { ERC20full:
         '4':
          { events: {},
            links: {},
-           address: '0xb80dd974303a900a596c532f7bc44a284e7cfe71',
+           address: '0xcae7f285b0672047653008310c17709a15cf9dc9',
            transactionHash:
-            '0xda3e8aec0ea209b1e4647d6af64f2b34a911f42e96aadd5e82c6d0f41813aad7' },
+            '0xeff446a5fec7b8625a254ce4187a6b2c0185ad4eb623062816962ec9f558323b' },
         '17':
          { events: {},
            links: {},
@@ -2183,9 +2179,9 @@ export default { ERC20full:
         '8086':
          { events: {},
            links: {},
-           address: '0x9364777e92392db5c0f09b6cd3dba98e00805c00',
+           address: '0x197569f4db4a0a6adca9f79a490488b30fdefb6d',
            transactionHash:
-            '0xc51294245b87c89c9caf9f1c96be171523049b3c80361ecb26842129fa0c60ad' } },
+            '0xb8126622efcc4e2319b27b69e51e4ad732dbf64e590514cfc965d3e9d275d62a' } },
      abi:
       [ { constant: true,
           inputs: [],
