@@ -467,5 +467,14 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
         return methodHashToMethodName[_methodHash];
     }
 
+
+    /// @notice Function to get major proposal data
+    /// @param proposalId is the id of proposal
+    /// @return tuple containing all the data for proposal
+    function getProposalData(uint proposalId) public view returns (uint,string,uint,bool,uint,int) {
+        Proposal memory p = proposals[proposalId];
+        return (p.amount, p.description, p.minExecutionDate, p.executed, p.numberOfVotes, p.currentResult);
+    }
+
 }
 

@@ -146,6 +146,7 @@ contract('TwoKeyCongress', async (accounts) => {
             'Add new member',
             transactionBytecode, { from: accounts[2] });
 
+
         let flag = await congress.checkProposalCode(
             0,
             congress.address,
@@ -177,6 +178,9 @@ contract('TwoKeyCongress', async (accounts) => {
     it("advance time and execute proposal", async () => {
 
         await increaseTime(HOUR);
+
+        let proposalData = await congress.getProposalData(0);
+        console.log("Proposal Data : " + proposalData);
 
         await congress.send(10000, {
             from: accounts[5]
