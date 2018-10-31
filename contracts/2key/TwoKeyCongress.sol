@@ -481,6 +481,9 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
         return (p.amount, p.description, p.minExecutionDate, p.executed, p.numberOfVotes, p.currentResult, p.transactionBytecode);
     }
 
+
+    /// @notice Function to get addresses of all members in congress
+    /// @return array of addresses
     function getAllMemberAddresses() public view returns (address[]) {
         uint length = getMembersLength();
         address[] memory membersAddresses = new address[](length-1);
