@@ -2009,9 +2009,9 @@ export default { ERC20full:
       { '17':
          { events: {},
            links: {},
-           address: '0xc608e05ab2c5ecf8c3646697d0ca6969a0b8917e',
+           address: '0x835aaf6ea6b04892915a8299110652e7cc897a4e',
            transactionHash:
-            '0xe310107e566dfaf74a17e32cb619957fc76fa8641d6091a8205e0304dc47f46b' },
+            '0x0fe46cca03d4f3881596b030332e00e4f1418cec117dbe29c95afba6bcf26b39' },
         '47':
          { events: {},
            links: {},
