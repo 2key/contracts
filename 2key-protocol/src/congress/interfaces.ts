@@ -10,4 +10,5 @@ export interface ITwoKeyCongress {
     getMemberInfo: (from: string) => Promise<any>,
     getMethodNameFromHash: (congress: any, hash: string, from:string) => Promise<any>,
     getProposalInformations: (congress: any, proposalId: number, from: string) => Promise<any>,
+    getAllMembersForCongress: (congress: any, from:string) => Promise<string[]>,
 }

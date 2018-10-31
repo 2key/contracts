@@ -216,7 +216,13 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
         })
     }
 
-    //p.amount, p.description, p.minExecutionDate, p.executed, p.numberOfVotes, p.currentResult
+    /**
+     *
+     * @param congress
+     * @param {number} proposalId
+     * @param {string} from
+     * @returns {Promise<any>}
+     */
     public getProposalInformations(congress: any, proposalId: number, from: string) : Promise<any> {
         return new Promise( async(resolve, reject) => {
             try {
@@ -248,6 +254,23 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
                 };
 
                 resolve(proposal);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+    /**
+     *
+     * @param congress
+     * @param {string} from
+     * @returns {Promise<string[]>}
+     */
+    public getAllMembersForCongress(congress: any, from:string) : Promise<string[]> {
+        return new Promise( async(resolve,reject) => {
+            try {
+                let members = await promisify(this.congress.getAllMemberAddresses, [{from}]);
+                resolve(members);
             } catch (e) {
                 reject(e);
             }

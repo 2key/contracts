@@ -244,7 +244,7 @@ contract('TwoKeyCongress', async (accounts) => {
             proposalExecuted,
             proposalNumberOfVotes,
             proposalCurrentResult,
-            proposalTransactionBytecode
+            proposalTransactionBytecode,
         ] = await congress.getProposalData(0);
 
         proposalData = {
@@ -278,6 +278,11 @@ contract('TwoKeyCongress', async (accounts) => {
         console.log(proposalData.proposalTransactionBytecode.substring(10));
         let decoded = Web3EthAbi.decodeParameters(['address','string','uint256'],proposalData.proposalTransactionBytecode.substring(10));
         console.log(decoded);
+    })
+
+    it('should return members', async() => {
+        let members = await congress.getAllMemberAddresses();
+        console.log(members);
     })
 
     // it("vote yay account 6", async () => {
