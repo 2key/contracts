@@ -16,7 +16,7 @@ contract('TwoKeyCongress', async (accounts) => {
 
     let method=  web3.sha3('addMember(address,string,uint256)').slice(0,10);
     console.log("METHOD" + method);
-
+    let proposalData;
     let functionSignature = Web3EthAbi.encodeFunctionSignature({
         name: 'addMember',
         type: 'function',
@@ -178,9 +178,35 @@ contract('TwoKeyCongress', async (accounts) => {
     it("advance time and execute proposal", async () => {
 
         await increaseTime(HOUR);
+        //(p.amount, p.description, p.minExecutionDate, p.executed, p.numberOfVotes, p.currentResult, p.transactionBytecode);
+        let proposalAmount,
+            proposalDescription,
+            proposalMinExecutionDate,
+            proposalExecuted,
+            proposalNumberOfVotes,
+            proposalCurrentResult,
+            proposalTransactionBytecode;
 
-        let proposalData = await congress.getProposalData(0);
-        console.log("Proposal Data : " + proposalData);
+        [
+            proposalAmount,
+            proposalDescription,
+            proposalMinExecutionDate,
+            proposalExecuted,
+            proposalNumberOfVotes,
+            proposalCurrentResult,
+            proposalTransactionBytecode
+        ] = await congress.getProposalData(0);
+
+        proposalData = {
+            proposalAmount: proposalAmount,
+            proposalDescription: proposalDescription,
+            proposalMinExecutionDate: proposalMinExecutionDate,
+            proposalExecuted: proposalExecuted,
+            proposalNumberOfVotes: proposalNumberOfVotes,
+            proposalCurrentResult: proposalCurrentResult,
+            proposalTransactionBytecode: proposalTransactionBytecode,
+        };
+        console.log(proposalData);
 
         await congress.send(10000, {
             from: accounts[5]
@@ -198,6 +224,11 @@ contract('TwoKeyCongress', async (accounts) => {
         console.log(allowedMethods);
     });
 
+    it('should decode proposal bytecode' , async() => {
+        console.log(proposalData.proposalTransactionBytecode.substring(10));
+        let decoded = Web3EthAbi.decodeParameters(['address','string','uint256'],proposalData.proposalTransactionBytecode.substring(10));
+        console.log(decoded);
+    })
 
     // it("vote yay account 6", async () => {
     //     let v6 = await congress.vote(0, true, "yes, is good to keep things", {
