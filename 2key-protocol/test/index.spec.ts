@@ -719,6 +719,11 @@ describe('TwoKeyProtocol', () => {
     it('should get all whitelisted methods from congress', async() => {
         const methods = await twoKeyProtocol.Congress.getAllowedMethods(from);
         console.log(methods);
-    })
+    });
+
+    it('should get all congress members', async() => {
+        const methods = await twoKeyProtocol.Congress.getMembers();
+        console.log(methods);
+    });
 
 });

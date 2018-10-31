@@ -7,11 +7,13 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
     private readonly base: ITwoKeyBase;
     private readonly helpers: ITwoKeyHelpers;
     private readonly utils: ITwoKeyUtils;
+    private readonly congress: any;
 
     constructor(twoKeyProtocol: ITwoKeyBase, helpers: ITwoKeyHelpers, utils: ITwoKeyUtils) {
         this.base = twoKeyProtocol;
         this.helpers = helpers;
         this.utils = utils;
+        this.congress = twoKeyProtocol.twoKeyCongress;
     }
 
     /**
@@ -22,7 +24,7 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
     public getAllowedMethods(from: string) : Promise<string[]> {
         return new Promise(async(resolve,reject) => {
             try {
-                const allowedMethods = await promisify(this.base.twoKeyCongress.getAllowedMethods, [{from}]);
+                const allowedMethods = await promisify(this.congress.getAllowedMethods, [{from}]);
                 resolve(allowedMethods);
             } catch (e) {
                 reject(e);
@@ -39,7 +41,7 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
     public isUserMemberOfCongress(member: string, from:string) : Promise<boolean> {
         return new Promise(async(resolve, reject) => {
             try {
-                const isUserMember = await promisify(this.base.twoKeyCongress.checkIsMember,[member, {from}]);
+                const isUserMember = await promisify(this.congress.checkIsMember,[member, {from}]);
                 resolve(isUserMember);
             } catch (e) {
                 reject(e);
@@ -60,7 +62,7 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
         return new Promise( async(resolve, reject) => {
             try {
                 const nonce = await this.helpers._getNonce(from);
-                let proposalId = await promisify(this.base.twoKeyCongress.newProposal,[beneficiary,weiAmount,jobDescription,transactionBytecode,{from, nonce}]);
+                let proposalId = await promisify(this.congress.newProposal,[beneficiary,weiAmount,jobDescription,transactionBytecode,{from, nonce}]);
                 resolve(proposalId);
             } catch(e) {
                 reject(e);
@@ -81,7 +83,7 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
         return new Promise( async(resolve, reject) => {
             try {
                 const nonce = await this.helpers._getNonce(from);
-                let proposalId = await promisify(this.base.twoKeyCongress.newProposal,[beneficiary,etherAmount,jobDescription,transactionBytecode,{from, nonce}]);
+                let proposalId = await promisify(this.congress.newProposal,[beneficiary,etherAmount,jobDescription,transactionBytecode,{from, nonce}]);
                 resolve(proposalId);
             } catch(e) {
                 reject(e);
@@ -116,7 +118,7 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
         return new Promise(async(resolve,reject) => {
             try {
                 const nonce = await this.helpers._getNonce(from);
-                let voteId = await promisify(this.base.twoKeyCongress.vote, [proposalNumber, supportsProposal, justificationText, {from, nonce}]);
+                let voteId = await promisify(this.congress.vote, [proposalNumber, supportsProposal, justificationText, {from, nonce}]);
                 resolve(voteId);
             } catch (e) {
                 reject(e);
@@ -135,7 +137,7 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
         return new Promise(async(resolve,reject) => {
             try {
                 const nonce = await this.helpers._getNonce(from);
-                let txHash = await promisify(this.base.twoKeyCongress.executeProposal, [proposalNumber,transactionBytecode, {from, nonce}]);
+                let txHash = await promisify(this.congress.executeProposal, [proposalNumber,transactionBytecode, {from, nonce}]);
                 resolve(txHash);
             } catch(e) {
                 reject(e);
@@ -156,7 +158,7 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
                     currentResult,
                     description;
 
-                [numberOfVotes,currentResult,description] = await promisify(this.base.twoKeyCongress.getVoteCount, [{from}]);
+                [numberOfVotes,currentResult,description] = await promisify(this.congress.getVoteCount, [{from}]);
                 let obj = {
                     numberOfVotes: numberOfVotes,
                     currentResult: currentResult,
@@ -182,7 +184,7 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
                     votingPower,
                     memberSince;
 
-                [address, name, votingPower,memberSince] = await promisify(this.base.twoKeyCongress.getMemberInfo, [{from}]);
+                [address, name, votingPower,memberSince] = await promisify(this.congress.getMemberInfo, [{from}]);
 
                 let member = {
                     memberAddress: address,
@@ -206,7 +208,7 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
     public getMethodNameFromHash(congress: any, hash: string, from: string) : Promise<any> {
         return new Promise( async(resolve,reject) => {
             try {
-                let methodName = await promisify(this.base.twoKeyCongress.getMethodNameFromMethodHash, [hash, {from}]);
+                let methodName = await promisify(this.congress.getMethodNameFromMethodHash, [hash, {from}]);
                 resolve(methodName);
             } catch (e) {
                 reject(e);
@@ -234,7 +236,7 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
                     proposalNumberOfVotes,
                     proposalCurrentResult,
                     proposalTransactionBytecode
-                ] = await promisify(this.base.twoKeyCongress.getProposalData, [proposalId, {from}]);
+                ] = await promisify(this.congress.getProposalData, [proposalId, {from}]);
 
                 let proposal = {
                     proposalAmount: proposalAmount,
