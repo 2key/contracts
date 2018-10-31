@@ -239,7 +239,8 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
                     proposalExecutionDate,
                     proposalIsExecuted,
                     proposalNumberOfVotes,
-                    proposalCurrentResult;
+                    proposalCurrentResult,
+                    proposalTransactionBytecode;
 
                 [
                     proposalAmount,
@@ -247,7 +248,8 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
                     proposalExecutionDate,
                     proposalIsExecuted,
                     proposalNumberOfVotes,
-                    proposalCurrentResult
+                    proposalCurrentResult,
+                    proposalTransactionBytecode
                 ] = await promisify(congressInstance.getProposalData, [proposalId, {from}]);
 
                 let proposal = {
