@@ -107,7 +107,6 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
         return false;
     }
 
-
     constructor(
         uint256 _minutesForDebate, address[] initialMembers, uint[] votingPowers) Ownable() payable public {
         changeVotingRules(0, _minutesForDebate);
@@ -115,8 +114,8 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
         addMember(0,'',0);
         addMember(initialMembers[0], 'Eitan', votingPowers[0]);
         addMember(initialMembers[1], 'Kiki', votingPowers[1]);
-        addMember(initialMembers[2], 'intcollege', votingPowers[1]);
-        addMember(initialMembers[3], '2keyeconomy', votingPowers[1]);
+//        addMember(initialMembers[2], 'intcollege', votingPowers[1]);
+//        addMember(initialMembers[3], '2keyeconomy', votingPowers[1]);
         initialized = true;
         addInitialWhitelistedMethods();
     }
@@ -205,7 +204,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
             memberId[targetMember] = members.length;
             id = members.length++;
         }
-        minimumQuorum = members.length -1;
+        minimumQuorum = members.length - 1; //TODO: check this lione
         maxVotingPower += _votingPower;
         members[id] = Member({memberAddress: targetMember, memberSince: block.timestamp, votingPower: _votingPower, name: memberName});
         emit MembershipChanged(targetMember, true);
@@ -480,6 +479,17 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
     function getProposalData(uint proposalId) public view returns (uint,string,uint,bool,uint,int,bytes) {
         Proposal memory p = proposals[proposalId];
         return (p.amount, p.description, p.minExecutionDate, p.executed, p.numberOfVotes, p.currentResult, p.transactionBytecode);
+    }
+
+    function getAllMemberAddresses() public view returns (address[]) {
+        uint length = getMembersLength();
+        address[] memory membersAddresses = new address[](length-1);
+
+        for(uint i=1; i<length; i++) {
+            Member memory m = members[i];
+            membersAddresses[i-1] = m.memberAddress;
+        }
+        return membersAddresses;
     }
 
 }
