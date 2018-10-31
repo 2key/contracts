@@ -58,7 +58,7 @@ module.exports = {
       gas: 8000000,
       gasPrice: 5000000000
     },
-    'rinkeby-infura': {
+    rinkeby: {
       provider: () => LedgerProvider(`https://rinkeby.infura.io/v3/${infuraApiKey}`, {
         networkId: 4,
         // https://github.com/LedgerHQ/ledgerjs/issues/200
@@ -67,7 +67,9 @@ module.exports = {
         accountsLength: 1,
         accountsOffset: 0,
       }),
-
+      network_id: 4,
+      gas: 7000000,
+      gasPrice: 50000000000,
     },
     'rinkeby-test' : {
         provider: () => new HDWalletProvider(mnemonic, 'https://rinkeby.infura.io/v3/904c762bd6984606bf8ae7f30d7cb28c\n'),
