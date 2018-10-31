@@ -229,7 +229,8 @@ export class TwoKeyProtocol {
     public transfer2KEYTokens(to: string, value: number | string | BigNumber, from: string, gasPrice: number = this.gasPrice): Promise<string> {
         return new Promise<string>(async (resolve, reject) => {
             try {
-                const params = {from, gasPrice};
+                const nonce = await this.Helpers._getNonce(from);
+                const params = {from, gasPrice, nonce};
                 const txHash = await promisify(this.twoKeyEconomy.transfer, [to, value, params]);
                 resolve(txHash);
             } catch (err) {
@@ -241,7 +242,8 @@ export class TwoKeyProtocol {
     public transferEther(to: string, value: number | string | BigNumber, from: string, gasPrice: number = this.gasPrice): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
-                const params = {to, gasPrice, value, from};
+                const nonce = await this.Helpers._getNonce(from);
+                const params = {to, gasPrice, value, from, nonce};
                 const txHash = await promisify(this.web3.eth.sendTransaction, [params]);
                 resolve(txHash);
             } catch (err) {

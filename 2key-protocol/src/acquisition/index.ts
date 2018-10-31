@@ -181,10 +181,12 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     public updateOrSetIpfsHashPublicMeta(campaign: any, hash: string, from: string, gasPrice: number = this.base._getGasPrice()): Promise<string> {
         return new Promise<string>(async (resolve, reject) => {
             try {
+                const nonce = await this.helpers._getNonce(from);
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
                 const txHash: string = await promisify(campaignInstance.updateOrSetIpfsHashPublicMeta, [hash, {
                     from,
-                    gasPrice
+                    gasPrice,
+                    nonce,
                 }]);
                 resolve(txHash);
             } catch (e) {
@@ -238,7 +240,8 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     public async checkInventoryBalance(campaign: any, from: string): Promise<number | string | BigNumber> {
         try {
             const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-            const hash = await promisify(campaignInstance.getAndUpdateInventoryBalance, [{from}]);
+            const nonce = await this.helpers._getNonce(from);
+            const hash = await promisify(campaignInstance.getAndUpdateInventoryBalance, [{from, nonce}]);
             await this.utils.getTransactionReceiptMined(hash);
             const balance = await promisify(campaignInstance.getInventoryBalance, [{from}]);
             return Promise.resolve(balance);
@@ -326,7 +329,8 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         return new Promise(async (resolve, reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-                const contractor = await promisify(campaignInstance.getContractorAddress, [{from}]);
+                const nonce = await this.helpers._getNonce(from);
+                const contractor = await promisify(campaignInstance.getContractorAddress, [{from, nonce}]);
                 const [mainTxHash, plasmaTxHash] = await Promise.all([
                     promisify(campaignInstance.setPublicLinkKey, [publicLink, {
                         from,
@@ -426,9 +430,11 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 if (!arcBalance) {
                     this.base._log('No Arcs', arcBalance, 'Call Free Join Take');
                     const signature = Sign.free_join_take(from, public_address, f_address, f_secret, p_message, cut + 1);
+                    const nonce = await this.helpers._getNonce(from);
                     const txHash: string = await promisify(campaignInstance.distributeArcsBasedOnSignature, [signature, {
                         from,
                         gasPrice,
+                        nonce,
                     }]);
                     this.base._log('setPubLinkWithCut', txHash);
                     await this.utils.getTransactionReceiptMined(txHash);
@@ -490,6 +496,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
 
                 const prevChain = await promisify(campaignInstance.received_from, [from]);
+                const nonce = await this.helpers._getNonce(from);
                 if (!parseInt(prevChain, 16)) {
                     this.base._log('No ARCS call Free Join Take');
                     const {public_address} = generatePublicMeta();
@@ -497,7 +504,8 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     const txHash: string = await promisify(campaignInstance.joinAndConvert, [signature, {
                         from,
                         gasPrice,
-                        value
+                        value,
+                        nonce,
                     }]);
                     await this.utils.getTransactionReceiptMined(txHash);
                     resolve(txHash);
@@ -506,7 +514,8 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     const txHash: string = await promisify(campaignInstance.convert, [{
                         from,
                         gasPrice,
-                        value
+                        value,
+                        nonce,
                     }]);
                     resolve(txHash);
                 }
@@ -531,7 +540,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 if (parseInt(prevChain, 16)) {
                     reject(new Error('User already in chain'));
                 }
-
+                const nonce = await this.helpers._getNonce(from);
                 if (!arcBalance) {
                     const {public_address} = generatePublicMeta();
                     this.base._log('joinAndShareARC call Free Join Take');
@@ -539,13 +548,15 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     this.base._log(signature, recipient);
                     const txHash: string = await promisify(campaignInstance.joinAndShareARC, [signature, recipient, {
                         from,
-                        gasPrice
+                        gasPrice,
+                        nonce,
                     }]);
                     resolve(txHash);
                 } else {
                     const txHash: string = await promisify(campaignInstance.transfer, [recipient, 1, {
                         from,
-                        gasPrice
+                        gasPrice,
+                        nonce,
                     }]);
                     resolve(txHash);
                 }
@@ -625,9 +636,10 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     public approveConverter(campaign: any, converter: string, from: string, gasPrice: number = this.base._getGasPrice()): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
+                const nonce = await this.helpers._getNonce(from);
                 const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
                 const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
-                const txHash: string = await promisify(conversionHandlerInstance.approveConverter, [converter, {from, gasPrice}]);
+                const txHash: string = await promisify(conversionHandlerInstance.approveConverter, [converter, {from, gasPrice, nonce}]);
                 resolve(txHash);
             } catch (e) {
                 reject(e);
@@ -638,9 +650,10 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     public rejectConverter(campaign: any, converter: string, from: string, gasPrice: number = this.base._getGasPrice()): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
+                const nonce = await this.helpers._getNonce(from);
                 const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
                 const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
-                const txHash: string = await promisify(conversionHandlerInstance.rejectConverter, [converter, {from, gasPrice}]);
+                const txHash: string = await promisify(conversionHandlerInstance.rejectConverter, [converter, {from, gasPrice, nonce}]);
                 resolve(txHash);
             } catch (e) {
                 reject(e);
@@ -651,9 +664,10 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     public cancelConverter(campaign: any, from: string, gasPrice: number = this.base._getGasPrice()): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
+                const nonce = await this.helpers._getNonce(from);
                 const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
                 const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
-                const txHash: string = await promisify(conversionHandlerInstance.cancelConverter, [{from, gasPrice}]);
+                const txHash: string = await promisify(conversionHandlerInstance.cancelConverter, [{from, gasPrice, nonce}]);
                 resolve(txHash);
             } catch (e) {
                 reject(e);
@@ -692,8 +706,8 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
             try {
                 const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
                 const conversionHandlerInstance = this.base.web3.eth.contract(contracts.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
-
-                const txHash: string = await promisify(conversionHandlerInstance.executeConversion, [converter, {from, gasPrice}]);
+                const nonce = await this.helpers._getNonce(from);
+                const txHash: string = await promisify(conversionHandlerInstance.executeConversion, [converter, {from, gasPrice, nonce}]);
                 this.base._log(txHash);
                 resolve(txHash);
             } catch (e) {
@@ -701,7 +715,6 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
             }
         })
     }
-
 
     public getLockupContractsForConverter(campaign: any, converter: string, from: string): Promise<string[]> {
         return new Promise(async (resolve, reject) => {
@@ -716,12 +729,12 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         });
     }
 
-
     public addFungibleAssetsToInventoryOfCampaign(campaign: any, amount: number, from: string, gasPrice: number = this.base._getGasPrice()) : Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-                const txHash: string = await promisify(campaignInstance.addUnitsToInventory, [amount, {from, gasPrice}]);
+                const nonce = await this.helpers._getNonce(from);
+                const txHash: string = await promisify(campaignInstance.addUnitsToInventory, [amount, {from, gasPrice, nonce}]);
                 resolve(txHash);
             } catch (e) {
                 reject(e);
@@ -729,12 +742,12 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         })
     }
 
-
-    public cancel(campaign: any, from: string): Promise<string> {
+    public cancel(campaign: any, from: string, gasPrice: number = this.base._getGasPrice()): Promise<string> {
         return new Promise<string>(async (resolve, reject) => {
             try {
+                const nonce = await this.helpers._getNonce(from);
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-                const txHash: string = await promisify(campaignInstance.cancel,[{from}]);
+                const txHash: string = await promisify(campaignInstance.cancel,[{from, gasPrice, nonce}]);
                 resolve(txHash);
             } catch(e) {
                 reject(e);

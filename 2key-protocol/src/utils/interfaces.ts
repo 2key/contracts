@@ -107,6 +107,7 @@ export interface ITwoKeyHelpers {
     _getTwoKeyCongressInstance(congress: any) : Promise<any>,
     _createAndValidate: (contractName: string, address: string) => Promise<any>,
     _checkIPFS: () => Promise<boolean>,
+    _getNonce: (from: string) => Promise<number>,
 }
 
 export interface ITwoKeyUtils {

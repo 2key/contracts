@@ -106,8 +106,9 @@ export default class Helpers implements ITwoKeyHelpers {
     _createContract(contract: IContract, from: string, {gasPrice = this.gasPrice, params, progressCallback}: ICreateContractOpts = {}): Promise<string> {
         return new Promise(async (resolve, reject) => {
             const {abi, bytecode: data, name} = contract;
+            const nonce = await this._getNonce(from);
             const createParams = params ? [...params] : [];
-            createParams.push({data, from, gasPrice});
+            createParams.push({data, from, gasPrice, nonce});
             this.base._log('CREATE CONTRACT', name, params, from, gasPrice);
             let resolved: boolean = false;
             this.base.web3.eth.contract(abi).new(...createParams, (err, res) => {
@@ -158,18 +159,18 @@ export default class Helpers implements ITwoKeyHelpers {
         });
     }
 
-    // _getNonce(): Promise<number> {
-    //     return new Promise((resolve, reject) => {
-    //         this.base.web3.eth.getTransactionCount(this.base.address, 'pending', (err, res) => {
-    //             if (err) {
-    //                 reject(err);
-    //             } else {
-    //                 // console.log('NONCE', res, this.base.address);
-    //                 resolve(res);
-    //             }
-    //         });
-    //     });
-    // }
+    _getNonce(from: string): Promise<number> {
+        return new Promise((resolve, reject) => {
+            this.base.web3.eth.getTransactionCount(from, 'pending', (err, res) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    // console.log('NONCE', res, this.base.address);
+                    resolve(res);
+                }
+            });
+        });
+    }
 
     // _getBlock(block: string | number): Promise<ITransaction> {
     //     return new Promise((resolve, reject) => {

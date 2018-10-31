@@ -65,7 +65,8 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
         return new Promise( async(resolve, reject) => {
             try {
                 let congressInstance = await this.helpers._getTwoKeyCongressInstance(congress);
-                let proposalId = await promisify(congressInstance.newProposal,[beneficiary,weiAmount,jobDescription,transactionBytecode,{from}]);
+                const nonce = await this.helpers._getNonce(from);
+                let proposalId = await promisify(congressInstance.newProposal,[beneficiary,weiAmount,jobDescription,transactionBytecode,{from, nonce}]);
                 resolve(proposalId);
             } catch(e) {
                 reject(e);
@@ -87,7 +88,8 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
         return new Promise( async(resolve, reject) => {
             try {
                 let congressInstance = await this.helpers._getTwoKeyCongressInstance(congress);
-                let proposalId = await promisify(congressInstance.newProposal,[beneficiary,etherAmount,jobDescription,transactionBytecode,{from}]);
+                const nonce = await this.helpers._getNonce(from);
+                let proposalId = await promisify(congressInstance.newProposal,[beneficiary,etherAmount,jobDescription,transactionBytecode,{from, nonce}]);
                 resolve(proposalId);
             } catch(e) {
                 reject(e);
@@ -124,7 +126,8 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
         return new Promise(async(resolve,reject) => {
             try {
                 let congressInstance = await this.helpers._getTwoKeyCongressInstance(congress);
-                let voteId = await promisify(congressInstance.vote, [proposalNumber, supportsProposal, justificationText, {from}]);
+                const nonce = await this.helpers._getNonce(from);
+                let voteId = await promisify(congressInstance.vote, [proposalNumber, supportsProposal, justificationText, {from, nonce}]);
                 resolve(voteId);
             } catch (e) {
                 reject(e);
@@ -144,7 +147,8 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
         return new Promise(async(resolve,reject) => {
             try {
                 let congressInstance = await this.helpers._getTwoKeyCongressInstance(congress);
-                let txHash = await promisify(congressInstance.executeProposal, [proposalNumber,transactionBytecode, {from}]);
+                const nonce = await this.helpers._getNonce(from);
+                let txHash = await promisify(congressInstance.executeProposal, [proposalNumber,transactionBytecode, {from, nonce}]);
                 resolve(txHash);
             } catch(e) {
                 reject(e);
@@ -267,10 +271,4 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
             }
         })
     }
-
-
-
-
-
-
 }
