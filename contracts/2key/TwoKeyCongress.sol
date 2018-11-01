@@ -51,7 +51,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
     // Array of members
     Member[] public members;
     // Array of allowed methods
-    bytes32[] allowedMethods;
+    bytes32[] allowedMethodSignatures;
 
     mapping(bytes32 => string) methodHashToMethodName;
 
@@ -99,8 +99,8 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
     /// @param bytecode is the bytecode of transaction we'd like to execute
     /// @return true if whitelisted otherwise false
     function onlyAllowedMethods(bytes bytecode) public view returns (bool) {
-        for(uint i=0; i<allowedMethods.length; i++) {
-            if(compare(allowedMethods[i], bytecode)) {
+        for(uint i=0; i< allowedMethodSignatures.length; i++) {
+            if(compare(allowedMethodSignatures[i], bytecode)) {
                 return true;
             }
         }
@@ -167,7 +167,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
     /// @return hash of allowed methods
     function hashAllowedMethods(string nameAndParams) public returns (bytes32) {
         bytes32 allowed = keccak256(abi.encodePacked(nameAndParams));
-        allowedMethods.push(allowed);
+        allowedMethodSignatures.push(allowed);
         methodHashToMethodName[allowed] = nameAndParams;
         return allowed;
     }
@@ -241,7 +241,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
     */
     function addNewAllowedBytecode(bytes32 functionSignature) public {
         require(msg.sender == self);
-        allowedMethods.push(bytes32(functionSignature));
+        allowedMethodSignatures.push(bytes32(functionSignature));
     }
     /**
      * Change voting rules
@@ -280,6 +280,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
     returns (uint proposalID)
     {
         require(onlyAllowedMethods(transactionBytecode)); // security layer
+
         proposalID = proposals.length++;
         Proposal storage p = proposals[proposalID];
         p.recipient = beneficiary;
@@ -463,7 +464,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
     /// @notice Function / Getter for hashes of allowed methods
     /// @return array of bytes32 hashes
     function getAllowedMethods() public view returns (bytes32[]){
-        return allowedMethods;
+        return allowedMethodSignatures;
     }
 
     /// @notice Function to fetch method name from method hash
@@ -494,6 +495,5 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
         }
         return membersAddresses;
     }
-
 }
 

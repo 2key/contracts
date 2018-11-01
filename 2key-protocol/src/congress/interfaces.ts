@@ -1,7 +1,7 @@
 export interface ITwoKeyCongress {
     getAllowedMethods: (from: string) => Promise<string[]>,
     isUserMemberOfCongress: (member: string, from:string) => Promise<boolean>,
-    submitNewProposal: (beneficiary: string, weiAmount: number, jobDescription: string, transactionBytecode: string, from:string) => Promise<number>,
+    newProposalInWei: (beneficiary: string, weiAmount: number, jobDescription: string, transactionBytecode: string, from:string) => Promise<number>,
     newProposalInEther: (beneficiary: string, etherAmount: number, jobDescription: string, transactionBytecode: string, from:string) => Promise<number>,
     getAllProposals: (from:string) => Promise<any>,
     vote: (proposalNumber:number, supportsProposal: boolean, justificationText:string, from:string) => Promise<number>,

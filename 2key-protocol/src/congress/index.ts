@@ -58,7 +58,7 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
      * @param {string} from
      * @returns {Promise<number>}
      */
-    public submitNewProposal(beneficiary: string, weiAmount: number, jobDescription: string, transactionBytecode: string, from:string) : Promise<number> {
+    public newProposalInWei(beneficiary: string, weiAmount: number, jobDescription: string, transactionBytecode: string, from:string) : Promise<number> {
         return new Promise( async(resolve, reject) => {
             try {
                 const nonce = await this.helpers._getNonce(from);
@@ -276,4 +276,7 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
             }
         })
     }
+
+
+
 }
