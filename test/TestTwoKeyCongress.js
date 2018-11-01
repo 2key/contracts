@@ -57,7 +57,6 @@ console.log(encoodedParams === transactionBytecode);
 
 const TwoKeyCongress = artifacts.require("TwoKeyCongress");
 const BasicStorage = artifacts.require("BasicStorage");
-const TwoKeyEconomy = artifacts.require("TwoKeyEconomy");
 
 
 contract('TwoKeyCongress', async (accounts) => {
@@ -278,12 +277,19 @@ contract('TwoKeyCongress', async (accounts) => {
         console.log(proposalData.proposalTransactionBytecode.substring(10));
         let decoded = Web3EthAbi.decodeParameters(['address','string','uint256'],proposalData.proposalTransactionBytecode.substring(10));
         console.log(decoded);
-    })
+    });
 
     it('should return members', async() => {
         let members = await congress.getAllMemberAddresses();
         console.log(members);
-    })
+    });
+
+    it('should get name from method hash', async() => {
+        let name = await congress.getMethodNameFromMethodHash('0x1b760719f8f41f90c357d4b353586ac95b58f0c871009662d94c5284384a7081');
+        assert.equal('addMember(address,string,uint256)',name,'should be the same');
+    });
+
+
 
     // it("vote yay account 6", async () => {
     //     let v6 = await congress.vote(0, true, "yes, is good to keep things", {
