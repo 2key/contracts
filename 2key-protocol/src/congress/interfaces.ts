@@ -8,7 +8,7 @@ export interface ITwoKeyCongress {
     executeProposal: (proposalNumber: number, transactionBytecode: string, from: string) => Promise<string>,
     getVoteCount: (proposalNumber: number, from:string) => Promise<any>,
     getMemberInfo: (from: string) => Promise<any>,
-    getMethodNameFromHash: (congress: any, hash: string, from:string) => Promise<any>,
-    getProposalInformations: (congress: any, proposalId: number, from: string) => Promise<any>,
-    getAllMembersForCongress: (congress: any, from:string) => Promise<string[]>,
+    getMethodNameFromHash: (hash: string, from:string) => Promise<any>,
+    getProposalInformations: (proposalId: number, from: string) => Promise<any>,
+    getAllMembersForCongress: (from:string) => Promise<string[]>,
 }

@@ -205,7 +205,7 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
      * @param {string} from
      * @returns {Promise<any>}
      */
-    public getMethodNameFromHash(congress: any, hash: string, from: string) : Promise<any> {
+    public getMethodNameFromHash(hash: string, from: string) : Promise<any> {
         return new Promise( async(resolve,reject) => {
             try {
                 let methodName = await promisify(this.congress.getMethodNameFromMethodHash, [hash, {from}]);
@@ -218,12 +218,11 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
 
     /**
      *
-     * @param congress
      * @param {number} proposalId
      * @param {string} from
      * @returns {Promise<any>}
      */
-    public getProposalInformations(congress: any, proposalId: number, from: string) : Promise<any> {
+    public getProposalInformations(proposalId: number, from: string) : Promise<any> {
         return new Promise( async(resolve, reject) => {
             try {
                 let proposalAmount,
@@ -262,11 +261,10 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
 
     /**
      *
-     * @param congress
      * @param {string} from
      * @returns {Promise<string[]>}
      */
-    public getAllMembersForCongress(congress: any, from:string) : Promise<string[]> {
+    public getAllMembersForCongress(from:string) : Promise<string[]> {
         return new Promise( async(resolve,reject) => {
             try {
                 let members = await promisify(this.congress.getAllMemberAddresses, [{from}]);

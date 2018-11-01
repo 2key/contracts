@@ -490,11 +490,11 @@ describe('TwoKeyProtocol', () => {
         expect(hash).to.be.a('string');
     }).timeout(300000);
 
-    it('should print amount of tokens that user want to buy', async () => {
-        const tokens = await twoKeyProtocol.AcquisitionCampaign.getEstimatedTokenAmount(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETH, 'ether'));
-        console.log(tokens);
-        expect(tokens.totalTokens).to.gte(0);
-    });
+    // it('should print amount of tokens that user want to buy', async () => {
+    //     const tokens = await twoKeyProtocol.AcquisitionCampaign.getEstimatedTokenAmount(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETH, 'ether'));
+    //     console.log(tokens);
+    //     expect(tokens.totalTokens).to.gte(0);
+    // });
 
     it('should buy some tokens', async () => {
         console.log('4) buy from test4 REFLINK', refLink);
@@ -786,6 +786,13 @@ describe('TwoKeyProtocol', () => {
         console.log(methods);
     });
 
+    it('should get all whitelisted addresses', async() => {
+        const addresses = await twoKeyProtocol.Congress.getAllMembersForCongress(from);
+        console.log(addresses);
+        expect(addresses.length).to.be.equal(4);
+
+    });
+
     it('should submit new proposal', async () => {
         const {web3, address} = web3switcher.deployer();
         from = address;
@@ -797,13 +804,8 @@ describe('TwoKeyProtocol', () => {
             },
             plasmaPK: Sign.generatePrivateKey().toString('hex'),
         });
-        txHash = await twoKeyProtocol.Congress.submitNewProposal(
-            from,
-            1,
-            'addMember',
-            'addMember',
-            ['0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7', 'aydnep', 1],
-            from,
-        );
+
+        const proposalId = await twoKeyProtocol.Congress.newProposalInWei(this.congress,0,"Proposal for adding new member", "0x1b760719000000000000000000000000d03ea8624c8c5987235048901fb614fdca89b1170000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000000500000000000000000000000000000000000000000000000000000000000000064e696b6f6c610000000000000000000000000000000000000000000000000000", from);
+        console.log(proposalId);
     }).timeout(30000);
 });
