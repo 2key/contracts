@@ -114,8 +114,8 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
         addMember(0,'',0);
         addMember(initialMembers[0], 'Eitan', votingPowers[0]);
         addMember(initialMembers[1], 'Kiki', votingPowers[1]);
-//        addMember(initialMembers[2], 'intcollege', votingPowers[1]);
-//        addMember(initialMembers[3], '2keyeconomy', votingPowers[1]);
+        addMember(initialMembers[2], 'intcollege', votingPowers[1]);
+        addMember(initialMembers[3], '2keyeconomy', votingPowers[1]);
         initialized = true;
         addInitialWhitelistedMethods();
     }
