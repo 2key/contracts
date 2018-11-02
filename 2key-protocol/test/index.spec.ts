@@ -500,6 +500,8 @@ describe('TwoKeyProtocol', () => {
         console.log('4) buy from test4 REFLINK', refLink);
         const txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETH, 'ether'), refLink, from);
         console.log(txHash);
+        const campaigns = await twoKeyProtocol.Lockup.getCampaignsWhereConverter(from);
+        console.log(campaigns);
         expect(txHash).to.be.a('string');
     }).timeout(30000);
 
@@ -607,7 +609,7 @@ describe('TwoKeyProtocol', () => {
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const conversion = await twoKeyProtocol.AcquisitionCampaign.getConverterConversion(campaignAddress, from);
         console.log(conversion);
-        // expect(conversion).to.exist;
+        // expect(lockup).to.exist;
         expect(conversion[2]).to.be.equal(from);
     }).timeout(30000);
 
@@ -635,8 +637,8 @@ describe('TwoKeyProtocol', () => {
     }).timeout(30000);
 
 
-    it('should approve converter for conversion', async () => {
-        console.log('Test where contractor / moderator can approve converter to execute conversion');
+    it('should approve converter for lockup', async () => {
+        console.log('Test where contractor / moderator can approve converter to execute lockup');
         const {web3, address} = web3switcher.aydnep();
         from = address;
         twoKeyProtocol.setWeb3({
@@ -658,8 +660,9 @@ describe('TwoKeyProtocol', () => {
         expect(allPendingAfterApproved.length).to.be.equal(3);
     }).timeout(30000);
 
-    it('should reject converter for conversion', async () => {
-        console.log("Test where contractor / moderator can reject converter to execute conversion");
+
+    it('should reject converter for lockup', async () => {
+        console.log("Test where contractor / moderator can reject converter to execute lockup");
         txHash = await twoKeyProtocol.AcquisitionCampaign.rejectConverter(campaignAddress, env.TEST_ADDRESS, from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
 
@@ -673,7 +676,7 @@ describe('TwoKeyProtocol', () => {
 
     }).timeout(30000);
 
-    it('should cancel conversion', async () => {
+    it('should cancel lockup', async () => {
         const {web3, address} = web3switcher.gmail2();
         from = address;
         twoKeyProtocol.setWeb3({
@@ -707,7 +710,7 @@ describe('TwoKeyProtocol', () => {
         expect(allPending.length).to.be.equal(1);
     }).timeout(30000);
 
-    it('should execute conversion', async () => {
+    it('should print campaigns where user converter', async() => {
         const {web3, address} = web3switcher.test4();
         from = address;
         twoKeyProtocol.setWeb3({
@@ -718,10 +721,16 @@ describe('TwoKeyProtocol', () => {
             },
             plasmaPK: Sign.generatePrivateKey().toString('hex'),
         });
+        const campaigns = await twoKeyProtocol.Lockup.getCampaignsWhereConverter(from);
+        console.log(campaigns);
+    });
 
+
+    it('should execute lockup', async () => {
         const txHash = await twoKeyProtocol.AcquisitionCampaign.executeConversion(campaignAddress, env.TEST4_ADDRESS, from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(30000);
+
 
 
     it('should return addresses of lockup contracts for contractor', async () => {

@@ -30,7 +30,7 @@
 |    |----contracts.ts - our solidity abi interface that also contains bytecodes and networks address of all our
 |    |                   singletone and other contracts that used in our 2key-protocol class
 |    |----index.ts - our 2key-protocol entrypoint
-|    |----interface.ts - definitions of all functions and datastructures
+|    |----interfaces.ts - definitions of all functions and datastructures
 |----dist - submodule that synced with github.com/2key/2key-protocol repo here webpack will build our library
 |----test - tests folder
 |    |----_web3.ts - test helpers to create web3 instance with wallet provider

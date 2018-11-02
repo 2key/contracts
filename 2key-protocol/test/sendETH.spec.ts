@@ -16,6 +16,7 @@ let from: string;
 const sendETH: any = (recipient) => new Promise(async (resolve, reject) => {
     try {
         if (!twoKeyProtocol) {
+            console.log('Creating TwoKeyProtocol instance');
             const {web3, address} = await createWeb3(env.MNEMONIC_DEPLOYER, rpcUrl);
             from = address;
             twoKeyProtocol = new TwoKeyProtocol({

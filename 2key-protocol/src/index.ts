@@ -5,6 +5,7 @@ import RpcSubprovider from 'web3-provider-engine/subproviders/rpc';
 import WSSubprovider from 'web3-provider-engine/subproviders/websocket';
 import WalletSubprovider from 'ethereumjs-wallet/provider-engine';
 import * as eth_wallet from 'ethereumjs-wallet';
+import {BigNumber} from "bignumber.js";
 // import ethers from 'ethers';
 import contractsMeta from './contracts';
 import {
@@ -13,6 +14,7 @@ import {
     IContractsAddresses,
     IEhtereumNetworks,
     IERC20,
+    ILockup,
     ITwoKeyAcquisitionCampaign,
     ITwoKeyBase,
     ITwoKeyCongress,
@@ -24,7 +26,7 @@ import Index, {promisify} from './utils';
 import Helpers from './utils/helpers';
 import AcquisitionCampaign from './acquisition';
 import ERC20 from './erc20';
-import {BigNumber} from "bignumber.js";
+import Lockup from './lockup';
 import TwoKeyCongress from "./congress";
 
 // const addressRegex = /^0x[a-fA-F0-9]{40}$/;
@@ -61,6 +63,7 @@ export class TwoKeyProtocol {
     private Helpers: ITwoKeyHelpers;
     public AcquisitionCampaign: ITwoKeyAcquisitionCampaign;
     public Congress: ITwoKeyCongress;
+    public Lockup: ILockup;
     private _log: any;
 
     // private twoKeyReg: any;
@@ -152,6 +155,7 @@ export class TwoKeyProtocol {
         this.Utils = new Index(twoKeyBase, this.Helpers);
         this.AcquisitionCampaign = new AcquisitionCampaign(twoKeyBase, this.Helpers, this.Utils, this.ERC20);
         this.Congress = new TwoKeyCongress(twoKeyBase, this.Helpers, this.Utils);
+        this.Lockup = new Lockup(twoKeyBase, this.Helpers, this.AcquisitionCampaign);
     }
 
     public getBalance(address: string, erc20address?: string): Promise<BalanceMeta> {
