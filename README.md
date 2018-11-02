@@ -7,6 +7,22 @@ npm version patch
 npm publish
 ```
 
+#### 2key-protocol submodule
+That error means that projectfolder is already staged ("already exists in the index"). To find out what's going on here, try to list everything in the index under that folder with:
+
+```git ls-files --stage projectfolder```
+The first column of that output will tell you what type of object is in the index at projectfolder. (These look like Unix filemodes, but have special meanings in git.)
+
+I suspect that you will see something like:
+
+```160000 d00cf29f23627fc54eb992dde6a79112677cd86c 0   projectfolder```
+(i.e. a line beginning with 160000), in which case the repository in projectfolder has already been added as a "gitlink". If it doesn't appear in the output of git submodule, and you want to re-add it as a submodule, you can do:
+
+```git rm --cached projectfolder```
+... to unstage it, and then:
+
+```git submodule add url_to_repo projectfolder```
+
 #### Github Pages Site
 https://2key.github.io/contracts/
 
