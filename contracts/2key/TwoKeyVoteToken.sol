@@ -129,11 +129,7 @@ contract TwoKeyVoteToken is StandardToken, Ownable {
   view
   returns (uint256)
   {
-    if (allowedContract()) {
-      return balanceOf(_owner);
-    } else {
-      return 0;
-    }
+    return balanceOf(_owner);  // TODO this is true only if the _spender is a valid contract
   }
 
   /**
