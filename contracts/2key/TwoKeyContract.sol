@@ -204,6 +204,7 @@ contract TwoKeyContract is StandardToken, Ownable {
     uint n_influencers = 0;
     while (true) {
       influencer = received_from[influencer];
+      require(influencer != address(0),'not connected to contractor');
       if (influencer == owner) {
         break;
       }

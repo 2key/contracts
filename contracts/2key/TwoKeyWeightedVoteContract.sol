@@ -31,7 +31,7 @@ contract TwoKeyWeightedVoteContract is TwoKeySignedPresellContract {
       if (voted[influencer]) {
         continue;
       }
-      voted[influencer] = true;
+      voted[influencer] = true; // TODO count how much vote token the influencer already transfered for this vote
       // extract the vote (yes/no) and the weight of the vote from cut
       uint256 cut = influencer2cut[influencer];
       if (cut > 0) { // if cut == 0 then influencer did not vote at all
@@ -58,7 +58,7 @@ contract TwoKeyWeightedVoteContract is TwoKeySignedPresellContract {
             tokens = _units;
           }
           // make sure weight is not more than what coins allows owner to take
-          uint _allowance = Call.params2(erc20_token_sell_contract, "allowance(address,address)",uint(influencer),uint(owner));
+          uint _allowance = Call.params2(erc20_token_sell_contract, "allowance(address,address)",uint(influencer),uint(owner)); // BUG it should be msg.sender and not owner
           if (_allowance < tokens) {
             tokens = _allowance;
           }
