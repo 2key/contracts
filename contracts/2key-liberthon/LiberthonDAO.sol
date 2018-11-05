@@ -9,12 +9,18 @@ import "./MemberTypes.sol";
 */
 contract LiberthonDAO is MemberTypes {
 
-    string public organizationName;
+    /**
+        Nation details and rules
+    */
+    string public nationName;
+
+
     address[] founders;
     Member[] members;
     uint numOfMembers;
 
-    mapping(address => Member) addressToMember;
+    mapping(address => uint) memberAddressToId;
+    mapping(uint => Member) idToMember;
     mapping(address => MemberType) addressToType;
     mapping(bytes32 => Member[]) memberTypeToMembers;
 
@@ -22,22 +28,14 @@ contract LiberthonDAO is MemberTypes {
         Member username, firstname, lastname, and countryOfResidence will be limited to length of 32 ASCII chars
     */
     struct Member {
+        address memberAddress;
         bytes32 username;
         bytes32 firstName;
         bytes32 lastName;
-        bytes32 countryOfResidence;
-        uint votingPower;
+        MemberType type;
     }
 
-    struct VotingCampaign {
-        address creator;
-        address[] addressesVoted;
-        string description;
-        uint votesYes;
-        uint votesNo;
-        uint votingPowerYes;
-        uint votingPowerNo;
-    }
+
 
 
 
