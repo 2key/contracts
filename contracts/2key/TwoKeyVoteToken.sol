@@ -41,6 +41,7 @@ contract TwoKeyVoteToken is StandardToken, Ownable {
         bytes32 cc = keccak256(abi.encodePacked(_contractCode));
         canEmit[cc] = true;
     }
+
     ///@notice Modifier which will only allow allowed contracts to transfer tokens
     function allowedContract() private view returns (bool) {
         //just to use contract code instead of msg.sender address
