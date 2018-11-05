@@ -2,21 +2,20 @@ pragma solidity ^0.4.24;
 
 import "./MemberTypes.sol";
 
-
-/**
-    Liberthon hackathon DAO contract
-    @author Nikola Madjarevic
-*/
 contract LiberthonDAO is MemberTypes {
 
     string public nationName;
     bytes32 public ipfsForConstitution;
 
     Member[] members;
-
+    uint numOfMembers;
     mapping(address => uint) public memberId;
 
-    uint numOfMembers;
+
+    struct Proposal {
+
+    }
+
 
     struct Member {
         address memberAddress;
@@ -46,6 +45,7 @@ contract LiberthonDAO is MemberTypes {
         bytes32[] initialLastNames,
         bytes32[] initialMemberTypes
     ) public  {
+        //TODO: Add validation that the first address is the PRESIDENT's address
         // Requiring that for all members are all the informations passed
         require(initialMembersAddresses.length == initialUsernames.length &&
         initialUsernames.length == initialFirstNames.length &&
@@ -140,9 +140,6 @@ contract LiberthonDAO is MemberTypes {
         return (allMemberAddresses, allMemberUsernames, allMemberFirstNames, allMemberLastNames, allMemberTypes);
     }
 
-    function getNumberOfMembers() public view returns (uint,uint) {
-        return (numOfMembers, members.length);
-    }
 
 
 
