@@ -102,12 +102,46 @@ contract LiberthonDAO is MemberTypes {
         address _memberAddress,
         bytes32 _newType)
     internal {
+        require(memberId[_memberAddress] != 0);
         MemberType _newMemberType = convertToTypeFromBytes(_newType);
         uint id = memberId[_memberAddress];
 
         Member memory m = members[id];
         m.memberType = _newMemberType;
         members[id] = m;
+    }
+
+    function vote() public onlyMembers {
+
+    }
+
+    function createCampaign() public onlyMembers {
+
+    }
+
+    /// @notice Function to return all the members from Liberland
+    function getAllMembers() public view returns (address[],bytes32[],bytes32[],bytes32[], bytes32[]) {
+        uint length = members.length - 1;
+        address[] memory allMemberAddresses = new address[](length);
+        bytes32[] memory allMemberUsernames = new bytes32[](length);
+        bytes32[] memory allMemberFirstNames = new bytes32[](length);
+        bytes32[] memory allMemberLastNames = new bytes32[](length);
+        bytes32[] memory allMemberTypes = new bytes32[](length);
+
+        for(uint i=1; i<length + 1; i++) {
+            Member memory m = members[i];
+            allMemberAddresses[i-1] = m.memberAddress;
+            allMemberUsernames[i-1] = m.username;
+            allMemberFirstNames[i-1] = m.firstName;
+            allMemberLastNames[i-1] = m.lastName;
+            allMemberTypes[i-1] = convertTypeToBytes(m.memberType);
+        }
+
+        return (allMemberAddresses, allMemberUsernames, allMemberFirstNames, allMemberLastNames, allMemberTypes);
+    }
+
+    function getNumberOfMembers() public view returns (uint,uint) {
+        return (numOfMembers, members.length);
     }
 
 

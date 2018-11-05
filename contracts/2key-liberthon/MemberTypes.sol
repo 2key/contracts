@@ -50,4 +50,26 @@ contract MemberTypes {
         revert();
     }
 
+    function convertTypeToBytes(MemberType memberType) public pure returns (bytes32) {
+        if(memberType == MemberType.PRESIDENT) {
+            return bytes32("PRESIDENT");
+        } else if(memberType == MemberType.PRIME_MINISTER) {
+            return bytes32("PRIME_MINISTER");
+        } else if(memberType == MemberType.MINISTER) {
+            return bytes32("MINISTER");
+        } else if(memberType == MemberType.PARLIAMENT_MEMBER) {
+            return bytes32("PARLIAMENT_MEMBER");
+        } else if(memberType == MemberType.CONGRESS_MEMBER) {
+            return bytes32("CONGRESS_MEMBER");
+        } else if(memberType == MemberType.SENATE_MEMBER) {
+            return bytes32("SENATE_MEMBER");
+        } else if(memberType == MemberType.CITIZEN) {
+            return bytes32("CITIZEN");
+        } else if(memberType == MemberType.CITIZEN) {
+            return bytes32("MAYOR");
+        } else if(memberType == MemberType.CITIZEN) {
+            return bytes32("EX_PAT");
+        }
+    }
+
 }
