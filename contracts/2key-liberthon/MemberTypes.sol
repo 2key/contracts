@@ -15,7 +15,8 @@ contract MemberTypes {
         SENATE_MEMBER,
         CITIZEN,
         MAYOR,
-        EX_PAT
+        EX_PAT,
+        NOT_MEMBER
     }
 
     /**
@@ -24,6 +25,7 @@ contract MemberTypes {
         @return MemberType
     */
     function convertToTypeFromBytes(bytes32 memberType) public pure returns (MemberType) {
+        bytes32 not_member = bytes32(0);
         if(memberType == bytes32("PRESIDENT")) {
             return MemberType.PRESIDENT;
         } else if(memberType == bytes32("PRIME_MINISTER")) {
@@ -42,6 +44,8 @@ contract MemberTypes {
             return MemberType.MAYOR;
         } else if(memberType == bytes32("EX_PAT")) {
             return MemberType.EX_PAT;
+        } else if(memberType == not_member) {
+            return MemberType.NOT_MEMBER;
         }
         revert();
     }

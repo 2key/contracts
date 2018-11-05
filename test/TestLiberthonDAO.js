@@ -39,6 +39,6 @@ contract('LiberthonDAO', async(accounts) => {
             initialMemberlastNames,
             initialMemberTypes
         );
-    })
+    });
 
 });
