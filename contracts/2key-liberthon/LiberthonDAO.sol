@@ -20,7 +20,6 @@ contract LiberthonDAO is MemberTypes {
 
     mapping(address => uint) public memberAddressToId;
     mapping(uint => Member) public idToMember;
-    mapping(bytes32 => Member[]) public memberTypeToMembers;
 
     /**
         Member username, firstname, lastname, and countryOfResidence will be limited to length of 32 ASCII chars
@@ -84,11 +83,21 @@ contract LiberthonDAO is MemberTypes {
             memberType: _memberType
         });
 
-        memberTypeToMembers[memberType].push(m);
         members.push(m);
         memberAddressToId[_memberAddress] = numOfMembers;
         idToMember[numOfMembers] = m;
         numOfMembers++;
     }
 
+    function changeMemberType(
+        address _memberAddress,
+        bytes32 _newType)
+    internal {
+        MemberType _newMemberType = convertToTypeFromBytes(_newType);
+        uint id = memberAddressToId[_memberAddress];
+
+        Member memory m = members[id];
+        m.memberType = _newMemberType;
+        members[id] = m;
+    }
 }
