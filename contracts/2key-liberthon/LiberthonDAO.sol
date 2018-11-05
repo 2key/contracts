@@ -1,13 +1,14 @@
 pragma solidity ^0.4.24;
 
 import "./MemberTypes.sol";
+import "./LiberthonDAOInterface.sol";
 
 
 /**
     Liberthon hackathon DAO contract
     @author Nikola Madjarevic
 */
-contract LiberthonDAO is MemberTypes {
+contract LiberthonDAO is LiberthonDAOInterface,MemberTypes {
 
     /**
         Nation details and rules
