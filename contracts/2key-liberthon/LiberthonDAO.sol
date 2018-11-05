@@ -19,6 +19,7 @@ contract LiberthonDAO is LiberthonDAOInterface,MemberTypes {
     Member[] members;
     uint numOfMembers = 0;
 
+    mapping(address => bool) public memberExists;
     mapping(address => uint) public memberAddressToId;
     mapping(uint => Member) public idToMember;
 
@@ -88,6 +89,7 @@ contract LiberthonDAO is LiberthonDAOInterface,MemberTypes {
         memberAddressToId[_memberAddress] = numOfMembers;
         idToMember[numOfMembers] = m;
         numOfMembers++;
+        memberExists[_memberAddress] = true;
     }
 
     function changeMemberType(

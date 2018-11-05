@@ -16,10 +16,7 @@ contract LiberthonDAOInterface {
     internal;
 
     function changeConstitution(
-        bytes32 newIpfsHashForConstitution
-    ) internal;
-
-
-
+        bytes32 newIpfsHashForConstitution)
+    internal;
 
 }
