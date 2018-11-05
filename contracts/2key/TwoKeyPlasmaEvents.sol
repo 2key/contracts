@@ -1,4 +1,5 @@
 pragma solidity ^0.4.24; //We have to specify what version of compiler this code will use
+import './Call.sol';
 
 contract TwoKeyPlasmaEvents {
     // REPLICATE INFO FROM ETHEREUM NETWORK
@@ -39,7 +40,7 @@ contract TwoKeyPlasmaEvents {
     // in some cases the plasma address will be the same as the ethereum address and in that case it is not necessary to have an entry
     // the way to know if an address is a plasma address is to look it up in this mapping
     mapping(address => address) public plasma2ethereum;
-    mapping(address => address) public ethereum2plasma;
+    mapping(address => address[]) public ethereum2plasma;
 
     // SOCIAL GRAPH
 
@@ -51,51 +52,22 @@ contract TwoKeyPlasmaEvents {
     mapping(address => mapping(address => mapping(address => address))) public visited_from;
     // campaign,contractor eth-addr=>from eth-addr=>list of to eth or plasma address.
     mapping(address => mapping(address => mapping(address => address[]))) public visits_list;
-    // TODO    mapping(address => bytes[]) public sign_list;
 
-    function add_plasma2ethereum(bytes sig, bool with_prefix) public {
+    mapping(address => mapping(address => mapping(address => bytes))) public visited_sig;
+
+    function add_plasma2ethereum(bytes sig) public { // , bool with_prefix) public {
         // add an entry connecting msg.sender to the ethereum address that was used to sign sig.
         // see setup_demo.js on how to generate sig
-        // with_prefix should be true when using web3.eth.sign/getSign and false when using eth_signTypedData/ecsign
         bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to plasma address")),keccak256(abi.encodePacked(msg.sender))));
-        if (with_prefix) {
-            bytes memory prefix = "\x19Ethereum Signed Message:\n32";
-            hash = keccak256(abi.encodePacked(prefix, hash));
-        }
-
         require (sig.length == 65, 'bad signature length');
-        // The signature format is a compact form of:
-        //   {bytes32 r}{bytes32 s}{uint8 v}
-        // Compact means, uint8 is not padded to 32 bytes.
-        uint idx = 32;
-        bytes32 r;
-        assembly
-        {
-            r := mload(add(sig, idx))
+        address eth_address = Call.recoverHash(hash,sig,0);
+        if (plasma2ethereum[msg.sender] != eth_address) {
+            plasma2ethereum[msg.sender] = eth_address;
+            ethereum2plasma[eth_address].push(msg.sender);
         }
-
-        idx += 32;
-        bytes32 s;
-        assembly
-        {
-            s := mload(add(sig, idx))
-        }
-
-        idx += 1;
-        uint8 v;
-        assembly
-        {
-            v := mload(add(sig, idx))
-        }
-        if (v <= 1) v += 27;
-        require(v==27 || v==28,'bad sig v');
-
-        address eth_address = ecrecover(hash, v, r, s);
-        plasma2ethereum[msg.sender] = eth_address;
-        ethereum2plasma[eth_address] = msg.sender;
     }
 
-    function _test_path(address c, address contractor, address to) private returns (bool) {
+    function _test_path(address c, address contractor, address to) private view returns (bool) {
         while(to != contractor) {
             if(to == address(0)) {
                 return false;
@@ -105,134 +77,88 @@ contract TwoKeyPlasmaEvents {
         return true;
     }
 
-    function test_path(address c, address contractor, address to) private returns (bool) {
+    function test_path(address c, address contractor, address to) private view returns (bool) {
         if (_test_path(c, contractor, to)) {
             return true;
         }
-
-        return _test_path(c, contractor,  ethereum2plasma[to]);
+        for (uint i = 0; i < ethereum2plasma[to].length; i++) {
+            if (_test_path(c, contractor,  ethereum2plasma[to][i])) {
+                return true;
+            }
+        }
+        return false;
     }
 
     function visited(address c, address contractor, bytes sig) public {
         // c - addresss of the contract on ethereum
         // contractor - is the ethereum address of the contractor who created c. a dApp can read this information for free from ethereum.
         // caller must use the 2key-link and put his plasma address at the end using free_take
-        // sig contains the "from" and at the tip of sig you should put your own plasma address (msg.sender)
-
-        // TODO keep table of all 2keylinks of all contracts
-
-        // code bellow should be kept identical to transferSig when using free_take
-        uint idx = 0;
+        // sig contains the "from" and at the end of sig you should put your own plasma address (msg.sender) or a signature of cut using it
 
         address old_address;
-        if (idx+20 <= sig.length) {
-            idx += 20;
-            assembly
-            {
-                old_address := mload(add(sig, idx))
-            }
+        assembly
+        {
+            old_address := mload(add(sig, 21))
         }
 
         // validate an existing visit path from contractor address to the old_address
         require(test_path(c, contractor, old_address), 'no path to contractor');
 
-        address old_public_link_key = public_link_key[c][contractor][old_address];
-        require(old_public_link_key != address(0),'no public link key');
+        address old_key = public_link_key[c][contractor][old_address];
 
-        while (idx + 65 <= sig.length) {
-            // The signature format is a compact form of:
-            //   {bytes32 r}{bytes32 s}{uint8 v}
-            // Compact means, uint8 is not padded to 32 bytes.
-            idx += 32;
-            bytes32 r;
-            assembly
-            {
-                r := mload(add(sig, idx))
-            }
 
-            idx += 32;
-            bytes32 s;
-            assembly
-            {
-                s := mload(add(sig, idx))
-            }
+        address[] memory influencers;
+        address[] memory keys;
+        uint8[] memory weights;
+        (influencers, keys, weights) = Call.recoverSig(sig, old_key);
+        // check if we exactly reached the end of the signature. this can only happen if the signature
+        // was generated with free_join_take and in this case the last part of the signature must have been
+        // generated by the caller of this method
+        address last_address = influencers[influencers.length-1];
+        require(last_address == msg.sender || last_address == plasma2ethereum[msg.sender],'only the last in the link can call visited');
+        update_visited_sig(c, contractor, last_address, sig);
 
-            idx += 1;
-            uint8 v;
-            assembly
-            {
-                v := mload(add(sig, idx))
-            }
-            if (v <= 1) v += 27;
-            require(v==27 || v==28,'bad sig v');
-
-            // idx was increased by 65
-
-            bytes32 hash;
-            address new_public_key;
-            address new_address;
-            if (idx + 41 <= sig.length) {  // its  a < and not a <= because we dont want this to be the final iteration for the converter
-                uint8 bounty_cut;
-                {
-                    idx += 1;
-                    assembly
-                    {
-                        bounty_cut := mload(add(sig, idx))
-                    }
-                    require(bounty_cut > 0,'bounty/weight not defined (1..255)');
-                }
-
-                idx += 20;
-                assembly
-                {
-                    new_address := mload(add(sig, idx))
-                }
-
-                idx += 20;
-                assembly
-                {
-                    new_public_key := mload(add(sig, idx))
-                }
-                update_public_link_key(c, contractor, new_address, new_public_key);
-                update_bounty_cut(c, contractor, new_address, bounty_cut);
-
-                hash = keccak256(abi.encodePacked(bounty_cut, new_public_key, new_address));
-
-                // check if we exactly reached the end of the signature. this can only happen if the signature
-                // was generated with free_take_join and in this case the last part of the signature must have been
-                // generated by the caller of this method
-                if (idx == sig.length) {
-                    // this does not makes sense when done on plasma because the new_address is a plasma address and all previous address were eth address
-                    require(false, 'use free_take and not free_join'); // TODO change to revert()
-                    //                    require(new_address == msg.sender,'only the last in the link can call transferSig');
-                }
-            } else {
-                // handle short signatures generated with free_take
-                // signed message for the last step is the address of the converter
-                new_address = msg.sender;
-                hash = keccak256(abi.encodePacked(new_address));
-            }
-
+        uint i;
+        address new_address;
+        // move ARCs based on signature information
+        for (i = 0; i < influencers.length; i++) {
+            new_address = influencers[i];
             // NOTE!!!! for the last user in the sig the  new_address can be a plasma_address
             // as a result the same user with a plasma_address can appear later with an etherum address
             update_visit(c, contractor, old_address, new_address);
-
-            // check if we received a valid signature
-            address signer = ecrecover(hash, v, r, s);
-            require (signer == old_public_link_key, 'illegal signature');
-            old_public_link_key = new_public_key;
             old_address = new_address;
         }
-        require(idx == sig.length,'illegal message size');
+
+        for (i = 0; i < keys.length; i++) {
+            new_address = influencers[i];
+            address key = keys[i];
+            // TODO Updating the public key of influencers may not a good idea because it will require the influencers to use
+            // a deterministic private/public key in the link and this might require user interaction (MetaMask signature)
+            // TODO a possible solution is change public_link_key to address=>address[]
+            // update (only once) the public address used by each influencer
+            // we will need this in case one of the influencers will want to start his own off-chain link
+            update_public_link_key(c, contractor, new_address, key);
+        }
+
+        for (i = 0; i < weights.length; i++) {
+            new_address = influencers[i];
+            update_bounty_cut(c, contractor, new_address, weights[i]);
+        }
+    }
+
+    function update_visited_sig(address c, address contractor, address old_address, bytes sig) private {
+        visited_sig[c][contractor][old_address] = sig;
     }
 
     function update_public_link_key(address c, address contractor, address new_address, address new_public_key) private {
+        // TODO keep same as code in TwoKeySignedContract.sol:transferSig
         // update (only once) the public address used by each influencer
         // we will need this in case one of the influencers will want to start his own off-chain link
-        if (public_link_key[c][contractor][new_address] == 0) {
+        address old_address = public_link_key[c][contractor][new_address];
+        if (old_address == address(0)) {
             public_link_key[c][contractor][new_address] = new_public_key;
         } else {
-            require(public_link_key[c][contractor][new_address] == new_public_key,'public key can not be modified');
+            require(old_address == new_public_key,'public key can not be modified');
         }
     }
 
