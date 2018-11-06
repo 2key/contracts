@@ -14,6 +14,7 @@ contract DecentralizedNation {
     Member[] members;
     uint numOfMembers;
 
+    bool initialized = false;
 
     mapping(address => uint) public memberId;
     mapping(bytes32 => uint) public limitOfMembersPerType;
@@ -88,6 +89,7 @@ contract DecentralizedNation {
         nationName = _nationName;
         ipfsForConstitution = _ipfsHashForConstitution;
         ipfsHashForDAOPublicInfo = _ipfsHashForDAOPublicInfo;
+        initialized = true;
     }
 
 
@@ -98,6 +100,9 @@ contract DecentralizedNation {
         bytes32 memberLastName,
         bytes32 _memberType)
     internal {
+        if(initialized) {
+            require(limitOfMembersPerType[_memberType] < memberTypeToMembers[_memberType].length);
+        }
         require(checkIfMemberTypeExists(_memberType) || _memberType == bytes32(0));
         Member memory m = Member({
             memberAddress: _memberAddress,

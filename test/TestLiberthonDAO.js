@@ -92,4 +92,6 @@ contract('DecentralizedNation', async(accounts) => {
        let pts = await instance.getMembersVotingPoints(accounts[0]);
        assert.equal(pts,100);
     });
+
+
 });
