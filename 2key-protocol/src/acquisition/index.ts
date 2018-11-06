@@ -293,12 +293,13 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     const contractConstants = (await promisify(campaignInstance.getConstantInfo, []));
                     const decimals = contractConstants[3].toNumber();
                     this.base._log('Decimals', decimals);
+                    this.base._log('getEstimatedMaximumReferralReward', f_address, contractorAddress);
                     const maxReferralRewardPercent = new BigNumber(contractConstants[1]).div(10 ** decimals).toNumber();
                     if (f_address === contractorAddress) {
                         resolve(maxReferralRewardPercent);
                         return;
                     }
-                    const firstAddressInChain = p_message ? `0x${p_message.substring(0, 40)}` : f_address;
+                    const firstAddressInChain = p_message ? `0x${p_message.substring(2, 42)}` : f_address;
                     this.base._log('RefCHAIN', contractorAddress, f_address, firstAddressInChain);
                     let cuts: number[];
                     const firstPublicLink = await promisify(campaignInstance.publicLinkKey, [firstAddressInChain]);
