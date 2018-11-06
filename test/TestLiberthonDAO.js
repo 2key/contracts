@@ -1,5 +1,6 @@
 const DecentralizedNation = artifacts.require("DecentralizedNation");
 const TwoKeyVoteToken = artifacts.require("TwoKeyVoteToken");
+
 const utf8 = require('utf8');
 
 
@@ -41,7 +42,7 @@ var toUtf8 = function(hex) {
     return utf8.decode(str);
 };
 
-contract('DecentralizedNation', async(accounts) => {
+contract('DecentralizedNation', async(accounts,deployer) => {
 
     let initialMemberAddresses = [accounts[0],accounts[1]];
     let initialMemberUsernames = [fromUtf8("Marko"), fromUtf8("Petar")];
@@ -50,7 +51,6 @@ contract('DecentralizedNation', async(accounts) => {
     let initialMemberTypes = [fromUtf8("PRESIDENT"),fromUtf8("MINISTER")];
     let decentralizedNationInstance;
     let voteToken;
-
     it('should deploy contract', async() => {
         decentralizedNationInstance = await DecentralizedNation.new(
             'Liberland',
@@ -62,7 +62,6 @@ contract('DecentralizedNation', async(accounts) => {
             initialMemberlastNames,
             initialMemberTypes
         );
-        console.log(decentralizedNationInstance.address);
     });
 
     it('should return all members', async() => {
@@ -120,7 +119,25 @@ contract('DecentralizedNation', async(accounts) => {
         voteToken = await TwoKeyVoteToken.new(decentralizedNationInstance.address);
         let balanceOfMembers = await voteToken.balanceOf(accounts[0]);
         assert.equal(balanceOfMembers,100);
-    })
+    });
+
+    it('should start voting for national campaign', async() => {
+        let description = "Member Nikola to change his role to president";
+        let memberToChangeRole = accounts[1];
+        let newRole = initialMemberTypes[0];
+        let lengthInDays = 10;
+        await decentralizedNationInstance.startVotingForChanging(
+            description,
+            memberToChangeRole,
+            newRole,
+            lengthInDays
+           );
+
+        let nvcAddress = await decentralizedNationInstance.nationalVotingCampaigns(0);
+        console.log(nvcAddress);
+        let nvc = await decentralizedNationInstance.votingContractAddressToNationalVotingCampaign(nvcAddress);
+        console.log(nvc);
+    });
 
 
 });

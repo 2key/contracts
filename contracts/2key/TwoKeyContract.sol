@@ -361,9 +361,9 @@ contract TwoKeyPresellContract is TwoKeyContract {
 
 
   // Initialize all the constants
-  constructor(TwoKeyEventSource _eventSource, string _name, string _symbol,
+  constructor(address _eventSource, string _name, string _symbol,
         uint256 _tSupply, uint256 _quota, uint256 _cost, uint256 _bounty,
-        string _ipfs_hash, ERC20full _erc20_token_sell_contract) public {
+        string _ipfs_hash, address _erc20_token_sell_contract) public {
     require(_bounty <= _cost);
     // owner = msg.sender;  // done in Ownable()
     // We do an explicit type conversion from `address`
@@ -380,13 +380,13 @@ contract TwoKeyPresellContract is TwoKeyContract {
     ipfs_hash = _ipfs_hash;
     received_from[owner] = owner;  // allow owner to buy from himself
     if (_eventSource != address(0)) {
-      eventSource = _eventSource;
+      eventSource = TwoKeyEventSource(_eventSource);
       eventSource.created(this, owner);
     }
 
     if (_erc20_token_sell_contract != address(0)) {
       // fractional units are determined by the erc20 contract
-      erc20_token_sell_contract = _erc20_token_sell_contract;  // ERC20full()
+      erc20_token_sell_contract = ERC20full(_erc20_token_sell_contract);  // ERC20full()
       unit_decimals = call_return(erc20_token_sell_contract, "decimals()",0);
 //      emit Log1('start_unit_decimals', unit_decimals); // does not work in constructor on geth
       require(unit_decimals >= 0);

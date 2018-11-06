@@ -26,14 +26,6 @@ contract TwoKeyVoteToken is StandardToken, Ownable {
         decentralizedNation = _decentralizedNation;
     }
 
-    function hello() public view returns(string) {
-        return "HELLO";
-    }
-
-    function getAddressOfDAO() public view returns (address) {
-        return decentralizedNation;
-    }
-
     mapping(address => bool) private visited;
     ///Mapping contract bytecode to boolean if is allowed to transfer tokens
     mapping(bytes32 => bool) private canEmit;

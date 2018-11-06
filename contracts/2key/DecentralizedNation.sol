@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-
+import "./TwoKeyWeightedVoteContract.sol";
 contract DecentralizedNation {
 
 
@@ -19,13 +19,16 @@ contract DecentralizedNation {
     mapping(bytes32 => uint) public limitOfMembersPerType;
     mapping(bytes32 => address[]) public memberTypeToMembers;
 
+    uint numberOfVotingCamapignsAndPetitions;
 
     mapping(address => uint) votingPoints;
+    mapping(address => uint) numberOfVotingPetitionDuringLastRefill;
+
     mapping(bytes32 => AuthoritySchema) memberTypeToAuthoritySchemaToChange;
 
-    address [] nationalVotingCampaigns;
+    address [] public nationalVotingCampaigns;
 
-    mapping(address => NationalVotingCampaign) votingContractAddressToNationalVotingCampaign;
+    mapping(address => NationalVotingCampaign) public votingContractAddressToNationalVotingCampaign;
 
     struct NationalVotingCampaign {
         string votingReason; //simple text to fulfill screen?
@@ -123,6 +126,7 @@ contract DecentralizedNation {
         memberId[_memberAddress] = numOfMembers;
         memberTypeToMembers[_memberType].push(_memberAddress);
         votingPoints[_memberAddress] = 100;
+        numberOfVotingPetitionDuringLastRefill[_memberAddress] = numberOfVotingCamapignsAndPetitions;
         numOfMembers++;
     }
 
@@ -228,7 +232,7 @@ contract DecentralizedNation {
         string description,
         address _memberToChangeRole,
         bytes32 _newRole,
-        uint _votingCampaignInDays
+        uint _votingCampaignLengthInDays
     ) public {
         require(checkIfMemberTypeExists(_newRole));
         NationalVotingCampaign memory nvc = NationalVotingCampaign({
@@ -239,10 +243,24 @@ contract DecentralizedNation {
             votesYes: 0,
             votesNo: 0,
             votingResult: 0,
-            votingCampaignLengthInDays: block.timestamp + _votingCampaignInDays * (1 days)
+            votingCampaignLengthInDays: block.timestamp + _votingCampaignLengthInDays * (1 days)
         });
         //TODO: deploy weighted vote contract and map this to it
+        address twoKeyWeightedVoteContract = new TwoKeyWeightedVoteContract();
+        votingContractAddressToNationalVotingCampaign[twoKeyWeightedVoteContract] = nvc;
+        nationalVotingCampaigns.push(twoKeyWeightedVoteContract);
+        numberOfVotingCamapignsAndPetitions++;
     }
+
+//    // Refil voting points
+//    function checkAndUpdateMyVotingPoints() public returns (uint256) {
+//        if(numberOfVotingPetitionDuringLastRefill[msg.sender] + 10 <= numberOfVotingCamapignsAndPetitions) {
+//            votingPoints[msg.sender] = 100;
+//            return 100;
+//        } else {
+//            return votingPoints[msg.sender];
+//        }
+//    }
 
 
 }
