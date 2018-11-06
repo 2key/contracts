@@ -9,18 +9,17 @@ contract DecentralizedNation {
     bytes32 public ipfsHashForDAOPublicInfo;
 
 
-
     bytes32[] public memberTypes;
+
     Member[] members;
     uint numOfMembers;
 
 
     mapping(address => uint) public memberId;
     mapping(bytes32 => uint) public limitOfMembersPerType;
-
-
     mapping(bytes32 => address[]) public memberTypeToMembers;
 
+    mapping(address => uint) votingPoints;
 
     struct NationalVotingCampaign {
 
@@ -111,6 +110,7 @@ contract DecentralizedNation {
         members.push(m);
         memberId[_memberAddress] = numOfMembers;
         memberTypeToMembers[_memberType].push(_memberAddress);
+        votingPoints[_memberAddress] = 100;
         numOfMembers++;
     }
 
@@ -189,5 +189,9 @@ contract DecentralizedNation {
 
     function getLimitForType(bytes32 memberType) public view returns(uint) {
         return limitOfMembersPerType[memberType];
+    }
+
+    function getMembersVotingPoints(address _memberAddress) public view returns (uint) {
+        return votingPoints[_memberAddress];
     }
 }
