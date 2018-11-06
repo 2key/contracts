@@ -250,6 +250,10 @@ contract DecentralizedNation {
 //        nationalVotingCampaigns.push(twoKeyWeightedVoteContract);
 //        numberOfVotingCamapignsAndPetitions++;
     }
+    //TODO: initialize somehow voting contracts
+    //TODO: executeVoting results
+    //TODO: make connection between contracts
+    /// TODO: Gas avoid / transaction Bytecode
 
 //    // Refil voting points
 //    function checkAndUpdateMyVotingPoints() public returns (uint256) {
