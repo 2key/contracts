@@ -8,7 +8,6 @@ contract DecentralizedNation {
     bytes32 public ipfsForConstitution;
     bytes32 public ipfsHashForDAOPublicInfo;
 
-
     bytes32[] public memberTypes;
 
     Member[] members;
@@ -22,20 +21,23 @@ contract DecentralizedNation {
 
 
     mapping(address => uint) votingPoints;
-
     mapping(bytes32 => AuthoritySchema) memberTypeToAuthoritySchemaToChange;
 
+    address [] nationalVotingCampaigns;
+
+    mapping(address => NationalVotingCampaign) votingContractAddressToNationalVotingCampaign;
 
     struct NationalVotingCampaign {
-
+        string votingReason; //simple text to fulfill screen?
+        address targetOfVoting;
+        bytes32 newRole;
+        bool finished;
+        uint votesYes;
+        uint votesNo;
+        uint votingResult;
+        uint votingCampaignLengthInDays;
     }
 
-    struct PetitionCampaign {
-        string question;
-        bytes32[] answers;
-        uint [] scorePerAnswer;
-
-    }
 
     struct Member {
         address memberAddress;
@@ -144,8 +146,8 @@ contract DecentralizedNation {
         require(memberId[_memberAddress] != 0);
         require(checkIfMemberTypeExists(_newType));
 
+        AuthoritySchema memory schema = memberTypeToAuthoritySchemaToChange[_newType];
         uint id = memberId[_memberAddress];
-
         Member memory m = members[id];
         m.memberType = _newType;
         members[id] = m;
@@ -221,4 +223,26 @@ contract DecentralizedNation {
         AuthoritySchema memory schema = memberTypeToAuthoritySchemaToChange[memberType];
         return(schema.memberTypesEligibleToVote, schema.minimalNumberOfVoters, schema.minimalPercentToBeReached);
     }
+
+    function startVotingForChanging(
+        string description,
+        address _memberToChangeRole,
+        bytes32 _newRole,
+        uint _votingCampaignInDays
+    ) public {
+        require(checkIfMemberTypeExists(_newRole));
+        NationalVotingCampaign memory nvc = NationalVotingCampaign({
+            votingReason: description,
+            targetOfVoting: _memberToChangeRole,
+            newRole: _newRole,
+            finished: false,
+            votesYes: 0,
+            votesNo: 0,
+            votingResult: 0,
+            votingCampaignLengthInDays: block.timestamp + _votingCampaignInDays * (1 days)
+        });
+        //TODO: deploy weighted vote contract and map this to it
+    }
+
+
 }

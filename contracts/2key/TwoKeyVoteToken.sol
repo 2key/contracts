@@ -5,31 +5,39 @@ import '../openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol';
 import '../openzeppelin-solidity/contracts/token/ERC20/ERC20.sol';
 import '../openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import '../openzeppelin-solidity/contracts/math/SafeMath.sol';
-
+import '../interfaces/IDecentralizedNation.sol';
 import './TwoKeyReg.sol';
 import "./GetCode.sol";
 
 contract TwoKeyVoteToken is StandardToken, Ownable {
     using SafeMath for uint256;
 
+    mapping (address => mapping (address => uint256)) internal allowed;
+    mapping(address => uint256) internal balances;
+
     string public name = 'TwoKeyVote';
     string public symbol = '2KV';
     uint8 public decimals = 18;
 
-    constructor() Ownable() public {
-        //    totalSupply_ = 1000000000000000000000000000;
-        //    balances[msg.sender] = totalSupply_;
+    address public decentralizedNation;
+
+    constructor(address _decentralizedNation) Ownable() public {
+        require(_decentralizedNation!= address(0));
+        decentralizedNation = _decentralizedNation;
     }
 
-    TwoKeyReg public registry;
+    function hello() public view returns(string) {
+        return "HELLO";
+    }
+
+    function getAddressOfDAO() public view returns (address) {
+        return decentralizedNation;
+    }
+
     mapping(address => bool) private visited;
     ///Mapping contract bytecode to boolean if is allowed to transfer tokens
     mapping(bytes32 => bool) private canEmit;
 
-
-    function setRegistry(address _registry) public onlyOwner {
-        registry = TwoKeyReg(_registry);
-    }
 
     /// @notice function where admin or any authorized person (will be added if needed) can add more contracts to allow them call methods
     /// @param _contractAddress is actually the address of contract we'd like to allow
@@ -42,6 +50,7 @@ contract TwoKeyVoteToken is StandardToken, Ownable {
         canEmit[cc] = true;
     }
 
+
     ///@notice Modifier which will only allow allowed contracts to transfer tokens
     function allowedContract() private view returns (bool) {
         //just to use contract code instead of msg.sender address
@@ -50,29 +59,13 @@ contract TwoKeyVoteToken is StandardToken, Ownable {
         return canEmit[cc];
         return true;
     }
+
     modifier onlyAllowedContracts {
         require(allowedContract(), 'onlyAllowedContracts');
         _;
     }
 
-    /**
-    * @dev Gets or Create the balance of the specified address.
-    * @param _owner The address to query the the balance of.
-    * @return An uint256 representing the amount owned by the passed address.
-    */
 
-    function checkBalance(address _owner) internal returns (uint256) {
-        if (visited[_owner]) {
-            return balances[_owner];
-        }
-
-        visited[_owner] = true;
-        bytes memory _name = bytes(registry.address2username(_owner));
-        if (_name.length != 0) {
-            balances[_owner] = 1000000000000000000;
-        }
-        return balances[_owner];
-    }
 
     /**
     * @dev Gets the balance of the specified address.
@@ -80,17 +73,10 @@ contract TwoKeyVoteToken is StandardToken, Ownable {
     * @return An uint256 representing the amount owned by the passed address.
     */
     function balanceOf(address _owner) public view returns (uint256) {
-        if (visited[_owner]) {
-            return balances[_owner];
-        } else {
-            bytes memory _name = bytes(registry.address2username(_owner));
-            if (_name.length != 0) {
-                return 1000000000000000000;
-            } else {
-                return 0;
-            }
-        }
+        uint balance = IDecentralizedNation(decentralizedNation).getMembersVotingPoints(_owner);
+        return balance;
     }
+
 
     /**
      * @dev Transfer tokens from one address to another
@@ -107,7 +93,7 @@ contract TwoKeyVoteToken is StandardToken, Ownable {
     onlyAllowedContracts
     returns (bool)
     {
-        uint balance = checkBalance(_from);
+        uint balance = balanceOf(_from);
         require(_value <= balance, 'transferFrom balance');
         require(_to != address(0), 'transferFrom zero');
 
@@ -116,6 +102,7 @@ contract TwoKeyVoteToken is StandardToken, Ownable {
         emit Transfer(_from, _to, _value);
         return true;
     }
+
 
     /**
      * @dev Function to check the amount of tokens that an owner allowed to a spender.
@@ -132,6 +119,8 @@ contract TwoKeyVoteToken is StandardToken, Ownable {
     {
         return balanceOf(_owner);  // TODO this is true only if the _spender is a valid contract
     }
+
+
 
     /**
     * @dev Total number of tokens in existence

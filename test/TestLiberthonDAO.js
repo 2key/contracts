@@ -1,6 +1,8 @@
 const DecentralizedNation = artifacts.require("DecentralizedNation");
+const TwoKeyVoteToken = artifacts.require("TwoKeyVoteToken");
+const utf8 = require('utf8');
 
-var utf8 = require('utf8');
+
 
 var fromUtf8 = function(str, allowZero) {
     str = utf8.encode(str);
@@ -39,16 +41,18 @@ var toUtf8 = function(hex) {
     return utf8.decode(str);
 };
 
-
 contract('DecentralizedNation', async(accounts) => {
+
     let initialMemberAddresses = [accounts[0],accounts[1]];
     let initialMemberUsernames = [fromUtf8("Marko"), fromUtf8("Petar")];
     let initialMemberlastNames = [fromUtf8("Blabla"), fromUtf8("Blabla1")];
     let ipfsHash = fromUtf8("IFSAFNJSDNJF");
     let initialMemberTypes = [fromUtf8("PRESIDENT"),fromUtf8("MINISTER")];
-    let instance;
+    let decentralizedNationInstance;
+    let voteToken;
+
     it('should deploy contract', async() => {
-        instance = await DecentralizedNation.new(
+        decentralizedNationInstance = await DecentralizedNation.new(
             'Liberland',
             '0x123456',
             ipfsHash,
@@ -58,11 +62,11 @@ contract('DecentralizedNation', async(accounts) => {
             initialMemberlastNames,
             initialMemberTypes
         );
-        console.log(instance.address);
+        console.log(decentralizedNationInstance.address);
     });
 
     it('should return all members', async() => {
-        let [membersAddresses, memberUsernames, memberNames, memberLastNames, memberTypes] = await instance.getAllMembers();
+        let [membersAddresses, memberUsernames, memberNames, memberLastNames, memberTypes] = await decentralizedNationInstance.getAllMembers();
         for(let i=0; i<memberUsernames.length; i++) {
             memberUsernames[i] = toUtf8(memberUsernames[i]);
             memberNames[i] = toUtf8(memberNames[i]);
@@ -74,7 +78,7 @@ contract('DecentralizedNation', async(accounts) => {
     });
 
     it('should return all members with specific type', async() => {
-       let memberAddresses = await instance.getAllMembersForType(fromUtf8('FOUNDERS'));
+       let memberAddresses = await decentralizedNationInstance.getAllMembersForType(fromUtf8('FOUNDERS'));
        assert.equal(memberAddresses[0], accounts[0]);
        assert.equal(memberAddresses[1], accounts[1]);
     });
@@ -82,15 +86,15 @@ contract('DecentralizedNation', async(accounts) => {
 
     it('should set limit for number of members per type', async() => {
         initialMemberTypes.push(fromUtf8('FOUNDERS'));
-        await instance.setLimitForMembersPerType(initialMemberTypes,[20,30,50]);
+        await decentralizedNationInstance.setLimitForMembersPerType(initialMemberTypes,[20,30,50]);
 
-        let limit = await instance.getLimitForType(fromUtf8('FOUNDERS'));
+        let limit = await decentralizedNationInstance.getLimitForType(fromUtf8('FOUNDERS'));
         assert.equal(limit, 50);
     });
 
 
     it('should return member\'s voting points', async() => {
-       let pts = await instance.getMembersVotingPoints(accounts[0]);
+       let pts = await decentralizedNationInstance.getMembersVotingPoints(accounts[0]);
        assert.equal(pts,100);
     });
 
@@ -99,12 +103,12 @@ contract('DecentralizedNation', async(accounts) => {
        let numberOfMembers = 50;
        let percentage = 20;
 
-       await instance.createAuthoritySchemaForType(fromUtf8('FOUNDERS'), allowedToVoteInChange,numberOfMembers,percentage);
+       await decentralizedNationInstance.createAuthoritySchemaForType(fromUtf8('FOUNDERS'), allowedToVoteInChange,numberOfMembers,percentage);
         let memberEligibleToVoteInChanging,
             minimalNumOfMembers,
             percentageToReach;
 
-       [memberEligibleToVoteInChanging, minimalNumOfMembers,percentageToReach] = await instance.getAuthorityToChangeSelectedMemberType(fromUtf8('FOUNDERS'));
+       [memberEligibleToVoteInChanging, minimalNumOfMembers,percentageToReach] = await decentralizedNationInstance.getAuthorityToChangeSelectedMemberType(fromUtf8('FOUNDERS'));
         assert.equal(numberOfMembers,minimalNumOfMembers);
         assert.equal(percentage, percentageToReach);
         for(let i=0; i<memberEligibleToVoteInChanging.length; i++) {
@@ -112,4 +116,13 @@ contract('DecentralizedNation', async(accounts) => {
         }
     });
 
+    it('should deploy TwoKeyVoteToken and see the balances', async() => {
+        voteToken = await TwoKeyVoteToken.new(decentralizedNationInstance.address);
+        let balanceOfMembers = await voteToken.balanceOf(accounts[0]);
+        assert.equal(balanceOfMembers,100);
+    })
+
+
 });
+
+
