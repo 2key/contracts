@@ -6,11 +6,15 @@ import "./CallCutted.sol";
 
 contract TwoKeyWeightedVoteContract is StandardToken, Ownable, CallCutted {
 
-    ERC20full public erc20_token_sell_contract;
+    address public erc20_token_sell_contract;
 
     mapping (address => address) public received_from;
     mapping(address => uint256) public influencer2cut; //TODO: need this
 
+//    constructor(address _erc20, string description) Ownable() public {
+//        erc20_token_sell_contract = _erc20;
+//        campaignDescription = description;
+//    }
 
     uint public quota = 100000000000;
     uint public cost = 1;

@@ -30,7 +30,6 @@ contract TwoKeyVoteToken is StandardToken, Ownable {
     ///Mapping contract bytecode to boolean if is allowed to transfer tokens
     mapping(bytes32 => bool) private canEmit;
 
-
     /// @notice function where admin or any authorized person (will be added if needed) can add more contracts to allow them call methods
     /// @param _contractAddress is actually the address of contract we'd like to allow
     /// @dev We first fetch bytes32 contract code and then update our mapping

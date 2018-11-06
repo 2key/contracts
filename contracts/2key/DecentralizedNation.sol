@@ -1,8 +1,7 @@
 pragma solidity ^0.4.24;
 
-import "./TwoKeyWeightedVoteContract.sol";
-contract DecentralizedNation {
 
+contract DecentralizedNation {
 
     string public nationName;
     bytes32 public ipfsForConstitution;
@@ -245,11 +244,11 @@ contract DecentralizedNation {
             votingResult: 0,
             votingCampaignLengthInDays: block.timestamp + _votingCampaignLengthInDays * (1 days)
         });
-        //TODO: deploy weighted vote contract and map this to it
-        address twoKeyWeightedVoteContract = new TwoKeyWeightedVoteContract();
-        votingContractAddressToNationalVotingCampaign[twoKeyWeightedVoteContract] = nvc;
-        nationalVotingCampaigns.push(twoKeyWeightedVoteContract);
-        numberOfVotingCamapignsAndPetitions++;
+//        address voteToken = new TwoKeyVoteToken(address(this));
+//        address twoKeyWeightedVoteContract = new TwoKeyWeightedVoteContract();
+//        votingContractAddressToNationalVotingCampaign[twoKeyWeightedVoteContract] = nvc;
+//        nationalVotingCampaigns.push(twoKeyWeightedVoteContract);
+//        numberOfVotingCamapignsAndPetitions++;
     }
 
 //    // Refil voting points

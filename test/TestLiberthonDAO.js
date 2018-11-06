@@ -62,6 +62,7 @@ contract('DecentralizedNation', async(accounts,deployer) => {
             initialMemberlastNames,
             initialMemberTypes
         );
+        console.log("Dec" + decentralizedNationInstance.address)
     });
 
     it('should return all members', async() => {
@@ -133,10 +134,10 @@ contract('DecentralizedNation', async(accounts,deployer) => {
             lengthInDays
            );
 
-        let nvcAddress = await decentralizedNationInstance.nationalVotingCampaigns(0);
-        console.log(nvcAddress);
-        let nvc = await decentralizedNationInstance.votingContractAddressToNationalVotingCampaign(nvcAddress);
-        console.log(nvc);
+        // let nvcAddress = await decentralizedNationInstance.nationalVotingCampaigns(0);
+        // console.log(nvcAddress);
+        // let nvc = await decentralizedNationInstance.votingContractAddressToNationalVotingCampaign(nvcAddress);
+        // console.log(nvc);
     });
 
 
