@@ -30,16 +30,21 @@ function free_take(my_address: string, f_address: string, f_secret?: string, p_m
     }
 
     let m;
+    const version = p_message ? p_message.slice(0, 2) : '00';
     // let prefix = "00"  // not reall important because it only used when receiving a free link directly from the contractor
-    if (p_message) { // the message built by previous influencers
-        m = p_message + f_address.slice(2);
+
+    if (p_message) {  // the message built by previous influencers
+        m = p_message;
+        if (version === '00') {
+            m += f_address.slice(2);
+        }
         const old_public_address = privateToPublic(old_private_key);
-        m += old_public_address;
+        m += old_public_address
     } else {
         // this happens when receiving a free link directly from the contractor
-        // m = prefix + f_address.slice(2)
-        m = f_address.slice(2);
+        m = `00${f_address.slice(2)}`;
     }
+
 
     // the message we want to sign is my address (I'm the converter)
     // and we will sign with the private key from the previous step (contractor or influencer)
@@ -58,7 +63,7 @@ function free_take(my_address: string, f_address: string, f_secret?: string, p_m
     return m;
 }
 
-function free_join(my_address: string, public_address: string, f_address: string, f_secret: string, p_message: string, rCut: number): string {
+function free_join(my_address: string, public_address: string, f_address: string, f_secret: string, p_message: string, rCut: number, cutSign?: string): string {
     // let cut = fcut;
     // Input:
     //   my_address - I'm an influencer that wants to generate my own link
@@ -96,11 +101,27 @@ function free_join(my_address: string, public_address: string, f_address: string
     let m: Buffer | string = Buffer.concat([sig, cut]);
     m = m.toString('hex');
 
-    if (p_message) {
-        m = p_message + f_address.slice(2) + old_public_address + m;
+    const version = cutSign ? '01' : '00';
+    let previousMessage = p_message;
+    if (previousMessage) {
+        if (version === '00') {
+            previousMessage += f_address.slice(2)
+        }
+        previousMessage += old_public_address;
+        // m = previousMessage + f_address.slice(2) + old_public_address + m;
     } else {
+        previousMessage = version + f_address.slice(2);
         // this happens when receiving a free link directly from the contractor
-        m = f_address.slice(2) + m;
+        // m = f_address.slice(2) + m;
+    }
+    assert.ok(p_message.startsWith(version));
+    m = previousMessage + m;
+    if (cutSign) {
+        if (cutSign.startsWith('0x')) {
+            m += cutSign.slice(2)
+        } else {
+            m += cutSign
+        }
     }
     return m;
 }
@@ -214,7 +235,7 @@ function validate_join(firtsPublicKey: string, f_address: string, f_secret: stri
     return bounty_cuts;
 }
 
-function sign_plasma2eteherum(plasma_address:string, my_address:string, web3: any): Promise<IPlasmaSignature> {
+function sign_plasma2eteherum(plasma_address:string, my_address:string, web3: any): Promise<string> {
     const msgParams = [
         {
             type: 'bytes',      // Any valid solidity type
@@ -235,13 +256,21 @@ function sign_plasma2eteherum(plasma_address:string, my_address:string, web3: an
                 reject(err)
             } else if (!result) {
                 console.log('Error in sign_plasma2eteherum no result');
-                reject()
+                reject();
             } else {
-                const sig = typeof result != 'string' ? result.result : result;
-                resolve({
-                    sig,
-                    with_prefix: !Boolean(isMetaMask),
-                })
+                let sig = typeof result != 'string' ? result.result : result;
+
+                if (!isMetaMask) {
+                    let n = sig.length;
+                    let v = sig.slice(n - 2);
+                    v = parseInt(v,16) + 32;
+                    console.log('V:', v);
+                    v = Buffer.from([v]).toString('hex');
+                    console.log(v);
+                    sig = sig.slice(0, n - 2) + v;
+                }
+
+                resolve(sig)
             }
         }
 
@@ -256,6 +285,67 @@ function sign_plasma2eteherum(plasma_address:string, my_address:string, web3: an
         } else {
             let msg = sigUtil.typedSignatureHash(msgParams);
             // console.log(msg);
+            if (web3.eth.getSign) {
+                web3.eth.getSign(my_address, msg, cb)
+            } else {
+                // TODO Crazy bug in Web3 in doc it is said that msg should come first https://github.com/ethereum/wiki/wiki/JavaScript-API#web3ethsign
+                web3.eth.sign(my_address, msg, cb)
+            }
+        }
+    })
+}
+
+function sign_cut2eteherum(userCut: number, my_address: string, web3: any) {
+    const cut = '0x'+ Buffer.from([userCut]).toString('hex');
+    let msgParams = [
+        {
+            type: 'bytes',      // Any valid solidity type
+            name: 'binding to weight',     // Any string label you want
+            value: cut  // The value to sign
+        }
+    ];
+
+    return new Promise((resolve, reject) => {
+        if (!web3 || !web3.currentProvider) {
+            reject('No web3 instance');
+        }
+        const { isMetaMask } = web3.currentProvider;
+
+        function cb(err, result) {
+            if (err) {
+                console.log('Error in sign_cut2eteherum', err);
+                reject(err)
+            } else if (!result) {
+                console.log('Error in sign_cut2eteherum no result');
+                reject();
+            } else {
+                if (typeof result != 'string') {
+                    result = result.result
+                }
+
+                if (!isMetaMask) {
+                    let n = result.length;
+                    let v = result.slice(n - 2);
+                    v = parseInt(v,16) + 32;
+                    v = Buffer.from([v]).toString('hex');
+                    result = result.slice(0, n - 2) + v;
+                }
+
+                resolve(result);
+            }
+        }
+
+        if (isMetaMask) {
+            // metamask uses  web3.eth.sign to sign transaction and not for arbitrary messages
+            // instead use https://medium.com/metamask/scaling-web3-with-signtypeddata-91d6efc8b290
+            web3.currentProvider.sendAsync({
+                method: 'eth_signTypedData',
+                params: [msgParams, my_address],
+                from: my_address,
+            }, cb)
+        } else {
+            const msg = sigUtil.typedSignatureHash(msgParams);
+            console.log('my_address='+my_address+' msg='+ msg);
             if (web3.eth.getSign) {
                 web3.eth.getSign(my_address, msg, cb)
             } else {
@@ -370,5 +460,6 @@ export default {
     validate_join,
     generatePrivateKey,
     sign_plasma2eteherum,
+    sign_cut2eteherum,
     generateSignatureKeys,
 };

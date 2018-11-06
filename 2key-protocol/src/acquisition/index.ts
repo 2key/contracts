@@ -139,7 +139,11 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                         data.maxContributionETHWei,
                         data.referrerQuota || 5,
                     ],
-                    progressCallback
+                    progressCallback,
+                    link: {
+                        name: 'Call',
+                        address: this.base.twoKeyCall.address,
+                    },
                 });
                 const campaignReceipt = await this.utils.getTransactionReceiptMined(txHash, {web3: this.base.web3, interval, timeout});
                 if (campaignReceipt.status !== '0x1') {
@@ -150,6 +154,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 if (progressCallback) {
                     progressCallback('TwoKeyAcquisitionCampaignERC20', true, campaignAddress);
                 }
+                console.log('Campaign created', campaignAddress);
                 const campaignPublicLinkKey = await this.join(campaignAddress, from, {gasPrice});
                 if (progressCallback) {
                     progressCallback('SetPublicLinkKey', true, campaignPublicLinkKey);
@@ -364,27 +369,29 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     }
 
     // Join Offchain
-    public join(campaign: any, from: string, { cut, gasPrice = this.base._getGasPrice(), referralLink }: IJoinLinkOpts = {}): Promise<string> {
+    public join(campaign: any, from: string, { cut, gasPrice = this.base._getGasPrice(), referralLink, cutSign }: IJoinLinkOpts = {}): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
                 const campaignAddress = typeof (campaign) === 'string' ? campaign
                     : (await this.helpers._getAcquisitionCampaignInstance(campaign)).address;
 
-                if (from !== this.base.plasmaAddress) {
-                    const {sig, with_prefix} = await Sign.sign_plasma2eteherum(this.base.plasmaAddress, from, this.base.web3);
-                    this.base._log('Signature', sig, with_prefix, from, this.base.plasmaAddress);
-                    const txHash: string = await promisify(this.base.twoKeyPlasmaEvents.add_plasma2ethereum, [sig, with_prefix, {
-                        from: this.base.plasmaAddress,
-                        gasPrice: 0
-                    }]);
-                    await this.utils.getTransactionReceiptMined(txHash, {web3: this.base.plasmaWeb3, timeout: 300000});
-                    const stored_ethereum_address = await promisify(this.base.twoKeyPlasmaEvents.plasma2ethereum, [this.base.plasmaAddress]);
-                    if (stored_ethereum_address !== from) {
-                        reject(stored_ethereum_address + ' != ' + from)
-                    }
+                // if (from !== this.base.plasmaAddress) {
+                const sig = await Sign.sign_plasma2eteherum(this.base.plasmaAddress, from, this.base.web3);
+                this.base._log('Signature', sig, from, this.base.plasmaAddress);
+                const txHash: string = await promisify(this.base.twoKeyPlasmaEvents.add_plasma2ethereum, [sig, {
+                    from: this.base.plasmaAddress,
+                    gasPrice: 0
+                }]);
+                await this.utils.getTransactionReceiptMined(txHash, {web3: this.base.plasmaWeb3, timeout: 300000});
+                const stored_ethereum_address = await promisify(this.base.twoKeyPlasmaEvents.plasma2ethereum, [this.base.plasmaAddress]);
+                if (stored_ethereum_address !== from) {
+                    reject(stored_ethereum_address + ' != ' + from)
                 }
+                // }
+                // const {public_address, private_key} = await Sign.generateSignatureKeys(from, this.base.plasmaAddress, campaignAddress, this.base.web3);
 
-                const {public_address, private_key} = await Sign.generateSignatureKeys(from, this.base.plasmaAddress, campaignAddress, this.base.web3);
+                const private_key = this.base.web3.sha3(sig).slice(2, 2 + 32 * 2);
+                const public_address = Sign.privateToPublic(Buffer.from(private_key, 'hex'));
 
                 let new_message;
                 let contractor;
@@ -392,7 +399,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     const {f_address, f_secret, p_message, contractor: campaignContractor} = await this.utils.getOffchainDataFromIPFSHash(referralLink);
                     contractor = campaignContractor;
                     this.base._log('New link for', from, f_address, f_secret, p_message);
-                    new_message = Sign.free_join(from, public_address, f_address, f_secret, p_message, cut + 1);
+                    new_message = Sign.free_join(from, public_address, f_address, f_secret, p_message, cut + 1, cutSign);
                 } else {
                     const {contractor: campaignContractor} = await this.setPublicLinkKey(campaign, from, `0x${public_address}`, {cut, gasPrice});
                     contractor = campaignContractor;

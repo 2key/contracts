@@ -33,8 +33,10 @@ import TwoKeyCongress from "./congress";
 
 const TwoKeyDefaults = {
     // ipfsIp: '192.168.47.100',
-    ipfsIp: 'ipfs.aydnep.com.ua',
-    ipfsPort: '15001',
+    // ipfsIp: 'ipfs.aydnep.com.ua',
+    ipfsIp: 'ipfs.infura.io',
+    ipfsPort: '5001',
+    // ipfsPort: '15001',
     ipfsProtocol: 'https',
     mainNetId: 3,
     syncTwoKeyNetId: 17,
@@ -56,6 +58,7 @@ export class TwoKeyProtocol {
     private twoKeyCongress: any;
     private twoKeyReg: any;
     private twoKeyPlasmaEvents: any;
+    private twoKeyCall: any;
     private twoKeyEvents: any;
     private plasmaAddress: string;
     public ERC20: IERC20;
@@ -130,6 +133,7 @@ export class TwoKeyProtocol {
         this.twoKeyReg = this.web3.eth.contract(contractsMeta.TwoKeyReg.abi).at(contractsMeta.TwoKeyReg.networks[this.networks.mainNetId].address);
         this.twoKeyAdmin = this.web3.eth.contract(contractsMeta.TwoKeyAdmin.abi).at(contractsMeta.TwoKeyAdmin.networks[this.networks.mainNetId].address);
         this.twoKeyCongress = this.web3.eth.contract(contractsMeta.TwoKeyCongress.abi).at(contractsMeta.TwoKeyCongress.networks[this.networks.mainNetId].address);
+        this.twoKeyCall = this.web3.eth.contract(contractsMeta.Call.abi).at(contractsMeta.Call.networks[this.networks.mainNetId].address);
 
         this.ipfs = ipfsAPI(ipfsIp, ipfsPort, {protocol});
 
@@ -143,6 +147,7 @@ export class TwoKeyProtocol {
             twoKeyReg: this.twoKeyReg,
             twoKeyCongress: this.twoKeyCongress,
             twoKeyPlasmaEvents: this.twoKeyPlasmaEvents,
+            twoKeyCall: this.twoKeyCall,
             plasmaAddress: this.plasmaAddress,
             _getGasPrice: this._getGasPrice,
             _setGasPrice: this._setGasPrice,

@@ -23,6 +23,7 @@ import "./Call.sol";
 /// Contract which will represent campaign for the fungible assets
 contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
 
+    using Call for *;
     // ==============================================================================================================
     // =====================================TWO KEY ACQUISITION CAMPAIGN EVENTS======================================
     // ==============================================================================================================

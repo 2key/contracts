@@ -11,6 +11,7 @@ export interface ITwoKeyBase {
     networks: IEhtereumNetworks;
     contracts: IContractsAddresses;
     twoKeyEconomy: any;
+    twoKeyCall: any;
     twoKeyReg: any;
     twoKeyCongress: any;
     twoKeyPlasmaEvents: any;

@@ -120,10 +120,16 @@ export interface ITwoKeyUtils {
     getTransactionReceiptMined: (txHash: string, opts?: ITxReceiptOpts) => Promise<ITransactionReceipt>,
 }
 
+export interface ILink {
+    name: string,
+    address: string,
+}
+
 export interface ICreateContractOpts {
     gasPrice?: number,
     params?: any[],
     progressCallback?: ICreateCampaignProgress,
+    link?: ILink,
 }
 
 export interface IBalanceFromWeiOpts {

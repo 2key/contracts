@@ -103,9 +103,18 @@ export default class Helpers implements ITwoKeyHelpers {
         });
     }
 
-    _createContract(contract: IContract, from: string, {gasPrice = this.gasPrice, params, progressCallback}: ICreateContractOpts = {}): Promise<string> {
+    _createContract(contract: IContract, from: string, {gasPrice = this.gasPrice, params, progressCallback, link}: ICreateContractOpts = {}): Promise<string> {
         return new Promise(async (resolve, reject) => {
-            const {abi, bytecode: data, name} = contract;
+            const {abi, name} = contract;
+            let data = contract.bytecode;
+            if (link) {
+                console.log('LINK', Object.keys(link));
+                let template = `__${link.name}`;
+                for (let i = 0; i < 40 - link.name.length - 2; i++) {
+                    template += '_';
+                }
+                data = data.replace(new RegExp(template, 'g'), link.address.substring(2));
+            }
             const nonce = await this._getNonce(from);
             const createParams = params ? [...params] : [];
             createParams.push({data, from, gasPrice, nonce});
