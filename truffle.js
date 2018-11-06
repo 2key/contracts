@@ -139,7 +139,7 @@ module.exports = {
     'plasma-dev': {
       // host: '107.23.249.140',
       // port: 8090,
-      provider: () => new HDWalletProvider(mnemonic, 'http://107.23.249.140:8090'),
+      provider: () => new HDWalletProvider(mnemonic, 'https://test.plasma.2key.network/'),
       network_id: 17, // Match any network id
       gas: 7000000,
       gasPrice: 0,

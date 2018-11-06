@@ -265,6 +265,20 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         }
     }
 
+    public async plasma_bdfs(campaign: any, contractor: string, start_address: string, cb: (from: string) => void) {
+        for (let i = 0; i < start_address.length; i++) {
+            let from = start_address[i];
+            const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
+            const given_to = await promisify(this.base.twoKeyPlasmaEvents, [from, campaignInstance.address, contractor, {from: this.base.plasmaAddress}]);
+            if (given_to.length > 0) {
+                await this.plasma_bdfs(campaignInstance, contractor, given_to, cb)
+            } else {  // "from" is a leaf
+                await cb(from);
+            }
+        }
+    }
+
+
     // Estimate referral maximum reward
     public getEstimatedMaximumReferralReward(campaign: any, from: string, referralLink: string): Promise<number> {
         return new Promise(async (resolve, reject) => {

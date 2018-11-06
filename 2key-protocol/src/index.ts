@@ -40,7 +40,7 @@ const TwoKeyDefaults = {
     ipfsProtocol: 'https',
     mainNetId: 3,
     syncTwoKeyNetId: 17,
-    twoKeySyncUrl: 'https://astring.aydnep.com.ua:18545',
+    twoKeySyncUrl: 'https://test.plasma.2key.network/',
     twoKeyMainUrl: 'http://localhost:8585'
 };
 
