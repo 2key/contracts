@@ -6,7 +6,7 @@ module.exports.errTypes = {
     stackOverflow     : "stack overflow",
     stackUnderflow    : "stack underflow",
     staticStateChange : "static state change",
-    anyError          : ""  
+    anyError          : ""
 }
 
 module.exports.tryCatch = async function(promise, errType) {
@@ -21,7 +21,7 @@ module.exports.tryCatch = async function(promise, errType) {
             assert(error.message,error.message);
         }
         else
-        { 
+        {
            assert(error.message.startsWith(PREFIX + errType), "Expected an error starting with '" + PREFIX + errType + "' but got '" + error.message + "' instead");
        }
     }
@@ -29,3 +29,5 @@ module.exports.tryCatch = async function(promise, errType) {
 
 const PREFIX = "VM Exception while processing transaction: ";
 //const PREFIX = "The contract code couldn't be stored, please check your gas amount.";
+
+

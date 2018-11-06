@@ -1,0 +1,224 @@
+pragma solidity ^0.4.24;
+
+
+contract DecentralizedNation {
+
+
+    string public nationName;
+    bytes32 public ipfsForConstitution;
+    bytes32 public ipfsHashForDAOPublicInfo;
+
+
+    bytes32[] public memberTypes;
+
+    Member[] members;
+    uint numOfMembers;
+
+    bool initialized = false;
+
+    mapping(address => uint) public memberId;
+    mapping(bytes32 => uint) public limitOfMembersPerType;
+    mapping(bytes32 => address[]) public memberTypeToMembers;
+
+
+    mapping(address => uint) votingPoints;
+
+    mapping(bytes32 => AuthoritySchema) memberTypeToAuthoritySchemaToChange;
+
+
+    struct NationalVotingCampaign {
+
+    }
+
+    struct PetitionCampaign {
+        string question;
+        bytes32[] answers;
+        uint [] scorePerAnswer;
+
+    }
+
+    struct Member {
+        address memberAddress;
+        bytes32 username;
+        bytes32 firstName;
+        bytes32 lastName;
+        bytes32 memberType;
+    }
+
+
+    struct AuthoritySchema {
+        bytes32[] memberTypesEligibleToVote;
+        uint minimalNumberOfVoters;
+        uint minimalPercentToBeReached;
+    }
+
+
+    modifier onlyMembers {
+        require(memberId[msg.sender] != 0);
+        _;
+    }
+
+
+    constructor(
+        string _nationName,
+        bytes32 _ipfsHashForConstitution,
+        bytes32 _ipfsHashForDAOPublicInfo,
+        address[] initialMembersAddresses,
+        bytes32[] initialUsernames,
+        bytes32[] initialFirstNames,
+        bytes32[] initialLastNames,
+        bytes32[] initialMemberTypes
+    ) public  {
+        memberTypes.push(bytes32("FOUNDERS"));
+        require(initialMembersAddresses.length == initialUsernames.length &&
+        initialUsernames.length == initialFirstNames.length &&
+        initialFirstNames.length == initialLastNames.length);
+
+        uint length = initialMembersAddresses.length;
+
+        addMember(0,'','','',bytes32(0));
+
+        for(uint i=0; i<length; i++) {
+            addMember(
+                initialMembersAddresses[i],
+                initialUsernames[i],
+                initialFirstNames[i],
+                initialLastNames[i],
+                memberTypes[0]);
+        }
+
+        for(uint j=0; j<initialMemberTypes.length; j++) {
+            memberTypes.push(initialMemberTypes[j]);
+        }
+
+        nationName = _nationName;
+        ipfsForConstitution = _ipfsHashForConstitution;
+        ipfsHashForDAOPublicInfo = _ipfsHashForDAOPublicInfo;
+        initialized = true;
+    }
+
+
+    function addMember(
+        address _memberAddress,
+        bytes32 memberUsername,
+        bytes32 memberFirstName,
+        bytes32 memberLastName,
+        bytes32 _memberType)
+    internal {
+        if(initialized) {
+            require(limitOfMembersPerType[_memberType] < memberTypeToMembers[_memberType].length);
+        }
+        require(checkIfMemberTypeExists(_memberType) || _memberType == bytes32(0));
+        Member memory m = Member({
+            memberAddress: _memberAddress,
+            username: memberUsername,
+            firstName: memberFirstName,
+            lastName: memberLastName,
+            memberType: _memberType
+        });
+
+        members.push(m);
+        memberId[_memberAddress] = numOfMembers;
+        memberTypeToMembers[_memberType].push(_memberAddress);
+        votingPoints[_memberAddress] = 100;
+        numOfMembers++;
+    }
+
+
+    function removeMember(address targetMember) internal {
+        require(memberId[targetMember] != 0);
+        for (uint i = memberId[targetMember]; i<members.length-1; i++){
+            members[i] = members[i+1];
+        }
+        delete members[members.length-1];
+        memberId[targetMember] = 0;
+        votingPoints[targetMember] = 0;
+        members.length--;
+    }
+
+
+    function changeMemberType(
+        address _memberAddress,
+        bytes32 _newType)
+    internal {
+        require(memberId[_memberAddress] != 0);
+        require(checkIfMemberTypeExists(_newType));
+
+        uint id = memberId[_memberAddress];
+
+        Member memory m = members[id];
+        m.memberType = _newType;
+        members[id] = m;
+    }
+
+    function createAuthoritySchemaForType(
+        bytes32 memberType,
+        bytes32[] _memberTypesEligibleToVote,
+        uint _minimalNumberOfVoters,
+        uint _minimalPercentToBeReached
+    ) public {
+        require(checkIfMemberTypeExists(memberType));
+        memberTypeToAuthoritySchemaToChange[memberType] = AuthoritySchema({
+            memberTypesEligibleToVote: _memberTypesEligibleToVote,
+            minimalNumberOfVoters: _minimalNumberOfVoters,
+            minimalPercentToBeReached: _minimalPercentToBeReached
+        });
+    }
+
+
+    function setLimitForMembersPerType(bytes32[] types, uint[] limits) public {
+        require(types.length == limits.length);
+        for(uint i=0; i<types.length; i++) {
+            limitOfMembersPerType[types[i]] = limits[i];
+        }
+    }
+
+
+    function checkIfMemberTypeExists(bytes32 memberType) public view returns (bool) {
+        for(uint i=0; i<memberTypes.length; i++) {
+            if(memberTypes[i] == memberType) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /// @notice Function to return all the members from Liberland
+    function getAllMembers() public view returns (address[],bytes32[],bytes32[],bytes32[], bytes32[]) {
+        uint length = members.length - 1;
+        address[] memory allMemberAddresses = new address[](length);
+        bytes32[] memory allMemberUsernames = new bytes32[](length);
+        bytes32[] memory allMemberFirstNames = new bytes32[](length);
+        bytes32[] memory allMemberLastNames = new bytes32[](length);
+        bytes32[] memory allMemberTypes = new bytes32[](length);
+
+        for(uint i=1; i<length + 1; i++) {
+            Member memory m = members[i];
+            allMemberAddresses[i-1] = m.memberAddress;
+            allMemberUsernames[i-1] = m.username;
+            allMemberFirstNames[i-1] = m.firstName;
+            allMemberLastNames[i-1] = m.lastName;
+            allMemberTypes[i-1] = m.memberType;
+        }
+
+        return (allMemberAddresses, allMemberUsernames, allMemberFirstNames, allMemberLastNames, allMemberTypes);
+    }
+
+
+    function getAllMembersForType(bytes32 memberType) public view returns (address[]) {
+        return memberTypeToMembers[memberType];
+    }
+
+    function getLimitForType(bytes32 memberType) public view returns(uint) {
+        return limitOfMembersPerType[memberType];
+    }
+
+    function getMembersVotingPoints(address _memberAddress) public view returns (uint) {
+        return votingPoints[_memberAddress];
+    }
+
+    function getAuthorityToChangeSelectedMemberType(bytes32 memberType) public view returns (bytes32[], uint,uint) {
+        AuthoritySchema memory schema = memberTypeToAuthoritySchemaToChange[memberType];
+        return(schema.memberTypesEligibleToVote, schema.minimalNumberOfVoters, schema.minimalPercentToBeReached);
+    }
+}
