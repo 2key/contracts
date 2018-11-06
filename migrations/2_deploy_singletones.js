@@ -40,6 +40,8 @@ const TwoKeyAdmin = artifacts.require('TwoKeyAdmin');
 const EventSource = artifacts.require('TwoKeyEventSource');
 const TwoKeyReg = artifacts.require('TwoKeyReg');
 const TwoKeyCongress = artifacts.require('TwoKeyCongress');
+const Call = artifacts.require('Call');
+const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
 
 /*
     TwoKeyCongress constructor need 2 addresses passed, the best'd be if we get that addresses static and always save the same ones
@@ -55,6 +57,7 @@ module.exports = function deploy(deployer) {
   ];
   let votingPowers = [1,2];
 
+  deployer.deploy(Call);
   if(deployer.network.startsWith('dev') || deployer.network.startsWith('rinkeby') || deployer.network == 'ropsten') {
     deployer.deploy(TwoKeyCongress, 50, initialCongressMembers, votingPowers)
         .then(() => TwoKeyCongress.deployed())
@@ -78,7 +81,7 @@ module.exports = function deploy(deployer) {
             console.log('\x1b[31m', 'Error:', err.message, '\x1b[0m');
         });
   } else if(deployer.network.startsWith('plasma')) {
-    const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
+    deployer.link(Call,TwoKeyPlasmaEvents);
     deployer.deploy(TwoKeyPlasmaEvents);
   }
 };

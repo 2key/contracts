@@ -4,7 +4,8 @@ const TwoKeyUpgradableExchange = artifacts.require('TwoKeyUpgradableExchange');
 const TwoKeyAdmin = artifacts.require('TwoKeyAdmin');
 const EventSource = artifacts.require('TwoKeyEventSource');
 const TwoKeyReg = artifacts.require('TwoKeyReg');
-
+const Call = artifacts.require('Call');
+const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
 
 /*
 
@@ -19,6 +20,7 @@ const TwoKeyReg = artifacts.require('TwoKeyReg');
  */
 
 module.exports = function deploy(deployer) {
+  deployer.deploy(Call);
   if (deployer.network === 'staging') {
     deployer.deploy(ERC20TokenMock)
       .then(() => ERC20TokenMock.deployed())  //no need for tokenmock --?> this is actually the twokeyeconomy in the singletons
@@ -34,8 +36,9 @@ module.exports = function deploy(deployer) {
         console.log('\x1b[31m', 'Error:', err.message, '\x1b[0m');
       });
   } else if (deployer.network.startsWith('plasma')) {
-    const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
-    deployer.deploy(TwoKeyPlasmaEvents);
+      deployer.link(Call,TwoKeyPlasmaEvents);
+      deployer.deploy(TwoKeyPlasmaEvents);
+
   }
 
 };

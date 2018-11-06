@@ -2,11 +2,10 @@ const TwoKeyAcquisitionCampaignERC20 = artifacts.require('TwoKeyAcquisitionCampa
 const TwoKeyAdmin = artifacts.require('TwoKeyAdmin');
 const EventSource = artifacts.require('TwoKeyEventSource');
 const TwoKeyEconomy = artifacts.require('TwoKeyEconomy');
-// const TwoKeyWhitelistedInfluencer = artifacts.require('TwoKeyWhitelisted');
-// const TwoKeyWhitelistedConverter = artifacts.require('TwoKeyWhitelisted');
 const TwoKeyConversionHandler = artifacts.require('TwoKeyConversionHandler');
 const TwoKeyCampaignInventory = artifacts.require('TwoKeyCampaignInventory');
 const ERC20TokenMock = artifacts.require('ERC20TokenMock');
+const Call = artifacts.require('Call');
 
 /*
     address _twoKeyEventSource, address _twoKeyEconomy,
@@ -23,6 +22,7 @@ module.exports = function deploy(deployer) {
         deployer.deploy(TwoKeyConversionHandler,1012019,180,6,180)
             .then(() => TwoKeyConversionHandler.deployed())
             .then(() => deployer.deploy(ERC20TokenMock))
+            .then(() => deployer.link(Call,TwoKeyAcquisitionCampaignERC20))
             .then(() => deployer.deploy(TwoKeyAcquisitionCampaignERC20, EventSource.address, TwoKeyEconomy.address, TwoKeyConversionHandler.address,
                 '0xb3fa520368f2df7bed4df5185101f303f6c7decc', ERC20TokenMock.address,
                 12345,15345,12345,5,5,5,5,12,15,1))
