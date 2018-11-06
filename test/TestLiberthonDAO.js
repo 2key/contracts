@@ -1,4 +1,4 @@
-const LiberthonDAO = artifacts.require("LiberthonDAO");
+const DecentralizedNation = artifacts.require("DecentralizedNation");
 
 var utf8 = require('utf8');
 
@@ -40,16 +40,18 @@ var toUtf8 = function(hex) {
 };
 
 
-contract('LiberthonDAO', async(accounts) => {
+contract('DecentralizedNation', async(accounts) => {
     let initialMemberAddresses = [accounts[0],accounts[1]];
     let initialMemberUsernames = [fromUtf8("Marko"), fromUtf8("Petar")];
     let initialMemberlastNames = [fromUtf8("Blabla"), fromUtf8("Blabla1")];
+    let ipfsHash = fromUtf8("IFSAFNJSDNJF");
     let initialMemberTypes = [fromUtf8("PRESIDENT"),fromUtf8("MINISTER")];
     let instance;
     it('should deploy contract', async() => {
-        instance = await LiberthonDAO.new(
+        instance = await DecentralizedNation.new(
             'Liberland',
             '0x123456',
+            ipfsHash,
             initialMemberAddresses,
             initialMemberUsernames,
             initialMemberUsernames,

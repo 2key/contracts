@@ -1,18 +1,34 @@
 pragma solidity ^0.4.24;
 
-import "./MemberTypes.sol";
 
-contract LiberthonDAO is MemberTypes {
+contract DecentralizedNation {
+
 
     string public nationName;
     bytes32 public ipfsForConstitution;
+    bytes32 public ipfsHashForDAOPublicInfo;
 
+
+
+    bytes32[] public memberTypes;
     Member[] members;
     uint numOfMembers;
+
+
     mapping(address => uint) public memberId;
+    mapping(bytes32 => uint) public limitOfMembersPerType;
 
 
-    struct Proposal {
+    mapping(bytes32 => address[]) public memberTypeToMembers;
+
+
+    struct NationalVotingCampaign {
+
+    }
+
+    struct PetitionCampaign {
+        string question;
+        bytes32[] answers; //MVP version
 
     }
 
@@ -22,47 +38,57 @@ contract LiberthonDAO is MemberTypes {
         bytes32 username;
         bytes32 firstName;
         bytes32 lastName;
-        MemberType memberType;
+        bytes32 memberType;
     }
 
 
-    struct Majority {
-        MemberType lowestMemberTypeEligibleToVote;
-        uint minimalNumberOfVotes;
+    struct AuthoritySchema {
+        bytes32[]memberTypesEligibleToVote;
+        uint minimalNumberOfVoters;
     }
+
 
     modifier onlyMembers {
         require(memberId[msg.sender] != 0);
         _;
     }
 
+
     constructor(
         string _nationName,
         bytes32 _ipfsHashForConstitution,
+        bytes32 _ipfsHashForDAOPublicInfo,
         address[] initialMembersAddresses,
         bytes32[] initialUsernames,
         bytes32[] initialFirstNames,
         bytes32[] initialLastNames,
         bytes32[] initialMemberTypes
     ) public  {
-        //TODO: Add validation that the first address is the PRESIDENT's address
-        // Requiring that for all members are all the informations passed
+        memberTypes.push(bytes32("FOUNDERS"));
         require(initialMembersAddresses.length == initialUsernames.length &&
         initialUsernames.length == initialFirstNames.length &&
-        initialFirstNames.length == initialLastNames.length &&
-        initialLastNames.length == initialMemberTypes.length);
+        initialFirstNames.length == initialLastNames.length);
+
         uint length = initialMembersAddresses.length;
+
         addMember(0,'','','',bytes32(0));
+
         for(uint i=0; i<length; i++) {
             addMember(
                 initialMembersAddresses[i],
                 initialUsernames[i],
                 initialFirstNames[i],
                 initialLastNames[i],
-                initialMemberTypes[i]);
+                memberTypes[0]);
         }
+
+        for(uint j=0; j<initialMemberTypes.length; j++) {
+            memberTypes.push(initialMemberTypes[j]);
+        }
+
         nationName = _nationName;
         ipfsForConstitution = _ipfsHashForConstitution;
+        ipfsHashForDAOPublicInfo = _ipfsHashForDAOPublicInfo;
     }
 
 
@@ -71,10 +97,9 @@ contract LiberthonDAO is MemberTypes {
         bytes32 memberUsername,
         bytes32 memberFirstName,
         bytes32 memberLastName,
-        bytes32 memberType)
+        bytes32 _memberType)
     internal {
-        MemberType _memberType = convertToTypeFromBytes(memberType);
-
+        require(checkIfMemberTypeExists(_memberType) || _memberType == bytes32(0));
         Member memory m = Member({
             memberAddress: _memberAddress,
             username: memberUsername,
@@ -85,8 +110,10 @@ contract LiberthonDAO is MemberTypes {
 
         members.push(m);
         memberId[_memberAddress] = numOfMembers;
+        memberTypeToMembers[_memberType].push(_memberAddress);
         numOfMembers++;
     }
+
 
     function removeMember(address targetMember) internal {
         require(memberId[targetMember] != 0);
@@ -98,25 +125,40 @@ contract LiberthonDAO is MemberTypes {
         members.length--;
     }
 
+
     function changeMemberType(
         address _memberAddress,
         bytes32 _newType)
     internal {
         require(memberId[_memberAddress] != 0);
-        MemberType _newMemberType = convertToTypeFromBytes(_newType);
+        require(checkIfMemberTypeExists(_newType));
+
         uint id = memberId[_memberAddress];
 
         Member memory m = members[id];
-        m.memberType = _newMemberType;
+        m.memberType = _newType;
         members[id] = m;
     }
 
-    function vote() public onlyMembers {
 
+
+
+    function setLimitForMembersPerType(bytes32[] types, uint[] limits) public {
+        require(types.length == limits.length);
+        for(uint i=0; i<types.length; i++) {
+            limitOfMembersPerType[types[i]] = limits[i];
+        }
     }
 
-    function createCampaign() public onlyMembers {
 
+
+    function checkIfMemberTypeExists(bytes32 memberType) public view returns (bool) {
+        for(uint i=0; i<memberTypes.length; i++) {
+            if(memberTypes[i] == memberType) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /// @notice Function to return all the members from Liberland
@@ -134,14 +176,9 @@ contract LiberthonDAO is MemberTypes {
             allMemberUsernames[i-1] = m.username;
             allMemberFirstNames[i-1] = m.firstName;
             allMemberLastNames[i-1] = m.lastName;
-            allMemberTypes[i-1] = convertTypeToBytes(m.memberType);
+            allMemberTypes[i-1] = m.memberType;
         }
 
         return (allMemberAddresses, allMemberUsernames, allMemberFirstNames, allMemberLastNames, allMemberTypes);
     }
-
-
-
-
-
 }
