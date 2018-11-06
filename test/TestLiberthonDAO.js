@@ -71,5 +71,20 @@ contract('DecentralizedNation', async(accounts) => {
 
         console.log(memberUsernames);
         console.log(memberTypes);
-    })
+    });
+
+    it('should return all members with specific type', async() => {
+       let memberAddresses = await instance.getAllMembersForType(fromUtf8('FOUNDERS'));
+       assert.equal(memberAddresses[0], accounts[0]);
+       assert.equal(memberAddresses[1], accounts[1]);
+       console.log(memberAddresses);
+    });
+
+    it('should set limit for number of members per type', async() => {
+        initialMemberTypes.push(fromUtf8('FOUNDERS'));
+        await instance.setLimitForMembersPerType(initialMemberTypes,[20,30,50]);
+
+        let limit = await instance.getLimitForType(fromUtf8('FOUNDERS'));
+        assert.equal(limit, 50);
+    });
 });

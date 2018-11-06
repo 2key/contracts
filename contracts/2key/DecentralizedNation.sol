@@ -181,4 +181,13 @@ contract DecentralizedNation {
 
         return (allMemberAddresses, allMemberUsernames, allMemberFirstNames, allMemberLastNames, allMemberTypes);
     }
+
+
+    function getAllMembersForType(bytes32 memberType) public view returns (address[]) {
+        return memberTypeToMembers[memberType];
+    }
+
+    function getLimitForType(bytes32 memberType) public view returns(uint) {
+        return limitOfMembersPerType[memberType];
+    }
 }
