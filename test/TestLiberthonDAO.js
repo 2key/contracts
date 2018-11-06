@@ -58,6 +58,7 @@ contract('DecentralizedNation', async(accounts) => {
             initialMemberlastNames,
             initialMemberTypes
         );
+        console.log(instance.address);
     });
 
     it('should return all members', async() => {
@@ -93,5 +94,22 @@ contract('DecentralizedNation', async(accounts) => {
        assert.equal(pts,100);
     });
 
+    it('should create authority schema for the member type', async() => {
+       let allowedToVoteInChange = [fromUtf8('PRESIDENT'), fromUtf8('FOUNDERS')];
+       let numberOfMembers = 50;
+       let percentage = 20;
+
+       await instance.createAuthoritySchemaForType(fromUtf8('FOUNDERS'), allowedToVoteInChange,numberOfMembers,percentage);
+        let memberEligibleToVoteInChanging,
+            minimalNumOfMembers,
+            percentageToReach;
+
+       [memberEligibleToVoteInChanging, minimalNumOfMembers,percentageToReach] = await instance.getAuthorityToChangeSelectedMemberType(fromUtf8('FOUNDERS'));
+        assert.equal(numberOfMembers,minimalNumOfMembers);
+        assert.equal(percentage, percentageToReach);
+        for(let i=0; i<memberEligibleToVoteInChanging.length; i++) {
+            assert.equal(toUtf8(memberEligibleToVoteInChanging[i]), toUtf8(allowedToVoteInChange[i]));
+        }
+    });
 
 });

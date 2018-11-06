@@ -20,7 +20,11 @@ contract DecentralizedNation {
     mapping(bytes32 => uint) public limitOfMembersPerType;
     mapping(bytes32 => address[]) public memberTypeToMembers;
 
+
     mapping(address => uint) votingPoints;
+
+    mapping(bytes32 => AuthoritySchema) memberTypeToAuthoritySchemaToChange;
+
 
     struct NationalVotingCampaign {
 
@@ -28,10 +32,10 @@ contract DecentralizedNation {
 
     struct PetitionCampaign {
         string question;
-        bytes32[] answers; //MVP version
+        bytes32[] answers;
+        uint [] scorePerAnswer;
 
     }
-
 
     struct Member {
         address memberAddress;
@@ -43,8 +47,9 @@ contract DecentralizedNation {
 
 
     struct AuthoritySchema {
-        bytes32[]memberTypesEligibleToVote;
+        bytes32[] memberTypesEligibleToVote;
         uint minimalNumberOfVoters;
+        uint minimalPercentToBeReached;
     }
 
 
@@ -127,6 +132,7 @@ contract DecentralizedNation {
         }
         delete members[members.length-1];
         memberId[targetMember] = 0;
+        votingPoints[targetMember] = 0;
         members.length--;
     }
 
@@ -145,7 +151,19 @@ contract DecentralizedNation {
         members[id] = m;
     }
 
-
+    function createAuthoritySchemaForType(
+        bytes32 memberType,
+        bytes32[] _memberTypesEligibleToVote,
+        uint _minimalNumberOfVoters,
+        uint _minimalPercentToBeReached
+    ) public {
+        require(checkIfMemberTypeExists(memberType));
+        memberTypeToAuthoritySchemaToChange[memberType] = AuthoritySchema({
+            memberTypesEligibleToVote: _memberTypesEligibleToVote,
+            minimalNumberOfVoters: _minimalNumberOfVoters,
+            minimalPercentToBeReached: _minimalPercentToBeReached
+        });
+    }
 
 
     function setLimitForMembersPerType(bytes32[] types, uint[] limits) public {
@@ -154,7 +172,6 @@ contract DecentralizedNation {
             limitOfMembersPerType[types[i]] = limits[i];
         }
     }
-
 
 
     function checkIfMemberTypeExists(bytes32 memberType) public view returns (bool) {
@@ -198,5 +215,10 @@ contract DecentralizedNation {
 
     function getMembersVotingPoints(address _memberAddress) public view returns (uint) {
         return votingPoints[_memberAddress];
+    }
+
+    function getAuthorityToChangeSelectedMemberType(bytes32 memberType) public view returns (bytes32[], uint,uint) {
+        AuthoritySchema memory schema = memberTypeToAuthoritySchemaToChange[memberType];
+        return(schema.memberTypesEligibleToVote, schema.minimalNumberOfVoters, schema.minimalPercentToBeReached);
     }
 }
