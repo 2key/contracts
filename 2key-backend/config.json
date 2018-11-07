@@ -634,7 +634,7 @@
         "type": "function"
       }
     ],
-    "address": "0x365912aa2ea20d27fe09a5ede053ddb5443bfa35"
+    "address": "0x15ef0848e25e936d00bb5b91cfcb2caa6818a787"
   },
   "TwoKeyConversionHandler": {
     "abi": [
@@ -892,7 +892,7 @@
             "name": ""
           }
         ],
-        "stateMutability": "view",
+        "stateMutability": "pure",
         "payable": false,
         "type": "function"
       },
@@ -1168,9 +1168,18 @@
         "stateMutability": "nonpayable",
         "payable": false,
         "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": false,
+        "name": "cancelAndRejectContract",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
       }
     ],
-    "address": "0x7c220373f61eb83b06d7c2e1883a4faa366ac6a7"
+    "address": "0xadd4dfafb8cebb8038100300e4be8413c85f35f4"
   },
   "TwoKeyCongress": {
     "abi": [
@@ -1219,6 +1228,10 @@
           {
             "type": "bytes32",
             "name": "proposalHash"
+          },
+          {
+            "type": "bytes",
+            "name": "transactionBytecode"
           }
         ],
         "stateMutability": "view",
@@ -1383,10 +1396,6 @@
       {
         "stateMutability": "payable",
         "inputs": [
-          {
-            "type": "uint256",
-            "name": "_minimumQuorumForProposals"
-          },
           {
             "type": "uint256",
             "name": "_minutesForDebate"
@@ -1946,6 +1955,25 @@
         "type": "function"
       },
       {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_member"
+          }
+        ],
+        "constant": true,
+        "name": "checkIsMember",
+        "outputs": [
+          {
+            "type": "bool",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
         "inputs": [],
         "constant": true,
         "name": "getMaxVotingPower",
@@ -1986,9 +2014,85 @@
         "stateMutability": "view",
         "payable": false,
         "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "bytes32",
+            "name": "_methodHash"
+          }
+        ],
+        "constant": true,
+        "name": "getMethodNameFromMethodHash",
+        "outputs": [
+          {
+            "type": "string",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "uint256",
+            "name": "proposalId"
+          }
+        ],
+        "constant": true,
+        "name": "getProposalData",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": ""
+          },
+          {
+            "type": "string",
+            "name": ""
+          },
+          {
+            "type": "uint256",
+            "name": ""
+          },
+          {
+            "type": "bool",
+            "name": ""
+          },
+          {
+            "type": "uint256",
+            "name": ""
+          },
+          {
+            "type": "int256",
+            "name": ""
+          },
+          {
+            "type": "bytes",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "getAllMemberAddresses",
+        "outputs": [
+          {
+            "type": "address[]",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
       }
     ],
-    "address": "0xa1f58528beb0de28d39aa14f0830f287528866f8"
+    "address": "0xa3806a0fb877d5b9a7cb4a732a77f150c03cf5b3"
   },
   "TwoKeyEconomy": {
     "abi": [
@@ -2090,6 +2194,20 @@
         "outputs": [
           {
             "type": "string",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "twoKeyAdmin",
+        "outputs": [
+          {
+            "type": "address",
             "name": ""
           }
         ],
@@ -2472,6 +2590,20 @@
         "type": "function"
       },
       {
+        "inputs": [],
+        "constant": true,
+        "name": "transfersFrozen",
+        "outputs": [
+          {
+            "type": "bool",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
         "inputs": [
           {
             "type": "address",
@@ -2530,28 +2662,6 @@
           {
             "indexed": true,
             "type": "address",
-            "name": "owner"
-          },
-          {
-            "indexed": true,
-            "type": "address",
-            "name": "spender"
-          },
-          {
-            "indexed": false,
-            "type": "uint256",
-            "name": "value"
-          }
-        ],
-        "type": "event",
-        "name": "Approval",
-        "anonymous": false
-      },
-      {
-        "inputs": [
-          {
-            "indexed": true,
-            "type": "address",
             "name": "from"
           },
           {
@@ -2567,6 +2677,28 @@
         ],
         "type": "event",
         "name": "Transfer",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "tokenOwner"
+          },
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "spender"
+          },
+          {
+            "indexed": false,
+            "type": "uint256",
+            "name": "tokens"
+          }
+        ],
+        "type": "event",
+        "name": "Approval",
         "anonymous": false
       },
       {
@@ -2605,48 +2737,24 @@
       },
       {
         "inputs": [],
-        "constant": true,
-        "name": "getTokenName",
-        "outputs": [
-          {
-            "type": "string",
-            "name": ""
-          }
-        ],
-        "stateMutability": "view",
+        "constant": false,
+        "name": "freezeTransfers",
+        "outputs": [],
+        "stateMutability": "nonpayable",
         "payable": false,
         "type": "function"
       },
       {
         "inputs": [],
-        "constant": true,
-        "name": "getTokenSymbol",
-        "outputs": [
-          {
-            "type": "string",
-            "name": ""
-          }
-        ],
-        "stateMutability": "view",
-        "payable": false,
-        "type": "function"
-      },
-      {
-        "inputs": [],
-        "constant": true,
-        "name": "getTokenDecimals",
-        "outputs": [
-          {
-            "type": "uint8",
-            "name": ""
-          }
-        ],
-        "stateMutability": "view",
+        "constant": false,
+        "name": "unfreezeTransfers",
+        "outputs": [],
+        "stateMutability": "nonpayable",
         "payable": false,
         "type": "function"
       }
     ],
-    "address": "0x269b8f9d874bca303b0b67eff0a4a7c3818c63f2"
+    "address": "0xbc30083fe9c0915172057d7075a6d6ecafc725e0"
   },
   "Migrations": {
     "abi": [
@@ -2713,7 +2821,7 @@
         "type": "function"
       }
     ],
-    "address": "0x33bbd5080a2775ddffeac38a7b1e19946572c474"
+    "address": "0x37f954cbd49f9a367ca25b57a77c0a9f6c49d2dc"
   },
   "TwoKeyAcquisitionCampaignERC20": {
     "abi": [
@@ -2811,33 +2919,6 @@
         "type": "function"
       },
       {
-        "inputs": [
-          {
-            "type": "address",
-            "name": "c"
-          },
-          {
-            "type": "bytes",
-            "name": "_method"
-          },
-          {
-            "type": "uint256",
-            "name": "_val"
-          }
-        ],
-        "constant": true,
-        "name": "call_return",
-        "outputs": [
-          {
-            "type": "uint256",
-            "name": "answer"
-          }
-        ],
-        "stateMutability": "view",
-        "payable": false,
-        "type": "function"
-      },
-      {
         "inputs": [],
         "constant": true,
         "name": "totalSupply",
@@ -2875,20 +2956,6 @@
           }
         ],
         "stateMutability": "nonpayable",
-        "payable": false,
-        "type": "function"
-      },
-      {
-        "inputs": [],
-        "constant": true,
-        "name": "rate",
-        "outputs": [
-          {
-            "type": "uint256",
-            "name": ""
-          }
-        ],
-        "stateMutability": "view",
         "payable": false,
         "type": "function"
       },
@@ -3272,28 +3339,6 @@
           {
             "indexed": true,
             "type": "address",
-            "name": "owner"
-          },
-          {
-            "indexed": true,
-            "type": "address",
-            "name": "spender"
-          },
-          {
-            "indexed": false,
-            "type": "uint256",
-            "name": "value"
-          }
-        ],
-        "type": "event",
-        "name": "Approval",
-        "anonymous": false
-      },
-      {
-        "inputs": [
-          {
-            "indexed": true,
-            "type": "address",
             "name": "from"
           },
           {
@@ -3309,6 +3354,28 @@
         ],
         "type": "event",
         "name": "Transfer",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "tokenOwner"
+          },
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "spender"
+          },
+          {
+            "indexed": false,
+            "type": "uint256",
+            "name": "tokens"
+          }
+        ],
+        "type": "event",
+        "name": "Approval",
         "anonymous": false
       },
       {
@@ -3349,20 +3416,6 @@
             "name": ""
           }
         ],
-        "stateMutability": "nonpayable",
-        "payable": false,
-        "type": "function"
-      },
-      {
-        "inputs": [
-          {
-            "type": "uint256",
-            "name": "_amount"
-          }
-        ],
-        "constant": false,
-        "name": "redeemTwoKeyToken",
-        "outputs": [],
         "stateMutability": "nonpayable",
         "payable": false,
         "type": "function"
@@ -3809,9 +3862,41 @@
         "stateMutability": "nonpayable",
         "payable": false,
         "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": false,
+        "name": "sealAndApprove",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": false,
+        "name": "cancel",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": true,
+        "name": "isWithdrawApproved",
+        "outputs": [
+          {
+            "type": "bool",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
       }
     ],
-    "address": "0xa2b319f6a985b00f8024d8f77a12ef0c3f879899"
+    "address": "0x45a8241cb85b3783a0556b5ebb80d8bfb9888a84"
   },
   "TwoKeyUpgradableExchange": {
     "abi": [
@@ -4371,7 +4456,197 @@
         "type": "function"
       }
     ],
-    "address": "0x160120807a04e9ad8a665d53de082ece1db9185b"
+    "address": "0x2c5ef6b1b63ebec227d1eab46c0748dbcad70f81"
+  },
+  "Call": {
+    "abi": [
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "c"
+          },
+          {
+            "type": "bytes",
+            "name": "_method"
+          }
+        ],
+        "constant": true,
+        "name": "params0",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": "answer"
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "c"
+          },
+          {
+            "type": "bytes",
+            "name": "_method"
+          },
+          {
+            "type": "uint256",
+            "name": "_val"
+          }
+        ],
+        "constant": true,
+        "name": "params1",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": "answer"
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "c"
+          },
+          {
+            "type": "bytes",
+            "name": "_method"
+          },
+          {
+            "type": "uint256",
+            "name": "_val1"
+          },
+          {
+            "type": "uint256",
+            "name": "_val2"
+          }
+        ],
+        "constant": true,
+        "name": "params2",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": "answer"
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "bytes",
+            "name": "sig"
+          },
+          {
+            "type": "uint256",
+            "name": "idx"
+          }
+        ],
+        "constant": true,
+        "name": "loadAddress",
+        "outputs": [
+          {
+            "type": "address",
+            "name": ""
+          }
+        ],
+        "stateMutability": "pure",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "bytes",
+            "name": "sig"
+          },
+          {
+            "type": "uint256",
+            "name": "idx"
+          }
+        ],
+        "constant": true,
+        "name": "loadUint8",
+        "outputs": [
+          {
+            "type": "uint8",
+            "name": ""
+          }
+        ],
+        "stateMutability": "pure",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "bytes32",
+            "name": "hash"
+          },
+          {
+            "type": "bytes",
+            "name": "sig"
+          },
+          {
+            "type": "uint256",
+            "name": "idx"
+          }
+        ],
+        "constant": true,
+        "name": "recoverHash",
+        "outputs": [
+          {
+            "type": "address",
+            "name": ""
+          }
+        ],
+        "stateMutability": "pure",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "bytes",
+            "name": "sig"
+          },
+          {
+            "type": "address",
+            "name": "old_key"
+          }
+        ],
+        "constant": false,
+        "name": "recoverSig",
+        "outputs": [
+          {
+            "type": "address[]",
+            "name": ""
+          },
+          {
+            "type": "address[]",
+            "name": ""
+          },
+          {
+            "type": "uint8[]",
+            "name": ""
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      }
+    ],
+    "address": "0xf18f09a6a4028fd97b83caa56c65493fe356247b"
   },
   "ERC20TokenMock": {
     "abi": [
@@ -4603,28 +4878,6 @@
           {
             "indexed": true,
             "type": "address",
-            "name": "owner"
-          },
-          {
-            "indexed": true,
-            "type": "address",
-            "name": "spender"
-          },
-          {
-            "indexed": false,
-            "type": "uint256",
-            "name": "value"
-          }
-        ],
-        "type": "event",
-        "name": "Approval",
-        "anonymous": false
-      },
-      {
-        "inputs": [
-          {
-            "indexed": true,
-            "type": "address",
             "name": "from"
           },
           {
@@ -4641,9 +4894,31 @@
         "type": "event",
         "name": "Transfer",
         "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "tokenOwner"
+          },
+          {
+            "indexed": true,
+            "type": "address",
+            "name": "spender"
+          },
+          {
+            "indexed": false,
+            "type": "uint256",
+            "name": "tokens"
+          }
+        ],
+        "type": "event",
+        "name": "Approval",
+        "anonymous": false
       }
     ],
-    "address": "0x44bb9007efaaa00ccae6599ec68960e4e3a690bb"
+    "address": "0x3434e6515078edc3f8de2934f00c39b116518c0f"
   },
   "TwoKeyReg": {
     "abi": [
@@ -4895,6 +5170,25 @@
         "inputs": [],
         "constant": true,
         "name": "owner",
+        "outputs": [
+          {
+            "type": "address",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": ""
+          }
+        ],
+        "constant": true,
+        "name": "plasma2ethereum",
         "outputs": [
           {
             "type": "address",
@@ -5268,12 +5562,47 @@
           {
             "type": "address",
             "name": "_sender"
+          },
+          {
+            "type": "string",
+            "name": "_fullName"
+          },
+          {
+            "type": "string",
+            "name": "_email"
           }
         ],
         "constant": false,
         "name": "addName",
         "outputs": [],
         "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_user"
+          }
+        ],
+        "constant": true,
+        "name": "getUserData",
+        "outputs": [
+          {
+            "type": "bytes32",
+            "name": ""
+          },
+          {
+            "type": "bytes32",
+            "name": ""
+          },
+          {
+            "type": "bytes32",
+            "name": ""
+          }
+        ],
+        "stateMutability": "view",
         "payable": false,
         "type": "function"
       },
@@ -5380,12 +5709,64 @@
             "name": "length"
           }
         ],
+        "stateMutability": "pure",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "bytes",
+            "name": "sig"
+          }
+        ],
+        "constant": false,
+        "name": "addPlasma2Ethereum",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_userAddress"
+          }
+        ],
+        "constant": true,
+        "name": "checkIfUserExists",
+        "outputs": [
+          {
+            "type": "bool",
+            "name": ""
+          }
+        ],
         "stateMutability": "view",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "type": "string",
+            "name": "source"
+          }
+        ],
+        "constant": false,
+        "name": "stringToBytes32",
+        "outputs": [
+          {
+            "type": "bytes32",
+            "name": "result"
+          }
+        ],
+        "stateMutability": "nonpayable",
         "payable": false,
         "type": "function"
       }
     ],
-    "address": "0xabbea75724f8c89b252a96305a397ef4ed6ce19b"
+    "address": "0x388f11549cd63e19de7e3d87cf1d43dc54ce2e6e"
   },
   "TwoKeyAdmin": {
     "abi": [
@@ -5669,6 +6050,14 @@
           {
             "type": "address",
             "name": "_addr"
+          },
+          {
+            "type": "string",
+            "name": "fullName"
+          },
+          {
+            "type": "string",
+            "name": "email"
           }
         ],
         "constant": false,
@@ -5741,6 +6130,24 @@
         ],
         "constant": false,
         "name": "setSingletones",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": false,
+        "name": "freezeTransfersInEconomy",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "payable": false,
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "constant": false,
+        "name": "unfreezeTransfersInEconomy",
         "outputs": [],
         "stateMutability": "nonpayable",
         "payable": false,
@@ -5835,6 +6242,6 @@
         "type": "function"
       }
     ],
-    "address": "0xb72061b3bdc1685f8589e42c9fe1eaa54434377d"
+    "address": "0xb1332bd09f37d285110d1d3a22c53d110c9682f6"
   }
 }
