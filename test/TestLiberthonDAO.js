@@ -1,5 +1,6 @@
 const DecentralizedNation = artifacts.require("DecentralizedNation");
 const TwoKeyVoteToken = artifacts.require("TwoKeyVoteToken");
+const TwoKeyWeightedVoteContract = artifacts.require("TwoKeyWeightedVoteContract");
 
 const utf8 = require('utf8');
 
@@ -49,8 +50,11 @@ contract('DecentralizedNation', async(accounts,deployer) => {
     let initialMemberlastNames = [fromUtf8("Blabla"), fromUtf8("Blabla1")];
     let ipfsHash = fromUtf8("IFSAFNJSDNJF");
     let initialMemberTypes = [fromUtf8("PRESIDENT"),fromUtf8("MINISTER")];
+
     let decentralizedNationInstance;
     let voteToken;
+    let weightedVoteContract;
+
     it('should deploy contract', async() => {
         decentralizedNationInstance = await DecentralizedNation.new(
             'Liberland',
@@ -122,22 +126,31 @@ contract('DecentralizedNation', async(accounts,deployer) => {
         assert.equal(balanceOfMembers,100);
     });
 
+
     it('should start voting for national campaign', async() => {
         let description = "Member Nikola to change his role to president";
         let memberToChangeRole = accounts[1];
         let newRole = initialMemberTypes[0];
         let lengthInDays = 10;
+
+        weightedVoteContract = await TwoKeyWeightedVoteContract.new(description, decentralizedNationInstance.address);
         await decentralizedNationInstance.startVotingForChanging(
             description,
             memberToChangeRole,
             newRole,
-            lengthInDays
+            lengthInDays,
+            weightedVoteContract.address
            );
 
-        // let nvcAddress = await decentralizedNationInstance.nationalVotingCampaigns(0);
-        // console.log(nvcAddress);
-        // let nvc = await decentralizedNationInstance.votingContractAddressToNationalVotingCampaign(nvcAddress);
+        let nvcAddress = await decentralizedNationInstance.nationalVotingCampaigns(0);
+        assert.equal(nvcAddress,weightedVoteContract.address);
+
+        let nvc = await decentralizedNationInstance.votingContractAddressToNationalVotingCampaign(nvcAddress);
         // console.log(nvc);
+    });
+
+    it('should be able to fetch and execute results', async() => {
+        let result = await decentralizedNationInstance.getResultsForVoting(0);
     });
 
 

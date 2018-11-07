@@ -1,5 +1,6 @@
 pragma solidity ^0.4.24;
 
+import "../interfaces/ITwoKeyWeightedVoteContract.sol";
 
 contract DecentralizedNation {
 
@@ -231,7 +232,8 @@ contract DecentralizedNation {
         string description,
         address _memberToChangeRole,
         bytes32 _newRole,
-        uint _votingCampaignLengthInDays
+        uint _votingCampaignLengthInDays,
+        address twoKeyWeightedVoteContract
     ) public {
         require(checkIfMemberTypeExists(_newRole));
         NationalVotingCampaign memory nvc = NationalVotingCampaign({
@@ -244,26 +246,33 @@ contract DecentralizedNation {
             votingResult: 0,
             votingCampaignLengthInDays: block.timestamp + _votingCampaignLengthInDays * (1 days)
         });
-//        address voteToken = new TwoKeyVoteToken(address(this));
-//        address twoKeyWeightedVoteContract = new TwoKeyWeightedVoteContract();
-//        votingContractAddressToNationalVotingCampaign[twoKeyWeightedVoteContract] = nvc;
-//        nationalVotingCampaigns.push(twoKeyWeightedVoteContract);
-//        numberOfVotingCamapignsAndPetitions++;
+
+        votingContractAddressToNationalVotingCampaign[twoKeyWeightedVoteContract] = nvc;
+        nationalVotingCampaigns.push(twoKeyWeightedVoteContract);
+        numberOfVotingCamapignsAndPetitions++;
     }
-    //TODO: initialize somehow voting contracts
-    //TODO: executeVoting results
-    //TODO: make connection between contracts
-    /// TODO: Gas avoid / transaction Bytecode
 
-//    // Refil voting points
-//    function checkAndUpdateMyVotingPoints() public returns (uint256) {
-//        if(numberOfVotingPetitionDuringLastRefill[msg.sender] + 10 <= numberOfVotingCamapignsAndPetitions) {
-//            votingPoints[msg.sender] = 100;
-//            return 100;
-//        } else {
-//            return votingPoints[msg.sender];
-//        }
-//    }
 
+    function getResultsForVoting(uint nvc_id) public view returns (string) {
+        address nationalVotingCampaignContractAddress = nationalVotingCampaigns[nvc_id];
+        NationalVotingCampaign memory nvc = votingContractAddressToNationalVotingCampaign[nationalVotingCampaignContractAddress];
+
+        string memory description = ITwoKeyWeightedVoteContract(nationalVotingCampaignContractAddress).getDescription();
+        return description;
+    }
+
+    function executeVoting(uint nvc_id, bytes signature) public {
+        address nationalVotingCampaignContractAddress = nationalVotingCampaigns[nvc_id];
+        NationalVotingCampaign memory nvc = votingContractAddressToNationalVotingCampaign[nationalVotingCampaignContractAddress];
+
+        require(block.timestamp > nvc.votingCampaignLengthInDays);
+
+        AuthoritySchema memory authoritySchema = memberTypeToAuthoritySchemaToChange[nvc.newRole];
+        address [] memory allParticipants = ITwoKeyWeightedVoteContract(nationalVotingCampaignContractAddress).transferSig(signature);
+
+        //TODO: Validate all Participants roles and exclude ones not eligible to vote
+        //TODO: If any participant is not even a member of DAO exclude his vote
+        //TODO: At the end calculate voting points and sum them
+    }
 
 }
