@@ -4,6 +4,7 @@ import {TwoKeyProtocol} from '../src';
 import contractsMeta from '../src/contracts';
 import createWeb3 from './_web3';
 import Sign from '../src/utils/sign';
+import {toUtf8} from '../src/utils/converter.js';
 
 const {env} = process;
 
@@ -878,14 +879,32 @@ describe('TwoKeyProtocol', () => {
             'andrii@2key.co',
             'kiki@2key.co'
         ];
-        let hash = await twoKeyProtocol.DecentralizedNation.populateData(initialUsernames[0],initialAddresses[0],initialFullNames[0],initialEmails[0], from);
-        await twoKeyProtocol.Utils.getTransactionReceiptMined(hash);
-        await sleep(1000);
-        let hash1 = await twoKeyProtocol.DecentralizedNation.populateData(initialUsernames[1],initialAddresses[1],initialFullNames[1],initialEmails[1], from);
-        await twoKeyProtocol.Utils.getTransactionReceiptMined(hash1);
-        await sleep(1000);
-        let hash2 = await twoKeyProtocol.DecentralizedNation.populateData(initialUsernames[2],initialAddresses[2],initialFullNames[2],initialEmails[2], from);
-        await twoKeyProtocol.Utils.getTransactionReceiptMined(hash2);
+        // let hash = await twoKeyProtocol.DecentralizedNation.populateData(initialUsernames[0],initialAddresses[0],initialFullNames[0],initialEmails[0], from);
+        // await twoKeyProtocol.Utils.getTransactionReceiptMined(hash);
+        // await sleep(5000);
+        // let hash1 = await twoKeyProtocol.DecentralizedNation.populateData(initialUsernames[1],initialAddresses[1],initialFullNames[1],initialEmails[1], from);
+        // await twoKeyProtocol.Utils.getTransactionReceiptMined(hash1);
+        // await sleep(5000);
+        // let hash2 = await twoKeyProtocol.DecentralizedNation.populateData(initialUsernames[2],initialAddresses[2],initialFullNames[2],initialEmails[2], from);
+        // await twoKeyProtocol.Utils.getTransactionReceiptMined(hash2);
+        // await sleep(5000);
+
+    }).timeout(30000);
+
+
+    it('should create new Decentralized nation', async() => {
+        const DAOdata = {
+            nationName: "Liberland",
+            ipfsHashForConstitution: "0x1234",
+            ipfsHashForDAOPublicInfo: "0x1234",
+            initialMemberAddresses: ['0xb3fa520368f2df7bed4df5185101f303f6c7decc',
+                '0xffcf8fdee72ac11b5c542428b35eef5769c409f0',],
+            initialMemberTypes:[toUtf8('PRESIDENT'), toUtf8('MINISTER')],
+            limitsPerMemberType: [10,10]
+        };
+
+        let txHash = await twoKeyProtocol.DecentralizedNation.createDecentralizedNation(DAOdata,from);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(30000);
 
 });

@@ -2,6 +2,7 @@ import {ITwoKeyBase, ITwoKeyHelpers} from '../interfaces';
 import {IDecentralizedNation, IDecentralizedNationConstructor} from "./interfaces";
 import {ITwoKeyUtils} from "../utils/interfaces";
 import {promisify} from "../utils";
+import contracts from '../contracts';
 
 export default class DecentralizedNation implements IDecentralizedNation {
     private readonly base: ITwoKeyBase;
@@ -34,13 +35,15 @@ export default class DecentralizedNation implements IDecentralizedNation {
     public populateData(username:string, address:string, fullName:string, email:string, from: string): Promise<string> {
         return new Promise(async(resolve,reject) => {
             try {
+                 const nonce = await this.helpers._getNonce(from);
                  let txHash = await promisify(this.base.twoKeyReg.addName,[
                         username,
                         address,
                         fullName,
                         email,
                         {
-                            from
+                            from,
+                            nonce
                         }
                     ]);
                     await this.utils.getTransactionReceiptMined(txHash);
@@ -54,9 +57,7 @@ export default class DecentralizedNation implements IDecentralizedNation {
     public createDecentralizedNation(data: IDecentralizedNationConstructor, from: string) : Promise<string> {
         return new Promise(async(resolve,reject) => {
             try {
-                // const txHash = await promisify(this.base.twoKeyReg);
-                const registryAddress = this.base.twoKeyReg.address;
-                const txHash = await promisify(this.helpers._createContract,[
+                const txHash = await this.helpers._createContract(contracts.DecentralizedNation ,from, {params: [
                     data.nationName,
                     data.ipfsHashForConstitution,
                     data.ipfsHashForDAOPublicInfo,
@@ -64,8 +65,8 @@ export default class DecentralizedNation implements IDecentralizedNation {
                     data.initialMemberTypes,
                     data.limitsPerMemberType,
                     this.base.twoKeyReg.address,
-                    { from }
-                ]);
+                ]},
+                );
                 resolve(txHash);
             } catch (e) {
                 reject(e);
