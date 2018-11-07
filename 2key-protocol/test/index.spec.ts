@@ -812,15 +812,6 @@ describe('TwoKeyProtocol', () => {
     initialMemberTypes: string[],
     limitsPerMemberType: number[],
      */
-    it('should deploy new DAO', async() => {
-        const nationName = "Liberland";
-        const ipfsHashForConstitution =  "0x1234";
-        const ipfsHashForDAOPublicInfo = "0x1234";
-        const initialMemberAddresses = []
-        // const dao = {
-        //     nationName:
-        // }
-    });
 
 
     it('should check if address is maintainer', async() => {
