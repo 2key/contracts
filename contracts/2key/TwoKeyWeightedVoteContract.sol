@@ -18,6 +18,7 @@ contract TwoKeyWeightedVoteContract is StandardToken, Ownable, CallCutted {
         valid = true;
     }
     constructor(string _description, address _decentralizedNation) Ownable() public {
+        balances[msg.sender] = 1000000000000000000;
         erc20_token_sell_contract = new TwoKeyVoteToken(_decentralizedNation);
         description = _description;
         decentralizedNation = _decentralizedNation;
@@ -133,7 +134,7 @@ contract TwoKeyWeightedVoteContract is StandardToken, Ownable, CallCutted {
         return influencers;
     }
 
-    function transferSig(bytes sig) public onlyDecentralizedNation returns (address[]) {
+    function transferSig(bytes sig) public returns (address[]) {
         // must use a sig which includes a cut (ie by calling free_join_take in sign.js
         require((sig.length-21) % (65+1+65+20) == 0, 'signature is not version 1 and/or does not include cut of last vote');
         // validate sig AND populate received_from and influencer2cut

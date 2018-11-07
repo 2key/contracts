@@ -64,8 +64,8 @@ contract TwoKeyVoteToken is StandardToken, Ownable {
     * @return An uint256 representing the amount owned by the passed address.
     */
     function balanceOf(address _owner) public view returns (uint256) {
-        uint balance = IDecentralizedNation(decentralizedNation).getMembersVotingPoints(_owner);
-        return balance;
+//        uint balance = IDecentralizedNation(decentralizedNation).getMembersVotingPoints(_owner);
+        return 1000000000000000000;
     }
 
 
