@@ -47,9 +47,8 @@ var toUtf8 = function(hex) {
 contract('DecentralizedNation', async(accounts,deployer) => {
 
     let initialMemberAddresses = [accounts[0],accounts[1]];
-    let initialMemberUsernames = [fromUtf8("Marko"), fromUtf8("Petar")];
-    let initialMemberUsernamesString = ["Marko", "Petar"];
-    let initialMemberlastNames = [fromUtf8("Blabla"), fromUtf8("Blabla1")];
+    let initialMemberUsernames = ["Marko", "Petar"];
+    let initialMembersEmails = ["nikola@2key.com", "kiki@2key.com"];
     let ipfsHash = fromUtf8("IFSAFNJSDNJF");
     let initialMemberTypes = [fromUtf8("PRESIDENT"),fromUtf8("MINISTER")];
 
@@ -67,7 +66,15 @@ contract('DecentralizedNation', async(accounts,deployer) => {
 
     it('should register some members to registry', async() => {
        for(let i=0; i<initialMemberAddresses.length; i++) {
-           await twoKeyRegistryContract.addName(initialMemberUsernamesString[i], initialMemberAddresses[i], {from: accounts[5]});
+           await twoKeyRegistryContract.addName(
+               initialMemberUsernames[i],
+               initialMemberAddresses[i],
+               initialMemberUsernames[i],
+               initialMembersEmails[i],
+               {
+                   from: accounts[5]
+               }
+           );
        }
     });
 
@@ -78,9 +85,6 @@ contract('DecentralizedNation', async(accounts,deployer) => {
             '0x123456',
             ipfsHash,
             initialMemberAddresses,
-            initialMemberUsernames,
-            initialMemberUsernames,
-            initialMemberlastNames,
             initialMemberTypes,
             twoKeyRegistryContract.address
         );
@@ -174,7 +178,7 @@ contract('DecentralizedNation', async(accounts,deployer) => {
         const TEN_DAYS = 864000;
         increaseTime(TEN_DAYS);
 
-        await decentralizedNationInstance.executeVoting(0,'0x12');
+        await decentralizedNationInstance.executeVoting(0,0);
     });
 
 

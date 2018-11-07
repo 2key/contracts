@@ -29,6 +29,14 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
     // the way to know if an address is a plasma address is to look it up in this mapping
     mapping(address => address) public plasma2ethereum;
 
+    struct UserData {
+        string username;
+        string fullName;
+        string email;
+    }
+
+    mapping(address => UserData) addressToUserData;
+
     /*
         Those mappings are for the fetching data about in what contracts user participates in which role
     */
@@ -206,9 +214,22 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
     /// @notice Function where only admin can add a name - address pair
     /// @param _name is name of user
     /// @param _sender is address of user
-    function addName(string _name, address _sender) onlyTwoKeyMaintainer public {
+    function addName(string _name, address _sender, string _fullName, string _email) onlyTwoKeyMaintainer public {
         require(utfStringLength(_name) >= 3 && utfStringLength(_name) <=25);
+        addressToUserData[_sender] = UserData({
+            username: _name,
+            fullName: _fullName,
+            email: _email
+            });
         addNameInternal(_name, _sender);
+    }
+
+    function getUserData(address _user) public view returns (bytes32,bytes32,bytes32) {
+        UserData memory data = addressToUserData[_user];
+        bytes32 username = stringToBytes32(data.username);
+        bytes32 fullName = stringToBytes32(data.fullName);
+        bytes32 email = stringToBytes32(data.email);
+        return (username, fullName, email);
     }
 
     /// @notice Function where user can add name to his address
@@ -320,4 +341,17 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
             return true;
         }
     }
+
+    function stringToBytes32(string memory source) returns (bytes32 result) {
+        bytes memory tempEmptyStringTest = bytes(source);
+        if (tempEmptyStringTest.length == 0) {
+            return 0x0;
+        }
+
+        assembly {
+            result := mload(add(source, 32))
+        }
+    }
+
+
 }

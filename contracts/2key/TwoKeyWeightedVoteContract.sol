@@ -23,6 +23,11 @@ contract TwoKeyWeightedVoteContract is StandardToken, Ownable, CallCutted {
         decentralizedNation = _decentralizedNation;
     }
 
+    modifier onlyDecentralizedNation {
+        require(msg.sender == address(decentralizedNation));
+        _;
+    }
+
     uint public quota = 100000000000;
     uint public cost = 1;
     mapping(address => uint)  public voted_weight;
@@ -49,7 +54,7 @@ contract TwoKeyWeightedVoteContract is StandardToken, Ownable, CallCutted {
     }
 
 
-    function transferSig1(bytes sig) public returns (address[]) {
+    function transferSig1(bytes sig) public returns (address[])  {
         // move ARCs and set public_link keys and weights/cuts based on signature information
         // returns the last address in the sig
 
@@ -128,7 +133,7 @@ contract TwoKeyWeightedVoteContract is StandardToken, Ownable, CallCutted {
         return influencers;
     }
 
-    function transferSig(bytes sig) public returns (address[]) {
+    function transferSig(bytes sig) public onlyDecentralizedNation returns (address[]) {
         // must use a sig which includes a cut (ie by calling free_join_take in sign.js
         require((sig.length-21) % (65+1+65+20) == 0, 'signature is not version 1 and/or does not include cut of last vote');
         // validate sig AND populate received_from and influencer2cut
@@ -213,6 +218,7 @@ contract TwoKeyWeightedVoteContract is StandardToken, Ownable, CallCutted {
         emit Transfer(msg.sender, _to, _value);
         return true;
     }
+
 
     /**
      * @dev Transfer tokens from one address to another

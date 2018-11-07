@@ -177,8 +177,8 @@ contract TwoKeyAdmin is Destructible, AdminContract {
     /// @notice Function to add/update name - address pair from twoKeyAdmin
 	/// @param _name is name of user
 	/// @param _addr is address of user
-    function addNameToReg(string _name, address _addr) public {
-    	twoKeyReg.addName(_name, _addr);
+    function addNameToReg(string _name, address _addr, string fullName, string email) public {
+    	twoKeyReg.addName(_name, _addr, fullName, email);
     }
     
     /// @notice Function to update twoKeyUpgradableExchange contract address

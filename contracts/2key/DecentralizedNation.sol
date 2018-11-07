@@ -16,14 +16,14 @@ contract DecentralizedNation {
 
     bool initialized = false;
 
-    mapping(address => uint) public memberId;  //TODO pivot around 2key username - perhaps add the twokeyreg contract as an internal field
+    mapping(address => uint) public memberId;
     mapping(bytes32 => uint) public limitOfMembersPerType;
-    mapping(bytes32 => address[]) public memberTypeToMembers; //TODO add mapping from member type to number of members for easy lookup
+    mapping(bytes32 => address[]) public memberTypeToMembers;
 
     uint numberOfVotingCamapignsAndPetitions;
 
-    mapping(address => uint) votingPoints;  //TODO: better to pivot aroud the 2key username for all members (instead of member id)
-    mapping(address => uint) numberOfVotingPetitionDuringLastRefill; //TODO this field is unclear what does it do?
+    mapping(address => uint) votingPoints;
+    mapping(address => uint) numberOfVotingPetitionDuringLastRefill;
 
     mapping(bytes32 => AuthoritySchema) memberTypeToAuthoritySchemaToChange;
 
@@ -36,9 +36,11 @@ contract DecentralizedNation {
     //TODO need to add the national petition campaigns, they should have a standard authority schema, and get auto-upgraded to a congressional voting campaign if the autority
     //schema is satisfied
 
-    //TODO add a law book, and rejected votes/petitions history, any voting that is approved, goes into the law book (for now, until we have full auto-execution)
     //TODO any voting that didn't meet the required authority schema, goes into the history/archive
     //TODO any petition which meets the national interest criteria will graduate to a congress veto campaign, which can reject if there is vast majority against
+
+    address[] rejectedVotings;
+    address[] rejectedPetitions;
 
     address twoKeyRegistryContract;
 
@@ -57,8 +59,8 @@ contract DecentralizedNation {
     struct Member {
         address memberAddress;
         bytes32 username;
-        bytes32 firstName;
-        bytes32 lastName;
+        bytes32 fullName;
+        bytes32 email;
         bytes32 memberType;
     }
 
@@ -81,29 +83,20 @@ contract DecentralizedNation {
         bytes32 _ipfsHashForConstitution,
         bytes32 _ipfsHashForDAOPublicInfo,
         address[] initialMembersAddresses,
-        bytes32[] initialUsernames,
-        bytes32[] initialFirstNames,
-        bytes32[] initialLastNames,
-        bytes32[] initialMemberTypes,  //TODO add these initial members into a dedicated founders array
+        bytes32[] initialMemberTypes,
         address _twoKeyRegistry
     ) public  {
 
         memberTypes.push(bytes32("FOUNDERS"));
-        require(initialMembersAddresses.length == initialUsernames.length &&
-        initialUsernames.length == initialFirstNames.length &&
-        initialFirstNames.length == initialLastNames.length);
         twoKeyRegistryContract = _twoKeyRegistry;
 
         uint length = initialMembersAddresses.length;
 
-        addMember(0,'','','',bytes32(0));
+        addMember(0,bytes32(0));
 
         for(uint i=0; i<length; i++) {
             addMember(
                 initialMembersAddresses[i],
-                initialUsernames[i],
-                initialFirstNames[i],
-                initialLastNames[i],
                 memberTypes[0]);
         }
 
@@ -120,9 +113,6 @@ contract DecentralizedNation {
 
     function addMember(
         address _memberAddress,
-        bytes32 memberUsername,
-        bytes32 memberFirstName,
-        bytes32 memberLastName,
         bytes32 _memberType)
     internal {
         if(members.length > 0) {
@@ -132,12 +122,17 @@ contract DecentralizedNation {
             require(limitOfMembersPerType[_memberType] < memberTypeToMembers[_memberType].length);
         }
 
+        bytes32 memberUsername;
+        bytes32 memberFullName;
+        bytes32 memberEmail;
+
+        (memberUsername,memberFullName,memberEmail) = ITwoKeyRegistry(twoKeyRegistryContract).getUserData(_memberAddress);
         require(checkIfMemberTypeExists(_memberType) || _memberType == bytes32(0));
         Member memory m = Member({
             memberAddress: _memberAddress,
             username: memberUsername,
-            firstName: memberFirstName,
-            lastName: memberLastName,
+            fullName: memberFullName,
+            email: memberEmail,
             memberType: _memberType
         });
 
@@ -213,20 +208,20 @@ contract DecentralizedNation {
         uint length = members.length - 1;
         address[] memory allMemberAddresses = new address[](length);
         bytes32[] memory allMemberUsernames = new bytes32[](length);
-        bytes32[] memory allMemberFirstNames = new bytes32[](length);
-        bytes32[] memory allMemberLastNames = new bytes32[](length);
+        bytes32[] memory allMemberFullNames = new bytes32[](length);
+        bytes32[] memory allMemberEmails = new bytes32[](length);
         bytes32[] memory allMemberTypes = new bytes32[](length);
 
         for(uint i=1; i<length + 1; i++) {
             Member memory m = members[i];
             allMemberAddresses[i-1] = m.memberAddress;
             allMemberUsernames[i-1] = m.username;
-            allMemberFirstNames[i-1] = m.firstName;
-            allMemberLastNames[i-1] = m.lastName;
+            allMemberFullNames[i-1] = m.fullName;
+            allMemberEmails[i-1] = m.email;
             allMemberTypes[i-1] = m.memberType;
         }
 
-        return (allMemberAddresses, allMemberUsernames, allMemberFirstNames, allMemberLastNames, allMemberTypes);
+        return (allMemberAddresses, allMemberUsernames, allMemberFullNames, allMemberEmails, allMemberTypes);
     }
 
 
@@ -289,7 +284,7 @@ contract DecentralizedNation {
         require(block.timestamp > nvc.votingCampaignLengthInDays);
 
         AuthoritySchema memory authoritySchema = memberTypeToAuthoritySchemaToChange[nvc.newRole];
-//        address [] memory allParticipants = ITwoKeyWeightedVoteContract(nationalVotingCampaignContractAddress).transferSig(signature);
+        address [] memory allParticipants = ITwoKeyWeightedVoteContract(nationalVotingCampaignContractAddress).transferSig(signature);
 
         //TODO: Validate all Participants roles and exclude ones not eligible to vote
         //TODO: If any participant is not even a member of DAO exclude his vote
