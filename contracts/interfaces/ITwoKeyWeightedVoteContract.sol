@@ -5,4 +5,6 @@ contract ITwoKeyWeightedVoteContract {
     function transferSig(bytes sig) public returns (address[]);
     function setValid() public;
     function getDynamicData() public view returns (uint,uint,uint,uint,uint,uint);
+    function getHowMuchAddressPutPower(address add) public view returns (uint);
+    function getVoteAndChoicePerAddress(address voter) public view returns (bool, uint);
 }
