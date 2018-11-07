@@ -13,7 +13,4 @@ export default class DecentralizedNation implements IDecentralizedNation {
         this.utils = utils;
     }
 
-    public
-
-
 }

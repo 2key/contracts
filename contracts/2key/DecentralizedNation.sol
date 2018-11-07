@@ -90,6 +90,7 @@ contract DecentralizedNation {
         bytes32 _ipfsHashForDAOPublicInfo,
         address[] initialMembersAddresses,
         bytes32[] initialMemberTypes,
+        uint[] limitPerType,
         address _twoKeyRegistry
     ) public  {
 
@@ -106,8 +107,9 @@ contract DecentralizedNation {
                 initialMembersAddresses[i],
                 memberTypes[0]);
         }
-
+        require(limitPerType.length == initialMemberTypes.length);
         for(uint j=0; j<initialMemberTypes.length; j++) {
+            limitOfMembersPerType[initialMemberTypes[j]] = limitPerType[j];
             memberTypes.push(initialMemberTypes[j]);
         }
 
@@ -215,15 +217,6 @@ contract DecentralizedNation {
             minimalPercentToBeReached: _minimalPercentToBeReached
         });
     }
-
-
-    function setLimitForMembersPerType(bytes32[] types, uint[] limits) public {
-        require(types.length == limits.length);
-        for(uint i=0; i<types.length; i++) {
-            limitOfMembersPerType[types[i]] = limits[i];
-        }
-    }
-
 
     function checkIfMemberTypeExists(bytes32 memberType) public view returns (bool) {
         for(uint i=0; i<memberTypes.length; i++) {

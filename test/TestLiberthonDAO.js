@@ -61,7 +61,7 @@ contract('DecentralizedNation', async(accounts,deployer) => {
             accounts[7],
             accounts[8],
             accounts[9]];
-
+    let limits = [10,10];
     let manyMembersUsernames = ["Nikola","Andrii","SAndrii","Udi","Kiki", "Yoram", "Mark"];
     let manyMemberEmails = ["nikola@2key.com",
                             "andrii@2key.com",
@@ -117,6 +117,7 @@ contract('DecentralizedNation', async(accounts,deployer) => {
             ipfsHash,
             initialMemberAddresses,
             initialMemberTypes,
+            limits,
             twoKeyRegistryContract.address
         );
     });
@@ -140,13 +141,13 @@ contract('DecentralizedNation', async(accounts,deployer) => {
     });
 
 
-    it('should set limit for number of members per type', async() => {
-        initialMemberTypes.push(fromUtf8('FOUNDERS'));
-        await decentralizedNationInstance.setLimitForMembersPerType(initialMemberTypes,[20,30,50]);
-
-        let limit = await decentralizedNationInstance.getLimitForType(fromUtf8('FOUNDERS'));
-        assert.equal(limit, 50);
-    });
+    // it('should set limit for number of members per type', async() => {
+    //     initialMemberTypes.push(fromUtf8('FOUNDERS'));
+    //     await decentralizedNationInstance.setLimitForMembersPerType(initialMemberTypes,[20,30,50]);
+    //
+    //     let limit = await decentralizedNationInstance.getLimitForType(fromUtf8('FOUNDERS'));
+    //     assert.equal(limit, 50);
+    // });
 
 
     it('should return member\'s voting points', async() => {
