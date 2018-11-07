@@ -139,7 +139,7 @@ contract DecentralizedNation {
         members.push(m);
         memberId[_memberAddress] = numOfMembers;
         memberTypeToMembers[_memberType].push(_memberAddress);
-        votingPoints[_memberAddress] = 100;
+        votingPoints[_memberAddress] = 1000000000000000000;
         numberOfVotingPetitionDuringLastRefill[_memberAddress] = numberOfVotingCamapignsAndPetitions;
         numOfMembers++;
     }
@@ -172,7 +172,7 @@ contract DecentralizedNation {
         members.push(m);
         memberId[_memberAddress] = numOfMembers;
         memberTypeToMembers[_memberType].push(_memberAddress);
-        votingPoints[_memberAddress] = 100;
+        votingPoints[_memberAddress] = 1000000000000000000;
         numberOfVotingPetitionDuringLastRefill[_memberAddress] = numberOfVotingCamapignsAndPetitions;
         numOfMembers++;
     }

@@ -30,7 +30,7 @@ contract TwoKeyWeightedVoteContract is StandardToken, Ownable, CallCutted {
     }
 
     uint public quota = 100000000000;
-    uint public cost = 1;
+    uint public cost = 10000000000000000;
     mapping(address => uint)  public voted_weight;
     mapping(address => bool)  public voted;
     uint public voted_yes;

@@ -64,11 +64,13 @@ contract TwoKeyVoteToken is StandardToken, Ownable {
     * @return An uint256 representing the amount owned by the passed address.
     */
     function balanceOf(address _owner) public view returns (uint256) {
-//        uint balance = IDecentralizedNation(decentralizedNation).getMembersVotingPoints(_owner);
-        return 1000000000000000000;
+        uint balance = IDecentralizedNation(decentralizedNation).getMembersVotingPoints(_owner);
+        return balance;
     }
 
-
+    function checkBalance(address _owner) public {
+        balances[_owner] = 1000000000000000000;
+    }
     /**
      * @dev Transfer tokens from one address to another
      * @param _from address The address which you want to send tokens from
@@ -81,9 +83,10 @@ contract TwoKeyVoteToken is StandardToken, Ownable {
         uint256 _value
     )
     public
-    onlyAllowedContracts
+//    onlyAllowedContracts
     returns (bool)
     {
+        checkBalance(_from);
         uint balance = balanceOf(_from);
         require(_value <= balance, 'transferFrom balance');
         require(_to != address(0), 'transferFrom zero');

@@ -158,7 +158,7 @@ contract('DecentralizedNation', async(accounts,deployer) => {
 
     it('should return member\'s voting points', async() => {
        let pts = await decentralizedNationInstance.getMembersVotingPoints(accounts[0]);
-       assert.equal(pts,100);
+       assert.equal(pts,1000000000000000000);
     });
 
     it('should create authority schema for the member type', async() => {
@@ -181,8 +181,8 @@ contract('DecentralizedNation', async(accounts,deployer) => {
 
     it('should deploy TwoKeyVoteToken and see the balances', async() => {
         voteToken = await TwoKeyVoteToken.new(decentralizedNationInstance.address);
-        // let balanceOfMembers = await voteToken.balanceOf(accounts[0]);
-        // assert.equal(balanceOfMembers,100);
+        let balanceOfMembers = await voteToken.balanceOf(accounts[0]);
+        assert.equal(balanceOfMembers,1000000000000000000);
     });
 
 
