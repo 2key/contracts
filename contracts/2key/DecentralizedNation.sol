@@ -15,20 +15,29 @@ contract DecentralizedNation {
 
     bool initialized = false;
 
-    mapping(address => uint) public memberId;
+    mapping(address => uint) public memberId;  //TODO pivot around 2key username - perhaps add the twokeyreg contract as an internal field
     mapping(bytes32 => uint) public limitOfMembersPerType;
-    mapping(bytes32 => address[]) public memberTypeToMembers;
+    mapping(bytes32 => address[]) public memberTypeToMembers; //TODO add mapping from member type to number of members for easy lookup
 
     uint numberOfVotingCamapignsAndPetitions;
 
-    mapping(address => uint) votingPoints;
-    mapping(address => uint) numberOfVotingPetitionDuringLastRefill;
+    mapping(address => uint) votingPoints;  //TODO: better to pivot aroud the 2key userame for all members (instead of member id)
+    mapping(address => uint) numberOfVotingPetitionDuringLastRefill; //TODO this field is unclear what does it do?
 
     mapping(bytes32 => AuthoritySchema) memberTypeToAuthoritySchemaToChange;
 
-    address [] public nationalVotingCampaigns;
+    address [] public nationalVotingCampaigns;  //*
+    //TODO we should probably add national petitionn campaigns, and a default authoritySchema, that requires congress to vote (geenrates a new mendatory votinng campaign for congress
+    //members only, that has a end date and required authority schema, that if is not reached (miinmal voters etc..), the petition becomes law)
 
     mapping(address => NationalVotingCampaign) public votingContractAddressToNationalVotingCampaign;
+
+    //TODO need to add the national petition campaigns, they should have a standard authority schema, and get auto-upgraded to a congressional voting campaign if the autority
+    //schema is satisfied
+
+    //TODO add a law book, and rejected votes/petitions history, any voting that is approved, goes into the law book (for now, until we have full auto-execution)
+    //TODO any voting that didn't meet the required authority schema, goes into the history/archive
+    //TODO any petition which meets the national interest criteria will graduate to a congress veto campaign, which can reject if there is vast majority against
 
     struct NationalVotingCampaign {
         string votingReason; //simple text to fulfill screen?
@@ -72,7 +81,7 @@ contract DecentralizedNation {
         bytes32[] initialUsernames,
         bytes32[] initialFirstNames,
         bytes32[] initialLastNames,
-        bytes32[] initialMemberTypes
+        bytes32[] initialMemberTypes  //TODO add these initial members into a dedicated founders array
     ) public  {
         memberTypes.push(bytes32("FOUNDERS"));
         require(initialMembersAddresses.length == initialUsernames.length &&
