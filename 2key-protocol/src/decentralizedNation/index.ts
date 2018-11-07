@@ -62,7 +62,7 @@ export default class DecentralizedNation implements IDecentralizedNation {
                     data.ipfsHashForConstitution,
                     data.ipfsHashForDAOPublicInfo,
                     data.initialMemberAddresses,
-                    data.initialMemberTypes,
+                    data.initialMemberTypes.map(type => this.base.web3.toHex(type)),
                     data.limitsPerMemberType,
                     this.base.twoKeyReg.address,
                 ]},

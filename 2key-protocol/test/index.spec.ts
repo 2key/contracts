@@ -4,7 +4,6 @@ import {TwoKeyProtocol} from '../src';
 import contractsMeta from '../src/contracts';
 import createWeb3 from './_web3';
 import Sign from '../src/utils/sign';
-import {toUtf8} from '../src/utils/converter.js';
 
 const {env} = process;
 
@@ -784,6 +783,7 @@ describe('TwoKeyProtocol', () => {
         });
 
         const txHash = await twoKeyProtocol.AcquisitionCampaign.cancel(campaignAddress, from);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         for (let i = 0; i < addresses.length; i++) {
             let addressCurrent = addresses[i].toString();
             let balance = await twoKeyProtocol.ERC20.getERC20Balance(twoKeyEconomy, addressCurrent);
@@ -824,71 +824,19 @@ describe('TwoKeyProtocol', () => {
 
 
     it('should check if address is maintainer', async() => {
-        const {web3, address} = web3switcher.aydnep();
-        from = address;
-        twoKeyProtocol.setWeb3({
-            web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            plasmaPK: Sign.generatePrivateKey().toString('hex'),
-        });
+        // const {web3, address} = web3switcher.aydnep();
+        // from = address;
+        // twoKeyProtocol.setWeb3({
+        //     web3,
+        //     networks: {
+        //         mainNetId,
+        //         syncTwoKeyNetId,
+        //     },
+        //     plasmaPK: Sign.generatePrivateKey().toString('hex'),
+        // });
 
         let isMaintainer = await twoKeyProtocol.DecentralizedNation.check(from, from);
         console.log(isMaintainer);
-    }).timeout(30000);
-
-    function sleep(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
-
-    it('should populate data', async() => {
-
-        const {web3, address} = web3switcher.aydnep();
-        from = address;
-        twoKeyProtocol.setWeb3({
-            web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            plasmaPK: Sign.generatePrivateKey().toString('hex'),
-        });
-
-        let initialAddresses = [
-            '0xb3fa520368f2df7bed4df5185101f303f6c7decc',
-            '0xffcf8fdee72ac11b5c542428b35eef5769c409f0',
-            '0x22d491bde2303f2f43325b2108d26f1eaba1e32b'
-        ];
-
-        let initialUsernames = [
-            'Nikola',
-            'Andrii',
-            'Kiki'
-        ];
-
-        let initialFullNames = [
-            'Nikola Madjarevic',
-            'Andrii Pindiura',
-            'Erez Ben Kiki'
-        ];
-
-        let initialEmails = [
-            'nikola@2key.co',
-            'andrii@2key.co',
-            'kiki@2key.co'
-        ];
-        // let hash = await twoKeyProtocol.DecentralizedNation.populateData(initialUsernames[0],initialAddresses[0],initialFullNames[0],initialEmails[0], from);
-        // await twoKeyProtocol.Utils.getTransactionReceiptMined(hash);
-        // await sleep(5000);
-        // let hash1 = await twoKeyProtocol.DecentralizedNation.populateData(initialUsernames[1],initialAddresses[1],initialFullNames[1],initialEmails[1], from);
-        // await twoKeyProtocol.Utils.getTransactionReceiptMined(hash1);
-        // await sleep(5000);
-        // let hash2 = await twoKeyProtocol.DecentralizedNation.populateData(initialUsernames[2],initialAddresses[2],initialFullNames[2],initialEmails[2], from);
-        // await twoKeyProtocol.Utils.getTransactionReceiptMined(hash2);
-        // await sleep(5000);
-
     }).timeout(30000);
 
     let daoAddress;
@@ -899,7 +847,7 @@ describe('TwoKeyProtocol', () => {
             ipfsHashForDAOPublicInfo: "0x1234",
             initialMemberAddresses: ['0xb3fa520368f2df7bed4df5185101f303f6c7decc',
                 '0xffcf8fdee72ac11b5c542428b35eef5769c409f0',],
-            initialMemberTypes:[toUtf8('PRESIDENT'), toUtf8('MINISTER')],
+            initialMemberTypes:['PRESIDENT', 'MINISTER'],
             limitsPerMemberType: [10,10]
         };
 
