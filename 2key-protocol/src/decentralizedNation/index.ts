@@ -67,11 +67,25 @@ export default class DecentralizedNation implements IDecentralizedNation {
                     this.base.twoKeyReg.address,
                 ]},
                 );
-                resolve(txHash);
+                let receipt = await this.utils.getTransactionReceiptMined(txHash);
+                let address = receipt.contractAddress;
+                resolve(address);
             } catch (e) {
                 reject(e);
             }
         })
+    }
+
+    public getAllMembersFromDAO(decentralizedNation:any, from:string) : Promise<any> {
+        return new Promise(async(resolve,reject) => {
+            try {
+                let decentralizedNationInstance = await this.helpers._getDecentralizedNationInstance(decentralizedNation);
+                let allMembers = await promisify(decentralizedNationInstance.getAllMembers, [{from}]);
+                resolve(allMembers)
+            } catch (e) {
+                reject(e);
+            }
+        });
     }
 
 }

@@ -222,6 +222,12 @@ export default class Helpers implements ITwoKeyHelpers {
             : await this._createAndValidate('TwoKeyAcquisitionCampaignERC20', campaign);
     }
 
+    async _getDecentralizedNationInstance(decentralizedNation: any) : Promise<any> {
+        return decentralizedNation.address
+        ? decentralizedNation
+            : await this._createAndValidate('DecentralizedNation', decentralizedNation);
+    }
+
     async _getTwoKeyCongressInstance(congress: any): Promise<any> {
         return congress.address
             ? congress

@@ -891,7 +891,7 @@ describe('TwoKeyProtocol', () => {
 
     }).timeout(30000);
 
-
+    let daoAddress;
     it('should create new Decentralized nation', async() => {
         const DAOdata = {
             nationName: "Liberland",
@@ -903,8 +903,13 @@ describe('TwoKeyProtocol', () => {
             limitsPerMemberType: [10,10]
         };
 
-        let txHash = await twoKeyProtocol.DecentralizedNation.createDecentralizedNation(DAOdata,from);
-        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        daoAddress = await twoKeyProtocol.DecentralizedNation.createDecentralizedNation(DAOdata,from);
+        console.log(daoAddress);
     }).timeout(30000);
 
+
+    it('should get all members from DAO', async() => {
+        let members = await twoKeyProtocol.DecentralizedNation.getAllMembersFromDAO(daoAddress, from);
+        console.log(members);
+    }).timeout(30000)
 });
