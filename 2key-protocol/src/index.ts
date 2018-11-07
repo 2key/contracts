@@ -12,6 +12,7 @@ import {
     BalanceMeta,
     IContractEvent,
     IContractsAddresses,
+    IDecentralizedNation,
     IEhtereumNetworks,
     IERC20,
     ILockup,
@@ -28,6 +29,7 @@ import AcquisitionCampaign from './acquisition';
 import ERC20 from './erc20';
 import Lockup from './lockup';
 import TwoKeyCongress from "./congress";
+import DecentralizedNation from "./decentralizedNation";
 
 // const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 
@@ -65,6 +67,7 @@ export class TwoKeyProtocol {
     public Utils: ITwoKeyUtils;
     private Helpers: ITwoKeyHelpers;
     public AcquisitionCampaign: ITwoKeyAcquisitionCampaign;
+    public DecentralizedNation: IDecentralizedNation;
     public Congress: ITwoKeyCongress;
     public Lockup: ILockup;
     private _log: any;
@@ -159,6 +162,7 @@ export class TwoKeyProtocol {
         this.ERC20 = new ERC20(twoKeyBase, this.Helpers);
         this.Utils = new Index(twoKeyBase, this.Helpers);
         this.AcquisitionCampaign = new AcquisitionCampaign(twoKeyBase, this.Helpers, this.Utils, this.ERC20);
+        this.DecentralizedNation = new DecentralizedNation(twoKeyBase, this.Helpers, this.Utils);
         this.Congress = new TwoKeyCongress(twoKeyBase, this.Helpers, this.Utils);
         this.Lockup = new Lockup(twoKeyBase, this.Helpers, this.AcquisitionCampaign);
     }

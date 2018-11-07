@@ -802,8 +802,28 @@ describe('TwoKeyProtocol', () => {
 
     });
 
-    it('should submit new proposal', async () => {
-        const {web3, address} = web3switcher.deployer();
+    /*
+
+      nationName: string,
+    ipfsHashForConstitution: string,
+    ipfsHashForDAOPublicInfo: string,
+    initialMemberAddresses: string[],
+    initialMemberTypes: string[],
+    limitsPerMemberType: number[],
+     */
+    it('should deploy new DAO', async() => {
+        const nationName = "Liberland";
+        const ipfsHashForConstitution =  "0x1234";
+        const ipfsHashForDAOPublicInfo = "0x1234";
+        const initialMemberAddresses = []
+        // const dao = {
+        //     nationName:
+        // }
+    });
+
+
+    it('should check if add is maintainer', async() => {
+        const {web3, address} = web3switcher.aydnep();
         from = address;
         twoKeyProtocol.setWeb3({
             web3,
@@ -814,7 +834,75 @@ describe('TwoKeyProtocol', () => {
             plasmaPK: Sign.generatePrivateKey().toString('hex'),
         });
 
-        const proposalId = await twoKeyProtocol.Congress.newProposalInWei(this.congress,0,"Proposal for adding new member", "0x1b760719000000000000000000000000d03ea8624c8c5987235048901fb614fdca89b1170000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000000500000000000000000000000000000000000000000000000000000000000000064e696b6f6c610000000000000000000000000000000000000000000000000000", from);
-        console.log(proposalId);
+        let isMaintainer = await twoKeyProtocol.DecentralizedNation.check(from, from);
+        console.log(isMaintainer);
     }).timeout(30000);
+
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    it('should populate data', async() => {
+
+        const {web3, address} = web3switcher.aydnep();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            plasmaPK: Sign.generatePrivateKey().toString('hex'),
+        });
+
+        let initialAddresses = [
+            '0xb3fa520368f2df7bed4df5185101f303f6c7decc',
+            '0xffcf8fdee72ac11b5c542428b35eef5769c409f0',
+            '0x22d491bde2303f2f43325b2108d26f1eaba1e32b'
+        ];
+
+        let initialUsernames = [
+            'Nikola',
+            'Andrii',
+            'Kiki'
+        ];
+
+        let initialFullNames = [
+            'Nikola Madjarevic',
+            'Andrii Pindiura',
+            'Erez Ben Kiki'
+        ];
+
+        let initialEmails = [
+            'nikola@2key.co',
+            'andrii@2key.co',
+            'kiki@2key.co'
+        ];
+        let hash = await twoKeyProtocol.DecentralizedNation.populateData(initialUsernames[0],initialAddresses[0],initialFullNames[0],initialEmails[0], from);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(hash);
+        await sleep(1000);
+        let hash1 = await twoKeyProtocol.DecentralizedNation.populateData(initialUsernames[1],initialAddresses[1],initialFullNames[1],initialEmails[1], from);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(hash1);
+        await sleep(1000);
+        let hash2 = await twoKeyProtocol.DecentralizedNation.populateData(initialUsernames[2],initialAddresses[2],initialFullNames[2],initialEmails[2], from);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(hash2);
+    }).timeout(30000);
+
+    // it('should submit new proposal', async () => {
+    //     const {web3, address} = web3switcher.deployer();
+    //     from = address;
+    //     twoKeyProtocol.setWeb3({
+    //         web3,
+    //         networks: {
+    //             mainNetId,
+    //             syncTwoKeyNetId,
+    //         },
+    //         plasmaPK: Sign.generatePrivateKey().toString('hex'),
+    //     });
+    //
+    //     const proposalId = await twoKeyProtocol.Congress.newProposalInWei(this.congress,0,"Proposal for adding new member", "0x1b760719000000000000000000000000d03ea8624c8c5987235048901fb614fdca89b1170000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000000500000000000000000000000000000000000000000000000000000000000000064e696b6f6c610000000000000000000000000000000000000000000000000000", from);
+    //     console.log(proposalId);
+    // }).timeout(30000);
+
+
 });

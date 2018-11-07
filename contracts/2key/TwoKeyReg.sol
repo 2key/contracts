@@ -95,7 +95,7 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
     /// @notice Function to check if maintainer exists
     /// @param _maintainer is the address of maintainer we're checking occurence
     /// @return true if exists otherwise false
-    function checkIfTwoKeyMaintainerExists(address _maintainer) private view returns (bool) {
+    function checkIfTwoKeyMaintainerExists(address _maintainer) public view returns (bool) {
         for(uint i=0; i<maintainers.length; i++) {
               if(_maintainer == maintainers[i]) {
                   return true;
