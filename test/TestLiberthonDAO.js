@@ -47,8 +47,8 @@ var toUtf8 = function(hex) {
 
 contract('DecentralizedNation', async(accounts,deployer) => {
 
-    let initialMemberAddresses = [accounts[0],accounts[1]];
-    let initialMemberUsernames = ["Marko", "Petar"];
+    let initialMemberAddresses = [accounts[0]];
+    let initialMemberUsernames = ["Marko","Petar"];
     let initialMemberFullNames = ["Marko Ivanovic", "Petar Petrovic"];
     let initialMembersEmails = ["nikola@2key.com", "kiki@2key.com"];
     let ipfsHash = fromUtf8("IFSAFNJSDNJF");
@@ -180,9 +180,10 @@ contract('DecentralizedNation', async(accounts,deployer) => {
         let memberToChangeRole = accounts[1];
         let newRole = initialMemberTypes[0];
         let lengthInDays = 2;
-
+        let rolesEligible = [fromUtf8("PRESIDENT"),fromUtf8("MINISTER")];
         weightedVoteContract = await TwoKeyWeightedVoteContract.new(description, decentralizedNationInstance.address);
         await decentralizedNationInstance.startVotingForChanging(
+            rolesEligible,
             description,
             memberToChangeRole,
             newRole,
@@ -217,7 +218,7 @@ contract('DecentralizedNation', async(accounts,deployer) => {
             email,
             memberType;
 
-        [memberAddress, username,fullName,email, memberType] = await decentralizedNationInstance.members(3);
+        [memberAddress, username,fullName,email, memberType] = await decentralizedNationInstance.members(2);
 
         console.log(toUtf8(username));
         console.log(toUtf8(fullName));
@@ -236,8 +237,8 @@ contract('DecentralizedNation', async(accounts,deployer) => {
         let votedNo = await weightedVoteContract.voted_no();
         console.log(votedNo);
 
-        addresses = await weightedVoteContract.transferSig('0x0190f8bf6a479f320ead074411a4b0e7944ea8c9c1ecb4c13502f09f8cb5ef2c832d7b629d7b0cb056a3349233b8feb593e9e4550e420cbbfd5b0b160bdf52b44621be72d0eb1f3df2a4818677ac0ea165723f5cd41ccdf331900d06b5c02485570d733cb928354eca69857850802280320560b01c44cd3c02c32fa9028cf616dd92a47117abd152adfaa29aa097373024f95de3af53642116568a2453d4f8a91a3efa8b9854e10c6da29d59');
-
+        addresses = await decentralizedNationInstance.executeVoting(0,'0x0190f8bf6a479f320ead074411a4b0e7944ea8c9c1ecb4c13502f09f8cb5ef2c832d7b629d7b0cb056a3349233b8feb593e9e4550e420cbbfd5b0b160bdf52b44621be72d0eb1f3df2a4818677ac0ea165723f5cd41ccdf331900d06b5c02485570d733cb928354eca69857850802280320560b01c44cd3c02c32fa9028cf616dd92a47117abd152adfaa29aa097373024f95de3af53642116568a2453d4f8a91a3efa8b9854e10c6da29d59');
+        console.log(addresses);
         votedYes = await weightedVoteContract.voted_yes();
         console.log(votedYes);
 

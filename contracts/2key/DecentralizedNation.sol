@@ -43,9 +43,20 @@ contract DecentralizedNation {
     address twoKeyRegistryContract;
 
     struct NationalVotingCampaign {
+        bytes32 [] eligibleToVote;
         string votingReason; //simple text to fulfill screen?
         address targetOfVoting;
         bytes32 newRole;
+        bool finished;
+        uint votesYes;
+        uint votesNo;
+        uint votingResult;
+        uint votingCampaignLengthInDays;
+    }
+
+    struct VotingCampaignToChangeConstitution {
+        string votingReason;
+        bytes32 newHashOfConstitution;
         bool finished;
         uint votesYes;
         uint votesNo;
@@ -80,7 +91,7 @@ contract DecentralizedNation {
         string _nationName,
         bytes32 _ipfsHashForConstitution,
         bytes32 _ipfsHashForDAOPublicInfo,
-        address[] initialMembersAddresses,
+        address[] founder,
         bytes32[] initialMemberTypes,
         uint[] limitPerType,
         uint[] rightsToCreateVoting,
@@ -91,19 +102,13 @@ contract DecentralizedNation {
         address _twoKeyRegistry
     ) public  {
         require(limitPerType.length == initialMemberTypes.length);
-        initialFounder = msg.sender;
+        initialFounder = founder[0];
         memberTypes.push(bytes32("FOUNDERS"));
         twoKeyRegistryContract = _twoKeyRegistry;
 
-        uint length = initialMembersAddresses.length;
-
         addMember(0,bytes32(0));
+        addMember(founder[0], bytes32("FOUNDERS"));
 
-        for(uint i=0; i<length; i++) {
-            addMember(
-                initialMembersAddresses[i],
-                memberTypes[0]);
-        }
 
         for(uint j=0; j<initialMemberTypes.length; j++) {
             limitOfMembersPerType[initialMemberTypes[j]] = limitPerType[j];
@@ -114,6 +119,7 @@ contract DecentralizedNation {
             }
             memberTypes.push(initialMemberTypes[j]);
         }
+
         minimalNumberOfVotersForVotingCampaign = _minimalNumberOfVotersForVotingCampaign;
         minimalPercentOfVotersForVotingCampaign = _minimalPercentOfVotersForVotingCampaign;
         minimalNumberOfVotersForPetitioningCampaign = _minimalNumberOfVotersForPetitioningCampaign;
@@ -209,19 +215,6 @@ contract DecentralizedNation {
         members[id] = m;
     }
 
-//    function createAuthoritySchemaForType(
-//        bytes32 memberType,
-//        bytes32[] _memberTypesEligibleToVote,
-//        uint _minimalNumberOfVoters,
-//        uint _minimalPercentToBeReached
-//    ) public {
-//        require(checkIfMemberTypeExists(memberType));
-//        memberTypeToAuthoritySchemaToChange[memberType] = AuthoritySchema({
-//            memberTypesEligibleToVote: _memberTypesEligibleToVote,
-//            minimalNumberOfVoters: _minimalNumberOfVoters,
-//            minimalPercentToBeReached: _minimalPercentToBeReached
-//        });
-//    }
 
     function checkIfMemberTypeExists(bytes32 memberType) public view returns (bool) {
         for(uint i=0; i<memberTypes.length; i++) {
@@ -268,6 +261,7 @@ contract DecentralizedNation {
 
 
     function startVotingForChanging(
+        bytes32[] eligibleMemberTypes,
         string description,
         address _memberToChangeRole,
         bytes32 _newRole,
@@ -276,6 +270,7 @@ contract DecentralizedNation {
     ) public {
         require(checkIfMemberTypeExists(_newRole));
         NationalVotingCampaign memory nvc = NationalVotingCampaign({
+            eligibleToVote: eligibleMemberTypes,
             votingReason: description,
             targetOfVoting: _memberToChangeRole,
             newRole: _newRole,
@@ -309,7 +304,23 @@ contract DecentralizedNation {
 
         address [] memory allParticipants = ITwoKeyWeightedVoteContract(nationalVotingCampaignContractAddress).transferSig(signature);
 
-        return allParticipants.length;
+//        for(uint i=0; i<allParticipants.length; i++) {
+//            uint vote;
+//            uint power;
+//
+//            ITwoKeyWeightedVoteContract(nationalVotingCampaignContractAddress).getVoteAndChoicePerAddress(allParticipants[i]);
+//            if(vote == true) {
+//                nvc.voted_yes++;
+//                nvc.votingResult += power;
+//            } else {
+//                nvc.voted_no++;
+//                nvc.votingResult -= power;
+//            }
+//        }
+
+        votingContractAddressToNationalVotingCampaign[nationalVotingCampaignContractAddress] = nvc;
+
+
         //TODO: Validate all Participants roles and exclude ones not eligible to vote
         //TODO: If any participant is not even a member of DAO exclude his vote
         //TODO: At the end calculate voting points and sum them
