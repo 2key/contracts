@@ -26,20 +26,16 @@ contract DecentralizedNation {
     mapping(address => uint) votingPoints;
     mapping(address => uint) numberOfVotingPetitionDuringLastRefill;
 
-    mapping(bytes32 => AuthoritySchema) memberTypeToAuthoritySchemaToChange;
     mapping(bytes32 => bool) isMemberTypeEligibleToCreateVotingCampaign;
 
-    address [] public nationalVotingCampaigns;  //*
-    //TODO we should probably add national petitionn campaigns, and a default authoritySchema, that requires congress to vote (geenrates a new mendatory votinng campaign for congress
-    //members only, that has a end date and required authority schema, that if is not reached (miinmal voters etc..), the petition becomes law)
+    address [] public nationalVotingCampaigns;
 
     mapping(address => NationalVotingCampaign) public votingContractAddressToNationalVotingCampaign;
 
-    //TODO need to add the national petition campaigns, they should have a standard authority schema, and get auto-upgraded to a congressional voting campaign if the autority
-    //schema is satisfied
-
-    //TODO any voting that didn't meet the required authority schema, goes into the history/archive
-    //TODO any petition which meets the national interest criteria will graduate to a congress veto campaign, which can reject if there is vast majority against
+    uint minimalNumberOfVotersForVotingCampaign;
+    uint minimalPercentOfVotersForVotingCampaign;
+    uint minimalNumberOfVotersForPetitioningCampaign;
+    uint minimalPercentOfVotersForPetitioningCampaign;
 
     address[] rejectedVotings;
     address[] rejectedPetitions;
@@ -67,11 +63,6 @@ contract DecentralizedNation {
     }
 
 
-    struct AuthoritySchema {
-        bytes32[] memberTypesEligibleToVote;
-        uint minimalNumberOfVoters;
-        uint minimalPercentToBeReached;
-    }
 
 
     modifier onlyMembers {
@@ -93,9 +84,13 @@ contract DecentralizedNation {
         bytes32[] initialMemberTypes,
         uint[] limitPerType,
         uint[] rightsToCreateVoting,
+        uint _minimalNumberOfVotersForVotingCampaign,
+        uint _minimalPercentOfVotersForVotingCampaign,
+        uint _minimalNumberOfVotersForPetitioningCampaign,
+        uint _minimalPercentOfVotersForPetitioningCampaign,
         address _twoKeyRegistry
     ) public  {
-
+        require(limitPerType.length == initialMemberTypes.length);
         initialFounder = msg.sender;
         memberTypes.push(bytes32("FOUNDERS"));
         twoKeyRegistryContract = _twoKeyRegistry;
@@ -109,7 +104,7 @@ contract DecentralizedNation {
                 initialMembersAddresses[i],
                 memberTypes[0]);
         }
-        require(limitPerType.length == initialMemberTypes.length);
+
         for(uint j=0; j<initialMemberTypes.length; j++) {
             limitOfMembersPerType[initialMemberTypes[j]] = limitPerType[j];
             if(rightsToCreateVoting[j] == 1){
@@ -119,6 +114,10 @@ contract DecentralizedNation {
             }
             memberTypes.push(initialMemberTypes[j]);
         }
+        minimalNumberOfVotersForVotingCampaign = _minimalNumberOfVotersForVotingCampaign;
+        minimalPercentOfVotersForVotingCampaign = _minimalPercentOfVotersForVotingCampaign;
+        minimalNumberOfVotersForPetitioningCampaign = _minimalNumberOfVotersForPetitioningCampaign;
+        minimalPercentOfVotersForPetitioningCampaign = _minimalPercentOfVotersForPetitioningCampaign;
 
         nationName = _nationName;
         ipfsForConstitution = _ipfsHashForConstitution;
@@ -204,26 +203,25 @@ contract DecentralizedNation {
         require(memberId[_memberAddress] != 0);
         require(checkIfMemberTypeExists(_newType));
 
-        AuthoritySchema memory schema = memberTypeToAuthoritySchemaToChange[_newType];
         uint id = memberId[_memberAddress];
         Member memory m = members[id];
         m.memberType = _newType;
         members[id] = m;
     }
 
-    function createAuthoritySchemaForType(
-        bytes32 memberType,
-        bytes32[] _memberTypesEligibleToVote,
-        uint _minimalNumberOfVoters,
-        uint _minimalPercentToBeReached
-    ) public {
-        require(checkIfMemberTypeExists(memberType));
-        memberTypeToAuthoritySchemaToChange[memberType] = AuthoritySchema({
-            memberTypesEligibleToVote: _memberTypesEligibleToVote,
-            minimalNumberOfVoters: _minimalNumberOfVoters,
-            minimalPercentToBeReached: _minimalPercentToBeReached
-        });
-    }
+//    function createAuthoritySchemaForType(
+//        bytes32 memberType,
+//        bytes32[] _memberTypesEligibleToVote,
+//        uint _minimalNumberOfVoters,
+//        uint _minimalPercentToBeReached
+//    ) public {
+//        require(checkIfMemberTypeExists(memberType));
+//        memberTypeToAuthoritySchemaToChange[memberType] = AuthoritySchema({
+//            memberTypesEligibleToVote: _memberTypesEligibleToVote,
+//            minimalNumberOfVoters: _minimalNumberOfVoters,
+//            minimalPercentToBeReached: _minimalPercentToBeReached
+//        });
+//    }
 
     function checkIfMemberTypeExists(bytes32 memberType) public view returns (bool) {
         for(uint i=0; i<memberTypes.length; i++) {
@@ -268,10 +266,6 @@ contract DecentralizedNation {
         return votingPoints[_memberAddress];
     }
 
-    function getAuthorityToChangeSelectedMemberType(bytes32 memberType) public view returns (bytes32[], uint,uint) {
-        AuthoritySchema memory schema = memberTypeToAuthoritySchemaToChange[memberType];
-        return(schema.memberTypesEligibleToVote, schema.minimalNumberOfVoters, schema.minimalPercentToBeReached);
-    }
 
     function startVotingForChanging(
         string description,
@@ -313,7 +307,6 @@ contract DecentralizedNation {
 
         require(block.timestamp > nvc.votingCampaignLengthInDays);
 
-        AuthoritySchema memory authoritySchema = memberTypeToAuthoritySchemaToChange[nvc.newRole];
         address [] memory allParticipants = ITwoKeyWeightedVoteContract(nationalVotingCampaignContractAddress).transferSig(signature);
 
         return allParticipants.length;

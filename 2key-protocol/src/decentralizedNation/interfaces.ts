@@ -14,5 +14,9 @@ export interface IDecentralizedNationConstructor {
     initialMemberTypes: string[],
     limitsPerMemberType: number[],
     eligibleToStartVotingCampaign: number[],
+    minimalNumberOfVotersForVotingCampaign: number,
+    minimalPercentOfVotersForVotingCampaign: number,
+    minimalNumberOfVotersForPetitioningCampaign: number,
+    minimalPercentOfVotersForPetitioningCampaign: number,
 }
 

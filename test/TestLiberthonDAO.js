@@ -126,6 +126,10 @@ contract('DecentralizedNation', async(accounts,deployer) => {
             initialMemberTypes,
             limits,
             initialRightTOCreateVotingCampaign,
+            10000,
+            50,
+            100000,
+            60,
             twoKeyRegistryContract.address
         );
     });
@@ -163,23 +167,6 @@ contract('DecentralizedNation', async(accounts,deployer) => {
        assert.equal(pts,1000000000000000000);
     });
 
-    it('should create authority schema for the member type', async() => {
-       let allowedToVoteInChange = [fromUtf8('PRESIDENT'), fromUtf8('FOUNDERS')];
-       let numberOfMembers = 50;
-       let percentage = 20;
-
-       await decentralizedNationInstance.createAuthoritySchemaForType(fromUtf8('FOUNDERS'), allowedToVoteInChange,numberOfMembers,percentage);
-        let memberEligibleToVoteInChanging,
-            minimalNumOfMembers,
-            percentageToReach;
-
-       [memberEligibleToVoteInChanging, minimalNumOfMembers,percentageToReach] = await decentralizedNationInstance.getAuthorityToChangeSelectedMemberType(fromUtf8('FOUNDERS'));
-        assert.equal(numberOfMembers,minimalNumOfMembers);
-        assert.equal(percentage, percentageToReach);
-        for(let i=0; i<memberEligibleToVoteInChanging.length; i++) {
-            assert.equal(toUtf8(memberEligibleToVoteInChanging[i]), toUtf8(allowedToVoteInChange[i]));
-        }
-    });
 
     it('should deploy TwoKeyVoteToken and see the balances', async() => {
         voteToken = await TwoKeyVoteToken.new(decentralizedNationInstance.address);
