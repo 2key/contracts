@@ -59,8 +59,8 @@ export default class DecentralizedNation implements IDecentralizedNation {
             try {
                 const txHash = await this.helpers._createContract(contracts.DecentralizedNation ,from, {params: [
                     data.nationName,
-                    this.base.web3.toHex(data.ipfsHashForConstitution),
-                    this.base.web3.toHex(data.ipfsHashForDAOPublicInfo),
+                    data.ipfsHashForConstitution,
+                    data.ipfsHashForDAOPublicInfo,
                     data.initialMemberAddresses,
                     data.initialMemberTypes.map(type => this.base.web3.toHex(type)),
                     data.limitsPerMemberType,
