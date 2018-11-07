@@ -11,7 +11,8 @@ contract DecentralizedNation {
 
     bytes32[] public memberTypes;
 
-    Member[] members;
+    address initialFounder;
+    Member[] public members;
     uint numOfMembers;
 
     bool initialized = false;
@@ -77,6 +78,11 @@ contract DecentralizedNation {
         _;
     }
 
+    modifier onlyInitialFounder {
+        require(msg.sender == initialFounder);
+        _;
+    }
+
 
     constructor(
         string _nationName,
@@ -87,6 +93,7 @@ contract DecentralizedNation {
         address _twoKeyRegistry
     ) public  {
 
+        initialFounder = msg.sender;
         memberTypes.push(bytes32("FOUNDERS"));
         twoKeyRegistryContract = _twoKeyRegistry;
 
@@ -111,6 +118,30 @@ contract DecentralizedNation {
     }
 
 
+    function addMembersByFounders(address _memberAddress, bytes32 _memberType) public onlyInitialFounder {
+        require(limitOfMembersPerType[_memberType] > memberTypeToMembers[_memberType].length);
+        bytes32 memberUsername;
+        bytes32 memberFullName;
+        bytes32 memberEmail;
+
+        (memberUsername,memberFullName,memberEmail) = ITwoKeyRegistry(twoKeyRegistryContract).getUserData(_memberAddress);
+        require(checkIfMemberTypeExists(_memberType) || _memberType == bytes32(0));
+        Member memory m = Member({
+            memberAddress: _memberAddress,
+            username: memberUsername,
+            fullName: memberFullName,
+            email: memberEmail,
+            memberType: _memberType
+            });
+
+        members.push(m);
+        memberId[_memberAddress] = numOfMembers;
+        memberTypeToMembers[_memberType].push(_memberAddress);
+        votingPoints[_memberAddress] = 100;
+        numberOfVotingPetitionDuringLastRefill[_memberAddress] = numberOfVotingCamapignsAndPetitions;
+        numOfMembers++;
+    }
+
     function addMember(
         address _memberAddress,
         bytes32 _memberType)
@@ -119,7 +150,7 @@ contract DecentralizedNation {
             require(ITwoKeyRegistry(twoKeyRegistryContract).checkIfUserExists(_memberAddress));
         }
         if(initialized) {
-            require(limitOfMembersPerType[_memberType] < memberTypeToMembers[_memberType].length);
+            require(limitOfMembersPerType[_memberType] > memberTypeToMembers[_memberType].length);
         }
 
         bytes32 memberUsername;
@@ -284,7 +315,7 @@ contract DecentralizedNation {
         require(block.timestamp > nvc.votingCampaignLengthInDays);
 
         AuthoritySchema memory authoritySchema = memberTypeToAuthoritySchemaToChange[nvc.newRole];
-        address [] memory allParticipants = ITwoKeyWeightedVoteContract(nationalVotingCampaignContractAddress).transferSig(signature);
+//        address [] memory allParticipants = ITwoKeyWeightedVoteContract(nationalVotingCampaignContractAddress).transferSig(signature);
 
         //TODO: Validate all Participants roles and exclude ones not eligible to vote
         //TODO: If any participant is not even a member of DAO exclude his vote

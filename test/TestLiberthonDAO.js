@@ -48,9 +48,29 @@ contract('DecentralizedNation', async(accounts,deployer) => {
 
     let initialMemberAddresses = [accounts[0],accounts[1]];
     let initialMemberUsernames = ["Marko", "Petar"];
+    let initialMemberFullNames = ["Marko Ivanovic", "Petar Petrovic"];
     let initialMembersEmails = ["nikola@2key.com", "kiki@2key.com"];
     let ipfsHash = fromUtf8("IFSAFNJSDNJF");
     let initialMemberTypes = [fromUtf8("PRESIDENT"),fromUtf8("MINISTER")];
+
+    let manyMemberAddresses = [
+            accounts[2],
+            accounts[3],
+            accounts[4],
+            accounts[6],
+            accounts[7],
+            accounts[8],
+            accounts[9]];
+
+    let manyMembersUsernames = ["Nikola","Andrii","SAndrii","Udi","Kiki", "Yoram", "Mark"];
+    let manyMemberEmails = ["nikola@2key.com",
+                            "andrii@2key.com",
+                            "sandrii2key.com",
+                            "udi@2key.com",
+                            "kiki@2key.com",
+                            "yoram@2key.com",
+                            "mark@2key.com",
+    ];
 
     let decentralizedNationInstance;
     let voteToken;
@@ -69,12 +89,23 @@ contract('DecentralizedNation', async(accounts,deployer) => {
            await twoKeyRegistryContract.addName(
                initialMemberUsernames[i],
                initialMemberAddresses[i],
-               initialMemberUsernames[i],
+               initialMemberFullNames[i],
                initialMembersEmails[i],
                {
                    from: accounts[5]
                }
            );
+       }
+       for(let j=0; j<manyMemberAddresses.length; j++) {
+           await twoKeyRegistryContract.addName(
+               manyMembersUsernames[j],
+               manyMemberAddresses[j],
+               manyMembersUsernames[j],
+               manyMemberEmails[j],
+               {
+                   from: accounts[5]
+               }
+           )
        }
     });
 
@@ -180,6 +211,27 @@ contract('DecentralizedNation', async(accounts,deployer) => {
 
         await decentralizedNationInstance.executeVoting(0,0);
     });
+
+    it('founders should add members without voting', async() => {
+        let newMemberAddress = accounts[6];
+        let newMemberType = fromUtf8('PRESIDENT');
+
+        await decentralizedNationInstance.addMembersByFounders(newMemberAddress,newMemberType, {from: accounts[0]});
+
+        let memberAddress,
+            username,
+            fullName,
+            email,
+            memberType;
+
+        [memberAddress, username,fullName,email, memberType] = await decentralizedNationInstance.members(3);
+
+        console.log(toUtf8(username));
+        console.log(toUtf8(fullName));
+        console.log(toUtf8(email));
+        console.log(toUtf8(memberType));
+    });
+
 
 
 });
