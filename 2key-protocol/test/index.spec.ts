@@ -848,6 +848,7 @@ describe('TwoKeyProtocol', () => {
             initialMemberAddresses: ['0xb3fa520368f2df7bed4df5185101f303f6c7decc',
                 '0xffcf8fdee72ac11b5c542428b35eef5769c409f0',],
             initialMemberTypes:['PRESIDENT', 'MINISTER'],
+            eligibleToStartVotingCampaign: [1,1],
             limitsPerMemberType: [10,10]
         };
 

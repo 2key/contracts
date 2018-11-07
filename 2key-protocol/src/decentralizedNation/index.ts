@@ -64,6 +64,7 @@ export default class DecentralizedNation implements IDecentralizedNation {
                     data.initialMemberAddresses,
                     data.initialMemberTypes.map(type => this.base.web3.toHex(type)),
                     data.limitsPerMemberType,
+                    data.eligibleToStartVotingCampaign,
                     this.base.twoKeyReg.address,
                 ]},
                 );
