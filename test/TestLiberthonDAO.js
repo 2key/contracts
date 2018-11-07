@@ -53,6 +53,7 @@ contract('DecentralizedNation', async(accounts,deployer) => {
     let initialMembersEmails = ["nikola@2key.com", "kiki@2key.com"];
     let ipfsHash = fromUtf8("IFSAFNJSDNJF");
     let initialMemberTypes = [fromUtf8("PRESIDENT"),fromUtf8("MINISTER")];
+    let initialRightTOCreateVotingCampaign = [1,1];
     let plasmaEvents;
 
     let manyMemberAddresses = [
@@ -124,6 +125,7 @@ contract('DecentralizedNation', async(accounts,deployer) => {
             initialMemberAddresses,
             initialMemberTypes,
             limits,
+            initialRightTOCreateVotingCampaign,
             twoKeyRegistryContract.address
         );
     });
@@ -208,15 +210,12 @@ contract('DecentralizedNation', async(accounts,deployer) => {
         // console.log(nvc);
     });
 
-    it('should be able to fetch and execute results', async() => {
-        let result = await decentralizedNationInstance.getResultsForVoting(0);
-    });
 
     it('should advance time and execute voting with all validations', async() => {
         const TEN_DAYS = 864000;
         increaseTime(TEN_DAYS);
 
-        await decentralizedNationInstance.executeVoting(0,0);
+        // await decentralizedNationInstance.executeVoting(0,0);
     });
 
     it('founders should add members without voting', async() => {
@@ -265,6 +264,11 @@ contract('DecentralizedNation', async(accounts,deployer) => {
         console.log(weightedNo.toNumber());
 
     })
+
+    it('should read results',async() => {
+       let results = await decentralizedNationInstance.getResultsForVoting(0);
+       console.log(results);
+    });
     // it('should get votes', async() => {
     //     let contractor = accounts[0];
     //     let coinbase_link = await free_join (contractor, contractor, weightedVoteContract, contractor)

@@ -40,6 +40,9 @@ contract TwoKeyWeightedVoteContract is StandardToken, Ownable, CallCutted {
     uint public weighted_no;
     uint public total_weight;  // this can be bigger than weighted_yes+weighted_no because of lack of voting coins
 
+    function getDynamicData() public view returns (uint,uint,uint,uint,uint,uint) {
+        return (voted_yes,voted_no, total_vote, weighted_yes,weighted_no, total_weight);
+    }
     mapping (address => address) public received_from;
     mapping(address => uint256) public influencer2cut;
 

@@ -4,4 +4,5 @@ contract ITwoKeyWeightedVoteContract {
     function getDescription() public view returns(string);
     function transferSig(bytes sig) public returns (address[]);
     function setValid() public;
+    function getDynamicData() public view returns (uint,uint,uint,uint,uint,uint);
 }

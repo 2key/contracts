@@ -27,6 +27,7 @@ contract DecentralizedNation {
     mapping(address => uint) numberOfVotingPetitionDuringLastRefill;
 
     mapping(bytes32 => AuthoritySchema) memberTypeToAuthoritySchemaToChange;
+    mapping(bytes32 => bool) isMemberTypeEligibleToCreateVotingCampaign;
 
     address [] public nationalVotingCampaigns;  //*
     //TODO we should probably add national petitionn campaigns, and a default authoritySchema, that requires congress to vote (geenrates a new mendatory votinng campaign for congress
@@ -91,6 +92,7 @@ contract DecentralizedNation {
         address[] initialMembersAddresses,
         bytes32[] initialMemberTypes,
         uint[] limitPerType,
+        uint[] rightsToCreateVoting,
         address _twoKeyRegistry
     ) public  {
 
@@ -110,6 +112,11 @@ contract DecentralizedNation {
         require(limitPerType.length == initialMemberTypes.length);
         for(uint j=0; j<initialMemberTypes.length; j++) {
             limitOfMembersPerType[initialMemberTypes[j]] = limitPerType[j];
+            if(rightsToCreateVoting[j] == 1){
+                isMemberTypeEligibleToCreateVotingCampaign[initialMemberTypes[j]] = true;
+            } else {
+                isMemberTypeEligibleToCreateVotingCampaign[initialMemberTypes[j]] = false;
+            }
             memberTypes.push(initialMemberTypes[j]);
         }
 
@@ -292,15 +299,14 @@ contract DecentralizedNation {
     }
 
 
-    function getResultsForVoting(uint nvc_id) public view returns (string) {
+    function getResultsForVoting(uint nvc_id) public view returns (uint,uint,uint,uint,uint,uint) {
         address nationalVotingCampaignContractAddress = nationalVotingCampaigns[nvc_id];
         NationalVotingCampaign memory nvc = votingContractAddressToNationalVotingCampaign[nationalVotingCampaignContractAddress];
 
-        string memory description = ITwoKeyWeightedVoteContract(nationalVotingCampaignContractAddress).getDescription();
-        return description;
+        return ITwoKeyWeightedVoteContract(nationalVotingCampaignContractAddress).getDynamicData();
     }
 
-    function executeVoting(uint nvc_id, bytes signature) public returns (bool) {
+    function executeVoting(uint nvc_id, bytes signature) public returns (uint) {
         //Will return true if executed or false if didn't meet the criteria so we'll be able to show to user why
         address nationalVotingCampaignContractAddress = nationalVotingCampaigns[nvc_id];
         NationalVotingCampaign memory nvc = votingContractAddressToNationalVotingCampaign[nationalVotingCampaignContractAddress];
@@ -308,8 +314,9 @@ contract DecentralizedNation {
         require(block.timestamp > nvc.votingCampaignLengthInDays);
 
         AuthoritySchema memory authoritySchema = memberTypeToAuthoritySchemaToChange[nvc.newRole];
-//        address [] memory allParticipants = ITwoKeyWeightedVoteContract(nationalVotingCampaignContractAddress).transferSig(signature);
+        address [] memory allParticipants = ITwoKeyWeightedVoteContract(nationalVotingCampaignContractAddress).transferSig(signature);
 
+        return allParticipants.length;
         //TODO: Validate all Participants roles and exclude ones not eligible to vote
         //TODO: If any participant is not even a member of DAO exclude his vote
         //TODO: At the end calculate voting points and sum them
