@@ -822,7 +822,7 @@ describe('TwoKeyProtocol', () => {
     });
 
 
-    it('should check if add is maintainer', async() => {
+    it('should check if address is maintainer', async() => {
         const {web3, address} = web3switcher.aydnep();
         from = address;
         twoKeyProtocol.setWeb3({
@@ -887,22 +887,5 @@ describe('TwoKeyProtocol', () => {
         let hash2 = await twoKeyProtocol.DecentralizedNation.populateData(initialUsernames[2],initialAddresses[2],initialFullNames[2],initialEmails[2], from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(hash2);
     }).timeout(30000);
-
-    // it('should submit new proposal', async () => {
-    //     const {web3, address} = web3switcher.deployer();
-    //     from = address;
-    //     twoKeyProtocol.setWeb3({
-    //         web3,
-    //         networks: {
-    //             mainNetId,
-    //             syncTwoKeyNetId,
-    //         },
-    //         plasmaPK: Sign.generatePrivateKey().toString('hex'),
-    //     });
-    //
-    //     const proposalId = await twoKeyProtocol.Congress.newProposalInWei(this.congress,0,"Proposal for adding new member", "0x1b760719000000000000000000000000d03ea8624c8c5987235048901fb614fdca89b1170000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000000500000000000000000000000000000000000000000000000000000000000000064e696b6f6c610000000000000000000000000000000000000000000000000000", from);
-    //     console.log(proposalId);
-    // }).timeout(30000);
-
 
 });
