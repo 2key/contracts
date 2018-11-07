@@ -68,6 +68,7 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
         _;
     }
 
+
     /// Modifier which will allow only 2keyMaintainer to invoke function calls
     modifier onlyTwoKeyMaintainer {
         require(checkIfTwoKeyMaintainerExists(msg.sender));
@@ -75,8 +76,8 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
     }
 
     constructor (address _twoKeyEventSource, address _twoKeyAdmin, address _maintainer) RBACWithAdmin(_twoKeyAdmin) public {
-        require(_twoKeyEventSource != address(0));
-        require(_twoKeyAdmin != address(0));
+//        require(_twoKeyEventSource != address(0));
+//        require(_twoKeyAdmin != address(0));
         twoKeyEventSource = _twoKeyEventSource;
         twoKeyAdminContractAddress = _twoKeyAdmin;
         maintainers.push(_maintainer);
@@ -311,4 +312,12 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
         plasma2ethereum[plasma_address] = msg.sender;
     }
 
+    function checkIfUserExists(address _userAddress) public view returns (bool) {
+        bytes memory tempEmptyStringTest = bytes(address2username[_userAddress]); // Uses memory
+        if (tempEmptyStringTest.length == 0) {
+            return false;
+        } else {
+            return true;
+        }
+    }
 }

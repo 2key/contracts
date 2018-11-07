@@ -11,7 +11,12 @@ contract TwoKeyWeightedVoteContract is StandardToken, Ownable, CallCutted {
     string public description;
     address public decentralizedNation;
 
+    bool public valid = false;
 
+    function setValid() public {
+        require(msg.sender == decentralizedNation);
+        valid = true;
+    }
     constructor(string _description, address _decentralizedNation) Ownable() public {
         erc20_token_sell_contract = new TwoKeyVoteToken(_decentralizedNation);
         description = _description;

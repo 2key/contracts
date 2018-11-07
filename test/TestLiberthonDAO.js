@@ -1,7 +1,8 @@
 const DecentralizedNation = artifacts.require("DecentralizedNation");
 const TwoKeyVoteToken = artifacts.require("TwoKeyVoteToken");
 const TwoKeyWeightedVoteContract = artifacts.require("TwoKeyWeightedVoteContract");
-
+const TwoKeyReg = artifacts.require("TwoKeyReg.sol");
+const { increaseTime } = require("./utils");
 const utf8 = require('utf8');
 
 
@@ -47,6 +48,7 @@ contract('DecentralizedNation', async(accounts,deployer) => {
 
     let initialMemberAddresses = [accounts[0],accounts[1]];
     let initialMemberUsernames = [fromUtf8("Marko"), fromUtf8("Petar")];
+    let initialMemberUsernamesString = ["Marko", "Petar"];
     let initialMemberlastNames = [fromUtf8("Blabla"), fromUtf8("Blabla1")];
     let ipfsHash = fromUtf8("IFSAFNJSDNJF");
     let initialMemberTypes = [fromUtf8("PRESIDENT"),fromUtf8("MINISTER")];
@@ -54,6 +56,21 @@ contract('DecentralizedNation', async(accounts,deployer) => {
     let decentralizedNationInstance;
     let voteToken;
     let weightedVoteContract;
+    let twoKeyRegistryContract;
+
+    it('should deploy registry contract', async() => {
+        twoKeyRegistryContract = await TwoKeyReg.new(
+            '0x0', '0x0', accounts[5]
+        );
+        console.log(twoKeyRegistryContract.address);
+    });
+
+    it('should register some members to registry', async() => {
+       for(let i=0; i<initialMemberAddresses.length; i++) {
+           await twoKeyRegistryContract.addName(initialMemberUsernamesString[i], initialMemberAddresses[i], {from: accounts[5]});
+       }
+    });
+
 
     it('should deploy contract', async() => {
         decentralizedNationInstance = await DecentralizedNation.new(
@@ -64,9 +81,9 @@ contract('DecentralizedNation', async(accounts,deployer) => {
             initialMemberUsernames,
             initialMemberUsernames,
             initialMemberlastNames,
-            initialMemberTypes
+            initialMemberTypes,
+            twoKeyRegistryContract.address
         );
-        console.log("Dec" + decentralizedNationInstance.address)
     });
 
     it('should return all members', async() => {
@@ -131,7 +148,7 @@ contract('DecentralizedNation', async(accounts,deployer) => {
         let description = "Member Nikola to change his role to president";
         let memberToChangeRole = accounts[1];
         let newRole = initialMemberTypes[0];
-        let lengthInDays = 10;
+        let lengthInDays = 2;
 
         weightedVoteContract = await TwoKeyWeightedVoteContract.new(description, decentralizedNationInstance.address);
         await decentralizedNationInstance.startVotingForChanging(
@@ -151,6 +168,13 @@ contract('DecentralizedNation', async(accounts,deployer) => {
 
     it('should be able to fetch and execute results', async() => {
         let result = await decentralizedNationInstance.getResultsForVoting(0);
+    });
+
+    it('should advance time and execute voting with all validations', async() => {
+        const TEN_DAYS = 864000;
+        increaseTime(TEN_DAYS);
+
+        await decentralizedNationInstance.executeVoting(0,'0x12');
     });
 
 

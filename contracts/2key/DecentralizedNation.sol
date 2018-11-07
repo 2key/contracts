@@ -1,6 +1,7 @@
 pragma solidity ^0.4.24;
 
 import "../interfaces/ITwoKeyWeightedVoteContract.sol";
+import "../interfaces/ITwoKeyRegistry.sol";
 
 contract DecentralizedNation {
 
@@ -21,7 +22,7 @@ contract DecentralizedNation {
 
     uint numberOfVotingCamapignsAndPetitions;
 
-    mapping(address => uint) votingPoints;  //TODO: better to pivot aroud the 2key userame for all members (instead of member id)
+    mapping(address => uint) votingPoints;  //TODO: better to pivot aroud the 2key username for all members (instead of member id)
     mapping(address => uint) numberOfVotingPetitionDuringLastRefill; //TODO this field is unclear what does it do?
 
     mapping(bytes32 => AuthoritySchema) memberTypeToAuthoritySchemaToChange;
@@ -38,6 +39,8 @@ contract DecentralizedNation {
     //TODO add a law book, and rejected votes/petitions history, any voting that is approved, goes into the law book (for now, until we have full auto-execution)
     //TODO any voting that didn't meet the required authority schema, goes into the history/archive
     //TODO any petition which meets the national interest criteria will graduate to a congress veto campaign, which can reject if there is vast majority against
+
+    address twoKeyRegistryContract;
 
     struct NationalVotingCampaign {
         string votingReason; //simple text to fulfill screen?
@@ -81,12 +84,15 @@ contract DecentralizedNation {
         bytes32[] initialUsernames,
         bytes32[] initialFirstNames,
         bytes32[] initialLastNames,
-        bytes32[] initialMemberTypes  //TODO add these initial members into a dedicated founders array
+        bytes32[] initialMemberTypes,  //TODO add these initial members into a dedicated founders array
+        address _twoKeyRegistry
     ) public  {
+
         memberTypes.push(bytes32("FOUNDERS"));
         require(initialMembersAddresses.length == initialUsernames.length &&
         initialUsernames.length == initialFirstNames.length &&
         initialFirstNames.length == initialLastNames.length);
+        twoKeyRegistryContract = _twoKeyRegistry;
 
         uint length = initialMembersAddresses.length;
 
@@ -119,9 +125,13 @@ contract DecentralizedNation {
         bytes32 memberLastName,
         bytes32 _memberType)
     internal {
+        if(members.length > 0) {
+            require(ITwoKeyRegistry(twoKeyRegistryContract).checkIfUserExists(_memberAddress));
+        }
         if(initialized) {
             require(limitOfMembersPerType[_memberType] < memberTypeToMembers[_memberType].length);
         }
+
         require(checkIfMemberTypeExists(_memberType) || _memberType == bytes32(0));
         Member memory m = Member({
             memberAddress: _memberAddress,
@@ -256,6 +266,7 @@ contract DecentralizedNation {
             votingCampaignLengthInDays: block.timestamp + _votingCampaignLengthInDays * (1 days)
         });
 
+        ITwoKeyWeightedVoteContract(twoKeyWeightedVoteContract).setValid();
         votingContractAddressToNationalVotingCampaign[twoKeyWeightedVoteContract] = nvc;
         nationalVotingCampaigns.push(twoKeyWeightedVoteContract);
         numberOfVotingCamapignsAndPetitions++;
@@ -270,14 +281,15 @@ contract DecentralizedNation {
         return description;
     }
 
-    function executeVoting(uint nvc_id, bytes signature) public {
+    function executeVoting(uint nvc_id, bytes signature) public returns (bool) {
+        //Will return true if executed or false if didn't meet the criteria so we'll be able to show to user why
         address nationalVotingCampaignContractAddress = nationalVotingCampaigns[nvc_id];
         NationalVotingCampaign memory nvc = votingContractAddressToNationalVotingCampaign[nationalVotingCampaignContractAddress];
 
         require(block.timestamp > nvc.votingCampaignLengthInDays);
 
         AuthoritySchema memory authoritySchema = memberTypeToAuthoritySchemaToChange[nvc.newRole];
-        address [] memory allParticipants = ITwoKeyWeightedVoteContract(nationalVotingCampaignContractAddress).transferSig(signature);
+//        address [] memory allParticipants = ITwoKeyWeightedVoteContract(nationalVotingCampaignContractAddress).transferSig(signature);
 
         //TODO: Validate all Participants roles and exclude ones not eligible to vote
         //TODO: If any participant is not even a member of DAO exclude his vote
