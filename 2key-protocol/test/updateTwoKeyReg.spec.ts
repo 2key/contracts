@@ -22,7 +22,7 @@ console.log(contractsMeta.TwoKeyEconomy.networks[mainNetId].address);
 
 describe(`TwoKeyProtocol ${network}`, () => {
     it('should populate data', async() => {
-        const { web3, address } = await web3switcher(rpcUrl, rpcUrl, '9125720a89c9297cde4a3cfc92f233da5b22f868b44f78171354d4e0f7fe74ec');
+        const { web3, address } = await web3switcher(rpcUrl, rpcUrl, 'f4318acc8a26d653570e7e600239a27a6b2307eb2f59a2b06d77bb7b9cab031f');
         const twoKeyProtocol = new TwoKeyProtocol({
             web3,
             networks: {
