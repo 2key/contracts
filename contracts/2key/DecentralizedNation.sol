@@ -6,8 +6,8 @@ import "../interfaces/ITwoKeyRegistry.sol";
 contract DecentralizedNation {
 
     string public nationName;
-    bytes32 public ipfsForConstitution;
-    bytes32 public ipfsHashForDAOPublicInfo;
+    string public ipfsForConstitution;
+    string public ipfsHashForDAOPublicInfo;
 
     bytes32[] public memberTypes;
 
@@ -89,8 +89,8 @@ contract DecentralizedNation {
 
     constructor(
         string _nationName,
-        bytes32 _ipfsHashForConstitution,
-        bytes32 _ipfsHashForDAOPublicInfo,
+        string _ipfsHashForConstitution,
+        string _ipfsHashForDAOPublicInfo,
         address[] founder,
         bytes32[] initialMemberTypes,
         uint[] limitPerType,
