@@ -283,9 +283,9 @@ describe('TwoKeyProtocol', () => {
     let daoAddress;
     it('should create new Decentralized nation', async() => {
         const DAOdata = {
-            nationName: "Liberland",
-            ipfsHashForConstitution: "0x1234",
-            ipfsHashForDAOPublicInfo: "0x1234",
+            nationName: 'Liberland',
+            ipfsHashForConstitution: 'QmPVDkkkB6TtbgbnjUXeCAafLKEe9LWFEqixz1YqimUgmz',
+            ipfsHashForDAOPublicInfo: 'QmXL6inxYQc233L3NEqS1LmMnrBDPcPFtNrk7bvYHhwy4Y',
             initialMemberAddresses: ['0xb3fa520368f2df7bed4df5185101f303f6c7decc',
                 '0xffcf8fdee72ac11b5c542428b35eef5769c409f0',],
             initialMemberTypes:['PRESIDENT', 'MINISTER'],
@@ -310,5 +310,10 @@ describe('TwoKeyProtocol', () => {
     it('should get all members from DAO', async() => {
         let members = await twoKeyProtocol.DecentralizedNation.getAllMembersFromDAO(daoAddress, from);
         console.log(members);
+    }).timeout(30000);
+
+    it('should get all data from DAO', async() => {
+        let data = await twoKeyProtocol.DecentralizedNation.getNameAndIpfsHashesForDAO(daoAddress, from);
+        console.log(data);
     }).timeout(30000);
 });
