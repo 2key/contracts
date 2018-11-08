@@ -2,13 +2,20 @@ export interface IDecentralizedNation {
     createDecentralizedNation: (data: IDecentralizedNationConstructor, from: string) => Promise<string>,
     populateData: (username:string, address:string, fullName:string, email:string, from: string) => Promise<string>
     check: (address: string,from:string) => Promise<boolean>,
-    getAllMembersFromDAO: (decentralizedNation:any, from:string) => Promise<any>,
+    getAllMembersFromDAO: (decentralizedNation:any, from:string) => Promise<IMember[]>,
     getAllMembersForSpecificType: (decentralizedNation:any, type:string, from:string) => Promise<any>,
     getVotingPointsForTheMember: (decentralizedNation: any, address: string, from: string) => Promise<number>,
     addMemberByFounder: (decentralizedNation: any, newMemberAddress: string, memberType:string, from:string) => Promise<string>,
     getNameAndIpfsHashesForDAO: (decentralizedNation: any, from: string) => Promise<any>,
 }
 
+export interface IMember {
+    address: string,
+    username: string,
+    fullname: string,
+    email: string,
+    type: string,
+}
 
 export interface IDecentralizedNationConstructor {
     nationName: string,

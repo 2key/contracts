@@ -1,5 +1,5 @@
 import {ITwoKeyBase, ITwoKeyHelpers} from '../interfaces';
-import {IDecentralizedNation, IDecentralizedNationConstructor} from "./interfaces";
+import {IDecentralizedNation, IDecentralizedNationConstructor, IMember} from "./interfaces";
 import {ITwoKeyUtils} from "../utils/interfaces";
 import {promisify} from "../utils";
 import contracts from '../contracts';
@@ -102,12 +102,30 @@ export default class DecentralizedNation implements IDecentralizedNation {
      * @param {string} from
      * @returns {Promise<any>}
      */
-    public getAllMembersFromDAO(decentralizedNation:any, from:string) : Promise<any> {
+    public getAllMembersFromDAO(decentralizedNation:any, from:string) : Promise<IMember[]> {
+        /*
+        * addresses[]
+        * usernames[]: bytes
+        * fullnames[]: bytes
+        * emails[]: bytes
+        * types[]: bytes
+        * */
         return new Promise(async(resolve,reject) => {
             try {
-                let decentralizedNationInstance = await this.helpers._getDecentralizedNationInstance(decentralizedNation);
-                let allMembers = await promisify(decentralizedNationInstance.getAllMembers, [{from}]);
-                resolve(allMembers)
+                const decentralizedNationInstance = await this.helpers._getDecentralizedNationInstance(decentralizedNation);
+                const members:IMember[] = [];
+                const [ addresses, usernames, fullnames, emails, types ] = await promisify(decentralizedNationInstance.getAllMembers, [{from}]);
+                const l = addresses.length;
+                for (let i = 0; i < l; i++) {
+                    members.push({
+                        address: addresses[i],
+                        username: this.base.web3.toUtf8(usernames[i]),
+                        fullname: this.base.web3.toUtf8(fullnames[i]),
+                        email: this.base.web3.toUtf8(emails[i]),
+                        type: this.base.web3.toUtf8(types[i]),
+                    });
+                }
+                resolve(members)
             } catch (e) {
                 reject(e);
             }
