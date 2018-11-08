@@ -22,6 +22,7 @@ import {
     ITwoKeyHelpers,
     ITwoKeyInit,
     ITwoKeyUtils,
+    ITwoKeyWeightedVoteContract
 } from './interfaces';
 import Index, {promisify} from './utils';
 import Helpers from './utils/helpers';
@@ -68,6 +69,7 @@ export class TwoKeyProtocol {
     private Helpers: ITwoKeyHelpers;
     public AcquisitionCampaign: ITwoKeyAcquisitionCampaign;
     public DecentralizedNation: IDecentralizedNation;
+    public WeightedVoteContract: ITwoKeyWeightedVoteContract;
     public Congress: ITwoKeyCongress;
     public Lockup: ILockup;
     private _log: any;

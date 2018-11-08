@@ -275,7 +275,6 @@ contract('DecentralizedNation', async(accounts,deployer) => {
         console.log("This is NVC after we got all votes");
         console.log(nvc);
     })
-
 });
 
 
