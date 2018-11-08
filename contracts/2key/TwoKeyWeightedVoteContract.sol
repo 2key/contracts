@@ -3,7 +3,6 @@ pragma solidity ^0.4.24;
 import './TwoKeyContract.sol';
 import './TwoKeySignedContract.sol';
 import "./CallCutted.sol";
-import "./TwoKeyVoteToken.sol";
 
 contract TwoKeyWeightedVoteContract is StandardToken, Ownable, CallCutted {
 
@@ -18,12 +17,13 @@ contract TwoKeyWeightedVoteContract is StandardToken, Ownable, CallCutted {
         valid = true;
     }
 
-    constructor(string _description, address _decentralizedNation) Ownable() public {
+    constructor(string _description, address _decentralizedNation, address erc20) Ownable() public {
         balances[msg.sender] = 1000000000000000000;
-        erc20_token_sell_contract = new TwoKeyVoteToken(_decentralizedNation);
         description = _description;
         decentralizedNation = _decentralizedNation;
+        erc20_token_sell_contract = erc20;
     }
+
 
     modifier onlyDecentralizedNation {
         require(msg.sender == address(decentralizedNation));

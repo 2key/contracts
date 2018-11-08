@@ -99,7 +99,9 @@ export default class DecentralizedNation implements IDecentralizedNation {
     public create(data: IDecentralizedNationConstructor, from: string, { gasPrice, progressCallback, interval, timeout = 60000 }: ICreateOpts = {}) : Promise<string> {
         return new Promise(async(resolve,reject) => {
             try {
-                const txHash = await this.helpers._createContract(contracts.DecentralizedNation ,from, {params: [
+                //TODO: Deploy twokeyVoteToken
+
+                let txHash = await this.helpers._createContract(contracts.DecentralizedNation ,from, {params: [
                     data.nationName,
                     data.ipfsHashForConstitution,
                     data.ipfsHashForDAOPublicInfo,
@@ -264,11 +266,17 @@ export default class DecentralizedNation implements IDecentralizedNation {
         return new Promise(async(resolve, reject) => {
             try{
                 const decentralizedNationInstance = await this.helpers._getDecentralizedNationInstance(decentralizedNation);
+                let addressOfVoteToken = await promisify(decentralizedNationInstance.votingToken,[]);
+
+                console.log("ADDRESS OF VOTE TOKEN: " + addressOfVoteToken);
+
                 const dataForVotingContract : ITwoKeyWeightedVoteConstructor = {
                     descriptionForVoting: data.votingReason,
-                    addressOfDAO: decentralizedNationInstance.address
+                    addressOfDAO: decentralizedNationInstance.address,
+                    erc20: addressOfVoteToken
                 };
 
+                console.log("HERE");
                 let addressOfVotingContract = await this.veightedVode.createWeightedVoteContract(dataForVotingContract, from, {
                     gasPrice, progressCallback, interval, timeout
                 });

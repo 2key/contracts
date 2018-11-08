@@ -20,7 +20,8 @@ export default class TwoKeyWeightedVoteContract implements ITwoKeyWeightedVoteCo
             try {
                 let txHash = await this.helpers._createContract(contracts.TwoKeyWeightedVoteContract ,from, {params: [
                         data.descriptionForVoting,
-                        data.addressOfDAO
+                        data.addressOfDAO,
+                        data.erc20
                     ],
                         gasPrice,
                         progressCallback

@@ -2,6 +2,7 @@ pragma solidity ^0.4.24;
 
 import "../interfaces/ITwoKeyWeightedVoteContract.sol";
 import "../interfaces/ITwoKeyRegistry.sol";
+import "./TwoKeyVoteToken.sol";
 
 contract DecentralizedNation {
 
@@ -9,12 +10,13 @@ contract DecentralizedNation {
     string public ipfsForConstitution;
     string public ipfsHashForDAOPublicInfo;
 
-
     bytes32[] public memberTypes;
 
     address initialFounder;
     Member[] public members;
     uint numOfMembers;
+
+    address public votingToken;
 
     bool initialized = false;
 
@@ -31,8 +33,6 @@ contract DecentralizedNation {
     mapping(address => uint) votingPoints;
     mapping(address => uint) totalNumberOfCampaigns;
     mapping(bytes32 => bool) public isMemberTypeEligibleToCreateVotingCampaign;
-
-
 
     uint minimalNumberOfPositiveVotersForVotingCampaign;
     uint minimalPercentOfVotersForVotingCampaign;
@@ -97,10 +97,10 @@ contract DecentralizedNation {
         memberTypes.push(bytes32("FOUNDERS"));
         isMemberTypeEligibleToCreateVotingCampaign[bytes32("FOUNDERS")] = true;
         twoKeyRegistryContract = _twoKeyRegistry;
-
         addMember(0,bytes32(0));
         addMember(founder[0], bytes32("FOUNDERS"));
 
+        votingToken = new TwoKeyVoteToken(address(this));
 
         for(uint j=0; j<initialMemberTypes.length; j++) {
             limitOfMembersPerType[initialMemberTypes[j]] = limitPerType[j];

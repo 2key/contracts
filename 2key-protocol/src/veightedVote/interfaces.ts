@@ -7,4 +7,5 @@ export interface ITwoKeyWeightedVoteContract {
 export interface ITwoKeyWeightedVoteConstructor {
     descriptionForVoting: string,
     addressOfDAO: string
+    erc20: string
 }
