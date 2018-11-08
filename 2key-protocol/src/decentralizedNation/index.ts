@@ -1,18 +1,28 @@
 import {ICreateOpts, ITwoKeyBase, ITwoKeyHelpers} from '../interfaces';
-import {IDaoMeta, IDecentralizedNation, IDecentralizedNationConstructor, IMember} from "./interfaces";
+import {
+    IDaoMeta,
+    IDecentralizedNation,
+    IDecentralizedNationConstructor,
+    IMember,
+    INationalVotingCampaign
+} from "./interfaces";
 import {ITwoKeyUtils} from "../utils/interfaces";
 import {promisify} from "../utils";
 import contracts from '../contracts';
+import {ITwoKeyWeightedVoteConstructor} from "../veightedVote/interfaces";
+import {ITwoKeyWeightedVoteContract} from "../veightedVote";
 
 export default class DecentralizedNation implements IDecentralizedNation {
     private readonly base: ITwoKeyBase;
     private readonly helpers: ITwoKeyHelpers;
     private readonly utils: ITwoKeyUtils;
+    private readonly veightedVode: ITwoKeyWeightedVoteContract;
 
-    constructor(twoKeyProtocol: ITwoKeyBase, helpers: ITwoKeyHelpers, utils: ITwoKeyUtils) {
+    constructor(twoKeyProtocol: ITwoKeyBase, helpers: ITwoKeyHelpers, utils: ITwoKeyUtils, veightedVote: ITwoKeyWeightedVoteContract) {
         this.base = twoKeyProtocol;
         this.helpers = helpers;
         this.utils = utils;
+        this.veightedVode = veightedVote;
     }
 
     _convertMembersFromBytes(members: any): IMember[] {
@@ -234,6 +244,46 @@ export default class DecentralizedNation implements IDecentralizedNation {
             } catch (e) {
                 reject(e);
             }
+        })
+    }
+
+    /**
+     *
+     * @param decentralizedNation
+     * @param {INationalVotingCampaign} data
+     * @param {string} from
+     * @param {number} gasPrice
+     * @param {ICreateCampaignProgress} progressCallback
+     * @param {number} interval
+     * @param {number} timeout
+     * @returns {Promise<string>}
+     */
+    public createVotingCampaign(decentralizedNation: any, data: INationalVotingCampaign, from: string, { gasPrice, progressCallback, interval, timeout = 60000 }: ICreateOpts = {}) : Promise<string> {
+        return new Promise(async(resolve, reject) => {
+
+            const decentralizedNationInstance = await this.helpers._getDecentralizedNationInstance(decentralizedNation);
+            const dataForVotingContract : ITwoKeyWeightedVoteConstructor = {
+                descriptionForVoting: data.votingReason,
+                addressOfDAO: decentralizedNationInstance.address
+            };
+
+            let addressOfVotingContract = await this.veightedVode.createWeightedVoteContract(dataForVotingContract, from, {
+                gasPrice, progressCallback, interval, timeout
+            });
+
+            let txHash = await promisify(decentralizedNationInstance.startVotingForChanging,[
+                data.eligibleRolesToVote,
+                data.votingReason,
+                data.subjectWeAreVotingFor,
+                data.newRoleForTheSubject,
+                data.campaignLengthInDays,
+                addressOfVotingContract,
+                {
+                    from,
+                    gasPrice,
+                }
+            ]);
+            resolve(txHash);
         })
     }
 }
