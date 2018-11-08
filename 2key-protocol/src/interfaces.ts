@@ -23,6 +23,14 @@ export interface ITwoKeyBase {
     _log: any,
 }
 
+export interface ICreateOpts {
+    progressCallback?: ICreateCampaignProgress,
+    gasPrice?: number,
+    interval?: number,
+    timeout?: number
+}
+
+
 // We need twoKeyAdmin in order to approve twoKeyAcquisitionCampaign to emit events
 export interface ITwoKeyAdmin {
 

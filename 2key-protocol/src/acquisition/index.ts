@@ -1,9 +1,8 @@
-import {IERC20, IOffchainData, ITwoKeyBase, ITwoKeyHelpers, ITwoKeyUtils,} from '../interfaces';
+import {IERC20, IOffchainData, ITwoKeyBase, ITwoKeyHelpers, ITwoKeyUtils, ICreateOpts } from '../interfaces';
 import {
     IAcquisitionCampaign,
     IAcquisitionCampaignMeta,
     ITokenAmount,
-    ICreateOpts,
     IJoinLinkOpts,
     IPublicLinkKey,
     IPublicLinkOpts,

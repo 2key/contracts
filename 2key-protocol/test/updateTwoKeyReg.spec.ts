@@ -20,6 +20,8 @@ console.log(mainNetId);
 console.log(contractsMeta.TwoKeyEventSource.networks[mainNetId].address);
 console.log(contractsMeta.TwoKeyEconomy.networks[mainNetId].address);
 
+const [web3_address, username, name, email] = process.argv[7].split(':');
+
 describe(`TwoKeyProtocol ${network}`, () => {
     it('should populate data', async() => {
         const { web3, address } = await web3switcher(rpcUrl, rpcUrl, 'f4318acc8a26d653570e7e600239a27a6b2307eb2f59a2b06d77bb7b9cab031f');
@@ -68,13 +70,15 @@ describe(`TwoKeyProtocol ${network}`, () => {
             'kiki@2key.co',
             'aydnep@aydnep.com.ua'
         ];
-        let hash = await twoKeyProtocol.DecentralizedNation.populateData(initialUsernames[0],initialAddresses[0],initialFullNames[0],initialEmails[0], from);
+        let hash = await twoKeyProtocol.DecentralizedNation.populateData(username, web3_address, name, email, from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(hash);
-        hash = await twoKeyProtocol.DecentralizedNation.populateData(initialUsernames[1],initialAddresses[1],initialFullNames[1],initialEmails[1], from);
-        await twoKeyProtocol.Utils.getTransactionReceiptMined(hash);
-        hash = await twoKeyProtocol.DecentralizedNation.populateData(initialUsernames[2],initialAddresses[2],initialFullNames[2],initialEmails[2], from);
-        await twoKeyProtocol.Utils.getTransactionReceiptMined(hash);
-        hash = await twoKeyProtocol.DecentralizedNation.populateData(initialUsernames[3],initialAddresses[3],initialFullNames[3],initialEmails[3], from);
-        await twoKeyProtocol.Utils.getTransactionReceiptMined(hash);
+        // let hash = await twoKeyProtocol.DecentralizedNation.populateData(initialUsernames[0],initialAddresses[0],initialFullNames[0],initialEmails[0], from);
+        // await twoKeyProtocol.Utils.getTransactionReceiptMined(hash);
+        // hash = await twoKeyProtocol.DecentralizedNation.populateData(initialUsernames[1],initialAddresses[1],initialFullNames[1],initialEmails[1], from);
+        // await twoKeyProtocol.Utils.getTransactionReceiptMined(hash);
+        // hash = await twoKeyProtocol.DecentralizedNation.populateData(initialUsernames[2],initialAddresses[2],initialFullNames[2],initialEmails[2], from);
+        // await twoKeyProtocol.Utils.getTransactionReceiptMined(hash);
+        // hash = await twoKeyProtocol.DecentralizedNation.populateData(initialUsernames[3],initialAddresses[3],initialFullNames[3],initialEmails[3], from);
+        // await twoKeyProtocol.Utils.getTransactionReceiptMined(hash);
     }).timeout(300000);
 });

@@ -1,5 +1,7 @@
+import {ICreateOpts} from '../interfaces';
+
 export interface IDecentralizedNation {
-    createDecentralizedNation: (data: IDecentralizedNationConstructor, from: string) => Promise<string>,
+    create: (data: IDecentralizedNationConstructor, from: string, opts?: ICreateOpts) => Promise<string>,
     populateData: (username:string, address:string, fullName:string, email:string, from: string) => Promise<string>
     check: (address: string, from:string) => Promise<boolean>,
     getAllMembersFromDAO: (decentralizedNation:any) => Promise<IMember[]>,

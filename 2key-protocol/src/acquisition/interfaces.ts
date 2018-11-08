@@ -1,5 +1,5 @@
 import {BigNumber} from 'bignumber.js';
-import {ICreateCampaignProgress,} from '../interfaces';
+import {ICreateOpts} from '../interfaces';
 
 export interface IPublicLinkKey {
     contractor: string,
@@ -87,11 +87,4 @@ export interface IPublicLinkOpts {
 export interface IJoinLinkOpts extends IPublicLinkOpts{
     referralLink?: string,
     cutSign?: string,
-}
-
-export interface ICreateOpts {
-    progressCallback?: ICreateCampaignProgress,
-    gasPrice?: number,
-    interval?: number,
-    timeout?: number
 }

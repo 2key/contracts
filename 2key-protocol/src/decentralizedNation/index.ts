@@ -1,4 +1,4 @@
-import {ITwoKeyBase, ITwoKeyHelpers} from '../interfaces';
+import {ICreateOpts, ITwoKeyBase, ITwoKeyHelpers} from '../interfaces';
 import {IDaoMeta, IDecentralizedNation, IDecentralizedNationConstructor, IMember} from "./interfaces";
 import {ITwoKeyUtils} from "../utils/interfaces";
 import {promisify} from "../utils";
@@ -85,7 +85,7 @@ export default class DecentralizedNation implements IDecentralizedNation {
      * @param {string} from
      * @returns {Promise<string>}
      */
-    public createDecentralizedNation(data: IDecentralizedNationConstructor, from: string) : Promise<string> {
+    public create(data: IDecentralizedNationConstructor, from: string, { gasPrice, progressCallback, interval, timeout = 60000 }: ICreateOpts = {}) : Promise<string> {
         return new Promise(async(resolve,reject) => {
             try {
                 const txHash = await this.helpers._createContract(contracts.DecentralizedNation ,from, {params: [
@@ -101,9 +101,11 @@ export default class DecentralizedNation implements IDecentralizedNation {
                     data.minimalNumberOfVotersForPetitioningCampaign,
                     data.minimalPercentOfVotersForPetitioningCampaign,
                     this.base.twoKeyReg.address,
-                ]},
+                ],
+                    gasPrice,
+                    progressCallback, },
                 );
-                let receipt = await this.utils.getTransactionReceiptMined(txHash);
+                let receipt = await this.utils.getTransactionReceiptMined(txHash, { interval, timeout, web3: this.base.web3 });
                 let address = receipt.contractAddress;
                 resolve(address);
             } catch (e) {
