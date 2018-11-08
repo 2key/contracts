@@ -119,6 +119,7 @@ contract DecentralizedNation {
         require(limitPerType.length == initialMemberTypes.length);
         initialFounder = founder[0];
         memberTypes.push(bytes32("FOUNDERS"));
+        isMemberTypeEligibleToCreateVotingCampaign[bytes32("FOUNDERS")] = true;
         twoKeyRegistryContract = _twoKeyRegistry;
 
         addMember(0,bytes32(0));
@@ -283,6 +284,9 @@ contract DecentralizedNation {
         uint _votingCampaignLengthInDays,
         address twoKeyWeightedVoteContract
     ) public {
+        uint id = memberId[msg.sender];
+        Member memory m = members[id];
+        require(isMemberTypeEligibleToCreateVotingCampaign[m.memberType]);
         require(checkIfMemberTypeExists(_newRole));
         NationalVotingCampaign memory nvc = NationalVotingCampaign({
             eligibleToVote: eligibleMemberTypes,
@@ -338,7 +342,6 @@ contract DecentralizedNation {
                 nvc.votingResult -= int(power);
             }
         }
-
         votingContractAddressToNationalVotingCampaign[nationalVotingCampaignContractAddress] = nvc;
     }
 
