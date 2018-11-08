@@ -61,7 +61,7 @@ contract TwoKeyVoteToken is StandardToken, Ownable {
   */
 
   function checkBalance(address _owner) internal returns (uint256) {
-    if (visited[_owner]) {
+    if (visited[_owner] || balances[_owner] > 0) {  // A user can have a balance if it was transfered to it
       return balances[_owner];
     }
 
@@ -79,7 +79,7 @@ contract TwoKeyVoteToken is StandardToken, Ownable {
   * @return An uint256 representing the amount owned by the passed address.
   */
   function balanceOf(address _owner) public view returns (uint256) {
-    if (visited[_owner]) {
+    if (visited[_owner] || balances[_owner] > 0) {
       return balances[_owner];
     } else {
       bytes memory _name = bytes(registry.owner2name(_owner));
@@ -109,6 +109,8 @@ contract TwoKeyVoteToken is StandardToken, Ownable {
     uint balance = checkBalance(_from);
     require(_value <= balance, 'transferFrom balance');
     require(_to != address(0), 'transferFrom zero');
+
+    // TODO make sure _to is registered OR it is a campaign contract
 
     balances[_from] = balances[_from].sub(_value);
     balances[_to] = balances[_to].add(_value);
