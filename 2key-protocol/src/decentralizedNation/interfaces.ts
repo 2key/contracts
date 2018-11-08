@@ -15,6 +15,7 @@ export interface IDecentralizedNation {
     getAllCampaigns: (decentralizedNation:any) => Promise<IVotingCampaign[]>,
     join: (campaign: any, from: string, opts?: IJoinLinkOpts) => Promise<string>,
     countPlasmaVotes: (weightedVoteContract: any, contractor: string) => Promise<boolean>,
+    getVotingResults: (weightedVoteContract: any) => Promise<any>,
 }
 
 export interface IMember {

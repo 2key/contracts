@@ -117,7 +117,7 @@ function free_join(my_address: string, public_address: string, f_address: string
     assert.ok(previousMessage.startsWith(version));
     m = previousMessage + m;
     if (cutSign) {
-        console.log(cutSign);
+        console.log('CUT SIGN', cutSign);
         if (cutSign.startsWith('0x')) {
             m += cutSign.slice(2)
         } else {

@@ -297,7 +297,7 @@ describe('TwoKeyProtocol', () => {
             minimalPercentOfVotersForVotingCampaign: 60,
             minimalNumberOfVotersForPetitioningCampaign: 1000000,
             minimalPercentOfVotersForPetitioningCampaign: 51,
-            limitsPerMemberType: [10,10]
+            limitsPerMemberType: [15,15]
         };
 
         daoAddress = await twoKeyProtocol.DecentralizedNation.create(DAOdata, from);
@@ -316,26 +316,43 @@ describe('TwoKeyProtocol', () => {
     }).timeout(30000);
 
 
-    it('should add members by founder', async() => {
-        let newmember = '0xffcf8fdee72ac11b5c542428b35eef5769c409f0';
-        let memberType = 'PRESIDENT';
-        let txHash = await twoKeyProtocol.DecentralizedNation.addMemberByFounder(daoAddress,newmember, memberType, from);
-        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-    }).timeout(30000);
+    // it('should add members by founder', async() => {
+    //     let newmember = '0xffcf8fdee72ac11b5c542428b35eef5769c409f0';
+    //     let memberType = 'PRESIDENT';
+    //     let txHash = await twoKeyProtocol.DecentralizedNation.addMemberByFounder(daoAddress,newmember, memberType, from);
+    //     await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+    // }).timeout(30000);
 
     it('should add members by founder', async() => {
-        let newmember = '0xb3fa520368f2df7bed4df5185101f303f6c7decc';
+        // let newmember = '0xb3fa520368f2df7bed4df5185101f303f6c7decc';
         let memberType = 'PRESIDENT';
-        let txHash = await twoKeyProtocol.DecentralizedNation.addMemberByFounder(daoAddress,newmember, memberType, from);
-        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-    }).timeout(30000);
+        const members = [
+            '0xb3fa520368f2df7bed4df5185101f303f6c7decc',
+            '0xffcf8fdee72ac11b5c542428b35eef5769c409f0',
+            '0x22d491bde2303f2f43325b2108d26f1eaba1e32b',
+            '0xf3c7641096bc9dc50d94c572bb455e56efc85412',
+            '0xebadf86c387fe3a4378738dba140da6ce014e974',
+            '0xec8b6aaee825e0bbc812ca13e1b4f4b038154688',
+            '0xfc279a3c3fa62b8c840abaa082cd6b4073e699c8',
+            '0xc744f2ddbca85a82be8f36c159be548022281c62',
+            '0x1b00334784ee0360ddf70dfd3a2c53ccf51e5b96',
+            '0x084d61962273589bf894c7b8794aa8915a06200f'
+        ];
+        const l = members.length;
+        for (let i = 0; i < l; i++) {
+            const txHash = await twoKeyProtocol.DecentralizedNation.addMemberByFounder(daoAddress, members[i], memberType, from);
+            await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        }
+        // let txHash = await twoKeyProtocol.DecentralizedNation.addMemberByFounder(daoAddress,newmember, memberType, from);
+        // await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+    }).timeout(300000);
 
-    it('should add members by founder', async() => {
-        let newmember = '0x22d491bde2303f2f43325b2108d26f1eaba1e32b';
-        let memberType = 'PRESIDENT';
-        let txHash = await twoKeyProtocol.DecentralizedNation.addMemberByFounder(daoAddress,newmember, memberType, from);
-        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-    }).timeout(30000);
+    // it('should add members by founder', async() => {
+    //     let newmember = '0x22d491bde2303f2f43325b2108d26f1eaba1e32b';
+    //     let memberType = 'PRESIDENT';
+    //     let txHash = await twoKeyProtocol.DecentralizedNation.addMemberByFounder(daoAddress,newmember, memberType, from);
+    //     await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+    // }).timeout(30000);
 
     it('should get all members from DAO', async() => {
         let members = await twoKeyProtocol.DecentralizedNation.getAllMembersFromDAO(daoAddress);
@@ -410,6 +427,13 @@ describe('TwoKeyProtocol', () => {
         const result = await twoKeyProtocol.DecentralizedNation.countPlasmaVotes(votingCampaign, from);
         // referralLink = await twoKeyProtocol.DecentralizedNation.join(votingCampaign, from, { cut: 100, referralLink });
         console.log('CALCULATED', result);
+    }).timeout(30000);
+
+    it('should print voting results', async() => {
+
+        const results = await twoKeyProtocol.DecentralizedNation.getVotingResults(votingCampaign);
+        // referralLink = await twoKeyProtocol.DecentralizedNation.join(votingCampaign, from, { cut: 100, referralLink });
+        console.log('CALCULATED', results);
     }).timeout(30000);
     /*
             '0xb3fa520368f2df7bed4df5185101f303f6c7decc',
