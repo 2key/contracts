@@ -102,6 +102,7 @@ export interface ITwoKeyHelpers {
     _getUrlParams: (url: string) => any,
     _checkBalanceBeforeTransaction: (gasRequired: number, gasPrice: number, from: string) => Promise<boolean>,
     _getAcquisitionCampaignInstance: (campaign: any) => Promise<any>,
+    _getWeightedVoteContract: (campaign: any) => Promise<any>,
     _getERC20Instance: (erc20: any) => Promise<any>,
     _getTwoKeyAdminInstance(twoKeyAdmin: any) : Promise<any>,
     _getTwoKeyCongressInstance(congress: any) : Promise<any>,

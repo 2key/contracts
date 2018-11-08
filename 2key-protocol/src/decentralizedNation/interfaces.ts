@@ -1,4 +1,5 @@
 import {ICreateOpts} from '../interfaces';
+import {IJoinLinkOpts} from "../acquisition/interfaces";
 
 export interface IDecentralizedNation {
     create: (data: IDecentralizedNationConstructor, from: string, opts?: ICreateOpts) => Promise<string>,
@@ -11,7 +12,9 @@ export interface IDecentralizedNation {
     getNameAndIpfsHashesForDAO: (decentralizedNation: any) => Promise<IDaoMeta>,
     createCampaign: (decentralizedNation: any, data: INationalVotingCampaign, from: string,  opts?: ICreateOpts) => Promise<any>,
     isTypeEligibleToCreateAVotingCampaign: (decentralizedNation: any, memberType: string) => Promise<boolean>,
-    getAllCampaigns: (decentralizedNation:any) => Promise<IVotingCampaign[]>
+    getAllCampaigns: (decentralizedNation:any) => Promise<IVotingCampaign[]>,
+    join: (campaign: any, from: string, opts?: IJoinLinkOpts) => Promise<string>,
+    countPlasmaVotes: (weightedVoteContract: any, contractor: string) => Promise<boolean>,
 }
 
 export interface IMember {
