@@ -10,6 +10,8 @@ export interface IDecentralizedNation {
     addMemberByFounder: (decentralizedNation: any, newMemberAddress: string, memberType:string, from:string) => Promise<string>,
     getNameAndIpfsHashesForDAO: (decentralizedNation: any) => Promise<IDaoMeta>,
     createVotingCampaign: (decentralizedNation: any, data: INationalVotingCampaign, from: string,  opts?: ICreateOpts) => Promise<number>,
+    isTypeEligibleToCreateAVotingCampaign: (decentralizedNation: any, memberType: string) => Promise<boolean>,
+    getAllStructuredNationalVotingCampaigns: (decentralizedNation:any) => Promise<any>
 }
 
 export interface IMember {
