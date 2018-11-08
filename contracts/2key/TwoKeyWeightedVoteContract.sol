@@ -80,13 +80,54 @@ contract TwoKeyWeightedVoteContract is TwoKeySignedPresellContract {
           } else {
             weighted_no += weight;
           }
-          // transfer coins from influncer to owner in the amount of the weight used for voting
-          require(address(erc20_token_sell_contract).call(bytes4(keccak256("transferFrom(address,address,uint256)")),influencer,owner,tokens));
           voted_weight[influencer] += weight;
+
+          // TODO its always a good idea to have external calls the last statement in code
+          // transfer coins from influncer to the contract in the amount of the weight used for voting
+          transferCoins(voters, i, tokens);
         }
       }
     }
 
     return voters;
+  }
+
+  function sqrt(uint x) public view returns (uint y) {
+    uint z = x.add(1).div(2);
+    y = x;
+    while (z < y) {
+      y = z;
+      z = x.div(z).add(z).div(2);
+    }
+  }
+
+  function transferCoins(address[] voters, uint i, uint tokens) {
+    // send all tokens to this contract
+    // send sone tokens as bounty from the contract back to influencers
+    // any tokens left in the contract are lost forever
+    address influencer = voters[i];
+    require(address(erc20_token_sell_contract).call(bytes4(keccak256("transferFrom(address,address,uint256)")),influencer,this,tokens));
+
+    // distribute some of the tokens back from the contract to the influencers
+    for (uint j = 0; j < i; j++) {
+      address a;
+      a = voters[i-1-j];
+      // We want to take the square root of the weight but not of cost.
+      // tokens = weight*cost
+      // sqrt(tokens*cost) = sqrt(weight*cost*cost) = sqrt(weight) * cost
+      tokens = sqrt(tokens.mul(cost));
+      if (tokens==0) {
+        break;
+      }
+      require(address(erc20_token_sell_contract).call(bytes4(keccak256("transferFrom(address,address,uint256)")),this,a,tokens));
+    }
+  }
+
+  function redeem() public {
+    revert();
+  }
+
+  function buyProduct() public payable {
+    revert();
   }
 }

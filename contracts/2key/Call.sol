@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
 library Call {
-    function params0(address c, bytes _method) public view returns (uint answer) {
+   function params0(address c, bytes _method) public view returns (uint answer) {
         // https://medium.com/@blockchain101/calling-the-function-of-another-contract-in-solidity-f9edfa921f4c
         //    dc = c;
         bytes4 sig = bytes4(keccak256(_method));
