@@ -23,7 +23,7 @@ contract DecentralizedNation {
     mapping(bytes32 => address[]) public memberTypeToMembers;
     uint numberOfVotingCamapignsAndPetitions;
 
-    mapping(address => bytes32) memberAddressToMemberType;
+    mapping(address => bytes32) public memberAddressToMemberType;
 
     mapping(address => uint) votingPoints;
     mapping(address => uint) numberOfVotingPetitionDuringLastRefill;
@@ -31,7 +31,7 @@ contract DecentralizedNation {
     address [] public nationalVotingCampaigns;
     mapping(address => NationalVotingCampaign) public votingContractAddressToNationalVotingCampaign;
 
-    uint minimalNumberOfVotersForVotingCampaign;
+    uint minimalNumberOfPositiveVotersForVotingCampaign;
     uint minimalPercentOfVotersForVotingCampaign;
     uint minimalNumberOfVotersForPetitioningCampaign;
     uint minimalPercentOfVotersForPetitioningCampaign;
@@ -122,7 +122,7 @@ contract DecentralizedNation {
             memberTypes.push(initialMemberTypes[j]);
         }
 
-        minimalNumberOfVotersForVotingCampaign = _minimalNumberOfVotersForVotingCampaign;
+        minimalNumberOfPositiveVotersForVotingCampaign = _minimalNumberOfVotersForVotingCampaign;
         minimalPercentOfVotersForVotingCampaign = _minimalPercentOfVotersForVotingCampaign;
         minimalNumberOfVotersForPetitioningCampaign = _minimalNumberOfVotersForPetitioningCampaign;
         minimalPercentOfVotersForPetitioningCampaign = _minimalPercentOfVotersForPetitioningCampaign;
@@ -223,14 +223,15 @@ contract DecentralizedNation {
         members.length--;
     }
 
-
+    function getMemberId(address _memberAddress) public view returns (uint) {
+        return memberId[msg.sender];
+    }
     function changeMemberType(
         address _memberAddress,
         bytes32 _newType)
     internal {
         require(memberId[_memberAddress] != 0);
         require(checkIfMemberTypeExists(_newType));
-
         uint id = memberId[_memberAddress];
         memberAddressToMemberType[_memberAddress] = _newType;
         Member memory m = members[id];
@@ -328,7 +329,7 @@ contract DecentralizedNation {
         //Will return true if executed or false if didn't meet the criteria so we'll be able to show to user why
         address nationalVotingCampaignContractAddress = nationalVotingCampaigns[nvc_id];
         NationalVotingCampaign memory nvc = votingContractAddressToNationalVotingCampaign[nationalVotingCampaignContractAddress];
-
+        require(nvc.finished == false);
         require(block.timestamp > nvc.votingCampaignLengthInDays);
 
         address [] memory allParticipants = ITwoKeyWeightedVoteContract(nationalVotingCampaignContractAddress).getAllVoters();
@@ -358,6 +359,11 @@ contract DecentralizedNation {
         }
         nvc.finished = true;
         votingContractAddressToNationalVotingCampaign[nationalVotingCampaignContractAddress] = nvc;
+
+        if(nvc.votesYes >= minimalNumberOfPositiveVotersForVotingCampaign  &&
+            nvc.votingResultForYes > nvc.votingResultForNo) {
+            changeMemberType(nvc.targetOfVoting, nvc.newRole);
+        }
 
     }
 

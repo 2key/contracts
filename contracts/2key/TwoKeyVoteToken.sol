@@ -56,8 +56,7 @@ contract TwoKeyVoteToken is StandardToken, Ownable {
         _;
     }
 
-
-
+    
     /**
     * @dev Gets the balance of the specified address.
     * @param _owner The address to query the the balance of.

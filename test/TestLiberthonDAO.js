@@ -126,10 +126,10 @@ contract('DecentralizedNation', async(accounts,deployer) => {
             initialMemberTypes,
             limits,
             initialRightTOCreateVotingCampaign,
-            10000,
-            50,
-            100000,
-            60,
+            1,
+            1,
+            1,
+            1,
             twoKeyRegistryContract.address
         );
     });
@@ -176,7 +176,7 @@ contract('DecentralizedNation', async(accounts,deployer) => {
 
     it('should start voting for national campaign', async() => {
         let description = "Member Nikola to change his role to president";
-        let memberToChangeRole = accounts[1];
+        let memberToChangeRole = accounts[8];
         let newRole = initialMemberTypes[0];
         let lengthInDays = 2;
         let rolesEligible = [fromUtf8("PRESIDENT"),fromUtf8("MINISTER"),fromUtf8("FOUNDERS")];
@@ -263,7 +263,12 @@ contract('DecentralizedNation', async(accounts,deployer) => {
 
 
     it('should read from contract', async() => {
+        let memberRole = await decentralizedNationInstance.memberAddressToMemberType(accounts[8]);
+        console.log(toUtf8(memberRole));
         let addresses = await decentralizedNationInstance.executeVoting(0,'0x0190f8bf6a479f320ead074411a4b0e7944ea8c9c1ecb4c13502f09f8cb5ef2c832d7b629d7b0cb056a3349233b8feb593e9e4550e420cbbfd5b0b160bdf52b44621be72d0eb1f3df2a4818677ac0ea165723f5cd41ccdf331900d06b5c02485570d733cb928354eca69857850802280320560b01c44cd3c02c32fa9028cf616dd92a47117abd152adfaa29aa097373024f95de3af53642116568a2453d4f8a91a3efa8b9854e10c6da29d59');
+
+        memberRole = await decentralizedNationInstance.memberAddressToMemberType(accounts[8]);
+        console.log(toUtf8(memberRole));
 
         let address = await decentralizedNationInstance.nationalVotingCampaigns(0);
         let nvc = await decentralizedNationInstance.getNVC(address);
