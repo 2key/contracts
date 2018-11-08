@@ -4,7 +4,8 @@ import {
     IDecentralizedNation,
     IDecentralizedNationConstructor,
     IMember,
-    INationalVotingCampaign, IVotingCampaign
+    INationalVotingCampaign,
+    IVotingCampaign
 } from "./interfaces";
 import {ITwoKeyUtils} from "../utils/interfaces";
 import {promisify} from "../utils";
@@ -259,44 +260,34 @@ export default class DecentralizedNation implements IDecentralizedNation {
      * @param {number} timeout
      * @returns {Promise<string>}
      */
-    public createVotingCampaign(decentralizedNation: any, data: INationalVotingCampaign, from: string, { gasPrice, progressCallback, interval, timeout = 60000 }: ICreateOpts = {}) : Promise<number> {
+    public createCampaign(decentralizedNation: any, data: INationalVotingCampaign, from: string, { gasPrice, progressCallback, interval, timeout = 60000 }: ICreateOpts = {}) : Promise<any> {
         return new Promise(async(resolve, reject) => {
+            try{
+                const decentralizedNationInstance = await this.helpers._getDecentralizedNationInstance(decentralizedNation);
+                const dataForVotingContract : ITwoKeyWeightedVoteConstructor = {
+                    descriptionForVoting: data.votingReason,
+                    addressOfDAO: decentralizedNationInstance.address
+                };
 
-            const decentralizedNationInstance = await this.helpers._getDecentralizedNationInstance(decentralizedNation);
-            const dataForVotingContract : ITwoKeyWeightedVoteConstructor = {
-                descriptionForVoting: data.votingReason,
-                addressOfDAO: decentralizedNationInstance.address
-            };
+                let addressOfVotingContract = await this.veightedVode.createWeightedVoteContract(dataForVotingContract, from, {
+                    gasPrice, progressCallback, interval, timeout
+                });
 
-            let addressOfVotingContract = await this.veightedVode.createWeightedVoteContract(dataForVotingContract, from, {
-                gasPrice, progressCallback, interval, timeout
-            });
-
-
-            for(let i=0; i<data.eligibleRolesToVote.length; i++) {
-                data.eligibleRolesToVote[i] = this.base.web3.toHex(data.eligibleRolesToVote[i]);
+                let txHash = await promisify(decentralizedNationInstance.startCampagin,[
+                    data.votingReason,
+                    data.campaignLengthInDays,
+                    addressOfVotingContract,
+                    data.flag,
+                    {
+                        from,
+                        gasPrice,
+                    }
+                ]);
+                await this.utils.getTransactionReceiptMined(txHash);
+                resolve(txHash);
+            } catch(e) {
+                reject(e);
             }
-
-            let txHash = await promisify(decentralizedNationInstance.startVotingForChanging,[
-                data.eligibleRolesToVote,
-                data.votingReason,
-                data.subjectWeAreVotingFor,
-                this.base.web3.toHex(data.newRoleForTheSubject),
-                data.campaignLengthInDays,
-                addressOfVotingContract,
-                {
-                    from,
-                    gasPrice,
-                }
-            ]);
-            await this.utils.getTransactionReceiptMined(txHash);
-
-            let addressOfVoting = await promisify(decentralizedNationInstance.nationalVotingCampaigns,[0]);
-
-            let nvc = await promisify(decentralizedNationInstance.votingContractAddressToNationalVotingCampaign,[addressOfVoting])
-            console.log("CAMPAIGN ID: " + addressOfVoting);
-            console.log(nvc);
-            resolve(addressOfVoting);
         })
     }
 
@@ -324,7 +315,8 @@ export default class DecentralizedNation implements IDecentralizedNation {
      * @param decentralizedNation
      * @returns {Promise<any>}
      */
-    public getAllStructuredNationalVotingCampaigns(decentralizedNation:any) : Promise<IVotingCampaign[]> {
+
+    public getAllCampaigns(decentralizedNation:any) : Promise<IVotingCampaign[]> {
         return new Promise(async(resolve,reject) => {
            try {
                let decentralizedNationInstance = await this.helpers._getDecentralizedNationInstance(decentralizedNation);
@@ -332,18 +324,17 @@ export default class DecentralizedNation implements IDecentralizedNation {
                const promises = [];
                for (let i=0; i<numberOfCampaigns; i++) {
                    promises.push(new Promise(async (cResolve, cReject) => {
-                       let nvcAddress = await promisify(decentralizedNationInstance.nationalVotingCampaigns,[i]);
-                       let [eligibleToVote, votingReason, targetOfVoting, newRole, finished, votesYes, votesNo, votingResultForYes, votingResultForNo, votingCampaignLengthInDays]
-                           = await promisify(decentralizedNationInstance.getNVC,[nvcAddress]);
-                       eligibleToVote = eligibleToVote.map(item => this.base.web3.toUtf8(item));
-                       newRole = this.base.web3.toUtf8(newRole);
+                       let nvcAddress = await promisify(decentralizedNationInstance.allCampaigns,[i]);
+                       let [votingReason, finished, votesYes, votesNo, votingResultForYes, votingResultForNo, votingCampaignLengthInDays, votingCampaignContractAddress, campaignType]
+                           = await promisify(decentralizedNationInstance.getCampaign,[i]);
                        votesYes = votesYes.toNumber();
                        votesNo = votesNo.toNumber();
                        votingResultForYes = votingResultForYes.toNumber();
                        votingResultForNo = votingResultForNo.toNumber();
                        votingCampaignLengthInDays = new Date(votingCampaignLengthInDays.toNumber());
+                       campaignType = this.base.web3.toUtf8(campaignType);
                        cResolve({
-                           eligibleToVote, votingReason, targetOfVoting, newRole, finished, votesYes, votesNo, votingResultForYes, votingResultForNo, votingCampaignLengthInDays
+                           votingReason, finished, votesYes, votesNo, votingResultForYes, votingResultForNo, votingCampaignLengthInDays, votingCampaignContractAddress, campaignType
                        });
                    }));
                }

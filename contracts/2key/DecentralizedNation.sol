@@ -42,8 +42,6 @@ contract DecentralizedNation {
 
     address twoKeyRegistryContract;
 
-
-
     struct Campaign {
         string votingReason; //simple text to fulfill screen?
         bool finished;

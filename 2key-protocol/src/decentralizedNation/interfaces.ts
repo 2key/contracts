@@ -9,9 +9,9 @@ export interface IDecentralizedNation {
     getVotingPointsForTheMember: (decentralizedNation: any, address: string, from: string) => Promise<number>,
     addMemberByFounder: (decentralizedNation: any, newMemberAddress: string, memberType:string, from:string) => Promise<string>,
     getNameAndIpfsHashesForDAO: (decentralizedNation: any) => Promise<IDaoMeta>,
-    createVotingCampaign: (decentralizedNation: any, data: INationalVotingCampaign, from: string,  opts?: ICreateOpts) => Promise<number>,
+    createCampaign: (decentralizedNation: any, data: INationalVotingCampaign, from: string,  opts?: ICreateOpts) => Promise<any>,
     isTypeEligibleToCreateAVotingCampaign: (decentralizedNation: any, memberType: string) => Promise<boolean>,
-    getAllStructuredNationalVotingCampaigns: (decentralizedNation:any) => Promise<IVotingCampaign[]>
+    getAllCampaigns: (decentralizedNation:any) => Promise<IVotingCampaign[]>
 }
 
 export interface IMember {
@@ -30,24 +30,21 @@ export interface IDaoMeta {
 
 
 export interface INationalVotingCampaign {
-    eligibleRolesToVote: string[], // bytes32
     votingReason: string, //Just some text
-    subjectWeAreVotingFor: string, //The address
-    newRoleForTheSubject: string, //bytes32
     campaignLengthInDays: number,
+    flag: number,
 }
 
 export interface IVotingCampaign {
-    eligibleToVote: string[],
     votingReason: string,
-    targetOfVoting: string,
-    newRole: string,
     finished: boolean,
     votesYes: number,
     votesNo: number,
     votingResultForYes: number,
     votingResultForNo: number,
     votingCampaignLengthInDays: Date,
+    votingCampaignContractAddress: string,
+    campaignType: string
 }
 
 export interface IDecentralizedNationConstructor {

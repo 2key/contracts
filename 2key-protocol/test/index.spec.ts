@@ -851,14 +851,15 @@ describe('TwoKeyProtocol', () => {
         console.log(daoAddress);
     }).timeout(30000);
 
-    it('should get all members of DAO', async() => {
-        const members = await twoKeyProtocol.DecentralizedNation.getAllMembersFromDAO(daoAddress);
-        console.log('MEMBERS', members);
-    }).timeout(30000);
-
-
-    it('should get all members from DAO', async() => {
-        let members = await twoKeyProtocol.DecentralizedNation.getAllMembersFromDAO(daoAddress);
-        console.log(members);
-    }).timeout(30000);
+    //
+    // it('should get all members of DAO', async() => {
+    //     const members = await twoKeyProtocol.DecentralizedNation.getAllMembersFromDAO(daoAddress);
+    //     console.log('MEMBERS', members);
+    // }).timeout(30000);
+    //
+    //
+    // it('should get all members from DAO', async() => {
+    //     let members = await twoKeyProtocol.DecentralizedNation.getAllMembersFromDAO(daoAddress);
+    //     console.log(members);
+    // }).timeout(30000);
 });

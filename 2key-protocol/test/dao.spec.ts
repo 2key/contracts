@@ -310,7 +310,7 @@ describe('TwoKeyProtocol', () => {
 
 
     it('should get all members from DAO', async() => {
-        let members = await twoKeyProtocol.DecentralizedNation.getAllMembersFromDAO(daoAddress, from);
+        let members = await twoKeyProtocol.DecentralizedNation.getAllMembersFromDAO(daoAddress);
         console.log(members);
     }).timeout(30000);
 
@@ -322,32 +322,59 @@ describe('TwoKeyProtocol', () => {
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(30000);
 
+    it('should add members by founder', async() => {
+        let newmember = '0xb3fa520368f2df7bed4df5185101f303f6c7decc';
+        let memberType = 'PRESIDENT';
+        let txHash = await twoKeyProtocol.DecentralizedNation.addMemberByFounder(daoAddress,newmember, memberType, from);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+    }).timeout(30000);
+
+    it('should add members by founder', async() => {
+        let newmember = '0x22d491bde2303f2f43325b2108d26f1eaba1e32b';
+        let memberType = 'PRESIDENT';
+        let txHash = await twoKeyProtocol.DecentralizedNation.addMemberByFounder(daoAddress,newmember, memberType, from);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+    }).timeout(30000);
+
     it('should get all members from DAO', async() => {
-        let members = await twoKeyProtocol.DecentralizedNation.getAllMembersFromDAO(daoAddress, from);
+        let members = await twoKeyProtocol.DecentralizedNation.getAllMembersFromDAO(daoAddress);
         console.log(members);
     }).timeout(30000);
 
+
     // NVC = National Voting Campaign which executes itself when voting is finished
-    it('should create  new  NVC', async() => {
+    it('should create  new  Campaign', async() => {
         const campaign : INationalVotingCampaign= {
-            eligibleRolesToVote: ['PRESIDENT','MINISTER'],
             votingReason: 'Because Andrii is not good CSS dev :D',
-            subjectWeAreVotingFor: '0x22d491bde2303f2f43325b2108d26f1eaba1e32b',
-            newRoleForTheSubject: 'PRESIDENT',
             campaignLengthInDays: 1,
+            flag: 0,
         };
-        let campaignId = await twoKeyProtocol.DecentralizedNation.createVotingCampaign(daoAddress,campaign,from);
+        let campaignId = await twoKeyProtocol.DecentralizedNation.createCampaign(daoAddress,campaign,from);
         console.log(campaignId);
     }).timeout(30000);
 
-    it('get all voting campaigns for DAO', async() => {
-        let campaigns = await twoKeyProtocol.DecentralizedNation.getAllStructuredNationalVotingCampaigns(daoAddress);
-        console.log(campaigns);
-    }).timeout(30000);
+    // it('get all voting campaigns for DAO', async() => {
+    //     let campaigns = await twoKeyProtocol.DecentralizedNation.getAllStructuredNationalVotingCampaigns(daoAddress);
+    //     console.log(campaigns);
+    // }).timeout(30000);
 
     it('it should check role for create voting', async() => {
         let isAbleToStartVoting = await twoKeyProtocol.DecentralizedNation.isTypeEligibleToCreateAVotingCampaign(daoAddress, 'PRESIDENT');
         console.log(isAbleToStartVoting);
     }).timeout(30000);
+
+    it('should join link and transfer sig', async() => {
+
+    }).timeout(30000);
+    /*
+            '0xb3fa520368f2df7bed4df5185101f303f6c7decc',
+            '0xffcf8fdee72ac11b5c542428b35eef5769c409f0',
+            '0x22d491bde2303f2f43325b2108d26f1eaba1e32b'
+     */
+
+
+
+
+
 
 });
