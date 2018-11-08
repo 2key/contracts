@@ -273,7 +273,7 @@ export default class DecentralizedNation implements IDecentralizedNation {
                 const dataForVotingContract : ITwoKeyWeightedVoteConstructor = {
                     descriptionForVoting: data.votingReason,
                     addressOfDAO: decentralizedNationInstance.address,
-                    erc20: '0xae6be7e59a5e8cbbc943e9fbd39fd5bde8e0f131'
+                    erc20: addressOfVoteToken
                 };
 
                 this.base._log("HERE");
