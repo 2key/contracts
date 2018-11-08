@@ -110,7 +110,7 @@ contract TwoKeyVoteToken is StandardToken, Ownable {
         uint balance = balanceOf(_from);
         require(_value <= balance, 'transferFrom balance');
         require(_to != address(0), 'transferFrom zero');
-
+        //TODO : reduce balance on contract
         balances[_from] = balances[_from].sub(_value);
         balances[_to] = balances[_to].add(_value);
         emit Transfer(_from, _to, _value);

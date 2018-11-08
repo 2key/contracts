@@ -176,33 +176,23 @@ contract('DecentralizedNation', async(accounts,deployer) => {
 
     it('should start voting for national campaign', async() => {
         let description = "Member Nikola to change his role to president";
-        let memberToChangeRole = accounts[8];
-        let newRole = initialMemberTypes[0];
         let lengthInDays = 2;
-        let rolesEligible = [fromUtf8("PRESIDENT"),fromUtf8("MINISTER"),fromUtf8("FOUNDERS")];
         weightedVoteContract = await TwoKeyWeightedVoteContract.new(description, decentralizedNationInstance.address);
-        await decentralizedNationInstance.startVotingForChanging(
-            rolesEligible,
+        await decentralizedNationInstance.startCampagin(
             description,
-            memberToChangeRole,
-            newRole,
             lengthInDays,
-            weightedVoteContract.address
+            weightedVoteContract.address,
+            0
            );
 
-        let nvcAddress = await decentralizedNationInstance.nationalVotingCampaigns(0);
-        assert.equal(nvcAddress,weightedVoteContract.address);
-
-        let nvc = await decentralizedNationInstance.votingContractAddressToNationalVotingCampaign(nvcAddress);
-        // console.log(nvc);
+        let campaign = await decentralizedNationInstance.getCampaign(0);
+        console.log(campaign);
     });
 
 
     it('should advance time and execute voting with all validations', async() => {
         const TEN_DAYS = 864000;
         increaseTime(TEN_DAYS);
-
-        // await decentralizedNationInstance.executeVoting(0,0);
     });
 
     it('founders should add members without voting', async() => {
@@ -244,11 +234,6 @@ contract('DecentralizedNation', async(accounts,deployer) => {
         let weightedNo = await weightedVoteContract.weighted_no();
         console.log("weighted no: " + weightedNo.toNumber());
     });
-
-    // it('should read results',async() => {
-    //    let results = await decentralizedNationInstance.getResultsForVoting(0);
-    //    console.log(results);
-    // });
 
     it('get vote and choice per address', async() => {
         let addresses = await weightedVoteContract.transferSig('0x0190f8bf6a479f320ead074411a4b0e7944ea8c9c1ecb4c13502f09f8cb5ef2c832d7b629d7b0cb056a3349233b8feb593e9e4550e420cbbfd5b0b160bdf52b44621be72d0eb1f3df2a4818677ac0ea165723f5cd41ccdf331900d06b5c02485570d733cb928354eca69857850802280320560b01c44cd3c02c32fa9028cf616dd92a47117abd152adfaa29aa097373024f95de3af53642116568a2453d4f8a91a3efa8b9854e10c6da29d59');
