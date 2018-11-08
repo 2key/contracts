@@ -1,5 +1,5 @@
 import {ITwoKeyBase, ITwoKeyHelpers} from '../interfaces';
-import {IDecentralizedNation, IDecentralizedNationConstructor, IMember} from "./interfaces";
+import {IDaoMeta, IDecentralizedNation, IDecentralizedNationConstructor, IMember} from "./interfaces";
 import {ITwoKeyUtils} from "../utils/interfaces";
 import {promisify} from "../utils";
 import contracts from '../contracts';
@@ -15,13 +15,29 @@ export default class DecentralizedNation implements IDecentralizedNation {
         this.utils = utils;
     }
 
+    _convertMembersFromBytes(members: any): IMember[] {
+        const result: IMember[] = [];
+        const [ addresses, usernames, fullnames, emails, types ] = members;
+        const l = addresses.length;
+        for (let i = 0; i < l; i++) {
+            result.push({
+                address: addresses[i],
+                username: this.base.web3.toUtf8(usernames[i]),
+                fullname: this.base.web3.toUtf8(fullnames[i]),
+                email: this.base.web3.toUtf8(emails[i]),
+                type: this.base.web3.toUtf8(types[i]),
+            });
+        }
+        return result;
+    }
+
     /**
      *
      * @param {IDecentralizedNationConstructor} data
      * @param {string} from
      * @returns {Promise<string>}
      */
-    public check(address: string, from:string): Promise<boolean> {
+    public check(address: string, from: string): Promise<boolean> {
         return new Promise(async(resolve,reject) => {
             try {
                 let exists = await promisify(this.base.twoKeyReg.checkIfTwoKeyMaintainerExists, [address, {from}]);
@@ -113,18 +129,19 @@ export default class DecentralizedNation implements IDecentralizedNation {
         return new Promise(async(resolve,reject) => {
             try {
                 const decentralizedNationInstance = await this.helpers._getDecentralizedNationInstance(decentralizedNation);
-                const members:IMember[] = [];
-                const [ addresses, usernames, fullnames, emails, types ] = await promisify(decentralizedNationInstance.getAllMembers, [{from}]);
-                const l = addresses.length;
-                for (let i = 0; i < l; i++) {
-                    members.push({
-                        address: addresses[i],
-                        username: this.base.web3.toUtf8(usernames[i]),
-                        fullname: this.base.web3.toUtf8(fullnames[i]),
-                        email: this.base.web3.toUtf8(emails[i]),
-                        type: this.base.web3.toUtf8(types[i]),
-                    });
-                }
+                // const members:IMember[] = [];
+                // const [ addresses, usernames, fullnames, emails, types ] = await promisify(decentralizedNationInstance.getAllMembers, [{from}]);
+                const members = this._convertMembersFromBytes(await promisify(decentralizedNationInstance.getAllMembers, [{from}]));
+                // const l = addresses.length;
+                // for (let i = 0; i < l; i++) {
+                //     members.push({
+                //         address: addresses[i],
+                //         username: this.base.web3.toUtf8(usernames[i]),
+                //         fullname: this.base.web3.toUtf8(fullnames[i]),
+                //         email: this.base.web3.toUtf8(emails[i]),
+                //         type: this.base.web3.toUtf8(types[i]),
+                //     });
+                // }
                 resolve(members)
             } catch (e) {
                 reject(e);
@@ -200,12 +217,18 @@ export default class DecentralizedNation implements IDecentralizedNation {
      * @param {string} from
      * @returns {Promise<any>}
      */
-    public getNameAndIpfsHashesForDAO(decentralizedNation: any, from: string) : Promise<any> {
+    public getNameAndIpfsHashesForDAO(decentralizedNation: any, from: string) : Promise<IDaoMeta> {
         return new Promise( async(resolve, reject) => {
             try {
-                let decentralizedNationInstance = await this.helpers._getDecentralizedNationInstance(decentralizedNation);
-                let data = await promisify(decentralizedNationInstance.getNameAndIpfsHashes,[{from}]);
-                resolve(data);
+                const decentralizedNationInstance = await this.helpers._getDecentralizedNationInstance(decentralizedNation);
+                const [name, constitution, metaIPFS] = await promisify(decentralizedNationInstance.getNameAndIpfsHashes,[{from}]);
+                console.log(name, constitution, metaIPFS);
+                const meta = JSON.parse((await promisify(this.base.ipfs.cat, [metaIPFS])).toString());
+                resolve({
+                    name,
+                    constitution,
+                    meta,
+                });
             } catch (e) {
                 reject(e);
             }
