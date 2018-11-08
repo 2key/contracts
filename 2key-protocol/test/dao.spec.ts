@@ -4,6 +4,7 @@ import {TwoKeyProtocol} from '../src';
 import contractsMeta from '../src/contracts';
 import createWeb3 from './_web3';
 import Sign from '../src/utils/sign';
+import {INationalVotingCampaign} from "../src/decentralizedNation/interfaces";
 
 const {env} = process;
 
@@ -280,12 +281,13 @@ describe('TwoKeyProtocol', () => {
         console.log(isMaintainer);
     }).timeout(30000);
 
+
     let daoAddress;
     it('should create new Decentralized nation', async() => {
         const DAOdata = {
-            nationName: 'Liberland',
-            ipfsHashForConstitution: 'QmPVDkkkB6TtbgbnjUXeCAafLKEe9LWFEqixz1YqimUgmz',
-            ipfsHashForDAOPublicInfo: 'QmXL6inxYQc233L3NEqS1LmMnrBDPcPFtNrk7bvYHhwy4Y',
+            nationName: "Liberland",
+            ipfsHashForConstitution: "0x1234",
+            ipfsHashForDAOPublicInfo: "0x1234",
             initialMemberAddresses: ['0xb3fa520368f2df7bed4df5185101f303f6c7decc',
                 '0xffcf8fdee72ac11b5c542428b35eef5769c409f0',],
             initialMemberTypes:['PRESIDENT', 'MINISTER'],
@@ -301,14 +303,41 @@ describe('TwoKeyProtocol', () => {
         console.log(daoAddress);
     }).timeout(30000);
 
-    it('should get all members of DAO', async() => {
-        const members = await twoKeyProtocol.DecentralizedNation.getAllMembersFromDAO(daoAddress);
-        console.log('MEMBERS', members);
+    // it('should get all members of DAO', async() => {
+    //     const members = await twoKeyProtocol.DecentralizedNation.getAllMembersForSpecificType(daoAddress, from);
+    //     console.log('MEMBERS', members);
+    // }).timeout(30000);
+
+
+    it('should get all members from DAO', async() => {
+        let members = await twoKeyProtocol.DecentralizedNation.getAllMembersFromDAO(daoAddress, from);
+        console.log(members);
     }).timeout(30000);
 
 
-    it('should get all data from DAO', async() => {
-        let data = await twoKeyProtocol.DecentralizedNation.getNameAndIpfsHashesForDAO(daoAddress);
-        console.log(data);
+    it('should add members by founder', async() => {
+        let newmember = '0xffcf8fdee72ac11b5c542428b35eef5769c409f0';
+        let memberType = 'PRESIDENT';
+        let txHash = await twoKeyProtocol.DecentralizedNation.addMemberByFounder(daoAddress,newmember, memberType, from);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+    }).timeout(30000);
+
+    it('should get all members from DAO', async() => {
+        let members = await twoKeyProtocol.DecentralizedNation.getAllMembersFromDAO(daoAddress, from);
+        console.log(members);
+    }).timeout(30000);
+
+
+    // NVC = National Voting Campaign which executes itself when voting is finished
+    it('should create  new  NVC', async() => {
+        const campaign : INationalVotingCampaign= {
+            eligibleRolesToVote: ['PRESIDENT','MINISTER'],
+            votingReason: 'Because Andrii is not good CSS dev :D',
+            subjectWeAreVotingFor: '0x22d491bde2303f2f43325b2108d26f1eaba1e32b',
+            newRoleForTheSubject: 'PRESIDENT',
+            campaignLengthInDays: 1,
+        };
+        let campaignId = await twoKeyProtocol.DecentralizedNation.createVotingCampaign(daoAddress,campaign,from);
+        console.log(campaignId);
     }).timeout(30000);
 });

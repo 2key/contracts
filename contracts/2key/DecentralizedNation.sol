@@ -290,7 +290,7 @@ contract DecentralizedNation {
         bytes32 _newRole,
         uint _votingCampaignLengthInDays,
         address twoKeyWeightedVoteContract
-    ) public {
+    ) public returns (uint) {
         uint id = memberId[msg.sender];
         Member memory m = members[id];
         require(isMemberTypeEligibleToCreateVotingCampaign[m.memberType]);
@@ -312,6 +312,7 @@ contract DecentralizedNation {
         votingContractAddressToNationalVotingCampaign[twoKeyWeightedVoteContract] = nvc;
         nationalVotingCampaigns.push(twoKeyWeightedVoteContract);
         numberOfVotingCamapignsAndPetitions++;
+        return (numberOfVotingCamapignsAndPetitions-1);
     }
 
 

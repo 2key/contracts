@@ -130,7 +130,7 @@ export default class DecentralizedNation implements IDecentralizedNation {
      * @param {string} from
      * @returns {Promise<any>}
      */
-    public getAllMembersFromDAO(decentralizedNation:any) : Promise<IMember[]> {
+    public getAllMembersFromDAO(decentralizedNation:any, from:string) : Promise<IMember[]> {
         /*
         * addresses[]
         * usernames[]: bytes
@@ -143,7 +143,7 @@ export default class DecentralizedNation implements IDecentralizedNation {
                 const decentralizedNationInstance = await this.helpers._getDecentralizedNationInstance(decentralizedNation);
                 // const members:IMember[] = [];
                 // const [ addresses, usernames, fullnames, emails, types ] = await promisify(decentralizedNationInstance.getAllMembers, [{from}]);
-                const members = this._convertMembersFromBytes(await promisify(decentralizedNationInstance.getAllMembers, []));
+                const members = this._convertMembersFromBytes(await promisify(decentralizedNationInstance.getAllMembers, [{from}]));
                 // const l = addresses.length;
                 // for (let i = 0; i < l; i++) {
                 //     members.push({
@@ -215,6 +215,7 @@ export default class DecentralizedNation implements IDecentralizedNation {
                memberType = this.base.web3.toHex(memberType);
                let decentralizedNationInstance = await this.helpers._getDecentralizedNationInstance(decentralizedNation);
                let txHash = await promisify(decentralizedNationInstance.addMembersByFounders,[newMemberAddress,memberType,{from}]);
+               console.log(txHash);
                resolve(txHash);
            } catch (e) {
                reject(e);
@@ -258,7 +259,7 @@ export default class DecentralizedNation implements IDecentralizedNation {
      * @param {number} timeout
      * @returns {Promise<string>}
      */
-    public createVotingCampaign(decentralizedNation: any, data: INationalVotingCampaign, from: string, { gasPrice, progressCallback, interval, timeout = 60000 }: ICreateOpts = {}) : Promise<string> {
+    public createVotingCampaign(decentralizedNation: any, data: INationalVotingCampaign, from: string, { gasPrice, progressCallback, interval, timeout = 60000 }: ICreateOpts = {}) : Promise<number> {
         return new Promise(async(resolve, reject) => {
 
             const decentralizedNationInstance = await this.helpers._getDecentralizedNationInstance(decentralizedNation);
@@ -271,11 +272,15 @@ export default class DecentralizedNation implements IDecentralizedNation {
                 gasPrice, progressCallback, interval, timeout
             });
 
-            let txHash = await promisify(decentralizedNationInstance.startVotingForChanging,[
+            for(let i=0; i<data.eligibleRolesToVote.length; i++) {
+                data.eligibleRolesToVote[i] = this.base.web3.toHex(data.eligibleRolesToVote[i]);
+            }
+
+            let campaignId = await promisify(decentralizedNationInstance.startVotingForChanging,[
                 data.eligibleRolesToVote,
                 data.votingReason,
                 data.subjectWeAreVotingFor,
-                data.newRoleForTheSubject,
+                this.base.web3.toHex(data.newRoleForTheSubject),
                 data.campaignLengthInDays,
                 addressOfVotingContract,
                 {
@@ -283,7 +288,8 @@ export default class DecentralizedNation implements IDecentralizedNation {
                     gasPrice,
                 }
             ]);
-            resolve(txHash);
+
+            resolve(campaignId);
         })
     }
 }
