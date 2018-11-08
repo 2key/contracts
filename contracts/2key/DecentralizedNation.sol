@@ -335,7 +335,7 @@ contract DecentralizedNation {
             }
             if(vote == false){
                 nvc.votesNo++;
-                nvc.votingResult += int(power);
+                nvc.votingResult -= int(power);
             }
         }
 

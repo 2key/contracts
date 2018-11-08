@@ -157,6 +157,9 @@ contract TwoKeyWeightedVoteContract is StandardToken, Ownable, CallCutted {
             // extract the vote (yes/no) and the weight of the vote from cut
             uint256 cut = influencer2cut[influencer];
             bool new_votter = !voted[influencer];
+            if(new_votter) {
+                allVoters.push(influencer);
+            }
             voted[influencer] = true;
             if (new_votter) {
                 total_vote++;
@@ -211,13 +214,9 @@ contract TwoKeyWeightedVoteContract is StandardToken, Ownable, CallCutted {
                 }
             }
         }
-        delete allVoters;
-        allVoters.length = 0;
-        for(uint k=0; k<voters.length; k++) {
-            allVoters.push(voters[k]);
-        }
         return voters;
     }
+
 
     function getVoteAndChoicePerAddress(address voter) public view returns (bool, uint) {
         return (weightedYes[voter], voted_weight[voter]);
