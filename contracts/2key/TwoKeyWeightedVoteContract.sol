@@ -17,11 +17,18 @@ contract TwoKeyWeightedVoteContract is StandardToken, Ownable, CallCutted {
         valid = true;
     }
 
+    address contractor;
+
     constructor(string _description, address _decentralizedNation, address erc20) Ownable() public {
         balances[msg.sender] = 1000000000000000000;
         description = _description;
         decentralizedNation = _decentralizedNation;
         erc20_token_sell_contract = erc20;
+        contractor = msg.sender;
+    }
+
+    function getContractorAddress() public view returns (address) {
+        return contractor;
     }
 
 

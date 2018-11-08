@@ -1,29 +1,33 @@
-import {ICreateOpts, ITwoKeyBase, ITwoKeyHelpers} from '../interfaces';
+import {ICreateOpts, ITwoKeyBase, ITwoKeyHelpers, ITwoKeyAcquisitionCampaign} from '../interfaces';
 import {
     IDaoMeta,
     IDecentralizedNation,
     IDecentralizedNationConstructor,
     IMember,
     INationalVotingCampaign,
-    IVotingCampaign
+    IVotingCampaign,
 } from "./interfaces";
 import {ITwoKeyUtils} from "../utils/interfaces";
 import {promisify} from "../utils";
 import contracts from '../contracts';
 import {ITwoKeyWeightedVoteConstructor} from "../veightedVote/interfaces";
 import {ITwoKeyWeightedVoteContract} from "../veightedVote";
+import {IJoinLinkOpts} from "../acquisition/interfaces";
+import Sign from '../utils/sign';
 
 export default class DecentralizedNation implements IDecentralizedNation {
     private readonly base: ITwoKeyBase;
     private readonly helpers: ITwoKeyHelpers;
     private readonly utils: ITwoKeyUtils;
     private readonly veightedVode: ITwoKeyWeightedVoteContract;
+    private readonly acquisitionCampaign: ITwoKeyAcquisitionCampaign;
 
-    constructor(twoKeyProtocol: ITwoKeyBase, helpers: ITwoKeyHelpers, utils: ITwoKeyUtils, veightedVote: ITwoKeyWeightedVoteContract) {
+    constructor(twoKeyProtocol: ITwoKeyBase, helpers: ITwoKeyHelpers, utils: ITwoKeyUtils, veightedVote: ITwoKeyWeightedVoteContract, acquisitionCampaign: ITwoKeyAcquisitionCampaign) {
         this.base = twoKeyProtocol;
         this.helpers = helpers;
         this.utils = utils;
         this.veightedVode = veightedVote;
+        this.acquisitionCampaign = acquisitionCampaign;
     }
 
     _convertMembersFromBytes(members: any): IMember[] {
@@ -292,7 +296,8 @@ export default class DecentralizedNation implements IDecentralizedNation {
                     }
                 ]);
                 await this.utils.getTransactionReceiptMined(txHash);
-                resolve(txHash);
+                const campaignPublicLinkKey = await this.acquisitionCampaign.join(addressOfVotingContract, from, {gasPrice});
+                resolve(campaignPublicLinkKey);
             } catch(e) {
                 reject(e);
             }
@@ -348,6 +353,80 @@ export default class DecentralizedNation implements IDecentralizedNation {
                }
                resolve(await Promise.all(promises));
            } catch(e) {
+               reject(e);
+           }
+        });
+    }
+
+    async plasma_bdfs(weightedVoteContract: any, contractor: string, start_address: string[], cb: (from: string) => void) {
+        for (let i = 0; i < start_address.length; i++) {
+            let from = start_address[i];
+            const weightedVoteContractInstance = await this.helpers._getWeightedVoteContract(weightedVoteContract);
+            const given_to = await promisify(this.base.twoKeyPlasmaEvents.get_visits_list, [from, weightedVoteContractInstance.address, contractor, {from: this.base.plasmaAddress}]);
+            if (given_to.length > 0) {
+                await this.plasma_bdfs(weightedVoteContract, contractor, given_to, cb)
+            } else {  // "from" is a leaf
+                await cb(from);
+            }
+        }
+    }
+
+    public countPlasmaVotes(weightedVoteContract: any, contractor: string): Promise<boolean> {
+        return new Promise<boolean>(async (resolve, reject) => {
+           try {
+               await this.plasma_bdfs(weightedVoteContract, contractor, [contractor], async (from) => {
+                   // check if "from" is off-chain
+                   const weightedVoteContractInstance = await this.helpers._getWeightedVoteContract(weightedVoteContract);
+                   let arcs = await promisify(weightedVoteContractInstance.balanceOf, [from]);
+                   if (arcs.toNumber()) return;
+                   let m = await promisify(this.base.twoKeyPlasmaEvents.visited_sig, [weightedVoteContractInstance.address, contractor, from]);
+                   console.log(`FROM=${from} SIG=${m}`);
+                   m = m.slice(2);  // remove 0x
+                   let version = m.slice(0, 2);
+                   let msg_len = (version == '01') ? 86 : 41;
+
+                   let r = (m.length - 2 * 21) % (2 * (65 + msg_len));
+                   m = m.slice(0, m.length - r);
+
+                   if (m.length > 40) {
+                       let first_address = `0x${m.slice(2, 42)}`;
+                       let first_public_key = await promisify(weightedVoteContractInstance.public_link_key, [first_address]);
+                       let cuts = Sign.validate_join(first_public_key, null, null, `0x${m}`);
+                       console.log(`cuts=${cuts.toString()}`);
+                       await promisify(weightedVoteContractInstance.transferSig, [`0x${m}`, { from: contractor }]);
+                   }
+               });
+               resolve(true);
+           } catch (e) {
+               reject(e);
+           }
+        });
+        //
+        // let total_vote = await c.total_vote();
+        // let voted_yes = await c.voted_yes();
+        // let voted_no = await c.voted_no();
+        // let weighted_yes = await c.weighted_yes();
+        // let weighted_no = await c.weighted_no();
+        // let total_weight = await c.total_weight();
+        // console.log('total_vote='+total_vote+' voted_yes='+voted_yes+' voted_no='+voted_no+'total_weight='+total_weight+' weighted_yes='+weighted_yes+' weighted_no='+weighted_no)
+    }
+
+
+
+    public join(campaign: any, from: string, { cut, gasPrice = this.base._getGasPrice(), referralLink, cutSign }: IJoinLinkOpts = {}): Promise<string> {
+        return new Promise<string>(async (resolve, reject) => {
+           try {
+               if (cut > 0 && cut <= 100) {
+                   cut = cut + 1
+               } else if (cut < 0 && cut >= -100) {
+                   cut = 255 + cut
+               } else if (cut != 255) {
+                   cut = 0
+               }
+               const cut_sign = await Sign.sign_cut2eteherum(cut, from, this.base.web3);
+               const hash = await this.acquisitionCampaign.join(campaign, from, { cut, gasPrice, referralLink, cutSign: cut_sign });
+               resolve(hash);
+           } catch (e) {
                reject(e);
            }
         });

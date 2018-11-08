@@ -333,7 +333,7 @@ function sign_plasma2eteherum(plasma_address: string, my_address: string, web3: 
     })
 }
 
-function sign_cut2eteherum(userCut: number, my_address: string, web3: any) {
+function sign_cut2eteherum(userCut: number, my_address: string, web3: any): Promise<string> {
     const cut = '0x' + Buffer.from([userCut]).toString('hex');
     let msgParams = [
         {

@@ -166,7 +166,7 @@ export class TwoKeyProtocol {
         this.Utils = new Index(twoKeyBase, this.Helpers);
         this.AcquisitionCampaign = new AcquisitionCampaign(twoKeyBase, this.Helpers, this.Utils, this.ERC20);
         this.TwoKeyWeightedVoteContract = new TwoKeyWeightedVoteContract(twoKeyBase, this.Helpers, this.Utils);
-        this.DecentralizedNation = new DecentralizedNation(twoKeyBase, this.Helpers, this.Utils, this.TwoKeyWeightedVoteContract);
+        this.DecentralizedNation = new DecentralizedNation(twoKeyBase, this.Helpers, this.Utils, this.TwoKeyWeightedVoteContract, this.AcquisitionCampaign);
         this.Congress = new TwoKeyCongress(twoKeyBase, this.Helpers, this.Utils);
         this.Lockup = new Lockup(twoKeyBase, this.Helpers, this.AcquisitionCampaign);
     }

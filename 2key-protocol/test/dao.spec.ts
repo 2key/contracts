@@ -117,6 +117,7 @@ const eventEmited = (error, event) => {
 const addresses = [env.AYDNEP_ADDRESS, env.GMAIL_ADDRESS, env.TEST4_ADDRESS, env.RENATA_ADDRESS, env.UPORT_ADDRESS, env.GMAIL2_ADDRESS, env.AYDNEP2_ADDRESS, env.TEST_ADDRESS];
 
 let twoKeyProtocol: TwoKeyProtocol;
+let referralLink;
 
 const printBalances = (done) => {
     Promise.all([
@@ -349,13 +350,15 @@ describe('TwoKeyProtocol', () => {
             campaignLengthInDays: 1,
             flag: 0,
         };
-        let campaignId = await twoKeyProtocol.DecentralizedNation.createCampaign(daoAddress,campaign,from);
-        console.log(campaignId);
+        referralLink = await twoKeyProtocol.DecentralizedNation.createCampaign(daoAddress,campaign,from);
+        console.log('VOTE PUBLIC LINK', referralLink);
     }).timeout(30000);
 
+    let votingCampaign;
     it('get all voting campaigns for DAO', async() => {
         let campaigns = await twoKeyProtocol.DecentralizedNation.getAllCampaigns(daoAddress);
         console.log(campaigns);
+        votingCampaign = campaigns[0].votingCampaignContractAddress;
     }).timeout(30000);
 
     it('it should check role for create voting', async() => {
@@ -363,8 +366,50 @@ describe('TwoKeyProtocol', () => {
         console.log(isAbleToStartVoting);
     }).timeout(30000);
 
-    it('should join link and transfer sig', async() => {
+    it('should join link from gmail', async() => {
+        const {web3, address} = web3switcher.gmail();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            plasmaPK: Sign.generatePrivateKey().toString('hex'),
+        });
+        referralLink = await twoKeyProtocol.DecentralizedNation.join(votingCampaign, from, { cut: 50, referralLink });
+        console.log('GMAIL LINK', referralLink);
+    }).timeout(30000);
 
+    it('should join link from test4', async() => {
+        const {web3, address} = web3switcher.test4();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            plasmaPK: Sign.generatePrivateKey().toString('hex'),
+        });
+        referralLink = await twoKeyProtocol.DecentralizedNation.join(votingCampaign, from, { cut: 100, referralLink });
+        console.log('TEST4 LINK', referralLink);
+    }).timeout(30000);
+
+    it('should calculate vote', async() => {
+        const {web3, address} = web3switcher.aydnep();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            plasmaPK: Sign.generatePrivateKey().toString('hex'),
+        });
+        const result = await twoKeyProtocol.DecentralizedNation.countPlasmaVotes(votingCampaign, from);
+        // referralLink = await twoKeyProtocol.DecentralizedNation.join(votingCampaign, from, { cut: 100, referralLink });
+        console.log('CALCULATED', result);
     }).timeout(30000);
     /*
             '0xb3fa520368f2df7bed4df5185101f303f6c7decc',
