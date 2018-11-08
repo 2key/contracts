@@ -268,15 +268,15 @@ export default class DecentralizedNation implements IDecentralizedNation {
                 const decentralizedNationInstance = await this.helpers._getDecentralizedNationInstance(decentralizedNation);
                 let addressOfVoteToken = await promisify(decentralizedNationInstance.votingToken,[]);
 
-                console.log("ADDRESS OF VOTE TOKEN: " + addressOfVoteToken);
+                this.base._log("ADDRESS OF VOTE TOKEN: " + addressOfVoteToken);
 
                 const dataForVotingContract : ITwoKeyWeightedVoteConstructor = {
                     descriptionForVoting: data.votingReason,
                     addressOfDAO: decentralizedNationInstance.address,
-                    erc20: addressOfVoteToken
+                    erc20: '0xae6be7e59a5e8cbbc943e9fbd39fd5bde8e0f131'
                 };
 
-                console.log("HERE");
+                this.base._log("HERE");
                 let addressOfVotingContract = await this.veightedVode.createWeightedVoteContract(dataForVotingContract, from, {
                     gasPrice, progressCallback, interval, timeout
                 });
