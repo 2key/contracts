@@ -32,6 +32,15 @@ export default class DecentralizedNation implements IDecentralizedNation {
         })
     }
 
+    /**
+     *
+     * @param {string} username
+     * @param {string} address
+     * @param {string} fullName
+     * @param {string} email
+     * @param {string} from
+     * @returns {Promise<string>}
+     */
     public populateData(username:string, address:string, fullName:string, email:string, from: string): Promise<string> {
         return new Promise(async(resolve,reject) => {
             try {
@@ -54,6 +63,12 @@ export default class DecentralizedNation implements IDecentralizedNation {
         })
     }
 
+    /**
+     *
+     * @param {IDecentralizedNationConstructor} data
+     * @param {string} from
+     * @returns {Promise<string>}
+     */
     public createDecentralizedNation(data: IDecentralizedNationConstructor, from: string) : Promise<string> {
         return new Promise(async(resolve,reject) => {
             try {
@@ -81,6 +96,12 @@ export default class DecentralizedNation implements IDecentralizedNation {
         })
     }
 
+    /**
+     *
+     * @param decentralizedNation
+     * @param {string} from
+     * @returns {Promise<any>}
+     */
     public getAllMembersFromDAO(decentralizedNation:any, from:string) : Promise<any> {
         return new Promise(async(resolve,reject) => {
             try {
@@ -94,11 +115,19 @@ export default class DecentralizedNation implements IDecentralizedNation {
     }
 
 
-    public getAllMembersForSpecificType(decentralizedNation:any, type:string, from:string) : Promise<any> {
+    /**
+     *
+     * @param decentralizedNation
+     * @param {string} memberType
+     * @param {string} from
+     * @returns {Promise<any>}
+     */
+    public getAllMembersForSpecificType(decentralizedNation:any, memberType:string, from:string) : Promise<any> {
         return new Promise(async(resolve,reject) => {
            try {
                 let decentralizedNationInstance = await this.helpers._getDecentralizedNationInstance(decentralizedNation);
-                let allMembersForType = await promisify(decentralizedNationInstance.getAllMembersForType,[type,{from}]);
+               memberType = this.base.web3.toHex(memberType);
+                let allMembersForType = await promisify(decentralizedNationInstance.getAllMembersForType,[memberType,{from}]);
                 resolve(allMembersForType);
            } catch (e) {
                reject(e);
@@ -106,4 +135,43 @@ export default class DecentralizedNation implements IDecentralizedNation {
         });
     }
 
+    /**
+     *
+     * @param decentralizedNation
+     * @param {string} address
+     * @param {string} from
+     * @returns {Promise<number>}
+     */
+    public getVotingPointsForTheMember(decentralizedNation: any, address: string, from: string) : Promise<number> {
+        return new Promise (async(resolve,reject) => {
+            try {
+                let decentralizedNationInstance = await this.helpers._getDecentralizedNationInstance(decentralizedNation);
+                let votingPoints = await promisify(decentralizedNationInstance.getMembersVotingPoints,[address,{from}]);
+                resolve(votingPoints);
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
+
+    /**
+     *
+     * @param decentralizedNation
+     * @param {string} newMemberAddress
+     * @param {string} memberType
+     * @param {string} from
+     * @returns {Promise<string>}
+     */
+    public addMemberByFounder(decentralizedNation: any, newMemberAddress: string, memberType:string, from:string) : Promise<string> {
+        return new Promise(async(resolve,reject) => {
+           try {
+               memberType = this.base.web3.toHex(memberType);
+               let decentralizedNationInstance = await this.helpers._getDecentralizedNationInstance(decentralizedNation);
+               let txHash = await promisify(decentralizedNationInstance.addMembersByFounders,[newMemberAddress,memberType,{from}]);
+               resolve(txHash);
+           } catch (e) {
+               reject(e);
+           }
+        });
+    }
 }

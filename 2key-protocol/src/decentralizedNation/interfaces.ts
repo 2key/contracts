@@ -4,6 +4,8 @@ export interface IDecentralizedNation {
     check: (address: string,from:string) => Promise<boolean>,
     getAllMembersFromDAO: (decentralizedNation:any, from:string) => Promise<any>,
     getAllMembersForSpecificType: (decentralizedNation:any, type:string, from:string) => Promise<any>,
+    getVotingPointsForTheMember: (decentralizedNation: any, address: string, from: string) => Promise<number>,
+    addMemberByFounder: (decentralizedNation: any, newMemberAddress: string, memberType:string, from:string) => Promise<string>,
 }
 
 
