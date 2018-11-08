@@ -130,7 +130,7 @@ export default class DecentralizedNation implements IDecentralizedNation {
      * @param {string} from
      * @returns {Promise<any>}
      */
-    public getAllMembersFromDAO(decentralizedNation:any, from:string) : Promise<IMember[]> {
+    public getAllMembersFromDAO(decentralizedNation:any) : Promise<IMember[]> {
         /*
         * addresses[]
         * usernames[]: bytes
@@ -143,7 +143,7 @@ export default class DecentralizedNation implements IDecentralizedNation {
                 const decentralizedNationInstance = await this.helpers._getDecentralizedNationInstance(decentralizedNation);
                 // const members:IMember[] = [];
                 // const [ addresses, usernames, fullnames, emails, types ] = await promisify(decentralizedNationInstance.getAllMembers, [{from}]);
-                const members = this._convertMembersFromBytes(await promisify(decentralizedNationInstance.getAllMembers, [{from}]));
+                const members = this._convertMembersFromBytes(await promisify(decentralizedNationInstance.getAllMembers, []));
                 // const l = addresses.length;
                 // for (let i = 0; i < l; i++) {
                 //     members.push({
