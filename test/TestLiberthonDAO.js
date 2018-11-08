@@ -149,7 +149,6 @@ contract('DecentralizedNation', async(accounts,deployer) => {
     it('should return all members with specific type', async() => {
        let memberAddresses = await decentralizedNationInstance.getAllMembersForType(fromUtf8('FOUNDERS'));
        assert.equal(memberAddresses[0], accounts[0]);
-       assert.equal(memberAddresses[1], accounts[1]);
     });
 
 
@@ -211,6 +210,8 @@ contract('DecentralizedNation', async(accounts,deployer) => {
         let newMemberType = fromUtf8('PRESIDENT');
 
         await decentralizedNationInstance.addMembersByFounders(newMemberAddress,newMemberType, {from: accounts[0]});
+        await decentralizedNationInstance.addMembersByFounders(accounts[8],newMemberType, {from: accounts[0]});
+        await decentralizedNationInstance.addMembersByFounders(accounts[9],newMemberType, {from: accounts[0]});
 
         let memberAddress,
             username,
@@ -238,7 +239,7 @@ contract('DecentralizedNation', async(accounts,deployer) => {
         console.log(votedNo);
 
         addresses = await decentralizedNationInstance.executeVoting(0,'0x0190f8bf6a479f320ead074411a4b0e7944ea8c9c1ecb4c13502f09f8cb5ef2c832d7b629d7b0cb056a3349233b8feb593e9e4550e420cbbfd5b0b160bdf52b44621be72d0eb1f3df2a4818677ac0ea165723f5cd41ccdf331900d06b5c02485570d733cb928354eca69857850802280320560b01c44cd3c02c32fa9028cf616dd92a47117abd152adfaa29aa097373024f95de3af53642116568a2453d4f8a91a3efa8b9854e10c6da29d59');
-        console.log(addresses);
+
         votedYes = await weightedVoteContract.voted_yes();
         console.log(votedYes);
 
