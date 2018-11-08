@@ -9,6 +9,7 @@ contract DecentralizedNation {
     string public ipfsForConstitution;
     string public ipfsHashForDAOPublicInfo;
 
+
     bytes32[] public memberTypes;
 
     address initialFounder;
@@ -324,6 +325,10 @@ contract DecentralizedNation {
         //TODO: Validate all Participants roles and exclude ones not eligible to vote
         //TODO: If any participant is not even a member of DAO exclude his vote
         //TODO: At the end calculate voting points and sum them
+    }
+
+    function getNameAndIpfsHashes() public view returns (string,string,string) {
+        return (nationName, ipfsForConstitution, ipfsHashForDAOPublicInfo);
     }
 
 }

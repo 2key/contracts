@@ -6,6 +6,7 @@ export interface IDecentralizedNation {
     getAllMembersForSpecificType: (decentralizedNation:any, type:string, from:string) => Promise<any>,
     getVotingPointsForTheMember: (decentralizedNation: any, address: string, from: string) => Promise<number>,
     addMemberByFounder: (decentralizedNation: any, newMemberAddress: string, memberType:string, from:string) => Promise<string>,
+    getNameAndIpfsHashesForDAO: (decentralizedNation: any, from: string) => Promise<any>,
 }
 
 

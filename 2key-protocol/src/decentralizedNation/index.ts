@@ -174,4 +174,23 @@ export default class DecentralizedNation implements IDecentralizedNation {
            }
         });
     }
+
+
+    /**
+     *
+     * @param decentralizedNation
+     * @param {string} from
+     * @returns {Promise<any>}
+     */
+    public getNameAndIpfsHashesForDAO(decentralizedNation: any, from: string) : Promise<any> {
+        return new Promise( async(resolve, reject) => {
+            try {
+                let decentralizedNationInstance = await this.helpers._getDecentralizedNationInstance(decentralizedNation);
+                let data = await promisify(decentralizedNationInstance.getNameAndIpfsHashes,[{from}]);
+                resolve(data);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
 }
