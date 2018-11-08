@@ -51,10 +51,24 @@ contract DecentralizedNation {
         bool finished;
         uint votesYes;
         uint votesNo;
-        uint votingResult;
+        int votingResult;
         uint votingCampaignLengthInDays;
     }
 
+    function getNVC(address votingCampaignAddress) public view returns (bytes32[], string, address, bytes32, bool, uint, uint, int, uint) {
+        NationalVotingCampaign memory nvc = votingContractAddressToNationalVotingCampaign[votingCampaignAddress];
+        return (
+            nvc.eligibleToVote,
+            nvc.votingReason,
+            nvc.targetOfVoting,
+            nvc.newRole,
+            nvc.finished,
+            nvc.votesYes,
+            nvc.votesNo,
+            nvc.votingResult,
+            nvc.votingCampaignLengthInDays
+        );
+    }
     struct VotingCampaignToChangeConstitution {
         string votingReason;
         bytes32 newHashOfConstitution;
@@ -289,12 +303,16 @@ contract DecentralizedNation {
     }
 
 
+
+
     function getResultsForVoting(uint nvc_id) public view returns (uint,uint,uint,uint,uint,uint) {
         address nationalVotingCampaignContractAddress = nationalVotingCampaigns[nvc_id];
-        NationalVotingCampaign memory nvc = votingContractAddressToNationalVotingCampaign[nationalVotingCampaignContractAddress];
-
         return ITwoKeyWeightedVoteContract(nationalVotingCampaignContractAddress).getDynamicData();
     }
+
+
+
+
 
     function executeVoting(uint nvc_id, bytes signature) public returns (uint) {
         //Will return true if executed or false if didn't meet the criteria so we'll be able to show to user why
@@ -303,29 +321,29 @@ contract DecentralizedNation {
 
         require(block.timestamp > nvc.votingCampaignLengthInDays);
 
-        address [] memory allParticipants = ITwoKeyWeightedVoteContract(nationalVotingCampaignContractAddress).transferSig(signature);
+        address [] memory allParticipants = ITwoKeyWeightedVoteContract(nationalVotingCampaignContractAddress).getAllVoters();
 
-//        for(uint i=0; i<allParticipants.length; i++) {
-//            uint vote;
-//            uint power;
-//
-//            ITwoKeyWeightedVoteContract(nationalVotingCampaignContractAddress).getVoteAndChoicePerAddress(allParticipants[i]);
-//            if(vote == true) {
-//                nvc.voted_yes++;
-//                nvc.votingResult += power;
-//            } else {
-//                nvc.voted_no++;
-//                nvc.votingResult -= power;
-//            }
-//        }
+        for(uint i=0; i<allParticipants.length; i++) {
+            bool vote;
+            uint power;
+
+            (vote,power) = ITwoKeyWeightedVoteContract(nationalVotingCampaignContractAddress).getVoteAndChoicePerAddress(allParticipants[i]);
+
+            if(vote == true) {
+                nvc.votesYes++;
+                nvc.votingResult += int(power);
+            }
+            if(vote == false){
+                nvc.votesNo++;
+                nvc.votingResult += int(power);
+            }
+        }
 
         votingContractAddressToNationalVotingCampaign[nationalVotingCampaignContractAddress] = nvc;
-
-
-        //TODO: Validate all Participants roles and exclude ones not eligible to vote
-        //TODO: If any participant is not even a member of DAO exclude his vote
-        //TODO: At the end calculate voting points and sum them
     }
+
+
+
 
     function getNameAndIpfsHashes() public view returns (string,string,string) {
         return (nationName, ipfsForConstitution, ipfsHashForDAOPublicInfo);
