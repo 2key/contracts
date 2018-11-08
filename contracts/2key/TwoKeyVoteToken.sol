@@ -56,19 +56,40 @@ contract TwoKeyVoteToken is StandardToken, Ownable {
         _;
     }
 
-    
+
     /**
     * @dev Gets the balance of the specified address.
     * @param _owner The address to query the the balance of.
     * @return An uint256 representing the amount owned by the passed address.
     */
+    /*
+
+    */
     function balanceOf(address _owner) public view returns (uint256) {
-        uint balance = IDecentralizedNation(decentralizedNation).getMembersVotingPoints(_owner);
-        return balance;
+        if (visited[_owner]) {
+            return balances[_owner];
+        } else {
+            uint id = IDecentralizedNation(decentralizedNation).getMemberid(_owner);
+            if(id != 0) {
+                uint balance = IDecentralizedNation(decentralizedNation).getMembersVotingPoints(_owner);
+                return balance;
+            } else {
+                return 0;
+            }
+        }
     }
 
-    function checkBalance(address _owner) public {
-        balances[_owner] = IDecentralizedNation(decentralizedNation).getMembersVotingPoints(_owner);
+    function checkBalance(address _owner) internal returns (uint256){
+        if (visited[_owner]) {
+            return balances[_owner];
+        }
+
+        visited[_owner] = true;
+        uint id = IDecentralizedNation(decentralizedNation).getMemberid(_owner);
+        if(id != 0) {
+             balances[_owner] = IDecentralizedNation(decentralizedNation).getMembersVotingPoints(_owner);
+        }
+        return balances[_owner];
     }
     /**
      * @dev Transfer tokens from one address to another
@@ -82,7 +103,7 @@ contract TwoKeyVoteToken is StandardToken, Ownable {
         uint256 _value
     )
     public
-//    onlyAllowedContracts
+        onlyOwner
     returns (bool)
     {
         checkBalance(_from);
@@ -110,7 +131,7 @@ contract TwoKeyVoteToken is StandardToken, Ownable {
     view
     returns (uint256)
     {
-        return balanceOf(_owner);  // TODO this is true only if the _spender is a valid contract
+        return balanceOf(_owner);
     }
 
 

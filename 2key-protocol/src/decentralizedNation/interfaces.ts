@@ -27,14 +27,8 @@ export interface IDaoMeta {
     constitution: string,
     meta: any,
 }
-/*
-bytes32[] eligibleMemberTypes,
-        string description,
-        address _memberToChangeRole,
-        bytes32 _newRole,
-        uint _votingCampaignLengthInDays,
-        address twoKeyWeightedVoteContract
- */
+
+
 export interface INationalVotingCampaign {
     eligibleRolesToVote: string[], // bytes32
     votingReason: string, //Just some text

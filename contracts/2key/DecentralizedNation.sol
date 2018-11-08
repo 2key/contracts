@@ -19,6 +19,11 @@ contract DecentralizedNation {
     bool initialized = false;
 
     mapping(address => uint) public memberId;
+
+    function getMemberid(address _member) public view returns (uint) {
+        return memberId[_member];
+    }
+
     mapping(bytes32 => uint) public limitOfMembersPerType;
     mapping(bytes32 => address[]) public memberTypeToMembers;
 
@@ -29,12 +34,16 @@ contract DecentralizedNation {
     mapping(address => uint) votingPoints;
     mapping(address => uint) numberOfVotingPetitionDuringLastRefill;
     mapping(bytes32 => bool) public isMemberTypeEligibleToCreateVotingCampaign;
-    address [] public nationalVotingCampaigns;
 
+    address [] public nationalVotingCampaigns;
+    address [] public nationalPetitionCampaigns;
+
+    mapping(address => PetitionCampaign) public votingContractAddressToNationalPetitioningCampaign;
     mapping(address => NationalVotingCampaign) public votingContractAddressToNationalVotingCampaign;
 
     uint minimalNumberOfPositiveVotersForVotingCampaign;
     uint minimalPercentOfVotersForVotingCampaign;
+
     uint minimalNumberOfVotersForPetitioningCampaign;
     uint minimalPercentOfVotersForPetitioningCampaign;
 
@@ -57,9 +66,8 @@ contract DecentralizedNation {
     }
 
 
-    struct ConstitutionCampaign {
+    struct PetitionCampaign {
         string votingReason;
-        bytes32 newHashOfConstitution;
         bool finished;
         uint votesYes;
         uint votesNo;
@@ -284,6 +292,28 @@ contract DecentralizedNation {
         return votingPoints[_memberAddress];
     }
 
+    function startNationalPetitioningCampaign(
+        string description,
+        uint votingCampaignLengthInDays,
+        address twoKeyWeightedVoteContract
+    ) public {
+        require(memberId[msg.sender] != 0);
+
+        PetitionCampaign memory p =  PetitionCampaign({
+            votingReason : description,
+            finished: false,
+            votesYes: 0,
+            votesNo: 0,
+            votingResult: 0,
+            votingCampaignLengthInDays: votingCampaignLengthInDays
+        });
+        ITwoKeyWeightedVoteContract(twoKeyWeightedVoteContract).setValid();
+        votingContractAddressToNationalPetitioningCampaign[twoKeyWeightedVoteContract] = p;
+        nationalPetitionCampaigns.push(twoKeyWeightedVoteContract);
+        numberOfVotingCamapignsAndPetitions++;
+    }
+
+
     function startVotingForChanging(
         bytes32[] eligibleMemberTypes,
         string description,
@@ -291,7 +321,7 @@ contract DecentralizedNation {
         bytes32 _newRole,
         uint _votingCampaignLengthInDays,
         address twoKeyWeightedVoteContract
-    ) public returns (uint) {
+    ) public {
         uint id = memberId[msg.sender];
         Member memory m = members[id];
         require(isMemberTypeEligibleToCreateVotingCampaign[m.memberType]);
@@ -313,7 +343,6 @@ contract DecentralizedNation {
         votingContractAddressToNationalVotingCampaign[twoKeyWeightedVoteContract] = nvc;
         nationalVotingCampaigns.push(twoKeyWeightedVoteContract);
         numberOfVotingCamapignsAndPetitions++;
-        return (numberOfVotingCamapignsAndPetitions-1);
     }
 
 
