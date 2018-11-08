@@ -56,8 +56,7 @@ contract TwoKeyVoteToken is StandardToken, Ownable {
         _;
     }
 
-
-
+    
     /**
     * @dev Gets the balance of the specified address.
     * @param _owner The address to query the the balance of.
@@ -69,7 +68,7 @@ contract TwoKeyVoteToken is StandardToken, Ownable {
     }
 
     function checkBalance(address _owner) public {
-        balances[_owner] = 1000000000000000000;
+        balances[_owner] = IDecentralizedNation(decentralizedNation).getMembersVotingPoints(_owner);
     }
     /**
      * @dev Transfer tokens from one address to another
