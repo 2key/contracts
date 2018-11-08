@@ -272,11 +272,12 @@ export default class DecentralizedNation implements IDecentralizedNation {
                 gasPrice, progressCallback, interval, timeout
             });
 
+
             for(let i=0; i<data.eligibleRolesToVote.length; i++) {
                 data.eligibleRolesToVote[i] = this.base.web3.toHex(data.eligibleRolesToVote[i]);
             }
 
-            let campaignId = await promisify(decentralizedNationInstance.startVotingForChanging,[
+            let txHash = await promisify(decentralizedNationInstance.startVotingForChanging,[
                 data.eligibleRolesToVote,
                 data.votingReason,
                 data.subjectWeAreVotingFor,
@@ -288,8 +289,14 @@ export default class DecentralizedNation implements IDecentralizedNation {
                     gasPrice,
                 }
             ]);
+            await this.utils.getTransactionReceiptMined(txHash);
 
-            resolve(campaignId);
+            let addressOfVoting = await promisify(decentralizedNationInstance.nationalVotingCampaigns,[0]);
+
+            let nvc = await promisify(decentralizedNationInstance.votingContractAddressToNationalVotingCampaign,[addressOfVoting])
+            console.log("CAMPAIGN ID: " + addressOfVoting);
+            console.log(nvc);
+            resolve(addressOfVoting);
         })
     }
 }
