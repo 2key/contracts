@@ -379,6 +379,7 @@ export default class DecentralizedNation implements IDecentralizedNation {
                    const weightedVoteContractInstance = await this.helpers._getWeightedVoteContract(weightedVoteContract);
                    let arcs = await promisify(weightedVoteContractInstance.balanceOf, [from]);
                    if (arcs.toNumber()) return;
+                   console.log('visited_sig', weightedVoteContractInstance.address, contractor, from);
                    let m = await promisify(this.base.twoKeyPlasmaEvents.visited_sig, [weightedVoteContractInstance.address, contractor, from]);
                    console.log(`FROM=${from} SIG=${m}`);
                    m = m.slice(2);  // remove 0x
@@ -413,7 +414,7 @@ export default class DecentralizedNation implements IDecentralizedNation {
 
 
 
-    public join(campaign: any, from: string, { cut, gasPrice = this.base._getGasPrice(), referralLink, cutSign }: IJoinLinkOpts = {}): Promise<string> {
+    public join(campaign: any, from: string, { cut, gasPrice = this.base._getGasPrice(), referralLink }: IJoinLinkOpts = {}): Promise<string> {
         return new Promise<string>(async (resolve, reject) => {
            try {
                if (cut > 0 && cut <= 100) {
@@ -424,11 +425,24 @@ export default class DecentralizedNation implements IDecentralizedNation {
                    cut = 0
                }
                const cut_sign = await Sign.sign_cut2eteherum(cut, from, this.base.web3);
+               console.log('JOIN', await this.utils.getOffchainDataFromIPFSHash(referralLink));
                const hash = await this.acquisitionCampaign.join(campaign, from, { cut, gasPrice, referralLink, cutSign: cut_sign });
                resolve(hash);
            } catch (e) {
                reject(e);
            }
         });
+    }
+
+    public getVotingResults(weightedVoteContract: any): Promise<any> {
+        return new Promise<any>(async (resolve, reject) => {
+            try {
+                const weightedVoteContractInstance = await this.helpers._getWeightedVoteContract(weightedVoteContract);
+                const results = await promisify(weightedVoteContractInstance.getDynamicData, []);
+                resolve(results);
+            } catch (e) {
+                reject(e);
+            }
+        })
     }
 }
