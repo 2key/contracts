@@ -69,7 +69,7 @@ contract TwoKeyVoteToken is StandardToken, Ownable {
     }
 
     function checkBalance(address _owner) public {
-        balances[_owner] = 1000000000000000000;
+        balances[_owner] = IDecentralizedNation(decentralizedNation).getMembersVotingPoints(_owner);
     }
     /**
      * @dev Transfer tokens from one address to another

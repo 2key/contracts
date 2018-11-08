@@ -210,7 +210,7 @@ contract('DecentralizedNation', async(accounts,deployer) => {
         let newMemberType = fromUtf8('PRESIDENT');
 
         await decentralizedNationInstance.addMembersByFounders(newMemberAddress,newMemberType, {from: accounts[0]});
-        await decentralizedNationInstance.addMembersByFounders(accounts[8],newMemberType, {from: accounts[0]});
+        await decentralizedNationInstance.addMembersByFounders(accounts[8],fromUtf8('MINISTER'), {from: accounts[0]});
         await decentralizedNationInstance.addMembersByFounders(accounts[9],newMemberType, {from: accounts[0]});
 
         console.log(accounts[7],accounts[8],accounts[9]);

@@ -49,25 +49,13 @@ contract DecentralizedNation {
         bool finished;
         uint votesYes;
         uint votesNo;
-        int votingResult;
+        int votingResultForYes;
+        int votingResultForNo;
         uint votingCampaignLengthInDays;
     }
 
-    function getNVC(address votingCampaignAddress) public view returns (bytes32[], string, address, bytes32, bool, uint, uint, int, uint) {
-        NationalVotingCampaign memory nvc = votingContractAddressToNationalVotingCampaign[votingCampaignAddress];
-        return (
-            nvc.eligibleToVote,
-            nvc.votingReason,
-            nvc.targetOfVoting,
-            nvc.newRole,
-            nvc.finished,
-            nvc.votesYes,
-            nvc.votesNo,
-            nvc.votingResult,
-            nvc.votingCampaignLengthInDays
-        );
-    }
-    struct VotingCampaignToChangeConstitution {
+
+    struct ConstitutionCampaign {
         string votingReason;
         bytes32 newHashOfConstitution;
         bool finished;
@@ -281,7 +269,6 @@ contract DecentralizedNation {
         return (allMemberAddresses, allMemberUsernames, allMemberFullNames, allMemberEmails, allMemberTypes);
     }
 
-
     function getAllMembersForType(bytes32 memberType) public view returns (address[]) {
         return memberTypeToMembers[memberType];
     }
@@ -293,7 +280,6 @@ contract DecentralizedNation {
     function getMembersVotingPoints(address _memberAddress) public view returns (uint) {
         return votingPoints[_memberAddress];
     }
-
 
     function startVotingForChanging(
         bytes32[] eligibleMemberTypes,
@@ -315,7 +301,8 @@ contract DecentralizedNation {
             finished: false,
             votesYes: 0,
             votesNo: 0,
-            votingResult: 0,
+            votingResultForYes: 0,
+            votingResultForNo: 0,
             votingCampaignLengthInDays: block.timestamp + _votingCampaignLengthInDays * (1 days)
         });
 
@@ -347,32 +334,49 @@ contract DecentralizedNation {
         address [] memory allParticipants = ITwoKeyWeightedVoteContract(nationalVotingCampaignContractAddress).getAllVoters();
 
         for(uint i=0; i<allParticipants.length; i++) {
-                bool vote;
-                uint power;
-                bytes32 memberType = memberAddressToMemberType[allParticipants[i]];
-                bool isEligibleToVote = false;
-                for(uint j=0; j<nvc.eligibleToVote.length; j++) {
-                    if(memberType == nvc.eligibleToVote[j]) {
-                        isEligibleToVote = true;
-                    }
-                }
-                if(isEligibleToVote) {
-                    (vote,power) = ITwoKeyWeightedVoteContract(nationalVotingCampaignContractAddress).getVoteAndChoicePerAddress(allParticipants[i]);
-
-                    if(vote == true) {
-                        nvc.votesYes++;
-                        nvc.votingResult += int(power);
-                    }
-                    if(vote == false){
-                        nvc.votesNo++;
-                        nvc.votingResult -= int(power);
-                    }
+            bool vote;
+            uint power;
+            bytes32 memberType = memberAddressToMemberType[allParticipants[i]];
+            bool isEligibleToVote = false;
+            for(uint j=0; j<nvc.eligibleToVote.length; j++) {
+                if(memberType == nvc.eligibleToVote[j]) {
+                    isEligibleToVote = true;
                 }
             }
+            if(isEligibleToVote) {
+                (vote,power) = ITwoKeyWeightedVoteContract(nationalVotingCampaignContractAddress).getVoteAndChoicePerAddress(allParticipants[i]);
+
+                if(vote == true) {
+                    nvc.votesYes++;
+                    nvc.votingResultForYes += int(power);
+                }
+                if(vote == false){
+                    nvc.votesNo++;
+                    nvc.votingResultForNo += int(power);
+                }
+            }
+        }
+        nvc.finished = true;
         votingContractAddressToNationalVotingCampaign[nationalVotingCampaignContractAddress] = nvc;
+
     }
 
 
+    function getNVC(address votingCampaignAddress) public view returns (bytes32[], string, address, bytes32, bool, uint, uint, int, int, uint) {
+        NationalVotingCampaign memory nvc = votingContractAddressToNationalVotingCampaign[votingCampaignAddress];
+        return (
+        nvc.eligibleToVote,
+        nvc.votingReason,
+        nvc.targetOfVoting,
+        nvc.newRole,
+        nvc.finished,
+        nvc.votesYes,
+        nvc.votesNo,
+        nvc.votingResultForYes,
+        nvc.votingResultForNo,
+        nvc.votingCampaignLengthInDays
+        );
+    }
 
 
     function getNameAndIpfsHashes() public view returns (string,string,string) {
