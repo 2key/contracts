@@ -847,13 +847,18 @@ describe('TwoKeyProtocol', () => {
             limitsPerMemberType: [10,10]
         };
 
-        daoAddress = await twoKeyProtocol.DecentralizedNation.createDecentralizedNation(DAOdata,from);
+        daoAddress = await twoKeyProtocol.DecentralizedNation.createDecentralizedNation(DAOdata, from);
         console.log(daoAddress);
+    }).timeout(30000);
+
+    it('should get all members of DAO', async() => {
+        const members = await twoKeyProtocol.DecentralizedNation.getAllMembersFromDAO(daoAddress, from);
+        console.log('MEMBERS', members);
     }).timeout(30000);
 
 
     it('should get all members from DAO', async() => {
         let members = await twoKeyProtocol.DecentralizedNation.getAllMembersFromDAO(daoAddress, from);
         console.log(members);
-    }).timeout(30000)
+    }).timeout(30000);
 });
