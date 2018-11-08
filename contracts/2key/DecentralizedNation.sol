@@ -349,16 +349,24 @@ contract DecentralizedNation {
         for(uint i=0; i<allParticipants.length; i++) {
                 bool vote;
                 uint power;
-
-                (vote,power) = ITwoKeyWeightedVoteContract(nationalVotingCampaignContractAddress).getVoteAndChoicePerAddress(allParticipants[i]);
-
-                if(vote == true) {
-                    nvc.votesYes++;
-                    nvc.votingResult += int(power);
+                bytes32 memberType = memberAddressToMemberType[allParticipants[i]];
+                bool isEligibleToVote = false;
+                for(uint j=0; j<nvc.eligibleToVote.length; j++) {
+                    if(memberType == nvc.eligibleToVote[j]) {
+                        isEligibleToVote = true;
+                    }
                 }
-                if(vote == false){
-                    nvc.votesNo++;
-                    nvc.votingResult -= int(power);
+                if(isEligibleToVote) {
+                    (vote,power) = ITwoKeyWeightedVoteContract(nationalVotingCampaignContractAddress).getVoteAndChoicePerAddress(allParticipants[i]);
+
+                    if(vote == true) {
+                        nvc.votesYes++;
+                        nvc.votingResult += int(power);
+                    }
+                    if(vote == false){
+                        nvc.votesNo++;
+                        nvc.votingResult -= int(power);
+                    }
                 }
             }
         votingContractAddressToNationalVotingCampaign[nationalVotingCampaignContractAddress] = nvc;
