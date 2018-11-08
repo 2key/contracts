@@ -31,6 +31,7 @@ import ERC20 from './erc20';
 import Lockup from './lockup';
 import TwoKeyCongress from "./congress";
 import DecentralizedNation from "./decentralizedNation";
+import TwoKeyWeightedVoteContract from "./veightedVote";
 
 // const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 
@@ -69,7 +70,7 @@ export class TwoKeyProtocol {
     private Helpers: ITwoKeyHelpers;
     public AcquisitionCampaign: ITwoKeyAcquisitionCampaign;
     public DecentralizedNation: IDecentralizedNation;
-    public WeightedVoteContract: ITwoKeyWeightedVoteContract;
+    public TwoKeyWeightedVoteContract: ITwoKeyWeightedVoteContract;
     public Congress: ITwoKeyCongress;
     public Lockup: ILockup;
     private _log: any;
@@ -164,7 +165,8 @@ export class TwoKeyProtocol {
         this.ERC20 = new ERC20(twoKeyBase, this.Helpers);
         this.Utils = new Index(twoKeyBase, this.Helpers);
         this.AcquisitionCampaign = new AcquisitionCampaign(twoKeyBase, this.Helpers, this.Utils, this.ERC20);
-        this.DecentralizedNation = new DecentralizedNation(twoKeyBase, this.Helpers, this.Utils);
+        this.TwoKeyWeightedVoteContract = new TwoKeyWeightedVoteContract(twoKeyBase, this.Helpers, this.Utils);
+        this.DecentralizedNation = new DecentralizedNation(twoKeyBase, this.Helpers, this.Utils, this.TwoKeyWeightedVoteContract);
         this.Congress = new TwoKeyCongress(twoKeyBase, this.Helpers, this.Utils);
         this.Lockup = new Lockup(twoKeyBase, this.Helpers, this.AcquisitionCampaign);
     }

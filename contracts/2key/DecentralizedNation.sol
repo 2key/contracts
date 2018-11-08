@@ -29,6 +29,7 @@ contract DecentralizedNation {
     mapping(address => uint) numberOfVotingPetitionDuringLastRefill;
     mapping(bytes32 => bool) isMemberTypeEligibleToCreateVotingCampaign;
     address [] public nationalVotingCampaigns;
+
     mapping(address => NationalVotingCampaign) public votingContractAddressToNationalVotingCampaign;
 
     uint minimalNumberOfPositiveVotersForVotingCampaign;

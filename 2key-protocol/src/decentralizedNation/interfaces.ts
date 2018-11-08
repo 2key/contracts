@@ -38,7 +38,6 @@ export interface INationalVotingCampaign {
     subjectWeAreVotingFor: string, //The address
     newRoleForTheSubject: string, //bytes32
     campaignLengthInDays: number,
-    twoKeyWeightedVoteContract: string //address of contract we'll deploy immediately
 }
 
 export interface IDecentralizedNationConstructor {
