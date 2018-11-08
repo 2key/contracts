@@ -21,16 +21,14 @@ contract DecentralizedNation {
     mapping(address => uint) public memberId;
     mapping(bytes32 => uint) public limitOfMembersPerType;
     mapping(bytes32 => address[]) public memberTypeToMembers;
-
     uint numberOfVotingCamapignsAndPetitions;
+
+    mapping(address => bytes32) memberAddressToMemberType;
 
     mapping(address => uint) votingPoints;
     mapping(address => uint) numberOfVotingPetitionDuringLastRefill;
-
     mapping(bytes32 => bool) isMemberTypeEligibleToCreateVotingCampaign;
-
     address [] public nationalVotingCampaigns;
-
     mapping(address => NationalVotingCampaign) public votingContractAddressToNationalVotingCampaign;
 
     uint minimalNumberOfVotersForVotingCampaign;
@@ -150,6 +148,7 @@ contract DecentralizedNation {
 
     function addMembersByFounders(address _memberAddress, bytes32 _memberType) public onlyInitialFounder {
         require(limitOfMembersPerType[_memberType] > memberTypeToMembers[_memberType].length);
+
         bytes32 memberUsername;
         bytes32 memberFullName;
         bytes32 memberEmail;
@@ -165,6 +164,7 @@ contract DecentralizedNation {
             });
 
         members.push(m);
+        memberAddressToMemberType[_memberAddress] = _memberType;
         memberId[_memberAddress] = numOfMembers;
         memberTypeToMembers[_memberType].push(_memberAddress);
         votingPoints[_memberAddress] = 1000000000000000000;
@@ -198,6 +198,7 @@ contract DecentralizedNation {
         });
 
         members.push(m);
+        memberAddressToMemberType[_memberAddress] = _memberType;
         memberId[_memberAddress] = numOfMembers;
         memberTypeToMembers[_memberType].push(_memberAddress);
         votingPoints[_memberAddress] = 1000000000000000000;
@@ -205,14 +206,31 @@ contract DecentralizedNation {
         numOfMembers++;
     }
 
+    function removeMemberFromMemberTypeArray(address targetMember) internal {
+        bytes32 memberType = memberAddressToMemberType[targetMember];
+        bool flag = false;
+        for(uint i=0; i<memberTypeToMembers[memberType].length - 1; i++) {
+            if(memberTypeToMembers[memberType][i] == targetMember) {
+                flag = true;
+            }
+            if(flag == true || i== memberTypeToMembers[memberType].length - 2) {
+                memberTypeToMembers[memberType][i] = memberTypeToMembers[memberType][i+1];
+            }
+        }
+        delete memberTypeToMembers[memberType][memberTypeToMembers[memberType].length-1];
+    }
 
     function removeMember(address targetMember) internal {
         require(memberId[targetMember] != 0);
-        for (uint i = memberId[targetMember]; i<members.length-1; i++){
-            members[i] = members[i+1];
+        for (uint j = memberId[targetMember]; j<members.length-1; j++){
+            members[j] = members[j+1];
         }
         delete members[members.length-1];
+
+        removeMemberFromMemberTypeArray(targetMember);
+
         memberId[targetMember] = 0;
+        memberAddressToMemberType[targetMember] = bytes32(0);
         votingPoints[targetMember] = 0;
         members.length--;
     }
@@ -226,6 +244,7 @@ contract DecentralizedNation {
         require(checkIfMemberTypeExists(_newType));
 
         uint id = memberId[_memberAddress];
+        memberAddressToMemberType[_memberAddress] = _newType;
         Member memory m = members[id];
         m.memberType = _newType;
         members[id] = m;
@@ -328,20 +347,20 @@ contract DecentralizedNation {
         address [] memory allParticipants = ITwoKeyWeightedVoteContract(nationalVotingCampaignContractAddress).getAllVoters();
 
         for(uint i=0; i<allParticipants.length; i++) {
-            bool vote;
-            uint power;
+                bool vote;
+                uint power;
 
-            (vote,power) = ITwoKeyWeightedVoteContract(nationalVotingCampaignContractAddress).getVoteAndChoicePerAddress(allParticipants[i]);
+                (vote,power) = ITwoKeyWeightedVoteContract(nationalVotingCampaignContractAddress).getVoteAndChoicePerAddress(allParticipants[i]);
 
-            if(vote == true) {
-                nvc.votesYes++;
-                nvc.votingResult += int(power);
+                if(vote == true) {
+                    nvc.votesYes++;
+                    nvc.votingResult += int(power);
+                }
+                if(vote == false){
+                    nvc.votesNo++;
+                    nvc.votingResult -= int(power);
+                }
             }
-            if(vote == false){
-                nvc.votesNo++;
-                nvc.votingResult -= int(power);
-            }
-        }
         votingContractAddressToNationalVotingCampaign[nationalVotingCampaignContractAddress] = nvc;
     }
 

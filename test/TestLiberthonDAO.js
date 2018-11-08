@@ -179,7 +179,7 @@ contract('DecentralizedNation', async(accounts,deployer) => {
         let memberToChangeRole = accounts[1];
         let newRole = initialMemberTypes[0];
         let lengthInDays = 2;
-        let rolesEligible = [fromUtf8("PRESIDENT"),fromUtf8("MINISTER")];
+        let rolesEligible = [fromUtf8("PRESIDENT"),fromUtf8("MINISTER"),fromUtf8("FOUNDERS")];
         weightedVoteContract = await TwoKeyWeightedVoteContract.new(description, decentralizedNationInstance.address);
         await decentralizedNationInstance.startVotingForChanging(
             rolesEligible,
