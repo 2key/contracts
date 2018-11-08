@@ -91,6 +91,15 @@ contract TwoKeyVoteToken is StandardToken, Ownable {
         }
         return balances[_owner];
     }
+
+//    function balanceOf(address _owner) public view returns (uint256) {
+//        uint balance = IDecentralizedNation(decentralizedNation).getMembersVotingPoints(_owner);
+//        return balance;
+//    }
+//
+//    function checkBalance(address _owner) public {
+//        balances[_owner] = IDecentralizedNation(decentralizedNation).getMembersVotingPoints(_owner);
+//    }
     /**
      * @dev Transfer tokens from one address to another
      * @param _from address The address which you want to send tokens from
@@ -103,7 +112,7 @@ contract TwoKeyVoteToken is StandardToken, Ownable {
         uint256 _value
     )
     public
-        onlyOwner
+//        onlyOwner
     returns (bool)
     {
         checkBalance(_from);

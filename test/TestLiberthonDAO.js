@@ -134,6 +134,7 @@ contract('DecentralizedNation', async(accounts,deployer) => {
         );
     });
 
+
     it('should return all members', async() => {
         let [membersAddresses, memberUsernames, memberNames, memberLastNames, memberTypes] = await decentralizedNationInstance.getAllMembers();
         for(let i=0; i<memberUsernames.length; i++) {
@@ -152,32 +153,18 @@ contract('DecentralizedNation', async(accounts,deployer) => {
     });
 
 
-    // it('should set limit for number of members per type', async() => {
-    //     initialMemberTypes.push(fromUtf8('FOUNDERS'));
-    //     await decentralizedNationInstance.setLimitForMembersPerType(initialMemberTypes,[20,30,50]);
-    //
-    //     let limit = await decentralizedNationInstance.getLimitForType(fromUtf8('FOUNDERS'));
-    //     assert.equal(limit, 50);
-    // });
-
-
     it('should return member\'s voting points', async() => {
        let pts = await decentralizedNationInstance.getMembersVotingPoints(accounts[0]);
        assert.equal(pts,1000000000000000000);
     });
 
 
-    it('should deploy TwoKeyVoteToken and see the balances', async() => {
-        voteToken = await TwoKeyVoteToken.new(decentralizedNationInstance.address);
-        let balanceOfMembers = await voteToken.balanceOf(accounts[0]);
-        assert.equal(balanceOfMembers,1000000000000000000);
-    });
-
 
     it('should start voting for national campaign', async() => {
         let description = "Member Nikola to change his role to president";
         let lengthInDays = 2;
-        weightedVoteContract = await TwoKeyWeightedVoteContract.new(description, decentralizedNationInstance.address);
+        let tokenAddress = await decentralizedNationInstance.votingToken();
+        weightedVoteContract = await TwoKeyWeightedVoteContract.new(description, decentralizedNationInstance.address, tokenAddress);
         await decentralizedNationInstance.startCampagin(
             description,
             lengthInDays,

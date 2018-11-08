@@ -319,7 +319,7 @@ contract DecentralizedNation {
 
         require(campaign.finished == false);
 //        require(block.timestamp > nvc.votingCampaignLengthInDays);
-
+        ITwoKeyWeightedVoteContract(campaign.votingContract).transferSig(signature);
         address [] memory allParticipants = ITwoKeyWeightedVoteContract(campaign.votingContract).getAllVoters();
 
         for(uint i=0; i<allParticipants.length; i++) {
