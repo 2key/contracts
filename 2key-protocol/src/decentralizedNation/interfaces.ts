@@ -3,6 +3,7 @@ export interface IDecentralizedNation {
     populateData: (username:string, address:string, fullName:string, email:string, from: string) => Promise<string>
     check: (address: string,from:string) => Promise<boolean>,
     getAllMembersFromDAO: (decentralizedNation:any, from:string) => Promise<any>,
+    getAllMembersForSpecificType: (decentralizedNation:any, type:string, from:string) => Promise<any>,
 }
 
 

@@ -93,4 +93,17 @@ export default class DecentralizedNation implements IDecentralizedNation {
         });
     }
 
+
+    public getAllMembersForSpecificType(decentralizedNation:any, type:string, from:string) : Promise<any> {
+        return new Promise(async(resolve,reject) => {
+           try {
+                let decentralizedNationInstance = await this.helpers._getDecentralizedNationInstance(decentralizedNation);
+                let allMembersForType = await promisify(decentralizedNationInstance.getAllMembersForType,[type,{from}]);
+                resolve(allMembersForType);
+           } catch (e) {
+               reject(e);
+           }
+        });
+    }
+
 }
