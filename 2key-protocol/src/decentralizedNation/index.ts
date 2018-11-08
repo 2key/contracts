@@ -299,4 +299,46 @@ export default class DecentralizedNation implements IDecentralizedNation {
             resolve(addressOfVoting);
         })
     }
+
+    /**
+     *
+     * @param decentralizedNation
+     * @param {string} memberType
+     * @returns {Promise<boolean>}
+     */
+    public isTypeEligibleToCreateAVotingCampaign(decentralizedNation: any, memberType: string) : Promise<boolean> {
+        return new Promise(async(resolve,reject) => {
+            try {
+                memberType = this.base.web3.toHex(memberType);
+                let decentralizedNationInstance = await this.helpers._getDecentralizedNationInstance(decentralizedNation);
+                let isEligible = await promisify(decentralizedNationInstance.isMemberTypeEligibleToCreateVotingCampaign, [memberType]);
+                resolve(isEligible);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+    /**
+     *
+     * @param decentralizedNation
+     * @returns {Promise<any>}
+     */
+    public getAllStructuredNationalVotingCampaigns(decentralizedNation:any) : Promise<any> {
+        return new Promise(async(resolve,reject) => {
+           try {
+               let decentralizedNationInstance = await this.helpers._getDecentralizedNationInstance(decentralizedNation);
+               let numberOfCampaigns = await promisify(decentralizedNationInstance.getNumberOfVotingCampaigns,[]);
+                const promises = [];
+               for(let i=0; i<numberOfCampaigns; i++) {
+                   let nvcAddress = await promisify(decentralizedNationInstance.nationalVotingCampaigns,[i]);
+                   let nvcObject = await promisify(decentralizedNationInstance.votingContractAddressToNationalVotingCampaign,[nvcAddress]);
+                   promises.push(nvcObject);
+               }
+
+           } catch(e) {
+               reject(e);
+           }
+        });
+    }
 }

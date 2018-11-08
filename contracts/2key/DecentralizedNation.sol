@@ -21,13 +21,14 @@ contract DecentralizedNation {
     mapping(address => uint) public memberId;
     mapping(bytes32 => uint) public limitOfMembersPerType;
     mapping(bytes32 => address[]) public memberTypeToMembers;
+
     uint numberOfVotingCamapignsAndPetitions;
 
     mapping(address => bytes32) public memberAddressToMemberType;
 
     mapping(address => uint) votingPoints;
     mapping(address => uint) numberOfVotingPetitionDuringLastRefill;
-    mapping(bytes32 => bool) isMemberTypeEligibleToCreateVotingCampaign;
+    mapping(bytes32 => bool) public isMemberTypeEligibleToCreateVotingCampaign;
     address [] public nationalVotingCampaigns;
 
     mapping(address => NationalVotingCampaign) public votingContractAddressToNationalVotingCampaign;
@@ -369,20 +370,24 @@ contract DecentralizedNation {
 
     }
 
+    function getNumberOfVotingCampaigns() public view returns (uint) {
+        return nationalVotingCampaigns.length;
+    }
+
 
     function getNVC(address votingCampaignAddress) public view returns (bytes32[], string, address, bytes32, bool, uint, uint, int, int, uint) {
         NationalVotingCampaign memory nvc = votingContractAddressToNationalVotingCampaign[votingCampaignAddress];
         return (
-        nvc.eligibleToVote,
-        nvc.votingReason,
-        nvc.targetOfVoting,
-        nvc.newRole,
-        nvc.finished,
-        nvc.votesYes,
-        nvc.votesNo,
-        nvc.votingResultForYes,
-        nvc.votingResultForNo,
-        nvc.votingCampaignLengthInDays
+            nvc.eligibleToVote,
+            nvc.votingReason,
+            nvc.targetOfVoting,
+            nvc.newRole,
+            nvc.finished,
+            nvc.votesYes,
+            nvc.votesNo,
+            nvc.votingResultForYes,
+            nvc.votingResultForNo,
+            nvc.votingCampaignLengthInDays
         );
     }
 
