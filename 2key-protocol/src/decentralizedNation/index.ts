@@ -4,7 +4,7 @@ import {
     IDecentralizedNation,
     IDecentralizedNationConstructor,
     IMember,
-    INationalVotingCampaign
+    INationalVotingCampaign, IVotingCampaign
 } from "./interfaces";
 import {ITwoKeyUtils} from "../utils/interfaces";
 import {promisify} from "../utils";
@@ -324,18 +324,30 @@ export default class DecentralizedNation implements IDecentralizedNation {
      * @param decentralizedNation
      * @returns {Promise<any>}
      */
-    public getAllStructuredNationalVotingCampaigns(decentralizedNation:any) : Promise<any> {
+    public getAllStructuredNationalVotingCampaigns(decentralizedNation:any) : Promise<IVotingCampaign[]> {
         return new Promise(async(resolve,reject) => {
            try {
                let decentralizedNationInstance = await this.helpers._getDecentralizedNationInstance(decentralizedNation);
                let numberOfCampaigns = await promisify(decentralizedNationInstance.getNumberOfVotingCampaigns,[]);
-                const promises = [];
-               for(let i=0; i<numberOfCampaigns; i++) {
-                   let nvcAddress = await promisify(decentralizedNationInstance.nationalVotingCampaigns,[i]);
-                   let nvcObject = await promisify(decentralizedNationInstance.votingContractAddressToNationalVotingCampaign,[nvcAddress]);
-                   promises.push(nvcObject);
+               const promises = [];
+               for (let i=0; i<numberOfCampaigns; i++) {
+                   promises.push(new Promise(async (cResolve, cReject) => {
+                       let nvcAddress = await promisify(decentralizedNationInstance.nationalVotingCampaigns,[i]);
+                       let [eligibleToVote, votingReason, targetOfVoting, newRole, finished, votesYes, votesNo, votingResultForYes, votingResultForNo, votingCampaignLengthInDays]
+                           = await promisify(decentralizedNationInstance.getNVC,[nvcAddress]);
+                       eligibleToVote = eligibleToVote.map(item => this.base.web3.toUtf8(item));
+                       newRole = this.base.web3.toUtf8(newRole);
+                       votesYes = votesYes.toNumber();
+                       votesNo = votesNo.toNumber();
+                       votingResultForYes = votingResultForYes.toNumber();
+                       votingResultForNo = votingResultForNo.toNumber();
+                       votingCampaignLengthInDays = new Date(votingCampaignLengthInDays.toNumber());
+                       cResolve({
+                           eligibleToVote, votingReason, targetOfVoting, newRole, finished, votesYes, votesNo, votingResultForYes, votingResultForNo, votingCampaignLengthInDays
+                       });
+                   }));
                }
-
+               resolve(await Promise.all(promises));
            } catch(e) {
                reject(e);
            }

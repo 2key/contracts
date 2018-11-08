@@ -327,7 +327,6 @@ describe('TwoKeyProtocol', () => {
         console.log(members);
     }).timeout(30000);
 
-
     // NVC = National Voting Campaign which executes itself when voting is finished
     it('should create  new  NVC', async() => {
         const campaign : INationalVotingCampaign= {
@@ -340,4 +339,15 @@ describe('TwoKeyProtocol', () => {
         let campaignId = await twoKeyProtocol.DecentralizedNation.createVotingCampaign(daoAddress,campaign,from);
         console.log(campaignId);
     }).timeout(30000);
+
+    it('get all voting campaigns for DAO', async() => {
+        let campaigns = await twoKeyProtocol.DecentralizedNation.getAllStructuredNationalVotingCampaigns(daoAddress);
+        console.log(campaigns);
+    }).timeout(30000);
+
+    it('it should check role for create voting', async() => {
+        let isAbleToStartVoting = await twoKeyProtocol.DecentralizedNation.isTypeEligibleToCreateAVotingCampaign(daoAddress, 'PRESIDENT');
+        console.log(isAbleToStartVoting);
+    }).timeout(30000);
+
 });
