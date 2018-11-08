@@ -353,10 +353,10 @@ describe('TwoKeyProtocol', () => {
         console.log(campaignId);
     }).timeout(30000);
 
-    // it('get all voting campaigns for DAO', async() => {
-    //     let campaigns = await twoKeyProtocol.DecentralizedNation.getAllStructuredNationalVotingCampaigns(daoAddress);
-    //     console.log(campaigns);
-    // }).timeout(30000);
+    it('get all voting campaigns for DAO', async() => {
+        let campaigns = await twoKeyProtocol.DecentralizedNation.getAllCampaigns(daoAddress);
+        console.log(campaigns);
+    }).timeout(30000);
 
     it('it should check role for create voting', async() => {
         let isAbleToStartVoting = await twoKeyProtocol.DecentralizedNation.isTypeEligibleToCreateAVotingCampaign(daoAddress, 'PRESIDENT');

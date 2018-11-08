@@ -325,7 +325,7 @@ export default class DecentralizedNation implements IDecentralizedNation {
                for (let i=0; i<numberOfCampaigns; i++) {
                    promises.push(new Promise(async (cResolve, cReject) => {
                        let nvcAddress = await promisify(decentralizedNationInstance.allCampaigns,[i]);
-                       let [votingReason, finished, votesYes, votesNo, votingResultForYes, votingResultForNo, votingCampaignLengthInDays, votingCampaignContractAddress, campaignType]
+                       let [votingReason, finished, votesYes, votesNo, votingResultForYes, votingResultForNo, votingCampaignLengthInDays, campaignType, votingCampaignContractAddress]
                            = await promisify(decentralizedNationInstance.getCampaign,[i]);
                        votesYes = votesYes.toNumber();
                        votesNo = votesNo.toNumber();
@@ -334,7 +334,7 @@ export default class DecentralizedNation implements IDecentralizedNation {
                        votingCampaignLengthInDays = new Date(votingCampaignLengthInDays.toNumber());
                        campaignType = this.base.web3.toUtf8(campaignType);
                        cResolve({
-                           votingReason, finished, votesYes, votesNo, votingResultForYes, votingResultForNo, votingCampaignLengthInDays, votingCampaignContractAddress, campaignType
+                           votingReason, finished, votesYes, votesNo, votingResultForYes, votingResultForNo, votingCampaignLengthInDays, campaignType, votingCampaignContractAddress,
                        });
                    }));
                }

@@ -43,8 +43,8 @@ export interface IVotingCampaign {
     votingResultForYes: number,
     votingResultForNo: number,
     votingCampaignLengthInDays: Date,
+    campaignType: string,
     votingCampaignContractAddress: string,
-    campaignType: string
 }
 
 export interface IDecentralizedNationConstructor {
