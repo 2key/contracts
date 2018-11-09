@@ -11,7 +11,13 @@ export default { Call:
            links: {},
            address: '0x4b94f53255d6589bab18c74c598b9e50fdd07c4f',
            transactionHash:
-            '0x146dcc44330171b994120579dc285360fdd2ab49ebbdea3966d0f673960e4292' } },
+            '0x146dcc44330171b994120579dc285360fdd2ab49ebbdea3966d0f673960e4292' },
+        '8086':
+         { events: {},
+           links: {},
+           address: '0x7eeb9589fe265e2b59874d9e58161831b831898e',
+           transactionHash:
+            '0x27eea374a4dd100c670e442515d76a21b0e6963a0fce303281e69f379b2c0202' } },
      abi:
       [ { constant: true,
           inputs:
@@ -971,9 +977,9 @@ export default { Call:
         '8086':
          { events: {},
            links: {},
-           address: '0xfaa99d6caf5df1af8426d2bfb5bf83ccb7ed0552',
+           address: '0x5743d3361ca42805529442fa9bc4824c3e987ca0',
            transactionHash:
-            '0xcd81526b9ea356c563aa50601a556e53802c1b23aa2c5838bf03445c9e66dada' } },
+            '0xa5b802e0e07c01efc858d575f216b7cd74471b69f98b7218cbcc32778b06d526' } },
      abi:
       [ { constant: false,
           inputs: [],
@@ -1212,7 +1218,13 @@ export default { Call:
            links: {},
            address: '0x3fb442877dfa75f416b2b2d5ae005fcf5fa0f3da',
            transactionHash:
-            '0x13b503b8c855b0e6c9bffd64ad659e4e056ebd5c0d177c44c9008c0b1866c2e6' } },
+            '0x13b503b8c855b0e6c9bffd64ad659e4e056ebd5c0d177c44c9008c0b1866c2e6' },
+        '8086':
+         { events: {},
+           links: {},
+           address: '0x9ab96383516ab94fa9b5b3faa83e7d6ca42997f9',
+           transactionHash:
+            '0x827364c64c5236b779cbad54ad3cfef257ea1abfaf7963e5d08ce75e0330e7ce' } },
      abi:
       [ { constant: true,
           inputs: [ { name: '', type: 'uint256' } ],
@@ -1820,9 +1832,9 @@ export default { Call:
         '8086':
          { events: {},
            links: {},
-           address: '0x622e96748f1ff2bffad72d94f766d5b4c477b706',
+           address: '0x329fb525ad5f4647354d7b019b799c3808722d32',
            transactionHash:
-            '0x109d93d2b9895e808e4bd214d03f5515d0c5e91d8ca9b5129dd255c72ab6a279' } },
+            '0x3cc27c6e959108a8433a3d6dbdef491fbe2304412d551f65df011b1ddceeb134' } },
      abi:
       [ { constant: true,
           inputs: [],
@@ -2144,9 +2156,9 @@ export default { Call:
         '8086':
          { events: {},
            links: {},
-           address: '0xf86337c0ffc4afb993fc352d2605e70cbaa284db',
+           address: '0x1dbec44c74ac80063c6ff98a5f57c2405398f3b7',
            transactionHash:
-            '0x5c48132011966c022132e54468665871f70896ab1312a7fa5afe69f2146d0296' } },
+            '0x61b33b9cb6c374aa7ae22f7b835bc39e32dcb7c2979e0fa31501cd11d8e0f3ee' } },
      abi:
       [ { inputs: [ { name: '_twoKeyAdminAddress', type: 'address' } ],
           payable: false,
@@ -2558,9 +2570,9 @@ export default { Call:
         '8086':
          { events: {},
            links: {},
-           address: '0x197569f4db4a0a6adca9f79a490488b30fdefb6d',
+           address: '0x7b02e7c2e5414080416c58dd0df270a5294ce9ac',
            transactionHash:
-            '0xb8126622efcc4e2319b27b69e51e4ad732dbf64e590514cfc965d3e9d275d62a' } },
+            '0x75dd8b1732a3813930f965100e108575370e287169fb3f80afdf86a23d62ff83' } },
      abi:
       [ { constant: true,
           inputs: [],
