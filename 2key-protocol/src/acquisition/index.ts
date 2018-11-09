@@ -379,6 +379,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 // if (from !== this.base.plasmaAddress) {
                 const sig = await Sign.sign_plasma2eteherum(this.base.plasmaAddress, from, this.base.web3);
                 this.base._log('Signature', sig);
+                this.base._log(campaignAddress, from, this.base.plasmaAddress, cut);
                 const txHash: string = await promisify(this.base.twoKeyPlasmaEvents.add_plasma2ethereum, [sig, {
                     from: this.base.plasmaAddress,
                     gasPrice: 0

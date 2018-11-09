@@ -389,6 +389,7 @@ export default class DecentralizedNation implements IDecentralizedNation {
                }
                resolve();
            } catch (e) {
+               this.base._log('visitOffChain', e);
                reject(e);
            }
         });
@@ -453,9 +454,10 @@ export default class DecentralizedNation implements IDecentralizedNation {
                } else if (cut != 255) {
                    cut = 0
                }
-               const cut_sign = await Sign.sign_cut2eteherum(cut, from, this.base.web3);
+               const cutSign = await Sign.sign_cut2eteherum(cut, from, this.base.web3);
+               this.base._log('sign_cut2eteherum', cutSign);
                // console.log('JOIN', await this.utils.getOffchainDataFromIPFSHash(referralLink));
-               const newReferralLink = await this.acquisitionCampaign.join(campaign, from, { cut, gasPrice, referralLink, cutSign: cut_sign, voting: true });
+               const newReferralLink = await this.acquisitionCampaign.join(campaign, from, { cut, gasPrice, referralLink, cutSign, voting: true });
                // TODO: add visit
                await this.visitOffChain(this.base.plasmaAddress, newReferralLink);
                resolve(newReferralLink);
