@@ -130,6 +130,7 @@ export interface ILink {
 
 export interface ICreateContractOpts {
     gasPrice?: number,
+    nonce?: number,
     params?: any[],
     progressCallback?: ICreateCampaignProgress,
     link?: ILink,

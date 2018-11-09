@@ -103,8 +103,6 @@ export default class DecentralizedNation implements IDecentralizedNation {
     public create(data: IDecentralizedNationConstructor, from: string, { gasPrice, progressCallback, interval, timeout = 60000 }: ICreateOpts = {}) : Promise<string> {
         return new Promise(async(resolve,reject) => {
             try {
-                //TODO: Deploy twokeyVoteToken
-
                 let txHash = await this.helpers._createContract(contracts.DecentralizedNation ,from, {params: [
                     data.nationName,
                     data.ipfsHashForConstitution,
@@ -426,7 +424,7 @@ export default class DecentralizedNation implements IDecentralizedNation {
                        let first_address = `0x${m.slice(2, 42)}`;
                        let first_public_key = await promisify(weightedVoteContractInstance.public_link_key, [first_address]);
                        let cuts = Sign.validate_join(first_public_key, null, null, `0x${m}`);
-                       // console.log(`cuts=${cuts.toString()}`);
+                       this.base._log(`cuts=${cuts.toString()}`);
                        const txHash = await promisify(weightedVoteContractInstance.transferSig, [`0x${m}`, { from: contractor }]);
                        resolve(txHash);
                    }

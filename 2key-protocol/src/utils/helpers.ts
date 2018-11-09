@@ -118,7 +118,7 @@ export default class Helpers implements ITwoKeyHelpers {
             const nonce = await this._getNonce(from);
             const createParams = params ? [...params] : [];
             createParams.push({data, from, gasPrice, nonce});
-            this.base._log('CREATE CONTRACT', name, params, from, gasPrice);
+            this.base._log('CREATE CONTRACT', name, params, from, gasPrice, nonce);
             let resolved: boolean = false;
             this.base.web3.eth.contract(abi).new(...createParams, (err, res) => {
                 if (err) {

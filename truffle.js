@@ -72,7 +72,7 @@ module.exports = {
       gasPrice: 50000000000,
     },
     'rinkeby-test' : {
-        provider: () => new HDWalletProvider(mnemonic, 'https://rinkeby.infura.io/v3/904c762bd6984606bf8ae7f30d7cb28c\n'),
+        provider: () => new HDWalletProvider(mnemonic, 'https://rinkeby.infura.io/v3/904c762bd6984606bf8ae7f30d7cb28c'),
         network_id: 4,
         gas: 7000000,
         gasPrice: 50000000000

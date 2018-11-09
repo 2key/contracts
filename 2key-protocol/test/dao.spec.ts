@@ -13,31 +13,9 @@ const rpcUrl = env.RPC_URL;
 const mainNetId = env.MAIN_NET_ID;
 const syncTwoKeyNetId = env.SYNC_NET_ID;
 const destinationAddress = env.AYDNEP_ADDRESS;
-const delay = env.TEST_DELAY;
 // const destinationAddress = env.DESTINATION_ADDRESS || '0xd9ce6800b997a0f26faffc0d74405c841dfc64b7'
-console.log(mainNetId);
-const addressRegex = /^0x[a-fA-F0-9]{40}$/;
-const maxConverterBonusPercent = 23;
-const pricePerUnitInETH = 0.1;
-const maxReferralRewardPercent = 15;
-const moderatorFeePercentage = 1;
-const minContributionETH = 1;
-const maxContributionETH = 10;
-const now = new Date();
-const campaignStartTime = Math.round(new Date(now.valueOf()).setDate(now.getDate() - 30) / 1000);
-const campaignEndTime = Math.round(new Date(now.valueOf()).setDate(now.getDate() + 30) / 1000);
 const twoKeyEconomy = contractsMeta.TwoKeyEconomy.networks[mainNetId].address;
 const twoKeyAdmin = contractsMeta.TwoKeyAdmin.networks[mainNetId].address;
-
-function makeHandle(max: number = 8): string {
-    let text = '';
-    let possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-
-    for (let i = 0; i < max; i++)
-        text += possible.charAt(Math.floor(Math.random() * possible.length));
-
-    return text;
-}
 
 // console.log(makeHandle(4096));
 
@@ -106,13 +84,6 @@ const web3switcher = {
 //     console.log(env[key]);
 // });
 
-const eventEmited = (error, event) => {
-    if (error) {
-        console.log('Event error', error);
-    } else {
-        console.log('2Key Event', event);
-    }
-};
 
 const addresses = [env.AYDNEP_ADDRESS, env.GMAIL_ADDRESS, env.TEST4_ADDRESS, env.RENATA_ADDRESS, env.UPORT_ADDRESS, env.GMAIL2_ADDRESS, env.AYDNEP2_ADDRESS, env.TEST_ADDRESS];
 
@@ -287,10 +258,9 @@ describe('TwoKeyProtocol', () => {
     it('should create new Decentralized nation', async() => {
         const DAOdata = {
             nationName: "Liberland",
-            ipfsHashForConstitution: "0x1234",
-            ipfsHashForDAOPublicInfo: "0x1234",
-            initialMemberAddresses: ['0xb3fa520368f2df7bed4df5185101f303f6c7decc',
-                '0xffcf8fdee72ac11b5c542428b35eef5769c409f0',],
+            ipfsHashForConstitution: "QmX4qfH7ruxdL1DVcmRGa3JB5qLsoessSmucCa8WDRCBzQ",
+            ipfsHashForDAOPublicInfo: "QmX4qfH7ruxdL1DVcmRGa3JB5qLsoessSmucCa8WDRCBzQ",
+            initialMemberAddresses: ['0xb3fa520368f2df7bed4df5185101f303f6c7decc'],
             initialMemberTypes:['PRESIDENT', 'MINISTER'],
             eligibleToStartVotingCampaign: [1,1],
             minimalNumberOfVotersForVotingCampaign: 100000,
@@ -300,9 +270,9 @@ describe('TwoKeyProtocol', () => {
             limitsPerMemberType: [15,15]
         };
 
-        daoAddress = await twoKeyProtocol.DecentralizedNation.create(DAOdata, from);
+        daoAddress = await twoKeyProtocol.DecentralizedNation.create(DAOdata, from, { gasPrice: 5000000000 });
         console.log(daoAddress);
-    }).timeout(30000);
+    }).timeout(300000);
 
     // it('should get all members of DAO', async() => {
     //     const members = await twoKeyProtocol.DecentralizedNation.getAllMembersForSpecificType(daoAddress, from);
@@ -367,9 +337,9 @@ describe('TwoKeyProtocol', () => {
             campaignLengthInDays: 1,
             flag: 0,
         };
-        referralLink = await twoKeyProtocol.DecentralizedNation.createCampaign(daoAddress,campaign,from);
+        referralLink = await twoKeyProtocol.DecentralizedNation.createCampaign(daoAddress,campaign,from, { gasPrice: 15000000000 });
         console.log('VOTE PUBLIC LINK', referralLink);
-    }).timeout(30000);
+    }).timeout(300000);
 
     let votingCampaign;
     it('get all voting campaigns for DAO', async() => {
@@ -440,7 +410,7 @@ describe('TwoKeyProtocol', () => {
     it('should get campaign data', async() => {
         const res = await twoKeyProtocol.DecentralizedNation.getCampaignByVotingContractAddress(daoAddress,votingCampaign);
         console.log(res);
-    })
+    }).timeout(30000)
     /*
             '0xb3fa520368f2df7bed4df5185101f303f6c7decc',
             '0xffcf8fdee72ac11b5c542428b35eef5769c409f0',
