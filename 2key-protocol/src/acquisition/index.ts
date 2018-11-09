@@ -346,6 +346,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                         contractor, from, publicLink, {from: this.base.plasmaAddress, gasPrice: 0}
                     ]),
                 ]);
+                console.log('>>>PLASMADEBUG', campaignInstance.address, contractor, from, publicLink,  {from: this.base.plasmaAddress, gasPrice: 0});
                 await Promise.all([this.utils.getTransactionReceiptMined(mainTxHash), this.utils.getTransactionReceiptMined(plasmaTxHash, {web3: this.base.plasmaWeb3})]);
                 if (cut > -1) {
                     await promisify(campaignInstance.setCut, [cut, {from}]);
@@ -400,6 +401,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     const {f_address, f_secret, p_message, contractor: campaignContractor} = await this.utils.getOffchainDataFromIPFSHash(referralLink);
                     contractor = campaignContractor;
                     this.base._log('New link for', from, f_address, f_secret, p_message);
+                    this.base._log('P_MESSAGE', p_message);
                     new_message = Sign.free_join(from, public_address, f_address, f_secret, p_message, cut + 1, cutSign);
                 } else {
                     const {contractor: campaignContractor} = await this.setPublicLinkKey(campaign, from, `0x${public_address}`, {cut, gasPrice});

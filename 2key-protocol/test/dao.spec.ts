@@ -414,7 +414,7 @@ describe('TwoKeyProtocol', () => {
     }).timeout(30000);
 
     it('should calculate vote', async() => {
-        const {web3, address} = web3switcher.aydnep();
+        const {web3, address} = web3switcher.deployer();
         from = address;
         twoKeyProtocol.setWeb3({
             web3,

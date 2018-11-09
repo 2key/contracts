@@ -12,7 +12,7 @@ const syncTwoKeyNetId = env.SYNC_NET_ID;
 // let twoKeyProtocol;
 
 const { web3 } = createWeb3(env.MNEMONIC_DEPLOYER, rpcUrl);
-const { web3: plasmaWeb3 } = createWeb3(env.MNEMONIC_DEPLOYER, 'https://astring.aydnep.com.ua:18545');
+const { web3: plasmaWeb3 } = createWeb3(env.MNEMONIC_DEPLOYER, 'https://test.plasma.2key.network/');
 // twoKeyProtocol = new TwoKeyProtocol({
 //     web3,
 //     address,
