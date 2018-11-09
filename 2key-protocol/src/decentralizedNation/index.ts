@@ -383,8 +383,8 @@ export default class DecentralizedNation implements IDecentralizedNation {
                } else {
                    const public_address =  Sign.privateToPublic(Buffer.from(f_secret, 'hex'));
                    let visit_sig = `0x${p_message}${public_address}`;
-                   // this.base._log('CALLING PLASMA VISIT', campaign, contractor, visit_sig, { from: plasma_address, gasPrice: 0, gas: 700000 });
-                   await promisify(this.base.twoKeyPlasmaEvents.visited, [campaign, contractor, visit_sig, { from: plasma_address, gasPrice: 0}]);
+                   this.base._log('CALLING PLASMA VISIT', campaign, contractor, visit_sig, plasma_address);
+                   await promisify(this.base.twoKeyPlasmaEvents.visited, [campaign, contractor, visit_sig, { from: plasma_address, gasPrice: 0, gas: 7000000}]);
                    // await this.utils.getTransactionReceiptMined(txHash);
                }
                resolve();
