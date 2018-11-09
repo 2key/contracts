@@ -424,10 +424,11 @@ describe('TwoKeyProtocol', () => {
             },
             plasmaPK: Sign.generatePrivateKey().toString('hex'),
         });
-        const result = await twoKeyProtocol.DecentralizedNation.countPlasmaVotes(votingCampaign, from);
+        const txHash = await twoKeyProtocol.DecentralizedNation.countPlasmaVotes(votingCampaign, from);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         // referralLink = await twoKeyProtocol.DecentralizedNation.join(votingCampaign, from, { cut: 100, referralLink });
-        console.log('CALCULATED', result);
-    }).timeout(30000);
+        console.log('CALCULATED', txHash);
+    }).timeout(300000);
 
     it('should print voting results', async() => {
 

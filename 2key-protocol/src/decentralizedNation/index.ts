@@ -378,18 +378,17 @@ export default class DecentralizedNation implements IDecentralizedNation {
         return new Promise<void>(async (resolve, reject) => {
            try {
                // resolve()
-               const {f_secret, p_message = '', contractor, campaign} = await this.utils.getOffchainDataFromIPFSHash(referralLink);
-               console.log('>>>>>>>visitOffChain', campaign, contractor);
+               const {f_address, f_secret, p_message = '', contractor, campaign} = await this.utils.getOffchainDataFromIPFSHash(referralLink);
+               console.log('>>>>>>>visitOffChain', p_message, f_address);
                if (!p_message.startsWith('01')) {
                    // reject(new Error('Wrong version'));
                    console.log('NO P_MESSAGE');
                } else {
                    const public_address =  Sign.privateToPublic(Buffer.from(f_secret, 'hex'));
                    let visit_sig = `0x${p_message}${public_address}`;
-                   console.log('CALLING PLASMA VISIT', campaign, contractor);
-                   console.log(visit_sig);
+                   this.base._log('CALLING PLASMA VISIT', campaign, contractor, visit_sig, { from: plasma_address, gasPrice: 0, gas: 700000 });
                    const txHash = await promisify(this.base.twoKeyPlasmaEvents.visited, [campaign, contractor, visit_sig, { from: plasma_address, gasPrice: 0, gas: 700000 }]);
-                   await this.utils.getTransactionReceiptMined(txHash);
+                   // await this.utils.getTransactionReceiptMined(txHash);
                }
                resolve();
            } catch (e) {
@@ -406,8 +405,8 @@ export default class DecentralizedNation implements IDecentralizedNation {
     }
 
 
-    public countPlasmaVotes(weightedVoteContract: any, contractor: string): Promise<boolean> {
-        return new Promise<boolean>(async (resolve, reject) => {
+    public countPlasmaVotes(weightedVoteContract: any, contractor: string): Promise<string> {
+        return new Promise<string>(async (resolve, reject) => {
            try {
                await this.plasma_bdfs(weightedVoteContract, contractor, [contractor], async (from) => {
                    // check if "from" is off-chain
@@ -429,10 +428,10 @@ export default class DecentralizedNation implements IDecentralizedNation {
                        let first_public_key = await promisify(weightedVoteContractInstance.public_link_key, [first_address]);
                        let cuts = Sign.validate_join(first_public_key, null, null, `0x${m}`);
                        console.log(`cuts=${cuts.toString()}`);
-                       await promisify(weightedVoteContractInstance.transferSig, [`0x${m}`, { from: contractor }]);
+                       const txHash = await promisify(weightedVoteContractInstance.transferSig, [`0x${m}`, { from: contractor }]);
+                       resolve(txHash);
                    }
                });
-               resolve(true);
            } catch (e) {
                reject(e);
            }
@@ -459,10 +458,10 @@ export default class DecentralizedNation implements IDecentralizedNation {
                }
                const cut_sign = await Sign.sign_cut2eteherum(cut, from, this.base.web3);
                console.log('JOIN', await this.utils.getOffchainDataFromIPFSHash(referralLink));
-               const hash = await this.acquisitionCampaign.join(campaign, from, { cut, gasPrice, referralLink, cutSign: cut_sign });
+               const newReferralLink = await this.acquisitionCampaign.join(campaign, from, { cut, gasPrice, referralLink, cutSign: cut_sign });
                // TODO: add visit
-               await this.visitOffChain(this.base.plasmaAddress, referralLink);
-               resolve(hash);
+               await this.visitOffChain(this.base.plasmaAddress, newReferralLink);
+               resolve(newReferralLink);
            } catch (e) {
                reject(e);
            }
@@ -473,7 +472,7 @@ export default class DecentralizedNation implements IDecentralizedNation {
         return new Promise<any>(async (resolve, reject) => {
             try {
                 const weightedVoteContractInstance = await this.helpers._getWeightedVoteContract(weightedVoteContract);
-                const results = await promisify(weightedVoteContractInstance.getAllVoters, []);
+                const results = await promisify(weightedVoteContractInstance.getDynamicData, []);
                 resolve(results);
             } catch (e) {
                 reject(e);

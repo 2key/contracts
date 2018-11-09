@@ -379,7 +379,10 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
 
                 // if (from !== this.base.plasmaAddress) {
                 const sig = await Sign.sign_plasma2eteherum(this.base.plasmaAddress, from, this.base.web3);
-                this.base._log('Signature', sig, from, this.base.plasmaAddress);
+                this.base._log('Signature', sig, {
+                    from: this.base.plasmaAddress,
+                    gasPrice: 0
+                });
                 const txHash: string = await promisify(this.base.twoKeyPlasmaEvents.add_plasma2ethereum, [sig, {
                     from: this.base.plasmaAddress,
                     gasPrice: 0
@@ -402,7 +405,8 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     contractor = campaignContractor;
                     this.base._log('New link for', from, f_address, f_secret, p_message);
                     this.base._log('P_MESSAGE', p_message);
-                    new_message = Sign.free_join(from, public_address, f_address, f_secret, p_message, cut + 1, cutSign);
+                    // TODO: Andrii in AcquisitionCampaign this method was with (cut + 1)
+                    new_message = Sign.free_join(from, public_address, f_address, f_secret, p_message, cut, cutSign);
                 } else {
                     const {contractor: campaignContractor} = await this.setPublicLinkKey(campaign, from, `0x${public_address}`, {cut, gasPrice});
                     contractor = campaignContractor;
@@ -416,6 +420,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 if (new_message) {
                     linkObject.p_message = new_message;
                 }
+                this.base._log('ACQUISITION_JOIN', linkObject.p_message, from);
                 const link = await this.utils.ipfsAdd(linkObject);
                 resolve(link);
             } catch (err) {

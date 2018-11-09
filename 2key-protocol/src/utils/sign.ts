@@ -361,6 +361,7 @@ function sign_cut2eteherum(userCut: number, my_address: string, web3: any): Prom
                     result = result.result
                 }
 
+
                 if (!isMetaMask) {
                     let n = result.length;
                     let v = result.slice(n - 2);
