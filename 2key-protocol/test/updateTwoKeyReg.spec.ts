@@ -5,6 +5,11 @@ import contractsMeta from '../src/contracts';
 import web3switcher from './_web3';
 import Sign from '../src/utils/sign';
 
+
+
+//  RINKEBY=true yarn run test:one 2key-protocol/test/updateTwoKeyReg.spec.ts "0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7:2key13:Andrii Pindiura:aydnep@aydnep.com.ua"
+
+
 const rpcUrl = process.env.RINKEBY ? 'wss://rinkeby.infura.io/ws' : 'wss://ropsten.infura.io/ws';
 // const rpcUrl = 'wss://ropsten.infura.io/ws';
 const mainNetId = process.env.RINKEBY ? 4 : 3;
