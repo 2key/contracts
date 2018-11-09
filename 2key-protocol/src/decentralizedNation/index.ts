@@ -1,4 +1,4 @@
-import {ICreateOpts, ITwoKeyBase, ITwoKeyHelpers, ITwoKeyAcquisitionCampaign} from '../interfaces';
+import {ICreateOpts, ITwoKeyAcquisitionCampaign, ITwoKeyBase, ITwoKeyHelpers} from '../interfaces';
 import {
     IDaoMeta,
     IDecentralizedNation,
@@ -465,6 +465,11 @@ export default class DecentralizedNation implements IDecentralizedNation {
         });
     }
 
+    /**
+     *
+     * @param weightedVoteContract
+     * @returns {Promise<any>}
+     */
     public getVotingResults(weightedVoteContract: any): Promise<any> {
         return new Promise<any>(async (resolve, reject) => {
             try {
@@ -476,4 +481,58 @@ export default class DecentralizedNation implements IDecentralizedNation {
             }
         })
     }
+
+    /**
+     *
+     * @param decentralizedNation
+     * @param {string} weightedVoteContractAddress
+     * @returns {Promise<any>}
+     */
+    public getCampaignByVotingContractAddress(decentralizedNation: any, weightedVoteContractAddress:string) : Promise<any> {
+        return new Promise<any>(async(resolve,reject) => {
+            try {
+                let decentralizedNationInstance = await this.helpers._getDecentralizedNationInstance(decentralizedNation);
+                const prom = new Promise(async(cResolve,cReject) => {
+                    let [votingReason, finished, votesYes, votesNo, votingResultForYes, votingResultForNo, votingCampaignLengthInDays, campaignType, votingCampaignContractAddress]
+                        = await promisify(decentralizedNationInstance.getCampaignByAddressOfVoteContract, [weightedVoteContractAddress]);
+                    votesYes = votesYes.toNumber();
+                    votesNo = votesNo.toNumber();
+                    votingResultForYes = votingResultForYes.toNumber();
+                    votingResultForNo = votingResultForNo.toNumber();
+                    votingCampaignLengthInDays = new Date(votingCampaignLengthInDays.toNumber());
+                    campaignType = this.base.web3.toUtf8(campaignType);
+                    cResolve({
+                        votingReason, finished, votesYes, votesNo, votingResultForYes, votingResultForNo, votingCampaignLengthInDays, campaignType, votingCampaignContractAddress,
+                    });
+                })
+
+
+                resolve(prom);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+    /**
+     *
+     * @param decentralizedNation
+     * @param {number} campaignId
+     * @param {string} signature
+     * @param {string} from
+     * @returns {Promise<any>}
+     */
+    public executeCampaign(decentralizedNation: any, campaignId: number, signature: string, from:string) : Promise<any> {
+        return new Promise(async(resolve, reject) => {
+            try {
+                const decentralizedNationInstance = await this.helpers._getDecentralizedNationInstance(decentralizedNation);
+
+                const txHash = await promisify(decentralizedNationInstance.executeVoting,[campaignId,signature,{from}]);
+                resolve(txHash);
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
+
 }

@@ -25,6 +25,9 @@ contract DecentralizedNation {
     mapping(bytes32 => uint) public limitOfMembersPerType;
     mapping(bytes32 => address[]) public memberTypeToMembers;
 
+    mapping(address => Campaign) public votingContractToCampaign;
+
+
     Campaign[] public allCampaigns;
     uint numberOfVotingCamapignsAndPetitions;
 
@@ -301,6 +304,7 @@ contract DecentralizedNation {
             votingContract: twoKeyWeightedVoteContract
         });
 
+        votingContractToCampaign[twoKeyWeightedVoteContract] = cmp;
         ITwoKeyWeightedVoteContract(twoKeyWeightedVoteContract).setValid();
         allCampaigns.push(cmp);
         numberOfVotingCamapignsAndPetitions++;
@@ -343,6 +347,20 @@ contract DecentralizedNation {
 
     function getNumberOfVotingCampaigns() public view returns (uint) {
         return numberOfVotingCamapignsAndPetitions;
+    }
+
+    function getCampaignByAddressOfVoteContract(address voteContract) public view returns (string, bool, uint, uint, int, int, uint, bytes32, address) {
+        Campaign memory campaign = votingContractToCampaign[voteContract];
+        return (
+        campaign.votingReason,
+        campaign.finished,
+        campaign.votesYes,
+        campaign.votesNo,
+        campaign.votingResultForYes,
+        campaign.votingResultForNo,
+        campaign.votingCampaignLengthInDays,
+        campaign.campaignType,
+        campaign.votingContract);
     }
 
 

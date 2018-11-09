@@ -436,6 +436,11 @@ describe('TwoKeyProtocol', () => {
         // referralLink = await twoKeyProtocol.DecentralizedNation.join(votingCampaign, from, { cut: 100, referralLink });
         console.log('CALCULATED', results);
     }).timeout(30000);
+
+    it('should get campaign data', async() => {
+        const res = await twoKeyProtocol.DecentralizedNation.getCampaignByVotingContractAddress(daoAddress,votingCampaign);
+        console.log(res);
+    })
     /*
             '0xb3fa520368f2df7bed4df5185101f303f6c7decc',
             '0xffcf8fdee72ac11b5c542428b35eef5769c409f0',
