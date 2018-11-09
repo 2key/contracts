@@ -280,12 +280,9 @@ export default class DecentralizedNation implements IDecentralizedNation {
                     erc20: addressOfVoteToken
                 };
 
-                this.base._log("HERE");
                 let addressOfVotingContract = await this.veightedVode.createWeightedVoteContract(dataForVotingContract, from, {
                     gasPrice, progressCallback, interval, timeout
                 });
-
-                console.log('>>>>>VOTEDCONTRACT', addressOfVotingContract, from);
 
                 let txHash = await promisify(decentralizedNationInstance.startCampagin,[
                     data.votingReason,
@@ -298,7 +295,7 @@ export default class DecentralizedNation implements IDecentralizedNation {
                     }
                 ]);
                 await this.utils.getTransactionReceiptMined(txHash);
-                const campaignPublicLinkKey = await this.acquisitionCampaign.join(addressOfVotingContract, from, { gasPrice, voting: true });
+                const campaignPublicLinkKey = await this.acquisitionCampaign.join(addressOfVotingContract, from, { gasPrice, voting: true, daoContract: decentralizedNationInstance.address });
                 resolve(campaignPublicLinkKey);
             } catch(e) {
                 reject(e);
@@ -378,7 +375,8 @@ export default class DecentralizedNation implements IDecentralizedNation {
         return new Promise<void>(async (resolve, reject) => {
            try {
                // resolve()
-               const {f_secret, p_message = '', contractor, campaign} = await this.utils.getOffchainDataFromIPFSHash(referralLink);
+               const {f_secret, p_message = '', contractor, campaign, dao} = await this.utils.getOffchainDataFromIPFSHash(referralLink);
+               this.base._log('VISIT VOTING, DAO address', dao);
                if (!p_message.startsWith('01')) {
                    // reject(new Error('Wrong version'));
                    console.log('NO P_MESSAGE');

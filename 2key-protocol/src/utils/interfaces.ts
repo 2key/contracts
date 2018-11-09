@@ -29,6 +29,7 @@ export interface IOffchainData {
     f_address: string,
     f_secret: string,
     p_message?: string,
+    dao?: string,
 }
 
 export interface ITransaction {

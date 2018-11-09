@@ -370,7 +370,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     }
 
     // Join Offchain
-    public join(campaign: any, from: string, { cut, gasPrice = this.base._getGasPrice(), referralLink, cutSign, voting }: IJoinLinkOpts = {}): Promise<string> {
+    public join(campaign: any, from: string, { cut, gasPrice = this.base._getGasPrice(), referralLink, cutSign, voting, daoContract }: IJoinLinkOpts = {}): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
                 const campaignAddress = typeof (campaign) === 'string' ? campaign
@@ -378,10 +378,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
 
                 // if (from !== this.base.plasmaAddress) {
                 const sig = await Sign.sign_plasma2eteherum(this.base.plasmaAddress, from, this.base.web3);
-                this.base._log('Signature', sig, {
-                    from: this.base.plasmaAddress,
-                    gasPrice: 0
-                });
+                this.base._log('Signature', sig);
                 const txHash: string = await promisify(this.base.twoKeyPlasmaEvents.add_plasma2ethereum, [sig, {
                     from: this.base.plasmaAddress,
                     gasPrice: 0
@@ -399,22 +396,26 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
 
                 let new_message;
                 let contractor;
+                let dao;
                 if (referralLink) {
-                    const {f_address, f_secret, p_message, contractor: campaignContractor} = await this.utils.getOffchainDataFromIPFSHash(referralLink);
+                    const {f_address, f_secret, p_message, contractor: campaignContractor, dao: daoAddress } = await this.utils.getOffchainDataFromIPFSHash(referralLink);
                     contractor = campaignContractor;
+                    dao = daoAddress;
                     // this.base._log('New link for', from, f_address, f_secret, p_message);
                     // this.base._log('P_MESSAGE', p_message);
                     // TODO: Andrii in AcquisitionCampaign this method was with (cut + 1)
                     new_message = Sign.free_join(from, public_address, f_address, f_secret, p_message, voting ? cut : cut + 1, cutSign);
                 } else {
                     const {contractor: campaignContractor} = await this.setPublicLinkKey(campaign, from, `0x${public_address}`, {cut, gasPrice});
+                    dao = voting ? daoContract : undefined;
                     contractor = campaignContractor;
                 }
                 const linkObject: IOffchainData = {
                     campaign: campaignAddress,
                     contractor,
                     f_address: from,
-                    f_secret: private_key
+                    f_secret: private_key,
+                    dao,
                 };
                 if (new_message) {
                     linkObject.p_message = new_message;
