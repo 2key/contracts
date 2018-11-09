@@ -17,46 +17,11 @@ const ledgerOptions = {
 
 module.exports = {
   networks: {
-    'development': {
-      host: 'localhost',
-      port: 8545,
-      // provider: new HDWalletProvider(mnemonic, "http://localhost:8500"),
-      network_id: '*', // Match any network id
-      gas: 10000000,
-      gasPrice: 2000000000
-    },
-    'dev-ganache': {
-      host: 'localhost',
-      port: 8500,
-      network_id: '*', // Match any network id
-      gas: 8000000,
-      gasPrice: 2000000000
-    },
     'dev-local': {
       provider: new HDWalletProvider(mnemonic, 'http://localhost:8545'),
       network_id: 8086, // Match any network id
       gas: 8000000,
       gasPrice: 2000000000
-    },
-    'dev-private': {
-      provider: () => new HDWalletProvider(mnemonic_private, 'http://192.168.47.101:28545'),
-      // provider: () => new PKProvider(['d718529bf9e0a5365e3a3545b66a612ff29be12aba366b6e6e919bef1d3b83e2'], 'http://astring.aydnep.com.ua:8545'),
-      network_id: 8087, // Match any network id
-      gas: 7888888,
-      gasPrice: 2000000000
-    },
-    'dev-ap': {
-      provider: () => new HDWalletProvider(mnemonic, 'http://astring.aydnep.com.ua:8545'),
-      // provider: () => new PKProvider(['d718529bf9e0a5365e3a3545b66a612ff29be12aba366b6e6e919bef1d3b83e2'], 'http://astring.aydnep.com.ua:8545'),
-      network_id: 8087, // Match any network id
-      gas: 7888888,
-      gasPrice: 2000000000
-    },
-    'dev-2key': {
-      provider: () => new HDWalletProvider(mnemonic, 'http://18.233.2.70:8500'),
-      network_id: '*', // Match any network id
-      gas: 8000000,
-      gasPrice: 5000000000
     },
     rinkeby: {
       provider: () => LedgerProvider(`https://rinkeby.infura.io/v3/${infuraApiKey}`, {
@@ -77,7 +42,6 @@ module.exports = {
         gas: 7000000,
         gasPrice: 50000000000
     },
-
     staging: {
       provider: () => LedgerProvider(`https://ropsten.infura.io/v3/${infuraApiKey}`, {
         networkId: 3,
@@ -127,15 +91,6 @@ module.exports = {
       gasPrice: 1
       // gasPrice: 2000000000
     },
-    'plasma-ap': {
-      // host: 'localhost',
-      // port: 8545,
-      provider: () => new HDWalletProvider(mnemonic, 'https://astring.aydnep.com.ua:18545'),
-      network_id: 17, // Match any network id
-      gas: 7000000,
-      gasPrice: 1
-      // gasPrice: 2000000000
-    },
     'plasma-dev': {
       // host: '107.23.249.140',
       // port: 8090,
@@ -145,10 +100,5 @@ module.exports = {
       gasPrice: 0,
       // gasPrice: 2000000000
     },
-    'plasma-2key': {
-      provider: () => new HDWalletProvider(mnemonic, 'http://18.233.2.70:8500/prv2'),
-      gas: 7000000,
-      gasPrice: 2000000000
-    }
   }
 };
