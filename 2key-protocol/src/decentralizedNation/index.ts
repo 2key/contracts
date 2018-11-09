@@ -298,7 +298,7 @@ export default class DecentralizedNation implements IDecentralizedNation {
                     }
                 ]);
                 await this.utils.getTransactionReceiptMined(txHash);
-                const campaignPublicLinkKey = await this.acquisitionCampaign.join(addressOfVotingContract, from, {gasPrice});
+                const campaignPublicLinkKey = await this.acquisitionCampaign.join(addressOfVotingContract, from, { gasPrice, voting: true });
                 resolve(campaignPublicLinkKey);
             } catch(e) {
                 reject(e);
@@ -378,16 +378,15 @@ export default class DecentralizedNation implements IDecentralizedNation {
         return new Promise<void>(async (resolve, reject) => {
            try {
                // resolve()
-               const {f_address, f_secret, p_message = '', contractor, campaign} = await this.utils.getOffchainDataFromIPFSHash(referralLink);
-               console.log('>>>>>>>visitOffChain', p_message, f_address);
+               const {f_secret, p_message = '', contractor, campaign} = await this.utils.getOffchainDataFromIPFSHash(referralLink);
                if (!p_message.startsWith('01')) {
                    // reject(new Error('Wrong version'));
                    console.log('NO P_MESSAGE');
                } else {
                    const public_address =  Sign.privateToPublic(Buffer.from(f_secret, 'hex'));
                    let visit_sig = `0x${p_message}${public_address}`;
-                   this.base._log('CALLING PLASMA VISIT', campaign, contractor, visit_sig, { from: plasma_address, gasPrice: 0, gas: 700000 });
-                   const txHash = await promisify(this.base.twoKeyPlasmaEvents.visited, [campaign, contractor, visit_sig, { from: plasma_address, gasPrice: 0, gas: 700000 }]);
+                   // this.base._log('CALLING PLASMA VISIT', campaign, contractor, visit_sig, { from: plasma_address, gasPrice: 0, gas: 700000 });
+                   await promisify(this.base.twoKeyPlasmaEvents.visited, [campaign, contractor, visit_sig, { from: plasma_address, gasPrice: 0}]);
                    // await this.utils.getTransactionReceiptMined(txHash);
                }
                resolve();
@@ -427,7 +426,7 @@ export default class DecentralizedNation implements IDecentralizedNation {
                        let first_address = `0x${m.slice(2, 42)}`;
                        let first_public_key = await promisify(weightedVoteContractInstance.public_link_key, [first_address]);
                        let cuts = Sign.validate_join(first_public_key, null, null, `0x${m}`);
-                       console.log(`cuts=${cuts.toString()}`);
+                       // console.log(`cuts=${cuts.toString()}`);
                        const txHash = await promisify(weightedVoteContractInstance.transferSig, [`0x${m}`, { from: contractor }]);
                        resolve(txHash);
                    }
@@ -457,8 +456,8 @@ export default class DecentralizedNation implements IDecentralizedNation {
                    cut = 0
                }
                const cut_sign = await Sign.sign_cut2eteherum(cut, from, this.base.web3);
-               console.log('JOIN', await this.utils.getOffchainDataFromIPFSHash(referralLink));
-               const newReferralLink = await this.acquisitionCampaign.join(campaign, from, { cut, gasPrice, referralLink, cutSign: cut_sign });
+               // console.log('JOIN', await this.utils.getOffchainDataFromIPFSHash(referralLink));
+               const newReferralLink = await this.acquisitionCampaign.join(campaign, from, { cut, gasPrice, referralLink, cutSign: cut_sign, voting: true });
                // TODO: add visit
                await this.visitOffChain(this.base.plasmaAddress, newReferralLink);
                resolve(newReferralLink);

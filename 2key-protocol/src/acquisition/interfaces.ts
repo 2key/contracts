@@ -87,4 +87,5 @@ export interface IPublicLinkOpts {
 export interface IJoinLinkOpts extends IPublicLinkOpts{
     referralLink?: string,
     cutSign?: string,
+    voting?: boolean,
 }

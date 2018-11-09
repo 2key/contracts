@@ -336,7 +336,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
                 const nonce = await this.helpers._getNonce(from);
                 const contractor = await promisify(campaignInstance.getContractorAddress, [{from, nonce}]);
-                this.base._log('SETPUBLICLINK CONTRACTOR', contractor, publicLink);
+                // this.base._log('SETPUBLICLINK CONTRACTOR', contractor, publicLink);
                 const [mainTxHash, plasmaTxHash] = await Promise.all([
                     promisify(campaignInstance.setPublicLinkKey, [publicLink, {
                         from,
@@ -346,10 +346,9 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                         contractor, from, publicLink, {from: this.base.plasmaAddress, gasPrice: 0}
                     ]),
                 ]);
-                console.log('>>>PLASMADEBUG', campaignInstance.address, contractor, from, publicLink,  {from: this.base.plasmaAddress, gasPrice: 0});
                 await Promise.all([this.utils.getTransactionReceiptMined(mainTxHash), this.utils.getTransactionReceiptMined(plasmaTxHash, {web3: this.base.plasmaWeb3})]);
                 if (cut > -1) {
-                    await promisify(campaignInstance.setCut, [cut, {from}]);
+                    await promisify(campaignInstance.setCut, [cut - 1, {from}]);
                 }
                 resolve({publicLink, contractor});
             } catch (err) {
@@ -371,7 +370,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     }
 
     // Join Offchain
-    public join(campaign: any, from: string, { cut, gasPrice = this.base._getGasPrice(), referralLink, cutSign }: IJoinLinkOpts = {}): Promise<string> {
+    public join(campaign: any, from: string, { cut, gasPrice = this.base._getGasPrice(), referralLink, cutSign, voting }: IJoinLinkOpts = {}): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
                 const campaignAddress = typeof (campaign) === 'string' ? campaign
@@ -403,10 +402,10 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 if (referralLink) {
                     const {f_address, f_secret, p_message, contractor: campaignContractor} = await this.utils.getOffchainDataFromIPFSHash(referralLink);
                     contractor = campaignContractor;
-                    this.base._log('New link for', from, f_address, f_secret, p_message);
-                    this.base._log('P_MESSAGE', p_message);
+                    // this.base._log('New link for', from, f_address, f_secret, p_message);
+                    // this.base._log('P_MESSAGE', p_message);
                     // TODO: Andrii in AcquisitionCampaign this method was with (cut + 1)
-                    new_message = Sign.free_join(from, public_address, f_address, f_secret, p_message, cut, cutSign);
+                    new_message = Sign.free_join(from, public_address, f_address, f_secret, p_message, voting ? cut : cut + 1, cutSign);
                 } else {
                     const {contractor: campaignContractor} = await this.setPublicLinkKey(campaign, from, `0x${public_address}`, {cut, gasPrice});
                     contractor = campaignContractor;
@@ -420,7 +419,6 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 if (new_message) {
                     linkObject.p_message = new_message;
                 }
-                this.base._log('ACQUISITION_JOIN', linkObject.p_message, from);
                 const link = await this.utils.ipfsAdd(linkObject);
                 resolve(link);
             } catch (err) {
