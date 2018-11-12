@@ -23,7 +23,14 @@ module.exports = {
       gas: 8000000,
       gasPrice: 2000000000
     },
-    rinkeby: {
+
+    'development' : {
+        host: "localhost",
+        port: 8545,
+        network_id: "*" // Match any network id
+    },
+
+    'rinkeby' : {
       provider: () => LedgerProvider(`https://rinkeby.infura.io/v3/${infuraApiKey}`, {
         networkId: 4,
         // https://github.com/LedgerHQ/ledgerjs/issues/200
@@ -36,13 +43,15 @@ module.exports = {
       gas: 7000000,
       gasPrice: 50000000000,
     },
+
     'rinkeby-test' : {
         provider: () => new HDWalletProvider(mnemonic, 'https://rinkeby.infura.io/v3/904c762bd6984606bf8ae7f30d7cb28c'),
         network_id: 4,
         gas: 7000000,
         gasPrice: 50000000000
     },
-    staging: {
+
+    'staging' : {
       provider: () => LedgerProvider(`https://ropsten.infura.io/v3/${infuraApiKey}`, {
         networkId: 3,
         // https://github.com/LedgerHQ/ledgerjs/issues/200
@@ -56,12 +65,14 @@ module.exports = {
       gas: 8000000,
       gasPrice: 50000000000
     },
+
     'ropsten' : {
         provider: () => new HDWalletProvider(mnemonic, 'https://ropsten.infura.io/v3/71d39c30bc984e8a8a0d8adca84620ad'),
         network_id: 3,
         gas: 8000000,
         gasPrice: 50000000000
     },
+
     'staging-2key': {
       provider: () => LedgerProvider('http://18.233.2.70:8500/ropsten', {
         networkId: 3,
@@ -76,12 +87,14 @@ module.exports = {
       gas: 8000000,
       gasPrice: 50000000000
     },
+
     'kovan': {
       provider: () => new HDWalletProvider(mnemonic, 'https://kovan.infura.io/6rAARDbMXpJlwODa2kbk'),
       network_id: 42,
       gas: 7000000,
       gasPrice: 3000000000
     },
+
     'plasma-local': {
       // host: 'localhost',
       // port: 8545,
@@ -91,6 +104,7 @@ module.exports = {
       gasPrice: 1
       // gasPrice: 2000000000
     },
+
     'plasma-dev': {
       // host: '107.23.249.140',
       // port: 8090,
