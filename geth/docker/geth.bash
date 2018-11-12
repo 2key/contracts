@@ -7,7 +7,7 @@ if [ ! -d /geth/data/keystore ]; then
 
 	for i in {1..13}
 	do
-		echo "GENERATIONG KEY "$i" ON DEVNET"
+		echo "GENERATING KEY "$i" ON DEVNET"
 		geth --datadir=/geth/data account import --password /opt/geth/passwords <(sed -n "$i"p /opt/geth/key.prv)
 	done
 fi
