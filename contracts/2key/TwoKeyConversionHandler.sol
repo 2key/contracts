@@ -451,5 +451,4 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
             TwoKeyLockupContract(allLockUpContracts[i]).cancelCampaignAndGetBackTokens(assetContractERC20);
         }
     }
-
 }

@@ -24,11 +24,11 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
     event Rewarded(address indexed to, uint256 amount);
     event Expired(address indexed _contract);
 
-    TwoKeyConversionHandler conversionHandler;
+    TwoKeyConversionHandler public conversionHandler;
 
     mapping(address => uint256) referrer2cut; // Mapping representing how much are cuts in percent(0-100) for referrer address
     mapping(address => uint256) internal referrerBalancesETHWei; // balance of EthWei for each influencer that he can withdraw
-    mapping(address => uint256) internal referrerTotalEarnings2KEY; // Total earnings for referrers
+    mapping(address => uint256) internal referrerTotalEarningsEthWEI; // Total earnings for referrers
     mapping(address => uint) balancesConvertersETH; // Amount converter put to the contract in Ether
     mapping(address => uint) balances;
     mapping(address => uint) moderatorBalanceETHWEI;
@@ -37,7 +37,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
     mapping(address => address) public publicLinkKey; // Public link key can generate only somebody who has ARCs
 
 
-    uint campaignInventoryUnitsBalance; // Balance will represent how many that tokens (erc20) we have on our Campaign
+    uint256 public campaignInventoryUnitsBalance; // Balance will represent how many that tokens (erc20) we have on our Campaign
     address assetContractERC20; // Asset contract is address of ERC20 inventory
     uint256 contractorBalance;
     uint256 contractorTotalProceeds;
@@ -287,7 +287,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
 
 
 
-    function createConversion(uint conversionAmountETHWei, address converterAddress) {
+    function createConversion(uint conversionAmountETHWei, address converterAddress) internal {
         uint baseTokensForConverterUnits;
         uint bonusTokensForConverterUnits;
 
@@ -334,7 +334,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
                 }
             }
             referrerBalancesETHWei[influencers[i]] = referrerBalancesETHWei[influencers[i]].add(b);
-            referrerTotalEarnings2KEY[influencers[i]] = referrerTotalEarnings2KEY[influencers[i]].add(convertETHWeiToTwoKey(b));
+            referrerTotalEarningsEthWEI[influencers[i]] = referrerTotalEarningsEthWEI[influencers[i]].add(b);
             emit Rewarded(influencers[i], b);
             total_bounty = total_bounty.add(b);
             _maxReferralRewardETHWei = _maxReferralRewardETHWei.sub(b);
@@ -347,7 +347,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
     /// @param _to address we're sending the amount of ERC20
     /// @param _amount is the amount of ERC20's we're going to transfer
     /// @return true if successful, otherwise reverts
-    function moveFungibleAsset(address _to, uint256 _amount) public onlyTwoKeysConversionHandler returns (bool) {
+    function moveFungibleAsset(address _to, uint256 _amount) public onlyTwoKeyConversionHandler returns (bool) {
         require(campaignInventoryUnitsBalance >= _amount);
         require(
             assetContractERC20.call(
@@ -366,14 +366,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
     function getAmountAddressSent(address _from) public view returns (uint) {
         return balancesConvertersETH[_from];
     }
-
-
-    /// @notice Function to check contract balance of specified ERC20 tokens
-    /// @return balance
-    function getContractBalance() public view returns (uint) {
-        return campaignInventoryUnitsBalance;
-    }
-
 
     /// @notice Function to return constantss
     function getConstantInfo() public view returns (uint256, uint256, uint256, uint256) {
@@ -402,6 +394,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
         require(referrer2cut[msg.sender] != 0);
         return referrer2cut[msg.sender] - 1;
     }
+
 
     /// @notice Function to check balance of the ERC20 inventory (view - no gas needed to call this function)
     /// @dev we're using Utils contract and fetching the balance of this contract address
@@ -484,12 +477,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
         contractorBalance.add(value);
     }
 
-    /// @notice getter for address of conversion handler
-    /// @return address representing conversionHandler contract
-    function getTwoKeyConversionHandlerAddress() public view returns (address) {
-        return conversionHandler;
-    }
-
     /// @notice Getter for the address status if it's joined
     /// @return true / false
     function getAddressJoinedStatus() public view returns (bool) {
@@ -520,34 +507,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
         return withdrawApproved;
     }
 
-    // @notice Withdraw function for converter and contractor
-    function withdrawEth(uint value) public payable {
-        uint transferAmount = 0;
-        if(msg.sender == contractor) {
-            if(contractorBalance >= value) {
-                transferAmount = value;
-            } else {
-                transferAmount = contractorBalance;
-            }
-            contractor.transfer(transferAmount);
-            contractorBalance.sub(transferAmount);
-        } else if(balancesConvertersETH[msg.sender] > 0) {
-            address converter = msg.sender;
-            if(balancesConvertersETH[msg.sender] >= value) {
-                transferAmount = value;
-            } else {
-                transferAmount = balancesConvertersETH[msg.sender];
-            }
-            converter.transfer(transferAmount);
-            balancesConvertersETH[msg.sender] = balancesConvertersETH[msg.sender].sub(transferAmount);
 
-        }
-    }
 
-    // @notice Function to convert ETH to 2key
-    function convertETHWeiToTwoKey(uint value) public view returns (uint) {
-        return value*pricePerUnitInETHWei;
-    }
 
 }
 

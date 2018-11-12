@@ -43,6 +43,7 @@ export interface IAcquisitionCampaign {
     bonusTokensVestingStartShiftInDaysFromDistributionDate: number
 }
 
+
 export interface ITwoKeyAcquisitionCampaign {
     estimateCreation: (data: IAcquisitionCampaign, from: string) => Promise<number>,
     create: (data: IAcquisitionCampaign, from: string, opts?: ICreateOpts) => Promise<IAcquisitionCampaignMeta>,
