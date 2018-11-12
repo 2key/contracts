@@ -15,6 +15,7 @@ import createLedgerSubprovider from '@ledgerhq/web3-subprovider';
 interface EthereumWeb3 {
     web3: any;
     address: string;
+    privateKey?: string;
 }
 
 export function ledgerWeb3(rpcUrl: string, networkId?: number, path?: string): Promise<EthereumWeb3> {
@@ -74,6 +75,7 @@ export default function (mnemonic: string, rpcUrl: string, pk?: string): Ethereu
     engine.start();
     const web3 = new Web3(engine);
     const address = `0x${wallet.getAddress().toString('hex')}`;
-    console.log('new Web3', address);
-    return {web3, address};
+    const privateKey = wallet.getPrivateKey().toString('hex');
+    console.log('new Web3', address, privateKey);
+    return {web3, address, privateKey};
 }
