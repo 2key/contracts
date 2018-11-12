@@ -18,7 +18,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     using SafeMath for uint256;
 
     mapping(address => Conversion) public conversions;
-    // Same conversion can appear only in once of this 4 arrays at a time
 
     // Mapping where we will store as the key state of conversion, and as value, there'll be all converters which conversions are in that state
     mapping(bytes32 => address[]) conversionStateToConverters;
@@ -139,16 +138,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         require(c.state != ConversionState.REJECTED);
     }
 
-    /// @notice Function which will support checking if escrow is expired
-    /// @dev only contract TwoKeyAcquisitionCampaign can call this method
-    /// @param _converterAddress is the address of the converter
-    function supportForExpireEscrow(address _converterAddress) public view onlyTwoKeyAcquisitionCampaign {
-        Conversion memory c = conversions[_converterAddress];
-        require(c.state != ConversionState.CANCELLED);
-        require(c.state != ConversionState.FULFILLED);
-        require(c.state != ConversionState.REJECTED);
-        require(now > c.conversionExpiresAt);
-    }
+
 
     /// @notice Support function to create conversion
     /// @dev This function can only be called from TwoKeyAcquisitionCampaign contract address
@@ -194,20 +184,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         bytes memory encoded = encodeParams(_conversion.converter, _conversion.conversionCreatedAt, _conversion.conversionAmount);
         return encoded;
     }
-
-
-//    function getConversionAttributes(address _converter) public view onlyTwoKeyAcquisitionCampaign returns (uint,uint,uint,uint) {
-//        Conversion memory conversion = conversions[_converter];
-//        return (conversion.maxReferralRewardETHWei, conversion.moderatorFeeETHWei,
-//        conversion.baseTokenUnits, conversion.bonusTokenUnits);
-//    }
-
-    //TODO: Check on status call but no more need for this function
-//    function fullFillConversion(address _converter) public onlyTwoKeyAcquisitionCampaign {
-//        Conversion memory conversion = conversions[_converter];
-//        conversion.state = ConversionState.FULFILLED;
-//        conversions[_converter] = conversion;
-//    }
 
     function executeConversion(address _converter) public onlyApprovedConverter {
         didConverterConvert(_converter);

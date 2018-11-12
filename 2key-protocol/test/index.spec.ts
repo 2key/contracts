@@ -377,7 +377,6 @@ describe('TwoKeyProtocol', () => {
             moderatorFeePercentageWei: twoKeyProtocol.Utils.toWei(moderatorFeePercentage, 'ether'),
             minContributionETHWei: twoKeyProtocol.Utils.toWei(minContributionETH, 'ether'),
             maxContributionETHWei: twoKeyProtocol.Utils.toWei(maxContributionETH, 'ether'),
-            // tokenDistributionDate: Math.round(Date.now() / 1000),
             tokenDistributionDate: 12345678,
             maxDistributionDateShiftInDays: 180,
             bonusTokensVestingMonths: 6,
@@ -750,6 +749,15 @@ describe('TwoKeyProtocol', () => {
     }).timeout(30000);
     it('should print after all tests', printBalances).timeout(15000);
 
+    it('should print balances before cancelation', async() => {
+        for (let i = 0; i < addresses.length; i++) {
+            let addressCurrent = addresses[i].toString();
+            let balance = await twoKeyProtocol.ERC20.getERC20Balance(twoKeyEconomy, addressCurrent);
+            console.log("Address: " + addressCurrent + " ----- balance: " + balance);
+        }
+    }).timeout(30000);
+
+
     it('should print balances of ERC20 on lockupContracts', async () => {
         const {web3, address} = web3switcher.aydnep();
         from = address;
@@ -814,42 +822,7 @@ describe('TwoKeyProtocol', () => {
      */
 
 
-    it('should check if address is maintainer', async() => {
-        // const {web3, address} = web3switcher.aydnep();
-        // from = address;
-        // twoKeyProtocol.setWeb3({
-        //     web3,
-        //     networks: {
-        //         mainNetId,
-        //         syncTwoKeyNetId,
-        //     },
-        //     plasmaPK: Sign.generatePrivateKey().toString('hex'),
-        // });
 
-        let isMaintainer = await twoKeyProtocol.DecentralizedNation.check(from, from);
-        console.log(isMaintainer);
-    }).timeout(30000);
-
-    let daoAddress;
-    it('should create new Decentralized nation', async() => {
-        const DAOdata = {
-            nationName: "Liberland",
-            ipfsHashForConstitution: "0x1234",
-            ipfsHashForDAOPublicInfo: "0x1234",
-            initialMemberAddresses: ['0xb3fa520368f2df7bed4df5185101f303f6c7decc',
-                '0xffcf8fdee72ac11b5c542428b35eef5769c409f0',],
-            initialMemberTypes:['PRESIDENT', 'MINISTER'],
-            eligibleToStartVotingCampaign: [1,1],
-            minimalNumberOfVotersForVotingCampaign: 100000,
-            minimalPercentOfVotersForVotingCampaign: 60,
-            minimalNumberOfVotersForPetitioningCampaign: 1000000,
-            minimalPercentOfVotersForPetitioningCampaign: 51,
-            limitsPerMemberType: [10,10]
-        };
-
-        daoAddress = await twoKeyProtocol.DecentralizedNation.create(DAOdata, from);
-        console.log(daoAddress);
-    }).timeout(30000);
 
     //
     // it('should get all members of DAO', async() => {

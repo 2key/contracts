@@ -43,6 +43,15 @@ contract DecentralizedNation {
     uint minimalNumberOfVotersForPetitioningCampaign;
     uint minimalPercentOfVotersForPetitioningCampaign;
 
+    function getLimitsForDAO() public view returns (uint,uint,uint,uint) {
+        return(
+            minimalNumberOfPositiveVotersForVotingCampaign,
+            minimalPercentOfVotersForVotingCampaign,
+            minimalNumberOfVotersForPetitioningCampaign,
+            minimalPercentOfVotersForPetitioningCampaign
+        );
+    }
+
     address twoKeyRegistryContract;
 
     struct Campaign {
@@ -94,7 +103,7 @@ contract DecentralizedNation {
         uint _minimalNumberOfVotersForPetitioningCampaign,
         uint _minimalPercentOfVotersForPetitioningCampaign,
         address _twoKeyRegistry
-    ) public  {
+    ) public {
         require(limitPerType.length == initialMemberTypes.length);
         initialFounder = founder[0];
         memberTypes.push(bytes32("FOUNDERS"));

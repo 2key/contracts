@@ -505,7 +505,7 @@ export default class DecentralizedNation implements IDecentralizedNation {
                     cResolve({
                         votingReason, finished, votesYes, votesNo, votingResultForYes, votingResultForNo, votingCampaignLengthInDays, campaignType, votingCampaignContractAddress,
                     });
-                })
+                });
 
 
                 resolve(prom);
@@ -534,6 +534,32 @@ export default class DecentralizedNation implements IDecentralizedNation {
                 reject(e);
             }
         });
+    }
+
+
+    /**
+     *
+     * @param decentralizedNation
+     * @returns {Promise<any>}
+     */
+    public getLimitsForCampaign(decentralizedNation: any) : Promise<any> {
+        return new Promise(async(resolve,reject) => {
+            try {
+                const decentralizedNationInstance = await this.helpers._getDecentralizedNationInstance(decentralizedNation);
+                let [minimalNumberVoting,minimalPercentVoting, minimalNumberPetitioning,minimalPercentPetitioning]
+                = await promisify(decentralizedNationInstance.getLimitsForDAO, []);
+
+                let obj = {
+                    minimalNumberVoting: minimalNumberVoting,
+                    minimalPercentVoting: minimalPercentVoting,
+                    minimalNumberPetitioning: minimalNumberPetitioning,
+                    minimalPercentPetitioning: minimalPercentPetitioning,
+                };
+                resolve(obj);
+            } catch (e) {
+                reject(e);
+            }
+        })
     }
 
 }
