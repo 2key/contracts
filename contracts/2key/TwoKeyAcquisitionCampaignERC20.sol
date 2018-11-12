@@ -353,7 +353,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
     /// @param _to address we're sending the amount of ERC20
     /// @param _amount is the amount of ERC20's we're going to transfer
     /// @return true if successful, otherwise reverts
-    function moveFungibleAsset(address _to, uint256 _amount) internal onlyTwoKeyConversionHandler returns (bool) {
+    function moveFungibleAsset(address _to, uint256 _amount) public onlyTwoKeyConversionHandler returns (bool) {
         require(campaignInventoryUnitsBalance >= _amount);
         require(
             assetContractERC20.call(
@@ -410,12 +410,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
         return cuts;
     }
 
-
-    /// @notice Function which returns value of maxReferralRewardPercent
-    /// @return value of maxReferralRewardPercent as uint256
-    function getMaxReferralRewardPercent() public view returns (uint256) {
-        return maxReferralRewardPercent;
-    }
 
     /// @notice This is acting as a getter for referrer2cut
     /// @dev Transaction will revert if msg.sender is not present in mapping
@@ -556,7 +550,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
 
 
     function contractorWithdrawEth() public onlyContractor {
-        require(!isOngoing());
+
     }
 
 }
