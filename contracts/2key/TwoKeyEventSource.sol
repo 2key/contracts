@@ -72,6 +72,22 @@ contract TwoKeyEventSource is TwoKeyTypes {
         uint value
     );
 
+    uint counter = 0;
+
+    address[] whitelistedDeployers = [
+                                        0xb3FA520368f2Df7BED4dF5185101f303f6c7decc, //local-geth
+                                        0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1, //ganache -deterministic
+                                        0x94aac1FE48D0ABeC6A07051e089759E767C3f26c // rinkeby
+                                    ];
+
+    function isAddressWhitelistedDeployer(address x) public view returns (bool) {
+        for(uint i=0; i<whitelistedDeployers.length; i++) {
+            if(x == whitelistedDeployers[i]) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     // TwoKeyAdmin twoKeyAdmin;
     address twoKeyAdmin;
@@ -125,8 +141,10 @@ contract TwoKeyEventSource is TwoKeyTypes {
     /// @param _contractAddress is actually the address of contract we'd like to allow
     /// @dev We first fetch bytes32 contract code and then update our mapping
     /// @dev only admin can call this or an authorized person
+    /// onlyAuthorizedSubadmins
     function addContract(address _contractAddress) public onlyAuthorizedSubadmins {
         require(_contractAddress != address(0));
+        counter++;
         bytes memory _contractCode = GetCode.at(_contractAddress);
         canEmit[_contractCode] = true;
     }
@@ -190,8 +208,16 @@ contract TwoKeyEventSource is TwoKeyTypes {
     /// This user will be contractor
     /// onlyAllowedContracts commented so Andri can fetch this
     function created(address _campaign, address _owner) public {
-//        interfaceTwoKeyReg.addWhereContractor(_campaign, _owner);
-    	emit Created(_campaign, _owner);
+        bytes memory code = GetCode.at(msg.sender);
+        if(isAddressWhitelistedDeployer(_owner)) {
+            interfaceTwoKeyReg.addWhereContractor(_campaign, _owner);
+            canEmit[code] = true;
+            emit Created(_campaign, _owner);
+        } else {
+            require(canEmit[code] == true);
+            interfaceTwoKeyReg.addWhereContractor(_campaign, _owner);
+            emit Created(_campaign, _owner);
+        }
     }
 
 

@@ -94,16 +94,15 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
         uint _conversionQuota
     )
     TwoKeyCampaignARC(
-        _twoKeyEventSource,
+            _twoKeyEventSource,
             _conversionQuota
-    ) StandardToken()
+    )
     public {
         require(_assetContractERC20 != address(0));
         require(_maxReferralRewardPercent > 0);
         require(_conversionHandler != address(0));
-
-        contractor = msg.sender;
         conversionHandler = TwoKeyConversionHandler(_conversionHandler);
+        contractor = msg.sender;
         moderator = _moderator;
         assetContractERC20 = _assetContractERC20;
         campaignStartTime = _campaignStartTime;
@@ -115,13 +114,15 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
         pricePerUnitInETHWei = _pricePerUnitInETH;
         minContributionETH = _minContributionETH;
         maxContributionETH = _maxContributionETH;
-        unit_decimals = IERC20(assetContractERC20).decimals();
-        symbol = IERC20(assetContractERC20).symbol();
+        setERC20Attributes();
         conversionHandler.setTwoKeyAcquisitionCampaignERC20(address(this), _moderator, contractor, _assetContractERC20, symbol);
         twoKeyEventSource.created(address(this), contractor);
     }
 
-
+    function setERC20Attributes() internal {
+        unit_decimals = IERC20(assetContractERC20).decimals();
+        symbol = IERC20(assetContractERC20).symbol();
+    }
 
     /**
      * given the total payout, calculates the moderator fee

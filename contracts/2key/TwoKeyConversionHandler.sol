@@ -185,13 +185,11 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         return encoded;
     }
 
-
     function executeConversion(address _converter) public onlyApprovedConverter {
         didConverterConvert(_converter);
         performConversion(_converter);
         moveFromApprovedToFulfilledState(_converter);
     }
-
 
     function performConversion(address _converter) internal {
         Conversion memory conversion = conversions[_converter];
@@ -451,4 +449,5 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
             TwoKeyLockupContract(allLockUpContracts[i]).cancelCampaignAndGetBackTokens(assetContractERC20);
         }
     }
+
 }
