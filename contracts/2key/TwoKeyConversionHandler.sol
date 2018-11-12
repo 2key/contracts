@@ -18,7 +18,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     using SafeMath for uint256;
 
     mapping(address => Conversion) public conversions;
-    // Same conversion can appear only in once of this 4 arrays at a time
 
     // Mapping where we will store as the key state of conversion, and as value, there'll be all converters which conversions are in that state
     mapping(bytes32 => address[]) conversionStateToConverters;
@@ -139,16 +138,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         require(c.state != ConversionState.REJECTED);
     }
 
-    /// @notice Function which will support checking if escrow is expired
-    /// @dev only contract TwoKeyAcquisitionCampaign can call this method
-    /// @param _converterAddress is the address of the converter
-    function supportForExpireEscrow(address _converterAddress) public view onlyTwoKeyAcquisitionCampaign {
-        Conversion memory c = conversions[_converterAddress];
-        require(c.state != ConversionState.CANCELLED);
-        require(c.state != ConversionState.FULFILLED);
-        require(c.state != ConversionState.REJECTED);
-        require(now > c.conversionExpiresAt);
-    }
+
 
     /// @notice Support function to create conversion
     /// @dev This function can only be called from TwoKeyAcquisitionCampaign contract address
