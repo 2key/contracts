@@ -377,7 +377,6 @@ describe('TwoKeyProtocol', () => {
             moderatorFeePercentageWei: twoKeyProtocol.Utils.toWei(moderatorFeePercentage, 'ether'),
             minContributionETHWei: twoKeyProtocol.Utils.toWei(minContributionETH, 'ether'),
             maxContributionETHWei: twoKeyProtocol.Utils.toWei(maxContributionETH, 'ether'),
-            // tokenDistributionDate: Math.round(Date.now() / 1000),
             tokenDistributionDate: 12345678,
             maxDistributionDateShiftInDays: 180,
             bonusTokensVestingMonths: 6,
@@ -749,6 +748,15 @@ describe('TwoKeyProtocol', () => {
         expect(addresses.length).to.be.equal(7);
     }).timeout(30000);
     it('should print after all tests', printBalances).timeout(15000);
+
+    it('should print balances before cancelation', async() => {
+        for (let i = 0; i < addresses.length; i++) {
+            let addressCurrent = addresses[i].toString();
+            let balance = await twoKeyProtocol.ERC20.getERC20Balance(twoKeyEconomy, addressCurrent);
+            console.log("Address: " + addressCurrent + " ----- balance: " + balance);
+        }
+    }).timeout(30000);
+
 
     it('should print balances of ERC20 on lockupContracts', async () => {
         const {web3, address} = web3switcher.aydnep();

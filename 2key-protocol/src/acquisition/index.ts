@@ -1,11 +1,11 @@
-import {IERC20, IOffchainData, ITwoKeyBase, ITwoKeyHelpers, ITwoKeyUtils, ICreateOpts } from '../interfaces';
+import {ICreateOpts, IERC20, IOffchainData, ITwoKeyBase, ITwoKeyHelpers, ITwoKeyUtils} from '../interfaces';
 import {
     IAcquisitionCampaign,
     IAcquisitionCampaignMeta,
-    ITokenAmount,
     IJoinLinkOpts,
     IPublicLinkKey,
     IPublicLinkOpts,
+    ITokenAmount,
     ITwoKeyAcquisitionCampaign,
 } from './interfaces';
 
@@ -52,8 +52,12 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         this.erc20 = erc20;
     }
 
-    /* ACQUISITION CAMPAIGN */
-
+    /**
+     *
+     * @param {IAcquisitionCampaign} data
+     * @param {string} from
+     * @returns {Promise<number>}
+     */
     public estimateCreation(data: IAcquisitionCampaign, from: string): Promise<number> {
         return new Promise(async (resolve, reject) => {
             try {
@@ -67,7 +71,6 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     ]);
                 const campaignGas = await this.helpers._estimateSubcontractGas(contractsMeta.TwoKeyAcquisitionCampaignERC20, from, [
                     this.helpers._getContractDeployedAddress('TwoKeyEventSource'),
-                    this.base.twoKeyEconomy.address,
                     // Fake WhiteListInfluence address
                     `0x${public_address}`,
                     // Fake WhiteListConverter address
@@ -93,7 +96,16 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         });
     }
 
-    // Create Campaign
+    /**
+     *
+     * @param {IAcquisitionCampaign} data
+     * @param {string} from
+     * @param {ICreateCampaignProgress} progressCallback
+     * @param {number} gasPrice
+     * @param {number} interval
+     * @param {number} timeout
+     * @returns {Promise<IAcquisitionCampaignMeta>}
+     */
     public create(data: IAcquisitionCampaign, from: string, { progressCallback, gasPrice, interval, timeout = 60000 }: ICreateOpts = {}): Promise<IAcquisitionCampaignMeta> {
         return new Promise(async (resolve, reject) => {
             try {
@@ -117,13 +129,11 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                         progressCallback('TwoKeyConversionHandler', true, conversionHandlerAddress);
                     }
                 }
-                // const whitelistsInstance = this.web3.eth.contract(contractsMeta.TwoKeyWhitelisted.abi).at(whitelistsAddress);
 
                 txHash = await this.helpers._createContract(contractsMeta.TwoKeyAcquisitionCampaignERC20, from, {
                     gasPrice,
                     params: [
                         this.helpers._getContractDeployedAddress('TwoKeyEventSource'),
-                        this.base.twoKeyEconomy.address,
                         conversionHandlerAddress,
                         data.moderator || from,
                         data.assetContractERC20,
@@ -170,6 +180,12 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         });
     }
 
+    /**
+     *
+     * @param {string} campaignAddress
+     * @param {string} from
+     * @returns {Promise<string>}
+     */
     public addTwoKeyAcquisitionCampaignToBeEligibleToEmitEvents(campaignAddress: string, from: string): Promise<string> {
         return new Promise<string>(async (resolve, reject) => {
             try {
@@ -182,6 +198,14 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         });
     }
 
+    /**
+     *
+     * @param campaign
+     * @param {string} hash
+     * @param {string} from
+     * @param {number} gasPrice
+     * @returns {Promise<string>}
+     */
     public updateOrSetIpfsHashPublicMeta(campaign: any, hash: string, from: string, gasPrice: number = this.base._getGasPrice()): Promise<string> {
         return new Promise<string>(async (resolve, reject) => {
             try {
@@ -199,12 +223,16 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         });
     }
 
+    /**
+     *
+     * @param campaign
+     * @param {string} from
+     * @returns {Promise<any>}
+     */
     public getPublicMeta(campaign: any, from?: string): Promise<any> {
         return new Promise<any>(async (resolve, reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-                // const contractor = await promisify(campaignInstance.getContractorAddress, []);
-                // const ipfsHash = await promisify(campaignInstance.publicMetaHash, []);
                 const isAddressJoined = await this.isAddressJoined(campaignInstance, from);
                 const ipfsHash = await promisify(campaignInstance.publicMetaHash, []);
                 const meta = JSON.parse((await promisify(this.base.ipfs.cat, [ipfsHash])).toString());
@@ -215,6 +243,12 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         });
     }
 
+    /**
+     *
+     * @param {string} hash
+     * @param {string} from
+     * @returns {Promise<any>}
+     */
     public getCampaignFromLink(hash: string, from?: string): Promise<any> {
         return new Promise<any>(async (resolve, reject) => {
             try {
@@ -228,7 +262,12 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         });
     }
 
-    // Inventory
+    /**
+     *
+     * @param campaign
+     * @param {string} from
+     * @returns {Promise<number | string | BigNumber>}
+     */
     public getInventoryBalance(campaign: any, from: string): Promise<number | string | BigNumber> {
         return new Promise<number>(async (resolve, reject) => {
             try {
@@ -241,6 +280,12 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         });
     }
 
+    /**
+     *
+     * @param campaign
+     * @param {string} from
+     * @returns {Promise<number | string | BigNumber>}
+     */
     public async checkInventoryBalance(campaign: any, from: string): Promise<number | string | BigNumber> {
         try {
             const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
@@ -254,6 +299,12 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         }
     }
 
+    /**
+     *
+     * @param campaign
+     * @param {string} from
+     * @returns {Promise<number>}
+     */
     public async getReferrerCut(campaign: any, from: string): Promise<number> {
         try {
             const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
@@ -264,7 +315,13 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         }
     }
 
-    // Estimate referral maximum reward
+    /**
+     *
+     * @param campaign
+     * @param {string} from
+     * @param {string} referralLink
+     * @returns {Promise<number>}
+     */
     public getEstimatedMaximumReferralReward(campaign: any, from: string, referralLink: string): Promise<number> {
         return new Promise(async (resolve, reject) => {
             try {
@@ -307,7 +364,12 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
 
     /* LINKS */
 
-    // Visit link
+    /**
+     *
+     * @param {string} campaignAddress
+     * @param {string} referralLink
+     * @returns {Promise<string>}
+     */
     public visit(campaignAddress: string, referralLink: string): Promise<string> {
         return new Promise<string>(async (resolve, reject) => {
             try {
@@ -330,6 +392,15 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     }
 
     // Set Public Link
+    /**
+     *
+     * @param campaign
+     * @param {string} from
+     * @param {string} publicLink
+     * @param {number} cut
+     * @param {number} gasPrice
+     * @returns {Promise<IPublicLinkKey>}
+     */
     public setPublicLinkKey(campaign: any, from: string, publicLink: string, { cut, gasPrice = this.base._getGasPrice() }: IPublicLinkOpts = {}): Promise<IPublicLinkKey> {
         return new Promise(async (resolve, reject) => {
             try {
@@ -358,6 +429,12 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     }
 
     // Get Public Link
+    /**
+     *
+     * @param campaign
+     * @param {string} from
+     * @returns {Promise<string>}
+     */
     public async getPublicLinkKey(campaign: any, from: string): Promise<string> {
         try {
             const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
@@ -370,6 +447,18 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     }
 
     // Join Offchain
+    /**
+     *
+     * @param campaign
+     * @param {string} from
+     * @param {number} cut
+     * @param {number} gasPrice
+     * @param {string} referralLink
+     * @param {string} cutSign
+     * @param {boolean} voting
+     * @param {string} daoContract
+     * @returns {Promise<string>}
+     */
     public join(campaign: any, from: string, { cut, gasPrice = this.base._getGasPrice(), referralLink, cutSign, voting, daoContract }: IJoinLinkOpts = {}): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
@@ -431,6 +520,15 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     }
 
     // ShortUrl
+    /**
+     *
+     * @param campaign
+     * @param {string} from
+     * @param {string} referralLink
+     * @param {number} cut
+     * @param {number} gasPrice
+     * @returns {Promise<string>}
+     */
     public joinAndSetPublicLinkWithCut(campaign: any, from: string, referralLink: string, {cut, gasPrice = this.base._getGasPrice()}: IPublicLinkOpts = {}): Promise<string> {
         return new Promise(async (resolve, reject) => {
             const {f_address, f_secret, p_message} = await this.utils.getOffchainDataFromIPFSHash(referralLink);
@@ -467,6 +565,12 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         });
     }
 
+    /**
+     *
+     * @param campaign
+     * @param {string} from
+     * @returns {Promise<number>}
+     */
     public getBalanceOfArcs(campaign: any, from: string): Promise<number> {
         return new Promise(async (resolve, reject) => {
             try {
@@ -480,6 +584,12 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     }
 
     /* PARTICIPATE */
+    /**
+     *
+     * @param campaign
+     * @param {string | number | BigNumber} value
+     * @returns {Promise<ITokenAmount>}
+     */
     public getEstimatedTokenAmount(campaign: any, value: string | number | BigNumber): Promise<ITokenAmount> {
         return new Promise<ITokenAmount>(async (resolve, reject) => {
             try {
@@ -501,6 +611,15 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         });
     }
 
+    /**
+     *
+     * @param campaign
+     * @param {string | number | BigNumber} value
+     * @param {string} publicLink
+     * @param {string} from
+     * @param {number} gasPrice
+     * @returns {Promise<string>}
+     */
     public joinAndConvert(campaign: any, value: string | number | BigNumber, publicLink: string, from: string, gasPrice: number = this.base._getGasPrice()): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
@@ -542,6 +661,15 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     }
 
     // Send ARCS to other account
+    /**
+     *
+     * @param campaign
+     * @param {string} from
+     * @param {string} referralLink
+     * @param {string} recipient
+     * @param {number} gasPrice
+     * @returns {Promise<string>}
+     */
     public joinAndShareARC(campaign: any, from: string, referralLink: string, recipient: string, {gasPrice = this.base._getGasPrice()}: IPublicLinkOpts = {}): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
@@ -582,6 +710,12 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     }
 
     /* HELPERS */
+    /**
+     *
+     * @param campaign
+     * @param {string} from
+     * @returns {Promise<boolean>}
+     */
     public isAddressJoined(campaign: any, from: string): Promise<boolean> {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
@@ -593,6 +727,12 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         });
     }
 
+    /**
+     *
+     * @param campaign
+     * @param {string} from
+     * @returns {Promise<any>}
+     */
     public getConverterConversion(campaign: any, from: string): Promise<any> {
         return new Promise<any>(async (resolve, reject) => {
             try {
@@ -607,6 +747,11 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         })
     }
 
+    /**
+     *
+     * @param campaign
+     * @returns {Promise<string>}
+     */
     public getTwoKeyConversionHandlerAddress(campaign: any): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
@@ -633,6 +778,12 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     //     })
     // }
 
+    /**
+     *
+     * @param campaign
+     * @param {string} from
+     * @returns {Promise<string[]>}
+     */
     public getAllPendingConverters(campaign: any, from: string): Promise<string[]> {
         return new Promise(async (resolve, reject) => {
             try {
@@ -648,6 +799,14 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         })
     }
 
+    /**
+     *
+     * @param campaign
+     * @param {string} converter
+     * @param {string} from
+     * @param {number} gasPrice
+     * @returns {Promise<string>}
+     */
     public approveConverter(campaign: any, converter: string, from: string, gasPrice: number = this.base._getGasPrice()): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
@@ -662,6 +821,14 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         })
     }
 
+    /**
+     *
+     * @param campaign
+     * @param {string} converter
+     * @param {string} from
+     * @param {number} gasPrice
+     * @returns {Promise<string>}
+     */
     public rejectConverter(campaign: any, converter: string, from: string, gasPrice: number = this.base._getGasPrice()): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
@@ -676,6 +843,13 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         })
     }
 
+    /**
+     *
+     * @param campaign
+     * @param {string} from
+     * @param {number} gasPrice
+     * @returns {Promise<string>}
+     */
     public cancelConverter(campaign: any, from: string, gasPrice: number = this.base._getGasPrice()): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
@@ -690,6 +864,12 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         })
     }
 
+    /**
+     *
+     * @param campaign
+     * @param {string} from
+     * @returns {Promise<string[]>}
+     */
     public getApprovedConverters(campaign: any, from: string): Promise<string[]> {
         return new Promise(async (resolve, reject) => {
             try {
@@ -703,6 +883,12 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         })
     }
 
+    /**
+     *
+     * @param campaign
+     * @param {string} from
+     * @returns {Promise<string[]>}
+     */
     public getAllRejectedConverters(campaign: any, from: string): Promise<string[]> {
         return new Promise(async (resolve, reject) => {
             try {
@@ -716,6 +902,14 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         })
     }
 
+    /**
+     *
+     * @param campaign
+     * @param {string} converter
+     * @param {string} from
+     * @param {number} gasPrice
+     * @returns {Promise<string>}
+     */
     public executeConversion(campaign: any, converter: string, from: string, gasPrice: number = this.base._getGasPrice()): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
@@ -731,6 +925,13 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         })
     }
 
+    /**
+     *
+     * @param campaign
+     * @param {string} converter
+     * @param {string} from
+     * @returns {Promise<string[]>}
+     */
     public getLockupContractsForConverter(campaign: any, converter: string, from: string): Promise<string[]> {
         return new Promise(async (resolve, reject) => {
             try {
@@ -744,6 +945,14 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         });
     }
 
+    /**
+     *
+     * @param campaign
+     * @param {number} amount
+     * @param {string} from
+     * @param {number} gasPrice
+     * @returns {Promise<string>}
+     */
     public addFungibleAssetsToInventoryOfCampaign(campaign: any, amount: number, from: string, gasPrice: number = this.base._getGasPrice()) : Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
@@ -757,6 +966,13 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         })
     }
 
+    /**
+     *
+     * @param campaign
+     * @param {string} from
+     * @param {number} gasPrice
+     * @returns {Promise<string>}
+     */
     public cancel(campaign: any, from: string, gasPrice: number = this.base._getGasPrice()): Promise<string> {
         return new Promise<string>(async (resolve, reject) => {
             try {

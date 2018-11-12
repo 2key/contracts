@@ -59,7 +59,7 @@ contract TwoKeyUpgradableExchange is Crowdsale, Ownable, RBACWithAdmin {
 	/// @notice Function where only admin can upgrade exchange contract with new exchange contract. 
     /// @dev This method is called only when alive (i.e. not upgraded to newExchange) and by admin
     /// @param _to is address of New Exchange Contract
-	function upgrade(address _to) public onlyAlive onlyAdmin{
+	function upgrade(address _to) public onlyAlive onlyAdmin {
 		filler = TwoKeyUpgradableExchange(_to);		// check if the address is exchange contract address -- add typecast
 	}
 

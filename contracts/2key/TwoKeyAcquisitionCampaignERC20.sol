@@ -13,10 +13,6 @@ import "./Call.sol";
     TODO: Payout for contractor Eth
     TODO: Payout for converter Eth
     TODO: Staking mechanism getting 2key for ether
-    We're storing all balances on contract, and we should just make the method where anyone can withdraw his funds
-
-    If withdraw is in ETHER, then we'll do basic transfer
-    Otherwise we'll send tokens from economy to the user and delete his balances
 */
 
 /// @author Nikola Madjarevic
@@ -31,33 +27,37 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
     TwoKeyConversionHandler conversionHandler;
 
     mapping(address => uint256) referrer2cut; // Mapping representing how much are cuts in percent(0-100) for referrer address
-    mapping(address => uint256) internal referrerBalances2KEY; // balance of TwoKeyToken for each influencer that they can withdraw
     mapping(address => uint256) internal referrerBalancesETHWei; // balance of EthWei for each influencer that he can withdraw
     mapping(address => uint256) internal referrerTotalEarnings2KEY; // Total earnings for referrers
     mapping(address => uint) balancesConvertersETH; // Amount converter put to the contract in Ether
     mapping(address => uint) balances;
+    mapping(address => uint) moderatorBalanceETHWEI;
+
     mapping(address => uint256) public units; // Number of units (ERC20 tokens) bought
     mapping(address => address) public publicLinkKey; // Public link key can generate only somebody who has ARCs
 
 
     uint campaignInventoryUnitsBalance; // Balance will represent how many that tokens (erc20) we have on our Campaign
     address assetContractERC20; // Asset contract is address of ERC20 inventory
-    address twoKeyEconomy; // TwoKeyEconomy contract (ERC20)
     uint256 contractorBalance;
     uint256 contractorTotalProceeds;
     uint256 pricePerUnitInETHWei; // There's single price for the unit ERC20 (Should be in WEI)
     uint256 campaignStartTime; // Time when campaign start
     uint256 campaignEndTime; // Time when campaign ends
     uint256 expiryConversionInHours; // How long convertor can be pending before it will be automatically rejected and funds will be returned to convertor (hours)
-    uint256 moderatorFeePercentage; // How long will hold asset in escrow
+    uint256 moderatorFeePercentage; // Fee which moderator gets
     string public publicMetaHash; // Ipfs hash of json campaign object
     string privateMetaHash; // Ipfs hash of json sensitive (contractor) information
     uint256 public maxReferralRewardPercent; // maxRefferalRewardPercent is actually bonus percentage in ETH
     uint maxConverterBonusPercent; //translates to discount - we can add this to constructor
+
     uint minContributionETH; // Minimal amount of ETH that can be paid by converter to create conversion
     uint maxContributionETH; // Maximal amount of ETH that can be paid by converter to create conversion
+
     uint unit_decimals; // ERC20 selling data
     string symbol; // ERC20 selling data
+
+
     bool withdrawApproved = false; // Until contractor set this to be true, no one can withdraw funds etc.
     bool canceled = false; // This means if contractor cancel everything
 
@@ -80,7 +80,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
 
     constructor(
         address _twoKeyEventSource,
-        address _twoKeyEconomy,
         address _conversionHandler,
         address _moderator,
         address _assetContractERC20,
@@ -100,13 +99,11 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
             _conversionQuota
     ) StandardToken()
     public {
-        require(_twoKeyEconomy != address(0));
         require(_assetContractERC20 != address(0));
         require(_maxReferralRewardPercent > 0);
         require(_conversionHandler != address(0));
 
         contractor = msg.sender;
-        twoKeyEconomy = _twoKeyEconomy;
         conversionHandler = TwoKeyConversionHandler(_conversionHandler);
         moderator = _moderator;
         assetContractERC20 = _assetContractERC20;
@@ -139,6 +136,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
         }
         return 0;
     }
+
 
     /// @notice Method to add fungible asset to our contract
     /// @dev When user calls this method, he just says the actual amount of ERC20 he'd like to transfer to us
@@ -232,9 +230,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
         for (i = 0; i < keys.length; i++) {
             new_address = influencers[i];
             address key = keys[i];
-            // TODO Updating the public key of influencers may not be a good idea because it will require the influencers to use
             // a deterministic private/public key in the link and this might require user interaction (MetaMask signature)
-            // TODO a possible solution is change public_link_key to address=>address[]
             // update (only once) the public address used by each influencer
             // we will need this in case one of the influencers will want to start his own off-chain link
             if (publicLinkKey[new_address] == 0) {
@@ -257,6 +253,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
             }
         }
     }
+
 
 
     function joinAndShareARC(bytes signature, address receiver) public {
@@ -337,14 +334,11 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
                 }
             }
             referrerBalancesETHWei[influencers[i]] = referrerBalancesETHWei[influencers[i]].add(b);
-            referrerTotalEarnings2KEY[influencers[i]] = referrerTotalEarnings2KEY[influencers[i]].add(b);
+            referrerTotalEarnings2KEY[influencers[i]] = referrerTotalEarnings2KEY[influencers[i]].add(convertETHWeiToTwoKey(b));
             emit Rewarded(influencers[i], b);
             total_bounty = total_bounty.add(b);
             _maxReferralRewardETHWei = _maxReferralRewardETHWei.sub(b);
         }
-
-        contractorBalance = contractorBalance.add(_maxReferralRewardETHWei);
-        contractorTotalProceeds = contractorTotalProceeds.add(_maxReferralRewardETHWei);
     }
 
 
@@ -353,7 +347,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
     /// @param _to address we're sending the amount of ERC20
     /// @param _amount is the amount of ERC20's we're going to transfer
     /// @return true if successful, otherwise reverts
-    function moveFungibleAsset(address _to, uint256 _amount) public onlyTwoKeyConversionHandler returns (bool) {
+    function moveFungibleAsset(address _to, uint256 _amount) public onlyTwoKeysConversionHandler returns (bool) {
         require(campaignInventoryUnitsBalance >= _amount);
         require(
             assetContractERC20.call(
@@ -363,16 +357,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
         );
         campaignInventoryUnitsBalance = campaignInventoryUnitsBalance - _amount;
         return true;
-    }
-
-
-    /// @notice Function which will transfer fungible assets from contract to someone
-    /// @param _to is the address we're sending the fungible assets
-    /// @param _amount is the amount of ERC20 we're going to transfer
-    /// @return true if trasaction completes otherwise transaction will revert
-    function transferFungibleAsset(address _to, uint256 _amount) public returns (bool) {
-        ///TODO: Who can call this check?
-        return moveFungibleAsset(_to, _amount);
     }
 
 
@@ -442,12 +426,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
         uint baseTokensForConverterUnits = conversionAmountETHWei.mul(10 ** unit_decimals).div(pricePerUnitInETHWei);
         uint bonusTokensForConverterUnits = baseTokensForConverterUnits.mul(maxConverterBonusPercent).div(100).div(10 ** unit_decimals);
         return (baseTokensForConverterUnits, bonusTokensForConverterUnits);
-    }
-
-    /// @notice View function - contractor getter
-    /// @return address of contractor
-    function getContractorAddress() public view returns (address) {
-        return contractor;
     }
 
 
@@ -542,15 +520,33 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
         return withdrawApproved;
     }
 
-//    function converterWithdrawEth() public {
-//        require(canceled == true);
-//        //transfer back funds to converter
-//        msg.sender.transfer(balancesConvertersETH[msg.sender]);
-//    }
+    // @notice Withdraw function for converter and contractor
+    function withdrawEth(uint value) public payable {
+        uint transferAmount = 0;
+        if(msg.sender == contractor) {
+            if(contractorBalance >= value) {
+                transferAmount = value;
+            } else {
+                transferAmount = contractorBalance;
+            }
+            contractor.transfer(transferAmount);
+            contractorBalance.sub(transferAmount);
+        } else if(balancesConvertersETH[msg.sender] > 0) {
+            address converter = msg.sender;
+            if(balancesConvertersETH[msg.sender] >= value) {
+                transferAmount = value;
+            } else {
+                transferAmount = balancesConvertersETH[msg.sender];
+            }
+            converter.transfer(transferAmount);
+            balancesConvertersETH[msg.sender] = balancesConvertersETH[msg.sender].sub(transferAmount);
 
+        }
+    }
 
-    function contractorWithdrawEth() public onlyContractor {
-
+    // @notice Function to convert ETH to 2key
+    function convertETHWeiToTwoKey(uint value) public view returns (uint) {
+        return value*pricePerUnitInETHWei;
     }
 
 }

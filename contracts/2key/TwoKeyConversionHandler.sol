@@ -186,24 +186,12 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     }
 
 
-//    function getConversionAttributes(address _converter) public view onlyTwoKeyAcquisitionCampaign returns (uint,uint,uint,uint) {
-//        Conversion memory conversion = conversions[_converter];
-//        return (conversion.maxReferralRewardETHWei, conversion.moderatorFeeETHWei,
-//        conversion.baseTokenUnits, conversion.bonusTokenUnits);
-//    }
-
-    //TODO: Check on status call but no more need for this function
-//    function fullFillConversion(address _converter) public onlyTwoKeyAcquisitionCampaign {
-//        Conversion memory conversion = conversions[_converter];
-//        conversion.state = ConversionState.FULFILLED;
-//        conversions[_converter] = conversion;
-//    }
-
     function executeConversion(address _converter) public onlyApprovedConverter {
         didConverterConvert(_converter);
         performConversion(_converter);
         moveFromApprovedToFulfilledState(_converter);
     }
+
 
     function performConversion(address _converter) internal {
         Conversion memory conversion = conversions[_converter];
