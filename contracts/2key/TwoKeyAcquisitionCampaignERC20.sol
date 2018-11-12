@@ -30,7 +30,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
     mapping(address => uint256) internal referrerBalancesETHWei; // balance of EthWei for each influencer that he can withdraw
     mapping(address => uint256) internal referrerTotalEarningsEthWEI; // Total earnings for referrers
     mapping(address => uint) balancesConvertersETH; // Amount converter put to the contract in Ether
-    mapping(address => uint) balances;
     mapping(address => uint) moderatorBalanceETHWEI;
 
     mapping(address => uint256) public units; // Number of units (ERC20 tokens) bought
