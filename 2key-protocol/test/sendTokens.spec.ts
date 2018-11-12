@@ -2,7 +2,7 @@ import {expect} from 'chai';
 import 'mocha';
 import {TwoKeyProtocol} from '../src';
 import contractsMeta from '../src/contracts';
-import { ledgerWeb3 } from './_web3';
+import createWeb3, { ledgerWeb3 } from './_web3';
 import Sign from '../src/utils/sign';
 
 const rpcUrl = process.env.RINKEBY ? 'wss://rinkeby.infura.io/ws' : 'wss://ropsten.infura.io/ws';
@@ -24,7 +24,9 @@ console.log(contractsMeta.TwoKeyEconomy.networks[mainNetId].address);
 const sendTokens: any = new Promise(async (resolve, reject) => {
     try {
         // const { web3, address } = createWeb3('laundry version question endless august scatter desert crew memory toy attract cruel', rpcUrl);
-        const { web3, address } = await ledgerWeb3(rpcUrl, mainNetId);
+        const { web3, address } = process.env.HD
+            ? createWeb3('laundry version question endless august scatter desert crew memory toy attract cruel', rpcUrl)
+            : await ledgerWeb3(rpcUrl, mainNetId);
         const twoKeyProtocol = new TwoKeyProtocol({
             web3,
             networks: {
