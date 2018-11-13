@@ -334,7 +334,7 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
     }
 
     function checkIfUserExists(address _userAddress) public view returns (bool) {
-        bytes memory tempEmptyStringTest = bytes(address2username[_userAddress]); // Uses memory
+        bytes memory tempEmptyStringTest = bytes(address2username[_userAddress]);
         if (tempEmptyStringTest.length == 0) {
             return false;
         } else {

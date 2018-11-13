@@ -42,22 +42,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     uint bonusTokensVestingMonths; // 6 months
     uint bonusTokensVestingStartShiftInDaysFromDistributionDate; // 180 days
 
-    uint moderatorBalanceETHWei;
-    uint moderatorTotalEarningsETHWei;
 
-
-    /// @notice Method which will be called inside constructor of TwoKeyAcquisitionCampaignERC20
-    /// @param _twoKeyAcquisitionCampaignERC20 is the address of TwoKeyAcquisitionCampaignERC20 contract
-    /// @param _moderator is the address of the moderator
-    /// @param _contractor is the address of the contractor
-    function setTwoKeyAcquisitionCampaignERC20(address _twoKeyAcquisitionCampaignERC20, address _moderator, address _contractor, address _assetContractERC20, string _assetSymbol) public {
-        require(twoKeyAcquisitionCampaignERC20 == address(0));
-        twoKeyAcquisitionCampaignERC20 = _twoKeyAcquisitionCampaignERC20;
-        moderator = _moderator;
-        contractor = _contractor;
-        assetContractERC20 =_assetContractERC20;
-        assetSymbol = _assetSymbol;
-    }
 
     /// Structure which will represent conversion
     struct Conversion {
@@ -105,9 +90,19 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         bonusTokensVestingStartShiftInDaysFromDistributionDate = _bonusTokensVestingStartShiftInDaysFromDistributionDate;
     }
 
-    /*
-    ====================================================================================================================
-    */
+    /// @notice Method which will be called inside constructor of TwoKeyAcquisitionCampaignERC20
+    /// @param _twoKeyAcquisitionCampaignERC20 is the address of TwoKeyAcquisitionCampaignERC20 contract
+    /// @param _moderator is the address of the moderator
+    /// @param _contractor is the address of the contractor
+    function setTwoKeyAcquisitionCampaignERC20(address _twoKeyAcquisitionCampaignERC20, address _moderator, address _contractor, address _assetContractERC20, string _assetSymbol) public {
+        require(twoKeyAcquisitionCampaignERC20 == address(0));
+        twoKeyAcquisitionCampaignERC20 = _twoKeyAcquisitionCampaignERC20;
+        moderator = _moderator;
+        contractor = _contractor;
+        assetContractERC20 =_assetContractERC20;
+        assetSymbol = _assetSymbol;
+    }
+
 
     /// @notice Function which checks if converter has converted
     /// @dev will throw if not
@@ -117,27 +112,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         require(c.state != ConversionState.FULFILLED);
         require(c.state != ConversionState.CANCELLED);
     }
-
-    /*
-    ====================================================================================================================
-    */
-
-    function supportForCanceledEscrow(address _converterAddress) public onlyTwoKeyAcquisitionCampaign returns (uint256){
-        Conversion memory c = conversions[_converterAddress];
-        c.state = ConversionState.CANCELLED;
-        conversions[_converterAddress] = c;
-
-        return (c.contractorProceedsETHWei);
-    }
-
-
-    function supportForCancelAssetTwoKey(address _converterAddress) public view onlyTwoKeyAcquisitionCampaign{
-        Conversion memory c = conversions[_converterAddress];
-        require(c.state != ConversionState.CANCELLED);
-        require(c.state != ConversionState.FULFILLED);
-        require(c.state != ConversionState.REJECTED);
-    }
-
 
 
     /// @notice Support function to create conversion
@@ -185,6 +159,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         return encoded;
     }
 
+
     function executeConversion(address _converter) public onlyApprovedConverter {
         didConverterConvert(_converter);
         performConversion(_converter);
@@ -197,9 +172,8 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateRefchainRewards(conversion.maxReferralRewardETHWei, _converter);
 
         // update moderator balances
-        moderatorBalanceETHWei = moderatorBalanceETHWei.add(conversion.moderatorFeeETHWei);
-        moderatorTotalEarningsETHWei = moderatorTotalEarningsETHWei.add(conversion.moderatorFeeETHWei);
 
+        ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateModeratorBalanceETHWei(conversion.moderatorFeeETHWei);
 
         TwoKeyLockupContract firstLockUp = new TwoKeyLockupContract(tokenDistributionDate, maxDistributionDateShiftInDays,
                             conversion.baseTokenUnits, _converter, conversion.contractor, twoKeyAcquisitionCampaignERC20);

@@ -9,4 +9,5 @@ contract ITwoKeyAcquisitionCampaignERC20 {
     function moveFungibleAsset(address _to, uint256 _amount) public returns (bool);
     function updateContractorProceeds(uint value) public;
     function sendBackEthWhenConversionCancelled(address _cancelledConverter, uint _conversionAmount) public;
+    function updateModeratorBalanceETHWei(uint _value) public;
 }

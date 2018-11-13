@@ -30,7 +30,11 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
     mapping(address => uint256) internal referrerBalancesETHWei; // balance of EthWei for each influencer that he can withdraw
     mapping(address => uint256) internal referrerTotalEarningsEthWEI; // Total earnings for referrers
     mapping(address => uint) balancesConvertersETH; // Amount converter put to the contract in Ether
-    mapping(address => uint) moderatorBalanceETHWEI;
+
+    uint moderatorBalanceETHWei;
+    uint moderatorTotalEarningsETHWei;
+
+
 
     mapping(address => uint256) public units; // Number of units (ERC20 tokens) bought
     mapping(address => address) public publicLinkKey; // Public link key can generate only somebody who has ARCs
@@ -306,7 +310,10 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
 
     }
 
-
+    function updateModeratorBalanceETHWei(uint _value) public onlyTwoKeyConversionHandler {
+        moderatorBalanceETHWei.add(_value);
+        moderatorTotalEarningsETHWei.add(_value);
+    }
 
     function updateRefchainRewards(uint256 _maxReferralRewardETHWei, address _converter) public onlyTwoKeyConversionHandler {
         require(_maxReferralRewardETHWei > 0, 'Max referral reward in ETH must be > 0');
