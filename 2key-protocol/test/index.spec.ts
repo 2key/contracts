@@ -499,8 +499,8 @@ describe('TwoKeyProtocol', () => {
         console.log('4) buy from test4 REFLINK', refLink);
         const txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETH, 'ether'), refLink, from);
         console.log(txHash);
-        const campaigns = await twoKeyProtocol.Lockup.getCampaignsWhereConverter(from);
-        console.log(campaigns);
+        // const campaigns = await twoKeyProtocol.getCampaignsWhereConverter(from);
+        // console.log(campaigns);
         expect(txHash).to.be.a('string');
     }).timeout(30000);
 
@@ -636,7 +636,7 @@ describe('TwoKeyProtocol', () => {
     }).timeout(30000);
 
 
-    it('should approve converter for lockup', async () => {
+    it('should approve converter', async () => {
         console.log('Test where contractor / moderator can approve converter to execute lockup');
         const {web3, address} = web3switcher.aydnep();
         from = address;
@@ -660,7 +660,7 @@ describe('TwoKeyProtocol', () => {
     }).timeout(30000);
 
 
-    it('should reject converter for lockup', async () => {
+    it('should reject converter', async () => {
         console.log("Test where contractor / moderator can reject converter to execute lockup");
         txHash = await twoKeyProtocol.AcquisitionCampaign.rejectConverter(campaignAddress, env.TEST_ADDRESS, from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
@@ -675,7 +675,7 @@ describe('TwoKeyProtocol', () => {
 
     }).timeout(30000);
 
-    it('should cancel lockup', async () => {
+    it('should cancel converter', async () => {
         const {web3, address} = web3switcher.gmail2();
         from = address;
         twoKeyProtocol.setWeb3({
@@ -720,12 +720,12 @@ describe('TwoKeyProtocol', () => {
             },
             plasmaPK: Sign.generatePrivateKey().toString('hex'),
         });
-        const campaigns = await twoKeyProtocol.Lockup.getCampaignsWhereConverter(from);
-        console.log(campaigns);
+        // const campaigns = await twoKeyProtocol.Lockup.getCampaignsWhereConverter(from);
+        // console.log(campaigns);
     });
 
 
-    it('should execute lockup', async () => {
+    it('should execute conversion and create lockup contract', async () => {
         const txHash = await twoKeyProtocol.AcquisitionCampaign.executeConversion(campaignAddress, env.TEST4_ADDRESS, from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(30000);
@@ -745,9 +745,21 @@ describe('TwoKeyProtocol', () => {
         });
         const addresses = await twoKeyProtocol.AcquisitionCampaign.getLockupContractsForConverter(campaignAddress, env.TEST4_ADDRESS, from);
         console.log('Lockup contracts addresses : ' + addresses);
-        expect(addresses.length).to.be.equal(7);
+        expect(addresses.length).to.be.equal(1);
     }).timeout(30000);
-    it('should print after all tests', printBalances).timeout(15000);
+    // it('should print after all tests', printBalances).timeout(15000);
+
+    it('==> should print base tokens balance on lockup contract', async() => {
+        const addresses = await twoKeyProtocol.AcquisitionCampaign.getLockupContractsForConverter(campaignAddress, env.TEST4_ADDRESS, from);
+        const balance = await twoKeyProtocol.Lockup.getBaseTokensAmount(addresses[0],from);
+        console.log("Base balance on lockup contract is : " + balance);
+    });
+
+    it('==> should print bonus tokens balance on lockup contract', async() => {
+        const addresses = await twoKeyProtocol.AcquisitionCampaign.getLockupContractsForConverter(campaignAddress, env.TEST4_ADDRESS, from);
+        const balance = await twoKeyProtocol.Lockup.getBonusTokenAmount(addresses[0],from);
+        console.log("Bonus balance on lockup contract is: " + balance);
+    })
 
     it('should print balances before cancelation', async() => {
         for (let i = 0; i < addresses.length; i++) {
@@ -792,21 +804,21 @@ describe('TwoKeyProtocol', () => {
 
         const txHash = await twoKeyProtocol.AcquisitionCampaign.cancel(campaignAddress, from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-        for (let i = 0; i < addresses.length; i++) {
-            let addressCurrent = addresses[i].toString();
-            let balance = await twoKeyProtocol.ERC20.getERC20Balance(twoKeyEconomy, addressCurrent);
-            console.log("Address: " + addressCurrent + " ----- balance: " + balance);
-        }
+        // for (let i = 0; i < addresses.length; i++) {
+        //     let addressCurrent = addresses[i].toString();
+        //     let balance = await twoKeyProtocol.ERC20.getERC20Balance(twoKeyEconomy, addressCurrent);
+        //     console.log("Address: " + addressCurrent + " ----- balance: " + balance);
+        // }
     }).timeout(30000);
 
     it('should get all whitelisted methods from congress', async () => {
         const methods = await twoKeyProtocol.Congress.getAllowedMethods(from);
-        console.log(methods);
+        // console.log(methods);
     });
 
     it('should get all whitelisted addresses', async() => {
         const addresses = await twoKeyProtocol.Congress.getAllMembersForCongress(from);
-        console.log(addresses);
+        // console.log(addresses);
         expect(addresses.length).to.be.equal(4);
 
     });
