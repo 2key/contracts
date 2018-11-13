@@ -1006,7 +1006,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         return new Promise(async(resolve,reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-                const result: boolean = await promisify(campaignInstance.contractor,[{from}]);
+                const result: string = await promisify(campaignInstance.contractor,[{from}]);
                 if(result === from) {
                     resolve(true);
                 } else {
