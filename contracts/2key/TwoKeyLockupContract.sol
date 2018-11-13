@@ -133,7 +133,7 @@ contract TwoKeyLockupContract {
         return bonusTokens / bonusTokensVestingMonths;
     }
 
-    function getBalaceOfContract() public view returns (uint) {
+    function getBalanceOfContract() public view returns (uint) {
         return totalTokens;
     }
 
