@@ -183,19 +183,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         uint totalUnits = conversion.baseTokenUnits + conversion.bonusTokenUnits;
         ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).moveFungibleAsset(address(lockupContract), totalUnits);
 
-//        uint bonusAmountSplited = conversion.bonusTokenUnits / bonusTokensVestingMonths;
-//        address [] memory lockupContracts=  new address[](bonusTokensVestingMonths + 1);
-//
-//        for(uint i=0; i<bonusTokensVestingMonths; i++) {
-//            TwoKeyLockupContract lockup = new TwoKeyLockupContract(tokenDistributionDate +
-//                                    bonusTokensVestingStartShiftInDaysFromDistributionDate + i*(30 days), maxDistributionDateShiftInDays, bonusAmountSplited,
-//                                    _converter, conversion.contractor, twoKeyAcquisitionCampaignERC20);
-//            ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).moveFungibleAsset(address(lockup), bonusAmountSplited);
-//            allLockUpContracts.push(address(lockup));
-//            lockupContracts[i] = lockup;
-//        }
-//        lockupContracts[lockupContracts.length - 1] = firstLockUp;
-
         ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateContractorProceeds(conversion.contractorProceedsETHWei);
         conversion.state = ConversionState.FULFILLED;
         conversions[_converter] = conversion;
