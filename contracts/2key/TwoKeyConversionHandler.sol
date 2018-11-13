@@ -175,29 +175,31 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
 
         ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateModeratorBalanceETHWei(conversion.moderatorFeeETHWei);
 
-        TwoKeyLockupContract firstLockUp = new TwoKeyLockupContract(tokenDistributionDate, maxDistributionDateShiftInDays,
-                            conversion.baseTokenUnits, _converter, conversion.contractor, twoKeyAcquisitionCampaignERC20);
+        TwoKeyLockupContract lockupContract = new TwoKeyLockupContract(bonusTokensVestingStartShiftInDaysFromDistributionDate, bonusTokensVestingMonths, tokenDistributionDate, maxDistributionDateShiftInDays,
+            conversion.baseTokenUnits, conversion.bonusTokenUnits, _converter, conversion.contractor, twoKeyAcquisitionCampaignERC20);
 
-        allLockUpContracts.push(address(firstLockUp));
+        allLockUpContracts.push(address(lockupContract));
 
-        ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).moveFungibleAsset(address(firstLockUp), conversion.baseTokenUnits);
-        uint bonusAmountSplited = conversion.bonusTokenUnits / bonusTokensVestingMonths;
-        address [] memory lockupContracts=  new address[](bonusTokensVestingMonths + 1);
+        uint totalUnits = conversion.baseTokenUnits + conversion.bonusTokenUnits;
+        ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).moveFungibleAsset(address(lockupContract), totalUnits);
 
-        for(uint i=0; i<bonusTokensVestingMonths; i++) {
-            TwoKeyLockupContract lockup = new TwoKeyLockupContract(tokenDistributionDate +
-                                    bonusTokensVestingStartShiftInDaysFromDistributionDate + i*(30 days), maxDistributionDateShiftInDays, bonusAmountSplited,
-                                    _converter, conversion.contractor, twoKeyAcquisitionCampaignERC20);
-            ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).moveFungibleAsset(address(lockup), bonusAmountSplited);
-            allLockUpContracts.push(address(lockup));
-            lockupContracts[i] = lockup;
-        }
-        lockupContracts[lockupContracts.length - 1] = firstLockUp;
+//        uint bonusAmountSplited = conversion.bonusTokenUnits / bonusTokensVestingMonths;
+//        address [] memory lockupContracts=  new address[](bonusTokensVestingMonths + 1);
+//
+//        for(uint i=0; i<bonusTokensVestingMonths; i++) {
+//            TwoKeyLockupContract lockup = new TwoKeyLockupContract(tokenDistributionDate +
+//                                    bonusTokensVestingStartShiftInDaysFromDistributionDate + i*(30 days), maxDistributionDateShiftInDays, bonusAmountSplited,
+//                                    _converter, conversion.contractor, twoKeyAcquisitionCampaignERC20);
+//            ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).moveFungibleAsset(address(lockup), bonusAmountSplited);
+//            allLockUpContracts.push(address(lockup));
+//            lockupContracts[i] = lockup;
+//        }
+//        lockupContracts[lockupContracts.length - 1] = firstLockUp;
 
         ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateContractorProceeds(conversion.contractorProceedsETHWei);
         conversion.state = ConversionState.FULFILLED;
         conversions[_converter] = conversion;
-        converterToLockupContracts[_converter] = lockupContracts;
+        converterToLockupContracts[_converter].push(lockupContract);
     }
 
     /// @notice Function to convert converter state to it's bytes representation (Maybe we don't even need it)
