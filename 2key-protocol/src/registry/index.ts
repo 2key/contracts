@@ -2,7 +2,7 @@ import {ITwoKeyBase, ITwoKeyHelpers} from '../interfaces';
 import {promisify} from '../utils'
 import {ITwoKeyReg} from "./interfaces";
 
-export default class ERC20 implements ITwoKeyReg {
+export default class TwoKeyReg implements ITwoKeyReg {
     private readonly base: ITwoKeyBase;
     private readonly helpers: ITwoKeyHelpers;
 
@@ -10,6 +10,7 @@ export default class ERC20 implements ITwoKeyReg {
         this.base = twoKeyProtocol;
         this.helpers = helpers;
     }
+
 
     /**
      *
@@ -28,6 +29,7 @@ export default class ERC20 implements ITwoKeyReg {
         });
     }
 
+
     /**
      *
      * @param {string} from
@@ -44,4 +46,7 @@ export default class ERC20 implements ITwoKeyReg {
             }
         });
     }
+
+
+
 }
