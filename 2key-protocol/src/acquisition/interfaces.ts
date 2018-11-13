@@ -79,6 +79,8 @@ export interface ITwoKeyAcquisitionCampaign {
     addFungibleAssetsToInventoryOfCampaign: (campaign: any, amount: number, from: string, gasPrice? :number) => Promise<string>,
     cancel: (campaign: any, from: string, gasPrice?: number) => Promise<string>,
     isAddressContractor: (campaign:any, from:string) => Promise<boolean>,
+    getAcquisitionContractBalanceERC20: (campaign: any) => Promise<number>,
+    getAmountOfEthAddressSentToAcquisition: (campaign: any, from: string) => Promise<number>,
 }
 
 export interface IPublicLinkOpts {
