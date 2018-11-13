@@ -12,13 +12,13 @@ contract TwoKeyLockupContract {
     uint totalTokens;
     uint withdrawn = 0;
 
-    bool changed = false;
-
     address converter;
     address contractor;
     address twoKeyAcquisitionCampaignERC20Address;
     address twoKeyConversionHandler;
     address assetContractERC20;
+
+    bool changed = false;
 
     modifier onlyContractor() {
         require(msg.sender == contractor);
@@ -35,7 +35,7 @@ contract TwoKeyLockupContract {
         _;
     }
 
-
+    //TODO: Only converter or contractor can see all this informations
     constructor(
         uint _bonusTokensVestingStartShiftInDaysFromDistributionDate,
         uint _bonusTokensVestingMonths,
@@ -102,6 +102,8 @@ contract TwoKeyLockupContract {
         selfdestruct(twoKeyAcquisitionCampaignERC20Address);
     }
 
+    /// @notice This function will check how much of bonus tokens are unlocked at the moment
+    /// @dev this is internal function
     function howMuchBonusUnlocked() internal view returns (uint) {
         uint bonusSplited = bonusTokens / bonusTokensVestingMonths;
 
