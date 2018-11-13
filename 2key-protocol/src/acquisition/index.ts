@@ -999,6 +999,28 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     /**
      *
      * @param campaign
+     * @param {string} from
+     * @returns {Promise<boolean>}
+     */
+    public isAddressContractor(campaign:any, from:string) : Promise<boolean> {
+        return new Promise(async(resolve,reject) => {
+            try {
+                const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
+                const result: boolean = await promisify(campaignInstance.contractor,[{from}]);
+                if(result === from) {
+                    resolve(true);
+                } else {
+                    resolve(false);
+                }
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+    /**
+     *
+     * @param campaign
      * @returns {Promise<number>}
      */
     public getAcquisitionContractBalanceERC20(campaign: any) : Promise<number> {
