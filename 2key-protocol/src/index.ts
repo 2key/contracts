@@ -168,7 +168,7 @@ export class TwoKeyProtocol {
         this.TwoKeyWeightedVoteContract = new TwoKeyWeightedVoteContract(twoKeyBase, this.Helpers, this.Utils);
         this.DecentralizedNation = new DecentralizedNation(twoKeyBase, this.Helpers, this.Utils, this.TwoKeyWeightedVoteContract, this.AcquisitionCampaign);
         this.Congress = new TwoKeyCongress(twoKeyBase, this.Helpers, this.Utils);
-        this.Lockup = new Lockup(twoKeyBase, this.Helpers, this.AcquisitionCampaign);
+        this.Lockup = new Lockup(twoKeyBase, this.Helpers, this.Utils);
     }
 
     public getBalance(address: string, erc20address?: string): Promise<BalanceMeta> {

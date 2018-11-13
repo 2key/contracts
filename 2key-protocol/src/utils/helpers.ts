@@ -216,6 +216,12 @@ export default class Helpers implements ITwoKeyHelpers {
         return true;
     }
 
+    async _getLockupContractInstance(lockupContract: any) : Promise<any> {
+        return lockupContract.address
+            ? lockupContract
+            : await this._createAndValidate('TwoKeyLockupContract', lockupContract);
+    }
+
     async _getAcquisitionCampaignInstance(campaign: any): Promise<any> {
         return campaign.address
             ? campaign
