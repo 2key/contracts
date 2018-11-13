@@ -78,6 +78,7 @@ export interface ITwoKeyAcquisitionCampaign {
     getLockupContractsForConverter: (campaign: any, converter: string, from: string) => Promise<string[]>,
     addFungibleAssetsToInventoryOfCampaign: (campaign: any, amount: number, from: string, gasPrice? :number) => Promise<string>,
     cancel: (campaign: any, from: string, gasPrice?: number) => Promise<string>,
+    isAddressContractor: (campaign:any, from:string) => Promise<boolean>,
 }
 
 export interface IPublicLinkOpts {
