@@ -71,10 +71,22 @@ module.exports = function deploy(deployer) {
         .then(() => deployer.deploy(TwoKeyUpgradableExchange, 1, deployer.network.startsWith('rinkeby') ? '0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f' : '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7', TwoKeyEconomy.address, TwoKeyAdmin.address))
         .then(() => TwoKeyUpgradableExchange.deployed())
         .then(() => deployer.deploy(EventSource, TwoKeyAdmin.address))
-        .then(() => EventSource.deployed())
+        // .then(() => EventSource.deployed())
         // .then(() => adminInstance.setTwoKeyExchange(TwoKeyUpgradableExchange.address))
         .then(() => deployer.deploy(TwoKeyReg, EventSource.address, TwoKeyAdmin.address,deployer.network.startsWith('rinkeby') ? '0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f' : '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7'))
         .then(() => TwoKeyReg.deployed())
+        .then(() => EventSource.deployed().then(async(eventSource) => {
+            console.log("... Adding TwoKeyReg to EventSource");
+            await new Promise(async(resolve,reject) => {
+                try {
+                    let txHash = await eventSource.addTwoKeyReg(TwoKeyReg.address).then(() => true);
+                    resolve(txHash);
+                } catch (e) {
+                    reject(e);
+                }
+            });
+            console.log("Added TwoKeyReg: " + TwoKeyReg.address + "  to EventSource : " + EventSource.address + "!")
+        }))
         .then(() => adminInstance.setSingletones(TwoKeyEconomy.address, TwoKeyUpgradableExchange.address, TwoKeyReg.address, EventSource.address))
         .then(() => true)
         .catch((err) => {
