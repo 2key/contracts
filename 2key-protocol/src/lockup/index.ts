@@ -142,6 +142,35 @@ export default class Lockup implements ILockup {
         })
     }
 
+    //TODO!!!!!!
+    /**
+     *
+     * @param {string} twoKeyLockup
+     * @param {string} from
+     * @returns {Promise<any>}
+     */
+    public getStatistics(twoKeyLockup: string, from:string) : Promise<any> {
+        return new Promise(async(resolve,reject) => {
+            try {
+                const twoKeyLockupInstance = await this.helpers._getLockupContractInstance(twoKeyLockup);
+                const totalTokens = await promisify(twoKeyLockupInstance.getBalaceOfContract,[{from}]);
+                const withdrawn = await promisify(twoKeyLockupInstance.getWithdrawn,[{from}]);
+                const vestingMonths = await promisify(twoKeyLockupInstance.getNumberOfVestingMonths,[{from}]);
+                const monthlyBonus = await promisify(twoKeyLockupInstance.getMonthlyBonus,[{from}]);
+
+                if(withdrawn == 0) {
+                    let objs = [];
+                    let baseTokens = totalTokens - vestingMonths*monthlyBonus;
+                    for(let i=0; i<vestingMonths; i++) {
+
+                    }
+                }
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
 }
 
 export { ILockup } from './interfaces';

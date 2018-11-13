@@ -144,4 +144,8 @@ contract TwoKeyLockupContract {
     function getAllUnlockedAtTheMoment() public view returns (uint) {
         return isBaseUnlocked() + howMuchBonusUnlocked();
     }
+
+    function getNumberOfVestingMonths() public view returns (uint) {
+        return bonusTokensVestingMonths;
+    }
 }
