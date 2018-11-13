@@ -176,7 +176,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateModeratorBalanceETHWei(conversion.moderatorFeeETHWei);
 
         TwoKeyLockupContract lockupContract = new TwoKeyLockupContract(bonusTokensVestingStartShiftInDaysFromDistributionDate, bonusTokensVestingMonths, tokenDistributionDate, maxDistributionDateShiftInDays,
-            conversion.baseTokenUnits, conversion.bonusTokenUnits, _converter, conversion.contractor, twoKeyAcquisitionCampaignERC20);
+            conversion.baseTokenUnits, conversion.bonusTokenUnits, _converter, conversion.contractor, twoKeyAcquisitionCampaignERC20, assetContractERC20);
 
         allLockUpContracts.push(address(lockupContract));
 

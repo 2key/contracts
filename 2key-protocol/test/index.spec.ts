@@ -377,7 +377,7 @@ describe('TwoKeyProtocol', () => {
             moderatorFeePercentageWei: twoKeyProtocol.Utils.toWei(moderatorFeePercentage, 'ether'),
             minContributionETHWei: twoKeyProtocol.Utils.toWei(minContributionETH, 'ether'),
             maxContributionETHWei: twoKeyProtocol.Utils.toWei(maxContributionETH, 'ether'),
-            tokenDistributionDate: 12345678,
+            tokenDistributionDate: 1541109593669,
             maxDistributionDateShiftInDays: 180,
             bonusTokensVestingMonths: 6,
             bonusTokensVestingStartShiftInDaysFromDistributionDate: 180
@@ -753,13 +753,43 @@ describe('TwoKeyProtocol', () => {
         const addresses = await twoKeyProtocol.AcquisitionCampaign.getLockupContractsForConverter(campaignAddress, env.TEST4_ADDRESS, from);
         const balance = await twoKeyProtocol.Lockup.getBaseTokensAmount(addresses[0],from);
         console.log("Base balance on lockup contract is : " + balance);
-    });
+    }).timeout(30000);
 
     it('==> should print bonus tokens balance on lockup contract', async() => {
         const addresses = await twoKeyProtocol.AcquisitionCampaign.getLockupContractsForConverter(campaignAddress, env.TEST4_ADDRESS, from);
         const balance = await twoKeyProtocol.Lockup.getBonusTokenAmount(addresses[0],from);
         console.log("Bonus balance on lockup contract is: " + balance);
-    })
+    }).timeout(30000);
+
+    it('==> should print 0 if base tokens are locked otherwise tokens balance', async() => {
+        const addresses = await twoKeyProtocol.AcquisitionCampaign.getLockupContractsForConverter(campaignAddress, env.TEST4_ADDRESS, from);
+        const balance = await twoKeyProtocol.Lockup.checkIfBaseIsUnlocked(addresses[0],from);
+        console.log("Balance is: " + balance);
+    }).timeout(30000);
+
+    it('==> should print monthly bonus (vested bonus per month)', async() => {
+        const addresses = await twoKeyProtocol.AcquisitionCampaign.getLockupContractsForConverter(campaignAddress, env.TEST4_ADDRESS, from);
+        const balance = await twoKeyProtocol.Lockup.getMonthlyBonus(addresses[0],from);
+        console.log("Monthly bonus is: " + balance);
+    }).timeout(30000);
+
+    it('==> should print how much of tokens are unlocked', async() => {
+        const addresses = await twoKeyProtocol.AcquisitionCampaign.getLockupContractsForConverter(campaignAddress, env.TEST4_ADDRESS, from);
+        const balance = await twoKeyProtocol.Lockup.getAllUnlockedAtTheMoment(addresses[0],from);
+        console.log("Unlocked amount of base & bonus tokens is: " + balance);
+    }).timeout(30000);
+
+    it('==> should withdraw available tokens', async() => {
+        const addresses = await twoKeyProtocol.AcquisitionCampaign.getLockupContractsForConverter(campaignAddress, env.TEST4_ADDRESS, from);
+        const txHash = await twoKeyProtocol.Lockup.withdrawTokens(addresses[0],from);
+        console.log(txHash);
+    }).timeout(30000);
+
+    it('==> should print amount user has withdrawn', async() => {
+        const addresses = await twoKeyProtocol.AcquisitionCampaign.getLockupContractsForConverter(campaignAddress, env.TEST4_ADDRESS, from);
+        const balance = await twoKeyProtocol.Lockup.getAmountUserWithdrawn(addresses[0],from);
+        console.log("Withdrawn amount of tokens is: " + balance);
+    }).timeout(30000);
 
     it('should print balances before cancelation', async() => {
         for (let i = 0; i < addresses.length; i++) {
