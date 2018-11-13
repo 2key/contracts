@@ -1,32 +1,48 @@
-import {ITwoKeyBase, ITwoKeyHelpers, ITwoKeyAcquisitionCampaign} from '../interfaces';
+import {ITwoKeyBase, ITwoKeyHelpers} from '../interfaces';
 import {promisify} from '../utils';
 import {ILockup} from './interfaces';
+import {ITwoKeyUtils} from "../utils/interfaces";
 
 export default class Lockup implements ILockup {
     private readonly base: ITwoKeyBase;
     private readonly helpers: ITwoKeyHelpers;
-    private readonly acquisition: ITwoKeyAcquisitionCampaign;
-    // private readonly utils: ITwoKeyUtils;
+    private readonly utils: ITwoKeyUtils;
 
-    constructor(twoKeyProtocol: ITwoKeyBase, helpers: ITwoKeyHelpers, acquisition: ITwoKeyAcquisitionCampaign) {
+    constructor(twoKeyProtocol: ITwoKeyBase, helpers: ITwoKeyHelpers, utils: ITwoKeyUtils) {
         this.base = twoKeyProtocol;
         this.helpers = helpers;
-        this.acquisition = acquisition;
+        this.utils = utils;
     }
 
-    public getCampaignsWhereConverter(from: string): Promise<string[]> {
-        return new Promise<string[]>(async (resolve, reject) => {
+    /**
+     *
+     * @param {string} twoKeyLockup
+     * @param {string} from
+     * @returns {Promise<number>}
+     */
+    public getBaseTokensAmount(twoKeyLockup: string, from: string): Promise<number> {
+        return new Promise(async(resolve, reject) => {
             try {
-                const campaigns = await promisify(this.base.twoKeyReg.getContractsWhereUserIsConverter, [from]);
-                console.log('CONVERTER_CAMPAIGNS', campaigns);
-                resolve(campaigns);
+                const twoKeyLockupInstance = await this.helpers._getLockupContractInstance(twoKeyLockup);
+                const baseTokensAmount = await promisify(twoKeyLockupInstance.getBaseTokensAmount, [{from}]);
+                resolve(baseTokensAmount);
             } catch (e) {
                 reject(e);
             }
-        });
+        })
     }
 
-
+    public getBonusTokenAmount(twoKeyLockup: string, from: string): Promise<number> {
+        return new Promise(async(resolve, reject) => {
+            try {
+                const twoKeyLockupInstance = await this.helpers._getLockupContractInstance(twoKeyLockup);
+                const bonusTokensAmount = await promisify(twoKeyLockupInstance.getTotalBonus, [{from}]);
+                resolve(bonusTokensAmount);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
 }
 
 export { ILockup } from './interfaces';
