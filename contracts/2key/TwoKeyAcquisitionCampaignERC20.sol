@@ -71,12 +71,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
         _;
     }
 
-
-
-    // ==============================================================================================================
-    // =============================TWO KEY ACQUISITION CAMPAIGN CONSTRUCTOR=========================================
-    // ==============================================================================================================
-
     constructor(
         address _twoKeyEventSource,
         address _conversionHandler,
@@ -98,9 +92,9 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
             _conversionQuota
     )
     public {
-        require(_assetContractERC20 != address(0));
-        require(_maxReferralRewardPercent > 0);
-        require(_conversionHandler != address(0));
+        require(_assetContractERC20 != address(0), 'ERC20 contract address can not be 0x0');
+        require(_maxReferralRewardPercent > 0, 'Max referral reward percent must be > 0');
+        require(_conversionHandler != address(0), 'Address of Conversion Handler can not be 0x0');
         conversionHandler = TwoKeyConversionHandler(_conversionHandler);
         contractor = msg.sender;
         moderator = _moderator;
@@ -296,7 +290,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
         uint totalTokensForConverterUnits = baseTokensForConverterUnits + bonusTokensForConverterUnits;
 
         uint256 _total_units = getInventoryBalance();
-        require(_total_units >= totalTokensForConverterUnits);
+        require(_total_units >= totalTokensForConverterUnits, 'Inventory balance does not have enough funds');
 
         units[converterAddress] = units[converterAddress].add(totalTokensForConverterUnits);
 
@@ -315,7 +309,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
 
 
     function updateRefchainRewards(uint256 _maxReferralRewardETHWei, address _converter) public onlyTwoKeyConversionHandler {
-        require(_maxReferralRewardETHWei > 0);
+        require(_maxReferralRewardETHWei > 0, 'Max referral reward in ETH must be > 0');
         address converter = _converter;
         address[] memory influencers = getReferrers(converter);
 
@@ -348,12 +342,12 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
     /// @param _amount is the amount of ERC20's we're going to transfer
     /// @return true if successful, otherwise reverts
     function moveFungibleAsset(address _to, uint256 _amount) public onlyTwoKeyConversionHandler returns (bool) {
-        require(campaignInventoryUnitsBalance >= _amount);
+        require(campaignInventoryUnitsBalance >= _amount, 'Campaign inventory should be greater than amount');
         require(
             assetContractERC20.call(
                 bytes4(keccak256(abi.encodePacked("transfer(address,uint256)"))),
                 _to, _amount
-            )
+            ), 'Transfer of ERC20 failed'
         );
         campaignInventoryUnitsBalance = campaignInventoryUnitsBalance - _amount;
         return true;
@@ -391,7 +385,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
     /// @dev Transaction will revert if msg.sender is not present in mapping
     /// @return cut value / otherwise reverts
     function getReferrerCut() public view returns (uint256) {
-        require(referrer2cut[msg.sender] != 0);
+        require(referrer2cut[msg.sender] != 0, 'Referrer cut can not be 0');
         return referrer2cut[msg.sender] - 1;
     }
 
@@ -492,7 +486,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
     }
 
     function sealAndApprove() public onlyContractor {
-        require(block.timestamp > campaignStartTime && block.timestamp < campaignEndTime);
+        require(block.timestamp > campaignStartTime && block.timestamp < campaignEndTime, 'Time is not good');
         require(withdrawApproved = false);
         withdrawApproved = true;
     }
@@ -507,9 +501,4 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
         return withdrawApproved;
     }
 
-
-
-
 }
-
-//TODO: See how to link withdrawal of ETH awith
