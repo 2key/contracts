@@ -13,7 +13,7 @@ import "./TwoKeyReg.sol";
 //TODO: If this contract will be managed by congress then it can't be destructible, or in that case to be deployed via congress
 contract TwoKeyAdmin is Destructible, IAdminContract {
 	TwoKeyEconomy public twoKeyEconomy;
-	TwoKeyUpgradableExchange public twokeyUpgradableExchange;
+	TwoKeyUpgradableExchange public twoKeyUpgradableExchange;
 	TwoKeyEventSource public twoKeyEventSource;
 	TwoKeyReg public twoKeyReg;
 
@@ -63,7 +63,7 @@ contract TwoKeyAdmin is Destructible, IAdminContract {
 		twoKeyEconomy.transfer(_newAdminContract, balanceOfOldAdmin);
 		twoKeyEconomy.changeAdmin(_newAdminContract);
 		newAdminContractObject.transfer(address(this).balance);
-		newAdminContractObject.setSingletones(twoKeyEconomy, twokeyUpgradableExchange, twoKeyReg, twoKeyEventSource);
+		newAdminContractObject.setSingletones(twoKeyEconomy, twoKeyUpgradableExchange, twoKeyReg, twoKeyEventSource);
 		wasReplaced = true;
 		twoKeyEventSource.changeAdmin(_newAdminContract);
 	}
@@ -89,7 +89,7 @@ contract TwoKeyAdmin is Destructible, IAdminContract {
     /// @param newExchange is New Upgradable Exchange contract address
 	function upgradeEconomyExchangeByAdmins(address newExchange) external wasNotReplaced onlyTwoKeyCongress {
 		require (newExchange != address(0));
-		twokeyUpgradableExchange.upgrade(newExchange);
+		twoKeyUpgradableExchange.upgrade(newExchange);
 	}
 
     /// @notice Function where only elected admin can transfer ethers to an address
@@ -178,7 +178,7 @@ contract TwoKeyAdmin is Destructible, IAdminContract {
 	/// @param _exchange is address of new twoKeyUpgradableExchange contract
 	function updateExchange(address _exchange) public  onlyTwoKeyCongress {
 		require (_exchange != address(0));
-		twokeyUpgradableExchange = TwoKeyUpgradableExchange(_exchange);
+		twoKeyUpgradableExchange = TwoKeyUpgradableExchange(_exchange);
 	}
 
     /// @notice Function to update twoKeyRegistry contract address
@@ -204,7 +204,7 @@ contract TwoKeyAdmin is Destructible, IAdminContract {
 		//this is only for first time deployment of admin contract and other singletons
 		require(twoKeyEconomy == address(0));
 		require(twoKeyReg == address(0));
-		require(twokeyUpgradableExchange == address(0));
+		require(twoKeyUpgradableExchange == address(0));
 		require(twoKeyEventSource == address(0));
 
 		require(_economy != address(0));
@@ -213,7 +213,7 @@ contract TwoKeyAdmin is Destructible, IAdminContract {
     	require(_eventSource != address(0));
 
 		twoKeyReg = TwoKeyReg(_reg);
-    	twokeyUpgradableExchange = TwoKeyUpgradableExchange(_exchange);
+    	twoKeyUpgradableExchange = TwoKeyUpgradableExchange(_exchange);
 		twoKeyEconomy = TwoKeyEconomy(_economy);
 		twoKeyEventSource = TwoKeyEventSource(_eventSource);
     }
@@ -260,7 +260,7 @@ contract TwoKeyAdmin is Destructible, IAdminContract {
 	/// @notice Function to fetch twoKeyUpgradableExchange contract address 
 	/// @return _address is address of twoKeyUpgradableExchange contract
     function getTwoKeyUpgradableExchange () public view returns(address _exchange)  {
-    	return address(twokeyUpgradableExchange);
+    	return address(twoKeyUpgradableExchange);
     }
     
 } 
