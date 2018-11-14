@@ -84,8 +84,8 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
     }
 
     constructor (address _twoKeyEventSource, address _twoKeyAdmin, address _maintainer) RBACWithAdmin(_twoKeyAdmin) public {
-//        require(_twoKeyEventSource != address(0));
-//        require(_twoKeyAdmin != address(0));
+        require(_twoKeyEventSource != address(0));
+        require(_twoKeyAdmin != address(0));
         twoKeyEventSource = _twoKeyEventSource;
         twoKeyAdminContractAddress = _twoKeyAdmin;
         maintainers.push(_maintainer);
