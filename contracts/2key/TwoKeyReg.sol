@@ -3,7 +3,7 @@ pragma solidity ^0.4.24;
 import '../openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import "./RBACWithAdmin.sol";
 
-contract TwoKeyReg is Ownable, RBACWithAdmin {
+contract TwoKeyReg is Ownable {
 
     /// @notice Event is emitted when a user's name is changed
     event UserNameChanged(address owner, string name);
@@ -83,7 +83,12 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
         _;
     }
 
-    constructor (address _twoKeyEventSource, address _twoKeyAdmin, address _maintainer) RBACWithAdmin(_twoKeyAdmin) public {
+    modifier onlyAdmin {
+        require(msg.sender == twoKeyAdminContractAddress);
+        _;
+    }
+
+    constructor (address _twoKeyEventSource, address _twoKeyAdmin, address _maintainer) public {
         require(_twoKeyEventSource != address(0));
         require(_twoKeyAdmin != address(0));
         twoKeyEventSource = _twoKeyEventSource;
@@ -351,6 +356,11 @@ contract TwoKeyReg is Ownable, RBACWithAdmin {
         assembly {
             result := mload(add(source, 32))
         }
+    }
+
+    function addTwoKeyMaintainer(address _maintainer) public onlyAdmin {
+        require(_maintainer != address(0));
+        maintainers.push(_maintainer);
     }
 
 

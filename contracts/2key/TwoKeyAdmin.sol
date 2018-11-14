@@ -10,7 +10,7 @@ import "../interfaces/IERC20.sol";
 import "./TwoKeyEventSource.sol";
 import "./TwoKeyReg.sol";
 
-/// TODO: Analyze backwards and nonbackwards compatibility when we update contracts
+//TODO: If this contract will be managed by congress then it can't be destructible, or in that case to be deployed via congress
 contract TwoKeyAdmin is Destructible, IAdminContract {
 
 	TwoKeyEconomy private twoKeyEconomy;
@@ -122,31 +122,30 @@ contract TwoKeyAdmin is Destructible, IAdminContract {
 
 	/// @notice Function to add moderator
 	/// @param _address is address of moderator
-	function addModeratorForReg(address _address) public wasNotReplaced onlyTwoKeyCongress {
+	function addMaintainerForRegistry(address _address) public wasNotReplaced onlyTwoKeyCongress {
 		require (_address != address(0));		
-		string memory moderator = twoKeyReg.getModeratorRole();
-		twoKeyReg.adminAddRole(_address, moderator);
+		twoKeyReg.addTwoKeyMaintainer(_address);
 	}
 	
-	/// @notice Function to remove moderator
-	/// @param _address is address of moderator
-	function removeModeratorForReg(address _address) public wasNotReplaced onlyTwoKeyCongress {
-		require (_address != address(0));		
-		string memory moderator = twoKeyReg.getModeratorRole();
-		require(twoKeyReg.hasRole(_address, moderator) == true);
-		twoKeyReg.adminRemoveRole(_address, moderator);
-	}
-
-	/// @notice Method to update moderator
-	/// @param _moderator is address of current moderator
-	/// @param _newModerator is address of new moderator
-	function updateModeratorForReg(address _moderator, address _newModerator) public wasNotReplaced onlyTwoKeyCongress {
-		require (_moderator != address(0));		
-		require (_newModerator != address(0));		
-		string memory moderator = twoKeyReg.getModeratorRole();
-		if(twoKeyReg.hasRole(_moderator, moderator))
-			twoKeyReg.adminUpdateRole(_moderator, _newModerator, moderator);	
-	}
+//	/// @notice Function to remove moderator
+//	/// @param _address is address of moderator
+//	function removeModeratorForReg(address _address) public wasNotReplaced onlyTwoKeyCongress {
+//		require (_address != address(0));
+//		string memory moderator = twoKeyReg.getModeratorRole();
+//		require(twoKeyReg.hasRole(_address, moderator) == true);
+//		twoKeyReg.adminRemoveRole(_address, moderator);
+//	}
+//
+//	/// @notice Method to update moderator
+//	/// @param _moderator is address of current moderator
+//	/// @param _newModerator is address of new moderator
+//	function updateModeratorForReg(address _moderator, address _newModerator) public wasNotReplaced onlyTwoKeyCongress {
+//		require (_moderator != address(0));
+//		require (_newModerator != address(0));
+//		string memory moderator = twoKeyReg.getModeratorRole();
+//		if(twoKeyReg.hasRole(_moderator, moderator))
+//			twoKeyReg.adminUpdateRole(_moderator, _newModerator, moderator);
+//	}
 
     /// @notice Function to whitelist address as an authorized user for twoKeyEventSource contract
 	/// @param _address is address of user

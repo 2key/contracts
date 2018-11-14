@@ -1,12 +1,10 @@
 pragma solidity ^0.4.24;
 
 import '../openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol';
-import '../openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import '../openzeppelin-solidity/contracts/token/ERC20/ERC20.sol';
 import "./TwoKeyAdmin.sol";
-import "./RBACWithAdmin.sol";
 
-contract TwoKeyUpgradableExchange is Crowdsale, Ownable, RBACWithAdmin {
+contract TwoKeyUpgradableExchange is Crowdsale {
 
 	TwoKeyUpgradableExchange filler;
 
@@ -19,10 +17,16 @@ contract TwoKeyUpgradableExchange is Crowdsale, Ownable, RBACWithAdmin {
 		_;
 	}
 
+	modifier onlyAdmin() {
+		require(msg.sender == address(admin));
+		_;
+	}
+
 	TwoKeyAdmin admin;
 
-	constructor(uint256 _rate, address _wallet, ERC20 _token, address _twoKeyAdmin) RBACWithAdmin(_twoKeyAdmin)
-		Crowdsale(_rate, _wallet, _token) Ownable() public {
+
+	constructor(uint256 _rate, address _wallet, ERC20 _token, address _twoKeyAdmin)
+		Crowdsale(_rate, _wallet, _token) public {
 		require(_twoKeyAdmin != address(0));
     	admin = TwoKeyAdmin(_twoKeyAdmin);
     	// admin.setTwoKeyExchange(address(this));	
@@ -79,5 +83,4 @@ contract TwoKeyUpgradableExchange is Crowdsale, Ownable, RBACWithAdmin {
 	function getFiller() view public returns(address) {
 		return filler;	
 	}
-	
 }
