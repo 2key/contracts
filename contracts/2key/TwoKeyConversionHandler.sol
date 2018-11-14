@@ -107,7 +107,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     /// @notice Function which checks if converter has converted
     /// @dev will throw if not
     /// @param converterAddress is the address of converter
-    function didConverterConvert(address converterAddress) public view {
+    function isConversionExecuted(address converterAddress) public view {
         Conversion memory c = conversions[converterAddress];
         require(c.state != ConversionState.FULFILLED);
         require(c.state != ConversionState.CANCELLED);
@@ -161,7 +161,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
 
 
     function executeConversion(address _converter) public onlyApprovedConverter {
-        didConverterConvert(_converter);
+        isConversionExecuted(_converter);
         performConversion(_converter);
         moveFromApprovedToFulfilledState(_converter);
     }
@@ -172,8 +172,8 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateRefchainRewards(conversion.maxReferralRewardETHWei, _converter);
 
         // update moderator balances
-
         ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateModeratorBalanceETHWei(conversion.moderatorFeeETHWei);
+
 
         TwoKeyLockupContract lockupContract = new TwoKeyLockupContract(bonusTokensVestingStartShiftInDaysFromDistributionDate, bonusTokensVestingMonths, tokenDistributionDate, maxDistributionDateShiftInDays,
             conversion.baseTokenUnits, conversion.bonusTokenUnits, _converter, conversion.contractor, twoKeyAcquisitionCampaignERC20, assetContractERC20);
