@@ -12,6 +12,7 @@ import "./TwoKeyReg.sol";
 
 //TODO: If this contract will be managed by congress then it can't be destructible, or in that case to be deployed via congress
 contract TwoKeyAdmin is Destructible, IAdminContract {
+
 	TwoKeyEconomy public twoKeyEconomy;
 	TwoKeyUpgradableExchange public twoKeyUpgradableExchange;
 	TwoKeyEventSource public twoKeyEventSource;
@@ -22,9 +23,6 @@ contract TwoKeyAdmin is Destructible, IAdminContract {
 	address public newTwoKeyAdminAddress;
 	bool private wasReplaced;
 
-	/*
-	* Modifiers
-	*/
 
     /// @notice Modifier will revert if calling address is not owner or previous active admin contract
 	modifier onlyAuthorizedAdmins() {
@@ -44,6 +42,7 @@ contract TwoKeyAdmin is Destructible, IAdminContract {
 		_;
 	}
 
+    //TODO: Why is constructor payable? Is there any logic behind it?
 	constructor(
 		address _electorateAdmins		
 	) Ownable() Destructible() payable public {
