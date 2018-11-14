@@ -2,11 +2,10 @@ pragma solidity ^0.4.24;
 
 import '../openzeppelin-solidity/contracts/token/ERC20/ERC20.sol';
 import '../openzeppelin-solidity/contracts/ownership/Ownable.sol';
-import "./RBACWithAdmin.sol";
 import "./StandardTokenModified.sol";
 
 
-contract TwoKeyEconomy is RBACWithAdmin, StandardTokenModified, Ownable {
+contract TwoKeyEconomy is StandardTokenModified, Ownable {
 
     /*
         TwoKeyEconomy inheritance ERC20
@@ -32,11 +31,16 @@ contract TwoKeyEconomy is RBACWithAdmin, StandardTokenModified, Ownable {
         _;
     }
 
-    constructor (address _twoKeyAdmin) RBACWithAdmin(_twoKeyAdmin) Ownable() public {
+    constructor (address _twoKeyAdmin) Ownable() public {
         require(_twoKeyAdmin != address(0));
         twoKeyAdmin = _twoKeyAdmin;
         totalSupply_= 1000000000000000000000000;
         balances[_twoKeyAdmin] = totalSupply_;
+    }
+
+    function changeAdmin(address _newAdmin) public onlyTwoKeyAdmin {
+        require(_newAdmin != address(0));
+        twoKeyAdmin = _newAdmin;
     }
 
     /// @notice TwoKeyAmin is available to freeze all transfers on ERC for some period of time

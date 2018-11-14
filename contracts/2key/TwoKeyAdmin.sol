@@ -23,7 +23,6 @@ contract TwoKeyAdmin is Destructible, IAdminContract {
 	address private newTwoKeyAdminAddress;
 	bool private wasReplaced;
 
-
 	/*
 	* Modifiers
 	*/
@@ -63,8 +62,7 @@ contract TwoKeyAdmin is Destructible, IAdminContract {
 		TwoKeyAdmin newAdminContractObject = TwoKeyAdmin(_newAdminContract);
 		newTwoKeyAdminAddress = _newAdminContract;
 		twoKeyEconomy.transfer(_newAdminContract, balanceOfOldAdmin);
-		string memory admin = twoKeyEconomy.getAdminRole();
-		twoKeyEconomy.adminAddRole(_newAdminContract, admin);
+		twoKeyEconomy.changeAdmin(_newAdminContract);
 		newAdminContractObject.transfer(address(this).balance);
 		newAdminContractObject.setSingletones(twoKeyEconomy, twokeyUpgradableExchange, twoKeyReg, twoKeyEventSource);
 		wasReplaced = true;
