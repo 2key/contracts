@@ -66,7 +66,6 @@ module.exports = function deploy(deployer) {
         .then(function(instance) {
             adminInstance = instance;
         })
-        .then(() => deployer.deploy(TwoKeyCongress, 50, initialCongressMembers, votingPowers))
         .then(() => deployer.deploy(TwoKeyEconomy, TwoKeyAdmin.address))
         .then(() => deployer.deploy(TwoKeyUpgradableExchange, 1, deployer.network.startsWith('rinkeby') ? '0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f' : '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7', TwoKeyEconomy.address, TwoKeyAdmin.address))
         .then(() => TwoKeyUpgradableExchange.deployed())
