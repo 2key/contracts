@@ -10,9 +10,8 @@ import "../interfaces/IERC20.sol";
 import "./TwoKeyEventSource.sol";
 import "./TwoKeyReg.sol";
 
-// SAFT are to be implemented by transferEtherByAdmins with the amount including the discount, according to the prevailing rate
 /// TODO: Analyze backwards and nonbackwards compatibility when we update contracts
-contract TwoKeyAdmin is Destructible, AdminContract {
+contract TwoKeyAdmin is Destructible, IAdminContract {
 
 	TwoKeyEconomy private twoKeyEconomy;
 	TwoKeyUpgradableExchange private twokeyUpgradableExchange;
@@ -20,7 +19,6 @@ contract TwoKeyAdmin is Destructible, AdminContract {
 	TwoKeyReg private twoKeyReg;
 	address private previousAdmin;
 
-	// 1 electorate admin is 1 two key congress
 	address private twoKeyCongress;
 	address private newTwoKeyAdminAddress;
 	bool private wasReplaced;
@@ -165,8 +163,7 @@ contract TwoKeyAdmin is Destructible, AdminContract {
 		twoKeyEventSource = TwoKeyEventSource(_twoKeyEventSource);
 	}
 
-	/// TODO: Who can call this method???
-    /// @notice Function to whitelist contract address for Event Source contract 
+    /// @notice Function to whitelist contract address for Event Source contract
 	/// @dev We're requiring contract address different from address 0 as it is required to be deployed before calling this method
 	/// @param _contractAddress is address of a contract
 	function twoKeyEventSourceAddAuthorizedContracts(address _contractAddress) public {
