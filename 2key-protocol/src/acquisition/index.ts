@@ -116,7 +116,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @param {number} timeout
      * @returns {Promise<IAcquisitionCampaignMeta>}
      */
-    public create(data: IAcquisitionCampaign, from: string, { progressCallback, gasPrice, interval, timeout = 60000 }: ICreateOpts = {}): Promise<IAcquisitionCampaignMeta> {
+    public create(data: IAcquisitionCampaign, from: string, {progressCallback, gasPrice, interval, timeout = 60000}: ICreateOpts = {}): Promise<IAcquisitionCampaignMeta> {
         return new Promise(async (resolve, reject) => {
             try {
                 let txHash: string;
@@ -128,8 +128,16 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 let conversionHandlerAddress = data.conversionHandlerAddress;
                 if (!conversionHandlerAddress) {
                     this.base._log([data.tokenDistributionDate, data.maxDistributionDateShiftInDays, data.bonusTokensVestingMonths, data.bonusTokensVestingStartShiftInDaysFromDistributionDate], gasPrice);
-                    txHash = await this.helpers._createContract(contractsMeta.TwoKeyConversionHandler, from, { gasPrice, params: [data.tokenDistributionDate, data.maxDistributionDateShiftInDays, data.bonusTokensVestingMonths, data.bonusTokensVestingStartShiftInDaysFromDistributionDate], progressCallback});
-                    const predeployReceipt = await this.utils.getTransactionReceiptMined(txHash,{ web3: this.base.web3, interval, timeout});
+                    txHash = await this.helpers._createContract(contractsMeta.TwoKeyConversionHandler, from, {
+                        gasPrice,
+                        params: [data.tokenDistributionDate, data.maxDistributionDateShiftInDays, data.bonusTokensVestingMonths, data.bonusTokensVestingStartShiftInDaysFromDistributionDate],
+                        progressCallback
+                    });
+                    const predeployReceipt = await this.utils.getTransactionReceiptMined(txHash, {
+                        web3: this.base.web3,
+                        interval,
+                        timeout
+                    });
                     if (predeployReceipt.status !== '0x1') {
                         reject(predeployReceipt);
                         return;
@@ -164,7 +172,11 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                         address: this.base.twoKeyCall.address,
                     },
                 });
-                const campaignReceipt = await this.utils.getTransactionReceiptMined(txHash, {web3: this.base.web3, interval, timeout});
+                const campaignReceipt = await this.utils.getTransactionReceiptMined(txHash, {
+                    web3: this.base.web3,
+                    interval,
+                    timeout
+                });
                 if (campaignReceipt.status !== '0x1') {
                     reject(campaignReceipt);
                     return;
@@ -411,7 +423,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @param {number} gasPrice
      * @returns {Promise<IPublicLinkKey>}
      */
-    public setPublicLinkKey(campaign: any, from: string, publicLink: string, { cut, gasPrice = this.base._getGasPrice() }: IPublicLinkOpts = {}): Promise<IPublicLinkKey> {
+    public setPublicLinkKey(campaign: any, from: string, publicLink: string, {cut, gasPrice = this.base._getGasPrice()}: IPublicLinkOpts = {}): Promise<IPublicLinkKey> {
         return new Promise(async (resolve, reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
@@ -469,7 +481,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @param {string} daoContract
      * @returns {Promise<string>}
      */
-    public join(campaign: any, from: string, { cut, gasPrice = this.base._getGasPrice(), referralLink, cutSign, voting, daoContract }: IJoinLinkOpts = {}): Promise<string> {
+    public join(campaign: any, from: string, {cut, gasPrice = this.base._getGasPrice(), referralLink, cutSign, voting, daoContract}: IJoinLinkOpts = {}): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
                 const campaignAddress = typeof (campaign) === 'string' ? campaign
@@ -498,7 +510,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 let contractor;
                 let dao;
                 if (referralLink) {
-                    const {f_address, f_secret, p_message, contractor: campaignContractor, dao: daoAddress } = await this.utils.getOffchainDataFromIPFSHash(referralLink);
+                    const {f_address, f_secret, p_message, contractor: campaignContractor, dao: daoAddress} = await this.utils.getOffchainDataFromIPFSHash(referralLink);
                     contractor = campaignContractor;
                     dao = daoAddress;
                     // this.base._log('New link for', from, f_address, f_secret, p_message);
@@ -506,7 +518,10 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     // TODO: Andrii in AcquisitionCampaign this method was with (cut + 1)
                     new_message = Sign.free_join(from, public_address, f_address, f_secret, p_message, voting ? cut : cut + 1, cutSign);
                 } else {
-                    const {contractor: campaignContractor} = await this.setPublicLinkKey(campaign, from, `0x${public_address}`, {cut, gasPrice});
+                    const {contractor: campaignContractor} = await this.setPublicLinkKey(campaign, from, `0x${public_address}`, {
+                        cut,
+                        gasPrice
+                    });
                     dao = voting ? daoContract : undefined;
                     contractor = campaignContractor;
                 }
@@ -823,7 +838,11 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 const nonce = await this.helpers._getNonce(from);
                 const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
                 const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
-                const txHash: string = await promisify(conversionHandlerInstance.approveConverter, [converter, {from, gasPrice, nonce}]);
+                const txHash: string = await promisify(conversionHandlerInstance.approveConverter, [converter, {
+                    from,
+                    gasPrice,
+                    nonce
+                }]);
                 resolve(txHash);
             } catch (e) {
                 reject(e);
@@ -845,7 +864,11 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 const nonce = await this.helpers._getNonce(from);
                 const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
                 const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
-                const txHash: string = await promisify(conversionHandlerInstance.rejectConverter, [converter, {from, gasPrice, nonce}]);
+                const txHash: string = await promisify(conversionHandlerInstance.rejectConverter, [converter, {
+                    from,
+                    gasPrice,
+                    nonce
+                }]);
                 resolve(txHash);
             } catch (e) {
                 reject(e);
@@ -866,7 +889,11 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 const nonce = await this.helpers._getNonce(from);
                 const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
                 const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
-                const txHash: string = await promisify(conversionHandlerInstance.cancelConverter, [{from, gasPrice, nonce}]);
+                const txHash: string = await promisify(conversionHandlerInstance.cancelConverter, [{
+                    from,
+                    gasPrice,
+                    nonce
+                }]);
                 resolve(txHash);
             } catch (e) {
                 reject(e);
@@ -926,7 +953,11 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
                 const conversionHandlerInstance = this.base.web3.eth.contract(contracts.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
                 const nonce = await this.helpers._getNonce(from);
-                const txHash: string = await promisify(conversionHandlerInstance.executeConversion, [converter, {from, gasPrice, nonce}]);
+                const txHash: string = await promisify(conversionHandlerInstance.executeConversion, [converter, {
+                    from,
+                    gasPrice,
+                    nonce
+                }]);
                 this.base._log(txHash);
                 resolve(txHash);
             } catch (e) {
@@ -963,12 +994,16 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @param {number} gasPrice
      * @returns {Promise<string>}
      */
-    public addFungibleAssetsToInventoryOfCampaign(campaign: any, amount: number, from: string, gasPrice: number = this.base._getGasPrice()) : Promise<string> {
+    public addFungibleAssetsToInventoryOfCampaign(campaign: any, amount: number, from: string, gasPrice: number = this.base._getGasPrice()): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
                 const nonce = await this.helpers._getNonce(from);
-                const txHash: string = await promisify(campaignInstance.addUnitsToInventory, [amount, {from, gasPrice, nonce}]);
+                const txHash: string = await promisify(campaignInstance.addUnitsToInventory, [amount, {
+                    from,
+                    gasPrice,
+                    nonce
+                }]);
                 resolve(txHash);
             } catch (e) {
                 reject(e);
@@ -988,9 +1023,9 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
             try {
                 const nonce = await this.helpers._getNonce(from);
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-                const txHash: string = await promisify(campaignInstance.cancel,[{from, gasPrice, nonce}]);
+                const txHash: string = await promisify(campaignInstance.cancel, [{from, gasPrice, nonce}]);
                 resolve(txHash);
-            } catch(e) {
+            } catch (e) {
                 reject(e);
             }
         })
@@ -1002,11 +1037,11 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @param {string} from
      * @returns {Promise<boolean>}
      */
-    public isAddressContractor(campaign:any, from:string) : Promise<boolean> {
-        return new Promise(async(resolve,reject) => {
+    public isAddressContractor(campaign: any, from: string): Promise<boolean> {
+        return new Promise(async (resolve, reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-                const result: string = await promisify(campaignInstance.contractor,[{from}]);
+                const result: string = await promisify(campaignInstance.contractor, [{from}]);
                 resolve(result === from);
             } catch (e) {
                 reject(e);
@@ -1019,11 +1054,11 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @param campaign
      * @returns {Promise<number>}
      */
-    public getAcquisitionContractBalanceERC20(campaign: any) : Promise<number> {
-        return new Promise(async(resolve,reject) => {
+    public getAcquisitionContractBalanceERC20(campaign: any): Promise<number> {
+        return new Promise(async (resolve, reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-                const balanceOnContract: number = await promisify(campaignInstance.campaignInventoryUnitsBalance,[]);
+                const balanceOnContract: number = await promisify(campaignInstance.campaignInventoryUnitsBalance, []);
                 resolve(balanceOnContract);
             } catch (e) {
                 reject(e);
@@ -1039,7 +1074,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @returns {Promise<number>}
      */
     public getAmountOfEthAddressSentToAcquisition(campaign: any, from: string): Promise<number> {
-        return new Promise<number>(async(resolve,reject) => {
+        return new Promise<number>(async (resolve, reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
                 const value: number = await promisify(campaignInstance.getAmountAddressSent, [from]);
@@ -1049,4 +1084,65 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
             }
         });
     }
+
+    /**
+     *
+     * @param campaign
+     * @param {string} from
+     * @param {number} gasPrice
+     * @returns {Promise<string>}
+     */
+    public contractorWithdraw(campaign: any, from: string, gasPrice: number = this.base._getGasPrice()): Promise<string> {
+        return new Promise<string>(async (resolve, reject) => {
+            try {
+                const nonce = await this.helpers._getNonce(from);
+                const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
+                const txHash: string = await promisify(campaignInstance.withdrawContractor, [{
+                    from,
+                    gasPrice,
+                    nonce
+                }]);
+                resolve(txHash);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+    /**
+     *
+     * @param campaign
+     * @param {string} from
+     * @returns {Promise<number>}
+     */
+    public getContractorBalance(campaign: any, from: string): Promise<number> {
+        return new Promise<number>(async (resolve, reject) => {
+            try {
+                const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
+                const balanceinWei = await promisify(campaignInstance.getContractorBalance, [{from}]);
+                resolve(balanceinWei);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+    /**
+     *
+     * @param campaign
+     * @param {string} from
+     * @returns {Promise<number>}
+     */
+    public getModeratorBalance(campaign: any, from: string): Promise<number> {
+        return new Promise<number>(async (resolve, reject) => {
+            try {
+                const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
+                const balanceinWei = await promisify(campaignInstance.getModeratorBalance, [{from}]);
+                resolve(balanceinWei);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
 }

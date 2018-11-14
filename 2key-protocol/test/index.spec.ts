@@ -370,11 +370,11 @@ describe('TwoKeyProtocol', () => {
             campaignStartTime,
             campaignEndTime,
             expiryConversion: 1000 * 60 * 60 * 24,
-            maxConverterBonusPercentWei: twoKeyProtocol.Utils.toWei(maxConverterBonusPercent, 'ether'),
+            maxConverterBonusPercentWei: maxConverterBonusPercent,
             pricePerUnitInETHWei: twoKeyProtocol.Utils.toWei(pricePerUnitInETH, 'ether'),
-            maxReferralRewardPercentWei: twoKeyProtocol.Utils.toWei(maxReferralRewardPercent, 'ether'),
+            maxReferralRewardPercentWei: maxReferralRewardPercent,
             assetContractERC20: twoKeyEconomy,
-            moderatorFeePercentageWei: twoKeyProtocol.Utils.toWei(moderatorFeePercentage, 'ether'),
+            moderatorFeePercentageWei: moderatorFeePercentage,
             minContributionETHWei: twoKeyProtocol.Utils.toWei(minContributionETH, 'ether'),
             maxContributionETHWei: twoKeyProtocol.Utils.toWei(maxContributionETH, 'ether'),
             tokenDistributionDate: 1541109593669,
@@ -797,6 +797,36 @@ describe('TwoKeyProtocol', () => {
         console.log(stats);
     }).timeout(30000);
 
+    it('should print balances', printBalances).timeout(15000);
+
+    it('==> should contractor withdraw his earnings', async() => {
+        const {web3, address} = web3switcher.aydnep();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            plasmaPK: Sign.generatePrivateKey().toString('hex'),
+        });
+
+        const isContractor:boolean = await twoKeyProtocol.AcquisitionCampaign.isAddressContractor(campaignAddress,from);
+        console.log('Aydnep is contractor: ' + isContractor);
+        const balanceOfContract = await twoKeyProtocol.getBalance(campaignAddress);
+        console.log('contract balance', twoKeyProtocol.Utils.balanceFromWeiString(balanceOfContract, {
+            inWei: true,
+            toNum: true
+        }).balance);
+
+        const contractorBalance = await twoKeyProtocol.AcquisitionCampaign.getContractorBalance(campaignAddress,from);
+        console.log('Contractor balance: ' + twoKeyProtocol.Utils.fromWei(contractorBalance));
+        const moderatorBalance = await twoKeyProtocol.AcquisitionCampaign.getModeratorBalance(campaignAddress,from);
+        console.log('Moderator balance: ' + twoKeyProtocol.Utils.fromWei(moderatorBalance));
+        const hash = await twoKeyProtocol.AcquisitionCampaign.contractorWithdraw(campaignAddress,from);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+    }).timeout(30000);
+
     it('should print balances before cancelation', async() => {
         for (let i = 0; i < addresses.length; i++) {
             let addressCurrent = addresses[i].toString();
@@ -858,6 +888,8 @@ describe('TwoKeyProtocol', () => {
         expect(addresses.length).to.be.equal(4);
 
     });
+
+    it('should print balances', printBalances).timeout(15000);
 
     /*
 

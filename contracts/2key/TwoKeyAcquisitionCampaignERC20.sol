@@ -8,12 +8,6 @@ import "../interfaces/IERC20.sol";
 import "./TwoKeyTypes.sol";
 import "./Call.sol";
 
-/*
-    TODO: Payouts for referrers and moderators in TwoKey
-    TODO: Payout for contractor Eth
-    TODO: Payout for converter Eth
-    TODO: Staking mechanism getting 2key for ether
-*/
 
 /// @author Nikola Madjarevic
 /// Contract which will represent campaign for the fungible assets
@@ -129,7 +123,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
      */
     function calculateModeratorFee(uint256 _conversionAmountETHWei) internal view returns (uint256)  {
         if (moderatorFeePercentage > 0) {// send the fee to moderator
-            uint256 fee = _conversionAmountETHWei.mul(moderatorFeePercentage).div(100).div(10 ** unit_decimals);
+            uint256 fee = _conversionAmountETHWei.mul(moderatorFeePercentage).div(100);
             return fee;
         }
         return 0;
@@ -311,8 +305,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
     }
 
     function updateModeratorBalanceETHWei(uint _value) public onlyTwoKeyConversionHandler {
-        moderatorBalanceETHWei.add(_value);
-        moderatorTotalEarningsETHWei.add(_value);
+        moderatorBalanceETHWei = moderatorBalanceETHWei.add(_value);
+        moderatorTotalEarningsETHWei = moderatorTotalEarningsETHWei.add(_value);
     }
 
     function updateRefchainRewards(uint256 _maxReferralRewardETHWei, address _converter) public onlyTwoKeyConversionHandler {
@@ -474,8 +468,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
     /// @dev can be called only from TwoKeyConversionHandler contract
     /// @param value it the value we'd like to add to total contractor proceeds and contractor balance
     function updateContractorProceeds(uint value) public onlyTwoKeyConversionHandler {
-        contractorTotalProceeds.add(value);
-        contractorBalance.add(value);
+        contractorTotalProceeds = contractorTotalProceeds.add(value);
+        contractorBalance = contractorBalance.add(value);
     }
 
     /// @notice Getter for the address status if it's joined
@@ -508,4 +502,19 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
         return withdrawApproved;
     }
 
+    function getContractorBalance() public onlyContractor view returns (uint) {
+        return contractorBalance;
+    }
+
+    function getModeratorBalance() public onlyContractorOrModerator view returns (uint) {
+        return moderatorBalanceETHWei;
+    }
+
+    function withdrawContractor() public onlyContractor returns (bool) {
+        require(contractorBalance > 0,'You need to have some balance in order to do withdraw');
+        require(contractorBalance <= this.balance, 'Contractor balance should be less then contract balance');
+        contractor.transfer(contractorBalance);
+        contractorBalance = 0;
+        return true;
+    }
 }

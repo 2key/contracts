@@ -81,6 +81,9 @@ export interface ITwoKeyAcquisitionCampaign {
     isAddressContractor: (campaign:any, from:string) => Promise<boolean>,
     getAcquisitionContractBalanceERC20: (campaign: any) => Promise<number>,
     getAmountOfEthAddressSentToAcquisition: (campaign: any, from: string) => Promise<number>,
+    contractorWithdraw: (campaign:any, from: string, gasPrice?: number) => Promise<string>,
+    getContractorBalance: (campaign:any, from:string) => Promise<number>,
+    getModeratorBalance: (campaign:any, from:string) => Promise<number>,
 }
 
 export interface IPublicLinkOpts {
