@@ -72,39 +72,24 @@ contract TwoKeyEventSource is TwoKeyTypes {
         uint value
     );
 
-    uint counter = 0;
 
+    uint counter = 0;
     address[] whitelistedDeployers = [
                                         0xb3FA520368f2Df7BED4dF5185101f303f6c7decc, //local-geth
                                         0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1, //ganache -deterministic
                                         0x94aac1FE48D0ABeC6A07051e089759E767C3f26c // rinkeby
                                     ];
 
-    function isAddressWhitelistedDeployer(address x) public view returns (bool) {
-        for(uint i=0; i<whitelistedDeployers.length; i++) {
-            if(x == whitelistedDeployers[i]) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     // TwoKeyAdmin twoKeyAdmin;
     address twoKeyAdmin;
-
     /// Interface representing TwoKeyReg contract (Reducing gas usage that's why interface instead of contract instance)
     ITwoKeyReg interfaceTwoKeyReg;
-
     /// Mapping contract bytecode to boolean if is allowed to emit an event
     mapping(bytes => bool) canEmit;
-
     /// Mapping contract bytecode to enumerator CampaignType.
     mapping(bytes => CampaignType) codeToType;
-
-
     /// Mapping an address to boolean if allowed to modify
     mapping(address => bool) authorizedSubadmins;
-
 
     /// @notice Modifier which allows only admin to call a function - can be easily modified if there is going to be more admins
     modifier onlyAdmin {
@@ -286,5 +271,14 @@ contract TwoKeyEventSource is TwoKeyTypes {
 
     function checkIsAuthorized(address _subAdmin) public view returns (bool) {
         return authorizedSubadmins[_subAdmin];
+    }
+
+    function isAddressWhitelistedDeployer(address x) public view returns (bool) {
+        for(uint i=0; i<whitelistedDeployers.length; i++) {
+            if(x == whitelistedDeployers[i]) {
+                return true;
+            }
+        }
+        return false;
     }
 }
