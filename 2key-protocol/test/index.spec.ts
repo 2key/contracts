@@ -791,6 +791,12 @@ describe('TwoKeyProtocol', () => {
         console.log("Withdrawn amount of tokens is: " + balance);
     }).timeout(30000);
 
+    it('==> should print statistics of withdrawal', async() => {
+        const addresses = await twoKeyProtocol.AcquisitionCampaign.getLockupContractsForConverter(campaignAddress, env.TEST4_ADDRESS, from);
+        const stats = await twoKeyProtocol.Lockup.getStatistics(addresses[0], from);
+        console.log(stats);
+    }).timeout(30000);
+
     it('should print balances before cancelation', async() => {
         for (let i = 0; i < addresses.length; i++) {
             let addressCurrent = addresses[i].toString();

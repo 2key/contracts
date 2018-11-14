@@ -142,7 +142,6 @@ export default class Lockup implements ILockup {
         })
     }
 
-    //TODO!!!!!!
     /**
      *
      * @param {string} twoKeyLockup
@@ -153,18 +152,51 @@ export default class Lockup implements ILockup {
         return new Promise(async(resolve,reject) => {
             try {
                 const twoKeyLockupInstance = await this.helpers._getLockupContractInstance(twoKeyLockup);
-                const totalTokens = await promisify(twoKeyLockupInstance.getBalaceOfContract,[{from}]);
-                const withdrawn = await promisify(twoKeyLockupInstance.getWithdrawn,[{from}]);
-                const vestingMonths = await promisify(twoKeyLockupInstance.getNumberOfVestingMonths,[{from}]);
-                const monthlyBonus = await promisify(twoKeyLockupInstance.getMonthlyBonus,[{from}]);
+                let [baseTokens, bonusTokens, vestingMonths, withdrawn, totalTokensLeft]
+                    = await promisify(twoKeyLockupInstance.getInformation,[{from}]);
 
+                let monthlyBonus = bonusTokens/vestingMonths;
+
+                console.log('Total tokens: ' + totalTokensLeft);
+                console.log('Withdrawn: ' + withdrawn);
+                console.log('Base Tokens: ' + baseTokens);
+                console.log('Vesting months: ' + vestingMonths);
+                console.log('Monthly bonus: '+  monthlyBonus);
+
+                let stats = [];
+                let statObject;
+                let sum = 0;
                 if(withdrawn == 0) {
-                    let objs = [];
-                    let baseTokens = totalTokens - vestingMonths*monthlyBonus;
-                    for(let i=0; i<vestingMonths; i++) {
-
-                    }
+                    statObject = {
+                        'amount' : baseTokens,
+                        'taken' : false,
+                    };
+                } else {
+                    statObject = {
+                        'amount' : baseTokens,
+                        'taken' : true,
+                    };
+                    sum = baseTokens;
                 }
+
+                stats.push(statObject);
+                console.log('Sum is: ' + sum);
+                for(let i=0; i<vestingMonths; i++) {
+                    if(sum + monthlyBonus > withdrawn) {
+                        statObject = {
+                            'amount' : monthlyBonus,
+                            'taken' : false,
+                        }
+                    } else {
+                        statObject = {
+                            'amount' : monthlyBonus,
+                            'taken' : true,
+                        };
+                        sum += monthlyBonus;
+                    }
+                    stats.push(statObject);
+                }
+                resolve(stats);
             } catch (e) {
                 reject(e);
             }

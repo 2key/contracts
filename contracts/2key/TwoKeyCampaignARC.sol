@@ -22,7 +22,6 @@ contract TwoKeyCampaignARC is StandardToken {
 	mapping(address => address) public received_from;
 
 
-    // ==================================================================================================================================
     // @notice Modifier which allows only contractor to call methods
     modifier onlyContractor() {
         require(msg.sender == contractor);
@@ -38,7 +37,6 @@ contract TwoKeyCampaignARC is StandardToken {
         require(msg.sender == contractor || msg.sender == moderator);
         _;
     }
-    // ==================================================================================================================================
 
 
     constructor(address _twoKeyEventSource, uint256 _conversionQuota) StandardToken() public {

@@ -9,7 +9,7 @@ contract TwoKeyLockupContract {
 
     uint public baseTokens;
     uint public bonusTokens;
-    uint totalTokens;
+    uint totalTokensLeftOnContract;
     uint withdrawn = 0;
 
     address converter;
@@ -59,7 +59,7 @@ contract TwoKeyLockupContract {
         twoKeyAcquisitionCampaignERC20Address = _acquisitionCampaignERC20Address;
         twoKeyConversionHandler = msg.sender;
         assetContractERC20 = _assetContractERC20;
-        totalTokens = baseTokens + bonusTokens;
+        totalTokensLeftOnContract = baseTokens + bonusTokens;
     }
 
 
@@ -85,7 +85,7 @@ contract TwoKeyLockupContract {
             bytes4(keccak256(abi.encodePacked("transfer(address,uint256)"))),
             msg.sender, amount
         ));
-        totalTokens = totalTokens - amount;
+        totalTokensLeftOnContract = totalTokensLeftOnContract - amount;
         withdrawn = withdrawn + amount;
         return true;
     }
@@ -135,8 +135,8 @@ contract TwoKeyLockupContract {
         return bonusTokens / bonusTokensVestingMonths;
     }
 
-    function getBalanceOfContract() public view returns (uint) {
-        return totalTokens;
+    function getTotalTokensLeftOnContract() public view returns (uint) {
+        return totalTokensLeftOnContract;
     }
 
     function getWithdrawn() public view returns (uint) {
@@ -149,5 +149,9 @@ contract TwoKeyLockupContract {
 
     function getNumberOfVestingMonths() public view returns (uint) {
         return bonusTokensVestingMonths;
+    }
+
+    function getInformation() public view returns (uint,uint,uint,uint,uint) {
+        return (baseTokens, bonusTokens, bonusTokensVestingMonths, withdrawn, totalTokensLeftOnContract);
     }
 }

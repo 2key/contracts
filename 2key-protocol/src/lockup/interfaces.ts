@@ -6,4 +6,5 @@ export interface ILockup {
     getAllUnlockedAtTheMoment: (twoKeyLockup: string, from:string) => Promise<number>,
     getAmountUserWithdrawn: (twoKeyLockup: string, from: string) => Promise<number>,
     withdrawTokens: (twoKeyLockup: string, from:string) => Promise<string>,
+    getStatistics: (twoKeyLockup: string, from:string) => Promise<any>,
 }
