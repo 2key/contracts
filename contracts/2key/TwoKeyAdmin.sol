@@ -12,15 +12,14 @@ import "./TwoKeyReg.sol";
 
 //TODO: If this contract will be managed by congress then it can't be destructible, or in that case to be deployed via congress
 contract TwoKeyAdmin is Destructible, IAdminContract {
+	TwoKeyEconomy public twoKeyEconomy;
+	TwoKeyUpgradableExchange public twokeyUpgradableExchange;
+	TwoKeyEventSource public twoKeyEventSource;
+	TwoKeyReg public twoKeyReg;
 
-	TwoKeyEconomy private twoKeyEconomy;
-	TwoKeyUpgradableExchange private twokeyUpgradableExchange;
-	TwoKeyEventSource private twoKeyEventSource;
-	TwoKeyReg private twoKeyReg;
-	address private previousAdmin;
-
-	address private twoKeyCongress;
-	address private newTwoKeyAdminAddress;
+	address public previousAdmin;
+	address public twoKeyCongress;
+	address public newTwoKeyAdminAddress;
 	bool private wasReplaced;
 
 	/*
