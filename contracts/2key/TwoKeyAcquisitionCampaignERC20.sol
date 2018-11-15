@@ -502,14 +502,23 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
         return withdrawApproved;
     }
 
+    /// @notice Function to fetch contractor balance in ETH
+    /// @dev only contractor can call this function, otherwise it will revert
+    /// @return value of contractor balance in ETH WEI
     function getContractorBalance() public onlyContractor view returns (uint) {
         return contractorBalance;
     }
 
+    /// @notice Function to fetch moderator balance in ETH
+    /// @dev only contractor or moderator are eligible to call this function
+    /// @return value of his balance in ETH
     function getModeratorBalance() public onlyContractorOrModerator view returns (uint) {
         return moderatorBalanceETHWei;
     }
 
+    /// @notice Function where contractor can withdraw his funds
+    /// @dev onlyContractor can call this method
+    /// @return true if successful otherwise will 'revert'
     function withdrawContractor() public onlyContractor returns (bool) {
         require(contractorBalance > 0,'You need to have some balance in order to do withdraw');
         require(contractorBalance <= this.balance, 'Contractor balance should be less then contract balance');
