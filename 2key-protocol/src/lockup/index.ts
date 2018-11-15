@@ -156,10 +156,10 @@ export default class Lockup implements ILockup {
                     = await promisify(twoKeyLockupInstance.getInformation,[{from}]);
 
                 let monthlyBonus = bonusTokens/vestingMonths;
-
-                console.log('Total tokens: ' + totalTokensLeft);
+                console.log('Bonus tokens: ' + bonusTokens);
                 console.log('Withdrawn: ' + withdrawn);
                 console.log('Base Tokens: ' + baseTokens);
+                console.log('Total tokens left on the contract: ' + totalTokensLeft);
                 console.log('Vesting months: ' + vestingMonths);
                 console.log('Monthly bonus: '+  monthlyBonus);
 
