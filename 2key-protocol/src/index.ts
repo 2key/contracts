@@ -136,7 +136,7 @@ export class TwoKeyProtocol {
         } else {
             throw new Error('No web3 instance');
         }
-        this.twoKeyUpgradableExchange = this.web3.eth.contract(contractsMeta.TwoKeyUpgradableExchange).at(contractsMeta.TwoKeyEconomy.networks[this.networks.mainNetId].address);
+        this.twoKeyUpgradableExchange = this.web3.eth.contract(contractsMeta.TwoKeyUpgradableExchange.abi).at(contractsMeta.TwoKeyUpgradableExchange.networks[this.networks.mainNetId].address);
         this.twoKeyEconomy = this.web3.eth.contract(contractsMeta.TwoKeyEconomy.abi).at(contractsMeta.TwoKeyEconomy.networks[this.networks.mainNetId].address);
         this.twoKeyReg = this.web3.eth.contract(contractsMeta.TwoKeyReg.abi).at(contractsMeta.TwoKeyReg.networks[this.networks.mainNetId].address);
         this.twoKeyAdmin = this.web3.eth.contract(contractsMeta.TwoKeyAdmin.abi).at(contractsMeta.TwoKeyAdmin.networks[this.networks.mainNetId].address);
@@ -151,6 +151,7 @@ export class TwoKeyProtocol {
             ipfs: this.ipfs,
             networks: this.networks,
             contracts: this.contracts,
+            twoKeyUpgradableExchange: this.twoKeyUpgradableExchange,
             twoKeyEconomy: this.twoKeyEconomy,
             twoKeyReg: this.twoKeyReg,
             twoKeyCongress: this.twoKeyCongress,
