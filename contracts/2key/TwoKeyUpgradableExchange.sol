@@ -29,8 +29,6 @@ contract TwoKeyUpgradableExchange is Crowdsale {
 		Crowdsale(_rate, _wallet, _token) public {
 		require(_twoKeyAdmin != address(0));
     	admin = TwoKeyAdmin(_twoKeyAdmin);
-    	// admin.setTwoKeyExchange(address(this));	
-    	
 	}
 
     /// View function - doesn't cost any gas to be executed
