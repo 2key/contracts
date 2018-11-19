@@ -216,7 +216,7 @@ contract TwoKeyAdmin is Destructible, IAdminContract {
 	}
 
 
-    function transfer2KeyTokens(address _economy, address _to, uint _amount) public onlyTwoKeyUpgradableExchange returns (bool) {
+    function transfer2KeyTokens(address _to, uint _amount) public onlyTwoKeyUpgradableExchange returns (bool) {
 		bool completed = twoKeyEconomy.transfer(_to, _amount);
 		return completed;
 	}
