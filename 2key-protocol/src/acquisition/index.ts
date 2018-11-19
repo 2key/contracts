@@ -1145,4 +1145,29 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         })
     }
 
+    /**
+     *
+     * @param campaign
+     * @param {string} from
+     * @param {number} gasPrice
+     * @returns {Promise<any>}
+     */
+    public moderatorAndReferrerWithdraw(campaign: any, from: string, gasPrice: number = this.base._getGasPrice()) : Promise<any> {
+        return new Promise<any>(async(resolve,reject) => {
+            try {
+                const nonce = await this.helpers._getNonce(from);
+                const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
+                const txHash: string = await promisify(campaignInstance.withdrawModeratorOrReferrer,[
+                    //upgradableExchangeAddress
+                    {
+                        from,
+                        gasPrice,
+                        nonce
+                    }]);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
 }
