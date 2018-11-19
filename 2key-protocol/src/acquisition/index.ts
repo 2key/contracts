@@ -1158,7 +1158,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 const nonce = await this.helpers._getNonce(from);
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
                 const txHash: string = await promisify(campaignInstance.withdrawModeratorOrReferrer,[
-                    //upgradableExchangeAddress
+                    this.base.twoKeyUpgradableExchange,
                     {
                         from,
                         gasPrice,

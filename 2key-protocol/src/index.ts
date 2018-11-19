@@ -57,6 +57,7 @@ export class TwoKeyProtocol {
     public gas: number;
     private networks: IEhtereumNetworks;
     private contracts: IContractsAddresses;
+    private twoKeyUpgradableExchange: any;
     private twoKeyEconomy: any;
     private twoKeyAdmin: any;
     private twoKeyCongress: any;
@@ -135,6 +136,7 @@ export class TwoKeyProtocol {
         } else {
             throw new Error('No web3 instance');
         }
+        this.twoKeyUpgradableExchange = this.web3.eth.contract(contractsMeta.TwoKeyUpgradableExchange).at(contractsMeta.TwoKeyEconomy.networks[this.networks.mainNetId].address);
         this.twoKeyEconomy = this.web3.eth.contract(contractsMeta.TwoKeyEconomy.abi).at(contractsMeta.TwoKeyEconomy.networks[this.networks.mainNetId].address);
         this.twoKeyReg = this.web3.eth.contract(contractsMeta.TwoKeyReg.abi).at(contractsMeta.TwoKeyReg.networks[this.networks.mainNetId].address);
         this.twoKeyAdmin = this.web3.eth.contract(contractsMeta.TwoKeyAdmin.abi).at(contractsMeta.TwoKeyAdmin.networks[this.networks.mainNetId].address);
