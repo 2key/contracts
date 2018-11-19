@@ -1,7 +1,6 @@
 pragma solidity ^0.4.24; 
 
 import '../openzeppelin-solidity/contracts/lifecycle/Destructible.sol';
-import '../openzeppelin-solidity/contracts/ownership/Ownable.sol';
 
 import './TwoKeyEconomy.sol';
 import './TwoKeyUpgradableExchange.sol';
@@ -25,34 +24,43 @@ contract TwoKeyAdmin is Destructible, IAdminContract {
 
 
     /// @notice Modifier will revert if calling address is not owner or previous active admin contract
-	modifier onlyAuthorizedAdmins() {
+	modifier onlyAuthorizedAdmins {
 		require((msg.sender == owner) || (msg.sender == previousAdmin));
 	   _;
 	}
 
-    /// @notice Modifier will revert if calling address is not a member of electorateAdmins 
-	modifier onlyTwoKeyCongress() {
+    /// @notice Modifier will revert if calling address is not a member of electorateAdmins
+	modifier onlyTwoKeyCongress {
 		require(msg.sender == twoKeyCongress);
 	    _;
 	}
 
-    /// @notice Modifier will revert if contract is already replaced 
-	modifier wasNotReplaced() {
+    /// @notice Modifier will revert if contract is already replaced
+	modifier wasNotReplaced {
 		require(!wasReplaced);
 		_;
 	}
 
+    /// @notice Modifier will revert if caller is not TwoKeyUpgradableExchange
+    modifier onlyTwoKeyUpgradableExchange {
+        require(msg.sender == address(twoKeyUpgradableExchange));
+        _;
+    }
+
+
+
     //TODO: Why is constructor payable? Is there any logic behind it?
 	constructor(
-		address _electorateAdmins		
+		address _electorateAdmins
 	) Ownable() Destructible() payable public {
 		require(_electorateAdmins != address(0));
 		wasReplaced = false;
 		twoKeyCongress = _electorateAdmins;
 	}
 
-    
-    /// @notice Function where only elected admin can replace the exisitng admin contract with new admin contract. 
+
+
+    /// @notice Function where only elected admin can replace the exisitng admin contract with new admin contract.
     /// @dev This method is expected to transfer it's current economy to new admin contract
     /// @param _newAdminContract is address of New Admin Contract
 	function replaceOneself(address _newAdminContract) external wasNotReplaced onlyTwoKeyCongress {
@@ -75,7 +83,7 @@ contract TwoKeyAdmin is Destructible, IAdminContract {
 	}
 
     /// @notice Function where only elected admin can transfer tokens to an address
-    /// @dev We're recuring to address different from address 0 and token amount greator than 0
+    /// @dev We're recurring to address different from address 0 and token amount greater than 0
     /// @param _to receiver's address
     /// @param _tokens is token amounts to be transfers
 	function transferByAdmins(address _to, uint256 _tokens) external wasNotReplaced onlyTwoKeyCongress {
@@ -91,16 +99,16 @@ contract TwoKeyAdmin is Destructible, IAdminContract {
 		twoKeyUpgradableExchange.upgrade(newExchange);
 	}
 
-    /// @notice Function where only elected admin can transfer ethers to an address
-    /// @dev We're recuring to address different from address 0 and amount greator than 0
+    /// @notice Function where only elected admin can transfer ether to an address
+    /// @dev We're recurring to address different from address 0 and amount greater than 0
     /// @param to receiver's address
-    /// @param amount of ethers to be transfers
+    /// @param amount of ether to be transferred
 	function transferEtherByAdmins(address to, uint256 amount) external wasNotReplaced onlyTwoKeyCongress {
 		require(to != address(0)  && amount > 0);
 		to.transfer(amount);
 	}
 
-	/// @notice Fallback function will transfer payable value to new admin contract if admin contract is replaced else will be stored this the exisitng admin contract as it's balance
+	/// @notice Fallback function will transfer payable value to new admin contract if admin contract is replaced else will be stored this the exist admin contract as it's balance
 	/// @dev A payable fallback method
 	function() public payable {
 		if (wasReplaced) {
@@ -108,7 +116,7 @@ contract TwoKeyAdmin is Destructible, IAdminContract {
 		}
 	}
 
-    /// @notice Function will transfer contract balance to owner if contract was never replaced else will transfer the funds to the new Admin contract address  
+    /// @notice Function will transfer contract balance to owner if contract was never replaced else will transfer the funds to the new Admin contract address
 	function destroy() public onlyTwoKeyCongress {
 		if (!wasReplaced)
 			selfdestruct(owner);
@@ -119,29 +127,9 @@ contract TwoKeyAdmin is Destructible, IAdminContract {
 	/// @notice Function to add moderator
 	/// @param _address is address of moderator
 	function addMaintainerForRegistry(address _address) public wasNotReplaced onlyTwoKeyCongress {
-		require (_address != address(0));		
+		require (_address != address(0));
 		twoKeyReg.addTwoKeyMaintainer(_address);
 	}
-	
-//	/// @notice Function to remove moderator
-//	/// @param _address is address of moderator
-//	function removeModeratorForReg(address _address) public wasNotReplaced onlyTwoKeyCongress {
-//		require (_address != address(0));
-//		string memory moderator = twoKeyReg.getModeratorRole();
-//		require(twoKeyReg.hasRole(_address, moderator) == true);
-//		twoKeyReg.adminRemoveRole(_address, moderator);
-//	}
-//
-//	/// @notice Method to update moderator
-//	/// @param _moderator is address of current moderator
-//	/// @param _newModerator is address of new moderator
-//	function updateModeratorForReg(address _moderator, address _newModerator) public wasNotReplaced onlyTwoKeyCongress {
-//		require (_moderator != address(0));
-//		require (_newModerator != address(0));
-//		string memory moderator = twoKeyReg.getModeratorRole();
-//		if(twoKeyReg.hasRole(_moderator, moderator))
-//			twoKeyReg.adminUpdateRole(_moderator, _newModerator, moderator);
-//	}
 
     /// @notice Function to whitelist address as an authorized user for twoKeyEventSource contract
 	/// @param _address is address of user
@@ -150,7 +138,7 @@ contract TwoKeyAdmin is Destructible, IAdminContract {
 		twoKeyEventSource.addAuthorizedAddress(_address);
 	}
 
-    /// @notice Function to add twoKeyEventSource contract to twoKeyAdmin 
+    /// @notice Function to add twoKeyEventSource contract to twoKeyAdmin
 	/// @dev We're requiring twoKeyEventSource contract address different from address 0 as it is required to be deployed before calling this method
 	/// @param _twoKeyEventSource is address of twoKeyEventSource contract address
 	function addTwoKeyEventSource(address _twoKeyEventSource) public {
@@ -172,7 +160,7 @@ contract TwoKeyAdmin is Destructible, IAdminContract {
     function addNameToReg(string _name, address _addr, string fullName, string email) public {
     	twoKeyReg.addName(_name, _addr, fullName, email);
     }
-    
+
     /// @notice Function to update twoKeyUpgradableExchange contract address
 	/// @param _exchange is address of new twoKeyUpgradableExchange contract
 	function updateExchange(address _exchange) public  onlyTwoKeyCongress {
@@ -184,7 +172,7 @@ contract TwoKeyAdmin is Destructible, IAdminContract {
 	/// @param _reg is address of new twoKeyRegistry contract
 	function updateRegistry(address _reg) public onlyTwoKeyCongress {
 		require (_reg != address(0));
-		twoKeyReg = TwoKeyReg(_reg);		
+		twoKeyReg = TwoKeyReg(_reg);
 	}
 
     /// @notice Function to update twoKeyEventSource contract address
@@ -194,7 +182,7 @@ contract TwoKeyAdmin is Destructible, IAdminContract {
 		twoKeyEventSource = TwoKeyEventSource(_eventSource);
 	}
 
- 	/// @notice Function to set Singletones contract address 
+ 	/// @notice Function to set Singletones contract address
 	/// @dev We're requiring contract addresses different from address 0 as they are required to be deployed before calling this method
 	/// @param _economy is address of twoKeyEconomy contract address
 	/// @param _exchange is address of twoKeyExchange contract address
@@ -228,10 +216,12 @@ contract TwoKeyAdmin is Destructible, IAdminContract {
 	}
 
 
-    function transfer2KeyTokens(address _economy, address _to, uint _amount) public returns (bool) {
-		bool completed = IERC20(address(_economy)).transfer(_to, _amount);
+    function transfer2KeyTokens(address _to, uint256 _amount) public returns (bool) {
+		bool completed = twoKeyEconomy.transfer(_to, _amount);
 		return completed;
 	}
+
+
 
     /// View function - doesn't cost any gas to be executed
 	/// @notice Function to get Ether Balance of given address 

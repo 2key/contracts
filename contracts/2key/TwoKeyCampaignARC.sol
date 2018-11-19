@@ -10,7 +10,7 @@ contract TwoKeyCampaignARC is StandardToken {
 	using SafeMath for uint256;
 
 	address public contractor;
-    address moderator;
+    address public moderator;
 
 	uint256 totalSupply_ = 1000000;
 

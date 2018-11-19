@@ -41,11 +41,11 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
     uint256 pricePerUnitInETHWei; // There's single price for the unit ERC20 (Should be in WEI)
     uint256 campaignStartTime; // Time when campaign start
     uint256 campaignEndTime; // Time when campaign ends
-    uint256 expiryConversionInHours; // How long convertor can be pending before it will be automatically rejected and funds will be returned to convertor (hours)
+    uint256 expiryConversionInHours; // How long converter can be pending before it will be automatically rejected and funds will be returned to convertor (hours)
     uint256 moderatorFeePercentage; // Fee which moderator gets
     string public publicMetaHash; // Ipfs hash of json campaign object
     string privateMetaHash; // Ipfs hash of json sensitive (contractor) information
-    uint256 public maxReferralRewardPercent; // maxRefferalRewardPercent is actually bonus percentage in ETH
+    uint256 public maxReferralRewardPercent; // maxReferralRewardPercent is actually bonus percentage in ETH
     uint maxConverterBonusPercent; //translates to discount - we can add this to constructor
 
     uint minContributionETH; // Minimal amount of ETH that can be paid by converter to create conversion
@@ -525,5 +525,18 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
         contractor.transfer(contractorBalance);
         contractorBalance = 0;
         return true;
+    }
+
+
+    function withdrawModeratorOrReferrer(address _upgradableExchange) public returns (bool) {
+        if(msg.sender == moderator) {
+            _upgradableExchange.transfer(moderatorBalanceETHWei);
+            moderatorBalanceETHWei = 0;
+        } else if(referrerBalancesETHWei[msg.sender] != 0) {
+            _upgradableExchange.transfer(referrerBalancesETHWei[msg.sender]);
+            referrerBalancesETHWei[msg.sender] = 0;
+        } else {
+            revert();
+        }
     }
 }

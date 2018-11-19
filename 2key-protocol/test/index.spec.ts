@@ -200,7 +200,7 @@ describe('TwoKeyProtocol', () => {
                 if (parseFloat(balance['2KEY'].toString()) <= 20000) {
                     console.log('NO BALANCE at aydnep account');
                     const admin = web3.eth.contract(contractsMeta.TwoKeyAdmin.abi).at(contractsMeta.TwoKeyAdmin.networks[mainNetId].address);
-                    admin.transfer2KeyTokens(twoKeyEconomy, destinationAddress, twoKeyProtocol.Utils.toWei(100000, 'ether'), {from: env.DEPLOYER_ADDRESS}, async (err, res) => {
+                    admin.transfer2KeyTokens(destinationAddress, twoKeyProtocol.Utils.toWei(100000, 'ether'), {from: env.DEPLOYER_ADDRESS}, async (err, res) => {
                         if (err) {
                             reject(err);
                         } else {
@@ -824,7 +824,19 @@ describe('TwoKeyProtocol', () => {
         const moderatorBalance = await twoKeyProtocol.AcquisitionCampaign.getModeratorBalance(campaignAddress,from);
         console.log('Moderator balance: ' + twoKeyProtocol.Utils.fromWei(moderatorBalance));
         const hash = await twoKeyProtocol.AcquisitionCampaign.contractorWithdraw(campaignAddress,from);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(hash);
+    }).timeout(30000);
+
+
+    it('==> should print moderator address', async() => {
+        const moderatorAddress: string = await twoKeyProtocol.AcquisitionCampaign.getModeratorAddress(campaignAddress,from);
+        console.log("Moderator address is: " + moderatorAddress);
+    }).timeout(30000);
+
+    it('==> should moderator withdraw his balances in 2key-tokens', async() => {
+        const txHash = await twoKeyProtocol.AcquisitionCampaign.moderatorAndReferrerWithdraw(campaignAddress,from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        console.log(txHash);
     }).timeout(30000);
 
     it('should print balances before cancelation', async() => {
@@ -886,8 +898,9 @@ describe('TwoKeyProtocol', () => {
         const addresses = await twoKeyProtocol.Congress.getAllMembersForCongress(from);
         // console.log(addresses);
         expect(addresses.length).to.be.equal(4);
-
     });
+
+
 
     it('should print balances', printBalances).timeout(15000);
 

@@ -13,6 +13,7 @@ export interface ITwoKeyBase {
     ipfs: any;
     networks: IEhtereumNetworks;
     contracts: IContractsAddresses;
+    twoKeyUpgradableExchange: any;
     twoKeyEconomy: any;
     twoKeyCall: any;
     twoKeyReg: any;

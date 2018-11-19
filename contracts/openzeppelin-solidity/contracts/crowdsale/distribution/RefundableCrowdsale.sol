@@ -26,7 +26,7 @@ contract RefundableCrowdsale is FinalizableCrowdsale {
    */
   constructor(uint256 _goal) public {
     require(_goal > 0);
-    escrow = new RefundEscrow(wallet);
+    escrow = new RefundEscrow(admin);
     goal = _goal;
   }
 
