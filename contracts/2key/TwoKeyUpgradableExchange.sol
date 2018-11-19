@@ -33,24 +33,6 @@ contract TwoKeyUpgradableExchange is Crowdsale {
     	
 	}
 
-    /// @notice It is a payable function that allows user to sell tokens in exchange of their ethers (in Weis). 
-	/// @dev This method is called only when alive (i.e. not upgraded to newExchange)
-    /// @param _tokenAmount is amount of tokens to sell
-	function sellTokens(uint256 _tokenAmount) public onlyAlive payable {
-		// require(token.allowance(this, msg.sender) >= _tokenAmount);
-		require(token.allowance(msg.sender, this) >= _tokenAmount);
-		require(token.transferFrom(msg.sender, this, _tokenAmount));
-
-		uint256 weiAmount = _getWeiAmount(_tokenAmount);
-		
-		//require(weiAmount >= address(this).balance);
-		require(weiAmount <= address(this).balance);
-	    weiRaised = weiRaised.sub(weiAmount);
-        msg.sender.transfer(weiAmount);
-
-	    emit TokenSell(msg.sender, wallet, weiAmount, _tokenAmount);
-	}
-
     /// View function - doesn't cost any gas to be executed
 	/// @notice Function to fetch value of tokens in Wei. 
     /// @dev It is an internal method
