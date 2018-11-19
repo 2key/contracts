@@ -2,7 +2,6 @@ pragma solidity ^0.4.24;
 
 import '../openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol';
 import '../openzeppelin-solidity/contracts/token/ERC20/ERC20.sol';
-import "./TwoKeyAdmin.sol";
 
 contract TwoKeyUpgradableExchange is Crowdsale {
 
@@ -22,13 +21,10 @@ contract TwoKeyUpgradableExchange is Crowdsale {
 		_;
 	}
 
-	TwoKeyAdmin admin;
 
-
-	constructor(uint256 _rate, address _wallet, ERC20 _token, address _twoKeyAdmin)
-		Crowdsale(_rate, _wallet, _token) public {
+	constructor(uint256 _rate, address _twoKeyAdmin, ERC20 _token)
+		Crowdsale(_rate, _twoKeyAdmin, _token) public {
 		require(_twoKeyAdmin != address(0));
-    	admin = TwoKeyAdmin(_twoKeyAdmin);
 	}
 
     /// View function - doesn't cost any gas to be executed
@@ -51,13 +47,6 @@ contract TwoKeyUpgradableExchange is Crowdsale {
     function() external payable {
 		if (filler != address(0))
 			filler.transfer(msg.value);
-	}
-
-    /// @notice It is a payable function that allows user to buy tokens in exchange of their ethers (in Weis). 
-    /// @dev This method is called only when alive (i.e. not upgraded to newExchange)
-    /// @param _beneficiary is address of user where tokens will be transferred
-	function buyTokens(address _beneficiary) public onlyAlive payable {
-		super.buyTokens(_beneficiary);
 	}
 
 	function getFiller() view public returns(address) {
