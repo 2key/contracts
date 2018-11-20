@@ -44,7 +44,8 @@ const TwoKeyDefaults = {
     ipfsProtocol: 'https',
     mainNetId: 3,
     syncTwoKeyNetId: 17,
-    twoKeySyncUrl: 'https://test.plasma.2key.network/',
+    // twoKeySyncUrl: 'https://test.plasma.2key.network/',
+    twoKeySyncUrl: 'https://rpc.private.test.k8s.2key.net',
     twoKeyMainUrl: 'http://localhost:8585'
 };
 

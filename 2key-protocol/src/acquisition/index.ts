@@ -355,10 +355,12 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     const contractorAddress = await promisify(campaignInstance.contractor, []);
                     const {f_address, f_secret, p_message} = await this.utils.getOffchainDataFromIPFSHash(referralLink);
                     const contractConstants = (await promisify(campaignInstance.getConstantInfo, []));
-                    const decimals = contractConstants[3].toNumber();
-                    this.base._log('Decimals', decimals);
+                    // const decimals = contractConstants[3].toNumber();
+                    // this.base._log('Decimals', decimals);
                     this.base._log('getEstimatedMaximumReferralReward', f_address, contractorAddress);
-                    const maxReferralRewardPercent = new BigNumber(contractConstants[1]).div(10 ** decimals).toNumber();
+                    // const maxReferralRewardPercent = new BigNumber(contractConstants[1]).div(10 ** decimals).toNumber();
+                    const maxReferralRewardPercent = contractConstants[1].toNumber();
+                    this.base._log('maxReferralRewardPercent', maxReferralRewardPercent)
                     if (f_address === contractorAddress) {
                         resolve(maxReferralRewardPercent);
                         return;
@@ -430,16 +432,24 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 const nonce = await this.helpers._getNonce(from);
                 const contractor = await promisify(campaignInstance.contractor, [{from, nonce}]);
                 // this.base._log('SETPUBLICLINK CONTRACTOR', contractor, publicLink);
-                const [mainTxHash, plasmaTxHash] = await Promise.all([
-                    promisify(campaignInstance.setPublicLinkKey, [publicLink, {
-                        from,
-                        gasPrice,
-                    }]),
-                    promisify(this.base.twoKeyPlasmaEvents.setPublicLinkKey, [campaignInstance.address,
+                const mainTxHash = await promisify(campaignInstance.setPublicLinkKey, [publicLink, {
+                    from,
+                    gasPrice,
+                }]);
+                let plasmaTxHash;
+                try {
+                    plasmaTxHash = await promisify(this.base.twoKeyPlasmaEvents.setPublicLinkKey, [campaignInstance.address,
                         contractor, from, publicLink, {from: this.base.plasmaAddress, gasPrice: 0}
-                    ]),
-                ]);
-                await Promise.all([this.utils.getTransactionReceiptMined(mainTxHash), this.utils.getTransactionReceiptMined(plasmaTxHash, {web3: this.base.plasmaWeb3})]);
+                    ]);
+                } catch (plasmaErr) {
+                    this.base._log('Plasma error:', plasmaErr);
+                }
+                const promises = [];
+                promises.push(this.utils.getTransactionReceiptMined(mainTxHash));
+                if (plasmaTxHash) {
+                    promises.push(this.utils.getTransactionReceiptMined(plasmaTxHash, {web3: this.base.plasmaWeb3}))
+                }
+                await Promise.all(promises);
                 if (cut > -1) {
                     await promisify(campaignInstance.setCut, [cut - 1, {from}]);
                 }
@@ -491,17 +501,20 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 const sig = await Sign.sign_plasma2eteherum(this.base.plasmaAddress, from, this.base.web3);
                 this.base._log('Signature', sig);
                 this.base._log(campaignAddress, from, this.base.plasmaAddress, cut);
-                const txHash: string = await promisify(this.base.twoKeyPlasmaEvents.add_plasma2ethereum, [sig, {
-                    from: this.base.plasmaAddress,
-                    gasPrice: 0
-                }]);
-                await this.utils.getTransactionReceiptMined(txHash, {web3: this.base.plasmaWeb3, timeout: 300000});
-                const stored_ethereum_address = await promisify(this.base.twoKeyPlasmaEvents.plasma2ethereum, [this.base.plasmaAddress]);
-                if (stored_ethereum_address !== from) {
-                    reject(stored_ethereum_address + ' != ' + from)
+                let txHash: string;
+                try {
+                    txHash = await promisify(this.base.twoKeyPlasmaEvents.add_plasma2ethereum, [sig, {
+                        from: this.base.plasmaAddress,
+                        gasPrice: 0
+                    }]);
+                    await this.utils.getTransactionReceiptMined(txHash, {web3: this.base.plasmaWeb3, timeout: 300000});
+                    const stored_ethereum_address = await promisify(this.base.twoKeyPlasmaEvents.plasma2ethereum, [this.base.plasmaAddress]);
+                    if (stored_ethereum_address !== from) {
+                        reject(stored_ethereum_address + ' != ' + from)
+                    }
+                } catch (plasmaErr) {
+                    this.base._log('Plasma Error:', plasmaErr);
                 }
-                // }
-                // const {public_address, private_key} = await Sign.generateSignatureKeys(from, this.base.plasmaAddress, campaignAddress, this.base.web3);
 
                 const private_key = this.base.web3.sha3(sig).slice(2, 2 + 32 * 2);
                 const public_address = Sign.privateToPublic(Buffer.from(private_key, 'hex'));
