@@ -74,7 +74,8 @@ module.exports = {
         networkId: 4,
         // https://github.com/LedgerHQ/ledgerjs/issues/200
         path: "44'/60'/0'/0",
-        askConfirm: true,
+        // askConfirm: true,
+        askConfirm: false,
         accountsLength: 1,
         accountsOffset: 0,
       }),
