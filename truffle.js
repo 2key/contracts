@@ -69,6 +69,36 @@ module.exports = {
       gasPrice: 50000000000,
     },
 
+    'public.test.k8s' : {
+      provider: () => LedgerProvider('https://rpc.public.test.k8s.2key.net', {
+        networkId: 4,
+        // https://github.com/LedgerHQ/ledgerjs/issues/200
+        path: "44'/60'/0'/0",
+        askConfirm: true,
+        accountsLength: 1,
+        accountsOffset: 0,
+      }),
+      network_id: 4,
+      gas: 7000000,
+      gasPrice: 50000000000,
+    },
+
+    'private.test.k8s': {
+      // 0x0E0D3E393B47058c3A85e33EFE542B7fBc51BB07
+      // http://ext.geth.private.test.k8s.2key.net:8545/
+      // provider: () => new PrivateKeyProvider('da16b3f97e1f39ac93788d925e17286f20dc737cc208d57ca4d49b128b69eb85', 'http://ext.geth.private.test.k8s.2key.net:8545'),
+      provider: () => new HDWalletProvider(mnemonic, 'https://rpc.private.test.k8s.2key.net'),
+      // host: 'https://ext.geth.private.test.k8s.2key.net',
+      // port: 8545,
+      // network_id: 98052, // Match any network id
+      network_id: 98052,
+      gas: 7000000,
+      gasPrice: 0,
+      // gasPrice: 100000000000,
+      // gasPrice: 2000000000
+    },
+
+
     'rinkeby-test' : {
         provider: () => new HDWalletProvider(mnemonic, 'https://rinkeby.infura.io/v3/904c762bd6984606bf8ae7f30d7cb28c'),
         network_id: 4,
@@ -137,20 +167,6 @@ module.exports = {
       network_id: 17, // Match any network id
       gas: 7000000,
       gasPrice: 0,
-      // gasPrice: 2000000000
-    },
-    'plasma-node': {
-      // 0x0E0D3E393B47058c3A85e33EFE542B7fBc51BB07
-      // http://ext.geth.private.test.k8s.2key.net:8545/
-      // provider: () => new PrivateKeyProvider('da16b3f97e1f39ac93788d925e17286f20dc737cc208d57ca4d49b128b69eb85', 'http://ext.geth.private.test.k8s.2key.net:8545'),
-      provider: () => new HDWalletProvider(mnemonic, 'http://ext.geth.private.test.k8s.2key.net:8545/'),
-      // host: 'https://ext.geth.private.test.k8s.2key.net',
-      // port: 8545,
-      // network_id: 98052, // Match any network id
-      network_id: '*', // Match any network id
-      gas: 7000000,
-      gasPrice: 0,
-      // gasPrice: 100000000000,
       // gasPrice: 2000000000
     },
   }
