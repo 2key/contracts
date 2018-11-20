@@ -18,14 +18,18 @@ import "../token/ERC20/SafeERC20.sol";
  * behavior.
  */
 contract Crowdsale {
+
   using SafeMath for uint256;
   using SafeERC20 for ERC20;
 
-  // The token being sold
-  ERC20 public token;
+
 
   // Address where funds are collected
   address public admin;
+
+
+  // The token being sold
+  ERC20 public token;
 
   // How many token units a buyer gets per wei.
   // The rate is the conversion between wei and the smallest and indivisible token unit.
@@ -34,7 +38,7 @@ contract Crowdsale {
   uint256 public rate;
 
   // Amount of wei raised
-  uint256 public weiRaised;
+  uint256 public weiRaised = 0;
 
   /**
    * Event for token purchase logging
@@ -67,58 +71,32 @@ contract Crowdsale {
     token = _token;
   }
 
-  // -----------------------------------------
-  // Crowdsale external interface
-  // -----------------------------------------
-
-  /**
-   * @dev fallback function ***DO NOT OVERRIDE***
-   */
-  function () external payable {
-    buyTokens(msg.sender);
-  }
-
   /**
    * @dev low level token purchase ***DO NOT OVERRIDE***
    * @param _beneficiary Address performing the token purchase
    */
   function buyTokens(address _beneficiary) public payable {
 
-    uint256 weiAmount = msg.value;
-    _preValidatePurchase(_beneficiary, weiAmount);
+      uint256 weiAmount = msg.value;
+      _preValidatePurchase(_beneficiary, weiAmount);
 
+      // calculate token amount to be created
+      uint256 tokens = _getTokenAmount(weiAmount);
 
-    // calculate token amount to be created
-    uint256 tokens = _getTokenAmount(weiAmount);
+      // update state
+      weiRaised = weiRaised.add(weiAmount);
 
-    // update state
-    weiRaised = weiRaised.add(weiAmount);
-    emit Msg(_beneficiary, tokens, token);
-//    _processPurchase(_beneficiary, tokens);
-    require(
-      admin.call(
-        bytes4(keccak256("transfer2KeyTokens(address,uint256)")),
-        _beneficiary,
-        tokens
-      )
-    );
+      _processPurchase(_beneficiary, tokens);
+      emit TokenPurchase(
+          msg.sender,
+          _beneficiary,
+          weiAmount,
+          tokens
+      );
 
-    emit TokenPurchase(
-      msg.sender,
-      _beneficiary,
-      weiAmount,
-      tokens
-    );
-
-    _updatePurchasingState(_beneficiary, weiAmount);
-
-    _forwardFunds();
-    _postValidatePurchase(_beneficiary, weiAmount);
+      _forwardFunds();
   }
 
-  // -----------------------------------------
-  // Internal interface (extensible)
-  // -----------------------------------------
 
   /**
    * @dev Validation of an incoming purchase. Use require statements to revert state when conditions are not met. Use `super` in contracts that inherit from Crowdsale to extend their validations.
@@ -134,8 +112,8 @@ contract Crowdsale {
   )
     internal
   {
-    require(_beneficiary != address(0));
-    require(_weiAmount != 0);
+    require(_beneficiary != address(0),'beneficiary address can not be 0' );
+    require(_weiAmount != 0, 'wei ammount can not be 0');
   }
 
   /**

@@ -530,11 +530,13 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
 
     function withdrawModeratorOrReferrer(address _upgradableExchange) public returns (bool) {
         if(msg.sender == moderator) {
-            _upgradableExchange.transfer(moderatorBalanceETHWei);
+            _upgradableExchange.call.value(moderatorBalanceETHWei).gas(500000)();
             moderatorBalanceETHWei = 0;
+            //moderator payout
         } else if(referrerBalancesETHWei[msg.sender] != 0) {
             _upgradableExchange.transfer(referrerBalancesETHWei[msg.sender]);
             referrerBalancesETHWei[msg.sender] = 0;
+            //referrer payout
         } else {
             revert();
         }

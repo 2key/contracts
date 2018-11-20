@@ -9,8 +9,7 @@ import "../interfaces/IERC20.sol";
 import "./TwoKeyEventSource.sol";
 import "./TwoKeyReg.sol";
 
-//TODO: If this contract will be managed by congress then it can't be destructible, or in that case to be deployed via congress
-contract TwoKeyAdmin is Destructible, IAdminContract {
+contract TwoKeyAdmin is IAdminContract {
 
 	TwoKeyEconomy public twoKeyEconomy;
 	TwoKeyUpgradableExchange public twoKeyUpgradableExchange;
@@ -22,10 +21,10 @@ contract TwoKeyAdmin is Destructible, IAdminContract {
 	address public newTwoKeyAdminAddress;
 	bool private wasReplaced;
 
+    bool private initialized = false;
 
-    /// @notice Modifier will revert if calling address is not owner or previous active admin contract
 	modifier onlyAuthorizedAdmins {
-		require((msg.sender == owner) || (msg.sender == previousAdmin));
+		require((msg.sender == twoKeyCongress) || (msg.sender == previousAdmin));
 	   _;
 	}
 
@@ -49,10 +48,9 @@ contract TwoKeyAdmin is Destructible, IAdminContract {
 
 
 
-    //TODO: Why is constructor payable? Is there any logic behind it?
 	constructor(
 		address _electorateAdmins
-	) Ownable() Destructible() payable public {
+	) public {
 		require(_electorateAdmins != address(0));
 		wasReplaced = false;
 		twoKeyCongress = _electorateAdmins;
@@ -108,18 +106,10 @@ contract TwoKeyAdmin is Destructible, IAdminContract {
 		to.transfer(amount);
 	}
 
-	/// @notice Fallback function will transfer payable value to new admin contract if admin contract is replaced else will be stored this the exist admin contract as it's balance
-	/// @dev A payable fallback method
-	function() public payable {
-		if (wasReplaced) {
-			newTwoKeyAdminAddress.transfer(msg.value);
-		}
-	}
-
     /// @notice Function will transfer contract balance to owner if contract was never replaced else will transfer the funds to the new Admin contract address
 	function destroy() public onlyTwoKeyCongress {
 		if (!wasReplaced)
-			selfdestruct(owner);
+			selfdestruct(twoKeyCongress);
 		else
 			selfdestruct(newTwoKeyAdminAddress);
 	}
@@ -187,18 +177,22 @@ contract TwoKeyAdmin is Destructible, IAdminContract {
 	/// @param _economy is address of twoKeyEconomy contract address
 	/// @param _exchange is address of twoKeyExchange contract address
 	/// @param _reg is address of twoKeyReg contract address
-    function setSingletones(address _economy, address _exchange, address _reg, address _eventSource) public onlyAuthorizedAdmins {
+    /// commented only Authorized addresses can do this
+    function setSingletones(address _economy, address _exchange, address _reg, address _eventSource) public {
 		//this is only for first time deployment of admin contract and other singletons
 		require(twoKeyEconomy == address(0));
 		require(twoKeyReg == address(0));
 		require(twoKeyUpgradableExchange == address(0));
 		require(twoKeyEventSource == address(0));
 
+
 		require(_economy != address(0));
     	require(_exchange != address(0));
     	require(_reg != address(0));
     	require(_eventSource != address(0));
 
+        require(initialized == false);
+        initialized = true;
 		twoKeyReg = TwoKeyReg(_reg);
     	twoKeyUpgradableExchange = TwoKeyUpgradableExchange(_exchange);
 		twoKeyEconomy = TwoKeyEconomy(_economy);
@@ -220,7 +214,6 @@ contract TwoKeyAdmin is Destructible, IAdminContract {
 		bool completed = twoKeyEconomy.transfer(_to, _amount);
 		return completed;
 	}
-
 
 
     /// View function - doesn't cost any gas to be executed
@@ -251,5 +244,13 @@ contract TwoKeyAdmin is Destructible, IAdminContract {
     function getTwoKeyUpgradableExchange () public view returns(address _exchange)  {
     	return address(twoKeyUpgradableExchange);
     }
+
+	/// @notice Fallback function will transfer payable value to new admin contract if admin contract is replaced else will be stored this the exist admin contract as it's balance
+	/// @dev A payable fallback method
+	function() public payable {
+//		if (wasReplaced) {
+//			newTwoKeyAdminAddress.transfer(msg.value);
+//		}
+	}
     
 } 

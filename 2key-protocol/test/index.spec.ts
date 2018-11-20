@@ -205,6 +205,7 @@ describe('TwoKeyProtocol', () => {
                             reject(err);
                         } else {
                             console.log('Send Tokens', res);
+                            console.log("Admin address: " + contractsMeta.TwoKeyAdmin.networks[mainNetId].address);
                             const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(res);
                             resolve(receipt);
                         }

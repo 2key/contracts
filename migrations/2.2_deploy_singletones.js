@@ -20,7 +20,7 @@ module.exports = function deploy(deployer) {
     '0xb3fa520368f2df7bed4df5185101f303f6c7decc', // 2keyeconomy
   ];
   let votingPowers = [1,2];
-
+//0xb6736cdd635779a74a6bd359864cf2965a9d5113
   deployer.deploy(Call);
   if(deployer.network.startsWith('dev') || deployer.network.startsWith('rinkeby') || deployer.network == 'ropsten') {
     deployer.deploy(TwoKeyCongress, 50, initialCongressMembers, votingPowers)
@@ -29,6 +29,7 @@ module.exports = function deploy(deployer) {
         .then(() => TwoKeyAdmin.deployed())
         .then(async(instance) => {
             adminInstance = instance;
+            console.log("ADMIN ADDRESS: " + TwoKeyAdmin.address);
         })
         .then(() => deployer.deploy(TwoKeyEconomy, TwoKeyAdmin.address))
         .then(() => deployer.deploy(TwoKeyUpgradableExchange, 1, TwoKeyAdmin.address, TwoKeyEconomy.address))
@@ -58,6 +59,17 @@ module.exports = function deploy(deployer) {
                     reject(e);
                 }
             });
+        })
+        .then(async() => {
+            await new Promise(async(resolve,reject) => {
+                try {
+                    let txHash = await adminInstance.transfer2KeyTokens(TwoKeyUpgradableExchange.address, 10000000000000000000);
+                    console.log('... Successfully transfered 2key tokens');
+                    resolve(txHash);
+                } catch (e) {
+                    reject(e);
+                }
+            })
         })
         .then(() => true)
         .catch((err) => {

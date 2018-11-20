@@ -1158,6 +1158,9 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         return new Promise<any>(async(resolve,reject) => {
             try {
                 const nonce = await this.helpers._getNonce(from);
+                console.log('Upgradable exchange address: ' + this.base.twoKeyUpgradableExchange.address);
+                const balance = await this.erc20.getERC20Balance(this.base.twoKeyEconomy.address, this.base.twoKeyUpgradableExchange.address);
+                console.log("Balance of 2keys on upgradable exchange is: " + balance);
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
                 const txHash: string = await promisify(campaignInstance.withdrawModeratorOrReferrer,[
                     this.base.twoKeyUpgradableExchange.address,

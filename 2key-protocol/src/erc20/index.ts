@@ -13,6 +13,11 @@ export default class ERC20 implements IERC20 {
         // this.utils = utils;
     }
 
+    /**
+     *
+     * @param erc20
+     * @returns {Promise<string>}
+     */
     public getERC20Symbol(erc20: any): Promise<string> {
         return new Promise<string>(async (resolve, reject) => {
             try {
@@ -26,6 +31,12 @@ export default class ERC20 implements IERC20 {
     }
 
 
+    /**
+     *
+     * @param erc20
+     * @param {string} address
+     * @returns {Promise<number>}
+     */
     public getERC20Balance(erc20: any, address: string): Promise<number> {
         return new Promise<number>(async(resolve,reject) => {
             try {
@@ -38,6 +49,15 @@ export default class ERC20 implements IERC20 {
         })
     }
 
+    /**
+     *
+     * @param erc20
+     * @param {string} address
+     * @param {string} spenderAddress
+     * @param {number} value
+     * @param {string} from
+     * @returns {Promise<string>}
+     */
     public erc20ApproveAddress(erc20:any, address:string, spenderAddress: string, value:number, from: string): Promise<string> {
         return new Promise(async (resolve,reject) => {
             try {

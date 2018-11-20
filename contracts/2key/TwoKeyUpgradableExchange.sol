@@ -10,7 +10,7 @@ contract TwoKeyUpgradableExchange is Crowdsale {
 	/// @notice Event is emitted when a user sell his tokens
 	event TokenSell(address indexed purchaser, address indexed beneficiary, uint256 value, uint256 amount);
 
-    /// @notice Modifier will revert if filler is set to any address 
+
 	modifier onlyAlive() {
 		require(filler == address(0));
 		_;
@@ -24,11 +24,20 @@ contract TwoKeyUpgradableExchange is Crowdsale {
 
 	constructor(uint256 _rate, address _twoKeyAdmin, ERC20 _token)
 		Crowdsale(_rate, _twoKeyAdmin, _token) public {
-		require(_twoKeyAdmin != address(0));
 	}
 
-    /// View function - doesn't cost any gas to be executed
-	/// @notice Function to fetch value of tokens in Wei. 
+    function () public payable {
+//        require(
+//            address(token).call(
+//                bytes4(keccak256('transfer(address,uint256)')),
+//                msg.sender,
+//                1000
+//            )
+//        );
+        buyTokens(msg.sender);
+    }
+
+	/// @notice Function to fetch value of tokens in Wei.
     /// @dev It is an internal method
     /// @param _tokenAmount is amount of tokens
     /// @return Value of tokens in Wei
@@ -43,13 +52,9 @@ contract TwoKeyUpgradableExchange is Crowdsale {
 		filler = TwoKeyUpgradableExchange(_to);		// check if the address is exchange contract address -- add typecast
 	}
 
-    /// @notice It is a payable fallback method that will transfer payable amount to new Exchange if it is upgraded, else will be stored in the existing exchange as its balance
-    function() external payable {
-		if (filler != address(0))
-			filler.transfer(msg.value);
-	}
 
 	function getFiller() view public returns(address) {
 		return filler;	
 	}
+
 }
