@@ -252,6 +252,11 @@ export default class Helpers implements ITwoKeyHelpers {
             : await this._createAndValidate('ERC20full', erc20);
     }
 
+    async getUpgradableExchangeInstance(upgradableExchange: any) : Promise<any> {
+        return upgradableExchange.address
+            ? upgradableExchange
+            : await this._createAndValidate('TwoKeyUpgradableExchange', upgradableExchange);
+    }
     async _getTwoKeyRegInstance(twoKeyReg: any) : Promise<any> {
         return twoKeyReg.address
             ? twoKeyReg
