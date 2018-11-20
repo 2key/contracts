@@ -149,7 +149,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     /// @param conversionCreatedAt is timestamp when conversion is created
     /// @param conversionAmountETH is the amount of conversion in ETH
     /// @return bytes containing all this data concatenated and encoded into hex
-    function encodeParams(address converter, uint conversionCreatedAt, uint conversionAmountETH) public pure returns(bytes) {
+    function encodeParams(address converter, uint conversionCreatedAt, uint conversionAmountETH) internal pure returns(bytes) {
         return abi.encodePacked(converter, conversionCreatedAt, conversionAmountETH);
     }
 
