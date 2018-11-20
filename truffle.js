@@ -2,6 +2,7 @@
 require('babel-register');
 // https://github.com/trufflesuite/truffle-hdwallet-provider
 const HDWalletProvider = require('truffle-hdwallet-provider');
+const PrivateKeyProvider = require('truffle-privatekey-provider');
 // const HDWalletProvider = require('./WalletProvider');
 const LedgerProvider = require('./LedgerProvider');
 
@@ -14,6 +15,30 @@ const ledgerOptions = {
   networkId: 3, // ropsten testnet
   accountsOffset: 0 // we use the first address
 };
+
+/*
+# Internal
+## Testing:
+Private: geth.private.test.k8s.2key.net:8545, geth.private.test.k8s.2key.net:8546
+Public: geth.public.test.k8s.2key.net:8545, geth.public.test.k8s.2key.net:8546
+
+## Production:
+Private: geth.private.prod.k8s.2key.net:8545, geth.private.prod.k8s.2key.net:8546
+Public: geth.public.prod.k8s.2key.net:8545, geth.public.prod.k8s.2key.net:8546
+
+# External:
+## Testing:
+Private: ext.geth.private.test.k8s.2key.net:8545, ext.geth.private.test.k8s.2key.net:8546
+Private WS SSL: ws-ext.geth.private.test.k8s.2key.net:443
+
+Public: ext.geth.public.test.k8s.2key.net:8545, ext.geth.public.test.k8s.2key.net:8546
+Public WS SSL: ws-ext.geth.public.test.k8s.2key.net:443
+
+## Production:
+Private: ext.geth.private.prod.k8s.2key.net:8545, ext.geth.private.prod.k8s.2key.net:8546
+Public: ext.geth.public.prod.k8s.2key.net:8545, ext.geth.public.prod.k8s.2key.net:8546
+
+*/
 
 module.exports = {
   networks: {
@@ -112,6 +137,20 @@ module.exports = {
       network_id: 17, // Match any network id
       gas: 7000000,
       gasPrice: 0,
+      // gasPrice: 2000000000
+    },
+    'plasma-node': {
+      // 0x0E0D3E393B47058c3A85e33EFE542B7fBc51BB07
+      // http://ext.geth.private.test.k8s.2key.net:8545/
+      // provider: () => new PrivateKeyProvider('da16b3f97e1f39ac93788d925e17286f20dc737cc208d57ca4d49b128b69eb85', 'http://ext.geth.private.test.k8s.2key.net:8545'),
+      provider: () => new HDWalletProvider(mnemonic, 'http://ext.geth.private.test.k8s.2key.net:8545/'),
+      // host: 'https://ext.geth.private.test.k8s.2key.net',
+      // port: 8545,
+      // network_id: 98052, // Match any network id
+      network_id: '*', // Match any network id
+      gas: 7000000,
+      gasPrice: 0,
+      // gasPrice: 100000000000,
       // gasPrice: 2000000000
     },
   }
