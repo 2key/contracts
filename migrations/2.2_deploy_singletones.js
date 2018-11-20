@@ -22,7 +22,7 @@ module.exports = function deploy(deployer) {
   let votingPowers = [1,2];
 //0xb6736cdd635779a74a6bd359864cf2965a9d5113
   deployer.deploy(Call);
-  if(deployer.network.startsWith('dev') || deployer.network.startsWith('rinkeby') || deployer.network == 'ropsten') {
+  if(deployer.network.startsWith('dev') || deployer.network.startsWith('public.') || deployer.network.startsWith('rinkeby') || deployer.network == 'ropsten') {
     deployer.deploy(TwoKeyCongress, 50, initialCongressMembers, votingPowers)
         .then(() => TwoKeyCongress.deployed())
         .then(() => deployer.deploy(TwoKeyAdmin,TwoKeyCongress.address))
@@ -36,7 +36,7 @@ module.exports = function deploy(deployer) {
         .then(() => deployer.deploy(TwoKeyUpgradableExchange, 95, TwoKeyAdmin.address, TwoKeyEconomy.address))
         .then(() => TwoKeyUpgradableExchange.deployed())
         .then(() => deployer.deploy(EventSource, TwoKeyAdmin.address))
-        .then(() => deployer.deploy(TwoKeyReg, EventSource.address, TwoKeyAdmin.address,deployer.network.startsWith('rinkeby') ? '0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f' : '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7'))
+        .then(() => deployer.deploy(TwoKeyReg, EventSource.address, TwoKeyAdmin.address, (deployer.network.startsWith('rinkeby') || deployer.network.startsWith('public.')) ? '0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f' : '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7'))
         .then(() => TwoKeyReg.deployed())
         .then(() => EventSource.deployed().then(async(eventSource) => {
             console.log("... Adding TwoKeyReg to EventSource");

@@ -5,14 +5,14 @@ import contractsMeta from '../src/contracts';
 import createWeb3, { ledgerWeb3 } from './_web3';
 import Sign from '../src/utils/sign';
 
-const rpcUrl = process.env.RINKEBY ? 'wss://rinkeby.infura.io/ws' : 'wss://ropsten.infura.io/ws';
+const rpcUrl = process.env.RINKEBY ? 'https://rpc.public.test.k8s.2key.net' : 'wss://ropsten.infura.io/ws';
 // const rpcUrl = 'wss://ropsten.infura.io/ws';
 const mainNetId = process.env.RINKEBY ? 4 : 3;
 const syncTwoKeyNetId = 17;
 const destinationAddress = '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7';
 console.log(mainNetId);
 
-const twoKeyEconomy = contractsMeta.TwoKeyEconomy.networks[mainNetId].address;
+// const twoKeyEconomy = contractsMeta.TwoKeyEconomy.networks[mainNetId].address;
 
 const network = process.env.RINKEBY ? 'RINKEBY' : 'ROPSTEN';
 const gasPrice = process.env.GASPRICE || 5000000000;
@@ -39,7 +39,7 @@ const sendTokens: any = new Promise(async (resolve, reject) => {
         if (parseFloat(balance['2KEY'].toString()) <= 20000 || process.env.FORCE) {
             console.log('NO BALANCE at aydnep account');
             const admin = web3.eth.contract(contractsMeta.TwoKeyAdmin.abi).at(contractsMeta.TwoKeyAdmin.networks[mainNetId].address);
-            admin.transfer2KeyTokens(twoKeyEconomy, destinationAddress, twoKeyProtocol.Utils.toWei(100000, 'ether'), { from: address, gas: 7000000, gasPrice },  async (err, res) => {
+            admin.transfer2KeyTokens(destinationAddress, twoKeyProtocol.Utils.toWei(100000, 'ether'), { from: address, gas: 7000000, gasPrice },  async (err, res) => {
                 if (err) {
                     reject(err);
                 } else {
