@@ -869,26 +869,26 @@ describe('TwoKeyProtocol', () => {
         }
     }).timeout(30000);
 
-    it('should cancel and return all tokens to acquisition campaign', async () => {
-        const {web3, address} = web3switcher.aydnep();
-        from = address;
-        twoKeyProtocol.setWeb3({
-            web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            plasmaPK: Sign.generatePrivateKey().toString('hex'),
-        });
-
-        const txHash = await twoKeyProtocol.AcquisitionCampaign.cancel(campaignAddress, from);
-        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-        // for (let i = 0; i < addresses.length; i++) {
-        //     let addressCurrent = addresses[i].toString();
-        //     let balance = await twoKeyProtocol.ERC20.getERC20Balance(twoKeyEconomy, addressCurrent);
-        //     console.log("Address: " + addressCurrent + " ----- balance: " + balance);
-        // }
-    }).timeout(30000);
+    // it('should cancel and return all tokens to acquisition campaign', async () => {
+    //     const {web3, address} = web3switcher.aydnep();
+    //     from = address;
+    //     twoKeyProtocol.setWeb3({
+    //         web3,
+    //         networks: {
+    //             mainNetId,
+    //             syncTwoKeyNetId,
+    //         },
+    //         plasmaPK: Sign.generatePrivateKey().toString('hex'),
+    //     });
+    //
+    //     const txHash = await twoKeyProtocol.AcquisitionCampaign.cancel(campaignAddress, from);
+    //     await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+    //     // for (let i = 0; i < addresses.length; i++) {
+    //     //     let addressCurrent = addresses[i].toString();
+    //     //     let balance = await twoKeyProtocol.ERC20.getERC20Balance(twoKeyEconomy, addressCurrent);
+    //     //     console.log("Address: " + addressCurrent + " ----- balance: " + balance);
+    //     // }
+    // }).timeout(30000);
 
     it('should get all whitelisted methods from congress', async () => {
         const methods = await twoKeyProtocol.Congress.getAllowedMethods(from);

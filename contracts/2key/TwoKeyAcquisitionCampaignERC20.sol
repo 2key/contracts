@@ -3,10 +3,12 @@ pragma solidity ^0.4.24;
 import "../openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "./TwoKeyCampaignARC.sol";
 import "./TwoKeyEventSource.sol";
-import "./TwoKeyConversionHandler.sol";
+//import "./TwoKeyConversionHandler.sol";
 import "../interfaces/IERC20.sol";
 import "./TwoKeyTypes.sol";
 import "./Call.sol";
+import "../interfaces/IUpgradableExchange.sol";
+import "../interfaces/ITwoKeyConversionHandler.sol";
 
 
 /// @author Nikola Madjarevic
@@ -18,7 +20,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
     event Rewarded(address indexed to, uint256 amount);
     event Expired(address indexed _contract);
 
-    TwoKeyConversionHandler public conversionHandler;
+    address public conversionHandler;
 
     mapping(address => uint256) referrer2cut; // Mapping representing how much are cuts in percent(0-100) for referrer address
     mapping(address => uint256) internal referrerBalancesETHWei; // balance of EthWei for each influencer that he can withdraw
@@ -93,7 +95,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
         require(_assetContractERC20 != address(0), 'ERC20 contract address can not be 0x0');
         require(_maxReferralRewardPercent > 0, 'Max referral reward percent must be > 0');
         require(_conversionHandler != address(0), 'Address of Conversion Handler can not be 0x0');
-        conversionHandler = TwoKeyConversionHandler(_conversionHandler);
+        conversionHandler = _conversionHandler;
         contractor = msg.sender;
         moderator = _moderator;
         assetContractERC20 = _assetContractERC20;
@@ -107,7 +109,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
         minContributionETH = _minContributionETH;
         maxContributionETH = _maxContributionETH;
         setERC20Attributes();
-        conversionHandler.setTwoKeyAcquisitionCampaignERC20(address(this), _moderator, contractor, _assetContractERC20, symbol);
+        ITwoKeyConversionHandler(conversionHandler).setTwoKeyAcquisitionCampaignERC20(address(this), _moderator, contractor, _assetContractERC20, symbol);
         twoKeyEventSource.created(address(this), contractor);
     }
 
@@ -297,7 +299,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
 
         uint256 contractorProceedsETHWei = conversionAmountETHWei - maxReferralRewardETHWei - moderatorFeeETHWei;
 
-        conversionHandler.supportForCreateConversion(contractor, contractorProceedsETHWei, converterAddress,
+        ITwoKeyConversionHandler(conversionHandler).supportForCreateConversion(contractor, contractorProceedsETHWei, converterAddress,
             conversionAmountETHWei, maxReferralRewardETHWei, moderatorFeeETHWei,
             baseTokensForConverterUnits,bonusTokensForConverterUnits,
             expiryConversionInHours);
@@ -486,17 +488,17 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
         _cancelledConverter.transfer(_conversionAmount);
     }
 
-    function sealAndApprove() public onlyContractor {
-        require(block.timestamp > campaignStartTime && block.timestamp < campaignEndTime, 'Time is not good');
-        require(withdrawApproved = false);
-        withdrawApproved = true;
-    }
-
-    function cancel() public onlyContractor {
-        conversionHandler.cancelAndRejectContract();
-        withdrawApproved = false;
-        canceled = true;
-    }
+//    function sealAndApprove() public onlyContractor {
+//        require(block.timestamp > campaignStartTime && block.timestamp < campaignEndTime, 'Time is not good');
+//        require(withdrawApproved = false);
+//        withdrawApproved = true;
+//    }
+//
+//    function cancel() public onlyContractor {
+//        ITwoKeyConversionHandler(conversionHandler).cancelAndRejectContract();
+//        withdrawApproved = false;
+//        canceled = true;
+//    }
 
     function isWithdrawApproved() public view returns (bool) {
         return withdrawApproved;
@@ -530,11 +532,10 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
 
     function withdrawModeratorOrReferrer(address _upgradableExchange) public returns (bool) {
         if(msg.sender == moderator) {
-            _upgradableExchange.call.value(moderatorBalanceETHWei).gas(500000)();
+            IUpgradableExchange(_upgradableExchange).buyTokens.value(moderatorBalanceETHWei)(msg.sender);
             moderatorBalanceETHWei = 0;
-            //moderator payout
         } else if(referrerBalancesETHWei[msg.sender] != 0) {
-            _upgradableExchange.transfer(referrerBalancesETHWei[msg.sender]);
+            IUpgradableExchange(_upgradableExchange).buyTokens.value(referrerBalancesETHWei[msg.sender])(msg.sender);
             referrerBalancesETHWei[msg.sender] = 0;
             //referrer payout
         } else {

@@ -27,13 +27,6 @@ contract TwoKeyUpgradableExchange is Crowdsale {
 	}
 
     function () public payable {
-//        require(
-//            address(token).call(
-//                bytes4(keccak256('transfer(address,uint256)')),
-//                msg.sender,
-//                1000
-//            )
-//        );
         buyTokens(msg.sender);
     }
 
