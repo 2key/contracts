@@ -76,7 +76,7 @@ module.exports = function deploy(deployer) {
         .catch((err) => {
             console.log('\x1b[31m', 'Error:', err.message, '\x1b[0m');
         });
-  } else if(deployer.network.startsWith('plasma')) {
+  } else if(deployer.network.startsWith('plasma') || deployer.network.startsWith('private')) {
     deployer.link(Call,TwoKeyPlasmaEvents);
     deployer.deploy(TwoKeyPlasmaEvents);
   }
