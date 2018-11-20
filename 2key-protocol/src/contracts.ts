@@ -3,9 +3,9 @@ export default { Call:
       { '4':
          { events: {},
            links: {},
-           address: '0xfd3d7b11a56424940356b1db608d0e19f2096d35',
+           address: '0xb7d08296a7f190d7825376c26378a60230004ebf',
            transactionHash:
-            '0x676b4986922748f0b96866fe1664c85b2a1fb407ff05303886f1e80dd0eac7c1' },
+            '0x860390565b40a23299d6a4df80f7f1fea6a0913de6ac00c89e2baa04b6eacce2' },
         '17':
          { events: {},
            links: {},
@@ -15,9 +15,9 @@ export default { Call:
         '98052':
          { events: {},
            links: {},
-           address: '0x524793585665ee82712b7c8ebda6d85de8cadf52',
+           address: '0xda3856bd6b032518117cb13a49285ef38835a08f',
            transactionHash:
-            '0x9ca6a309b09d2f4c2441e2ad1afe4b45e72f77e3666ea470c24edfdec970effd' } },
+            '0xe414731a3ee1f26364409e07b6aefdba3d8514f39a80c704fef371cb604e3a0e' } },
      abi:
       [ { constant: true,
           inputs:
