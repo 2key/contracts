@@ -32,7 +32,8 @@ module.exports = function deploy(deployer) {
             console.log("ADMIN ADDRESS: " + TwoKeyAdmin.address);
         })
         .then(() => deployer.deploy(TwoKeyEconomy, TwoKeyAdmin.address))
-        .then(() => deployer.deploy(TwoKeyUpgradableExchange, 1, TwoKeyAdmin.address, TwoKeyEconomy.address))
+        //price in mili-cents 0.095$ = 1 token
+        .then(() => deployer.deploy(TwoKeyUpgradableExchange, 95, TwoKeyAdmin.address, TwoKeyEconomy.address))
         .then(() => TwoKeyUpgradableExchange.deployed())
         .then(() => deployer.deploy(EventSource, TwoKeyAdmin.address))
         .then(() => deployer.deploy(TwoKeyReg, EventSource.address, TwoKeyAdmin.address,deployer.network.startsWith('rinkeby') ? '0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f' : '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7'))

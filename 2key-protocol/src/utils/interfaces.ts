@@ -109,6 +109,7 @@ export interface ITwoKeyHelpers {
     _getTwoKeyCongressInstance(congress: any) : Promise<any>,
     _getDecentralizedNationInstance(decentralizedNation: any) : Promise<any>,
     _getLockupContractInstance(twoKeyLockup: any) : Promise<any>,
+    _getUpgradableExchangeInstance(upgradableExchange: any) : Promise<any>,
     _createAndValidate: (contractName: string, address: string) => Promise<any>,
     _checkIPFS: () => Promise<boolean>,
     _getNonce: (from: string) => Promise<number>,
