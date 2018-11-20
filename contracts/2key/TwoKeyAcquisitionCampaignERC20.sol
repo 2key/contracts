@@ -18,7 +18,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
     using Call for *;
 
     event Rewarded(address indexed to, uint256 amount);
-    event Expired(address indexed _contract);
 
     address public conversionHandler;
 
@@ -232,7 +231,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
             } else {
                 require(publicLinkKey[new_address] == key,'public key can not be modified');
             }
-        }
+        }///
 
         for (i = 0; i < cuts.length; i++) {
             new_address = influencers[i];
