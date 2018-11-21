@@ -3,7 +3,9 @@ pragma solidity ^0.4.24;
 import "../../installed_contracts/oraclize-api/contracts/usingOraclize.sol";
 
 
+//SINGLETON
 contract TwoKeyFetchETHPrice is usingOraclize {
+
     string public ETHUSD;
     event LogConstructorInitiated(string nextStep);
     event LogPriceUpdated(string price);

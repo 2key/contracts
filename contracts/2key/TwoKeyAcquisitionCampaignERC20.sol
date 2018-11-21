@@ -56,7 +56,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
     string symbol; // ERC20 selling data
 
 
-    bool withdrawApproved = false; // Until contractor set this to be true, no one can withdraw funds etc.
+    bool public withdrawApproved = false; // Until contractor set this to be true, no one can withdraw funds etc.
     bool canceled = false; // This means if contractor cancel everything
 
 
@@ -305,11 +305,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
 
     }
 
-    function updateModeratorBalanceETHWei(uint _value) public onlyTwoKeyConversionHandler {
-        moderatorBalanceETHWei = moderatorBalanceETHWei.add(_value);
-        moderatorTotalEarningsETHWei = moderatorTotalEarningsETHWei.add(_value);
-    }
-
     function updateRefchainRewards(uint256 _maxReferralRewardETHWei, address _converter) public onlyTwoKeyConversionHandler {
         require(_maxReferralRewardETHWei > 0, 'Max referral reward in ETH must be > 0');
         address converter = _converter;
@@ -465,6 +460,14 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
         twoKeyEventSource.updatedPublicMetaHash(block.timestamp, value);
     }
 
+    /// @notice Option to update moderator balance
+    /// @dev can be called only from TwoKeyConversionHandler contract
+    /// @param _value is the value we'd like to add to total moderator earnings and moderator balance
+    function updateModeratorBalanceETHWei(uint _value) public onlyTwoKeyConversionHandler {
+        moderatorBalanceETHWei = moderatorBalanceETHWei.add(_value);
+        moderatorTotalEarningsETHWei = moderatorTotalEarningsETHWei.add(_value);
+    }
+
     /// @notice Option to update contractor proceeds
     /// @dev can be called only from TwoKeyConversionHandler contract
     /// @param value it the value we'd like to add to total contractor proceeds and contractor balance
@@ -499,9 +502,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
 //        canceled = true;
 //    }
 
-    function isWithdrawApproved() public view returns (bool) {
-        return withdrawApproved;
-    }
 
     /// @notice Function to fetch contractor balance in ETH
     /// @dev only contractor can call this function, otherwise it will revert
@@ -536,7 +536,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
         } else if(referrerBalancesETHWei[msg.sender] != 0) {
             IUpgradableExchange(_upgradableExchange).buyTokens.value(referrerBalancesETHWei[msg.sender])(msg.sender);
             referrerBalancesETHWei[msg.sender] = 0;
-            //referrer payout
         } else {
             revert();
         }
