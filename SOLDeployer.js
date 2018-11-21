@@ -329,7 +329,7 @@ async function main() {
           /* eslint-disable no-await-in-loop */
           await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--network', networks[i]].concat(process.argv.slice(4)));
           /* eslint-enable no-await-in-loop */
-          if(networks[i] === 'public.test.k8s') {
+          if(networks[i] === 'public.test.k8s' || networks[i] === 'public.test.k8s-hdwallet') {
               flag = true;
           }
         }
