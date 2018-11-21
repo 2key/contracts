@@ -10,10 +10,10 @@ import Sign from '../src/utils/sign';
 //  RINKEBY=true yarn run test:one 2key-protocol/test/updateTwoKeyReg.spec.ts "0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7:2key13:Andrii Pindiura:aydnep@aydnep.com.ua"
 
 
-const rpcUrl = process.env.RINKEBY ? 'wss://rinkeby.infura.io/ws' : 'wss://ropsten.infura.io/ws';
+const rpcUrl = process.env.RINKEBY ? 'https://rpc.public.test.k8s.2key.net' : 'wss://ropsten.infura.io/ws';
 // const rpcUrl = 'wss://ropsten.infura.io/ws';
 const mainNetId = process.env.RINKEBY ? 4 : 3;
-const syncTwoKeyNetId = 17;
+const syncTwoKeyNetId = 98052;
 console.log(mainNetId);
 
 const twoKeyEconomy = contractsMeta.TwoKeyEconomy.networks[mainNetId].address;
