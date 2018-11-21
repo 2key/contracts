@@ -19,6 +19,10 @@ contract TwoKeyFetchETHPrice is usingOraclize {
         emit LogPriceUpdated(result);
     }
 
+    function getPriceUint() public view returns (uint) {
+        return parseInt(ETHUSD);
+    }
+
     function updatePrice() payable {
         if (oraclize_getPrice("URL") > this.balance) {
             emit LogNewOraclizeQuery("Oraclize query was NOT sent, please add some ETH to cover for the query fee");
