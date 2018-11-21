@@ -335,7 +335,11 @@ async function main() {
         }
 
         if(flag) {
-            Console.log('Generating new contracts_version.json file...');
+            Console.log('Generating new contracts_version.json for 2key-protocol and config.json file for 2key-backend...');
+            const pythonGenerate = spawn('python', ['./2key-backend/generate_config.py']);
+            pythonGenerate.stdout.on('data', function(data) {
+                console.log(data.toString());
+            });
             versioning.wrapper(4);
         }
         // await runProcess(path.join(_dirname,'generateContractsVersioning.js'), ['--network'], networks[0]);
