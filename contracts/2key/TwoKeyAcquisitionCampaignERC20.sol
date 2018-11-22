@@ -3,9 +3,7 @@ pragma solidity ^0.4.24;
 import "../openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "./TwoKeyCampaignARC.sol";
 import "./TwoKeyEventSource.sol";
-//import "./TwoKeyConversionHandler.sol";
 import "../interfaces/IERC20.sol";
-import "./TwoKeyTypes.sol";
 import "./Call.sol";
 import "../interfaces/IUpgradableExchange.sol";
 import "../interfaces/ITwoKeyConversionHandler.sol";
@@ -13,7 +11,7 @@ import "../interfaces/ITwoKeyConversionHandler.sol";
 
 /// @author Nikola Madjarevic
 /// Contract which will represent campaign for the fungible assets
-contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
+contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
 
     using Call for *;
 
@@ -35,19 +33,18 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
     mapping(address => address) public publicLinkKey; // Public link key can generate only somebody who has ARCs
 
 
-    uint256 public campaignInventoryUnitsBalance; // Balance will represent how many that tokens (erc20) we have on our Campaign
     address assetContractERC20; // Asset contract is address of ERC20 inventory
     uint256 contractorBalance;
     uint256 contractorTotalProceeds;
     uint256 pricePerUnitInETHWei; // There's single price for the unit ERC20 (Should be in WEI)
-    uint256 campaignStartTime; // Time when campaign start
-    uint256 campaignEndTime; // Time when campaign ends
+    uint256 public campaignStartTime; // Time when campaign start
+    uint256 public campaignEndTime; // Time when campaign ends
     uint256 expiryConversionInHours; // How long converter can be pending before it will be automatically rejected and funds will be returned to convertor (hours)
     uint256 moderatorFeePercentage; // Fee which moderator gets
     string public publicMetaHash; // Ipfs hash of json campaign object
     string privateMetaHash; // Ipfs hash of json sensitive (contractor) information
     uint256 public maxReferralRewardPercent; // maxReferralRewardPercent is actually bonus percentage in ETH
-    uint maxConverterBonusPercent; //translates to discount - we can add this to constructor
+    uint public maxConverterBonusPercent; //translates to discount - we can add this to constructor
 
     uint minContributionETH; // Minimal amount of ETH that can be paid by converter to create conversion
     uint maxContributionETH; // Maximal amount of ETH that can be paid by converter to create conversion
@@ -144,7 +141,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
                 _amount
             )
         );
-        campaignInventoryUnitsBalance += _amount;
         return true;
     }
 
@@ -333,20 +329,19 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
     }
 
 
-    /// @notice Move some amount of ERC20 from our campaignInventoryUnitsBalance to someone
+    /// @notice Move some amount of ERC20 from our campaign to someone
     /// @dev internal function
     /// @param _to address we're sending the amount of ERC20
     /// @param _amount is the amount of ERC20's we're going to transfer
     /// @return true if successful, otherwise reverts
     function moveFungibleAsset(address _to, uint256 _amount) public onlyTwoKeyConversionHandler returns (bool) {
-        require(campaignInventoryUnitsBalance >= _amount, 'Campaign inventory should be greater than amount');
+        require(getInventoryBalance() >= _amount, 'Campaign inventory should be greater than amount');
         require(
             assetContractERC20.call(
                 bytes4(keccak256(abi.encodePacked("transfer(address,uint256)"))),
                 _to, _amount
             ), 'Transfer of ERC20 failed'
         );
-        campaignInventoryUnitsBalance = campaignInventoryUnitsBalance - _amount;
         return true;
     }
 
@@ -395,13 +390,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
         return balance;
     }
 
-    /// @notice Function which will check the balance and automatically update the balance in our contract regarding balance response
-    /// @return balance of ERC20 we have in our contract
-    function getAndUpdateInventoryBalance() public returns (uint) {
-        uint balance = getInventoryBalance();
-        campaignInventoryUnitsBalance = balance;
-        return balance;
-    }
 
     /// @notice Function which will calculate the base amount, bonus amount
     /// @param conversionAmountETHWei is amount of eth in conversion
@@ -522,7 +510,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC, TwoKeyTypes {
     /// @return true if successful otherwise will 'revert'
     function withdrawContractor() public onlyContractor returns (bool) {
         require(contractorBalance > 0,'You need to have some balance in order to do withdraw');
-        require(contractorBalance <= this.balance, 'Contractor balance should be less then contract balance');
+        require(contractorBalance <= address(this).balance, 'Contractor balance should be less then contract balance');
         contractor.transfer(contractorBalance);
         contractorBalance = 0;
         return true;
