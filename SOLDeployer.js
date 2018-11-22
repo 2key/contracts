@@ -134,6 +134,7 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
         if(deployment) {
           fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts_deployed.json'), JSON.stringify(json, null, 2));
             console.log('Writing contracts_deployed.json...');
+            console.log('Copying this to 2key-protcol/dist...');
         }
         console.log('Done');
         resolve();
