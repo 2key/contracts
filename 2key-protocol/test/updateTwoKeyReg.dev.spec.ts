@@ -1,4 +1,3 @@
-import {expect} from 'chai';
 import 'mocha';
 import {TwoKeyProtocol} from '../src';
 import contractsMeta from '../src/contracts';
@@ -41,6 +40,7 @@ describe(`TwoKeyProtocol ${network}`, () => {
         });
 
         let initialAddresses = [
+            '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7',
             '0xb3fa520368f2df7bed4df5185101f303f6c7decc',
             '0xffcf8fdee72ac11b5c542428b35eef5769c409f0',
             '0x22d491bde2303f2f43325b2108d26f1eaba1e32b',
@@ -50,10 +50,12 @@ describe(`TwoKeyProtocol ${network}`, () => {
             '0xfc279a3c3fa62b8c840abaa082cd6b4073e699c8',
             '0xc744f2ddbca85a82be8f36c159be548022281c62',
             '0x1b00334784ee0360ddf70dfd3a2c53ccf51e5b96',
-            '0x084d61962273589bf894c7b8794aa8915a06200f'
+            '0x084d61962273589bf894c7b8794aa8915a06200f',
+
         ];
 
         let initialUsernames = [
+            'Aydnep',
             'Nikola',
             'Andrii',
             'Kiki',
@@ -68,6 +70,7 @@ describe(`TwoKeyProtocol ${network}`, () => {
         ];
 
         let initialFullNames = [
+            'aydnep account',
             'Nikola Madjarevic',
             'Andrii Pindiura',
             'Erez Ben Kiki',
@@ -81,6 +84,7 @@ describe(`TwoKeyProtocol ${network}`, () => {
         ];
 
         let initialEmails = [
+            'aydneppp@gmail.com',
             'nikola@2key.co',
             'andrii@2key.co',
             'kiki@2key.co',
@@ -90,7 +94,7 @@ describe(`TwoKeyProtocol ${network}`, () => {
             'aydnep_uport@gmail.com',
             'aydnep+2@gmail.com',
             'aydnep+2@aydnep.com.ua',
-            'test@gmail.com'
+            'test@gmail.com',
         ];
         const l = initialUsernames.length;
         for (let i = 0; i < l; i++) {

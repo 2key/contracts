@@ -7,7 +7,7 @@ import Sign from '../src/utils/sign';
 
 const {env} = process;
 
-// const artifacts = require('../src/contracts.json');
+// const artifacts = require('../src/contracts_deployed.json');
 const rpcUrl = env.RPC_URL;
 const mainNetId = env.MAIN_NET_ID;
 const syncTwoKeyNetId = env.SYNC_NET_ID;

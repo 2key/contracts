@@ -132,8 +132,8 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
         console.log('Writing contracts.ts...');
         fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts.ts'), `export default ${util.inspect(contracts, {depth: 10})}`);
         if(deployment) {
-          fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts.json'), JSON.stringify(json, null, 2));
-            console.log('Writing contracts.json...');
+          fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts_deployed.json'), JSON.stringify(json, null, 2));
+            console.log('Writing contracts_deployed.json...');
         }
         console.log('Done');
         resolve();
@@ -177,7 +177,7 @@ async function deploy() {
     twoKeyProtocolStatus = await twoKeyProtocolLibGit.status();
     const localChanges = contractsStatus.files
       // .filter(item => !(item.path.includes('2key-protocol-npm')
-      .filter(item => !(item.path.includes('dist') || item.path.includes('contracts.ts') || item.path.includes('contracts.json')
+      .filter(item => !(item.path.includes('dist') || item.path.includes('contracts.ts') || item.path.includes('contracts_deployed.json')
         || (process.env.NODE_ENV === 'development' && item.path.includes(process.argv[1].split('/').pop()))));
     if (contractsStatus.behind || localChanges.length) {
       console.log('You have unsynced changes!', localChanges);

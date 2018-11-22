@@ -311,9 +311,6 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     public async checkInventoryBalance(campaign: any, from: string): Promise<number | string | BigNumber> {
         try {
             const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-            const nonce = await this.helpers._getNonce(from);
-            const hash = await promisify(campaignInstance.getAndUpdateInventoryBalance, [{from, nonce}]);
-            await this.utils.getTransactionReceiptMined(hash);
             const balance = await promisify(campaignInstance.getInventoryBalance, [{from}]);
             return Promise.resolve(balance);
         } catch (err) {
