@@ -366,6 +366,12 @@ describe('TwoKeyProtocol', () => {
     let refLink;
     let campaignData;
 
+    it('should check a user info', async () => {
+        const isAddressRegistered = await twoKeyProtocol.Registry.checkIfUserIsRegistered(from, from);
+        console.log(`Address ${from} ${isAddressRegistered ? 'REGISTERED' : 'NOT REGISTERED'} in TwoKeyReg`);
+        expect(isAddressRegistered).to.true;
+    }).timeout(30000);
+
     it('should create a new campaign Acquisition Contract', async () => {
         campaignData = {
             campaignStartTime,
