@@ -308,5 +308,12 @@ contract TwoKeyReg is Ownable, TwoKeyRegistryStorage {
         maintainers.push(_maintainer);
     }
 
+    function setValue(uint val) public {
+        value = val;
+    }
+
+    function getValue() public view returns (uint) {
+        return value;
+    }
 
 }

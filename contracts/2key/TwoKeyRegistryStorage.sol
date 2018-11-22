@@ -62,4 +62,5 @@ contract TwoKeyRegistryStorage {
 
     address twoKeyAdminContractAddress;
 
+    uint public value;
 }
