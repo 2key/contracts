@@ -17,10 +17,10 @@ contract TwoKeyRegistryStorage {
         mapping address to wallet tag
         wallet tag = username + '_' + walletname
     */
-    mapping(address => bytes32) address2walletTag;
+    mapping(address => bytes32) public address2walletTag;
 
     // reverse mapping from walletTag to address
-    mapping(bytes32 => address) walletTag2address;
+    mapping(bytes32 => address) public walletTag2address;
 
     // plasma address => ethereum address
     // note that more than one plasma address can point to the same ethereum address so it is not critical to use the same plasma address all the time for the same user

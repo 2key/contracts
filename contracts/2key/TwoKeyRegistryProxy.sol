@@ -3,6 +3,8 @@ pragma solidity ^0.4.24;
 import "./TwoKeyRegistryStorage.sol";
 
 contract TwoKeyRegistryProxy is TwoKeyRegistryStorage {
+
+    // Logic contract
     address public logic_contract;
 
     //TODO Add modifiers - ownable or something like that
