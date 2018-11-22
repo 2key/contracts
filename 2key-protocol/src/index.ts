@@ -22,7 +22,8 @@ import {
     ITwoKeyHelpers,
     ITwoKeyInit,
     ITwoKeyUtils,
-    ITwoKeyWeightedVoteContract
+    ITwoKeyWeightedVoteContract,
+    ITwoKeyReg,
 } from './interfaces';
 import Index, {promisify} from './utils';
 import Helpers from './utils/helpers';
@@ -32,6 +33,7 @@ import Lockup from './lockup';
 import TwoKeyCongress from "./congress";
 import DecentralizedNation from "./decentralizedNation";
 import TwoKeyWeightedVoteContract from "./veightedVote";
+import TwoKerRegistry from './registry';
 
 // const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 
@@ -75,6 +77,7 @@ export class TwoKeyProtocol {
     public TwoKeyWeightedVoteContract: ITwoKeyWeightedVoteContract;
     public Congress: ITwoKeyCongress;
     public Lockup: ILockup;
+    public Registry: ITwoKeyReg;
     private _log: any;
 
     // private twoKeyReg: any;
@@ -173,6 +176,7 @@ export class TwoKeyProtocol {
         this.DecentralizedNation = new DecentralizedNation(twoKeyBase, this.Helpers, this.Utils, this.TwoKeyWeightedVoteContract, this.AcquisitionCampaign);
         this.Congress = new TwoKeyCongress(twoKeyBase, this.Helpers, this.Utils);
         this.Lockup = new Lockup(twoKeyBase, this.Helpers, this.Utils);
+        this.Registry = new TwoKerRegistry(twoKeyBase, this.Helpers);
     }
 
     public getBalance(address: string, erc20address?: string): Promise<BalanceMeta> {
