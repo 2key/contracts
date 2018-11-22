@@ -19,6 +19,8 @@ const twoKeyProtocolLibDir = path.join(__dirname, '2key-protocol', 'dist');
 
 const deploymentHistoryPath = path.join(__dirname, 'history.json');
 
+let deployment = false;
+
 const contractsGit = simpleGit();
 const twoKeyProtocolLibGit = simpleGit(twoKeyProtocolLibDir);
 const versioning = require('./generateContractsVersioning');
@@ -129,8 +131,10 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
         });
         console.log('Writing contracts.ts...');
         fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts.ts'), `export default ${util.inspect(contracts, {depth: 10})}`);
-        console.log('Writing contracts.json...');
-        fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts.json'), JSON.stringify(json, null, 2));
+        if(deployment) {
+          fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts.json'), JSON.stringify(json, null, 2));
+            console.log('Writing contracts.json...');
+        }
         console.log('Done');
         resolve();
       } catch (err) {
@@ -155,6 +159,7 @@ const runProcess = (app, args) => new Promise((resolve, reject) => {
 
 async function deploy() {
   try {
+    deployment = true;
     await contractsGit.fetch();
     await contractsGit.submoduleUpdate();
     let contractsStatus = await contractsGit.status();
@@ -366,7 +371,6 @@ async function main() {
     case '--ledger':
       ledgerProvider('https://ropsten.infura.io/v3/71d39c30bc984e8a8a0d8adca84620ad', { networkId: 3 });
       break;
-
     default:
       deploy();
   }
