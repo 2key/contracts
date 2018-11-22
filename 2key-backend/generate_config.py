@@ -23,6 +23,5 @@ for contract in os.listdir(directory):
 
 
 
-
 with open('config.json', 'w') as config:
     json.dump(final, config)

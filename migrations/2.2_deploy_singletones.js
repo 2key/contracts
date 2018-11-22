@@ -80,4 +80,4 @@ module.exports = function deploy(deployer) {
     deployer.link(Call,TwoKeyPlasmaEvents);
     deployer.deploy(TwoKeyPlasmaEvents);
   }
-};
+}

@@ -364,7 +364,7 @@ async function main() {
       restoreFromArchive();
       break;
     case '--ledger':
-      ledgerProvider('https://ropsten.infura.io/v3/71d39c30bc984e8a8a0d8adca84620ad', { networkId: 3 })
+      ledgerProvider('https://ropsten.infura.io/v3/71d39c30bc984e8a8a0d8adca84620ad', { networkId: 3 });
       break;
 
     default:

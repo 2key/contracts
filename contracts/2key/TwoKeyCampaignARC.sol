@@ -1,11 +1,10 @@
 pragma solidity ^0.4.24;
 
-import '../openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol';
 import '../openzeppelin-solidity/contracts/math/SafeMath.sol';
-
 import './TwoKeyEventSource.sol';
+import "./ArcERC20.sol";
 
-contract TwoKeyCampaignARC is StandardToken {
+contract TwoKeyCampaignARC is ArcERC20 {
 
 	using SafeMath for uint256;
 
@@ -21,25 +20,25 @@ contract TwoKeyCampaignARC is StandardToken {
 	// referral graph, who did you receive the referral from
 	mapping(address => address) public received_from;
 
-
     // @notice Modifier which allows only contractor to call methods
     modifier onlyContractor() {
         require(msg.sender == contractor);
         _;
     }
+
     // @notice Modifier which allows only moderator to call methods
     modifier onlyModerator() {
         require(msg.sender == moderator);
         _;
     }
+
     // @notice Modifier which allows only contractor or moderator to call methods
     modifier onlyContractorOrModerator() {
         require(msg.sender == contractor || msg.sender == moderator);
         _;
     }
 
-
-    constructor(address _twoKeyEventSource, uint256 _conversionQuota) StandardToken() public {
+    constructor(address _twoKeyEventSource, uint256 _conversionQuota) ArcERC20() public {
 		require(_twoKeyEventSource != address(0));
 		twoKeyEventSource = TwoKeyEventSource(_twoKeyEventSource);
 		conversionQuota = _conversionQuota;
@@ -150,42 +149,6 @@ contract TwoKeyCampaignARC is StandardToken {
 		}
 	}
 
-	// incentive model
-	// no reputation model really
-	// compute the last referral chain, _from is the last influencer before the converter, and _maxReward is the total rewarded
-	// to all influencers
-//	function transferRewardsTwoKeyToken(address _from, uint256 _maxReward) public {
-//
-//		require(_from != address(0));
-//		address _to = msg.sender;
-//
-//		// if you dont have ARCs then first take them (join) from _from
-//		if (this.balanceOf(_to) == 0) {
-//			transferFrom(_from, _to, 1);
-//		}
-//
-//
-//		// compute last referral chain
-//
-//		uint256 influencersCount;
-//		address influencer = msg.sender;
-//		while (true) {
-//			influencer = received_from[influencer];
-//			if (influencer == contractor) {
-//				break;
-//			}
-//			influencersCount++;
-//		}
-//
-//		uint256 rewardPerInfluencer = _maxReward.div(influencersCount);
-//		influencer = msg.sender;
-//		for(uint256 i = 0; i < influencersCount; i++) {
-//			influencer = received_from[influencer];
-//			xbalancesTwoKey[influencer] = xbalancesTwoKey[influencer].add(rewardPerInfluencer);
-//			twoKeyEventSource.rewarded(address(this), influencer, rewardPerInfluencer);
-//		}
-//
-//	}
 
 	function getReferrers(address customer) public view returns (address[]) {
 		// build a list of all influencers from converter back to to contractor
