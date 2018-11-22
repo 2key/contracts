@@ -14,6 +14,7 @@ const readdir = util.promisify(fs.readdir);
 const buildPath = path.join(__dirname, 'build', 'contracts');
 const buildBackupPath = path.join(__dirname, 'build', 'contracts.bak');
 const twoKeyProtocolDir = path.join(__dirname, '2key-protocol', 'src');
+const twoKeyProtocolDist = path.join(__dirname, '2key-protocol', 'dist');
 const buildArchPath = path.join(twoKeyProtocolDir, 'contracts.tar.gz');
 const twoKeyProtocolLibDir = path.join(__dirname, '2key-protocol', 'dist');
 
@@ -134,6 +135,7 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
         if(deployment) {
           fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts_deployed.json'), JSON.stringify(json, null, 2));
             console.log('Writing contracts_deployed.json...');
+            fs.copyFileSync(path.join(twoKeyProtocolDir, 'contracts_deployed.json'),path.join(twoKeyProtocolDist,'contracts_deployed.json'));
             console.log('Copying this to 2key-protcol/dist...');
         }
         console.log('Done');
