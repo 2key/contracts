@@ -186,7 +186,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     progressCallback('TwoKeyAcquisitionCampaignERC20', true, campaignAddress);
                 }
                 console.log('Campaign created', campaignAddress);
-                const campaignPublicLinkKey = await this.join(campaignAddress, from, {gasPrice});
+                const campaignPublicLinkKey = await this.join(campaignAddress, from, {gasPrice, progressCallback});
                 if (progressCallback) {
                     progressCallback('SetPublicLinkKey', true, campaignPublicLinkKey);
                 }
@@ -422,7 +422,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @param {number} gasPrice
      * @returns {Promise<IPublicLinkKey>}
      */
-    public setPublicLinkKey(campaign: any, from: string, publicLink: string, {cut, gasPrice = this.base._getGasPrice()}: IPublicLinkOpts = {}): Promise<IPublicLinkKey> {
+    public setPublicLinkKey(campaign: any, from: string, publicLink: string, {cut, gasPrice = this.base._getGasPrice(), progressCallback}: IPublicLinkOpts = {}): Promise<IPublicLinkKey> {
         return new Promise(async (resolve, reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
@@ -433,11 +433,17 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     from,
                     gasPrice,
                 }]);
+                if (progressCallback) {
+                    progressCallback('setPublicLinkKey', false, mainTxHash);
+                }
                 let plasmaTxHash;
                 try {
                     plasmaTxHash = await promisify(this.base.twoKeyPlasmaEvents.setPublicLinkKey, [campaignInstance.address,
                         contractor, from, publicLink, {from: this.base.plasmaAddress, gasPrice: 0}
                     ]);
+                    if (progressCallback) {
+                        progressCallback('TwoKeyPlasmaEvents.setPublicLinkKey', false, plasmaTxHash);
+                    }    
                 } catch (plasmaErr) {
                     this.base._log('Plasma error:', plasmaErr);
                 }
@@ -447,6 +453,14 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     promises.push(this.utils.getTransactionReceiptMined(plasmaTxHash, {web3: this.base.plasmaWeb3}))
                 }
                 await Promise.all(promises);
+                if (promises.length > 1) {
+                    if (progressCallback) {
+                        progressCallback('TwoKeyPlasmaEvents.setPublicLinkKey', true, plasmaTxHash);
+                    }    
+                }
+                if (progressCallback) {
+                    progressCallback('setPublicLinkKey', true, mainTxHash);
+                }
                 if (cut > -1) {
                     await promisify(campaignInstance.setCut, [cut - 1, {from}]);
                 }
@@ -488,7 +502,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @param {string} daoContract
      * @returns {Promise<string>}
      */
-    public join(campaign: any, from: string, {cut, gasPrice = this.base._getGasPrice(), referralLink, cutSign, voting, daoContract}: IJoinLinkOpts = {}): Promise<string> {
+    public join(campaign: any, from: string, {cut, gasPrice = this.base._getGasPrice(), referralLink, cutSign, voting, daoContract, progressCallback}: IJoinLinkOpts = {}): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
                 const campaignAddress = typeof (campaign) === 'string' ? campaign
@@ -530,7 +544,8 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 } else {
                     const {contractor: campaignContractor} = await this.setPublicLinkKey(campaign, from, `0x${public_address}`, {
                         cut,
-                        gasPrice
+                        gasPrice,
+                        progressCallback,
                     });
                     dao = voting ? daoContract : undefined;
                     contractor = campaignContractor;

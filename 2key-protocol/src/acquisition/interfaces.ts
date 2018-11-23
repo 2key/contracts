@@ -91,6 +91,7 @@ export interface ITwoKeyAcquisitionCampaign {
 export interface IPublicLinkOpts {
     cut?: number,
     gasPrice?: number,
+    progressCallback?: ICreateCampaignProgress,
 }
 
 export interface IJoinLinkOpts extends IPublicLinkOpts{
@@ -98,4 +99,5 @@ export interface IJoinLinkOpts extends IPublicLinkOpts{
     cutSign?: string,
     voting?: boolean,
     daoContract?: string,
+    progressCallback?: ICreateCampaignProgress,
 }
