@@ -117,8 +117,8 @@ const restoreFromArchive = () => new Promise(async (resolve, reject) => {
 const generateSOLInterface = () => new Promise((resolve, reject) => {
   console.log('Generating abi');
   if (fs.existsSync(buildPath)) {
-    const contracts = {};
-    const json = {};
+    let contracts = {};
+    let json = {};
     let hashMap = {};
     let data = {};
     readdir(buildPath).then((files) => {
@@ -170,13 +170,14 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
                     humanHash: rhd.humanizeDigest(hash,8)
                 };
         });
-        console.log(keyHash);
-        contracts['NetworkHashes'] = keyHash;
-        json['NetworkHashes'] = keyHash;
+        let obj = {};
+        obj['NetworkHashes'] = keyHash;
+        contracts = Object.assign(obj, contracts);
         console.log('Writing contracts.ts...');
         fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts.ts'), `export default ${util.inspect(contracts, {depth: 10})}`);
         if(deployment) {
-          fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts_deployed.json'), JSON.stringify(json, null, 2));
+            json = Object.assign(obj,json);
+            fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts_deployed.json'), JSON.stringify(json, null, 2));
             console.log('Writing contracts_deployed.json...');
             fs.copyFileSync(path.join(twoKeyProtocolDir, 'contracts_deployed.json'),path.join(twoKeyProtocolDist,'contracts_deployed.json'));
             console.log('Copying this to 2key-protcol/dist...');
