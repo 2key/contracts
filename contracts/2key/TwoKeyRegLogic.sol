@@ -3,7 +3,7 @@ pragma solidity ^0.4.24;
 import '../openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import "./TwoKeyRegistryStorage.sol";
 
-contract TwoKeyReg is Ownable, TwoKeyRegistryStorage {
+contract TwoKeyRegLogic is Ownable, TwoKeyRegistryStorage {
 
     /// @notice Event is emitted when a user's name is changed
     event UserNameChanged(address owner, string name);
