@@ -3,6 +3,10 @@ const path = require('path');
 const util = require('util');
 const tar = require('tar');
 const rimraf = require('rimraf');
+const sha256 = require('js-sha256');
+const rhd = require('node-humanhash');
+
+
 // const compressor = require('node-minify');
 const simpleGit = require('simple-git/promise');
 const childProcess = require('child_process');
@@ -115,6 +119,8 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
   if (fs.existsSync(buildPath)) {
     const contracts = {};
     const json = {};
+    let hashMap = {};
+    let data = {};
     readdir(buildPath).then((files) => {
       try {
         files.forEach((file) => {
@@ -128,8 +134,45 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
               ? {networks, abi, name: contractName} : {bytecode, abi, name: contractName};
             json[contractName] = whitelist[contractName].singletone
               ? {networks, abi, name: contractName} : {bytecode, abi, name: contractName};
+
+            let networkKeys = Object.keys(networks);
+
+            networkKeys.forEach((key) => {
+                if (Array.isArray(data[key.toString()])) {
+                    data[key.toString()].push({
+                        contract : contractName,
+                        address : networks[key].address});
+                } else {
+                    data[key.toString()] = [{
+                        contract : contractName,
+                        address : networks[key].address}];
+                }
+            });
           }
         });
+        let keyHash = {}
+        let keys = Object.keys(data);
+        keys.forEach((key) => {
+            let arr = data[key];
+            let arrayOfAddresses = [];
+            arr.forEach((element) => {
+                arrayOfAddresses.push(element.address);
+            });
+            let mergedString = [];
+            arrayOfAddresses.forEach((address) => {
+                mergedString = mergedString + address.toString();
+            });
+
+            let hash = sha256(mergedString);
+            keyHash[key] =
+                {
+                    hash: hash,
+                    humanHash: rhd.humanizeDigest(hash,8)
+                };
+        });
+        console.log(keyHash);
+        contracts['NetworkHashes'] = keyHash;
+        json['NetworkHashes'] = keyHash;
         console.log('Writing contracts.ts...');
         fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts.ts'), `export default ${util.inspect(contracts, {depth: 10})}`);
         if(deployment) {
