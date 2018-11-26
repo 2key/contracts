@@ -328,11 +328,24 @@ async function deploy() {
     await contractsGit.commit(commit);
     await twoKeyProtocolLibGit.push('origin', contractsStatus.current);
     await contractsGit.push('origin', contractsStatus.current);
-    if (!local) {
-      await twoKeyProtocolLibGit.addTag(tag);
-      await contractsGit.addTag(tag);
-      await twoKeyProtocolLibGit.pushTags('origin');
-      await contractsGit.pushTags('origin');
+
+      /**
+       * Npm patch & public
+       * Get version of package
+       * put the tag
+       */
+    if(!local) {
+        process.chdir(twoKeyProtocolDist);
+        await runProcess('npm',['version patch']);
+        await runProcess('npm', ['publish']);
+        var json = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+        let npmVersionTag = json.version;
+        console.log(npmVersionTag);
+        process.chdir('../../');
+        // await twoKeyProtocolLibGit.addTag(tag);
+        await contractsGit.addTag(npmVersionTag);
+        // await twoKeyProtocolLibGit.pushTags('origin');
+        await contractsGit.pushTags('origin');
     }
   } catch (e) {
     if (e.output) {

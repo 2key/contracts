@@ -9,7 +9,8 @@ contract TwoKeyEventSource is TwoKeyTypes {
     /// Events
     event Created(
         address indexed _campaign,
-        address indexed _owner
+        address indexed _owner,
+        address indexed _moderator
     );
 
     event Joined(
@@ -18,14 +19,20 @@ contract TwoKeyEventSource is TwoKeyTypes {
         address indexed _to
     );
 
-    event Escrow(
+    event Converted(
         address indexed _campaign,
         address indexed _converter,
-        string indexed assetName,
-        address _childContractID,
-        uint256 _indexOrAmount,
-        CampaignType _type
+        uint256 _amount
     );
+
+//    event Escrow(
+//        address indexed _campaign,
+//        address indexed _converter,
+//        string indexed assetName,
+//        address _childContractID,
+//        uint256 _indexOrAmount,
+//        CampaignType _type
+//    );
 
     event Rewarded(
         address indexed _campaign,
@@ -33,14 +40,14 @@ contract TwoKeyEventSource is TwoKeyTypes {
         uint256 _amount
     );
 
-    event Fulfilled(
-        address indexed _campaign,
-        address indexed _converter,
-        string indexed assetName,
-        address _childContractID,
-        uint256 _indexOrAmount,
-        CampaignType _type
-    );
+//    event Fulfilled(
+//        address indexed _campaign,
+//        address indexed _converter,
+//        string indexed assetName,
+//        address _childContractID,
+//        uint256 _indexOrAmount,
+//        CampaignType _type
+//    );
 
     event Cancelled(
         address indexed _campaign,
@@ -81,7 +88,7 @@ contract TwoKeyEventSource is TwoKeyTypes {
                                     ];
 
     // TwoKeyAdmin twoKeyAdmin;
-    address twoKeyAdmin;
+    address public twoKeyAdmin; //included getter
     /// Interface representing TwoKeyReg contract (Reducing gas usage that's why interface instead of contract instance)
     ITwoKeyReg interfaceTwoKeyReg;
     /// Mapping contract bytecode to boolean if is allowed to emit an event
@@ -89,7 +96,7 @@ contract TwoKeyEventSource is TwoKeyTypes {
     /// Mapping contract bytecode to enumerator CampaignType.
     mapping(bytes => CampaignType) codeToType;
     /// Mapping an address to boolean if allowed to modify
-    mapping(address => bool) authorizedSubadmins;
+    mapping(address => bool) public authorizedSubadmins;
 
     /// @notice Modifier which allows only admin to call a function - can be easily modified if there is going to be more admins
     modifier onlyAdmin {
@@ -105,9 +112,8 @@ contract TwoKeyEventSource is TwoKeyTypes {
 
     /// @notice Modifier which will only allow allowed contracts to emit an event
     modifier onlyAllowedContracts {
-        //just to use contract code instead of msg.sender address
         bytes memory code = GetCode.at(msg.sender);
-        require(canEmit[code] == true);
+        require(canEmit[code] == true,'Contract code is not supported to emit the events');
         _;
     }
 
@@ -192,16 +198,18 @@ contract TwoKeyEventSource is TwoKeyTypes {
     /// @dev Only allowed contracts can call this function ---> means can emit events
     /// This user will be contractor
     /// onlyAllowedContracts commented so Andri can fetch this
-    function created(address _campaign, address _owner) public {
+    function created(address _campaign, address _owner, address _moderator) public {
         bytes memory code = GetCode.at(msg.sender);
         if(isAddressWhitelistedDeployer(_owner)) {
-            interfaceTwoKeyReg.addWhereContractor(_campaign, _owner);
+            interfaceTwoKeyReg.addWhereContractor(_owner, _campaign);
+            interfaceTwoKeyReg.addWhereModerator(_moderator, _campaign);
             canEmit[code] = true;
-            emit Created(_campaign, _owner);
+            emit Created(_campaign, _owner, _moderator);
         } else {
             require(canEmit[code] == true);
-            interfaceTwoKeyReg.addWhereContractor(_campaign, _owner);
-            emit Created(_campaign, _owner);
+            interfaceTwoKeyReg.addWhereContractor(_owner, _campaign);
+            interfaceTwoKeyReg.addWhereModerator(_moderator, _campaign);
+            emit Created(_campaign, _owner, _moderator);
         }
     }
 
@@ -209,31 +217,36 @@ contract TwoKeyEventSource is TwoKeyTypes {
     /// @dev Only allowed contracts can call this function ---> means can emit events
     /// This user will be refferer
     /// onlyAllowedContracts
-    function joined(address _campaign, address _from, address _to) public  {
+    function joined(address _campaign, address _from, address _to) public onlyAllowedContracts {
         interfaceTwoKeyReg.addWhereReferrer(_campaign, _from);
     	emit Joined(_campaign, _from, _to);
+    }
+
+    function converted(address _campaign, address _converter, uint256 _amountETHWei) public onlyAllowedContracts {
+        interfaceTwoKeyReg.addWhereConverter(_converter, _campaign);
+        emit Converted(_campaign, _converter, _amountETHWei);
     }
 
 
     /// @dev Only allowed contracts can call this function ---> means can emit events
     //onlyAllowedContracts
-    function escrow(address _campaign, address _converter, string _assetName, address _childContractID, uint256 _indexOrAmount, CampaignType _type) public {
-    	emit Escrow(_campaign, _converter, _assetName, _childContractID, _indexOrAmount, _type);
-    }
+//    function escrow(address _campaign, address _converter, string _assetName, address _childContractID, uint256 _indexOrAmount, CampaignType _type) public {
+//    	emit Escrow(_campaign, _converter, _assetName, _childContractID, _indexOrAmount, _type);
+//    }
 
 
     /// @dev Only allowed contracts can call this function ---> means can emit events
     // onlyAllowedContracts
-    function rewarded(address _campaign, address _to, uint256 _amount) public  {
+    function rewarded(address _campaign, address _to, uint256 _amount) public onlyAllowedContracts {
     	emit Rewarded(_campaign, _to, _amount);
 	}
 
 
     /// @dev Only allowed contracts can call this function ---> means can emit events
     //onlyAllowedContracts
-	function fulfilled(address  _campaign, address _converter, string _assetName, address _childContractID, uint256 _indexOrAmount, CampaignType _type) public  {
-		emit Fulfilled(_campaign, _converter, _assetName, _childContractID, _indexOrAmount, _type);
-	}
+//	function fulfilled(address  _campaign, address _converter, string _assetName, address _childContractID, uint256 _indexOrAmount, CampaignType _type) public  {
+//		emit Fulfilled(_campaign, _converter, _assetName, _childContractID, _indexOrAmount, _type);
+//	}
 
 
     /// @dev Only allowed contracts can call this function ---> means can emit events
@@ -245,32 +258,21 @@ contract TwoKeyEventSource is TwoKeyTypes {
 
     /// @dev Only allowed contracts can call this function - means can emit events
     ///onlyAllowedContracts
-    function updatedPublicMetaHash(uint timestamp, string value) public  {
+    function updatedPublicMetaHash(uint timestamp, string value) public {
         emit UpdatedPublicMetaHash(timestamp, value);
     }
 
 
     /// @dev Only allowed contracts can call this function - means can emit events
     // onlyAllowedContracts
-    function updatedData(uint timestamp, uint value, string action) public  {
+    function updatedData(uint timestamp, uint value, string action) public onlyAllowedContracts  {
         emit UpdatedData(timestamp, value, action);
     }
 
-
-    /// @dev Only allowed contracts can call this function - means can emit events
-    //onlyAllowedContracts
-    function receivedEther(address _sender, uint _value) public  {
-        emit ReceivedEther(_sender, _value);
-    }
-
-
-    function getAdmin() public view returns (address) {
-        return twoKeyAdmin;
-    }
-
-
-    function checkIsAuthorized(address _subAdmin) public view returns (bool) {
-        return authorizedSubadmins[_subAdmin];
+    // @dev function for testing purposes
+    function isAddressWhitelistedToEmitEvents(address _whitelisted) public view returns (bool) {
+        bytes memory code = GetCode.at(_whitelisted);
+        return canEmit[code];
     }
 
     function isAddressWhitelistedDeployer(address x) public view returns (bool) {
