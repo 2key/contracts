@@ -4,6 +4,7 @@ import '../openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol';
 import '../openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import './ERC20full.sol';
 import './TwoKeyEventSource.sol';
+import './TwoKeyReg.sol';
 import './Call.sol';
 
 /**
@@ -22,7 +23,7 @@ contract TwoKeyContract is StandardToken, Ownable {
 
   using SafeMath for uint256;
   // Public variables of the token
-//  TwoKeyReg registry;  // 2key admin contract that created this
+  TwoKeyReg registry;
   TwoKeyEventSource eventSource;
 
   // address public owner;  // Who created the contract (business) // contained in Ownable.sol
@@ -278,7 +279,7 @@ contract TwoKeyAcquisitionContract is TwoKeyContract
   uint256 public _total_units; // total number of units on offer
 
   // Initialize all the constants
-  constructor(TwoKeyEventSource _eventSource, string _name, string _symbol,
+  constructor(TwoKeyReg _reg, TwoKeyEventSource _eventSource, string _name, string _symbol,
         uint256 _tSupply, uint256 _quota, uint256 _cost, uint256 _bounty,
         uint256 _units, string _ipfs_hash) public {
     require(_bounty <= _cost);
@@ -303,6 +304,9 @@ contract TwoKeyAcquisitionContract is TwoKeyContract
     if (_eventSource != address(0)) {
       eventSource = _eventSource;
       eventSource.created(this, owner);
+    }
+    if (_reg != address(0)) {
+      registry = _reg;
     }
   }
 
@@ -331,7 +335,7 @@ contract TwoKeyPresellContract is TwoKeyContract {
 //  address dc;
 
   // Initialize all the constants
-  constructor(TwoKeyEventSource _eventSource, string _name, string _symbol,
+  constructor(TwoKeyReg _reg, TwoKeyEventSource _eventSource, string _name, string _symbol,
         uint256 _tSupply, uint256 _quota, uint256 _cost, uint256 _bounty,
         string _ipfs_hash, ERC20full _erc20_token_sell_contract) public {
     require(_bounty <= _cost);
@@ -352,6 +356,9 @@ contract TwoKeyPresellContract is TwoKeyContract {
     if (_eventSource != address(0)) {
       eventSource = _eventSource;
       eventSource.created(this, owner);
+    }
+    if (_reg != address(0)) {
+      registry = _reg;
     }
 
     if (_erc20_token_sell_contract != address(0)) {

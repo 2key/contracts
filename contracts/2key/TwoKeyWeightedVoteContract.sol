@@ -4,11 +4,11 @@ import './TwoKeySignedContract.sol';
 import './Call.sol';
 
 contract TwoKeyWeightedVoteContract is TwoKeySignedPresellContract {
-  constructor(TwoKeyEventSource _eventSource, string _name, string _symbol,
+  constructor(TwoKeyReg _reg, TwoKeyEventSource _eventSource, string _name, string _symbol,
     uint256 _tSupply, uint256 _quota, uint256 _cost, uint256 _bounty,
     string _ipfs_hash, ERC20full _erc20_token_sell_contract)
   public
-  TwoKeySignedPresellContract(_eventSource,_name,_symbol,_tSupply,_quota,_cost,_bounty,_ipfs_hash,_erc20_token_sell_contract)
+  TwoKeySignedPresellContract(_reg,_eventSource,_name,_symbol,_tSupply,_quota,_cost,_bounty,_ipfs_hash,_erc20_token_sell_contract)
   {
   }
 

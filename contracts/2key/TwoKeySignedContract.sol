@@ -102,21 +102,21 @@ contract TwoKeySignedContract is TwoKeyContract {
 }
 
 contract TwoKeySignedAcquisitionContract is TwoKeyAcquisitionContract, TwoKeySignedContract {
-  constructor(TwoKeyEventSource _eventSource, string _name, string _symbol,
+  constructor(TwoKeyReg _reg, TwoKeyEventSource _eventSource, string _name, string _symbol,
         uint256 _tSupply, uint256 _quota, uint256 _cost, uint256 _bounty,
         uint256 _units, string _ipfs_hash)
         public
-        TwoKeyAcquisitionContract(_eventSource,_name,_symbol,_tSupply,_quota,_cost,_bounty,_units,_ipfs_hash)
+        TwoKeyAcquisitionContract(_reg,_eventSource,_name,_symbol,_tSupply,_quota,_cost,_bounty,_units,_ipfs_hash)
   {
   }
 }
 
 contract TwoKeySignedPresellContract is TwoKeyPresellContract, TwoKeySignedContract {
-  constructor(TwoKeyEventSource _eventSource, string _name, string _symbol,
+  constructor(TwoKeyReg _reg, TwoKeyEventSource _eventSource, string _name, string _symbol,
         uint256 _tSupply, uint256 _quota, uint256 _cost, uint256 _bounty,
         string _ipfs_hash, ERC20full _erc20_token_sell_contract)
         public
-        TwoKeyPresellContract(_eventSource,_name,_symbol,_tSupply,_quota,_cost,_bounty,_ipfs_hash,_erc20_token_sell_contract)
+        TwoKeyPresellContract(_reg, _eventSource,_name,_symbol,_tSupply,_quota,_cost,_bounty,_ipfs_hash,_erc20_token_sell_contract)
   {
   }
 }
