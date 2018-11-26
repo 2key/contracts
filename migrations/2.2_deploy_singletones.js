@@ -2,7 +2,7 @@ const TwoKeyEconomy = artifacts.require('TwoKeyEconomy');
 const TwoKeyUpgradableExchange = artifacts.require('TwoKeyUpgradableExchange');
 const TwoKeyAdmin = artifacts.require('TwoKeyAdmin');
 const EventSource = artifacts.require('TwoKeyEventSource');
-const TwoKeyReg = artifacts.require('TwoKeyReg');
+const TwoKeyRegLogic = artifacts.require('TwoKeyRegLogic');
 const TwoKeyCongress = artifacts.require('TwoKeyCongress');
 const Call = artifacts.require('Call');
 const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
@@ -36,24 +36,24 @@ module.exports = function deploy(deployer) {
         .then(() => deployer.deploy(TwoKeyUpgradableExchange, 95, TwoKeyAdmin.address, TwoKeyEconomy.address))
         .then(() => TwoKeyUpgradableExchange.deployed())
         .then(() => deployer.deploy(EventSource, TwoKeyAdmin.address))
-        .then(() => deployer.deploy(TwoKeyReg, EventSource.address, TwoKeyAdmin.address, (deployer.network.startsWith('rinkeby') || deployer.network.startsWith('public.')) ? '0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f' : '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7'))
-        .then(() => TwoKeyReg.deployed())
+        .then(() => deployer.deploy(TwoKeyRegLogic, EventSource.address, TwoKeyAdmin.address, (deployer.network.startsWith('rinkeby') || deployer.network.startsWith('public.')) ? '0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f' : '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7'))
+        .then(() => TwoKeyRegLogic.deployed())
         .then(() => EventSource.deployed().then(async(eventSource) => {
-            console.log("... Adding TwoKeyReg to EventSource");
+            console.log("... Adding TwoKeyRegLogic to EventSource");
             await new Promise(async(resolve,reject) => {
                 try {
-                    let txHash = await eventSource.addTwoKeyReg(TwoKeyReg.address).then(() => true);
+                    let txHash = await eventSource.addTwoKeyReg(TwoKeyRegLogic.address).then(() => true);
                     resolve(txHash);
                 } catch (e) {
                     reject(e);
                 }
             });
-            console.log("Added TwoKeyReg: " + TwoKeyReg.address + "  to EventSource : " + EventSource.address + "!")
+            console.log("Added TwoKeyReg: " + TwoKeyRegLogic.address + "  to EventSource : " + EventSource.address + "!")
         }))
         .then(async() => {
             await new Promise(async(resolve,reject) => {
                 try {
-                    let txHash = await adminInstance.setSingletones(TwoKeyEconomy.address, TwoKeyUpgradableExchange.address, TwoKeyReg.address, EventSource.address);
+                    let txHash = await adminInstance.setSingletones(TwoKeyEconomy.address, TwoKeyUpgradableExchange.address, TwoKeyRegLogic.address, EventSource.address);
                     console.log('...Succesfully added singletones');
                     resolve(txHash);
                 } catch (e) {
