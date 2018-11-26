@@ -75,7 +75,9 @@ contract TwoKeyContract is BasicToken, Ownable {
    * @param _to address The address which you want to transfer to
    * @param _value uint256 the amount of tokens to be transferred
    */
-  function transferFrom(address _from, address _to, uint256 _value) internal returns (bool) {
+  // TODO change this function from public to internal if you dont want people to join without a 2key link
+  function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
+    require(_value == 1, 'can only transfer 1 ARC');
     require(_from != address(0), '_from undefined');
     require(_to != address(0), '_to undefined');
     require(received_from[_to] == 0, '_to already has ARCs');
@@ -101,7 +103,7 @@ contract TwoKeyContract is BasicToken, Ownable {
     balances[_to] = balances[_to].add(quota);
     totalSupply_ = totalSupply_.add(quota.sub(1));
 
-    emit Transfer(_from, _to, _value);
+    emit Transfer(_from, _to, 1);
     if (received_from[_to] == 0) {
       // inform the 2key admin contract, once, that an influencer has joined
       if (eventSource != address(0)) {
