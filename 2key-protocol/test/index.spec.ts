@@ -401,6 +401,16 @@ describe('TwoKeyProtocol', () => {
         return expect(addressRegex.test(campaignAddress)).to.be.true;
     }).timeout(1200000);
 
+    it('should check for the moderator and contractor in registry after campaign is created', async() => {
+        console.log(from);
+        const addressesWhereUserIsContractor = await twoKeyProtocol.Registry.getCampaignsWhereUserIsContractor(from);
+        const addressesWhereUserIsModerator = await twoKeyProtocol.Registry.getCampaignsWhereUserIsModerator(from);
+
+        console.log("Contractor: " + addressesWhereUserIsContractor);
+        console.log("Moderator: " + addressesWhereUserIsModerator);
+    }).timeout(30000);
+
+
     it('should save campaign to IPFS', async () => {
         const hash = await twoKeyProtocol.Utils.ipfsAdd(campaignData);
         txHash = await twoKeyProtocol.AcquisitionCampaign.updateOrSetIpfsHashPublicMeta(campaignAddress, hash, from);

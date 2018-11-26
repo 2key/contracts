@@ -1,7 +1,7 @@
 export interface ITwoKeyReg {
     checkIfUserIsRegistered: (address: string, from: string) => Promise<boolean>,
-    getCampaignsWhereUserIsConverter: (from: string) => Promise<string[]>,
-    getCampaignsWhereUserIsContractor: (from: string) => Promise<string[]>,
-    getCampaignsWhereUserIsModerator: (from: string) => Promise<string[]>,
-    getCampaignsWhereUserIsReferrer: (from: string) => Promise<string[]>,
+    getCampaignsWhereUserIsConverter: (address: string) => Promise<string[]>,
+    getCampaignsWhereUserIsContractor: (address: string) => Promise<string[]>,
+    getCampaignsWhereUserIsModerator: (address: string) => Promise<string[]>,
+    getCampaignsWhereUserIsReferrer: (address: string) => Promise<string[]>,
 }

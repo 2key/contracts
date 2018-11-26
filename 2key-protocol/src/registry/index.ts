@@ -35,11 +35,11 @@ export default class TwoKeyReg implements ITwoKeyReg {
      * @param {string} from
      * @returns {Promise<string[]>}
      */
-    public getCampaignsWhereUserIsConverter(from: string): Promise<string[]> {
+    public getCampaignsWhereUserIsConverter(address: string): Promise<string[]> {
         return new Promise<string[]>(async (resolve, reject) => {
             try {
-                const campaigns = await promisify(this.base.twoKeyReg.userToCampaignsWhereConverter, [from,{from}]);
-                console.log('Campaigns where' + from + 'is converter: ', campaigns);
+                const campaigns = await promisify(this.base.twoKeyReg.getContractsWhereUserIsConverter, [address]);
+                console.log('Campaigns where' + address + 'is converter: ', campaigns);
                 resolve(campaigns);
             } catch (e) {
                 reject(e);
@@ -52,11 +52,11 @@ export default class TwoKeyReg implements ITwoKeyReg {
      * @param {string} from
      * @returns {Promise<string[]>}
      */
-    public getCampaignsWhereUserIsContractor(from: string) : Promise<string[]> {
+    public getCampaignsWhereUserIsContractor(address: string) : Promise<string[]> {
         return new Promise<string[]>(async (resolve,reject) => {
             try {
-                const campaigns = await promisify(this.base.twoKeyReg.userToCampaignsWhereContractor,[from,{from}]);
-                console.log('Campaigns where : ' + from + 'is contractor: ' +  campaigns);
+                const campaigns = await promisify(this.base.twoKeyReg.getContractsWhereUserIsContractor,[address]);
+                console.log('Campaigns where : ' + address + 'is contractor: ' +  campaigns);
                 resolve(campaigns);
             } catch (e) {
                 reject(e);
@@ -69,11 +69,11 @@ export default class TwoKeyReg implements ITwoKeyReg {
      * @param {string} from
      * @returns {Promise<string[]>}
      */
-    public getCampaignsWhereUserIsModerator(from: string) : Promise<string[]> {
+    public getCampaignsWhereUserIsModerator(address: string) : Promise<string[]> {
         return new Promise(async (resolve,reject) => {
             try {
-                const campaigns = await promisify(this.base.twoKeyReg.userToCampaignsWhereModerator,[from,{from}]);
-                console.log('Campaigns where : ' + from + 'is moderator: ' + campaigns);
+                const campaigns = await promisify(this.base.twoKeyReg.getContractsWhereUserIsModerator,[address]);
+                console.log('Campaigns where : ' + address + 'is moderator: ' + campaigns);
                 resolve(campaigns);
             } catch (e) {
                 reject(e);
@@ -86,18 +86,15 @@ export default class TwoKeyReg implements ITwoKeyReg {
      * @param {string} from
      * @returns {Promise<string[]>}
      */
-    public getCampaignsWhereUserIsReferrer(from: string) : Promise<string[]> {
+    public getCampaignsWhereUserIsReferrer(address: string) : Promise<string[]> {
         return new Promise(async (resolve,reject) => {
             try {
-                const campaigns = await promisify(this.base.twoKeyReg.userToCampaignsWhereReferrer,[from,{from}]);
-                console.log('Campaigns where: '+ from + 'is referrer: ' + campaigns);
+                const campaigns = await promisify(this.base.twoKeyReg.getContractsWhereUserIsReferrer,[address]);
+                console.log('Campaigns where: '+ address + 'is referrer: ' + campaigns);
                 resolve(campaigns);
             } catch (e) {
                 reject(e);
             }
         })
     }
-
-
-
 }
