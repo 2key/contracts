@@ -58,7 +58,7 @@ contract TwoKeyRegistryStorage {
 
     /// Address for contract maintainer
     /// Should be the array of addresses - will have permission on some of the mappings to update
-    address[] maintainers;
+    address[] public maintainers;
 
     address twoKeyAdminContractAddress;
 

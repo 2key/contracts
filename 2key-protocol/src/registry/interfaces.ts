@@ -4,4 +4,6 @@ export interface ITwoKeyReg {
     getCampaignsWhereUserIsContractor: (address: string) => Promise<string[]>,
     getCampaignsWhereUserIsModerator: (address: string) => Promise<string[]>,
     getCampaignsWhereUserIsReferrer: (address: string) => Promise<string[]>,
+    getRegistryMaintainers: () => Promise<string[]>,
+
 }
