@@ -35,16 +35,67 @@ export default class TwoKeyReg implements ITwoKeyReg {
      * @param {string} from
      * @returns {Promise<string[]>}
      */
-    public getCampaignsWhereConverter(from: string): Promise<string[]> {
+    public getCampaignsWhereUserIsConverter(from: string): Promise<string[]> {
         return new Promise<string[]>(async (resolve, reject) => {
             try {
-                const campaigns = await promisify(this.base.twoKeyReg.getContractsWhereUserIsConverter, [from]);
-                console.log('Converter campaigns: ', campaigns);
+                const campaigns = await promisify(this.base.twoKeyReg.userToCampaignsWhereConverter, [from,{from}]);
+                console.log('Campaigns where' + from + 'is converter: ', campaigns);
                 resolve(campaigns);
             } catch (e) {
                 reject(e);
             }
         });
+    }
+
+    /**
+     *
+     * @param {string} from
+     * @returns {Promise<string[]>}
+     */
+    public getCampaignsWhereUserIsContractor(from: string) : Promise<string[]> {
+        return new Promise<string[]>(async (resolve,reject) => {
+            try {
+                const campaigns = await promisify(this.base.twoKeyReg.userToCampaignsWhereContractor,[from,{from}]);
+                console.log('Campaigns where : ' + from + 'is contractor: ' +  campaigns);
+                resolve(campaigns);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+    /**
+     *
+     * @param {string} from
+     * @returns {Promise<string[]>}
+     */
+    public getCampaignsWhereUserIsModerator(from: string) : Promise<string[]> {
+        return new Promise(async (resolve,reject) => {
+            try {
+                const campaigns = await promisify(this.base.twoKeyReg.userToCampaignsWhereModerator,[from,{from}]);
+                console.log('Campaigns where : ' + from + 'is moderator: ' + campaigns);
+                resolve(campaigns);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+    /**
+     *
+     * @param {string} from
+     * @returns {Promise<string[]>}
+     */
+    public getCampaignsWhereUserIsReferrer(from: string) : Promise<string[]> {
+        return new Promise(async (resolve,reject) => {
+            try {
+                const campaigns = await promisify(this.base.twoKeyReg.userToCampaignsWhereReferrer,[from,{from}]);
+                console.log('Campaigns where: '+ from + 'is referrer: ' + campaigns);
+                resolve(campaigns);
+            } catch (e) {
+                reject(e);
+            }
+        })
     }
 
 
