@@ -343,7 +343,7 @@ async function deploy() {
         console.log(npmVersionTag);
         process.chdir('../../');
         // await twoKeyProtocolLibGit.addTag(tag);
-        await contractsGit.addTag(npmVersionTag);
+        await contractsGit.addTag('v'+npmVersionTag.toString());
         await twoKeyProtocolLibGit.pushTags('origin');
         await contractsGit.pushTags('origin');
     }
