@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24; //We have to specify what version of compiler this code will use
 
-import '../openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol';
+import "../openzeppelin-solidity/contracts/token/ERC20/BasicToken.sol";
 import '../openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import './ERC20full.sol';
 import './TwoKeyEventSource.sol';
@@ -14,7 +14,7 @@ import './Call.sol';
  * @dev https://github.com/ethereum/EIPs/issues/20
  * @dev Based on code by FirstBlood: https://github.com/Firstbloodio/token/blob/master/smart_contract/FirstBloodToken.sol
  */
-contract TwoKeyContract is StandardToken, Ownable {
+contract TwoKeyContract is BasicToken, Ownable {
   event Fulfilled(address indexed to, uint256 units);
   event Rewarded(address indexed to, uint256 amount);
   event Log1(string s, uint256 units);
@@ -68,24 +68,6 @@ contract TwoKeyContract is StandardToken, Ownable {
     }
     influencer2cut[msg.sender] = cut;
   }
-  // Modified 2Key method
-
-  /**
-  * @dev transfer token for a specified address
-  * @param _to The address to transfer to.
-  * @param _value The amount to be transferred.
-  */
-  function transferQuota(address _to, uint256 _value) public returns (bool) {
-    require(_to != address(0));
-    require(_value <= balances[msg.sender]);
-
-    // SafeMath.sub will throw if there is not enough balance.
-    balances[msg.sender] = balances[msg.sender].sub(_value);
-    balances[_to] = balances[_to].add(_value * quota);
-    totalSupply_ = totalSupply_ + _value * (quota - 1);
-    emit Transfer(msg.sender, _to, _value);
-    return true;
-  }
 
   /**
    * @dev Transfer tokens from one address to another
@@ -93,44 +75,41 @@ contract TwoKeyContract is StandardToken, Ownable {
    * @param _to address The address which you want to transfer to
    * @param _value uint256 the amount of tokens to be transferred
    */
-  function transferFromQuota(address _from, address _to, uint256 _value) public returns (bool) {
-    require(_to != address(0), '_to already has ARCs');
-    require(_value <= balances[_from], '_from does not have enough ARCs');
-    require(_value <= allowed[_from][msg.sender], 'sender not allowed');
-
-    balances[_from] = balances[_from].sub(_value);
-//    uint256 v = _value.mul(quota);
-//    uint256 w = balanceOf(_to);
-//    uint256 x = w.add(v);
-    balances[_to] = balances[_to].add(_value.mul(quota));
-    totalSupply_ = totalSupply_.add(_value.mul(quota.sub(1)));
-    allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
-    emit Transfer(_from, _to, _value);
-    return true;
-  }
-
-  /**
-   * @dev Transfer tokens from one address to another
-   * @param _from address The address which you want to send tokens from
-   * @param _to address The address which you want to transfer to
-   * @param _value uint256 the amount of tokens to be transferred
-   */
-  function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
+  function transferFrom(address _from, address _to, uint256 _value) internal returns (bool) {
+    require(_from != address(0), '_from undefined');
+    require(_to != address(0), '_to undefined');
     require(received_from[_to] == 0, '_to already has ARCs');
-    require(_from != address(0), '_from does not have ARCs');
-    allowed[_from][msg.sender] = 1;
-    if (transferFromQuota(_from, _to, _value)) {
-      if (received_from[_to] == 0) {
-        // inform the 2key admin contract, once, that an influencer has joined
-        if (eventSource != address(0)) {
-          eventSource.joined(this, _from, _to);
+    if (registry != address(0)) {
+      address plasma_to = registry.ethereum2plasma(_to);
+      require(received_from[plasma_to] == 0, 'plasma _to already has ARCs');
+      address eth_to = registry.plasma2ethereum(_to);
+      require(received_from[eth_to] == 0, 'eth _to already has ARCs');
+
+      if (balances[_from] == 0) {
+        address plasma_from = registry.ethereum2plasma(_from);
+        if (balances[plasma_from] > 0) {
+          _from = plasma_from;
+        } else {
+          address eth_from = registry.plasma2ethereum(_from);
+          require(balances[eth_from] > 0,'_from does not have arcs');
+          _from = eth_from;
         }
       }
-      received_from[_to] = _from;
-      return true;
-    } else {
-      return false;
     }
+
+    balances[_from] = balances[_from].sub(1);
+    balances[_to] = balances[_to].add(quota);
+    totalSupply_ = totalSupply_.add(quota.sub(1));
+
+    emit Transfer(_from, _to, _value);
+    if (received_from[_to] == 0) {
+      // inform the 2key admin contract, once, that an influencer has joined
+      if (eventSource != address(0)) {
+        eventSource.joined(this, _from, _to);
+      }
+    }
+    received_from[_to] = _from;
+    return true;
   }
 
   /**
@@ -139,19 +118,8 @@ contract TwoKeyContract is StandardToken, Ownable {
   * @param _value The amount to be transferred.
   */
   function transfer(address _to, uint256 _value) public returns (bool) {
-    require(received_from[_to] == 0);
-    if (transferQuota(_to, _value)) {
-      if (received_from[_to] == 0) {
-        // inform the 2key admin contract, once, that an influencer has joined
-        if (eventSource != address(0)) {
-          eventSource.joined(this, msg.sender, _to);
-        }
-      }
-      received_from[_to] = msg.sender;
-      return true;
-    } else {
-      return false;
-    }
+    require(false, 'not implemented');
+    return false;
   }
 
   // New 2Key method
@@ -183,13 +151,40 @@ contract TwoKeyContract is StandardToken, Ownable {
 
   function redeem() public {
     address influencer = msg.sender;
-    uint256 b = xbalances[influencer];
-    require(b > 0);
-    if (b > address(this).balance) {
-      b = address(this).balance;
+    uint256 b0 = xbalances[influencer];
+
+    uint256 b1 = 0;
+    if (registry != address(0)) {
+      address influencer_plasma = registry.ethereum2plasma(influencer);
+      if (influencer_plasma != address(0)) {
+        b1 = xbalances[influencer_plasma];
+      }
     }
-    xbalances[influencer] = xbalances[influencer].sub(b);
-    if(!influencer.send(b)){
+
+    uint256 b = b0.add(b1);
+    if (b == 0) {
+      return;
+    }
+
+    uint256 bmax = address(this).balance;
+    if (bmax == 0) {
+      return;
+    }
+    if (b0 > bmax) {
+      b0 = bmax;
+      b1 = 0;
+      b = bmax;
+    } else if (b > bmax) {
+      b1 = bmax.sub(b0);
+      b = bmax;
+    }
+
+    xbalances[influencer] = xbalances[influencer].sub(b0);
+    if (b1 > 0) {
+      xbalances[influencer_plasma] = xbalances[influencer_plasma].sub(b1);
+    }
+
+    if(!influencer.send(b)) {
        revert();
     }
   }
