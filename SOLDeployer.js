@@ -336,8 +336,8 @@ async function deploy() {
        */
     if(!local) {
         process.chdir(twoKeyProtocolDist);
-        await runProcess('npm version patch');
-        await runProcess('npm publish');
+        await runProcess('npm',['version', 'patch']);
+        await runProcess('npm',['publish']);
         var json = JSON.parse(fs.readFileSync('package.json', 'utf8'));
         let npmVersionTag = json.version;
         console.log(npmVersionTag);
