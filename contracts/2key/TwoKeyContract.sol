@@ -301,7 +301,7 @@ contract TwoKeyAcquisitionContract is TwoKeyContract
 
     if (_eventSource != address(0)) {
       eventSource = _eventSource;
-      eventSource.created(this, owner);
+//      eventSource.created(this, owner);
     }
   }
 
@@ -381,7 +381,7 @@ contract TwoKeyPresellContract is TwoKeyContract {
     received_from[owner] = owner;  // allow owner to buy from himself
     if (_eventSource != address(0)) {
       eventSource = TwoKeyEventSource(_eventSource);
-      eventSource.created(this, owner);
+//      eventSource.created(this, owner);
     }
 
     if (_erc20_token_sell_contract != address(0)) {
