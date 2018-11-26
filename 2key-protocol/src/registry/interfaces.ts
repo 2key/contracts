@@ -5,4 +5,5 @@ export interface ITwoKeyReg {
     getCampaignsWhereUserIsModerator: (address: string) => Promise<string[]>,
     getCampaignsWhereUserIsReferrer: (address: string) => Promise<string[]>,
     getRegistryMaintainers: () => Promise<string[]>,
+    setWalletName: (username: string, address: string, username_walletName: string, from: string, gasPrice?: number) => Promise<string>,
 }

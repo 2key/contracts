@@ -114,4 +114,37 @@ export default class TwoKeyReg implements ITwoKeyReg {
             }
         })
     }
+
+    /**
+     *
+     * @param {string} username
+     * @param {string} address
+     * @param {string} username_walletName
+     * @param {string} from
+     * @param {number} gasPrice
+     * @returns {Promise<string>}
+     */
+    public setWalletName(username: string, address: string, username_walletName: string, from: string, gasPrice: number = this.base._getGasPrice()) : Promise<string> {
+        return new Promise<string>(async(resolve,reject) => {
+            try {
+                const nonce = await this.helpers._getNonce(from);
+                const txHash = await promisify(this.base.twoKeyReg.setWalletName,
+                    [
+                        username,
+                        address,
+                        username_walletName,
+                        {
+                            from,
+                            gasPrice,
+                            nonce
+                        }
+                    ]);
+                resolve(txHash);
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
+
+
 }
