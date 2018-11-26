@@ -6,6 +6,8 @@ import "./GetCode.sol";
 
 contract TwoKeyEventSource is TwoKeyTypes {
 
+    mapping(address => bool) public activeUser;
+
     /// Events
     event Created(address indexed _campaign, address indexed _owner);
     event Joined(address indexed _campaign, address indexed _from, address indexed _to);
@@ -137,6 +139,7 @@ contract TwoKeyEventSource is TwoKeyTypes {
     /// @dev Only allowed contracts can call this function ---> means can emit events
     // TODO use msg.sender instead of _campaign
     function joined(address _campaign, address _from, address _to) public onlyAllowedContracts {
+      activeUser[_to] = true;  // do we want to do it also for _from and created, escrow, rewarded, fulfilled
     	emit Joined(_campaign, _from, _to);
     }
 
