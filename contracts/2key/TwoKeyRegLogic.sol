@@ -193,7 +193,7 @@ contract TwoKeyRegLogic is Ownable, TwoKeyRegistryStorage {
     /// @param username is the username of the user we want to update map for
     /// @param _address is the address of the user we want to update map for
     /// @param _username_walletName is the concatenated username + '_' + walletName, since sending from trusted provider no need to validate
-    function addWalletName(string memory username, address _address, string memory _username_walletName) public onlyTwoKeyMaintainer {
+    function setWalletName(string memory username, address _address, string memory _username_walletName) public onlyTwoKeyMaintainer {
         require(_address != address(0));
         require(username2currentAddress[keccak256(abi.encodePacked(username))] == _address); // validating that username exists
 
