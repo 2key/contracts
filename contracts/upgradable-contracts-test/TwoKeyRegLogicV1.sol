@@ -62,6 +62,8 @@ contract TwoKeyRegLogicV1 is Upgradeable {
 
     uint public value;
 
+    uint public value2;
+
     /// @notice Event is emitted when a user's name is changed
     event UserNameChanged(address owner, string name);
 
@@ -90,13 +92,21 @@ contract TwoKeyRegLogicV1 is Upgradeable {
         _;
     }
 
-    constructor (address _twoKeyEventSource, address _twoKeyAdmin, address _maintainer) public {
-        require(_twoKeyEventSource != address(0));
-        require(_twoKeyAdmin != address(0));
+    function setInitialParams(address _twoKeyEventSource, address _twoKeyAdmin, address _maintainer) public {
+        require(twoKeyEventSource == address(0));
+        require(twoKeyAdminContractAddress == address(0));
         twoKeyEventSource = _twoKeyEventSource;
         twoKeyAdminContractAddress = _twoKeyAdmin;
         maintainers.push(_maintainer);
     }
+
+//    constructor (address _twoKeyEventSource, address _twoKeyAdmin, address _maintainer) public {
+//        require(_twoKeyEventSource != address(0));
+//        require(_twoKeyAdmin != address(0));
+//        twoKeyEventSource = _twoKeyEventSource;
+//        twoKeyAdminContractAddress = _twoKeyAdmin;
+//        maintainers.push(_maintainer);
+//    }
 
 
     /// @notice Function to check if maintainer exists
@@ -372,4 +382,13 @@ contract TwoKeyRegLogicV1 is Upgradeable {
     function getValue() public view returns (uint) {
         return value;
     }
+
+    function setValue2(uint val) public {
+        value2 = value + val;
+    }
+
+    function getValue2() public view returns(uint) {
+        return value2;
+    }
+
 }
