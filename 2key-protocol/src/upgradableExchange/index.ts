@@ -66,6 +66,7 @@ export default class UpgradableExchange implements IUpgradableExchange {
         })
     }
 
+
     /**
      *
      * @param {string} from
@@ -76,6 +77,23 @@ export default class UpgradableExchange implements IUpgradableExchange {
             try {
                 const weiRaised = await promisify(this.base.twoKeyUpgradableExchange.weiRaised, [{from}]);
                 resolve(weiRaised);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+
+    /**
+     *
+     * @param {string} from
+     * @returns {Promise<number>}
+     */
+    public getTransactionCount(from: string) : Promise<number> {
+        return new Promise<number>(async(resolve,reject) => {
+            try {
+                const transactionCount = await promisify(this.base.twoKeyUpgradableExchange.transactionCounter,[{from}]);
+                resolve(transactionCount);
             } catch (e) {
                 reject(e);
             }

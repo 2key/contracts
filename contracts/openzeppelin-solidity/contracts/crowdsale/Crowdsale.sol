@@ -37,6 +37,8 @@ contract Crowdsale {
   // 1 wei will give you 1 unit, or 0.001 TOK.
   uint256 public rate;
 
+  uint256 public transactionCounter = 0;
+
   // Amount of wei raised
   uint256 public weiRaised = 0;
 
@@ -85,7 +87,7 @@ contract Crowdsale {
 
     // update state
     weiRaised = weiRaised.add(weiAmount);
-
+    transactionCounter++;
     _processPurchase(_beneficiary, tokens);
     emit TokenPurchase(
         msg.sender,

@@ -3,5 +3,5 @@ export interface IUpgradableExchange {
     getERC20Token: (from: string) => Promise<string>,
     getAdmin: (from: string) => Promise<string>,
     getWeiRaised: (from: string) => Promise<number>,
-
+    getTransactionCount: (from: string) => Promise<number>,
 }
