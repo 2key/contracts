@@ -83,10 +83,10 @@ contract TwoKeySignedContract is TwoKeyContract {
 
       // update (only once) the cut used by each influencer
       // we will need this in case one of the influencers will want to start his own off-chain link
-      if (influencer2cut[new_address] == 0) {
+      if (cutOf(new_address) == 0) {
         influencer2cut[new_address] = weight;
       } else {
-        require(influencer2cut[new_address] == weight,'bounty cut can not be modified');
+        require(cutOf(new_address) == weight,'bounty cut can not be modified');
       }
     }
 

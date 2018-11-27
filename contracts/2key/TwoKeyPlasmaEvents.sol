@@ -40,7 +40,7 @@ contract TwoKeyPlasmaEvents {
     // in some cases the plasma address will be the same as the ethereum address and in that case it is not necessary to have an entry
     // the way to know if an address is a plasma address is to look it up in this mapping
     mapping(address => address) public plasma2ethereum;
-    mapping(address => address[]) public ethereum2plasma;
+    mapping(address => address) public ethereum2plasma;  // TODO match just one plasma address to eth address. We may want to change this to an array
 
     // SOCIAL GRAPH
 
@@ -56,15 +56,15 @@ contract TwoKeyPlasmaEvents {
     mapping(address => mapping(address => mapping(address => bytes))) public visited_sig;
 
     function add_plasma2ethereum(bytes sig) public { // , bool with_prefix) public {
+        address plasma_address = msg.sender;
         // add an entry connecting msg.sender to the ethereum address that was used to sign sig.
         // see setup_demo.js on how to generate sig
         bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to plasma address")),keccak256(abi.encodePacked(msg.sender))));
         require (sig.length == 65, 'bad signature length');
         address eth_address = Call.recoverHash(hash,sig,0);
-        if (plasma2ethereum[msg.sender] != eth_address) {
-            plasma2ethereum[msg.sender] = eth_address;
-            ethereum2plasma[eth_address].push(msg.sender);
-        }
+        require(plasma2ethereum[plasma_address] == address(0) || plasma2ethereum[plasma_address] == eth_address, "cant change plasma=>eth");
+        plasma2ethereum[plasma_address] = eth_address;
+        ethereum2plasma[eth_address] = plasma_address;
     }
 
     function _test_path(address c, address contractor, address to) private view returns (bool) {
@@ -81,10 +81,8 @@ contract TwoKeyPlasmaEvents {
         if (_test_path(c, contractor, to)) {
             return true;
         }
-        for (uint i = 0; i < ethereum2plasma[to].length; i++) {
-            if (_test_path(c, contractor,  ethereum2plasma[to][i])) {
-                return true;
-            }
+        if (_test_path(c, contractor,  ethereum2plasma[to])) {
+            return true;
         }
         return false;
     }
@@ -162,13 +160,28 @@ contract TwoKeyPlasmaEvents {
         }
     }
 
-    function update_bounty_cut(address c, address contractor, address new_address, uint8 bounty_cut) private {
+    function cutOf(address c, address contractor, address _owner) public view returns (uint256) {
+        uint256 b = influencer2cut[c][contractor][_owner];
+        if (b == 0) {
+            address plasma_owner = ethereum2plasma[_owner];
+            b = influencer2cut[c][contractor][plasma_owner];
+            if (b != 0) {
+                return b;
+            }
+            address eth_owner = plasma2ethereum[_owner];
+            b = influencer2cut[c][contractor][eth_owner];
+        }
+        return b;
+    }
+
+    function update_bounty_cut(address c, address contractor, address new_address, uint8 new_cut) private {
         // update (only once) the cut used by each influencer
         // we will need this in case one of the influencers will want to start his own off-chain link
-        if (influencer2cut[c][contractor][new_address] == 0) {
-            influencer2cut[c][contractor][new_address] = uint256(bounty_cut);
+        uint old_cut = cutOf(c,contractor,new_address);
+        if (old_cut == 0) {
+            influencer2cut[c][contractor][new_address] = uint256(new_cut);
         } else {
-            require(influencer2cut[c][contractor][new_address] == uint256(bounty_cut),'bounty cut can not be modified');
+            require(old_cut == uint256(new_cut),'bounty cut can not be modified');
         }
     }
 
@@ -183,7 +196,7 @@ contract TwoKeyPlasmaEvents {
 
     // return a list of eth/plasma address that came from "from"
     // this method converts address in the list from plasma to ether when possible
-    function get_visits_list(address from, address c, address contractor) public view returns (address[]) {
+    function get_visits_list1(address from, address c, address contractor) public view returns (address[]) {
         uint n_influencers = visits_list[c][contractor][from].length;
         if (n_influencers == 0) {
             return visits_list[c][contractor][from];
@@ -195,6 +208,36 @@ contract TwoKeyPlasmaEvents {
                 influencers[i] = plasma2ethereum[influencer];
             } else {
                 influencers[i] = influencer;
+            }
+        }
+        return influencers;
+    }
+    function get_visits_list(address from, address c, address contractor) public view returns (address[]) {
+        // concatenate get_visits_list1 for the address from and its alter ego address (if from is eth then plasma and vice versa)
+        address[] memory influencers1 = get_visits_list1(from,c,contractor);
+        address from2 = plasma2ethereum[from];
+        if (from2 == address(0)) {
+            from2 = ethereum2plasma[from];
+        }
+        if (from2 == address(0)) {
+            return influencers1;
+        }
+        address[] memory influencers2 = get_visits_list1(from2,c,contractor);
+        uint n2 = influencers2.length;
+        if(n2 == 0) {
+            return influencers1;
+        }
+        uint n1 = influencers1.length;
+        if(n1 == 0) {
+            return influencers2;
+        }
+        uint n = n1 + n2;
+        address[] memory influencers = new address[](n);
+        for (uint i = 0; i < n; i++) {
+            if(i < n1) {
+                influencers[i] = influencers1[i];
+            } else {
+                influencers[i] = influencers2[i - n1];
             }
         }
         return influencers;

@@ -43,7 +43,7 @@ contract TwoKeyContract is BasicToken, Ownable {
 
   // The cut from the bounty each influencer is taking + 1
   // zero (also the default value) indicates default behaviour in which the influencer takes an equal amount as other influencers
-  mapping(address => uint256) public influencer2cut;
+  mapping(address => uint256) internal influencer2cut;
 
   function getCuts(address last_influencer) public view returns (uint256[]) {
     address[] memory influencers = getInfluencers(last_influencer);
@@ -51,9 +51,9 @@ contract TwoKeyContract is BasicToken, Ownable {
     uint256[] memory cuts = new uint256[](n_influencers + 1);
     for (uint i = 0; i < n_influencers; i++) {
       address influencer = influencers[i];
-      cuts[i] = influencer2cut[influencer];
+      cuts[i] = cutOf(influencer);
     }
-    cuts[n_influencers] = influencer2cut[last_influencer];
+    cuts[n_influencers] = cutOf(last_influencer);
     return cuts;
   }
 
@@ -62,11 +62,27 @@ contract TwoKeyContract is BasicToken, Ownable {
     // the value 255 is used to signal equal partition with other influencers
     // A sender can set the value only once in a contract
     require(cut <= 100 || cut == 255);
-    require(influencer2cut[msg.sender] == 0);
-    if (cut <= 100) {
-      cut++;
+    require(influencer2cut[msg.sender] == 0, 'cut not zero');
+    if (registry != address(0)) {
+      address plasma_owner = registry.ethereum2plasma(msg.sender);
+      require(influencer2cut[plasma_owner] == 0, 'plasma cut not zero');
+      address eth_owner = registry.plasma2ethereum(msg.sender);
+      require(influencer2cut[eth_owner] == 0, 'eth cut not zero');
     }
     influencer2cut[msg.sender] = cut;
+  }
+  function cutOf(address _owner) public view returns (uint256) {
+    uint256 b = influencer2cut[_owner];
+    if (b == 0 && registry != address(0)) {
+      address plasma_owner = registry.ethereum2plasma(_owner);
+      b = influencer2cut[plasma_owner];
+      if (b != 0) {
+        return b;
+      }
+      address eth_owner = registry.plasma2ethereum(_owner);
+      b = influencer2cut[eth_owner];
+    }
+    return b;
   }
 
   /**
@@ -132,9 +148,35 @@ contract TwoKeyContract is BasicToken, Ownable {
 
   function total_units() public view returns (uint256);
 
+  /**
+  * @dev Gets the balance of the specified address.
+  * @param _owner The address to query the the balance of.
+  * @return An uint256 representing the amount owned by the passed address.
+  */
+  function balanceOf(address _owner) public view returns (uint256) {
+    uint256 b = balances[_owner];
+    if (registry != address(0)) {
+      address plasma_owner = registry.ethereum2plasma(_owner);
+      b += balances[plasma_owner];
+      address eth_owner = registry.plasma2ethereum(_owner);
+      b += balances[eth_owner];
+    }
+    return b;
+  }
+  function xbalanceOf(address _owner) public view returns (uint256) {
+    uint256 b = xbalances[_owner];
+    if (registry != address(0)) {
+      address plasma_owner = registry.ethereum2plasma(_owner);
+      b += xbalances[plasma_owner];
+      address eth_owner = registry.plasma2ethereum(_owner);
+      b += xbalances[eth_owner];
+    }
+    return b;
+  }
+
   function getDynamicInfo(address me) public view returns (uint256,uint256,uint256,uint256,uint256,uint256,uint256) {
     // address(this).balance is solidity reserved word for the the ETH amount deposited in the contract
-    return (balanceOf(me),units[me],xbalances[me],totalSupply_,address(this).balance,total_units(),influencer2cut[me]);
+    return (balanceOf(me),units[me],xbalanceOf(me),totalSupply_,address(this).balance,total_units(),cutOf(me));
   }
 
   // function () external payable {
@@ -187,7 +229,7 @@ contract TwoKeyContract is BasicToken, Ownable {
     }
 
     if(!influencer.send(b)) {
-       revert();
+       revert("failed to send");
     }
   }
 
@@ -226,19 +268,15 @@ contract TwoKeyContract is BasicToken, Ownable {
     // buy coins with cut
     // low level product purchase function
     address customer = msg.sender;
-    emit Log1A('customer',customer);
-    uint256 customer_balance = balanceOf(customer);
-    emit Log1('customer_balance', customer_balance);
-    require(customer_balance > 0);
+    require(balanceOf(customer) > 0,"no arcs");
 
     uint256 _total_units = total_units();
-    emit Log1('_total_units',_total_units);
+//    emit Log1('_total_units',_total_units);
 
-    require(_units > 0);
-    require(_total_units >= _units);
+    require(_units > 0,"no units requested");
+    require(_total_units >= _units,"not enough units available in stock");
     address[] memory influencers = getInfluencers(customer);
     uint n_influencers = influencers.length;
-    emit Log1('n_influencers',n_influencers);
 
     // distribute bounty to influencers
     uint256 total_bounty = 0;
@@ -248,8 +286,7 @@ contract TwoKeyContract is BasicToken, Ownable {
       if (i == n_influencers-1) {  // if its the last influencer then all the bounty goes to it.
         b = _bounty;
       } else {
-        uint256 cut = influencer2cut[influencer];
-        //        emit Log("CUT", influencer, cut);
+        uint256 cut = cutOf(influencer);
         if (cut > 0 && cut <= 101) {
           b = _bounty.mul(cut.sub(1)).div(100);
         } else {  // cut == 0 or 255 indicates equal particine of the bounty
@@ -279,7 +316,7 @@ contract TwoKeyAcquisitionContract is TwoKeyContract
   constructor(TwoKeyReg _reg, TwoKeyEventSource _eventSource, string _name, string _symbol,
         uint256 _tSupply, uint256 _quota, uint256 _cost, uint256 _bounty,
         uint256 _units, string _ipfs_hash) public {
-    require(_bounty <= _cost);
+    require(_bounty <= _cost,"bounty bigger than cost");
     // owner = msg.sender;  // done in Ownable()
     // We do an explicit type conversion from `address`
     // to `TwoKeyReg` and assume that the type of
@@ -315,7 +352,7 @@ contract TwoKeyAcquisitionContract is TwoKeyContract
   function buyProduct() public payable {
     // caluclate the number of units being purchased
     uint _units = msg.value.div(cost);
-    require(msg.value == cost * _units);
+    require(msg.value == cost * _units, "ethere sent does not divide equally into units");
     // bounty is the cost of a single token. Compute the bounty for the units
     // we are buying
     uint256 _bounty = bounty.mul(_units);
@@ -335,7 +372,7 @@ contract TwoKeyPresellContract is TwoKeyContract {
   constructor(TwoKeyReg _reg, TwoKeyEventSource _eventSource, string _name, string _symbol,
         uint256 _tSupply, uint256 _quota, uint256 _cost, uint256 _bounty,
         string _ipfs_hash, ERC20full _erc20_token_sell_contract) public {
-    require(_bounty <= _cost);
+    require(_bounty <= _cost,"bounty bigger than cost");
     // owner = msg.sender;  // done in Ownable()
     // We do an explicit type conversion from `address`
     // to `TwoKeyReg` and assume that the type of
@@ -363,8 +400,8 @@ contract TwoKeyPresellContract is TwoKeyContract {
       erc20_token_sell_contract = _erc20_token_sell_contract;  // ERC20full()
       unit_decimals = Call.params0(erc20_token_sell_contract, "decimals()");
 //      emit Log1('start_unit_decimals', unit_decimals); // does not work in constructor on geth
-      require(unit_decimals >= 0);
-      require(unit_decimals <= 18);
+      require(unit_decimals >= 0,"unit decimals to low");
+      require(unit_decimals <= 18,"unit decimals to big");
     }
   }
 
@@ -378,21 +415,23 @@ contract TwoKeyPresellContract is TwoKeyContract {
   // low level product purchase function
 
   function buyProduct() public payable {
-    emit Log1('unit_decimals', unit_decimals);
+//    emit Log1('unit_decimals', unit_decimals);
 //    unit_decimals = 18; // uint256(erc20_token_sell_contract.decimals());
     // cost is the cost of a single token. Each token has 10**decimals units
     uint256 _units = msg.value.mul(10**unit_decimals).div(cost);
-    emit Log1('units', _units);
+//    emit Log1('units', _units);
     // bounty is the cost of a single token. Compute the bounty for the units
     // we are buying
     uint256 _bounty = bounty.mul(_units).div(10**unit_decimals);
-    emit Log1('_bounty', _bounty);
+//    emit Log1('_bounty', _bounty);
 
     buyProductInternal(_units, _bounty);
 
-    emit Log1('going to transfer', _units);
+//    emit Log1('going to transfer', _units);
+//    emit Log1A('coin', address(erc20_token_sell_contract));
 
 //    erc20_token_sell_contract.transfer(msg.sender, _units);  // TODO is this dangerous!?
-    require(address(erc20_token_sell_contract).call(bytes4(keccak256("transfer(address,uint256)")),msg.sender,_units));
+    require(address(erc20_token_sell_contract).call(bytes4(keccak256("transfer(address,uint256)")),msg.sender,_units),
+      "failed to send coins");
   }
 }

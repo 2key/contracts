@@ -25,9 +25,8 @@ contract TwoKeyReg is Ownable {
 
   function addNameInternal(string _name, address _sender) private {
     // check if name is taken
-    if (name2owner[keccak256(abi.encodePacked(_name))] != 0) {
-      revert();
-    }
+    require(name2owner[keccak256(abi.encodePacked(_name))] == 0, "name already assigned");
+
     // remove previous name
     bytes memory last_name = bytes(owner2name[_sender]);
     if (last_name.length != 0) {
@@ -47,6 +46,7 @@ contract TwoKeyReg is Ownable {
   }
 
   function addPlasma2Ethereum(bytes sig) public {
+    // TODO add an option to save the private key of plasma stored encrypted with a pubkey pair generated secretly by msg.sender https://github.com/pubkey/eth-crypto
     require(!eventSource.activeUser(msg.sender), 'cant set plasma address to an active user');
     bytes32 hash = keccak256(abi.encodePacked(msg.sender));
     require (sig.length == 65, 'bad signature length');

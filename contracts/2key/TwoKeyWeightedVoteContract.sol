@@ -32,7 +32,7 @@ contract TwoKeyWeightedVoteContract is TwoKeySignedPresellContract {
       address influencer = voters[i];
 
       // extract the vote (yes/no) and the weight of the vote from cut
-      uint256 cut = influencer2cut[influencer];
+      uint256 cut = cutOf(influencer);
       bool new_votter = !voted[influencer];
       voted[influencer] = true;
       if (new_votter) {
