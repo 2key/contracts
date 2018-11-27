@@ -924,6 +924,11 @@ describe('TwoKeyProtocol', () => {
         console.log('Rate is : ' + rate);
     });
 
+    it('should print maintainer addresses', async() => {
+        const maintainers = await twoKeyProtocol.Registry.getRegistryMaintainers();
+        console.log(maintainers);
+    })
+
 
 
 

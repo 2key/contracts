@@ -1,7 +1,6 @@
 pragma solidity ^0.4.24;
 
 import '../openzeppelin-solidity/contracts/ownership/Ownable.sol';
-import "./TwoKeyRegistryStorage.sol";
 import "./Upgradeable.sol";
 
 contract TwoKeyRegLogic is Upgradeable {
@@ -91,13 +90,20 @@ contract TwoKeyRegLogic is Upgradeable {
         _;
     }
 
-    constructor (address _twoKeyEventSource, address _twoKeyAdmin, address _maintainer) public {
-        require(_twoKeyEventSource != address(0));
-        require(_twoKeyAdmin != address(0));
+    function setInitialParams(address _twoKeyEventSource, address _twoKeyAdmin, address _maintainer) public {
+        require(twoKeyEventSource == address(0));
+        require(twoKeyAdminContractAddress == address(0));
         twoKeyEventSource = _twoKeyEventSource;
         twoKeyAdminContractAddress = _twoKeyAdmin;
         maintainers.push(_maintainer);
     }
+//    constructor (address _twoKeyEventSource, address _twoKeyAdmin, address _maintainer) public {
+//        require(_twoKeyEventSource != address(0));
+//        require(_twoKeyAdmin != address(0));
+//        twoKeyEventSource = _twoKeyEventSource;
+//        twoKeyAdminContractAddress = _twoKeyAdmin;
+//        maintainers.push(_maintainer);
+//    }
 
 
     /// @notice Function to check if maintainer exists
@@ -110,6 +116,10 @@ contract TwoKeyRegLogic is Upgradeable {
               }
         }
         return false;
+    }
+
+    function getMaintainers() public view returns (address[]){
+        return maintainers;
     }
 
     /// @notice Method to change the allowed TwoKeyEventSource contract address
@@ -222,7 +232,8 @@ contract TwoKeyRegLogic is Upgradeable {
     /// @notice Function where only admin can add a name - address pair
     /// @param _name is name of user
     /// @param _sender is address of user
-    function addName(string _name, address _sender, string _fullName, string _email) onlyTwoKeyMaintainer public {
+    //onlyTwoKeyMaintainer
+    function addName(string _name, address _sender, string _fullName, string _email) public onlyTwoKeyMaintainer {
         require(utfStringLength(_name) >= 3 && utfStringLength(_name) <=25);
         addressToUserData[_sender] = UserData({
             username: _name,
@@ -251,6 +262,7 @@ contract TwoKeyRegLogic is Upgradeable {
     /// @param username is the username of the user we want to update map for
     /// @param _address is the address of the user we want to update map for
     /// @param _username_walletName is the concatenated username + '_' + walletName, since sending from trusted provider no need to validate
+    //onlyTwoKeyMaintainer
     function setWalletName(string memory username, address _address, string memory _username_walletName) public onlyTwoKeyMaintainer {
         require(_address != address(0));
         require(username2currentAddress[keccak256(abi.encodePacked(username))] == _address); // validating that username exists
