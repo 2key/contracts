@@ -1,4 +1,4 @@
-# Upgradeability using Inherited Storage (proposed by open-zeppelin initially)
+# Upgradeability using Inherited Storage (based on proposal by open-zeppelin initially)
 
 In this readme, let's name the contract we'd like to support upgradability: ContractV1, ContractV2, etc.
 The idea of this approach is to allow us to upgrade a contract's behavior, assuming that each version will follow the 
