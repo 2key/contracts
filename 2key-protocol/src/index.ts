@@ -34,6 +34,8 @@ import TwoKeyCongress from "./congress";
 import DecentralizedNation from "./decentralizedNation";
 import TwoKeyWeightedVoteContract from "./veightedVote";
 import TwoKerRegistry from './registry';
+import UpgradableExchange from './upgradableExchange';
+import {IUpgradableExchange} from "./upgradableExchange/interfaces";
 
 // const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 
@@ -78,6 +80,8 @@ export class TwoKeyProtocol {
     public Congress: ITwoKeyCongress;
     public Lockup: ILockup;
     public Registry: ITwoKeyReg;
+    public UpgradableExchange: IUpgradableExchange;
+
     private _log: any;
 
     // private twoKeyReg: any;
@@ -171,6 +175,7 @@ export class TwoKeyProtocol {
         this.Helpers = new Helpers(twoKeyBase);
         this.ERC20 = new ERC20(twoKeyBase, this.Helpers);
         this.Utils = new Index(twoKeyBase, this.Helpers);
+        this.UpgradableExchange = new UpgradableExchange(twoKeyBase,this.Helpers,this.Utils);
         this.AcquisitionCampaign = new AcquisitionCampaign(twoKeyBase, this.Helpers, this.Utils, this.ERC20);
         this.TwoKeyWeightedVoteContract = new TwoKeyWeightedVoteContract(twoKeyBase, this.Helpers, this.Utils);
         this.DecentralizedNation = new DecentralizedNation(twoKeyBase, this.Helpers, this.Utils, this.TwoKeyWeightedVoteContract, this.AcquisitionCampaign);

@@ -223,6 +223,8 @@ describe('TwoKeyProtocol', () => {
     let aydnepBalance;
     let txHash;
 
+
+
     it('should return a balance for address', async () => {
         const business = twoKeyProtocol.Utils.balanceFromWeiString(await twoKeyProtocol.getBalance(twoKeyAdmin), {
             inWei: true,
@@ -916,6 +918,12 @@ describe('TwoKeyProtocol', () => {
         // console.log(addresses);
         expect(addresses.length).to.be.equal(4);
     });
+
+    it('should get rate from upgradable exchange', async() => {
+        const rate = await twoKeyProtocol.UpgradableExchange.getRate(from);
+        console.log('Rate is : ' + rate);
+    });
+
 
 
 

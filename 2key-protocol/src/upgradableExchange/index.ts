@@ -18,16 +18,15 @@ export default class UpgradableExchange implements IUpgradableExchange {
 
     /**
      *
-     * @param upgradableExchange
      * @param {string} from
      * @returns {Promise<number>}
      */
-    public getRate(upgradableExchange: any, from: string) : Promise<number> {
+    public getRate(from: string) : Promise<number> {
         return new Promise<number>(async(resolve,reject) => {
             try {
-                const instance = await this.helpers._getUpgradableExchangeInstance(upgradableExchange);
-                const rate = await promisify(instance.rate,[{from}]);
-                resolve(rate);
+                let dolarRate = await promisify(this.base.twoKeyUpgradableExchange.rate,[{from}]);
+                dolarRate = dolarRate / 1000;
+                resolve(dolarRate);
             } catch (e) {
                 reject(e);
             }
@@ -36,15 +35,13 @@ export default class UpgradableExchange implements IUpgradableExchange {
 
     /**
      *
-     * @param upgradableExchange
      * @param {string} from
      * @returns {Promise<string>}
      */
-    public getERC20Token(upgradableExchange: any, from: string) : Promise<string> {
+    public getERC20Token(from: string) : Promise<string> {
         return new Promise<string>(async(resolve,reject) => {
             try {
-                const instance = await this.helpers._getUpgradableExchangeInstance(upgradableExchange);
-                const erc20Address = await promisify(instance.token,[{from}]);
+                const erc20Address = await promisify(this.base.twoKeyUpgradableExchange.token,[{from}]);
                 resolve(erc20Address);
             } catch (e) {
                 reject(e);
@@ -55,15 +52,13 @@ export default class UpgradableExchange implements IUpgradableExchange {
 
     /**
      *
-     * @param upgradableExchange
      * @param {string} from
      * @returns {Promise<string>}
      */
-    public getAdmin(upgradableExchange: any, from: string) : Promise<string> {
+    public getAdmin(from: string) : Promise<string> {
         return new Promise<string>(async(resolve,reject) => {
             try {
-                const instance = await this.helpers._getUpgradableExchangeInstance(upgradableExchange);
-                const admin = await promisify(instance.admin,[{from}]);
+                const admin = await promisify(this.base.twoKeyUpgradableExchange.admin,[{from}]);
                 resolve(admin);
             } catch (e) {
                 reject(e);
@@ -73,15 +68,13 @@ export default class UpgradableExchange implements IUpgradableExchange {
 
     /**
      *
-     * @param upgradableExchange
      * @param {string} from
      * @returns {Promise<number>}
      */
-    public getWeiRaised(upgradableExchange: any, from: string) : Promise<number> {
+    public getWeiRaised(from: string) : Promise<number> {
         return new Promise<number>(async(resolve,reject) => {
             try {
-                const instance = await this.helpers._getUpgradableExchangeInstance(upgradableExchange);
-                const weiRaised = await promisify(instance.weiRaised, [{from}]);
+                const weiRaised = await promisify(this.base.twoKeyUpgradableExchange.weiRaised, [{from}]);
                 resolve(weiRaised);
             } catch (e) {
                 reject(e);
