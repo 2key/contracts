@@ -37,3 +37,25 @@ The `UpgradeabilityStorage` contract holds data needed for upgradeability, which
 (ContractV1,ContractV2) behavior though `Upgradeable`. Then, each contract behavior defines all the necessary state 
 variables to carry out their storage. Notice that `ContractV1` inherits the same storage structure defined in `ContractV2`. 
 This is a requirement of the proposed approach to ensure the proxy storage is not messed up.
+
+
+### How to Initialize
+
+```
+Deploy a Registry contract
+Deploy an initial version of your contract (v1). Make sure it inherits the Upgradeable contract
+Register the address of your initial version to the Registry
+Ask the Registry contract to create an UpgradeabilityProxy instance
+Call your UpgradeabilityProxy to upgrade to the your initial version of the contract
+
+```
+### How to Upgrade
+```
+Deploy a new version of your contract (v2) that inherits from your initial version to make sure it keeps the storage structure of the proxy and the one in the initial version of your contract.
+Register the new version of your contract to the Registry
+Call your UpgradeabilityProxy instance to upgrade to the new registered version.
+```
+### Key Takeaways
+
+We can introduce upgraded functions as well as new functions and new state variables in future deployed logic contracts by still calling the same UpgradeabilityProxy contract.
+
