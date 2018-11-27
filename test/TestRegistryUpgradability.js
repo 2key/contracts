@@ -1,42 +1,34 @@
-const TwoKeyReg = artifacts.require("TwoKeyReg");
-const TwoKeyRegistryProxy = artifacts.require("TwoKeyRegistryProxy");
-const TwoKeyRegistryStorage = artifacts.require("TwoKeyRegistryStorage");
+const TwoKeyRegLogic = artifacts.require('TwoKeyRegLogic');
+const TwoKeyRegLogicV1 = artifacts.require('TwoKeyRegLogicV1');
+const Registry = artifacts.require('Registry');
+const Proxy = artifacts.require('UpgradeabilityProxy');
 
 
+contract('Upgradeable', async(accounts) => {
 
-contract('TwoKeyReg', async(accounts) => {
-    let registryInstance;
-    let proxyInstance;
+    it('should work', async() =>  {
+        const impl_v1_0 = await TwoKeyRegLogic.new(accounts[0],accounts[0],accounts[0]);
+        const impl_v1_1 = await TwoKeyRegLogicV1.new(accounts[0],accounts[0],accounts[0]);
 
-    /*
-            TwoKeyRegistryStorage
-                   /      \
-                  /        \
-                 /          \
-                /            \
-    TwoKeyRegistryProxy    TwoKeyReg
+        const registry = await Registry.new();
+        await registry.addVersion("1.0", impl_v1_0.address);
+        await registry.addVersion("1.1", impl_v1_1.address);
 
-     */
+        const {logs} = await registry.createProxy("1.0");
 
-    before(async() => {
-        registryInstance = await TwoKeyReg.new(accounts[0],accounts[0],accounts[0],{from: accounts[0]});
-        proxyInstance = await TwoKeyRegistryProxy.new({from: accounts[0]});
-        await proxyInstance.setLogicContract(registryInstance.address);
-        console.log('Successfully added registry to proxy');
-        let add = await proxyInstance.logic_contract();
-        assert.equal(add, registryInstance.address, 'should be the same');
-    });
+        const {proxy} = logs.find(l => l.event === 'ProxyCreated').args;
 
+        await TwoKeyRegLogic.at(proxy).setValue(5);
+        let value = await TwoKeyRegLogic.at(proxy).getValue();
+        console.log(value);
 
-    it('should set value there', async() => {
-        await TwoKeyReg.at(proxyInstance.address).setValue(55);
-        console.log('Done');
+        await Proxy.at(proxy).upgradeTo("1.1");
 
-        let val = await TwoKeyReg.at(proxyInstance.address).getValue();
-        console.log('Value is: ' + val);
-    });
+        let value1 = await TwoKeyRegLogicV1.at(proxy).getValue();
+        console.log(value1);
+        await TwoKeyRegLogicV1.at(proxy).setValue(9);
+        value1 = await TwoKeyRegLogicV1.at(proxy).getValue();
+        console.log(value1);
+    })
 
-
-
-
-});
+})

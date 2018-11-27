@@ -41,16 +41,16 @@ contract TwoKeyRegistryStorage {
     */
 
     /// mapping users address to addresses of campaigns where he is contractor
-    mapping(address => address[]) userToCampaignsWhereContractor;
+    mapping(address => address[]) public userToCampaignsWhereContractor;
 
     /// mapping users address to addresses of campaigns where he is moderator
-    mapping(address => address[]) userToCampaignsWhereModerator;
+    mapping(address => address[]) public userToCampaignsWhereModerator;
 
     /// mapping users address to addresses of campaigns where he is refferer
-    mapping(address => address[]) userToCampaignsWhereReferrer;
+    mapping(address => address[]) public userToCampaignsWhereReferrer;
 
     /// mapping users address to addresses of campaigns where he is converter
-    mapping(address => address[]) userToCampaignsWhereConverter;
+    mapping(address => address[]) public userToCampaignsWhereConverter;
 
     /// Address of 2key event source contract which will have permission to write on this contract
     /// (Address is enough, there is no need to spend sufficient gas and instantiate whole contract)
@@ -58,7 +58,7 @@ contract TwoKeyRegistryStorage {
 
     /// Address for contract maintainer
     /// Should be the array of addresses - will have permission on some of the mappings to update
-    address[] public maintainers;
+    address[] maintainers;
 
     address twoKeyAdminContractAddress;
 

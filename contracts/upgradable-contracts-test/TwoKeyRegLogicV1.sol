@@ -4,7 +4,7 @@ import '../openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import "./TwoKeyRegistryStorage.sol";
 import "./Upgradeable.sol";
 
-contract TwoKeyRegLogic is Upgradeable {
+contract TwoKeyRegLogicV1 is Upgradeable {
 
     /// mapping user's address to user's name
     mapping(address => string) public address2username;
@@ -105,9 +105,9 @@ contract TwoKeyRegLogic is Upgradeable {
     /// @return true if exists otherwise false
     function checkIfTwoKeyMaintainerExists(address _maintainer) public view returns (bool) {
         for(uint i=0; i<maintainers.length; i++) {
-              if(_maintainer == maintainers[i]) {
-                  return true;
-              }
+            if(_maintainer == maintainers[i]) {
+                return true;
+            }
         }
         return false;
     }
@@ -118,7 +118,7 @@ contract TwoKeyRegLogic is Upgradeable {
         require(_twoKeyEventSource != address(0));
         twoKeyEventSource = _twoKeyEventSource;
     }
-  
+
 
 
     /// Only TwoKeyEventSource contract can issue this calls
@@ -367,11 +367,10 @@ contract TwoKeyRegLogic is Upgradeable {
     }
 
     function setValue(uint val) public {
-        value = val;
+        value = val + 5;
     }
 
     function getValue() public view returns (uint) {
         return value;
     }
-
 }
