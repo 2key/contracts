@@ -2,7 +2,7 @@ pragma solidity ^0.4.24;
 
 import '../openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import "./TwoKeyRegistryStorage.sol";
-import "./Upgradeable.sol";
+import "../2key/Upgradeable.sol";
 
 contract TwoKeyRegLogicV1 is Upgradeable {
 

@@ -3,7 +3,7 @@ pragma solidity ^0.4.24;
 import './IRegistry.sol';
 
 /**
- * @title Upgra deabilityStorage
+ * @title UpgradeabilityStorage
  * @dev This contract holds all the necessary state variables to support the upgrade functionality
  */
 contract UpgradeabilityStorage {
