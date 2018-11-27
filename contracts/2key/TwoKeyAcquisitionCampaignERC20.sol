@@ -256,6 +256,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         distributeArcsBasedOnSignature(signature);
         createConversion(msg.value, msg.sender);
         balancesConvertersETH[msg.sender] += msg.value;
+        twoKeyEventSource.converted(address(this),msg.sender,msg.value);
+
     }
 
     function convert() public payable  {
@@ -264,6 +266,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         require(received_from[msg.sender] != address(0));
         createConversion(msg.value, msg.sender);
         balancesConvertersETH[msg.sender] += msg.value;
+        twoKeyEventSource.converted(address(this),msg.sender,msg.value);
     }
 
     function() external payable {
@@ -272,6 +275,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         require(balanceOf(msg.sender) > 0);
         createConversion(msg.value, msg.sender);
         balancesConvertersETH[msg.sender] += msg.value;
+        twoKeyEventSource.converted(address(this),msg.sender,msg.value);
     }
 
 

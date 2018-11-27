@@ -121,10 +121,11 @@ contract TwoKeyEventSource is TwoKeyTypes {
     /// @param _twoKeyAdminAddress is the address of TwoKeyAdmin contract previously deployed
     constructor(address _twoKeyAdminAddress) public {
         twoKeyAdmin = _twoKeyAdminAddress;
+        authorizedSubadmins[msg.sender] = true;
     }
 
 
-    function addTwoKeyReg(address _twoKeyReg) public {
+    function addTwoKeyReg(address _twoKeyReg) public onlyAuthorizedSubadmins {
         interfaceTwoKeyReg = ITwoKeyReg(_twoKeyReg);
     }
 
@@ -197,20 +198,12 @@ contract TwoKeyEventSource is TwoKeyTypes {
 
     /// @dev Only allowed contracts can call this function ---> means can emit events
     /// This user will be contractor
-    /// onlyAllowedContracts commented so Andri can fetch this
     function created(address _campaign, address _owner, address _moderator) public {
-        bytes memory code = GetCode.at(msg.sender);
-        if(isAddressWhitelistedDeployer(_owner)) {
-            interfaceTwoKeyReg.addWhereContractor(_owner, _campaign);
-            interfaceTwoKeyReg.addWhereModerator(_moderator, _campaign);
-            canEmit[code] = true;
-            emit Created(_campaign, _owner, _moderator);
-        } else {
-            require(canEmit[code] == true);
-            interfaceTwoKeyReg.addWhereContractor(_owner, _campaign);
-            interfaceTwoKeyReg.addWhereModerator(_moderator, _campaign);
-            emit Created(_campaign, _owner, _moderator);
-        }
+//        bytes memory code = GetCode.at(_campaign);
+//        require(canEmit[code] == true);
+        interfaceTwoKeyReg.addWhereContractor(_owner, _campaign);
+        interfaceTwoKeyReg.addWhereModerator(_moderator, _campaign);
+        emit Created(_campaign, _owner, _moderator);
     }
 
 
