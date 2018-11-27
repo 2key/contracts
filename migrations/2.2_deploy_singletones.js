@@ -6,12 +6,16 @@ const TwoKeyRegLogic = artifacts.require('TwoKeyRegLogic');
 const TwoKeyCongress = artifacts.require('TwoKeyCongress');
 const Call = artifacts.require('Call');
 const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
+const Registry = artifacts.require('Registry');
 
+
+var fs = require('fs');
 /*
     TwoKeyCongress constructor need 2 addresses passed, the best'd be if we get that addresses static and always save the same ones
  */
 
 module.exports = function deploy(deployer) {
+    let proxyAddress;
   let adminInstance;
   let initialCongressMembers = [
     '0x4216909456e770FFC737d987c273a0B8cE19C13e', // Eitan
@@ -36,24 +40,54 @@ module.exports = function deploy(deployer) {
         .then(() => deployer.deploy(TwoKeyUpgradableExchange, 95, TwoKeyAdmin.address, TwoKeyEconomy.address))
         .then(() => TwoKeyUpgradableExchange.deployed())
         .then(() => deployer.deploy(EventSource, TwoKeyAdmin.address))
-        .then(() => deployer.deploy(TwoKeyRegLogic, EventSource.address, TwoKeyAdmin.address, (deployer.network.startsWith('rinkeby') || deployer.network.startsWith('public.')) ? '0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f' : '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7'))
+        .then(() => deployer.deploy(TwoKeyRegLogic)
         .then(() => TwoKeyRegLogic.deployed())
+        .then(() => deployer.deploy(Registry))
+        .then(() => Registry.deployed().then(async(registry) => {
+            console.log('... Adding TwoKeyRegLogic to Proxy registry as valid implementation');
+            await new Promise(async(resolve,reject) => {
+                try {
+                    let txHash = await registry.addVersion("1.0",TwoKeyRegLogic.address);
+                    const {logs} = await registry.createProxy("1.0");
+                    const {proxy} = logs.find(l => l.event === 'ProxyCreated').args;
+                    console.log('Proxy address: ' + proxy);
+                    let obj = {
+                        'TwoKeyRegistryLogic' : TwoKeyRegLogic.address,
+                        'Proxy' : proxy
+                    };
+                    await TwoKeyRegLogic.at(proxy).setInitialParams(EventSource.address, TwoKeyAdmin.address, (deployer.network.startsWith('rinkeby') || deployer.network.startsWith('public.')) ? '0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f' : '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7');
+
+                    fs.writeFile("./2key-protocol/proxyAddresses.json", JSON.stringify(obj), (err) => {
+                        if (err) {
+                            console.error(err);
+                            return;
+                        }
+                        console.log("File has been created");
+                    });
+
+                    proxyAddress = proxy;
+                    resolve(proxy);
+                } catch (e) {
+                    reject(e);
+                }
+            })
+        }))
         .then(() => EventSource.deployed().then(async(eventSource) => {
             console.log("... Adding TwoKeyRegLogic to EventSource");
             await new Promise(async(resolve,reject) => {
                 try {
-                    let txHash = await eventSource.addTwoKeyReg(TwoKeyRegLogic.address).then(() => true);
+                    let txHash = await eventSource.addTwoKeyReg(proxyAddress).then(() => true);
                     resolve(txHash);
                 } catch (e) {
                     reject(e);
                 }
             });
-            console.log("Added TwoKeyReg: " + TwoKeyRegLogic.address + "  to EventSource : " + EventSource.address + "!")
+            console.log("Added TwoKeyReg: " + proxyAddress + "  to EventSource : " + EventSource.address + "!")
         }))
         .then(async() => {
             await new Promise(async(resolve,reject) => {
                 try {
-                    let txHash = await adminInstance.setSingletones(TwoKeyEconomy.address, TwoKeyUpgradableExchange.address, TwoKeyRegLogic.address, EventSource.address);
+                    let txHash = await adminInstance.setSingletones(TwoKeyEconomy.address, TwoKeyUpgradableExchange.address, proxyAddress, EventSource.address);
                     console.log('...Succesfully added singletones');
                     resolve(txHash);
                 } catch (e) {
@@ -75,7 +109,7 @@ module.exports = function deploy(deployer) {
         .then(() => true)
         .catch((err) => {
             console.log('\x1b[31m', 'Error:', err.message, '\x1b[0m');
-        });
+        }));
   } else if(deployer.network.startsWith('plasma') || deployer.network.startsWith('private')) {
     deployer.link(Call,TwoKeyPlasmaEvents);
     deployer.deploy(TwoKeyPlasmaEvents);

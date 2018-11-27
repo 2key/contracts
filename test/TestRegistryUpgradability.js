@@ -17,11 +17,14 @@ contract('Upgradeable', async(accounts) => {
         const {logs} = await registry.createProxy("1.0");
 
         const {proxy} = logs.find(l => l.event === 'ProxyCreated').args;
-
         await TwoKeyRegLogic.at(proxy).setValue(5);
+        let maintainers = await TwoKeyRegLogic.at(proxy).getMaintainers();
+        console.log('Maintainers: '+ maintainers);
+        await TwoKeyRegLogic.at(proxy).addName('Name',accounts[1],'Perica','nikola@gmail.com');
         let value = await TwoKeyRegLogic.at(proxy).getValue();
         console.log(value);
 
+        console.log('Accounts[0] : ' + accounts);
         await Proxy.at(proxy).upgradeTo("1.1");
 
         let value1 = await TwoKeyRegLogicV1.at(proxy).getValue();
