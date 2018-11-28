@@ -1,9 +1,9 @@
 export default { NetworkHashes:
    { '8086':
       { hash:
-         '625ff1c6d6eabf90cd69acb11131df43483680e60adba0c5f254c0e17d55dbfd',
+         '79477337e0dca3e75288043dc9176e68914023c759559d6f110ccc6eb8d1c078',
         humanHash:
-         'overwhelming and        i   evening streets  hotels you nights   let     argument   when insidious  ' },
+         'when oyster our in     follow  you then  like i i  one upon  and insidious  i evening let  i    when' },
      '98052':
       { hash:
          '6f1d9986861dd68182c2ded8b50d498897961d2e8fd960a93cc63e3fbfe53a9d',
@@ -2478,9 +2478,9 @@ export default { NetworkHashes:
       { '8086':
          { events: {},
            links: {},
-           address: '0xa7d63ffece2f4dcf5ee53b964f50724d46bd4510',
+           address: '0x2b21cb3a78210f32eb963f241e5ec1f3bab82c5c',
            transactionHash:
-            '0x0a04746631054df468045ed191923a2425ddaffe329dd429fb7895e8f3fbd7b0' } },
+            '0xf93696a9b517fd4d32c1dcb99d9dcf72dcbf52cef3bd79043406981bd58f79d0' } },
      abi:
       [ { constant: true,
           inputs: [ { name: '', type: 'address' } ],

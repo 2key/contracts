@@ -1240,4 +1240,22 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         });
     }
 
+    /**
+     *
+     * @param campaign
+     * @param {string} from
+     * @returns {Promise<number>}
+     */
+    public getModeratorTotalEarnings(campaign:any, from:string) : Promise<number> {
+        return new Promise<number>(async(resolve,reject) => {
+            try {
+                const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
+                const moderatorBalanceTotal = await promisify(campaignInstance.getModeratorTotalEarnings,[{from}]);
+                resolve(moderatorBalanceTotal);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
 }

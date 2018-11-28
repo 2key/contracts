@@ -502,6 +502,12 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         return moderatorBalanceETHWei;
     }
 
+    /// @notice Function to fetch moderator balance in ETH earned all time
+    /// @dev only Contractor or mdoerator can call this
+    /// @return value of total earnings
+    function getModeratorTotalEarnings() public onlyContractorOrModerator view returns (uint) {
+        return moderatorTotalEarningsETHWei;
+    }
     /// @notice Function where contractor can withdraw his funds
     /// @dev onlyContractor can call this method
     /// @return true if successful otherwise will 'revert'

@@ -88,6 +88,7 @@ export interface ITwoKeyAcquisitionCampaign {
     moderatorAndReferrerWithdraw: (campaign: any, from: string, gasPrice? : number) => Promise<any>,
     getModeratorAddress: (campaign: any, from: string) => Promise<string>,
     getAcquisitionCampaignCurrency: (campaign: any, from: string) => Promise<string>,
+    getModeratorTotalEarnings: (campaign:any, from:string) => Promise<number>,
 }
 
 export interface IPublicLinkOpts {
