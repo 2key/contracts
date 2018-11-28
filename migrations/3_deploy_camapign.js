@@ -1,7 +1,5 @@
 const TwoKeyAcquisitionCampaignERC20 = artifacts.require('TwoKeyAcquisitionCampaignERC20');
-const TwoKeyAdmin = artifacts.require('TwoKeyAdmin');
 const EventSource = artifacts.require('TwoKeyEventSource');
-const TwoKeyEconomy = artifacts.require('TwoKeyEconomy');
 const TwoKeyConversionHandler = artifacts.require('TwoKeyConversionHandler');
 const TwoKeyCampaignInventory = artifacts.require('TwoKeyCampaignInventory');
 const ERC20TokenMock = artifacts.require('ERC20TokenMock');

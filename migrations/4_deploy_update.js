@@ -4,7 +4,7 @@ const TwoKeyRegLogic = artifacts.require('TwoKeyRegLogic');
 const Registry = artifacts.require('Registry');
 const Proxy = artifacts.require('UpgradeabilityProxy');
 const json = require('../2key-protocol/proxyAddresses.json');
-
+const fs = require('fs');
 module.exports = function deploy(deployer) {
     console.log(process.argv);
     let found = false;
@@ -18,6 +18,7 @@ module.exports = function deploy(deployer) {
         /**
          * This script is going to be executed only if the argument in migration command is 'update'
          */
+        let lastTwoKeyRegLogicAddress;
         console.log('Arugment is found');
         deployer.deploy(TwoKeyRegLogic)
             .then(() => TwoKeyRegLogic.deployed()
@@ -25,6 +26,7 @@ module.exports = function deploy(deployer) {
                 await new Promise(async(resolve,reject) => {
                         try {
                             console.log('Setting initial parameters in TwoKeyRegLogic...');
+                            lastTwoKeyRegLogicAddress = twoKeyRegLogic.address;
                             let txHash = await twoKeyRegLogic.setInitialParams(
                                 EventSource.address,
                                 TwoKeyAdmin.address,
@@ -40,10 +42,21 @@ module.exports = function deploy(deployer) {
             .then(async (registry) => {
                 await new Promise(async(resolve,reject) => {
                     try {
-                        console.log('Adding new version to the registry contract...');
-                        let txHash = await registry.addVersion("1.2",TwoKeyRegLogic.address);
-                        console.log('Upgrading proxy to new version');
-                        txHash = await Proxy.at(json.Proxy).upgradeTo("1.2");
+                        console.log('... Adding new version to the registry contract');
+
+                        let v = parseInt(json.Version.substr(-1)) + 1;
+                        json.Version = json.Version.substr(0,json.Version.length-1) + v.toString();
+                        console.log('New version : '+ json.Version);
+
+                        let txHash = await registry.addVersion(json.Version,TwoKeyRegLogic.address);
+                        console.log('... Upgrading proxy to new version');
+
+                        txHash = await Proxy.at(json.Proxy).upgradeTo(json.Version);
+
+                        json.TwoKeyRegistryLogic = lastTwoKeyRegLogicAddress;
+                        fs.writeFileSync('../2key-protocol/proxyAddresses.json',JSON.stringify(json,null,4));
+                        console.log('proxyAddresses.json file is updated with newest version of contract');
+
                         resolve(txHash);
                     } catch (e) {
                         reject(e);
