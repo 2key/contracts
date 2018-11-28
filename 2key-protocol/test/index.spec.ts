@@ -386,6 +386,7 @@ describe('TwoKeyProtocol', () => {
             moderatorFeePercentageWei: moderatorFeePercentage,
             minContributionETHWei: twoKeyProtocol.Utils.toWei(minContributionETH, 'ether'),
             maxContributionETHWei: twoKeyProtocol.Utils.toWei(maxContributionETH, 'ether'),
+            currency: 'ETH',
             tokenDistributionDate: 1541109593669,
             maxDistributionDateShiftInDays: 180,
             bonusTokensVestingMonths: 6,

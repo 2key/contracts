@@ -32,11 +32,11 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     mapping(address => uint256) public units; // Number of units (ERC20 tokens) bought
     mapping(address => address) public publicLinkKey; // Public link key can generate only somebody who has ARCs
 
-
+    string public currency; // currency can be either ETH or USD
     address assetContractERC20; // Asset contract is address of ERC20 inventory
     uint256 contractorBalance;
     uint256 contractorTotalProceeds;
-    uint256 pricePerUnitInETHWei; // There's single price for the unit ERC20 (Should be in WEI)
+    uint256 pricePerUnitInETHWeiOrUSD; // There's single price for the unit ERC20 (Should be in WEI)
     uint256 public campaignStartTime; // Time when campaign start
     uint256 public campaignEndTime; // Time when campaign ends
     uint256 expiryConversionInHours; // How long converter can be pending before it will be automatically rejected and funds will be returned to convertor (hours)
@@ -46,8 +46,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     uint256 public maxReferralRewardPercent; // maxReferralRewardPercent is actually bonus percentage in ETH
     uint public maxConverterBonusPercent; //translates to discount - we can add this to constructor
 
-    uint minContributionETH; // Minimal amount of ETH that can be paid by converter to create conversion
-    uint maxContributionETH; // Maximal amount of ETH that can be paid by converter to create conversion
+    uint minContributionETHorUSD; // Minimal amount of ETH or USD that can be paid by converter to create conversion
+    uint maxContributionETHorUSD; // Maximal amount of ETH or USD that can be paid by converter to create conversion
 
     uint unit_decimals; // ERC20 selling data
     string symbol; // ERC20 selling data
@@ -72,38 +72,31 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         address _conversionHandler,
         address _moderator,
         address _assetContractERC20,
-        uint _campaignStartTime,
-        uint _campaignEndTime,
-        uint _expiryConversion,
-        uint _moderatorFeePercentage,
-        uint _maxReferralRewardPercent,
-        uint _maxConverterBonusPercent,
-        uint _pricePerUnitInETH,
-        uint _minContributionETH,
-        uint _maxContributionETH,
-        uint _conversionQuota
+        uint [] values,
+        string _currency
     )
     TwoKeyCampaignARC(
             _twoKeyEventSource,
-            _conversionQuota
+            values[9]
     )
     public {
         require(_assetContractERC20 != address(0), 'ERC20 contract address can not be 0x0');
-        require(_maxReferralRewardPercent > 0, 'Max referral reward percent must be > 0');
+        require(values[4] > 0, 'Max referral reward percent must be > 0');
         require(_conversionHandler != address(0), 'Address of Conversion Handler can not be 0x0');
         conversionHandler = _conversionHandler;
         contractor = msg.sender;
         moderator = _moderator;
         assetContractERC20 = _assetContractERC20;
-        campaignStartTime = _campaignStartTime;
-        campaignEndTime = _campaignEndTime;
-        expiryConversionInHours = _expiryConversion;
-        moderatorFeePercentage = _moderatorFeePercentage;
-        maxReferralRewardPercent = _maxReferralRewardPercent;
-        maxConverterBonusPercent = _maxConverterBonusPercent;
-        pricePerUnitInETHWei = _pricePerUnitInETH;
-        minContributionETH = _minContributionETH;
-        maxContributionETH = _maxContributionETH;
+        campaignStartTime = values[0];
+        campaignEndTime = values[1];
+        expiryConversionInHours = values[2];
+        moderatorFeePercentage = values[3];
+        maxReferralRewardPercent = values[4];
+        maxConverterBonusPercent = values[5];
+        pricePerUnitInETHWeiOrUSD = values[6];
+        minContributionETHorUSD = values[7];
+        maxContributionETHorUSD = values[8];
+        currency = _currency;
         setERC20Attributes();
         ITwoKeyConversionHandler(conversionHandler).setTwoKeyAcquisitionCampaignERC20(address(this), _moderator, contractor, _assetContractERC20, symbol);
         twoKeyEventSource.created(address(this), contractor, moderator);
@@ -251,8 +244,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     }
 
     function joinAndConvert(bytes signature) public payable {
-        require(msg.value >= minContributionETH);
-        require(msg.value <= maxContributionETH);
+        require(msg.value >= minContributionETHorUSD);
+        require(msg.value <= maxContributionETHorUSD);
         distributeArcsBasedOnSignature(signature);
         createConversion(msg.value, msg.sender);
         balancesConvertersETH[msg.sender] += msg.value;
@@ -261,8 +254,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     }
 
     function convert() public payable  {
-        require(msg.value >= minContributionETH);
-        require(msg.value <= maxContributionETH);
+        require(msg.value >= minContributionETHorUSD);
+        require(msg.value <= maxContributionETHorUSD);
         require(received_from[msg.sender] != address(0));
         createConversion(msg.value, msg.sender);
         balancesConvertersETH[msg.sender] += msg.value;
@@ -270,8 +263,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     }
 
     function() external payable {
-        require(msg.value >= minContributionETH);
-        require(msg.value <= maxContributionETH);
+        require(msg.value >= minContributionETHorUSD);
+        require(msg.value <= maxContributionETHorUSD);
         require(balanceOf(msg.sender) > 0);
         createConversion(msg.value, msg.sender);
         balancesConvertersETH[msg.sender] += msg.value;
@@ -359,7 +352,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
 
     /// @notice Function to return constantss
     function getConstantInfo() public view returns (uint256, uint256, uint256, uint256) {
-        return (pricePerUnitInETHWei, maxReferralRewardPercent, conversionQuota, unit_decimals);
+        return (pricePerUnitInETHWeiOrUSD, maxReferralRewardPercent, conversionQuota, unit_decimals);
     }
 
     /// @notice Function which acts like getter for all cuts in array
@@ -399,7 +392,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     /// @param conversionAmountETHWei is amount of eth in conversion
     /// @return tuple containing (base,bonus)
     function getEstimatedTokenAmount(uint conversionAmountETHWei) public view returns (uint, uint) {
-        uint baseTokensForConverterUnits = conversionAmountETHWei.mul(10 ** unit_decimals).div(pricePerUnitInETHWei);
+        uint baseTokensForConverterUnits = conversionAmountETHWei.mul(10 ** unit_decimals).div(pricePerUnitInETHWeiOrUSD);
         uint bonusTokensForConverterUnits = baseTokensForConverterUnits.mul(maxConverterBonusPercent).div(100);
         return (baseTokensForConverterUnits, bonusTokensForConverterUnits);
     }
@@ -423,16 +416,16 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     /// @notice Option to update MinContributionETH
     /// @dev only Contractor can call this method, otherwise it will revert - emits Event when updated
     /// @param value is the new value we are going to set for minContributionETH
-    function updateMinContributionETH(uint value) public onlyContractor {
-        minContributionETH = value;
+    function updateMinContributionETHOrUSD(uint value) public onlyContractor {
+        minContributionETHorUSD = value;
         twoKeyEventSource.updatedData(block.timestamp, value, "Updated maxContribution");
     }
 
     /// @notice Option to update maxContributionETH
     /// @dev only Contractor can call this method, otherwise it will revert - emits Event when updated
     /// @param value is the new maxContribution value
-    function updateMaxContributionETH(uint value) public onlyContractor {
-        maxContributionETH = value;
+    function updateMaxContributionETHorUSD(uint value) public onlyContractor {
+        maxContributionETHorUSD = value;
         twoKeyEventSource.updatedData(block.timestamp, value, "Updated maxContribution");
     }
 

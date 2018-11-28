@@ -28,7 +28,7 @@ module.exports = function deploy(deployer) {
             .then(() => deployer.deploy(TwoKeyHackEventSource))
             .then(() => deployer.deploy(TwoKeyAcquisitionCampaignERC20, TwoKeyHackEventSource.address, TwoKeyConversionHandler.address,
                 '0xb3fa520368f2df7bed4df5185101f303f6c7decc', ERC20TokenMock.address,
-                12345, 15345, 12345, 5, 5, 5, 5, 12, 15, 1))
+                [12345, 15345, 12345, 5, 5, 5, 5, 12, 15, 1], 'USD'))
             .then(() => TwoKeyAcquisitionCampaignERC20.deployed())
             .then(() => true)
             .then(() => EventSource.deployed().then(async (eventSource) => {

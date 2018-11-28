@@ -155,7 +155,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                         conversionHandlerAddress,
                         data.moderator || from,
                         data.assetContractERC20,
-                        data.campaignStartTime,
+                        [data.campaignStartTime,
                         data.campaignEndTime,
                         data.expiryConversion,
                         data.moderatorFeePercentageWei,
@@ -164,7 +164,8 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                         data.pricePerUnitInETHWei,
                         data.minContributionETHWei,
                         data.maxContributionETHWei,
-                        data.referrerQuota || 5,
+                        data.referrerQuota || 5],
+                        data.currency
                     ],
                     progressCallback,
                     link: {
@@ -705,6 +706,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 }
             } catch (e) {
                 this.base._log('joinAndConvert ERROR', e.toString());
+                this.base._log(e);
                 reject(e);
             }
         });
@@ -1216,6 +1218,25 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
            } catch (e) {
                reject(e);
            }
+        });
+    }
+
+
+    /**
+     *
+     * @param campaign
+     * @param {string} from
+     * @returns {Promise<string>}
+     */
+    public getAcquisitionCampaignCurrency(campaign: any, from: string) : Promise<string> {
+        return new Promise<string>(async(resolve, reject) => {
+            try {
+                const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
+                const currency: string = await promisify(campaignInstance.currency,[{from}]);
+                resolve(currency);
+            } catch (e) {
+                reject(e);
+            }
         });
     }
 

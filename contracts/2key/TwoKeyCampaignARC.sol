@@ -7,7 +7,6 @@ import "./ArcERC20.sol";
 contract TwoKeyCampaignARC is ArcERC20 {
 
 	using SafeMath for uint256;
-
 	address public contractor;
     address public moderator;
 
