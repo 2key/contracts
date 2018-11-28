@@ -912,23 +912,28 @@ describe('TwoKeyProtocol', () => {
     it('should get all whitelisted methods from congress', async () => {
         const methods = await twoKeyProtocol.Congress.getAllowedMethods(from);
         // console.log(methods);
-    });
+    }).timeout(30000);
 
     it('should get all whitelisted addresses', async() => {
         const addresses = await twoKeyProtocol.Congress.getAllMembersForCongress(from);
         // console.log(addresses);
         expect(addresses.length).to.be.equal(4);
-    });
+    }).timeout(30000);
 
     it('should get rate from upgradable exchange', async() => {
         const rate = await twoKeyProtocol.UpgradableExchange.getRate(from);
         console.log('Rate is : ' + rate);
-    });
+    }).timeout(30000);
+
+    it('should print currency', async() => {
+        const currency = await twoKeyProtocol.AcquisitionCampaign.getAcquisitionCampaignCurrency(campaignAddress, from);
+        console.log('Currency is: '+ currency);
+    }).timeout(30000);
 
     it('should print maintainer addresses', async() => {
         const maintainers = await twoKeyProtocol.Registry.getRegistryMaintainers();
         console.log(maintainers);
-    })
+    }).timeout(30000);
 
 
 
