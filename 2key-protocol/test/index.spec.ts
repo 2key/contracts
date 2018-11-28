@@ -935,6 +935,11 @@ describe('TwoKeyProtocol', () => {
         console.log(maintainers);
     }).timeout(30000);
 
+    it('should get moderator total earnings in campaign', async() => {
+        const totalEarnings = await twoKeyProtocol.AcquisitionCampaign.getModeratorTotalEarnings(campaignAddress,from);
+        console.log('Moderator total earnings: '+ totalEarnings);
+    })
+
 
 
 
