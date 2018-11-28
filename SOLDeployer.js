@@ -389,7 +389,9 @@ async function main() {
       try {
         const networks = process.argv[3];
         //truffle migrate --network=dev-local --f 4 update
-        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'),['migrate',`--network=${networks}`,'--f 4','update']);
+        fs.unlinkSync(path.join(buildPath, 'TwoKeyRegLogic.json'));
+        await runProcess('truffle',['migrate',`--network=${networks}`,'--f 4','update']);
+        await generateSOLInterface();
         process.exit(0);
       } catch (err) {
         process.exit(1);

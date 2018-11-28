@@ -3,7 +3,7 @@ const EventSource = artifacts.require('TwoKeyEventSource');
 const TwoKeyRegLogic = artifacts.require('TwoKeyRegLogic');
 const Registry = artifacts.require('Registry');
 const Proxy = artifacts.require('UpgradeabilityProxy');
-const json = require('./2key-protocol/src/proxyAddresses.json');
+const json = require('../2key-protocol/src/proxyAddresses.json');
 const fs = require('fs');
 module.exports = function deploy(deployer) {
     console.log(process.argv);

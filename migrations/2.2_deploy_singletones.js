@@ -65,7 +65,6 @@ module.exports = function deploy(deployer) {
                         }
                         console.log("File has been created");
                     });
-
                     proxyAddress = proxy;
                     resolve(proxy);
                 } catch (e) {

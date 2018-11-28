@@ -1,9 +1,9 @@
 export default { NetworkHashes:
    { '8086':
       { hash:
-         '7845f72f5cddb5ede42fefa9cc14534c3f7c8892e5ceb6f4f39e2fe029fb2828',
+         '625ff1c6d6eabf90cd69acb11131df43483680e60adba0c5f254c0e17d55dbfd',
         humanHash:
-         'when restaurants  go and     go    out tedious you then when         go  go  go go' },
+         'overwhelming and        i   evening streets  hotels you nights   let     argument   when insidious  ' },
      '98052':
       { hash:
          '6f1d9986861dd68182c2ded8b50d498897961d2e8fd960a93cc63e3fbfe53a9d',
@@ -14,9 +14,9 @@ export default { NetworkHashes:
       { '8086':
          { events: {},
            links: {},
-           address: '0x54635e24549aa71cd81cc8289a41ff77c55db8cc',
+           address: '0x1950b26d58d36db978e9c8781821fa875e0cbb01',
            transactionHash:
-            '0x96fd72316d400c696d56edeb302ac8f4b48aaeeb4ecd1ae65f193890035de6af' },
+            '0x7b26096f4daaaa111ab151ad6090307cb07d819807eab2d40cff73f67d4a20c1' },
         '98052':
          { events: {},
            links: {},
@@ -517,9 +517,9 @@ export default { NetworkHashes:
                  name: 'VersionAdded',
                  type: 'event' } },
            links: {},
-           address: '0xaaf846de2bc761b4671472b734bbba6c648de6a9',
+           address: '0x9975b48a11508eb943cb35e1c6cb9e3756b28416',
            transactionHash:
-            '0x02fb81df4de30bdd3d1714477252904159c0bf073afd7e5bcc267eaccde980ef' } },
+            '0x7a65e995d682635a9732042c5176dcfdf1c7762717d889a418f5138923f4eebd' } },
      abi:
       [ { anonymous: false,
           inputs: [ { indexed: false, name: 'proxy', type: 'address' } ],
@@ -1009,9 +1009,9 @@ export default { NetworkHashes:
       { '8086':
          { events: {},
            links: {},
-           address: '0xe4a03a5955e87b550323184a8fe2f4fb161e2b56',
+           address: '0x2edc473be53408c21a195084e5233b40b461a4bf',
            transactionHash:
-            '0x2b07ef06fd995c72d0281c6e248ccba518371d798cc0671492ec25296001020c' } },
+            '0x41bbed6517e69c5cc887dc400459fcb044a5e97f0763e7ce1e718defe04153f1' } },
      abi:
       [ { constant: true,
           inputs: [],
@@ -1241,9 +1241,9 @@ export default { NetworkHashes:
       { '8086':
          { events: {},
            links: {},
-           address: '0xb51c32ae3c6367db4d21e9279f04b3232480f685',
+           address: '0xd939886b8d5136fa26a0dce66b1e7bc7617efd68',
            transactionHash:
-            '0xc0bd1fe50fb692dad6c1125b2766331bac7e96444ac3187678e836f59664a31a' } },
+            '0xd0b395fb491df4d840f4f89ef9c489358797cd4620cf9230b86083bcf689e5cf' } },
      abi:
       [ { constant: true,
           inputs: [ { name: '', type: 'uint256' } ],
@@ -1802,9 +1802,9 @@ export default { NetworkHashes:
       { '8086':
          { events: {},
            links: {},
-           address: '0xdbf88c559b7a9348a68aa75bbb591f5740464da6',
+           address: '0xefe0a5fd25ae3e0e7eb87c9706c4716116c64dcf',
            transactionHash:
-            '0x1337400f532902c4c617c108bc2d6dde53250488c55e311e3228f6175d60db1a' } },
+            '0xd746a223cd25db83e9f53f97a33b2b2ed736e5ef9e50b52df5a76561ceabe2c3' } },
      abi:
       [ { constant: true,
           inputs: [],
@@ -1987,9 +1987,9 @@ export default { NetworkHashes:
       { '8086':
          { events: {},
            links: {},
-           address: '0xe2b46c78fdd93923934dd80eee4d235cfc2d6310',
+           address: '0x0ff7c26c9fe20ddf3b6eb8ff1bf8bf2a1948f84d',
            transactionHash:
-            '0x96f8b431198709693bdd98ad5c495665862cc42aa685e2115f0ae5d616edb537' } },
+            '0xfe25bf6c8b472b4bb1b41111d6f6559f4eaa0de407fc83405dcc99635ff6e5ef' } },
      abi:
       [ { constant: true,
           inputs: [],
@@ -2478,9 +2478,9 @@ export default { NetworkHashes:
       { '8086':
          { events: {},
            links: {},
-           address: '0x5dc619d82a4e11f5cdb0267398ec699f6ea657e4',
+           address: '0xa7d63ffece2f4dcf5ee53b964f50724d46bd4510',
            transactionHash:
-            '0x104f2905985c9bed97ca209552ca059322bfc2f6c8f1fbef1c16a0e9558b94a0' } },
+            '0x0a04746631054df468045ed191923a2425ddaffe329dd429fb7895e8f3fbd7b0' } },
      abi:
       [ { constant: true,
           inputs: [ { name: '', type: 'address' } ],
@@ -2800,9 +2800,9 @@ export default { NetworkHashes:
       { '8086':
          { events: {},
            links: {},
-           address: '0x6e2cdb2188665a83143eb837a9120295f8bbe2b9',
+           address: '0xd41a6259854c3309bf7b0fe37d51da3af1ee6142',
            transactionHash:
-            '0x82629d136d18520f0a68f9221e967b80ecb951019cfcad7b9be59e1c5cf2671a' } },
+            '0x7cdc52556f299bbb8ceac8515ada2aadda1a90ae78ca2c448c00fb8d56d5adb9' } },
      abi:
       [ { constant: true,
           inputs: [],
