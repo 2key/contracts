@@ -388,7 +388,8 @@ async function main() {
     case '--update':
       try {
         const networks = process.argv[3];
-        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'),['migrate --f 4 ','--network',networks.concat(process.argv.slice(4)),' update']);
+        //truffle migrate --network=dev-local --f 4 update
+        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'),['migrate','--network=',networks,'--f 4','update']);
         process.exit(0);
       } catch (err) {
         process.exit(1);
