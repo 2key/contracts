@@ -32,7 +32,7 @@ const versioning = require('./generateContractsVersioning');
 
 async function handleExit(p) {
   console.log(p);
-  if (p !== 0 && (process.argv[2] !== '--migrate' && process.argv[2] !== '--test' && process.argv[2] !== '--ledger')) {
+  if (p !== 0 && (process.argv[2] !== '--migrate' && process.argv[2] !== '--update' && process.argv[2] !== '--test' && process.argv[2] !== '--ledger')) {
     await contractsGit.reset('hard');
     await twoKeyProtocolLibGit.reset('hard');
   }

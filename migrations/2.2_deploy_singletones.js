@@ -58,7 +58,7 @@ module.exports = function deploy(deployer) {
                     };
                     await TwoKeyRegLogic.at(proxy).setInitialParams(EventSource.address, TwoKeyAdmin.address, (deployer.network.startsWith('rinkeby') || deployer.network.startsWith('public.')) ? '0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f' : '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7');
 
-                    fs.writeFile("./2key-protocol/proxyAddresses.json", JSON.stringify(obj,null,4), (err) => {
+                    fs.writeFile("./2key-protocol/src/proxyAddresses.json", JSON.stringify(obj,null,4), (err) => {
                         if (err) {
                             console.error(err);
                             return;
