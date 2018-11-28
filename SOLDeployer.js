@@ -385,9 +385,19 @@ const test = () => new Promise(async (resolve, reject) => {
 async function main() {
   const mode = process.argv[2];
   switch (mode) {
+    case '--update':
+      try {
+        const networks = process.argv[3];
+        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'),['migrate --f 4 ','--network',networks.concat(process.argv.slice(4)),' update']);
+        process.exit(0);
+      } catch (err) {
+        process.exit(1);
+      }
+      break;
     case '--migrate':
         try {
         const networks = process.argv[3].split(',');
+
         const l = networks.length;
         let flag = false;
         for (let i = 0; i < l; i += 1) {
@@ -422,6 +432,7 @@ async function main() {
     case '--generate':
       generateSOLInterface();
       break;
+
     case '--archive':
       archiveBuild();
       break;
