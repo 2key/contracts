@@ -389,7 +389,7 @@ async function main() {
       try {
         const networks = process.argv[3];
         //truffle migrate --network=dev-local --f 4 update
-        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'),['migrate','--network=',networks,'--f 4','update']);
+        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'),['migrate',`--network=${networks}`,'--f 4','update']);
         process.exit(0);
       } catch (err) {
         process.exit(1);
