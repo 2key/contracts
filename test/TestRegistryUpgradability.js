@@ -3,7 +3,7 @@ const TwoKeyRegLogicV1 = artifacts.require('TwoKeyRegLogicV1');
 const Registry = artifacts.require('Registry');
 const Proxy = artifacts.require('UpgradeabilityProxy');
 
-
+//TODO : Registry -> SingletonRegistry
 contract('Upgradeable', async(accounts) => {
 
     it('should work', async() =>  {
@@ -14,7 +14,6 @@ contract('Upgradeable', async(accounts) => {
         const registry = await Registry.new();
 
         await registry.addVersion("1.0", impl_v1_0.address);
-        await registry.addVersion("1.1", impl_v1_1.address);
 
         const {logs} = await registry.createProxy("1.0");
 
@@ -26,11 +25,14 @@ contract('Upgradeable', async(accounts) => {
 
         await TwoKeyRegLogic.at(proxy).setValue(5);
         let value = await TwoKeyRegLogic.at(proxy).getValue();
+        console.log('First value is: ' + value);
         assert.equal(value,5,'values are not same 1');
+
 
         let maint = await TwoKeyRegLogic.at(proxy).getMaintainers();
         console.log(maint);
 
+        await registry.addVersion("1.1", impl_v1_1.address);
         await Proxy.at(proxy).upgradeTo("1.1");
 
 
