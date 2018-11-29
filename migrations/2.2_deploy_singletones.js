@@ -51,8 +51,9 @@ module.exports = function deploy(deployer) {
                     const {logs} = await registry.createProxy("1.0");
                     const {proxy} = logs.find(l => l.event === 'ProxyCreated').args;
                     console.log('Proxy address: ' + proxy);
-                    let obj = {
-                        'TwoKeyRegistryLogic' : TwoKeyRegLogic.address,
+                    let obj = {};
+                    obj['TwoKeyRegistryLogic'] = {
+                        'address' : TwoKeyRegLogic.address,
                         'Proxy' : proxy,
                         'Version': "1.0"
                     };

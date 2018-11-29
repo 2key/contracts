@@ -1,28 +1,28 @@
 export default { NetworkHashes:
    { '8086':
       { hash:
-         '234a3362a4d94bd04d524b28fc96198f19885da66d8f30ae8901209f40c301f9',
+         'f751f4a21d052ea86368e077761979e47823a57a73a8d999ae20f906bcb6e107',
         humanHash:
-         'upon you retreats overwhelming   you  you follow you go   us  us  and  i  deserted   us a  one  us ' },
+         ' that   us and go  question i  come women us when  when upon  when our     a  i    when' },
      '98052':
       { hash:
-         '6f1d9986861dd68182c2ded8b50d498897961d2e8fd960a93cc63e3fbfe53a9d',
+         '32253a1d01498cc06bae476ddcc0d67d57f0dedd6144a02e0ea203386c887200',
         humanHash:
-         'i us    us        let you    us go   lead  then  then then   then ' } },
+         'muttering through then us us you   i  oyster i    when to    an sawdust  go let  then then i  make let' } },
   Call:
    { networks:
       { '8086':
          { events: {},
            links: {},
-           address: '0x3db0c8f1d20179b2d01f2c9a7ec9def6b3b4fede',
+           address: '0x835aaf6ea6b04892915a8299110652e7cc897a4e',
            transactionHash:
-            '0x4e1a031e52199f30cdfbbdcc749867134cbad72dce6325fcd0f7adba1c8657d7' },
+            '0xc9611fd356adcdce2a23564502375196b3a898b76c59f54ecc86d6a9911c37d5' },
         '98052':
          { events: {},
            links: {},
-           address: '0xe650be85e7fd39c9759d7a84514851861f4c56b8',
+           address: '0x8bff9b233076fb7a18d91ddebdb17139a1680b5f',
            transactionHash:
-            '0x29877ca9d3e40cf7123f8797ec5bc107d62c04829b54a7839171986b6aeab905' } },
+            '0x1af278f10aea7eb6cf181abc91ad067a1eece45a11888cca571b907c02a313f1' } },
      abi:
       [ { constant: true,
           inputs:
@@ -517,9 +517,9 @@ export default { NetworkHashes:
                  name: 'VersionAdded',
                  type: 'event' } },
            links: {},
-           address: '0x0b03688adfaddfb96bd1e673077f3eec69ad1c1e',
+           address: '0x6615cfa5d861430cfe998c6fa1989229cce344a4',
            transactionHash:
-            '0xcad1e2a7d97d0360297aa84b2caa718fe38303c1aacf5163d7152a723b117b78' } },
+            '0x680ad273cb8a151ef6fecd1a7a10e106beda9fb3ea35ab021fe9eff3b672fb04' } },
      abi:
       [ { anonymous: false,
           inputs: [ { indexed: false, name: 'proxy', type: 'address' } ],
@@ -1016,9 +1016,9 @@ export default { NetworkHashes:
       { '8086':
          { events: {},
            links: {},
-           address: '0xd9559a6ebccc6b0c6075c5bd9b4a3bcf0ec9310a',
+           address: '0x5263b6d2b58419dada5312a46be476551c29fd8a',
            transactionHash:
-            '0xf9b1c998fd0c86a4e3149ea77992c2232340c6cd436cc031ad4308999adf9532' } },
+            '0xb373b3f9550f8eb5d20156dd853638a7506a20aa7d2309bf054faa751523453f' } },
      abi:
       [ { constant: true,
           inputs: [],
@@ -1248,9 +1248,9 @@ export default { NetworkHashes:
       { '8086':
          { events: {},
            links: {},
-           address: '0xdc9bd5e10b86ac154105bf1406049e79d21fa33d',
+           address: '0xadec89f1a020bd1cb492391c85d3ee2a35e83c4e',
            transactionHash:
-            '0xf053b7b8316f7b69cc0ac7422154b421ad944d2ab7e6982d25e23d644bfa87eb' } },
+            '0x4918e1fdba74e723396171dbb99a3de7f32c0d9da1c352e1a0d934ee31b81367' } },
      abi:
       [ { constant: true,
           inputs: [ { name: '', type: 'uint256' } ],
@@ -1809,9 +1809,9 @@ export default { NetworkHashes:
       { '8086':
          { events: {},
            links: {},
-           address: '0xb4223e810e13a9b18f28ebac30eb9109cdb87694',
+           address: '0xa2ce3ec5cd60f7e2b6f7ac96767bcf3b7d0edf6e',
            transactionHash:
-            '0x71bd792ff0c74cbd8cf85522ab242ce857874c2622af5e0715525fb2ffe5296e' } },
+            '0x1e85db774cd02b9d297c9a3cd7195a3beaef99a7f14f247a2f85200c9183739c' } },
      abi:
       [ { constant: true,
           inputs: [],
@@ -1994,9 +1994,9 @@ export default { NetworkHashes:
       { '8086':
          { events: {},
            links: {},
-           address: '0x1e4751b8983a23ef606f49c08bbd72120907484c',
+           address: '0xf67c9ec17a52bf4ea597821412cadea3ff1ee7ca',
            transactionHash:
-            '0x4d25858d3a558990af542e2c7412f144e954106c371433ea4b3604cc8389a834' } },
+            '0x2efd299fd1d5143c88763d986d121502d58f9cc3feb4418f2efcea6f6279d122' } },
      abi:
       [ { constant: true,
           inputs: [],
@@ -2351,10 +2351,10 @@ export default { NetworkHashes:
    { networks:
       { '98052':
          { events: {},
-           links: { Call: '0xe650be85e7fd39c9759d7a84514851861f4c56b8' },
-           address: '0x32643cd0b303ed2f9f1d40f8e4fb807c7c285403',
+           links: { Call: '0x8bff9b233076fb7a18d91ddebdb17139a1680b5f' },
+           address: '0xfd1bada5c433891fac18cfa9983e0f9bb09ea6c9',
            transactionHash:
-            '0x55b1c401c1013f6e9c2f6a5b7531ee99117fc035ffb3ef7600f8e2d50e3bdd08' } },
+            '0xfe576e3b795a689f2e92444a73bdcd26bb888830be869013c1acd8f848ca6042' } },
      abi:
       [ { constant: true,
           inputs:
@@ -2485,9 +2485,9 @@ export default { NetworkHashes:
       { '8086':
          { events: {},
            links: {},
-           address: '0x69110403a81ce2c6e467b46a077ee23a8db98588',
+           address: '0x4c3f7a2d47855e8f05b2913d144abc3b938e0a63',
            transactionHash:
-            '0xa17d6f88e967038bf582631440c795e687aecab1201c99aa307f29267244228e' } },
+            '0xce68bd186cc91a390c6ea91bde540fde77455c2b7c3e4adea4674188bb87cff3' } },
      abi:
       [ { constant: true,
           inputs: [ { name: '', type: 'address' } ],
@@ -2807,9 +2807,9 @@ export default { NetworkHashes:
       { '8086':
          { events: {},
            links: {},
-           address: '0x3fde0928cc67ee399093a44ea4089f629072d10e',
+           address: '0x9993da88b6721bc0844e5c5b1ea02d25c38b2c12',
            transactionHash:
-            '0x12194592ee3ecc2c0c91899f17783779bc59c3ea75feabaf09f7dd358896e46c' } },
+            '0x5cc0e3013265a92e5661e27ceb13ce8cdef66e3c698542caf8c285b729e1cb7e' } },
      abi:
       [ { constant: true,
           inputs: [],
