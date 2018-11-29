@@ -1,11 +1,13 @@
 pragma solidity ^0.4.24;
 
+import "../interfaces/ITwoKeyExchangeContract.sol";
+
 /**
  * @author Nikola Madjarevic
  * This is going to be the contract on which we will store exchange rates between USD and ETH
  * Will be maintained, and updated by our (@2key) trusted server and CMC api every 8 hours.
  */
-contract TwoKeyExchangeContract {
+contract TwoKeyExchangeContract is ITwoKeyExchangeContract {
 
     /**
      * @notice public variable which will store rate between 1 wei eth and 1 wei dollar
