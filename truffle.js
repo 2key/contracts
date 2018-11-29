@@ -17,28 +17,36 @@ const ledgerOptions = {
 };
 
 /*
-# Internal
-## Testing:
-Private: geth.private.test.k8s.2key.net:8545, geth.private.test.k8s.2key.net:8546
-Public: geth.public.test.k8s.2key.net:8545, geth.public.test.k8s.2key.net:8546
 
-## Production:
-Private: geth.private.prod.k8s.2key.net:8545, geth.private.prod.k8s.2key.net:8546
-Public: geth.public.prod.k8s.2key.net:8545, geth.public.prod.k8s.2key.net:8546
+#### STAGING PLASMA
 
-# External:
-## Testing:
-Private: ext.geth.private.test.k8s.2key.net:8545, ext.geth.private.test.k8s.2key.net:8546
-Private WS SSL: ws-ext.geth.private.test.k8s.2key.net:443
+**RPC**:  https://rpc.private.test.k8s.2key.net:443
 
-Public: ext.geth.public.test.k8s.2key.net:8545, ext.geth.public.test.k8s.2key.net:8546
-Public WS SSL: ws-ext.geth.public.test.k8s.2key.net:443
+**WS**:   wss://ws.private.test.k8s.2key.net:443
 
-## Production:
-Private: ext.geth.private.prod.k8s.2key.net:8545, ext.geth.private.prod.k8s.2key.net:8546
-Public: ext.geth.public.prod.k8s.2key.net:8545, ext.geth.public.prod.k8s.2key.net:8546
+
+#### RINKEBY
+
+**RPC**:  https://rpc.public.test.k8s.2key.net:443
+
+**WS**:   wss://ws.public.test.k8s.2key.net:443
+
+
+#### PROD-PLASMA
+
+**RPC**:  https://rpc.private.prod.k8s.2key.net:443
+
+**WS**:   wss://ws.private.prod.k8s.2key.net:443
+
+
+#### MAIN-NET
+
+**RPC**:  https://rpc.public.prod.k8s.2key.net:443
+
+**WS**:   wss://ws.public.prod.k8s.2key.net:443
 
 */
+
 
 module.exports = {
   networks: {

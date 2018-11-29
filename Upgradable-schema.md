@@ -26,9 +26,19 @@ Schema:
                                             |    ContractV1    |  ← |    ContractV2    |         
                                              ------------------      ------------------
                                           
+For the example of TwoKeyReg:
+Proxy: will not be deployed (it serves as inheritence parent for UpgradeabilitySrorage)
+UpgradeabilityStorage: will not be deployed (it serves as inheritence parent for UpgradeabilitySrorage)
+UpgradeabilityProxy: gets deployed by the registry, gets deployed only once in lifetime for a specific logicContract type (e.g. TwoKeyReg)
+Upgradeable: logic which is inherits by any 2key singleton logic
+Registry: 
 
 `Proxy`, `UpgradeabilityProxy` and `UpgradeabilityStorage` are generic contracts that can be used to implement
 upgradeability through proxies.  
+
+`Proxy`: forwards calls (it can forward any call) to the valid implementation
+`UpgradeabilityProxy`: changes the implementation version
+`UpgradeabilityStorage`: stores registry address, current implementaion. 
 
 `UpgradeabilityProxy` is the contract that will delegate calls to specific implementations of the logic contract behavior. 
 These behaviors are the code that can be upgraded by the token developer (e.g. `ContractV1` and `ContractV2`). 
