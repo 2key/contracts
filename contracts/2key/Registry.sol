@@ -8,6 +8,8 @@ import "./UpgradabilityProxy.sol";
  * @title Registry
  * @dev This contract works as a registry of versions, it holds the implementations for the registered versions.
  */
+
+//TODO: Support one registry for all singletones (map all this per contract name)
 contract Registry is IRegistry {
     // Mapping of versions to implementations of different functions
     mapping (string => address) internal versions;
