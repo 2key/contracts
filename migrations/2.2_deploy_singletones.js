@@ -7,7 +7,7 @@ const TwoKeyCongress = artifacts.require('TwoKeyCongress');
 const Call = artifacts.require('Call');
 const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
 const Registry = artifacts.require('Registry');
-
+const TwoKeyExchangeContract = artifacts.require('TwoKeyExchangeContract');
 
 var fs = require('fs');
 /*
@@ -15,12 +15,13 @@ var fs = require('fs');
  */
 
 module.exports = function deploy(deployer) {
-    let proxyAddress;
+  let proxyAddress;
   let adminInstance;
   let initialCongressMembers = [
     '0x4216909456e770FFC737d987c273a0B8cE19C13e', // Eitan
     '0x5e2B2b278445AaA649a6b734B0945Bd9177F4F03', // Kiki
   ];
+  let maintainerAddress = (deployer.network.startsWith('rinkeby') || deployer.network.startsWith('public.')) ? '0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f' : '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7';
   let votingPowers = [1,1];
 //0xb6736cdd635779a74a6bd359864cf2965a9d5113
   deployer.deploy(Call);
@@ -34,9 +35,10 @@ module.exports = function deploy(deployer) {
             console.log("ADMIN ADDRESS: " + TwoKeyAdmin.address);
         })
         .then(() => deployer.deploy(TwoKeyEconomy, TwoKeyAdmin.address))
-        //price in mili-cents 0.095$ = 1 token
         .then(() => deployer.deploy(TwoKeyUpgradableExchange, 95, TwoKeyAdmin.address, TwoKeyEconomy.address))
         .then(() => TwoKeyUpgradableExchange.deployed())
+        .then(() => deployer.deploy(TwoKeyExchangeContract, [maintainerAddress], TwoKeyAdmin.address))
+        .then(() => TwoKeyExchangeContract.deployed())
         .then(() => deployer.deploy(EventSource, TwoKeyAdmin.address))
         .then(() => deployer.deploy(TwoKeyRegLogic)
         .then(() => TwoKeyRegLogic.deployed())

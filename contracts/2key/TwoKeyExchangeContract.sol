@@ -2,10 +2,11 @@ pragma solidity ^0.4.24;
 
 import "../interfaces/ITwoKeyExchangeContract.sol";
 
+
 /**
  * @author Nikola Madjarevic
  * This is going to be the contract on which we will store exchange rates between USD and ETH
- * Will be maintained, and updated by our (@2key) trusted server and CMC api every 8 hours.
+ * Will be maintained, and updated by our trusted server and CMC api every 8 hours.
  */
 contract TwoKeyExchangeContract is ITwoKeyExchangeContract {
 
@@ -67,7 +68,7 @@ contract TwoKeyExchangeContract is ITwoKeyExchangeContract {
      * @notice Function where our backend will update the state (rate between eth_wei and dollar_wei) every 8 hours
      * @dev only twoKeyMaintainer address will be eligible to update it
      */
-    function setPrice(uint _EthWEI_UsdWEI) public onlyTwoKeyMaintainer {
+    function setPrice(uint _EthWEI_UsdWEI) public onlyMaintainer {
         EthWEI_UsdWEI = _EthWEI_UsdWEI;
     }
 
