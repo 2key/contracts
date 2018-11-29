@@ -20,10 +20,8 @@ module.exports = function deploy(deployer) {
   let initialCongressMembers = [
     '0x4216909456e770FFC737d987c273a0B8cE19C13e', // Eitan
     '0x5e2B2b278445AaA649a6b734B0945Bd9177F4F03', // Kiki
-    '0xd9ce6800b997a0f26faffc0d74405c841dfc64b7', // intcollege
-    '0xb3fa520368f2df7bed4df5185101f303f6c7decc', // 2keyeconomy
   ];
-  let votingPowers = [1,2];
+  let votingPowers = [1,1];
 //0xb6736cdd635779a74a6bd359864cf2965a9d5113
   deployer.deploy(Call);
   if(deployer.network.startsWith('dev') || deployer.network.startsWith('public.') || deployer.network.startsWith('rinkeby') || deployer.network == 'ropsten') {
