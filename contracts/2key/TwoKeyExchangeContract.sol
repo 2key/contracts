@@ -11,7 +11,7 @@ contract TwoKeyExchangeContract {
      * @notice public variable which will store rate between 1 wei eth and 1 wei dollar
      * Will be updated every 8 hours, and it's public
      */
-    uint public EthWEI_UsdWEI;
+    uint EthWEI_UsdWEI;
 
     /**
      * Mapping which will store maintainers who are eligible to update contract state
@@ -69,15 +69,12 @@ contract TwoKeyExchangeContract {
         EthWEI_UsdWEI = _EthWEI_UsdWEI;
     }
 
-   /**
-    * 1 ETH = 1000000000000000000 wei
-    * 1$ wei = 1000000000000000000 $wei
-    * 1 ETH = X $
-    * 1 wei  = X * 10**18 $ price for 1 WEI in dollars
-    * value = rate * wei / 1000;
-   */
-
-
-
+    /**
+     * @notice Function to get actual rate how much is 1 wei worth $ weis
+     * @return EthWEI_UsdWEI value
+     */
+    function getPrice() public view returns (uint) {
+        return EthWEI_UsdWEI;
+    }
 
 }
