@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-import './IRegistry.sol';
+import './ITwoKeySingletonesRegistry.sol';
 import './Upgradeable.sol';
 import "./UpgradabilityProxy.sol";
 
@@ -10,7 +10,7 @@ import "./UpgradabilityProxy.sol";
  */
 
 //TODO: Support one registry for all singletones (map all this per contract name)
-contract Registry is IRegistry {
+contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
     // Mapping of versions to implementations of different functions
     mapping (string => address) internal versions;
 

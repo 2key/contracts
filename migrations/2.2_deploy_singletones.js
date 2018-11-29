@@ -6,7 +6,7 @@ const TwoKeyRegLogic = artifacts.require('TwoKeyRegLogic');
 const TwoKeyCongress = artifacts.require('TwoKeyCongress');
 const Call = artifacts.require('Call');
 const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
-const Registry = artifacts.require('Registry');
+const TwoKeySingletonesRegistry = artifacts.require('TwoKeySingletonesRegistry');
 const TwoKeyExchangeContract = artifacts.require('TwoKeyExchangeContract');
 
 var fs = require('fs');
@@ -42,8 +42,8 @@ module.exports = function deploy(deployer) {
         .then(() => deployer.deploy(EventSource, TwoKeyAdmin.address))
         .then(() => deployer.deploy(TwoKeyRegLogic)
         .then(() => TwoKeyRegLogic.deployed())
-        .then(() => deployer.deploy(Registry))
-        .then(() => Registry.deployed().then(async(registry) => {
+        .then(() => deployer.deploy(TwoKeySingletonesRegistry))
+        .then(() => TwoKeySingletonesRegistry.deployed().then(async(registry) => {
             console.log('... Adding TwoKeyRegLogic to Proxy registry as valid implementation');
             await new Promise(async(resolve,reject) => {
                 try {

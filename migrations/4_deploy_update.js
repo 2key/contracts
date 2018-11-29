@@ -1,7 +1,7 @@
 const TwoKeyAdmin = artifacts.require('TwoKeyAdmin');
 const EventSource = artifacts.require('TwoKeyEventSource');
 const TwoKeyRegLogic = artifacts.require('TwoKeyRegLogic');
-const Registry = artifacts.require('Registry');
+const TwoKeySingletonesRegistry = artifacts.require('TwoKeySingletonesRegistry');
 const Proxy = artifacts.require('UpgradeabilityProxy');
 const json = require('../2key-protocol/src/proxyAddresses.json');
 const fs = require('fs');
@@ -38,7 +38,7 @@ module.exports = function deploy(deployer) {
                         }
                     })
                 })
-            .then(() => Registry.deployed()
+            .then(() => TwoKeySingletonesRegistry.deployed()
             .then(async (registry) => {
                 await new Promise(async(resolve,reject) => {
                     try {

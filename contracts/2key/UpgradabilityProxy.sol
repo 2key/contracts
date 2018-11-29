@@ -1,7 +1,7 @@
 pragma solidity ^0.4.18;
 
 import './Proxy.sol';
-import './IRegistry.sol';
+import './ITwoKeySingletonesRegistry.sol';
 import "./UpgradabilityStorage.sol";
 
 /**
@@ -14,7 +14,7 @@ contract UpgradeabilityProxy is Proxy, UpgradeabilityStorage {
     * @dev Constructor function
     */
     constructor (string _version) public {
-        registry = IRegistry(msg.sender);
+        registry = ITwoKeySingletonesRegistry(msg.sender);
         upgradeTo(_version);
     }
 

@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-import './IRegistry.sol';
+import './ITwoKeySingletonesRegistry.sol';
 
 /**
  * @title UpgradeabilityStorage
@@ -8,7 +8,7 @@ import './IRegistry.sol';
  */
 contract UpgradeabilityStorage {
     // Versions registry
-    IRegistry internal registry;
+    ITwoKeySingletonesRegistry internal registry;
 
     // Address of the current implementation
     address internal _implementation;

@@ -4,7 +4,7 @@ pragma solidity ^0.4.18;
  * @title IRegistry
  * @dev This contract represents the interface of a registry contract
  */
-interface IRegistry {
+interface ITwoKeySingletonesRegistry {
     /**
     * @dev This event will be emitted every time a new proxy is created
     * @param proxy representing the address of the proxy created
