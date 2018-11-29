@@ -7,14 +7,14 @@ import './TwoKeyUpgradableExchange.sol';
 import "../interfaces/IAdminContract.sol";
 import "../interfaces/IERC20.sol";
 import "./TwoKeyEventSource.sol";
-import "./TwoKeyRegLogic.sol";
+import "./TwoKeyRegistry.sol";
 
 contract TwoKeyAdmin is IAdminContract {
 
 	TwoKeyEconomy public twoKeyEconomy;
 	TwoKeyUpgradableExchange public twoKeyUpgradableExchange;
 	TwoKeyEventSource public twoKeyEventSource;
-	TwoKeyRegLogic public twoKeyReg;
+	TwoKeyRegistry public twoKeyReg;
 
 	address public previousAdmin;
 	address public twoKeyCongress;
@@ -162,7 +162,7 @@ contract TwoKeyAdmin is IAdminContract {
 	/// @param _reg is address of new twoKeyRegistry contract
 	function updateRegistry(address _reg) public onlyTwoKeyCongress {
 		require (_reg != address(0));
-		twoKeyReg = TwoKeyRegLogic(_reg);
+		twoKeyReg = TwoKeyRegistry(_reg);
 	}
 
     /// @notice Function to update twoKeyEventSource contract address
@@ -193,7 +193,7 @@ contract TwoKeyAdmin is IAdminContract {
 
         require(initialized == false);
         initialized = true;
-		twoKeyReg = TwoKeyRegLogic(_reg);
+		twoKeyReg = TwoKeyRegistry(_reg);
     	twoKeyUpgradableExchange = TwoKeyUpgradableExchange(_exchange);
 		twoKeyEconomy = TwoKeyEconomy(_economy);
 		twoKeyEventSource = TwoKeyEventSource(_eventSource);

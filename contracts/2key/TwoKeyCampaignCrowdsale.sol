@@ -4,7 +4,7 @@ import '../openzeppelin-solidity/contracts/math/SafeMath.sol';
 import '../openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol';
 
 import './TwoKeyAcquisitionCampaignERC20.sol';
-import './TwoKeyRegLogic.sol';
+import './TwoKeyRegistry.sol';
 import './TwoKeyEconomy.sol';
 import './TwoKeyEventSource.sol';
 import './TwoKeyTypes.sol';

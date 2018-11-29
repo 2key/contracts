@@ -1,9 +1,8 @@
 pragma solidity ^0.4.24;
 
-import '../openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import "./Upgradeable.sol";
 
-contract TwoKeyRegLogic is Upgradeable {
+contract TwoKeyRegistry is Upgradeable {
 
     /// mapping user's address to user's name
     mapping(address => string) public address2username;

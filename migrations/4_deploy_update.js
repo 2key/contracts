@@ -1,6 +1,6 @@
 const TwoKeyAdmin = artifacts.require('TwoKeyAdmin');
 const EventSource = artifacts.require('TwoKeyEventSource');
-const TwoKeyRegLogic = artifacts.require('TwoKeyRegLogic');
+const TwoKeyRegistry = artifacts.require('TwoKeyRegistry');
 const TwoKeySingletonesRegistry = artifacts.require('TwoKeySingletonesRegistry');
 const Proxy = artifacts.require('UpgradeabilityProxy');
 const json = require('../2key-protocol/src/proxyAddresses.json');
@@ -18,16 +18,16 @@ module.exports = function deploy(deployer) {
         /**
          * This script is going to be executed only if the argument in migration command is 'update'
          */
-        let lastTwoKeyRegLogicAddress;
+        let lastTwoKeyRegistryAddress;
         console.log('Arugment is found');
-        deployer.deploy(TwoKeyRegLogic)
-            .then(() => TwoKeyRegLogic.deployed()
-            .then(async(twoKeyRegLogic) => {
+        deployer.deploy(TwoKeyRegistry)
+            .then(() => TwoKeyRegistry.deployed()
+            .then(async(twoKeyRegistryInstance) => {
                 await new Promise(async(resolve,reject) => {
                         try {
-                            console.log('Setting initial parameters in TwoKeyRegLogic...');
-                            lastTwoKeyRegLogicAddress = twoKeyRegLogic.address;
-                            let txHash = await twoKeyRegLogic.setInitialParams(
+                            console.log('Setting initial parameters in TwoKeyRegistry...');
+                            lastTwoKeyRegistryAddress = twoKeyRegistryInstance.address;
+                            let txHash = await twoKeyRegistryInstance.setInitialParams(
                                 EventSource.address,
                                 TwoKeyAdmin.address,
                                 (deployer.network.startsWith('rinkeby') || deployer.network.startsWith('public.')) ? '0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f' : '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7')
@@ -45,15 +45,15 @@ module.exports = function deploy(deployer) {
                         console.log('... Adding new version to the registry contract');
 
                         let v = parseInt(json.TwoKeyRegistryLogic.Version.substr(-1)) + 1;
-                        json['TwoKeyRegLogic'].Version = json.TwoKeyRegistryLogic.Version.substr(0,json.TwoKeyRegistryLogic.Version.length-1) + v.toString();
+                        json['TwoKeyRegistry'].Version = json.TwoKeyRegistryLogic.Version.substr(0,json.TwoKeyRegistryLogic.Version.length-1) + v.toString();
                         console.log('New version : '+ json.TwoKeyRegistryLogic.Version);
 
-                        let txHash = await registry.addVersion(json.TwoKeyRegistryLogic.Version,TwoKeyRegLogic.address);
+                        let txHash = await registry.addVersion(json.TwoKeyRegistryLogic.Version,TwoKeyRegistry.address);
                         console.log('... Upgrading proxy to new version');
 
                         txHash = await Proxy.at(json.TwoKeyRegistryLogic.Proxy).upgradeTo(json.TwoKeyRegistryLogic.Version);
 
-                        json.TwoKeyRegistryLogic.address = lastTwoKeyRegLogicAddress;
+                        json.TwoKeyRegistryLogic.address = lastTwoKeyRegistryAddress;
                         fs.writeFileSync('./2key-protocol/src/proxyAddresses.json',JSON.stringify(json,null,4));
                         console.log('proxyAddresses.json file is updated with newest version of contract');
 

@@ -1,10 +1,9 @@
 pragma solidity ^0.4.24;
 
-import '../openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import "../2key/Upgradeable.sol";
-import "../2key/TwoKeyRegLogic.sol";
+import "../2key/TwoKeyRegistry.sol";
 
-contract TwoKeyRegLogicV1 is TwoKeyRegLogic {
+contract TwoKeyRegistryV1 is TwoKeyRegistry {
 
     function setValue(uint val) public {
         value = value + val + 3;

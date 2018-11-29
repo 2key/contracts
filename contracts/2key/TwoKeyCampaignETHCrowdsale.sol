@@ -3,7 +3,7 @@ pragma solidity ^0.4.24;
 import '../openzeppelin-solidity/contracts/math/SafeMath.sol';
 
 import './TwoKeyCampaignETH.sol';
-import './TwoKeyRegLogic.sol';
+import './TwoKeyRegistry.sol';
 import './TwoKeyEconomy.sol';
 import './TwoKeyEventSource.sol';
 import "./TwoKeyConversionHandler.sol";

@@ -149,7 +149,7 @@ export class TwoKeyProtocol {
         //contractsMeta.TwoKeyRegLogic.networks[this.networks.mainNetId].address
         this.twoKeyUpgradableExchange = this.web3.eth.contract(contractsMeta.TwoKeyUpgradableExchange.abi).at(contractsMeta.TwoKeyUpgradableExchange.networks[this.networks.mainNetId].address);
         this.twoKeyEconomy = this.web3.eth.contract(contractsMeta.TwoKeyEconomy.abi).at(contractsMeta.TwoKeyEconomy.networks[this.networks.mainNetId].address);
-        this.twoKeyReg = this.web3.eth.contract(contractsMeta.TwoKeyRegLogic.abi).at(proxyInfo.TwoKeyRegistryLogic.Proxy);
+        this.twoKeyReg = this.web3.eth.contract(contractsMeta.TwoKeyRegistry.abi).at(proxyInfo.TwoKeyRegistry.Proxy);
         this.twoKeyAdmin = this.web3.eth.contract(contractsMeta.TwoKeyAdmin.abi).at(contractsMeta.TwoKeyAdmin.networks[this.networks.mainNetId].address);
         this.twoKeyCongress = this.web3.eth.contract(contractsMeta.TwoKeyCongress.abi).at(contractsMeta.TwoKeyCongress.networks[this.networks.mainNetId].address);
         this.twoKeyCall = this.web3.eth.contract(contractsMeta.Call.abi).at(contractsMeta.Call.networks[this.networks.mainNetId].address);

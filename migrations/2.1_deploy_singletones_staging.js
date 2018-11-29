@@ -3,7 +3,7 @@ const ERC20TokenMock = artifacts.require('ERC20TokenMock');
 const TwoKeyUpgradableExchange = artifacts.require('TwoKeyUpgradableExchange');
 const TwoKeyAdmin = artifacts.require('TwoKeyAdmin');
 const EventSource = artifacts.require('TwoKeyEventSource');
-const TwoKeyRegLogic = artifacts.require('TwoKeyRegLogic');
+const TwoKeyRegistry = artifacts.require('TwoKeyRegistry');
 const Call = artifacts.require('Call');
 const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
 
@@ -30,7 +30,7 @@ module.exports = function deploy(deployer) {
       .then(() => TwoKeyUpgradableExchange.deployed())
       .then(() => deployer.deploy(TwoKeyEconomy, TwoKeyAdmin.address))
       .then(() => deployer.deploy(EventSource, TwoKeyAdmin.address))
-      .then(() => deployer.deploy(TwoKeyRegLogic, EventSource.address, TwoKeyAdmin.address))
+      .then(() => deployer.deploy(TwoKeyRegistry, EventSource.address, TwoKeyAdmin.address))
       .then(() => true)
       .catch((err) => {
         console.log('\x1b[31m', 'Error:', err.message, '\x1b[0m');

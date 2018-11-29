@@ -6,7 +6,7 @@ import '../openzeppelin-solidity/contracts/token/ERC20/ERC20.sol';
 import '../openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import '../openzeppelin-solidity/contracts/math/SafeMath.sol';
 import '../interfaces/IDecentralizedNation.sol';
-import './TwoKeyRegLogic.sol';
+import './TwoKeyRegistry.sol';
 import "./GetCode.sol";
 
 contract TwoKeyVoteToken is StandardToken, Ownable {

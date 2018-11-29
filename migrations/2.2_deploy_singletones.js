@@ -2,7 +2,7 @@ const TwoKeyEconomy = artifacts.require('TwoKeyEconomy');
 const TwoKeyUpgradableExchange = artifacts.require('TwoKeyUpgradableExchange');
 const TwoKeyAdmin = artifacts.require('TwoKeyAdmin');
 const EventSource = artifacts.require('TwoKeyEventSource');
-const TwoKeyRegLogic = artifacts.require('TwoKeyRegLogic');
+const TwoKeyRegistry = artifacts.require('TwoKeyRegistry');
 const TwoKeyCongress = artifacts.require('TwoKeyCongress');
 const Call = artifacts.require('Call');
 const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
@@ -40,24 +40,24 @@ module.exports = function deploy(deployer) {
         .then(() => deployer.deploy(TwoKeyExchangeContract, [maintainerAddress], TwoKeyAdmin.address))
         .then(() => TwoKeyExchangeContract.deployed())
         .then(() => deployer.deploy(EventSource, TwoKeyAdmin.address))
-        .then(() => deployer.deploy(TwoKeyRegLogic)
-        .then(() => TwoKeyRegLogic.deployed())
+        .then(() => deployer.deploy(TwoKeyRegistry)
+        .then(() => TwoKeyRegistry.deployed())
         .then(() => deployer.deploy(TwoKeySingletonesRegistry))
         .then(() => TwoKeySingletonesRegistry.deployed().then(async(registry) => {
-            console.log('... Adding TwoKeyRegLogic to Proxy registry as valid implementation');
+            console.log('... Adding TwoKeyRegistry to Proxy registry as valid implementation');
             await new Promise(async(resolve,reject) => {
                 try {
-                    let txHash = await registry.addVersion("1.0",TwoKeyRegLogic.address);
+                    let txHash = await registry.addVersion("1.0",TwoKeyRegistry.address);
                     const {logs} = await registry.createProxy("1.0");
                     const {proxy} = logs.find(l => l.event === 'ProxyCreated').args;
                     console.log('Proxy address: ' + proxy);
                     let obj = {};
-                    obj['TwoKeyRegistryLogic'] = {
-                        'address' : TwoKeyRegLogic.address,
+                    obj['TwoKeyRegistry'] = {
+                        'address' : TwoKeyRegistry.address,
                         'Proxy' : proxy,
                         'Version': "1.0"
                     };
-                    await TwoKeyRegLogic.at(proxy).setInitialParams(EventSource.address, TwoKeyAdmin.address, (deployer.network.startsWith('rinkeby') || deployer.network.startsWith('public.')) ? '0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f' : '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7');
+                    await TwoKeyRegistry.at(proxy).setInitialParams(EventSource.address, TwoKeyAdmin.address, (deployer.network.startsWith('rinkeby') || deployer.network.startsWith('public.')) ? '0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f' : '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7');
 
                     fs.writeFile("./2key-protocol/src/proxyAddresses.json", JSON.stringify(obj,null,4), (err) => {
                         if (err) {
@@ -74,7 +74,7 @@ module.exports = function deploy(deployer) {
             })
         }))
         .then(() => EventSource.deployed().then(async(eventSource) => {
-            console.log("... Adding TwoKeyRegLogic to EventSource");
+            console.log("... Adding TwoKeyRegistry to EventSource");
             await new Promise(async(resolve,reject) => {
                 try {
                     let txHash = await eventSource.addTwoKeyReg(proxyAddress).then(() => true);
