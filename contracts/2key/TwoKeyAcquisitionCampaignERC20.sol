@@ -270,7 +270,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
 
     /**
      * @notice Function where converter can convert
-     * @param signature is the signature chain
      * @dev payable function
      */
     function convert() public payable  {
@@ -323,6 +322,12 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
 
     }
 
+    /**
+     * @notice Update refferal chain with rewards (update state variables)
+     * @param _maxReferralRewardETHWei is the max referral reward set
+     * @param _converter is the address of the converter
+     * @dev This function can only be called by TwoKeyConversionHandler contract
+     */
     function updateRefchainRewards(uint256 _maxReferralRewardETHWei, address _converter) public onlyTwoKeyConversionHandler {
         require(_maxReferralRewardETHWei > 0, 'Max referral reward in ETH must be > 0');
         address converter = _converter;
@@ -412,7 +417,11 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     /// @param conversionAmountETHWei is amount of eth in conversion
     /// @return tuple containing (base,bonus)
     function getEstimatedTokenAmount(uint conversionAmountETHWei) public view returns (uint, uint) {
-        uint baseTokensForConverterUnits = conversionAmountETHWei.mul(10 ** unit_decimals).div(pricePerUnitInETHWeiOrUSD);
+        uint value = pricePerUnitInETHWeiOrUSD;
+        if(keccak256(currency) == keccak256('USD')) {
+            value = pricePerUnitInETHWeiOrUSD * ITwoKeyExchangeContract(ethUSDExchangeContract).getPrice();
+        }
+        uint baseTokensForConverterUnits = conversionAmountETHWei.mul(10 ** unit_decimals).div(value);
         uint bonusTokensForConverterUnits = baseTokensForConverterUnits.mul(maxConverterBonusPercent).div(100);
         return (baseTokensForConverterUnits, bonusTokensForConverterUnits);
     }
