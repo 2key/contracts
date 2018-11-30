@@ -137,7 +137,7 @@ export class TwoKeyProtocol {
 
         if (web3) {
             this.web3 = new Web3(web3.currentProvider);
-            this.web3.eth.defaultBlock = 'pending';
+            // this.web3.eth.defaultBlock = 'pending';
             // this.twoKeyEventSource = this.web3.eth.contract(contractsMeta.TwoKeyEventSource.abi).at(contractsMeta.TwoKeyEventSource.networks[this.networks.mainNetId].address);
         } else if (rpcUrl) {
             const mainEngine = new ProviderEngine();

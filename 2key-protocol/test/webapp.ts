@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (web3 && web3.currentProvider && web3.eth.defaultAccount) {
             const plasmaPK = crypto.randomBytes(32).toString('hex');
             const address = web3.eth.defaultAccount;
-            web3.eth.defaultBlock = 'pending';
+            // web3.eth.defaultBlock = 'pending';
             // @ts-ignore
             window.TWOKEY = new TwoKeyProtocol({
                 web3,
