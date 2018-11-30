@@ -327,6 +327,13 @@ describe('TwoKeyProtocol', () => {
         // .to.be.equal(twoKeyProtocol.getGasPrice());
     }).timeout(30000);
 
+    it('should set eth-dolar rate', async() => {
+        txHash = await twoKeyProtocol.TwoKeyExchangeContract.setValue(1,from);
+        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        let value = await twoKeyProtocol.TwoKeyExchangeContract.getValue(from);
+        console.log('Value ETH-USD is: ' + value);
+    }).timeout(30000);
+
     it('should show token symbol of economy', async () => {
         const tokenSymbol = await twoKeyProtocol.ERC20.getERC20Symbol(twoKeyEconomy);
         console.log(tokenSymbol);
@@ -386,7 +393,7 @@ describe('TwoKeyProtocol', () => {
             moderatorFeePercentageWei: moderatorFeePercentage,
             minContributionETHWei: twoKeyProtocol.Utils.toWei(minContributionETH, 'ether'),
             maxContributionETHWei: twoKeyProtocol.Utils.toWei(maxContributionETH, 'ether'),
-            currency: 'ETH',
+            currency: 'USD',
             tokenDistributionDate: 1541109593669,
             maxDistributionDateShiftInDays: 180,
             bonusTokensVestingMonths: 6,
