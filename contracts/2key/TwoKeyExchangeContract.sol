@@ -21,15 +21,22 @@ contract TwoKeyExchangeContract is ITwoKeyExchangeContract {
      */
     mapping(address => bool) public isMaintainer;
 
-
+    /**
+     * Address of TwoKeyAdmin contract, which will be the only one eligible to manipulate the maintainers
+     */
     address public twoKeyAdmin;
 
-
+    /**
+     * @notice Modifier to restrict calling the method to anyone but maintainers
+     */
     modifier onlyMaintainer {
         require(isMaintainer[msg.sender] == true);
         _;
     }
 
+    /**
+     * @notice Modifier to restrict calling the method to anyone but twoKeyAdmin
+     */
     modifier onlyTwoKeyAdmin {
         require(msg.sender == address(twoKeyAdmin));
         _;
