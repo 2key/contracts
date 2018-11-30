@@ -19,11 +19,13 @@ import {
     ITwoKeyAcquisitionCampaign,
     ITwoKeyBase,
     ITwoKeyCongress,
+    ITwoKeyExchangeContract,
     ITwoKeyHelpers,
     ITwoKeyInit,
     ITwoKeyReg,
     ITwoKeyUtils,
     ITwoKeyWeightedVoteContract,
+    IUpgradableExchange
 } from './interfaces';
 import Index, {promisify} from './utils';
 import Helpers from './utils/helpers';
@@ -35,7 +37,7 @@ import DecentralizedNation from "./decentralizedNation";
 import TwoKeyWeightedVoteContract from "./veightedVote";
 import TwoKerRegistry from './registry';
 import UpgradableExchange from './upgradableExchange';
-import {IUpgradableExchange} from "./upgradableExchange/interfaces";
+import TwoKeyExchangeContract from './exchangeETHUSD';
 
 const proxyInfo = require('./proxyAddresses.json');
 // const addressRegex = /^0x[a-fA-F0-9]{40}$/;
@@ -63,6 +65,7 @@ export class TwoKeyProtocol {
     public gas: number;
     private networks: IEhtereumNetworks;
     private contracts: IContractsAddresses;
+    private twoKeyExchangeContract: any;
     private twoKeyUpgradableExchange: any;
     private twoKeyEconomy: any;
     private twoKeyAdmin: any;
@@ -82,6 +85,7 @@ export class TwoKeyProtocol {
     public Lockup: ILockup;
     public Registry: ITwoKeyReg;
     public UpgradableExchange: IUpgradableExchange;
+    public TwoKeyExchangeContract: ITwoKeyExchangeContract;
 
     private _log: any;
 
@@ -147,6 +151,7 @@ export class TwoKeyProtocol {
         }
 
         //contractsMeta.TwoKeyRegLogic.networks[this.networks.mainNetId].address
+        this.twoKeyExchangeContract = this.web3.eth.contract(contractsMeta.TwoKeyExchangeContract.abi).at(contractsMeta.TwoKeyExchangeContract.networks[this.networks.mainNetId].address);
         this.twoKeyUpgradableExchange = this.web3.eth.contract(contractsMeta.TwoKeyUpgradableExchange.abi).at(contractsMeta.TwoKeyUpgradableExchange.networks[this.networks.mainNetId].address);
         this.twoKeyEconomy = this.web3.eth.contract(contractsMeta.TwoKeyEconomy.abi).at(contractsMeta.TwoKeyEconomy.networks[this.networks.mainNetId].address);
         this.twoKeyReg = this.web3.eth.contract(contractsMeta.TwoKeyRegistry.abi).at(proxyInfo.TwoKeyRegistry.Proxy);
@@ -162,6 +167,7 @@ export class TwoKeyProtocol {
             ipfs: this.ipfs,
             networks: this.networks,
             contracts: this.contracts,
+            twoKeyExchangeContract: this.twoKeyExchangeContract,
             twoKeyUpgradableExchange: this.twoKeyUpgradableExchange,
             twoKeyEconomy: this.twoKeyEconomy,
             twoKeyReg: this.twoKeyReg,
@@ -178,6 +184,7 @@ export class TwoKeyProtocol {
         this.Helpers = new Helpers(twoKeyBase);
         this.ERC20 = new ERC20(twoKeyBase, this.Helpers);
         this.Utils = new Index(twoKeyBase, this.Helpers);
+        this.TwoKeyExchangeContract = new TwoKeyExchangeContract(twoKeyBase, this.Helpers, this.Utils);
         this.UpgradableExchange = new UpgradableExchange(twoKeyBase,this.Helpers,this.Utils);
         this.AcquisitionCampaign = new AcquisitionCampaign(twoKeyBase, this.Helpers, this.Utils, this.ERC20);
         this.TwoKeyWeightedVoteContract = new TwoKeyWeightedVoteContract(twoKeyBase, this.Helpers, this.Utils);

@@ -38,6 +38,7 @@ export interface IAcquisitionCampaign {
     maxContributionETHWei: number | string | BigNumber,
     referrerQuota?: number,
     currency: string,
+    twoKeyExchangeContract: string,
     tokenDistributionDate: number,
     maxDistributionDateShiftInDays: number,
     bonusTokensVestingMonths: number,

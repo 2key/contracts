@@ -165,7 +165,8 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                         data.minContributionETHWei,
                         data.maxContributionETHWei,
                         data.referrerQuota || 5],
-                        data.currency
+                        data.currency,
+                        this.helpers._getContractDeployedAddress('TwoKeyExchangeContract')
                     ],
                     progressCallback,
                     link: {

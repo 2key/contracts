@@ -7,6 +7,7 @@ import "../interfaces/IERC20.sol";
 import "./Call.sol";
 import "../interfaces/IUpgradableExchange.sol";
 import "../interfaces/ITwoKeyConversionHandler.sol";
+import "../interfaces/ITwoKeyExchangeContract.sol";
 
 
 /// @author Nikola Madjarevic
@@ -33,6 +34,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     mapping(address => address) public publicLinkKey; // Public link key can generate only somebody who has ARCs
 
     string public currency; // currency can be either ETH or USD
+    address ethUSDExchangeContract;
     address assetContractERC20; // Asset contract is address of ERC20 inventory
     uint256 contractorBalance;
     uint256 contractorTotalProceeds;
@@ -45,7 +47,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     string privateMetaHash; // Ipfs hash of json sensitive (contractor) information
     uint256 public maxReferralRewardPercent; // maxReferralRewardPercent is actually bonus percentage in ETH
     uint public maxConverterBonusPercent; //translates to discount - we can add this to constructor
-
     uint minContributionETHorUSD; // Minimal amount of ETH or USD that can be paid by converter to create conversion
     uint maxContributionETHorUSD; // Maximal amount of ETH or USD that can be paid by converter to create conversion
 
@@ -73,7 +74,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         address _moderator,
         address _assetContractERC20,
         uint [] values,
-        string _currency
+        string _currency,
+        address _ethUSDExchangeContract
     )
     TwoKeyCampaignARC(
             _twoKeyEventSource,
@@ -97,6 +99,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         minContributionETHorUSD = values[7];
         maxContributionETHorUSD = values[8];
         currency = _currency;
+        ethUSDExchangeContract = _ethUSDExchangeContract;
         setERC20Attributes();
         ITwoKeyConversionHandler(conversionHandler).setTwoKeyAcquisitionCampaignERC20(address(this), _moderator, contractor, _assetContractERC20, symbol);
         twoKeyEventSource.created(address(this), contractor, moderator);
@@ -127,13 +130,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     /// @return true if successful, otherwise transaction will revert
     function addUnitsToInventory(uint256 _amount) public returns (bool) {
         require(
-            assetContractERC20.call(
-                bytes4(keccak256("transferFrom(address,address,uint256)")),
-                msg.sender,
-                address(this),
-                _amount
-            )
-        );
+        IERC20(assetContractERC20).transferFrom(msg.sender, address(this), _amount));
         return true;
     }
 
@@ -243,19 +240,26 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         transferFrom(msg.sender, receiver, 1);
     }
 
+    function requirementForMsgValue(uint msgValue) internal {
+        if(keccak256(currency) == keccak256('USD')) {
+            require(msgValue > ITwoKeyExchangeContract(ethUSDExchangeContract).getPrice() * minContributionETHorUSD);
+            require(msgValue < ITwoKeyExchangeContract(ethUSDExchangeContract).getPrice() * maxContributionETHorUSD);
+        } else {
+            require(msgValue >= minContributionETHorUSD);
+            require(msgValue <= maxContributionETHorUSD);
+        }
+    }
+
     function joinAndConvert(bytes signature) public payable {
-        require(msg.value >= minContributionETHorUSD);
-        require(msg.value <= maxContributionETHorUSD);
+        requirementForMsgValue(msg.value);
         distributeArcsBasedOnSignature(signature);
         createConversion(msg.value, msg.sender);
         balancesConvertersETH[msg.sender] += msg.value;
         twoKeyEventSource.converted(address(this),msg.sender,msg.value);
-
     }
 
     function convert() public payable  {
-        require(msg.value >= minContributionETHorUSD);
-        require(msg.value <= maxContributionETHorUSD);
+        requirementForMsgValue(msg.value);
         require(received_from[msg.sender] != address(0));
         createConversion(msg.value, msg.sender);
         balancesConvertersETH[msg.sender] += msg.value;
@@ -263,8 +267,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     }
 
     function() external payable {
-        require(msg.value >= minContributionETHorUSD);
-        require(msg.value <= maxContributionETHorUSD);
+        requirementForMsgValue(msg.value);
         require(balanceOf(msg.sender) > 0);
         createConversion(msg.value, msg.sender);
         balancesConvertersETH[msg.sender] += msg.value;
@@ -334,11 +337,12 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     function moveFungibleAsset(address _to, uint256 _amount) public onlyTwoKeyConversionHandler returns (bool) {
         require(getInventoryBalance() >= _amount, 'Campaign inventory should be greater than amount');
         require(
-            assetContractERC20.call(
-                bytes4(keccak256(abi.encodePacked("transfer(address,uint256)"))),
-                _to, _amount
-            ), 'Transfer of ERC20 failed'
-        );
+        IERC20(assetContractERC20).transfer(_to,_amount),'Transfer of ERC20 failed');
+//            assetContractERC20.call(
+//                bytes4(keccak256(abi.encodePacked("transfer(address,uint256)"))),
+//                _to, _amount
+//            ),
+//        );
         return true;
     }
 
@@ -383,7 +387,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     /// @dev we're using Utils contract and fetching the balance of this contract address
     /// @return balance value as uint
     function getInventoryBalance() public view returns (uint) {
-        uint balance = Call.params1(assetContractERC20, "balanceOf(address)", uint(this));
+        uint balance = IERC20(assetContractERC20).balanceOf(address(this));
         return balance;
     }
 

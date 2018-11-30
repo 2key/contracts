@@ -6,6 +6,8 @@ export {IDecentralizedNation} from './decentralizedNation/interfaces';
 export {ITwoKeyWeightedVoteContract} from './veightedVote/interfaces';
 export {ITwoKeyReg} from './registry/interfaces';
 export {ITwoKeyHelpers,ITwoKeyUtils,BalanceMeta,IOffchainData} from './utils/interfaces';
+export {IUpgradableExchange} from './upgradableExchange/interfaces';
+export {ITwoKeyExchangeContract} from './exchangeETHUSD/interfaces';
 
 export interface ITwoKeyBase {
     web3: any;
@@ -13,6 +15,7 @@ export interface ITwoKeyBase {
     ipfs: any;
     networks: IEhtereumNetworks;
     contracts: IContractsAddresses;
+    twoKeyExchangeContract: any;
     twoKeyUpgradableExchange: any;
     twoKeyEconomy: any;
     twoKeyCall: any;

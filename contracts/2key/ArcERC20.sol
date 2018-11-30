@@ -1,8 +1,5 @@
 pragma solidity ^0.4.24;
 
-import "../openzeppelin-solidity/contracts/token/ERC20/ERC20Basic.sol";
-import "../openzeppelin-solidity/contracts/math/SafeMath.sol";
-
 /**
  * @title Standard ERC20 token
  *
@@ -10,9 +7,9 @@ import "../openzeppelin-solidity/contracts/math/SafeMath.sol";
  * https://github.com/ethereum/EIPs/issues/20
  * Based on code by FirstBlood: https://github.com/Firstbloodio/token/blob/master/smart_contract/FirstBloodToken.sol
  */
-contract ArcERC20 is ERC20Basic {
+contract ArcERC20  {
 
-    using SafeMath for uint256;
+    event Transfer(address indexed from, address indexed to, uint256 value);
 
     uint256 internal totalSupply_;
     string public name;
@@ -57,11 +54,11 @@ contract ArcERC20 is ERC20Basic {
      * @param _spender The address which will spend the funds.
      * @param _value The amount of tokens to be spent.
      */
-    function approve(address _spender, uint256 _value) public returns (bool) {
-        allowed[msg.sender][_spender] = _value;
-        emit Approval(msg.sender, _spender, _value);
-        return true;
-    }
+//    function approve(address _spender, uint256 _value) public returns (bool) {
+//        allowed[msg.sender][_spender] = _value;
+//        emit Approval(msg.sender, _spender, _value);
+//        return true;
+//    }
 
     /**
      * @dev Function to check the amount of tokens that an owner allowed to a spender.
@@ -69,16 +66,16 @@ contract ArcERC20 is ERC20Basic {
      * @param _spender address The address which will spend the funds.
      * @return A uint256 specifying the amount of tokens still available for the spender.
      */
-    function allowance(
-        address _owner,
-        address _spender
-    )
-    public
-    view
-    returns (uint256)
-    {
-        return allowed[_owner][_spender];
-    }
+//    function allowance(
+//        address _owner,
+//        address _spender
+//    )
+//    public
+//    view
+//    returns (uint256)
+//    {
+//        return allowed[_owner][_spender];
+//    }
 
     /**
      * @dev Increase the amount of tokens that an owner allowed to a spender.

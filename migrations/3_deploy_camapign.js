@@ -5,16 +5,7 @@ const TwoKeyCampaignInventory = artifacts.require('TwoKeyCampaignInventory');
 const ERC20TokenMock = artifacts.require('ERC20TokenMock');
 const Call = artifacts.require('Call');
 const TwoKeyHackEventSource = artifacts.require('TwoKeyHackEventSource');
-
-/*
-    address _twoKeyEventSource, address _twoKeyEconomy,
-    address _converterWhitelist, address _referrerWhitelist,
-    address _moderator, address _assetContractERC20, uint _campaignStartTime, uint _campaignEndTime,
-    uint _expiryConversion, uint _moderatorFeePercentage, uint _maxReferralRewardPercent, uint _maxConverterBonusPercent,
-    uint _pricePerUnitInETH, uint _minContributionETH, uint _maxContributionETH,
-    uint _conversionQuota
- */
-
+const TwoKeyExchangeContract = artifacts.require('TwoKeyExchangeContract');
 
 module.exports = function deploy(deployer) {
     let x = 1;
@@ -26,7 +17,7 @@ module.exports = function deploy(deployer) {
             .then(() => deployer.deploy(TwoKeyHackEventSource))
             .then(() => deployer.deploy(TwoKeyAcquisitionCampaignERC20, TwoKeyHackEventSource.address, TwoKeyConversionHandler.address,
                 '0xb3fa520368f2df7bed4df5185101f303f6c7decc', ERC20TokenMock.address,
-                [12345, 15345, 12345, 5, 5, 5, 5, 12, 15, 1], 'USD'))
+                [12345, 15345, 12345, 5, 5, 5, 5, 12, 15, 1], 'USD', TwoKeyExchangeContract.address))
             .then(() => TwoKeyAcquisitionCampaignERC20.deployed())
             .then(() => true)
             .then(() => EventSource.deployed().then(async (eventSource) => {
