@@ -293,6 +293,12 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
 
 
 
+    /**
+     * @notice Function which is executed to create conversion
+     * @param conversionAmountETHWei is the amount of the ether sent to the contract
+     * @param converterAddress is the sender of eth to the contract
+     * @dev can be called only internally
+     */
     function createConversion(uint conversionAmountETHWei, address converterAddress) internal {
         uint baseTokensForConverterUnits;
         uint bonusTokensForConverterUnits;
