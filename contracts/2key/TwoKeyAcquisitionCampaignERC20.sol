@@ -25,8 +25,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     mapping(address => uint256) internal referrerTotalEarningsEthWEI; // Total earnings for referrers
     mapping(address => uint) balancesConvertersETH; // Amount converter put to the contract in Ether
 
-    uint moderatorBalanceETHWei;
-    uint moderatorTotalEarningsETHWei;
+    uint moderatorBalanceETHWei; //Balance of the moderator which can be withdrawn
+    uint moderatorTotalEarningsETHWei; //Total earnings of the moderator all time
 
 
 
@@ -129,8 +129,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     /// @param _amount is the amount of ERC20 contract he'd like to give us
     /// @return true if successful, otherwise transaction will revert
     function addUnitsToInventory(uint256 _amount) public returns (bool) {
-        require(
-        IERC20(assetContractERC20).transferFrom(msg.sender, address(this), _amount));
+        require(IERC20(assetContractERC20).transferFrom(msg.sender, address(this), _amount));
         return true;
     }
 
@@ -359,13 +358,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     /// @return true if successful, otherwise reverts
     function moveFungibleAsset(address _to, uint256 _amount) public onlyTwoKeyConversionHandler returns (bool) {
         require(getInventoryBalance() >= _amount, 'Campaign inventory should be greater than amount');
-        require(
-        IERC20(assetContractERC20).transfer(_to,_amount),'Transfer of ERC20 failed');
-//            assetContractERC20.call(
-//                bytes4(keccak256(abi.encodePacked("transfer(address,uint256)"))),
-//                _to, _amount
-//            ),
-//        );
+        require(IERC20(assetContractERC20).transfer(_to,_amount),'Transfer of ERC20 failed');
         return true;
     }
 
