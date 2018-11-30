@@ -240,6 +240,11 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         transferFrom(msg.sender, receiver, 1);
     }
 
+    /**
+     * @notice internal function to validate the request is proper
+     * @param msgValue is the value of the message sent
+     * @dev validates if msg.Value is in interval of [minContribution, maxContribution]
+     */
     function requirementForMsgValue(uint msgValue) internal {
         if(keccak256(currency) == keccak256('USD')) {
             uint val = ITwoKeyExchangeContract(ethUSDExchangeContract).getPrice();
