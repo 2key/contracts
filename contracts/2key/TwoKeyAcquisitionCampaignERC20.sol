@@ -242,8 +242,9 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
 
     function requirementForMsgValue(uint msgValue) internal {
         if(keccak256(currency) == keccak256('USD')) {
-            require(msgValue > ITwoKeyExchangeContract(ethUSDExchangeContract).getPrice() * minContributionETHorUSD);
-            require(msgValue < ITwoKeyExchangeContract(ethUSDExchangeContract).getPrice() * maxContributionETHorUSD);
+            uint val = ITwoKeyExchangeContract(ethUSDExchangeContract).getPrice();
+            require(msgValue >= val * minContributionETHorUSD);
+            require(msgValue <= val * maxContributionETHorUSD);
         } else {
             require(msgValue >= minContributionETHorUSD);
             require(msgValue <= maxContributionETHorUSD);
