@@ -36,7 +36,7 @@ export default class TwoKeyExchangeContract implements ITwoKeyExchangeContract {
      * @param {number} price
      * @returns {Promise<string>}
      */
-    public setValue(from: string, price:number) : Promise<string> {
+    public setValue(price: number, from: string) : Promise<string> {
         return new Promise<string>(async(resolve,reject) => {
             try {
                 let txHash = await promisify(this.base.twoKeyExchangeContract.setPrice,[price, {from}]);

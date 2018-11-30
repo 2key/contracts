@@ -1,4 +1,4 @@
 export interface ITwoKeyExchangeContract {
     getValue: (from: string) => Promise<number>,
-    setValue: (from: string, price:number) => Promise<string>,
+    setValue: (price: number, from: string) => Promise<string>,
 }
