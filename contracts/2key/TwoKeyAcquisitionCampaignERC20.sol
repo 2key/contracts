@@ -251,6 +251,11 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         }
     }
 
+    /**
+     * @notice Function where converter can join and convert
+     * @param signature is the signature chain
+     * @dev payable function
+     */
     function joinAndConvert(bytes signature) public payable {
         requirementForMsgValue(msg.value);
         distributeArcsBasedOnSignature(signature);
@@ -259,6 +264,11 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         twoKeyEventSource.converted(address(this),msg.sender,msg.value);
     }
 
+    /**
+     * @notice Function where converter can convert
+     * @param signature is the signature chain
+     * @dev payable function
+     */
     function convert() public payable  {
         requirementForMsgValue(msg.value);
         require(received_from[msg.sender] != address(0));
@@ -266,6 +276,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         balancesConvertersETH[msg.sender] += msg.value;
         twoKeyEventSource.converted(address(this),msg.sender,msg.value);
     }
+
 
     function() external payable {
         requirementForMsgValue(msg.value);
