@@ -127,15 +127,15 @@ contract TwoKeyWeightedVoteContract is TwoKeySignedPresellContract {
       xbalances[owner] -= tokens;
 
       require(address(erc20_token_sell_contract).call(bytes4(keccak256("transferFrom(address,address,uint256)")),
-          this, voters[k], tokens));
+          this, voters[k], tokens),"failed to send coins");
     }
   }
 
   function redeem() public {
-    revert();
+    revert("redeem not implemented");
   }
 
   function buyProduct() public payable {
-    revert();
+    revert("buyProduct not implemented");
   }
 }

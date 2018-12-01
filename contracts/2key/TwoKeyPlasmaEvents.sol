@@ -164,12 +164,14 @@ contract TwoKeyPlasmaEvents {
         uint256 b = influencer2cut[c][contractor][_owner];
         if (b == 0) {
             address plasma_owner = ethereum2plasma[_owner];
+            // TODO check not zero address
             b = influencer2cut[c][contractor][plasma_owner];
             if (b != 0) {
                 return b;
             }
             address eth_owner = plasma2ethereum[_owner];
-            b = influencer2cut[c][contractor][eth_owner];
+            // TODO check not zero address
+        b = influencer2cut[c][contractor][eth_owner];
         }
         return b;
     }

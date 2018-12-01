@@ -61,11 +61,11 @@ contract TwoKeyContract is BasicToken, Ownable {
     // the sender sets what is the percentage of the bounty s/he will receive when acting as an influencer
     // the value 255 is used to signal equal partition with other influencers
     // A sender can set the value only once in a contract
-    require(cut <= 100 || cut == 255);
     require(influencer2cut[msg.sender] == 0, 'cut not zero');
     if (registry != address(0)) {
       address plasma_owner = registry.ethereum2plasma(msg.sender);
       require(influencer2cut[plasma_owner] == 0, 'plasma cut not zero');
+      // TODO this can never happen because msg.sender is always an eth address
       address eth_owner = registry.plasma2ethereum(msg.sender);
       require(influencer2cut[eth_owner] == 0, 'eth cut not zero');
     }
@@ -79,6 +79,7 @@ contract TwoKeyContract is BasicToken, Ownable {
       if (b != 0) {
         return b;
       }
+      // TODO this can never happen because msg.sender is always an eth address
       address eth_owner = registry.plasma2ethereum(_owner);
       b = influencer2cut[eth_owner];
     }
@@ -136,7 +137,7 @@ contract TwoKeyContract is BasicToken, Ownable {
   * @param _value The amount to be transferred.
   */
   function transfer(address _to, uint256 _value) public returns (bool) {
-    require(false, 'not implemented');
+    require(false, 'transfer not implemented');
     return false;
   }
 
@@ -185,7 +186,7 @@ contract TwoKeyContract is BasicToken, Ownable {
 
   // buy product. if you dont have ARCs then first take them (join) from _from
   function buyFrom(address _from) public payable {
-    require(_from != address(0));
+    require(_from != address(0),"from not defined");
     address _to = msg.sender;
     if (balanceOf(_to) == 0) {
       transferFrom(_from, _to, 1);
