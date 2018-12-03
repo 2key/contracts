@@ -33,6 +33,7 @@ contract MaintainingPattern {
         _;
     }
 
+
     constructor(address [] _maintainers, address _twoKeyAdmin) public {
         twoKeyAdmin = _twoKeyAdmin;
         isMaintainer[msg.sender] = true; //for truffle deployment

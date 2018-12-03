@@ -42,7 +42,7 @@ module.exports = function deploy(deployer) {
         .then(() => deployer.deploy(EventSource, TwoKeyAdmin.address))
         .then(() => deployer.deploy(TwoKeyRegistry)
         .then(() => TwoKeyRegistry.deployed())
-        .then(() => deployer.deploy(TwoKeySingletonesRegistry))
+        .then(() => deployer.deploy(TwoKeySingletonesRegistry, [maintainerAddress], TwoKeyAdmin.address))
         .then(() => TwoKeySingletonesRegistry.deployed().then(async(registry) => {
             console.log('... Adding TwoKeyRegistry to Proxy registry as valid implementation');
             await new Promise(async(resolve,reject) => {
