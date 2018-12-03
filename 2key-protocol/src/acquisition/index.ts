@@ -406,7 +406,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     sig,
                     {from: this.base.plasmaAddress, gasPrice: 0}
                 ]);
-                await this.utils.getTransactionReceiptMined(txHash, {web3: this.base.plasmaWeb3});
+                // await this.utils.getTransactionReceiptMined(txHash, {web3: this.base.plasmaWeb3});
                 resolve(txHash);
             } catch (e) {
                 reject(e);
@@ -693,7 +693,6 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                         value,
                         nonce,
                     }]);
-                    await this.utils.getTransactionReceiptMined(txHash);
                     resolve(txHash);
                 } else {
                     this.base._log('Previous referrer', prevChain, value);

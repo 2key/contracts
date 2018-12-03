@@ -478,7 +478,7 @@ describe('TwoKeyProtocol', () => {
             },
             plasmaPK: Sign.generatePrivateKey().toString('hex'),
         });
-        await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, refLink);
+        txHash = await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, refLink);
         console.log('isUserJoined', await twoKeyProtocol.AcquisitionCampaign.isAddressJoined(campaignAddress, from));
         const hash = await twoKeyProtocol.AcquisitionCampaign.join(campaignAddress, from, {
             cut: 50,
@@ -490,7 +490,7 @@ describe('TwoKeyProtocol', () => {
     }).timeout(30000);
 
     it('should cut link', async () => {
-        await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, refLink);
+        txHash = await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, refLink);
         // twoKeyProtocol.unsubscribe2KeyEvents();
         const {web3, address} = web3switcher.test4();
         from = address;
@@ -526,6 +526,8 @@ describe('TwoKeyProtocol', () => {
         console.log('4) buy from test4 REFLINK', refLink);
         const txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETH, 'ether'), refLink, from);
         console.log(txHash);
+        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+
         // const campaigns = await twoKeyProtocol.getCampaignsWhereConverter(from);
         // console.log(campaigns);
         expect(txHash).to.be.a('string');
@@ -566,6 +568,7 @@ describe('TwoKeyProtocol', () => {
         });
         console.log('6) uport buy from REFLINK', refLink);
         const txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETH * 1.5, 'ether'), refLink, from);
+        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         console.log(txHash);
         expect(txHash).to.be.a('string');
     }).timeout(30000);
@@ -809,6 +812,7 @@ describe('TwoKeyProtocol', () => {
     it('==> should withdraw available tokens', async() => {
         const addresses = await twoKeyProtocol.AcquisitionCampaign.getLockupContractsForConverter(campaignAddress, env.TEST4_ADDRESS, from);
         const txHash = await twoKeyProtocol.Lockup.withdrawTokens(addresses[0],from);
+        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         console.log(txHash);
     }).timeout(30000);
 

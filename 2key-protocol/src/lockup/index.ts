@@ -134,7 +134,7 @@ export default class Lockup implements ILockup {
             try {
                 const twoKeyLockupInstance = await this.helpers._getLockupContractInstance(twoKeyLockup);
                 const txHash = await promisify(twoKeyLockupInstance.transferFungibleAsset, [{from}]);
-                await this.utils.getTransactionReceiptMined(txHash);
+                // await this.utils.getTransactionReceiptMined(txHash);
                 resolve(txHash);
             } catch (e) {
                 reject(e);
