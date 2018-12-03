@@ -8,6 +8,12 @@ export default class TwoKeyExchangeContract implements ITwoKeyExchangeContract {
     private readonly helpers: ITwoKeyHelpers;
     private readonly utils: ITwoKeyUtils;
 
+    /**
+     *
+     * @param {ITwoKeyBase} twoKeyProtocol
+     * @param {ITwoKeyHelpers} helpers
+     * @param {ITwoKeyUtils} utils
+     */
     constructor(twoKeyProtocol: ITwoKeyBase, helpers: ITwoKeyHelpers, utils: ITwoKeyUtils) {
         this.base = twoKeyProtocol;
         this.helpers = helpers;
