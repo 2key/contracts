@@ -57,11 +57,17 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
 //    bool canceled = false; // This means if contractor cancel everything
 
 
+    /**
+     * @notice Modifier which will enable function to be executed in specific time period
+     */
     modifier isOngoing() {
         require(block.timestamp >= campaignStartTime && block.timestamp <= campaignEndTime);
         _;
     }
 
+    /**
+     * @notice Modifier which will enable only twoKeyConversionHandlerContract to execute some functions
+     */
     modifier onlyTwoKeyConversionHandler() {
         require(msg.sender == address(conversionHandler));
         _;
@@ -104,6 +110,10 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         twoKeyEventSource.created(address(this), contractor, moderator);
     }
 
+    /**
+     * @notice Function to set ERC20 token which is being sold attributes
+     * @dev internal function, can't be called outside of the contract
+     */
     function setERC20Attributes() internal {
         unit_decimals = IERC20(assetContractERC20).decimals();
 //        symbol = IERC20(assetContractERC20).symbol();
