@@ -246,9 +246,15 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
             require(msgValue >= minContributionETHorFiatCurrency);
             require(msgValue <= maxContributionETHorFiatCurrency);
         } else {
-            uint val = ITwoKeyExchangeContract(ethUSDExchangeContract).getPrice(currency);
-            require(msgValue >= val * minContributionETHorFiatCurrency);
-            require(msgValue <= val * maxContributionETHorFiatCurrency);
+            uint val;
+            bool flag;
+            (val, flag) = ITwoKeyExchangeContract(ethUSDExchangeContract).getPrice(currency);
+            if(flag) {
+                require(msgValue * val >= minContributionETHorFiatCurrency); //converting ether to fiat
+                require(msgValue * val <= maxContributionETHorFiatCurrency); //converting ether to fiat
+            }
+            require(msgValue >= val * minContributionETHorFiatCurrency); //converting fiat to ether
+            require(msgValue <= val * maxContributionETHorFiatCurrency); //converting fiat to ether
         }
     }
 
@@ -416,7 +422,14 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     function getEstimatedTokenAmount(uint conversionAmountETHWei) public view returns (uint, uint) {
         uint value = pricePerUnitInETHWeiOrUSD;
         if(keccak256(currency) != keccak256('ETH')) {
-            value = pricePerUnitInETHWeiOrUSD * ITwoKeyExchangeContract(ethUSDExchangeContract).getPrice(currency);
+            uint rate;
+            bool flag;
+            (rate,flag) = ITwoKeyExchangeContract(ethUSDExchangeContract).getPrice(currency);
+            if(flag) {
+                conversionAmountETHWei = conversionAmountETHWei * rate; //converting eth to $wei
+            } else {
+                value = value * rate; //converting dollar wei to eth
+            }
         }
         uint baseTokensForConverterUnits = conversionAmountETHWei.mul(10 ** unit_decimals).div(value);
         uint bonusTokensForConverterUnits = baseTokensForConverterUnits.mul(maxConverterBonusPercent).div(100);

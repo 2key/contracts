@@ -16,7 +16,12 @@ contract TwoKeyExchangeContract is MaintainingPattern, ITwoKeyExchangeContract {
      * Will be updated every 8 hours, and it's public
      */
     //TODO: Rename fiatCurrencyExchangeRateToOneEther
-    mapping(bytes32 => uint) public currency2value;
+    mapping(bytes32 => FiatCurrency) public currencyName2rate;
+
+    struct FiatCurrency {
+        uint rateEth;
+        bool isGreater; //Flag which represent if 1 ETH > 1 fiat (ex. 1eth = 120euros) true (1eth = 0.001 BTC) false
+    }
 
     constructor(address [] _maintainers, address _twoKeyAdmin) MaintainingPattern (_maintainers, _twoKeyAdmin )
     public {
@@ -27,8 +32,12 @@ contract TwoKeyExchangeContract is MaintainingPattern, ITwoKeyExchangeContract {
      * @notice Function where our backend will update the state (rate between eth_wei and dollar_wei) every 8 hours
      * @dev only twoKeyMaintainer address will be eligible to update it
      */
-    function setPrice(bytes32 _currency, uint _ETHWei_CurrencyWEI) public onlyMaintainer {
-        currency2value[_currency] = _ETHWei_CurrencyWEI;
+    function setPrice(bytes32 _currency, bool _isGreater, uint _ETHWei_CurrencyWEI) public onlyMaintainer {
+        FiatCurrency memory f = FiatCurrency ({
+            rateEth: _ETHWei_CurrencyWEI,
+            isGreater: _isGreater
+        });
+        currencyName2rate[_currency] = f;
     }
 
     /**
@@ -36,9 +45,9 @@ contract TwoKeyExchangeContract is MaintainingPattern, ITwoKeyExchangeContract {
      * @param _currency is the currency (ex. 'USD', 'EUR', etc.)
      * @return rate between currency and eth wei
      */
-    function getPrice(string _currency) public view returns (uint) {
+    function getPrice(string _currency) public view returns (uint,bool) {
         bytes32 key = stringToBytes32(_currency);
-        return currency2value[key];
+        return (currencyName2rate[key].rateEth, currencyName2rate[key].isGreater);
     }
 
     /**
@@ -51,7 +60,6 @@ contract TwoKeyExchangeContract is MaintainingPattern, ITwoKeyExchangeContract {
         if (tempEmptyStringTest.length == 0) {
             return 0x0;
         }
-
         assembly {
             result := mload(add(source, 32))
         }
