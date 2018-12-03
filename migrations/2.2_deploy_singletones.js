@@ -47,8 +47,8 @@ module.exports = function deploy(deployer) {
             console.log('... Adding TwoKeyRegistry to Proxy registry as valid implementation');
             await new Promise(async(resolve,reject) => {
                 try {
-                    let txHash = await registry.addVersion("1.0",TwoKeyRegistry.address);
-                    const {logs} = await registry.createProxy("1.0");
+                    let txHash = await registry.addVersion("TwoKeyRegistry", "1.0",TwoKeyRegistry.address);
+                    const {logs} = await registry.createProxy("TwoKeyRegistry", "1.0");
                     const {proxy} = logs.find(l => l.event === 'ProxyCreated').args;
                     console.log('Proxy address: ' + proxy);
                     let obj = {};

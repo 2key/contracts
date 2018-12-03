@@ -44,16 +44,16 @@ module.exports = function deploy(deployer) {
                     try {
                         console.log('... Adding new version to the registry contract');
 
-                        let v = parseInt(json.TwoKeyRegistryLogic.Version.substr(-1)) + 1;
-                        json['TwoKeyRegistry'].Version = json.TwoKeyRegistryLogic.Version.substr(0,json.TwoKeyRegistryLogic.Version.length-1) + v.toString();
-                        console.log('New version : '+ json.TwoKeyRegistryLogic.Version);
+                        let v = parseInt(json.TwoKeyRegistry.Version.substr(-1)) + 1;
+                        json['TwoKeyRegistry'].Version = json.TwoKeyRegistry.Version.substr(0,json.TwoKeyRegistry.Version.length-1) + v.toString();
+                        console.log('New version : '+ json.TwoKeyRegistry.Version);
 
-                        let txHash = await registry.addVersion(json.TwoKeyRegistryLogic.Version,TwoKeyRegistry.address);
+                        let txHash = await registry.addVersion("TwoKeyRegistry",json.TwoKeyRegistry.Version,TwoKeyRegistry.address);
                         console.log('... Upgrading proxy to new version');
 
-                        txHash = await Proxy.at(json.TwoKeyRegistryLogic.Proxy).upgradeTo(json.TwoKeyRegistryLogic.Version);
+                        txHash = await Proxy.at(json.TwoKeyRegistry.Proxy).upgradeTo("TwoKeyRegistry",json.TwoKeyRegistry.Version);
 
-                        json.TwoKeyRegistryLogic.address = lastTwoKeyRegistryAddress;
+                        json.TwoKeyRegistry.address = lastTwoKeyRegistryAddress;
                         fs.writeFileSync('./2key-protocol/src/proxyAddresses.json',JSON.stringify(json,null,4));
                         console.log('proxyAddresses.json file is updated with newest version of contract');
 
