@@ -45,10 +45,10 @@ contract TwoKeyCampaignARC is ArcERC20 {
 	}
 
 	/**
-	  * @dev transfer token for a specified address
-	  * @param _to The address to transfer to.
-	  * @param _value The amount to be transferred.
-	  */
+	 * @dev transfer token for a specified address
+	 * @param _to The address to transfer to.
+	 * @param _value The amount to be transferred.
+	 */
 	function transferQuota(address _to, uint256 _value) public returns (bool) {
 		require(_to != address(0));
 		require(_value <= balances[msg.sender]);
@@ -62,11 +62,11 @@ contract TwoKeyCampaignARC is ArcERC20 {
 	}
 
 	/**
-	   * @dev Transfer tokens from one address to another
-	   * @param _from address The address which you want to send tokens from
-	   * @param _to address The address which you want to transfer to
-	   * @param _value uint256 the amount of tokens to be transferred
-	   */
+	 * @dev Transfer tokens from one address to another
+	 * @param _from address The address which you want to send tokens from
+	 * @param _to address The address which you want to transfer to
+	 * @param _value uint256 the amount of tokens to be transferred
+	 */
 	function transferFromQuota(address _from, address _to, uint256 _value) private returns (bool) {
 		require(_to != address(0));
 		require(_value <= balances[_from]);
