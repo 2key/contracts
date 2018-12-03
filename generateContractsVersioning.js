@@ -9,9 +9,10 @@ const singletones = [
     "TwoKeyEconomy",
     "TwoKeyUpgradableExchange",
     "TwoKeyEventSource",
-    "TwoKeyReg",
+    "TwoKeyRegistry",
     "TwoKeyPlasmaEvents",
-    "TwoKeyCongress"
+    "TwoKeyCongress",
+    "TwoKeyExchangeContract"
 ];
 
 

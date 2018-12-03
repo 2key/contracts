@@ -54,8 +54,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     string symbol; // ERC20 selling data
 
 
-    bool public withdrawApproved = false; // Until contractor set this to be true, no one can withdraw funds etc.
-    bool canceled = false; // This means if contractor cancel everything
+//    bool public withdrawApproved = false; // Until contractor set this to be true, no one can withdraw funds etc.
+//    bool canceled = false; // This means if contractor cancel everything
 
 
     modifier isOngoing() {
