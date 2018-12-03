@@ -6,6 +6,7 @@ const ERC20TokenMock = artifacts.require('ERC20TokenMock');
 const Call = artifacts.require('Call');
 const TwoKeyHackEventSource = artifacts.require('TwoKeyHackEventSource');
 const TwoKeyExchangeContract = artifacts.require('TwoKeyExchangeContract');
+const json = require('../2key-protocol/src/proxyAddresses.json');
 
 module.exports = function deploy(deployer) {
     let x = 1;
@@ -20,11 +21,11 @@ module.exports = function deploy(deployer) {
                 [12345, 15345, 12345, 5, 5, 5, 5, 12, 15, 1], 'USD', TwoKeyExchangeContract.address))
             .then(() => TwoKeyAcquisitionCampaignERC20.deployed())
             .then(() => true)
-            .then(() => EventSource.deployed().then(async (eventSource) => {
+            .then(() => EventSource.deployed().then(async () => {
                 console.log("... Adding TwoKeyAcquisitionCampaign to EventSource");
                 await new Promise(async (resolve, reject) => {
                     try {
-                        let txHash = await eventSource.addContract(TwoKeyAcquisitionCampaignERC20.address, {gas: 7000000}).then(() => true);
+                        let txHash = await EventSource.at(json.TwoKeyEventSource.Proxy).addContract(TwoKeyAcquisitionCampaignERC20.address, {gas: 7000000}).then(() => true);
                         resolve(txHash);
                     } catch (e) {
                         reject(e);

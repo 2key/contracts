@@ -3,8 +3,9 @@ pragma solidity ^0.4.24;
 import './TwoKeyTypes.sol';
 import "./GetCode.sol";
 import "../interfaces/ITwoKeyReg.sol";
+import "./Upgradeable.sol";
 
-contract TwoKeyEventSource is TwoKeyTypes {
+contract TwoKeyEventSource is Upgradeable, TwoKeyTypes {
 
     /// Events
     event Created(
@@ -119,7 +120,13 @@ contract TwoKeyEventSource is TwoKeyTypes {
 
     /// @notice Constructor during deployment of contract we need to set an admin address (means TwoKeyAdmin needs to be previously deployed)
     /// @param _twoKeyAdminAddress is the address of TwoKeyAdmin contract previously deployed
-    constructor(address _twoKeyAdminAddress) public {
+//    constructor(address _twoKeyAdminAddress) public {
+//        twoKeyAdmin = _twoKeyAdminAddress;
+//        authorizedSubadmins[msg.sender] = true;
+//    }
+
+    function setInitialParams(address _twoKeyAdminAddress) public {
+        require(twoKeyAdmin == address(0));
         twoKeyAdmin = _twoKeyAdminAddress;
         authorizedSubadmins[msg.sender] = true;
     }
