@@ -418,7 +418,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     /// @return tuple containing (base,bonus)
     function getEstimatedTokenAmount(uint conversionAmountETHWei) public view returns (uint, uint) {
         uint value = pricePerUnitInETHWeiOrUSD;
-        if(keccak256(currency) == keccak256('USD')) {
+        if(keccak256(currency) != keccak256('ETH')) {
             value = pricePerUnitInETHWeiOrUSD * ITwoKeyExchangeContract(ethUSDExchangeContract).getPrice(currency);
         }
         uint baseTokensForConverterUnits = conversionAmountETHWei.mul(10 ** unit_decimals).div(value);
@@ -537,6 +537,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     function getModeratorTotalEarnings() public onlyContractorOrModerator view returns (uint) {
         return moderatorTotalEarningsETHWei;
     }
+
     /// @notice Function where contractor can withdraw his funds
     /// @dev onlyContractor can call this method
     /// @return true if successful otherwise will 'revert'
@@ -547,7 +548,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         contractorBalance = 0;
         return true;
     }
-
 
     function withdrawModeratorOrReferrer(address _upgradableExchange) public returns (bool) {
         if(msg.sender == moderator) {
