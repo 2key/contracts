@@ -29,7 +29,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     uint moderatorTotalEarningsETHWei; //Total earnings of the moderator all time
 
 
-
     mapping(address => uint256) public units; // Number of units (ERC20 tokens) bought
     mapping(address => address) public publicLinkKey; // Public link key can generate only somebody who has ARCs
 
@@ -51,7 +50,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     uint maxContributionETHorUSD; // Maximal amount of ETH or USD that can be paid by converter to create conversion
 
     uint unit_decimals; // ERC20 selling data
-    string symbol; // ERC20 selling data
+//    string symbol; // ERC20 selling data
 
 
 //    bool public withdrawApproved = false; // Until contractor set this to be true, no one can withdraw funds etc.
@@ -107,7 +106,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
 
     function setERC20Attributes() internal {
         unit_decimals = IERC20(assetContractERC20).decimals();
-        symbol = IERC20(assetContractERC20).symbol();
+//        symbol = IERC20(assetContractERC20).symbol();
     }
 
     /**
@@ -319,7 +318,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
             conversionAmountETHWei, maxReferralRewardETHWei, moderatorFeeETHWei,
             baseTokensForConverterUnits,bonusTokensForConverterUnits,
             expiryConversionInHours);
-
     }
 
     /**
