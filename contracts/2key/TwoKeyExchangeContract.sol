@@ -1,6 +1,7 @@
 pragma solidity ^0.4.24;
 
 import "../interfaces/ITwoKeyExchangeContract.sol";
+import "./MaintainingPattern.sol";
 
 
 /**
@@ -8,7 +9,7 @@ import "../interfaces/ITwoKeyExchangeContract.sol";
  * This is going to be the contract on which we will store exchange rates between USD and ETH
  * Will be maintained, and updated by our trusted server and CMC api every 8 hours.
  */
-contract TwoKeyExchangeContract is ITwoKeyExchangeContract {
+contract TwoKeyExchangeContract is MaintainingPattern, ITwoKeyExchangeContract {
 
     /**
      * @notice public mapping which will store rate between 1 wei eth and 1 wei fiat currency
@@ -16,62 +17,10 @@ contract TwoKeyExchangeContract is ITwoKeyExchangeContract {
      */
     mapping(bytes32 => uint) public currency2value;
 
+    constructor(address [] _maintainers, address _twoKeyAdmin) MaintainingPattern (_maintainers, _twoKeyAdmin )
+    public {
 
-    /**
-     * Mapping which will store maintainers who are eligible to update contract state
-     */
-    mapping(address => bool) public isMaintainer;
-
-    /**
-     * Address of TwoKeyAdmin contract, which will be the only one eligible to manipulate the maintainers
-     */
-    address public twoKeyAdmin;
-
-    /**
-     * @notice Modifier to restrict calling the method to anyone but maintainers
-     */
-    modifier onlyMaintainer {
-        require(isMaintainer[msg.sender] == true);
-        _;
     }
-
-    /**
-     * @notice Modifier to restrict calling the method to anyone but twoKeyAdmin
-     */
-    modifier onlyTwoKeyAdmin {
-        require(msg.sender == address(twoKeyAdmin));
-        _;
-    }
-
-    constructor(address [] _maintainers, address _twoKeyAdmin) public {
-        twoKeyAdmin = _twoKeyAdmin;
-        for(uint i=0; i<_maintainers.length; i++) {
-            isMaintainer[_maintainers[i]] = true;
-        }
-    }
-
-    /**
-     * @notice Function which can add new maintainers, in general it's array because this supports adding multiple addresses in 1 trnx
-     * @dev only twoKeyAdmin contract is eligible to mutate state of maintainers
-     * @param _maintainers is the array of maintainer addresses
-     */
-    function addMaintainers(address [] _maintainers) public onlyTwoKeyAdmin {
-        for(uint i=0; i<_maintainers.length; i++) {
-            isMaintainer[_maintainers[i]] = true;
-        }
-    }
-
-    /**
-     * @notice Function which can remove some maintainers, in general it's array because this supports adding multiple addresses in 1 trnx
-     * @dev only twoKeyAdmin contract is eligible to mutate state of maintainers
-     * @param _maintainers is the array of maintainer addresses
-     */
-    function removeMaintainers(address [] _maintainers) public onlyTwoKeyAdmin {
-        for(uint i=0; i<_maintainers.length; i++) {
-            isMaintainer[_maintainers[i]] = false;
-        }
-    }
-
     /**
      * @notice Function where our backend will update the state (rate between eth_wei and dollar_wei) every 8 hours
      * @dev only twoKeyMaintainer address will be eligible to update it

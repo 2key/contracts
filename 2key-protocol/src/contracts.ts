@@ -6,9 +6,9 @@ export default { NetworkHashes:
          '  you  do then make   women and   an lead then i    you when     patient  streets  when us' },
      '8086':
       { hash:
-         'bdb6b77975b930bd23b7af21477b91a4194f9d38cf3a7b858d3611438a44a57e',
+         '90172fda661eb7e1131a6cf3e7562ce22c63328e08f536334ab90de6b468d671',
         humanHash:
-         '   when room  deserted  upon   patient oyster when   us you  then  then when   nights evening hotels  sawdust  when' },
+         ' like go  not us   spread us i   intent go  go question muttering  let  nights retreats you  let   i  it' },
      '98052':
       { hash:
          '06ad63cf0ae525e308fff5455f2b6b80d29deed7c337ab0134c61e276dc2db3d',
@@ -35,9 +35,9 @@ export default { NetworkHashes:
         '8086':
          { events: {},
            links: {},
-           address: '0xf55d1829a413f0503e3538cbbdc8a7f096f82449',
+           address: '0x42c4b6fee469da380fbdfb6f9bd52ff04fdf1b06',
            transactionHash:
-            '0xc9ced7acb9430fbe8368f80714f1df6ce2e4eb4e584743b919cc560b6503bd44' },
+            '0xe232990709712a5802d7924b27314ca503d5146aa2cf491f5376358d2e6ecf04' },
         '98052':
          { events: {},
            links: {},
@@ -963,9 +963,9 @@ export default { NetworkHashes:
         '8086':
          { events: {},
            links: {},
-           address: '0xaf5edd4ef634fcf5253ff03a0416a726a5866184',
+           address: '0xe39ca43562b6ae350e657d93ec3419ba73f96992',
            transactionHash:
-            '0x3fb2ab9839e093c663ee879a2084b6d0aa7b35f333f592712dbb83de8abd2197' },
+            '0x9c14ecd6268228910330ed251ff02598b49393c1058e7cecf0206ba2e1ad0594' },
         '1543572092936':
          { events: {},
            links: {},
@@ -1213,9 +1213,9 @@ export default { NetworkHashes:
         '8086':
          { events: {},
            links: {},
-           address: '0xd6714311bc19552f0b59616a30059a6f332c6dbc',
+           address: '0x022f787400ac9964c88547526c4d03f615919b0b',
            transactionHash:
-            '0x3d21af5fb075fbbc305bb89091a13053b55814a6c7f4de35e126f32627ecdcf0' },
+            '0xe681407c9e4feb321e671437c107ea99a41a2184fb94e09f5bb837c5fda945f0' },
         '1543572092936':
          { events: {},
            links: {},
@@ -1792,9 +1792,9 @@ export default { NetworkHashes:
         '8086':
          { events: {},
            links: {},
-           address: '0x9e7352169e9b824311ff0ae804066b259f162860',
+           address: '0x33181044189d1fc553a10d452adc57ad455f6ae3',
            transactionHash:
-            '0x86eefe9be415478563be2dafa26dded4821662f5f5ba272c2fb904b93ddb9dbb' },
+            '0xb451b4cfb88f21b0e3ef5dd05045162a54341851893a9b49edd968848ad3dde5' },
         '1543572092936':
          { events: {},
            links: {},
@@ -1995,9 +1995,9 @@ export default { NetworkHashes:
         '8086':
          { events: {},
            links: {},
-           address: '0x90ab4a4000e282babc5d6b8be569879e4b1d31d7',
+           address: '0xed69c03f9a15b5b56d540bcf337ba0221a3747dc',
            transactionHash:
-            '0xd94b23199515e569d42b68b685aef64c21abf9467718f05f81df9738c439fb60' },
+            '0x2dab660f7a948128713cb67f517f3a574dd5f2b106ca80da75cb2bc66d37d283' },
         '1543572092936':
          { events: {},
            links: {},
@@ -2248,9 +2248,9 @@ export default { NetworkHashes:
         '8086':
          { events: {},
            links: {},
-           address: '0x7936d67060d58fb2d99c120592d4afd15b075df3',
+           address: '0xaf8a16a6fde5a2b1f06c33ee6c7bd5b2a2e59246',
            transactionHash:
-            '0xd29f5d44209811537e4ee1bbeb9e6729f763c71638bc2f722509570b02056a3e' },
+            '0x0190f5ee1aa2aac45d6b0ec54d4cd3d385e8205b0b7638170af79b3efb3050cb' },
         '1543572092936':
          { events: {},
            links: {},
@@ -2271,12 +2271,26 @@ export default { NetworkHashes:
           payable: false,
           stateMutability: 'view',
           type: 'function' },
+        { constant: false,
+          inputs: [ { name: '_maintainers', type: 'address[]' } ],
+          name: 'addMaintainers',
+          outputs: [],
+          payable: false,
+          stateMutability: 'nonpayable',
+          type: 'function' },
         { constant: true,
           inputs: [ { name: '', type: 'bytes32' } ],
           name: 'currency2value',
           outputs: [ { name: '', type: 'uint256' } ],
           payable: false,
           stateMutability: 'view',
+          type: 'function' },
+        { constant: false,
+          inputs: [ { name: '_maintainers', type: 'address[]' } ],
+          name: 'removeMaintainers',
+          outputs: [],
+          payable: false,
+          stateMutability: 'nonpayable',
           type: 'function' },
         { constant: true,
           inputs: [ { name: '', type: 'address' } ],
@@ -2291,20 +2305,6 @@ export default { NetworkHashes:
           payable: false,
           stateMutability: 'nonpayable',
           type: 'constructor' },
-        { constant: false,
-          inputs: [ { name: '_maintainers', type: 'address[]' } ],
-          name: 'addMaintainers',
-          outputs: [],
-          payable: false,
-          stateMutability: 'nonpayable',
-          type: 'function' },
-        { constant: false,
-          inputs: [ { name: '_maintainers', type: 'address[]' } ],
-          name: 'removeMaintainers',
-          outputs: [],
-          payable: false,
-          stateMutability: 'nonpayable',
-          type: 'function' },
         { constant: false,
           inputs:
            [ { name: '_currency', type: 'bytes32' },
@@ -2596,9 +2596,9 @@ export default { NetworkHashes:
         '8086':
          { events: {},
            links: {},
-           address: '0x523708e6be93308d5387d9967d207cd4b6a90a15',
+           address: '0x555f7ee7335bf466744685e322aa2931802c1be6',
            transactionHash:
-            '0xef27c71e32e189341bbeafb3df1b6077f7933b38775f24abcdb111cf0f04b371' },
+            '0xc0a315e24840741dee5727a8423a1265dc51f851530997bf439077d19b23f520' },
         '1543572092936':
          { events: {},
            links: {},
@@ -2936,9 +2936,9 @@ export default { NetworkHashes:
         '8086':
          { events: {},
            links: {},
-           address: '0x9230a983ee395beded4955a4d17bab4157202f3c',
+           address: '0x2f78f4781eb04572f0c400252c2af780fb04672c',
            transactionHash:
-            '0x23ae5a3a67e3d6955ef259214c775d43acc4f6ace9e5cc6ab21f4e4691a7d58d' },
+            '0xc83a491af69f983111d3197b148fce3dd7967319e546c46774ab4bf9ae36b691' },
         '1543572092936':
          { events: {},
            links: {},
