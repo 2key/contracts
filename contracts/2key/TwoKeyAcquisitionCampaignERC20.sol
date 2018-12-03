@@ -46,8 +46,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     string privateMetaHash; // Ipfs hash of json sensitive (contractor) information
     uint256 public maxReferralRewardPercent; // maxReferralRewardPercent is actually bonus percentage in ETH
     uint public maxConverterBonusPercent; //translates to discount - we can add this to constructor
-    uint minContributionETHorUSD; // Minimal amount of ETH or USD that can be paid by converter to create conversion
-    uint maxContributionETHorUSD; // Maximal amount of ETH or USD that can be paid by converter to create conversion
+    uint minContributionETHorFiatCurrency; // Minimal amount of ETH or USD that can be paid by converter to create conversion
+    uint maxContributionETHorFiatCurrency; // Maximal amount of ETH or USD that can be paid by converter to create conversion
 
     uint unit_decimals; // ERC20 selling data
 //    string symbol; // ERC20 selling data
@@ -95,8 +95,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         maxReferralRewardPercent = values[4];
         maxConverterBonusPercent = values[5];
         pricePerUnitInETHWeiOrUSD = values[6];
-        minContributionETHorUSD = values[7];
-        maxContributionETHorUSD = values[8];
+        minContributionETHorFiatCurrency = values[7];
+        maxContributionETHorFiatCurrency = values[8];
         currency = _currency;
         ethUSDExchangeContract = _ethUSDExchangeContract;
         setERC20Attributes();
@@ -231,8 +231,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         }
     }
 
-
-
     function joinAndShareARC(bytes signature, address receiver) public {
         distributeArcsBasedOnSignature(signature);
         transferFrom(msg.sender, receiver, 1);
@@ -245,12 +243,12 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      */
     function requirementForMsgValue(uint msgValue) internal {
         if(keccak256(currency) == keccak256('ETH')) {
-            require(msgValue >= minContributionETHorUSD);
-            require(msgValue <= maxContributionETHorUSD);
+            require(msgValue >= minContributionETHorFiatCurrency);
+            require(msgValue <= maxContributionETHorFiatCurrency);
         } else {
             uint val = ITwoKeyExchangeContract(ethUSDExchangeContract).getPrice(currency);
-            require(msgValue >= val * minContributionETHorUSD);
-            require(msgValue <= val * maxContributionETHorUSD);
+            require(msgValue >= val * minContributionETHorFiatCurrency);
+            require(msgValue <= val * maxContributionETHorFiatCurrency);
         }
     }
 
@@ -290,7 +288,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
 
 
 
-    /**
+    /*./ >>/*
+
      * @notice Function which is executed to create conversion
      * @param conversionAmountETHWei is the amount of the ether sent to the contract
      * @param converterAddress is the sender of eth to the contract
@@ -444,7 +443,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     /// @dev only Contractor can call this method, otherwise it will revert - emits Event when updated
     /// @param value is the new value we are going to set for minContributionETH
     function updateMinContributionETHOrUSD(uint value) public onlyContractor {
-        minContributionETHorUSD = value;
+        minContributionETHorFiatCurrency = value;
         twoKeyEventSource.updatedData(block.timestamp, value, "Updated maxContribution");
     }
 
@@ -452,7 +451,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     /// @dev only Contractor can call this method, otherwise it will revert - emits Event when updated
     /// @param value is the new maxContribution value
     function updateMaxContributionETHorUSD(uint value) public onlyContractor {
-        maxContributionETHorUSD = value;
+        maxContributionETHorFiatCurrency = value;
         twoKeyEventSource.updatedData(block.timestamp, value, "Updated maxContribution");
     }
 

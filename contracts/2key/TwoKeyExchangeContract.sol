@@ -15,12 +15,14 @@ contract TwoKeyExchangeContract is MaintainingPattern, ITwoKeyExchangeContract {
      * @notice public mapping which will store rate between 1 wei eth and 1 wei fiat currency
      * Will be updated every 8 hours, and it's public
      */
+    //TODO: Rename fiatCurrencyExchangeRateToOneEther
     mapping(bytes32 => uint) public currency2value;
 
     constructor(address [] _maintainers, address _twoKeyAdmin) MaintainingPattern (_maintainers, _twoKeyAdmin )
     public {
 
     }
+
     /**
      * @notice Function where our backend will update the state (rate between eth_wei and dollar_wei) every 8 hours
      * @dev only twoKeyMaintainer address will be eligible to update it
@@ -38,7 +40,6 @@ contract TwoKeyExchangeContract is MaintainingPattern, ITwoKeyExchangeContract {
         bytes32 key = stringToBytes32(_currency);
         return currency2value[key];
     }
-
 
     /**
      * @notice Helper method to convert string to bytes32
