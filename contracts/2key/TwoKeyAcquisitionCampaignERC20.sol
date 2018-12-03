@@ -16,7 +16,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
 
     using Call for *;
 
-    event Rewarded(address indexed to, uint256 amount);
+//    event Rewarded(address indexed to, uint256 amount);
 
     address public conversionHandler;
 
@@ -349,7 +349,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
             }
             referrerBalancesETHWei[influencers[i]] = referrerBalancesETHWei[influencers[i]].add(b);
             referrerTotalEarningsEthWEI[influencers[i]] = referrerTotalEarningsEthWEI[influencers[i]].add(b);
-            emit Rewarded(influencers[i], b);
+//            emit Rewarded(influencers[i], b);
             total_bounty = total_bounty.add(b);
             _maxReferralRewardETHWei = _maxReferralRewardETHWei.sub(b);
         }
