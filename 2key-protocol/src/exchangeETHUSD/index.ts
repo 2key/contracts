@@ -34,6 +34,7 @@ export default class TwoKeyExchangeContract implements ITwoKeyExchangeContract {
     /**
      *
      * @param {string} currency
+     * @param {boolean} isGreater
      * @param {number} price
      * @param {string} from
      * @returns {Promise<string>}

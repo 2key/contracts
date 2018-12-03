@@ -15,12 +15,11 @@ contract TwoKeyExchangeContract is MaintainingPattern, ITwoKeyExchangeContract {
      * @notice public mapping which will store rate between 1 wei eth and 1 wei fiat currency
      * Will be updated every 8 hours, and it's public
      */
-    //TODO: Rename fiatCurrencyExchangeRateToOneEther
     mapping(bytes32 => FiatCurrency) public currencyName2rate;
 
     struct FiatCurrency {
-        uint rateEth;
-        bool isGreater; //Flag which represent if 1 ETH > 1 fiat (ex. 1eth = 120euros) true (1eth = 0.001 BTC) false
+        uint rateEth; // this is representing rate between eth and some currency where will be 1 unit to X units depending on more valuable curr
+        bool isGreater; //Flag which represent if 1 ETH > 1 fiat (ex. 1eth = 120euros) true (1eth = 0.001 X) false
     }
 
     constructor(address [] _maintainers, address _twoKeyAdmin) MaintainingPattern (_maintainers, _twoKeyAdmin )
