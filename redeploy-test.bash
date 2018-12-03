@@ -23,3 +23,5 @@ yarn run test:one 2key-protocol/test/updateTwoKeyReg.dev.spec.ts
 spinner 4
 echo "Running test"
 yarn run test
+spinner 4
+echo "Bash script finished execution!"
