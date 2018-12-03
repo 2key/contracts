@@ -23,7 +23,7 @@ export default class TwoKeyExchangeContract implements ITwoKeyExchangeContract {
     public getValue(currency: string, from: string) : Promise<any> {
         return new Promise<number>(async(resolve,reject) => {
             try {
-                let rateObject = await promisify(this.base.twoKeyExchangeContract.getPrice,[currency, {from}]);
+                let rateObject = await promisify(this.base.twoKeyExchangeContract.getFiatCurrencyDetails,[currency, {from}]);
                 resolve(rateObject);
             } catch (e) {
                 reject(e);
@@ -44,7 +44,7 @@ export default class TwoKeyExchangeContract implements ITwoKeyExchangeContract {
             try {
                 let currencyHex = await this.base.web3.toHex(currency).toString();
                 console.log(currencyHex);
-                let txHash = await promisify(this.base.twoKeyExchangeContract.setPrice,[currencyHex, isGreater, price, {from}]);
+                let txHash = await promisify(this.base.twoKeyExchangeContract.setFiatCurrencyDetails,[currencyHex, isGreater, price, {from}]);
                 resolve(txHash);
             } catch (e) {
                 reject(e);

@@ -31,7 +31,7 @@ contract TwoKeyExchangeContract is MaintainingPattern, ITwoKeyExchangeContract {
      * @notice Function where our backend will update the state (rate between eth_wei and dollar_wei) every 8 hours
      * @dev only twoKeyMaintainer address will be eligible to update it
      */
-    function setPrice(bytes32 _currency, bool _isGreater, uint _ETHWei_CurrencyWEI) public onlyMaintainer {
+    function setFiatCurrencyDetails(bytes32 _currency, bool _isGreater, uint _ETHWei_CurrencyWEI) public onlyMaintainer {
         FiatCurrency memory f = FiatCurrency ({
             rateEth: _ETHWei_CurrencyWEI,
             isGreater: _isGreater
@@ -44,7 +44,7 @@ contract TwoKeyExchangeContract is MaintainingPattern, ITwoKeyExchangeContract {
      * @param _currency is the currency (ex. 'USD', 'EUR', etc.)
      * @return rate between currency and eth wei
      */
-    function getPrice(string _currency) public view returns (uint,bool) {
+    function getFiatCurrencyDetails(string _currency) public view returns (uint,bool) {
         bytes32 key = stringToBytes32(_currency);
         return (currencyName2rate[key].rateEth, currencyName2rate[key].isGreater);
     }
