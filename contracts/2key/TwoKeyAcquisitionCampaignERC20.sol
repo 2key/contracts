@@ -128,7 +128,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     /// @param _amount is the amount of ERC20 contract he'd like to give us
     /// @return true if successful, otherwise transaction will revert
     function addUnitsToInventory(uint256 _amount) public returns (bool) {
-        require(IERC20(assetContractERC20).transferFrom(msg.sender, address(this), _amount));
+        require(IERC20(assetContractERC20).transferFrom(msg.sender, address(this), _amount),'Failed adding units to inventory');
         return true;
     }
 
@@ -145,7 +145,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         // the sender sets what is the percentage of the bounty s/he will receive when acting as an influencer
         // the value 255 is used to signal equal partition with other influencers
         // A sender can set the value only once in a contract
-        require(cut <= 100 || cut == 255);
+        require(cut <= 100 || cut == 255, 'Cut is not in valid range');
         require(referrer2cut[msg.sender] == 0);
         if (cut <= 100) {
             cut++;
