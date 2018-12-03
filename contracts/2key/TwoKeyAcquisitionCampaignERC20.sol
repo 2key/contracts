@@ -246,7 +246,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      */
     function requirementForMsgValue(uint msgValue) internal {
         if(keccak256(currency) == keccak256('USD')) {
-            uint val = ITwoKeyExchangeContract(ethUSDExchangeContract).getPrice();
+            uint val = ITwoKeyExchangeContract(ethUSDExchangeContract).getPrice(currency);
             require(msgValue >= val * minContributionETHorUSD);
             require(msgValue <= val * maxContributionETHorUSD);
         } else {
@@ -419,7 +419,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     function getEstimatedTokenAmount(uint conversionAmountETHWei) public view returns (uint, uint) {
         uint value = pricePerUnitInETHWeiOrUSD;
         if(keccak256(currency) == keccak256('USD')) {
-            value = pricePerUnitInETHWeiOrUSD * ITwoKeyExchangeContract(ethUSDExchangeContract).getPrice();
+            value = pricePerUnitInETHWeiOrUSD * ITwoKeyExchangeContract(ethUSDExchangeContract).getPrice(currency);
         }
         uint baseTokensForConverterUnits = conversionAmountETHWei.mul(10 ** unit_decimals).div(value);
         uint bonusTokensForConverterUnits = baseTokensForConverterUnits.mul(maxConverterBonusPercent).div(100);

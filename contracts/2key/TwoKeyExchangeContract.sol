@@ -11,10 +11,11 @@ import "../interfaces/ITwoKeyExchangeContract.sol";
 contract TwoKeyExchangeContract is ITwoKeyExchangeContract {
 
     /**
-     * @notice public variable which will store rate between 1 wei eth and 1 wei dollar
+     * @notice public mapping which will store rate between 1 wei eth and 1 wei fiat currency
      * Will be updated every 8 hours, and it's public
      */
-    uint EthWEI_UsdWEI;
+    mapping(bytes32 => uint) public currency2value;
+
 
     /**
      * Mapping which will store maintainers who are eligible to update contract state
@@ -75,16 +76,35 @@ contract TwoKeyExchangeContract is ITwoKeyExchangeContract {
      * @notice Function where our backend will update the state (rate between eth_wei and dollar_wei) every 8 hours
      * @dev only twoKeyMaintainer address will be eligible to update it
      */
-    function setPrice(uint _EthWEI_UsdWEI) public onlyMaintainer {
-        EthWEI_UsdWEI = _EthWEI_UsdWEI;
+    function setPrice(bytes32 _currency, uint _ETHWei_CurrencyWEI) public onlyMaintainer {
+        currency2value[_currency] = _ETHWei_CurrencyWEI;
     }
 
     /**
-     * @notice Function to get actual rate how much is 1 wei worth $ weis
-     * @return EthWEI_UsdWEI value
+     * @notice Function to get price for the selected currency
+     * @param _currency is the currency (ex. 'USD', 'EUR', etc.)
+     * @return rate between currency and eth wei
      */
-    function getPrice() public view returns (uint) {
-        return EthWEI_UsdWEI;
+    function getPrice(string _currency) public view returns (uint) {
+        bytes32 key = stringToBytes32(_currency);
+        return currency2value[key];
+    }
+
+
+    /**
+     * @notice Helper method to convert string to bytes32
+     * @dev If string.length > 32 then the rest after 32nd char will be deleted
+     * @return result
+     */
+    function stringToBytes32(string memory source) returns (bytes32 result) {
+        bytes memory tempEmptyStringTest = bytes(source);
+        if (tempEmptyStringTest.length == 0) {
+            return 0x0;
+        }
+
+        assembly {
+            result := mload(add(source, 32))
+        }
     }
 
 }
