@@ -21,17 +21,17 @@ module.exports = function deploy(deployer) {
                 [12345, 15345, 12345, 5, 5, 5, 5, 12, 15, 1], 'USD', TwoKeyExchangeContract.address))
             .then(() => TwoKeyAcquisitionCampaignERC20.deployed())
             .then(() => true)
-            .then(() => EventSource.deployed().then(async () => {
+            .then(async () => {
                 console.log("... Adding TwoKeyAcquisitionCampaign to EventSource");
                 await new Promise(async (resolve, reject) => {
                     try {
-                        let txHash = await EventSource.at(json.TwoKeyEventSource.Proxy).addContract(TwoKeyAcquisitionCampaignERC20.address, {gas: 7000000}).then(() => true);
+                        let txHash = await EventSource.at(json.TwoKeyEventSource.Proxy).addContract(TwoKeyAcquisitionCampaignERC20.address, {gas: 7000000});
                         resolve(txHash);
                     } catch (e) {
                         reject(e);
                     }
                 });
-                console.log("Added TwoKeyAcquisition: " + TwoKeyAcquisitionCampaignERC20.address + "  to EventSource : " + EventSource.address + "!");
-            })).then(() => true);
+                console.log("Added TwoKeyAcquisition: " + TwoKeyAcquisitionCampaignERC20.address + "  to EventSource : " + json.TwoKeyEventSource.Proxy + "!");
+            }).then(() => true);
     }
 }

@@ -12,6 +12,11 @@ import "./MaintainingPattern.sol";
 contract TwoKeyExchangeContract is MaintainingPattern, ITwoKeyExchangeContract {
 
     /**
+     * @notice Event will be emitted every time we update the price for the fiat
+     */
+    event PriceUpdated(bytes32 _currency, uint newRate, uint _timestamp, address _updater);
+
+    /**
      * @notice public mapping which will store rate between 1 wei eth and 1 wei fiat currency
      * Will be updated every 8 hours, and it's public
      */
@@ -52,6 +57,7 @@ contract TwoKeyExchangeContract is MaintainingPattern, ITwoKeyExchangeContract {
             maintainerWhoUpdated: msg.sender
         });
         currencyName2rate[_currency] = f;
+        emit PriceUpdated(_currency, _RateFromOneGreaterThanUnitInWeiOfLesserThanUnit, block.timestamp, msg.sender);
     }
 
     /**

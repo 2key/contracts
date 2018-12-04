@@ -118,13 +118,6 @@ contract TwoKeyEventSource is Upgradeable, TwoKeyTypes {
         _;
     }
 
-    /// @notice Constructor during deployment of contract we need to set an admin address (means TwoKeyAdmin needs to be previously deployed)
-    /// @param _twoKeyAdminAddress is the address of TwoKeyAdmin contract previously deployed
-//    constructor(address _twoKeyAdminAddress) public {
-//        twoKeyAdmin = _twoKeyAdminAddress;
-//        authorizedSubadmins[msg.sender] = true;
-//    }
-
     function setInitialParams(address _twoKeyAdminAddress) public {
         require(twoKeyAdmin == address(0));
         twoKeyAdmin = _twoKeyAdminAddress;
@@ -205,9 +198,8 @@ contract TwoKeyEventSource is Upgradeable, TwoKeyTypes {
 
     /// @dev Only allowed contracts can call this function ---> means can emit events
     /// This user will be contractor
+    /// can't do any validation by contract code because at the time of the execution bytecode is not yet available
     function created(address _campaign, address _owner, address _moderator) public {
-//        bytes memory code = GetCode.at(_campaign);
-//        require(canEmit[code] == true);
         interfaceTwoKeyReg.addWhereContractor(_owner, _campaign);
         interfaceTwoKeyReg.addWhereModerator(_moderator, _campaign);
         emit Created(_campaign, _owner, _moderator);
@@ -265,7 +257,7 @@ contract TwoKeyEventSource is Upgradeable, TwoKeyTypes {
 
     /// @dev Only allowed contracts can call this function - means can emit events
     // onlyAllowedContracts
-    function updatedData(uint timestamp, uint value, string action) public onlyAllowedContracts  {
+    function updatedData(uint timestamp, uint value, string action) public onlyAllowedContracts {
         emit UpdatedData(timestamp, value, action);
     }
 
