@@ -46,7 +46,7 @@ module.exports = function deploy(deployer) {
         .then(() => deployer.deploy(TwoKeySingletonesRegistry, [maintainerAddress], TwoKeyAdmin.address))
         .then(() => TwoKeySingletonesRegistry.deployed().then(async(registry) => {
             console.log('... Adding TwoKeyRegistry to Proxy registry as valid implementation');
-            let obj = {}
+            let obj = {};
             await new Promise(async(resolve,reject) => {
                 try {
                     /**
@@ -101,13 +101,11 @@ module.exports = function deploy(deployer) {
                     reject(e);
                 }
             })
-
             console.log('... Setting Initial params in both contracts');
             await new Promise(async(resolve,reject) => {
                 try {
                     /**
                      * Setting initial parameters in event source and twoKeyRegistry contract
-                     *
                      */
                     await EventSource.at(proxyAddressTwoKeyEventSource).setInitialParams(TwoKeyAdmin.address);
                     let txHash = await TwoKeyRegistry.at(proxyAddressTwoKeyRegistry).setInitialParams(proxyAddressTwoKeyEventSource, TwoKeyAdmin.address, (deployer.network.startsWith('rinkeby') || deployer.network.startsWith('public.')) ? '0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f' : '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7');
@@ -116,8 +114,6 @@ module.exports = function deploy(deployer) {
                     reject(e);
                 }
             })
-
-
         }))
         .then(() => EventSource.deployed().then(async() => {
             console.log("... Adding TwoKeyRegistry to EventSource");
