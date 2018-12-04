@@ -258,7 +258,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         } else {
             uint val;
             bool flag;
-            (val, flag) = ITwoKeyExchangeContract(ethUSDExchangeContract).getFiatCurrencyDetails(currency);
+            (val, flag,,) = ITwoKeyExchangeContract(ethUSDExchangeContract).getFiatCurrencyDetails(currency);
             if(flag) {
                 require(msgValue * val >= minContributionETHorFiatCurrency); //converting ether to fiat
                 require(msgValue * val <= maxContributionETHorFiatCurrency); //converting ether to fiat
@@ -434,7 +434,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         if(keccak256(currency) != keccak256('ETH')) {
             uint rate;
             bool flag;
-            (rate,flag) = ITwoKeyExchangeContract(ethUSDExchangeContract).getFiatCurrencyDetails(currency);
+            (rate,flag,,) = ITwoKeyExchangeContract(ethUSDExchangeContract).getFiatCurrencyDetails(currency);
             if(flag) {
                 conversionAmountETHWei = conversionAmountETHWei * rate; //converting eth to $wei
             } else {

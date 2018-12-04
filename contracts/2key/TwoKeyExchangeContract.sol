@@ -20,6 +20,8 @@ contract TwoKeyExchangeContract is MaintainingPattern, ITwoKeyExchangeContract {
     struct FiatCurrency {
         uint rateEth; // this is representing rate between eth and some currency where will be 1 unit to X units depending on more valuable curr
         bool isGreater; //Flag which represent if 1 ETH > 1 fiat (ex. 1eth = 120euros) true (1eth = 0.001 X) false
+        uint timeUpdated;
+        address maintainerWhoUpdated;
     }
 
     constructor(address [] _maintainers, address _twoKeyAdmin) MaintainingPattern (_maintainers, _twoKeyAdmin )
@@ -30,18 +32,24 @@ contract TwoKeyExchangeContract is MaintainingPattern, ITwoKeyExchangeContract {
     /**
      * @notice Function where our backend will update the state (rate between eth_wei and dollar_wei) every 8 hours
      * @dev only twoKeyMaintainer address will be eligible to update it
-
-     given:  1 ETH == 119.45678 USD ==>
-     then it holds:   1 * 10^18 ETH_WEI ==  119.45678 * 10^18 USD_WEI
-     it also holds:  1 ETH = 119.45678 * 10^18 USD_WEI  (iff ETH _isGreater than USD)
-     so backend will update on the rate of 1 (greater than currency) == X (the updated value) in the (lesser than currency in WEI)
-     so in the example above, the backend will send the following request:
-     setFiatCurrencyDetails("USD",true,119456780000000000000)
+     * @param _currency is the bytes32 (hex) representation of currency shortcut string ('USD','EUR',etc)
+     * @param _isETHGreaterThanCurrency true if 1 eth = more than 1 unit of X otherwise false
+     * @param _RateFromOneGreaterThanUnitInWeiOfLesserThanUnit 1 (greater than currency) == X (the updated value) in the (lesser than currency in WEI)
      */
     function setFiatCurrencyDetails(bytes32 _currency, bool _isETHGreaterThanCurrency, uint _RateFromOneGreaterThanUnitInWeiOfLesserThanUnit) public onlyMaintainer {
+        /**
+         * given:  1 ETH == 119.45678 USD ==>
+         * then it holds:   1 * 10^18 ETH_WEI ==  119.45678 * 10^18 USD_WEI
+         * it also holds:  1 ETH = 119.45678 * 10^18 USD_WEI  (iff ETH _isGreater than USD)
+         * so backend will update on the rate of 1 (greater than currency) == X (the updated value) in the (lesser than currency in WEI)
+         * so in the example above, the backend will send the following request:
+         * setFiatCurrencyDetails("USD",true,119456780000000000000)
+         */
         FiatCurrency memory f = FiatCurrency ({
             rateEth: _RateFromOneGreaterThanUnitInWeiOfLesserThanUnit,
-            isGreater: _isETHGreaterThanCurrency
+            isGreater: _isETHGreaterThanCurrency,
+            timeUpdated: block.timestamp,
+            maintainerWhoUpdated: msg.sender
         });
         currencyName2rate[_currency] = f;
     }
@@ -51,9 +59,14 @@ contract TwoKeyExchangeContract is MaintainingPattern, ITwoKeyExchangeContract {
      * @param _currency is the currency (ex. 'USD', 'EUR', etc.)
      * @return rate between currency and eth wei
      */
-    function getFiatCurrencyDetails(string _currency) public view returns (uint,bool) {
+    function getFiatCurrencyDetails(string _currency) public view returns (uint,bool,uint,address) {
         bytes32 key = stringToBytes32(_currency);
-        return (currencyName2rate[key].rateEth, currencyName2rate[key].isGreater);
+        return (
+            currencyName2rate[key].rateEth,
+            currencyName2rate[key].isGreater,
+            currencyName2rate[key].timeUpdated,
+            currencyName2rate[key].maintainerWhoUpdated
+        );
     }
 
     /**
