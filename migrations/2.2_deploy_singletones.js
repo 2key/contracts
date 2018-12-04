@@ -61,7 +61,6 @@ module.exports = function deploy(deployer) {
                         'Proxy' : proxy,
                         'Version': "1.0"
                     };
-                    await TwoKeyRegistry.at(proxy).setInitialParams(EventSource.address, TwoKeyAdmin.address, (deployer.network.startsWith('rinkeby') || deployer.network.startsWith('public.')) ? '0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f' : '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7');
                     proxyAddressTwoKeyRegistry = proxy;
                     resolve(proxy);
                 } catch (e) {
@@ -85,7 +84,6 @@ module.exports = function deploy(deployer) {
                         'Proxy' : proxy,
                         'Version' : "1.0"
                     };
-                    await EventSource.at(proxy).setInitialParams(TwoKeyAdmin.address);
                     proxyAddressTwoKeyEventSource = proxy;
 
                     /**
@@ -99,6 +97,21 @@ module.exports = function deploy(deployer) {
                         console.log("File has been created");
                     });
                     resolve(proxy);
+                } catch (e) {
+                    reject(e);
+                }
+            })
+
+            console.log('... Setting Initial params in both contracts');
+            await new Promise(async(resolve,reject) => {
+                try {
+                    /**
+                     * Setting initial parameters in event source and twoKeyRegistry contract
+                     *
+                     */
+                    await EventSource.at(proxyAddressTwoKeyEventSource).setInitialParams(TwoKeyAdmin.address);
+                    let txHash = await TwoKeyRegistry.at(proxyAddressTwoKeyRegistry).setInitialParams(proxyAddressTwoKeyEventSource, TwoKeyAdmin.address, (deployer.network.startsWith('rinkeby') || deployer.network.startsWith('public.')) ? '0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f' : '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7');
+                    resolve(txHash);
                 } catch (e) {
                     reject(e);
                 }

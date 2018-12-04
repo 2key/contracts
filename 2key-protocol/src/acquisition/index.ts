@@ -14,6 +14,9 @@ import contractsMeta, {default as contracts} from '../contracts';
 import {promisify} from '../utils';
 import Sign from '../utils/sign';
 
+const proxyInfo = require('../proxyAddresses.json');
+
+
 /**
  *
  * @param {number[]} cuts
@@ -151,7 +154,8 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 txHash = await this.helpers._createContract(contractsMeta.TwoKeyAcquisitionCampaignERC20, from, {
                     gasPrice,
                     params: [
-                        this.helpers._getContractDeployedAddress('TwoKeyEventSource'),
+                        proxyInfo.TwoKeyEventSource.Proxy,
+                        // this.helpers._getContractDeployedAddress('TwoKeyEventSource'),
                         conversionHandlerAddress,
                         data.moderator || from,
                         data.assetContractERC20,
