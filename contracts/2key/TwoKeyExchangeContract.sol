@@ -30,11 +30,18 @@ contract TwoKeyExchangeContract is MaintainingPattern, ITwoKeyExchangeContract {
     /**
      * @notice Function where our backend will update the state (rate between eth_wei and dollar_wei) every 8 hours
      * @dev only twoKeyMaintainer address will be eligible to update it
+
+     given:  1 ETH == 119.45678 USD ==>
+     then it holds:   1 * 10^18 ETH_WEI ==  119.45678 * 10^18 USD_WEI
+     it also holds:  1 ETH = 119.45678 * 10^18 USD_WEI  (iff ETH _isGreater than USD)
+     so backend will update on the rate of 1 (greater than currency) == X (the updated value) in the (lesser than currency in WEI)
+     so in the example above, the backend will send the following request:
+     setFiatCurrencyDetails("USD",true,119456780000000000000)
      */
-    function setFiatCurrencyDetails(bytes32 _currency, bool _isGreater, uint _ETHWei_CurrencyWEI) public onlyMaintainer {
+    function setFiatCurrencyDetails(bytes32 _currency, bool _isETHGreaterThanCurrency, uint _RateFromOneGreaterThanUnitInWeiOfLesserThanUnit) public onlyMaintainer {
         FiatCurrency memory f = FiatCurrency ({
-            rateEth: _ETHWei_CurrencyWEI,
-            isGreater: _isGreater
+            rateEth: _RateFromOneGreaterThanUnitInWeiOfLesserThanUnit,
+            isGreater: _isETHGreaterThanCurrency
         });
         currencyName2rate[_currency] = f;
     }
