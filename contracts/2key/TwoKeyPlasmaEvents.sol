@@ -23,26 +23,12 @@ contract TwoKeyPlasmaEvents {
     // The cut from the bounty each influencer is taking + 1
     // zero (also the default value) indicates default behaviour in which the influencer takes an equal amount as other influencers
     mapping(address => mapping(address => mapping(address => uint256))) public influencer2cut;
-    // have a different setPublicLinkKey method that a plasma user can call with a new contract,public_link_key
-    // The steps are as follow:
-    // 1. make sure you have an ethereum address
-    // 2. call add_plasma2ethereum to make a connection between plamsa address (msg.sender) to ethereum address
-    // 3. the plasma user pass his ethereum address with the public key used in 2key-link
-    //
-    function setPublicLinkKey(address c, address contractor, address ethereum_address, address _public_link_key) public {
-        // the public key can be set by the plasma user that already proved that she is also the ethereum_address using  add_plasma2ethereum
-        require(msg.sender == ethereum_address || plasma2ethereum[msg.sender] == ethereum_address, 'you dont own ethereum_address');
-        update_public_link_key(c, contractor, ethereum_address, _public_link_key);
-    }
-
     // plasma address => ethereum address
     // note that more than one plasma address can point to the same ethereum address so it is not critical to use the same plasma address all the time for the same user
     // in some cases the plasma address will be the same as the ethereum address and in that case it is not necessary to have an entry
     // the way to know if an address is a plasma address is to look it up in this mapping
     mapping(address => address) public plasma2ethereum;
-    mapping(address => address) public ethereum2plasma;  // TODO match just one plasma address to eth address. We may want to change this to an array
-
-    // SOCIAL GRAPH
+    mapping(address => address) public ethereum2plasma;
 
     // campaign,contractor eth-addr=>from eth-addr=>to eth or plasma address=>true/false
     // not that the "to" addrss in an edge of the graph can be either a plasma or an ethereum address
@@ -67,7 +53,57 @@ contract TwoKeyPlasmaEvents {
         ethereum2plasma[eth_address] = plasma_address;
     }
 
-    function _test_path(address c, address contractor, address to) private view returns (bool) {
+    function plasmaOf(address me) public view returns (address) {
+        require(me != address(0), 'undefined user');
+        address plasma = ethereum2plasma[me];
+        if (plasma != address(0)) {
+            return plasma;
+        }
+        return me;
+    }
+
+    function setPublicLinkKeyOf(address c, address contractor, address new_address, address new_public_key) private {
+        // TODO keep same as code in TwoKeySignedContract.sol:transferSig
+        // update (only once) the public address used by each influencer
+        // we will need this in case one of the influencers will want to start his own off-chain link
+        new_address = plasmaOf(new_address);
+        address old_address = public_link_key[c][contractor][new_address];
+        if (old_address == address(0)) {
+            public_link_key[c][contractor][new_address] = new_public_key;
+        } else {
+            require(old_address == new_public_key,'public key can not be modified');
+        }
+    }
+    // have a different setPublicLinkKey method that a plasma user can call with a new contract,public_link_key
+    // The steps are as follow:
+    // 1. make sure you have an ethereum address
+    // 2. call add_plasma2ethereum to make a connection between plamsa address (msg.sender) to ethereum address
+    // 3. the plasma user pass his ethereum address with the public key used in 2key-link
+    //
+    function setPublicLinkKey(address c, address contractor, address new_public_key) private {
+        setPublicLinkKeyOf(c, contractor, msg.sender, new_public_key);
+    }
+
+    function setCutOf(address c, address contractor, address me, uint256 cut) internal {
+        // what is the percentage of the bounty s/he will receive when acting as an influencer
+        // the value 255 is used to signal equal partition with other influencers
+        // A sender can set the value only once in a contract
+        address plasma = plasmaOf(me);
+        require(influencer2cut[c][contractor][plasma] == 0 || influencer2cut[c][contractor][plasma] == cut, 'cut already set');
+        influencer2cut[c][contractor][plasma] = cut;
+    }
+
+    function setCut(address c, address contractor, uint256 cut) public {
+        setCutOf(c, contractor, msg.sender, cut);
+    }
+
+    function cutOf(address c, address contractor, address me) public view returns (uint256) {
+        return influencer2cut[c][contractor][plasmaOf(me)];
+    }
+
+    function test_path(address c, address contractor, address to) private view returns (bool) {
+        contractor = plasmaOf(contractor);
+        to = plasmaOf(to);
         while(to != contractor) {
             if(to == address(0)) {
                 return false;
@@ -77,14 +113,8 @@ contract TwoKeyPlasmaEvents {
         return true;
     }
 
-    function test_path(address c, address contractor, address to) private view returns (bool) {
-        if (_test_path(c, contractor, to)) {
-            return true;
-        }
-        if (_test_path(c, contractor,  ethereum2plasma[to])) {
-            return true;
-        }
-        return false;
+    function publicLinkKeyOf(address c, address contractor, address me) public returns (address) {
+        return public_link_key[c][contractor][plasmaOf(me)];
     }
 
     function visited(address c, address contractor, bytes sig) public {
@@ -98,11 +128,11 @@ contract TwoKeyPlasmaEvents {
         {
             old_address := mload(add(sig, 21))
         }
-
+        old_address = plasmaOf(old_address);
         // validate an existing visit path from contractor address to the old_address
         require(test_path(c, contractor, old_address), 'no path to contractor');
 
-        address old_key = public_link_key[c][contractor][old_address];
+        address old_key = publicLinkKeyOf(c, contractor, old_address);
 
 
         address[] memory influencers;
@@ -112,136 +142,44 @@ contract TwoKeyPlasmaEvents {
         // check if we exactly reached the end of the signature. this can only happen if the signature
         // was generated with free_join_take and in this case the last part of the signature must have been
         // generated by the caller of this method
-        address last_address = influencers[influencers.length-1];
-        require(last_address == msg.sender || last_address == plasma2ethereum[msg.sender],'only the last in the link can call visited');
-        update_visited_sig(c, contractor, last_address, sig);
+        address last_address = plasmaOf(influencers[influencers.length-1]);
+        require(last_address == msg.sender, 'only the last in the link can call visited');
+        visited_sig[c][contractor][last_address] = sig;
 
         uint i;
         address new_address;
         // move ARCs based on signature information
         for (i = 0; i < influencers.length; i++) {
-            new_address = influencers[i];
+            new_address = plasmaOf(influencers[i]);
             // NOTE!!!! for the last user in the sig the  new_address can be a plasma_address
             // as a result the same user with a plasma_address can appear later with an etherum address
-            update_visit(c, contractor, old_address, new_address);
+            if (!visits[c][contractor][old_address][new_address]) {  // generate event only once for each tripplet
+                visits[c][contractor][old_address][new_address] = true;
+                visited_from[c][contractor][new_address] = old_address;
+                visits_list[c][contractor][old_address].push(new_address);
+                emit Visited(new_address, c, contractor, old_address);
+            }
+
             old_address = new_address;
         }
 
         for (i = 0; i < keys.length; i++) {
-            new_address = influencers[i];
-            address key = keys[i];
             // TODO Updating the public key of influencers may not a good idea because it will require the influencers to use
             // a deterministic private/public key in the link and this might require user interaction (MetaMask signature)
             // TODO a possible solution is change public_link_key to address=>address[]
             // update (only once) the public address used by each influencer
             // we will need this in case one of the influencers will want to start his own off-chain link
-            update_public_link_key(c, contractor, new_address, key);
+            setPublicLinkKeyOf(c, contractor, influencers[i], keys[i]);
         }
 
         for (i = 0; i < weights.length; i++) {
-            new_address = influencers[i];
-            update_bounty_cut(c, contractor, new_address, weights[i]);
-        }
-    }
-
-    function update_visited_sig(address c, address contractor, address old_address, bytes sig) private {
-        visited_sig[c][contractor][old_address] = sig;
-    }
-
-    function update_public_link_key(address c, address contractor, address new_address, address new_public_key) private {
-        // TODO keep same as code in TwoKeySignedContract.sol:transferSig
-        // update (only once) the public address used by each influencer
-        // we will need this in case one of the influencers will want to start his own off-chain link
-        address old_address = public_link_key[c][contractor][new_address];
-        if (old_address == address(0)) {
-            public_link_key[c][contractor][new_address] = new_public_key;
-        } else {
-            require(old_address == new_public_key,'public key can not be modified');
-        }
-    }
-
-    function cutOf(address c, address contractor, address _owner) public view returns (uint256) {
-        uint256 b = influencer2cut[c][contractor][_owner];
-        if (b == 0) {
-            address plasma_owner = ethereum2plasma[_owner];
-            // TODO check not zero address
-            b = influencer2cut[c][contractor][plasma_owner];
-            if (b != 0) {
-                return b;
-            }
-            address eth_owner = plasma2ethereum[_owner];
-            // TODO check not zero address
-        b = influencer2cut[c][contractor][eth_owner];
-        }
-        return b;
-    }
-
-    function update_bounty_cut(address c, address contractor, address new_address, uint8 new_cut) private {
-        // update (only once) the cut used by each influencer
-        // we will need this in case one of the influencers will want to start his own off-chain link
-        uint old_cut = cutOf(c,contractor,new_address);
-        if (old_cut == 0) {
-            influencer2cut[c][contractor][new_address] = uint256(new_cut);
-        } else {
-            require(old_cut == uint256(new_cut),'bounty cut can not be modified');
-        }
-    }
-
-    function update_visit(address c, address contractor, address old_address, address new_address) private {
-        if (!visits[c][contractor][old_address][new_address]) {  // generate event only once for each tripplet
-            visits[c][contractor][old_address][new_address] = true;
-            visited_from[c][contractor][new_address] = old_address;
-            visits_list[c][contractor][old_address].push(new_address);
-            emit Visited(new_address, c, contractor, old_address);
+            setCutOf(c, contractor, influencers[i], weights[i]);
         }
     }
 
     // return a list of eth/plasma address that came from "from"
     // this method converts address in the list from plasma to ether when possible
-    function get_visits_list1(address from, address c, address contractor) public view returns (address[]) {
-        uint n_influencers = visits_list[c][contractor][from].length;
-        if (n_influencers == 0) {
-            return visits_list[c][contractor][from];
-        }
-        address[] memory influencers = new address[](n_influencers);
-        for (uint i = 0; i < n_influencers; i++) {
-            address influencer = visits_list[c][contractor][from][i];
-            if (plasma2ethereum[influencer] != address(0)) {
-                influencers[i] = plasma2ethereum[influencer];
-            } else {
-                influencers[i] = influencer;
-            }
-        }
-        return influencers;
-    }
     function get_visits_list(address from, address c, address contractor) public view returns (address[]) {
-        // concatenate get_visits_list1 for the address from and its alter ego address (if from is eth then plasma and vice versa)
-        address[] memory influencers1 = get_visits_list1(from,c,contractor);
-        address from2 = plasma2ethereum[from];
-        if (from2 == address(0)) {
-            from2 = ethereum2plasma[from];
-        }
-        if (from2 == address(0)) {
-            return influencers1;
-        }
-        address[] memory influencers2 = get_visits_list1(from2,c,contractor);
-        uint n2 = influencers2.length;
-        if(n2 == 0) {
-            return influencers1;
-        }
-        uint n1 = influencers1.length;
-        if(n1 == 0) {
-            return influencers2;
-        }
-        uint n = n1 + n2;
-        address[] memory influencers = new address[](n);
-        for (uint i = 0; i < n; i++) {
-            if(i < n1) {
-                influencers[i] = influencers1[i];
-            } else {
-                influencers[i] = influencers2[i - n1];
-            }
-        }
-        return influencers;
+        return visits_list[c][contractor][plasmaOf(from)];
     }
 }

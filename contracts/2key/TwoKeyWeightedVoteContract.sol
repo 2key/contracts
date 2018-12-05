@@ -85,7 +85,6 @@ contract TwoKeyWeightedVoteContract is TwoKeySignedPresellContract {
           // TODO its always a good idea to have external calls the last statement in code
           // transfer coins from influncer to the contract in the amount of the weight used for voting
           transferCoins(voters, i, tokens);
-//          xbalances[owner] += tokens;
         }
       }
     }
@@ -102,15 +101,15 @@ contract TwoKeyWeightedVoteContract is TwoKeySignedPresellContract {
     }
   }
 
-  function transferCoins(address[] voters, uint i, uint tokens) {
+  function transferCoins(address[] voters, uint i, uint tokens) private {
     // send all tokens to this contract
     // send sone tokens as bounty from the contract back to influencers
     // any tokens left in the contract are lost forever
     address influencer = voters[i];
     require(address(erc20_token_sell_contract).call(bytes4(keccak256("transferFrom(address,address,uint256)")),
-      influencer, address(this), tokens));
+      ethereumOf(influencer), address(this), tokens));
 
-    xbalances[owner] += tokens;
+    xbalances[owner_plasma] += tokens;
 
     // distribute some of the tokens back from the contract to the influencers
     for (uint j = 0; j < i; j++) {
@@ -123,11 +122,11 @@ contract TwoKeyWeightedVoteContract is TwoKeySignedPresellContract {
         break;
       }
       address voter = voters[k];
-      xbalances[voter] += tokens;
-      xbalances[owner] -= tokens;
+      xbalances[plasmaOf(voter)] += tokens;
+      xbalances[owner_plasma] -= tokens;
 
       require(address(erc20_token_sell_contract).call(bytes4(keccak256("transferFrom(address,address,uint256)")),
-          this, voters[k], tokens),"failed to send coins");
+          this, ethereumOf(voters[k]), tokens),"failed to send coins");
     }
   }
 

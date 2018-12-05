@@ -27,6 +27,7 @@ contract TwoKeyContract is BasicToken, Ownable {
   TwoKeyEventSource eventSource;
 
   // address public owner;  // Who created the contract (business) // contained in Ownable.sol
+  address owner_plasma; // must be set in constructor
   string public name;
   string public ipfs_hash;
   string public symbol;
@@ -37,6 +38,7 @@ contract TwoKeyContract is BasicToken, Ownable {
   uint256 unit_decimals;  // units being sold can be fractional (for example tokens in ERC20)
 
   // Private variables of the token
+  // in all mappings the address is always a plasma address
   mapping (address => address) public received_from;
   mapping(address => uint256) public xbalances; // balance of external currency (ETH or 2Key coin)
   mapping(address => uint256) public units; // number of units bought
@@ -44,6 +46,48 @@ contract TwoKeyContract is BasicToken, Ownable {
   // The cut from the bounty each influencer is taking + 1
   // zero (also the default value) indicates default behaviour in which the influencer takes an equal amount as other influencers
   mapping(address => uint256) internal influencer2cut;
+
+  // All user information is stored on their plasma address
+  // a msg sender must have a plasma address in registry
+  function senderPlasma() public view returns (address) {
+    address plasma = registry.ethereum2plasma(msg.sender);
+    require(plasma != address(0), 'unregistered user');
+    return plasma;
+  }
+
+  function plasmaOf(address me) public view returns (address) {
+    require(me != address(0), 'undefined user');
+    address plasma = registry.ethereum2plasma(me);
+    if (plasma != address(0)) {
+      return plasma;
+    }
+    return me;
+  }
+  function ethereumOf(address me) public view returns (address) {
+    require(me != address(0), 'undefined user');
+    address ethereum = registry.plasma2ethereum(me);
+    if (ethereum != address(0)) {
+      return ethereum;
+    }
+    return me;
+  }
+
+  function setCutOf(address me, uint256 cut) internal {
+    // what is the percentage of the bounty s/he will receive when acting as an influencer
+    // the value 255 is used to signal equal partition with other influencers
+    // A sender can set the value only once in a contract
+    address plasma = plasmaOf(me);
+    require(influencer2cut[plasma] == 0 || influencer2cut[plasma] == cut, 'cut already set');
+    influencer2cut[plasma] = cut;
+  }
+
+  function setCut(uint256 cut) public {
+    setCutOf(msg.sender, cut);
+  }
+
+  function cutOf(address me) public view returns (uint256) {
+    return influencer2cut[plasmaOf(me)];
+  }
 
   function getCuts(address last_influencer) public view returns (uint256[]) {
     address[] memory influencers = getInfluencers(last_influencer);
@@ -57,65 +101,23 @@ contract TwoKeyContract is BasicToken, Ownable {
     return cuts;
   }
 
-  function setCut(uint256 cut) public {
-    // the sender sets what is the percentage of the bounty s/he will receive when acting as an influencer
-    // the value 255 is used to signal equal partition with other influencers
-    // A sender can set the value only once in a contract
-    require(influencer2cut[msg.sender] == 0, 'cut not zero');
-    if (registry != address(0)) {
-      address plasma_owner = registry.ethereum2plasma(msg.sender);
-      require(influencer2cut[plasma_owner] == 0, 'plasma cut not zero');
-      // TODO this can never happen because msg.sender is always an eth address
-      address eth_owner = registry.plasma2ethereum(msg.sender);
-      require(influencer2cut[eth_owner] == 0, 'eth cut not zero');
-    }
-    influencer2cut[msg.sender] = cut;
-  }
-  function cutOf(address _owner) public view returns (uint256) {
-    uint256 b = influencer2cut[_owner];
-    if (b == 0 && registry != address(0)) {
-      address plasma_owner = registry.ethereum2plasma(_owner);
-      b = influencer2cut[plasma_owner];
-      if (b != 0) {
-        return b;
-      }
-      // TODO this can never happen because msg.sender is always an eth address
-      address eth_owner = registry.plasma2ethereum(_owner);
-      b = influencer2cut[eth_owner];
-    }
-    return b;
-  }
-
   /**
    * @dev Transfer tokens from one address to another
-   * @param _from address The address which you want to send tokens from
-   * @param _to address The address which you want to transfer to
+   * @param _from address The address which you want to send tokens from ALREADY converted to plasma
+   * @param _to address The address which you want to transfer to ALREADY converted to plasma
    * @param _value uint256 the amount of tokens to be transferred
    */
-  // TODO change this function from public to internal if you dont want people to join without a 2key link
-  function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
+  function transferFrom(address _from, address _to, uint256 _value) internal returns (bool) {
+    // _from and _to are assumed to be already converted to plasma address (e.g. using plasmaOf)
     require(_value == 1, 'can only transfer 1 ARC');
     require(_from != address(0), '_from undefined');
     require(_to != address(0), '_to undefined');
-    require(received_from[_to] == 0, '_to already has ARCs');
-    if (registry != address(0)) {
-      address plasma_to = registry.ethereum2plasma(_to);
-      require(received_from[plasma_to] == 0, 'plasma _to already has ARCs');
-      address eth_to = registry.plasma2ethereum(_to);
-      require(received_from[eth_to] == 0, 'eth _to already has ARCs');
 
-      if (balances[_from] == 0) {
-        address plasma_from = registry.ethereum2plasma(_from);
-        if (balances[plasma_from] > 0) {
-          _from = plasma_from;
-        } else {
-          address eth_from = registry.plasma2ethereum(_from);
-          require(balances[eth_from] > 0,'_from does not have arcs');
-          _from = eth_from;
-        }
-      }
-    }
+//    // normalize address to be plasma
+//    _from = plasmaOf(_from);
+//    _to = plasmaOf(_to);
 
+    require(balances[_from] > 0,'_from does not have arcs');
     balances[_from] = balances[_from].sub(1);
     balances[_to] = balances[_to].add(quota);
     totalSupply_ = totalSupply_.add(quota.sub(1));
@@ -137,11 +139,9 @@ contract TwoKeyContract is BasicToken, Ownable {
   * @param _value The amount to be transferred.
   */
   function transfer(address _to, uint256 _value) public returns (bool) {
-    require(false, 'transfer not implemented');
+    revert('transfer not implemented');
     return false;
   }
-
-  // New 2Key method
 
   function getConstantInfo() public view returns (string,string,uint256,uint256,uint256,address,string,uint256) {
     return (name,symbol,cost,bounty,quota,owner,ipfs_hash,unit_decimals);
@@ -150,44 +150,35 @@ contract TwoKeyContract is BasicToken, Ownable {
   function total_units() public view returns (uint256);
 
   /**
-  * @dev Gets the balance of the specified address.
-  * @param _owner The address to query the the balance of.
-  * @return An uint256 representing the amount owned by the passed address.
+  * Gets the balance of the specified address.
+  * me - The address to query the the balance of.
+  * returns An uint256 representing the amount owned by the passed address.
   */
-  function balanceOf(address _owner) public view returns (uint256) {
-    uint256 b = balances[_owner];
-    if (registry != address(0)) {
-      address plasma_owner = registry.ethereum2plasma(_owner);
-      b += balances[plasma_owner];
-      address eth_owner = registry.plasma2ethereum(_owner);
-      b += balances[eth_owner];
-    }
-    return b;
+  function balanceOf(address me) public view returns (uint256) {
+    return balances[plasmaOf(me)];
   }
-  function xbalanceOf(address _owner) public view returns (uint256) {
-    uint256 b = xbalances[_owner];
-    if (registry != address(0)) {
-      address plasma_owner = registry.ethereum2plasma(_owner);
-      b += xbalances[plasma_owner];
-      address eth_owner = registry.plasma2ethereum(_owner);
-      b += xbalances[eth_owner];
-    }
-    return b;
+
+  function xbalanceOf(address me) public view returns (uint256) {
+    return xbalances[plasmaOf(me)];
+  }
+
+  function unitsOf(address me) public view returns (uint256) {
+    return units[plasmaOf(me)];
   }
 
   function getDynamicInfo(address me) public view returns (uint256,uint256,uint256,uint256,uint256,uint256,uint256) {
     // address(this).balance is solidity reserved word for the the ETH amount deposited in the contract
-    return (balanceOf(me),units[me],xbalanceOf(me),totalSupply_,address(this).balance,total_units(),cutOf(me));
+    return (balanceOf(me),unitsOf(me),xbalanceOf(me),totalSupply_,address(this).balance,total_units(),cutOf(me));
   }
 
-  // function () external payable {
-  //   buyProduct();
-  // }
+   function () external payable {
+     buyProduct();
+   }
 
   // buy product. if you dont have ARCs then first take them (join) from _from
   function buyFrom(address _from) public payable {
-    require(_from != address(0),"from not defined");
-    address _to = msg.sender;
+    _from = plasmaOf(_from);
+    address _to = senderPlasma();
     if (balanceOf(_to) == 0) {
       transferFrom(_from, _to, 1);
     }
@@ -195,58 +186,37 @@ contract TwoKeyContract is BasicToken, Ownable {
   }
 
   function redeem() public {
-    address influencer = msg.sender;
-    uint256 b0 = xbalances[influencer];
+    address influencer = senderPlasma();
+    uint256 b = xbalances[influencer];
 
-    uint256 b1 = 0;
-    if (registry != address(0)) {
-      address influencer_plasma = registry.ethereum2plasma(influencer);
-      if (influencer_plasma != address(0)) {
-        b1 = xbalances[influencer_plasma];
-      }
+
+    uint256 bmax = address(this).balance;
+    if (b > bmax) {
+      b = bmax;
     }
-
-    uint256 b = b0.add(b1);
     if (b == 0) {
       return;
     }
 
-    uint256 bmax = address(this).balance;
-    if (bmax == 0) {
-      return;
-    }
-    if (b0 > bmax) {
-      b0 = bmax;
-      b1 = 0;
-      b = bmax;
-    } else if (b > bmax) {
-      b1 = bmax.sub(b0);
-      b = bmax;
-    }
-
-    xbalances[influencer] = xbalances[influencer].sub(b0);
-    if (b1 > 0) {
-      xbalances[influencer_plasma] = xbalances[influencer_plasma].sub(b1);
-    }
-
+    xbalances[influencer] = xbalances[influencer].sub(b);
     if(!influencer.send(b)) {
        revert("failed to send");
     }
   }
 
   // low level product purchase function
-  function buyProduct() public payable;
+  function buyProduct() public payable {}
 
   function getInfluencers(address customer) public view returns (address[]) {
-    // build a list of all influencers from converter back to to contractor
+    // build a list of all influencers (using plasma adress) from converter back to to contractor
     // dont count the conveter and contractr themselves
-    address influencer = customer;
+    address influencer = plasmaOf(customer);
     // first count how many influencers
     uint n_influencers = 0;
     while (true) {
-      influencer = received_from[influencer];
+      influencer = received_from[influencer];  // already a plasma address
       require(influencer != address(0),'not connected to contractor');
-      if (influencer == owner) {
+      if (influencer == owner_plasma) {
         break;
       }
       n_influencers++;
@@ -282,7 +252,6 @@ contract TwoKeyContract is BasicToken, Ownable {
     // distribute bounty to influencers
     uint256 total_bounty = 0;
     for (uint i = 0; i < n_influencers; i++) {
-      address influencer = influencers[i];  // influencers is in reverse order
       uint256 b;
       if (i == n_influencers-1) {  // if its the last influencer then all the bounty goes to it.
         b = _bounty;
@@ -294,6 +263,7 @@ contract TwoKeyContract is BasicToken, Ownable {
           b = _bounty.div(n_influencers-i);
         }
       }
+      address influencer = plasmaOf(influencers[i]);  // influencers is in reverse order
       xbalances[influencer] = xbalances[influencer].add(b);
       emit Rewarded(influencer, b);
       total_bounty = total_bounty.add(b);
@@ -301,7 +271,7 @@ contract TwoKeyContract is BasicToken, Ownable {
     }
 
     // all that is left from the cost is given to the owner for selling the product
-    xbalances[owner] = xbalances[owner].add(msg.value).sub(total_bounty); // TODO we want the cost of a token to be fixed?
+    xbalances[owner_plasma] = xbalances[owner_plasma].add(msg.value).sub(total_bounty); // TODO we want the cost of a token to be fixed?
     units[customer] = units[customer].add(_units);
 
     emit Fulfilled(customer, units[customer]);
@@ -326,7 +296,6 @@ contract TwoKeyAcquisitionContract is TwoKeyContract
     name = _name;
     symbol = _symbol;
     totalSupply_ = _tSupply;
-    balances[owner] = _tSupply;
     cost = _cost;
     bounty = _bounty;
     quota = _quota;
@@ -334,14 +303,15 @@ contract TwoKeyAcquisitionContract is TwoKeyContract
     ipfs_hash = _ipfs_hash;
     unit_decimals = 0;  // dont allow fractional units
 
-    received_from[owner] = owner;  // allow owner to buy from himself
+
+    registry = _reg;
+    owner_plasma = plasmaOf(owner); // can be called after setting registry
+    received_from[owner_plasma] = owner_plasma;  // allow owner to buy from himself
+    balances[owner_plasma] = _tSupply;
 
     if (_eventSource != address(0)) {
       eventSource = _eventSource;
-      eventSource.created(this, owner);
-    }
-    if (_reg != address(0)) {
-      registry = _reg;
+      eventSource.created(this, owner_plasma);
     }
   }
 
@@ -382,18 +352,17 @@ contract TwoKeyPresellContract is TwoKeyContract {
     name = _name;
     symbol = _symbol;
     totalSupply_ = _tSupply;
-    balances[owner] = _tSupply;
     cost = _cost;
     bounty = _bounty;
     quota = _quota;
     ipfs_hash = _ipfs_hash;
-    received_from[owner] = owner;  // allow owner to buy from himself
+    registry = _reg;
+    owner_plasma = plasmaOf(owner); // can be called after setting registry
+    received_from[owner_plasma] = owner_plasma;  // allow owner to buy from himself
+    balances[owner_plasma] = _tSupply;
     if (_eventSource != address(0)) {
       eventSource = _eventSource;
-      eventSource.created(this, owner);
-    }
-    if (_reg != address(0)) {
-      registry = _reg;
+      eventSource.created(this, owner_plasma);
     }
 
     if (_erc20_token_sell_contract != address(0)) {
@@ -431,7 +400,8 @@ contract TwoKeyPresellContract is TwoKeyContract {
 //    emit Log1('going to transfer', _units);
 //    emit Log1A('coin', address(erc20_token_sell_contract));
 
-//    erc20_token_sell_contract.transfer(msg.sender, _units);  // TODO is this dangerous!?
+    // We are sending the bought coins to the ether address of the converter
+    // keep this last
     require(address(erc20_token_sell_contract).call(bytes4(keccak256("transfer(address,uint256)")),msg.sender,_units),
       "failed to send coins");
   }
