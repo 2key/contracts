@@ -50,14 +50,25 @@ contract TwoKeyContract is BasicToken, Ownable {
   // All user information is stored on their plasma address
   // a msg sender must have a plasma address in registry
   function senderPlasma() public view returns (address) {
-    address plasma = registry.ethereum2plasma(msg.sender);
-    require(plasma != address(0), 'unregistered user');
+    address me = msg.sender;
+    if (registry == address(0)) {
+      return me;
+    }
+    address plasma = registry.ethereum2plasma(me);
+    if (plasma == address(0)) {
+      return me;
+    }
+//    require(plasma != address(0), 'unregistered user');
     return plasma;
   }
 
   function plasmaOf(address me) public view returns (address) {
     require(me != address(0), 'undefined user');
-    address plasma = registry.ethereum2plasma(me);
+    address plasma = me;
+    if (registry == address(0)) {
+      return plasma;
+    }
+    plasma = registry.ethereum2plasma(plasma);
     if (plasma != address(0)) {
       return plasma;
     }
@@ -65,7 +76,11 @@ contract TwoKeyContract is BasicToken, Ownable {
   }
   function ethereumOf(address me) public view returns (address) {
     require(me != address(0), 'undefined user');
-    address ethereum = registry.plasma2ethereum(me);
+    address ethereum = me;
+    if (registry == address(0)) {
+      return ethereum;
+    }
+    ethereum = registry.plasma2ethereum(ethereum);
     if (ethereum != address(0)) {
       return ethereum;
     }
@@ -107,7 +122,7 @@ contract TwoKeyContract is BasicToken, Ownable {
    * @param _to address The address which you want to transfer to ALREADY converted to plasma
    * @param _value uint256 the amount of tokens to be transferred
    */
-  function transferFrom(address _from, address _to, uint256 _value) internal returns (bool) {
+  function transferFrom(address _from, address _to, uint256 _value) public onlyOwner returns (bool) {
     // _from and _to are assumed to be already converted to plasma address (e.g. using plasmaOf)
     require(_value == 1, 'can only transfer 1 ARC');
     require(_from != address(0), '_from undefined');
@@ -205,7 +220,7 @@ contract TwoKeyContract is BasicToken, Ownable {
   }
 
   // low level product purchase function
-  function buyProduct() public payable {}
+  function buyProduct() public payable;
 
   function getInfluencers(address customer) public view returns (address[]) {
     // build a list of all influencers (using plasma adress) from converter back to to contractor
@@ -276,7 +291,6 @@ contract TwoKeyContract is BasicToken, Ownable {
 
     emit Fulfilled(customer, units[customer]);
   }
-
 }
 
 contract TwoKeyAcquisitionContract is TwoKeyContract

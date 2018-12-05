@@ -26,7 +26,7 @@ contract TwoKeyWeightedVoteContract is TwoKeySignedPresellContract {
     // must use a sig which includes a cut (ie by calling free_join_take in sign.js
     require((sig.length-21) % (65+1+65+20) == 0, 'signature is not version 1 and/or does not include cut of last vote');
     // validate sig AND populate received_from and influencer2cut
-    address[] memory voters = super.transferSig(sig);
+    address[] memory voters; //  = super.transferSig(sig);
 
     for (uint i = 0; i < voters.length; i++) {
       address influencer = voters[i];

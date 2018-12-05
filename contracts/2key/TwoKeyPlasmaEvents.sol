@@ -80,7 +80,7 @@ contract TwoKeyPlasmaEvents {
     // 2. call add_plasma2ethereum to make a connection between plamsa address (msg.sender) to ethereum address
     // 3. the plasma user pass his ethereum address with the public key used in 2key-link
     //
-    function setPublicLinkKey(address c, address contractor, address new_public_key) private {
+    function setPublicLinkKey(address c, address contractor, address new_public_key) public {
         setPublicLinkKeyOf(c, contractor, msg.sender, new_public_key);
     }
 
