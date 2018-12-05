@@ -140,10 +140,10 @@ module.exports = {
     },
 
     'ropsten' : {
-        provider: () => new HDWalletProvider(mnemonic, 'https://ropsten.infura.io/v3/71d39c30bc984e8a8a0d8adca84620ad'),
+        provider: () => new HDWalletProvider(mnemonic, `https://ropsten.infura.io/v3/${infuraApiKey}`),
         network_id: 3,
         gas: 8000000,
-        gasPrice: 50000000000
+        gasPrice: 60000000000
     },
 
     'staging-2key': {
