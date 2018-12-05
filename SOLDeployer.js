@@ -29,6 +29,14 @@ let deployment = false;
 const contractsGit = simpleGit();
 const twoKeyProtocolLibGit = simpleGit(twoKeyProtocolLibDir);
 const versioning = require('./generateContractsVersioning');
+/**
+ *
+ * @type {{}}
+ */
+let maintainerAddress = {};
+maintainerAddress['rinkeby'] = '0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f';
+maintainerAddress['ropsten'] = '0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f';
+maintainerAddress['local'] = '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7';
 
 async function handleExit(p) {
   console.log(p);
@@ -172,11 +180,16 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
         });
         let obj = {};
         obj['NetworkHashes'] = keyHash;
+
+        let obj1 = {};
+        obj1['Maintainers'] = maintainerAddress;
         contracts = Object.assign(obj, contracts);
+        contracts = Object.assign(obj1, contracts);
         console.log('Writing contracts.ts...');
         fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts.ts'), `export default ${util.inspect(contracts, {depth: 10})}`);
         if(deployment) {
             json = Object.assign(obj,json);
+            json = Object.assign(obj1,json);
             fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts_deployed.json'), JSON.stringify(json, null, 2));
             console.log('Writing contracts_deployed.json...');
             fs.copyFileSync(path.join(twoKeyProtocolDir, 'contracts_deployed.json'),path.join(twoKeyProtocolDist,'contracts_deployed.json'));
