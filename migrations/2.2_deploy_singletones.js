@@ -22,11 +22,11 @@ module.exports = function deploy(deployer) {
     '0x4216909456e770FFC737d987c273a0B8cE19C13e', // Eitan
     '0x5e2B2b278445AaA649a6b734B0945Bd9177F4F03', // Kiki
   ];
-  let maintainerAddress = (deployer.network.startsWith('rinkeby') || deployer.network.startsWith('public.')) ? '0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f' : '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7';
+  let maintainerAddress = (deployer.network.startsWith('ropsten') || deployer.network.startsWith('rinkeby') || deployer.network.startsWith('public.')) ? '0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f' : '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7';
   let votingPowers = [1,1];
 //0xb6736cdd635779a74a6bd359864cf2965a9d5113
   deployer.deploy(Call);
-  if(deployer.network.startsWith('dev') || deployer.network.startsWith('public.') || deployer.network.startsWith('rinkeby') || deployer.network == 'ropsten') {
+  if(deployer.network.startsWith('dev') || deployer.network.startsWith('public.') || deployer.network.startsWith('rinkeby') || deployer.network.startsWith('ropsten')) {
     deployer.deploy(TwoKeyCongress, 50, initialCongressMembers, votingPowers)
         .then(() => TwoKeyCongress.deployed())
         .then(() => deployer.deploy(TwoKeyAdmin,TwoKeyCongress.address))
