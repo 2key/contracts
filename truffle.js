@@ -81,7 +81,7 @@ module.exports = {
 
     'public.test.k8s' : {
       provider: () => LedgerProvider('https://rpc.public.test.k8s.2key.net', {
-        networkId: 4,
+        networkId: 3,
         // https://github.com/LedgerHQ/ledgerjs/issues/200
         path: "44'/60'/0'/0",
         // askConfirm: true,
@@ -90,14 +90,14 @@ module.exports = {
         accountsOffset: 0,
       }),
       network_id: 4,
-      gas: 7000000,
+      gas: 8000000,
       gasPrice: 50000000000,
     },
 
     'public.test.k8s-hdwallet' : {
       provider: () => new HDWalletProvider(mnemonic, 'https://rpc.public.test.k8s.2key.net'),
-      network_id: 4,
-      gas: 7000000,
+      network_id: 3,
+      gas: 8000000,
       gasPrice: 50000000000,
     },
 
