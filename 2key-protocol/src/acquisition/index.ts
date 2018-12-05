@@ -154,7 +154,8 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 txHash = await this.helpers._createContract(contractsMeta.TwoKeyAcquisitionCampaignERC20, from, {
                     gasPrice,
                     params: [
-                        proxyInfo.TwoKeyEventSource.Proxy,
+                        this.base.twoKeyEventSource.address,
+                        // proxyInfo.TwoKeyEventSource.Proxy,
                         // this.helpers._getContractDeployedAddress('TwoKeyEventSource'),
                         conversionHandlerAddress,
                         data.moderator || from,

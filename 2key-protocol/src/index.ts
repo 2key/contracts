@@ -65,6 +65,7 @@ export class TwoKeyProtocol {
     public gas: number;
     private networks: IEhtereumNetworks;
     private contracts: IContractsAddresses;
+    private twoKeyEventSource: any;
     private twoKeyExchangeContract: any;
     private twoKeyUpgradableExchange: any;
     private twoKeyEconomy: any;
@@ -154,7 +155,8 @@ export class TwoKeyProtocol {
         this.twoKeyExchangeContract = this.web3.eth.contract(contractsMeta.TwoKeyExchangeContract.abi).at(contractsMeta.TwoKeyExchangeContract.networks[this.networks.mainNetId].address);
         this.twoKeyUpgradableExchange = this.web3.eth.contract(contractsMeta.TwoKeyUpgradableExchange.abi).at(contractsMeta.TwoKeyUpgradableExchange.networks[this.networks.mainNetId].address);
         this.twoKeyEconomy = this.web3.eth.contract(contractsMeta.TwoKeyEconomy.abi).at(contractsMeta.TwoKeyEconomy.networks[this.networks.mainNetId].address);
-        this.twoKeyReg = this.web3.eth.contract(contractsMeta.TwoKeyRegistry.abi).at(proxyInfo.TwoKeyRegistry.Proxy);
+        this.twoKeyReg = this.web3.eth.contract(contractsMeta.TwoKeyRegistry.abi).at(proxyInfo.TwoKeyRegistry[`${this.networks.mainNetId}`].Proxy);
+        this.twoKeyEventSource = this.web3.eth.contract(contractsMeta.TwoKeyEventSource.abi).at(proxyInfo.TwoKeyEventSource[`${this.networks.mainNetId}`].Proxy);
         this.twoKeyAdmin = this.web3.eth.contract(contractsMeta.TwoKeyAdmin.abi).at(contractsMeta.TwoKeyAdmin.networks[this.networks.mainNetId].address);
         this.twoKeyCongress = this.web3.eth.contract(contractsMeta.TwoKeyCongress.abi).at(contractsMeta.TwoKeyCongress.networks[this.networks.mainNetId].address);
         this.twoKeyCall = this.web3.eth.contract(contractsMeta.Call.abi).at(contractsMeta.Call.networks[this.networks.mainNetId].address);
@@ -167,6 +169,7 @@ export class TwoKeyProtocol {
             ipfs: this.ipfs,
             networks: this.networks,
             contracts: this.contracts,
+            twoKeyEventSource: this.twoKeyEventSource,
             twoKeyExchangeContract: this.twoKeyExchangeContract,
             twoKeyUpgradableExchange: this.twoKeyUpgradableExchange,
             twoKeyEconomy: this.twoKeyEconomy,

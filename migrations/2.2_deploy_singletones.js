@@ -8,13 +8,30 @@ const Call = artifacts.require('Call');
 const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
 const TwoKeySingletonesRegistry = artifacts.require('TwoKeySingletonesRegistry');
 const TwoKeyExchangeContract = artifacts.require('TwoKeyExchangeContract');
-
+const file = require('../2key-protocol/src/proxyAddresses.json');
 var fs = require('fs');
 /*
     TwoKeyCongress constructor need 2 addresses passed, the best'd be if we get that addresses static and always save the same ones
  */
 
 module.exports = function deploy(deployer) {
+    /**
+     * Read the file firts
+     */
+let networkId;
+    if(deployer.network.startsWith('ropsten')) {
+        networkId = 3;
+    } else if(deployer.network.startsWith('rinkeby')) {
+        networkId = 4;
+    } else if (deployer.network.startsWith('public')) {
+        networkId = 3;
+    } else if(deployer.network.startsWith('dev')) {
+        networkId = 8086;
+    }
+  let fileObject = {};
+  if(fs.existsSync(file)) {
+        fileObject = JSON.parse(fs.readFileSync(file,{encoding: 'utf8'}));
+  }
   let proxyAddressTwoKeyRegistry;
   let proxyAddressTwoKeyEventSource;
   let adminInstance;
@@ -46,21 +63,26 @@ module.exports = function deploy(deployer) {
         .then(() => deployer.deploy(TwoKeySingletonesRegistry, [maintainerAddress], TwoKeyAdmin.address))
         .then(() => TwoKeySingletonesRegistry.deployed().then(async(registry) => {
             console.log('... Adding TwoKeyRegistry to Proxy registry as valid implementation');
-            let obj = {};
             await new Promise(async(resolve,reject) => {
                 try {
                     /**
                      * Adding TwoKeyRegistry to the registry, deploying 1st proxy for that 1.0 version and setting initial params there
                      */
+
                     let txHash = await registry.addVersion("TwoKeyRegistry", "1.0",TwoKeyRegistry.address);
                     let {logs} = await registry.createProxy("TwoKeyRegistry", "1.0");
                     let {proxy} = logs.find(l => l.event === 'ProxyCreated').args;
                     console.log('Proxy address for the TwoKeyRegistry is : ' + proxy);
-                    obj['TwoKeyRegistry'] = {
-                        'address' : TwoKeyRegistry.address,
-                        'Proxy' : proxy,
+                    const twoKeyReg = fileObject.TwoKeyRegistry || {};
+
+                    twoKeyReg[networkId] =  {
+                        'address': TwoKeyRegistry.address,
+                        'Proxy': proxy,
                         'Version': "1.0"
                     };
+
+
+                    fileObject['TwoKeyRegistry'] = twoKeyReg;
                     proxyAddressTwoKeyRegistry = proxy;
                     resolve(proxy);
                 } catch (e) {
@@ -79,17 +101,21 @@ module.exports = function deploy(deployer) {
                     let {proxy} = logs.find(l => l.event === 'ProxyCreated').args;
                     console.log('Proxy address for the EventSource is : ' + proxy);
 
-                    obj['TwoKeyEventSource'] = {
-                        'address' : EventSource.address,
-                        'Proxy' : proxy,
-                        'Version' : "1.0"
+                    const twoKeyEventS = fileObject.TwoKeyEventSource || {};
+
+                    twoKeyEventS[networkId] =  {
+                        'address': EventSource.address,
+                        'Proxy': proxy,
+                        'Version': "1.0"
                     };
+                    fileObject['TwoKeyEventSource'] = twoKeyEventS;
                     proxyAddressTwoKeyEventSource = proxy;
 
                     /**
                      * Writing object with all informations to json file
                      */
-                    fs.writeFile("./2key-protocol/src/proxyAddresses.json", JSON.stringify(obj,null,4), (err) => {
+
+                    fs.writeFile("./2key-protocol/src/proxyAddresses.json", JSON.stringify(fileObject,null,4), (err) => {
                         if (err) {
                             console.error(err);
                             return;

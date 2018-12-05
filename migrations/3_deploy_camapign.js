@@ -9,6 +9,16 @@ const TwoKeyExchangeContract = artifacts.require('TwoKeyExchangeContract');
 const json = require('../2key-protocol/src/proxyAddresses.json');
 
 module.exports = function deploy(deployer) {
+    let networkId;
+    if(deployer.network.startsWith('ropsten')) {
+        networkId = 3;
+    } else if(deployer.network.startsWith('rinkeby')) {
+        networkId = 4;
+    } else if (deployer.network.startsWith('public')) {
+        networkId = 3;
+    } else if(deployer.network.startsWith('dev')) {
+        networkId = 8086;
+    }
     let x = 1;
     if (deployer.network.startsWith('dev') || deployer.network === 'ropsten' || (deployer.network.startsWith('rinkeby-test') && !process.env.DEPLOY)) {
         deployer.deploy(TwoKeyConversionHandler, 1012019, 180, 6, 180)
@@ -25,13 +35,13 @@ module.exports = function deploy(deployer) {
                 console.log("... Adding TwoKeyAcquisitionCampaign to EventSource");
                 await new Promise(async (resolve, reject) => {
                     try {
-                        let txHash = await EventSource.at(json.TwoKeyEventSource.Proxy).addContract(TwoKeyAcquisitionCampaignERC20.address, {gas: 7000000});
+                        let txHash = await EventSource.at(json.TwoKeyEventSource[networkId.toString()].Proxy).addContract(TwoKeyAcquisitionCampaignERC20.address, {gas: 7000000});
                         resolve(txHash);
                     } catch (e) {
                         reject(e);
                     }
                 });
-                console.log("Added TwoKeyAcquisition: " + TwoKeyAcquisitionCampaignERC20.address + "  to EventSource : " + json.TwoKeyEventSource.Proxy + "!");
+                console.log("Added TwoKeyAcquisition: " + TwoKeyAcquisitionCampaignERC20.address + "  to EventSource : " + json.TwoKeyEventSource[networkId.toString()].Proxy + "!");
             }).then(() => true);
     }
 }
