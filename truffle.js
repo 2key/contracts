@@ -132,7 +132,7 @@ module.exports = {
         gasPrice: 2500000000000
     },
 
-    'staging' : {
+    'ropsten.staging' : {
       provider: () => LedgerProvider(`https://ropsten.infura.io/v3/${infuraApiKey}`, {
         networkId: 3,
         // https://github.com/LedgerHQ/ledgerjs/issues/200
