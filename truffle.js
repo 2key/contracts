@@ -89,7 +89,7 @@ module.exports = {
         accountsLength: 1,
         accountsOffset: 0,
       }),
-      network_id: 4,
+      network_id: 3,
       gas: 8000000,
       gasPrice: 50000000000,
     },
