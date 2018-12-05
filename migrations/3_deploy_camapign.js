@@ -6,7 +6,11 @@ const ERC20TokenMock = artifacts.require('ERC20TokenMock');
 const Call = artifacts.require('Call');
 const TwoKeyHackEventSource = artifacts.require('TwoKeyHackEventSource');
 const TwoKeyExchangeContract = artifacts.require('TwoKeyExchangeContract');
-const json = require('../2key-protocol/src/proxyAddresses.json');
+const file = '../2key-protocol/src/proxyAddresses.json';
+const fs = require('fs');
+const path = require('path');
+
+
 
 module.exports = function deploy(deployer) {
     let networkId;
@@ -19,6 +23,7 @@ module.exports = function deploy(deployer) {
     } else if(deployer.network.startsWith('dev')) {
         networkId = 8086;
     }
+    console.log(networkId);
     let x = 1;
     if (deployer.network.startsWith('dev') || deployer.network === 'ropsten' || (deployer.network.startsWith('rinkeby-test') && !process.env.DEPLOY)) {
         deployer.deploy(TwoKeyConversionHandler, 1012019, 180, 6, 180)
@@ -32,9 +37,11 @@ module.exports = function deploy(deployer) {
             .then(() => TwoKeyAcquisitionCampaignERC20.deployed())
             .then(() => true)
             .then(async () => {
+                let json = JSON.parse(fs.readFileSync(path.join(__dirname,file),{encoding:'utf8'}));
                 console.log("... Adding TwoKeyAcquisitionCampaign to EventSource");
                 await new Promise(async (resolve, reject) => {
                     try {
+                        console.log(json.TwoKeyEventSource,json.TwoKeyEventSource[networkId.toString()], networkId.toString());
                         let txHash = await EventSource.at(json.TwoKeyEventSource[networkId.toString()].Proxy).addContract(TwoKeyAcquisitionCampaignERC20.address, {gas: 7000000});
                         resolve(txHash);
                     } catch (e) {

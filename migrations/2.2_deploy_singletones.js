@@ -8,8 +8,9 @@ const Call = artifacts.require('Call');
 const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
 const TwoKeySingletonesRegistry = artifacts.require('TwoKeySingletonesRegistry');
 const TwoKeyExchangeContract = artifacts.require('TwoKeyExchangeContract');
-const file = require('../2key-protocol/src/proxyAddresses.json');
-var fs = require('fs');
+const file = '../2key-protocol/src/proxyAddresses.json';
+const fs = require('fs');
+const path = require('path');
 /*
     TwoKeyCongress constructor need 2 addresses passed, the best'd be if we get that addresses static and always save the same ones
  */
@@ -28,10 +29,8 @@ let networkId;
     } else if(deployer.network.startsWith('dev')) {
         networkId = 8086;
     }
-  let fileObject = {};
-  if(fs.existsSync(file)) {
-        fileObject = JSON.parse(fs.readFileSync(file,{encoding: 'utf8'}));
-  }
+
+  let fileObject = JSON.parse(fs.readFileSync(path.join(__dirname, file),{encoding: 'utf8'}));
   let proxyAddressTwoKeyRegistry;
   let proxyAddressTwoKeyEventSource;
   let adminInstance;
