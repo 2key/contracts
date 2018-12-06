@@ -370,6 +370,7 @@ async function deploy() {
         await contractsGit.pushTags('origin');
         process.chdir(twoKeyProtocolDist);
         await runProcess('npm',['publish']);
+        await twoKeyProtocolLibGit.push('origin', contractsStatus.current);
     }
   } catch (e) {
     if (e.output) {
