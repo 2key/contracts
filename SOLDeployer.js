@@ -364,7 +364,7 @@ async function deploy() {
         let npmVersionTag = json.version;
         console.log(npmVersionTag);
         process.chdir('../../');
-        // await twoKeyProtocolLibGit.addTag(tag);
+        // await twoKeyProtocolLibGit.addTagcd(tag);
         await contractsGit.addTag('v'+npmVersionTag.toString());
         await twoKeyProtocolLibGit.pushTags('origin');
         await contractsGit.pushTags('origin');
