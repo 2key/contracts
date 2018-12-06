@@ -197,7 +197,7 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
         contracts = Object.assign(obj1, contracts);
         console.log('Writing contracts.ts...');
         fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts.ts'), `export default ${util.inspect(contracts, {depth: 10})}`);
-        if(deployment) {
+        if (deployment) {
             json = Object.assign(obj,json);
             json = Object.assign(obj1,json);
             fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts_deployed.json'), JSON.stringify(json, null, 2));

@@ -65,37 +65,6 @@ export default class DecentralizedNation implements IDecentralizedNation {
 
     /**
      *
-     * @param {string} username
-     * @param {string} address
-     * @param {string} fullName
-     * @param {string} email
-     * @param {string} from
-     * @returns {Promise<string>}
-     */
-    public populateData(username:string, address:string, fullName:string, email:string, from: string): Promise<string> {
-        return new Promise(async(resolve,reject) => {
-            try {
-                 const nonce = await this.helpers._getNonce(from);
-                 let txHash = await promisify(this.base.twoKeyReg.addName,[
-                        username,
-                        address,
-                        fullName,
-                        email,
-                        {
-                            from,
-                            nonce
-                        }
-                    ]);
-                    await this.utils.getTransactionReceiptMined(txHash);
-                resolve(txHash);
-            } catch(e) {
-                reject(e);
-            }
-        })
-    }
-
-    /**
-     *
      * @param {IDecentralizedNationConstructor} data
      * @param {string} from
      * @returns {Promise<string>}

@@ -3,7 +3,6 @@ import {IJoinLinkOpts} from "../acquisition/interfaces";
 
 export interface IDecentralizedNation {
     create: (data: IDecentralizedNationConstructor, from: string, opts?: ICreateOpts) => Promise<string>,
-    populateData: (username:string, address:string, fullName:string, email:string, from: string) => Promise<string>
     check: (address: string, from:string) => Promise<boolean>,
     getAllMembersFromDAO: (decentralizedNation:any) => Promise<IMember[]>,
     getAllMembersForSpecificType: (decentralizedNation:any, type:string, from:string) => Promise<any>,

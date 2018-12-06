@@ -1,14 +1,47 @@
-import {ITwoKeyBase, ITwoKeyHelpers} from '../interfaces';
+import {ITwoKeyBase, ITwoKeyHelpers, ITwoKeyUtils} from '../interfaces';
 import {promisify} from '../utils'
 import {ITwoKeyReg} from "./interfaces";
 
 export default class TwoKeyReg implements ITwoKeyReg {
     private readonly base: ITwoKeyBase;
     private readonly helpers: ITwoKeyHelpers;
+    private readonly utils: ITwoKeyUtils;
 
-    constructor(twoKeyProtocol: ITwoKeyBase, helpers: ITwoKeyHelpers) {
+    constructor(twoKeyProtocol: ITwoKeyBase, helpers: ITwoKeyHelpers, utils: ITwoKeyUtils) {
         this.base = twoKeyProtocol;
         this.helpers = helpers;
+        this.utils = utils;
+    }
+
+        /**
+     *
+     * @param {string} username
+     * @param {string} address
+     * @param {string} fullName
+     * @param {string} email
+     * @param {string} from
+     * @returns {Promise<string>}
+     */
+    public addName(username:string, address:string, fullName:string, email:string, from: string): Promise<string> {
+        return new Promise(async(resolve,reject) => {
+            try {
+                 const nonce = await this.helpers._getNonce(from);
+                 let txHash = await promisify(this.base.twoKeyReg.addName,[
+                        username,
+                        address,
+                        fullName,
+                        email,
+                        {
+                            from,
+                            nonce
+                        }
+                    ]);
+                    await this.utils.getTransactionReceiptMined(txHash);
+                resolve(txHash);
+            } catch(e) {
+                reject(e);
+            }
+        })
     }
 
 

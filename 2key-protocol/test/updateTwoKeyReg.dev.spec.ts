@@ -98,15 +98,15 @@ describe(`TwoKeyProtocol ${network}`, () => {
         ];
         const l = initialUsernames.length;
         for (let i = 0; i < l; i++) {
-            const hash = await twoKeyProtocol.DecentralizedNation.populateData(initialUsernames[i],initialAddresses[i],initialFullNames[i],initialEmails[i], from);
+            const hash = await twoKeyProtocol.Registry.addName(initialUsernames[i],initialAddresses[i],initialFullNames[i],initialEmails[i], from);
             console.log(initialUsernames[i], hash);
             await twoKeyProtocol.Utils.getTransactionReceiptMined(hash);
         }
-        // let hash = await twoKeyProtocol.DecentralizedNation.populateData(initialUsernames[0],initialAddresses[0],initialFullNames[0],initialEmails[0], from);
+        // let hash = await twoKeyProtocol.Registry.addName(initialUsernames[0],initialAddresses[0],initialFullNames[0],initialEmails[0], from);
         // await twoKeyProtocol.Utils.getTransactionReceiptMined(hash);
-        // let hash1 = await twoKeyProtocol.DecentralizedNation.populateData(initialUsernames[1],initialAddresses[1],initialFullNames[1],initialEmails[1], from);
+        // let hash1 = await twoKeyProtocol.Registry.addName(initialUsernames[1],initialAddresses[1],initialFullNames[1],initialEmails[1], from);
         // await twoKeyProtocol.Utils.getTransactionReceiptMined(hash1);
-        // let hash2 = await twoKeyProtocol.DecentralizedNation.populateData(initialUsernames[2],initialAddresses[2],initialFullNames[2],initialEmails[2], from);
+        // let hash2 = await twoKeyProtocol.Registry.addName(initialUsernames[2],initialAddresses[2],initialFullNames[2],initialEmails[2], from);
         // await twoKeyProtocol.Utils.getTransactionReceiptMined(hash2);
     }).timeout(300000);
 });
