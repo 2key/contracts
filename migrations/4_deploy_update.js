@@ -4,7 +4,8 @@ const TwoKeyRegistry = artifacts.require('TwoKeyRegistry');
 const TwoKeySingletonesRegistry = artifacts.require('TwoKeySingletonesRegistry');
 const Proxy = artifacts.require('UpgradeabilityProxy');
 const fs = require('fs');
-const proxyFile = '../build/contracts/proxyAddresses.json';
+
+const proxyFile = path.join(__dirname, '../build/contracts/proxyAddresses.json');
 
 
 module.exports = function deploy(deployer) {
