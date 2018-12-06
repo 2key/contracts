@@ -63,7 +63,7 @@ const getCurrentDeployedAddresses = () => new Promise((resolve) => {
         const {
           networks, contractName, bytecode, abi
         } = JSON.parse(fs.readFileSync(path.join(buildPath, files[i])));
-        if (Object.keys(networks).length) {
+        if (networks && Object.keys(networks).length) {
           contracts[contractName] = networks;
         }
       }
