@@ -37,7 +37,7 @@ module.exports = function deploy(deployer) {
             .then(() => TwoKeyAcquisitionCampaignERC20.deployed())
             .then(() => true)
             .then(async () => {
-                let json = JSON.parse(fs.readFileSync(path.join(__dirname, proxyFile),{encoding:'utf8'}));
+                let json = JSON.parse(fs.readFileSync(path.join(__dirname, proxyFile), { encoding:'utf-8' }));
                 console.log("... Adding TwoKeyAcquisitionCampaign to EventSource");
                 await new Promise(async (resolve, reject) => {
                     try {

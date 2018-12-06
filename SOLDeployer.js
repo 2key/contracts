@@ -204,10 +204,6 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
             console.log('Writing contracts_deployed.json...');
             fs.copyFileSync(path.join(twoKeyProtocolDir, 'contracts_deployed.json'),path.join(twoKeyProtocolDist,'contracts_deployed.json'));
             console.log('Copying this to 2key-protcol/dist...');
-            fs.copyFileSync(proxyFile ,path.join(twoKeyProtocolDir, 'proxyAddresses.json'));
-            console.log('Copying proxyAddresses.json to 2key-protcol/src...');
-            fs.copyFileSync(proxyFile ,path.join(twoKeyProtocolDist, 'proxyAddresses.json'));
-            console.log('Copying proxyAddresses.json to 2key-protcol/dist...');
         }
         console.log('Done');
         resolve();

@@ -77,7 +77,8 @@ let networkId;
                     twoKeyReg[networkId] =  {
                         'address': TwoKeyRegistry.address,
                         'Proxy': proxy,
-                        'Version': "1.0"
+                        'Version': "1.0",
+                        maintainer_address: maintainerAddress,
                     };
 
 
