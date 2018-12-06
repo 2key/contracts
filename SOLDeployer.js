@@ -350,7 +350,6 @@ async function deploy() {
     if(!local) {
         process.chdir(twoKeyProtocolDist);
         await runProcess('npm',['version', 'patch']);
-        await runProcess('npm',['publish']);
         var json = JSON.parse(fs.readFileSync('package.json', 'utf8'));
         let npmVersionTag = json.version;
         console.log(npmVersionTag);
@@ -359,6 +358,7 @@ async function deploy() {
         await contractsGit.addTag('v'+npmVersionTag.toString());
         await twoKeyProtocolLibGit.pushTags('origin');
         await contractsGit.pushTags('origin');
+        await runProcess('npm',['publish']);
     }
   } catch (e) {
     if (e.output) {
