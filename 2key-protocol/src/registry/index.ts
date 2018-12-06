@@ -25,6 +25,7 @@ export default class TwoKeyReg implements ITwoKeyReg {
     public addName(username:string, address:string, fullName:string, email:string, from: string): Promise<string> {
         return new Promise(async(resolve,reject) => {
             try {
+                console.log(this.base.twoKeyReg.address);
                  const nonce = await this.helpers._getNonce(from);
                  let txHash = await promisify(this.base.twoKeyReg.addName,[
                         username,

@@ -11,14 +11,13 @@ const mainNetId = env.MAIN_NET_ID;
 const syncTwoKeyNetId = env.SYNC_NET_ID;
 console.log(mainNetId);
 
-const network = process.env.RINKEBY ? 'RINKEBY' : 'ROPSTEN';
 // const gasPrice = process.env.GASPRICE || 5000000000;
 console.log(rpcUrl);
 console.log(mainNetId);
 console.log(contractsMeta.TwoKeyEventSource.networks[mainNetId].address);
 console.log(contractsMeta.TwoKeyEconomy.networks[mainNetId].address);
 
-describe(`TwoKeyProtocol ${network}`, () => {
+describe('TwoKeyProtocol', () => {
     it('should populate data', async() => {
         const { web3, address } = await web3switcher(rpcUrl, rpcUrl, '9125720a89c9297cde4a3cfc92f233da5b22f868b44f78171354d4e0f7fe74ec');
         const twoKeyProtocol = new TwoKeyProtocol({

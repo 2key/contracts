@@ -56,7 +56,7 @@ const TwoKeyDefaults = {
 };
 
 function getDeployedAddress(contract: string, networkId: number | string): string {
-    const network = contractsMeta[contract] && contractsMeta[contract][networkId] || {};
+    const network = contractsMeta[contract] && contractsMeta[contract].networks[networkId] || {};
     return network.Proxy || network.address;
 }
 
