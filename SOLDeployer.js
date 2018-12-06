@@ -126,9 +126,14 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
   console.log('Generating abi');
   if (fs.existsSync(buildPath)) {
     let contracts = {};
+    const proxyFile = path.join(twoKeyProtocolDir, 'proxyAddresses.json');
     let json = {};
     let hashMap = {};
     let data = {};
+    let proxyAddresses = {};
+    if (fs.existsSync(proxyFile)) {
+      proxyAddresses = JSON.parse(fs.readFileSync(proxyFile, { encoding: 'utf-8' }));
+    }
     readdir(buildPath).then((files) => {
       try {
         files.forEach((file) => {
@@ -138,10 +143,15 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
           if (whitelist[contractName]) {
             // contracts[contractName] = whitelist[contractName].deployed
             //   ? { abi, networks } : { abi, networks, bytecode };
+            const proxyNetworks = proxyAddresses[contractName] || {};
+            const mergedNetworks = {};
+            Object.keys(networks).forEach(key => {
+              mergedNetworks[key] = { ...networks[key], ...proxyNetworks[key] };
+            });
             contracts[contractName] = whitelist[contractName].singletone
-              ? {networks, abi, name: contractName} : {bytecode, abi, name: contractName};
+              ? {networks: mergedNetworks, abi, name: contractName} : {bytecode, abi, name: contractName};
             json[contractName] = whitelist[contractName].singletone
-              ? {networks, abi, name: contractName} : {bytecode, abi, name: contractName};
+              ? {networks: mergedNetworks, abi, name: contractName} : {bytecode, abi, name: contractName};
 
             let networkKeys = Object.keys(networks);
 
