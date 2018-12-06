@@ -39,7 +39,6 @@ import TwoKerRegistry from './registry';
 import UpgradableExchange from './upgradableExchange';
 import TwoKeyExchangeContract from './exchangeETHUSD';
 
-// const proxyInfo = require('./proxyAddresses.json');
 // const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 
 const TwoKeyDefaults = {
@@ -53,8 +52,14 @@ const TwoKeyDefaults = {
     syncTwoKeyNetId: 98052,
     // twoKeySyncUrl: 'https://test.plasma.2key.network/',
     twoKeySyncUrl: 'https://rpc.private.test.k8s.2key.net',
-    twoKeyMainUrl: 'http://localhost:8585'
+    twoKeyMainUrl: 'https://rpc.public.test.k8s.2key.net'
 };
+
+function getDeployedAddress(contract: string, networkId: number | string): string {
+    const network = contractsMeta[contract] && contractsMeta[contract][networkId] || {};
+    return network.Proxy || network.address;
+}
+
 
 export class TwoKeyProtocol {
     private web3: any;
@@ -134,7 +139,7 @@ export class TwoKeyProtocol {
         plasmaEngine.start();
         this.plasmaWeb3 = new Web3(plasmaEngine);
         this.plasmaAddress = `0x${eventsWallet.getAddress().toString('hex')}`;
-        this.twoKeyPlasmaEvents = this.plasmaWeb3.eth.contract(contractsMeta.TwoKeyPlasmaEvents.abi).at(contractsMeta.TwoKeyPlasmaEvents.networks[this.networks.syncTwoKeyNetId].address);
+        this.twoKeyPlasmaEvents = this.plasmaWeb3.eth.contract(contractsMeta.TwoKeyPlasmaEvents.abi).at(getDeployedAddress('TwoKeyPlasmaEvents', this.networks.syncTwoKeyNetId));
 
         if (web3) {
             this.web3 = new Web3(web3.currentProvider);
@@ -152,14 +157,14 @@ export class TwoKeyProtocol {
         }
 
         //contractsMeta.TwoKeyRegLogic.networks[this.networks.mainNetId].address
-        this.twoKeyExchangeContract = this.web3.eth.contract(contractsMeta.TwoKeyExchangeContract.abi).at(contractsMeta.TwoKeyExchangeContract.networks[this.networks.mainNetId].address);
-        this.twoKeyUpgradableExchange = this.web3.eth.contract(contractsMeta.TwoKeyUpgradableExchange.abi).at(contractsMeta.TwoKeyUpgradableExchange.networks[this.networks.mainNetId].address);
-        this.twoKeyEconomy = this.web3.eth.contract(contractsMeta.TwoKeyEconomy.abi).at(contractsMeta.TwoKeyEconomy.networks[this.networks.mainNetId].address);
-        this.twoKeyReg = this.web3.eth.contract(contractsMeta.TwoKeyRegistry.abi).at(contractsMeta.TwoKeyRegistry[this.networks.mainNetId].Proxy);
-        this.twoKeyEventSource = this.web3.eth.contract(contractsMeta.TwoKeyEventSource.abi).at(contractsMeta.TwoKeyEventSource[this.networks.mainNetId].Proxy);
-        this.twoKeyAdmin = this.web3.eth.contract(contractsMeta.TwoKeyAdmin.abi).at(contractsMeta.TwoKeyAdmin.networks[this.networks.mainNetId].address);
-        this.twoKeyCongress = this.web3.eth.contract(contractsMeta.TwoKeyCongress.abi).at(contractsMeta.TwoKeyCongress.networks[this.networks.mainNetId].address);
-        this.twoKeyCall = this.web3.eth.contract(contractsMeta.Call.abi).at(contractsMeta.Call.networks[this.networks.mainNetId].address);
+        this.twoKeyExchangeContract = this.web3.eth.contract(contractsMeta.TwoKeyExchangeContract.abi).at(getDeployedAddress('TwoKeyExchangeContract', this.networks.mainNetId));
+        this.twoKeyUpgradableExchange = this.web3.eth.contract(contractsMeta.TwoKeyUpgradableExchange.abi).at(getDeployedAddress('TwoKeyUpgradableExchange', this.networks.mainNetId));
+        this.twoKeyEconomy = this.web3.eth.contract(contractsMeta.TwoKeyEconomy.abi).at(getDeployedAddress('TwoKeyEconomy', this.networks.mainNetId));
+        this.twoKeyReg = this.web3.eth.contract(contractsMeta.TwoKeyRegistry.abi).at(getDeployedAddress('TwoKeyRegistry', this.networks.mainNetId));
+        this.twoKeyEventSource = this.web3.eth.contract(contractsMeta.TwoKeyEventSource.abi).at(getDeployedAddress('TwoKeyEventSource', this.networks.mainNetId));
+        this.twoKeyAdmin = this.web3.eth.contract(contractsMeta.TwoKeyAdmin.abi).at(getDeployedAddress('TwoKeyAdmin', this.networks.mainNetId));
+        this.twoKeyCongress = this.web3.eth.contract(contractsMeta.TwoKeyCongress.abi).at(getDeployedAddress('TwoKeyCongress', this.networks.mainNetId));
+        this.twoKeyCall = this.web3.eth.contract(contractsMeta.Call.abi).at(getDeployedAddress('Call', this.networks.mainNetId));
 
         this.ipfs = ipfsAPI(ipfsIp, ipfsPort, {protocol});
 
@@ -194,7 +199,7 @@ export class TwoKeyProtocol {
         this.DecentralizedNation = new DecentralizedNation(twoKeyBase, this.Helpers, this.Utils, this.TwoKeyWeightedVoteContract, this.AcquisitionCampaign);
         this.Congress = new TwoKeyCongress(twoKeyBase, this.Helpers, this.Utils);
         this.Lockup = new Lockup(twoKeyBase, this.Helpers, this.Utils);
-        this.Registry = new TwoKerRegistry(twoKeyBase, this.Helpers);
+        this.Registry = new TwoKerRegistry(twoKeyBase, this.Helpers, this.Utils);
     }
 
     public getBalance(address: string, erc20address?: string): Promise<BalanceMeta> {

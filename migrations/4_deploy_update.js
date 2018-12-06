@@ -3,8 +3,8 @@ const EventSource = artifacts.require('TwoKeyEventSource');
 const TwoKeyRegistry = artifacts.require('TwoKeyRegistry');
 const TwoKeySingletonesRegistry = artifacts.require('TwoKeySingletonesRegistry');
 const Proxy = artifacts.require('UpgradeabilityProxy');
-const json = require('../2key-protocol/src/proxyAddresses.json');
 const fs = require('fs');
+const proxyFile = '../build/contracts/proxyAddresses.json';
 
 
 module.exports = function deploy(deployer) {
@@ -46,6 +46,10 @@ module.exports = function deploy(deployer) {
                 await new Promise(async(resolve,reject) => {
                     try {
                         console.log('... Adding new version to the registry contract');
+                        let json = {};
+                        if (fs.existsSync(proxyFile)) {
+                            json = JSON.parse(fs.readFileSync(proxyFile, { encoding: 'utf-8' }));
+                        }
 
                         let v = parseInt(json.TwoKeyRegistry.Version.substr(-1)) + 1;
                         json['TwoKeyRegistry'].Version = json.TwoKeyRegistry.Version.substr(0,json.TwoKeyRegistry.Version.length-1) + v.toString();
@@ -57,7 +61,7 @@ module.exports = function deploy(deployer) {
                         txHash = await Proxy.at(json.TwoKeyRegistry.Proxy).upgradeTo("TwoKeyRegistry",json.TwoKeyRegistry.Version);
 
                         json.TwoKeyRegistry.address = lastTwoKeyRegistryAddress;
-                        fs.writeFileSync('./2key-protocol/src/proxyAddresses.json',JSON.stringify(json,null,4));
+                        fs.writeFileSync(proxyFile, JSON.stringify(json, null, 4));
                         console.log('proxyAddresses.json file is updated with newest version of contract');
 
                         resolve(txHash);

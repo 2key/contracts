@@ -14,9 +14,6 @@ import contractsMeta, {default as contracts} from '../contracts';
 import {promisify} from '../utils';
 import Sign from '../utils/sign';
 
-const proxyInfo = require('../proxyAddresses.json');
-
-
 /**
  *
  * @param {number[]} cuts

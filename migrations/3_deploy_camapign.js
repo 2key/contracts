@@ -6,7 +6,7 @@ const ERC20TokenMock = artifacts.require('ERC20TokenMock');
 const Call = artifacts.require('Call');
 const TwoKeyHackEventSource = artifacts.require('TwoKeyHackEventSource');
 const TwoKeyExchangeContract = artifacts.require('TwoKeyExchangeContract');
-const file = '../2key-protocol/src/proxyAddresses.json';
+const proxyFile = '../build/contracts/proxyAddresses.json';
 const fs = require('fs');
 const path = require('path');
 
@@ -37,7 +37,7 @@ module.exports = function deploy(deployer) {
             .then(() => TwoKeyAcquisitionCampaignERC20.deployed())
             .then(() => true)
             .then(async () => {
-                let json = JSON.parse(fs.readFileSync(path.join(__dirname,file),{encoding:'utf8'}));
+                let json = JSON.parse(fs.readFileSync(path.join(__dirname, proxyFile),{encoding:'utf8'}));
                 console.log("... Adding TwoKeyAcquisitionCampaign to EventSource");
                 await new Promise(async (resolve, reject) => {
                     try {
