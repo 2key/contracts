@@ -6,8 +6,8 @@
   },
   "NetworkHashes": {
     "3": {
-      "hash": "71a74a2e4911038f6aabd7e55a4fd22b3abf3c0ce58694a228819539fd8f6935",
-      "humanHash": "it  you go you evening then  i    and you  go then  then let     go   then   i restless"
+      "hash": "7c85af2cc5a94607825cbd00f91a4b64c9ff3b9d79d5f9ab7b10f8ccccd1ccff",
+      "humanHash": "when   go   with when  and  let  us you oh   then  when    when the      "
     },
     "4": {
       "hash": "501cfcf2b03f8e4ec943f989b53d2dce1414d296beccb4e3f16aff88dc3ea6f6",
@@ -6863,6 +6863,241 @@
       }
     ],
     "name": "TwoKeyRegistry"
+  },
+  "TwoKeySingletonesRegistry": {
+    "networks": {
+      "3": {
+        "events": {
+          "0x00fffc2da0b561cae30d9826d37709e9421c4725faebc226cbbb7ef5fc5e7349": {
+            "anonymous": false,
+            "inputs": [
+              {
+                "indexed": false,
+                "name": "proxy",
+                "type": "address"
+              }
+            ],
+            "name": "ProxyCreated",
+            "type": "event"
+          },
+          "0xe2a08c9e50f4a219841f60ac40fa9d1f2cccb83ac2d3439c8c568fdf1f7c19e4": {
+            "anonymous": false,
+            "inputs": [
+              {
+                "indexed": false,
+                "name": "version",
+                "type": "string"
+              },
+              {
+                "indexed": false,
+                "name": "implementation",
+                "type": "address"
+              }
+            ],
+            "name": "VersionAdded",
+            "type": "event"
+          }
+        },
+        "links": {},
+        "address": "0x496f0ee8efc53cfebc0adda94d6d5c16cae238c0",
+        "transactionHash": "0x1d47362a57102b781e0f9d82e4e84e2b09e20ad14c8157413182b606af57f58c"
+      }
+    },
+    "abi": [
+      {
+        "constant": true,
+        "inputs": [],
+        "name": "twoKeyAdmin",
+        "outputs": [
+          {
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "constant": false,
+        "inputs": [
+          {
+            "name": "_maintainers",
+            "type": "address[]"
+          }
+        ],
+        "name": "addMaintainers",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "constant": false,
+        "inputs": [
+          {
+            "name": "_maintainers",
+            "type": "address[]"
+          }
+        ],
+        "name": "removeMaintainers",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "constant": true,
+        "inputs": [
+          {
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "name": "isMaintainer",
+        "outputs": [
+          {
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "name": "_maintainers",
+            "type": "address[]"
+          },
+          {
+            "name": "_twoKeyAdmin",
+            "type": "address"
+          }
+        ],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": false,
+            "name": "proxy",
+            "type": "address"
+          }
+        ],
+        "name": "ProxyCreated",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": false,
+            "name": "version",
+            "type": "string"
+          },
+          {
+            "indexed": false,
+            "name": "implementation",
+            "type": "address"
+          }
+        ],
+        "name": "VersionAdded",
+        "type": "event"
+      },
+      {
+        "constant": false,
+        "inputs": [
+          {
+            "name": "contractName",
+            "type": "string"
+          },
+          {
+            "name": "version",
+            "type": "string"
+          },
+          {
+            "name": "implementation",
+            "type": "address"
+          }
+        ],
+        "name": "addVersion",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "constant": true,
+        "inputs": [
+          {
+            "name": "contractName",
+            "type": "string"
+          },
+          {
+            "name": "version",
+            "type": "string"
+          }
+        ],
+        "name": "getVersion",
+        "outputs": [
+          {
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "constant": true,
+        "inputs": [
+          {
+            "name": "_contractName",
+            "type": "string"
+          }
+        ],
+        "name": "getContractProxyAddress",
+        "outputs": [
+          {
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "constant": false,
+        "inputs": [
+          {
+            "name": "contractName",
+            "type": "string"
+          },
+          {
+            "name": "version",
+            "type": "string"
+          }
+        ],
+        "name": "createProxy",
+        "outputs": [
+          {
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "payable": true,
+        "stateMutability": "payable",
+        "type": "function"
+      }
+    ],
+    "name": "TwoKeySingletonesRegistry"
   },
   "TwoKeyUpgradableExchange": {
     "networks": {
