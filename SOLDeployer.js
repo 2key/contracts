@@ -368,6 +368,7 @@ async function deploy() {
         await contractsGit.addTag('v'+npmVersionTag.toString());
         await twoKeyProtocolLibGit.pushTags('origin');
         await contractsGit.pushTags('origin');
+        process.chdir(twoKeyProtocolDist);
         await runProcess('npm',['publish']);
     }
   } catch (e) {
