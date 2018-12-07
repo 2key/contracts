@@ -70,7 +70,7 @@ export class TwoKeyProtocol {
     public gas: number;
     private networks: IEhtereumNetworks;
     private contracts: IContractsAddresses;
-    private twoKeyEventSource: any;
+    public twoKeyEventSource: any;
     private twoKeyExchangeContract: any;
     private twoKeyUpgradableExchange: any;
     private twoKeyEconomy: any;

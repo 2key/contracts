@@ -17,7 +17,7 @@ const delay = env.TEST_DELAY;
 console.log(mainNetId);
 const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 const maxConverterBonusPercent = 23;
-const pricePerUnitInETH = 0.1;
+const pricePerUnitInETH = 5;
 const maxReferralRewardPercent = 15;
 const moderatorFeePercentage = 1;
 const minContributionETH = 1;
@@ -516,11 +516,11 @@ describe('TwoKeyProtocol', () => {
         expect(hash).to.be.a('string');
     }).timeout(300000);
 
-    // it('should print amount of tokens that user want to buy', async () => {
-    //     const tokens = await twoKeyProtocol.AcquisitionCampaign.getEstimatedTokenAmount(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETH, 'ether'));
-    //     console.log(tokens);
-    //     expect(tokens.totalTokens).to.gte(0);
-    // });
+    it('should print amount of tokens that user want to buy', async () => {
+        const tokens = await twoKeyProtocol.AcquisitionCampaign.getEstimatedTokenAmount(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETH, 'ether'));
+        console.log(tokens);
+        expect(tokens.totalTokens).to.gte(0);
+    });
 
     it('should buy some tokens', async () => {
         console.log('4) buy from test4 REFLINK', refLink);
