@@ -17,11 +17,11 @@ const delay = env.TEST_DELAY;
 console.log(mainNetId);
 const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 const maxConverterBonusPercent = 23;
-const pricePerUnitInETH = 5;
+const pricePerUnitInETHOrUSD = 5;
 const maxReferralRewardPercent = 15;
 const moderatorFeePercentage = 1;
-const minContributionETH = 1;
-const maxContributionETH = 10;
+const minContributionETHorUSD = 5;
+const maxContributionETHorUSD = 1000;
 const now = new Date();
 const campaignStartTime = Math.round(new Date(now.valueOf()).setDate(now.getDate() - 30) / 1000);
 const campaignEndTime = Math.round(new Date(now.valueOf()).setDate(now.getDate() + 30) / 1000);
@@ -328,7 +328,7 @@ describe('TwoKeyProtocol', () => {
     }).timeout(30000);
 
     it('should set eth-dolar rate', async() => {
-        txHash = await twoKeyProtocol.TwoKeyExchangeContract.setValue('USD', false, 1, from);
+        txHash = await twoKeyProtocol.TwoKeyExchangeContract.setValue('USD', true, twoKeyProtocol.Utils.toWei(1, 'ether'), from);
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         let value = await twoKeyProtocol.TwoKeyExchangeContract.getValue('USD', from);
         console.log(value);
@@ -362,12 +362,12 @@ describe('TwoKeyProtocol', () => {
     //         campaignEndTime,
     //         expiryConversion: 1000 * 60 * 60 * 24,
     //         maxConverterBonusPercentWei: twoKeyProtocol.toWei(maxConverterBonusPercent, 'ether'),
-    //         pricePerUnitInETHWei: twoKeyProtocol.toWei(pricePerUnitInETH, 'ether'),
+    //         pricePerUnitInETHWei: twoKeyProtocol.toWei(pricePerUnitInETHOrUSD, 'ether'),
     //         maxReferralRewardPercentWei: twoKeyProtocol.toWei(c, 'ether'),
     //         assetContractERC20: twoKeyEconomy,
     //         moderatorFeePercentageWei: twoKeyProtocol.toWei(moderatorFeePercentage, 'ether'),
-    //         minContributionETHWei: twoKeyProtocol.toWei(minContributionETH, 'ether'),
-    //         maxContributionETHWei: twoKeyProtocol.toWei(maxContributionETH, 'ether'),
+    //         minContributionETHWei: twoKeyProtocol.toWei(minContributionETHorUSD, 'ether'),
+    //         maxContributionETHWei: twoKeyProtocol.toWei(maxContributionETHorUSD, 'ether'),
     //     });
     //     console.log('TotalGas required for Campaign Creation', gas);
     //     return expect(gas).to.exist.to.greaterThan(0);
@@ -387,12 +387,12 @@ describe('TwoKeyProtocol', () => {
             campaignEndTime,
             expiryConversion: 1000 * 60 * 60 * 24,
             maxConverterBonusPercentWei: maxConverterBonusPercent,
-            pricePerUnitInETHWei: twoKeyProtocol.Utils.toWei(pricePerUnitInETH, 'ether'),
+            pricePerUnitInETHWei: twoKeyProtocol.Utils.toWei(pricePerUnitInETHOrUSD, 'ether'),
             maxReferralRewardPercentWei: maxReferralRewardPercent,
             assetContractERC20: twoKeyEconomy,
             moderatorFeePercentageWei: moderatorFeePercentage,
-            minContributionETHWei: twoKeyProtocol.Utils.toWei(minContributionETH, 'ether'),
-            maxContributionETHWei: twoKeyProtocol.Utils.toWei(maxContributionETH, 'ether'),
+            minContributionETHWei: twoKeyProtocol.Utils.toWei(minContributionETHorUSD, 'ether'),
+            maxContributionETHWei: twoKeyProtocol.Utils.toWei(maxContributionETHorUSD, 'ether'),
             currency: 'USD',
             tokenDistributionDate: 1541109593669,
             maxDistributionDateShiftInDays: 180,
@@ -517,14 +517,14 @@ describe('TwoKeyProtocol', () => {
     }).timeout(300000);
 
     it('should print amount of tokens that user want to buy', async () => {
-        const tokens = await twoKeyProtocol.AcquisitionCampaign.getEstimatedTokenAmount(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETH, 'ether'));
+        const tokens = await twoKeyProtocol.AcquisitionCampaign.getEstimatedTokenAmount(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD, 'ether'));
         console.log(tokens);
         expect(tokens.totalTokens).to.gte(0);
     });
 
     it('should buy some tokens', async () => {
         console.log('4) buy from test4 REFLINK', refLink);
-        const txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETH, 'ether'), refLink, from);
+        const txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD, 'ether'), refLink, from);
         console.log(txHash);
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
 
@@ -567,7 +567,7 @@ describe('TwoKeyProtocol', () => {
             plasmaPK: Sign.generatePrivateKey().toString('hex'),
         });
         console.log('6) uport buy from REFLINK', refLink);
-        const txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETH * 1.5, 'ether'), refLink, from);
+        const txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD * 1.5, 'ether'), refLink, from);
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         console.log(txHash);
         expect(txHash).to.be.a('string');
@@ -595,7 +595,7 @@ describe('TwoKeyProtocol', () => {
         });
         const arcs = await twoKeyProtocol.AcquisitionCampaign.getBalanceOfArcs(campaignAddress, from);
         console.log('GMAIL2 ARCS', arcs);
-        txHash = await twoKeyProtocol.transferEther(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETH * 1.1, 'ether'), from);
+        txHash = await twoKeyProtocol.transferEther(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD * 1.1, 'ether'), from);
         console.log('HASH', txHash);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const conversion = await twoKeyProtocol.AcquisitionCampaign.getConverterConversion(campaignAddress, from);
@@ -634,7 +634,7 @@ describe('TwoKeyProtocol', () => {
             },
             plasmaPK: Sign.generatePrivateKey().toString('hex'),
         });
-        txHash = await twoKeyProtocol.transferEther(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETH * 1.1, 'ether'), from);
+        txHash = await twoKeyProtocol.transferEther(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD * 1.1, 'ether'), from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const conversion = await twoKeyProtocol.AcquisitionCampaign.getConverterConversion(campaignAddress, from);
         console.log(conversion);

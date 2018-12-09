@@ -2,6 +2,7 @@ import {ITwoKeyExchangeContract} from "./interfaces";
 import {ITwoKeyBase, ITwoKeyHelpers} from "../interfaces";
 import {ITwoKeyUtils} from "../utils/interfaces";
 import {promisify} from "../utils";
+import {BigNumber} from "bignumber.js";
 
 export default class TwoKeyExchangeContract implements ITwoKeyExchangeContract {
     private readonly base: ITwoKeyBase;
@@ -45,7 +46,7 @@ export default class TwoKeyExchangeContract implements ITwoKeyExchangeContract {
      * @param {string} from
      * @returns {Promise<string>}
      */
-    public setValue(currency: string, isGreater: boolean, price: number, from: string) : Promise<string> {
+    public setValue(currency: string, isGreater: boolean, price: number | string | BigNumber, from: string) : Promise<string> {
         return new Promise<string>(async(resolve,reject) => {
             try {
                 let currencyHex = await this.base.web3.toHex(currency).toString();
