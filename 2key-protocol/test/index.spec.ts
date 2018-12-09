@@ -328,7 +328,7 @@ describe('TwoKeyProtocol', () => {
     }).timeout(30000);
 
     it('should set eth-dolar rate', async() => {
-        txHash = await twoKeyProtocol.TwoKeyExchangeContract.setValue('USD', true, twoKeyProtocol.Utils.toWei(1, 'ether'), from);
+        txHash = await twoKeyProtocol.TwoKeyExchangeContract.setValue('USD', true, 91287027178099998720, from);
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         let value = await twoKeyProtocol.TwoKeyExchangeContract.getValue('USD', from);
         console.log(value);

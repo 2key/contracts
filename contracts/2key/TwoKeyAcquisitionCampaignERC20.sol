@@ -262,9 +262,10 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
             if(flag) {
                 require((msgValue * val).div(10**18) >= minContributionETHorFiatCurrency); //converting ether to fiat
                 require((msgValue * val).div(10**18) <= maxContributionETHorFiatCurrency); //converting ether to fiat
+            } else {
+                require(msgValue >= (val * minContributionETHorFiatCurrency).div(10**18)); //converting fiat to ether
+                require(msgValue <= (val * maxContributionETHorFiatCurrency).div(10**18)); //converting fiat to ether
             }
-            require(msgValue >= (val * minContributionETHorFiatCurrency).div(10**18)); //converting fiat to ether
-            require(msgValue <= (val * maxContributionETHorFiatCurrency).div(10**18)); //converting fiat to ether
         }
     }
 
