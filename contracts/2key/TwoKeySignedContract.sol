@@ -22,7 +22,7 @@ contract TwoKeySignedContract is TwoKeyContract {
     setPublicLinkKeyOf(msg.sender, new_public_key);
   }
 
-  function publicLinkKeyOf(address me) public returns (address) {
+  function publicLinkKeyOf(address me) public view returns (address) {
     return public_link_key[plasmaOf(me)];
   }
 
@@ -71,7 +71,7 @@ contract TwoKeySignedContract is TwoKeyContract {
       new_address = plasmaOf(influencers[i]);
 
       if (received_from[new_address] == 0) {
-        transferFrom(old_address, new_address, 1);
+        transferFromInternal(old_address, new_address, 1);
       } else {
         require(received_from[new_address] == old_address,'only tree ARCs allowed');
       }

@@ -63,7 +63,6 @@ contract TwoKeyContract is BasicToken, Ownable {
   }
 
   function plasmaOf(address me) public view returns (address) {
-    require(me != address(0), 'undefined user');
     address plasma = me;
     if (registry == address(0)) {
       return plasma;
@@ -75,7 +74,6 @@ contract TwoKeyContract is BasicToken, Ownable {
     return me;
   }
   function ethereumOf(address me) public view returns (address) {
-    require(me != address(0), 'undefined user');
     address ethereum = me;
     if (registry == address(0)) {
       return ethereum;
@@ -123,6 +121,9 @@ contract TwoKeyContract is BasicToken, Ownable {
    * @param _value uint256 the amount of tokens to be transferred
    */
   function transferFrom(address _from, address _to, uint256 _value) public onlyOwner returns (bool) {
+    return transferFromInternal(_from, _to, _value);
+  }
+  function transferFromInternal(address _from, address _to, uint256 _value) internal returns (bool) {
     // _from and _to are assumed to be already converted to plasma address (e.g. using plasmaOf)
     require(_value == 1, 'can only transfer 1 ARC');
     require(_from != address(0), '_from undefined');
@@ -195,7 +196,7 @@ contract TwoKeyContract is BasicToken, Ownable {
     _from = plasmaOf(_from);
     address _to = senderPlasma();
     if (balanceOf(_to) == 0) {
-      transferFrom(_from, _to, 1);
+      transferFromInternal(_from, _to, 1);
     }
     buyProduct();
   }

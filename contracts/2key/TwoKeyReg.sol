@@ -3,6 +3,7 @@ pragma solidity ^0.4.24;
 import '../openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import './TwoKeyEconomy.sol';
 import './TwoKeyEventSource.sol';
+import './Call.sol';
 
 contract TwoKeyReg is Ownable {
   mapping(address => string) public owner2name;
@@ -21,6 +22,8 @@ contract TwoKeyReg is Ownable {
   // Initialize all the constants
   constructor(TwoKeyEventSource _eventSource) public {
     eventSource = _eventSource;
+    plasma2ethereum[owner] = owner;
+    ethereum2plasma[owner] = owner;
   }
 
   function addNameInternal(string _name, address _sender) private {
@@ -46,40 +49,15 @@ contract TwoKeyReg is Ownable {
   }
 
   function addPlasma2Ethereum(bytes sig) public {
-    // TODO add an option to save the private key of plasma stored encrypted with a pubkey pair generated secretly by msg.sender https://github.com/pubkey/eth-crypto
-    require(!eventSource.activeUser(msg.sender), 'cant set plasma address to an active user');
-    bytes32 hash = keccak256(abi.encodePacked(msg.sender));
-    require (sig.length == 65, 'bad signature length');
-    // The signature format is a compact form of:
-    //   {bytes32 r}{bytes32 s}{uint8 v}
-    // Compact means, uint8 is not padded to 32 bytes.
-    uint idx = 32;
-    bytes32 r;
-    assembly
-    {
-      r := mload(add(sig, idx))
-    }
-
-    idx += 32;
-    bytes32 s;
-    assembly
-    {
-      s := mload(add(sig, idx))
-    }
-
-    idx += 1;
-    uint8 v;
-    assembly
-    {
-      v := mload(add(sig, idx))
-    }
-    if (v <= 1) v += 27;
-    require(v==27 || v==28,'bad sig v');
-
-    address plasma_address = ecrecover(hash, v, r, s);
-    require(plasma2ethereum[plasma_address] == address(0) || plasma2ethereum[plasma_address] == msg.sender, "cant change plasma=>eth");
-    plasma2ethereum[plasma_address] = msg.sender;
-    ethereum2plasma[msg.sender] = plasma_address;
+    address eth_address = msg.sender;
+      // add an entry connecting msg.sender to the ethereum address that was used to sign sig.
+      // see setup_demo.js on how to generate sig
+    bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to ethereum address")),keccak256(abi.encodePacked(eth_address))));
+    require (sig.length == 65, 'bad ethereum signature length');
+    address plasma_address = Call.recoverHash(hash,sig,0);
+    require(plasma2ethereum[plasma_address] == address(0) || plasma2ethereum[plasma_address] == eth_address, "cant change eth=>plasma");
+    plasma2ethereum[plasma_address] = eth_address;
+    ethereum2plasma[eth_address] = plasma_address;
   }
 
   function getName2Owner(string _name) public view returns (address) {
