@@ -23,6 +23,7 @@ console.log(rpcUrl);
 console.log(mainNetId);
 console.log(contractsMeta.TwoKeyEventSource.networks[mainNetId].address);
 console.log(contractsMeta.TwoKeyEconomy.networks[mainNetId].address);
+console.log(process.argv);
 
 describe(`TwoKeyProtocol ${network}`, () => {
     it('should populate data', async() => {
@@ -38,7 +39,7 @@ describe(`TwoKeyProtocol ${network}`, () => {
             plasmaPK: Sign.generatePrivateKey().toString('hex'),
         });
         const from = address;
-        const txHash = await promisify(twoKeyProtocol.twoKeyEventSource.addContract, ['0xb691acc6ff25858f53e1171446935caff4666a4f', { from }])
+        const txHash = await promisify(twoKeyProtocol.twoKeyEventSource.addContract, [process.argv[7], { from }])
         console.log('txHash', txHash);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(300000);
