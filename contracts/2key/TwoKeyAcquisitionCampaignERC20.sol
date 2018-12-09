@@ -260,11 +260,11 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
             bool flag;
             (val, flag,,) = ITwoKeyExchangeContract(ethUSDExchangeContract).getFiatCurrencyDetails(currency);
             if(flag) {
-                require(msgValue * val >= minContributionETHorFiatCurrency); //converting ether to fiat
-                require(msgValue * val <= maxContributionETHorFiatCurrency); //converting ether to fiat
+                require((msgValue * val).div(10**18) >= minContributionETHorFiatCurrency); //converting ether to fiat
+                require((msgValue * val).div(10**18) <= maxContributionETHorFiatCurrency); //converting ether to fiat
             }
-            require(msgValue >= val * minContributionETHorFiatCurrency); //converting fiat to ether
-            require(msgValue <= val * maxContributionETHorFiatCurrency); //converting fiat to ether
+            require(msgValue >= (val * minContributionETHorFiatCurrency).div(10**18)); //converting fiat to ether
+            require(msgValue <= (val * maxContributionETHorFiatCurrency).div(10**18)); //converting fiat to ether
         }
     }
 
@@ -436,9 +436,9 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
             bool flag;
             (rate,flag,,) = ITwoKeyExchangeContract(ethUSDExchangeContract).getFiatCurrencyDetails(currency);
             if(flag) {
-                conversionAmountETHWei = conversionAmountETHWei * rate; //converting eth to $wei
+                conversionAmountETHWei = (conversionAmountETHWei * rate).div(10 ** 18); //converting eth to $wei
             } else {
-                value = value * rate; //converting dollar wei to eth
+                value = (value * rate).div(10 ** 18); //converting dollar wei to eth
             }
         }
         uint baseTokensForConverterUnits = conversionAmountETHWei.mul(10 ** unit_decimals).div(value);
