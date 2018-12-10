@@ -23,7 +23,9 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     mapping(address => uint256) referrer2cut; // Mapping representing how much are cuts in percent(0-100) for referrer address
     mapping(address => uint256) internal referrerBalancesETHWei; // balance of EthWei for each influencer that he can withdraw
     mapping(address => uint256) internal referrerTotalEarningsEthWEI; // Total earnings for referrers
-    mapping(address => uint) balancesConvertersETH; // Amount converter put to the contract in Ether
+    mapping(address => uint256) internal referrerAddressToCounterOfConversions;
+
+    mapping(address => uint256) balancesConvertersETH; // Amount converter put to the contract in Ether
 
     uint moderatorBalanceETHWei; //Balance of the moderator which can be withdrawn
     uint moderatorTotalEarningsETHWei; //Total earnings of the moderator all time
@@ -133,10 +135,13 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     }
 
 
-    /// @notice Method to add fungible asset to our contract
-    /// @dev When user calls this method, he just says the actual amount of ERC20 he'd like to transfer to us
-    /// @param _amount is the amount of ERC20 contract he'd like to give us
-    /// @return true if successful, otherwise transaction will revert
+
+    /**
+     * @notice Method to add fungible asset to our contract
+     * @dev When user calls this method, he just says the actual amount of ERC20 he'd like to transfer to us
+     * @param _amount is the amount of ERC20 contract he'd like to give us
+     * @return true if successful, otherwise transaction will revert
+     */
     function addUnitsToInventory(uint256 _amount) public returns (bool) {
         require(IERC20(assetContractERC20).transferFrom(msg.sender, address(this), _amount),'Failed adding units to inventory');
         return true;
@@ -305,8 +310,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
 
 
 
-    /*./ >>/*
-
+    /*
      * @notice Function which is executed to create conversion
      * @param conversionAmountETHWei is the amount of the ether sent to the contract
      * @param converterAddress is the sender of eth to the contract
@@ -363,6 +367,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
             }
             referrerBalancesETHWei[influencers[i]] = referrerBalancesETHWei[influencers[i]].add(b);
             referrerTotalEarningsEthWEI[influencers[i]] = referrerTotalEarningsEthWEI[influencers[i]].add(b);
+            referrerAddressToCounterOfConversions[influencers[i]]++;
 //            emit Rewarded(influencers[i], b);
             total_bounty = total_bounty.add(b);
             _maxReferralRewardETHWei = _maxReferralRewardETHWei.sub(b);
@@ -559,6 +564,17 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         return moderatorTotalEarningsETHWei;
     }
 
+    /**
+     * @notice Function to fetch for the referrer his balance, his total earnings, and how many conversions he participated in
+     * @dev only referrer by himself, moderator, or contractor can call this
+     * @param _referrer is the address of referrer we're checking for
+     * @return tuple containing this 3 information
+     */
+    function getReferrerBalanceAndTotalEarningsAndNumberOfConversions(address _referrer) public view returns (uint,uint,uint) {
+        require(msg.sender == _referrer || msg.sender == contractor || msg.sender == moderator);
+        return (referrerBalancesETHWei[_referrer],referrerTotalEarningsEthWEI[_referrer],referrerAddressToCounterOfConversions[_referrer]);
+    }
+
     /// @notice Function where contractor can withdraw his funds
     /// @dev onlyContractor can call this method
     /// @return true if successful otherwise will 'revert'
@@ -569,6 +585,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         contractorBalance = 0;
         return true;
     }
+
 
     function withdrawModeratorOrReferrer(address _upgradableExchange) public returns (bool) {
         if(msg.sender == moderator) {
