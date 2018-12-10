@@ -56,10 +56,10 @@ module.exports = function deploy(deployer) {
                 console.log("ADMIN ADDRESS: " + TwoKeyAdmin.address);
             })
             .then(() => deployer.deploy(TwoKeyEconomy, TwoKeyAdmin.address))
-            .then(() => deployer.deploy(TwoKeyUpgradableExchange, 95, TwoKeyAdmin.address, TwoKeyEconomy.address))
-            .then(() => TwoKeyUpgradableExchange.deployed())
             .then(() => deployer.deploy(TwoKeyExchangeContract, [maintainerAddress], TwoKeyAdmin.address))
             .then(() => TwoKeyExchangeContract.deployed())
+            .then(() => deployer.deploy(TwoKeyUpgradableExchange, 95, TwoKeyAdmin.address, TwoKeyEconomy.address, TwoKeyExchangeContract.address))
+            .then(() => TwoKeyUpgradableExchange.deployed())
             .then(() => deployer.deploy(EventSource))
             .then(() => deployer.deploy(TwoKeyRegistry)
                 .then(() => TwoKeyRegistry.deployed())

@@ -3,6 +3,7 @@ pragma solidity ^0.4.24;
 import "../token/ERC20/ERC20.sol";
 import "../math/SafeMath.sol";
 import "../token/ERC20/SafeERC20.sol";
+import "../../../interfaces/ITwoKeyExchangeContract.sol";
 
 
 /**
@@ -22,6 +23,8 @@ contract Crowdsale {
   using SafeMath for uint256;
   using SafeERC20 for ERC20;
 
+
+  address public twoKeyExchangeContract;
 
 
   // Address where funds are collected
@@ -63,7 +66,7 @@ contract Crowdsale {
    * @param _admin Address where collected funds will be forwarded to
    * @param _token Address of the token being sold
    */
-  constructor(uint256 _rate, address _admin, ERC20 _token) public {
+  constructor(uint256 _rate, address _admin, ERC20 _token, address _twoKeyExchangeContract) public {
     require(_rate > 0);
     require(_admin != address(0));
     require(_token != address(0));
@@ -71,6 +74,7 @@ contract Crowdsale {
     rate = _rate;
     admin = _admin;
     token = _token;
+    twoKeyExchangeContract = _twoKeyExchangeContract;
   }
 
   /**
@@ -182,7 +186,10 @@ contract Crowdsale {
   function _getTokenAmount(uint256 _weiAmount)
     internal view returns (uint256)
   {
-    return _weiAmount.mul(rate);
+    uint amount;
+    bool flag;
+    (value,flag,,) = ITwoKeyExchangeContract(twoKeyExchangeContract).getFiatCurrencyDetails("USD");
+    return (_weiAmount*value).div(10**18).div(rate);
   }
 
   /**
