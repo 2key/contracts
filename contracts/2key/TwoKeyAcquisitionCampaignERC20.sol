@@ -24,14 +24,12 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     mapping(address => uint256) internal referrerBalancesETHWei; // balance of EthWei for each influencer that he can withdraw
     mapping(address => uint256) internal referrerTotalEarningsEthWEI; // Total earnings for referrers
     mapping(address => uint256) internal referrerAddressToCounterOfConversions;
-
-    mapping(address => uint256) balancesConvertersETH; // Amount converter put to the contract in Ether
-
     uint moderatorBalanceETHWei; //Balance of the moderator which can be withdrawn
     uint moderatorTotalEarningsETHWei; //Total earnings of the moderator all time
 
 
-    mapping(address => uint256) public units; // Number of units (ERC20 tokens) bought
+    mapping(address => uint256) balancesConvertersETH; // Amount converter put to the contract in Ether
+    mapping(address => uint256) internal units; // Number of units (ERC20 tokens) bought
     mapping(address => address) public publicLinkKey; // Public link key can generate only somebody who has ARCs
 
     string public currency; // currency can be either ETH or USD
@@ -40,20 +38,18 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     uint256 contractorBalance;
     uint256 contractorTotalProceeds;
     uint256 pricePerUnitInETHWeiOrUSD; // There's single price for the unit ERC20 (Should be in WEI)
-    uint256 public campaignStartTime; // Time when campaign start
-    uint256 public campaignEndTime; // Time when campaign ends
+    uint256 campaignStartTime; // Time when campaign start
+    uint256 campaignEndTime; // Time when campaign ends
     uint256 expiryConversionInHours; // How long converter can be pending before it will be automatically rejected and funds will be returned to convertor (hours)
     uint256 moderatorFeePercentage; // Fee which moderator gets
     string public publicMetaHash; // Ipfs hash of json campaign object
     string privateMetaHash; // Ipfs hash of json sensitive (contractor) information
-    uint256 public maxReferralRewardPercent; // maxReferralRewardPercent is actually bonus percentage in ETH
-    uint public maxConverterBonusPercent; //translates to discount - we can add this to constructor
+    uint256 maxReferralRewardPercent; // maxReferralRewardPercent is actually bonus percentage in ETH
+    uint maxConverterBonusPercent; //translates to discount - we can add this to constructor
     uint minContributionETHorFiatCurrency; // Minimal amount of ETH or USD that can be paid by converter to create conversion
     uint maxContributionETHorFiatCurrency; // Maximal amount of ETH or USD that can be paid by converter to create conversion
 
     uint unit_decimals; // ERC20 selling data
-//    string symbol; // ERC20 selling data
-
 
 //    bool public withdrawApproved = false; // Until contractor set this to be true, no one can withdraw funds etc.
 //    bool canceled = false; // This means if contractor cancel everything
@@ -90,7 +86,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     )
     public {
         require(_assetContractERC20 != address(0), 'ERC20 contract address can not be 0x0');
-        require(values[4] > 0, 'Max referral reward percent must be > 0');
+        require(values[4] > 0, 'Max referral reward percent must be > i0');
         require(_conversionHandler != address(0), 'Address of Conversion Handler can not be 0x0');
         conversionHandler = _conversionHandler;
         contractor = msg.sender;
@@ -426,7 +422,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     /// @notice Function to check balance of the ERC20 inventory (view - no gas needed to call this function)
     /// @dev we're using Utils contract and fetching the balance of this contract address
     /// @return balance value as uint
-    function getInventoryBalance() public view returns (uint) {
+    function getInventoryBalance() internal view returns (uint) {
         uint balance = IERC20(assetContractERC20).balanceOf(address(this));
         return balance;
     }
@@ -526,6 +522,10 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         return false;
     }
 
+    function getCampaignStartAndEndTime() public view returns (uint,uint) {
+        return (campaignStartTime, campaignEndTime);
+    }
+
     function sendBackEthWhenConversionCancelled(address _cancelledConverter, uint _conversionAmount) public onlyTwoKeyConversionHandler {
         _cancelledConverter.transfer(_conversionAmount);
     }
@@ -550,18 +550,11 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         return contractorBalance;
     }
 
-    /// @notice Function to fetch moderator balance in ETH
+    /// @notice Function to fetch moderator balance in ETH and his total earnings
     /// @dev only contractor or moderator are eligible to call this function
     /// @return value of his balance in ETH
-    function getModeratorBalance() public onlyContractorOrModerator view returns (uint) {
-        return moderatorBalanceETHWei;
-    }
-
-    /// @notice Function to fetch moderator balance in ETH earned all time
-    /// @dev only Contractor or mdoerator can call this
-    /// @return value of total earnings
-    function getModeratorTotalEarnings() public onlyContractorOrModerator view returns (uint) {
-        return moderatorTotalEarningsETHWei;
+    function getModeratorBalanceAndTotalEarnings() public onlyContractorOrModerator view returns (uint,uint) {
+        return (moderatorBalanceETHWei,moderatorTotalEarningsETHWei);
     }
 
     /**
@@ -572,15 +565,13 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      */
     function getReferrerBalanceAndTotalEarningsAndNumberOfConversions(address _referrer) public view returns (uint,uint,uint) {
         require(msg.sender == _referrer || msg.sender == contractor || msg.sender == moderator);
-        return (referrerBalancesETHWei[_referrer],referrerTotalEarningsEthWEI[_referrer],referrerAddressToCounterOfConversions[_referrer]);
+        return (referrerBalancesETHWei[_referrer],referrerTotalEarningsEthWEI[_referrer], referrerAddressToCounterOfConversions[_referrer]);
     }
 
     /// @notice Function where contractor can withdraw his funds
     /// @dev onlyContractor can call this method
     /// @return true if successful otherwise will 'revert'
     function withdrawContractor() public onlyContractor returns (bool) {
-        require(contractorBalance > 0,'You need to have some balance in order to do withdraw');
-        require(contractorBalance <= address(this).balance, 'Contractor balance should be less then contract balance');
         contractor.transfer(contractorBalance);
         contractorBalance = 0;
         return true;

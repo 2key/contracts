@@ -14,7 +14,7 @@ contract TwoKeyCampaignARC is ArcERC20 {
 
 	TwoKeyEventSource twoKeyEventSource;
 
-	uint256 public conversionQuota;  // maximal ARC tokens that can be passed in transferFrom
+	uint256 conversionQuota;  // maximal ARC tokens that can be passed in transferFrom
 
 	// referral graph, who did you receive the referral from
 	mapping(address => address) public received_from;

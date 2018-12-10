@@ -315,7 +315,8 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     public async checkInventoryBalance(campaign: any, from: string): Promise<number | string | BigNumber> {
         try {
             const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-            const balance = await promisify(campaignInstance.getInventoryBalance, [{from}]);
+
+            const balance = await this.erc20.getERC20Balance(this.base.twoKeyEconomy.address, campaignInstance.address);
             return Promise.resolve(balance);
         } catch (err) {
             Promise.reject(err);
@@ -1078,22 +1079,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         })
     }
 
-    /**
-     *
-     * @param campaign
-     * @returns {Promise<number>}
-     */
-    public getAcquisitionContractBalanceERC20(campaign: any): Promise<number> {
-        return new Promise(async (resolve, reject) => {
-            try {
-                const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-                const balanceOnContract: number = await promisify(campaignInstance.campaignInventoryUnitsBalance, []);
-                resolve(balanceOnContract);
-            } catch (e) {
-                reject(e);
-            }
-        })
-    }
+
 
 
     /**
@@ -1167,8 +1153,8 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         return new Promise<number>(async (resolve, reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-                const balanceinWei = await promisify(campaignInstance.getModeratorBalance, [{from}]);
-                resolve(balanceinWei);
+                let [moderatorBalance, moderatorTotalEarnings] = await promisify(campaignInstance.getModeratorBalanceAndTotalEarnings, [{from}]);
+                resolve(moderatorBalance);
             } catch (e) {
                 reject(e);
             }
@@ -1252,7 +1238,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         return new Promise<number>(async(resolve,reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-                const moderatorBalanceTotal = await promisify(campaignInstance.getModeratorTotalEarnings,[{from}]);
+                let [moderatorBalance,moderatorBalanceTotal] = await promisify(campaignInstance.getModeratorBalanceAndTotalEarnings,[{from}]);
                 resolve(moderatorBalanceTotal);
             } catch (e) {
                 reject(e);
