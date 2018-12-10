@@ -27,7 +27,7 @@ export default class TwoKeyExchangeContract implements ITwoKeyExchangeContract {
      * @param {string} from
      * @returns {Promise<number>}
      */
-    public getValue(currency: string, from: string) : Promise<any> {
+    public getRatesETHFiat(currency: string, from: string) : Promise<any> {
         return new Promise<number>(async(resolve,reject) => {
             try {
                 let rateObject = await promisify(this.base.twoKeyExchangeContract.getFiatCurrencyDetails,[currency, {from}]);
