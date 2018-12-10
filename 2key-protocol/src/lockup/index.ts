@@ -152,7 +152,7 @@ export default class Lockup implements ILockup {
         return new Promise(async(resolve,reject) => {
             try {
                 const twoKeyLockupInstance = await this.helpers._getLockupContractInstance(twoKeyLockup);
-                let [baseTokens, bonusTokens, vestingMonths, withdrawn, totalTokensLeft]
+                let [baseTokens, bonusTokens, vestingMonths, withdrawn, totalTokensLeft, allUnlockedAtTheMoment]
                     = await promisify(twoKeyLockupInstance.getInformation,[{from}]);
 
                 let monthlyBonus = bonusTokens/vestingMonths;
@@ -162,6 +162,7 @@ export default class Lockup implements ILockup {
                 console.log('Total tokens left on the contract: ' + totalTokensLeft);
                 console.log('Vesting months: ' + vestingMonths);
                 console.log('Monthly bonus: '+  monthlyBonus);
+                console.log('All unlocked at the moment :' + allUnlockedAtTheMoment);
 
                 let stats = [];
                 let statObject;
