@@ -151,7 +151,8 @@ contract TwoKeyLockupContract {
         return bonusTokensVestingMonths;
     }
 
-    function getInformation() public view returns (uint,uint,uint,uint,uint) {
-        return (baseTokens, bonusTokens, bonusTokensVestingMonths, withdrawn, totalTokensLeftOnContract);
+    function getInformation() public view returns (uint,uint,uint,uint,uint,uint) {
+        uint allUnlockedAtTheMoment = getAllUnlockedAtTheMoment();
+        return (baseTokens, bonusTokens, bonusTokensVestingMonths, withdrawn, totalTokensLeftOnContract, allUnlockedAtTheMoment);
     }
 }
