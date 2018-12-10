@@ -186,7 +186,7 @@ contract Crowdsale {
   function _getTokenAmount(uint256 _weiAmount)
     internal view returns (uint256)
   {
-    uint amount;
+    uint value;
     bool flag;
     (value,flag,,) = ITwoKeyExchangeContract(twoKeyExchangeContract).getFiatCurrencyDetails("USD");
     return (_weiAmount*value).div(10**18).div(rate);

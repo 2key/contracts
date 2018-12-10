@@ -22,8 +22,8 @@ contract TwoKeyUpgradableExchange is Crowdsale {
 	}
 
 
-	constructor(uint256 _rate, address _twoKeyAdmin, ERC20 _token)
-		Crowdsale(_rate, _twoKeyAdmin, _token) public {
+	constructor(uint256 _rate, address _twoKeyAdmin, ERC20 _token, address _twoKeyUpgradableExchange)
+		Crowdsale(_rate, _twoKeyAdmin, _token, _twoKeyUpgradableExchange) public {
 	}
 
     function () public payable {
