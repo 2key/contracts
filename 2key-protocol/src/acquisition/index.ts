@@ -1260,4 +1260,29 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         })
     }
 
+    /**
+     *
+     * @param campaign
+     * @param {string} referrer
+     * @param {string} from
+     * @returns {Promise<any>}
+     */
+    public getReferrerBalanceAndTotalEarningsAndNumberOfConversions(campaign:any, referrer: string, from: string) : Promise<any> {
+        return new Promise<any>(async(resolve,reject) => {
+           try {
+               const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
+               let [referrerBalanceAvailable, referrerTotalEarnings, referrerInCountOfConversions] =
+                   await promisify(campaignInstance.getReferrerBalanceAndTotalEarningsAndNumberOfConversions,[referrer, {from}]);
+               const obj = {
+                   'balanceAvailable' : referrerBalanceAvailable,
+                   'totalEarnings' : referrerTotalEarnings,
+                   'numberOfConversionsParticipatedIn' : referrerInCountOfConversions
+               };
+               resolve(obj)
+           } catch (e) {
+               reject(e);
+           }
+        });
+    }
+
 }

@@ -90,6 +90,7 @@ export interface ITwoKeyAcquisitionCampaign {
     getModeratorAddress: (campaign: any, from: string) => Promise<string>,
     getAcquisitionCampaignCurrency: (campaign: any, from: string) => Promise<string>,
     getModeratorTotalEarnings: (campaign:any, from:string) => Promise<number>,
+    getReferrerBalanceAndTotalEarningsAndNumberOfConversions: (campaign:any, referrer: string, from: string) => Promise<any>,
 }
 
 export interface IPublicLinkOpts {
