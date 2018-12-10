@@ -5,14 +5,14 @@ export default { Maintainers:
   NetworkHashes:
    { '8086':
       { hash:
-         'bc5d9bf4c8ba772dd1159695e23544973fa825624a8c607f55a588a345a3bca9',
+         '67facfc96b8c2b9956407583fc3200622572a86cf22336b208eed6cc82de3e8e',
         humanHash:
-         ' and     come go  against    restless sawdust  then  through overwhelming you  lead when insidious    restaurants   ' },
+         'ask    i  go  intent one room   muttering let overwhelming through make  i  upon nights  let      then ' },
      '98052':
       { hash:
-         'a110985cd676d2ad043f6263a123051b00e5cb62dd1eb67d17d77df436e1b0f7',
+         '380c218f504d9641044ff534d0fa7ef244bb6cf89226c42275de0c5309eda1df',
         humanHash:
-         ' the  and  women   you then overwhelming question  upon and us let   overwhelming  us  when like  when  nights   ' },
+         'then let patient  shells you  night you you  of   when  sawdust  i   certain  etherized room  let tedious let   ' },
      '1544441348064':
       { hash:
          'dd80b754e4b42045c823365dcb2995721777f71ddc9a2b4a7c85dab304b841a0',
@@ -33,15 +33,15 @@ export default { Maintainers:
       { '8086':
          { events: {},
            links: {},
-           address: '0xfe1d3941ea21cefec03b14644334969ff95e8ae3',
+           address: '0xcae5c3eb11eee9ffc948da27c22009465fd47565',
            transactionHash:
-            '0xe8f3abe1b194a3cbe99cf0adc45f11d2e4cd512462c05abbd0fac68b04c6acc1' },
+            '0xcd8398b3b55c74280f27f90aa7a288bb1e33b3234e2bf2cf851465878354f7c5' },
         '98052':
          { events: {},
            links: {},
-           address: '0xee5b892ccabfc07f73729339303d6e230d40f9e6',
+           address: '0x01a1301aa828ef1cb9f46a2f6a1f26ecdeffb84a',
            transactionHash:
-            '0xe607dede0d24d7d69732597e37e0080ddadd3c1c45395ea6d01f7f832977b752' },
+            '0x8ed143640337ceb7eb5ddded1b7c59f06a64c94503a1c59d42d739257b38ad59' },
         '1544441348064':
          { events: {},
            links: {},
@@ -924,9 +924,9 @@ export default { Maintainers:
       { '8086':
          { events: {},
            links: {},
-           address: '0xfd1bada5c433891fac18cfa9983e0f9bb09ea6c9',
+           address: '0x79da6534537bcee07ee2bc1ac4ec1e3f50904af2',
            transactionHash:
-            '0x6c6499c85a882c565596984fc2955242cb2d8ec6daa11d25f4591f5db9fd6559' },
+            '0x02758bf37a8c5feefa8c3ceef5b12c526de3455f73a424a69e509c908df10163' },
         '1544441348064':
          { events: {},
            links: {},
@@ -1174,9 +1174,9 @@ export default { Maintainers:
       { '8086':
          { events: {},
            links: {},
-           address: '0x8bff9b233076fb7a18d91ddebdb17139a1680b5f',
+           address: '0x541b253d4701d755746820a634f46069cd891c20',
            transactionHash:
-            '0x67a0dd88a76b2919a471ca9d4bcc4ae6106b60301ebaedca21f1fbfa4985c4a3' },
+            '0x5b3b3ce0f37d281204a36763725e19d3336d884514e08706a4cfe902b577f777' },
         '1544441348064':
          { events: {},
            links: {},
@@ -1753,9 +1753,9 @@ export default { Maintainers:
       { '8086':
          { events: {},
            links: {},
-           address: '0x8e8ab4a1224cb3508c81ba79707400b817167c59',
+           address: '0xa285f1d9dca36df7889995c6c35a0f8d4abac0a9',
            transactionHash:
-            '0xfadd1196b9abcc162aae96e15b5caa94d56bdcdc071a46dd059c71a0af343e56' },
+            '0x0a721e07e07495bafcba45cb3a6e12891d0c6f3d62c728d3b4c6472cbbee4c27' },
         '1544441348064':
          { events: {},
            links: {},
@@ -1956,10 +1956,10 @@ export default { Maintainers:
       { '8086':
          { events: {},
            links: {},
-           address: '0x544b5898062c1fa8ef84aff4e6db98fbd7e5b99b',
+           address: '0xf6c26d8d14d4ce05ccd5616bfcc7f2baa0d5b4a0',
            transactionHash:
-            '0x89e831f6ec0071d83e4c8e15f0871cd9c1d413fa7fba150ddbd25db21cb53f03',
-           Proxy: '0xb32d9e6dbafc2686e7f7cf2e2c4919726b05987a',
+            '0x98499fffd6c098412782c70dd6a36c3013d14d49497e2d19628eea15ad42b628',
+           Proxy: '0x442261fea2612cf4b6ab5513a333d11dbe130768',
            Version: '1.0',
            maintainer_address: '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7' },
         '1544441348064':
@@ -2229,9 +2229,9 @@ export default { Maintainers:
       { '8086':
          { events: {},
            links: {},
-           address: '0xf1497c06ad1c7c3c4158f2bef6814201a9554aeb',
+           address: '0x31fea9daeaa1862ad0adfec849be2ef9b391849d',
            transactionHash:
-            '0x6db171c4d3870c89c760e3a1da39decc5932817564c6e30d84786bfcd7fee177' },
+            '0x3433b1699acce5d2c55b877e694be713fd98a2951c9ffc6788319bce35d487a7' },
         '1544441348064':
          { events: {},
            links: {},
@@ -2462,10 +2462,10 @@ export default { Maintainers:
    { networks:
       { '98052':
          { events: {},
-           links: { Call: '0xee5b892ccabfc07f73729339303d6e230d40f9e6' },
-           address: '0x745d20e43da3b43dc3ede45f02ed469741eb0d51',
+           links: { Call: '0x01a1301aa828ef1cb9f46a2f6a1f26ecdeffb84a' },
+           address: '0xf6a2452dd31afd18bf97e7e039c62d39304875e3',
            transactionHash:
-            '0xab24705ae036681c03e100aaa5cf8eae4104e2febbc62735a13dda7116ef3cbf' } },
+            '0x24127d0cd9ca3bc2e42d7993d97606c56a702250bc9d8dbe1a808e3615524501' } },
      abi:
       [ { constant: true,
           inputs:
@@ -2596,10 +2596,10 @@ export default { Maintainers:
       { '8086':
          { events: {},
            links: {},
-           address: '0x8bff7970ae0d1cfb516471fc5a13b7684f5ad335',
+           address: '0xc91189343b5bdb5fa15053eb80ba7ce6f59f4302',
            transactionHash:
-            '0x6bfc8c7563c447afa2e9f1da5690b7c9f934092661cdfe7a95854377c193bb11',
-           Proxy: '0x852c813047d2b8104c062f9bd900f58686c86990',
+            '0x2266b0b04e8bf93a9eae978f3b534a5afc98be6cf01dcc7b302a65993905f068',
+           Proxy: '0x176fcb8792358b6e0b7164540b3333e4688624a2',
            Version: '1.0',
            maintainer_address: '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7' },
         '1544441348064':
@@ -2951,9 +2951,9 @@ export default { Maintainers:
                  name: 'VersionAdded',
                  type: 'event' } },
            links: {},
-           address: '0xec5cc9db5446246b744a090cf657edc0b2a89d90',
+           address: '0x63b46b6fca211f91e4b74504b9b7ee00a7830573',
            transactionHash:
-            '0x514a67abb9506903a976fd819984874d5add23c8733efe9ba9b3b7c6f59f2ba3' },
+            '0x9526e3b726ad3c7a324b51340e098c4d5dedda6df9847163f83222c774a4ec7d' },
         '1544441348064':
          { events:
             { '0x00fffc2da0b561cae30d9826d37709e9421c4725faebc226cbbb7ef5fc5e7349':
@@ -3094,9 +3094,9 @@ export default { Maintainers:
       { '8086':
          { events: {},
            links: {},
-           address: '0x402ba7f30a4c07d01d807ac1595d4129fbe5416f',
+           address: '0x07ca4eabaa56982c71f8f6ded92774ab6bc728c7',
            transactionHash:
-            '0x4693d5aa3807d08825930ccbff97a0e7ac7d97b849daef241cb3a880acab9740' },
+            '0x569b65d15f4682a18ac7f6c7a64edd68f4eec0c6d923dd7d4b9338e29b043575' },
         '1544441348064':
          { events: {},
            links: {},
