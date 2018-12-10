@@ -371,11 +371,13 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     }
 
 
-    /// @notice Move some amount of ERC20 from our campaign to someone
-    /// @dev internal function
-    /// @param _to address we're sending the amount of ERC20
-    /// @param _amount is the amount of ERC20's we're going to transfer
-    /// @return true if successful, otherwise reverts
+    /**
+     * @notice Move some amount of ERC20 from our campaign to someone
+     * @dev internal function
+     * @param _to address we're sending the amount of ERC20
+     * @param _amount is the amount of ERC20's we're going to transfer
+     * @return true if successful, otherwise reverts
+     */
     function moveFungibleAsset(address _to, uint256 _amount) public onlyTwoKeyConversionHandler returns (bool) {
         require(getInventoryBalance() >= _amount, 'Campaign inventory should be greater than amount');
         require(IERC20(assetContractERC20).transfer(_to,_amount),'Transfer of ERC20 failed');
