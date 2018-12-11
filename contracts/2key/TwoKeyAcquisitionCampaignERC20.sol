@@ -524,10 +524,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         return false;
     }
 
-    function getCampaignStartAndEndTime() public view returns (uint,uint) {
-        return (campaignStartTime, campaignEndTime);
-    }
-
     function sendBackEthWhenConversionCancelled(address _cancelledConverter, uint _conversionAmount) public onlyTwoKeyConversionHandler {
         _cancelledConverter.transfer(_conversionAmount);
     }
@@ -570,9 +566,11 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         return (referrerBalancesETHWei[_referrer],referrerTotalEarningsEthWEI[_referrer], referrerAddressToCounterOfConversions[_referrer]);
     }
 
-    /// @notice Function where contractor can withdraw his funds
-    /// @dev onlyContractor can call this method
-    /// @return true if successful otherwise will 'revert'
+    /**
+     * @notice Function where contractor can withdraw his funds
+     * @dev onlyContractor can call this method
+     * @return true if successful otherwise will 'revert'
+     */
     function withdrawContractor() public onlyContractor returns (bool) {
         contractor.transfer(contractorBalance);
         contractorBalance = 0;
