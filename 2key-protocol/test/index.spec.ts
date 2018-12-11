@@ -376,7 +376,7 @@ describe('TwoKeyProtocol', () => {
     let campaignData;
 
     it('should check a user info', async () => {
-        const isAddressRegistered = await twoKeyProtocol.Registry.checkIfUserIsRegistered(from, from);
+        const isAddressRegistered = await twoKeyProtocol.Registry.checkIfAddressIsRegistered(from, from);
         console.log(`Address ${from} ${isAddressRegistered ? 'REGISTERED' : 'NOT REGISTERED'} in TwoKeyReg`);
         expect(isAddressRegistered).to.true;
     }).timeout(30000);

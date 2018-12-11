@@ -51,10 +51,10 @@ export default class TwoKeyReg implements ITwoKeyReg {
      * @param {string} from
      * @returns {Promise<boolean>}
      */
-    public checkIfUserIsRegistered(address: string, from: string) : Promise<boolean> {
+    public checkIfAddressIsRegistered(address: string) : Promise<boolean> {
         return new Promise(async(resolve,reject) => {
             try {
-                let isRegistered = await promisify(this.base.twoKeyReg.checkIfUserExists,[address, {from}]);
+                let isRegistered = await promisify(this.base.twoKeyReg.checkIfUserExists,[address]);
                 resolve(isRegistered);
             } catch (e) {
                 reject(e);
@@ -62,6 +62,23 @@ export default class TwoKeyReg implements ITwoKeyReg {
         });
     }
 
+    /**
+     *
+     * @param {string} address
+     * @param {string} from
+     * @returns {Promise<boolean>}
+     */
+    public checkIfUserIsRegistered(username: string) : Promise<string> {
+        return new Promise(async(resolve,reject) => {
+            try {
+                const handle = this.base.web3.sha3(username);
+                let isRegistered = await promisify(this.base.twoKeyReg.username2currentAddress,[handle]);
+                resolve(isRegistered);
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
 
     /**
      *
