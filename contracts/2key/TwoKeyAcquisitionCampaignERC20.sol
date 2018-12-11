@@ -579,7 +579,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         return true;
     }
 
-
+    //TODO: This is a backdoor, _upgradableExchange should be only ours upgradable exchange address!!!
     function withdrawModeratorOrReferrer(address _upgradableExchange) public returns (bool) {
         if(msg.sender == moderator) {
             IUpgradableExchange(_upgradableExchange).buyTokens.value(moderatorBalanceETHWei)(msg.sender);
