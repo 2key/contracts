@@ -23,8 +23,10 @@ module.exports = function deploy(deployer) {
             networkId = 4;
         } else if (deployer.network.startsWith('public')) {
             networkId = 3;
-        } else if (deployer.network.startsWith('dev')) {
+        } else if (deployer.network.startsWith('dev-local')) {
             networkId = 8086;
+        } else if (deployer.network.startsWith('development')) {
+            networkId = 'ganache';
         }
         console.log(networkId);
         let x = 1;

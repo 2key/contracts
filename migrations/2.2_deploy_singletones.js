@@ -12,9 +12,6 @@ const fs = require('fs');
 const path = require('path');
 
 const proxyFile = path.join(__dirname, '../build/contracts/proxyAddresses.json');
-/*
-    TwoKeyCongress constructor need 2 addresses passed, the best'd be if we get that addresses static and always save the same ones
- */
 
 module.exports = function deploy(deployer) {
     /**
@@ -27,8 +24,10 @@ module.exports = function deploy(deployer) {
         networkId = 4;
     } else if (deployer.network.startsWith('public')) {
         networkId = 3;
-    } else if (deployer.network.startsWith('dev')) {
+    } else if (deployer.network.startsWith('dev-local')) {
         networkId = 8086;
+    } else if (deployer.network.startsWith('development')) {
+        networkId = 'ganache';
     }
 
     let fileObject = {};
@@ -120,20 +119,14 @@ module.exports = function deploy(deployer) {
                              * Writing object with all informations to json file
                              */
 
-                            fs.writeFile(proxyFile, JSON.stringify(fileObject, null, 4), (err) => {
-                                if (err) {
-                                    console.error(err);
-                                    return;
-                                }
-                                console.log("File has been created");
-                            });
+                            fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
                             resolve(proxy);
                         } catch (e) {
                             reject(e);
                         }
                     })
-                    console.log('... Setting Initial params in both contracts');
                     await new Promise(async (resolve, reject) => {
+                        console.log('... Setting Initial params in both contracts');
                         try {
                             /**
                              * Setting initial parameters in event source and twoKeyRegistry contract
