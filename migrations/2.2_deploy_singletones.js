@@ -36,6 +36,8 @@ module.exports = function deploy(deployer) {
     }
     let proxyAddressTwoKeyRegistry;
     let proxyAddressTwoKeyEventSource;
+    let proxyAddressTwoKeyExchange;
+
     let adminInstance;
     let initialCongressMembers = [
         '0x4216909456e770FFC737d987c273a0B8cE19C13e', // Eitan
@@ -57,126 +59,149 @@ module.exports = function deploy(deployer) {
             .then(() => deployer.deploy(TwoKeyEconomy, TwoKeyAdmin.address))
             .then(() => deployer.deploy(TwoKeyExchangeContract, [maintainerAddress], TwoKeyAdmin.address))
             .then(() => TwoKeyExchangeContract.deployed())
-            .then(() => deployer.deploy(TwoKeyUpgradableExchange, 95, TwoKeyAdmin.address, TwoKeyEconomy.address, TwoKeyExchangeContract.address))
-            .then(() => TwoKeyUpgradableExchange.deployed())
             .then(() => deployer.deploy(EventSource))
             .then(() => deployer.deploy(TwoKeyRegistry)
-                .then(() => TwoKeyRegistry.deployed())
-                .then(() => deployer.deploy(TwoKeySingletonesRegistry, [maintainerAddress], TwoKeyAdmin.address))
-                .then(() => TwoKeySingletonesRegistry.deployed().then(async (registry) => {
-                    console.log('... Adding TwoKeyRegistry to Proxy registry as valid implementation');
-                    await new Promise(async (resolve, reject) => {
-                        try {
-                            /**
-                             * Adding TwoKeyRegistry to the registry, deploying 1st proxy for that 1.0 version and setting initial params there
-                             */
+            .then(() => TwoKeyRegistry.deployed())
+            .then(() => deployer.deploy(TwoKeySingletonesRegistry, [maintainerAddress], TwoKeyAdmin.address))
+            .then(() => TwoKeySingletonesRegistry.deployed().then(async (registry) => {
+                console.log('... Adding TwoKeyRegistry to Proxy registry as valid implementation');
+                await new Promise(async (resolve, reject) => {
+                    try {
+                        /**
+                         * Adding TwoKeyRegistry to the registry, deploying 1st proxy for that 1.0 version and setting initial params there
+                         */
+                        let txHash = await registry.addVersion("TwoKeyRegistry", "1.0", TwoKeyRegistry.address);
+                        let { logs } = await registry.createProxy("TwoKeyRegistry", "1.0");
+                        let { proxy } = logs.find(l => l.event === 'ProxyCreated').args;
+                        console.log('Proxy address for the TwoKeyRegistry is : ' + proxy);
+                        const twoKeyReg = fileObject.TwoKeyRegistry || {};
 
-                            let txHash = await registry.addVersion("TwoKeyRegistry", "1.0", TwoKeyRegistry.address);
-                            let { logs } = await registry.createProxy("TwoKeyRegistry", "1.0");
-                            let { proxy } = logs.find(l => l.event === 'ProxyCreated').args;
-                            console.log('Proxy address for the TwoKeyRegistry is : ' + proxy);
-                            const twoKeyReg = fileObject.TwoKeyRegistry || {};
-
-                            twoKeyReg[networkId] = {
-                                'address': TwoKeyRegistry.address,
-                                'Proxy': proxy,
-                                'Version': "1.0",
-                                maintainer_address: maintainerAddress,
-                            };
+                        twoKeyReg[networkId] = {
+                            'address': TwoKeyRegistry.address,
+                            'Proxy': proxy,
+                            'Version': "1.0",
+                            maintainer_address: maintainerAddress,
+                        };
 
 
-                            fileObject['TwoKeyRegistry'] = twoKeyReg;
-                            proxyAddressTwoKeyRegistry = proxy;
-                            resolve(proxy);
-                        } catch (e) {
-                            reject(e);
-                        }
-                    });
+                        fileObject['TwoKeyRegistry'] = twoKeyReg;
+                        proxyAddressTwoKeyRegistry = proxy;
+                        resolve(proxy);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
 
-                    console.log('... Adding EventSource to Proxy registry as valid implementation');
-                    await new Promise(async (resolve, reject) => {
-                        try {
-                            /**
-                             * Adding EventSource to the registry, deploying 1st proxy for that 1.0 version of EventSource and setting initial params there
-                             */
-                            let txHash = await registry.addVersion("TwoKeyEventSource", "1.0", EventSource.address);
-                            let { logs } = await registry.createProxy("TwoKeyEventSource", "1.0");
-                            let { proxy } = logs.find(l => l.event === 'ProxyCreated').args;
-                            console.log('Proxy address for the EventSource is : ' + proxy);
+                console.log('... Adding EventSource to Proxy registry as valid implementation');
+                await new Promise(async (resolve, reject) => {
+                    try {
+                        /**
+                         * Adding EventSource to the registry, deploying 1st proxy for that 1.0 version of EventSource and setting initial params there
+                         */
+                        let txHash = await registry.addVersion("TwoKeyEventSource", "1.0", EventSource.address);
+                        let { logs } = await registry.createProxy("TwoKeyEventSource", "1.0");
+                        let { proxy } = logs.find(l => l.event === 'ProxyCreated').args;
+                        console.log('Proxy address for the EventSource is : ' + proxy);
 
-                            const twoKeyEventS = fileObject.TwoKeyEventSource || {};
+                        const twoKeyEventS = fileObject.TwoKeyEventSource || {};
 
-                            twoKeyEventS[networkId] = {
-                                'address': EventSource.address,
-                                'Proxy': proxy,
-                                'Version': "1.0",
-                                maintainer_address: maintainerAddress,
-                            };
-                            fileObject['TwoKeyEventSource'] = twoKeyEventS;
-                            proxyAddressTwoKeyEventSource = proxy;
+                        twoKeyEventS[networkId] = {
+                            'address': EventSource.address,
+                            'Proxy': proxy,
+                            'Version': "1.0",
+                            maintainer_address: maintainerAddress,
+                        };
+                        fileObject['TwoKeyEventSource'] = twoKeyEventS;
+                        proxyAddressTwoKeyEventSource = proxy;
+                        resolve(proxy);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
 
-                            /**
-                             * Writing object with all informations to json file
-                             */
+                console.log('... Adding TwoKeyExchangeContract to Proxy registry as valid implementation');
+                await new Promise(async (resolve,reject) => {
+                    try {
+                        /**
+                         * Adding EventSource to the registry, deploying 1st proxy for that 1.0 version of EventSource and setting initial params there
+                         */
+                        let txHash = await registry.addVersion("TwoKeyExchangeContract", "1.0", TwoKeyExchangeContract.address);
+                        let { logs } = await registry.createProxy("TwoKeyExchangeContract", "1.0");
+                        let { proxy } = logs.find(l => l.event === 'ProxyCreated').args;
+                        console.log('Proxy address for the TwoKeyExchangeContract is : ' + proxy);
 
-                            fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
-                            resolve(proxy);
-                        } catch (e) {
-                            reject(e);
-                        }
-                    })
-                    await new Promise(async (resolve, reject) => {
-                        console.log('... Setting Initial params in both contracts');
-                        try {
-                            /**
-                             * Setting initial parameters in event source and twoKeyRegistry contract
-                             */
-                            await EventSource.at(proxyAddressTwoKeyEventSource).setInitialParams(TwoKeyAdmin.address);
-                            let txHash = await TwoKeyRegistry.at(proxyAddressTwoKeyRegistry).setInitialParams(proxyAddressTwoKeyEventSource, TwoKeyAdmin.address, maintainerAddress);
-                            resolve(txHash);
-                        } catch (e) {
-                            reject(e);
-                        }
-                    })
-                }))
-                .then(() => EventSource.deployed().then(async () => {
-                    console.log("... Adding TwoKeyRegistry to EventSource");
-                    await new Promise(async (resolve, reject) => {
-                        try {
-                            let txHash = await EventSource.at(proxyAddressTwoKeyEventSource).addTwoKeyReg(proxyAddressTwoKeyRegistry).then(() => true);
-                            resolve(txHash);
-                        } catch (e) {
-                            reject(e);
-                        }
-                    });
-                    console.log("Added TwoKeyReg: " + proxyAddressTwoKeyRegistry + "  to EventSource : " + proxyAddressTwoKeyEventSource + "!")
-                }))
-                .then(async () => {
-                    await new Promise(async (resolve, reject) => {
-                        try {
-                            let txHash = await adminInstance.setSingletones(TwoKeyEconomy.address, TwoKeyUpgradableExchange.address, proxyAddressTwoKeyRegistry, proxyAddressTwoKeyEventSource);
-                            console.log('...Succesfully added singletones');
-                            resolve(txHash);
-                        } catch (e) {
-                            reject(e);
-                        }
-                    });
+                        const twoKeyExchange = fileObject.TwoKeyExchange || {};
+
+                        twoKeyExchange[networkId] = {
+                            'address': TwoKeyExchangeContract.address,
+                            'Proxy': proxy,
+                            'Version': "1.0",
+                            maintainer_address: maintainerAddress,
+                        };
+                        fileObject['TwoKeyExchangeContract'] = twoKeyExchange;
+                        proxyAddressTwoKeyExchange = proxy;
+
+                        fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
+                        resolve(proxy);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
+                await new Promise(async (resolve, reject) => {
+                    console.log('... Setting Initial params in both contracts');
+                    try {
+                        /**
+                         * Setting initial parameters in event source and twoKeyRegistry contract
+                         */
+                        await EventSource.at(proxyAddressTwoKeyEventSource).setInitialParams(TwoKeyAdmin.address);
+                        await TwoKeyExchangeContract.at(proxyAddressTwoKeyExchange).setInitialParams([maintainerAddress], TwoKeyAdmin.address);
+                        let txHash = await TwoKeyRegistry.at(proxyAddressTwoKeyRegistry).setInitialParams(proxyAddressTwoKeyEventSource, TwoKeyAdmin.address, maintainerAddress);
+                        resolve(txHash);
+                    } catch (e) {
+                        reject(e);
+                    }
                 })
-                .then(async () => {
-                    await new Promise(async (resolve, reject) => {
-                        try {
-                            let txHash = await adminInstance.transfer2KeyTokens(TwoKeyUpgradableExchange.address, 10000000000000000000);
-                            console.log('... Successfully transfered 2key tokens');
-                            resolve(txHash);
-                        } catch (e) {
-                            reject(e);
-                        }
-                    })
+            }))
+            .then(() => deployer.deploy(TwoKeyUpgradableExchange, 95, TwoKeyAdmin.address, TwoKeyEconomy.address, proxyAddressTwoKeyExchange))
+            .then(() => TwoKeyUpgradableExchange.deployed())
+            .then(() => EventSource.deployed().then(async () => {
+                console.log("... Adding TwoKeyRegistry to EventSource");
+                await new Promise(async (resolve, reject) => {
+                    try {
+                        let txHash = await EventSource.at(proxyAddressTwoKeyEventSource).addTwoKeyReg(proxyAddressTwoKeyRegistry).then(() => true);
+                        resolve(txHash);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
+                console.log("Added TwoKeyReg: " + proxyAddressTwoKeyRegistry + "  to EventSource : " + proxyAddressTwoKeyEventSource + "!")
+            }))
+            .then(async () => {
+                await new Promise(async (resolve, reject) => {
+                    try {
+                        let txHash = await adminInstance.setSingletones(TwoKeyEconomy.address, proxyAddressTwoKeyExchange, proxyAddressTwoKeyRegistry, proxyAddressTwoKeyEventSource);
+                        console.log('...Succesfully added singletones');
+                        resolve(txHash);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
+            })
+            .then(async () => {
+                await new Promise(async (resolve, reject) => {
+                    try {
+                        let txHash = await adminInstance.transfer2KeyTokens(proxyAddressTwoKeyExchange, 10000000000000000000);
+                        console.log('... Successfully transfered 2key tokens');
+                        resolve(txHash);
+                    } catch (e) {
+                        reject(e);
+                    }
                 })
-                .then(() => true)
-                .catch((err) => {
-                    console.log('\x1b[31m', 'Error:', err.message, '\x1b[0m');
-                }));
+            })
+            .then(() => true)
+            .catch((err) => {
+                console.log('\x1b[31m', 'Error:', err.message, '\x1b[0m');
+            }));
     } else if (deployer.network.startsWith('plasma') || deployer.network.startsWith('private')) {
         deployer.link(Call, TwoKeyPlasmaEvents);
         deployer.deploy(TwoKeyPlasmaEvents);

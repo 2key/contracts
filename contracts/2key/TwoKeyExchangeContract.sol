@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
-import "../interfaces/ITwoKeyExchangeContract.sol";
 import "./MaintainingPattern.sol";
+import "./Upgradeable.sol";
 
 
 /**
@@ -9,8 +9,65 @@ import "./MaintainingPattern.sol";
  * This is going to be the contract on which we will store exchange rates between USD and ETH
  * Will be maintained, and updated by our trusted server and CMC api every 8 hours.
  */
-contract TwoKeyExchangeContract is MaintainingPattern, ITwoKeyExchangeContract {
+contract TwoKeyExchangeContract is Upgradeable {
 
+
+    /**
+     * Mapping which will store maintainers who are eligible to update contract state
+     */
+    mapping(address => bool) public isMaintainer;
+
+    /**
+     * Address of TwoKeyAdmin contract, which will be the only one eligible to manipulate the maintainers
+     */
+    address public twoKeyAdmin;
+
+    /**
+     * @notice Modifier to restrict calling the method to anyone but maintainers
+     */
+    modifier onlyMaintainer {
+        require(isMaintainer[msg.sender] == true);
+        _;
+    }
+
+    /**
+     * @notice Modifier to restrict calling the method to anyone but twoKeyAdmin
+     */
+    modifier onlyTwoKeyAdmin {
+        require(msg.sender == address(twoKeyAdmin));
+        _;
+    }
+
+
+    constructor(address [] _maintainers, address _twoKeyAdmin) public {
+        twoKeyAdmin = _twoKeyAdmin;
+        isMaintainer[msg.sender] = true; //for truffle deployment
+        for(uint i=0; i<_maintainers.length; i++) {
+            isMaintainer[_maintainers[i]] = true;
+        }
+    }
+
+    /**
+     * @notice Function which can add new maintainers, in general it's array because this supports adding multiple addresses in 1 trnx
+     * @dev only twoKeyAdmin contract is eligible to mutate state of maintainers
+     * @param _maintainers is the array of maintainer addresses
+     */
+    function addMaintainers(address [] _maintainers) public onlyTwoKeyAdmin {
+        for(uint i=0; i<_maintainers.length; i++) {
+            isMaintainer[_maintainers[i]] = true;
+        }
+    }
+
+    /**
+     * @notice Function which can remove some maintainers, in general it's array because this supports adding multiple addresses in 1 trnx
+     * @dev only twoKeyAdmin contract is eligible to mutate state of maintainers
+     * @param _maintainers is the array of maintainer addresses
+     */
+    function removeMaintainers(address [] _maintainers) public onlyTwoKeyAdmin {
+        for(uint i=0; i<_maintainers.length; i++) {
+            isMaintainer[_maintainers[i]] = false;
+        }
+    }
     /**
      * @notice Event will be emitted every time we update the price for the fiat
      */
@@ -29,9 +86,21 @@ contract TwoKeyExchangeContract is MaintainingPattern, ITwoKeyExchangeContract {
         address maintainerWhoUpdated;
     }
 
-    constructor(address [] _maintainers, address _twoKeyAdmin) MaintainingPattern (_maintainers, _twoKeyAdmin )
-    public {
 
+    /**
+     * @notice Function which will be called immediately after contract deployment
+     * @param _maintainers is the array of maintainers addresses
+     * @param _twoKeyAdmin is the address of TwoKeyAdmin contract
+     * @dev Can be called only once
+     */
+    function setInitialParams(address [] _maintainers, address _twoKeyAdmin) {
+        require(_twoKeyAdmin != address(0)); //validation that it can be called only once
+        require(twoKeyAdmin == address(0)); //validation that it can be called only once
+        twoKeyAdmin = _twoKeyAdmin;
+        isMaintainer[msg.sender] = true; //for truffle deployment
+        for(uint i=0; i<_maintainers.length; i++) {
+            isMaintainer[_maintainers[i]] = true;
+        }
     }
 
     /**
