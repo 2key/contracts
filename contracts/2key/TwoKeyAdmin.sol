@@ -89,14 +89,6 @@ contract TwoKeyAdmin is IAdminContract {
 		twoKeyEconomy.transfer(_to, _tokens);
 	}
 
-    /// @notice Function where only elected admin can upgrade exchange contract address
-    /// @dev We're recuring newExchange address different from address 0
-    /// @param newExchange is New Upgradable Exchange contract address
-	function upgradeEconomyExchangeByAdmins(address newExchange) external wasNotReplaced onlyTwoKeyCongress {
-		require (newExchange != address(0));
-		twoKeyUpgradableExchange.upgrade(newExchange);
-	}
-
     /// @notice Function where only elected admin can transfer ether to an address
     /// @dev We're recurring to address different from address 0 and amount greater than 0
     /// @param to receiver's address
