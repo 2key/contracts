@@ -2,6 +2,7 @@ const TwoKeyAdmin = artifacts.require('TwoKeyAdmin');
 const EventSource = artifacts.require('TwoKeyEventSource');
 const TwoKeyRegistry = artifacts.require('TwoKeyRegistry');
 const TwoKeySingletonesRegistry = artifacts.require('TwoKeySingletonesRegistry');
+const TwoKeyExchangeContract = artifacts.require('TwoKeyExchangeContract');
 const Proxy = artifacts.require('UpgradeabilityProxy');
 const fs = require('fs');
 const path = require('path');
@@ -28,17 +29,26 @@ module.exports = function deploy(deployer) {
     let isEventSource = false;
 
     /**
+     * Is twoKeyExchangeContract the one we are updating
+     * @type {boolean}
+     */
+    let isTwoKeyExchangeContract = false;
+
+    /**
      * Determining which contract we want to update
      */
     process.argv.forEach((argument) => {
         if (argument == 'update') {
             found = true
         }
-        if (argument == 'TwoKeyRegistry') {
+        else if (argument == 'TwoKeyRegistry') {
             isRegistry = true;
         }
-        if (argument == 'TwoKeyEventSource') {
+        else if (argument == 'TwoKeyEventSource') {
             isEventSource = true;
+        }
+        else if (argument == 'TwoKeyExchangeContract') {
+            isTwoKeyExchangeContract = true;
         }
     });
 
@@ -59,13 +69,13 @@ module.exports = function deploy(deployer) {
         networkId = 'ganache';
     }
 
+    /**
+     * If network is not found or contract is not found return immediately
+     */
     if(networkId == 0 || found == false) {
         return;
     }
 
-    /**
-     * Determining if argument for update is found
-     */
     if(found) {
         let fileObject = {};
         if (fs.existsSync(proxyFile)) {
@@ -131,7 +141,7 @@ module.exports = function deploy(deployer) {
                                     let txHash = await registry.addVersion("TwoKeyEventSource", twoKeyEventSource[networkId.toString()].Version, EventSource.address);
 
                                     console.log('... Upgrading proxy to new version');
-                                    txHash = await Proxy.at(twoKeyEventSource[networkId.toString()].Proxy).upgradeTo("TwoKeyEventSource", "1.1");
+                                    txHash = await Proxy.at(twoKeyEventSource[networkId.toString()].Proxy).upgradeTo("TwoKeyEventSource", twoKeyEventSource[networkId.toString()].Version);
                                     twoKeyEventSource[networkId.toString()].address = lastEventSourceAddress;
 
                                     fileObject['TwoKeyEventSource'] = twoKeyEventSource;
@@ -144,6 +154,44 @@ module.exports = function deploy(deployer) {
                         })
 
                 )
+        } else if(isTwoKeyExchangeContract) {
+            /**
+             * If contract we're updating is TwoKeyExchangeContract (argument) this 'subscript' will be executed!
+             */
+            let lastTwoKeyExchangeContract;
+            console.log('TwoKeyExchangeContract will be updated now.');
+            deployer.deploy(TwoKeyExchangeContract)
+                .then(() => TwoKeyExchangeContract.deployed()
+                    .then((twoKeyExchangeInstance) => {
+                        lastTwoKeyExchangeContract = twoKeyExchangeInstance.address;
+                    })
+                    .then(() => TwoKeySingletonesRegistry.deployed())
+                    .then(async(registry) => {
+                        await new Promise(async(resolve,reject) => {
+                            try {
+                                console.log('... Adding new version of TwoKeyExchangeContract to the registry contract');
+                                const twoKeyExchange = fileObject.TwoKeyExchangeContract || {};
+
+                                let v = parseInt(twoKeyExchange[networkId.toString()].Version.substr(-1)) + 1;
+                                twoKeyExchange[networkId.toString()].Version = twoKeyExchange[networkId.toString()].Version.substr(0, twoKeyExchange[networkId.toString()].Version.length - 1) + v.toString();
+                                console.log('New version : ' + twoKeyExchange[networkId.toString()].Version);
+                                let txHash = await registry.addVersion("TwoKeyExchangeContract", twoKeyExchange[networkId.toString()].Version, TwoKeyExchangeContract.address);
+
+                                console.log('... Upgrading proxy to new version');
+                                txHash = await Proxy.at(twoKeyExchange[networkId.toString()].Proxy).upgradeTo("TwoKeyExchangeContract", twoKeyExchange[networkId.toString()].Version);
+                                twoKeyExchange[networkId.toString()].address = lastTwoKeyExchangeContract;
+
+                                fileObject['TwoKeyExchangeContract'] = twoKeyExchange;
+                                fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
+                                resolve(txHash);
+                            } catch (e) {
+                                reject(e);
+                            }
+                        })
+                    })
+
+                )
+
         }
     } else {
         console.log('Argument is not found - no contracts will be updated.');
