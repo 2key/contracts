@@ -138,7 +138,7 @@ module.exports = function deploy(deployer) {
                             'Version': "1.0",
                             maintainer_address: maintainerAddress,
                         };
-                        fileObject['TwoKeyExchangeContract'] = twoKeyExchange;
+                        // fileObject['TwoKeyExchangeContract'] = twoKeyExchange;
                         proxyAddressTwoKeyExchange = proxy;
 
                         fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
@@ -154,7 +154,8 @@ module.exports = function deploy(deployer) {
                          * Setting initial parameters in event source and twoKeyRegistry contract
                          */
                         await EventSource.at(proxyAddressTwoKeyEventSource).setInitialParams(TwoKeyAdmin.address);
-                        await TwoKeyExchangeContract.at(proxyAddressTwoKeyExchange).setInitialParams([maintainerAddress], TwoKeyAdmin.address);
+                        //TODO: revert back to proxy address of exchange once it's ready
+                        // await TwoKeyExchangeContract.at(TwoKeyExchangeContract.address).setInitialParams([maintainerAddress], TwoKeyAdmin.address);
                         let txHash = await TwoKeyRegistry.at(proxyAddressTwoKeyRegistry).setInitialParams(proxyAddressTwoKeyEventSource, TwoKeyAdmin.address, maintainerAddress);
                         resolve(txHash);
                     } catch (e) {
@@ -162,7 +163,8 @@ module.exports = function deploy(deployer) {
                     }
                 })
             }))
-            .then(() => deployer.deploy(TwoKeyUpgradableExchange, 95, TwoKeyAdmin.address, TwoKeyEconomy.address, proxyAddressTwoKeyExchange))
+            //TODO: revert back to proxy address of exchange once it's ready
+            .then(() => deployer.deploy(TwoKeyUpgradableExchange, 95, TwoKeyAdmin.address, TwoKeyEconomy.address, TwoKeyExchangeContract.address))
             .then(() => TwoKeyUpgradableExchange.deployed())
             .then(() => EventSource.deployed().then(async () => {
                 console.log("... Adding TwoKeyRegistry to EventSource");
@@ -179,7 +181,8 @@ module.exports = function deploy(deployer) {
             .then(async () => {
                 await new Promise(async (resolve, reject) => {
                     try {
-                        let txHash = await adminInstance.setSingletones(TwoKeyEconomy.address, proxyAddressTwoKeyExchange, proxyAddressTwoKeyRegistry, proxyAddressTwoKeyEventSource);
+                        //TODO: revert back to proxy address of exchange once it's ready
+                        let txHash = await adminInstance.setSingletones(TwoKeyEconomy.address, TwoKeyUpgradableExchange.address, proxyAddressTwoKeyRegistry, proxyAddressTwoKeyEventSource);
                         console.log('...Succesfully added singletones');
                         resolve(txHash);
                     } catch (e) {
@@ -190,7 +193,7 @@ module.exports = function deploy(deployer) {
             .then(async () => {
                 await new Promise(async (resolve, reject) => {
                     try {
-                        let txHash = await adminInstance.transfer2KeyTokens(proxyAddressTwoKeyExchange, 10000000000000000000);
+                        let txHash = await adminInstance.transfer2KeyTokens(TwoKeyUpgradableExchange.address, 10000000000000000000);
                         console.log('... Successfully transfered 2key tokens');
                         resolve(txHash);
                     } catch (e) {
@@ -206,4 +209,4 @@ module.exports = function deploy(deployer) {
         deployer.link(Call, TwoKeyPlasmaEvents);
         deployer.deploy(TwoKeyPlasmaEvents);
     }
-}
+};
