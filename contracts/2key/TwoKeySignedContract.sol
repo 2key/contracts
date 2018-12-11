@@ -76,22 +76,21 @@ contract TwoKeySignedContract is TwoKeyContract {
         require(received_from[new_address] == old_address,'only tree ARCs allowed');
       }
       old_address = new_address;
-    }
 
-    // TODO Updating the public key of influencers may not be a good idea because it will require the influencers to use
-    // a deterministic private/public key in the link and this might require user interaction (MetaMask signature)
-    // TODO a possible solution is change public_link_key to address=>address[]
-    // update (only once) the public address used by each influencer
-    // we will need this in case one of the influencers will want to start his own off-chain link
-    for (i = 0; i < keys.length; i++) {
-      setPublicLinkKeyOf(influencers[i], keys[i]);
-    }
+      // TODO Updating the public key of influencers may not be a good idea because it will require the influencers to use
+      // a deterministic private/public key in the link and this might require user interaction (MetaMask signature)
+      // TODO a possible solution is change public_link_key to address=>address[]
+      // update (only once) the public address used by each influencer
+      // we will need this in case one of the influencers will want to start his own off-chain link
+      if (i < keys.length) {
+        setPublicLinkKeyOf(new_address, keys[i]);
+      }
 
-    // update (only once) the cut used by each influencer
-    // we will need this in case one of the influencers will want to start his own off-chain link
-    for (i = 0; i < weights.length; i++) {
-      new_address = plasmaOf(influencers[i]);
-      setCutOf(influencers[i], uint256(weights[i]));
+      // update (only once) the cut used by each influencer
+      // we will need this in case one of the influencers will want to start his own off-chain link
+      if (i < weights.length) {
+        setCutOf(new_address, uint256(weights[i]));
+      }
     }
 
     return influencers;
