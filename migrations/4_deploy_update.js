@@ -189,9 +189,7 @@ module.exports = function deploy(deployer) {
                             }
                         })
                     })
-
                 )
-
         }
     } else {
         console.log('Argument is not found - no contracts will be updated.');
