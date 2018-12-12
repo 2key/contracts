@@ -328,7 +328,7 @@ contract TwoKeyAcquisitionContract is TwoKeyContract
 
     if (_eventSource != address(0)) {
       eventSource = _eventSource;
-      eventSource.created(this, owner_plasma);
+      eventSource.created(this, owner);
     }
   }
 
