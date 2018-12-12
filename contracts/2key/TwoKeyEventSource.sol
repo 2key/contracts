@@ -80,14 +80,6 @@ contract TwoKeyEventSource is Upgradeable, TwoKeyTypes {
         uint value
     );
 
-
-    uint counter = 0;
-    address[] whitelistedDeployers = [
-                                        0xb3FA520368f2Df7BED4dF5185101f303f6c7decc, //local-geth
-                                        0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1, //ganache -deterministic
-                                        0x94aac1FE48D0ABeC6A07051e089759E767C3f26c // rinkeby
-                                    ];
-
     // TwoKeyAdmin twoKeyAdmin;
     address public twoKeyAdmin; //included getter
     /// Interface representing TwoKeyReg contract (Reducing gas usage that's why interface instead of contract instance)
@@ -136,7 +128,6 @@ contract TwoKeyEventSource is Upgradeable, TwoKeyTypes {
     /// onlyAuthorizedSubadmins
     function addContract(address _contractAddress) public onlyAuthorizedSubadmins {
         require(_contractAddress != address(0));
-        counter++;
         bytes memory _contractCode = GetCode.at(_contractAddress);
         canEmit[_contractCode] = true;
     }
@@ -267,12 +258,4 @@ contract TwoKeyEventSource is Upgradeable, TwoKeyTypes {
         return canEmit[code];
     }
 
-    function isAddressWhitelistedDeployer(address x) public view returns (bool) {
-        for(uint i=0; i<whitelistedDeployers.length; i++) {
-            if(x == whitelistedDeployers[i]) {
-                return true;
-            }
-        }
-        return false;
-    }
 }
