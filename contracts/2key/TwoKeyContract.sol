@@ -217,7 +217,8 @@ contract TwoKeyContract is BasicToken, Ownable {
     }
 
     xbalances[influencer] = xbalances[influencer].sub(b);
-    if(!influencer.send(b)) {
+    // super important to send to msg.senbder not to influencer
+    if(!msg.sender.send(b)) {
        revert("failed to send");
     }
   }
