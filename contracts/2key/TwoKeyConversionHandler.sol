@@ -17,6 +17,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
 
     using SafeMath for uint256;
 
+    //TODO: See if this should be public or private with specific roles
     mapping(address => Conversion) public conversions;
 
     // Mapping where we will store as the key state of conversion, and as value, there'll be all converters which conversions are in that state
@@ -107,10 +108,11 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     /// @notice Function which checks if converter has converted
     /// @dev will throw if not
     /// @param converterAddress is the address of converter
-    function isConversionExecuted(address converterAddress) public view {
+    function isConversionExecuted(address converterAddress) public view returns (bool) {
         Conversion memory c = conversions[converterAddress];
         require(c.state != ConversionState.FULFILLED);
         require(c.state != ConversionState.CANCELLED);
+        return true;
     }
 
 
@@ -161,7 +163,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
 
 
     function executeConversion(address _converter) public onlyApprovedConverter {
-        isConversionExecuted(_converter);
+        require(isConversionExecuted(_converter));
         performConversion(_converter);
         moveFromApprovedToFulfilledState(_converter);
     }
@@ -374,7 +376,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     function moveFromApprovedToFulfilledState(address _converter) private {
         bytes32 destination = bytes32("FULFILLED");
         moveFromStateAToStateB(_converter, destination);
-        converterToConversionState[_converter] = ConversionState.FULFILLED;
+        converterToConversionState[_converster] = ConversionState.FULFILLED;
     }
 
 
@@ -407,7 +409,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     }
 
 
-    function cancelAndRejectContract() public onlyTwoKeyAcquisitionCampaign {
+    function cancelAndRejectContract() external onlyTwoKeyAcquisitionCampaign {
         for(uint i=0; i<allLockUpContracts.length; i++) {
             TwoKeyLockupContract(allLockUpContracts[i]).cancelCampaignAndGetBackTokens(assetContractERC20);
         }
