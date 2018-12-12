@@ -128,6 +128,8 @@ contract TwoKeyContract is BasicToken, Ownable {
     require(_value == 1, 'can only transfer 1 ARC');
     require(_from != address(0), '_from undefined');
     require(_to != address(0), '_to undefined');
+    _from = plasmaOf(_from);
+    _to = plasmaOf(_to);
 
 //    // normalize address to be plasma
 //    _from = plasmaOf(_from);
@@ -230,7 +232,7 @@ contract TwoKeyContract is BasicToken, Ownable {
     // first count how many influencers
     uint n_influencers = 0;
     while (true) {
-      influencer = received_from[influencer];  // already a plasma address
+      influencer = plasmaOf(received_from[influencer]);  // already a plasma address
       require(influencer != address(0),'not connected to contractor');
       if (influencer == owner_plasma) {
         break;
@@ -241,9 +243,9 @@ contract TwoKeyContract is BasicToken, Ownable {
     address[] memory influencers = new address[](n_influencers);
     // fill the array of influencers in reverse order, from the last influencer just before the converter to the
     // first influencer just after the contractor
-    influencer = customer;
+    influencer = plasmaOf(customer);
     while (n_influencers > 0) {
-      influencer = received_from[influencer];
+      influencer = plasmaOf(received_from[influencer]);
       n_influencers--;
       influencers[n_influencers] = influencer;
     }
@@ -254,7 +256,7 @@ contract TwoKeyContract is BasicToken, Ownable {
   function buyProductInternal(uint256 _units, uint256 _bounty) public payable {
     // buy coins with cut
     // low level product purchase function
-    address customer = msg.sender;
+    address customer = senderPlasma();
     require(balanceOf(customer) > 0,"no arcs");
 
     uint256 _total_units = total_units();
