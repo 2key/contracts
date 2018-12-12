@@ -51,7 +51,6 @@ module.exports = function deploy(deployer) {
                 console.log("... Adding TwoKeyAcquisitionCampaign to EventSource");
                 await new Promise(async (resolve, reject) => {
                     try {
-                        console.log(json.TwoKeyEventSource, json.TwoKeyEventSource[networkId.toString()], networkId.toString());
                         let txHash = await EventSource.at(json.TwoKeyEventSource[networkId.toString()].Proxy).addContract(TwoKeyAcquisitionCampaignERC20.address, {gas: 7000000});
                         resolve(txHash);
                     } catch (e) {

@@ -1,36 +1,10 @@
 pragma solidity ^0.4.24;
 
-import '../openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import '../openzeppelin-solidity/contracts/math/SafeMath.sol';
 
-// TODO: OnlyMember should be actually onlyContract by itself
-// TODO: Resolve in tests how to call other methods in the contract (truffle test)
+contract TwoKeyCongress {
 
-
-// Interface for ERC20 token to use method transferFrom
-interface Token {
-    function transferFrom(address _from, address _to, uint256 _value) external returns (bool success);
-}
-
-// Contract TokenRecipient
-contract TokenRecipient {
     event ReceivedEther(address sender, uint amount);
-    event ReceivedTokens(address _from, uint256 _value, address _token, bytes _extraData);
-
-    function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData) public {
-        Token t = Token(_token);
-        require(t.transferFrom(_from, this, _value));
-        emit ReceivedTokens(_from, _value, _token, _extraData);
-    }
-
-    function () payable  public {
-        emit ReceivedEther(msg.sender, msg.value);
-    }
-}
-
-
-contract TwoKeyCongress is Ownable, TokenRecipient {
-
     using SafeMath for uint;
 
     bool initialized;
@@ -108,13 +82,13 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
     }
 
     constructor(
-        uint256 _minutesForDebate, address[] initialMembers, uint[] votingPowers) Ownable() payable public {
+        uint256 _minutesForDebate, address[] initialMembers, uint[] votingPowers) payable public {
         changeVotingRules(0, _minutesForDebate);
         self = address(this);
         addMember(0,'',0);
         addMember(initialMembers[0], 'Eitan', votingPowers[0]);
         addMember(initialMembers[1], 'Kiki', votingPowers[1]);
-//        addMember(initialMembers[2], 'intcollege', votingPowers[1]);
+//        addMember(initialMembers[2], 'in  tcollege', votingPowers[1]);
 //        addMember(initialMembers[3], '2keyeconomy', votingPowers[1]);
         initialized = true;
         addInitialWhitelistedMethods();
@@ -446,7 +420,7 @@ contract TwoKeyCongress is Ownable, TokenRecipient {
 
     /// @notice Fallback function
     function () payable public {
-
+        emit ReceivedEther(msg.sender, msg.value);
     }
 
     /// @notice Getter for maximum voting power
