@@ -380,7 +380,7 @@ contract TwoKeyPresellContract is TwoKeyContract {
     balances[owner_plasma] = _tSupply;
     if (_eventSource != address(0)) {
       eventSource = _eventSource;
-      eventSource.created(this, owner_plasma);
+      eventSource.created(this, owner);
     }
 
     if (_erc20_token_sell_contract != address(0)) {
