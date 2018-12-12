@@ -16,28 +16,15 @@ contract TwoKeyAdmin is IAdminContract {
 	TwoKeyEventSource public twoKeyEventSource;
 	TwoKeyRegistry public twoKeyReg;
 
-	address public previousAdmin;
 	address public twoKeyCongress;
 	address public newTwoKeyAdminAddress;
-	bool private wasReplaced;
 
     bool private initialized = false;
-
-	modifier onlyAuthorizedAdmins {
-		require((msg.sender == twoKeyCongress) || (msg.sender == previousAdmin));
-	   _;
-	}
 
     /// @notice Modifier will revert if calling address is not a member of electorateAdmins
 	modifier onlyTwoKeyCongress {
 		require(msg.sender == twoKeyCongress);
 	    _;
-	}
-
-    /// @notice Modifier will revert if contract is already replaced
-	modifier wasNotReplaced {
-		require(!wasReplaced);
-		_;
 	}
 
     /// @notice Modifier will revert if caller is not TwoKeyUpgradableExchange
@@ -46,22 +33,17 @@ contract TwoKeyAdmin is IAdminContract {
         _;
     }
 
-
-
 	constructor(
-		address _electorateAdmins
+		address _twoKeyCongress
 	) public {
-		require(_electorateAdmins != address(0));
-		wasReplaced = false;
-		twoKeyCongress = _electorateAdmins;
+		require(_twoKeyCongress != address(0));
+		twoKeyCongress = _twoKeyCongress;
 	}
-
-
 
     /// @notice Function where only elected admin can replace the exisitng admin contract with new admin contract.
     /// @dev This method is expected to transfer it's current economy to new admin contract
     /// @param _newAdminContract is address of New Admin Contract
-	function replaceOneself(address _newAdminContract) external wasNotReplaced onlyTwoKeyCongress {
+	function replaceOneself(address _newAdminContract) external onlyTwoKeyCongress {
 		uint balanceOfOldAdmin = twoKeyEconomy.balanceOf(address(this));
 		TwoKeyAdmin newAdminContractObject = TwoKeyAdmin(_newAdminContract);
 		newTwoKeyAdminAddress = _newAdminContract;
@@ -69,22 +51,14 @@ contract TwoKeyAdmin is IAdminContract {
 		twoKeyEconomy.changeAdmin(_newAdminContract);
 		newAdminContractObject.transfer(address(this).balance);
 		newAdminContractObject.setSingletones(twoKeyEconomy, twoKeyUpgradableExchange, twoKeyReg, twoKeyEventSource);
-		wasReplaced = true;
 		twoKeyEventSource.changeAdmin(_newAdminContract);
-	}
-
-	/// @notice Function to add the address of previous active admin contract
-	/// @param _previousAdmin is address of previous active admin contract
-	function addPreviousAdmin(address _previousAdmin) public onlyTwoKeyCongress {
-		require(_previousAdmin != address(0));
-		previousAdmin = _previousAdmin;
 	}
 
     /// @notice Function where only elected admin can transfer tokens to an address
     /// @dev We're recurring to address different from address 0 and token amount greater than 0
     /// @param _to receiver's address
     /// @param _tokens is token amounts to be transfers
-	function transferByAdmins(address _to, uint256 _tokens) external wasNotReplaced onlyTwoKeyCongress {
+	function transferByAdmins(address _to, uint256 _tokens) external onlyTwoKeyCongress {
 		require (_to != address(0) && _tokens > 0);
 		twoKeyEconomy.transfer(_to, _tokens);
 	}
@@ -93,22 +67,19 @@ contract TwoKeyAdmin is IAdminContract {
     /// @dev We're recurring to address different from address 0 and amount greater than 0
     /// @param to receiver's address
     /// @param amount of ether to be transferred
-	function transferEtherByAdmins(address to, uint256 amount) external wasNotReplaced onlyTwoKeyCongress {
+	function transferEtherByAdmins(address to, uint256 amount) external onlyTwoKeyCongress {
 		require(to != address(0)  && amount > 0);
 		to.transfer(amount);
 	}
 
     /// @notice Function will transfer contract balance to owner if contract was never replaced else will transfer the funds to the new Admin contract address
 	function destroy() public onlyTwoKeyCongress {
-		if (!wasReplaced)
-			selfdestruct(twoKeyCongress);
-		else
-			selfdestruct(newTwoKeyAdminAddress);
+        selfdestruct(twoKeyCongress);
 	}
 
 	/// @notice Function to add moderator
 	/// @param _address is address of moderator
-	function addMaintainerForRegistry(address _address) public wasNotReplaced onlyTwoKeyCongress {
+	function addMaintainerForRegistry(address _address) public onlyTwoKeyCongress {
 		require (_address != address(0));
 		twoKeyReg.addTwoKeyMaintainer(_address);
 	}
@@ -240,9 +211,7 @@ contract TwoKeyAdmin is IAdminContract {
 	/// @notice Fallback function will transfer payable value to new admin contract if admin contract is replaced else will be stored this the exist admin contract as it's balance
 	/// @dev A payable fallback method
 	function() public payable {
-//		if (wasReplaced) {
-//			newTwoKeyAdminAddress.transfer(msg.value);
-//		}
-	}
+
+    }
     
 } 
