@@ -13,6 +13,8 @@ contract TwoKeyUpgradableExchange is Crowdsale {
 		_;
 	}
 
+	//TODO: We should somehow add audited contracts here which will be eligible to buyTokens, not everyone
+
 	constructor(uint256 _rate, address _twoKeyAdmin, ERC20 _token, address _twoKeyUpgradableExchange)
 		Crowdsale(_rate, _twoKeyAdmin, _token, _twoKeyUpgradableExchange) public {
 	}
@@ -20,13 +22,4 @@ contract TwoKeyUpgradableExchange is Crowdsale {
     function () public payable {
         buyTokens(msg.sender);
     }
-
-	/// @notice Function to fetch value of tokens in Wei.
-    /// @dev It is an internal method
-    /// @param _tokenAmount is amount of tokens
-    /// @return Value of tokens in Wei
-	function _getWeiAmount(uint256 _tokenAmount) internal view returns (uint256) {
-	   return _tokenAmount.div(rate);
-	}
-
 }
