@@ -59,8 +59,6 @@ contract TwoKeyRegistry is Upgradeable {
 
     address twoKeyAdminContractAddress;
 
-    uint public value;
-
     /// @notice Event is emitted when a user's name is changed
     event UserNameChanged(address owner, string name);
 
@@ -375,14 +373,6 @@ contract TwoKeyRegistry is Upgradeable {
     function addTwoKeyMaintainer(address _maintainer) public onlyAdmin {
         require(_maintainer != address(0));
         maintainers.push(_maintainer);
-    }
-
-    function setValue(uint val) public {
-        value = val;
-    }
-
-    function getValue() public view returns (uint) {
-        return value;
     }
 
 }
