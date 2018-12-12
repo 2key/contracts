@@ -19,6 +19,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
 //    event Rewarded(address indexed to, uint256 amount);
 
     address public conversionHandler;
+    address public upgradableExchange;
 
     mapping(address => uint256) referrer2cut; // Mapping representing how much are cuts in percent(0-100) for referrer address
     mapping(address => uint256) internal referrerBalancesETHWei; // balance of EthWei for each influencer that he can withdraw
@@ -78,7 +79,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         address _assetContractERC20,
         uint [] values,
         string _currency,
-        address _ethUSDExchangeContract
+        address _ethUSDExchangeContract,
+        address _twoKeyUpgradableExchangeContract
     )
     TwoKeyCampaignARC(
             _twoKeyEventSource,
@@ -89,6 +91,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         require(values[4] > 0, 'Max referral reward percent must be > i0');
         require(_conversionHandler != address(0), 'Address of Conversion Handler can not be 0x0');
         conversionHandler = _conversionHandler;
+        upgradableExchange = _twoKeyUpgradableExchangeContract;
         contractor = msg.sender;
         moderator = _moderator;
         assetContractERC20 = _assetContractERC20;
@@ -578,12 +581,12 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     }
 
     //TODO: This is a backdoor, _upgradableExchange should be only ours upgradable exchange address!!!
-    function withdrawModeratorOrReferrer(address _upgradableExchange) public returns (bool) {
+    function withdrawModeratorOrReferrer() public returns (bool) {
         if(msg.sender == moderator) {
-            IUpgradableExchange(_upgradableExchange).buyTokens.value(moderatorBalanceETHWei)(msg.sender);
+            IUpgradableExchange(upgradableExchange).buyTokens.value(moderatorBalanceETHWei)(msg.sender);
             moderatorBalanceETHWei = 0;
         } else if(referrerBalancesETHWei[msg.sender] != 0) {
-            IUpgradableExchange(_upgradableExchange).buyTokens.value(referrerBalancesETHWei[msg.sender])(msg.sender);
+            IUpgradableExchange(upgradableExchange).buyTokens.value(referrerBalancesETHWei[msg.sender])(msg.sender);
             referrerBalancesETHWei[msg.sender] = 0;
         } else {
             revert();

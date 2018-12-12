@@ -168,7 +168,8 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                         data.maxContributionETHWei,
                         data.referrerQuota || 5],
                         data.currency,
-                        this.helpers._getContractDeployedAddress('TwoKeyExchangeContract')
+                        this.helpers._getContractDeployedAddress('TwoKeyExchangeContract'),
+                        this.helpers._getContractDeployedAddress('TwoKeyUpgradableExchange')
                     ],
                     progressCallback,
                     link: {
@@ -1178,7 +1179,6 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 console.log("Balance of 2keys on upgradable exchange is: " + balance);
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
                 const txHash: string = await promisify(campaignInstance.withdrawModeratorOrReferrer,[
-                    this.base.twoKeyUpgradableExchange.address,
                     {
                         from,
                         gasPrice,

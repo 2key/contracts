@@ -42,7 +42,8 @@ module.exports = function deploy(deployer) {
                 ERC20TokenMock.address,
                 [12345, 15345, 12345, 5, 5, 5, 5, 12, 15, 1],
                 'USD',
-                TwoKeyExchangeContract.address))
+                TwoKeyExchangeContract.address,
+                TwoKeyUpgradableExchange.address))
             .then(() => TwoKeyAcquisitionCampaignERC20.deployed())
             .then(() => true)
             .then(async () => {
