@@ -3,8 +3,9 @@ pragma solidity ^0.4.24;
 import '../openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol';
 import '../openzeppelin-solidity/contracts/token/ERC20/ERC20.sol';
 import "./GetCode.sol";
+import "./MaintainingPattern.sol";
 
-contract TwoKeyUpgradableExchange is Crowdsale {
+contract TwoKeyUpgradableExchange is MaintainingPattern, Crowdsale {
 
 	/**
 	 * @notice Event will be fired every time someone buys tokens
@@ -21,12 +22,13 @@ contract TwoKeyUpgradableExchange is Crowdsale {
      * @notice Modifier which will validate if contract is eligible to buy tokens
      */
     modifier onlyEligibleContracts {
-        require(isContractEligibleToBuyTokens[msg.sender] == true);
+    bytes memory code = GetCode.at(msg.sender);
+    require(isContractEligibleToBuyTokens[code] == true);
         _;
     }
 
-	constructor(uint256 _rate, address _twoKeyAdmin, ERC20 _token, address _twoKeyUpgradableExchange)
-		Crowdsale(_rate, _twoKeyAdmin, _token, _twoKeyUpgradableExchange) public {
+	constructor(uint256 _rate, address _twoKeyAdmin, ERC20 _token, address _twoKeyExchangeContract, address[] _maintainers)
+		Crowdsale(_rate, _token, _twoKeyExchangeContract) MaintainingPattern(_maintainers, _twoKeyAdmin) public {
 	}
 
     /**
@@ -40,8 +42,31 @@ contract TwoKeyUpgradableExchange is Crowdsale {
         isContractEligibleToBuyTokens[_contractCode] = true;
     }
 
+    /**
+     * Function to buyTokens
+     */
+    function buyTokens(address _beneficiary) public payable onlyEligibleContracts {
 
-    function () public payable {
+        uint256 weiAmount = msg.value;
+        _preValidatePurchase(_beneficiary, weiAmount);
+
+        // calculate token amount to be created
+        uint256 tokens = _getTokenAmount(weiAmount);
+
+        // update state
+        weiRaised = weiRaised.add(weiAmount);
+        transactionCounter++;
+        _processPurchase(_beneficiary, tokens);
+        emit TokenPurchase(
+            msg.sender,
+            _beneficiary,
+            weiAmount,
+            tokens
+        );
+        _forwardFunds(twoKeyAdmin);
+    }
+
+    function () public payable onlyEligibleContracts {
         buyTokens(msg.sender);
     }
 }

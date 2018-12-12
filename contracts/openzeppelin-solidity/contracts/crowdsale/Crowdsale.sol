@@ -27,10 +27,6 @@ contract Crowdsale {
   address public twoKeyExchangeContract;
 
 
-  // Address where funds are collected
-  address public admin;
-
-
   // The token being sold
   ERC20 public token;
 
@@ -63,46 +59,16 @@ contract Crowdsale {
 
   /**
    * @param _rate Number of token units a buyer gets per wei
-   * @param _admin Address where collected funds will be forwarded to
    * @param _token Address of the token being sold
    */
-  constructor(uint256 _rate, address _admin, ERC20 _token, address _twoKeyExchangeContract) public {
+  constructor(uint256 _rate, ERC20 _token, address _twoKeyExchangeContract) public {
     require(_rate > 0);
-    require(_admin != address(0));
     require(_token != address(0));
 
     rate = _rate;
-    admin = _admin;
     token = _token;
     twoKeyExchangeContract = _twoKeyExchangeContract;
   }
-
-  /**
-   * @dev low level token purchase ***DO NOT OVERRIDE***
-   * @param _beneficiary Address performing the token purchase
-   */
-  function buyTokens(address _beneficiary) public payable {
-
-    uint256 weiAmount = msg.value;
-    _preValidatePurchase(_beneficiary, weiAmount);
-
-    // calculate token amount to be created
-    uint256 tokens = _getTokenAmount(weiAmount);
-
-    // update state
-    weiRaised = weiRaised.add(weiAmount);
-    transactionCounter++;
-    _processPurchase(_beneficiary, tokens);
-    emit TokenPurchase(
-        msg.sender,
-        _beneficiary,
-        weiAmount,
-        tokens
-    );
-
-    _forwardFunds();
-  }
-
 
   /**
    * @dev Validation of an incoming purchase. Use require statements to revert state when conditions are not met. Use `super` in contracts that inherit from Crowdsale to extend their validations.
@@ -195,7 +161,7 @@ contract Crowdsale {
   /**
    * @dev Determines how ETH is stored/forwarded on purchases.
    */
-  function _forwardFunds() internal {
-    admin.transfer(msg.value);
+  function _forwardFunds(address _twoKeyAdmin) internal {
+    _twoKeyAdmin.transfer(msg.value);
   }
 }
