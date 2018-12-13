@@ -81,6 +81,23 @@ contract TwoKeyCongress {
         return false;
     }
 
+    /**
+     * @notice Function which will be called only once, immediately after contract deployment
+     * @param _minutesForDebate is the number of minutes debate length
+     * @param initialMembers is the array containing addresses of initial members
+     * @paramvotingPowers is the array of unassigned integers containing voting powers respectively
+     * @dev initialMembers.length must be equal votingPowers.length
+     */
+    function setInitialParams(uint256 _minutesForDebate, address[] initialMembers, uint[] votingPowers) payable external {
+        changeVotingRules(0, _minutesForDebate);
+        self = address(this);
+        addMember(0,'',0);
+        addMember(initialMembers[0], 'Eitan', votingPowers[0]);
+        addMember(initialMembers[1], 'Kiki', votingPowers[1]);
+        initialized = true;
+        addInitialWhitelistedMethods();
+    }
+
     constructor(
         uint256 _minutesForDebate, address[] initialMembers, uint[] votingPowers) payable public {
         changeVotingRules(0, _minutesForDebate);
@@ -88,8 +105,6 @@ contract TwoKeyCongress {
         addMember(0,'',0);
         addMember(initialMembers[0], 'Eitan', votingPowers[0]);
         addMember(initialMembers[1], 'Kiki', votingPowers[1]);
-//        addMember(initialMembers[2], 'in  tcollege', votingPowers[1]);
-//        addMember(initialMembers[3], '2keyeconomy', votingPowers[1]);
         initialized = true;
         addInitialWhitelistedMethods();
     }
@@ -97,6 +112,7 @@ contract TwoKeyCongress {
 
     /// @notice Function to add initial whitelisted methods during the deployment
     /// @dev Function is internal, it can't be called outside of the contract
+    //TODO: Maybe we can hardcode this values instead of hardcoding method names, even saves us gas during the deployment
     function addInitialWhitelistedMethods() internal {
         hashAllowedMethods("addMember(address,string,uint256)");
         hashAllowedMethods("removeMember(address)");
