@@ -81,6 +81,13 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     }
 
 
+    /**
+     * @notice Contstructor of the conversion handler contract
+     * @param _tokenDistributionDate is the date of token distribution
+     * @param _maxDistributionDateShiftInDays is the maximum distribution shift in days
+     * @param _bonusTokensVestingMonths is the number of bonus token vesting months
+     * @param _bonusTokensVestingStartShiftInDaysFromDistributionDate is
+     */
     constructor(uint _tokenDistributionDate, // January 1st 2019
         uint _maxDistributionDateShiftInDays, // 180 days
         uint _bonusTokensVestingMonths, // 6 months
@@ -376,7 +383,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     function moveFromApprovedToFulfilledState(address _converter) private {
         bytes32 destination = bytes32("FULFILLED");
         moveFromStateAToStateB(_converter, destination);
-        converterToConversionState[_converster] = ConversionState.FULFILLED;
+        converterToConversionState[_converter] = ConversionState.FULFILLED;
     }
 
 
