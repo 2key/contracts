@@ -249,7 +249,6 @@ contract TwoKeyRegistry is Upgradeable {
     /// @param username is the username of the user we want to update map for
     /// @param _address is the address of the user we want to update map for
     /// @param _username_walletName is the concatenated username + '_' + walletName, since sending from trusted provider no need to validate
-    //onlyTwoKeyMaintainer
     function setWalletName(string memory username, address _address, string memory _username_walletName) public onlyTwoKeyMaintainer {
         require(_address != address(0));
         require(username2currentAddress[keccak256(abi.encodePacked(username))] == _address); // validating that username exists
@@ -306,6 +305,10 @@ contract TwoKeyRegistry is Upgradeable {
         }
     }
 
+    /**
+     * @notice Function to add plasma address to ethereum
+     * @param sig is the signature
+     */
     function addPlasma2Ethereum(bytes sig) public {
         bytes32 hash = keccak256(abi.encodePacked(msg.sender));
         require (sig.length == 65, 'bad signature length');
@@ -340,6 +343,11 @@ contract TwoKeyRegistry is Upgradeable {
         plasma2ethereum[plasma_address] = msg.sender;
     }
 
+    /**
+     * @notice Function to check if the user exists
+     * @param _userAddress is the address of the user
+     * @return true if exists otherwise false
+     */
     function checkIfUserExists(address _userAddress) external view returns (bool) {
         bytes memory tempEmptyStringTest = bytes(address2username[_userAddress]);
         if (tempEmptyStringTest.length == 0) {
