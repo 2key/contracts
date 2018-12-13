@@ -10,7 +10,6 @@ contract TwoKeyCongress is Upgradeable {
 
     bool initialized;
 
-    address self;
     // The maximum voting power containing sum of voting powers of all active members
     uint256 maxVotingPower;
     //The minimum number of voting members that must be in attendance
@@ -91,7 +90,6 @@ contract TwoKeyCongress is Upgradeable {
      */
     function setInitialParams(uint256 _minutesForDebate, address[] initialMembers, uint[] votingPowers) payable external {
         changeVotingRules(0, _minutesForDebate);
-        self = address(this);
         addMember(0,'',0);
         addMember(initialMembers[0], 'Eitan', votingPowers[0]);
         addMember(initialMembers[1], 'Kiki', votingPowers[1]);
@@ -104,22 +102,14 @@ contract TwoKeyCongress is Upgradeable {
     /// @dev Function is internal, it can't be called outside of the contract
     //TODO: Maybe we can hardcode this values instead of hardcoding method names, even saves us gas during the deployment
     function addInitialWhitelistedMethods() internal {
-        hashAllowedMethods("addMember(address,string,uint256)");
-        hashAllowedMethods("removeMember(address)");
-        hashAllowedMethods("replaceOneself(address)");
-        hashAllowedMethods("addPreviousAdmin(address)");
         hashAllowedMethods("transferByAdmins(address,uint256)");
-        hashAllowedMethods("upgradeEconomyExchangeByAdmins(address)");
         hashAllowedMethods("transferEtherByAdmins(address,uint256)");
-        hashAllowedMethods("destroy()");
-        hashAllowedMethods("addModeratorForReg(address)");
-        hashAllowedMethods("removeModeratorForReg(address)");
-        hashAllowedMethods("updateModeratorForReg(address,address)");
-        hashAllowedMethods("updateExchange(address)");
-        hashAllowedMethods("updateRegistry(address)");
-        hashAllowedMethods("updateEventSource(address)");
-        hashAllowedMethods("freezeTransfersInEconomy()");
-        hashAllowedMethods("unfreezeTransfersInEconomy()");
+        hashAllowedMethods("destroy");
+        hashAllowedMethods("addMaintainerForRegistry(address)");
+        hashAllowedMethods("twoKeyEventSourceAddMaintainer(address[])");
+        hashAllowedMethods("twoKeyEventSourceWhitelistContract(address)");
+        hashAllowedMethods("freezeTransfersInEconomy");
+        hashAllowedMethods("unfreezeTransfersInEconomy");
     }
 
 
@@ -177,7 +167,7 @@ contract TwoKeyCongress is Upgradeable {
      */
     function addMember(address targetMember, string memberName, uint _votingPower) public {
         if(initialized == true) {
-            require(msg.sender == self);
+            require(msg.sender == address(this));
         }
         uint id = memberId[targetMember];
         if (id == 0) {
@@ -198,7 +188,7 @@ contract TwoKeyCongress is Upgradeable {
      * @param targetMember ethereum address to be removed
      */
     function removeMember(address targetMember) public {
-        require(msg.sender == self);
+        require(msg.sender == address(this));
         require(memberId[targetMember] != 0);
 
         uint votingPower = getMemberVotingPower(targetMember);
@@ -220,7 +210,7 @@ contract TwoKeyCongress is Upgradeable {
      *  @dev method requires that it's called only by contract
     */
     function addNewAllowedBytecode(bytes32 functionSignature) public {
-        require(msg.sender == self);
+        require(msg.sender == address(this));
         allowedMethodSignatures.push(bytes32(functionSignature));
     }
     /**
