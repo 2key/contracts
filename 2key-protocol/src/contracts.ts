@@ -5,14 +5,14 @@ export default { Maintainers:
   NetworkHashes:
    { '8086':
       { hash:
-         'beb55ef1eed25eaf313d6fa5ff682936922622ea9d09369830b99b93e7160e15',
+         'a7e8ce0a0ed82a0a7ba4e5117f13ea45856bbc1267cf867b0ec971ccf65d9e04',
         humanHash:
-         '  and    and  streets then i   i go nights  certain etherized   let nights  deserted     sky let against' },
+         '   let let  go let when   evening when spread  restaurants  i  is ask   when let  it   and  you' },
      '98052':
       { hash:
-         'a784ac4d7982a3f54c91d538ef32ce91b5f870755bbf38179d70d049d5ee78c2',
+         'd35cc1b991c0de8e80b8383b3afb451bef572326fd88492a0b311bd5b166891d',
         humanHash:
-         '   you when    you   then  muttering     what room and  then like  what  you   when ' } },
+         ' and         then then then  restaurants us  to upon certain   you go let streets us   not  us' } },
   Call:
    { networks:
       { '8086':
@@ -24,9 +24,9 @@ export default { Maintainers:
         '98052':
          { events: {},
            links: {},
-           address: '0x172db1bd36358ecf2f518bcd1cffccfccfa84896',
+           address: '0x925a6a6b3ff4f50bc9f9139eb237497af09226ad',
            transactionHash:
-            '0x8a36aaca1e0ad6950702ba943b8f80862899af63b990a29d9241647511e0e1bc' } },
+            '0x03690cb8323dcca3fc6363e66ef67adf6a1cec6763608e134be15e4019a03adf' } },
      abi:
       [ { constant: true,
           inputs:
@@ -893,7 +893,7 @@ export default { Maintainers:
            links: {},
            address: '0x835aaf6ea6b04892915a8299110652e7cc897a4e',
            transactionHash:
-            '0x58af737a2d9b9c6f80a75618b4dfdf172a0a61dc58b7210ec39489d5e4d55db1' } },
+            '0x4ca61e25ff0d613a4042469accd718875e7bae6520ce6b7ccb7327003b1c7ddd' } },
      abi:
       [ { constant: true,
           inputs: [],
@@ -1090,11 +1090,61 @@ export default { Maintainers:
   TwoKeyCongress:
    { networks:
       { '8086':
-         { events: {},
+         { events:
+            { '0xa419615bc8fda4c87663805ee2a3597a6d71c1d476911d9892f340d965bc7bf1':
+               { anonymous: false,
+                 inputs:
+                  [ { indexed: false, name: 'sender', type: 'address' },
+                    { indexed: false, name: 'amount', type: 'uint256' } ],
+                 name: 'ReceivedEther',
+                 type: 'event' },
+              '0x646fec02522b41e7125cfc859a64fd4f4cefd5dc3b6237ca0abe251ded1fa881':
+               { anonymous: false,
+                 inputs:
+                  [ { indexed: false, name: 'proposalID', type: 'uint256' },
+                    { indexed: false, name: 'recipient', type: 'address' },
+                    { indexed: false, name: 'amount', type: 'uint256' },
+                    { indexed: false, name: 'description', type: 'string' } ],
+                 name: 'ProposalAdded',
+                 type: 'event' },
+              '0xc34f869b7ff431b034b7b9aea9822dac189a685e0b015c7d1be3add3f89128e8':
+               { anonymous: false,
+                 inputs:
+                  [ { indexed: false, name: 'proposalID', type: 'uint256' },
+                    { indexed: false, name: 'position', type: 'bool' },
+                    { indexed: false, name: 'voter', type: 'address' },
+                    { indexed: false, name: 'justification', type: 'string' } ],
+                 name: 'Voted',
+                 type: 'event' },
+              '0xd220b7272a8b6d0d7d6bcdace67b936a8f175e6d5c1b3ee438b72256b32ab3af':
+               { anonymous: false,
+                 inputs:
+                  [ { indexed: false, name: 'proposalID', type: 'uint256' },
+                    { indexed: false, name: 'result', type: 'int256' },
+                    { indexed: false, name: 'quorum', type: 'uint256' },
+                    { indexed: false, name: 'active', type: 'bool' } ],
+                 name: 'ProposalTallied',
+                 type: 'event' },
+              '0x27b022af4a8347100c7a041ce5ccf8e14d644ff05de696315196faae8cd50c9b':
+               { anonymous: false,
+                 inputs:
+                  [ { indexed: false, name: 'member', type: 'address' },
+                    { indexed: false, name: 'isMember', type: 'bool' } ],
+                 name: 'MembershipChanged',
+                 type: 'event' },
+              '0x4e5482c936e2afb137e294316762dfae82eecfc2c31ab15d926766d513570ad7':
+               { anonymous: false,
+                 inputs:
+                  [ { indexed: false, name: '_newMinimumQuorum', type: 'uint256' },
+                    { indexed: false,
+                      name: '_newDebatingPeriodInMinutes',
+                      type: 'uint256' } ],
+                 name: 'ChangeOfRules',
+                 type: 'event' } },
            links: {},
            address: '0x14b7475398d9e2f1b4e3682bebdc1d2d3b27027b',
            transactionHash:
-            '0x8c941a4c7cc453c4e60b9ba816cc8954d6795c8e4f95155c6feee337577d6140' } },
+            '0x622004574b16c5767d6eae0cacb42149160ad48f43ec8091d157ca09811c285c' } },
      abi:
       [ { constant: true,
           inputs: [ { name: '', type: 'uint256' } ],
@@ -1128,6 +1178,13 @@ export default { Maintainers:
           stateMutability: 'view',
           type: 'function' },
         { constant: true,
+          inputs: [],
+          name: 'implementation',
+          outputs: [ { name: '', type: 'address' } ],
+          payable: false,
+          stateMutability: 'view',
+          type: 'function' },
+        { constant: true,
           inputs: [ { name: '', type: 'uint256' } ],
           name: 'members',
           outputs:
@@ -1152,13 +1209,13 @@ export default { Maintainers:
           payable: false,
           stateMutability: 'view',
           type: 'function' },
-        { inputs:
-           [ { name: '_minutesForDebate', type: 'uint256' },
-             { name: 'initialMembers', type: 'address[]' },
-             { name: 'votingPowers', type: 'uint256[]' } ],
+        { constant: false,
+          inputs: [ { name: 'sender', type: 'address' } ],
+          name: 'initialize',
+          outputs: [],
           payable: true,
           stateMutability: 'payable',
-          type: 'constructor' },
+          type: 'function' },
         { payable: true, stateMutability: 'payable', type: 'fallback' },
         { anonymous: false,
           inputs:
@@ -1210,6 +1267,16 @@ export default { Maintainers:
           outputs: [ { name: '', type: 'bool' } ],
           payable: false,
           stateMutability: 'view',
+          type: 'function' },
+        { constant: false,
+          inputs:
+           [ { name: '_minutesForDebate', type: 'uint256' },
+             { name: 'initialMembers', type: 'address[]' },
+             { name: 'votingPowers', type: 'uint256[]' } ],
+          name: 'setInitialParams',
+          outputs: [],
+          payable: true,
+          stateMutability: 'payable',
           type: 'function' },
         { constant: true,
           inputs:
@@ -1789,7 +1856,7 @@ export default { Maintainers:
            links: {},
            address: '0xa2ce3ec5cd60f7e2b6f7ac96767bcf3b7d0edf6e',
            transactionHash:
-            '0x01a3df8347bbe847b97443cfb2d41a9e2bf808e9864dc210b959212da4805baf',
+            '0x964e1cbe569e5f7981032298da361aeef5905f87b4ab924a24292e3eedf46c50',
            Proxy: '0xd56996f0af4d1b3320a1c9a9e14031c4a2e0b123',
            Version: '1.0',
            maintainer_address: '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7' } },
@@ -2037,7 +2104,7 @@ export default { Maintainers:
            links: {},
            address: '0x5263b6d2b58419dada5312a46be476551c29fd8a',
            transactionHash:
-            '0x4d99d42dcf3247daa6d12329f299780f27576a8c36e75dc920707ede80b7ff7b' } },
+            '0x4807ed6cdcd3245e3da42547da34be8075dbfaf2d6d0f4a9cbeadda88cbd70df' } },
      abi:
       [ { constant: true,
           inputs: [],
@@ -2273,10 +2340,10 @@ export default { Maintainers:
    { networks:
       { '98052':
          { events: {},
-           links: { Call: '0x172db1bd36358ecf2f518bcd1cffccfccfa84896' },
-           address: '0x624684709cf45e750d7afbef774496e82cb4eb6f',
+           links: { Call: '0x925a6a6b3ff4f50bc9f9139eb237497af09226ad' },
+           address: '0x78854ae4c9dc8b63bc48c61c317bb43593988222',
            transactionHash:
-            '0xea3f33b3f7ff880d2a9dd891c926f06e9ae05382dab8f6ae3fbe5d4d14c3bda2' } },
+            '0xa5b8a6260a48beb9889f478c251451dc951c41f919838fc837a0006551af7887' } },
      abi:
       [ { constant: true,
           inputs:
@@ -2409,7 +2476,7 @@ export default { Maintainers:
            links: {},
            address: '0x9993da88b6721bc0844e5c5b1ea02d25c38b2c12',
            transactionHash:
-            '0x8141a0a4e5c360571b6e5d9aca79fc1550e9513fdaeecae38b60f7bdca6c39e6',
+            '0xe24a48a0370785dce0d69bd86db8b990071917733f30ca6cf3e7522cf8dd7cac',
            Proxy: '0x77930db6304cc301aa0a36d5e28cabd6e565c316',
            Version: '1.0',
            maintainer_address: '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7' } },

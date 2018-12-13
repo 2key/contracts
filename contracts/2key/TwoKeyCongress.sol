@@ -1,8 +1,9 @@
 pragma solidity ^0.4.24;
 
 import '../openzeppelin-solidity/contracts/math/SafeMath.sol';
+import "./Upgradeable.sol";
 
-contract TwoKeyCongress {
+contract TwoKeyCongress is Upgradeable {
 
     event ReceivedEther(address sender, uint amount);
     using SafeMath for uint;
@@ -85,21 +86,10 @@ contract TwoKeyCongress {
      * @notice Function which will be called only once, immediately after contract deployment
      * @param _minutesForDebate is the number of minutes debate length
      * @param initialMembers is the array containing addresses of initial members
-     * @paramvotingPowers is the array of unassigned integers containing voting powers respectively
+     * @param votingPowers is the array of unassigned integers containing voting powers respectively
      * @dev initialMembers.length must be equal votingPowers.length
      */
     function setInitialParams(uint256 _minutesForDebate, address[] initialMembers, uint[] votingPowers) payable external {
-        changeVotingRules(0, _minutesForDebate);
-        self = address(this);
-        addMember(0,'',0);
-        addMember(initialMembers[0], 'Eitan', votingPowers[0]);
-        addMember(initialMembers[1], 'Kiki', votingPowers[1]);
-        initialized = true;
-        addInitialWhitelistedMethods();
-    }
-
-    constructor(
-        uint256 _minutesForDebate, address[] initialMembers, uint[] votingPowers) payable public {
         changeVotingRules(0, _minutesForDebate);
         self = address(this);
         addMember(0,'',0);

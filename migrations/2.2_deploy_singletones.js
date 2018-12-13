@@ -39,7 +39,6 @@ module.exports = function deploy(deployer) {
         fileObject = JSON.parse(fs.readFileSync(proxyFile, { encoding: 'utf8' }));
     }
 
-
     /**
      * Define proxyAddress variables for the contracts
      */
@@ -47,6 +46,7 @@ module.exports = function deploy(deployer) {
     let proxyAddressTwoKeyEventSource;
     let proxyAddressTwoKeyExchange;
     let proxyAddressTwoKeyAdmin;
+    let proxyAddressTwoKeyCongress;
 
 
     /**
@@ -176,7 +176,7 @@ module.exports = function deploy(deployer) {
 
                 await new Promise(async(resolve,reject) => {
                     try {
-                        console.log('... Adding TwoKeyAdming contract to proxy registry as valid implementation');
+                        console.log('... Adding TwoKeyAdmin contract to proxy registry as valid implementation');
                         /**
                          * Adding TwoKeyAdmin to the registry, deploying 1st proxy for that 1.0 version of TwoKeyAdmin
                          */
@@ -196,7 +196,6 @@ module.exports = function deploy(deployer) {
                         // fileObject['TwoKeyAdmin'] = twoKeyAdmin;
                         proxyAddressTwoKeyAdmin = proxy;
 
-                        fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
                         resolve(proxy);
 
                     } catch (e) {
@@ -204,6 +203,33 @@ module.exports = function deploy(deployer) {
                     }
                 });
 
+                await new Promise(async(resolve,reject) => {
+                    try {
+                        console.log('... Adding TwoKeyCongress contract to proxy registry as valid implementation');
+                        /**
+                         * Adding TwoKeyCongress to the registry, deploying 1st proxy for that 1.0 version of TwoKeyCongress
+                         */
+                        let txHash = await registry.addVersion("TwoKeyCongress", "1.0", TwoKeyCongress.address);
+                        let { logs } = await registry.createProxy("TwoKeyCongress", "1.0");
+                        let { proxy } = logs.find(l => l.event === 'ProxyCreated').args;
+                        console.log('Proxy address for the TwoKeyCongress contract is : ' + proxy);
+
+                        const twoKeyCongress = fileObject.TwoKeyCongress || {};
+                        twoKeyCongress[networkId] = {
+                            'address' : TwoKeyCongress.address,
+                            'Proxy' : proxy,
+                            'Version' : "1.0",
+                            maintainer_address: maintainerAddress
+                        };
+
+                        // fileObject['TwoKeyCongress'] = twoKeyCongress;
+                        proxyAddressTwoKeyCongress = proxy;
+                        fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
+                        resolve(proxy);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
 
                 await new Promise(async (resolve, reject) => {
                     console.log('... Setting Initial params in all singletone proxy contracts');
@@ -230,6 +256,15 @@ module.exports = function deploy(deployer) {
                             proxyAddressTwoKeyRegistry,
                             proxyAddressTwoKeyEventSource
                         );
+
+                        //TODO: Change to proxy addresses once it's all ready
+                        await TwoKeyCongress.at(TwoKeyCongress.address).setInitialParams
+                        (
+                            50,
+                            initialCongressMembers,
+                            votingPowers
+                        );
+
                         let txHash = await TwoKeyRegistry.at(proxyAddressTwoKeyRegistry).setInitialParams
                         (
                             proxyAddressTwoKeyEventSource,
