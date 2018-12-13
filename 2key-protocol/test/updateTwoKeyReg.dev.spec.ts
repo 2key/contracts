@@ -101,6 +101,7 @@ describe('TwoKeyProtocol', () => {
             console.log(initialUsernames[i], hash);
             await twoKeyProtocol.Utils.getTransactionReceiptMined(hash);
         }
+        console.log('0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7:', await twoKeyProtocol.Registry.getUserData('0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7'));
         // let hash = await twoKeyProtocol.Registry.addName(initialUsernames[0],initialAddresses[0],initialFullNames[0],initialEmails[0], from);
         // await twoKeyProtocol.Utils.getTransactionReceiptMined(hash);
         // let hash1 = await twoKeyProtocol.Registry.addName(initialUsernames[1],initialAddresses[1],initialFullNames[1],initialEmails[1], from);

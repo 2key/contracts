@@ -1,6 +1,6 @@
 import {ITwoKeyBase, ITwoKeyHelpers, ITwoKeyUtils} from '../interfaces';
 import {promisify} from '../utils'
-import {ITwoKeyReg} from "./interfaces";
+import {ITwoKeyReg, IUserData} from "./interfaces";
 
 export default class TwoKeyReg implements ITwoKeyReg {
     private readonly base: ITwoKeyBase;
@@ -74,6 +74,21 @@ export default class TwoKeyReg implements ITwoKeyReg {
                 const handle = this.base.web3.sha3(username);
                 let isRegistered = await promisify(this.base.twoKeyReg.username2currentAddress,[handle]);
                 resolve(isRegistered);
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
+
+    public getUserData(address: string) : Promise<IUserData> {
+        return new Promise(async(resolve,reject) => {
+            try {
+                const [username, fullname, email] = await promisify(this.base.twoKeyReg.getUserData, [address]);
+                resolve({
+                    username,
+                    fullname,
+                    email,
+                });
             } catch (e) {
                 reject(e);
             }
