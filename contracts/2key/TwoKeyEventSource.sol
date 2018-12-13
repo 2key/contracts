@@ -7,7 +7,27 @@ import "./Upgradeable.sol";
 
 contract TwoKeyEventSource is Upgradeable, TwoKeyTypes {
 
-    /// Events
+    /**
+     * Address of TwoKeyRegistry contract
+     */
+    address twoKeyRegistry;
+
+    /**
+     * Mapping which will map contract code to true/false depending if that code is eligible to emit events
+     */
+    mapping(bytes => bool) canEmit;
+
+    /**
+     * Mapping which will store maintainers who are eligible to update contract state
+     */
+    mapping(address => bool) public isMaintainer;
+
+    /**
+     * Address of TwoKeyAdmin contract, which will be the only one eligible to manipulate the maintainers
+     */
+    address public twoKeyAdmin;
+
+
     event Created(
         address indexed _campaign,
         address indexed _owner,
@@ -26,35 +46,15 @@ contract TwoKeyEventSource is Upgradeable, TwoKeyTypes {
         uint256 _amount
     );
 
-//    event Escrow(
-//        address indexed _campaign,
-//        address indexed _converter,
-//        string indexed assetName,
-//        address _childContractID,
-//        uint256 _indexOrAmount,
-//        CampaignType _type
-//    );
-
     event Rewarded(
         address indexed _campaign,
         address indexed _to,
         uint256 _amount
     );
 
-//    event Fulfilled(
-//        address indexed _campaign,
-//        address indexed _converter,
-//        string indexed assetName,
-//        address _childContractID,
-//        uint256 _indexOrAmount,
-//        CampaignType _type
-//    );
-
     event Cancelled(
         address indexed _campaign,
         address indexed _converter,
-        string indexed assetName,
-        address _childContractID,
         uint256 _indexOrAmount,
         CampaignType _type
     );
@@ -80,181 +80,189 @@ contract TwoKeyEventSource is Upgradeable, TwoKeyTypes {
         uint value
     );
 
-    // TwoKeyAdmin twoKeyAdmin;
-    address public twoKeyAdmin; //included getter
-    /// Interface representing TwoKeyReg contract (Reducing gas usage that's why interface instead of contract instance)
-    ITwoKeyReg interfaceTwoKeyReg;
-    /// Mapping contract bytecode to boolean if is allowed to emit an event
-    mapping(bytes => bool) canEmit;
-    /// Mapping contract bytecode to enumerator CampaignType.
-    mapping(bytes => CampaignType) codeToType;
-    /// Mapping an address to boolean if allowed to modify
-    mapping(address => bool) public authorizedSubadmins;
 
-    /// @notice Modifier which allows only admin to call a function - can be easily modified if there is going to be more admins
-    modifier onlyAdmin {
+    /**
+     * @notice Modifier to restrict calling the method to anyone but maintainers
+     */
+    modifier onlyMaintainer {
+        require(isMaintainer[msg.sender] == true);
+        _;
+    }
+
+    /**
+     * @notice Modifier to restrict calling the method to anyone but twoKeyAdmin
+     */
+    modifier onlyTwoKeyAdmin {
         require(msg.sender == address(twoKeyAdmin));
         _;
     }
 
-    /// @notice Modifier which allows all modifiers to update canEmit mapping - ever
-    modifier onlyAuthorizedSubadmins {
-        require(authorizedSubadmins[msg.sender] == true || msg.sender == address(twoKeyAdmin));
+    /**
+     * @notice Modifier to restrict calling the method to anyone but authorized people
+     */
+    modifier onlyMaintainerOrTwoKeyAdmin {
+        require(isMaintainer[msg.sender] == true || msg.sender == address(twoKeyAdmin));
         _;
     }
 
-    /// @notice Modifier which will only allow allowed contracts to emit an event
+    /**
+     * Modifier which will allow only specific contracts to emit events
+     */
     modifier onlyAllowedContracts {
         bytes memory code = GetCode.at(msg.sender);
         require(canEmit[code] == true,'Contract code is not supported to emit the events');
         _;
     }
 
-    function setInitialParams(address _twoKeyAdminAddress) external {
+    /**
+     * @notice Function to set initial params in the contract
+     * @param _twoKeyAdmin is the address of twoKeyAdmin contract
+     * @param _maintainers is the array containing addresses of maintainers
+     * @param _twoKeyRegistry is the address of twoKeyRegistry contract
+     */
+    function setInitialParams(address _twoKeyAdmin, address [] _maintainers, address _twoKeyRegistry) external {
         require(twoKeyAdmin == address(0));
-        twoKeyAdmin = _twoKeyAdminAddress;
-        authorizedSubadmins[msg.sender] = true;
+        twoKeyAdmin = _twoKeyAdmin;
+        twoKeyRegistry = _twoKeyRegistry;
+        isMaintainer[msg.sender] = true; //also the deployer will be authorized maintainer
+        for(uint i=0; i<_maintainers.length; i++) {
+            isMaintainer[_maintainers[i]] = true;
+        }
     }
 
 
-    function addTwoKeyReg(address _twoKeyReg) public onlyAuthorizedSubadmins {
-        interfaceTwoKeyReg = ITwoKeyReg(_twoKeyReg);
-    }
-
-    /// @notice function where admin or any authorized person (will be added if needed) can add more contracts to allow them call methods
-    /// @param _contractAddress is actually the address of contract we'd like to allow
-    /// @dev We first fetch bytes32 contract code and then update our mapping
-    /// @dev only admin can call this or an authorized person
-    /// onlyAuthorizedSubadmins
-    function addContract(address _contractAddress) public onlyAuthorizedSubadmins {
+    /**
+     * @notice function where admin or any maintainer can add more contracts to allow them call methods
+     * @param _contractAddress is actually the address of contract we'd like to allow
+     * @dev We first fetch bytes contract code and then update our mapping
+     * @dev only admin can call this or an authorized person
+     */
+    function addContract(address _contractAddress) external onlyMaintainerOrTwoKeyAdmin {
         require(_contractAddress != address(0));
         bytes memory _contractCode = GetCode.at(_contractAddress);
         canEmit[_contractCode] = true;
     }
 
 
-    /// @notice function where admin or any authorized person (will be added if needed) can remove contract (disable permissions to emit Events)
-    /// @param _contractAddress is actually the address of contract we'd like to disable
-    /// @dev We first fetch bytes32 contract code and then update our mapping
-    /// @dev only admin can call this or an authorized person
-    function removeContract(address _contractAddress) public onlyAuthorizedSubadmins {
+    /**
+     * @notice function where admin or any maintainer can remove contract from whitelist
+     * @param _contractAddress is actually the address of contract we'd like to disallow
+     * @dev We first fetch bytes contract code and then update our mapping
+     * @dev only admin can call this or an authorized person
+     */
+    function removeContract(address _contractAddress) external onlyMaintainerOrTwoKeyAdmin {
         require(_contractAddress != address(0));
         bytes memory _contractCode = GetCode.at(_contractAddress);
         canEmit[_contractCode] = false;
     }
 
-
-    /// @notice Function where an admin can authorize any other person to modify allowed contracts
-    /// @param _newAddress is the address of new modifier contract / account
-    /// @dev if only contract can be modifier then we'll add one more validation step
-    function addAuthorizedAddress(address _newAddress) public {
-        require(_newAddress != address(0));
-        authorizedSubadmins[_newAddress] = true;
+    /**
+    * @notice Function which can add new maintainers, in general it's array because this supports adding multiple addresses in 1 trnx
+    * @dev only twoKeyAdmin contract is eligible to mutate state of maintainers
+    * @param _maintainers is the array of maintainer addresses
+    */
+    function addMaintainers(address [] _maintainers) external onlyTwoKeyAdmin {
+        for(uint i=0; i<_maintainers.length; i++) {
+            isMaintainer[_maintainers[i]] = true;
+        }
     }
 
-
-    /// @notice Function to remove authorization from an modifier
-    /// @param _authorizedAddress is the address of modifier
-    /// @dev checking if that address is set to true before since we'll spend 21k gas if it's already false to override that value
-    function removeAuthorizedAddress(address _authorizedAddress) public onlyAdmin {
-        require(_authorizedAddress != address(0));
-        require(authorizedSubadmins[_authorizedAddress] == true);
-
-        authorizedSubadmins[_authorizedAddress] = false;
+    /**
+     * @notice Function which can remove some maintainers, in general it's array because this supports adding multiple addresses in 1 trnx
+     * @dev only twoKeyAdmin contract is eligible to mutate state of maintainers
+     * @param _maintainers is the array of maintainer addresses
+     */
+    function removeMaintainers(address [] _maintainers) external onlyTwoKeyAdmin {
+        for(uint i=0; i<_maintainers.length; i++) {
+            isMaintainer[_maintainers[i]] = false;
+        }
     }
 
-
-    /// @notice Function to map contract code to type of campaign
-    /// @dev is contract required to be allowed to emit to even exist in mapping codeToType
-    /// @param _contractCode is code od contract
-    /// @param _campaignType is enumerator representing type of campaign
-    function addCampaignType(bytes _contractCode, CampaignType _campaignType) public {
-        require(canEmit[_contractCode] == true); //Check if this validation is needed
-        codeToType[_contractCode] = _campaignType;
-    }
-
-
-    /// @notice Function where admin can be changed
-    /// @param _newAdminAddress is the address of new admin
-    /// @dev think about some security layer here
-    function changeAdmin(address _newAdminAddress) public onlyAdmin {
-        twoKeyAdmin = _newAdminAddress;
-    }
-
-
-    function checkCanEmit(bytes _contractCode) public view returns (bool) {
-        return canEmit[_contractCode];
-    }
-
-
-    /// @dev Only allowed contracts can call this function ---> means can emit events
-    /// This user will be contractor
-    /// can't do any validation by contract code because at the time of the execution bytecode is not yet available
-    function created(address _campaign, address _owner, address _moderator) public {
-        interfaceTwoKeyReg.addWhereContractor(_owner, _campaign);
-        interfaceTwoKeyReg.addWhereModerator(_moderator, _campaign);
+    /**
+     * @notice Function to emit created event every time campaign is created
+     * @param _campaign is the address of the deployed campaign
+     * @param _owner is the contractor address of the campaign
+     * @param _moderator is the address of the moderator in campaign
+     * @dev this function updates values in TwoKeyRegistry contract
+     */
+    function created(address _campaign, address _owner, address _moderator) external {
+        //TODO: Add validation layer for this function
+        ITwoKeyReg(twoKeyRegistry).addWhereContractor(_owner, _campaign);
+        ITwoKeyReg(twoKeyRegistry).addWhereModerator(_moderator, _campaign);
         emit Created(_campaign, _owner, _moderator);
     }
 
-
-    /// @dev Only allowed contracts can call this function ---> means can emit events
-    /// This user will be refferer
-    /// onlyAllowedContracts
-    function joined(address _campaign, address _from, address _to) public onlyAllowedContracts {
-        interfaceTwoKeyReg.addWhereReferrer(_campaign, _from);
+    /**
+     * @notice Function to emit created event every time someone has joined to campaign
+     * @param _campaign is the address of the deployed campaign
+     * @param _from is the address of the referrer
+     * @param _to is the address of person who has joined
+     * @dev this function updates values in TwoKeyRegistry contract
+     */
+    function joined(address _campaign, address _from, address _to) external onlyAllowedContracts {
+        ITwoKeyReg(twoKeyRegistry).addWhereReferrer(_campaign, _from);
     	emit Joined(_campaign, _from, _to);
     }
 
-    function converted(address _campaign, address _converter, uint256 _amountETHWei) public onlyAllowedContracts {
-        interfaceTwoKeyReg.addWhereConverter(_converter, _campaign);
+    /**
+     * @notice Function to emit created event every time conversion happened
+     * @param _campaign is the address of the deployed campaign
+     * @param _converter is the converter address
+     * @param _amountETHWei is the conversion amount
+     * @dev this function updates values in TwoKeyRegistry contract
+     */
+    function converted(address _campaign, address _converter, uint256 _amountETHWei) external onlyAllowedContracts {
+        ITwoKeyReg(twoKeyRegistry).addWhereConverter(_converter, _campaign);
         emit Converted(_campaign, _converter, _amountETHWei);
     }
 
-
-    /// @dev Only allowed contracts can call this function ---> means can emit events
-    //onlyAllowedContracts
-//    function escrow(address _campaign, address _converter, string _assetName, address _childContractID, uint256 _indexOrAmount, CampaignType _type) public {
-//    	emit Escrow(_campaign, _converter, _assetName, _childContractID, _indexOrAmount, _type);
-//    }
-
-
-    /// @dev Only allowed contracts can call this function ---> means can emit events
-    // onlyAllowedContracts
-    function rewarded(address _campaign, address _to, uint256 _amount) public onlyAllowedContracts {
+    /**
+     * @notice Function to emit created event every time reward happened
+     * @param _campaign is the address of the deployed campaign
+     * @param _to is the reward receiver
+     * @param _amount is the reward amount
+     */
+    function rewarded(address _campaign, address _to, uint256 _amount) external onlyAllowedContracts {
     	emit Rewarded(_campaign, _to, _amount);
 	}
 
-
-    /// @dev Only allowed contracts can call this function ---> means can emit events
-    //onlyAllowedContracts
-//	function fulfilled(address  _campaign, address _converter, string _assetName, address _childContractID, uint256 _indexOrAmount, CampaignType _type) public  {
-//		emit Fulfilled(_campaign, _converter, _assetName, _childContractID, _indexOrAmount, _type);
-//	}
-
-
-    /// @dev Only allowed contracts can call this function ---> means can emit events
-    //onlyAllowedContracts
-	function cancelled(address  _campaign, address _converter, string _assetName, address _childContractID, uint256 _indexOrAmount, CampaignType _type) public {
-		emit Cancelled(_campaign, _converter, _assetName, _childContractID, _indexOrAmount, _type);
+    /**
+     * @notice Function to emit created event every time campaign is cancelled
+     * @param _campaign is the address of the cancelled campaign
+     * @param _converter is the address of the converter
+     * @param _indexOrAmount is the amount of campaign
+     * @param _type is the campaign type
+     */
+	function cancelled(address  _campaign, address _converter, uint256 _indexOrAmount, CampaignType _type) external onlyAllowedContracts{
+		emit Cancelled(_campaign, _converter, _indexOrAmount, _type);
 	}
 
-
-    /// @dev Only allowed contracts can call this function - means can emit events
-    ///onlyAllowedContracts
-    function updatedPublicMetaHash(uint timestamp, string value) public {
+    /**
+     * @notice Function which will emit updated public meta hash event
+     * @param timestamp is the moment of execution
+     * @param value is the new value of public meta hash (in this case it's ipfs hash bytes32)
+     */
+    function updatedPublicMetaHash(uint timestamp, string value) external onlyAllowedContracts {
         emit UpdatedPublicMetaHash(timestamp, value);
     }
 
-
-    /// @dev Only allowed contracts can call this function - means can emit events
-    // onlyAllowedContracts
-    function updatedData(uint timestamp, uint value, string action) public onlyAllowedContracts {
+    /**
+     * @notice Function which will emit updated data event
+     * @param timestamp is the moment of execution
+     * @param value is the new value
+     * @param action is the string describing action what was updated exactly
+     */
+    function updatedData(uint timestamp, uint value, string action) external onlyAllowedContracts {
         emit UpdatedData(timestamp, value, action);
     }
 
-    // @dev function for testing purposes
-    function isAddressWhitelistedToEmitEvents(address _whitelisted) public view returns (bool) {
-        bytes memory code = GetCode.at(_whitelisted);
+    /**
+     * @notice Function to check if the contract deployed at passed address is eligible to emit events through this contract
+     * @param _contractAddress is the address of contract we're checking
+     * @return true if eligible otherwise will return false
+     */
+    function isAddressWhitelistedToEmitEvents(address _contractAddress) external view returns (bool) {
+        bytes memory code = GetCode.at(_contractAddress);
         return canEmit[code];
     }
 

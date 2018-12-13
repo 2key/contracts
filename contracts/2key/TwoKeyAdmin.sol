@@ -88,16 +88,16 @@ contract TwoKeyAdmin is Upgradeable {
 	}
 
     /// @notice Function to whitelist address as an authorized user for twoKeyEventSource contract
-	/// @param _address is address of user
-	function twoKeyEventSourceAddAuthorizedAddress(address _address) public {
-		require(_address != address(0));
-		twoKeyEventSource.addAuthorizedAddress(_address);
+	/// @param _maintainers is array of addresses of maintainers
+	function twoKeyEventSourceAddMaintainer(address [] _maintainers) public onlyTwoKeyCongress{
+		require(_maintainers.length > 0);
+		twoKeyEventSource.addMaintainers(_maintainers);
 	}
 
     /// @notice Function to whitelist contract address for Event Source contract
 	/// @dev We're requiring contract address different from address 0 as it is required to be deployed before calling this method
 	/// @param _contractAddress is address of a contract
-	function twoKeyEventSourceAddAuthorizedContracts(address _contractAddress) public {
+	function twoKeyEventSourceWhitelistContract(address _contractAddress) public onlyTwoKeyCongress {
 		require(_contractAddress != address(0));
 		twoKeyEventSource.addContract(_contractAddress);
 	}

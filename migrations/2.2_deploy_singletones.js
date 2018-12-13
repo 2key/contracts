@@ -239,7 +239,9 @@ module.exports = function deploy(deployer) {
                          */
                         await EventSource.at(proxyAddressTwoKeyEventSource).setInitialParams
                         (
-                            TwoKeyAdmin.address
+                            TwoKeyAdmin.address,
+                            [maintainerAddress],
+                            proxyAddressTwoKeyRegistry
                         );
                         //TODO: revert back to proxy address of exchange once it's ready
                         // await TwoKeyExchangeContract.at(TwoKeyExchangeContract.address).setInitialParams
@@ -276,18 +278,6 @@ module.exports = function deploy(deployer) {
                         reject(e);
                     }
                 })
-            }))
-            .then(() => EventSource.deployed().then(async () => {
-                console.log("... Adding TwoKeyRegistry to EventSource");
-                await new Promise(async (resolve, reject) => {
-                    try {
-                        let txHash = await EventSource.at(proxyAddressTwoKeyEventSource).addTwoKeyReg(proxyAddressTwoKeyRegistry).then(() => true);
-                        resolve(txHash);
-                    } catch (e) {
-                        reject(e);
-                    }
-                });
-                console.log("Added TwoKeyReg: " + proxyAddressTwoKeyRegistry + "  to EventSource : " + proxyAddressTwoKeyEventSource + "!")
             }))
             .then(async () => {
                 await new Promise(async (resolve, reject) => {
