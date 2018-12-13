@@ -33,6 +33,14 @@ contract MaintainingPattern {
         _;
     }
 
+    /**
+    * @notice Modifier to restrict calling the method to anyone but authorized people
+    */
+    modifier onlyMaintainerOrTwoKeyAdmin {
+        require(isMaintainer[msg.sender] == true || msg.sender == address(twoKeyAdmin));
+        _;
+    }
+
 
     constructor(address [] _maintainers, address _twoKeyAdmin) public {
         twoKeyAdmin = _twoKeyAdmin;
