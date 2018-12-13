@@ -858,6 +858,11 @@ describe('TwoKeyProtocol', () => {
         await twoKeyProtocol.Utils.getTransactionReceiptMined(hash);
     }).timeout(30000);
 
+    it('==> should add acquisition campaign to be eligible to buy tokens from Upgradable exchange', async() => {
+        const txHash: string = await twoKeyProtocol.UpgradableExchange.addContractToBeEligibleToGetTokensFromExchange(campaignAddress,from);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        console.log('Added');
+    }).timeout(30000);
 
     it('==> should print moderator address', async() => {
         const moderatorAddress: string = await twoKeyProtocol.AcquisitionCampaign.getModeratorAddress(campaignAddress,from);

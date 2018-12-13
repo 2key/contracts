@@ -164,7 +164,7 @@ module.exports = function deploy(deployer) {
                 })
             }))
             //TODO: revert back to proxy address of exchange once it's ready
-            .then(() => deployer.deploy(TwoKeyUpgradableExchange, 95, TwoKeyAdmin.address, TwoKeyEconomy.address, TwoKeyExchangeContract.address))
+            .then(() => deployer.deploy(TwoKeyUpgradableExchange, 95, TwoKeyAdmin.address, TwoKeyEconomy.address, TwoKeyExchangeContract.address, [maintainerAddress]))
             .then(() => TwoKeyUpgradableExchange.deployed())
             .then(() => EventSource.deployed().then(async () => {
                 console.log("... Adding TwoKeyRegistry to EventSource");

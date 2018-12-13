@@ -100,4 +100,21 @@ export default class UpgradableExchange implements IUpgradableExchange {
         })
     }
 
+    /**
+     *
+     * @param {string} from
+     * @param {string} contractAddress
+     * @returns {Promise<string>}
+     */
+    public addContractToBeEligibleToGetTokensFromExchange(contractAddress: string, from: string) : Promise<string> {
+        return new Promise<string>(async(resolve,reject) => {
+            try {
+                const addContractHash = await promisify(this.base.twoKeyUpgradableExchange.addContractToBeEligibleToBuyTokens,[contractAddress,{from}]);
+                resolve(addContractHash);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
 }

@@ -4,4 +4,5 @@ export interface IUpgradableExchange {
     getAdmin: (from: string) => Promise<string>,
     getWeiRaised: (from: string) => Promise<number>,
     getTransactionCount: (from: string) => Promise<number>,
+    addContractToBeEligibleToGetTokensFromExchange: (contractAddress: string, from: string) => Promise<string>
 }
