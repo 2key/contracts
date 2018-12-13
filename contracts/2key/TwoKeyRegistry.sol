@@ -87,6 +87,12 @@ contract TwoKeyRegistry is Upgradeable {
         _;
     }
 
+    /**
+     * @notice Function which can be called only once
+     * @param _twoKeyEventSource is the address of twoKeyEventSource contract
+     * @param _twoKeyAdmin is the address of twoKeyAdmin contract
+     * @param _maintainer is the address of initial maintainer
+     */
     function setInitialParams(address _twoKeyEventSource, address _twoKeyAdmin, address _maintainer) external {
         require(twoKeyEventSource == address(0));
         require(twoKeyAdminContractAddress == address(0));
@@ -94,14 +100,6 @@ contract TwoKeyRegistry is Upgradeable {
         twoKeyAdminContractAddress = _twoKeyAdmin;
         maintainers.push(_maintainer);
     }
-//    constructor (address _twoKeyEventSource, address _twoKeyAdmin, address _maintainer) public {
-//        require(_twoKeyEventSource != address(0));
-//        require(_twoKeyAdmin != address(0));
-//        twoKeyEventSource = _twoKeyEventSource;
-//        twoKeyAdminContractAddress = _twoKeyAdmin;
-//        maintainers.push(_maintainer);
-//    }
-
 
     /// @notice Function to check if maintainer exists
     /// @param _maintainer is the address of maintainer we're checking occurence
@@ -119,21 +117,13 @@ contract TwoKeyRegistry is Upgradeable {
         return maintainers;
     }
 
-    /// @notice Method to change the allowed TwoKeyEventSource contract address
-    /// @param _twoKeyEventSource new TwoKeyEventSource contract address
-    function changeTwoKeyEventSource(address _twoKeyEventSource) public onlyAdmin {
-        require(_twoKeyEventSource != address(0));
-        twoKeyEventSource = _twoKeyEventSource;
-    }
-  
-
 
     /// Only TwoKeyEventSource contract can issue this calls
     /// @notice Function to add new campaign contract where user is contractor
     /// @dev We're requiring the contract address different address 0 because it needs to be deployed
     /// @param _userAddress is address of contractor
     /// @param _contractAddress is address of deployed campaign contract
-    function addWhereContractor(address _userAddress, address _contractAddress) public onlyTwoKeyEventSource {
+    function addWhereContractor(address _userAddress, address _contractAddress) external onlyTwoKeyEventSource {
         require(_contractAddress != address(0));
         userToCampaignsWhereContractor[_userAddress].push(_contractAddress);
     }
@@ -143,7 +133,7 @@ contract TwoKeyRegistry is Upgradeable {
     /// @dev We're requiring the contract address different address 0 because it needs to be deployed
     /// @param _userAddress is address of moderator
     /// @param _contractAddress is address of deployed campaign contract
-    function addWhereModerator(address _userAddress, address _contractAddress) public onlyTwoKeyEventSource {
+    function addWhereModerator(address _userAddress, address _contractAddress) external onlyTwoKeyEventSource {
         require(_contractAddress != address(0));
         userToCampaignsWhereModerator[_userAddress].push(_contractAddress);
     }
@@ -153,7 +143,7 @@ contract TwoKeyRegistry is Upgradeable {
     /// @dev We're requiring the contract address different address 0 because it needs to be deployed
     /// @param _userAddress is address of refferer
     /// @param _contractAddress is address of deployed campaign contract
-    function addWhereReferrer(address _userAddress, address _contractAddress) public onlyTwoKeyEventSource {
+    function addWhereReferrer(address _userAddress, address _contractAddress) external onlyTwoKeyEventSource {
         require(_contractAddress != address(0));
         userToCampaignsWhereReferrer[_userAddress].push(_contractAddress);
     }
@@ -163,7 +153,7 @@ contract TwoKeyRegistry is Upgradeable {
     /// @dev We're requiring the contract address different address 0 because it needs to be deployed
     /// @param _userAddress is address of converter
     /// @param _contractAddress is address of deployed campaign contract
-    function addWhereConverter(address _userAddress, address _contractAddress) public onlyTwoKeyEventSource {
+    function addWhereConverter(address _userAddress, address _contractAddress) external onlyTwoKeyEventSource {
         require(_contractAddress != address(0));
         userToCampaignsWhereConverter[_userAddress].push(_contractAddress);
     }
@@ -172,7 +162,7 @@ contract TwoKeyRegistry is Upgradeable {
     /// @notice Function to fetch all campaign contracts where user is contractor
     /// @param _userAddress is address of user
     /// @return array of addresses (campaign contracts)
-    function getContractsWhereUserIsContractor(address _userAddress) public view returns (address[]) {
+    function getContractsWhereUserIsContractor(address _userAddress) external view returns (address[]) {
         require(_userAddress != address(0));
         return userToCampaignsWhereContractor[_userAddress];
     }
@@ -181,7 +171,7 @@ contract TwoKeyRegistry is Upgradeable {
     /// @notice Function to fetch all campaign contracts where user is moderator
     /// @param _userAddress is address of user
     /// @return array of addresses (campaign contracts)
-    function getContractsWhereUserIsModerator(address _userAddress) public view returns (address[]) {
+    function getContractsWhereUserIsModerator(address _userAddress) external view returns (address[]) {
         require(_userAddress != address(0));
         return userToCampaignsWhereModerator[_userAddress];
     }
@@ -190,7 +180,7 @@ contract TwoKeyRegistry is Upgradeable {
     /// @notice Function to fetch all campaign contracts where user is refferer
     /// @param _userAddress is address of user
     /// @return array of addresses (campaign contracts)
-    function getContractsWhereUserIsReferrer(address _userAddress) public view returns (address[]) {
+    function getContractsWhereUserIsReferrer(address _userAddress) external view returns (address[]) {
         require(_userAddress != address(0));
         return userToCampaignsWhereReferrer[_userAddress];
     }
@@ -199,7 +189,7 @@ contract TwoKeyRegistry is Upgradeable {
     /// @notice Function to fetch all campaign contracts where user is converter
     /// @param _userAddress is address of user
     /// @return array of addresses (campaign contracts)
-    function getContractsWhereUserIsConverter(address _userAddress) public view returns (address[]) {
+    function getContractsWhereUserIsConverter(address _userAddress) external view returns (address[]) {
         require(_userAddress != address(0));
         return userToCampaignsWhereConverter[_userAddress];
     }
@@ -240,7 +230,7 @@ contract TwoKeyRegistry is Upgradeable {
         addNameInternal(_name, _sender);
     }
 
-    function getUserData(address _user) public view returns (bytes32,bytes32,bytes32) {
+    function getUserData(address _user) external view returns (bytes32,bytes32,bytes32) {
         UserData memory data = addressToUserData[_user];
         bytes32 username = stringToBytes32(data.username);
         bytes32 fullName = stringToBytes32(data.fullName);
@@ -250,7 +240,7 @@ contract TwoKeyRegistry is Upgradeable {
 
     /// @notice Function where user can add name to his address
     /// @param _name is name of user
-    function addNameByUser(string _name) public {
+    function addNameByUser(string _name) external {
         require(utfStringLength(_name) >= 3 && utfStringLength(_name) <=25);
         addNameInternal(_name, msg.sender);
     }
@@ -272,7 +262,7 @@ contract TwoKeyRegistry is Upgradeable {
     /// @notice Function to fetch address of the user that corresponds to given name
     /// @param _name is name of user
     /// @return address of the user as type address
-    function getUserName2UserAddress(string _name) public view returns (address) {
+    function getUserName2UserAddress(string _name) external view returns (address) {
         return username2currentAddress[keccak256(abi.encodePacked(_name))];
     }
 
@@ -280,14 +270,14 @@ contract TwoKeyRegistry is Upgradeable {
     /// @notice Function to fetch name that corresponds to the address
     /// @param _sender is address of user
     /// @return name of the user as type string
-    function getUserAddress2UserName(address _sender) public view returns (string) {
+    function getUserAddress2UserName(address _sender) external view returns (string) {
         return address2username[_sender];
     }
 
 
     /// Get history of changed addresses
     /// @return array of addresses sorted
-    function getHistoryOfChangedAddresses() public view returns (address[]) {
+    function getHistoryOfChangedAddresses() external view returns (address[]) {
         string memory name = address2username[msg.sender];
         return username2AddressHistory[keccak256(abi.encodePacked(name))];
     }
@@ -295,7 +285,7 @@ contract TwoKeyRegistry is Upgradeable {
     /// @notice Function to fetch actual length of string
     /// @param str is the string we'd like to get length of
     /// @return length of the string
-    function utfStringLength(string str) public pure returns (uint length) {
+    function utfStringLength(string str) internal pure returns (uint length) {
         uint i=0;
         bytes memory string_rep = bytes(str);
 
@@ -350,7 +340,7 @@ contract TwoKeyRegistry is Upgradeable {
         plasma2ethereum[plasma_address] = msg.sender;
     }
 
-    function checkIfUserExists(address _userAddress) public view returns (bool) {
+    function checkIfUserExists(address _userAddress) external view returns (bool) {
         bytes memory tempEmptyStringTest = bytes(address2username[_userAddress]);
         if (tempEmptyStringTest.length == 0) {
             return false;
@@ -359,7 +349,7 @@ contract TwoKeyRegistry is Upgradeable {
         }
     }
 
-    function stringToBytes32(string memory source) returns (bytes32 result) {
+    function stringToBytes32(string memory source) internal returns (bytes32 result) {
         bytes memory tempEmptyStringTest = bytes(source);
         if (tempEmptyStringTest.length == 0) {
             return 0x0;
