@@ -1,15 +1,14 @@
 pragma solidity ^0.4.24; 
 
-import '../openzeppelin-solidity/contracts/lifecycle/Destructible.sol';
-
 import './TwoKeyEconomy.sol';
 import './TwoKeyUpgradableExchange.sol';
 import "../interfaces/IAdminContract.sol";
 import "../interfaces/IERC20.sol";
 import "./TwoKeyEventSource.sol";
 import "./TwoKeyRegistry.sol";
+import "./Upgradeable.sol";
 
-contract TwoKeyAdmin is IAdminContract {
+contract TwoKeyAdmin is Upgradeable {
 
 	TwoKeyEconomy public twoKeyEconomy;
 	TwoKeyUpgradableExchange public twoKeyUpgradableExchange;
@@ -33,26 +32,30 @@ contract TwoKeyAdmin is IAdminContract {
         _;
     }
 
-	constructor(
-		address _twoKeyCongress
-	) public {
-		require(_twoKeyCongress != address(0));
-		twoKeyCongress = _twoKeyCongress;
-	}
-
-    /// @notice Function where only elected admin can replace the exisitng admin contract with new admin contract.
-    /// @dev This method is expected to transfer it's current economy to new admin contract
-    /// @param _newAdminContract is address of New Admin Contract
-	function replaceOneself(address _newAdminContract) external onlyTwoKeyCongress {
-		uint balanceOfOldAdmin = twoKeyEconomy.balanceOf(address(this));
-		TwoKeyAdmin newAdminContractObject = TwoKeyAdmin(_newAdminContract);
-		newTwoKeyAdminAddress = _newAdminContract;
-		twoKeyEconomy.transfer(_newAdminContract, balanceOfOldAdmin);
-		twoKeyEconomy.changeAdmin(_newAdminContract);
-		newAdminContractObject.transfer(address(this).balance);
-		newAdminContractObject.setSingletones(twoKeyEconomy, twoKeyUpgradableExchange, twoKeyReg, twoKeyEventSource);
-		twoKeyEventSource.changeAdmin(_newAdminContract);
-	}
+    /**
+     * @notice Function to set initial parameters in the contract including singletones
+     * @param _twoKeyCongress is the address of TwoKeyCongress
+     * @param _economy is the address of TwoKeyEconomy
+     * @param _exchange is the address of TwoKeyUpgradableExchange
+     * @param _twoKeyRegistry is the address of TwoKeyRegistry
+     * @param _eventSource is the address of TwoKeyEventSource
+     * @dev This function can be called only once, which will be done immediately after deployment.
+     */
+    function setInitialParams(
+        address _twoKeyCongress,
+        address _economy,
+        address _exchange,
+        address _twoKeyRegistry,
+        address _eventSource
+    ) public {
+        require(initialized == false);
+        twoKeyCongress = _twoKeyCongress;
+        twoKeyReg = TwoKeyRegistry(_twoKeyRegistry);
+        twoKeyUpgradableExchange = TwoKeyUpgradableExchange(_exchange);
+        twoKeyEconomy = TwoKeyEconomy(_economy);
+        twoKeyEventSource = TwoKeyEventSource(_eventSource);
+        initialized = true;
+    }
 
     /// @notice Function where only elected admin can transfer tokens to an address
     /// @dev We're recurring to address different from address 0 and token amount greater than 0
@@ -91,14 +94,6 @@ contract TwoKeyAdmin is IAdminContract {
 		twoKeyEventSource.addAuthorizedAddress(_address);
 	}
 
-    /// @notice Function to add twoKeyEventSource contract to twoKeyAdmin
-	/// @dev We're requiring twoKeyEventSource contract address different from address 0 as it is required to be deployed before calling this method
-	/// @param _twoKeyEventSource is address of twoKeyEventSource contract address
-	function addTwoKeyEventSource(address _twoKeyEventSource) public {
-		require(_twoKeyEventSource != address(0));
-		twoKeyEventSource = TwoKeyEventSource(_twoKeyEventSource);
-	}
-
     /// @notice Function to whitelist contract address for Event Source contract
 	/// @dev We're requiring contract address different from address 0 as it is required to be deployed before calling this method
 	/// @param _contractAddress is address of a contract
@@ -135,33 +130,6 @@ contract TwoKeyAdmin is IAdminContract {
 		twoKeyEventSource = TwoKeyEventSource(_eventSource);
 	}
 
- 	/// @notice Function to set Singletones contract address
-	/// @dev We're requiring contract addresses different from address 0 as they are required to be deployed before calling this method
-	/// @param _economy is address of twoKeyEconomy contract address
-	/// @param _exchange is address of twoKeyExchange contract address
-	/// @param _reg is address of twoKeyReg contract address
-    /// commented only Authorized addresses can do this
-    function setSingletones(address _economy, address _exchange, address _reg, address _eventSource) public {
-		//this is only for first time deployment of admin contract and other singletons
-		require(twoKeyEconomy == address(0));
-		require(twoKeyReg == address(0));
-		require(twoKeyUpgradableExchange == address(0));
-		require(twoKeyEventSource == address(0));
-
-
-		require(_economy != address(0));
-    	require(_exchange != address(0));
-    	require(_reg != address(0));
-    	require(_eventSource != address(0));
-
-        require(initialized == false);
-        initialized = true;
-		twoKeyReg = TwoKeyRegistry(_reg);
-    	twoKeyUpgradableExchange = TwoKeyUpgradableExchange(_exchange);
-		twoKeyEconomy = TwoKeyEconomy(_economy);
-		twoKeyEventSource = TwoKeyEventSource(_eventSource);
-    }
-
 	/// @notice Function to freeze all transfers for 2KEY token
 	function freezeTransfersInEconomy() public onlyTwoKeyCongress {
 		IERC20(address(twoKeyEconomy)).freezeTransfers();
@@ -172,39 +140,31 @@ contract TwoKeyAdmin is IAdminContract {
 		IERC20(address(twoKeyEconomy)).unfreezeTransfers();
 	}
 
-
+	//TODO: Backdoor function, delete (modify) once
     function transfer2KeyTokens(address _to, uint256 _amount) public returns (bool) {
 		bool completed = twoKeyEconomy.transfer(_to, _amount);
 		return completed;
 	}
 
-
-    /// View function - doesn't cost any gas to be executed
-	/// @notice Function to get Ether Balance of given address 
-	/// @param _addr is address of user
-	/// @return Ether balance of given address
-	function getEtherBalanceOfAnAddress(address _addr) public view returns (uint256){
-		return address(_addr).balance;
-	}
 	
 	/// View function - doesn't cost any gas to be executed
 	/// @notice Function to fetch twoKeyEconomy contract address 
 	/// @return _economy is address of twoKeyEconomy contract 
-    function getTwoKeyEconomy () public view returns(address _economy)  {
+    function getTwoKeyEconomy() public view returns(address)  {
     	return address(twoKeyEconomy);
     }
 	
 	/// View function - doesn't cost any gas to be executed
 	/// @notice Function to fetch twoKeyReg contract address 
 	/// @return _address is address of twoKeyReg contract
-    function getTwoKeyReg () public view returns(address _address)  {
+    function getTwoKeyReg() public view returns(address)  {
     	return address(twoKeyReg);
     }
 
     /// View function - doesn't cost any gas to be executed
 	/// @notice Function to fetch twoKeyUpgradableExchange contract address 
 	/// @return _address is address of twoKeyUpgradableExchange contract
-    function getTwoKeyUpgradableExchange () public view returns(address _exchange)  {
+    function getTwoKeyUpgradableExchange() public view returns(address)  {
     	return address(twoKeyUpgradableExchange);
     }
 

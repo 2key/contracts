@@ -868,7 +868,7 @@ describe('TwoKeyProtocol', () => {
         const moderatorAddress: string = await twoKeyProtocol.AcquisitionCampaign.getModeratorAddress(campaignAddress,from);
         console.log("Moderator address is: " + moderatorAddress);
     }).timeout(30000);
-
+    
     it('==> should moderator withdraw his balances in 2key-tokens', async() => {
         const txHash = await twoKeyProtocol.AcquisitionCampaign.moderatorAndReferrerWithdraw(campaignAddress,from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
