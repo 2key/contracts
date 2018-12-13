@@ -110,7 +110,7 @@ contract TwoKeyEventSource is Upgradeable, TwoKeyTypes {
         _;
     }
 
-    function setInitialParams(address _twoKeyAdminAddress) public {
+    function setInitialParams(address _twoKeyAdminAddress) external {
         require(twoKeyAdmin == address(0));
         twoKeyAdmin = _twoKeyAdminAddress;
         authorizedSubadmins[msg.sender] = true;

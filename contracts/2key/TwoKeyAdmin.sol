@@ -47,7 +47,7 @@ contract TwoKeyAdmin is Upgradeable {
         address _exchange,
         address _twoKeyRegistry,
         address _eventSource
-    ) public {
+    ) external {
         require(initialized == false);
         twoKeyCongress = _twoKeyCongress;
         twoKeyReg = TwoKeyRegistry(_twoKeyRegistry);

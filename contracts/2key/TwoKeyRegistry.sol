@@ -87,7 +87,7 @@ contract TwoKeyRegistry is Upgradeable {
         _;
     }
 
-    function setInitialParams(address _twoKeyEventSource, address _twoKeyAdmin, address _maintainer) public {
+    function setInitialParams(address _twoKeyEventSource, address _twoKeyAdmin, address _maintainer) external {
         require(twoKeyEventSource == address(0));
         require(twoKeyAdminContractAddress == address(0));
         twoKeyEventSource = _twoKeyEventSource;

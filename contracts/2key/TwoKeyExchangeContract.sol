@@ -93,7 +93,7 @@ contract TwoKeyExchangeContract is Upgradeable {
      * @param _twoKeyAdmin is the address of TwoKeyAdmin contract
      * @dev Can be called only once
      */
-    function setInitialParams(address [] _maintainers, address _twoKeyAdmin) {
+    function setInitialParams(address [] _maintainers, address _twoKeyAdmin) external {
         require(_twoKeyAdmin != address(0)); //validation that it can be called only once
         require(twoKeyAdmin == address(0)); //validation that it can be called only once
         twoKeyAdmin = _twoKeyAdmin;
