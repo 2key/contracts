@@ -89,7 +89,7 @@ export interface ITwoKeyAcquisitionCampaign {
     getModeratorAddress: (campaign: any, from: string) => Promise<string>,
     getAcquisitionCampaignCurrency: (campaign: any, from: string) => Promise<string>,
     getModeratorTotalEarnings: (campaign:any, from:string) => Promise<number>,
-    getReferrerBalanceAndTotalEarningsAndNumberOfConversions: (campaign:any, referrer: string, from: string) => Promise<any>,
+    getReferrerBalanceAndTotalEarningsAndNumberOfConversions: (campaign:any, referrer: string, from: string) => Promise<IReferrerSummary>,
 }
 
 export interface IPublicLinkOpts {
@@ -104,4 +104,11 @@ export interface IJoinLinkOpts extends IPublicLinkOpts{
     voting?: boolean,
     daoContract?: string,
     progressCallback?: ICreateCampaignProgress,
+}
+
+export interface IReferrerSummary {
+    balanceAvailable: number,
+    totalEarnings: number,
+    numberOfConversionsParticipatedIn : number,
+    campaignAddress: string,
 }

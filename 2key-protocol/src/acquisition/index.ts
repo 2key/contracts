@@ -7,6 +7,7 @@ import {
     IPublicLinkOpts,
     ITokenAmount,
     ITwoKeyAcquisitionCampaign,
+    IReferrerSummary,
 } from './interfaces';
 
 import {BigNumber} from 'bignumber.js';
@@ -1253,16 +1254,17 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @param {string} from
      * @returns {Promise<any>}
      */
-    public getReferrerBalanceAndTotalEarningsAndNumberOfConversions(campaign:any, referrer: string, from: string) : Promise<any> {
+    public getReferrerBalanceAndTotalEarningsAndNumberOfConversions(campaign:any, referrer: string, from: string) : Promise<IReferrerSummary> {
         return new Promise<any>(async(resolve,reject) => {
            try {
                const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
                let [referrerBalanceAvailable, referrerTotalEarnings, referrerInCountOfConversions] =
                    await promisify(campaignInstance.getReferrerBalanceAndTotalEarningsAndNumberOfConversions,[referrer, {from}]);
                const obj = {
-                   'balanceAvailable' : referrerBalanceAvailable,
-                   'totalEarnings' : referrerTotalEarnings,
-                   'numberOfConversionsParticipatedIn' : referrerInCountOfConversions
+                   balanceAvailable: parseFloat(this.utils.fromWei(referrerBalanceAvailable, 'ether').toString()),
+                   totalEarnings: parseFloat(this.utils.fromWei(referrerTotalEarnings, 'ether').toString()),
+                   numberOfConversionsParticipatedIn : parseFloat(this.utils.fromWei(referrerInCountOfConversions, 'ether').toString()),
+                   campaignAddress: campaignInstance.address,
                };
                resolve(obj)
            } catch (e) {
