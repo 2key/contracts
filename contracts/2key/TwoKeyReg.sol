@@ -28,7 +28,7 @@ contract TwoKeyReg is Ownable {
 
   function addNameInternal(string _name, address _sender) private {
     // check if name is taken
-    require(name2owner[keccak256(abi.encodePacked(_name))] == 0, "name already assigned");
+    require(name2owner[keccak256(abi.encodePacked(_name))] == 0 || name2owner[keccak256(abi.encodePacked(_name))] == _sender, "name already assigned");
 
     // remove previous name
     bytes memory last_name = bytes(owner2name[_sender]);
