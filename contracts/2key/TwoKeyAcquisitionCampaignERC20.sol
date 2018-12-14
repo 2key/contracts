@@ -584,12 +584,15 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @notice Function where moderator or referrer can withdraw their available funds
      */
     function withdrawModeratorOrReferrer() public returns (bool) {
+        uint x;
         if(msg.sender == moderator) {
+            x = moderatorBalanceETHWei;
             moderatorBalanceETHWei = 0;
-            IUpgradableExchange(upgradableExchange).buyTokens.value(moderatorBalanceETHWei)(msg.sender);
+            IUpgradableExchange(upgradableExchange).buyTokens.value(x)(msg.sender);
         } else if(referrerBalancesETHWei[msg.sender] != 0) {
+            x = referrerBalancesETHWei[msg.sender];
             referrerBalancesETHWei[msg.sender] = 0;
-            IUpgradableExchange(upgradableExchange).buyTokens.value(referrerBalancesETHWei[msg.sender])(msg.sender);
+            IUpgradableExchange(upgradableExchange).buyTokens.value(x)(msg.sender);
         } else {
             revert();
         }
