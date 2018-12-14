@@ -81,12 +81,12 @@ contract TwoKeyLockupContract {
     function transferFungibleAsset() public returns (bool) {
         uint unlocked = getAllUnlockedAtTheMoment();
         uint amount = unlocked - withdrawn;
+        totalTokensLeftOnContract = totalTokensLeftOnContract - amount;
+        withdrawn = withdrawn + amount;
         require(assetContractERC20.call(
             bytes4(keccak256(abi.encodePacked("transfer(address,uint256)"))),
             msg.sender, amount
         ));
-        totalTokensLeftOnContract = totalTokensLeftOnContract - amount;
-        withdrawn = withdrawn + amount;
         return true;
     }
 
