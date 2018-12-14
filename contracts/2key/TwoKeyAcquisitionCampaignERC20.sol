@@ -353,7 +353,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         uint256 total_bounty = 0;
         for (uint i = 0; i < influencers.length; i++) {
             uint256 b;
-            if (i == influencers.length - 1) {// if its the last influencer then all the bounty goes to it.
+            if (i == influencers.length - 1) {  // if its the last influencer then all the bounty goes to it.
                 b = _maxReferralRewardETHWei;
             }
             else {
@@ -575,18 +575,21 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @return true if successful otherwise will 'revert'
      */
     function withdrawContractor() public onlyContractor returns (bool) {
-        contractor.transfer(contractorBalance);
         contractorBalance = 0;
+        contractor.transfer(contractorBalance);
         return true;
     }
 
+    /**
+     * @notice Function where moderator or referrer can withdraw their available funds
+     */
     function withdrawModeratorOrReferrer() public returns (bool) {
         if(msg.sender == moderator) {
-            IUpgradableExchange(upgradableExchange).buyTokens.value(moderatorBalanceETHWei)(msg.sender);
             moderatorBalanceETHWei = 0;
+            IUpgradableExchange(upgradableExchange).buyTokens.value(moderatorBalanceETHWei)(msg.sender);
         } else if(referrerBalancesETHWei[msg.sender] != 0) {
-            IUpgradableExchange(upgradableExchange).buyTokens.value(referrerBalancesETHWei[msg.sender])(msg.sender);
             referrerBalancesETHWei[msg.sender] = 0;
+            IUpgradableExchange(upgradableExchange).buyTokens.value(referrerBalancesETHWei[msg.sender])(msg.sender);
         } else {
             revert();
         }
