@@ -161,7 +161,7 @@ contract TwoKeyPlasmaEvents {
         // move ARCs based on signature information
         for (i = 0; i < influencers.length; i++) {
             new_address = plasmaOf(influencers[i]);
-//            require(new_address != plasmaOf(contractor), 'contractor can not be an influencer');
+            require(new_address != plasmaOf(contractor), 'contractor can not be an influencer');
             // NOTE!!!! for the last user in the sig the  new_address can be a plasma_address
             // as a result the same user with a plasma_address can appear later with an etherum address
             if (!visits[c][contractor][old_address][new_address]) {  // generate event only once for each tripplet
