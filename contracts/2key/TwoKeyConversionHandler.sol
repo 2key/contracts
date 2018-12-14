@@ -17,7 +17,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
 
     using SafeMath for uint256;
 
-    //TODO: See if this should be public or private with specific roles
     mapping(address => Conversion) public conversions;
 
     // Mapping where we will store as the key state of conversion, and as value, there'll be all converters which conversions are in that state
@@ -279,6 +278,42 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         return false;
     }
 
+//    function getConversionForConverter(
+//        address _converter
+//    ) external view returns (
+//        address,
+//        uint256,
+//        address,
+//        ConversionState,
+//        string,
+//        address,
+//        uint256,
+//        uint256,
+//        uint256,
+//        uint256,
+//        uint256,
+//        CampaignType,
+//        uint256,
+//        uint256) {
+//            require(msg.sender == _converter || msg.sender == contractor || msg.sender == moderator);
+//            Conversion memory conversion = conversions[_converter];
+//            return(
+//                conversion.contractor,
+//                conversion.contractorProceedsETHWei,
+//                conversion.converter,
+//                conversion.state,
+//                conversion.assetSymbol,
+//                conversion.assetContractERC20,
+//                conversion.conversionAmount,
+//                conversion.maxReferralRewardETHWei,
+//                conversion.moderatorFeeETHWei,
+//                conversion.baseTokenUnits,
+//                conversion.bonusTokenUnits,
+//                conversion.campaignType,
+//                conversion.conversionCreatedAt,
+//                conversion.conversionExpiresAt
+//            );
+//    }
 
     /// @notice Function to get all pending converters
     /// @dev view function - no gas cost & only Contractor or Moderator can call this function - otherwise will revert
