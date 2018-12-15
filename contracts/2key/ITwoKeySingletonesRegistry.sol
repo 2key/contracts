@@ -23,12 +23,12 @@ interface ITwoKeySingletonesRegistry {
     * @param version representing the version name of the new implementation to be registered
     * @param implementation representing the address of the new implementation to be registered
     */
-    function addVersion(string _contractName, string version, address implementation) public;
+    function addVersion(string _contractName, string version, address implementation) external;
 
     /**
     * @dev Tells the address of the implementation for a given version
     * @param version to query the implementation of
     * @return address of the implementation registered for the given version
     */
-    function getVersion(string _contractName, string version) public view returns (address);
+    function getVersion(string _contractName, string version) external view returns (address);
 }
