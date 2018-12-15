@@ -1,5 +1,7 @@
 pragma solidity ^0.4.24;
 
+import "../interfaces/IERC20.sol";
+
 contract TwoKeyLockupContract {
 
     uint bonusTokensVestingStartShiftInDaysFromDistributionDate;
@@ -83,10 +85,7 @@ contract TwoKeyLockupContract {
         uint amount = unlocked - withdrawn;
         totalTokensLeftOnContract = totalTokensLeftOnContract - amount;
         withdrawn = withdrawn + amount;
-        require(assetContractERC20.call(
-            bytes4(keccak256(abi.encodePacked("transfer(address,uint256)"))),
-            msg.sender, amount
-        ));
+        require(IERC20(assetContractERC20).transfer(msg.sender,amount));
         return true;
     }
 
@@ -95,10 +94,7 @@ contract TwoKeyLockupContract {
     /// @notice This function can only be called by conversion handler and that's when contractor want to cancel his campaign
     /// @param _assetContractERC20 is the asset contract address
     function cancelCampaignAndGetBackTokens(address _assetContractERC20) public onlyTwoKeyConversionHandler {
-        _assetContractERC20.call( //Send the tokens back to campaign
-            bytes4(keccak256(abi.encodePacked("transfer(address,uint256)"))),
-            twoKeyAcquisitionCampaignERC20Address, baseTokens+bonusTokens
-        );
+        require(IERC20(_assetContractERC20).transfer(twoKeyAcquisitionCampaignERC20Address, baseTokens+bonusTokens));
         selfdestruct(twoKeyAcquisitionCampaignERC20Address);
     }
 

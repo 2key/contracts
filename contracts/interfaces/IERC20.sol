@@ -2,12 +2,12 @@ pragma solidity ^0.4.24;
 
 /// Interface of ERC20 contract we need in order to invoke balanceOf method from another contracts
 contract IERC20 {
-    function balanceOf(address whom) view public returns (uint);
-    function transfer(address _to, uint256 _value) public returns (bool);
-    function transferFrom(address _from, address _to, uint256 _value) public returns (bool);
-    function decimals() view public returns (uint);
-    function symbol() view public returns (string);
-    function name() view public returns (string);
-    function freezeTransfers() public;
-    function unfreezeTransfers() public;
+    function balanceOf(address whom) external view returns (uint);
+    function transfer(address _to, uint256 _value) external returns (bool);
+    function transferFrom(address _from, address _to, uint256 _value) external returns (bool);
+    function decimals() external view returns (uint);
+    function symbol() external view returns (string);
+    function name() external view returns (string);
+    function freezeTransfers() external;
+    function unfreezeTransfers() external;
 }

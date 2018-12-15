@@ -7,7 +7,7 @@ import "./TwoKeyConversionStates.sol";
 import "./TwoKeyLockupContract.sol";
 import "../openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "./TwoKeyConverterStates.sol";
-
+import "../interfaces/IERC20.sol";
 
 
 // adapted from: 
