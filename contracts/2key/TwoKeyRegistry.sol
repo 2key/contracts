@@ -8,7 +8,7 @@ contract TwoKeyRegistry is Upgradeable {
     mapping(address => string) public address2username;
     /// mapping user's name to user's address
     mapping(bytes32 => address) public username2currentAddress;
-    // mapping username to array of addresses he is using/used
+    /// mapping username to array of addresses he is using/used
     mapping(bytes32 => address[]) public username2AddressHistory;
     /*
         mapping address to wallet tag
@@ -357,7 +357,7 @@ contract TwoKeyRegistry is Upgradeable {
         }
     }
 
-    function stringToBytes32(string memory source) internal returns (bytes32 result) {
+    function stringToBytes32(string memory source) internal pure returns (bytes32 result) {
         bytes memory tempEmptyStringTest = bytes(source);
         if (tempEmptyStringTest.length == 0) {
             return 0x0;
