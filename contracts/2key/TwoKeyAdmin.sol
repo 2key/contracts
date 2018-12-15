@@ -10,10 +10,10 @@ import "./Upgradeable.sol";
 
 contract TwoKeyAdmin is Upgradeable {
 
-	TwoKeyEconomy public twoKeyEconomy;
-	TwoKeyUpgradableExchange public twoKeyUpgradableExchange;
-	TwoKeyEventSource public twoKeyEventSource;
-	TwoKeyRegistry public twoKeyReg;
+	TwoKeyEconomy twoKeyEconomy;
+	TwoKeyUpgradableExchange twoKeyUpgradableExchange;
+	TwoKeyEventSource twoKeyEventSource;
+	TwoKeyRegistry twoKeyReg;
 
 	address public twoKeyCongress;
 	address public newTwoKeyAdminAddress;
