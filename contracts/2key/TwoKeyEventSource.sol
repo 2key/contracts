@@ -112,7 +112,7 @@ contract TwoKeyEventSource is TwoKeyTypes {
     /// @dev is contract required to be allowed to emit to even exist in mapping codeToType
     /// @param _contractCode is code od contract
     /// @param _campaignType is enumerator representing type of campaign
-    function addCampaignType(bytes _contractCode, CampaignType _campaignType) {
+    function addCampaignType(bytes _contractCode, CampaignType _campaignType) public onlyAdmin {
         bytes32 cc = keccak256(abi.encodePacked(_contractCode));
         require(canEmit[cc] == true); //Check if this validation is needed
         codeToType[cc] = _campaignType;

@@ -92,7 +92,7 @@ contract TwoKeyWeightedVoteContract is TwoKeySignedPresellContract {
     return voters;
   }
 
-  function sqrt(uint x) public view returns (uint y) {
+  function sqrt(uint x) public pure returns (uint y) {
     uint z = x.add(1).div(2);
     y = x;
     while (z < y) {

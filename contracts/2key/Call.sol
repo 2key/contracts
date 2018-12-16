@@ -91,7 +91,7 @@ library Call {
         }
     }
 
-    function loadAddress(bytes sig, uint idx) pure returns (address) {
+    function loadAddress(bytes sig, uint idx) public pure returns (address) {
         address influencer;
         idx += 20;
         assembly
@@ -101,7 +101,7 @@ library Call {
         return influencer;
     }
 
-    function loadUint8(bytes sig, uint idx) pure returns (uint8) {
+    function loadUint8(bytes sig, uint idx) public pure returns (uint8) {
         uint8 weight;
         idx += 1;
         assembly
@@ -112,7 +112,7 @@ library Call {
     }
 
 
-    function recoverHash(bytes32 hash, bytes sig, uint idx) pure returns (address) {
+    function recoverHash(bytes32 hash, bytes sig, uint idx) public pure returns (address) {
         // same as recoverHash in utils/sign.js
         // The signature format is a compact form of:
         //   {bytes32 r}{bytes32 s}{uint8 v}
@@ -148,7 +148,7 @@ library Call {
 
     }
 
-    function recoverSigMemory(bytes sig) private returns (address[], address[], uint8[], uint[], uint) {
+    function recoverSigMemory(bytes sig) private pure returns (address[], address[], uint8[], uint[], uint) {
         uint8 version = loadUint8(sig, 0);
         uint msg_len = (version == 1) ? 1+65+20 : 1+20+20;
         uint n_influencers = (sig.length-21) / (65+msg_len);
@@ -163,7 +163,7 @@ library Call {
         return (influencers, keys, weights, offsets, msg_len);
     }
 
-    function recoverSigParts(bytes sig) private returns (address[], address[], uint8[], uint[]) {
+    function recoverSigParts(bytes sig) private view returns (address[], address[], uint8[], uint[]) {  // view because it uses msg.sender
         // sig structure:
         // 1 byte version 0 or 1
         // 20 bytes are the address of the contractor or the influencer who created sig.
@@ -224,7 +224,7 @@ library Call {
         return (influencers, keys, weights, offsets);
     }
 
-    function recoverSig(bytes sig, address old_key) public returns (address[], address[], uint8[]) {
+    function recoverSig(bytes sig, address old_key) public view returns (address[], address[], uint8[]) {
         // validate sig AND
         // recover the information from the signature: influencers, public_link_keys, weights/cuts
         // influencers may have one more address than the keys and weights arrays

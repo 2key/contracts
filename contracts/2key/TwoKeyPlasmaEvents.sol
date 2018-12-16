@@ -41,6 +41,7 @@ contract TwoKeyPlasmaEvents {
     mapping(address => mapping(address => mapping(address => address[]))) public visits_list;
 
     mapping(address => mapping(address => mapping(address => bytes))) public visited_sig;
+    mapping(address => mapping(address => bytes)) public notes;
 
     function add_plasma2ethereum(bytes sig) public { // , bool with_prefix) public {
         address plasma_address = msg.sender;
@@ -123,8 +124,13 @@ contract TwoKeyPlasmaEvents {
         return true;
     }
 
-    function publicLinkKeyOf(address c, address contractor, address me) public returns (address) {
+    function publicLinkKeyOf(address c, address contractor, address me) public view returns (address) {
         return public_link_key[c][contractor][plasmaOf(me)];
+    }
+
+    function setNote(address c, bytes note) public {
+        // note is a message you can store with sig. For example it could be the secret you used encrypted by you
+        notes[c][msg.sender] = note;
     }
 
     function visited(address c, address contractor, bytes sig) public {

@@ -14,6 +14,7 @@ contract TwoKeyReg is Ownable {
   // the way to know if an address is a plasma address is to look it up in this mapping
   mapping(address => address) public plasma2ethereum;
   mapping(address => address) public ethereum2plasma;
+  mapping(address => bytes) public notes;
 
   event UserNameChanged(address owner, string name);
 
@@ -46,6 +47,11 @@ contract TwoKeyReg is Ownable {
 
   function addNameByUser(string _name) public {
     addNameInternal(_name, msg.sender);
+  }
+
+  function setNote(bytes note) public {
+    // note is a message you can store with sig. For example it could be the secret you used encrypted by you
+    notes[msg.sender] = note;
   }
 
   function addPlasma2Ethereum(bytes sig) public {
