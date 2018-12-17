@@ -575,8 +575,9 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @return true if successful otherwise will 'revert'
      */
     function withdrawContractor() public onlyContractor returns (bool) {
+        uint balance = contractorBalance;
         contractorBalance = 0;
-        contractor.transfer(contractorBalance);
+        contractor.transfer(balance);
         return true;
     }
 
@@ -584,15 +585,15 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @notice Function where moderator or referrer can withdraw their available funds
      */
     function withdrawModeratorOrReferrer() public returns (bool) {
-        uint x;
+        uint balance;
         if(msg.sender == moderator) {
-            x = moderatorBalanceETHWei;
+            balance = moderatorBalanceETHWei;
             moderatorBalanceETHWei = 0;
-            IUpgradableExchange(upgradableExchange).buyTokens.value(x)(msg.sender);
+            IUpgradableExchange(upgradableExchange).buyTokens.value(balance)(msg.sender);
         } else if(referrerBalancesETHWei[msg.sender] != 0) {
-            x = referrerBalancesETHWei[msg.sender];
+            balance = referrerBalancesETHWei[msg.sender];
             referrerBalancesETHWei[msg.sender] = 0;
-            IUpgradableExchange(upgradableExchange).buyTokens.value(x)(msg.sender);
+            IUpgradableExchange(upgradableExchange).buyTokens.value(balance)(msg.sender);
         } else {
             revert();
         }
