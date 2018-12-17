@@ -253,9 +253,37 @@ module.exports = function deploy(deployer) {
              */
             let lastTwoKeyCongressContract;
             console.log('TwoKeyCongress will be updated now.');
+            deployer.deploy(TwoKeyCongress)
+                .then(() => TwoKeyCongress.deployed()
+                    .then((twoKeyCongressInstance) => {
+                        lastTwoKeyCongressContract = twoKeyCongressInstance.address;
+                    })
+                    .then(() => TwoKeySingletonesRegistry.deployed)
+                    .then(async(registry) => {
+                       await new Promise(async(resolve,reject) => {
+                           try {
+                               console.log('... Adding new version of TwoKeyCongress to the registry contract');
+                               const twoKeyCongress = fileObject.twoKeyCongress || {};
+                               let v = parseInt(twoKeyCongress[networkId.toString()].Version.substr(-1)) + 1;
+                               twoKeyCongress[networkId.toString()].Version = twoKeyCongress[networkId.toString()].Version.substr(0, twoKeyCongress[networkId.toString()].Version.length - 1) + v.toString();
+                               console.log('New version : ' + twoKeyCongress[networkId.toString()].Version);
+                               let txHash = await registry.addVersion("TwoKeyCongress", twoKeyCongress[networkId.toString()].Version, TwoKeyCongress.address);
 
+                               console.log('... Upgrading proxy to new version');
+                               txHash = await Proxy.at(twoKeyCongress[networkId.toString()].Proxy).upgradeTo("TwoKeyCongress", twoKeyCongress[networkId.toString()].Version);
+                               twoKeyCongress[networkId.toString()].address = lastTwoKeyCongressContract;
+
+                               fileObject['TwoKeyCongress'] = twoKeyCongress;
+                               fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
+                               resolve(txHash);
+                           } catch (e) {
+                               reject(e);
+                           }
+                       })
+                    })
+                )
         }
     } else {
-        console.log('Argument is not found - no contracts will be updated.');
+        console.log('Argument is not found - contracts will not be updated!');
     }
 }
