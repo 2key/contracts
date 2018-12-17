@@ -253,6 +253,11 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         }
     }
 
+    /**
+     * @notice Function to join with signature and share 1 arc to the receiver
+     * @param signature is the signature
+     * @param receiver is the address we're sending ARCs to
+     */
     function joinAndShareARC(bytes signature, address receiver) public {
         distributeArcsBasedOnSignature(signature);
         transferFrom(msg.sender, receiver, 1);
@@ -265,18 +270,18 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      */
     function requirementForMsgValue(uint msgValue) internal {
         if(keccak256(currency) == keccak256('ETH')) {
-            require(msgValue >= minContributionETHorFiatCurrency, 'Amount sent to contract is less than minContribution');
-            require(msgValue <= maxContributionETHorFiatCurrency, 'Amount sent to contract is greater than maxContribution');
+            require(msgValue >= minContributionETHorFiatCurrency);
+            require(msgValue <= maxContributionETHorFiatCurrency);
         } else {
             uint val;
             bool flag;
             (val, flag,,) = ITwoKeyExchangeContract(ethUSDExchangeContract).getFiatCurrencyDetails(currency);
             if(flag) {
-                require((msgValue * val).div(10**18) >= minContributionETHorFiatCurrency,'Amount sent to contract is less than minContribution'); //converting ether to fiat
-                require((msgValue * val).div(10**18) <= maxContributionETHorFiatCurrency, 'Amount sent to contract is greater than maxContribution'); //converting ether to fiat
+                require((msgValue * val).div(10**18) >= minContributionETHorFiatCurrency); //converting ether to fiat
+                require((msgValue * val).div(10**18) <= maxContributionETHorFiatCurrency); //converting ether to fiat
             } else {
-                require(msgValue >= (val * minContributionETHorFiatCurrency).div(10**18),'Amount sent to contract is less than minContribution'); //converting fiat to ether
-                require(msgValue <= (val * maxContributionETHorFiatCurrency).div(10**18),'Amount sent to contract is greater than maxContribution'); //converting fiat to ether
+                require(msgValue >= (val * minContributionETHorFiatCurrency).div(10**18)); //converting fiat to ether
+                require(msgValue <= (val * maxContributionETHorFiatCurrency).div(10**18)); //converting fiat to ether
             }
         }
     }
@@ -643,7 +648,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
             referrerBalancesETHWei[msg.sender] = 0;
             IUpgradableExchange(upgradableExchange).buyTokens.value(balance)(msg.sender);
         } else {
-            revert('You do not have any balance to withdraw on this contract');
+            revert();
         }
     }
 }

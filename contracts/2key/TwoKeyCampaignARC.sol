@@ -49,7 +49,7 @@ contract TwoKeyCampaignARC is ArcERC20 {
 	 * @param _to The address to transfer to.
 	 * @param _value The amount to be transferred.
 	 */
-	function transferQuota(address _to, uint256 _value) public returns (bool) {
+	function transferQuota(address _to, uint256 _value) private returns (bool) {
 		require(_to != address(0));
 		require(_value <= balances[msg.sender]);
 
@@ -149,7 +149,7 @@ contract TwoKeyCampaignARC is ArcERC20 {
 	}
 
 
-	function getReferrers(address customer) public view returns (address[]) {
+	function getReferrers(address customer) internal view returns (address[]) {
 		// build a list of all influencers from converter back to to contractor
 		// dont count the conveter and contractr themselves
 		address influencer = customer;
