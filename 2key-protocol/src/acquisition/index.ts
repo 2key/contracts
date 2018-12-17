@@ -690,8 +690,11 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 const nonce = await this.helpers._getNonce(from);
                 if (!parseInt(prevChain, 16)) {
                     this.base._log('No ARCS call Free Join Take');
-                    const {public_address} = generatePublicMeta();
+                    // const newPublicLink = await this.join(campaignInstance, from, { referralLink: publicLink, cut })
+                    const { public_address } = generatePublicMeta();
                     const signature = Sign.free_join_take(from, public_address, f_address, f_secret, p_message);
+                    // TODO: Nikola try to comment two lines before and uncomment next line 
+                    // const signature = Sign.free_take(from, f_address, f_secret, p_message);
                     const txHash: string = await promisify(campaignInstance.joinAndConvert, [signature, {
                         from,
                         gasPrice,
