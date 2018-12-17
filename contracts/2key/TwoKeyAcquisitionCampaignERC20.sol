@@ -147,7 +147,11 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     }
 
 
-    /// At the beginning only contractor can call this method bcs he is the only one who has arcs
+    /**
+     * @notice Function to set public link key
+     * @dev At the beginning only contractor can call this method bcs he is the only one who has arcs
+     * @param _public_link_key is the public link key we want to set for the msg.sender
+     */
     function setPublicLinkKey(address _public_link_key) public {
         require(balanceOf(msg.sender) > 0,'no ARCs');
         require(publicLinkKey[msg.sender] == address(0),'public link key already defined');
@@ -155,6 +159,10 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     }
 
 
+    /**
+     * @notice Function to set cut
+     * @param cut is the cut amount user want to set. Must be less <= 100 or 255 (default value)
+     */
     function setCut(uint256 cut) public {
         // the sender sets what is the percentage of the bounty s/he will receive when acting as an influencer
         // the value 255 is used to signal equal partition with other influencers
@@ -388,21 +396,28 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     }
 
 
-    /// @notice Function to check how much eth has been sent to contract from address
-    /// @param _from is the address we'd like to check balance
-    /// @return amount of ether sent to contract from the specified address
+    /**
+     * @notice Function to check how much eth has been sent to contract from address
+     * @param _from is the address we'd like to check balance
+     * @return amount of ether sent to contract from the specified address
+     */
     function getAmountAddressSent(address _from) public view returns (uint) {
         return balancesConvertersETH[_from];
     }
 
-    /// @notice Function to return constantss
+    /**
+     * @notice Function to return constants
+     * @return price, maxReferralRewardPercent, quota for conversion and unit_decimals for erc20
+     */
     function getConstantInfo() public view returns (uint256, uint256, uint256, uint256) {
         return (pricePerUnitInETHWeiOrUSD, maxReferralRewardPercent, conversionQuota, unit_decimals);
     }
 
-    /// @notice Function which acts like getter for all cuts in array
-    /// @param last_influencer is the last influencer
-    /// @return array of integers containing cuts respectively
+    /**
+     * @notice Function which acts like getter for all cuts in array
+     * @param last_influencer is the last influencer
+     * @return array of integers containing cuts respectively
+     */
     function getReferrerCuts(address last_influencer) public view returns (uint256[]) {
         address[] memory influencers = getReferrers(last_influencer);
         uint256[] memory cuts = new uint256[](influencers.length + 1);
@@ -415,27 +430,33 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     }
 
 
-    /// @notice This is acting as a getter for referrer2cut
-    /// @dev Transaction will revert if msg.sender is not present in mapping
-    /// @return cut value / otherwise reverts
+    /**
+     * @notice This is acting as a getter for referrer2cut
+     * @dev Transaction will revert if msg.sender is not present in mapping
+     * @return cut value / otherwise reverts
+     */
     function getReferrerCut() public view returns (uint256) {
         require(referrer2cut[msg.sender] != 0, 'Referrer cut can not be 0');
         return referrer2cut[msg.sender] - 1;
     }
 
 
-    /// @notice Function to check balance of the ERC20 inventory (view - no gas needed to call this function)
-    /// @dev we're using Utils contract and fetching the balance of this contract address
-    /// @return balance value as uint
+    /**
+     * @notice Function to check balance of the ERC20 inventory (view - no gas needed to call this function)
+     * @dev we're using Utils contract and fetching the balance of this contract address
+     * @return balance value as uint
+     */
     function getInventoryBalance() internal view returns (uint) {
         uint balance = IERC20(assetContractERC20).balanceOf(address(this));
         return balance;
     }
 
 
-    /// @notice Function which will calculate the base amount, bonus amount
-    /// @param conversionAmountETHWei is amount of eth in conversion
-    /// @return tuple containing (base,bonus)
+    /**
+     * @notice Function which will calculate the base amount, bonus amount
+     * @param conversionAmountETHWei is amount of eth in conversion
+     * @return tuple containing (base,bonus)
+     */
     function getEstimatedTokenAmount(uint conversionAmountETHWei) public view returns (uint, uint) {
         uint value = pricePerUnitInETHWeiOrUSD;
         if(keccak256(currency) != keccak256('ETH')) {
@@ -454,71 +475,89 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     }
 
 
-    /// @notice Setter for privateMetaHash
-    /// @dev only Contractor can call this method, otherwise function will revert
-    /// @param _privateMetaHash is string representation of private metadata hash
+    /**
+     * @notice Setter for privateMetaHash
+     * @dev only Contractor can call this method, otherwise function will revert
+     * @param _privateMetaHash is string representation of private metadata hash
+     */
     function setPrivateMetaHash(string _privateMetaHash) public onlyContractor {
         privateMetaHash = _privateMetaHash;
     }
 
-    /// @notice Getter for privateMetaHash
-    /// @dev only Contractor can call this method, otherwise function will revert
-    /// @return string representation of private metadata hash
+    /**
+     * @notice Getter for privateMetaHash
+     * @dev only Contractor can call this method, otherwise function will revert
+     * @return string representation of private metadata hash
+     */
     function getPrivateMetaHash() public view onlyContractor returns (string) {
         return privateMetaHash;
     }
 
 
-    /// @notice Option to update MinContributionETH
-    /// @dev only Contractor can call this method, otherwise it will revert - emits Event when updated
-    /// @param value is the new value we are going to set for minContributionETH
+    /**
+     * @notice Function to update MinContributionETH
+     * @dev only Contractor can call this method, otherwise it will revert - emits Event when updated
+     * @param value is the new value we are going to set for minContributionETH
+     */
     function updateMinContributionETHOrUSD(uint value) public onlyContractor {
         minContributionETHorFiatCurrency = value;
         twoKeyEventSource.updatedData(block.timestamp, value, "Updated maxContribution");
     }
 
-    /// @notice Option to update maxContributionETH
-    /// @dev only Contractor can call this method, otherwise it will revert - emits Event when updated
-    /// @param value is the new maxContribution value
+    /**
+     * @notice Function to update maxContributionETH
+     * @dev only Contractor can call this method, otherwise it will revert - emits Event when updated
+     * @param value is the new maxContribution value
+     */
     function updateMaxContributionETHorUSD(uint value) public onlyContractor {
         maxContributionETHorFiatCurrency = value;
         twoKeyEventSource.updatedData(block.timestamp, value, "Updated maxContribution");
     }
 
-    /// @notice Option to update maxReferralRewardPercent
-    /// @dev only Contractor can call this method, otherwise it will revert - emits Event when updated
-    /// @param value is the new referral percent value
+    /**
+     * @notice Function to update maxReferralRewardPercent
+     * @dev only Contractor can call this method, otherwise it will revert - emits Event when updated
+     * @param value is the new referral percent value
+     */
     function updateMaxReferralRewardPercent(uint value) public onlyContractor {
         maxReferralRewardPercent = value;
         twoKeyEventSource.updatedData(block.timestamp, value, "Updated maxReferralRewardPercent");
     }
 
-    /// @notice Option to update /set publicMetaHash
-    /// @dev only Contractor can call this function, otherwise it will revert - emits Event when set/updated
-    /// @param value is the value for the publicMetaHash
+    /**
+     * @notice Function to update /set publicMetaHash
+     * @dev only Contractor can call this function, otherwise it will revert - emits Event when set/updated
+     * @param value is the value for the publicMetaHash
+     */
     function updateOrSetIpfsHashPublicMeta(string value) public onlyContractor {
         publicMetaHash = value;
         twoKeyEventSource.updatedPublicMetaHash(block.timestamp, value);
     }
 
-    /// @notice Option to update moderator balance
-    /// @dev can be called only from TwoKeyConversionHandler contract
-    /// @param _value is the value we'd like to add to total moderator earnings and moderator balance
+    /**
+     * @notice Function to update moderator balance
+     * @dev can be called only from TwoKeyConversionHandler contract
+     * @param _value is the value we'd like to add to total moderator earnings and moderator balance
+     */
     function updateModeratorBalanceETHWei(uint _value) public onlyTwoKeyConversionHandler {
         moderatorBalanceETHWei = moderatorBalanceETHWei.add(_value);
         moderatorTotalEarningsETHWei = moderatorTotalEarningsETHWei.add(_value);
     }
 
-    /// @notice Option to update contractor proceeds
-    /// @dev can be called only from TwoKeyConversionHandler contract
-    /// @param value it the value we'd like to add to total contractor proceeds and contractor balance
+    /**
+     * @notice Option to update contractor proceeds
+     * @dev can be called only from TwoKeyConversionHandler contract
+     * @param value it the value we'd like to add to total contractor proceeds and contractor balance
+     */
     function updateContractorProceeds(uint value) public onlyTwoKeyConversionHandler {
         contractorTotalProceeds = contractorTotalProceeds.add(value);
         contractorBalance = contractorBalance.add(value);
     }
 
-    /// @notice Getter for the address status if it's joined
-    /// @return true / false
+    /**
+     * @notice Function to check if the msg.sender has already joined
+     * @return true/false depending of joined status
+     */
     function getAddressJoinedStatus() public view returns (bool) {
         if(msg.sender == address(contractor) || msg.sender == address(moderator) || received_from[msg.sender] != address(0)
             || balanceOf(msg.sender) > 0 || publicLinkKey[msg.sender] != address(0)) {
@@ -544,16 +583,20 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
 //    }
 
 
-    /// @notice Function to fetch contractor balance in ETH
-    /// @dev only contractor can call this function, otherwise it will revert
-    /// @return value of contractor balance in ETH WEI
+    /**
+     * @notice Function to fetch contractor balance in ETH
+     * @dev only contractor can call this function, otherwise it will revert
+     * @return value of contractor balance in ETH WEI
+     */
     function getContractorBalance() public onlyContractor view returns (uint) {
         return contractorBalance;
     }
 
-    /// @notice Function to fetch moderator balance in ETH and his total earnings
-    /// @dev only contractor or moderator are eligible to call this function
-    /// @return value of his balance in ETH
+    /**
+     * @notice Function to fetch moderator balance in ETH and his total earnings
+     * @dev only contractor or moderator are eligible to call this function
+     * @return value of his balance in ETH
+     */
     function getModeratorBalanceAndTotalEarnings() public onlyContractorOrModerator view returns (uint,uint) {
         return (moderatorBalanceETHWei,moderatorTotalEarningsETHWei);
     }
