@@ -11,17 +11,17 @@ spinner() {
     done
 }
 
-spinner 4
+spinner 2
 echo "Redeploying contracts to dev-local"
 yarn run deploy --migrate dev-local,private.test.k8s --reset
-spinner 4
+spinner 2
 echo "Sending some eth to addresses"
 yarn run test:one 2key-protocol/test/sendETH.spec.ts
-spinner 4
+spinner 2
 echo "Running test to fill some data to 2key-reg"
 yarn run test:one 2key-protocol/test/updateTwoKeyReg.dev.spec.ts
-spinner 4
+spinner 2
 echo "Running test"
 yarn run test
-spinner 4
+spinner 2
 echo "Bash script finished execution!"
