@@ -577,6 +577,10 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     function withdrawContractor() public onlyContractor returns (bool) {
         uint balance = contractorBalance;
         contractorBalance = 0;
+        /**
+         * In general transfer by itself prevents against reentrancy attack since it will throw if more than 2300 gas
+         * but however it's not bad to practice this pattern of firstly reducing balance and then doing transfer
+         */
         contractor.transfer(balance);
         return true;
     }
@@ -585,6 +589,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @notice Function where moderator or referrer can withdraw their available funds
      */
     function withdrawModeratorOrReferrer() public returns (bool) {
+        //Creating additional variable to prevent reentrancy attack
         uint balance;
         if(msg.sender == moderator) {
             balance = moderatorBalanceETHWei;
