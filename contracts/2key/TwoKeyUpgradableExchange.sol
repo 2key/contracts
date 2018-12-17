@@ -4,18 +4,19 @@ import '../openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol';
 import '../openzeppelin-solidity/contracts/token/ERC20/ERC20.sol';
 import "./GetCode.sol";
 import "./MaintainingPattern.sol";
+import "../interfaces/ITwoKeyExchangeContract.sol";
 
 contract TwoKeyUpgradableExchange is MaintainingPattern {
 
     using SafeMath for uint256;
     using SafeERC20 for ERC20;
 
-
     address public twoKeyExchangeContract;
 
 
     // The token being sold
     ERC20 public token;
+
 
     // How many token units a buyer gets per wei.
     // The rate is the conversion between wei and the smallest and indivisible token unit.
@@ -152,7 +153,8 @@ contract TwoKeyUpgradableExchange is MaintainingPattern {
     }
 
     /**
-     * Function to buyTokens
+     * @notice Function to buyTokens
+     * @param _beneficiary to get
      */
     function buyTokens(address _beneficiary) public payable onlyEligibleContracts {
         uint256 weiAmount = msg.value;

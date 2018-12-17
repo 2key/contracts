@@ -3,7 +3,6 @@ pragma solidity ^0.4.24;
 import "../token/ERC20/ERC20.sol";
 import "../math/SafeMath.sol";
 import "../token/ERC20/SafeERC20.sol";
-import "../../../interfaces/ITwoKeyExchangeContract.sol";
 
 
 /**
@@ -19,16 +18,14 @@ import "../../../interfaces/ITwoKeyExchangeContract.sol";
  * behavior.
  */
 contract Crowdsale {
-
   using SafeMath for uint256;
   using SafeERC20 for ERC20;
 
-
-  address public twoKeyExchangeContract;
-
-
   // The token being sold
   ERC20 public token;
+
+  // Address where funds are collected
+  address public wallet;
 
   // How many token units a buyer gets per wei.
   // The rate is the conversion between wei and the smallest and indivisible token unit.
@@ -36,10 +33,8 @@ contract Crowdsale {
   // 1 wei will give you 1 unit, or 0.001 TOK.
   uint256 public rate;
 
-  uint256 public transactionCounter = 0;
-
   // Amount of wei raised
-  uint256 public weiRaised = 0;
+  uint256 public weiRaised;
 
   /**
    * Event for token purchase logging
@@ -57,20 +52,66 @@ contract Crowdsale {
 
   /**
    * @param _rate Number of token units a buyer gets per wei
+   * @param _wallet Address where collected funds will be forwarded to
    * @param _token Address of the token being sold
    */
-  constructor(uint256 _rate, ERC20 _token, address _twoKeyExchangeContract) public {
+  constructor(uint256 _rate, address _wallet, ERC20 _token) public {
     require(_rate > 0);
+    require(_wallet != address(0));
     require(_token != address(0));
 
     rate = _rate;
+    wallet = _wallet;
     token = _token;
-    twoKeyExchangeContract = _twoKeyExchangeContract;
+  }
+
+  // -----------------------------------------
+  // Crowdsale external interface
+  // -----------------------------------------
+
+  /**
+   * @dev fallback function ***DO NOT OVERRIDE***
+   */
+  function () external payable {
+    buyTokens(msg.sender);
   }
 
   /**
+   * @dev low level token purchase ***DO NOT OVERRIDE***
+   * @param _beneficiary Address performing the token purchase
+   */
+  function buyTokens(address _beneficiary) public payable {
+
+    uint256 weiAmount = msg.value;
+    _preValidatePurchase(_beneficiary, weiAmount);
+
+    // calculate token amount to be created
+    uint256 tokens = _getTokenAmount(weiAmount);
+
+    // update state
+    weiRaised = weiRaised.add(weiAmount);
+
+    _processPurchase(_beneficiary, tokens);
+    emit TokenPurchase(
+      msg.sender,
+      _beneficiary,
+      weiAmount,
+      tokens
+    );
+
+    _updatePurchasingState(_beneficiary, weiAmount);
+
+    _forwardFunds();
+    _postValidatePurchase(_beneficiary, weiAmount);
+  }
+
+  // -----------------------------------------
+  // Internal interface (extensible)
+  // -----------------------------------------
+
+  /**
    * @dev Validation of an incoming purchase. Use require statements to revert state when conditions are not met. Use `super` in contracts that inherit from Crowdsale to extend their validations.
-   * Example from CappedCrowdsale.sol's _preValidatePurchase method: 
+   * Example from CappedCrowdsale.sol's _preValidatePurchase method:
    *   super._preValidatePurchase(_beneficiary, _weiAmount);
    *   require(weiRaised.add(_weiAmount) <= cap);
    * @param _beneficiary Address performing the token purchase
@@ -80,10 +121,24 @@ contract Crowdsale {
     address _beneficiary,
     uint256 _weiAmount
   )
-    internal
+  internal
   {
-    require(_beneficiary != address(0),'beneficiary address can not be 0' );
-    require(_weiAmount != 0, 'wei ammount can not be 0');
+    require(_beneficiary != address(0));
+    require(_weiAmount != 0);
+  }
+
+  /**
+   * @dev Validation of an executed purchase. Observe state and use revert statements to undo rollback when valid conditions are not met.
+   * @param _beneficiary Address performing the token purchase
+   * @param _weiAmount Value in wei involved in the purchase
+   */
+  function _postValidatePurchase(
+    address _beneficiary,
+    uint256 _weiAmount
+  )
+  internal
+  {
+    // optional override
   }
 
   /**
@@ -95,7 +150,7 @@ contract Crowdsale {
     address _beneficiary,
     uint256 _tokenAmount
   )
-    internal
+  internal
   {
     token.safeTransfer(_beneficiary, _tokenAmount);
   }
@@ -109,9 +164,23 @@ contract Crowdsale {
     address _beneficiary,
     uint256 _tokenAmount
   )
-    internal
+  internal
   {
     _deliverTokens(_beneficiary, _tokenAmount);
+  }
+
+  /**
+   * @dev Override for extensions that require an internal state to check for validity (current user contributions, etc.)
+   * @param _beneficiary Address receiving the tokens
+   * @param _weiAmount Value in wei involved in the purchase
+   */
+  function _updatePurchasingState(
+    address _beneficiary,
+    uint256 _weiAmount
+  )
+  internal
+  {
+    // optional override
   }
 
   /**
@@ -120,18 +189,15 @@ contract Crowdsale {
    * @return Number of tokens that can be purchased with the specified _weiAmount
    */
   function _getTokenAmount(uint256 _weiAmount)
-    internal view returns (uint256)
+  internal view returns (uint256)
   {
-    uint value;
-    bool flag;
-    (value,flag,,) = ITwoKeyExchangeContract(twoKeyExchangeContract).getFiatCurrencyDetails("USD");
-    return (_weiAmount*value).div(10**18).div(rate);
+    return _weiAmount.mul(rate);
   }
 
   /**
    * @dev Determines how ETH is stored/forwarded on purchases.
    */
-  function _forwardFunds(address _twoKeyAdmin) internal {
-    _twoKeyAdmin.transfer(msg.value);
+  function _forwardFunds() internal {
+    wallet.transfer(msg.value);
   }
 }
