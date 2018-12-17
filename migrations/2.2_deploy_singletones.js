@@ -86,7 +86,7 @@ module.exports = function deploy(deployer) {
             //TODO: revert back to proxy address of exchange once it's ready
             .then(() => deployer.deploy(TwoKeyUpgradableExchange, 95, TwoKeyAdmin.address, TwoKeyEconomy.address, TwoKeyExchangeContract.address, [maintainerAddress]))
             .then(() => TwoKeyUpgradableExchange.deployed())
-            .then(() => deployer.deploy(TwoKeySingletonesRegistry, [maintainerAddress], TwoKeyAdmin.address))
+            .then(() => deployer.deploy(TwoKeySingletonesRegistry, [maintainerAddress], '0x0')) //adding empty admin address
             .then(() => TwoKeySingletonesRegistry.deployed().then(async (registry) => {
                 /**
                  * Here we will be adding all contracts to the Registry and create a Proxies for them
