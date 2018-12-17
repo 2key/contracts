@@ -71,10 +71,10 @@ contract TwoKeyContract is BasicToken, Ownable {
     if (plasma != address(0)) {
       return plasma;
     }
-    return me;
+    return me;  // assume me is a plasma address. TODO not to make this assumption
   }
 
-  function ethereumOf(address me) public view returns (address) {
+  function ethereumOf(address me) public view returns (address) {  // TODO do we need this?
     address ethereum = me;
     if (registry == address(0)) {
       return ethereum;
