@@ -22,8 +22,8 @@ contract TwoKeyUpgradableExchange is MaintainingPattern, Crowdsale {
      * @notice Modifier which will validate if contract is eligible to buy tokens
      */
     modifier onlyEligibleContracts {
-    bytes memory code = GetCode.at(msg.sender);
-    require(isContractEligibleToBuyTokens[code] == true);
+        bytes memory code = GetCode.at(msg.sender);
+        require(isContractEligibleToBuyTokens[code] == true);
         _;
     }
 
