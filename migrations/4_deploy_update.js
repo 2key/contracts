@@ -3,6 +3,7 @@ const EventSource = artifacts.require('TwoKeyEventSource');
 const TwoKeyRegistry = artifacts.require('TwoKeyRegistry');
 const TwoKeySingletonesRegistry = artifacts.require('TwoKeySingletonesRegistry');
 const TwoKeyExchangeContract = artifacts.require('TwoKeyExchangeContract');
+const TwoKeyCongress = artifacts.require('TwoKeyCongress');
 const Proxy = artifacts.require('UpgradeabilityProxy');
 const fs = require('fs');
 const path = require('path');
@@ -12,16 +13,19 @@ const proxyFile = path.join(__dirname, '../build/contracts/proxyAddresses.json')
 
 module.exports = function deploy(deployer) {
     let maintainerAddress = (deployer.network.startsWith('ropsten') || deployer.network.startsWith('rinkeby') || deployer.network.startsWith('public.')) ? '0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f' : '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7';
+
     /**
      * Is argument 'update' is found
      * @type {boolean}
      */
     let found = false;
+
     /**
      * Is Registry contract the one we are updating
      * @type {boolean}
      */
     let isRegistry = false;
+
     /**
      * Is eventSource contract the one we are updating
      * @type {boolean}
@@ -33,6 +37,18 @@ module.exports = function deploy(deployer) {
      * @type {boolean}
      */
     let isTwoKeyExchangeContract = false;
+
+    /**
+     * Is twoKeyAdminContract the one we are updating
+     * @type {boolean}
+     */
+    let isTwoKeyAdmin = false;
+
+    /**
+     * Is twoKeyCongress contract the one we are updating
+     * @type {boolean}
+     */
+    let isTwoKeyCongress = false;
 
     /**
      * Determining which contract we want to update
@@ -49,6 +65,12 @@ module.exports = function deploy(deployer) {
         }
         else if (argument == 'TwoKeyExchangeContract') {
             isTwoKeyExchangeContract = true;
+        }
+        else if (argument == 'TwoKeyAdmin') {
+            isTwoKeyAdmin = true;
+        }
+        else if (argument == 'TwoKeyCongress') {
+            isTwoKeyCongress = true;
         }
     });
 
@@ -190,6 +212,48 @@ module.exports = function deploy(deployer) {
                         })
                     })
                 )
+        } else if(isTwoKeyAdmin) {
+            /**
+             * If contract we're updating is TwoKeyAdmin (arugment) this 'subscript' will be executed
+             */
+            let lastTwoKeyAdminContract;
+            console.log('TwoKeyAdmin will be updated now.');
+            deployer.deploy(TwoKeyAdmin)
+                .then(() => TwoKeyAdmin.deployed()
+                    .then((twoKeyAdminInstance) => {
+                        lastTwoKeyAdminContract = twoKeyAdminInstance.address;
+                    })
+                    .then(() => TwoKeySingletonesRegistry.deployed())
+                    .then(async(registry) => {
+                        await new Promise(async(resolve,reject) => {
+                            try {
+                                console.log('... Adding new version of TwoKeyAdminContract to the registry contract');
+                                const twoKeyAdmin = fileObject.TwoKeyAdmin || {};
+                                let v = parseInt(twoKeyAdmin[networkId.toString()].Version.substr(-1)) + 1;
+                                twoKeyAdmin[networkId.toString()].Version = twoKeyAdmin[networkId.toString()].Version.substr(0, twoKeyAdmin[networkId.toString()].Version.length - 1) + v.toString();
+                                console.log('New version : ' + twoKeyAdmin[networkId.toString()].Version);
+                                let txHash = await registry.addVersion("TwoKeyAdmin", twoKeyAdmin[networkId.toString()].Version, TwoKeyAdmin.address);
+
+                                console.log('... Upgrading proxy to new version');
+                                txHash = await Proxy.at(twoKeyAdmin[networkId.toString()].Proxy).upgradeTo("TwoKeyAdmin", twoKeyAdmin[networkId.toString()].Version);
+                                twoKeyAdmin[networkId.toString()].address = lastTwoKeyAdminContract;
+
+                                fileObject['TwoKeyAdmin'] = twoKeyAdmin;
+                                fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
+                                resolve(txHash);
+                            } catch (e) {
+                                reject(e);
+                            }
+                        })
+                    })
+                )
+        } else if(isTwoKeyCongress) {
+            /**
+             * If contract we're updating is TwoKeyCongress (argument) this 'subscript' will be executed
+             */
+            let lastTwoKeyCongressContract;
+            console.log('TwoKeyCongress will be updated now.');
+
         }
     } else {
         console.log('Argument is not found - no contracts will be updated.');
