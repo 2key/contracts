@@ -82,14 +82,14 @@ contract TwoKeyAdmin is Upgradeable {
 
 	/// @notice Function to add moderator
 	/// @param _address is address of moderator
-	function addMaintainerForRegistry(address _address) public onlyTwoKeyCongress {
+	function addMaintainerForRegistry(address _address) external onlyTwoKeyCongress {
 		require (_address != address(0));
 		twoKeyReg.addTwoKeyMaintainer(_address);
 	}
 
     /// @notice Function to whitelist address as an authorized user for twoKeyEventSource contract
 	/// @param _maintainers is array of addresses of maintainers
-	function twoKeyEventSourceAddMaintainer(address [] _maintainers) public onlyTwoKeyCongress{
+	function twoKeyEventSourceAddMaintainer(address [] _maintainers) external onlyTwoKeyCongress{
 		require(_maintainers.length > 0);
 		twoKeyEventSource.addMaintainers(_maintainers);
 	}
@@ -97,7 +97,7 @@ contract TwoKeyAdmin is Upgradeable {
     /// @notice Function to whitelist contract address for Event Source contract
 	/// @dev We're requiring contract address different from address 0 as it is required to be deployed before calling this method
 	/// @param _contractAddress is address of a contract
-	function twoKeyEventSourceWhitelistContract(address _contractAddress) public onlyTwoKeyCongress {
+	function twoKeyEventSourceWhitelistContract(address _contractAddress) external onlyTwoKeyCongress {
 		require(_contractAddress != address(0));
 		twoKeyEventSource.addContract(_contractAddress);
 	}
@@ -105,43 +105,43 @@ contract TwoKeyAdmin is Upgradeable {
     /// @notice Function to add/update name - address pair from twoKeyAdmin
 	/// @param _name is name of user
 	/// @param _addr is address of user
-    function addNameToReg(string _name, address _addr, string fullName, string email) public {
+    function addNameToReg(string _name, address _addr, string fullName, string email) external {
     	twoKeyReg.addName(_name, _addr, fullName, email);
     }
 
     /// @notice Function to update twoKeyUpgradableExchange contract address
 	/// @param _exchange is address of new twoKeyUpgradableExchange contract
-	function updateExchange(address _exchange) public  onlyTwoKeyCongress {
+	function updateExchange(address _exchange) external onlyTwoKeyCongress {
 		require (_exchange != address(0));
 		twoKeyUpgradableExchange = TwoKeyUpgradableExchange(_exchange);
 	}
 
     /// @notice Function to update twoKeyRegistry contract address
 	/// @param _reg is address of new twoKeyRegistry contract
-	function updateRegistry(address _reg) public onlyTwoKeyCongress {
+	function updateRegistry(address _reg) external onlyTwoKeyCongress {
 		require (_reg != address(0));
 		twoKeyReg = TwoKeyRegistry(_reg);
 	}
 
     /// @notice Function to update twoKeyEventSource contract address
 	/// @param _eventSource is address of new twoKeyEventSource contract
-	function updateEventSource(address _eventSource) public onlyTwoKeyCongress {
+	function updateEventSource(address _eventSource) external onlyTwoKeyCongress {
 		require (_eventSource != address(0));
 		twoKeyEventSource = TwoKeyEventSource(_eventSource);
 	}
 
 	/// @notice Function to freeze all transfers for 2KEY token
-	function freezeTransfersInEconomy() public onlyTwoKeyCongress {
+	function freezeTransfersInEconomy() external onlyTwoKeyCongress {
 		IERC20(address(twoKeyEconomy)).freezeTransfers();
 	}
 
 	/// @notice Function to unfreeze all transfers for 2KEY token
-	function unfreezeTransfersInEconomy() public onlyTwoKeyCongress {
+	function unfreezeTransfersInEconomy() external onlyTwoKeyCongress {
 		IERC20(address(twoKeyEconomy)).unfreezeTransfers();
 	}
 
 	//TODO: Backdoor function, delete (modify) once
-    function transfer2KeyTokens(address _to, uint256 _amount) public returns (bool) {
+    function transfer2KeyTokens(address _to, uint256 _amount) external returns (bool) {
 		bool completed = twoKeyEconomy.transfer(_to, _amount);
 		return completed;
 	}
@@ -150,27 +150,27 @@ contract TwoKeyAdmin is Upgradeable {
 	/// View function - doesn't cost any gas to be executed
 	/// @notice Function to fetch twoKeyEconomy contract address 
 	/// @return _economy is address of twoKeyEconomy contract 
-    function getTwoKeyEconomy() public view returns(address)  {
+    function getTwoKeyEconomy() external view returns(address)  {
     	return address(twoKeyEconomy);
     }
 	
 	/// View function - doesn't cost any gas to be executed
 	/// @notice Function to fetch twoKeyReg contract address 
 	/// @return _address is address of twoKeyReg contract
-    function getTwoKeyReg() public view returns(address)  {
+    function getTwoKeyReg() external view returns(address)  {
     	return address(twoKeyReg);
     }
 
     /// View function - doesn't cost any gas to be executed
 	/// @notice Function to fetch twoKeyUpgradableExchange contract address 
 	/// @return _address is address of twoKeyUpgradableExchange contract
-    function getTwoKeyUpgradableExchange() public view returns(address)  {
+    function getTwoKeyUpgradableExchange() external view returns(address)  {
     	return address(twoKeyUpgradableExchange);
     }
 
 	/// @notice Fallback function will transfer payable value to new admin contract if admin contract is replaced else will be stored this the exist admin contract as it's balance
 	/// @dev A payable fallback method
-	function() public payable {
+	function() external payable {
 
     }
     
