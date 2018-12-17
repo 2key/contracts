@@ -73,6 +73,7 @@ contract TwoKeyContract is BasicToken, Ownable {
     }
     return me;
   }
+
   function ethereumOf(address me) public view returns (address) {
     address ethereum = me;
     if (registry == address(0)) {
