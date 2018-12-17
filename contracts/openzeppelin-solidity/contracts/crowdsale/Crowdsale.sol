@@ -55,8 +55,6 @@ contract Crowdsale {
     uint256 amount
   );
 
-  event Msg(address indexed _to, uint value, address indexed token);
-
   /**
    * @param _rate Number of token units a buyer gets per wei
    * @param _token Address of the token being sold
@@ -89,20 +87,6 @@ contract Crowdsale {
   }
 
   /**
-   * @dev Validation of an executed purchase. Observe state and use revert statements to undo rollback when valid conditions are not met.
-   * @param _beneficiary Address performing the token purchase
-   * @param _weiAmount Value in wei involved in the purchase
-   */
-  function _postValidatePurchase(
-    address _beneficiary,
-    uint256 _weiAmount
-  )
-    internal
-  {
-    // optional override
-  }
-
-  /**
    * @dev Source of tokens. Override this method to modify the way in which the crowdsale ultimately gets and sends its tokens.
    * @param _beneficiary Address performing the token purchase
    * @param _tokenAmount Number of tokens to be emitted
@@ -128,20 +112,6 @@ contract Crowdsale {
     internal
   {
     _deliverTokens(_beneficiary, _tokenAmount);
-  }
-
-  /**
-   * @dev Override for extensions that require an internal state to check for validity (current user contributions, etc.)
-   * @param _beneficiary Address receiving the tokens
-   * @param _weiAmount Value in wei involved in the purchase
-   */
-  function _updatePurchasingState(
-    address _beneficiary,
-    uint256 _weiAmount
-  )
-    internal
-  {
-    // optional override
   }
 
   /**
