@@ -1,29 +1,27 @@
 pragma solidity ^0.4.24;
-import '../openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import "./TwoKeyTypes.sol";
 import "../interfaces/ITwoKeyAcquisitionCampaignERC20.sol";
-import "./RBACWithAdmin.sol";
-import "./TwoKeyConversionStates.sol";
+import "./TwoKeyConversionAndConverterStates.sol";
 import "./TwoKeyLockupContract.sol";
 import "../openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "./TwoKeyConverterStates.sol";
 import "../interfaces/IERC20.sol";
 
 
 // adapted from: 
 // https://openzeppelin.org/api/docs/crowdsale_validation_WhitelistedCrowdsale.html
 
-contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
+contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionAndConverterStates {
 
     using SafeMath for uint256;
+    uint numberOfConversions;
+    Conversion[] public conversions;
+    mapping(address => uint[]) converterToHisConversions;
 
-    mapping(address => Conversion) public conversions;
+    //State to all converters in that state
+    mapping(bytes32 => address[]) stateToConverter;
 
-    // Mapping where we will store as the key state of conversion, and as value, there'll be all converters which conversions are in that state
-    mapping(bytes32 => address[]) conversionStateToConverters;
-
-    // Mapping where we will store converter address as the key, and as the value we will save the state of his conversion
-    mapping(address => ConversionState) converterToConversionState;
+    //Converter to his state
+    mapping(address => ConverterState) converterToState;
 
     mapping(address => address[]) converterToLockupContracts;
 
@@ -75,7 +73,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
 
 
     modifier onlyApprovedConverter() {
-        require(converterToConversionState[msg.sender] == ConversionState.APPROVED);
+        require(converterToState[msg.sender] == ConverterState.APPROVED);
         _;
     }
 
@@ -113,11 +111,9 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
 
     /// @notice Function which checks if converter has converted
     /// @dev will throw if not
-    /// @param converterAddress is the address of converter
-    function isConversionExecuted(address converterAddress) public view returns (bool) {
-        Conversion memory c = conversions[converterAddress];
-        require(c.state != ConversionState.FULFILLED);
-        require(c.state != ConversionState.CANCELLED);
+    function isConversionExecuted(uint _conversionId) public view returns (bool) {
+        Conversion memory c = conversions[_conversionId];
+        require(c.state == ConversionState.PENDING_APPROVAL || c.state == ConversionState.APPROVED);
         return true;
     }
 
@@ -139,52 +135,63 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
             uint256 baseTokensForConverterUnits,
             uint256 bonusTokensForConverterUnits,
             uint256 expiryConversion) public onlyTwoKeyAcquisitionCampaign {
-        // these are going to be global variables
 
+        ConversionState state = ConversionState.PENDING_APPROVAL;
+        if(converterToState[_converterAddress] == ConverterState.APPROVED) {
+            state = ConversionState.APPROVED;
+        } else if (converterToState[_converterAddress] == ConverterState.REJECTED) {
+            state = ConversionState.REJECTED;
+        }
         Conversion memory c = Conversion(_contractor, _contractorProceeds, _converterAddress,
-            ConversionState.PENDING, assetSymbol, assetContractERC20, _conversionAmount,
+            state , assetSymbol, assetContractERC20, _conversionAmount,
             _maxReferralRewardETHWei, _moderatorFeeETHWei, baseTokensForConverterUnits,
             bonusTokensForConverterUnits, CampaignType.CPA_FUNGIBLE,
-            now, now + expiryConversion * (1 hours)); // commented *(1hours)
+            now, now + expiryConversion * (1 hours));
 
-        conversions[_converterAddress] = c;
-        converterToConversionState[_converterAddress] = ConversionState.PENDING;
-        conversionStateToConverters[bytes32("PENDING")].push(_converterAddress);
-    }
+        conversions.push(c);
+        converterToHisConversions[msg.sender].push(numberOfConversions);
+        numberOfConversions++;
 
-    /// @notice Function to encode provided parameters into bytes
-    /// @param converter is address of converter
-    /// @param conversionCreatedAt is timestamp when conversion is created
-    /// @param conversionAmountETH is the amount of conversion in ETH
-    /// @return bytes containing all this data concatenated and encoded into hex
-    function encodeParams(address converter, uint conversionCreatedAt, uint conversionAmountETH) internal pure returns(bytes) {
-        return abi.encodePacked(converter, conversionCreatedAt, conversionAmountETH);
-    }
-
-    function getEncodedConversion(address converter) public view returns (bytes) {
-        Conversion memory _conversion = conversions[converter];
-        bytes memory encoded = encodeParams(_conversion.converter, _conversion.conversionCreatedAt, _conversion.conversionAmount);
-        return encoded;
+        if(converterToState[_converterAddress] == ConverterState.NOT_EXISTING) {
+            converterToState[_converterAddress] = ConverterState.PENDING_APPROVAL;
+            stateToConverter[bytes32("PENDING_APPROVAL")].push(_converterAddress);
+        }
     }
 
 
-    function executeConversion(address _converter) public onlyApprovedConverter {
-        require(isConversionExecuted(_converter));
-        performConversion(_converter);
-        moveFromApprovedToFulfilledState(_converter);
+    /**
+     * @notice Function to execute conversion
+     * @param _conversionId is the id of the conversion
+     * @dev this can be called only by approved converter
+     */
+    function executeConversion(uint _conversionId) public onlyApprovedConverter {
+        require(isConversionExecuted(_conversionId));
+//        bool flag = false;
+//        for(uint i=0; i<converterToHisConversions[msg.sender].length; i++) {
+//            if(converterToHisConversions[msg.sender][i] == _conversionId) {
+//                flag = true;
+//            }
+//        }
+//        require(flag);
+        performConversion(_conversionId);
     }
 
-    function performConversion(address _converter) internal {
-        Conversion memory conversion = conversions[_converter];
 
-        ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateRefchainRewards(conversion.maxReferralRewardETHWei, _converter);
+    /**
+     * @notice Function to perform all the logic which has to be done when we're performing conversion
+     * @param _conversionId is the id
+     */
+    function performConversion(uint _conversionId) internal {
+        Conversion memory conversion = conversions[_conversionId];
+
+        ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateRefchainRewards(conversion.maxReferralRewardETHWei, conversion.converter);
 
         // update moderator balances
         ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateModeratorBalanceETHWei(conversion.moderatorFeeETHWei);
 
 
         TwoKeyLockupContract lockupContract = new TwoKeyLockupContract(bonusTokensVestingStartShiftInDaysFromDistributionDate, bonusTokensVestingMonths, tokenDistributionDate, maxDistributionDateShiftInDays,
-            conversion.baseTokenUnits, conversion.bonusTokenUnits, _converter, conversion.contractor, twoKeyAcquisitionCampaignERC20, assetContractERC20);
+            conversion.baseTokenUnits, conversion.bonusTokenUnits, conversion.converter, conversion.contractor, twoKeyAcquisitionCampaignERC20, assetContractERC20);
 
         allLockUpContracts.push(address(lockupContract));
 
@@ -192,29 +199,23 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
         ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).moveFungibleAsset(address(lockupContract), totalUnits);
 
         ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateContractorProceeds(conversion.contractorProceedsETHWei);
-        conversion.state = ConversionState.FULFILLED;
-        conversions[_converter] = conversion;
-        converterToLockupContracts[_converter].push(lockupContract);
+        conversion.state = ConversionState.EXECUTED;
+        conversions[_conversionId] = conversion;
+        converterToLockupContracts[conversion.converter].push(lockupContract);
     }
 
     /// @notice Function to convert converter state to it's bytes representation (Maybe we don't even need it)
     /// @param state is conversion state
     /// @return bytes32 (hex) representation of state
-    function convertConverterStateToBytes(ConversionState state) public view returns (bytes32) {
-        if(ConversionState.APPROVED == state) {
+    function convertConverterStateToBytes(ConverterState state) public pure returns (bytes32) {
+        if(ConverterState.PENDING_APPROVAL == state) {
+            return bytes32("PENDING_APPROVAL");
+        }
+        if(ConverterState.APPROVED == state) {
             return bytes32("APPROVED");
         }
-        if(ConversionState.REJECTED == state) {
+        if(ConverterState.REJECTED == state) {
             return bytes32("REJECTED");
-        }
-        if(ConversionState.CANCELLED == state) {
-            return bytes32("CANCELLED");
-        }
-        if(ConversionState.PENDING == state) {
-            return bytes32("PENDING");
-        }
-        if(ConversionState.FULFILLED == state) {
-            return bytes32("FULFILLED");
         }
     }
 
@@ -224,7 +225,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     /// @param _converter is the address of converter
     /// @return true if yes, otherwise false
     function isConverterApproved(address _converter) public onlyContractorOrModerator view  returns (bool) {
-        if(converterToConversionState[_converter] == ConversionState.APPROVED) {
+        if(converterToState[_converter] == ConverterState.APPROVED) {
             return true;
         }
         return false;
@@ -236,7 +237,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     /// @param _converter is the address of converter
     /// @return true if yes, otherwise false
     function isConverterRejected(address _converter) public view onlyContractorOrModerator returns (bool) {
-        if(converterToConversionState[_converter] == ConversionState.REJECTED) {
+        if(converterToState[_converter] == ConverterState.REJECTED) {
             return true;
         }
         return false;
@@ -247,36 +248,13 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     /// @dev only contractor or moderator are eligible to call this function
     /// @param _converter is the address of converter
     /// @return true if yes, otherwise false
-    function isConverterCancelled(address _converter) public view onlyContractorOrModerator returns (bool) {
-        if(converterToConversionState[_converter] == ConversionState.CANCELLED) {
+    function isConverterPendingApproval(address _converter) public view onlyContractorOrModerator returns (bool) {
+        if(converterToState[_converter] == ConverterState.PENDING_APPROVAL) {
             return true;
         }
         return false;
     }
 
-
-    /// @notice Function to check whether converter is fulfilled or not
-    /// @dev only contractor or moderator are eligible to call this function
-    /// @param _converter is the address of converter
-    /// @return true if yes, otherwise false
-    function isConverterFulfilled(address _converter) public view onlyContractorOrModerator returns (bool) {
-        if(converterToConversionState[_converter] == ConversionState.FULFILLED) {
-            return true;
-        }
-        return false;
-    }
-
-
-    /// @notice Function to check whether converter is pending or not
-    /// @dev only contractor or moderator are eligible to call this function
-    /// @param _converter is the address of converter
-    /// @return true if yes, otherwise false
-    function isConverterPending(address _converter) public view onlyContractorOrModerator returns (bool) {
-        if(converterToConversionState[_converter] == ConversionState.PENDING) {
-            return true;
-        }
-        return false;
-    }
 
 //    function getConversionForConverter(
 //        address _converter
@@ -319,14 +297,14 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     /// @dev view function - no gas cost & only Contractor or Moderator can call this function - otherwise will revert
     /// @return array of pending converter addresses
     function getAllPendingConverters() public view onlyContractorOrModerator returns (address[]) {
-        return (conversionStateToConverters[bytes32("PENDING")]);
+        return (stateToConverter[bytes32("PENDING_APPROVAL")]);
     }
 
     /// @notice Function to get all rejected converters
     /// @dev view function - no gas cost & only Contractor or Moderator can call this function - otherwise will revert
     /// @return array of rejected converter addresses
     function getAllRejectedConverters() public view onlyContractorOrModerator returns(address[]) {
-        return conversionStateToConverters[bytes32("REJECTED")];
+        return stateToConverter[bytes32("REJECTED")];
     }
 
 
@@ -334,23 +312,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     /// @dev view function - no gas cost & only Contractor or Moderator can call this function - otherwise will revert
     /// @return array of approved converter addresses
     function getAllApprovedConverters() public view onlyContractorOrModerator returns(address[]) {
-        return conversionStateToConverters[bytes32("APPROVED")];
-    }
-
-
-    /// @notice Function to get all cancelled converters
-    /// @dev view function - no gas cost & only Contractor or Moderator can call this function - otherwise will revert
-    /// @return array of cancelled converter addresses
-    function getAllCancelledConverters() public view onlyContractorOrModerator returns(address[]) {
-        return conversionStateToConverters[bytes32("CANCELLED")];
-    }
-
-
-    /// @notice Function to get all fulfilled converters
-    /// @dev view function - no gas cost & only Contractor or Moderator can call this function - otherwise will revert
-    /// @return array of fulfilled converter addresses
-    function getAllFulfilledConverters() public view onlyContractorOrModerator returns(address[]) {
-        return conversionStateToConverters[bytes32("FULFILLED")];
+        return stateToConverter[bytes32("APPROVED")];
     }
 
 
@@ -367,16 +329,16 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     /// @param _converter is the address of converter
     /// @param destinationState is the state we'd like to move converter to
     function moveFromStateAToStateB(address _converter, bytes32 destinationState) internal {
-        ConversionState state = converterToConversionState[_converter];
+        ConverterState state = converterToState[_converter];
         bytes32 key = convertConverterStateToBytes(state);
-        address[] memory pending = conversionStateToConverters[key];
+        address[] memory pending = stateToConverter[key];
         for(uint i=0; i< pending.length; i++) {
             if(pending[i] == _converter) {
-                conversionStateToConverters[destinationState].push(_converter);
+                stateToConverter[destinationState].push(_converter);
                 pending[i] = pending[pending.length-1];
                 delete pending[pending.length-1];
-                conversionStateToConverters[key] = pending;
-                conversionStateToConverters[key].length--;
+                stateToConverter[key] = pending;
+                stateToConverter[key].length--;
                 break;
             }
         }
@@ -389,19 +351,8 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     function moveFromPendingOrRejectedToApprovedState(address _converter) private {
         bytes32 destination = bytes32("APPROVED");
         moveFromStateAToStateB(_converter, destination);
-        converterToConversionState[_converter] = ConversionState.APPROVED;
+        converterToState[_converter] = ConverterState.APPROVED;
     }
-
-
-    /// @notice Function where we can change state of converter to Approved
-    /// @dev Converter can only be approved if his previous state is pending or rejected
-    /// @param _converter is the address of converter
-    function moveFromPendingOrRejectedToCancelledState(address _converter) private {
-        bytes32 destination = bytes32("CANCELLED");
-        moveFromStateAToStateB(_converter, destination);
-        converterToConversionState[_converter] = ConversionState.CANCELLED;
-    }
-
 
     /// @notice Function where we're going to move state of conversion from pending to rejected
     /// @dev private function, will be executed in another one
@@ -409,16 +360,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     function moveFromPendingToRejectedState(address _converter) private {
         bytes32 destination = bytes32("REJECTED");
         moveFromStateAToStateB(_converter, destination);
-        converterToConversionState[_converter] = ConversionState.REJECTED;
-    }
-
-    /// @notice Function where we're going to move state of conversion from approved to fulfilled
-    /// @dev private function, will be executed in another one
-    /// @param _converter is the address of converter
-    function moveFromApprovedToFulfilledState(address _converter) private {
-        bytes32 destination = bytes32("FULFILLED");
-        moveFromStateAToStateB(_converter, destination);
-        converterToConversionState[_converter] = ConversionState.FULFILLED;
+        converterToState[_converter] = ConverterState.REJECTED;
     }
 
 
@@ -426,7 +368,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     /// @dev only moderator or contractor can call this method
     /// @param _converter is the address of converter
     function approveConverter(address _converter) public onlyContractorOrModerator {
-        require(converterToConversionState[_converter] == ConversionState.PENDING || converterToConversionState[_converter] == ConversionState.REJECTED);
+        require(converterToState[_converter] == ConverterState.PENDING_APPROVAL || converterToState[_converter] == ConverterState.REJECTED);
         moveFromPendingOrRejectedToApprovedState(_converter);
     }
 
@@ -435,26 +377,26 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates {
     /// @dev only moderator or contractor can call this function
     /// @param _converter is the address of converter
     function rejectConverter(address _converter) public onlyContractorOrModerator  {
-        require(converterToConversionState[_converter] == ConversionState.PENDING);
+        require(converterToState[_converter] == ConverterState.PENDING_APPROVAL);
         moveFromPendingToRejectedState(_converter);
     }
 
-
-    /// @notice Function where contractor or moderator can cancel the converter
-    function cancelConverter() public {
-        require(converterToConversionState[msg.sender] == ConversionState.REJECTED ||
-        converterToConversionState[msg.sender] == ConversionState.PENDING);
-        moveFromPendingOrRejectedToCancelledState(msg.sender);
-
-        Conversion memory conversion = conversions[msg.sender];
-        ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).sendBackEthWhenConversionCancelled(msg.sender, conversion.conversionAmount);
-    }
-
-
-    function cancelAndRejectContract() external onlyTwoKeyAcquisitionCampaign {
-        for(uint i=0; i<allLockUpContracts.length; i++) {
-            TwoKeyLockupContract(allLockUpContracts[i]).cancelCampaignAndGetBackTokens(assetContractERC20);
-        }
-    }
+//
+//    /// @notice Function where contractor or moderator can cancel the converter
+//    function cancelConverter() public {
+//        require(converterToState[msg.sender] == ConversionState.REJECTED ||
+//        converterToState[msg.sender] == ConversionState.PENDING);
+//        moveFromPendingOrRejectedToCancelledState(msg.sender);
+//
+//        Conversion memory conversion = conversions[msg.sender];
+//        ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).sendBackEthWhenConversionCancelled(msg.sender, conversion.conversionAmount);
+//    }
+//
+//
+//    function cancelAndRejectContract() external onlyTwoKeyAcquisitionCampaign {
+//        for(uint i=0; i<allLockUpContracts.length; i++) {
+//            TwoKeyLockupContract(allLockUpContracts[i]).cancelCampaignAndGetBackTokens(assetContractERC20);
+//        }
+//    }
 
 }

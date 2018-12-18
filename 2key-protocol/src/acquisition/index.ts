@@ -799,7 +799,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
                 const conversionHandler = await promisify(campaignInstance.conversionHandler, [{from}]);
                 const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandler);
-                const conversion = await promisify(conversionHandlerInstance.conversions, [from]);
+                const conversion = await promisify(conversionHandlerInstance.conversions, [{from}]);
                 resolve(conversion);
             } catch (e) {
                 reject(e);
@@ -988,7 +988,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
                 const conversionHandlerInstance = this.base.web3.eth.contract(contracts.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
                 const nonce = await this.helpers._getNonce(from);
-                const txHash: string = await promisify(conversionHandlerInstance.executeConversion, [converter, {
+                const txHash: string = await promisify(conversionHandlerInstance.executeConversion, [0, {
                     from,
                     gasPrice,
                     nonce

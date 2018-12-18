@@ -598,9 +598,6 @@ describe('TwoKeyProtocol', () => {
         txHash = await twoKeyProtocol.transferEther(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD * 1.1, 'ether'), from);
         console.log('HASH', txHash);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-        const conversion = await twoKeyProtocol.AcquisitionCampaign.getConverterConversion(campaignAddress, from);
-        console.log(conversion);
-        expect(conversion[2]).to.be.equal(from);
     }).timeout(30000);
 
     it('should transfer arcs from new user to test', async () => {
@@ -636,10 +633,6 @@ describe('TwoKeyProtocol', () => {
         });
         txHash = await twoKeyProtocol.transferEther(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD * 1.1, 'ether'), from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-        const conversion = await twoKeyProtocol.AcquisitionCampaign.getConverterConversion(campaignAddress, from);
-        console.log(conversion);
-        // expect(lockup).to.exist;
-        expect(conversion[2]).to.be.equal(from);
     }).timeout(30000);
 
 
@@ -705,40 +698,6 @@ describe('TwoKeyProtocol', () => {
 
     }).timeout(30000);
 
-    it('should cancel converter', async () => {
-        const {web3, address} = web3switcher.gmail2();
-        from = address;
-        twoKeyProtocol.setWeb3({
-            web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            plasmaPK: Sign.generatePrivateKey().toString('hex'),
-        });
-
-        txHash = await twoKeyProtocol.AcquisitionCampaign.cancelConverter(campaignAddress, from);
-        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-
-    }).timeout(30000);
-
-    it('should get all pending converters after cancellation', async () => {
-        const {web3, address} = web3switcher.aydnep();
-        from = address;
-        twoKeyProtocol.setWeb3({
-            web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            plasmaPK: Sign.generatePrivateKey().toString('hex'),
-        });
-
-        const allPending = await twoKeyProtocol.AcquisitionCampaign.getAllPendingConverters(campaignAddress, from);
-        console.log('All pending after cancellation: ', allPending);
-        expect(allPending.length).to.be.equal(1);
-    }).timeout(30000);
-
     it('should print campaigns where user converter', async() => {
         const {web3, address} = web3switcher.test4();
         from = address;
@@ -756,6 +715,16 @@ describe('TwoKeyProtocol', () => {
 
 
     it('should execute conversion and create lockup contract', async () => {
+        const {web3, address} = web3switcher.test4();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            plasmaPK: Sign.generatePrivateKey().toString('hex'),
+        });
         const txHash = await twoKeyProtocol.AcquisitionCampaign.executeConversion(campaignAddress, env.TEST4_ADDRESS, from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(30000);
