@@ -163,7 +163,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @notice Function to set cut
      * @param cut is the cut amount user want to set. Must be less <= 100 or 255 (default value)
      */
-    function setCut(uint256 cut) public {
+    function setCut(uint256 cut) private {
         // the sender sets what is the percentage of the bounty s/he will receive when acting as an influencer
         // the value 255 is used to signal equal partition with other influencers
         // A sender can set the value only once in a contract
