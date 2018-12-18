@@ -34,7 +34,7 @@ contract TwoKeyEconomy is StandardTokenModified, Ownable {
     constructor (address _twoKeyAdmin) Ownable() public {
         require(_twoKeyAdmin != address(0));
         twoKeyAdmin = _twoKeyAdmin;
-        totalSupply_= 1000000000000000000000000;
+        totalSupply_= 1000000000000000000000000000;
         balances[_twoKeyAdmin] = totalSupply_;
     }
 
