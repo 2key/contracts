@@ -118,6 +118,15 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionAndConverterSta
         return true;
     }
 
+    function determineConversionState(address _converterAddress) private view returns (ConversionState) {
+        ConversionState state = ConversionState.PENDING_APPROVAL;
+        if(converterToState[_converterAddress] == ConverterState.APPROVED) {
+            state = ConversionState.APPROVED;
+        } else if (converterToState[_converterAddress] == ConverterState.REJECTED) {
+            state = ConversionState.REJECTED;
+        }
+        return state;
+    }
 
     /// @notice Support function to create conversion
     /// @dev This function can only be called from TwoKeyAcquisitionCampaign contract address
@@ -137,12 +146,12 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionAndConverterSta
             uint256 bonusTokensForConverterUnits,
             uint256 expiryConversion) public onlyTwoKeyAcquisitionCampaign {
 
-        ConversionState state = ConversionState.PENDING_APPROVAL;
-        if(converterToState[_converterAddress] == ConverterState.APPROVED) {
-            state = ConversionState.APPROVED;
-        } else if (converterToState[_converterAddress] == ConverterState.REJECTED) {
-            state = ConversionState.REJECTED;
-        }
+        ConversionState state = determineConversionState(_converterAddress);
+//        if(converterToState[_converterAddress] == ConverterState.APPROVED) {
+//            state = ConversionState.APPROVED;
+//        } else if (converterToState[_converterAddress] == ConverterState.REJECTED) {
+//            state = ConversionState.REJECTED;
+//        }
         Conversion memory c = Conversion(_contractor, _contractorProceeds, _converterAddress,
             state , assetSymbol, assetContractERC20, _conversionAmount,
             _maxReferralRewardETHWei, _moderatorFeeETHWei, baseTokensForConverterUnits,
