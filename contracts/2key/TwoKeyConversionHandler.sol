@@ -6,10 +6,11 @@ import "./TwoKeyLockupContract.sol";
 import "../openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "../interfaces/IERC20.sol";
 
-
-// adapted from: 
-// https://openzeppelin.org/api/docs/crowdsale_validation_WhitelistedCrowdsale.html
-
+/**
+ * @notice Contract to handle logic related for Acquisition
+ * @dev There will be 1 conversion handler per Acquisition Campaign
+ * @author Nikola Madjarevic
+ */
 contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionAndConverterStates {
 
     using SafeMath for uint256;
