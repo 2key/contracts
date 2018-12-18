@@ -824,19 +824,6 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         })
     }
 
-    // public getAssetContractData(campaign: any, from: string): Promise<any> {
-    //     return new Promise(async (resolve, reject) => {
-    //         try {
-    //             const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
-    //             const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
-    //             // const assetContractData = await promisify(conversionHandlerInstance.getContractor, [{ from }]);
-    //             // const assetContractData = await promisify(conversionHandlerInstance.getAssetContractData, []);
-    //             resolve(assetContractData)
-    //         } catch (e) {
-    //             reject(e);
-    //         }
-    //     })
-    // }
 
     /**
      *
