@@ -26,7 +26,7 @@ contract TwoKeyWeightedVoteContract is TwoKeySignedPresellContract {
     // must use a sig which includes a cut (ie by calling free_join_take in sign.js
     require((sig.length-21) % (65+1+65+20) == 0, 'signature is not version 1 and/or does not include cut of last vote');
     // validate sig AND populate received_from and influencer2cut
-    address[] memory voters; //  = super.transferSig(sig);
+    address[] memory voters = super.transferSig(sig);
 
     for (uint i = 0; i < voters.length; i++) {
       address influencer = voters[i];
@@ -63,12 +63,12 @@ contract TwoKeyWeightedVoteContract is TwoKeySignedPresellContract {
       if (weight > 0) {
         uint tokens = weight.mul(cost);
         // make sure weight is not more than number of coins influencer has
-        uint _units = Call.params1(erc20_token_sell_contract, "balanceOf(address)",uint(influencer));
+        uint _units = Call.params1(erc20_token_sell_contract, "balanceOf(address)",uint(ethereumOf(influencer)));
         if (_units < tokens) {
           tokens = _units;
         }
         // make sure weight is not more than what coins allows this contract to take
-        uint _allowance = Call.params2(erc20_token_sell_contract, "allowance(address,address)",uint(influencer),uint(this));
+        uint _allowance = Call.params2(erc20_token_sell_contract, "allowance(address,address)",uint(ethereumOf(influencer)),uint(this));
         if (_allowance < tokens) {
           tokens = _allowance;
         }

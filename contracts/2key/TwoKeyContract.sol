@@ -74,7 +74,8 @@ contract TwoKeyContract is BasicToken, Ownable {
     return me;  // assume me is a plasma address. TODO not to make this assumption
   }
 
-  function ethereumOf(address me) public view returns (address) {  // TODO do we need this?
+  function ethereumOf(address me) public view returns (address) {
+    // used in TwoKeyWeightedVoteContract to move coins
     address ethereum = me;
     if (registry == address(0)) {
       return ethereum;
@@ -83,7 +84,7 @@ contract TwoKeyContract is BasicToken, Ownable {
     if (ethereum != address(0)) {
       return ethereum;
     }
-    return me;
+    return me; // assume me is a ethereum address. TODO not to make this assumption
   }
 
   function setCutOf(address me, uint256 cut) internal {
