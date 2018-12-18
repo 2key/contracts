@@ -6,19 +6,6 @@ import "./StandardTokenModified.sol";
 
 
 contract TwoKeyEconomy is StandardTokenModified, Ownable {
-
-    /*
-        TwoKeyEconomy inheritance ERC20
-
-                  ERC20Basic (interfaces)
-                      |
-                StandardToken (implementation and variables)
-                      |
-                TwoKeyEconomy (our token)
-
-    */
-
-
     string public name = 'TwoKeyEconomy';
     string public symbol= '2KEY';
     uint8 public decimals= 18;
