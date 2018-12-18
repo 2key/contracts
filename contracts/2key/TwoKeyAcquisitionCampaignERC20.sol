@@ -9,9 +9,11 @@ import "../interfaces/IUpgradableExchange.sol";
 import "../interfaces/ITwoKeyConversionHandler.sol";
 import "../interfaces/ITwoKeyExchangeContract.sol";
 
+/**
+ * @author Nikola Madjarevic
+ * @notice Campaign which will sell ERC20 tokens
+ */
 
-/// @author Nikola Madjarevic
-/// Contract which will represent campaign for the fungible assets
 contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
 
     using Call for *;
