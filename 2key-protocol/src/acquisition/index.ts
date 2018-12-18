@@ -969,13 +969,13 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @param {number} gasPrice
      * @returns {Promise<string>}
      */
-    public executeConversion(campaign: any, converter: string, from: string, gasPrice: number = this.base._getGasPrice()): Promise<string> {
+    public executeConversion(campaign: any, conversion_id: number, from: string, gasPrice: number = this.base._getGasPrice()): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
                 const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
                 const conversionHandlerInstance = this.base.web3.eth.contract(contracts.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
                 const nonce = await this.helpers._getNonce(from);
-                const txHash: string = await promisify(conversionHandlerInstance.executeConversion, [0, {
+                const txHash: string = await promisify(conversionHandlerInstance.executeConversion, [conversion_id, {
                     from,
                     gasPrice,
                     nonce

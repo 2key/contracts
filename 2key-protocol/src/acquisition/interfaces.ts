@@ -76,7 +76,7 @@ export interface ITwoKeyAcquisitionCampaign {
     approveConverter: (campaign: any, converter: string, from: string, gasPrice? :number) => Promise<string>,
     rejectConverter: (campaign: any, converter: string, from: string, gasPrice? :number) => Promise<string>,
     visit: (campaignAddress: string, referralLink: string) => Promise<string>,
-    executeConversion: (campaign: any, converter: string, from: string, gasPrice? :number) => Promise<string>,
+    executeConversion: (campaign: any, conversion_id: number, from: string, gasPrice? :number) => Promise<string>,
     getLockupContractsForConverter: (campaign: any, converter: string, from: string) => Promise<string[]>,
     addFungibleAssetsToInventoryOfCampaign: (campaign: any, amount: number, from: string, gasPrice? :number) => Promise<string>,
     cancel: (campaign: any, from: string, gasPrice?: number) => Promise<string>,
