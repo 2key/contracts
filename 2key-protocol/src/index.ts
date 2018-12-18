@@ -74,7 +74,7 @@ export class TwoKeyProtocol {
     private twoKeyExchangeContract: any;
     private twoKeyUpgradableExchange: any;
     private twoKeyEconomy: any;
-    private twoKeyAdmin: any;
+    public twoKeyAdmin: any;
     private twoKeyCongress: any;
     private twoKeyReg: any;
     private twoKeyPlasmaEvents: any;

@@ -88,7 +88,7 @@ contract TwoKeyCongress is Upgradeable {
      * @param votingPowers is the array of unassigned integers containing voting powers respectively
      * @dev initialMembers.length must be equal votingPowers.length
      */
-    function setInitialParams(uint256 _minutesForDebate, address[] initialMembers, uint[] votingPowers) payable external {
+    constructor(uint256 _minutesForDebate, address[] initialMembers, uint[] votingPowers) payable public {
         changeVotingRules(0, _minutesForDebate);
         addMember(0,'',0);
         addMember(initialMembers[0], 'Eitan', votingPowers[0]);

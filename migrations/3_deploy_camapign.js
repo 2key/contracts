@@ -29,6 +29,7 @@ module.exports = function deploy(deployer) {
         }
         console.log(networkId);
         let x = 1;
+        let json = JSON.parse(fs.readFileSync(proxyFile, {encoding: 'utf-8'}));
         deployer.deploy(TwoKeyConversionHandler, 1012019, 180, 6, 180)
             .then(() => TwoKeyConversionHandler.deployed())
             .then(() => deployer.deploy(ERC20TokenMock))
@@ -41,12 +42,13 @@ module.exports = function deploy(deployer) {
                 ERC20TokenMock.address,
                 [12345, 15345, 12345, 5, 5, 5, 5, 12, 15, 1],
                 'USD',
-                TwoKeyExchangeContract.address,
-                TwoKeyUpgradableExchange.address))
+                json.TwoKeyExchangeContract[networkId.toString()].Proxy,
+                json.TwoKeyUpgradableExchange[networkId.toString()].Proxy,
+                )
+            )
             .then(() => TwoKeyAcquisitionCampaignERC20.deployed())
             .then(() => true)
             .then(async () => {
-                let json = JSON.parse(fs.readFileSync(proxyFile, {encoding: 'utf-8'}));
                 console.log("... Adding TwoKeyAcquisitionCampaign to EventSource");
                 await new Promise(async (resolve, reject) => {
                     try {

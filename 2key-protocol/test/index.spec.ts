@@ -199,7 +199,7 @@ describe('TwoKeyProtocol', () => {
                 console.log(adminBalance);
                 if (parseFloat(balance['2KEY'].toString()) <= 20000) {
                     console.log('NO BALANCE at aydnep account');
-                    const admin = web3.eth.contract(contractsMeta.TwoKeyAdmin.abi).at(contractsMeta.TwoKeyAdmin.networks[mainNetId].address);
+                    const admin = twoKeyProtocol.twoKeyAdmin;
                     admin.transfer2KeyTokens(destinationAddress, twoKeyProtocol.Utils.toWei(100000, 'ether'), {from: env.DEPLOYER_ADDRESS}, async (err, res) => {
                         if (err) {
                             reject(err);

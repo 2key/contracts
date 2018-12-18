@@ -5,28 +5,26 @@ import '../openzeppelin-solidity/contracts/token/ERC20/ERC20.sol';
 import "./GetCode.sol";
 import "./MaintainingPattern.sol";
 import "../interfaces/ITwoKeyExchangeContract.sol";
+import "./Upgradeable.sol";
 
-contract TwoKeyUpgradableExchange is MaintainingPattern {
+contract TwoKeyUpgradableExchange is Upgradeable {
 
+    using GetCode for *;
     using SafeMath for uint256;
     using SafeERC20 for ERC20;
 
-    address public twoKeyExchangeContract;
+    mapping(address => bool) public isMaintainer;
 
+    address twoKeyAdmin;
+    address twoKeyExchangeContract;
 
     // The token being sold
     ERC20 public token;
 
-
-    // How many token units a buyer gets per wei.
-    // The rate is the conversion between wei and the smallest and indivisible token unit.
-    // So, if you are using a rate of 1 with a DetailedERC20 token with 3 decimals called TOK
-    // 1 wei will give you 1 unit, or 0.001 TOK.
     uint256 public rate;
 
     uint256 public transactionCounter = 0;
 
-    // Amount of wei raised
     uint256 public weiRaised = 0;
 
     /**
@@ -52,6 +50,50 @@ contract TwoKeyUpgradableExchange is MaintainingPattern {
         uint256 value,
         uint256 amount
     );
+
+    /**
+     * @notice Constructor of the contract
+     */
+    function setInitialParams(uint256 _rate, address _twoKeyAdmin, ERC20 _token, address _twoKeyExchangeContract, address[] _maintainers) public {
+        //Validating that this can be called only once
+        require(rate == 0);
+        require(_rate != 0);
+
+        rate = _rate;
+        token = _token;
+        twoKeyExchangeContract = _twoKeyExchangeContract;
+
+        twoKeyAdmin = _twoKeyAdmin;
+        isMaintainer[msg.sender] = true; //for truffle deployment
+        for(uint i=0; i<_maintainers.length; i++) {
+            isMaintainer[_maintainers[i]] = true;
+        }
+    }
+
+
+    /**
+     * @notice Modifier to restrict calling the method to anyone but maintainers
+     */
+    modifier onlyMaintainer {
+        require(isMaintainer[msg.sender] == true);
+        _;
+    }
+
+    /**
+     * @notice Modifier to restrict calling the method to anyone but twoKeyAdmin
+     */
+    modifier onlyTwoKeyAdmin {
+        require(msg.sender == address(twoKeyAdmin));
+        _;
+    }
+
+    /**
+    * @notice Modifier to restrict calling the method to anyone but authorized people
+    */
+    modifier onlyMaintainerOrTwoKeyAdmin {
+        require(isMaintainer[msg.sender] == true || msg.sender == address(twoKeyAdmin));
+        _;
+    }
 
 
     /**
@@ -129,19 +171,6 @@ contract TwoKeyUpgradableExchange is MaintainingPattern {
     }
 
     /**
-     * @notice Constructor of the contract
-     */
-	constructor(uint256 _rate, address _twoKeyAdmin, ERC20 _token, address _twoKeyExchangeContract, address[] _maintainers)
-		MaintainingPattern(_maintainers, _twoKeyAdmin) public {
-        require(_rate > 0);
-        require(_token != address(0));
-
-        rate = _rate;
-        token = _token;
-        twoKeyExchangeContract = _twoKeyExchangeContract;
-	}
-
-    /**
      * @notice Function to add contract code to be eligible to buyTokens
      * @param _contractAddress is the address of the deployed contract
      * @dev only maintainer / admin can call this function
@@ -178,5 +207,26 @@ contract TwoKeyUpgradableExchange is MaintainingPattern {
 
     function () public payable onlyEligibleContracts {
         buyTokens(msg.sender);
+    }
+    /**
+     * @notice Function which can add new maintainers, in general it's array because this supports adding multiple addresses in 1 trnx
+     * @dev only twoKeyAdmin contract is eligible to mutate state of maintainers
+     * @param _maintainers is the array of maintainer addresses
+     */
+    function addMaintainers(address [] _maintainers) public onlyTwoKeyAdmin {
+        for(uint i=0; i<_maintainers.length; i++) {
+            isMaintainer[_maintainers[i]] = true;
+        }
+    }
+
+    /**
+     * @notice Function which can remove some maintainers, in general it's array because this supports adding multiple addresses in 1 trnx
+     * @dev only twoKeyAdmin contract is eligible to mutate state of maintainers
+     * @param _maintainers is the array of maintainer addresses
+     */
+    function removeMaintainers(address [] _maintainers) public onlyTwoKeyAdmin {
+        for(uint i=0; i<_maintainers.length; i++) {
+            isMaintainer[_maintainers[i]] = false;
+        }
     }
 }

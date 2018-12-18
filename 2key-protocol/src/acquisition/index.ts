@@ -5,9 +5,9 @@ import {
     IJoinLinkOpts,
     IPublicLinkKey,
     IPublicLinkOpts,
+    IReferrerSummary,
     ITokenAmount,
     ITwoKeyAcquisitionCampaign,
-    IReferrerSummary,
 } from './interfaces';
 
 import {BigNumber} from 'bignumber.js';
@@ -169,8 +169,8 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                         data.maxContributionETHWei,
                         data.referrerQuota || 5],
                         data.currency,
-                        this.helpers._getContractDeployedAddress('TwoKeyExchangeContract'),
-                        this.helpers._getContractDeployedAddress('TwoKeyUpgradableExchange')
+                        this.base.twoKeyExchangeContract.address,
+                        this.base.twoKeyUpgradableExchange.address
                     ],
                     progressCallback,
                     link: {
