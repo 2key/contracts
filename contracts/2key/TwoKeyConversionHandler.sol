@@ -16,7 +16,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionAndConverterSta
     using SafeMath for uint256;
     uint numberOfConversions;
     Conversion[] public conversions;
-    mapping(address => uint[]) converterToHisConversions;
+    mapping(address => uint[]) public converterToHisConversions;
 
     //State to all converters in that state
     mapping(bytes32 => address[]) stateToConverter;
@@ -49,8 +49,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionAndConverterSta
         uint256 contractorProceedsETHWei; // How much contractor will receive for this conversion
         address converter; // Converter is one who's buying tokens
         ConversionState state;
-        string assetSymbol; // Name of ERC20 token we're selling in our campaign (we can get that from contract address)
-        address assetContractERC20; // Address of ERC20 token we're selling in our campaign
         uint256 conversionAmount; // Amount for conversion (In ETH)
         uint256 maxReferralRewardETHWei;
         uint256 moderatorFeeETHWei;
@@ -59,6 +57,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionAndConverterSta
         CampaignType campaignType; // Enumerator representing type of campaign (This one is however acquisition)
         uint256 conversionCreatedAt; // When conversion is created
         uint256 conversionExpiresAt; // When conversion expires
+        bool isConverterAnonymous;
     }
 
     /// @notice Modifier which allows only TwoKeyAcquisitionCampaign to issue calls
@@ -130,13 +129,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionAndConverterSta
 
     /// @notice Support function to create conversion
     /// @dev This function can only be called from TwoKeyAcquisitionCampaign contract address
-    /// @param _contractor is the address of campaign contractor
-    /// @param _contractorProceeds is the amount which goes to contractor
-    /// @param _converterAddress is the address of the converter
-    /// @param _conversionAmount is the amount for conversion in ETH
-    /// @param expiryConversion is the length of conversion
     function supportForCreateConversion(
-            address _contractor,
             uint256 _contractorProceeds,
             address _converterAddress,
             uint256 _conversionAmount,
@@ -147,16 +140,11 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionAndConverterSta
             uint256 expiryConversion) public onlyTwoKeyAcquisitionCampaign {
 
         ConversionState state = determineConversionState(_converterAddress);
-//        if(converterToState[_converterAddress] == ConverterState.APPROVED) {
-//            state = ConversionState.APPROVED;
-//        } else if (converterToState[_converterAddress] == ConverterState.REJECTED) {
-//            state = ConversionState.REJECTED;
-//        }
-        Conversion memory c = Conversion(_contractor, _contractorProceeds, _converterAddress,
-            state , assetSymbol, assetContractERC20, _conversionAmount,
-            _maxReferralRewardETHWei, _moderatorFeeETHWei, baseTokensForConverterUnits,
-            bonusTokensForConverterUnits, CampaignType.CPA_FUNGIBLE,
-            now, now + expiryConversion * (1 hours));
+
+        Conversion memory c = Conversion(contractor, _contractorProceeds, _converterAddress,
+            state, _conversionAmount, _maxReferralRewardETHWei, _moderatorFeeETHWei,
+            baseTokensForConverterUnits, bonusTokensForConverterUnits, CampaignType.CPA_FUNGIBLE,
+            now, now + expiryConversion * (1 hours), false);
 
         conversions.push(c);
         converterToHisConversions[msg.sender].push(numberOfConversions);
@@ -391,8 +379,8 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionAndConverterSta
         moveFromPendingToRejectedState(_converter);
     }
 
-//
-//    /// @notice Function where contractor or moderator can cancel the converter
+
+    /// @notice Function where contractor or moderator can cancel the converter
 //    function cancelConverter() public {
 //        require(converterToState[msg.sender] == ConversionState.REJECTED ||
 //        converterToState[msg.sender] == ConversionState.PENDING);
