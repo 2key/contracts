@@ -49,8 +49,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionAndConverterSta
         uint256 contractorProceedsETHWei; // How much contractor will receive for this conversion
         address converter; // Converter is one who's buying tokens
         ConversionState state;
-        string assetSymbol; // Name of ERC20 token we're selling in our campaign (we can get that from contract address)
-        address assetContractERC20; // Address of ERC20 token we're selling in our campaign
         uint256 conversionAmount; // Amount for conversion (In ETH)
         uint256 maxReferralRewardETHWei;
         uint256 moderatorFeeETHWei;
@@ -59,6 +57,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionAndConverterSta
         CampaignType campaignType; // Enumerator representing type of campaign (This one is however acquisition)
         uint256 conversionCreatedAt; // When conversion is created
         uint256 conversionExpiresAt; // When conversion expires
+        bool isAnonymousContractor;
     }
 
     /// @notice Modifier which allows only TwoKeyAcquisitionCampaign to issue calls
@@ -153,10 +152,9 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionAndConverterSta
         //            state = ConversionState.REJECTED;
         //        }
         Conversion memory c = Conversion(_contractor, _contractorProceeds, _converterAddress,
-            state , assetSymbol, assetContractERC20, _conversionAmount,
-            _maxReferralRewardETHWei, _moderatorFeeETHWei, baseTokensForConverterUnits,
+            state ,_conversionAmount, _maxReferralRewardETHWei, _moderatorFeeETHWei, baseTokensForConverterUnits,
             bonusTokensForConverterUnits, CampaignType.CPA_FUNGIBLE,
-            now, now + expiryConversion * (1 hours));
+            now, now + expiryConversion * (1 hours), false);
 
         conversions.push(c);
         converterToHisConversions[msg.sender].push(numberOfConversions);
