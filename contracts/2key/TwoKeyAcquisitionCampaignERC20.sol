@@ -293,28 +293,26 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @param signature is the signature chain
      * @dev payable function
      */
-    function joinAndConvert(bytes signature, bool _isAnonymous) external payable returns (uint){
+    function joinAndConvert(bytes signature, bool _isAnonymous) external payable {
         requirementForMsgValue(msg.value);
         distributeArcsBasedOnSignature(signature);
-        uint id = createConversion(msg.value, msg.sender);
+        createConversion(msg.value, msg.sender);
         ITwoKeyConversionHandler(conversionHandler).setAnonymous(msg.sender, _isAnonymous);
         balancesConvertersETH[msg.sender] += msg.value;
         twoKeyEventSource.converted(address(this),msg.sender,msg.value);
-        return id;
     }
 
     /**
      * @notice Function where converter can convert
      * @dev payable function
      */
-    function convert(bool _isAnonymous) public payable returns (uint) {
+    function convert(bool _isAnonymous) public payable {
         requirementForMsgValue(msg.value);
         require(received_from[msg.sender] != address(0));
-        uint id = createConversion(msg.value, msg.sender);
+        createConversion(msg.value, msg.sender);
         ITwoKeyConversionHandler(conversionHandler).setAnonymous(msg.sender, _isAnonymous);
         balancesConvertersETH[msg.sender] += msg.value;
         twoKeyEventSource.converted(address(this),msg.sender,msg.value);
-        return id;
     }
 
     /*
@@ -323,7 +321,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @param converterAddress is the sender of eth to the contract
      * @dev can be called only internally
      */
-    function createConversion(uint conversionAmountETHWei, address converterAddress) internal returns (uint) {
+    function createConversion(uint conversionAmountETHWei, address converterAddress) internal {
         uint baseTokensForConverterUnits;
         uint bonusTokensForConverterUnits;
 
@@ -341,11 +339,10 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
 
         uint256 contractorProceedsETHWei = conversionAmountETHWei - maxReferralRewardETHWei - moderatorFeeETHWei;
 
-        uint id = ITwoKeyConversionHandler(conversionHandler).supportForCreateConversion(contractor, contractorProceedsETHWei, converterAddress,
+        ITwoKeyConversionHandler(conversionHandler).supportForCreateConversion(contractor, contractorProceedsETHWei, converterAddress,
             conversionAmountETHWei, maxReferralRewardETHWei, moderatorFeeETHWei,
             baseTokensForConverterUnits,bonusTokensForConverterUnits,
             expiryConversionInHours);
-        return id;
     }
 
     /**

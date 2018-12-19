@@ -799,7 +799,6 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         });
     }
 
-    /* HELPERS */
     /**
      *
      * @param campaign

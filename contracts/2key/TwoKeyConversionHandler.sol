@@ -18,6 +18,8 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionAndConverterSta
     Conversion[] public conversions;
     mapping(address => uint[]) converterToHisConversions;
 
+    event ConversionCreated(uint conversionId);
+
     //State to all converters in that state
     mapping(bytes32 => address[]) stateToConverter;
 
@@ -147,7 +149,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionAndConverterSta
         uint256 _moderatorFeeETHWei,
         uint256 baseTokensForConverterUnits,
         uint256 bonusTokensForConverterUnits,
-        uint256 expiryConversion) public onlyTwoKeyAcquisitionCampaign returns (uint) {
+        uint256 expiryConversion) public onlyTwoKeyAcquisitionCampaign {
 
         ConversionState state = determineConversionState(_converterAddress);
         Conversion memory c = Conversion(_contractor, _contractorProceeds, _converterAddress,
@@ -157,13 +159,14 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionAndConverterSta
 
         conversions.push(c);
         converterToHisConversions[msg.sender].push(numberOfConversions);
+
+        emit ConversionCreated(numberOfConversions);
         numberOfConversions++;
 
         if(converterToState[_converterAddress] == ConverterState.NOT_EXISTING) {
             converterToState[_converterAddress] = ConverterState.PENDING_APPROVAL;
             stateToConverter[bytes32("PENDING_APPROVAL")].push(_converterAddress);
         }
-        return numberOfConversions - 1;
     }
 
 
