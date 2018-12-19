@@ -56,11 +56,12 @@ export interface ITwoKeyAcquisitionCampaign {
     getInventoryBalance: (campaign: any, from: string) => Promise<number | string | BigNumber>,
     getPublicLinkKey: (campaign: any, from: string) => Promise<string>,
     getReferrerCut: (campaign: any, from: string) => Promise<number>,
-    getConverterConversion: (campaign: any, from: string) => Promise<any>,
     getAllPendingConverters: (campaign: any, from: string) => Promise<string[]>,
-    cancelConverter: (campaign: any, from: string) => Promise<string>,
     getApprovedConverters: (campaign: any, from: string) => Promise<string[]>,
     getAllRejectedConverters: (campaign: any, from: string) => Promise<string[]>,
+    getConverterConversionIds: (campaign: any, converterAddress: string, from: string) => Promise<any>,
+    getNumberOfConversions: (campaign:any, from:string) => Promise<number>,
+    getConversion: (campaign: any, conversionId: number, from: string) => Promise<any>,
     isAddressJoined: (campaign: any, from: string) => Promise<boolean>,
     getBalanceOfArcs: (campaign: any, from: string) => Promise<number>,
 
@@ -73,7 +74,6 @@ export interface ITwoKeyAcquisitionCampaign {
     convert: (campaign: any, value: string | number | BigNumber, from: string, gasPrice?: number) => Promise<string>
     getEstimatedTokenAmount: (campaign: any, value: string | number | BigNumber) => Promise<ITokenAmount>,
     getTwoKeyConversionHandlerAddress: (campaign: any) => Promise<string>,
-    // getAssetContractData: (campaign: any) => Promise<any>,
     approveConverter: (campaign: any, converter: string, from: string, gasPrice? :number) => Promise<string>,
     rejectConverter: (campaign: any, converter: string, from: string, gasPrice? :number) => Promise<string>,
     visit: (campaignAddress: string, referralLink: string) => Promise<string>,

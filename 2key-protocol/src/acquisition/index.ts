@@ -814,19 +814,20 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     }
 
     /**
-     *
+     * Function to get all conversion ids for the converter, can be called by converter itself, moderator or contractor
      * @param campaign
+     * @param {string} converterAddress
      * @param {string} from
      * @returns {Promise<any>}
      */
-    public getConverterConversion(campaign: any, from: string): Promise<any> {
-        return new Promise<any>(async (resolve, reject) => {
+    public getConverterConversionIds(campaign: any, converterAddress: string, from: string) : Promise<any> {
+        return new Promise<any>(async(resolve,reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-                const conversionHandler = await promisify(campaignInstance.conversionHandler, [{from}]);
+                const conversionHandler = await promisify(campaignInstance.conversionHandler,[{from}]);
                 const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandler);
-                const conversion = await promisify(conversionHandlerInstance.conversions, [{from}]);
-                resolve(conversion);
+                const conversionIds = await promisify(conversionHandlerInstance.getConverterConversionIds,[converterAddress,{from}]);
+                resolve(conversionIds);
             } catch (e) {
                 reject(e);
             }
@@ -834,7 +835,61 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     }
 
     /**
-     *
+     * Function to get number of conversions, can be only called by contractor/moderator
+     * @param campaign
+     * @param {string} from
+     * @returns {Promise<number>}
+     */
+    public getNumberOfConversions(campaign:any, from:string) : Promise<number> {
+        return new Promise<number>(async(resolve,reject) => {
+            try {
+                const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
+                const conversionHandler = await promisify(campaignInstance.conversionHandler,[{from}]);
+                const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandler);
+                const numberOfConversions = await promisify(conversionHandlerInstance.getNumberOfConversions,[{from}]);
+                resolve(numberOfConversions);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+    /**
+     * Function which gets conversion object, if converter is anonymous will return empty address for him
+     * @param campaign
+     * @param {number} conversionId
+     * @param {string} from
+     * @returns {Promise<any>}
+     */
+    public getConversion(campaign: any, conversionId: number, from: string) : Promise<any> {
+        return new Promise<any>(async(resolve,reject) => {
+            try {
+                const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
+                const conversionHandler = await promisify(campaignInstance.conversionHandler,[{from}]);
+                const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandler);
+                let [contractor, contractorProceedsETHWei, converter, state, conversionAmount, maxReferralRewardEthWei, baseTokenUnits,
+                bonusTokenUnits, conversionCreatedAt, conversionExpiresAt] = await promisify(conversionHandlerInstance.getConversion,[conversionId,{from}]);
+                let obj = {
+                    'contractor' : contractor,
+                    'contractorProceedsETHWei' : contractorProceedsETHWei,
+                    'converter' : converter,
+                    'state' : state,
+                    'conversionAmount' : conversionAmount,
+                    'maxReferralRewardEthWei' : maxReferralRewardEthWei,
+                    'baseTokenUnits' : baseTokenUnits,
+                    'bonusTokenUnits' : bonusTokenUnits,
+                    'conversionCreatedAt' : conversionCreatedAt,
+                    'conversionExpiresAt' : conversionExpiresAt
+                }
+                resolve(obj);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+    /**
+     * Function to get conversion handler address from the Acquisition campaign
      * @param campaign
      * @returns {Promise<string>}
      */
@@ -850,9 +905,8 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         })
     }
 
-
     /**
-     *
+     * Can only be called by contractor or moderator
      * @param campaign
      * @param {string} from
      * @returns {Promise<string[]>}
@@ -866,6 +920,44 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
                 const pendingConverters = await promisify(conversionHandlerInstance.getAllPendingConverters, [{from}]);
                 resolve(pendingConverters);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+    /**
+     *
+     * @param campaign
+     * @param {string} from
+     * @returns {Promise<string[]>}
+     */
+    public getApprovedConverters(campaign: any, from: string): Promise<string[]> {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
+                const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
+                const approvedConverters = await promisify(conversionHandlerInstance.getAllApprovedConverters, [{from}]);
+                resolve(approvedConverters);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+    /**
+     *
+     * @param campaign
+     * @param {string} from
+     * @returns {Promise<string[]>}
+     */
+    public getAllRejectedConverters(campaign: any, from: string): Promise<string[]> {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
+                const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
+                const rejectedConverters = await promisify(conversionHandlerInstance.getAllRejectedConverters, [{from}]);
+                resolve(rejectedConverters);
             } catch (e) {
                 reject(e);
             }
@@ -918,69 +1010,6 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     nonce
                 }]);
                 resolve(txHash);
-            } catch (e) {
-                reject(e);
-            }
-        })
-    }
-
-    /**
-     *
-     * @param campaign
-     * @param {string} from
-     * @param {number} gasPrice
-     * @returns {Promise<string>}
-     */
-    public cancelConverter(campaign: any, from: string, gasPrice: number = this.base._getGasPrice()): Promise<string> {
-        return new Promise(async (resolve, reject) => {
-            try {
-                const nonce = await this.helpers._getNonce(from);
-                const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
-                const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
-                const txHash: string = await promisify(conversionHandlerInstance.cancelConverter, [{
-                    from,
-                    gasPrice,
-                    nonce
-                }]);
-                resolve(txHash);
-            } catch (e) {
-                reject(e);
-            }
-        })
-    }
-
-    /**
-     *
-     * @param campaign
-     * @param {string} from
-     * @returns {Promise<string[]>}
-     */
-    public getApprovedConverters(campaign: any, from: string): Promise<string[]> {
-        return new Promise(async (resolve, reject) => {
-            try {
-                const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
-                const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
-                const approvedConverters = await promisify(conversionHandlerInstance.getAllApprovedConverters, [{from}]);
-                resolve(approvedConverters);
-            } catch (e) {
-                reject(e);
-            }
-        })
-    }
-
-    /**
-     *
-     * @param campaign
-     * @param {string} from
-     * @returns {Promise<string[]>}
-     */
-    public getAllRejectedConverters(campaign: any, from: string): Promise<string[]> {
-        return new Promise(async (resolve, reject) => {
-            try {
-                const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
-                const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
-                const rejectedConverters = await promisify(conversionHandlerInstance.getAllRejectedConverters, [{from}]);
-                resolve(rejectedConverters);
             } catch (e) {
                 reject(e);
             }

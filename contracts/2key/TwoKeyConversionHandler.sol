@@ -23,7 +23,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionAndConverterSta
 
     //Converter to his state
     mapping(address => ConverterState) converterToState;
-    mapping(address => bool) public isConverterAnonymous;
+    mapping(address => bool) isConverterAnonymous;
     mapping(address => address[]) converterToLockupContracts;
 
     address[] allLockUpContracts;
@@ -283,9 +283,9 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionAndConverterSta
                 empty = conversion.converter;
             }
             return(
-                empty,
+                conversion.contractor,
                 conversion.contractorProceedsETHWei,
-                conversion.converter,
+                empty,
                 conversion.state,
                 conversion.conversionAmount,
                 conversion.maxReferralRewardETHWei,
@@ -389,6 +389,27 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionAndConverterSta
         require(converterToState[_converter] == ConverterState.PENDING_APPROVAL);
         moveFromPendingToRejectedState(_converter);
     }
+
+    /**
+     * @notice Function to get all conversion ids for the converter
+     * @param _converter is the address of the converter
+     * @return array of conversion ids
+     * @dev can only be called by converter itself or moderator/contractor
+     */
+    function getConverterConversionIds(address _converter) external view returns (uint[]) {
+        require(msg.sender == contractor || msg.sender == moderator || msg.sender == _converter);
+        return converterToHisConversions[_converter];
+    }
+
+    /**
+     * @notice Function to get number of conversions
+     * @dev Can only be called by contractor or moderator
+     */
+    function getNumberOfConversions() external view returns (uint) {
+        require(msg.sender == contractor || msg.sender == moderator);
+        return numberOfConversions;
+    }
+
 
     //
     //    /// @notice Function where contractor or moderator can cancel the converter
