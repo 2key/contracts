@@ -147,7 +147,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionAndConverterSta
         uint256 _moderatorFeeETHWei,
         uint256 baseTokensForConverterUnits,
         uint256 bonusTokensForConverterUnits,
-        uint256 expiryConversion) public onlyTwoKeyAcquisitionCampaign {
+        uint256 expiryConversion) public onlyTwoKeyAcquisitionCampaign returns (uint) {
 
         ConversionState state = determineConversionState(_converterAddress);
         Conversion memory c = Conversion(_contractor, _contractorProceeds, _converterAddress,
@@ -163,6 +163,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionAndConverterSta
             converterToState[_converterAddress] = ConverterState.PENDING_APPROVAL;
             stateToConverter[bytes32("PENDING_APPROVAL")].push(_converterAddress);
         }
+        return numberOfConversions - 1;
     }
 
 

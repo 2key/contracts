@@ -10,10 +10,10 @@ contract ITwoKeyConversionHandler {
         uint256 _moderatorFeeETHWei,
         uint256 baseTokensForConverterUnits,
         uint256 bonusTokensForConverterUnits,
-        uint256 expiryConversion) public;
+        uint256 expiryConversion) external returns (uint);
 
     function setAnonymous(address _contractor, bool _isAnonymous) external;
-    function cancelAndRejectContract() public;
-    function setTwoKeyAcquisitionCampaignERC20(address _twoKeyAcquisitionCampaignERC20, address _moderator, address _contractor, address _assetContractERC20, string _assetSymbol) public;
+    function cancelAndRejectContract() external;
+    function setTwoKeyAcquisitionCampaignERC20(address _twoKeyAcquisitionCampaignERC20, address _moderator, address _contractor, address _assetContractERC20, string _assetSymbol) external;
 
 }
