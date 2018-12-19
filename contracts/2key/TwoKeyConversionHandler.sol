@@ -111,12 +111,17 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionAndConverterSta
 
     /// @notice Function which checks if converter has converted
     /// @dev will throw if not
-    function isConversionExecuted(uint _conversionId) public view returns (bool) {
+    function isConversionNotExecuted(uint _conversionId) public view returns (bool) {
         Conversion memory c = conversions[_conversionId];
         require(c.state == ConversionState.PENDING_APPROVAL || c.state == ConversionState.APPROVED);
         return true;
     }
 
+    /**
+     * @notice Determine the state of conversion based on converter address
+     * @param _converterAddress is the address of converter
+     * @return state of conversion (enum)
+     */
     function determineConversionState(address _converterAddress) private view returns (ConversionState) {
         ConversionState state = ConversionState.PENDING_APPROVAL;
         if(converterToState[_converterAddress] == ConverterState.APPROVED) {
@@ -146,11 +151,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionAndConverterSta
         uint256 expiryConversion) public onlyTwoKeyAcquisitionCampaign {
 
         ConversionState state = determineConversionState(_converterAddress);
-        //        if(converterToState[_converterAddress] == ConverterState.APPROVED) {
-        //            state = ConversionState.APPROVED;
-        //        } else if (converterToState[_converterAddress] == ConverterState.REJECTED) {
-        //            state = ConversionState.REJECTED;
-        //        }
         Conversion memory c = Conversion(_contractor, _contractorProceeds, _converterAddress,
             state ,_conversionAmount, _maxReferralRewardETHWei, _moderatorFeeETHWei, baseTokensForConverterUnits,
             bonusTokensForConverterUnits, CampaignType.CPA_FUNGIBLE,
@@ -172,8 +172,8 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionAndConverterSta
      * @param _conversionId is the id of the conversion
      * @dev this can be called only by approved converter
      */
-    function executeConversion(uint _conversionId) public onlyApprovedConverter {
-        require(isConversionExecuted(_conversionId));
+    function executeConversion(uint _conversionId) external onlyApprovedConverter {
+        require(isConversionNotExecuted(_conversionId));
         //        bool flag = false;
         //        for(uint i=0; i<converterToHisConversions[msg.sender].length; i++) {
         //            if(converterToHisConversions[msg.sender][i] == _conversionId) {
@@ -264,42 +264,39 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionAndConverterSta
     }
 
 
-    //    function getConversionForConverter(
-    //        address _converter
-    //    ) external view returns (
-    //        address,
-    //        uint256,
-    //        address,
-    //        ConversionState,
-    //        string,
-    //        address,
-    //        uint256,
-    //        uint256,
-    //        uint256,
-    //        uint256,
-    //        uint256,
-    //        CampaignType,
-    //        uint256,
-    //        uint256) {
-    //            require(msg.sender == _converter || msg.sender == contractor || msg.sender == moderator);
-    //            Conversion memory conversion = conversions[_converter];
-    //            return(
-    //                conversion.contractor,
-    //                conversion.contractorProceedsETHWei,
-    //                conversion.converter,
-    //                conversion.state,
-    //                conversion.assetSymbol,
-    //                conversion.assetContractERC20,
-    //                conversion.conversionAmount,
-    //                conversion.maxReferralRewardETHWei,
-    //                conversion.moderatorFeeETHWei,
-    //                conversion.baseTokenUnits,
-    //                conversion.bonusTokenUnits,
-    //                conversion.campaignType,
-    //                conversion.conversionCreatedAt,
-    //                conversion.conversionExpiresAt
-    //            );
-    //    }
+        function getConversion(
+            uint conversionId
+        ) external view returns (
+            address,
+            uint256,
+            address,
+            ConversionState,
+            uint256,
+            uint256,
+            uint256,
+            uint256,
+            uint256,
+            uint256,
+            uint256) {
+                string memory empty = "";
+                if(conversion.isAnonymous == false) {
+                    empty = conversion.contractor;
+                }
+                Conversion memory conversion = conversions[conversionId];
+                return(
+                    empty,
+                    conversion.contractorProceedsETHWei,
+                    conversion.converter,
+                    conversion.state,
+                    conversion.conversionAmount,
+                    conversion.maxReferralRewardETHWei,
+                    conversion.moderatorFeeETHWei,
+                    conversion.baseTokenUnits,
+                    conversion.bonusTokenUnits,
+                    conversion.conversionCreatedAt,
+                    conversion.conversionExpiresAt
+                );
+        }
 
     /// @notice Function to get all pending converters
     /// @dev view function - no gas cost & only Contractor or Moderator can call this function - otherwise will revert
