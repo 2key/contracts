@@ -695,7 +695,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     const signature = Sign.free_join_take(from, public_address, f_address, f_secret, p_message);
                     // TODO: Nikola try to comment two lines before and uncomment next line 
                     // const signature = Sign.free_take(from, f_address, f_secret, p_message);
-                    const txHash: string = await promisify(campaignInstance.joinAndConvert, [signature, {
+                    const txHash: string = await promisify(campaignInstance.joinAndConvert, [signature,false, {
                         from,
                         gasPrice,
                         value,
@@ -704,7 +704,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     resolve(txHash);
                 } else {
                     this.base._log('Previous referrer', prevChain, value);
-                    const txHash: string = await promisify(campaignInstance.convert, [{
+                    const txHash: string = await promisify(campaignInstance.convert, [false,{
                         from,
                         gasPrice,
                         value,
@@ -718,6 +718,32 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 reject(e);
             }
         });
+    }
+
+    /**
+     *
+     * @param campaign
+     * @param {string | number | BigNumber} value
+     * @param {string} from
+     * @param {number} gasPrice
+     * @returns {Promise<string>}
+     */
+    public convert(campaign: any, value: string | number | BigNumber, from: string, gasPrice: number = this.base._getGasPrice()) : Promise<string> {
+        return new Promise<string>(async(resolve,reject) => {
+            try {
+                const nonce = await this.helpers._getNonce(from);
+                const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
+                const txHash: string = await promisify(campaignInstance.convert, [false,{
+                    from,
+                    gasPrice,
+                    value,
+                    nonce,
+                }]);
+                resolve(txHash);
+            } catch (e) {
+                reject(e);
+            }
+        })
     }
 
     // Send ARCS to other account

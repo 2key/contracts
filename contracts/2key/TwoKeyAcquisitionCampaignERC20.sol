@@ -293,10 +293,11 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @param signature is the signature chain
      * @dev payable function
      */
-    function joinAndConvert(bytes signature) public payable {
+    function joinAndConvert(bytes signature, bool _isAnonymous) external payable {
         requirementForMsgValue(msg.value);
         distributeArcsBasedOnSignature(signature);
         createConversion(msg.value, msg.sender);
+        ITwoKeyConversionHandler(conversionHandler).setAnonymous(msg.sender, _isAnonymous);
         balancesConvertersETH[msg.sender] += msg.value;
         twoKeyEventSource.converted(address(this),msg.sender,msg.value);
     }
@@ -305,24 +306,14 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @notice Function where converter can convert
      * @dev payable function
      */
-    function convert() public payable  {
+    function convert(bool _isAnonymous) public payable  {
         requirementForMsgValue(msg.value);
         require(received_from[msg.sender] != address(0));
         createConversion(msg.value, msg.sender);
+        ITwoKeyConversionHandler(conversionHandler).setAnonymous(msg.sender, _isAnonymous);
         balancesConvertersETH[msg.sender] += msg.value;
         twoKeyEventSource.converted(address(this),msg.sender,msg.value);
     }
-
-
-    function() external payable {
-        requirementForMsgValue(msg.value);
-        require(balanceOf(msg.sender) > 0);
-        createConversion(msg.value, msg.sender);
-        balancesConvertersETH[msg.sender] += msg.value;
-        twoKeyEventSource.converted(address(this),msg.sender,msg.value);
-    }
-
-
 
     /*
      * @notice Function which is executed to create conversion

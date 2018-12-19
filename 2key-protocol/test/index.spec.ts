@@ -595,7 +595,8 @@ describe('TwoKeyProtocol', () => {
         });
         const arcs = await twoKeyProtocol.AcquisitionCampaign.getBalanceOfArcs(campaignAddress, from);
         console.log('GMAIL2 ARCS', arcs);
-        txHash = await twoKeyProtocol.transferEther(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD * 1.1, 'ether'), from);
+        txHash = await twoKeyProtocol.AcquisitionCampaign.convert(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD * 1.1, 'ether'), from);
+        // txHash = await twoKeyProtocol.transferEther(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD * 1.1, 'ether'), from);
         console.log('HASH', txHash);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(30000);
@@ -631,7 +632,8 @@ describe('TwoKeyProtocol', () => {
             },
             plasmaPK: Sign.generatePrivateKey().toString('hex'),
         });
-        txHash = await twoKeyProtocol.transferEther(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD * 1.1, 'ether'), from);
+        // txHash = await twoKeyProtocol.transferEther(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD * 1.1, 'ether'), from);
+        txHash = await twoKeyProtocol.AcquisitionCampaign.convert(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD * 1.1, 'ether'), from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(30000);
 

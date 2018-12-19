@@ -1,16 +1,12 @@
 import {BigNumber} from 'bignumber.js';
-import LZString from 'lz-string';
+import {BalanceMeta, ITwoKeyBase,} from '../interfaces';
 import {
-    BalanceMeta,
-    ITwoKeyBase,
-} from '../interfaces';
-import {
-    ITwoKeyUtils,
+    IBalanceFromWeiOpts,
     IBalanceNormalized,
     IOffchainData,
     ITransactionReceipt,
     ITwoKeyHelpers,
-    IBalanceFromWeiOpts,
+    ITwoKeyUtils,
     ITxReceiptOpts,
 } from './interfaces';
 
@@ -79,6 +75,19 @@ export default class Utils implements ITwoKeyUtils {
                 resolve(offchainObj);
             } catch (e) {
                 reject(e);
+            }
+        });
+    }
+
+    public transferEther(to: string, value: number | string | BigNumber, from: string): Promise<string> {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const nonce = await this.helpers._getNonce(from);
+                const params = {to, value, from, nonce};
+                const txHash = await promisify(this.base.web3.eth.sendTransaction, [params]);
+                resolve(txHash);
+            } catch (err) {
+                reject(err);
             }
         });
     }

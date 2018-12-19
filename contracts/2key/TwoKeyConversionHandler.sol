@@ -23,7 +23,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionAndConverterSta
 
     //Converter to his state
     mapping(address => ConverterState) converterToState;
-
+    mapping(address => bool) public isConverterAnonymous;
     mapping(address => address[]) converterToLockupContracts;
 
     address[] allLockUpContracts;
@@ -57,7 +57,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionAndConverterSta
         CampaignType campaignType; // Enumerator representing type of campaign (This one is however acquisition)
         uint256 conversionCreatedAt; // When conversion is created
         uint256 conversionExpiresAt; // When conversion expires
-        bool isAnonymousContractor;
     }
 
     /// @notice Modifier which allows only TwoKeyAcquisitionCampaign to issue calls
@@ -154,7 +153,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionAndConverterSta
         Conversion memory c = Conversion(_contractor, _contractorProceeds, _converterAddress,
             state ,_conversionAmount, _maxReferralRewardETHWei, _moderatorFeeETHWei, baseTokensForConverterUnits,
             bonusTokensForConverterUnits, CampaignType.CPA_FUNGIBLE,
-            now, now + expiryConversion * (1 hours), false);
+            now, now + expiryConversion * (1 hours));
 
         conversions.push(c);
         converterToHisConversions[msg.sender].push(numberOfConversions);
@@ -264,39 +263,44 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionAndConverterSta
     }
 
 
-        function getConversion(
-            uint conversionId
-        ) external view returns (
-            address,
-            uint256,
-            address,
-            ConversionState,
-            uint256,
-            uint256,
-            uint256,
-            uint256,
-            uint256,
-            uint256,
-            uint256) {
-                string memory empty = "";
-                if(conversion.isAnonymous == false) {
-                    empty = conversion.contractor;
-                }
-                Conversion memory conversion = conversions[conversionId];
-                return(
-                    empty,
-                    conversion.contractorProceedsETHWei,
-                    conversion.converter,
-                    conversion.state,
-                    conversion.conversionAmount,
-                    conversion.maxReferralRewardETHWei,
-                    conversion.moderatorFeeETHWei,
-                    conversion.baseTokenUnits,
-                    conversion.bonusTokenUnits,
-                    conversion.conversionCreatedAt,
-                    conversion.conversionExpiresAt
-                );
-        }
+    function getConversion(
+        uint conversionId
+    ) external view returns (
+        address,
+        uint256,
+        address,
+        ConversionState,
+        uint256,
+        uint256,
+        uint256,
+        uint256,
+        uint256,
+        uint256,
+        uint256) {
+            Conversion memory conversion = conversions[conversionId];
+            address empty = address(0);
+            if(isConverterAnonymous[conversion.converter] == false) {
+                empty = conversion.converter;
+            }
+            return(
+                empty,
+                conversion.contractorProceedsETHWei,
+                conversion.converter,
+                conversion.state,
+                conversion.conversionAmount,
+                conversion.maxReferralRewardETHWei,
+                conversion.moderatorFeeETHWei,
+                conversion.baseTokenUnits,
+                conversion.bonusTokenUnits,
+                conversion.conversionCreatedAt,
+                conversion.conversionExpiresAt
+            );
+    }
+
+
+    function setAnonymous(address _contractor, bool _isAnonymous) external onlyTwoKeyAcquisitionCampaign {
+        isConverterAnonymous[_contractor] = _isAnonymous;
+    }
 
     /// @notice Function to get all pending converters
     /// @dev view function - no gas cost & only Contractor or Moderator can call this function - otherwise will revert

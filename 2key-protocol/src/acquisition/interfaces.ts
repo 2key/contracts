@@ -70,6 +70,7 @@ export interface ITwoKeyAcquisitionCampaign {
     joinAndSetPublicLinkWithCut: (campaign: any, from: string, referralLink: string, opts?: IPublicLinkOpts) => Promise<string>,
     joinAndShareARC: (campaign: any, from: string, referralLink: string, recipient: string, opts?: IPublicLinkOpts) => Promise<string>,
     joinAndConvert: (campaign: any, value: string | number | BigNumber, publicLink: string, from: string, gasPrice?: number) => Promise<string>,
+    convert: (campaign: any, value: string | number | BigNumber, from: string, gasPrice?: number) => Promise<string>
     getEstimatedTokenAmount: (campaign: any, value: string | number | BigNumber) => Promise<ITokenAmount>,
     getTwoKeyConversionHandlerAddress: (campaign: any) => Promise<string>,
     // getAssetContractData: (campaign: any) => Promise<any>,

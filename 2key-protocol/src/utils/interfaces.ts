@@ -116,6 +116,7 @@ export interface ITwoKeyHelpers {
 }
 
 export interface ITwoKeyUtils {
+    transferEther: (to: string, value: number | string | BigNumber, from: string) => Promise<string>
     ipfsAdd: (data: any) => Promise<string>,
     getOffchainDataFromIPFSHash: (hash: string) => Promise<IOffchainData>,
     fromWei: (number: number | string | BigNumber, unit?: string | number) => string | BigNumber,
