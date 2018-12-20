@@ -19,7 +19,7 @@ describe(`TwoKeyProtocol ${network}`, () => {
     it('check if user registered in TwoKeyRegistry', async() => {
         const userAddress = process.argv[7];
         const userName = process.argv[8];
-        const { web3, address } = createWeb3('laundry version question endless august scatter desert crew memory toy attract cruel', rpcUrl);
+        const { web3 } = createWeb3('laundry version question endless august scatter desert crew memory toy attract cruel', rpcUrl);
         const twoKeyProtocol = new TwoKeyProtocol({
             web3,
             networks: {
@@ -28,9 +28,8 @@ describe(`TwoKeyProtocol ${network}`, () => {
             },
             plasmaPK: Sign.generatePrivateKey().toString('hex'),
         });
-        const from = address;
-        const isAddressRegistered = await twoKeyProtocol.Registry.checkIfAddressIsRegistered(userAddress, from);
-        const isUserRegistered = await twoKeyProtocol.Registry.checkIfUserIsRegistered(userName, from);
+        const isAddressRegistered = await twoKeyProtocol.Registry.checkIfAddressIsRegistered(userAddress);
+        const isUserRegistered = await twoKeyProtocol.Registry.checkIfUserIsRegistered(userName);
         console.log('User2Address', isUserRegistered);
         console.log(`Address ${userAddress} ${isAddressRegistered ? 'REGISTERED' : 'NOT REGISTERED'} in TwoKeyReg`);
     }).timeout(300000);
