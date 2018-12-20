@@ -101,8 +101,6 @@ module.exports = {
       //provider: () => new HDWalletProvider(mnemonic, 'https://rpc.private.test.k8s.2key.net'),
       provider: () => LedgerProvider('https://rpc.private.test.k8s.2key.net', {
         networkId: 98052,
-        gas: 7000000,
-        gasPrice: 0,
         // https://github.com/LedgerHQ/ledgerjs/issues/200
         path: "44'/60'/0'/0",
         // askConfirm: true,
@@ -110,6 +108,9 @@ module.exports = {
         accountsLength: 1,
         accountsOffset: 0,
       }),
+      network_id: 98052,
+      gas: 7000000,
+      gasPrice: 0,
       // host: 'https://ext.geth.private.test.k8s.2key.net',
       // port: 8545,
       // network_id: 98052, // Match any network id

@@ -55,8 +55,16 @@ module.exports = function deploy(deployer) {
     let initialCongressMembers = [
         '0x4216909456e770FFC737d987c273a0B8cE19C13e', // Eitan
         '0x5e2B2b278445AaA649a6b734B0945Bd9177F4F03', // Kiki
+
     ];
-    let maintainerAddress = (deployer.network.startsWith('ropsten') || deployer.network.startsWith('rinkeby') || deployer.network.startsWith('public.')) ? '0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f' : '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7';
+    let deployerAddress = '0x18e1d5ca01141E3a0834101574E5A1e94F0F8F6a';
+    let maintainerAddress = (deployer.network.startsWith('ropsten') || deployer.network.startsWith('rinkeby') || deployer.network.startsWith('public.test')) ? '0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f' : '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7';
+    // let envToSingletonToMaintainer = {prod:{
+    //         TwoKeyRegistry:
+    //
+    //
+    // }}
+
     let votingPowers = [1, 1];
 
     /**
@@ -75,7 +83,7 @@ module.exports = function deploy(deployer) {
             .then(() => TwoKeyRegistry.deployed())
             .then(() => deployer.deploy(TwoKeyUpgradableExchange))
             .then(() => TwoKeyUpgradableExchange.deployed())
-            .then(() => deployer.deploy(TwoKeySingletonesRegistry, [maintainerAddress], '0x0')) //adding empty admin address
+            .then(() => deployer.deploy(TwoKeySingletonesRegistry, [], '0x0')) //adding empty admin address
             .then(() => TwoKeySingletonesRegistry.deployed().then(async (registry) => {
                 /**
                  * Here we will be adding all contracts to the Registry and create a Proxies for them
@@ -125,7 +133,7 @@ module.exports = function deploy(deployer) {
                             'address': EventSource.address,
                             'Proxy': proxy,
                             'Version': "1.0",
-                            maintainer_address: maintainerAddress,
+                            maintainer_address: deployerAddress,
                         };
                         fileObject['TwoKeyEventSource'] = twoKeyEventS;
                         proxyAddressTwoKeyEventSource = proxy;
@@ -146,15 +154,15 @@ module.exports = function deploy(deployer) {
                         let { proxy } = logs.find(l => l.event === 'ProxyCreated').args;
                         console.log('Proxy address for the TwoKeyExchangeRateContract is : ' + proxy);
 
-                        const twoKeyExchange = fileObject.TwoKeyExchange || {};
+                        const twoKeyExchangeRate = fileObject.TwoKeyExchange || {};
 
-                        twoKeyExchange[networkId] = {
+                        twoKeyExchangeRate[networkId] = {
                             'address': TwoKeyExchangeRateContract.address,
                             'Proxy': proxy,
                             'Version': "1.0",
                             maintainer_address: maintainerAddress,
                         };
-                        fileObject['TwoKeyExchangeRateContract'] = twoKeyExchange;
+                        fileObject['TwoKeyExchangeRateContract'] = twoKeyExchangeRate;
                         proxyAddressTwoKeyExchange = proxy;
 
                         resolve(proxy);
@@ -181,7 +189,7 @@ module.exports = function deploy(deployer) {
                             'address': TwoKeyAdmin.address,
                             'Proxy': proxy,
                             'Version': "1.0",
-                            maintainer_address: maintainerAddress
+                            maintainer_address: deployerAddress
                         };
 
                         fileObject['TwoKeyAdmin'] = twoKeyAdmin;
@@ -210,7 +218,7 @@ module.exports = function deploy(deployer) {
                             'address' : TwoKeyUpgradableExchange.address,
                             'Proxy' : proxy,
                             'Version' : "1.0",
-                            maintainer_address: maintainerAddress
+                            maintainer_address: deployerAddress
                         };
 
                         fileObject['TwoKeyUpgradableExchange'] = twoKeyUpgradableExchange;
@@ -234,7 +242,7 @@ module.exports = function deploy(deployer) {
                         await EventSource.at(proxyAddressTwoKeyEventSource).setInitialParams
                         (
                             proxyAddressTwoKeyAdmin,
-                            [maintainerAddress],
+                            [],
                             proxyAddressTwoKeyRegistry
                         );
                         await TwoKeyExchangeRateContract.at(proxyAddressTwoKeyExchange).setInitialParams
@@ -249,7 +257,7 @@ module.exports = function deploy(deployer) {
                             proxyAddressTwoKeyAdmin,
                             TwoKeyEconomy.address,
                             proxyAddressTwoKeyExchange,
-                            [maintainerAddress]
+                            []
                         );
 
                         await TwoKeyAdmin.at(proxyAddressTwoKeyAdmin).setInitialParams
