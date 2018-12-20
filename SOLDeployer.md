@@ -1,5 +1,17 @@
 # SOLDeployer
 
+```
+brew install node@10
+echo 'export PATH="/usr/local/opt/node@10/bin:$PATH"' >> ~/.bash_profile
+export LDFLAGS="-L/usr/local/opt/node@10/lib"
+export CPPFLAGS="-I/usr/local/opt/node@10/include"
+
+```
+bash redeploy-test.bash
+```
+```
+yarn run deploy public.test.k8s,private.test.k8s 
+```
 ### How to deploy contracts to any network except local dev
 
 * Commit your changes

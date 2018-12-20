@@ -4,7 +4,7 @@ const TwoKeyConversionHandler = artifacts.require('TwoKeyConversionHandler');
 const ERC20TokenMock = artifacts.require('ERC20TokenMock');
 const Call = artifacts.require('Call');
 const TwoKeyHackEventSource = artifacts.require('TwoKeyHackEventSource');
-const TwoKeyExchangeContract = artifacts.require('TwoKeyExchangeContract');
+const TwoKeyExchangeRateContract = artifacts.require('TwoKeyExchangeRateContract');
 const TwoKeyUpgradableExchange = artifacts.require('TwoKeyUpgradableExchange');
 
 const fs = require('fs');
@@ -42,7 +42,7 @@ module.exports = function deploy(deployer) {
                 ERC20TokenMock.address,
                 [12345, 15345, 12345, 5, 5, 5, 5, 12, 15, 1],
                 'USD',
-                json.TwoKeyExchangeContract[networkId.toString()].Proxy,
+                json.TwoKeyExchangeRateContract[networkId.toString()].Proxy,
                 json.TwoKeyUpgradableExchange[networkId.toString()].Proxy,
                 )
             )

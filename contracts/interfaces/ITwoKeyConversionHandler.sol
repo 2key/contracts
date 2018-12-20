@@ -10,7 +10,7 @@ contract ITwoKeyConversionHandler {
         uint256 _moderatorFeeETHWei,
         uint256 baseTokensForConverterUnits,
         uint256 bonusTokensForConverterUnits,
-        uint256 expiryConversion) external returns (uint);
+        uint256 expiryConversion) external;
 
     function setAnonymous(address _contractor, bool _isAnonymous) external;
     function cancelAndRejectContract() external;

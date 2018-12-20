@@ -4,7 +4,7 @@ import '../openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol';
 import '../openzeppelin-solidity/contracts/token/ERC20/ERC20.sol';
 import "./GetCode.sol";
 import "./MaintainingPattern.sol";
-import "../interfaces/ITwoKeyExchangeContract.sol";
+import "../interfaces/ITwoKeyExchangeRateContract.sol";
 import "./Upgradeable.sol";
 
 contract TwoKeyUpgradableExchange is Upgradeable {
@@ -149,7 +149,7 @@ contract TwoKeyUpgradableExchange is Upgradeable {
     {
         uint value;
         bool flag;
-        (value,flag,,) = ITwoKeyExchangeContract(twoKeyExchangeContract).getFiatCurrencyDetails("USD");
+        (value,flag,,) = ITwoKeyExchangeRateContract(twoKeyExchangeContract).getFiatCurrencyDetails("USD");
         return (_weiAmount*value).div(10**18).div(rate);
     }
 

@@ -157,7 +157,7 @@ export class TwoKeyProtocol {
         }
 
         //contractsMeta.TwoKeyRegLogic.networks[this.networks.mainNetId].address
-        this.twoKeyExchangeContract = this.web3.eth.contract(contractsMeta.TwoKeyExchangeContract.abi).at(getDeployedAddress('TwoKeyExchangeContract', this.networks.mainNetId));
+        this.twoKeyExchangeContract = this.web3.eth.contract(contractsMeta.TwoKeyExchangeRateContract.abi).at(getDeployedAddress('TwoKeyExchangeRateContract', this.networks.mainNetId));
         this.twoKeyUpgradableExchange = this.web3.eth.contract(contractsMeta.TwoKeyUpgradableExchange.abi).at(getDeployedAddress('TwoKeyUpgradableExchange', this.networks.mainNetId));
         this.twoKeyEconomy = this.web3.eth.contract(contractsMeta.TwoKeyEconomy.abi).at(getDeployedAddress('TwoKeyEconomy', this.networks.mainNetId));
         this.twoKeyReg = this.web3.eth.contract(contractsMeta.TwoKeyRegistry.abi).at(getDeployedAddress('TwoKeyRegistry', this.networks.mainNetId));

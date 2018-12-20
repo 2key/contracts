@@ -8,6 +8,7 @@ import "./TwoKeyEventSource.sol";
 import "./TwoKeyRegistry.sol";
 import "./Upgradeable.sol";
 
+//TODO: Add all the missing functions from other singletones which can be called by TwoKeyAdmin
 contract TwoKeyAdmin is Upgradeable {
 
 	TwoKeyEconomy twoKeyEconomy;

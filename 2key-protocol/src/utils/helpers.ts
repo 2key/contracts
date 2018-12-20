@@ -274,7 +274,6 @@ export default class Helpers implements ITwoKeyHelpers {
         address: string
     ): Promise<any> {
         const code = await promisify(this.base.web3.eth.getCode, [address]);
-
         // in case of missing smartcontract, code can be equal to "0x0" or "0x" depending on exact web3 implementation
         // to cover all these cases we just check against the source code length — there won't be any meaningful EVM program in less then 3 chars
         if (code.length < 4 || !contractsMeta[contractName]) {

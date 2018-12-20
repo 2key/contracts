@@ -105,6 +105,7 @@ contract TwoKeyCongress is Upgradeable {
         hashAllowedMethods("transferByAdmins(address,uint256)");
         hashAllowedMethods("transferEtherByAdmins(address,uint256)");
         hashAllowedMethods("destroy");
+        hashAllowedMethods("transfer2KeyTokens(address,uint256)");
         hashAllowedMethods("addMaintainerForRegistry(address)");
         hashAllowedMethods("twoKeyEventSourceAddMaintainer(address[])");
         hashAllowedMethods("twoKeyEventSourceWhitelistContract(address)");
@@ -135,11 +136,10 @@ contract TwoKeyCongress is Upgradeable {
     /// @param nameAndParams is the name of the function and it's params to hash
     /// @dev example: 'functionName(address,string)'
     /// @return hash of allowed methods
-    function hashAllowedMethods(string nameAndParams) public returns (bytes32) {
+    function hashAllowedMethods(string nameAndParams) internal {
         bytes32 allowed = keccak256(abi.encodePacked(nameAndParams));
         allowedMethodSignatures.push(allowed);
         methodHashToMethodName[allowed] = nameAndParams;
-        return allowed;
     }
 
 
@@ -304,7 +304,7 @@ contract TwoKeyCongress is Upgradeable {
         address beneficiary,
         uint weiAmount,
         bytes transactionBytecode)
-    constant public
+    view public
     returns (bool codeChecksOut)
     {
         Proposal storage p = proposals[proposalNumber];

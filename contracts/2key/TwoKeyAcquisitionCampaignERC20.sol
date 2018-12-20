@@ -7,7 +7,7 @@ import "../interfaces/IERC20.sol";
 import "./Call.sol";
 import "../interfaces/IUpgradableExchange.sol";
 import "../interfaces/ITwoKeyConversionHandler.sol";
-import "../interfaces/ITwoKeyExchangeContract.sol";
+import "../interfaces/ITwoKeyExchangeRateContract.sol";
 
 /**
  * @author Nikola Madjarevic
@@ -277,7 +277,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         } else {
             uint val;
             bool flag;
-            (val, flag,,) = ITwoKeyExchangeContract(ethUSDExchangeContract).getFiatCurrencyDetails(currency);
+            (val, flag,,) = ITwoKeyExchangeRateContract(ethUSDExchangeContract).getFiatCurrencyDetails(currency);
             if(flag) {
                 require((msgValue * val).div(10**18) >= minContributionETHorFiatCurrency); //converting ether to fiat
                 require((msgValue * val).div(10**18) <= maxContributionETHorFiatCurrency); //converting ether to fiat
@@ -293,28 +293,26 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @param signature is the signature chain
      * @dev payable function
      */
-    function joinAndConvert(bytes signature, bool _isAnonymous) external payable returns (uint){
+    function joinAndConvert(bytes signature, bool _isAnonymous) external payable {
         requirementForMsgValue(msg.value);
         distributeArcsBasedOnSignature(signature);
-        uint id = createConversion(msg.value, msg.sender);
+        createConversion(msg.value, msg.sender);
         ITwoKeyConversionHandler(conversionHandler).setAnonymous(msg.sender, _isAnonymous);
         balancesConvertersETH[msg.sender] += msg.value;
         twoKeyEventSource.converted(address(this),msg.sender,msg.value);
-        return id;
     }
 
     /**
      * @notice Function where converter can convert
      * @dev payable function
      */
-    function convert(bool _isAnonymous) public payable returns (uint) {
+    function convert(bool _isAnonymous) public payable {
         requirementForMsgValue(msg.value);
         require(received_from[msg.sender] != address(0));
-        uint id = createConversion(msg.value, msg.sender);
+        createConversion(msg.value, msg.sender);
         ITwoKeyConversionHandler(conversionHandler).setAnonymous(msg.sender, _isAnonymous);
         balancesConvertersETH[msg.sender] += msg.value;
         twoKeyEventSource.converted(address(this),msg.sender,msg.value);
-        return id;
     }
 
     /*
@@ -323,7 +321,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @param converterAddress is the sender of eth to the contract
      * @dev can be called only internally
      */
-    function createConversion(uint conversionAmountETHWei, address converterAddress) internal returns (uint) {
+    function createConversion(uint conversionAmountETHWei, address converterAddress) internal {
         uint baseTokensForConverterUnits;
         uint bonusTokensForConverterUnits;
 
@@ -341,11 +339,10 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
 
         uint256 contractorProceedsETHWei = conversionAmountETHWei - maxReferralRewardETHWei - moderatorFeeETHWei;
 
-        uint id = ITwoKeyConversionHandler(conversionHandler).supportForCreateConversion(contractor, contractorProceedsETHWei, converterAddress,
+        ITwoKeyConversionHandler(conversionHandler).supportForCreateConversion(contractor, contractorProceedsETHWei, converterAddress,
             conversionAmountETHWei, maxReferralRewardETHWei, moderatorFeeETHWei,
             baseTokensForConverterUnits,bonusTokensForConverterUnits,
             expiryConversionInHours);
-        return id;
     }
 
     /**
@@ -463,7 +460,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         if(keccak256(currency) != keccak256('ETH')) {
             uint rate;
             bool flag;
-            (rate,flag,,) = ITwoKeyExchangeContract(ethUSDExchangeContract).getFiatCurrencyDetails(currency);
+            (rate,flag,,) = ITwoKeyExchangeRateContract(ethUSDExchangeContract).getFiatCurrencyDetails(currency);
             if(flag) {
                 conversionAmountETHWei = (conversionAmountETHWei * rate).div(10 ** 18); //converting eth to $wei
             } else {
