@@ -12,7 +12,7 @@ const singletones = [
     "TwoKeyRegistry",
     "TwoKeyPlasmaEvents",
     "TwoKeyCongress",
-    "TwoKeyExchangeContract",
+    "TwoKeyExchangeRateContract",
     "TwoKeySingletonesRegistry",
 ];
 

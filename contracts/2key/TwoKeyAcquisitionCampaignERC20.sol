@@ -7,7 +7,7 @@ import "../interfaces/IERC20.sol";
 import "./Call.sol";
 import "../interfaces/IUpgradableExchange.sol";
 import "../interfaces/ITwoKeyConversionHandler.sol";
-import "../interfaces/ITwoKeyExchangeContract.sol";
+import "../interfaces/ITwoKeyExchangeRateContract.sol";
 
 /**
  * @author Nikola Madjarevic
@@ -277,7 +277,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         } else {
             uint val;
             bool flag;
-            (val, flag,,) = ITwoKeyExchangeContract(ethUSDExchangeContract).getFiatCurrencyDetails(currency);
+            (val, flag,,) = ITwoKeyExchangeRateContract(ethUSDExchangeContract).getFiatCurrencyDetails(currency);
             if(flag) {
                 require((msgValue * val).div(10**18) >= minContributionETHorFiatCurrency); //converting ether to fiat
                 require((msgValue * val).div(10**18) <= maxContributionETHorFiatCurrency); //converting ether to fiat
@@ -460,7 +460,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         if(keccak256(currency) != keccak256('ETH')) {
             uint rate;
             bool flag;
-            (rate,flag,,) = ITwoKeyExchangeContract(ethUSDExchangeContract).getFiatCurrencyDetails(currency);
+            (rate,flag,,) = ITwoKeyExchangeRateContract(ethUSDExchangeContract).getFiatCurrencyDetails(currency);
             if(flag) {
                 conversionAmountETHWei = (conversionAmountETHWei * rate).div(10 ** 18); //converting eth to $wei
             } else {

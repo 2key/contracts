@@ -2,7 +2,7 @@ const TwoKeyAdmin = artifacts.require('TwoKeyAdmin');
 const EventSource = artifacts.require('TwoKeyEventSource');
 const TwoKeyRegistry = artifacts.require('TwoKeyRegistry');
 const TwoKeySingletonesRegistry = artifacts.require('TwoKeySingletonesRegistry');
-const TwoKeyExchangeContract = artifacts.require('TwoKeyExchangeContract');
+const TwoKeyExchangeRateContract = artifacts.require('TwoKeyExchangeRateContract');
 const TwoKeyCongress = artifacts.require('TwoKeyCongress');
 const Proxy = artifacts.require('UpgradeabilityProxy');
 const fs = require('fs');
@@ -63,7 +63,7 @@ module.exports = function deploy(deployer) {
         else if (argument == 'TwoKeyEventSource') {
             isEventSource = true;
         }
-        else if (argument == 'TwoKeyExchangeContract') {
+        else if (argument == 'TwoKeyExchangeRateContract') {
             isTwoKeyExchangeContract = true;
         }
         else if (argument == 'TwoKeyAdmin') {
@@ -178,12 +178,12 @@ module.exports = function deploy(deployer) {
                 )
         } else if(isTwoKeyExchangeContract) {
             /**
-             * If contract we're updating is TwoKeyExchangeContract (argument) this 'subscript' will be executed!
+             * If contract we're updating is TwoKeyExchangeRateContract (argument) this 'subscript' will be executed!
              */
             let lastTwoKeyExchangeContract;
-            console.log('TwoKeyExchangeContract will be updated now.');
-            deployer.deploy(TwoKeyExchangeContract)
-                .then(() => TwoKeyExchangeContract.deployed()
+            console.log('TwoKeyExchangeRateContract will be updated now.');
+            deployer.deploy(TwoKeyExchangeRateContract)
+                .then(() => TwoKeyExchangeRateContract.deployed()
                     .then((twoKeyExchangeInstance) => {
                         lastTwoKeyExchangeContract = twoKeyExchangeInstance.address;
                     })
@@ -191,19 +191,19 @@ module.exports = function deploy(deployer) {
                     .then(async(registry) => {
                         await new Promise(async(resolve,reject) => {
                             try {
-                                console.log('... Adding new version of TwoKeyExchangeContract to the registry contract');
-                                const twoKeyExchange = fileObject.TwoKeyExchangeContract || {};
+                                console.log('... Adding new version of TwoKeyExchangeRateContract to the registry contract');
+                                const twoKeyExchange = fileObject.ITwoKeyExchangeRateContract || {};
 
                                 let v = parseInt(twoKeyExchange[networkId.toString()].Version.substr(-1)) + 1;
                                 twoKeyExchange[networkId.toString()].Version = twoKeyExchange[networkId.toString()].Version.substr(0, twoKeyExchange[networkId.toString()].Version.length - 1) + v.toString();
                                 console.log('New version : ' + twoKeyExchange[networkId.toString()].Version);
-                                let txHash = await registry.addVersion("TwoKeyExchangeContract", twoKeyExchange[networkId.toString()].Version, TwoKeyExchangeContract.address);
+                                let txHash = await registry.addVersion("TwoKeyExchangeRateContract", twoKeyExchange[networkId.toString()].Version, TwoKeyExchangeRateContract.address);
 
                                 console.log('... Upgrading proxy to new version');
-                                txHash = await Proxy.at(twoKeyExchange[networkId.toString()].Proxy).upgradeTo("TwoKeyExchangeContract", twoKeyExchange[networkId.toString()].Version);
+                                txHash = await Proxy.at(twoKeyExchange[networkId.toString()].Proxy).upgradeTo("TwoKeyExchangeRateContract", twoKeyExchange[networkId.toString()].Version);
                                 twoKeyExchange[networkId.toString()].address = lastTwoKeyExchangeContract;
 
-                                fileObject['TwoKeyExchangeContract'] = twoKeyExchange;
+                                fileObject['TwoKeyExchangeRateContract'] = twoKeyExchange;
                                 fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
                                 resolve(txHash);
                             } catch (e) {

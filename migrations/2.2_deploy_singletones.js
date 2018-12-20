@@ -7,7 +7,7 @@ const TwoKeyCongress = artifacts.require('TwoKeyCongress');
 const Call = artifacts.require('Call');
 const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
 const TwoKeySingletonesRegistry = artifacts.require('TwoKeySingletonesRegistry');
-const TwoKeyExchangeContract = artifacts.require('TwoKeyExchangeContract');
+const TwoKeyExchangeRateContract = artifacts.require('TwoKeyExchangeRateContract');
 const fs = require('fs');
 const path = require('path');
 
@@ -68,8 +68,8 @@ module.exports = function deploy(deployer) {
             .then(() => TwoKeyCongress.deployed())
             .then(() => deployer.deploy(TwoKeyAdmin))
             .then(() => TwoKeyAdmin.deployed())
-            .then(() => deployer.deploy(TwoKeyExchangeContract))
-            .then(() => TwoKeyExchangeContract.deployed())
+            .then(() => deployer.deploy(TwoKeyExchangeRateContract))
+            .then(() => TwoKeyExchangeRateContract.deployed())
             .then(() => deployer.deploy(EventSource))
             .then(() => deployer.deploy(TwoKeyRegistry)
             .then(() => TwoKeyRegistry.deployed())
@@ -137,24 +137,24 @@ module.exports = function deploy(deployer) {
 
                 await new Promise(async (resolve,reject) => {
                     try {
-                        console.log('... Adding TwoKeyExchangeContract to Proxy registry as valid implementation');
+                        console.log('... Adding TwoKeyExchangeRateContract to Proxy registry as valid implementation');
                         /**
                          * Adding EventSource to the registry, deploying 1st proxy for that 1.0 version of EventSource
                          */
-                        let txHash = await registry.addVersion("TwoKeyExchangeContract", "1.0", TwoKeyExchangeContract.address);
-                        let { logs } = await registry.createProxy("TwoKeyExchangeContract", "1.0");
+                        let txHash = await registry.addVersion("TwoKeyExchangeRateContract", "1.0", TwoKeyExchangeRateContract.address);
+                        let { logs } = await registry.createProxy("TwoKeyExchangeRateContract", "1.0");
                         let { proxy } = logs.find(l => l.event === 'ProxyCreated').args;
-                        console.log('Proxy address for the TwoKeyExchangeContract is : ' + proxy);
+                        console.log('Proxy address for the TwoKeyExchangeRateContract is : ' + proxy);
 
                         const twoKeyExchange = fileObject.TwoKeyExchange || {};
 
                         twoKeyExchange[networkId] = {
-                            'address': TwoKeyExchangeContract.address,
+                            'address': TwoKeyExchangeRateContract.address,
                             'Proxy': proxy,
                             'Version': "1.0",
                             maintainer_address: maintainerAddress,
                         };
-                        fileObject['TwoKeyExchangeContract'] = twoKeyExchange;
+                        fileObject['TwoKeyExchangeRateContract'] = twoKeyExchange;
                         proxyAddressTwoKeyExchange = proxy;
 
                         resolve(proxy);
@@ -237,7 +237,7 @@ module.exports = function deploy(deployer) {
                             [maintainerAddress],
                             proxyAddressTwoKeyRegistry
                         );
-                        await TwoKeyExchangeContract.at(proxyAddressTwoKeyExchange).setInitialParams
+                        await TwoKeyExchangeRateContract.at(proxyAddressTwoKeyExchange).setInitialParams
                         (
                             [maintainerAddress],
                             proxyAddressTwoKeyAdmin

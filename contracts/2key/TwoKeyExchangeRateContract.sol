@@ -9,7 +9,7 @@ import "./Upgradeable.sol";
  * This is going to be the contract on which we will store exchange rates between USD and ETH
  * Will be maintained, and updated by our trusted server and CMC api every 8 hours.
  */
-contract TwoKeyExchangeContract is Upgradeable {
+contract TwoKeyExchangeRateContract is Upgradeable {
 
 
     /**

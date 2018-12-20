@@ -14,6 +14,7 @@ import "../interfaces/IERC20.sol";
 contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionAndConverterStates {
 
     using SafeMath for uint256;
+
     uint numberOfConversions = 0;
     Conversion[] public conversions;
     mapping(address => uint[]) converterToHisConversions;
