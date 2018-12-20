@@ -94,6 +94,32 @@ module.exports = {
       gasPrice: 50000000000,
     },
 
+    'private.test.k8s': {
+      // 0x0E0D3E393B47058c3A85e33EFE542B7fBc51BB07
+      // http://ext.geth.private.test.k8s.2key.net:8545/
+      // provider: () => new PrivateKeyProvider('da16b3f97e1f39ac93788d925e17286f20dc737cc208d57ca4d49b128b69eb85', 'http://ext.geth.private.test.k8s.2key.net:8545'),
+      //provider: () => new HDWalletProvider(mnemonic, 'https://rpc.private.test.k8s.2key.net'),
+      provider: () => LedgerProvider('https://rpc.private.test.k8s.2key.net', {
+        networkId: 98052,
+        gas: 7000000,
+        gasPrice: 0,
+        // https://github.com/LedgerHQ/ledgerjs/issues/200
+        path: "44'/60'/0'/0",
+        // askConfirm: true,
+        askConfirm: false,
+        accountsLength: 1,
+        accountsOffset: 0,
+      }),
+      // host: 'https://ext.geth.private.test.k8s.2key.net',
+      // port: 8545,
+      // network_id: 98052, // Match any network id
+      //network_id: 98052,
+      //gas: 7000000,
+      //gasPrice: 0,
+      // gasPrice: 100000000000,
+      // gasPrice: 2000000000
+    },
+
     'public.test.k8s-hdwallet' : {
       provider: () => new HDWalletProvider(mnemonic, 'https://rpc.public.test.k8s.2key.net'),
       network_id: 3,
@@ -101,7 +127,7 @@ module.exports = {
       gasPrice: 50000000000,
     },
 
-    'private.test.k8s': {
+    'private.test.k8s-hdwallet': {
       // 0x0E0D3E393B47058c3A85e33EFE542B7fBc51BB07
       // http://ext.geth.private.test.k8s.2key.net:8545/
       // provider: () => new PrivateKeyProvider('da16b3f97e1f39ac93788d925e17286f20dc737cc208d57ca4d49b128b69eb85', 'http://ext.geth.private.test.k8s.2key.net:8545'),
