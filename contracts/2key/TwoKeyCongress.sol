@@ -136,11 +136,10 @@ contract TwoKeyCongress is Upgradeable {
     /// @param nameAndParams is the name of the function and it's params to hash
     /// @dev example: 'functionName(address,string)'
     /// @return hash of allowed methods
-    function hashAllowedMethods(string nameAndParams) public returns (bytes32) {
+    function hashAllowedMethods(string nameAndParams) internal {
         bytes32 allowed = keccak256(abi.encodePacked(nameAndParams));
         allowedMethodSignatures.push(allowed);
         methodHashToMethodName[allowed] = nameAndParams;
-        return allowed;
     }
 
 
