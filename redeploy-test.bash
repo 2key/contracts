@@ -13,7 +13,7 @@ spinner() {
 
 spinner 2
 echo "Redeploying contracts to dev-local"
-yarn run deploy --migrate dev-local,private.test.k8s --reset
+yarn run deploy --migrate dev-local,private.test.k8s-hdwallet --reset
 spinner 2
 echo "Sending some eth to addresses"
 yarn run test:one 2key-protocol/test/sendETH.spec.ts
