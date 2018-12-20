@@ -8,6 +8,8 @@ export CPPFLAGS="-I/usr/local/opt/node@10/include"
 
 ```
 bash redeploy-test.bash
+yarn run deploy --migrate dev-local,private.test.k8s-hdwallet --reset
+
 ```
 ```
 yarn run deploy public.test.k8s,private.test.k8s 
