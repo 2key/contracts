@@ -105,6 +105,7 @@ contract TwoKeyCongress is Upgradeable {
         hashAllowedMethods("transferByAdmins(address,uint256)");
         hashAllowedMethods("transferEtherByAdmins(address,uint256)");
         hashAllowedMethods("destroy");
+        hashAllowedMethods("transfer2KeyTokens(address,uint256)");
         hashAllowedMethods("addMaintainerForRegistry(address)");
         hashAllowedMethods("twoKeyEventSourceAddMaintainer(address[])");
         hashAllowedMethods("twoKeyEventSourceWhitelistContract(address)");
