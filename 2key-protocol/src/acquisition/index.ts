@@ -1047,6 +1047,32 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     }
 
     /**
+     * Function where converter can cancel by himself one of his conversions which is still pending approval
+     * @param campaign
+     * @param {number} conversion_id
+     * @param {string} from
+     * @param {number} gasPrice
+     * @returns {Promise<string>}
+     */
+    public converterCancelConversion(campaign: any, conversion_id: number, from: string, gasPrice: number = this.base._getGasPrice()) : Promise<string> {
+        return new Promise<string>(async(resolve,reject) => {
+            try {
+                const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
+                const conversionHandlerInstance = this.base.web3.eth.contract(contracts.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
+                const nonce = await this.helpers._getNonce(from);
+                const txHash: string = await promisify(conversionHandlerInstance.converterCancelConversion,[conversion_id, {
+                    from,
+                    gasPrice,
+                    nonce
+                }]);
+                resolve(txHash);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+    /**
      *
      * @param campaign
      * @param {string} converter

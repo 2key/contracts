@@ -177,13 +177,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionAndConverterSta
      */
     function executeConversion(uint _conversionId) external onlyApprovedConverter {
         require(isConversionNotExecuted(_conversionId));
-        //        bool flag = false;
-        //        for(uint i=0; i<converterToHisConversions[msg.sender].length; i++) {
-        //            if(converterToHisConversions[msg.sender][i] == _conversionId) {
-        //                flag = true;
-        //            }
-        //        }
-        //        require(flag);
         performConversion(_conversionId);
     }
 
@@ -194,6 +187,8 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionAndConverterSta
      */
     function performConversion(uint _conversionId) internal {
         Conversion memory conversion = conversions[_conversionId];
+
+        require(msg.sender == conversion.converter);
 
         ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateRefchainRewards(conversion.maxReferralRewardETHWei, conversion.converter);
 
@@ -412,6 +407,21 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionAndConverterSta
     function getNumberOfConversions() external view returns (uint) {
         require(msg.sender == contractor || msg.sender == moderator);
         return numberOfConversions;
+    }
+
+    /**
+     * @notice Function to cancel conversion and get back money
+     * @param _conversionId is the id of the conversion
+     * @dev returns all the funds to the converter back
+     */
+    function converterCancelConversion(uint _conversionId) external {
+        Conversion memory conversion = conversions[_conversionId];
+        require(msg.sender == conversion.converter);
+        require(conversion.state == ConversionState.PENDING_APPROVAL);
+
+        conversion.state = ConversionState.CANCELLED_BY_CONVERTER;
+        ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).sendBackEthWhenConversionCancelled(msg.sender, conversion.conversionAmount);
+        conversions[_conversionId] = conversion;
     }
 
 
