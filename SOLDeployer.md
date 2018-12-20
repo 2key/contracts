@@ -12,7 +12,7 @@ yarn run deploy --migrate dev-local,private.test.k8s-hdwallet --reset
 
 ```
 ```
-yarn run deploy public.test.k8s,private.test.k8s 
+yarn run deploy public.test.k8s,private.test.k8s-hdwallet --reset
 ```
 ### How to deploy contracts to any network except local dev
 
