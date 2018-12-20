@@ -304,7 +304,7 @@ contract TwoKeyCongress is Upgradeable {
         address beneficiary,
         uint weiAmount,
         bytes transactionBytecode)
-    constant public
+    view public
     returns (bool codeChecksOut)
     {
         Proposal storage p = proposals[proposalNumber];
