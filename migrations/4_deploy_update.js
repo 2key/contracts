@@ -12,7 +12,6 @@ const proxyFile = path.join(__dirname, '../build/contracts/proxyAddresses.json')
 
 
 module.exports = function deploy(deployer) {
-    let maintainerAddress = (deployer.network.startsWith('ropsten') || deployer.network.startsWith('rinkeby') || deployer.network.startsWith('public.')) ? '0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f' : '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7';
 
     /**
      * Is argument 'update' is found
