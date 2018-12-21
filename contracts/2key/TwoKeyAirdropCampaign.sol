@@ -31,6 +31,10 @@ contract TwoKeyAirdropCampaign is TwoKeyConversionStates {
     uint maxNumberOfConversions;
     // Mapping converter address to the conversion => There can be only 1 converter per conversion
     mapping(address => Conversion) converterToConversion;
+    // Mapping referrer address to his balance
+    mapping(address => uint) referrerBalances;
+    // Mapping referrer address to his total earnings (only used for the statistics)
+    mapping(address => uint) referrerEarningsAllTime;
 
     struct Conversion {
         address converter;
@@ -84,8 +88,16 @@ contract TwoKeyAirdropCampaign is TwoKeyConversionStates {
      * @notice Function which will be executed to create conversion
      * @dev This function will revert if the maxNumberOfConversions is reached
      */
-    function convert() external onlyIfMaxNumberOfConversionsNotReached {
+    function convert(bytes signature) external onlyIfMaxNumberOfConversionsNotReached {
+        //TODO: Add validators, update rewards fields, parse signature, etc.
 
+        Conversion memory c = Conversion({
+            converter: msg.sender,
+            conversionTime: block.timestamp,
+            state: ConversionState.PENDING_APPROVAL
+        });
+        conversions.push(c);
+        numberOfConversions++;
     }
 
     /**
@@ -94,7 +106,24 @@ contract TwoKeyAirdropCampaign is TwoKeyConversionStates {
      * @param conversionId is the id of the conversion (position in the array of conversions)
      */
     function approveConversion(uint conversionId) external onlyContractor {
+        Conversion memory c = conversions[conversionId];
+        if(c.state == ConversionState.PENDING_APPROVAL) {
+            c.state = ConversionState.APPROVED;
+        }
+        conversions[conversionId] = c;
+    }
 
+    /**
+     * @notice Function to reject conversion
+     * @dev This function can be called only by contractor
+     * @param conversionId is the id of the conversion
+     */
+    function rejectConversion(uint conversionId) external onlyContractor {
+        Conversion memory c = conversions[conversionId];
+        if(c.state == ConversionState.PENDING_APPROVAL) {
+            c.state = ConversionState.REJECTED;
+        }
+        conversions[conversionId] = c;
     }
 
     /**

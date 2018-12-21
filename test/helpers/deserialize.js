@@ -37,7 +37,7 @@ function decode(testData) {
         numberOfTokensPerConverter : numberOfTokensPerConversion,
         numberOfConversions : numberOfConversions,
         maxNumberOfConversions : maxNumberOfConversions
-    }
+    };
     console.log(obj);
 }
 
@@ -45,4 +45,4 @@ function decode(testData) {
 
 module.exports = {
     deserializeHex, decode
-}
+};
