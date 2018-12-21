@@ -6,7 +6,7 @@ contract TwoKeyConverterStates {
     /// @notice Function to convert converter state to it's bytes representation (Maybe we don't even need it)
     /// @param state is conversion state
     /// @return bytes32 (hex) representation of state
-    function convertConverterStateToBytes(ConverterState state) public pure returns (bytes32) {
+    function convertConverterStateToBytes(ConverterState state) internal pure returns (bytes32) {
         if(ConverterState.PENDING_APPROVAL == state) {
             return bytes32("PENDING_APPROVAL");
         }
