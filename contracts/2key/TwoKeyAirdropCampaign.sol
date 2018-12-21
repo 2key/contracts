@@ -20,7 +20,7 @@ contract TwoKeyAirdropCampaign is TwoKeyConversionStates {
     // Time when campaign ends
     uint campaignEndTime;
     // This is representing the total number of tokens which will be given as reward to the converter
-    uint numberOfTokensPerConverter;
+    uint public numberOfTokensPerConverter;
     // This is representing the total amount for the referral per conversion -> defaults to numberOfTokensPerConverter
     uint referralReward;
     // Array of conversion objects
@@ -97,6 +97,10 @@ contract TwoKeyAirdropCampaign is TwoKeyConversionStates {
 
     }
 
+    /**
+     * @notice Function to return dynamic and static contract data, visible to everyone
+     * @return encoded data
+     */
     function getContractInformations() external view returns (bytes) {
         return abi.encodePacked(
             contractor,
