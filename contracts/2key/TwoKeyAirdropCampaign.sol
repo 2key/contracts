@@ -1,16 +1,18 @@
 pragma solidity ^0.4.24;
 
+import "./TwoKeyConversionStates.sol";
+
 /**
  * @notice Contract for the airdrop campaigns
  * @author Nikola Madjarevic
  * Created at 12/20/18
  */
-contract TwoKeyAirdropCampaign {
+contract TwoKeyAirdropCampaign is TwoKeyConversionStates {
 
     // This is representing the contractor (creator) of the campaign
     address contractor;
     // This is the amount of the tokens contractor is willing to spend for the airdrop campaign
-    uint inventory;
+    uint inventoryAmount;
     // This will be the contract ERC20 from which we will do payouts
     address erc20ContractAddress;
     // Time when campaign starts
@@ -21,6 +23,20 @@ contract TwoKeyAirdropCampaign {
     uint numberOfTokensPerConverter;
     // This is representing the total amount for the referral per conversion -> defaults to numberOfTokensPerConverter
     uint referralReward;
+    // Array of conversion objects
+    Conversion[] conversions;
+    // Number of conversions - representing at the same time conversion id
+    uint numberOfConversions = 0;
+    // Regarding fixed inventory and reward per conversion there is total number of conversions per campaign
+    uint maxNumberOfConversions;
+    // Mapping converter address to the conversion => There can be only 1 converter per conversion
+    mapping(address => Conversion) converterToConversion;
+
+    struct Conversion {
+        address converter;
+        uint conversionTime; //We can add this optional thing, like saving timestamp when conversion is created
+        ConversionState state;
+    }
 
     // Modifier which will prevent to do any actions if the time expired or didn't even started yet.
     modifier isOngoing {
@@ -28,8 +44,17 @@ contract TwoKeyAirdropCampaign {
         _;
     }
 
+    modifier onlyIfMaxNumberOfConversionsNotReached {
+        require(numberOfConversions < maxNumberOfConversions);
+        _;
+    }
 
-    //TODO: Expand and add modifiers to validate all the data is correct
+    // Modifier which will prevent to do any actions if the msg.sender is not the contractor
+    modifier onlyContractor {
+        require(msg.sender == contractor);
+        _;
+    }
+
     constructor(
         uint _inventory,
         address _erc20ContractAddress,
@@ -37,12 +62,14 @@ contract TwoKeyAirdropCampaign {
         uint _campaignEndTime,
         uint _numberOfTokensPerConverterAndReferralChain
     ) public {
-        inventory = _inventory;
+        contractor = msg.sender;
+        inventoryAmount = _inventory;
         erc20ContractAddress = _erc20ContractAddress;
         campaignStartTime = _campaignStartTime;
         campaignEndTime = _campaignEndTime;
         numberOfTokensPerConverter = _numberOfTokensPerConverterAndReferralChain;
         referralReward = _numberOfTokensPerConverterAndReferralChain;
+        maxNumberOfConversions = inventoryAmount / (2*_numberOfTokensPerConverterAndReferralChain);
     }
 
     /**
@@ -52,5 +79,33 @@ contract TwoKeyAirdropCampaign {
 
     }
 
+    /**
+     * @notice Function which will be executed to create conversion
+     * @dev This function will revert if the maxNumberOfConversions is reached
+     */
+    function convert() external onlyIfMaxNumberOfConversionsNotReached {
 
+    }
+
+    /**
+     * @notice Function to approve conversion
+     * @dev This function can be called only by contractor
+     * @param conversionId is the id of the conversion (position in the array of conversions)
+     */
+    function approveConversion(uint conversionId) external onlyContractor {
+
+    }
+
+    function getContractInformations() external view returns (bytes) {
+        return abi.encodePacked(
+            contractor,
+            inventoryAmount,
+            erc20ContractAddress,
+            campaignStartTime,
+            campaignEndTime,
+            numberOfTokensPerConverter,
+            numberOfConversions,
+            maxNumberOfConversions
+        );
+    }
 }

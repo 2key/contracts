@@ -1,17 +1,18 @@
 pragma solidity ^0.4.24;
 import "./TwoKeyTypes.sol";
 import "../interfaces/ITwoKeyAcquisitionCampaignERC20.sol";
-import "./TwoKeyConversionAndConverterStates.sol";
+import "./TwoKeyConversionStates.sol";
 import "./TwoKeyLockupContract.sol";
 import "../openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "../interfaces/IERC20.sol";
+import "./TwoKeyConverterStates.sol";
 
 /**
  * @notice Contract to handle logic related for Acquisition
  * @dev There will be 1 conversion handler per Acquisition Campaign
  * @author Nikola Madjarevic
  */
-contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionAndConverterStates {
+contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyConverterStates {
 
     using SafeMath for uint256;
 
@@ -210,22 +211,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionAndConverterSta
         conversions[_conversionId] = conversion;
         converterToLockupContracts[conversion.converter].push(lockupContract);
     }
-
-    /// @notice Function to convert converter state to it's bytes representation (Maybe we don't even need it)
-    /// @param state is conversion state
-    /// @return bytes32 (hex) representation of state
-    function convertConverterStateToBytes(ConverterState state) public pure returns (bytes32) {
-        if(ConverterState.PENDING_APPROVAL == state) {
-            return bytes32("PENDING_APPROVAL");
-        }
-        if(ConverterState.APPROVED == state) {
-            return bytes32("APPROVED");
-        }
-        if(ConverterState.REJECTED == state) {
-            return bytes32("REJECTED");
-        }
-    }
-
 
     /// @notice Function to check whether converter is approved or not
     /// @dev only contractor or moderator are eligible to call this function
