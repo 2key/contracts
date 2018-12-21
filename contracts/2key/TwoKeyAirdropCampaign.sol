@@ -44,6 +44,7 @@ contract TwoKeyAirdropCampaign is TwoKeyConversionStates {
         _;
     }
 
+    // Modifier which will restrict to overflow number of conversions
     modifier onlyIfMaxNumberOfConversionsNotReached {
         require(numberOfConversions < maxNumberOfConversions);
         _;

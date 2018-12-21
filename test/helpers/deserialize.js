@@ -1,4 +1,8 @@
-
+/**
+ *
+ * @param hex
+ * @returns {{converterAddress, conversionCreatedAt: number, conversionAmountEth: number}}
+ */
 function deserializeHex(hex) {
     let converterAddress = hex.slice(0,42);
     let conversionCreatedAt = parseInt(hex.slice(42, 42+64),16);
@@ -8,7 +12,7 @@ function deserializeHex(hex) {
         "converterAddress" : converterAddress,
         "conversionCreatedAt" : conversionCreatedAt,
         "conversionAmountEth" : conversionAmountETH
-    }
+    };
 
     return data;
 }
