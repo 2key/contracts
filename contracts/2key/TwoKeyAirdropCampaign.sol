@@ -32,9 +32,9 @@ contract TwoKeyAirdropCampaign is TwoKeyConversionStates {
     // Mapping converter address to the conversion => There can be only 1 converter per conversion
     mapping(address => Conversion) converterToConversion;
     // Mapping referrer address to his balance
-    mapping(address => uint) referrerBalances;
+    mapping(address => uint) referrerBalancesEthWEI;
     // Mapping referrer address to his total earnings (only used for the statistics)
-    mapping(address => uint) referrerEarningsAllTime;
+    mapping(address => uint) referrerTotalEarningsEthWEI;
 
     struct Conversion {
         address converter;
@@ -141,5 +141,26 @@ contract TwoKeyAirdropCampaign is TwoKeyConversionStates {
             numberOfConversions,
             maxNumberOfConversions
         );
+    }
+
+    /**
+     * @notice Function returns the total available balance of the referrer and his total earnings for this campaign
+     * @dev only referrer by himself or contractor can see the balance of the referrer
+     * @param _referrer is the address of the referrer we're checking balance for
+     */
+    function getReferrerBalanceAndTotalEarnings(address _referrer) external view returns (uint,uint){
+        require(msg.sender == contractor || msg.sender == _referrer);
+        return (referrerBalancesEthWEI[_referrer], referrerTotalEarningsEthWEI[_referrer]);
+    }
+
+    /**
+     * @notice Function to get conversion object
+     * @param conversionId is the id of the conversion
+     * @return tuple containing respectively converter address, conversionTime, and state of the conversion
+     */
+    function getConversion(uint conversionId) external view returns (address, uint, bytes32) {
+        Conversion memory conversion = conversions[conversionId];
+        require(msg.sender == conversion.converter || msg.sender == contractor);
+        return (conversion.converter, conversion.conversionTime, convertConversionStateToBytes(conversion.state));
     }
 }
