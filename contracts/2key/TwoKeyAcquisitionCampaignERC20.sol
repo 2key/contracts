@@ -83,10 +83,9 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         string _currency,
         address _ethUSDExchangeContract,
         address _twoKeyUpgradableExchangeContract
-    )
-    TwoKeyCampaignARC(
-            _twoKeyEventSource,
-            values[9]
+    ) TwoKeyCampaignARC(
+        _twoKeyEventSource,
+        values[9]
     )
     public {
         require(_assetContractERC20 != address(0), 'ERC20 contract address can not be 0x0');
