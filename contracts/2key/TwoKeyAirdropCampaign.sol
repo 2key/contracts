@@ -168,6 +168,9 @@ contract TwoKeyAirdropCampaign is TwoKeyConversionStates {
         return (conversion.converter, conversion.conversionTime, convertConversionStateToBytes(conversion.state));
     }
 
+    /**
+     * @notice Once the conversion is approved, means that converter has done the required action and he can withdraw tokens
+     */
     function converterWithdraw() external view {
         uint conversionId = converterToConversionId[msg.sender];
         Conversion memory c = conversions[conversionId];
