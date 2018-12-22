@@ -1,14 +1,13 @@
 pragma solidity ^0.4.24;
 
 import "./TwoKeyConversionStates.sol";
-
+import "../interfaces/IERC20.sol";
 /**
  * @notice Contract for the airdrop campaigns
  * @author Nikola Madjarevic
  * Created at 12/20/18
  */
 //TODO: Inherit arc contract
-//TODO: See the best pattern to apply for storing converter balance (maybe mapping or simple array of converters)
 contract TwoKeyAirdropCampaign is TwoKeyConversionStates {
 
     // This is representing the contractor (creator) of the campaign
@@ -174,7 +173,7 @@ contract TwoKeyAirdropCampaign is TwoKeyConversionStates {
         Conversion memory c = conversions[conversionId];
         require(c.state == ConversionState.APPROVED);
         hasConverterWithdrawnHisEarnings[msg.sender] = true;
-//        msg.sender.transfer(numberOfTokensPerConverter); this is going to be an erc20 transfer
+        IERC20(erc20ContractAddress).transfer(msg.sender, numberOfTokensPerConverter); this is going to be an erc20 transfer
         c.state = ConversionState.EXECUTED;
         conversions[conversionId] = c;
     }
