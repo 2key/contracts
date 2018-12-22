@@ -92,7 +92,7 @@ contract TwoKeyContract is BasicToken, Ownable {
     // the value 255 is used to signal equal partition with other influencers
     // A sender can set the value only once in a contract
     address plasma = plasmaOf(me);
-    require(influencer2cut[plasma] == 0 || influencer2cut[plasma] == cut, 'cut already set');
+    require(influencer2cut[plasma] == 0 || influencer2cut[plasma] == cut, 'cut already set differently');
     influencer2cut[plasma] = cut;
   }
 
@@ -273,6 +273,7 @@ contract TwoKeyContract is BasicToken, Ownable {
     // distribute bounty to influencers
     uint256 total_bounty = 0;
     for (uint i = 0; i < n_influencers; i++) {
+      address influencer = plasmaOf(influencers[i]);  // influencers is in reverse order
       uint256 b;
       if (i == n_influencers-1) {  // if its the last influencer then all the bounty goes to it.
         b = _bounty;
@@ -284,7 +285,6 @@ contract TwoKeyContract is BasicToken, Ownable {
           b = _bounty.div(n_influencers-i);
         }
       }
-      address influencer = plasmaOf(influencers[i]);  // influencers is in reverse order
       xbalances[influencer] = xbalances[influencer].add(b);
       emit Rewarded(influencer, b);
       total_bounty = total_bounty.add(b);
