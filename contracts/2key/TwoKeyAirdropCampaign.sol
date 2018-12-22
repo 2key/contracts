@@ -7,6 +7,8 @@ import "./TwoKeyConversionStates.sol";
  * @author Nikola Madjarevic
  * Created at 12/20/18
  */
+//TODO: Inherit arc contract
+//TODO: See the best pattern to apply for storing converter balance (maybe mapping or simple array of converters)
 contract TwoKeyAirdropCampaign is TwoKeyConversionStates {
 
     // This is representing the contractor (creator) of the campaign
@@ -30,11 +32,14 @@ contract TwoKeyAirdropCampaign is TwoKeyConversionStates {
     // Regarding fixed inventory and reward per conversion there is total number of conversions per campaign
     uint maxNumberOfConversions;
     // Mapping converter address to the conversion => There can be only 1 converter per conversion
-    mapping(address => Conversion) converterToConversion;
+    mapping(address => uint) converterToConversionId;
     // Mapping referrer address to his balance
     mapping(address => uint) referrerBalancesEthWEI;
     // Mapping referrer address to his total earnings (only used for the statistics)
     mapping(address => uint) referrerTotalEarningsEthWEI;
+    // Mapping which will follow if converter has withdrawn his earnings
+    mapping(address => bool) hasConverterWithdrawnHisEarnings;
+
 
     struct Conversion {
         address converter;
@@ -162,5 +167,15 @@ contract TwoKeyAirdropCampaign is TwoKeyConversionStates {
         Conversion memory conversion = conversions[conversionId];
         require(msg.sender == conversion.converter || msg.sender == contractor);
         return (conversion.converter, conversion.conversionTime, convertConversionStateToBytes(conversion.state));
+    }
+
+    function converterWithdraw() external view {
+        uint conversionId = converterToConversionId[msg.sender];
+        Conversion memory c = conversions[conversionId];
+        require(c.state == ConversionState.APPROVED);
+        hasConverterWithdrawnHisEarnings[msg.sender] = true;
+//        msg.sender.transfer(numberOfTokensPerConverter); this is going to be an erc20 transfer
+        c.state = ConversionState.EXECUTED;
+        conversions[conversionId] = c;
     }
 }
