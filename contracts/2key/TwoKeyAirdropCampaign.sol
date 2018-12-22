@@ -173,7 +173,7 @@ contract TwoKeyAirdropCampaign is TwoKeyConversionStates {
         Conversion memory c = conversions[conversionId];
         require(c.state == ConversionState.APPROVED);
         hasConverterWithdrawnHisEarnings[msg.sender] = true;
-        IERC20(erc20ContractAddress).transfer(msg.sender, numberOfTokensPerConverter); this is going to be an erc20 transfer
+        IERC20(erc20ContractAddress).transfer(msg.sender, numberOfTokensPerConverter); //this is going to be an erc20 transfer
         c.state = ConversionState.EXECUTED;
         conversions[conversionId] = c;
     }
