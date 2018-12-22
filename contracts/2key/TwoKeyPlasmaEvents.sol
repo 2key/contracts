@@ -100,7 +100,7 @@ contract TwoKeyPlasmaEvents {
         // the value 255 is used to signal equal partition with other influencers
         // A sender can set the value only once in a contract
         address plasma = plasmaOf(me);
-        require(influencer2cut[c][contractor][plasma] == 0 || influencer2cut[c][contractor][plasma] == cut, 'cut already set');
+        require(influencer2cut[c][contractor][plasma] == 0 || influencer2cut[c][contractor][plasma] == cut, 'cut already set differently');
         influencer2cut[c][contractor][plasma] = cut;
     }
 
