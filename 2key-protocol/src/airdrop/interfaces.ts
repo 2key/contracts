@@ -2,7 +2,7 @@
  * Interface to represent all the methods from the airdrop campaign
  */
 export interface ITwoKeyAirDropCampaign {
-
+    getContractInformations: (airdrop: any, from: string) => Promise<any>,
 }
 
 /**

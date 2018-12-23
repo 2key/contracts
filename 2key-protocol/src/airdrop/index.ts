@@ -24,7 +24,7 @@ export default class AcquisitionCampaign implements ITwoKeyAirDropCampaign {
     public getContractInformations(airdrop: any, from: string) : Promise<any> {
         return new Promise<any>(async(resolve,reject) => {
             try {
-                let airdropInstance = await this.helpers._getAirdropCampaignInstance(airdrop);
+                const airdropInstance = await this.helpers._getAirdropCampaignInstance(airdrop);
                 let campaignInformations : string = await promisify(airdropInstance.getContractInformations,[{from}]);
                 // TODO: Think about creating method in helpers which will work modular just by providing expected types and returning object
                 let contractor = campaignInformations.slice(0,42);
@@ -36,7 +36,7 @@ export default class AcquisitionCampaign implements ITwoKeyAirDropCampaign {
                 let numberOfConversions = parseInt(campaignInformations.slice(42+64+40+64+64+64, 42+64+40+64+64+64+64),16);
                 let maxNumberOfConversions = parseInt(campaignInformations.slice(42+64+40+64+64+64+64, 42+64+40+64+64+64+64+64),16);
 
-                let obj = {
+                let data = {
                     contractor : contractor,
                     inventoryAmount: inventoryAmount,
                     assetContractAddress : assetContractAddress,
@@ -46,11 +46,60 @@ export default class AcquisitionCampaign implements ITwoKeyAirDropCampaign {
                     numberOfConversions: numberOfConversions,
                     maxNumberOfConversions: maxNumberOfConversions
                 };
-                resolve(obj);
+                resolve(data);
             } catch (e) {
                 reject(e);
             }
         });
     }
+
+    /**
+     * This function will get referrer current balance and total earnings, can be called only by contractor or referrer himself
+     * @param airdrop
+     * @param {string} referrer
+     * @param {string} from
+     * @returns {Promise<any>}
+     */
+    public getReferrerBalanceAndTotalEarnings(airdrop: any, referrer: string, from: string) : Promise<any> {
+        return new Promise<any>(async(resolve,reject) => {
+           try {
+               const airdropInstance = await this.helpers._getAirdropCampaignInstance(airdrop);
+               let txHash = await promisify(airdropInstance.getReferrerBalanceAndTotalEarnings, [referrer,{from}]);
+               resolve(txHash);
+           } catch (e) {
+               reject(e);
+           }
+        });
+    }
+
+
+    /**
+     * This function will get conversion details, but only if the caller of the method is converter or contractor
+     * @param airdrop
+     * @param {number} conversionId
+     * @param {string} from
+     * @returns {Promise<any>}
+     */
+    public getConversion(airdrop: any, conversionId: number, from: string) : Promise<any> {
+        return new Promise<any>(async(resolve,reject) => {
+            try {
+                const airdropInstance = await this.helpers._getAirdropCampaignInstance(airdrop);
+                let [converter, conversionTime, conversionState] = await promisify(airdropInstance.getConversion,
+                    [conversionId,{from}]);
+                let conversion = {
+                    converter : converter,
+                    conversionTime: conversionTime,
+                    conversionState: this.base.web3.toUtf8(conversionState)
+                };
+                resolve(conversion);
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
+
+
+
+
 
 }
