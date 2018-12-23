@@ -10,6 +10,8 @@ import "../interfaces/IERC20.sol";
  */
 //TODO: Inherit arc contract
 contract TwoKeyAirdropCampaign is TwoKeyConversionStates {
+    // Campaign is activated once the 2key fee requirement is satisfied
+    bool isActivated = false;
     // Here will be static address of the economy previously deployed (ropsten version)
     address constant TWO_KEY_ECONOMY = address(0x3f9062abf3c483f02f42e0d2107a0a220c9d3529);
     // This is representing the contractor (creator) of the campaign
@@ -40,8 +42,8 @@ contract TwoKeyAirdropCampaign is TwoKeyConversionStates {
     mapping(address => uint) referrerTotalEarningsEthWEI;
     // Mapping which will follow if converter has withdrawn his earnings
     mapping(address => bool) hasConverterWithdrawnHisEarnings;
-    // Static value representing conversion fee in 2 key tokens
-    uint public CONVERSION_FEE_2KEY = 5;
+    // The amount of 2key tokens fee per conversion
+    uint constant CONVERSION_FEE_2KEY = 5;
 
     struct Conversion {
         address converter;
@@ -64,6 +66,12 @@ contract TwoKeyAirdropCampaign is TwoKeyConversionStates {
     // Modifier which will prevent to do any actions if the msg.sender is not the contractor
     modifier onlyContractor {
         require(msg.sender == contractor);
+        _;
+    }
+
+    // Modifier which will disallow function calls if it's not activated
+    modifier onlyIfActivated {
+        require(isActivated == true);
         _;
     }
 
@@ -91,12 +99,26 @@ contract TwoKeyAirdropCampaign is TwoKeyConversionStates {
 
     }
 
+    /**
+     * @notice Function to activate campaign
+     * @dev only contractor can activate campaign
+     * We're supposing that he has already sent his tokens to the contract, and also submitted (staked) 2key fee
+     */
+    function activateCampaign() external onlyContractor {
+        uint balance = IERC20(TWO_KEY_ECONOMY).balanceOf(address(this));
+        if(erc20ContractAddress == TWO_KEY_ECONOMY) {
+            require(balance == numberOfConversions * CONVERSION_FEE_2KEY + inventoryAmount);
+        } else {
+            require(balance == numberOfConversions * CONVERSION_FEE_2KEY);
+        }
+        isActivated = true;
+    }
 
     /**
      * @notice Function which will be executed to create conversion
      * @dev This function will revert if the maxNumberOfConversions is reached
      */
-    function convert(bytes signature) external onlyIfMaxNumberOfConversionsNotReached {
+    function convert(bytes signature) external onlyIfActivated onlyIfMaxNumberOfConversionsNotReached {
         //TODO: Add validators, update rewards fields, parse signature, etc.
         //TODO: Get from signature if there've been any converters
         //TODO: We can't allow anyone to do the action if there's not refchain behind him
