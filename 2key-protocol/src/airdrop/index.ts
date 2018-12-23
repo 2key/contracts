@@ -98,16 +98,25 @@ export default class AcquisitionCampaign implements ITwoKeyAirDropCampaign {
         });
     }
 
+    /**
+     * TODO: This will be a bit difficult to determine if the converter exist. Have to modify the structure a bit of his conversion
+     * @param airdrop
+     * @param {string} converter
+     * @param {string} from
+     * @returns {Promise<number>}
+     */
     public getConverterBalance(airdrop: any, converter:string, from:string) : Promise<number> {
         return new Promise<number>(async(resolve,reject) => {
             try {
                 const airdropInstance = await this.helpers._getAirdropCampaignInstance(airdrop);
-                let hasConverterWithdrawnHisEarnings = await promisify(airdropInstance.)
+
             } catch (e) {
                 reject(e);
             }
         })
     }
+
+
 
 
 
