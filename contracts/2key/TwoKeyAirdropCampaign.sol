@@ -39,7 +39,8 @@ contract TwoKeyAirdropCampaign is TwoKeyConversionStates {
     mapping(address => uint) referrerTotalEarningsEthWEI;
     // Mapping which will follow if converter has withdrawn his earnings
     mapping(address => bool) hasConverterWithdrawnHisEarnings;
-
+    // Static value representing conversion fee in 2 key tokens
+    uint public CONVERSION_FEE_2KEY = 5;
 
     struct Conversion {
         address converter;
@@ -88,6 +89,7 @@ contract TwoKeyAirdropCampaign is TwoKeyConversionStates {
     function () payable external {
 
     }
+
 
     /**
      * @notice Function which will be executed to create conversion
