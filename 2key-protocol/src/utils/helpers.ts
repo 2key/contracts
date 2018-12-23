@@ -228,6 +228,12 @@ export default class Helpers implements ITwoKeyHelpers {
             : await this._createAndValidate('TwoKeyAcquisitionCampaignERC20', campaign);
     }
 
+    async _getAirdropCampaignInstance(campaign: any) : Promise<any> {
+        return campaign.address
+            ? campaign
+            : await this._createAndValidate('TwoKeyAirdropCampaign', campaign);
+    }
+
     async _getWeightedVoteContract(campaign: any): Promise<any> {
         return campaign.address
             ? campaign
