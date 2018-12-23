@@ -11,7 +11,7 @@ contract TwoKeySingletoneAddressStorage is Ownable {
 
     mapping(string => address) contractNameToAddress;
 
-    constructor () Ownable()  public {
+    constructor () Ownable() public {
 
     }
 
