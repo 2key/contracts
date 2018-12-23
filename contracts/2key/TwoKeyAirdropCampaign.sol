@@ -10,7 +10,8 @@ import "../interfaces/IERC20.sol";
  */
 //TODO: Inherit arc contract
 contract TwoKeyAirdropCampaign is TwoKeyConversionStates {
-
+    // Here will be static address of the economy previously deployed (ropsten version)
+    address constant TWO_KEY_ECONOMY = address(0x3f9062abf3c483f02f42e0d2107a0a220c9d3529);
     // This is representing the contractor (creator) of the campaign
     address contractor;
     // This is the amount of the tokens contractor is willing to spend for the airdrop campaign
@@ -97,7 +98,8 @@ contract TwoKeyAirdropCampaign is TwoKeyConversionStates {
      */
     function convert(bytes signature) external onlyIfMaxNumberOfConversionsNotReached {
         //TODO: Add validators, update rewards fields, parse signature, etc.
-
+        //TODO: Get from signature if there've been any converters
+        //TODO: We can't allow anyone to do the action if there's not refchain behind him
         Conversion memory c = Conversion({
             converter: msg.sender,
             conversionTime: block.timestamp,
@@ -155,7 +157,7 @@ contract TwoKeyAirdropCampaign is TwoKeyConversionStates {
      * @dev only referrer by himself or contractor can see the balance of the referrer
      * @param _referrer is the address of the referrer we're checking balance for
      */
-    function getReferrerBalanceAndTotalEarnings(address _referrer) external view returns (uint,uint){
+    function getReferrerBalanceAndTotalEarnings(address _referrer) external view returns (uint,uint) {
         require(msg.sender == contractor || msg.sender == _referrer);
         return (referrerBalancesEthWEI[_referrer], referrerTotalEarningsEthWEI[_referrer]);
     }
@@ -183,4 +185,9 @@ contract TwoKeyAirdropCampaign is TwoKeyConversionStates {
         c.state = ConversionState.EXECUTED;
         conversions[conversionId] = c;
     }
+
+    function hasConverterWithdrawn(address converter) external view returns (bool) {
+
+    }
+
 }

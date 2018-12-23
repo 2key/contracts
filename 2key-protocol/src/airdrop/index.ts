@@ -98,7 +98,16 @@ export default class AcquisitionCampaign implements ITwoKeyAirDropCampaign {
         });
     }
 
-
+    public getConverterBalance(airdrop: any, converter:string, from:string) : Promise<number> {
+        return new Promise<number>(async(resolve,reject) => {
+            try {
+                const airdropInstance = await this.helpers._getAirdropCampaignInstance(airdrop);
+                let hasConverterWithdrawnHisEarnings = await promisify(airdropInstance.)
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
 
 
 
