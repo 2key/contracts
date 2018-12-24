@@ -99,7 +99,7 @@ export default class AcquisitionCampaign implements ITwoKeyAirDropCampaign {
     }
 
     /**
-     * TODO: This will be a bit difficult to determine if the converter exist. Have to modify the structure a bit of his conversion
+     * This method can resolve the balance of the converter only if he calls it or contractor
      * @param airdrop
      * @param {string} converter
      * @param {string} from
@@ -109,10 +109,13 @@ export default class AcquisitionCampaign implements ITwoKeyAirDropCampaign {
         return new Promise<number>(async(resolve,reject) => {
             try {
                 const airdropInstance = await this.helpers._getAirdropCampaignInstance(airdrop);
-
+                let converterBalance = await promisify(airdropInstance.getConverterBalance,[converter,{from}]);
+                resolve(converterBalance);
             } catch (e) {
                 reject(e);
             }
-        })
+        });
     }
+
+
 }
