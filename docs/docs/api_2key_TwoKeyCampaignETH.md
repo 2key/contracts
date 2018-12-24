@@ -1,6 +1,0 @@
----
-id: 2key_TwoKeyCampaignETH
-title: TwoKeyCampaignETH
----
-
-<div class="contract-doc"><div class="contract"><h2 class="contract-header"><span class="contract-kind">contract</span> TwoKeyCampaignETH</h2><p class="base-contracts"><span>is</span> <a href="2key_TwoKeyAcquisitionCampaignERC20.html">TwoKeyAcquisitionCampaignERC20</a></p><div class="source">Source: <a href="git+https://github.com/2keynet/web3-alpha/blob/v0.0.1/contracts/2key/TwoKeyCampaignETH.sol" target="_blank">2key/TwoKeyCampaignETH.sol</a></div></div><div class="index"><h2>Index</h2><ul><li><a href="2key_TwoKeyCampaignETH.html#actuallyFulfilledTwoKeyToken">actuallyFulfilledTwoKeyToken</a></li></ul></div><div class="reference"><h2>Reference</h2><div class="functions"><h3>Functions</h3><ul><li><div class="item function"><span id="actuallyFulfilledTwoKeyToken" class="anchor-marker"></span><h4 class="name">actuallyFulfilledTwoKeyToken</h4><div class="body"><code class="signature">function <strong>actuallyFulfilledTwoKeyToken</strong><span>() </span><span>internal </span></code><hr/><div class="description"><p>Calculates moderetor fee, pays the moderator, computes total reward transfer payout to buyer, deducting the fee and the total reward asks the campaign to distribute rewards to influencers.</p></div></div></div></li></ul></div></div></div>

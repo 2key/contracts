@@ -290,7 +290,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @param signature is the signature chain
      * @dev payable function
      */
-    function joinAndConvert(bytes signature, bool _isAnonymous) external payable {
+    function joinAndConvert(bytes signature, bool _isAnonymous) public payable {
         requirementForMsgValue(msg.value);
         distributeArcsBasedOnSignature(signature);
         createConversion(msg.value, msg.sender);
