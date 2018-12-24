@@ -94,13 +94,6 @@ contract TwoKeyAirdropCampaign is TwoKeyConversionStates {
     }
 
     /**
-     * @notice Default payable function
-     */
-    function () payable external {
-
-    }
-
-    /**
      * @notice Function to activate campaign
      * @dev only contractor can activate campaign
      * We're supposing that he has already sent his tokens to the contract, and also submitted (staked) 2key fee
