@@ -37,9 +37,9 @@ contract TwoKeyAirdropCampaign is TwoKeyConversionStates {
     // Mapping converter address to the conversion => There can be only 1 converter per conversion
     mapping(address => uint) converterToConversionId;
     // Mapping referrer address to his balance
-    mapping(address => uint) referrerBalancesEthWEI;
+    mapping(address => uint) referrerBalances;
     // Mapping referrer address to his total earnings (only used for the statistics)
-    mapping(address => uint) referrerTotalEarningsEthWEI;
+    mapping(address => uint) referrerTotalEarnings;
     // The amount of 2key tokens fee per conversion
     uint constant CONVERSION_FEE_2KEY = 5;
 
@@ -180,7 +180,7 @@ contract TwoKeyAirdropCampaign is TwoKeyConversionStates {
      */
     function getReferrerBalanceAndTotalEarnings(address _referrer) external view returns (uint,uint) {
         require(msg.sender == contractor || msg.sender == _referrer);
-        return (referrerBalancesEthWEI[_referrer], referrerTotalEarningsEthWEI[_referrer]);
+        return (referrerBalances[_referrer], referrerTotalEarnings[_referrer]);
     }
 
     /**
@@ -217,8 +217,18 @@ contract TwoKeyAirdropCampaign is TwoKeyConversionStates {
         uint conversionId = converterToConversionId[msg.sender];
         Conversion memory c = conversions[conversionId];
         require(c.state == ConversionState.APPROVED);
-        IERC20(erc20ContractAddress).transfer(msg.sender, numberOfTokensPerConverter); //this is going to be an erc20 transfer
         c.state = ConversionState.EXECUTED;
+        IERC20(erc20ContractAddress).transfer(msg.sender, numberOfTokensPerConverter); //this is going to be an erc20 transfer
         conversions[conversionId] = c;
+    }
+
+    /**
+     * @notice Function to withdraw erc20 tokens for the referrer
+     * @dev if referrer doesn't have any balance this will revert
+     */
+    function referrerWithdraw() external {
+        require(referrerBalances[msg.sender] > 0);
+        IERC20(erc20ContractAddress).transfer(msg.sender, referrerBalances[msg.sender]);
+        referrerBalances[msg.sender] = 0;
     }
 }
