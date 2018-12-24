@@ -342,8 +342,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
             conversionAmountETHWei, maxReferralRewardETHWei, moderatorFeeETHWei,
             baseTokensForConverterUnits,bonusTokensForConverterUnits,
             expiryConversionInHours);
-
-
     }
 
     /**
@@ -492,7 +490,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         return privateMetaHash;
     }
 
-
     /**
      * @notice Function to update MinContributionETH
      * @dev only Contractor can call this method, otherwise it will revert - emits Event when updated
@@ -572,6 +569,14 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
             return true;
         }
         return false;
+    }
+
+    /**
+     * @notice Function to check available amount of the tokens on the contract
+     */
+    function getAvailableAndNonReservedTokensAmount() external view returns (uint) {
+        uint inventoryBalance = getInventoryBalance();
+        return (inventoryBalance - reservedAmountOfTokens);
     }
 
     function sendBackEthWhenConversionCancelled(address _cancelledConverter, uint _conversionAmount) public onlyTwoKeyConversionHandler {
@@ -655,9 +660,5 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         }
     }
 
-    function getAvailableAndNonReservedTokensAmount() external view returns (uint) {
-        uint inventoryBalance = getInventoryBalance();
-        return (inventoryBalance - reservedAmountOfTokens);
-    }
 
 }
