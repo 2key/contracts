@@ -1347,4 +1347,22 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         });
     }
 
+    /**
+     * This function will get available balance including 'reserved' tokens
+     * @param campaign
+     * @param {string} from
+     * @returns {Promise<number>}
+     */
+    public getCurrentAvailableAmountOfTokens(campaign:any, from:string) : Promise<number> {
+        return new Promise(async(resolve,reject) => {
+            try {
+                const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
+                let availableBalance = await promisify(campaignInstance.getAvailableAndNonReservedTokensAmount,[{from}]);
+                resolve(availableBalance);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
 }

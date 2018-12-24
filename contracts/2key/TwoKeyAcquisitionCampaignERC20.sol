@@ -19,7 +19,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     using Call for *;
 
 //    event Rewarded(address indexed to, uint256 amount);
-
     address public conversionHandler;
     address public upgradableExchange;
 
@@ -51,8 +50,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     uint maxConverterBonusPercent; //translates to discount - we can add this to constructor
     uint minContributionETHorFiatCurrency; // Minimal amount of ETH or USD that can be paid by converter to create conversion
     uint maxContributionETHorFiatCurrency; // Maximal amount of ETH or USD that can be paid by converter to create conversion
-
     uint unit_decimals; // ERC20 selling data
+    uint reservedAmountOfTokens = 0;
 
 //    bool public withdrawApproved = false; // Until contractor set this to be true, no one can withdraw funds etc.
 //    bool canceled = false; // This means if contractor cancel everything
@@ -83,7 +82,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         string _currency,
         address _ethUSDExchangeContract,
         address _twoKeyUpgradableExchangeContract
-    ) TwoKeyCampaignARC(
+    ) TwoKeyCampaignARC (
         _twoKeyEventSource,
         values[9]
     )
@@ -118,7 +117,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      */
     function setERC20Attributes() internal {
         unit_decimals = IERC20(assetContractERC20).decimals();
-//        symbol = IERC20(assetContractERC20).symbol();
     }
 
     /**
@@ -329,7 +327,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         uint totalTokensForConverterUnits = baseTokensForConverterUnits + bonusTokensForConverterUnits;
 
         uint256 _total_units = getInventoryBalance();
-        require(_total_units >= totalTokensForConverterUnits, 'Inventory balance does not have enough funds');
+        require(_total_units - reservedAmountOfTokens >= totalTokensForConverterUnits, 'Inventory balance does not have enough funds');
 
         units[converterAddress] = units[converterAddress].add(totalTokensForConverterUnits);
 
@@ -338,10 +336,14 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
 
         uint256 contractorProceedsETHWei = conversionAmountETHWei - maxReferralRewardETHWei - moderatorFeeETHWei;
 
+        reservedAmountOfTokens = reservedAmountOfTokens + totalTokensForConverterUnits;
+
         ITwoKeyConversionHandler(conversionHandler).supportForCreateConversion(contractor, contractorProceedsETHWei, converterAddress,
             conversionAmountETHWei, maxReferralRewardETHWei, moderatorFeeETHWei,
             baseTokensForConverterUnits,bonusTokensForConverterUnits,
             expiryConversionInHours);
+
+
     }
 
     /**
@@ -552,6 +554,15 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     }
 
     /**
+     * @notice Function to update amount of the reserved tokens in case conversion is rejected
+     * @param value is the amount to reduce from reserved state
+     */
+    function updateReservedAmountOfTokensIfConversionRejectedOrExecuted(uint value) public onlyTwoKeyConversionHandler {
+        require(reservedAmountOfTokens - value >= 0);
+        reservedAmountOfTokens = reservedAmountOfTokens - value;
+    }
+
+    /**
      * @notice Function to check if the msg.sender has already joined
      * @return true/false depending of joined status
      */
@@ -585,7 +596,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @dev only contractor can call this function, otherwise it will revert
      * @return value of contractor balance in ETH WEI
      */
-    function getContractorBalance() public onlyContractor view returns (uint) {
+    function getContractorBalance() external onlyContractor view returns (uint) {
         return contractorBalance;
     }
 
@@ -594,7 +605,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @dev only contractor or moderator are eligible to call this function
      * @return value of his balance in ETH
      */
-    function getModeratorBalanceAndTotalEarnings() public onlyContractorOrModerator view returns (uint,uint) {
+    function getModeratorBalanceAndTotalEarnings() external onlyContractorOrModerator view returns (uint,uint) {
         return (moderatorBalanceETHWei,moderatorTotalEarningsETHWei);
     }
 
@@ -614,7 +625,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @dev onlyContractor can call this method
      * @return true if successful otherwise will 'revert'
      */
-    function withdrawContractor() public onlyContractor returns (bool) {
+    function withdrawContractor() external onlyContractor returns (bool) {
         uint balance = contractorBalance;
         contractorBalance = 0;
         /**
@@ -628,7 +639,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     /**
      * @notice Function where moderator or referrer can withdraw their available funds
      */
-    function withdrawModeratorOrReferrer() public returns (bool) {
+    function withdrawModeratorOrReferrer() external returns (bool) {
         //Creating additional variable to prevent reentrancy attack
         uint balance;
         if(msg.sender == moderator) {
@@ -643,4 +654,10 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
             revert();
         }
     }
+
+    function getAvailableAndNonReservedTokensAmount() external view returns (uint) {
+        uint inventoryBalance = getInventoryBalance();
+        return (inventoryBalance - reservedAmountOfTokens);
+    }
+
 }

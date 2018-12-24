@@ -64,7 +64,6 @@ export interface ITwoKeyAcquisitionCampaign {
     getConversion: (campaign: any, conversionId: number, from: string) => Promise<any>,
     isAddressJoined: (campaign: any, from: string) => Promise<boolean>,
     getBalanceOfArcs: (campaign: any, from: string) => Promise<number>,
-
     getEstimatedMaximumReferralReward: (campaign: any, from: string, referralLink: string) => Promise<number>,
     setPublicLinkKey: (campaign: any, from: string, publicLink: string, opts?: IPublicLinkOpts) => Promise<IPublicLinkKey>,
     join: (campaign: any, from: string, opts?: IJoinLinkOpts) => Promise<string>,
@@ -91,6 +90,7 @@ export interface ITwoKeyAcquisitionCampaign {
     getAcquisitionCampaignCurrency: (campaign: any, from: string) => Promise<string>,
     getModeratorTotalEarnings: (campaign:any, from:string) => Promise<number>,
     getReferrerBalanceAndTotalEarningsAndNumberOfConversions: (campaign:any, referrer: string, from: string) => Promise<IReferrerSummary>,
+    getCurrentAvailableAmountOfTokens: (campaign:any, from:string) => Promise<number>,
 }
 
 export interface IPublicLinkOpts {

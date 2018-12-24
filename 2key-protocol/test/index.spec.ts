@@ -554,6 +554,10 @@ describe('TwoKeyProtocol', () => {
         expect(hash).to.be.a('string');
     }).timeout(300000);
 
+    it('==> should print available amount of tokens before conversion', async() => {
+        const availableAmountOfTokens = await twoKeyProtocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(campaignAddress,from);
+        console.log('Available amount of tokens before conversion is: ' + availableAmountOfTokens);
+    }).timeout(30000);
 
     it('should buy some tokens from uport', async () => {
         const {web3, address} = web3switcher.uport();
@@ -571,6 +575,11 @@ describe('TwoKeyProtocol', () => {
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         console.log(txHash);
         expect(txHash).to.be.a('string');
+    }).timeout(30000);
+
+    it('==> should print available amount of tokens after conversion', async() => {
+        const availableAmountOfTokens = await twoKeyProtocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(campaignAddress,from);
+        console.log('Available amount of tokens after conversion is: ' + availableAmountOfTokens);
     }).timeout(30000);
 
     it('should transfer arcs to gmail2', async () => {
@@ -926,7 +935,6 @@ describe('TwoKeyProtocol', () => {
         const totalEarnings = await twoKeyProtocol.AcquisitionCampaign.getModeratorTotalEarnings(campaignAddress,from);
         console.log('Moderator total earnings: '+ totalEarnings);
     }).timeout(30000);
-
 
     it('should print balances', printBalances).timeout(15000);
 });
