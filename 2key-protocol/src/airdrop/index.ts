@@ -115,9 +115,4 @@ export default class AcquisitionCampaign implements ITwoKeyAirDropCampaign {
             }
         })
     }
-
-
-
-
-
 }

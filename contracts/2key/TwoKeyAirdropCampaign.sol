@@ -40,8 +40,6 @@ contract TwoKeyAirdropCampaign is TwoKeyConversionStates {
     mapping(address => uint) referrerBalancesEthWEI;
     // Mapping referrer address to his total earnings (only used for the statistics)
     mapping(address => uint) referrerTotalEarningsEthWEI;
-    // Mapping which will follow if converter has withdrawn his earnings
-    mapping(address => bool) hasConverterWithdrawnHisEarnings;
     // The amount of 2key tokens fee per conversion
     uint constant CONVERSION_FEE_2KEY = 5;
 
@@ -122,6 +120,7 @@ contract TwoKeyAirdropCampaign is TwoKeyConversionStates {
         //TODO: Add validators, update rewards fields, parse signature, etc.
         //TODO: Get from signature if there've been any converters
         //TODO: We can't allow anyone to do the action if there's not refchain behind him
+        //TODO: Add validator that converter previously doesn't exist
         Conversion memory c = Conversion({
             converter: msg.sender,
             conversionTime: block.timestamp,
@@ -202,14 +201,24 @@ contract TwoKeyAirdropCampaign is TwoKeyConversionStates {
         uint conversionId = converterToConversionId[msg.sender];
         Conversion memory c = conversions[conversionId];
         require(c.state == ConversionState.APPROVED);
-        hasConverterWithdrawnHisEarnings[msg.sender] = true;
         IERC20(erc20ContractAddress).transfer(msg.sender, numberOfTokensPerConverter); //this is going to be an erc20 transfer
         c.state = ConversionState.EXECUTED;
         conversions[conversionId] = c;
     }
 
-    function hasConverterWithdrawn(address converter) external view returns (bool) {
-
+    /**
+     * @notice Function to determine the balance of converter
+     * @dev Only converter by himself or contractor can see balance for the converter
+     * @param _converter address is the only argument we need
+     */
+    function checkConverterBalance(address _converter) public view returns (uint) {
+        require(msg.sender == _converter || msg.sender == contractor);
+        uint conversionId = converterToConversionId[_converter];
+        Conversion memory conversion = conversions[conversionId];
+        if(conversion.state == ConversionState.APPROVED) {
+            return numberOfTokensPerConverter;
+        } else {
+            return 0;
+        }
     }
-
 }
