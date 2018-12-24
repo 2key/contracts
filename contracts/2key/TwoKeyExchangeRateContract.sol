@@ -141,7 +141,7 @@ contract TwoKeyExchangeRateContract is Upgradeable {
      * @dev If string.length > 32 then the rest after 32nd char will be deleted
      * @return result
      */
-    function stringToBytes32(string memory source) returns (bytes32 result) {
+    function stringToBytes32(string memory source) internal returns (bytes32 result) {
         bytes memory tempEmptyStringTest = bytes(source);
         if (tempEmptyStringTest.length == 0) {
             return 0x0;
