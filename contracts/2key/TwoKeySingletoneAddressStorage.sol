@@ -27,6 +27,7 @@ contract TwoKeySingletoneAddressStorage is Ownable {
         contractNameToAddress['TwoKeyEconomy'] = addresses[3];
         contractNameToAddress['TwoKeyUpgradableExchange'] = addresses[4];
         contractNameToAddress['TwoKeyFixedRateExchange'] = addresses[5];
+        contractNameToAddress['TwoKeyRegistry'] = addresses[6];
     }
 
     /**
