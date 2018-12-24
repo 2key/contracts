@@ -35,6 +35,44 @@ export default class AcquisitionCampaign implements ITwoKeyAirDropCampaign {
     }
 
     /**
+     * Function where contractor can approve the selected conversion
+     * @param airdrop
+     * @param {number} conversionId
+     * @param {string} from
+     * @returns {Promise<string>}
+     */
+    public approveConversion(airdrop: any, conversionId: number, from: string) : Promise<string> {
+        return new Promise<string>(async(resolve,reject) => {
+            try {
+                const airdropInstance = await this.helpers._getAirdropCampaignInstance(airdrop);
+                let txHash = await promisify(airdropInstance.approveConversion,[conversionId,{from}]);
+                resolve(txHash);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+    /**
+     * Function where contractor can reject selected conversion
+     * @param airdrop
+     * @param {number} conversionId
+     * @param {string} from
+     * @returns {Promise<string>}
+     */
+    public rejectConversion(airdrop: any, conversionId: number, from: string) : Promise<string> {
+        return new Promise<string>(async(resolve,reject) => {
+            try {
+                const airdropInstance = await this.helpers._getAirdropCampaignInstance(airdrop);
+                let txHash = await promisify(airdropInstance.rejectConversion,[conversionId,{from}]);
+                resolve(txHash);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+    /**
      * Function to get static and dynamic informations about the airdrop contract
      * @param airdrop
      * @param {string} from
