@@ -16,6 +16,25 @@ export default class AcquisitionCampaign implements ITwoKeyAirDropCampaign {
     }
 
     /**
+     * This function can only be called by the contractor, and we suppose that previously he sent the required amount of 2keys to contract
+     * Also, probably activate campaign should check if the erc's are on the contract
+     * @param airdrop
+     * @param {string} from
+     * @returns {Promise<string>}
+     */
+    public activateCampaign(airdrop: any, from: string) : Promise<string> {
+        return new Promise<string>(async(resolve,reject) => {
+           try {
+               const airdropInstance = await this.helpers._getAirdropCampaignInstance(airdrop);
+               let txHash = await promisify(airdropInstance.activateCampaign,[{from}]);
+               resolve(txHash);
+           } catch (e){
+               reject(e);
+           }
+        });
+    }
+
+    /**
      * Function to get static and dynamic informations about the airdrop contract
      * @param airdrop
      * @param {string} from
@@ -26,7 +45,6 @@ export default class AcquisitionCampaign implements ITwoKeyAirDropCampaign {
             try {
                 const airdropInstance = await this.helpers._getAirdropCampaignInstance(airdrop);
                 let campaignInformations : string = await promisify(airdropInstance.getContractInformations,[{from}]);
-                // TODO: Think about creating method in helpers which will work modular just by providing expected types and returning object
                 let contractor = campaignInformations.slice(0,42);
                 let inventoryAmount = parseInt(campaignInformations.slice(42, 42+64),16);
                 let assetContractAddress = '0x' + campaignInformations.slice(42+64, 42+64+42);
