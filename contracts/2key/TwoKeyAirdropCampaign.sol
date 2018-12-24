@@ -88,6 +88,9 @@ contract TwoKeyAirdropCampaign is TwoKeyConversionStates {
         numberOfTokensPerConverter = _numberOfTokensPerConverterAndReferralChain;
         referralReward = _numberOfTokensPerConverterAndReferralChain;
         maxNumberOfConversions = inventoryAmount / (2*_numberOfTokensPerConverterAndReferralChain);
+        if(inventoryAmount - maxNumberOfConversions*2*_numberOfTokensPerConverterAndReferralChain > 0 ) {
+            //TODO: This is sufficient balance which can't be used, and will be returned back to the contractor
+        }
     }
 
     /**
