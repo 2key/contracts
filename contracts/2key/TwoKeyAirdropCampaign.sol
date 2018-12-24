@@ -195,23 +195,11 @@ contract TwoKeyAirdropCampaign is TwoKeyConversionStates {
     }
 
     /**
-     * @notice Once the conversion is approved, means that converter has done the required action and he can withdraw tokens
-     */
-    function converterWithdraw() external view {
-        uint conversionId = converterToConversionId[msg.sender];
-        Conversion memory c = conversions[conversionId];
-        require(c.state == ConversionState.APPROVED);
-        IERC20(erc20ContractAddress).transfer(msg.sender, numberOfTokensPerConverter); //this is going to be an erc20 transfer
-        c.state = ConversionState.EXECUTED;
-        conversions[conversionId] = c;
-    }
-
-    /**
      * @notice Function to determine the balance of converter
      * @dev Only converter by himself or contractor can see balance for the converter
      * @param _converter address is the only argument we need
      */
-    function checkConverterBalance(address _converter) public view returns (uint) {
+    function getConverterBalance(address _converter) external view returns (uint) {
         require(msg.sender == _converter || msg.sender == contractor);
         uint conversionId = converterToConversionId[_converter];
         Conversion memory conversion = conversions[conversionId];
@@ -220,5 +208,17 @@ contract TwoKeyAirdropCampaign is TwoKeyConversionStates {
         } else {
             return 0;
         }
+    }
+
+    /**
+     * @notice Once the conversion is approved, means that converter has done the required action and he can withdraw tokens
+     */
+    function converterWithdraw() external {
+        uint conversionId = converterToConversionId[msg.sender];
+        Conversion memory c = conversions[conversionId];
+        require(c.state == ConversionState.APPROVED);
+        IERC20(erc20ContractAddress).transfer(msg.sender, numberOfTokensPerConverter); //this is going to be an erc20 transfer
+        c.state = ConversionState.EXECUTED;
+        conversions[conversionId] = c;
     }
 }
