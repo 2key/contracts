@@ -14,6 +14,8 @@ contract TwoKeyAirdropCampaign is TwoKeyConversionStates {
     bool isActivated = false;
     // Here will be static address of the economy previously deployed (ropsten version)
     address constant TWO_KEY_ECONOMY = address(0x3f9062abf3c483f02f42e0d2107a0a220c9d3529);
+    // Here will be static address of the contract which stores all other addresses of singletones (proxy)
+    address constant TWO_KEY_SINGLETONE_ADDRESSES = address(0);
     // This is representing the contractor (creator) of the campaign
     address contractor;
     // This is the amount of the tokens contractor is willing to spend for the airdrop campaign
