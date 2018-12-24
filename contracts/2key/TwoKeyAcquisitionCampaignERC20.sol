@@ -443,7 +443,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @dev we're using Utils contract and fetching the balance of this contract address
      * @return balance value as uint
      */
-    function getInventoryBalance() internal view returns (uint) {
+    function getInventoryBalance() public view returns (uint) {
         uint balance = IERC20(assetContractERC20).balanceOf(address(this));
         return balance;
     }
