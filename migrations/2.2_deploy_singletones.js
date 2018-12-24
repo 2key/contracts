@@ -8,6 +8,8 @@ const Call = artifacts.require('Call');
 const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
 const TwoKeySingletonesRegistry = artifacts.require('TwoKeySingletonesRegistry');
 const TwoKeyExchangeRateContract = artifacts.require('TwoKeyExchangeRateContract');
+const TwoKeySingletoneAddressStorage = artifacts.require('TwoKeySingletoneAddressStorage');
+
 const fs = require('fs');
 const path = require('path');
 
@@ -81,6 +83,8 @@ module.exports = function deploy(deployer) {
             .then(() => deployer.deploy(EventSource))
             .then(() => deployer.deploy(TwoKeyRegistry)
             .then(() => TwoKeyRegistry.deployed())
+            .then(() => deployer.deploy(TwoKeySingletoneAddressStorage))
+            .then(() => TwoKeySingletoneAddressStorage.deployed())
             .then(() => deployer.deploy(TwoKeyUpgradableExchange))
             .then(() => TwoKeyUpgradableExchange.deployed())
             .then(() => deployer.deploy(TwoKeySingletonesRegistry, [], '0x0')) //adding empty admin address
@@ -287,6 +291,26 @@ module.exports = function deploy(deployer) {
                         console.log('Transfering 2key-tokens');
                         let txHash = await TwoKeyAdmin.at(proxyAddressTwoKeyAdmin).transfer2KeyTokens(proxyAddressTwoKeyUpgradableExchange, 10000000000000000000);
                         console.log('... Successfully transfered 2key tokens');
+                        resolve(txHash);
+                    } catch (e) {
+                        reject(e);
+                    }
+                })
+            })
+            .then(async () => {
+                await new Promise(async (resolve,reject) => {
+                    try {
+                        console.log('Adding all proxy addresses to contract storage');
+                        let txHash = await TwoKeySingletoneAddressStorage.at(TwoKeySingletoneAddressStorage.address)
+                            .setAddresses([
+                                proxyAddressTwoKeyAdmin,
+                                proxyAddressTwoKeyEventSource,
+                                TwoKeyCongress.address,
+                                TwoKeyEconomy.address,
+                                proxyAddressTwoKeyUpgradableExchange,
+                                proxyAddressTwoKeyExchange,
+                                proxyAddressTwoKeyRegistry
+                            ]);
                         resolve(txHash);
                     } catch (e) {
                         reject(e);
