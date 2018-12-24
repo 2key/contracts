@@ -38,8 +38,7 @@ const sendTokens: any = new Promise(async (resolve, reject) => {
         const {balance} = twoKeyProtocol.Utils.balanceFromWeiString(await twoKeyProtocol.getBalance(destinationAddress), {inWei: true});
         if (parseFloat(balance['2KEY'].toString()) <= 20000 || process.env.FORCE) {
             console.log('NO BALANCE at aydnep account');
-            const admin = web3.eth.contract(contractsMeta.TwoKeyAdmin.abi).at(contractsMeta.TwoKeyAdmin.networks[mainNetId].address);
-            admin.transfer2KeyTokens(destinationAddress, twoKeyProtocol.Utils.toWei(100000, 'ether'), { from: address, gas: 7000000, gasPrice },  async (err, res) => {
+            twoKeyProtocol.twoKeyAdmin.transfer2KeyTokens(destinationAddress, twoKeyProtocol.Utils.toWei(1000000, 'ether'), { from: address, gas: 7000000, gasPrice },  async (err, res) => {
                 if (err) {
                     reject(err);
                 } else {
