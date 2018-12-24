@@ -3,7 +3,7 @@ pragma solidity ^0.4.24;
 import "../openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 /**
- * @notice Contract for storing all our singletone addresses
+ * @notice Contract for storing all our singletone addresses (proxy)
  * @author Nikola Madjarevic
  * Created at 12/23/18
  */
