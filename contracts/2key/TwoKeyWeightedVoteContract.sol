@@ -137,4 +137,8 @@ contract TwoKeyWeightedVoteContract is TwoKeySignedPresellContract {
   function buyProduct() public payable {
     revert("buyProduct not implemented");
   }
+
+  function votes() public view returns (uint256, uint256, uint256, uint256, uint256, uint256) {
+    return (voted_yes, weighted_yes, voted_no, weighted_no, total_vote, total_weight);
+  }
 }

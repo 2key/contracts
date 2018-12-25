@@ -214,4 +214,11 @@ contract TwoKeyPlasmaEvents {
         from = plasmaOf(from);
         return visits_list[c][contractor][from];
     }
+
+    function votes(address c, address contractor) public view returns (uint256, uint256, uint256, uint256, uint256, uint256) {
+        return (
+            voted_yes[c][contractor], weighted_yes[c][contractor], voted_no[c][contractor], weighted_no[c][contractor],
+            voted_yes[c][contractor] + voted_no[c][contractor], weighted_yes[c][contractor] + weighted_no[c][contractor]
+        );
+    }
 }
