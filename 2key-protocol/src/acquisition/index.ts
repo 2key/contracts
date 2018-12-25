@@ -2,6 +2,7 @@ import {ICreateOpts, IERC20, IOffchainData, ITwoKeyBase, ITwoKeyHelpers, ITwoKey
 import {
     IAcquisitionCampaign,
     IAcquisitionCampaignMeta,
+    IConvertOpts,
     IJoinLinkOpts,
     IPublicLinkKey,
     IPublicLinkOpts,
@@ -677,7 +678,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @param {number} gasPrice
      * @returns {Promise<string>}
      */
-    public joinAndConvert(campaign: any, value: string | number | BigNumber, publicLink: string, from: string, gasPrice: number = this.base._getGasPrice()): Promise<string> {
+    public joinAndConvert(campaign: any, value: string | number | BigNumber, publicLink: string, from: string, {gasPrice = this.base._getGasPrice(), isConverterAnonymous}: IConvertOpts = {}): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
                 const {f_address, f_secret, p_message} = await this.utils.getOffchainDataFromIPFSHash(publicLink);
@@ -685,13 +686,13 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     reject('Broken Link');
                 }
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-
                 const prevChain = await promisify(campaignInstance.received_from, [from]);
                 const nonce = await this.helpers._getNonce(from);
                 if (!parseInt(prevChain, 16)) {
                     this.base._log('No ARCS call Free Join Take');
                     // const newPublicLink = await this.join(campaignInstance, from, { referralLink: publicLink, cut })
                     const { public_address } = generatePublicMeta();
+
                     // const signature = Sign.free_join_take(from, public_address, f_address, f_secret, p_message);
                     const signature = Sign.free_take(from, f_address, f_secret, p_message);
                     const txHash: string = await promisify(campaignInstance.joinAndConvert, [signature,false, {
@@ -731,7 +732,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @param {number} gasPrice
      * @returns {Promise<string>}
      */
-    public convert(campaign: any, value: string | number | BigNumber, from: string, gasPrice: number = this.base._getGasPrice()) : Promise<string> {
+    public convert(campaign: any, value: string | number | BigNumber, from: string, {gasPrice = this.base._getGasPrice(), isConverterAnonymous}: IConvertOpts = {}) : Promise<string> {
         return new Promise<string>(async(resolve,reject) => {
             try {
                 const nonce = await this.helpers._getNonce(from);

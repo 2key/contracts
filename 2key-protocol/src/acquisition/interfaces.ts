@@ -69,8 +69,8 @@ export interface ITwoKeyAcquisitionCampaign {
     join: (campaign: any, from: string, opts?: IJoinLinkOpts) => Promise<string>,
     joinAndSetPublicLinkWithCut: (campaign: any, from: string, referralLink: string, opts?: IPublicLinkOpts) => Promise<string>,
     joinAndShareARC: (campaign: any, from: string, referralLink: string, recipient: string, opts?: IPublicLinkOpts) => Promise<string>,
-    joinAndConvert: (campaign: any, value: string | number | BigNumber, publicLink: string, from: string, gasPrice?: number) => Promise<string>,
-    convert: (campaign: any, value: string | number | BigNumber, from: string, gasPrice?: number) => Promise<string>
+    joinAndConvert: (campaign: any, value: string | number | BigNumber, publicLink: string, from: string, opts?: IConvertOpts) => Promise<string>,
+    convert: (campaign: any, value: string | number | BigNumber, from: string, opts?: IConvertOpts) => Promise<string>
     getEstimatedTokenAmount: (campaign: any, value: string | number | BigNumber) => Promise<ITokenAmount>,
     getTwoKeyConversionHandlerAddress: (campaign: any) => Promise<string>,
     approveConverter: (campaign: any, converter: string, from: string, gasPrice? :number) => Promise<string>,
@@ -97,6 +97,11 @@ export interface IPublicLinkOpts {
     cut?: number,
     gasPrice?: number,
     progressCallback?: ICreateCampaignProgress,
+}
+
+export interface IConvertOpts {
+    gasPrice?: number,
+    isConverterAnonymous?: boolean
 }
 
 export interface IJoinLinkOpts extends IPublicLinkOpts{
