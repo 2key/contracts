@@ -111,6 +111,8 @@ contract TwoKeyCongress is Upgradeable {
         hashAllowedMethods("twoKeyEventSourceWhitelistContract(address)");
         hashAllowedMethods("freezeTransfersInEconomy");
         hashAllowedMethods("unfreezeTransfersInEconomy");
+        hashAllowedMethods("addMaintainersToSelectedSingletone(address,address[])");
+        hashAllowedMethods("deleteMaintainersFromSelectedSingletone(address,address[])");
     }
 
 

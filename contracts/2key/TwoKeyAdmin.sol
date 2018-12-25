@@ -2,11 +2,12 @@ pragma solidity ^0.4.24;
 
 import './TwoKeyEconomy.sol';
 import './TwoKeyUpgradableExchange.sol';
-import "../interfaces/IAdminContract.sol";
-import "../interfaces/IERC20.sol";
 import "./TwoKeyEventSource.sol";
 import "./TwoKeyRegistry.sol";
 import "./Upgradeable.sol";
+import "../interfaces/IAdminContract.sol";
+import "../interfaces/IERC20.sol";
+import "../interfaces/IMaintainingPattern.sol";
 
 //TODO: Add all the missing functions from other singletones which can be called by TwoKeyAdmin
 contract TwoKeyAdmin is Upgradeable {
@@ -174,5 +175,13 @@ contract TwoKeyAdmin is Upgradeable {
 	function() external payable {
 
     }
+
+	function addMaintainersToSelectedSingletone(address destinationContract, address [] maintainers) external onlyTwoKeyCongress {
+		IMaintainingPattern(destinationContract).addMaintainers(maintainers);
+	}
+
+	function deleteMaintainersFromSelectedSingletone(address destinationContract, address [] maintainers) external onlyTwoKeyCongress {
+		IMaintainingPattern(destinationContract).removeMaintainers(maintainers);
+	}
     
 } 
