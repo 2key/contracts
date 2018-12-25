@@ -693,6 +693,11 @@ describe('TwoKeyProtocol', () => {
         expect(allPendingAfterApproved.length).to.be.equal(3);
     }).timeout(30000);
 
+    it('should get converter conversion ids', async() => {
+        console.log('Test where we have to print conversion ids for the converter');
+        let conversionIds = await twoKeyProtocol.AcquisitionCampaign.getConverterConversionIds(campaignAddress, env.TEST4_ADDRESS, from);
+        console.log('For the converter: ' + env.TEST4_ADDRESS + 'conversion ids are:' + conversionIds);
+    }).timeout(30000);
 
     it('should reject converter', async () => {
         console.log("Test where contractor / moderator can reject converter to execute lockup");
