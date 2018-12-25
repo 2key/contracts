@@ -78,7 +78,7 @@ contract TwoKeyLockupContract {
 
 
     /// @notice Function where converter can withdraw his funds
-    /// @return true if transfer was successful, otherwise will revert
+    /// @return true is if transfer was successful, otherwise will revert
     /// onlyConverter
     function transferFungibleAsset() public returns (bool) {
         uint unlocked = getAllUnlockedAtTheMoment();
