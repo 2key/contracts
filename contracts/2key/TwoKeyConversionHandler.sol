@@ -160,7 +160,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
             now, now + expiryConversion * (1 hours));
 
         conversions.push(c);
-        converterToHisConversions[msg.sender].push(numberOfConversions);
+        converterToHisConversions[_converterAddress].push(numberOfConversions);
 
         emit ConversionCreated(numberOfConversions);
         numberOfConversions++;
@@ -373,6 +373,15 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
     function rejectConverter(address _converter) public onlyContractorOrModerator  {
         require(converterToState[_converter] == ConverterState.PENDING_APPROVAL);
         moveFromPendingToRejectedState(_converter);
+        for(uint i=0; i<converterToHisConversions[_converter].length; i++) {
+            uint conversionId = converterToHisConversions[_converter][i];
+            Conversion memory c = conversions[conversionId];
+            if(c.state == ConversionState.PENDING_APPROVAL) {
+                c.state = ConversionState.REJECTED;
+                conversions[conversionId] = c;
+                ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateReservedAmountOfTokensIfConversionRejectedOrExecuted(c.baseTokenUnits + c.bonusTokenUnits);
+            }
+        }
     }
 
     /**
