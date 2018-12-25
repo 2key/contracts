@@ -254,7 +254,6 @@ module.exports = function deploy(deployer) {
                             [maintainerAddress],
                             proxyAddressTwoKeyAdmin
                         );
-
                         await TwoKeyUpgradableExchange.at(proxyAddressTwoKeyUpgradableExchange).setInitialParams
                         (
                             95,
@@ -263,7 +262,6 @@ module.exports = function deploy(deployer) {
                             proxyAddressTwoKeyExchange,
                             []
                         );
-
                         await TwoKeyAdmin.at(proxyAddressTwoKeyAdmin).setInitialParams
                         (
                             TwoKeyCongress.address,
@@ -272,7 +270,6 @@ module.exports = function deploy(deployer) {
                             proxyAddressTwoKeyRegistry,
                             proxyAddressTwoKeyEventSource
                         );
-
                         let txHash = await TwoKeyRegistry.at(proxyAddressTwoKeyRegistry).setInitialParams
                         (
                             proxyAddressTwoKeyEventSource,
