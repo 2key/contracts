@@ -15,7 +15,7 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
 
     mapping (string => mapping(string => address)) internal versions;
     mapping (string => address) contractToProxy;
-    mapping (string => address[]) contractNameToAllVersions;
+    mapping (string => string) contractNameToLatestVersion;
 
     /**
      * @notice Calling super constructor from maintaining pattern
@@ -32,7 +32,7 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
     function addVersion(string contractName, string version, address implementation) public onlyMaintainer {
         require(versions[contractName][version] == 0x0);
         versions[contractName][version] = implementation;
-        contractNameToAllVersions[contractName].push(implementation);
+        contractNameToLatestVersion[contractName] = version;
         emit VersionAdded(version, implementation);
     }
 
@@ -46,22 +46,12 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
     }
 
     /**
-     * @notice Function to get all implementations of the contract
+     * @notice Gets the latest contract version
      * @param contractName is the name of the contract
-     * @return array of addresses for the implementations
+     * @return string representation of the last version
      */
-    function getAllContractImplementations(string contractName) public view returns (address[]) {
-        return contractNameToAllVersions[contractName];
-    }
-
-    /**
-     * @notice Gets the latest contract implementation address
-     * @param contractName is the name of the contract
-     * @return address of the latest implementation
-     */
-    function getLatestContractVersion(string contractName) public view returns (address) {
-        address[] memory allVersions = contractNameToAllVersions[contractName];
-        return allVersions[allVersions.length-1]; // picking up the last element in the array
+    function getLatestContractVersion(string contractName) public view returns (string) {
+        return contractNameToLatestVersion[contractName];
     }
 
     /**
