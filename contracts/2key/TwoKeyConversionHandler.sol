@@ -177,7 +177,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
      * @param _conversionId is the id of the conversion
      * @dev this can be called only by approved converter
      */
-    function executeConversion(uint _conversionId) external onlyApprovedConverter {
+    function executeConversion(uint _conversionId) external {
         require(isConversionNotExecuted(_conversionId));
         performConversion(_conversionId);
     }
@@ -190,7 +190,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
     function performConversion(uint _conversionId) internal {
         Conversion memory conversion = conversions[_conversionId];
 
-        require(msg.sender == conversion.converter);
+        require(msg.sender == conversion.converter || msg.sender == contractor);
 
         ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateRefchainRewards(conversion.maxReferralRewardETHWei, conversion.converter);
 
