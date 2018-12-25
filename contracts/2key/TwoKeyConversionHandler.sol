@@ -152,7 +152,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
         uint256 baseTokensForConverterUnits,
         uint256 bonusTokensForConverterUnits,
         uint256 expiryConversion) public onlyTwoKeyAcquisitionCampaign {
-
+        require(converterToState[_converterAddress] != ConverterState.REJECTED); // If converter is rejected then can't create conversion
         ConversionState state = determineConversionState(_converterAddress);
         Conversion memory c = Conversion(_contractor, _contractorProceeds, _converterAddress,
             state ,_conversionAmount, _maxReferralRewardETHWei, _moderatorFeeETHWei, baseTokensForConverterUnits,
@@ -380,6 +380,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
                 c.state = ConversionState.REJECTED;
                 conversions[conversionId] = c;
                 ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateReservedAmountOfTokensIfConversionRejectedOrExecuted(c.baseTokenUnits + c.bonusTokenUnits);
+                //TODO: Add refund method in the Acquisition to return all the money to converter
             }
         }
     }
