@@ -18,7 +18,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
 
     using Call for *;
 
-//    event Rewarded(address indexed to, uint256 amount);
     address public conversionHandler;
     address public upgradableExchange;
 
