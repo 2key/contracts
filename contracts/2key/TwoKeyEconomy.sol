@@ -11,6 +11,7 @@ contract TwoKeyEconomy is StandardTokenModified, Ownable {
     uint8 public decimals= 18;
 
     address public twoKeyAdmin;
+    address public twoKeySingletoneRegistry;
 
     modifier onlyTwoKeyAdmin {
         require(msg.sender == twoKeyAdmin);
@@ -18,9 +19,10 @@ contract TwoKeyEconomy is StandardTokenModified, Ownable {
         _;
     }
 
-    constructor (address _twoKeyAdmin) Ownable() public {
+    constructor (address _twoKeyAdmin, address _twoKeySingletoneRegistry) Ownable() public {
         require(_twoKeyAdmin != address(0));
         twoKeyAdmin = _twoKeyAdmin;
+        twoKeySingletoneRegistry = _twoKeySingletoneRegistry;
         totalSupply_= 1000000000000000000000000000;
         balances[_twoKeyAdmin] = totalSupply_;
     }

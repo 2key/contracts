@@ -234,7 +234,7 @@ module.exports = function deploy(deployer) {
                     }
                 });
             }))
-            .then(() => deployer.deploy(TwoKeyEconomy,proxyAddressTwoKeyAdmin))
+            .then(() => deployer.deploy(TwoKeyEconomy,proxyAddressTwoKeyAdmin, TwoKeySingletonesRegistry.address))
             .then(() => TwoKeyEconomy.deployed())
             .then(async () => {
                 await new Promise(async (resolve, reject) => {

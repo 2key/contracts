@@ -1,4 +1,3 @@
-
 pipeline {
   agent {
     docker {
@@ -10,7 +9,7 @@ pipeline {
   stages {
     stage('build-solidity-docs') {
       steps {
-        sh 'solidity-docgen ./ contracts/ ./docs'
+        sh 'solidity-docgen ./ contracts/ ./documentation'
       }
     }
     stage('deploy-to-gh-pages') {
