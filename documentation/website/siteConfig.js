@@ -21,17 +21,18 @@ const users = [
 ];
 
 const siteConfig = {
-  title: 'TwoKey documentation', // Title for your website.
-    tagline: 'Smart Contracts API Docs',
-    url: 'https://2key.github.io' /* your website url */ ,
-    baseUrl: '/contracts/' /* base url for your project */ ,
+  noIndex: true,
+  title: 'TwoKey documentation' /* title for your website */ ,
+  tagline: 'Smart Contracts API Docs',
+  url: 'https://2key.github.io' /* your website url */ ,
+  baseUrl: '/contracts/' /* base url for your project */ ,
   // For github.io type URLs, you would set the url and baseUrl like:
   //   url: 'https://facebook.github.io',
   //   baseUrl: '/test-site/',
 
   // Used for publishing and more
-  projectName: '2key-documentation',
-  organizationName: '2key.network',
+  projectName: 'contracts',
+  organizationName: '2key',
   // For top-level user or org sites, the organization is still the same.
   // e.g., for the https://JoelMarcey.github.io site, it would be set like...
   //   organizationName: 'JoelMarcey'
