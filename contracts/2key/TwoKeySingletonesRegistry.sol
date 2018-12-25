@@ -12,9 +12,10 @@ import "./MaintainingPattern.sol";
  * @notice Will be everything mapped by contract name, so we will easily update and get versions per contract, all stored here
  */
 contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegistry {
-    // Mapping of contract name to versions to implementations of different functions
+
     mapping (string => mapping(string => address)) internal versions;
     mapping (string => address) contractToProxy;
+    mapping (string => address[]) contractNameToAllVersions;
 
     /**
      * @notice Calling super constructor from maintaining pattern
@@ -24,23 +25,43 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
     }
 
     /**
-    * @dev Registers a new version with its implementation address
-    * @param version representing the version name of the new implementation to be registered
-    * @param implementation representing the address of the new implementation to be registered
-    */
+     * @dev Registers a new version with its implementation address
+     * @param version representing the version name of the new implementation to be registered
+     * @param implementation representing the address of the new implementation to be registered
+     */
     function addVersion(string contractName, string version, address implementation) public onlyMaintainer {
         require(versions[contractName][version] == 0x0);
         versions[contractName][version] = implementation;
+        contractNameToAllVersions[contractName].push(implementation);
         emit VersionAdded(version, implementation);
     }
 
     /**
-    * @dev Tells the address of the implementation for a given version
-    * @param version to query the implementation of
-    * @return address of the implementation registered for the given version
-    */
+     * @dev Tells the address of the implementation for a given version
+     * @param version to query the implementation of
+     * @return address of the implementation registered for the given version
+     */
     function getVersion(string contractName, string version) public view returns (address) {
         return versions[contractName][version];
+    }
+
+    /**
+     * @notice Function to get all implementations of the contract
+     * @param contractName is the name of the contract
+     * @return array of addresses for the implementations
+     */
+    function getAllContractImplementations(string contractName) public view returns (address[]) {
+        return contractNameToAllVersions[contractName];
+    }
+
+    /**
+     * @notice Gets the latest contract implementation address
+     * @param contractName is the name of the contract
+     * @return address of the latest implementation
+     */
+    function getLatestContractVersion(string contractName) public view returns (address) {
+        address[] memory allVersions = contractNameToAllVersions[contractName];
+        return allVersions[allVersions.length-1]; // picking up the last element in the array
     }
 
     /**
@@ -53,10 +74,10 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
     }
 
     /**
-    * @dev Creates an upgradeable proxy
-    * @param version representing the first version to be set for the proxy
-    * @return address of the new proxy created
-    */
+     * @dev Creates an upgradeable proxy
+     * @param version representing the first version to be set for the proxy
+     * @return address of the new proxy created
+     */
     function createProxy(string contractName, string version) public onlyMaintainer payable returns (UpgradeabilityProxy) {
         UpgradeabilityProxy proxy = new UpgradeabilityProxy(contractName, version);
         Upgradeable(proxy).initialize.value(msg.value)(msg.sender);
