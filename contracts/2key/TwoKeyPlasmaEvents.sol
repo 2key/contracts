@@ -43,6 +43,11 @@ contract TwoKeyPlasmaEvents {
     mapping(address => mapping(address => mapping(address => bytes))) public visited_sig;
     mapping(address => mapping(address => bytes)) public notes;
 
+    mapping(address => mapping(address => uint256)) public voted_yes;
+    mapping(address => mapping(address => uint256)) public weighted_yes;
+    mapping(address => mapping(address => uint256)) public voted_no;
+    mapping(address => mapping(address => uint256)) public weighted_no;
+
     function add_plasma2ethereum(bytes sig) public { // , bool with_prefix) public {
         address plasma_address = msg.sender;
         // add an entry connecting msg.sender to the ethereum address that was used to sign sig.
@@ -101,6 +106,15 @@ contract TwoKeyPlasmaEvents {
         // A sender can set the value only once in a contract
         address plasma = plasmaOf(me);
         require(influencer2cut[c][contractor][plasma] == 0 || influencer2cut[c][contractor][plasma] == cut, 'cut already set differently');
+        if (influencer2cut[c][contractor][plasma] == 0) {
+            if (0 < cut && cut <= 101) {
+                voted_yes[c][contractor]++;
+                weighted_yes[c][contractor] += cut-1;
+            } else if (154 < cut && cut < 255) {
+                voted_no[c][contractor]++;
+                weighted_no[c][contractor] += 255-cut;
+            }
+        }
         influencer2cut[c][contractor][plasma] = cut;
     }
 

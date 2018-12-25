@@ -40,7 +40,7 @@ contract TwoKeyWeightedVoteContract is TwoKeySignedPresellContract {
       }
       bool yes;
       uint256 weight;
-      if (cut <= 101) {
+      if (0 < cut && cut <= 101) {
         yes = true;
         if (new_votter) {
           voted_yes++;
