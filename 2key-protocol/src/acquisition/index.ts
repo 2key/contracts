@@ -688,14 +688,30 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
                 const prevChain = await promisify(campaignInstance.received_from, [from]);
                 const nonce = await this.helpers._getNonce(from);
+                let txHash;
                 if (!parseInt(prevChain, 16)) {
                     this.base._log('No ARCS call Free Join Take');
                     // const newPublicLink = await this.join(campaignInstance, from, { referralLink: publicLink, cut })
                     const { public_address } = generatePublicMeta();
+                    const sig = await Sign.sign_plasma2eteherum(this.base.plasmaAddress, from, this.base.web3);
+                    this.base._log('Signature', sig);
+                    this.base._log(campaignInstance.address, from, this.base.plasmaAddress);
+                    try {
+                        const stored_ethereum_address = await promisify(this.base.twoKeyPlasmaEvents.plasma2ethereum, [this.base.plasmaAddress]);
+                        if (stored_ethereum_address !== from) {
+                            txHash = await promisify(this.base.twoKeyPlasmaEvents.add_plasma2ethereum, [sig, {
+                                from: this.base.plasmaAddress,
+                                gasPrice: 0
+                            }]);
+                            // await this.utils.getTransactionReceiptMined(txHash, {web3: this.base.plasmaWeb3, timeout: 300000});
+                        }
 
+                    } catch (plasmaErr) {
+                        this.base._log('Plasma Error:', plasmaErr);
+                    }
                     // const signature = Sign.free_join_take(from, public_address, f_address, f_secret, p_message);
                     const signature = Sign.free_take(from, f_address, f_secret, p_message);
-                    const txHash: string = await promisify(campaignInstance.joinAndConvert, [signature,false, {
+                    txHash = await promisify(campaignInstance.joinAndConvert, [signature,false, {
                         from,
                         gasPrice,
                         value,
@@ -735,8 +751,23 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     public convert(campaign: any, value: string | number | BigNumber, from: string, {gasPrice = this.base._getGasPrice(), isConverterAnonymous}: IConvertOpts = {}) : Promise<string> {
         return new Promise<string>(async(resolve,reject) => {
             try {
-                const nonce = await this.helpers._getNonce(from);
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
+                const sig = await Sign.sign_plasma2eteherum(this.base.plasmaAddress, from, this.base.web3);
+                this.base._log('Signature', sig);
+                this.base._log(campaignInstance.address, from, this.base.plasmaAddress);
+                try {
+                    const stored_ethereum_address = await promisify(this.base.twoKeyPlasmaEvents.plasma2ethereum, [this.base.plasmaAddress]);
+                    if (stored_ethereum_address !== from) {
+                        await promisify(this.base.twoKeyPlasmaEvents.add_plasma2ethereum, [sig, {
+                            from: this.base.plasmaAddress,
+                            gasPrice: 0
+                        }]);
+                        // await this.utils.getTransactionReceiptMined(txHash, {web3: this.base.plasmaWeb3, timeout: 300000});
+                    }
+                } catch (plasmaErr) {
+                    this.base._log('Plasma Error:', plasmaErr);
+                }
+                const nonce = await this.helpers._getNonce(from);
                 const txHash: string = await promisify(campaignInstance.convert, [false,{
                     from,
                     gasPrice,
