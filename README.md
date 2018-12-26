@@ -14,7 +14,11 @@ yarn run test:one 2key-protocol/test/updateTwoKeyReg.dev.spec.ts
 yarn run test
 git add .
 git commit -m "Commit message"
-yarn run deploy public.test.k8s,private.test.k8s-hdwallet
+```
+
+``` add --reset if this is a hard redeploy
+yarn run deploy public.test.k8s,private.test.k8s-hdwallet --reset
+```
 #(if deploying with ledger public.test.k8s-hdwallet -> public.test.k8s)
 #Be prepared to enter OTP for the npm package
 cd 2key-protocol/dist
