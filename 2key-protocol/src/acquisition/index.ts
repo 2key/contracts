@@ -1414,4 +1414,22 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
             }
         })
     }
+
+    /**
+     * Only contractor or moderator can get it
+     * @param campaign
+     * @param {string} from
+     * @returns {Promise<string>}
+     */
+    public getPrivateMetaHash(campaign: any, from: string) : Promise<string> {
+        return new Promise<string>(async(resolve,reject) => {
+            try {
+                const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
+                let txHash: string = await promisify(campaignInstance.getPrivateMetaHash,[{from}]);
+                resolve(txHash);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
 }
