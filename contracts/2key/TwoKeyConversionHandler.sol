@@ -282,8 +282,8 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
     }
 
 
-    function setAnonymous(address _contractor, bool _isAnonymous) external onlyTwoKeyAcquisitionCampaign {
-        isConverterAnonymous[_contractor] = _isAnonymous;
+    function setAnonymous(address _converter, bool _isAnonymous) external onlyTwoKeyAcquisitionCampaign {
+        isConverterAnonymous[_converter] = _isAnonymous;
     }
 
     /// @notice Function to get all pending converters
