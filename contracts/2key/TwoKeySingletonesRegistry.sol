@@ -15,7 +15,7 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
 
     mapping (string => mapping(string => address)) internal versions;
     mapping (string => address) contractToProxy;
-    mapping (string => string) contractNameToLatestVersion;
+    mapping (string => string) contractNameToLatestVersionName;
 
     /**
      * @notice Calling super constructor from maintaining pattern
@@ -32,7 +32,7 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
     function addVersion(string contractName, string version, address implementation) public onlyMaintainer {
         require(versions[contractName][version] == 0x0);
         versions[contractName][version] = implementation;
-        contractNameToLatestVersion[contractName] = version;
+        contractNameToLatestVersionName[contractName] = version;
         emit VersionAdded(version, implementation);
     }
 
@@ -51,7 +51,7 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
      * @return string representation of the last version
      */
     function getLatestContractVersion(string contractName) public view returns (string) {
-        return contractNameToLatestVersion[contractName];
+        return contractNameToLatestVersionName[contractName];
     }
 
     /**
