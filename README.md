@@ -2,9 +2,15 @@
 
 In order to update npm package run the following: 
 ```
-cd 2key-protocol/
-npm version patch
-npm publish
+yarn run deploy --migrate dev-local,private.test.k8s --reset
+yarn run test
+git add .
+git commit -m "<Commit message"
+yarn run deploy public.test.k8s-hdwallet,private.test.k8s
+(if deploying with ledger public.test.k8s-hdwallet -> public.test.k8s)
+Be prepared to enter OTP for the npm package
+cd 2key-protocol/dist
+git pull (Everything should be up-to-date)
 ```
 
 #### 2key-protocol submodule
@@ -24,23 +30,26 @@ I suspect that you will see something like:
 ```git submodule add url_to_repo projectfolder```
 
 #### Github Pages Site
-https://2key.github.io/contracts/
+Url : https://2key.github.io/contracts/
 
 in order to run the docs site locally, run the following command (cwd = project folder):
 ```
-(cd ./docs/website && npm install && npm start)
+cd documentation/website
+yarn || npm install
+yarn start || npm start
 ```
 
-in order to update the docs manually, run the following command (cwd = project folder):
+in order to update the documentation manually, run the following command (cwd = project folder):
 
 ```
-solidity-docgen ./ ./contracts ./docs
+solidity-docgen ./ ./contracts ./documentation
 ```
 
 all docusaurus related files are under the docs subfolder.
 
 __very important__ this site is a public, do not pass it to anyone outside of twokey.
 
+CI/CD integration is not yet available.
 
 ## Install
 
