@@ -6,6 +6,9 @@ pipeline {
       args '-e npm_config_cache=npm-cache -e HOME=. -e GIT_USER=madjarevicn'
     }
   }
+  environment {
+        GITHUB_TOKEN = credentials('github')
+  }
   stages {
     stage('build-solidity-docs') {
       steps {
