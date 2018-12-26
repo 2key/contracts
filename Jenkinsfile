@@ -13,7 +13,6 @@ pipeline {
     stage('build-solidity-docs') {
       steps {
         sh 'solidity-docgen ./ contracts/ ./documentation'
-        sh 'echo $GITHUB_TOKEN'
       }
     }
     stage('deploy-to-gh-pages') {
