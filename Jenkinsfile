@@ -14,7 +14,7 @@ pipeline {
     }
     stage('deploy-to-gh-pages') {
       steps {
-        sh 'cd documentation/website && npm install && npm run build && npm run publish-gh-pages'
+        sh 'cd documentation/website && npm install && npm run build && GIT_USER=madjarevicn \\n  yarn run publish-gh-pages'
       }
     }
   }
