@@ -11,4 +11,5 @@ contract ITwoKeyAcquisitionCampaignERC20 {
     function sendBackEthWhenConversionCancelled(address _cancelledConverter, uint _conversionAmount) public;
     function updateModeratorBalanceETHWei(uint _value) public;
     function updateReservedAmountOfTokensIfConversionRejectedOrExecuted(uint value) public;
+    function refundConverterAndRemoveUnits(address _converter, uint amountOfEther, uint amountOfUnits) external;
 }

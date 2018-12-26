@@ -504,7 +504,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @dev only Contractor can call this method, otherwise it will revert - emits Event when updated
      * @param value is the new maxContribution value
      */
-    function updateMaxContributionETHorUSD(uint value) public onlyContractor {
+    function updateMaxContributionETHorUSD(uint value) external onlyContractor {
         maxContributionETHorFiatCurrency = value;
         twoKeyEventSource.updatedData(block.timestamp, value, "Updated maxContribution");
     }
@@ -514,7 +514,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @dev only Contractor can call this method, otherwise it will revert - emits Event when updated
      * @param value is the new referral percent value
      */
-    function updateMaxReferralRewardPercent(uint value) public onlyContractor {
+    function updateMaxReferralRewardPercent(uint value) external onlyContractor {
         maxReferralRewardPercent = value;
         twoKeyEventSource.updatedData(block.timestamp, value, "Updated maxReferralRewardPercent");
     }
@@ -629,7 +629,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @dev onlyContractor can call this method
      * @return true if successful otherwise will 'revert'
      */
-    function withdrawContractor() external onlyContractor returns (bool) {
+    function withdrawContractor() external onlyContractor {
         uint balance = contractorBalance;
         contractorBalance = 0;
         /**
@@ -637,13 +637,12 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
          * but however it's not bad to practice this pattern of firstly reducing balance and then doing transfer
          */
         contractor.transfer(balance);
-        return true;
     }
 
     /**
      * @notice Function where moderator or referrer can withdraw their available funds
      */
-    function withdrawModeratorOrReferrer() external returns (bool) {
+    function withdrawModeratorOrReferrer() external {
         //Creating additional variable to prevent reentrancy attack
         uint balance;
         if(msg.sender == moderator) {
@@ -658,6 +657,14 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
             revert();
         }
     }
+
+//    /**
+//     * @notice This function will be triggered in case converter is rejected
+//     */
+//    function refundConverterAndRemoveUnits(address _converter, uint amountOfEther, uint amountOfUnits) external onlyTwoKeyConversionHandler {
+//        units[_converter] = units[_converter] - amountOfUnits;
+//        _converter.transfer(amountOfEther);
+//    }
 
 
 }
