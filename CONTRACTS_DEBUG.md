@@ -31,6 +31,12 @@ After that call 'getFiatCurrencyDetails' function with "USD" as param
 1. If you get the response with `real values` (Timestamp != 0) then this is not an issue
 2. Otherwise, ping David/Eitan to run lambdas to update this
 
+##### Convert issues: 
+```$xslt
+Make sure you're sending enough ether regarding minimum and maximum contribution
+Make sure that if currency is not ETH but fiat, then your minimum and maximum contribution are calculated in Fiat
+```
+
 
 
 
