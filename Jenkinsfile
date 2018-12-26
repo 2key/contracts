@@ -6,6 +6,9 @@ pipeline {
       args '-e npm_config_cache=npm-cache -e HOME=.'
     }
   }
+  environment {
+        GITHUB_TOKEN = credentials('github')
+  }
   stages {
     stage('build-solidity-docs') {
       steps {
@@ -14,7 +17,7 @@ pipeline {
     }
     stage('deploy-to-gh-pages') {
       steps {
-        sh 'cd documentation/website && npm install && npm run build && GIT_USER=madjarevicn yarn run publish-gh-pages'
+        sh 'cd documentation/website && npm install && npm run build && yarn run publish-gh-pages'
       }
     }
   }
