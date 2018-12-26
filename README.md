@@ -1,17 +1,30 @@
 #### @2key/2key-protocol npm package
 
-In order to update npm package run the following: 
 ```
-yarn run deploy --migrate dev-local,private.test.k8s --reset
+yarn run geth
+```
+In order to update npm package run the following: 
+``` for hard reset of singletons add --reset flag
+yarn run deploy --migrate dev-local,private.test.k8s-hdwallet --reset 
+```
+
+```
+yarn run test:one 2key-protocol/test/sendETH.spec.ts
+yarn run test:one 2key-protocol/test/updateTwoKeyReg.dev.spec.ts
 yarn run test
 git add .
-git commit -m "<Commit message"
-yarn run deploy public.test.k8s-hdwallet,private.test.k8s
-(if deploying with ledger public.test.k8s-hdwallet -> public.test.k8s)
-Be prepared to enter OTP for the npm package
+git commit -m "Commit message"
+```
+
+``` add --reset if this is a hard redeploy
+yarn run deploy public.test.k8s,private.test.k8s-hdwallet --reset
+```
+#(if deploying with ledger public.test.k8s-hdwallet -> public.test.k8s)
+#Be prepared to enter OTP for the npm package
 cd 2key-protocol/dist
 git pull (Everything should be up-to-date)
 ```
+
 
 #### 2key-protocol submodule
 That error means that projectfolder is already staged ("already exists in the index"). To find out what's going on here, try to list everything in the index under that folder with:

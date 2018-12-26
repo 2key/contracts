@@ -7,7 +7,7 @@ const PrivateKeyProvider = require('truffle-privatekey-provider');
 const LedgerProvider = require('./LedgerProvider');
 
 const mnemonic = 'laundry version question endless august scatter desert crew memory toy attract cruel';
-const mnemonic_private = 'north depend loyal purpose because theme funny script debris divert kitchen junk diary angry method';
+//const mnemonic_private = 'north depend loyal purpose because theme funny script debris divert kitchen junk diary angry method';
 // make sure you have Ether on rinkeby address 0xb3fa520368f2df7bed4df5185101f303f6c7decc
 const infuraApiKey = 'db719ec4fd734e798e74782bce13bbca';
 
