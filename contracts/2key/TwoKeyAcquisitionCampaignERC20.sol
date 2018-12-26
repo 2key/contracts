@@ -476,7 +476,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @dev only Contractor can call this method, otherwise function will revert
      * @param _privateMetaHash is string representation of private metadata hash
      */
-    function setPrivateMetaHash(string _privateMetaHash) public onlyContractor {
+    function setPrivateMetaHash(string _privateMetaHash) public onlyContractorOrModerator {
         privateMetaHash = _privateMetaHash;
     }
 
@@ -485,7 +485,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @dev only Contractor can call this method, otherwise function will revert
      * @return string representation of private metadata hash
      */
-    function getPrivateMetaHash() public view onlyContractor returns (string) {
+    function getPrivateMetaHash() public view onlyContractorOrModerator returns (string) {
         return privateMetaHash;
     }
 

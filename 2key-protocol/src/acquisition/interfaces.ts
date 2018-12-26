@@ -50,7 +50,7 @@ export interface ITwoKeyAcquisitionCampaign {
     estimateCreation: (data: IAcquisitionCampaign, from: string) => Promise<number>,
     create: (data: IAcquisitionCampaign, from: string, opts?: ICreateOpts) => Promise<IAcquisitionCampaignMeta>,
     updateOrSetIpfsHashPublicMeta: (campaign: any, hash: string, from: string, gasPrice?: number) => Promise<string>,
-
+    setPrivateMetaHash: (campaign: any, privateMetaHash: string, from:string) => Promise<string>,
     getPublicMeta: (campaign: any, from?: string) => Promise<any>,
     checkInventoryBalance: (campaign: any, from: string) => Promise<number | string | BigNumber>,
     getInventoryBalance: (campaign: any, from: string) => Promise<number | string | BigNumber>,
