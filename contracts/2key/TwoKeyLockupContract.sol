@@ -37,7 +37,6 @@ contract TwoKeyLockupContract {
         _;
     }
 
-    //TODO: Only converter or contractor can see all this informations
     constructor(
         uint _bonusTokensVestingStartShiftInDaysFromDistributionDate,
         uint _bonusTokensVestingMonths,

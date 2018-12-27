@@ -171,6 +171,27 @@ export default class Lockup implements ILockup {
 
 
     /**
+     * Only contractor can change token distribution date
+     * @param {string} twoKeyLockup
+     * @param {number} newDate
+     * @param {string} from
+     * @returns {Promise<string>}
+     */
+    public changeTokenDistributionDate(twoKeyLockup: string, newDate: number, from: string) : Promise<string> {
+        return new Promise<string>(async(resolve,reject) => {
+            try {
+                const twoKeyLockupInstance = await this.helpers._getLockupContractInstance(twoKeyLockup);
+                let txHash = await promisify(twoKeyLockupInstance.changeTokenDistributionDate,[newDate,{from}]);
+                resolve(txHash);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+
+
+    /**
      *
      * @param {string} twoKeyLockup
      * @param {string} from
