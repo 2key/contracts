@@ -142,7 +142,7 @@ contract TwoKeyPlasmaEvents {
         return public_link_key[c][contractor][plasmaOf(me)];
     }
 
-    function setNote(address c, bytes note) public {
+    function setNoteByUser(address c, bytes note) public {
         // note is a message you can store with sig. For example it could be the secret you used encrypted by you
         notes[c][msg.sender] = note;
     }

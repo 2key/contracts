@@ -23,8 +23,6 @@ contract TwoKeyReg is Ownable {
   // Initialize all the constants
   constructor(TwoKeyEventSource _eventSource) public {
     eventSource = _eventSource;
-    plasma2ethereum[owner] = owner;
-    ethereum2plasma[owner] = owner;
   }
 
   function addNameInternal(string _name, address _sender) private {
@@ -49,21 +47,37 @@ contract TwoKeyReg is Ownable {
     addNameInternal(_name, msg.sender);
   }
 
-  function setNote(bytes note) public {
+  function setNoteInternal(bytes note, address me) private {
     // note is a message you can store with sig. For example it could be the secret you used encrypted by you
-    notes[msg.sender] = note;
+    notes[me] = note;
   }
 
-  function addPlasma2Ethereum(bytes sig) public {
-    address eth_address = msg.sender;
+  function setNoteByUser(bytes note) public {
+    // note is a message you can store with sig. For example it could be the secret you used encrypted by you
+    setNoteInternal(note, msg.sender);
+  }
+
+  function addPlasma2EthereumInternal(bytes sig, address eth_address) private {
       // add an entry connecting msg.sender to the ethereum address that was used to sign sig.
       // see setup_demo.js on how to generate sig
     bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to ethereum address")),keccak256(abi.encodePacked(eth_address))));
-    require (sig.length == 65, 'bad ethereum signature length');
     address plasma_address = Call.recoverHash(hash,sig,0);
     require(plasma2ethereum[plasma_address] == address(0) || plasma2ethereum[plasma_address] == eth_address, "cant change eth=>plasma");
     plasma2ethereum[plasma_address] = eth_address;
     ethereum2plasma[eth_address] = plasma_address;
+  }
+
+  function addPlasma2EthereumByUser(bytes sig) public {
+    addPlasma2EthereumInternal(sig, msg.sender);
+  }
+
+  function setPlasma2EthereumAndNoteSigned(bytes sig, bytes note, bytes external_sig) public {
+    bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to ethereum-plasma")),
+      keccak256(abi.encodePacked(sig,note))));
+    address eth_address = Call.recoverHash(hash,external_sig,0);
+    require (msg.sender == eth_address || msg.sender == owner, "only owner or user can change ethereum-plasma");
+    addPlasma2EthereumInternal(sig, eth_address);
+    setNoteInternal(note, eth_address);
   }
 
   function getName2Owner(string _name) public view returns (address) {

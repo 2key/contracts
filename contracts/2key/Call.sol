@@ -117,6 +117,7 @@ library Call {
         // The signature format is a compact form of:
         //   {bytes32 r}{bytes32 s}{uint8 v}
         // Compact means, uint8 is not padded to 32 bytes.
+        require (sig.length >= 65+idx, 'bad signature length');
         idx += 32;
         bytes32 r;
         assembly
