@@ -25,6 +25,8 @@ contract TwoKeyRegistry is Upgradeable {
     // the way to know if an address is a plasma address is to look it up in this mapping
     mapping(address => address) public plasma2ethereum;
 
+    mapping(address => address) public ethereum2plasma;
+
     struct UserData {
         string username;
         string fullName;
