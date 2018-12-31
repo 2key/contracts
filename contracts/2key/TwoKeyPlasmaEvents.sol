@@ -215,10 +215,10 @@ contract TwoKeyPlasmaEvents {
         return visits_list[c][contractor][from];
     }
 
-    function votes(address c, address contractor) public view returns (uint256, uint256, uint256, uint256, uint256, uint256) {
+    function votes(address c, address contractor) public view returns (uint256, uint256, uint256, uint256, uint256, int) {
         return (
             voted_yes[c][contractor], weighted_yes[c][contractor], voted_no[c][contractor], weighted_no[c][contractor],
-            voted_yes[c][contractor] + voted_no[c][contractor], weighted_yes[c][contractor] + weighted_no[c][contractor]
+            voted_yes[c][contractor] + voted_no[c][contractor], int(weighted_yes[c][contractor]) - int(weighted_no[c][contractor])
         );
     }
 }

@@ -19,7 +19,7 @@ contract TwoKeyWeightedVoteContract is TwoKeySignedPresellContract {
   uint public total_vote;  // this can be bigger than voted_yes+voted_no because of abstain votes
   uint public weighted_yes;
   uint public weighted_no;
-  uint public total_weight;  // this can be bigger than weighted_yes+weighted_no because of lack of voting coins
+  int public total_weight;  // this can be bigger than weighted_yes+weighted_no because of lack of voting coins
 
 
   function transferSig(bytes sig) public returns (address[]) {
@@ -56,7 +56,11 @@ contract TwoKeyWeightedVoteContract is TwoKeySignedPresellContract {
         weight = 0;
       }
       if (new_votter) {
-        total_weight += weight;
+        if (yes) {
+          total_weight += int(weight);
+        } else {
+          total_weight -= int(weight);
+        }
       }
       weight -= voted_weight[influencer];
 
@@ -138,7 +142,7 @@ contract TwoKeyWeightedVoteContract is TwoKeySignedPresellContract {
     revert("buyProduct not implemented");
   }
 
-  function votes() public view returns (uint256, uint256, uint256, uint256, uint256, uint256) {
+  function votes() public view returns (uint256, uint256, uint256, uint256, uint256, int) {
     return (voted_yes, weighted_yes, voted_no, weighted_no, total_vote, total_weight);
   }
 }
