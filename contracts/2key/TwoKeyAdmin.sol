@@ -113,7 +113,7 @@ contract TwoKeyAdmin is Upgradeable {
 
     /// @notice Function to update twoKeyUpgradableExchange contract address
 	/// @param _exchange is address of new twoKeyUpgradableExchange contract
-	function updateExchange(address _exchange) external onlyTwoKeyCongress {
+	function updateExchange(address _exchange) external onlyTwoKeyCongress {  //TODO Nikola do we need to upgrade singletons from here once the upgradability pattern has been introduced?
 		require (_exchange != address(0));
 		twoKeyUpgradableExchange = TwoKeyUpgradableExchange(_exchange);
 	}

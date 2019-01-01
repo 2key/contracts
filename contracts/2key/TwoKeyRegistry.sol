@@ -2,7 +2,7 @@ pragma solidity ^0.4.24;
 
 import "./Upgradeable.sol";
 
-contract TwoKeyRegistry is Upgradeable {
+contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriting from MaintainerPattern?
 
     /// mapping user's address to user's name
     mapping(address => string) public address2username;
@@ -374,5 +374,11 @@ contract TwoKeyRegistry is Upgradeable {
         require(_maintainer != address(0));
         maintainers.push(_maintainer);
     }
+
+
+    //TODO Nikola add also remove maintainer... And we should migrate to the maintainer pattern in general , or remove it in general, not have each contract act differently on this regard
+    //TODO Nikola, wherever we add maintainer, we should also be able to remove maintainer
+
+
 
 }

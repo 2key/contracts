@@ -13,7 +13,7 @@ contract TwoKeyEconomy is StandardTokenModified, Ownable {
     address public twoKeyAdmin;
     address public twoKeySingletoneRegistry;
 
-    modifier onlyTwoKeyAdmin {
+    modifier onlyTwoKeyAdmin { //TODO: Nikola why not use only the twoKeySingletoneRegistry to get all required singletons like the admin?
         require(msg.sender == twoKeyAdmin);
         require(address(twoKeyAdmin) != 0);
         _;
@@ -23,11 +23,11 @@ contract TwoKeyEconomy is StandardTokenModified, Ownable {
         require(_twoKeyAdmin != address(0));
         twoKeyAdmin = _twoKeyAdmin;
         twoKeySingletoneRegistry = _twoKeySingletoneRegistry;
-        totalSupply_= 1000000000000000000000000000;
+        totalSupply_= 1000000000000000000000000000; // 1B tokens total minted supply
         balances[_twoKeyAdmin] = totalSupply_;
     }
 
-    function changeAdmin(address _newAdmin) public onlyTwoKeyAdmin {
+    function changeAdmin(address _newAdmin) public onlyTwoKeyAdmin { //TODO Nikola this is probably no longer required since we have the proxy address maintaining the singleton address changes
         require(_newAdmin != address(0));
         twoKeyAdmin = _newAdmin;
     }

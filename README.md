@@ -24,8 +24,10 @@ yarn run deploy public.test.k8s,private.test.k8s-hdwallet --reset
 cd 2key-protocol/dist
 git pull (Everything should be up-to-date)
 ```
-
-
+if the npm publish fails:
+cd 2key-protocol/dist
+npm publish
+git push
 #### 2key-protocol submodule
 That error means that projectfolder is already staged ("already exists in the index"). To find out what's going on here, try to list everything in the index under that folder with:
 
