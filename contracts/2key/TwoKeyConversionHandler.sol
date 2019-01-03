@@ -313,7 +313,8 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
     /// @dev only contractor or moderator can call this function
     /// @param _converter is the address of converter
     /// @return array of addresses
-    function getLockupContractsForConverter(address _converter) public view onlyContractorOrModerator returns (address[]){
+    function getLockupContractsForConverter(address _converter) public view returns (address[]){
+        require(msg.sender == contractor || msg.sender == moderator || msg.sender == _converter);
         return converterToLockupContracts[_converter];
     }
 
