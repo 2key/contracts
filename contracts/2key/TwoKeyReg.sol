@@ -47,6 +47,14 @@ contract TwoKeyReg is Ownable {
     addNameInternal(_name, msg.sender);
   }
 
+  function addNameSigned(string _name, bytes external_sig) public {
+    bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to name")),
+      keccak256(abi.encodePacked(_name))));
+    address eth_address = Call.recoverHash(hash,external_sig,0);
+    require (msg.sender == eth_address || msg.sender == owner, "only owner or user can change name");
+    addNameInternal(_name, eth_address);
+  }
+
   function setNoteInternal(bytes note, address me) private {
     // note is a message you can store with sig. For example it could be the secret you used encrypted by you
     notes[me] = note;
