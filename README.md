@@ -1,31 +1,46 @@
 #### @2key/2key-protocol npm package
 
+In order to test app locally you will need running docker container
+- Simpliest way to run it is by executing command:
+    - Make sure before running this that you have installed all dependencies
+        - (npm install || yarn && yarn install)
 ```
 yarn run geth
 ```
-In order to update npm package run the following: 
-``` for hard reset of singletons add --reset flag
-yarn run deploy --migrate dev-local,private.test.k8s-hdwallet --reset 
-```
 
+##### In order to update npm package run the following: 
+- If there are no changes in singletones & plasma run following:
+```
+yarn run deploy --migrate dev-local,private.test.k8s
+yarn run test:one 2key-protocol/test/sendETH.spec.ts
+yarn run test:one 2key-protocol/test/updateTwoKeyReg.dev.spec.ts
+yarn run test
+git add .
+git commit -m <"Commit message">
+yarn run deploy public.test.k8s,private.test.k8s
+```
+- If there are changes in singletones and plasma (hard reset):
 ```
 bash ./redeploy-test.bash
 git add .
-git commit -m "Commit message"
+git commit -m <"Commit message">
+yarn run deploy public.test.k8s,private.test.k8s --reset
 ```
 
-``` add --reset if this is a hard redeploy
-yarn run deploy public.test.k8s,private.test.k8s-hdwallet --reset
+- If the npm publish fails:
 ```
-#(if deploying with ledger public.test.k8s-hdwallet -> public.test.k8s)
-#Be prepared to enter OTP for the npm package
-cd 2key-protocol/dist
-git pull (Everything should be up-to-date)
-```
-if the npm publish fails:
 cd 2key-protocol/dist
 npm publish
 git push
+```
+
+- After this process is done make sure both (if not then push changes):
+    - contracts repo (root) is up to date with branch
+    - cd 2key-protocol/dist is up to date with branch
+    
+
+
+
 #### 2key-protocol submodule
 That error means that projectfolder is already staged ("already exists in the index"). To find out what's going on here, try to list everything in the index under that folder with:
 
