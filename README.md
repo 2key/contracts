@@ -9,9 +9,7 @@ yarn run deploy --migrate dev-local,private.test.k8s-hdwallet --reset
 ```
 
 ```
-yarn run test:one 2key-protocol/test/sendETH.spec.ts
-yarn run test:one 2key-protocol/test/updateTwoKeyReg.dev.spec.ts
-yarn run test
+bash ./redeploy-test.bash
 git add .
 git commit -m "Commit message"
 ```
