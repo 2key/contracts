@@ -1,4 +1,4 @@
-import {ITwoKeyExchangeContract} from "./interfaces";
+import {ITwoKeyExchangeContract, RateObject} from "./interfaces";
 import {ITwoKeyBase, ITwoKeyHelpers} from "../interfaces";
 import {ITwoKeyUtils} from "../utils/interfaces";
 import {promisify} from "../utils";
@@ -27,10 +27,10 @@ export default class TwoKeyExchangeContract implements ITwoKeyExchangeContract {
      * @param {string} from
      * @returns {Promise<number>}
      */
-    public getRatesETHFiat(currency: string, from: string) : Promise<any> {
-        return new Promise<number>(async(resolve,reject) => {
+    public getRatesETHFiat(currency: string, from: string) : Promise<RateObject> {
+        return new Promise<RateObject>(async(resolve,reject) => {
             try {
-                let rateObject = await promisify(this.base.twoKeyExchangeContract.getFiatCurrencyDetails,[currency, {from}]);
+                let rateObject: RateObject = await promisify(this.base.twoKeyExchangeContract.getFiatCurrencyDetails,[currency, {from}]);
                 resolve(rateObject);
             } catch (e) {
                 reject(e);
