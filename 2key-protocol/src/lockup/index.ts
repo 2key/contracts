@@ -1,6 +1,6 @@
 import {ITwoKeyBase, ITwoKeyHelpers} from '../interfaces';
 import {promisify} from '../utils';
-import {ILockup} from './interfaces';
+import {ILockup, LockupInformation} from './interfaces';
 import {ITwoKeyUtils} from "../utils/interfaces";
 
 export default class Lockup implements ILockup {
@@ -146,15 +146,15 @@ export default class Lockup implements ILockup {
      *
      * @param {string} twoKeyLockup
      * @param {string} from
-     * @returns {Promise<any>}
+     * @returns {Promise<LockupInformation>}
      */
-    public getInformationFromLockup(twoKeyLockup: string, from: string) : Promise<any> {
-        return new Promise<any>(async(resolve,reject) => {
+    public getInformationFromLockup(twoKeyLockup: string, from: string) : Promise<LockupInformation> {
+        return new Promise<LockupInformation>(async(resolve,reject) => {
             try {
                 const twoKeyLockupInstance = await this.helpers._getLockupContractInstance(twoKeyLockup);
                 let [baseTokens, bonusTokens, vestingMonths, withdrawn, totalTokensLeft, allUnlockedAtTheMoment]
                     = await promisify(twoKeyLockupInstance.getInformation,[{from}]);
-                let obj = {
+                let obj : LockupInformation = {
                     'baseTokens' : baseTokens,
                     'bonusTokens' : bonusTokens,
                     'vestingMonths' : vestingMonths,

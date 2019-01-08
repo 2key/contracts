@@ -10,3 +10,12 @@ export interface ILockup {
     getInformationFromLockup: (twoKeyLockup: string, from: string) => Promise<any>,
     changeTokenDistributionDate: (twoKeyLockup: string, newDate: number, from: string) => Promise<string>
 }
+
+export interface LockupInformation {
+    'baseTokens' : number,
+    'bonusTokens' : number,
+    'vestingMonths' : number,
+    'withdrawn' : number,
+    'totalTokensLeft' : number,
+    'allUnlockedAtTheMoment' : number
+}
