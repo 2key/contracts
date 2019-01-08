@@ -61,9 +61,9 @@ export interface ITwoKeyAcquisitionCampaign {
     getAllPendingConverters: (campaign: any, from: string) => Promise<string[]>,
     getApprovedConverters: (campaign: any, from: string) => Promise<string[]>,
     getAllRejectedConverters: (campaign: any, from: string) => Promise<string[]>,
-    getConverterConversionIds: (campaign: any, converterAddress: string, from: string) => Promise<any>,
+    getConverterConversionIds: (campaign: any, converterAddress: string, from: string) => Promise<number[]>,
     getNumberOfConversions: (campaign:any, from:string) => Promise<number>,
-    getConversion: (campaign: any, conversionId: number, from: string) => Promise<any>,
+    getConversion: (campaign: any, conversionId: number, from: string) => Promise<IConversionObject>,
     isAddressJoined: (campaign: any, from: string) => Promise<boolean>,
     getBalanceOfArcs: (campaign: any, from: string) => Promise<number>,
     getEstimatedMaximumReferralReward: (campaign: any, from: string, referralLink: string) => Promise<number>,
@@ -87,7 +87,7 @@ export interface ITwoKeyAcquisitionCampaign {
     contractorWithdraw: (campaign:any, from: string, gasPrice?: number) => Promise<string>,
     getContractorBalance: (campaign:any, from:string) => Promise<number>,
     getModeratorBalance: (campaign:any, from:string) => Promise<number>,
-    moderatorAndReferrerWithdraw: (campaign: any, from: string, gasPrice? : number) => Promise<any>,
+    moderatorAndReferrerWithdraw: (campaign: any, from: string, gasPrice? : number) => Promise<string>,
     getModeratorAddress: (campaign: any, from: string) => Promise<string>,
     getAcquisitionCampaignCurrency: (campaign: any, from: string) => Promise<string>,
     getModeratorTotalEarnings: (campaign:any, from:string) => Promise<number>,
@@ -99,6 +99,19 @@ export interface IPublicLinkOpts {
     cut?: number,
     gasPrice?: number,
     progressCallback?: ICreateCampaignProgress,
+}
+
+export interface IConversionObject {
+    'contractor' : string,
+    'contractorProceedsETHWei' : number,
+    'converter' : string,
+    'state' : string,
+    'conversionAmount' : number,
+    'maxReferralRewardEthWei' : number,
+    'baseTokenUnits' : number,
+    'bonusTokenUnits' : number,
+    'conversionCreatedAt' : number,
+    'conversionExpiresAt' : number
 }
 
 export interface IConvertOpts {

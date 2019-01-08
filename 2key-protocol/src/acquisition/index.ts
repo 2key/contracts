@@ -1,7 +1,7 @@
 import {ICreateOpts, IERC20, IOffchainData, ITwoKeyBase, ITwoKeyHelpers, ITwoKeyUtils} from '../interfaces';
 import {
     IAcquisitionCampaign,
-    IAcquisitionCampaignMeta,
+    IAcquisitionCampaignMeta, IConversionObject,
     IConvertOpts,
     IJoinLinkOpts,
     IPublicLinkKey,
@@ -877,8 +877,8 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @param {string} from
      * @returns {Promise<any>}
      */
-    public getConverterConversionIds(campaign: any, converterAddress: string, from: string) : Promise<any> {
-        return new Promise<any>(async(resolve,reject) => {
+    public getConverterConversionIds(campaign: any, converterAddress: string, from: string) : Promise<number[]> {
+        return new Promise<number[]>(async(resolve,reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
                 const conversionHandler = await promisify(campaignInstance.conversionHandler,[{from}]);
@@ -918,15 +918,15 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @param {string} from
      * @returns {Promise<any>}
      */
-    public getConversion(campaign: any, conversionId: number, from: string) : Promise<any> {
-        return new Promise<any>(async(resolve,reject) => {
+    public getConversion(campaign: any, conversionId: number, from: string) : Promise<IConversionObject> {
+        return new Promise<IConversionObject>(async(resolve,reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
                 const conversionHandler = await promisify(campaignInstance.conversionHandler,[{from}]);
                 const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandler);
                 let [contractor, contractorProceedsETHWei, converter, state, conversionAmount, maxReferralRewardEthWei, baseTokenUnits,
                 bonusTokenUnits, conversionCreatedAt, conversionExpiresAt] = await promisify(conversionHandlerInstance.getConversion,[conversionId,{from}]);
-                let obj = {
+                let obj : IConversionObject = {
                     'contractor' : contractor,
                     'contractorProceedsETHWei' : contractorProceedsETHWei,
                     'converter' : converter,
@@ -937,7 +937,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     'bonusTokenUnits' : bonusTokenUnits,
                     'conversionCreatedAt' : conversionCreatedAt,
                     'conversionExpiresAt' : conversionExpiresAt
-                }
+                };
                 resolve(obj);
             } catch (e) {
                 reject(e);
@@ -1299,8 +1299,8 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @param {number} gasPrice
      * @returns {Promise<any>}
      */
-    public moderatorAndReferrerWithdraw(campaign: any, from: string, gasPrice: number = this.base._getGasPrice()) : Promise<any> {
-        return new Promise<any>(async(resolve,reject) => {
+    public moderatorAndReferrerWithdraw(campaign: any, from: string, gasPrice: number = this.base._getGasPrice()) : Promise<string> {
+        return new Promise<string>(async(resolve,reject) => {
             try {
                 const nonce = await this.helpers._getNonce(from);
                 console.log('Upgradable exchange address: ' + this.base.twoKeyUpgradableExchange.address);
@@ -1380,7 +1380,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @param campaign
      * @param {string} referrer
      * @param {string} from
-     * @returns {Promise<any>}
+     * @returns {Promise<IReferrerSummary>}
      */
     public getReferrerBalanceAndTotalEarningsAndNumberOfConversions(campaign:any, referrer: string, from: string) : Promise<IReferrerSummary> {
         return new Promise<any>(async(resolve,reject) => {
