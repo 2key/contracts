@@ -1,5 +1,5 @@
 import {ITwoKeyBase, ITwoKeyHelpers, ITwoKeyUtils} from '../interfaces';
-import {ITwoKeyCongress} from './interfaces';
+import {IMemberInfo, ITwoKeyCongress} from './interfaces';
 import {promisify} from '../utils'
 
 
@@ -176,8 +176,8 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
      * @param {string} from
      * @returns {Promise<any>}
      */
-    public getMemberInfo(from: string) : Promise<any> {
-        return new Promise( async(resolve, reject) => {
+    public getMemberInfo(from: string) : Promise<IMemberInfo> {
+        return new Promise<IMemberInfo>( async(resolve, reject) => {
             try {
                 let address,
                     name,
@@ -186,7 +186,7 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
 
                 [address, name, votingPower,memberSince] = await promisify(this.congress.getMemberInfo, [{from}]);
 
-                let member = {
+                let member: IMemberInfo = {
                     memberAddress: address,
                     memberName: name,
                     memberVotingPower: votingPower,
@@ -205,7 +205,7 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
      * @param {string} from
      * @returns {Promise<any>}
      */
-    public getMethodNameFromHash(hash: string, from: string) : Promise<any> {
+    public getMethodNameFromHash(hash: string, from: string) : Promise<string> {
         return new Promise( async(resolve,reject) => {
             try {
                 let methodName = await promisify(this.congress.getMethodNameFromMethodHash, [hash, {from}]);
