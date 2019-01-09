@@ -322,10 +322,6 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
         return username2AddressHistory[keccak256(abi.encodePacked(name))];
     }
 
-    function getMaintainers() public view returns (address[]){
-        return maintainers;
-    }
-
     /// @notice Function to fetch actual length of string
     /// @param str is the string we'd like to get length of
     /// @return length of the string

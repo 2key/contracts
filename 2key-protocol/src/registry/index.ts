@@ -166,22 +166,6 @@ export default class TwoKeyReg implements ITwoKeyReg {
 
     /**
      *
-     * @returns {Promise<string[]>}
-     */
-    public getRegistryMaintainers() : Promise<string[]> {
-        return new Promise(async(resolve,reject) => {
-            try {
-                const maintainers = await promisify(this.base.twoKeyReg.getMaintainers,[]);
-                console.log('Maintainers in registry contract are: '+ maintainers);
-                resolve(maintainers);
-            } catch (e) {
-                reject(e);
-            }
-        })
-    }
-
-    /**
-     *
      * @param {string} username
      * @param {string} address
      * @param {string} username_walletName
