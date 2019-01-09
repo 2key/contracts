@@ -1,8 +1,11 @@
 pragma solidity ^0.4.24;
 
 import "./Upgradeable.sol";
+import './Call.sol';
 
 contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriting from MaintainerPattern?
+
+    using Call for *;
 
     /// mapping user's address to user's name
     mapping(address => string) public address2username;
@@ -25,6 +28,7 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
     // the way to know if an address is a plasma address is to look it up in this mapping
     mapping(address => address) public plasma2ethereum;
     mapping(address => address) public ethereum2plasma;
+    mapping(address => bytes) public notes;
 
     struct UserData {
         string username;
@@ -56,7 +60,7 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
 
     /// Address for contract maintainer
     /// Should be the array of addresses - will have permission on some of the mappings to update
-    address[] maintainers;
+    mapping(address => bool) public isMaintainer;
 
     address twoKeyAdminContractAddress;
 
@@ -99,23 +103,14 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
         require(twoKeyAdminContractAddress == address(0));
         twoKeyEventSource = _twoKeyEventSource;
         twoKeyAdminContractAddress = _twoKeyAdmin;
-        maintainers.push(_maintainer);
+        isMaintainer[_maintainer] = true;
     }
 
     /// @notice Function to check if maintainer exists
     /// @param _maintainer is the address of maintainer we're checking occurence
     /// @return true if exists otherwise false
     function checkIfTwoKeyMaintainerExists(address _maintainer) public view returns (bool) {
-        for(uint i=0; i<maintainers.length; i++) {
-              if(_maintainer == maintainers[i]) {
-                  return true;
-              }
-        }
-        return false;
-    }
-
-    function getMaintainers() public view returns (address[]){
-        return maintainers;
+        return isMaintainer[_maintainer];
     }
 
 
@@ -231,12 +226,25 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
         addNameInternal(_name, _sender);
     }
 
-    function getUserData(address _user) external view returns (bytes32,bytes32,bytes32) {
-        UserData memory data = addressToUserData[_user];
-        bytes32 username = stringToBytes32(data.username);
-        bytes32 fullName = stringToBytes32(data.fullName);
-        bytes32 email = stringToBytes32(data.email);
-        return (username, fullName, email);
+    /// @notice Add signed name
+    /// @param _name is the name
+    /// @param external_sig is the external signature
+    function addNameSigned(string _name, bytes external_sig) public {
+        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to name")),
+            keccak256(abi.encodePacked(_name))));
+        address eth_address = Call.recoverHash(hash,external_sig,0);
+        require (msg.sender == eth_address || isMaintainer[msg.sender] == true, "only maintainer or user can change name");
+        addNameInternal(_name, eth_address);
+    }
+
+    function setNoteInternal(bytes note, address me) private {
+        // note is a message you can store with sig. For example it could be the secret you used encrypted by you
+        notes[me] = note;
+    }
+
+    function setNoteByUser(bytes note) public {
+        // note is a message you can store with sig. For example it could be the secret you used encrypted by you
+        setNoteInternal(note, msg.sender);
     }
 
     /// @notice Function where user can add name to his address
@@ -244,6 +252,15 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
     function addNameByUser(string _name) external {
         require(utfStringLength(_name) >= 3 && utfStringLength(_name) <=25);
         addNameInternal(_name, msg.sender);
+    }
+
+    function addTwoKeyMaintainer(address _maintainer) public onlyAdmin {
+        require(_maintainer != address(0));
+        isMaintainer[_maintainer] = true;
+    }
+
+    function removeTwoKeyMaintainer(address _maintainer) public onlyAdmin {
+        isMaintainer[_maintainer] = false;
     }
 
     /// @notice Function where TwoKeyMaintainer can add walletname to address
@@ -256,6 +273,29 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
 
         address2walletTag[_address] = keccak256(abi.encodePacked(_username_walletName));
         walletTag2address[keccak256(abi.encodePacked(_username_walletName))] = _address;
+    }
+
+    function addPlasma2EthereumInternal(bytes sig, address eth_address) private {
+        // add an entry connecting msg.sender to the ethereum address that was used to sign sig.
+        // see setup_demo.js on how to generate sig
+        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to ethereum address")),keccak256(abi.encodePacked(eth_address))));
+        address plasma_address = Call.recoverHash(hash,sig,0);
+        require(plasma2ethereum[plasma_address] == address(0) || plasma2ethereum[plasma_address] == eth_address, "cant change eth=>plasma");
+        plasma2ethereum[plasma_address] = eth_address;
+        ethereum2plasma[eth_address] = plasma_address;
+    }
+
+    function addPlasma2EthereumByUser(bytes sig) public {
+        addPlasma2EthereumInternal(sig, msg.sender);
+    }
+
+    function setPlasma2EthereumAndNoteSigned(bytes sig, bytes note, bytes external_sig) public {
+        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to ethereum-plasma")),
+            keccak256(abi.encodePacked(sig,note))));
+        address eth_address = Call.recoverHash(hash,external_sig,0);
+        require (msg.sender == eth_address || isMaintainer[msg.sender], "only maintainer or user can change ethereum-plasma");
+        addPlasma2EthereumInternal(sig, eth_address);
+        setNoteInternal(note, eth_address);
     }
 
     /// View function - doesn't cost any gas to be executed
@@ -307,44 +347,6 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
     }
 
     /**
-     * @notice Function to add plasma address to ethereum
-     * @param sig is the signature
-     */
-    function addPlasma2Ethereum(bytes sig) public {
-        bytes32 hash = keccak256(abi.encodePacked(msg.sender));
-        require (sig.length == 65, 'bad signature length');
-        // The signature format is a compact form of:
-        //   {bytes32 r}{bytes32 s}{uint8 v}
-        // Compact means, uint8 is not padded to 32 bytes.
-        uint idx = 32;
-        bytes32 r;
-        assembly
-        {
-            r := mload(add(sig, idx))
-        }
-
-        idx += 32;
-        bytes32 s;
-        assembly
-        {
-            s := mload(add(sig, idx))
-        }
-
-        idx += 1;
-        uint8 v;
-        assembly
-        {
-            v := mload(add(sig, idx))
-        }
-        if (v <= 1) v += 27;
-        require(v==27 || v==28,'bad sig v');
-
-        address plasma_address = ecrecover(hash, v, r, s);
-        require(plasma2ethereum[plasma_address] == address(0) || plasma2ethereum[plasma_address] == msg.sender, "cant change plasma=>eth");
-        plasma2ethereum[plasma_address] = msg.sender;
-    }
-
-    /**
      * @notice Function to check if the user exists
      * @param _userAddress is the address of the user
      * @return true if exists otherwise false
@@ -369,15 +371,12 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
         }
     }
 
-    function addTwoKeyMaintainer(address _maintainer) public onlyAdmin {
-        require(_maintainer != address(0));
-        maintainers.push(_maintainer);
+    function getUserData(address _user) external view returns (bytes32,bytes32,bytes32) {
+        UserData memory data = addressToUserData[_user];
+        bytes32 username = stringToBytes32(data.username);
+        bytes32 fullName = stringToBytes32(data.fullName);
+        bytes32 email = stringToBytes32(data.email);
+        return (username, fullName, email);
     }
-
-
-    //TODO Nikola add also remove maintainer... And we should migrate to the maintainer pattern in general , or remove it in general, not have each contract act differently on this regard
-    //TODO Nikola, wherever we add maintainer, we should also be able to remove maintainer
-
-
 
 }
