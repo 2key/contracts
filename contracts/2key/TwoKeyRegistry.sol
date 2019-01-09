@@ -24,8 +24,7 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
     // in some cases the plasma address will be the same as the ethereum address and in that case it is not necessary to have an entry
     // the way to know if an address is a plasma address is to look it up in this mapping
     mapping(address => address) public plasma2ethereum;
-
-//    mapping(address => address) public ethereum2plasma;
+    mapping(address => address) public ethereum2plasma;
 
     struct UserData {
         string username;
