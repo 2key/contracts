@@ -154,21 +154,21 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         publicLinkKey[msg.sender] = _public_link_key;
     }
 
-
-    /**
-     * @notice Function to set cut
-     * @param cut is the cut amount user want to set. Must be less <= 100 or 255 (default value)
-     */
-    function setCut(uint256 cut) private {
-        // the sender sets what is the percentage of the bounty s/he will receive when acting as an influencer
+    function setCutOf(address me, uint256 cut) internal {
+        // what is the percentage of the bounty s/he will receive when acting as an influencer
         // the value 255 is used to signal equal partition with other influencers
         // A sender can set the value only once in a contract
-        require(cut <= 100 || cut == 255, 'Cut is not in valid range');
-        require(referrer2cut[msg.sender] == 0);
-        if (cut <= 100) {
-            cut++;
-        }
-        referrer2cut[msg.sender] = cut;
+        address plasma = twoKeyEventSource.plasmaOf(me);
+        require(referrer2cut[plasma] == 0 || referrer2cut[plasma] == cut, 'cut already set differently');
+        referrer2cut[plasma] = cut;
+    }
+
+    function setCut(uint256 cut) public {
+        setCutOf(msg.sender, cut);
+    }
+
+    function getReferrerCut(address me) public view returns (uint256) {
+        return referrer2cut[twoKeyEventSource.plasmaOf(me)];
     }
 
 
@@ -424,15 +424,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     }
 
 
-    /**
-     * @notice This is acting as a getter for referrer2cut
-     * @dev Transaction will revert if msg.sender is not present in mapping
-     * @return cut value / otherwise reverts
-     */
-    function getReferrerCut() public view returns (uint256) {
-        require(referrer2cut[msg.sender] != 0, 'Referrer cut can not be 0');
-        return referrer2cut[msg.sender] - 1;
-    }
+
 
 
     /**
