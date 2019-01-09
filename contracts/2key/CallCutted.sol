@@ -1,4 +1,4 @@
-pragma solidity ^0.4.0;
+pragma solidity ^0.4.24;
 
 contract CallCutted {
     function params1(address c, bytes _method, uint _val) public view returns (uint answer) {
@@ -63,7 +63,7 @@ contract CallCutted {
         }
     }
 
-    function loadAddress(bytes sig, uint idx) pure returns (address) {
+    function loadAddress(bytes sig, uint idx) public pure returns (address) {
         address influencer;
         idx += 20;
         assembly
@@ -73,7 +73,7 @@ contract CallCutted {
         return influencer;
     }
 
-    function loadUint8(bytes sig, uint idx) pure returns (uint8) {
+    function loadUint8(bytes sig, uint idx) public pure returns (uint8) {
         uint8 weight;
         idx += 1;
         assembly
@@ -84,7 +84,7 @@ contract CallCutted {
     }
 
 
-    function recoverHash(bytes32 hash, bytes sig, uint idx) pure returns (address) {
+    function recoverHash(bytes32 hash, bytes sig, uint idx) public pure returns (address) {
         // same as recoverHash in utils/sign.js
         // The signature format is a compact form of:
         //   {bytes32 r}{bytes32 s}{uint8 v}

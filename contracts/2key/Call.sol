@@ -91,7 +91,7 @@ library Call {
         }
     }
 
-    function loadAddress(bytes sig, uint idx) pure returns (address) {
+    function loadAddress(bytes sig, uint idx) public pure returns (address) {
         address influencer;
         idx += 20;
         assembly
@@ -101,7 +101,7 @@ library Call {
         return influencer;
     }
 
-    function loadUint8(bytes sig, uint idx) pure returns (uint8) {
+    function loadUint8(bytes sig, uint idx) public pure returns (uint8) {
         uint8 weight;
         idx += 1;
         assembly
@@ -112,11 +112,12 @@ library Call {
     }
 
 
-    function recoverHash(bytes32 hash, bytes sig, uint idx) pure returns (address) {
+    function recoverHash(bytes32 hash, bytes sig, uint idx) public pure returns (address) {
         // same as recoverHash in utils/sign.js
         // The signature format is a compact form of:
         //   {bytes32 r}{bytes32 s}{uint8 v}
         // Compact means, uint8 is not padded to 32 bytes.
+        require (sig.length >= 65+idx, 'bad signature length');
         idx += 32;
         bytes32 r;
         assembly
@@ -148,7 +149,7 @@ library Call {
 
     }
 
-    function recoverSigMemory(bytes sig) private returns (address[], address[], uint8[], uint[], uint) {
+    function recoverSigMemory(bytes sig) private pure returns (address[], address[], uint8[], uint[], uint) {
         uint8 version = loadUint8(sig, 0);
         uint msg_len = (version == 1) ? 1+65+20 : 1+20+20;
         uint n_influencers = (sig.length-21) / (65+msg_len);
@@ -163,7 +164,7 @@ library Call {
         return (influencers, keys, weights, offsets, msg_len);
     }
 
-    function recoverSigParts(bytes sig) private returns (address[], address[], uint8[], uint[]) {
+    function recoverSigParts(bytes sig, address last_address) private pure returns (address[], address[], uint8[], uint[]) {
         // sig structure:
         // 1 byte version 0 or 1
         // 20 bytes are the address of the contractor or the influencer who created sig.
@@ -215,7 +216,7 @@ library Call {
                 idx += 20;
             } else {
                 // handle short signatures generated with free_take
-                influencers[count_influencers] = msg.sender;
+                influencers[count_influencers] = last_address;
             }
             count_influencers++;
         }
@@ -224,7 +225,7 @@ library Call {
         return (influencers, keys, weights, offsets);
     }
 
-    function recoverSig(bytes sig, address old_key) public returns (address[], address[], uint8[]) {
+    function recoverSig(bytes sig, address old_key) public pure returns (address[], address[], uint8[]) {
         // validate sig AND
         // recover the information from the signature: influencers, public_link_keys, weights/cuts
         // influencers may have one more address than the keys and weights arrays
@@ -235,7 +236,7 @@ library Call {
         address[] memory keys;
         uint8[] memory weights;
         uint[] memory offsets;
-        (influencers, keys, weights, offsets) = recoverSigParts(sig);
+        (influencers, keys, weights, offsets) = recoverSigParts(sig, msg.sender);
 
         // check if we received a valid signature
         for(uint i = 0; i < influencers.length; i++) {
