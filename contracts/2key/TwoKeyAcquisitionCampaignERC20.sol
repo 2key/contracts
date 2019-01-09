@@ -123,8 +123,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         return 0;
     }
 
-
-
     /**
      * @notice Method to add fungible asset to our contract
      * @dev When user calls this method, he just says the actual amount of ERC20 he'd like to transfer to us
@@ -136,12 +134,12 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         return true;
     }
 
-
     /**
      * @notice Function to set public link key
      * @dev At the beginning only contractor can call this method bcs he is the only one who has arcs
      * @param _public_link_key is the public link key we want to set for the msg.sender
      */
+    //TODO: What is happening here, this doesn't exist anymore in Udi's code
     function setPublicLinkKey(address _public_link_key) public {
         require(balanceOf(msg.sender) > 0,'no ARCs');
         require(publicLinkKey[msg.sender] == address(0),'public link key already defined');
