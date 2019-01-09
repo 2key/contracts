@@ -80,6 +80,11 @@ export default class TwoKeyReg implements ITwoKeyReg {
         });
     }
 
+    /**
+     *
+     * @param {string} address
+     * @returns {Promise<IUserData>}
+     */
     public getUserData(address: string) : Promise<IUserData> {
         return new Promise(async(resolve,reject) => {
             try {
