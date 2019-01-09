@@ -360,6 +360,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
                     b = _maxReferralRewardETHWei.div(influencers.length - i);
                 }
             }
+            //All mappings are now stated to plasma addresses
             referrerBalancesETHWei[influencers[i]] = referrerBalancesETHWei[influencers[i]].add(b);
             referrerTotalEarningsEthWEI[influencers[i]] = referrerTotalEarningsEthWEI[influencers[i]].add(b);
             referrerAddressToCounterOfConversions[influencers[i]]++;
