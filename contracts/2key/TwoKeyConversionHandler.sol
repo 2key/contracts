@@ -1,11 +1,15 @@
 pragma solidity ^0.4.24;
 import "./TwoKeyTypes.sol";
-import "../interfaces/ITwoKeyAcquisitionCampaignERC20.sol";
 import "./TwoKeyConversionStates.sol";
 import "./TwoKeyLockupContract.sol";
-import "../openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "../interfaces/IERC20.sol";
 import "./TwoKeyConverterStates.sol";
+
+import "../openzeppelin-solidity/contracts/math/SafeMath.sol";
+
+import "../interfaces/IERC20.sol";
+import "../interfaces/ITwoKeyAcquisitionCampaignERC20.sol";
+import "../interfaces/IUpgradableExchange.sol";
+
 
 /**
  * @notice Contract to handle logic related for Acquisition
@@ -30,11 +34,16 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
     mapping(address => bool) isConverterAnonymous;
     mapping(address => address[]) converterToLockupContracts;
 
+    uint moderatorBalanceETHWei; //Balance of the moderator which can be withdrawn
+    uint moderatorTotalEarningsETHWei; //Total earnings of the moderator all time
+
+
     address[] allLockUpContracts;
 
     address twoKeyAcquisitionCampaignERC20;
     address moderator;
     address contractor;
+    address upgradableExchange;
 
     address assetContractERC20;
     string assetSymbol;
@@ -102,13 +111,14 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
     /// @param _twoKeyAcquisitionCampaignERC20 is the address of TwoKeyAcquisitionCampaignERC20 contract
     /// @param _moderator is the address of the moderator
     /// @param _contractor is the address of the contractor
-    function setTwoKeyAcquisitionCampaignERC20(address _twoKeyAcquisitionCampaignERC20, address _moderator, address _contractor, address _assetContractERC20, string _assetSymbol) public {
+    function setTwoKeyAcquisitionCampaignERC20(address _twoKeyAcquisitionCampaignERC20, address _moderator, address _contractor, address _assetContractERC20, string _assetSymbol, address _upgradableExchange) public {
         require(twoKeyAcquisitionCampaignERC20 == address(0));
         twoKeyAcquisitionCampaignERC20 = _twoKeyAcquisitionCampaignERC20;
         moderator = _moderator;
         contractor = _contractor;
         assetContractERC20 =_assetContractERC20;
         assetSymbol = _assetSymbol;
+        upgradableExchange = _upgradableExchange;
     }
 
 
@@ -196,6 +206,8 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
         // update moderator balances
         ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateModeratorBalanceETHWei(conversion.moderatorFeeETHWei);
 
+        moderatorBalanceETHWei = moderatorBalanceETHWei.add(conversion.moderatorFeeETHWei);
+        moderatorTotalEarningsETHWei = moderatorTotalEarningsETHWei.add(conversion.moderatorFeeETHWei);
 
         TwoKeyLockupContract lockupContract = new TwoKeyLockupContract(bonusTokensVestingStartShiftInDaysFromDistributionDate, bonusTokensVestingMonths, tokenDistributionDate, maxDistributionDateShiftInDays,
             conversion.baseTokenUnits, conversion.bonusTokenUnits, conversion.converter, conversion.contractor, twoKeyAcquisitionCampaignERC20, assetContractERC20);
@@ -416,6 +428,23 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
     }
 
     /**
+     * @notice Function to fetch moderator balance in ETH and his total earnings
+     * @dev only contractor or moderator are eligible to call this function
+     * @return value of his balance in ETH
+     */
+    function getModeratorBalanceAndTotalEarnings() external onlyContractorOrModerator view returns (uint,uint) {
+        return (moderatorBalanceETHWei,moderatorTotalEarningsETHWei);
+    }
+
+
+    function withdrawModerator() external {
+        if(msg.sender == moderator && moderatorBalanceETHWei > 0) {
+            IUpgradableExchange(upgradableExchange).buyTokens.value(moderatorBalanceETHWei)(msg.sender);
+            moderatorBalanceETHWei = 0;
+        }
+    }
+
+    /**
      * @notice Function to cancel conversion and get back money
      * @param _conversionId is the id of the conversion
      * @dev returns all the funds to the converter back
@@ -429,6 +458,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
         ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).sendBackEthWhenConversionCancelled(msg.sender, conversion.conversionAmount);
         conversions[_conversionId] = conversion;
     }
+
 
 
     //

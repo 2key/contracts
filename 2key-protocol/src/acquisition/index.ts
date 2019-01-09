@@ -1283,7 +1283,9 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         return new Promise<number>(async (resolve, reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-                let [moderatorBalance, moderatorTotalEarnings] = await promisify(campaignInstance.getModeratorBalanceAndTotalEarnings, [{from}]);
+                const conversionHandler = await promisify(campaignInstance.conversionHandler,[{from}]);
+                const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandler);
+                let [moderatorBalance, moderatorTotalEarnings] = await promisify(conversionHandlerInstance.getModeratorBalanceAndTotalEarnings, [{from}]);
                 resolve(moderatorBalance);
             } catch (e) {
                 reject(e);
@@ -1302,6 +1304,10 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     public moderatorAndReferrerWithdraw(campaign: any, from: string, gasPrice: number = this.base._getGasPrice()) : Promise<string> {
         return new Promise<string>(async(resolve,reject) => {
             try {
+                /**
+                 * TODO: If moderator is doing withdraw it will go through conversion handler contract
+                 * @type {number}
+                 */
                 const nonce = await this.helpers._getNonce(from);
                 console.log('Upgradable exchange address: ' + this.base.twoKeyUpgradableExchange.address);
                 const balance = await this.erc20.getERC20Balance(this.base.twoKeyEconomy.address, this.base.twoKeyUpgradableExchange.address);

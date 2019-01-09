@@ -61,24 +61,6 @@ contract TwoKeyCampaignARC is ArcERC20 {
 //		return true;
 //	}
 
-	/**
-	 * @dev Transfer tokens from one address to another
-	 * @param _from address The address which you want to send tokens from
-	 * @param _to address The address which you want to transfer to
-	 * @param _value uint256 the amount of tokens to be transferred
-	 */
-	function transferFromQuota(address _from, address _to, uint256 _value) private returns (bool) {
-		require(_to != address(0));
-		require(_value <= balances[_from]);
-		require(_value <= allowed[_from][msg.sender]);
-
-		balances[_from] = balances[_from].sub(_value);
-		balances[_to] = balances[_to].add(_value * conversionQuota);
-		totalSupply_ = totalSupply_.add(_value.mul(conversionQuota - 1));
-		allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
-		emit Transfer(_from, _to, _value);
-		return true;
-	}
 //	/// @notice Function where contractor or moderator can take arcs from user (remove)
 //	/// @dev only contractor or moderator can call this function, otherwise it will revert
 //	/// @param _user is the address of user we're taking arcs from
@@ -106,27 +88,59 @@ contract TwoKeyCampaignARC is ArcERC20 {
 //       totalSupply_.add(_arcsAmount);
 //     }
 //
+//	/**
+//   	 * @dev Transfer tokens from one address to another
+//	 * @param _from address The address which you want to send tokens from
+//	 * @param _to address The address which you want to transfer to
+//	 * @param _value uint256 the amount of tokens to be transferred
+//	 */
+//	function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
+//		require(_value == 1);
+//		require(received_from[_to] == 0); // This line makes us sure we're in the tree
+//		require(_from != address(0));
+//		allowed[_from][msg.sender] = 1;
+//		if (transferFromQuota(_from, _to, _value)) {
+//			if (received_from[_to] == 0) {
+//				// inform the 2key admin contract, once, that an influencer has joined
+////				twoKeyEventSource.joined(address(this), _from, _to);
+//			}
+//			received_from[_to] = _from;
+//			return true;
+//		} else {
+//			return false;
+//		}
+//	}
+
+
 	/**
-   	 * @dev Transfer tokens from one address to another
-	 * @param _from address The address which you want to send tokens from
-	 * @param _to address The address which you want to transfer to
-	 * @param _value uint256 the amount of tokens to be transferred
-	 */
-	function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
-		require(_value == 1);
-		require(received_from[_to] == 0); // This line makes us sure we're in the tree
-		require(_from != address(0));
-		allowed[_from][msg.sender] = 1;
-		if (transferFromQuota(_from, _to, _value)) {
-			if (received_from[_to] == 0) {
-				// inform the 2key admin contract, once, that an influencer has joined
-//				twoKeyEventSource.joined(address(this), _from, _to);
-			}
-			received_from[_to] = _from;
-			return true;
-		} else {
-			return false;
+     * @dev Transfer tokens from one address to another
+     * @param _from address The address which you want to send tokens from ALREADY converted to plasma
+     * @param _to address The address which you want to transfer to ALREADY converted to plasma
+     * @param _value uint256 the amount of tokens to be transferred
+     */
+	function transferFrom(address _from, address _to, uint256 _value) public onlyContractorOrModerator returns (bool) {
+		return transferFromInternal(_from, _to, _value);
+	}
+	function transferFromInternal(address _from, address _to, uint256 _value) internal returns (bool) {
+		// _from and _to are assumed to be already converted to plasma address (e.g. using plasmaOf)
+		require(_value == 1, 'can only transfer 1 ARC');
+		require(_from != address(0), '_from undefined');
+		require(_to != address(0), '_to undefined');
+		_from = twoKeyEventSource.plasmaOf(_from);
+		_to = twoKeyEventSource.plasmaOf(_to);
+
+		require(balances[_from] > 0,'_from does not have arcs');
+		balances[_from] = balances[_from].sub(1);
+		balances[_to] = balances[_to].add(conversionQuota);
+		totalSupply_ = totalSupply_.add(conversionQuota.sub(1));
+
+		emit Transfer(_from, _to, 1);
+		if (received_from[_to] == 0) {
+			// inform the 2key admin contract, once, that an influencer has joined
+			twoKeyEventSource.joined(this, _from, _to);
 		}
+		received_from[_to] = _from;
+		return true;
 	}
 
 //	/**

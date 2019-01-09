@@ -23,9 +23,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     mapping(address => uint256) internal referrerBalancesETHWei; // balance of EthWei for each influencer that he can withdraw
     mapping(address => uint256) internal referrerTotalEarningsEthWEI; // Total earnings for referrers
     mapping(address => uint256) internal referrerAddressToCounterOfConversions;
-    uint moderatorBalanceETHWei; //Balance of the moderator which can be withdrawn
-    uint moderatorTotalEarningsETHWei; //Total earnings of the moderator all time
-
 
     mapping(address => uint256) balancesConvertersETH; // Amount converter put to the contract in Ether
     mapping(address => uint256) internal units; // Number of units (ERC20 tokens) bought
@@ -84,9 +81,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         values[9]
     )
     public {
-        require(_assetContractERC20 != address(0), 'ERC20 contract address can not be 0x0');
-        require(values[4] > 0, 'Max referral reward percent must be > i0');
-        require(_conversionHandler != address(0), 'Address of Conversion Handler can not be 0x0');
         conversionHandler = _conversionHandler;
         upgradableExchange = _twoKeyUpgradableExchangeContract;
         contractor = msg.sender;
@@ -104,7 +98,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         currency = _currency;
         ethUSDExchangeContract = _ethUSDExchangeContract;
         setERC20Attributes();
-        ITwoKeyConversionHandler(conversionHandler).setTwoKeyAcquisitionCampaignERC20(address(this), _moderator, contractor, _assetContractERC20, symbol);
+        ITwoKeyConversionHandler(conversionHandler).setTwoKeyAcquisitionCampaignERC20(address(this), _moderator, contractor, _assetContractERC20, symbol, upgradableExchange);
         twoKeyEventSource.created(address(this), contractor, moderator);
     }
 
@@ -519,15 +513,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         twoKeyEventSource.updatedPublicMetaHash(block.timestamp, value);
     }
 
-    /**
-     * @notice Function to update moderator balance
-     * @dev can be called only from TwoKeyConversionHandler contract
-     * @param _value is the value we'd like to add to total moderator earnings and moderator balance
-     */
-    function updateModeratorBalanceETHWei(uint _value) public onlyTwoKeyConversionHandler {
-        moderatorBalanceETHWei = moderatorBalanceETHWei.add(_value);
-        moderatorTotalEarningsETHWei = moderatorTotalEarningsETHWei.add(_value);
-    }
 
     /**
      * @notice Option to update contractor proceeds
@@ -595,15 +580,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     }
 
     /**
-     * @notice Function to fetch moderator balance in ETH and his total earnings
-     * @dev only contractor or moderator are eligible to call this function
-     * @return value of his balance in ETH
-     */
-    function getModeratorBalanceAndTotalEarnings() external onlyContractorOrModerator view returns (uint,uint) {
-        return (moderatorBalanceETHWei,moderatorTotalEarningsETHWei);
-    }
-
-    /**
      * @notice Function to fetch for the referrer his balance, his total earnings, and how many conversions he participated in
      * @dev only referrer by himself, moderator, or contractor can call this
      * @param _referrer is the address of referrer we're checking for
@@ -635,11 +611,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     function withdrawModeratorOrReferrer() external {
         //Creating additional variable to prevent reentrancy attack
         uint balance;
-        if(msg.sender == moderator) {
-            balance = moderatorBalanceETHWei;
-            moderatorBalanceETHWei = 0;
-            IUpgradableExchange(upgradableExchange).buyTokens.value(balance)(msg.sender);
-        } else if(referrerBalancesETHWei[msg.sender] != 0) {
+        if(referrerBalancesETHWei[msg.sender] != 0) {
             balance = referrerBalancesETHWei[msg.sender];
             referrerBalancesETHWei[msg.sender] = 0;
             IUpgradableExchange(upgradableExchange).buyTokens.value(balance)(msg.sender);
