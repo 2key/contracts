@@ -201,7 +201,7 @@ contract TwoKeyEventSource is Upgradeable, TwoKeyTypes {
      */
     function joined(address _campaign, address _from, address _to) external onlyAllowedContracts {
         ITwoKeyReg(twoKeyRegistry).addWhereReferrer(_campaign, _from);
-    	emit Joined(_campaign, _from, _to);
+        emit Joined(_campaign, _from, _to);
     }
 
     /**
@@ -223,8 +223,8 @@ contract TwoKeyEventSource is Upgradeable, TwoKeyTypes {
      * @param _amount is the reward amount
      */
     function rewarded(address _campaign, address _to, uint256 _amount) external onlyAllowedContracts {
-    	emit Rewarded(_campaign, _to, _amount);
-	}
+        emit Rewarded(_campaign, _to, _amount);
+    }
 
     /**
      * @notice Function to emit created event every time campaign is cancelled
@@ -233,9 +233,9 @@ contract TwoKeyEventSource is Upgradeable, TwoKeyTypes {
      * @param _indexOrAmount is the amount of campaign
      * @param _type is the campaign type
      */
-	function cancelled(address  _campaign, address _converter, uint256 _indexOrAmount, CampaignType _type) external onlyAllowedContracts{
-		emit Cancelled(_campaign, _converter, _indexOrAmount, _type);
-	}
+    function cancelled(address  _campaign, address _converter, uint256 _indexOrAmount, CampaignType _type) external onlyAllowedContracts{
+        emit Cancelled(_campaign, _converter, _indexOrAmount, _type);
+    }
 
     /**
      * @notice Function which will emit updated public meta hash event
@@ -264,6 +264,38 @@ contract TwoKeyEventSource is Upgradeable, TwoKeyTypes {
     function isAddressWhitelistedToEmitEvents(address _contractAddress) external view returns (bool) {
         bytes memory code = GetCode.at(_contractAddress);
         return canEmit[code];
+    }
+
+    /**
+     * @notice Function to determine plasma address of ethereum address
+     * @param me is the address (ethereum) of the user
+     * @return an address
+     */
+    function plasmaOf(address me) public view returns (address) {
+        if (twoKeyRegistry == address(0)) {
+            me;
+        }
+        address plasma = ITwoKeyReg(twoKeyRegistry).ethereum2plasma(plasma);
+        if (plasma != address(0)) {
+            return plasma;
+        }
+        return me;
+    }
+
+    /**
+     * @notice Function to determine ethereum address of plasma address
+     * @param me is the plasma address of the user
+     * @return ethereum address
+     */
+    function ethereumOf(address me) public view returns (address) {
+        if (twoKeyRegistry == address(0)) {
+            return me;
+        }
+        address ethereum = ITwoKeyReg(twoKeyRegistry).plasma2ethereum(ethereum);
+        if (ethereum != address(0)) {
+            return ethereum;
+        }
+        return me;
     }
 
 }
