@@ -225,7 +225,7 @@ library Call {
         return (influencers, keys, weights, offsets);
     }
 
-    function recoverSig(bytes sig, address old_key) public pure returns (address[], address[], uint8[]) {
+    function recoverSig(bytes sig, address old_key) public view returns (address[], address[], uint8[]) {
         // validate sig AND
         // recover the information from the signature: influencers, public_link_keys, weights/cuts
         // influencers may have one more address than the keys and weights arrays
