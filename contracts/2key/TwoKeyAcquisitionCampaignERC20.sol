@@ -585,6 +585,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      */
     function getReferrerBalanceAndTotalEarningsAndNumberOfConversions(address _referrer) public view returns (uint,uint,uint) {
         require(msg.sender == _referrer || msg.sender == contractor || msg.sender == moderator);
+        _referrer = twoKeyEventSource.plasmaOf(_referrer);
         return (referrerBalancesETHWei[_referrer],referrerTotalEarningsEthWEI[_referrer], referrerAddressToCounterOfConversions[_referrer]);
     }
 
