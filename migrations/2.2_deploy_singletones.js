@@ -81,6 +81,7 @@ module.exports = function deploy(deployer) {
             .then(() => deployer.deploy(TwoKeyExchangeRateContract))
             .then(() => TwoKeyExchangeRateContract.deployed())
             .then(() => deployer.deploy(EventSource))
+            .then(() => deployer.link(Call, TwoKeyRegistry))
             .then(() => deployer.deploy(TwoKeyRegistry)
             .then(() => TwoKeyRegistry.deployed())
             .then(() => deployer.deploy(TwoKeySingletoneAddressStorage))

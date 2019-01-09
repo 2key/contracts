@@ -411,14 +411,11 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         uint256[] memory cuts = new uint256[](influencers.length + 1);
         for (uint i = 0; i < influencers.length; i++) {
             address influencer = influencers[i];
-            cuts[i] = referrer2cut[influencer];
+            cuts[i] = getReferrerCut(influencer);
         }
-        cuts[influencers.length] = referrer2cut[last_influencer];
+        cuts[influencers.length] = getReferrerCut(last_influencer);
         return cuts;
     }
-
-
-
 
 
     /**
