@@ -525,6 +525,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     /**
      * @notice Function to check if the msg.sender has already joined
      * @return true/false depending of joined status
+     /// TODO: Not working anymore
      */
     function getAddressJoinedStatus() public view returns (bool) {
         if(msg.sender == address(contractor) || msg.sender == address(moderator) || received_from[msg.sender] != address(0)
