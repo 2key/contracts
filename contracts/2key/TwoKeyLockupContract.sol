@@ -14,6 +14,10 @@ contract TwoKeyLockupContract {
     uint totalTokensLeftOnContract;
     uint withdrawn = 0;
 
+
+    mapping(uint => uint) tokenUnlockingDate;
+    mapping(uint => bool) isWithdrawn;
+
     address converter;
     address contractor;
     address twoKeyAcquisitionCampaignERC20Address;
@@ -61,6 +65,23 @@ contract TwoKeyLockupContract {
         twoKeyConversionHandler = msg.sender;
         assetContractERC20 = _assetContractERC20;
         totalTokensLeftOnContract = baseTokens + bonusTokens;
+        tokenUnlockingDate[0] = tokenDistributionDate; //base tokens
+        for(uint i=1 ;i<bonusTokensVestingMonths + 1; i++) {
+            tokenUnlockingDate[i] = tokenDistributionDate + i*bonusTokensVestingMonths * (30 days); ///bonus tokens
+        }
+    }
+
+    function getLockupSummary() public onlyConverter returns (uint, uint, uint, uint[], bool[]) {
+        uint[] memory dates = new uint[](bonusTokensVestingMonths+1);
+        bool[] memory areTokensWithdrawn = new bool[](bonusTokensVestingMonths+1);
+
+        for(uint i=0; i<bonusTokensVestingMonths+1;i++) {
+            dates[i] = tokenUnlockingDate[i];
+            areTokensWithdrawn[i] = isWithdrawn[i];
+        }
+        //total = base + bonus
+        // monthly bonus = bonus/bonusTokensVestingMonths
+        return (baseTokens, bonusTokens, bonusTokensVestingMonths ,dates,areTokensWithdrawn);
     }
 
 
@@ -79,11 +100,15 @@ contract TwoKeyLockupContract {
     /// @notice Function where converter can withdraw his funds
     /// @return true is if transfer was successful, otherwise will revert
     /// onlyConverter
-    function transferFungibleAsset() public returns (bool) {
-        uint unlocked = getAllUnlockedAtTheMoment();
-        uint amount = unlocked - withdrawn;
-        totalTokensLeftOnContract = totalTokensLeftOnContract - amount;
-        withdrawn = withdrawn + amount;
+    function withdrawTokens(uint part) public returns (bool) {
+        require(isWithdrawn[part] == false && part < bonusTokensVestingMonths+1 && block.timestamp > tokenUnlockingDate[part]);
+        uint amount;
+        if(part == 0) {
+            amount = baseTokens;
+        } else {
+            amount = bonusTokens / bonusTokensVestingMonths;
+        }
+        isWithdrawn[part] = true;
         require(IERC20(assetContractERC20).transfer(msg.sender,amount));
         return true;
     }
@@ -97,57 +122,4 @@ contract TwoKeyLockupContract {
         selfdestruct(twoKeyAcquisitionCampaignERC20Address);
     }
 
-    /// @notice This function will check how much of bonus tokens are unlocked at the moment
-    /// @dev this is internal function
-    function howMuchBonusUnlocked() internal view returns (uint) {
-        uint bonusSplited = bonusTokens / bonusTokensVestingMonths;
-
-        uint counter = 0;
-        for(uint i=0; i<bonusTokensVestingMonths; i++) {
-            if(tokenDistributionDate + bonusTokensVestingStartShiftInDaysFromDistributionDate + i*(30 days) < block.timestamp) {
-                counter++;
-            }
-        }
-        return bonusSplited * counter;
-    }
-
-    function isBaseUnlocked() public view returns (uint) {
-        if(tokenDistributionDate > block.timestamp) {
-            return baseTokens;
-        }
-        return 0;
-    }
-
-    function getBaseTokensAmount() public view returns (uint) {
-        return baseTokens;
-    }
-
-    function getTotalBonus() public view returns (uint) {
-        return bonusTokens;
-    }
-
-    function getMonthlyBonus() public view returns (uint) {
-        return bonusTokens / bonusTokensVestingMonths;
-    }
-
-    function getTotalTokensLeftOnContract() public view returns (uint) {
-        return totalTokensLeftOnContract;
-    }
-
-    function getWithdrawn() public view returns (uint) {
-        return withdrawn;
-    }
-
-    function getAllUnlockedAtTheMoment() public view returns (uint) {
-        return isBaseUnlocked() + howMuchBonusUnlocked();
-    }
-
-    function getNumberOfVestingMonths() public view returns (uint) {
-        return bonusTokensVestingMonths;
-    }
-
-    function getInformation() public view returns (uint,uint,uint,uint,uint,uint) {
-        uint allUnlockedAtTheMoment = getAllUnlockedAtTheMoment();
-        return (baseTokens, bonusTokens, bonusTokensVestingMonths, withdrawn, totalTokensLeftOnContract, allUnlockedAtTheMoment);
-    }
 }
