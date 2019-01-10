@@ -14,126 +14,45 @@ export default class Lockup implements ILockup {
         this.utils = utils;
     }
 
+
     /**
-     *
+     * Get information from the Lockup contract, it's only available for the Converter
      * @param {string} twoKeyLockup
      * @param {string} from
-     * @returns {Promise<number>}
+     * @returns {Promise<LockupInformation>}
      */
-    public getBaseTokensAmount(twoKeyLockup: string, from: string): Promise<number> {
-        return new Promise(async(resolve, reject) => {
+    public getLockupInformations(twoKeyLockup: string, from:string) : Promise<LockupInformation> {
+        return new Promise<LockupInformation>(async(resolve,reject) => {
             try {
                 const twoKeyLockupInstance = await this.helpers._getLockupContractInstance(twoKeyLockup);
-                const baseTokensAmount = await promisify(twoKeyLockupInstance.getBaseTokensAmount, [{from}]);
-                resolve(baseTokensAmount);
+
+                let [bonusTokens, baseTokens, vestingMonths, unlockingDates, isWithdrawn] =
+                    await promisify(twoKeyLockupInstance.getLockupSummary,[{from}]);
+
+                let obj : LockupInformation = {
+                    baseTokens : baseTokens,
+                    bonusTokens : bonusTokens,
+                    vestingMonths : vestingMonths,
+                    unlockingDays : unlockingDates,
+                    areWithdrawn : isWithdrawn
+                };
+                resolve(obj);
             } catch (e) {
                 reject(e);
             }
         })
     }
-
-    /**
-     *
-     * @param {string} twoKeyLockup
-     * @param {string} from
-     * @returns {Promise<number>}
-     */
-    public getBonusTokenAmount(twoKeyLockup: string, from: string): Promise<number> {
-        return new Promise(async(resolve, reject) => {
-            try {
-                const twoKeyLockupInstance = await this.helpers._getLockupContractInstance(twoKeyLockup);
-                const bonusTokensAmount = await promisify(twoKeyLockupInstance.getTotalBonus, [{from}]);
-                resolve(bonusTokensAmount);
-            } catch (e) {
-                reject(e);
-            }
-        })
-    }
-
-    /**
-     *
-     * @param {string} twoKeyLockup
-     * @param {string} from
-     * @returns {Promise<number>}
-     */
-    public checkIfBaseIsUnlocked(twoKeyLockup: string, from: string): Promise<number> {
-        return new Promise(async(resolve,reject) => {
-            try {
-                const twoKeyLockupInstance = await this.helpers._getLockupContractInstance(twoKeyLockup);
-                const unlocked = await promisify(twoKeyLockupInstance.isBaseUnlocked,[{from}]);
-                resolve(unlocked);
-            } catch (e) {
-                reject(e);
-            }
-        })
-    }
-
-    /**
-     *
-     * @param {string} twoKeyLockup
-     * @param {string} from
-     * @returns {Promise<number>}
-     */
-    public getMonthlyBonus(twoKeyLockup: string, from: string): Promise<number> {
-        return new Promise(async(resolve, reject) => {
-            try {
-                const twoKeyLockupInstance = await this.helpers._getLockupContractInstance(twoKeyLockup);
-                const monthlyBonus = await promisify(twoKeyLockupInstance.getMonthlyBonus,[{from}]);
-                resolve(monthlyBonus)
-            } catch (e) {
-                reject(e);
-            }
-        })
-    }
-
-    /**
-     *
-     * @param {string} twoKeyLockup
-     * @param {string} from
-     * @returns {Promise<number>}
-     */
-    public getAllUnlockedAtTheMoment(twoKeyLockup: string, from:string) : Promise<number> {
-        return new Promise(async(resolve,reject) => {
-            try {
-                const twoKeyLockupInstance = await this.helpers._getLockupContractInstance(twoKeyLockup);
-                const bonusUnlocked = await promisify(twoKeyLockupInstance.getAllUnlockedAtTheMoment,[{from}]);
-                resolve(bonusUnlocked);
-            } catch (e) {
-                reject(e);
-            }
-        })
-    }
-
-
-    /**
-     *
-     * @param {string} twoKeyLockup
-     * @param {string} from
-     * @returns {Promise<number>}
-     */
-    public getAmountUserWithdrawn(twoKeyLockup: string, from: string) : Promise<number> {
-        return new Promise(async(resolve,reject) => {
-            try {
-                const twoKeyLockupInstance = await this.helpers._getLockupContractInstance(twoKeyLockup);
-                const withdrawn = await promisify(twoKeyLockupInstance.getWithdrawn,[{from}]);
-                resolve(withdrawn);
-            } catch (e) {
-                reject(e);
-            }
-        })
-    }
-
     /**
      *
      * @param {string} twoKeyLockup
      * @param {string} from
      * @returns {Promise<string>}
      */
-    public withdrawTokens(twoKeyLockup: string, from:string) : Promise<string> {
+    public withdrawTokens(twoKeyLockup: string, part: number, from:string) : Promise<string> {
         return new Promise(async(resolve,reject) => {
             try {
                 const twoKeyLockupInstance = await this.helpers._getLockupContractInstance(twoKeyLockup);
-                const txHash = await promisify(twoKeyLockupInstance.transferFungibleAsset, [{from}]);
+                const txHash = await promisify(twoKeyLockupInstance.transferFungibleAsset, [part,{from}]);
                 // await this.utils.getTransactionReceiptMined(txHash);
                 resolve(txHash);
             } catch (e) {
@@ -142,32 +61,7 @@ export default class Lockup implements ILockup {
         })
     }
 
-    /**
-     *
-     * @param {string} twoKeyLockup
-     * @param {string} from
-     * @returns {Promise<LockupInformation>}
-     */
-    public getInformationFromLockup(twoKeyLockup: string, from: string) : Promise<LockupInformation> {
-        return new Promise<LockupInformation>(async(resolve,reject) => {
-            try {
-                const twoKeyLockupInstance = await this.helpers._getLockupContractInstance(twoKeyLockup);
-                let [baseTokens, bonusTokens, vestingMonths, withdrawn, totalTokensLeft, allUnlockedAtTheMoment]
-                    = await promisify(twoKeyLockupInstance.getInformation,[{from}]);
-                let obj : LockupInformation = {
-                    'baseTokens' : baseTokens,
-                    'bonusTokens' : bonusTokens,
-                    'vestingMonths' : vestingMonths,
-                    'withdrawn' : withdrawn,
-                    'totalTokensLeft' : totalTokensLeft,
-                    'allUnlockedAtTheMoment' : allUnlockedAtTheMoment
-                };
-                resolve(obj);
-            } catch (e) {
-                reject(e);
-            }
-        })
-    }
+
 
 
     /**
@@ -189,69 +83,6 @@ export default class Lockup implements ILockup {
         })
     }
 
-
-
-    /**
-     *
-     * @param {string} twoKeyLockup
-     * @param {string} from
-     * @returns {Promise<any>}
-     */
-    public getStatistics(twoKeyLockup: string, from:string) : Promise<any> {
-        return new Promise(async(resolve,reject) => {
-            try {
-                const twoKeyLockupInstance = await this.helpers._getLockupContractInstance(twoKeyLockup);
-                let [baseTokens, bonusTokens, vestingMonths, withdrawn, totalTokensLeft, allUnlockedAtTheMoment]
-                    = await promisify(twoKeyLockupInstance.getInformation,[{from}]);
-
-                let monthlyBonus = bonusTokens/vestingMonths;
-                console.log('Bonus tokens: ' + bonusTokens);
-                console.log('Withdrawn: ' + withdrawn);
-                console.log('Base Tokens: ' + baseTokens);
-                console.log('Total tokens left on the contract: ' + totalTokensLeft);
-                console.log('Vesting months: ' + vestingMonths);
-                console.log('Monthly bonus: '+  monthlyBonus);
-                console.log('All unlocked at the moment :' + allUnlockedAtTheMoment);
-
-                let stats = [];
-                let statObject;
-                let sum = 0;
-                if(withdrawn == 0) {
-                    statObject = {
-                        'amount' : baseTokens,
-                        'taken' : false,
-                    };
-                } else {
-                    statObject = {
-                        'amount' : baseTokens,
-                        'taken' : true,
-                    };
-                    sum = baseTokens;
-                }
-
-                stats.push(statObject);
-                console.log('Sum is: ' + sum);
-                for(let i=0; i<vestingMonths; i++) {
-                    if(sum + monthlyBonus > withdrawn) {
-                        statObject = {
-                            'amount' : monthlyBonus,
-                            'taken' : false,
-                        }
-                    } else {
-                        statObject = {
-                            'amount' : monthlyBonus,
-                            'taken' : true,
-                        };
-                        sum += monthlyBonus;
-                    }
-                    stats.push(statObject);
-                }
-                resolve(stats);
-            } catch (e) {
-                reject(e);
-            }
-        })
-    }
 
 }
 
