@@ -602,9 +602,10 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     function withdrawModeratorOrReferrer() external {
         //Creating additional variable to prevent reentrancy attack
         uint balance;
-        if(referrerBalancesETHWei[msg.sender] != 0) {
-            balance = referrerBalancesETHWei[msg.sender];
-            referrerBalancesETHWei[msg.sender] = 0;
+        address _referrer = twoKeyEventSource.plasmaOf(msg.sender);
+        if(referrerBalancesETHWei[_referrer] != 0) {
+            balance = referrerBalancesETHWei[_referrer];
+            referrerBalancesETHWei[_referrer] = 0;
             IUpgradableExchange(upgradableExchange).buyTokens.value(balance)(msg.sender);
         } else {
             revert();
