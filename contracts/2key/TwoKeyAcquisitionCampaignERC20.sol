@@ -13,7 +13,6 @@ import "../interfaces/ITwoKeyExchangeRateContract.sol";
  * @author Nikola Madjarevic
  * @notice Campaign which will sell ERC20 tokens
  */
-
 contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
 
     using Call for *;
