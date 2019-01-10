@@ -14,7 +14,6 @@ export default class Lockup implements ILockup {
         this.utils = utils;
     }
 
-
     /**
      * Get information from the Lockup contract, it's only available for the Converter
      * @param {string} twoKeyLockup
@@ -28,7 +27,8 @@ export default class Lockup implements ILockup {
 
                 let [bonusTokens, baseTokens, vestingMonths, unlockingDates, isWithdrawn] =
                     await promisify(twoKeyLockupInstance.getLockupSummary,[{from}]);
-
+                console.log(baseTokens);
+                console.log(bonusTokens);
                 let obj : LockupInformation = {
                     baseTokens : baseTokens,
                     bonusTokens : bonusTokens,

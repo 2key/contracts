@@ -11,14 +11,12 @@ contract TwoKeyLockupContract {
 
     uint public baseTokens;
     uint public bonusTokens;
-    uint totalTokensLeftOnContract;
-    uint withdrawn = 0;
 
 
-    mapping(uint => uint) tokenUnlockingDate;
-    mapping(uint => bool) isWithdrawn;
+    mapping(uint => uint) public tokenUnlockingDate;
+    mapping(uint => bool) public isWithdrawn;
 
-    address converter;
+    address public converter;
     address contractor;
     address twoKeyAcquisitionCampaignERC20Address;
     address twoKeyConversionHandler;
@@ -64,14 +62,14 @@ contract TwoKeyLockupContract {
         twoKeyAcquisitionCampaignERC20Address = _acquisitionCampaignERC20Address;
         twoKeyConversionHandler = msg.sender;
         assetContractERC20 = _assetContractERC20;
-        totalTokensLeftOnContract = baseTokens + bonusTokens;
         tokenUnlockingDate[0] = tokenDistributionDate; //base tokens
         for(uint i=1 ;i<bonusTokensVestingMonths + 1; i++) {
-            tokenUnlockingDate[i] = tokenDistributionDate + i*bonusTokensVestingMonths * (30 days); ///bonus tokens
+            tokenUnlockingDate[i] = tokenDistributionDate + i * (30 days); ///bonus tokens
         }
     }
 
-    function getLockupSummary() public onlyConverter returns (uint, uint, uint, uint[], bool[]) {
+    ///TODO: Comment onlyConverter
+    function getLockupSummary() public view returns (uint, uint, uint, uint[], bool[]) {
         uint[] memory dates = new uint[](bonusTokensVestingMonths+1);
         bool[] memory areTokensWithdrawn = new bool[](bonusTokensVestingMonths+1);
 

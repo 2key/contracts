@@ -1,3 +1,5 @@
+import {BigNumber} from 'bignumber.js';
+
 export interface ILockup {
     withdrawTokens: (twoKeyLockup: string, part: number, from:string) => Promise<string>,
     changeTokenDistributionDate: (twoKeyLockup: string, newDate: number, from: string) => Promise<string>,
@@ -5,8 +7,8 @@ export interface ILockup {
 }
 
 export interface LockupInformation {
-    'baseTokens' : number,
-    'bonusTokens' : number,
+    'baseTokens' : string,
+    'bonusTokens' : string,
     'vestingMonths' : number,
     'unlockingDays' : number[],
     'areWithdrawn' : boolean[]
