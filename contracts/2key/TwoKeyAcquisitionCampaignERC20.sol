@@ -597,6 +597,11 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         contractor.transfer(balance);
     }
 
+
+    function buyTokensFromUpgradableExchange(uint amountOfMoney, address receiver) public {
+        require(msg.sender == address(this) || msg.sender == conversionHandler);
+        IUpgradableExchange(upgradableExchange).buyTokens.value(amountOfMoney)(receiver);
+    }
     /**
      * @notice Function where moderator or referrer can withdraw their available funds
      */
@@ -607,7 +612,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         if(referrerBalancesETHWei[_referrer] != 0) {
             balance = referrerBalancesETHWei[_referrer];
             referrerBalancesETHWei[_referrer] = 0;
-            IUpgradableExchange(upgradableExchange).buyTokens.value(balance)(msg.sender);
+            buyTokensFromUpgradableExchange(balance, msg.sender);
         } else {
             revert();
         }
