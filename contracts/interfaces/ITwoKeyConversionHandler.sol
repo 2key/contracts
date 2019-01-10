@@ -14,7 +14,7 @@ contract ITwoKeyConversionHandler {
 
     function setAnonymous(address _contractor, bool _isAnonymous) external;
     function cancelAndRejectContract() external;
-    function setTwoKeyAcquisitionCampaignERC20(address _twoKeyAcquisitionCampaignERC20, address _moderator, address _contractor, address _assetContractERC20, string _assetSymbol, address upgradableExchange) external;
+    function setTwoKeyAcquisitionCampaignERC20(address _twoKeyAcquisitionCampaignERC20, address _moderator, address _contractor, address _assetContractERC20, address upgradableExchange) external;
     function getModeratorBalanceAndTotalEarnings() external view returns (uint,uint);
 
 }

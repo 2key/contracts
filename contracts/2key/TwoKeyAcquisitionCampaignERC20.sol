@@ -98,7 +98,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         currency = _currency;
         ethUSDExchangeContract = _ethUSDExchangeContract;
         unit_decimals = IERC20(assetContractERC20).decimals();
-        ITwoKeyConversionHandler(conversionHandler).setTwoKeyAcquisitionCampaignERC20(address(this), _moderator, contractor, _assetContractERC20, symbol, upgradableExchange);
+        ITwoKeyConversionHandler(conversionHandler).setTwoKeyAcquisitionCampaignERC20(address(this), _moderator, contractor, _assetContractERC20, upgradableExchange);
         twoKeyEventSource.created(address(this), contractor, moderator);
     }
 
