@@ -165,7 +165,7 @@ contract TwoKeyCampaignARC is ArcERC20 {
 
 	function getReferrers(address customer) internal view returns (address[]) {
 		// build a list of all influencers from converter back to to contractor
-		// dont count the conveter and contractr themselves
+		// dont count the conveter and contractor themselves
 		address influencer = twoKeyEventSource.plasmaOf(customer);
 		// first count how many influencers
 		uint n_influencers = 0;

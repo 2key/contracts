@@ -580,6 +580,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         return (referrerBalancesETHWei[_referrer],referrerTotalEarningsEthWEI[_referrer], referrerAddressToCounterOfConversions[_referrer]);
     }
 
+
     /**
      * @notice Function where contractor can withdraw his funds
      * @dev onlyContractor can call this method
