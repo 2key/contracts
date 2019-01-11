@@ -394,7 +394,8 @@ describe('TwoKeyProtocol', () => {
             minContributionETHWei: twoKeyProtocol.Utils.toWei(minContributionETHorUSD, 'ether'),
             maxContributionETHWei: twoKeyProtocol.Utils.toWei(maxContributionETHorUSD, 'ether'),
             currency: 'ETH',
-            tokenDistributionDate: 1541109593669,
+            ///TODO: Leave a timestamp --> bear in mind that geth time is different
+            tokenDistributionDate: new Date().getTime()/1000,
             maxDistributionDateShiftInDays: 180,
             bonusTokensVestingMonths: 6,
             bonusTokensVestingStartShiftInDaysFromDistributionDate: 180
