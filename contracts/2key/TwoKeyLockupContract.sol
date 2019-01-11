@@ -98,7 +98,7 @@ contract TwoKeyLockupContract {
     /// @notice Function where converter can withdraw his funds
     /// @return true is if transfer was successful, otherwise will revert
     /// onlyConverter
-    function withdrawTokens(uint part) public returns (bool) {
+    function withdrawTokens(uint part) public onlyConverter returns (bool) {
         require(isWithdrawn[part] == false && part < bonusTokensVestingMonths+1 && block.timestamp > tokenUnlockingDate[part]);
         uint amount;
         if(part == 0) {
