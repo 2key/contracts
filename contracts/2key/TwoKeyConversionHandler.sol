@@ -102,13 +102,12 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
     /// @param _twoKeyAcquisitionCampaignERC20 is the address of TwoKeyAcquisitionCampaignERC20 contract
     /// @param _moderator is the address of the moderator
     /// @param _contractor is the address of the contractor
-    function setTwoKeyAcquisitionCampaignERC20(address _twoKeyAcquisitionCampaignERC20, address _moderator, address _contractor, address _assetContractERC20, string _assetSymbol) public {
+    function setTwoKeyAcquisitionCampaignERC20(address _twoKeyAcquisitionCampaignERC20, address _moderator, address _contractor, address _assetContractERC20) public {
         require(twoKeyAcquisitionCampaignERC20 == address(0));
         twoKeyAcquisitionCampaignERC20 = _twoKeyAcquisitionCampaignERC20;
         moderator = _moderator;
         contractor = _contractor;
         assetContractERC20 =_assetContractERC20;
-        assetSymbol = _assetSymbol;
     }
 
 

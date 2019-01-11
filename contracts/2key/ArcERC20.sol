@@ -12,9 +12,6 @@ contract ArcERC20  {
     event Transfer(address indexed from, address indexed to, uint256 value);
 
     uint256 internal totalSupply_;
-    string public name;
-    string public symbol;
-    uint8 public decimals;
 
     mapping (address => mapping (address => uint256)) internal allowed;
     mapping(address => uint256) internal balances;

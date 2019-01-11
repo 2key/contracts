@@ -103,17 +103,9 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         maxContributionETHorFiatCurrency = values[8];
         currency = _currency;
         ethUSDExchangeContract = _ethUSDExchangeContract;
-        setERC20Attributes();
-        ITwoKeyConversionHandler(conversionHandler).setTwoKeyAcquisitionCampaignERC20(address(this), _moderator, contractor, _assetContractERC20, symbol);
-        twoKeyEventSource.created(address(this), contractor, moderator);
-    }
-
-    /**
-     * @notice Function to set ERC20 token which is being sold attributes
-     * @dev internal function, can't be called outside of the contract
-     */
-    function setERC20Attributes() internal {
         unit_decimals = IERC20(assetContractERC20).decimals();
+        ITwoKeyConversionHandler(conversionHandler).setTwoKeyAcquisitionCampaignERC20(address(this), _moderator, contractor, _assetContractERC20);
+        twoKeyEventSource.created(address(this), contractor, moderator);
     }
 
     /**
