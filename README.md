@@ -27,6 +27,14 @@ git commit -m <"Commit message">
 yarn run deploy public.test.k8s,private.test.k8s --reset
 ```
 
+- regular deploy
+```
+bash ./redeploy-test.bash
+git add .
+git commit -m <"Commit message">
+yarn run deploy public.test.k8s,private.test.k8s
+```
+
 - If the npm publish fails:
 ```
 cd 2key-protocol/dist
