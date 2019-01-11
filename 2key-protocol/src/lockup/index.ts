@@ -42,9 +42,11 @@ export default class Lockup implements ILockup {
             }
         })
     }
+
     /**
-     *
+     * Method to withdraw tokens, converter is sending which part he wants to withdraw - only converter can call this
      * @param {string} twoKeyLockup
+     * @param {number} part
      * @param {string} from
      * @returns {Promise<string>}
      */
@@ -52,7 +54,7 @@ export default class Lockup implements ILockup {
         return new Promise(async(resolve,reject) => {
             try {
                 const twoKeyLockupInstance = await this.helpers._getLockupContractInstance(twoKeyLockup);
-                const txHash = await promisify(twoKeyLockupInstance.transferFungibleAsset, [part,{from}]);
+                const txHash = await promisify(twoKeyLockupInstance.withdraw, [part,{from}]);
                 // await this.utils.getTransactionReceiptMined(txHash);
                 resolve(txHash);
             } catch (e) {

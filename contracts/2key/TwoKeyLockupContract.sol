@@ -90,6 +90,13 @@ contract TwoKeyLockupContract {
         require(changed == false);
         require(_newDate - (maxDistributionDateShiftInDays * (1 days)) <= tokenDistributionDate);
         require(now < tokenDistributionDate);
+
+        uint shift = tokenDistributionDate - _newDate;
+        // If the date is changed shifting all tokens unlocking dates for the difference
+        for(uint i=0; i<bonusTokensVestingMonths+1;i++) {
+            tokenUnlockingDate[i] = tokenUnlockingDate[i] + shift;
+        }
+
         changed = true;
         tokenDistributionDate = _newDate;
     }
