@@ -25,15 +25,13 @@ export default class Lockup implements ILockup {
             try {
                 const twoKeyLockupInstance = await this.helpers._getLockupContractInstance(twoKeyLockup);
 
-                let [bonusTokens, baseTokens, vestingMonths, unlockingDates, isWithdrawn] =
+                let [baseTokens, bonusTokens, vestingMonths, unlockingDates, isWithdrawn] =
                     await promisify(twoKeyLockupInstance.getLockupSummary,[{from}]);
-                console.log(baseTokens);
-                console.log(bonusTokens);
                 let obj : LockupInformation = {
-                    baseTokens : baseTokens,
-                    bonusTokens : bonusTokens,
-                    vestingMonths : vestingMonths,
-                    unlockingDays : unlockingDates,
+                    baseTokens : parseFloat(this.utils.fromWei(baseTokens, 'ether').toString()),
+                    bonusTokens : parseFloat(this.utils.fromWei(bonusTokens, 'ether').toString()),
+                    vestingMonths : vestingMonths.toNumber(),
+                    unlockingDays : unlockingDates.map(date => parseInt(date.toString(),10)),
                     areWithdrawn : isWithdrawn
                 };
                 resolve(obj);

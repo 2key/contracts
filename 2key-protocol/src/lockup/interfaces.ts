@@ -7,8 +7,8 @@ export interface ILockup {
 }
 
 export interface LockupInformation {
-    'baseTokens' : string,
-    'bonusTokens' : string,
+    'baseTokens' : number,
+    'bonusTokens' : number,
     'vestingMonths' : number,
     'unlockingDays' : number[],
     'areWithdrawn' : boolean[]
