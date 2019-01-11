@@ -52,7 +52,7 @@ export default class Lockup implements ILockup {
         return new Promise(async(resolve,reject) => {
             try {
                 const twoKeyLockupInstance = await this.helpers._getLockupContractInstance(twoKeyLockup);
-                const txHash = await promisify(twoKeyLockupInstance.withdraw, [part,{from}]);
+                const txHash = await promisify(twoKeyLockupInstance.withdrawTokens, [part,{from}]);
                 // await this.utils.getTransactionReceiptMined(txHash);
                 resolve(txHash);
             } catch (e) {

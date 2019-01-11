@@ -13,7 +13,7 @@ const mainNetId = env.MAIN_NET_ID;
 const syncTwoKeyNetId = env.SYNC_NET_ID;
 const destinationAddress = env.AYDNEP_ADDRESS;
 const delay = env.TEST_DELAY;
-// const destinationAddress = env.DESTINATION_ADDRESS || '0xd9ce6800b997a0f26faffc0d74405c841dfc64b7'
+// const destinationAddress = env.DESTINATION_ADDRESS  || '0xd9ce6800b997a0f26faffc0d74405c841dfc64b7'
 console.log(mainNetId);
 const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 const maxConverterBonusPercent = 23;
@@ -395,7 +395,7 @@ describe('TwoKeyProtocol', () => {
             maxContributionETHWei: twoKeyProtocol.Utils.toWei(maxContributionETHorUSD, 'ether'),
             currency: 'ETH',
             ///TODO: Leave a timestamp --> bear in mind that geth time is different
-            tokenDistributionDate: new Date().getTime()/1000,
+            tokenDistributionDate: 1543623681,
             maxDistributionDateShiftInDays: 180,
             bonusTokensVestingMonths: 6,
             bonusTokensVestingStartShiftInDaysFromDistributionDate: 180
@@ -780,6 +780,22 @@ describe('TwoKeyProtocol', () => {
             },
             plasmaPK: Sign.generatePrivateKey().toString('hex'),
         });
+        const addresses = await twoKeyProtocol.AcquisitionCampaign.getLockupContractsForConverter(campaignAddress, env.TEST4_ADDRESS, from);
+        console.log(addresses);
+        const data = await twoKeyProtocol.Lockup.getLockupInformations(addresses[0], from);
+        console.log(data);
+        expect(data.baseTokens + data.bonusTokens).to.be.equal(1.23);
+    }).timeout(30000);
+
+    it('should withdraw from lockup contracts', async() => {
+        const lockupAddresses = await twoKeyProtocol.AcquisitionCampaign.getLockupContractsForConverter(campaignAddress, env.TEST4_ADDRESS, from);
+        const approved = lockupAddresses[0];
+
+        const txHash = await twoKeyProtocol.Lockup.withdrawTokens(approved,0,from);
+        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+    }).timeout(30000);
+
+    it('should get stats for the lockup after withdraw', async() => {
         const addresses = await twoKeyProtocol.AcquisitionCampaign.getLockupContractsForConverter(campaignAddress, env.TEST4_ADDRESS, from);
         console.log(addresses);
         const data = await twoKeyProtocol.Lockup.getLockupInformations(addresses[0], from);
