@@ -1,7 +1,7 @@
 import {ICreateOpts, IERC20, IOffchainData, ITwoKeyBase, ITwoKeyHelpers, ITwoKeyUtils} from '../interfaces';
 import {
     IAcquisitionCampaign,
-    IAcquisitionCampaignMeta, IConversionObject,
+    IAcquisitionCampaignMeta, IAddressStats, IConversionObject,
     IConvertOpts,
     IJoinLinkOpts,
     IPublicLinkKey,
@@ -1450,6 +1450,33 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
                 let txHash: string = await promisify(campaignInstance.getPrivateMetaHash,[{from}]);
                 resolve(txHash);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+    /**
+     * Method to get statistics for the address from acquisition campaign
+     * @param campaign
+     * @param {string} address
+     * @returns {Promise<IAddressStats>}
+     */
+    public getAddressStatistic(campaign: any, address: string) : Promise<IAddressStats>{
+        return new Promise<IAddressStats>(async(resolve,reject) => {
+            try {
+                const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
+                let [rewards, tokensBought, isConverter, isReferrer, isContractor] =
+                    await promisify(campaignInstance.getAddressStatistic,[address]);
+
+                let obj : IAddressStats = {
+                    rewards : parseFloat(this.utils.fromWei(rewards,'ether').toString()),
+                    tokensBought: parseFloat(this.utils.fromWei(tokensBought, 'ether').toString()),
+                    isConverter: isConverter,
+                    isReferrer: isReferrer,
+                    isContractor : isContractor
+                };
+                resolve(obj);
             } catch (e) {
                 reject(e);
             }

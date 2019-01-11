@@ -93,6 +93,7 @@ export interface ITwoKeyAcquisitionCampaign {
     getModeratorTotalEarnings: (campaign:any, from:string) => Promise<number>,
     getReferrerBalanceAndTotalEarningsAndNumberOfConversions: (campaign:any, referrer: string, from: string) => Promise<IReferrerSummary>,
     getCurrentAvailableAmountOfTokens: (campaign:any, from:string) => Promise<number>,
+    getAddressStatistic: (campaign: any, address: string) => Promise<IAddressStats>,
 }
 
 export interface IPublicLinkOpts {
@@ -132,4 +133,13 @@ export interface IReferrerSummary {
     totalEarnings: number,
     numberOfConversionsParticipatedIn : number,
     campaignAddress: string,
+}
+
+
+export interface IAddressStats {
+    rewards: number,
+    tokensBought: number,
+    isConverter: boolean,
+    isReferrer: boolean,
+    isContractor: boolean
 }

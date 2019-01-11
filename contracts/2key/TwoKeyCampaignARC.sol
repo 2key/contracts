@@ -25,12 +25,6 @@ contract TwoKeyCampaignARC is ArcERC20 {
         _;
     }
 
-    // @notice Modifier which allows only moderator to call methods
-    modifier onlyModerator() {
-        require(msg.sender == moderator);
-        _;
-    }
-
     // @notice Modifier which allows only contractor or moderator to call methods
     modifier onlyContractorOrModerator() {
         require(msg.sender == contractor || msg.sender == moderator);
@@ -44,22 +38,22 @@ contract TwoKeyCampaignARC is ArcERC20 {
 		balances[msg.sender] = totalSupply_;
 	}
 
-	/**
-	 * @dev transfer token for a specified address
-	 * @param _to The address to transfer to.
-	 * @param _value The amount to be transferred.
-	 */
-	function transferQuota(address _to, uint256 _value) private returns (bool) {
-		require(_to != address(0));
-		require(_value <= balances[msg.sender]);
-
-		// SafeMath.sub will throw if there is not enough balance.
-		balances[msg.sender] = balances[msg.sender].sub(_value);
-		balances[_to] = balances[_to].add(_value * conversionQuota);
-		totalSupply_ = totalSupply_.add(_value.mul(conversionQuota - 1));
-		emit Transfer(msg.sender, _to, _value);
-		return true;
-	}
+//	/**
+//	 * @dev transfer token for a specified address
+//	 * @param _to The address to transfer to.
+//	 * @param _value The amount to be transferred.
+//	 */
+//	function transferQuota(address _to, uint256 _value) private returns (bool) {
+//		require(_to != address(0));
+//		require(_value <= balances[msg.sender]);
+//
+//		// SafeMath.sub will throw if there is not enough balance.
+//		balances[msg.sender] = balances[msg.sender].sub(_value);
+//		balances[_to] = balances[_to].add(_value * conversionQuota);
+//		totalSupply_ = totalSupply_.add(_value.mul(conversionQuota - 1));
+//		emit Transfer(msg.sender, _to, _value);
+//		return true;
+//	}
 
 	/**
 	 * @dev Transfer tokens from one address to another
@@ -79,33 +73,33 @@ contract TwoKeyCampaignARC is ArcERC20 {
 		emit Transfer(_from, _to, _value);
 		return true;
 	}
-	/// @notice Function where contractor or moderator can take arcs from user (remove)
-	/// @dev only contractor or moderator can call this function, otherwise it will revert
-	/// @param _user is the address of user we're taking arcs from
-	/// @param _arcsAmount is the amount of arcs we're taking from the user
-	function removeArcsFromUser(address _user, uint _arcsAmount) public onlyContractorOrModerator {
-		require(_user != address(0));
-		require(_arcsAmount > 0);
-		if(balances[_user] < _arcsAmount) {
-			balances[_user] = 0;
-		} else {
-			balances[_user].sub(_arcsAmount);
-		}
-		//Get back this arcs to contractor or otherwise remove from totalSupply
-		balances[contractor].add(_arcsAmount);
-	}
-
-	/// @notice Function where contractor or moderator can give arcs to user
-	/// @dev only contractor or moderator can call this function, otherwise it will revert
-	/// @param _user is the address of the user who are we willing to give arcs
-	/// @param _arcsAmount is the value how many arcs we're giving him
-    function addArcsToUser(address _user, uint _arcsAmount) public onlyContractorOrModerator {
-       require(_user != address(0));
-       require(_arcsAmount > 0);
-       balances[_user].add(_arcsAmount);
-       totalSupply_.add(_arcsAmount);
-     }
-	
+//	/// @notice Function where contractor or moderator can take arcs from user (remove)
+//	/// @dev only contractor or moderator can call this function, otherwise it will revert
+//	/// @param _user is the address of user we're taking arcs from
+//	/// @param _arcsAmount is the amount of arcs we're taking from the user
+//	function removeArcsFromUser(address _user, uint _arcsAmount) public onlyContractorOrModerator {
+//		require(_user != address(0));
+//		require(_arcsAmount > 0);
+//		if(balances[_user] < _arcsAmount) {
+//			balances[_user] = 0;
+//		} else {
+//			balances[_user].sub(_arcsAmount);
+//		}
+//		//Get back this arcs to contractor or otherwise remove from totalSupply
+//		balances[contractor].add(_arcsAmount);
+//	}
+//
+//	/// @notice Function where contractor or moderator can give arcs to user
+//	/// @dev only contractor or moderator can call this function, otherwise it will revert
+//	/// @param _user is the address of the user who are we willing to give arcs
+//	/// @param _arcsAmount is the value how many arcs we're giving him
+//    function addArcsToUser(address _user, uint _arcsAmount) public onlyContractorOrModerator {
+//       require(_user != address(0));
+//       require(_arcsAmount > 0);
+//       balances[_user].add(_arcsAmount);
+//       totalSupply_.add(_arcsAmount);
+//     }
+//
 	/**
    	 * @dev Transfer tokens from one address to another
 	 * @param _from address The address which you want to send tokens from
@@ -129,24 +123,24 @@ contract TwoKeyCampaignARC is ArcERC20 {
 		}
 	}
 
-	/**
-	  * @dev transfer token for a specified address
-	  * @param _to The address to transfer to.
-	  * @param _value The amount to be transferred.
-	  */
-	function transfer(address _to, uint256 _value) public returns (bool) {
-		require(received_from[_to] == 0);
-		if (transferQuota(_to, _value)) {
-			if (received_from[_to] == 0) {
-				// inform the 2key admin contract, once, that an influencer has joined
-//				twoKeyEventSource.joined(address(this), msg.sender, _to);
-			}
-			received_from[_to] = msg.sender;
-			return true;
-		} else {
-			return false;
-		}
-	}
+//	/**
+//	  * @dev transfer token for a specified address
+//	  * @param _to The address to transfer to.
+//	  * @param _value The amount to be transferred.
+//	  */
+//	function transfer(address _to, uint256 _value) public returns (bool) {
+//		require(received_from[_to] == 0);
+//		if (transferQuota(_to, _value)) {
+//			if (received_from[_to] == 0) {
+//				// inform the 2key admin contract, once, that an influencer has joined
+////				twoKeyEventSource.joined(address(this), msg.sender, _to);
+//			}
+//			received_from[_to] = msg.sender;
+//			return true;
+//		} else {
+//			return false;
+//		}
+//	}
 
 
 	function getReferrers(address customer) internal view returns (address[]) {

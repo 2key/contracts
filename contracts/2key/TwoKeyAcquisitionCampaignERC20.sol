@@ -28,7 +28,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
 
 
     mapping(address => uint256) balancesConvertersETH; // Amount converter put to the contract in Ether
-    mapping(address => uint256) internal units; // Number of units (ERC20 tokens) bought
+    mapping(address => uint256) internal unitsConverterBought; // Number of units (ERC20 tokens) bought
     mapping(address => address) public publicLinkKey; // Public link key can generate only somebody who has ARCs
 
     string public currency; // currency can be either ETH or USD
@@ -147,21 +147,21 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     }
 
 
-    /**
-     * @notice Function to set cut
-     * @param cut is the cut amount user want to set. Must be less <= 100 or 255 (default value)
-     */
-    function setCut(uint256 cut) private {
-        // the sender sets what is the percentage of the bounty s/he will receive when acting as an influencer
-        // the value 255 is used to signal equal partition with other influencers
-        // A sender can set the value only once in a contract
-        require(cut <= 100 || cut == 255, 'Cut is not in valid range');
-        require(referrer2cut[msg.sender] == 0);
-        if (cut <= 100) {
-            cut++;
-        }
-        referrer2cut[msg.sender] = cut;
-    }
+//    /**
+//     * @notice Function to set cut
+//     * @param cut is the cut amount user want to set. Must be less <= 100 or 255 (default value)
+//     */
+//    function setCut(uint256 cut) private {
+//        // the sender sets what is the percentage of the bounty s/he will receive when acting as an influencer
+//        // the value 255 is used to signal equal partition with other influencers
+//        // A sender can set the value only once in a contract
+//        require(cut <= 100 || cut == 255, 'Cut is not in valid range');
+//        require(referrer2cut[msg.sender] == 0);
+//        if (cut <= 100) {
+//            cut++;
+//        }
+//        referrer2cut[msg.sender] = cut;
+//    }
 
 
     /// @notice Method distributes arcs based on signature
@@ -318,7 +318,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         uint256 _total_units = getInventoryBalance();
         require(_total_units - reservedAmountOfTokens >= totalTokensForConverterUnits, 'Inventory balance does not have enough funds');
 
-        units[converterAddress] = units[converterAddress].add(totalTokensForConverterUnits);
+        unitsConverterBought[converterAddress] = unitsConverterBought[converterAddress].add(totalTokensForConverterUnits);
 
         uint256 maxReferralRewardETHWei = conversionAmountETHWei.mul(maxReferralRewardPercent).div(100);
         uint256 moderatorFeeETHWei = calculateModeratorFee(conversionAmountETHWei);
@@ -612,6 +612,24 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     function getReferrerBalanceAndTotalEarningsAndNumberOfConversions(address _referrer) public view returns (uint,uint,uint) {
         require(msg.sender == _referrer || msg.sender == contractor || msg.sender == moderator);
         return (referrerBalancesETHWei[_referrer],referrerTotalEarningsEthWEI[_referrer], referrerAddressToCounterOfConversions[_referrer]);
+    }
+
+    //{ rewards: number,  tokens_bought: number, isConverter: bool, isReferrer: bool, isContractor: bool, isModerator:bool } right??
+    function getAddressStatistic(address _address) public view returns (uint,uint,bool,bool,bool) {
+        //contractor,moderator,converter,referrer
+        if(msg.sender == contractor) {
+            return (0, 0, false, false, true);
+        } else {
+            bool isConverter;
+            bool isReferrer;
+            if(unitsConverterBought[_address] > 0) {
+                isConverter = true;
+            }
+            if(referrerBalancesETHWei[_address] > 0) {
+                isReferrer = true;
+            }
+            return (referrerBalancesETHWei[_address], unitsConverterBought[_address], isConverter, isReferrer, false);
+        }
     }
 
     /**
