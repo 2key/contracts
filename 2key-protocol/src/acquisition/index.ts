@@ -1457,7 +1457,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     }
 
     /**
-     * Method to get statistics for the address from acquisition campaign
+     * Method to get statistics for the address
      * @param campaign
      * @param {string} address
      * @returns {Promise<IAddressStats>}
