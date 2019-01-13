@@ -26,7 +26,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
 
     mapping(address => uint256) balancesConvertersETH; // Amount converter put to the contract in Ether
     mapping(address => uint256) internal units; // Number of units (ERC20 tokens) bought
-    mapping(address => address) public publicLinkKey; // Public link key can generate only somebody who has ARCs
 
     string public currency; // currency can be either ETH or USD
     address ethUSDExchangeContract;
@@ -128,17 +127,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         return true;
     }
 
-    /**
-     * @notice Function to set public link key
-     * @dev At the beginning only contractor can call this method bcs he is the only one who has arcs
-     * @param _public_link_key is the public link key we want to set for the msg.sender
-     */
-    //TODO: What is happening here, this doesn't exist anymore in Udi's code
-    function setPublicLinkKey(address _public_link_key) public {
-        require(balanceOf(msg.sender) > 0,'no ARCs');
-        require(publicLinkKey[msg.sender] == address(0),'public link key already defined');
-        publicLinkKey[msg.sender] = _public_link_key;
-    }
+
 
     function setCutOf(address me, uint256 cut) internal {
         // what is the percentage of the bounty s/he will receive when acting as an influencer
@@ -530,7 +519,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      */
     function getAddressJoinedStatus() public view returns (bool) {
         if(msg.sender == address(contractor) || msg.sender == address(moderator) || received_from[msg.sender] != address(0)
-            || balanceOf(msg.sender) > 0 || publicLinkKey[msg.sender] != address(0)) {
+            || balanceOf(msg.sender) > 0) {
             return true;
         }
         return false;
