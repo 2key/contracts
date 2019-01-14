@@ -203,9 +203,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
         // update moderator balances
         ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateModeratorBalanceETHWei(conversion.moderatorFeeETHWei);
 
-        moderatorBalanceETHWei = moderatorBalanceETHWei.add(conversion.moderatorFeeETHWei);
-        moderatorTotalEarningsETHWei = moderatorTotalEarningsETHWei.add(conversion.moderatorFeeETHWei);
-
         TwoKeyLockupContract lockupContract = new TwoKeyLockupContract(bonusTokensVestingStartShiftInDaysFromDistributionDate, bonusTokensVestingMonths, tokenDistributionDate, maxDistributionDateShiftInDays,
             conversion.baseTokenUnits, conversion.bonusTokenUnits, conversion.converter, conversion.contractor, twoKeyAcquisitionCampaignERC20, assetContractERC20);
 
@@ -424,14 +421,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
         return numberOfConversions;
     }
 
-    /**
-     * @notice Function to fetch moderator balance in ETH and his total earnings
-     * @dev only contractor or moderator are eligible to call this function
-     * @return value of his balance in ETH
-     */
-    function getModeratorBalanceAndTotalEarnings() external onlyContractorOrModerator view returns (uint,uint) {
-        return (moderatorBalanceETHWei,moderatorTotalEarningsETHWei);
-    }
+
 
 
     function withdrawModerator() external {
