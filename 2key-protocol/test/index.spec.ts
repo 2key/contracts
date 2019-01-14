@@ -770,6 +770,24 @@ describe('TwoKeyProtocol', () => {
 
 
     it('should get all data from lockup contract for converter', async () => {
+        const {web3, address} = web3switcher.renata();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            plasmaPK: Sign.generatePrivateKey().toString('hex'),
+        });
+        const addresses = await twoKeyProtocol.AcquisitionCampaign.getLockupContractsForConverter(campaignAddress, env.RENATA_ADDRESS, from);
+        console.log(addresses);
+        const data = await twoKeyProtocol.Lockup.getLockupInformations(addresses[0], from);
+        console.log(data);
+        expect(data.baseTokens + data.bonusTokens).to.be.equal(1.23);
+    }).timeout(30000);
+
+    it('should withdraw from lockup contracts', async() => {
         const {web3, address} = web3switcher.test4();
         from = address;
         twoKeyProtocol.setWeb3({
@@ -780,14 +798,6 @@ describe('TwoKeyProtocol', () => {
             },
             plasmaPK: Sign.generatePrivateKey().toString('hex'),
         });
-        const addresses = await twoKeyProtocol.AcquisitionCampaign.getLockupContractsForConverter(campaignAddress, env.TEST4_ADDRESS, from);
-        console.log(addresses);
-        const data = await twoKeyProtocol.Lockup.getLockupInformations(addresses[0], from);
-        console.log(data);
-        expect(data.baseTokens + data.bonusTokens).to.be.equal(1.23);
-    }).timeout(30000);
-
-    it('should withdraw from lockup contracts', async() => {
         const lockupAddresses = await twoKeyProtocol.AcquisitionCampaign.getLockupContractsForConverter(campaignAddress, env.TEST4_ADDRESS, from);
         const approved = lockupAddresses[0];
 

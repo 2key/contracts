@@ -197,7 +197,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
 
 
         TwoKeyLockupContract lockupContract = new TwoKeyLockupContract(bonusTokensVestingStartShiftInDaysFromDistributionDate, bonusTokensVestingMonths, tokenDistributionDate, maxDistributionDateShiftInDays,
-            conversion.baseTokenUnits, conversion.bonusTokenUnits, conversion.converter, conversion.contractor, twoKeyAcquisitionCampaignERC20, assetContractERC20);
+            conversion.baseTokenUnits, conversion.bonusTokenUnits, _conversionId, conversion.converter, conversion.contractor, twoKeyAcquisitionCampaignERC20, assetContractERC20);
 
         allLockUpContracts.push(address(lockupContract));
 

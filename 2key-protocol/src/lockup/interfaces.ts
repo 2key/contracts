@@ -10,6 +10,7 @@ export interface LockupInformation {
     'baseTokens' : number,
     'bonusTokens' : number,
     'vestingMonths' : number,
+    'conversionId' : number,
     'unlockingDays' : number[],
     'areWithdrawn' : boolean[]
 }

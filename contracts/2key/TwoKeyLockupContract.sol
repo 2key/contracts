@@ -9,6 +9,8 @@ contract TwoKeyLockupContract {
     uint tokenDistributionDate;
     uint maxDistributionDateShiftInDays;
 
+    uint conversionId;
+
     uint public baseTokens;
     uint public bonusTokens;
 
@@ -46,6 +48,7 @@ contract TwoKeyLockupContract {
         uint _maxDistributionDateShiftInDays,
         uint _baseTokens,
         uint _bonusTokens,
+        uint _conversionId,
         address _converter,
         address _contractor,
         address _acquisitionCampaignERC20Address,
@@ -57,6 +60,7 @@ contract TwoKeyLockupContract {
         maxDistributionDateShiftInDays = _maxDistributionDateShiftInDays;
         baseTokens = _baseTokens;
         bonusTokens = _bonusTokens;
+        conversionId = _conversionId;
         converter = _converter;
         contractor = _contractor;
         twoKeyAcquisitionCampaignERC20Address = _acquisitionCampaignERC20Address;
@@ -69,7 +73,7 @@ contract TwoKeyLockupContract {
     }
 
     ///TODO: Comment onlyConverter
-    function getLockupSummary() public view returns (uint, uint, uint, uint[], bool[]) {
+    function getLockupSummary() public view returns (uint, uint, uint, uint, uint[], bool[]) {
         uint[] memory dates = new uint[](bonusTokensVestingMonths+1);
         bool[] memory areTokensWithdrawn = new bool[](bonusTokensVestingMonths+1);
 
@@ -79,7 +83,7 @@ contract TwoKeyLockupContract {
         }
         //total = base + bonus
         // monthly bonus = bonus/bonusTokensVestingMonths
-        return (baseTokens, bonusTokens, bonusTokensVestingMonths ,dates,areTokensWithdrawn);
+        return (baseTokens, bonusTokens, bonusTokensVestingMonths, conversionId, dates, areTokensWithdrawn);
     }
 
 
