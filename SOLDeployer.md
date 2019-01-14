@@ -24,7 +24,7 @@ yarn run deploy public.test.k8s,private.test.k8s-hdwallet --reset
 * Edit ContractDeploymentWhiteList.json
 * Make sure that you on same branches in contracts and 2key-protocol submodule (./2key-protocol/dist)
 * run ```yarn run deploy {comaseparated,networks} {truffle params if needed}```
-* if you want to avoid deploying mock TwoKeyAcquisitionCampaignERC20 set ```SKIP_TEST3=true```
+* if you want to avoid deploying mock TwoKeyAcquisitionCampaignERC20 set ```SKIP_3MIGRATION=true```
 * truffle migrate --f 3 --network=public.test.k8s-hdwallet in order to make new campaign eligible to emit events
 * wait until process finish
 * check both repos contracts and 2key-protocol should have same tags
