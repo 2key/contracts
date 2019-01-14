@@ -19,5 +19,9 @@ module.exports = function (rpcUrl, options) {
   engine.addProvider(new FiltersSubprovider());
   engine.addProvider(new ProviderSubprovider(new Web3.providers.HttpProvider(rpcUrl)));
   engine.start();
+  // const web3 = new Web3(engine);
+  // web3.eth.getAccounts((err, res) => {
+  //   console.log('Accounts', err, res);
+  // })
   return engine;
 }
