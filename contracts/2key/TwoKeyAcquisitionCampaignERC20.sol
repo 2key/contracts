@@ -34,6 +34,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     mapping(address => uint256) balancesConvertersETH; // Amount converter put to the contract in Ether
     mapping(address => uint256) internal units; // Number of units (ERC20 tokens) bought
 
+    //TODO: Probably move everything related to currency to another contract
     string public currency; // currency can be either ETH or USD
     address ethUSDExchangeContract;
     address assetContractERC20; // Asset contract is address of ERC20 inventory
