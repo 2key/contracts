@@ -35,9 +35,9 @@ contract TwoKeyCampaignARC is ArcERC20 {
     constructor(address _twoKeyEventSource, uint256 _conversionQuota) ArcERC20() public {
 		require(_twoKeyEventSource != address(0));
 		twoKeyEventSource = TwoKeyEventSource(_twoKeyEventSource);
-		received_from[twoKeyEventSource.plasmaOf(msg.sender)] = twoKeyEventSource.plasmaOf(msg.sender);
+		received_from[msg.sender] = msg.sender;
 		conversionQuota = _conversionQuota;
-		balances[twoKeyEventSource.plasmaOf(msg.sender)] = totalSupply_;
+		balances[msg.sender] = totalSupply_;
 	}
 
 	/**

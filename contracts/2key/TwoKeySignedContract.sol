@@ -41,7 +41,7 @@ contract TwoKeySignedContract is TwoKeyContract {
     address[] memory influencers;
     address[] memory keys;
     uint8[] memory weights;
-    (influencers, keys, weights) = Call.recoverSig(sig, old_key);
+    (influencers, keys, weights) = Call.recoverSig(sig, old_key,msg.sender);
 
     // check if we exactly reached the end of the signature. this can only happen if the signature
     // was generated with free_join_take and in this case the last part of the signature must have been
