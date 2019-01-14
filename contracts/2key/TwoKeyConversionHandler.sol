@@ -43,7 +43,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
     address twoKeyAcquisitionCampaignERC20;
     address moderator;
     address contractor;
-    address upgradableExchange;
 
     address assetContractERC20;
 
@@ -58,7 +57,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
     struct Conversion {
         address contractor; // Contractor (creator) of campaign
         uint256 contractorProceedsETHWei; // How much contractor will receive for this conversion
-        address converter; // Converter is one who's buying tokens
+        address converter; // Converter is one who's buying tokens -> plasma address
         ConversionState state;
         uint256 conversionAmount; // Amount for conversion (In ETH)
         uint256 maxReferralRewardETHWei;
@@ -109,13 +108,12 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
     /// @param _twoKeyAcquisitionCampaignERC20 is the address of TwoKeyAcquisitionCampaignERC20 contract
     /// @param _moderator is the address of the moderator
     /// @param _contractor is the address of the contractor
-    function setTwoKeyAcquisitionCampaignERC20(address _twoKeyAcquisitionCampaignERC20, address _moderator, address _contractor, address _assetContractERC20, address _upgradableExchange) public {
+    function setTwoKeyAcquisitionCampaignERC20(address _twoKeyAcquisitionCampaignERC20, address _moderator, address _contractor, address _assetContractERC20) public {
         require(twoKeyAcquisitionCampaignERC20 == address(0));
         twoKeyAcquisitionCampaignERC20 = _twoKeyAcquisitionCampaignERC20;
         moderator = _moderator;
         contractor = _contractor;
         assetContractERC20 =_assetContractERC20;
-        upgradableExchange = _upgradableExchange;
     }
 
 
@@ -203,6 +201,9 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
         // update moderator balances
         ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateModeratorBalanceETHWei(conversion.moderatorFeeETHWei);
 
+        /**
+         * For the lockup contracts there's no need to save to plasma address, there we'll save ethereum address
+         */
         TwoKeyLockupContract lockupContract = new TwoKeyLockupContract(bonusTokensVestingStartShiftInDaysFromDistributionDate, bonusTokensVestingMonths, tokenDistributionDate, maxDistributionDateShiftInDays,
             conversion.baseTokenUnits, conversion.bonusTokenUnits, conversion.converter, conversion.contractor, twoKeyAcquisitionCampaignERC20, assetContractERC20);
 

@@ -72,6 +72,11 @@ contract TwoKeyCampaignARC is ArcERC20 {
 
 
 
+	/**
+	 * @notice Function to get referrers for the converter
+	 * @param customer is the converter ETH address
+	 * @dev inside method we're converting it to plasma address
+	 */
 	function getReferrers(address customer) internal view returns (address[]) {
 		// build a list of all influencers from converter back to to contractor
 		// dont count the conveter and contractor themselves

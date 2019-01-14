@@ -102,7 +102,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         currency = _currency;
         ethUSDExchangeContract = _ethUSDExchangeContract;
         unit_decimals = IERC20(assetContractERC20).decimals();
-        ITwoKeyConversionHandler(conversionHandler).setTwoKeyAcquisitionCampaignERC20(address(this), _moderator, contractor, _assetContractERC20, upgradableExchange);
+        ITwoKeyConversionHandler(conversionHandler).setTwoKeyAcquisitionCampaignERC20(address(this), _moderator, contractor, _assetContractERC20);
         twoKeyEventSource.created(address(this), contractor, moderator);
     }
 
@@ -151,16 +151,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     }
 
     /**
-     * @notice Function to join with signature and share 1 arc to the receiver
-     * @param signature is the signature
-     * @param receiver is the address we're sending ARCs to
-     */
-    function joinAndShareARC(bytes signature, address receiver) public {
-//        distributeArcsBasedOnSignature(signature);
-        transferFrom(msg.sender, receiver, 1);
-    }
-
-    /**
      * @notice internal function to validate the request is proper
      * @param msgValue is the value of the message sent
      * @dev validates if msg.Value is in interval of [minContribution, maxContribution]
@@ -185,16 +175,19 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
 
     /**
      * @notice Function where converter can join and convert
-     * @param signature is the signature chain
      * @dev payable function
      */
-    function joinAndConvert(bytes signature, bool _isAnonymous) public payable {
+    function joinFromAndConvert(address _from, bool _isAnonymous) public payable {
         requirementForMsgValue(msg.value);
-//        distributeArcsBasedOnSignature(signature);
-        createConversion(msg.value, msg.sender);
-        ITwoKeyConversionHandler(conversionHandler).setAnonymous(msg.sender, _isAnonymous);
-        balancesConvertersETH[msg.sender] += msg.value;
-        twoKeyEventSource.converted(address(this),msg.sender,msg.value);
+        _from = twoKeyEventSource.plasmaOf(_from);
+        address _converterPlasma = twoKeyEventSource.plasmaOf(msg.sender);
+        if (balanceOf(_converterPlasma) == 0) {
+            transferFromInternal(_from, _converterPlasma, 1);
+        }
+        createConversion(msg.value, _converterPlasma);
+        ITwoKeyConversionHandler(conversionHandler).setAnonymous(_converterPlasma, _isAnonymous);
+        balancesConvertersETH[_converterPlasma] += msg.value;
+        twoKeyEventSource.converted(address(this),_converterPlasma,msg.value);
     }
 
     /**
@@ -203,11 +196,12 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      */
     function convert(bool _isAnonymous) public payable {
         requirementForMsgValue(msg.value);
-        require(received_from[msg.sender] != address(0));
-        createConversion(msg.value, msg.sender);
-        ITwoKeyConversionHandler(conversionHandler).setAnonymous(msg.sender, _isAnonymous);
-        balancesConvertersETH[msg.sender] += msg.value;
-        twoKeyEventSource.converted(address(this),msg.sender,msg.value);
+        address _converterPlasma = twoKeyEventSource.plasmaOf(msg.sender);
+        require(received_from[_converterPlasma] != address(0));
+        createConversion(msg.value, _converterPlasma);
+        ITwoKeyConversionHandler(conversionHandler).setAnonymous(_converterPlasma, _isAnonymous);
+        balancesConvertersETH[_converterPlasma] += msg.value;
+        twoKeyEventSource.converted(address(this),_converterPlasma,msg.value);
     }
 
     /*
@@ -216,7 +210,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @param converterAddress is the sender of eth to the contract
      * @dev can be called only internally
      */
-    function createConversion(uint conversionAmountETHWei, address converterAddress) internal {
+    function createConversion(uint conversionAmountETHWei, address converterPlasmaAddress) internal {
         uint baseTokensForConverterUnits;
         uint bonusTokensForConverterUnits;
 
@@ -227,7 +221,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         uint256 _total_units = getInventoryBalance();
         require(_total_units - reservedAmountOfTokens >= totalTokensForConverterUnits, 'Inventory balance does not have enough funds');
 
-        units[converterAddress] = units[converterAddress].add(totalTokensForConverterUnits);
+        units[converterPlasmaAddress] = units[converterPlasmaAddress].add(totalTokensForConverterUnits);
 
         uint256 maxReferralRewardETHWei = conversionAmountETHWei.mul(maxReferralRewardPercent).div(100);
         uint256 moderatorFeeETHWei = calculateModeratorFee(conversionAmountETHWei);
@@ -236,7 +230,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
 
         reservedAmountOfTokens = reservedAmountOfTokens + totalTokensForConverterUnits;
 
-        ITwoKeyConversionHandler(conversionHandler).supportForCreateConversion(contractor, contractorProceedsETHWei, converterAddress,
+        ITwoKeyConversionHandler(conversionHandler).supportForCreateConversion(contractor, contractorProceedsETHWei, converterPlasmaAddress,
             conversionAmountETHWei, maxReferralRewardETHWei, moderatorFeeETHWei,
             baseTokensForConverterUnits,bonusTokensForConverterUnits,
             expiryConversionInHours);
@@ -461,11 +455,11 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     /**
      * @notice Function to check if the msg.sender has already joined
      * @return true/false depending of joined status
-     /// TODO: Not working anymore
      */
     function getAddressJoinedStatus() public view returns (bool) {
-        if(msg.sender == address(contractor) || msg.sender == address(moderator) || received_from[msg.sender] != address(0)
-            || balanceOf(msg.sender) > 0) {
+        address plasma = twoKeyEventSource.plasmaOf(msg.sender);
+        if(plasma == address(contractor) || msg.sender == address(moderator) || received_from[plasma] != address(0)
+            || balanceOf(plasma) > 0) {
             return true;
         }
         return false;
@@ -482,18 +476,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     function sendBackEthWhenConversionCancelled(address _cancelledConverter, uint _conversionAmount) public onlyTwoKeyConversionHandler {
         _cancelledConverter.transfer(_conversionAmount);
     }
-
-//    function sealAndApprove() public onlyContractor {
-//        require(block.timestamp > campaignStartTime && block.timestamp < campaignEndTime, 'Time is not good');
-//        require(withdrawApproved = false);
-//        withdrawApproved = true;
-//    }
-//
-//    function cancel() public onlyContractor {
-//        ITwoKeyConversionHandler(conversionHandler).cancelAndRejectContract();
-//        withdrawApproved = false;
-//        canceled = true;
-//    }
 
 
     /**
