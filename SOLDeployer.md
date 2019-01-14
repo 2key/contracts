@@ -24,10 +24,11 @@ yarn run deploy public.test.k8s,private.test.k8s-hdwallet --reset
 * Edit ContractDeploymentWhiteList.json
 * Make sure that you on same branches in contracts and 2key-protocol submodule (./2key-protocol/dist)
 * run ```yarn run deploy {comaseparated,networks} {truffle params if needed}```
+* truffle migrate --f 3 --network=public.test.k8s-hdwallet in order to make new campaign eligible to emit events
 * wait until process finish
 * check both repos contracts and 2key-protocol should have same tags
 * notify to #dev channel with builded tag. (update dependency in `web-app/package.json:twokey-protocol`)
-
+```
 ### How to deploy contracts to local dev net without building release
 
 * ```yarn run deploy --migrate {comaseparated,networks} {truffle params if needed}```
