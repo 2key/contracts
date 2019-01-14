@@ -19,6 +19,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     address public conversionHandler;
     address public upgradableExchange;
 
+    address owner_plasma;
+
     mapping(address => uint256) referrer2cut; // Mapping representing how much are cuts in percent(0-100) for referrer address
     mapping(address => uint256) internal referrerBalancesETHWei; // balance of EthWei for each influencer that he can withdraw
     mapping(address => uint256) internal referrerTotalEarningsEthWEI; // Total earnings for referrers
@@ -103,6 +105,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         ethUSDExchangeContract = _ethUSDExchangeContract;
         unit_decimals = IERC20(assetContractERC20).decimals();
         ITwoKeyConversionHandler(conversionHandler).setTwoKeyAcquisitionCampaignERC20(address(this), _moderator, contractor, _assetContractERC20);
+        owner_plasma = _twoKeyEventSource.plasmaOf(msg.sender);
         twoKeyEventSource.created(address(this), contractor, moderator);
     }
 
