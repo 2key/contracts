@@ -84,6 +84,10 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
 
 
 
+    /**
+     * @notice Function which will unpack signature and get referrers, keys, and weights from it
+     * @param sig is signature
+     */
     function distributeArcsBasedOnSignature(bytes sig) private returns (address[]) {
         // move ARCs and set public_link keys and weights/cuts based on signature information
         // returns the last address in the sig
@@ -151,11 +155,21 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         return influencers;
     }
 
+    /**
+     * @notice Private function which will be executed at the withdraw time to buy 2key tokens from upgradable exchange contract
+     * @param amountOfMoney is the ether balance person has on the contract
+     * @param receiver is the address of the person who withdraws money
+     */
     function buyTokensFromUpgradableExchange(uint amountOfMoney, address receiver) private {
         IUpgradableExchange(upgradableExchange).buyTokens.value(amountOfMoney)(receiver);
     }
 
 
+    /**
+     * @notice Private function to set public link key to plasma address
+     * @param me is the ethereum address
+     * @param new_public_key is the new key user want's to set as his public key
+     */
     function setPublicLinkKeyOf(address me, address new_public_key) private {
         me = twoKeyEventSource.plasmaOf(me);
         require(balanceOf(me) > 0,'no ARCs');
@@ -169,6 +183,10 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     }
 
 
+    /**
+     * @notice Function to set public link key
+     * @param new_public_key is the new public key
+     */
     function setPublicLinkKey(address new_public_key) public {
         setPublicLinkKeyOf(msg.sender, new_public_key);
     }
@@ -185,6 +203,11 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         return true;
     }
 
+    /**
+     * @notice Function to set cut of
+     * @param me is the address (ethereum)
+     * @param cut is the cut value
+     */
     function setCutOf(address me, uint256 cut) internal {
         // what is the percentage of the bounty s/he will receive when acting as an influencer
         // the value 255 is used to signal equal partition with other influencers
@@ -194,6 +217,11 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         referrer2cut[plasma] = cut;
     }
 
+    /**
+     * @notice Function to set cut
+     * @param cut is the cut value
+     * @dev Executes internal setCutOf method
+     */
     function setCut(uint256 cut) public {
         setCutOf(msg.sender, cut);
     }
@@ -296,6 +324,12 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     }
 
 
+    /**
+     * @notice Function to send ether back to converter if his conversion is cancelled
+     * @param _cancelledConverter is the address of cancelled converter
+     * @param _conversionAmount is the amount he sent to the contract
+     * @dev This function can be called only by conversion handler
+     */
     function sendBackEthWhenConversionCancelled(address _cancelledConverter, uint _conversionAmount) public onlyTwoKeyConversionHandler {
         _cancelledConverter.transfer(_conversionAmount);
     }
@@ -367,6 +401,10 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     }
 
 
+    /**
+     * @notice Function to get cut for an (ethereum) address
+     * @param me is the ethereum address
+     */
     function getReferrerCut(address me) public view returns (uint256) {
         return referrer2cut[twoKeyEventSource.plasmaOf(me)];
     }
@@ -380,6 +418,9 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         return balancesConvertersETH[_from];
     }
 
+    /**
+     * @notice Function to return the constants from the contract
+     */
     function getConstantInfo() public view returns (uint,uint) {
         return (conversionQuota, maxReferralRewardPercent);
     }
