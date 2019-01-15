@@ -19,8 +19,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     address public upgradableExchange;
     address public twoKeyLogicHandler;
 
-    address owner_plasma;
-
     mapping(address => uint256) referrer2cut; // Mapping representing how much are cuts in percent(0-100) for referrer address
     mapping(address => uint256) internal referrerBalancesETHWei; // balance of EthWei for each influencer that he can withdraw
     mapping(address => uint256) internal referrerTotalEarningsEthWEI; // Total earnings for referrers
@@ -31,14 +29,14 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     uint moderatorBalanceETHWei; //Balance of the moderator which can be withdrawn
     uint moderatorTotalEarningsETHWei; //Total earnings of the moderator all time
 
+    uint256 contractorBalance;
+    uint256 contractorTotalProceeds;
+
     mapping(address => uint256) balancesConvertersETH; // Amount converter put to the contract in Ether
     mapping(address => uint256) internal units; // Number of units (ERC20 tokens) bought
 
     address assetContractERC20; // Asset contract is address of ERC20 inventory
-    uint256 contractorBalance;
-    uint256 contractorTotalProceeds;
-    uint256 campaignStartTime; // Time when campaign start
-    uint256 campaignEndTime; // Time when campaign ends
+
     uint256 expiryConversionInHours; // How long converter can be pending before it will be automatically rejected and funds will be returned to convertor (hours)
     uint256 moderatorFeePercentage; // Fee which moderator gets
     uint256 maxReferralRewardPercent; // maxReferralRewardPercent is actually bonus percentage in ETH
@@ -48,14 +46,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
 //    bool public withdrawApproved = false; // Until contractor set this to be true, no one can withdraw funds etc.
 //    bool canceled = false; // This means if contractor cancel everything
 
-
-    /**
-     * @notice Modifier which will enable function to be executed in specific time period
-     */
-    modifier isOngoing() {
-        require(block.timestamp >= campaignStartTime && block.timestamp <= campaignEndTime);
-        _;
-    }
 
     /**
      * @notice Modifier which will enable only twoKeyConversionHandlerContract to execute some functions
@@ -75,7 +65,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         address _twoKeyUpgradableExchangeContract
     ) TwoKeyCampaignARC (
         _twoKeyEventSource,
-        values[6]
+        values[4]
     )
     public {
         twoKeyLogicHandler = _twoKeyLogicHandler;
@@ -84,15 +74,12 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         contractor = msg.sender;
         moderator = _moderator;
         assetContractERC20 = _assetContractERC20;
-        campaignStartTime = values[0];
-        campaignEndTime = values[1];
-        expiryConversionInHours = values[2];
-        moderatorFeePercentage = values[3];
-        maxReferralRewardPercent = values[4];
-        maxConverterBonusPercent = values[5];
+        expiryConversionInHours = values[0];
+        moderatorFeePercentage = values[1];
+        maxReferralRewardPercent = values[2];
+        maxConverterBonusPercent = values[3];
         ITwoKeyConversionHandler(conversionHandler).setTwoKeyAcquisitionCampaignERC20(address(this), _moderator, contractor, _assetContractERC20);
         twoKeyEventSource.created(address(this), contractor, moderator);
-        owner_plasma = twoKeyEventSource.plasmaOf(msg.sender);
     }
 
     function publicLinkKeyOf(address me) public view returns (address) {

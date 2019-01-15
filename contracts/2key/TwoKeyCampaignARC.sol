@@ -10,6 +10,7 @@ contract TwoKeyCampaignARC is ArcERC20 {
 
 	address public contractor;
     address public moderator;
+	address ownerPlasma;
 
 	uint256 totalSupply_ = 1000000;
 
@@ -35,9 +36,10 @@ contract TwoKeyCampaignARC is ArcERC20 {
     constructor(address _twoKeyEventSource, uint256 _conversionQuota) ArcERC20() public {
 		require(_twoKeyEventSource != address(0));
 		twoKeyEventSource = TwoKeyEventSource(_twoKeyEventSource);
-		received_from[msg.sender] = msg.sender;
+		ownerPlasma = twoKeyEventSource.plasmaOf(msg.sender);
+		received_from[ownerPlasma] = ownerPlasma;
 		conversionQuota = _conversionQuota;
-		balances[msg.sender] = totalSupply_;
+		balances[ownerPlasma] = totalSupply_;
 	}
 
 	/**
@@ -49,6 +51,7 @@ contract TwoKeyCampaignARC is ArcERC20 {
 	function transferFrom(address _from, address _to, uint256 _value) public onlyContractorOrModerator returns (bool) {
 		return transferFromInternal(_from, _to, _value);
 	}
+
 	function transferFromInternal(address _from, address _to, uint256 _value) internal returns (bool) {
 		// _from and _to are assumed to be already converted to plasma address (e.g. using plasmaOf)
 		require(_value == 1, 'can only transfer 1 ARC');
@@ -87,7 +90,7 @@ contract TwoKeyCampaignARC is ArcERC20 {
 		while (true) {
 			influencer = twoKeyEventSource.plasmaOf(received_from[influencer]);
 			// Owner is owner of campaign (contractor)
-			if (influencer == twoKeyEventSource.plasmaOf(contractor)) {
+			if (influencer == ownerPlasma) {
 				break;
 			}
 			n_influencers++;

@@ -15,6 +15,9 @@ contract TwoKeyAcquisitionLogicHandler {
     address contractor;
     address ethUSDExchangeContract;
 
+    uint256 campaignStartTime; // Time when campaign start
+    uint256 campaignEndTime; // Time when campaign ends
+
     uint minContributionETHorFiatCurrency;
     uint maxContributionETHorFiatCurrency;
     uint256 pricePerUnitInETHWeiOrUSD; // There's single price for the unit ERC20 (Should be in WEI)
@@ -34,6 +37,8 @@ contract TwoKeyAcquisitionLogicHandler {
         uint _minContribution,
         uint _maxContribution,
         uint _pricePerUnitInETHWeiOrUSD,
+        uint _campaignStartTime,
+        uint _campaignEndTime,
         string _currency,
         address _ethUsdExchangeContract,
         address _assetContractERC20
@@ -42,12 +47,22 @@ contract TwoKeyAcquisitionLogicHandler {
         minContributionETHorFiatCurrency = _minContribution;
         maxContributionETHorFiatCurrency = _maxContribution;
         pricePerUnitInETHWeiOrUSD = _pricePerUnitInETHWeiOrUSD;
+        campaignStartTime = _campaignStartTime;
+        campaignEndTime = _campaignEndTime;
         currency = _currency;
         ethUSDExchangeContract = _ethUsdExchangeContract;
         unit_decimals = IERC20(_assetContractERC20).decimals();
     }
 
-
+    /**
+     * @notice Requirement for the checking if the campaign is active or not
+     */
+    function requirementIsOnActive() public view returns (bool) {
+        if(block.timestamp >= campaignStartTime && block.timestamp <= campaignEndTime) {
+            return true;
+        }
+        return false;
+    }
 
     /**
      * @notice internal function to validate the request is proper
@@ -142,5 +157,19 @@ contract TwoKeyAcquisitionLogicHandler {
      */
     function getPrivateMetaHash() public view onlyContractor returns (string) {
         return privateMetaHash;
+    }
+
+    /**
+     * @notice Get all constants from the contract
+     * @return all constants from the contract
+     */
+    function getConstantInfo() public view returns (uint,uint,uint,uint,uint,uint) {
+        return (
+            campaignStartTime,
+            campaignEndTime,
+            minContributionETHorFiatCurrency,
+            maxContributionETHorFiatCurrency,
+            unit_decimals,
+            pricePerUnitInETHWeiOrUSD);
     }
 }
