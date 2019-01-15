@@ -275,7 +275,7 @@ contract TwoKeyEventSource is Upgradeable, TwoKeyTypes {
         if (twoKeyRegistry == address(0)) {
             me;
         }
-        address plasma = ITwoKeyReg(twoKeyRegistry).ethereum2plasma(plasma);
+        address plasma = ITwoKeyReg(twoKeyRegistry).getEthereumToPlasma(me);
         if (plasma != address(0)) {
             return plasma;
         }
@@ -291,7 +291,7 @@ contract TwoKeyEventSource is Upgradeable, TwoKeyTypes {
         if (twoKeyRegistry == address(0)) {
             return me;
         }
-        address ethereum = ITwoKeyReg(twoKeyRegistry).plasma2ethereum(ethereum);
+        address ethereum = ITwoKeyReg(twoKeyRegistry).getPlasmaToEthereum(me);
         if (ethereum != address(0)) {
             return ethereum;
         }

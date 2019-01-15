@@ -26,8 +26,9 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
     // note that more than one plasma address can point to the same ethereum address so it is not critical to use the same plasma address all the time for the same user
     // in some cases the plasma address will be the same as the ethereum address and in that case it is not necessary to have an entry
     // the way to know if an address is a plasma address is to look it up in this mapping
-    mapping(address => address) public plasma2ethereum;
-    mapping(address => address) public ethereum2plasma;
+    mapping(address => address) plasma2ethereum;
+    mapping(address => address) ethereum2plasma;
+
     mapping(address => bytes) public notes;
 
     struct UserData {
@@ -345,6 +346,15 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
             length++;
         }
     }
+
+    function getPlasmaToEthereum(address plasma) public view returns (address) {
+        return plasma2ethereum[plasma];
+    }
+
+    function getEthereumToPlasma(address ethereum) public view returns (address) {
+        return ethereum2plasma[ethereum];
+    }
+
 
     /**
      * @notice Function to check if the user exists

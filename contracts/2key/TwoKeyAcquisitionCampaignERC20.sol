@@ -3,12 +3,11 @@ pragma solidity ^0.4.24;
 import "../openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "./TwoKeyCampaignARC.sol";
 import "./TwoKeyEventSource.sol";
-import "../interfaces/IERC20.sol";
 import "./Call.sol";
+import "../interfaces/IERC20.sol";
 import "../interfaces/IUpgradableExchange.sol";
 import "../interfaces/ITwoKeyConversionHandler.sol";
-import "../interfaces/ITwoKeyExchangeRateContract.sol";
-
+import "../interfaces/ITwoKeyAcquisitionLogicHandler.sol";
 /**
  * @author Nikola Madjarevic
  * @notice Campaign which will sell ERC20 tokens
@@ -18,6 +17,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     using Call for *;
     address public conversionHandler;
     address public upgradableExchange;
+    address public twoKeyLogicHandler;
 
     address owner_plasma;
 
@@ -34,24 +34,15 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     mapping(address => uint256) balancesConvertersETH; // Amount converter put to the contract in Ether
     mapping(address => uint256) internal units; // Number of units (ERC20 tokens) bought
 
-    //TODO: Probably move everything related to currency to another contract
-    string public currency; // currency can be either ETH or USD
-    address ethUSDExchangeContract;
     address assetContractERC20; // Asset contract is address of ERC20 inventory
     uint256 contractorBalance;
     uint256 contractorTotalProceeds;
-    uint256 pricePerUnitInETHWeiOrUSD; // There's single price for the unit ERC20 (Should be in WEI)
     uint256 campaignStartTime; // Time when campaign start
     uint256 campaignEndTime; // Time when campaign ends
     uint256 expiryConversionInHours; // How long converter can be pending before it will be automatically rejected and funds will be returned to convertor (hours)
     uint256 moderatorFeePercentage; // Fee which moderator gets
-    string public publicMetaHash; // Ipfs hash of json campaign object
-    string privateMetaHash; // Ipfs hash of json sensitive (contractor) information
     uint256 maxReferralRewardPercent; // maxReferralRewardPercent is actually bonus percentage in ETH
     uint maxConverterBonusPercent; //translates to discount - we can add this to constructor
-    uint minContributionETHorFiatCurrency; // Minimal amount of ETH or USD that can be paid by converter to create conversion
-    uint maxContributionETHorFiatCurrency; // Maximal amount of ETH or USD that can be paid by converter to create conversion
-    uint unit_decimals; // ERC20 selling data
     uint reservedAmountOfTokens = 0;
 
 //    bool public withdrawApproved = false; // Until contractor set this to be true, no one can withdraw funds etc.
@@ -74,21 +65,20 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         _;
     }
 
-    //TODO: Move expiry conversion in hours to two key conversion handler, no need to store in this contract since it's used there only
     constructor(
+        address _twoKeyLogicHandler,
         address _twoKeyEventSource,
         address _conversionHandler,
         address _moderator,
         address _assetContractERC20,
         uint [] values,
-        string _currency,
-        address _ethUSDExchangeContract,
         address _twoKeyUpgradableExchangeContract
     ) TwoKeyCampaignARC (
         _twoKeyEventSource,
-        values[9]
+        values[6]
     )
     public {
+        twoKeyLogicHandler = _twoKeyLogicHandler;
         conversionHandler = _conversionHandler;
         upgradableExchange = _twoKeyUpgradableExchangeContract;
         contractor = msg.sender;
@@ -100,15 +90,9 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         moderatorFeePercentage = values[3];
         maxReferralRewardPercent = values[4];
         maxConverterBonusPercent = values[5];
-        pricePerUnitInETHWeiOrUSD = values[6];
-        minContributionETHorFiatCurrency = values[7];
-        maxContributionETHorFiatCurrency = values[8];
-        currency = _currency;
-        ethUSDExchangeContract = _ethUSDExchangeContract;
-        unit_decimals = IERC20(assetContractERC20).decimals();
         ITwoKeyConversionHandler(conversionHandler).setTwoKeyAcquisitionCampaignERC20(address(this), _moderator, contractor, _assetContractERC20);
-//        owner_plasma = twoKeyEventSource.plasmaOf(msg.sender);
         twoKeyEventSource.created(address(this), contractor, moderator);
+        owner_plasma = twoKeyEventSource.plasmaOf(msg.sender);
     }
 
     function publicLinkKeyOf(address me) public view returns (address) {
@@ -226,8 +210,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         return true;
     }
 
-
-
     function setCutOf(address me, uint256 cut) internal {
         // what is the percentage of the bounty s/he will receive when acting as an influencer
         // the value 255 is used to signal equal partition with other influencers
@@ -246,34 +228,11 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     }
 
     /**
-     * @notice internal function to validate the request is proper
-     * @param msgValue is the value of the message sent
-     * @dev validates if msg.Value is in interval of [minContribution, maxContribution]
-     */
-    function requirementForMsgValue(uint msgValue) internal {
-        if(keccak256(currency) == keccak256('ETH')) {
-            require(msgValue >= minContributionETHorFiatCurrency);
-            require(msgValue <= maxContributionETHorFiatCurrency);
-        } else {
-            uint val;
-            bool flag;
-            (val, flag,,) = ITwoKeyExchangeRateContract(ethUSDExchangeContract).getFiatCurrencyDetails(currency);
-            if(flag) {
-                require((msgValue * val).div(10**18) >= minContributionETHorFiatCurrency); //converting ether to fiat
-                require((msgValue * val).div(10**18) <= maxContributionETHorFiatCurrency); //converting ether to fiat
-            } else {
-                require(msgValue >= (val * minContributionETHorFiatCurrency).div(10**18)); //converting fiat to ether
-                require(msgValue <= (val * maxContributionETHorFiatCurrency).div(10**18)); //converting fiat to ether
-            }
-        }
-    }
-
-    /**
      * @notice Function where converter can join and convert
      * @dev payable function
      */
     function joinAndConvert(bytes signature, bool _isAnonymous) public payable {
-        requirementForMsgValue(msg.value);
+        ITwoKeyAcquisitionLogicHandler(twoKeyLogicHandler).requirementForMsgValue(msg.value);
         address _converterPlasma = twoKeyEventSource.plasmaOf(msg.sender);
         distributeArcsBasedOnSignature(signature);
         createConversion(msg.value, _converterPlasma);
@@ -287,7 +246,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @dev payable function
      */
     function convert(bool _isAnonymous) public payable {
-        requirementForMsgValue(msg.value);
+        ITwoKeyAcquisitionLogicHandler(twoKeyLogicHandler).requirementForMsgValue(msg.value);
         address _converterPlasma = twoKeyEventSource.plasmaOf(msg.sender);
         require(received_from[_converterPlasma] != address(0));
         createConversion(msg.value, _converterPlasma);
@@ -306,7 +265,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         uint baseTokensForConverterUnits;
         uint bonusTokensForConverterUnits;
 
-        (baseTokensForConverterUnits, bonusTokensForConverterUnits) = getEstimatedTokenAmount(conversionAmountETHWei);
+        (baseTokensForConverterUnits, bonusTokensForConverterUnits)
+        = ITwoKeyAcquisitionLogicHandler(twoKeyLogicHandler).getEstimatedTokenAmount(conversionAmountETHWei, maxConverterBonusPercent);
 
         uint totalTokensForConverterUnits = baseTokensForConverterUnits + bonusTokensForConverterUnits;
 
@@ -388,14 +348,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     }
 
     /**
-     * @notice Function to return constants
-     * @return price, maxReferralRewardPercent, quota for conversion and unit_decimals for erc20
-     */
-    function getConstantInfo() public view returns (uint256, uint256, uint256, uint256) {
-        return (pricePerUnitInETHWeiOrUSD, maxReferralRewardPercent, conversionQuota, unit_decimals);
-    }
-
-    /**
      * @notice Function which acts like getter for all cuts in array
      * @param last_influencer is the last influencer
      * @return array of integers containing cuts respectively
@@ -422,48 +374,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         return balance;
     }
 
-
-    /**
-     * @notice Function which will calculate the base amount, bonus amount
-     * @param conversionAmountETHWei is amount of eth in conversion
-     * @return tuple containing (base,bonus)
-     */
-    function getEstimatedTokenAmount(uint conversionAmountETHWei) public view returns (uint, uint) {
-        uint value = pricePerUnitInETHWeiOrUSD;
-        if(keccak256(currency) != keccak256('ETH')) {
-            uint rate;
-            bool flag;
-            (rate,flag,,) = ITwoKeyExchangeRateContract(ethUSDExchangeContract).getFiatCurrencyDetails(currency);
-            if(flag) {
-                conversionAmountETHWei = (conversionAmountETHWei * rate).div(10 ** 18); //converting eth to $wei
-            } else {
-                value = (value * rate).div(10 ** 18); //converting dollar wei to eth
-            }
-        }
-        uint baseTokensForConverterUnits = conversionAmountETHWei.mul(10 ** unit_decimals).div(value);
-        uint bonusTokensForConverterUnits = baseTokensForConverterUnits.mul(maxConverterBonusPercent).div(100);
-        return (baseTokensForConverterUnits, bonusTokensForConverterUnits);
-    }
-
-
-    /**
-     * @notice Setter for privateMetaHash
-     * @dev only Contractor can call this method, otherwise function will revert
-     * @param _privateMetaHash is string representation of private metadata hash
-     */
-    function setPrivateMetaHash(string _privateMetaHash) public onlyContractorOrModerator {
-        privateMetaHash = _privateMetaHash;
-    }
-
-    /**
-     * @notice Getter for privateMetaHash
-     * @dev only Contractor can call this method, otherwise function will revert
-     * @return string representation of private metadata hash
-     */
-    function getPrivateMetaHash() public view onlyContractorOrModerator returns (string) {
-        return privateMetaHash;
-    }
-
     /**
      * @notice Function to fetch moderator balance in ETH and his total earnings
      * @dev only contractor or moderator are eligible to call this function
@@ -471,26 +381,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      */
     function getModeratorBalanceAndTotalEarnings() external onlyContractorOrModerator view returns (uint,uint) {
         return (moderatorBalanceETHWei,moderatorTotalEarningsETHWei);
-    }
-
-    /**
-     * @notice Function to update MinContributionETH
-     * @dev only Contractor can call this method, otherwise it will revert - emits Event when updated
-     * @param value is the new value we are going to set for minContributionETH
-     */
-    function updateMinContributionETHOrUSD(uint value) public onlyContractor {
-        minContributionETHorFiatCurrency = value;
-        twoKeyEventSource.updatedData(block.timestamp, value, "Updated maxContribution");
-    }
-
-    /**
-     * @notice Function to update maxContributionETH
-     * @dev only Contractor can call this method, otherwise it will revert - emits Event when updated
-     * @param value is the new maxContribution value
-     */
-    function updateMaxContributionETHorUSD(uint value) external onlyContractor {
-        maxContributionETHorFiatCurrency = value;
-        twoKeyEventSource.updatedData(block.timestamp, value, "Updated maxContribution");
     }
 
     /**
@@ -511,16 +401,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     function updateMaxReferralRewardPercent(uint value) external onlyContractor {
         maxReferralRewardPercent = value;
         twoKeyEventSource.updatedData(block.timestamp, value, "Updated maxReferralRewardPercent");
-    }
-
-    /**
-     * @notice Function to update /set publicMetaHash
-     * @dev only Contractor can call this function, otherwise it will revert - emits Event when set/updated
-     * @param value is the value for the publicMetaHash
-     */
-    function updateOrSetIpfsHashPublicMeta(string value) public onlyContractor {
-        publicMetaHash = value;
-        twoKeyEventSource.updatedPublicMetaHash(block.timestamp, value);
     }
 
 

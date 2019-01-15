@@ -36,9 +36,7 @@ contract TwoKeyAcquisitionLogicHandler {
         uint _pricePerUnitInETHWeiOrUSD,
         string _currency,
         address _ethUsdExchangeContract,
-        address _assetContractERC20,
-        string _publicMetaHash,
-        string _privateMetaHash
+        address _assetContractERC20
     ) public {
         contractor = msg.sender;
         minContributionETHorFiatCurrency = _minContribution;
@@ -47,8 +45,6 @@ contract TwoKeyAcquisitionLogicHandler {
         currency = _currency;
         ethUSDExchangeContract = _ethUsdExchangeContract;
         unit_decimals = IERC20(_assetContractERC20).decimals();
-        publicMetaHash = _publicMetaHash;
-        privateMetaHash = _privateMetaHash;
     }
 
 

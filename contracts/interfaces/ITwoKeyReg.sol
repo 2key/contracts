@@ -3,8 +3,6 @@ pragma solidity ^0.4.24;
 import "../openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 contract ITwoKeyReg is Ownable{
-    mapping(address => address) public plasma2ethereum;
-    mapping(address => address) public ethereum2plasma;
     function addTwoKeyEventSource(address _twoKeyEventSource) public;
     function changeTwoKeyEventSource(address _twoKeyEventSource) public;
     function addWhereContractor(address _userAddress, address _contractAddress) public;
@@ -21,4 +19,6 @@ contract ITwoKeyReg is Ownable{
     function addNameByUser(string _name) public;
     function getName2Owner(string _name) public view returns (address);
     function getOwner2Name(address _sender) public view returns (string);
+    function getPlasmaToEthereum(address plasma) public view returns (address);
+    function getEthereumToPlasma(address ethereum) public view returns (address);
 }

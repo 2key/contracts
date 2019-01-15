@@ -6,6 +6,7 @@ const Call = artifacts.require('Call');
 const TwoKeyHackEventSource = artifacts.require('TwoKeyHackEventSource');
 const TwoKeyExchangeRateContract = artifacts.require('TwoKeyExchangeRateContract');
 const TwoKeyUpgradableExchange = artifacts.require('TwoKeyUpgradableExchange');
+const TwoKeyAcquisitionLogicHandler = artifacts.require('TwoKeyAcquisitionLogicHandler');
 
 const fs = require('fs');
 const path = require('path');
@@ -34,17 +35,18 @@ module.exports = function deploy(deployer) {
             .then(() => TwoKeyConversionHandler.deployed())
             .then(() => deployer.deploy(ERC20TokenMock))
             .then(() => deployer.link(Call, TwoKeyAcquisitionCampaignERC20))
-            .then(() => deployer.deploy(TwoKeyHackEventSource))
+            .then(() => deployer.deploy(TwoKeyAcquisitionLogicHandler,
+                12, 15, 1, 'USD',
+                json.TwoKeyExchangeRateContract[networkId.toString()].Proxy,
+                ERC20TokenMock.address))
             .then(() => deployer.deploy(TwoKeyAcquisitionCampaignERC20,
-                TwoKeyHackEventSource.address,
+                TwoKeyAcquisitionLogicHandler.address,
+                json.TwoKeyEventSource[networkId.toString()].Proxy,
                 TwoKeyConversionHandler.address,
                 '0xb3fa520368f2df7bed4df5185101f303f6c7decc',
                 ERC20TokenMock.address,
-                [12345, 15345, 12345, 5, 5, 5, 5, 12, 15, 1],
-                'USD',
-                json.TwoKeyExchangeRateContract[networkId.toString()].Proxy,
-                json.TwoKeyUpgradableExchange[networkId.toString()].Proxy,
-                )
+                [12345, 15345, 12345, 5, 5, 5,1],
+                json.TwoKeyUpgradableExchange[networkId.toString()].Proxy)
             )
             .then(() => TwoKeyAcquisitionCampaignERC20.deployed())
             .then(() => true)
