@@ -17,7 +17,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     using Call for *;
     address public conversionHandler;
     address public upgradableExchange;
-    address public twoKeyLogicHandler;
+    address public twoKeyAcquisitionLogicHandler;
 
     mapping(address => uint256) referrer2cut; // Mapping representing how much are cuts in percent(0-100) for referrer address
     mapping(address => uint256) internal referrerBalancesETHWei; // balance of EthWei for each influencer that he can withdraw
@@ -56,7 +56,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     }
 
     constructor(
-        address _twoKeyLogicHandler,
+        address _twoKeyAcquisitionLogicHandler,
         address _twoKeyEventSource,
         address _conversionHandler,
         address _moderator,
@@ -68,7 +68,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         values[3]
     )
     public {
-        twoKeyLogicHandler = _twoKeyLogicHandler;
+        twoKeyAcquisitionLogicHandler = _twoKeyAcquisitionLogicHandler;
         conversionHandler = _conversionHandler;
         upgradableExchange = _twoKeyUpgradableExchangeContract;
         contractor = msg.sender;
@@ -218,7 +218,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @dev payable function
      */
     function joinAndConvert(bytes signature, bool _isAnonymous) public payable {
-        ITwoKeyAcquisitionLogicHandler(twoKeyLogicHandler).requirementForMsgValue(msg.value);
+        ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).requirementForMsgValue(msg.value);
         address _converterPlasma = twoKeyEventSource.plasmaOf(msg.sender);
         distributeArcsBasedOnSignature(signature);
         createConversion(msg.value, _converterPlasma);
@@ -232,7 +232,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @dev payable function
      */
     function convert(bool _isAnonymous) public payable {
-        ITwoKeyAcquisitionLogicHandler(twoKeyLogicHandler).requirementForMsgValue(msg.value);
+        ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).requirementForMsgValue(msg.value);
         address _converterPlasma = twoKeyEventSource.plasmaOf(msg.sender);
         require(received_from[_converterPlasma] != address(0));
         createConversion(msg.value, _converterPlasma);
@@ -252,7 +252,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         uint bonusTokensForConverterUnits;
 
         (baseTokensForConverterUnits, bonusTokensForConverterUnits)
-        = ITwoKeyAcquisitionLogicHandler(twoKeyLogicHandler).getEstimatedTokenAmount(conversionAmountETHWei);
+        = ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).getEstimatedTokenAmount(conversionAmountETHWei);
 
         uint totalTokensForConverterUnits = baseTokensForConverterUnits + bonusTokensForConverterUnits;
 

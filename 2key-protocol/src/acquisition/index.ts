@@ -74,33 +74,45 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         return new Promise(async (resolve, reject) => {
             try {
                 const {public_address} = generatePublicMeta();
-                const predeployGas = await this.helpers._estimateSubcontractGas(contractsMeta.TwoKeyConversionHandler, from,
+                const predeployGasConversionHandler = await this.helpers._estimateSubcontractGas(contractsMeta.TwoKeyConversionHandler, from,
                     [
                         data.tokenDistributionDate,
                         data.maxDistributionDateShiftInDays,
                         data.bonusTokensVestingMonths,
                         data.bonusTokensVestingStartShiftInDaysFromDistributionDate,
                     ]);
+
+                const predeployGasLogicHandler = await this.helpers._estimateSubcontractGas(contractsMeta.TwoKeyAcquisitionLogicHandler, from,
+                    [
+                        data.minContributionETHWei,
+                        data.maxContributionETHWei,
+                        data.pricePerUnitInETHWei,
+                        data.campaignStartTime,
+                        data.campaignEndTime,
+                        data.maxConverterBonusPercentWei,
+                        data.currency,
+                        data.twoKeyExchangeContract,
+                        data.assetContractERC20
+                    ]);
                 const campaignGas = await this.helpers._estimateSubcontractGas(contractsMeta.TwoKeyAcquisitionCampaignERC20, from, [
+                    `0x${public_address}`,
                     this.helpers._getContractDeployedAddress('TwoKeyEventSource'),
                     // Fake WhiteListInfluence address
                     `0x${public_address}`,
                     // Fake WhiteListConverter address
                     data.moderator || from,
                     data.assetContractERC20,
-                    data.campaignStartTime,
-                    data.campaignEndTime,
                     data.expiryConversion,
                     data.moderatorFeePercentageWei,
                     data.maxReferralRewardPercentWei,
-                    data.maxConverterBonusPercentWei,
-                    data.pricePerUnitInETHWei,
-                    data.minContributionETHWei,
-                    data.maxContributionETHWei,
                     data.referrerQuota || 5,
+                    `0x${public_address}`,
                 ]);
                 this.base._log('TwoKeyAcquisitionCampaignERC20 gas required', campaignGas);
-                const totalGas = predeployGas + campaignGas;
+                const totalGas = predeployGasConversionHandler + predeployGasLogicHandler + campaignGas;
+                console.log('Gas to deploy Conversion handler:  ' + predeployGasConversionHandler);
+                console.log('Gas to deploy Logic handler: ' + predeployGasLogicHandler);
+                console.log('Gas to deploy Campaign: ' + campaignGas);
                 resolve(totalGas);
             } catch (err) {
                 reject(err);
@@ -127,6 +139,9 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     reject('Invalid ERC20 address');
                     return;
                 }
+                /**
+                 * Creating and deploying conversion handler contract
+                 */
                 let conversionHandlerAddress = data.conversionHandlerAddress;
                 if (!conversionHandlerAddress) {
                     this.base._log([data.tokenDistributionDate, data.maxDistributionDateShiftInDays, data.bonusTokensVestingMonths, data.bonusTokensVestingStartShiftInDaysFromDistributionDate], gasPrice);
@@ -149,30 +164,52 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                         progressCallback('TwoKeyConversionHandler', true, conversionHandlerAddress);
                     }
                 }
+                /**
+                 * Creating and deploying logic handler contract
+                 */
+                let twoKeyAcquisitionLogicHandlerAddress = data.twoKeyAcquisitionLogicHandler;
+                if(!twoKeyAcquisitionLogicHandlerAddress) {
+                    txHash = await this.helpers._createContract(contractsMeta.TwoKeyAcquisitionLogicHandler, from, {
+                        gasPrice,
+                        params: [data.minContributionETHWei, data.maxContributionETHWei,data.pricePerUnitInETHWei,
+                            data.campaignStartTime, data.campaignEndTime, data.maxConverterBonusPercentWei,
+                            data.currency, this.base.twoKeyExchangeContract.address, data.assetContractERC20],
+                        progressCallback
+                    });
+                    const predeployReceipt = await this.utils.getTransactionReceiptMined(txHash, {
+                        web3: this.base.web3,
+                        interval,
+                        timeout
+                    });
+                    if (predeployReceipt.status !== '0x1') {
+                        reject(predeployReceipt);
+                        return;
+                    }
+                    twoKeyAcquisitionLogicHandlerAddress = predeployReceipt && predeployReceipt.contractAddress;
+                    if (progressCallback) {
+                        progressCallback('TwoKeyAcquisitionLogicHandler', true, twoKeyAcquisitionLogicHandlerAddress);
+                    }
+
+                }
 
                 txHash = await this.helpers._createContract(contractsMeta.TwoKeyAcquisitionCampaignERC20, from, {
                     gasPrice,
                     params: [
+                        twoKeyAcquisitionLogicHandlerAddress,
                         this.base.twoKeyEventSource.address,
                         // proxyInfo.TwoKeyEventSource.Proxy,
                         // this.helpers._getContractDeployedAddress('TwoKeyEventSource'),
                         conversionHandlerAddress,
                         data.moderator || from,
                         data.assetContractERC20,
-                        [data.campaignStartTime,
-                        data.campaignEndTime,
-                        data.expiryConversion,
-                        data.moderatorFeePercentageWei,
-                        data.maxReferralRewardPercentWei,
-                        data.maxConverterBonusPercentWei,
-                        data.pricePerUnitInETHWei,
-                        data.minContributionETHWei,
-                        data.maxContributionETHWei,
-                        data.referrerQuota || 5],
-                        data.currency,
-                        this.base.twoKeyExchangeContract.address,
-                        this.base.twoKeyUpgradableExchange.address
-                    ],
+                        [
+                            data.expiryConversion,
+                            data.moderatorFeePercentageWei,
+                            data.maxReferralRewardPercentWei,
+                            data.referrerQuota || 5
+                        ],
+                        this.base.twoKeyUpgradableExchange.address,
+                        ],
                     progressCallback,
                     link: {
                         name: 'Call',
@@ -193,10 +230,11 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     progressCallback('TwoKeyAcquisitionCampaignERC20', true, campaignAddress);
                 }
                 console.log('Campaign created', campaignAddress);
-                const campaignPublicLinkKey = await this.join(campaignAddress, from, {gasPrice, progressCallback});
-                if (progressCallback) {
-                    progressCallback('SetPublicLinkKey', true, campaignPublicLinkKey);
-                }
+                const campaignPublicLinkKey = '0x0';
+                // const campaignPublicLinkKey = await this.join(campaignAddress, from, {gasPrice, progressCallback});
+                // if (progressCallback) {
+                //     progressCallback('SetPublicLinkKey', true, campaignPublicLinkKey);
+                // }
                 resolve({
                     contractor: from,
                     campaignAddress,
@@ -240,7 +278,9 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
             try {
                 const nonce = await this.helpers._getNonce(from);
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-                const txHash: string = await promisify(campaignInstance.updateOrSetIpfsHashPublicMeta, [hash, {
+                const twoKeyAcquisitionLogicHandler = await promisify(campaignInstance.twoKeyAcquisitionLogicHandler,[{from}]);
+                const twoKeyAcquisitionLogicHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyAcquisitionLogicHandler.abi).at(twoKeyAcquisitionLogicHandler);
+                const txHash: string = await promisify(twoKeyAcquisitionLogicHandlerInstance.updateOrSetIpfsHashPublicMeta, [hash, {
                     from,
                     gasPrice,
                     nonce,
@@ -263,7 +303,9 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
                 const isAddressJoined = await this.isAddressJoined(campaignInstance, from);
-                const ipfsHash = await promisify(campaignInstance.publicMetaHash, []);
+                const twoKeyAcquisitionLogicHandler = await promisify(campaignInstance.twoKeyAcquisitionLogicHandler,[{from}]);
+                const twoKeyAcquisitionLogicHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyAcquisitionLogicHandler.abi).at(twoKeyAcquisitionLogicHandler);
+                const ipfsHash = await promisify(twoKeyAcquisitionLogicHandlerInstance.publicMetaHash, []);
                 const meta = JSON.parse((await promisify(this.base.ipfs.cat, [ipfsHash])).toString());
                 resolve({meta, isAddressJoined});
             } catch (e) {

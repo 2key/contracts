@@ -26,6 +26,7 @@ export interface ITokenAmount {
 export interface IAcquisitionCampaign {
     moderator?: string, // Address of the moderator - it's a contract that works (operates) as admin of whitelists contracts
     conversionHandlerAddress?: string,
+    twoKeyAcquisitionLogicHandler?: string,
     assetContractERC20: string,
     campaignStartTime: number, // Timestamp
     campaignEndTime: number, // Timestamp
