@@ -473,17 +473,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         return (moderatorBalanceETHWei,moderatorTotalEarningsETHWei);
     }
 
-
-    /**
-     * @notice Function to update moderator balance and total earnings by conversion handler at the moment of conversion execution
-     * @param _value is the value added
-     */
-    function updateModeratorBalanceETHWei(uint _value) public onlyTwoKeyConversionHandler {
-        moderatorBalanceETHWei = moderatorBalanceETHWei.add(_value);
-        moderatorTotalEarningsETHWei = moderatorTotalEarningsETHWei.add(_value);
-    }
-
-
     /**
      * @notice Function to update MinContributionETH
      * @dev only Contractor can call this method, otherwise it will revert - emits Event when updated
@@ -503,6 +492,16 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         maxContributionETHorFiatCurrency = value;
         twoKeyEventSource.updatedData(block.timestamp, value, "Updated maxContribution");
     }
+
+    /**
+     * @notice Function to update moderator balance and total earnings by conversion handler at the moment of conversion execution
+     * @param _value is the value added
+     */
+    function updateModeratorBalanceETHWei(uint _value) public onlyTwoKeyConversionHandler {
+        moderatorBalanceETHWei = moderatorBalanceETHWei.add(_value);
+        moderatorTotalEarningsETHWei = moderatorTotalEarningsETHWei.add(_value);
+    }
+
 
     /**
      * @notice Function to update maxReferralRewardPercent
@@ -633,14 +632,5 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
             }
         }
     }
-
-//    /**
-//     * @notice This function will be triggered in case converter is rejected
-//     */
-//    function refundConverterAndRemoveUnits(address _converter, uint amountOfEther, uint amountOfUnits) external onlyTwoKeyConversionHandler {
-//        units[_converter] = units[_converter] - amountOfUnits;
-//        _converter.transfer(amountOfEther);
-//    }
-
 
 }
