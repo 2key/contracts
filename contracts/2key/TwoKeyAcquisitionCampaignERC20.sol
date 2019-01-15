@@ -81,9 +81,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         twoKeyEventSource.created(address(this), contractor, moderator);
     }
 
-    function publicLinkKeyOf(address me) public view returns (address) {
-        return public_link_key[twoKeyEventSource.plasmaOf(me)];
-    }
+
 
 
     function distributeArcsBasedOnSignature(bytes sig) private returns (address[]) {
@@ -153,6 +151,10 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         return influencers;
     }
 
+    function buyTokensFromUpgradableExchange(uint amountOfMoney, address receiver) private {
+        IUpgradableExchange(upgradableExchange).buyTokens.value(amountOfMoney)(receiver);
+    }
+
 
     function setPublicLinkKeyOf(address me, address new_public_key) private {
         me = twoKeyEventSource.plasmaOf(me);
@@ -171,19 +173,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         setPublicLinkKeyOf(msg.sender, new_public_key);
     }
 
-
-    /**
-     * given the total payout, calculates the moderator fee
-     * @param  _conversionAmountETHWei total payout for escrow
-     * @return moderator fee
-     */
-    function calculateModeratorFee(uint256 _conversionAmountETHWei) internal view returns (uint256)  {
-        if (moderatorFeePercentage > 0) {// send the fee to moderator
-            uint256 fee = _conversionAmountETHWei.mul(moderatorFeePercentage).div(100);
-            return fee;
-        }
-        return 0;
-    }
 
     /**
      * @notice Method to add fungible asset to our contract
@@ -209,9 +198,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         setCutOf(msg.sender, cut);
     }
 
-    function getReferrerCut(address me) public view returns (uint256) {
-        return referrer2cut[twoKeyEventSource.plasmaOf(me)];
-    }
 
     /**
      * @notice Function where converter can join and convert
@@ -310,6 +296,10 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     }
 
 
+    function sendBackEthWhenConversionCancelled(address _cancelledConverter, uint _conversionAmount) public onlyTwoKeyConversionHandler {
+        _cancelledConverter.transfer(_conversionAmount);
+    }
+
     /**
      * @notice Move some amount of ERC20 from our campaign to someone
      * @dev internal function
@@ -323,6 +313,63 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         return true;
     }
 
+    /**
+     * @notice Function to update moderator balance and total earnings by conversion handler at the moment of conversion execution
+     * @param _value is the value added
+     */
+    function updateModeratorBalanceETHWei(uint _value) public onlyTwoKeyConversionHandler {
+        moderatorBalanceETHWei = moderatorBalanceETHWei.add(_value);
+        moderatorTotalEarningsETHWei = moderatorTotalEarningsETHWei.add(_value);
+    }
+
+
+    /**
+     * @notice Function to update maxReferralRewardPercent
+     * @dev only Contractor can call this method, otherwise it will revert - emits Event when updated
+     * @param value is the new referral percent value
+     */
+    function updateMaxReferralRewardPercent(uint value) external onlyContractor {
+        maxReferralRewardPercent = value;
+        twoKeyEventSource.updatedData(block.timestamp, value, "Updated maxReferralRewardPercent");
+    }
+
+
+    /**
+     * @notice Option to update contractor proceeds
+     * @dev can be called only from TwoKeyConversionHandler contract
+     * @param value it the value we'd like to add to total contractor proceeds and contractor balance
+     */
+    function updateContractorProceeds(uint value) public onlyTwoKeyConversionHandler {
+        contractorTotalProceeds = contractorTotalProceeds.add(value);
+        contractorBalance = contractorBalance.add(value);
+    }
+
+    /**
+     * @notice Function to update amount of the reserved tokens in case conversion is rejected
+     * @param value is the amount to reduce from reserved state
+     */
+    function updateReservedAmountOfTokensIfConversionRejectedOrExecuted(uint value) public onlyTwoKeyConversionHandler {
+        require(reservedAmountOfTokens - value >= 0);
+        reservedAmountOfTokens = reservedAmountOfTokens - value;
+    }
+
+    /**
+    * given the total payout, calculates the moderator fee
+    * @param  _conversionAmountETHWei total payout for escrow
+    * @return moderator fee
+    */
+    function calculateModeratorFee(uint256 _conversionAmountETHWei) internal view returns (uint256)  {
+        if (moderatorFeePercentage > 0) {// send the fee to moderator
+            uint256 fee = _conversionAmountETHWei.mul(moderatorFeePercentage).div(100);
+            return fee;
+        }
+        return 0;
+    }
+
+
+    function getReferrerCut(address me) public view returns (uint256) {
+        return referrer2cut[twoKeyEventSource.plasmaOf(me)];
+    }
 
     /**
      * @notice Function to check how much eth has been sent to contract from address
@@ -374,46 +421,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     }
 
     /**
-     * @notice Function to update moderator balance and total earnings by conversion handler at the moment of conversion execution
-     * @param _value is the value added
-     */
-    function updateModeratorBalanceETHWei(uint _value) public onlyTwoKeyConversionHandler {
-        moderatorBalanceETHWei = moderatorBalanceETHWei.add(_value);
-        moderatorTotalEarningsETHWei = moderatorTotalEarningsETHWei.add(_value);
-    }
-
-
-    /**
-     * @notice Function to update maxReferralRewardPercent
-     * @dev only Contractor can call this method, otherwise it will revert - emits Event when updated
-     * @param value is the new referral percent value
-     */
-    function updateMaxReferralRewardPercent(uint value) external onlyContractor {
-        maxReferralRewardPercent = value;
-        twoKeyEventSource.updatedData(block.timestamp, value, "Updated maxReferralRewardPercent");
-    }
-
-
-    /**
-     * @notice Option to update contractor proceeds
-     * @dev can be called only from TwoKeyConversionHandler contract
-     * @param value it the value we'd like to add to total contractor proceeds and contractor balance
-     */
-    function updateContractorProceeds(uint value) public onlyTwoKeyConversionHandler {
-        contractorTotalProceeds = contractorTotalProceeds.add(value);
-        contractorBalance = contractorBalance.add(value);
-    }
-
-    /**
-     * @notice Function to update amount of the reserved tokens in case conversion is rejected
-     * @param value is the amount to reduce from reserved state
-     */
-    function updateReservedAmountOfTokensIfConversionRejectedOrExecuted(uint value) public onlyTwoKeyConversionHandler {
-        require(reservedAmountOfTokens - value >= 0);
-        reservedAmountOfTokens = reservedAmountOfTokens - value;
-    }
-
-    /**
      * @notice Function to check if the msg.sender has already joined
      * @return true/false depending of joined status
      */
@@ -433,11 +440,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         uint inventoryBalance = getInventoryBalance();
         return (inventoryBalance - reservedAmountOfTokens);
     }
-
-    function sendBackEthWhenConversionCancelled(address _cancelledConverter, uint _conversionAmount) public onlyTwoKeyConversionHandler {
-        _cancelledConverter.transfer(_conversionAmount);
-    }
-
 
     /**
      * @notice Function to fetch contractor balance in ETH
@@ -460,6 +462,10 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         return (referrerBalancesETHWei[_referrer],referrerTotalEarningsEthWEI[_referrer], referrerAddressToCounterOfConversions[_referrer]);
     }
 
+    function publicLinkKeyOf(address me) public view returns (address) {
+        return public_link_key[twoKeyEventSource.plasmaOf(me)];
+    }
+
 
     /**
      * @notice Function where contractor can withdraw his funds
@@ -476,10 +482,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         contractor.transfer(balance);
     }
 
-
-    function buyTokensFromUpgradableExchange(uint amountOfMoney, address receiver) private {
-        IUpgradableExchange(upgradableExchange).buyTokens.value(amountOfMoney)(receiver);
-    }
 
     /**
      * @notice Function where moderator or referrer can withdraw their available funds
