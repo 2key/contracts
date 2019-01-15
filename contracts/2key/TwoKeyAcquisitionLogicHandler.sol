@@ -20,6 +20,9 @@ contract TwoKeyAcquisitionLogicHandler {
     uint256 pricePerUnitInETHWeiOrUSD; // There's single price for the unit ERC20 (Should be in WEI)
     uint unit_decimals; // ERC20 selling data
 
+    string public publicMetaHash; // Ipfs hash of json campaign object
+    string privateMetaHash; // Ipfs hash of json sensitive (contractor) information
+
     string public currency;
 
     modifier onlyContractor {
@@ -33,7 +36,9 @@ contract TwoKeyAcquisitionLogicHandler {
         uint _pricePerUnitInETHWeiOrUSD,
         string _currency,
         address _ethUsdExchangeContract,
-        address _assetContractERC20
+        address _assetContractERC20,
+        string _publicMetaHash,
+        string _privateMetaHash
     ) public {
         contractor = msg.sender;
         minContributionETHorFiatCurrency = _minContribution;
@@ -42,6 +47,8 @@ contract TwoKeyAcquisitionLogicHandler {
         currency = _currency;
         ethUSDExchangeContract = _ethUsdExchangeContract;
         unit_decimals = IERC20(_assetContractERC20).decimals();
+        publicMetaHash = _publicMetaHash;
+        privateMetaHash = _privateMetaHash;
     }
 
 
@@ -110,5 +117,34 @@ contract TwoKeyAcquisitionLogicHandler {
     function updateMaxContributionETHorUSD(uint value) external onlyContractor {
         maxContributionETHorFiatCurrency = value;
 //        twoKeyEventSource.updatedData(block.timestamp, value, "Updated maxContribution");
+    }
+
+    /**
+     * @notice Function to update /set publicMetaHash
+     * @dev only Contractor can call this function, otherwise it will revert - emits Event when set/updated
+     * @param value is the value for the publicMetaHash
+     */
+    function updateOrSetIpfsHashPublicMeta(string value) public onlyContractor {
+        publicMetaHash = value;
+//        twoKeyEventSource.updatedPublicMetaHash(block.timestamp, value);
+    }
+
+
+    /**
+     * @notice Setter for privateMetaHash
+     * @dev only Contractor can call this method, otherwise function will revert
+     * @param _privateMetaHash is string representation of private metadata hash
+     */
+    function setPrivateMetaHash(string _privateMetaHash) public onlyContractor {
+        privateMetaHash = _privateMetaHash;
+    }
+
+    /**
+     * @notice Getter for privateMetaHash
+     * @dev only Contractor can call this method, otherwise function will revert
+     * @return string representation of private metadata hash
+     */
+    function getPrivateMetaHash() public view onlyContractor returns (string) {
+        return privateMetaHash;
     }
 }
