@@ -1,7 +1,7 @@
 import {ICreateOpts, IERC20, IOffchainData, ITwoKeyBase, ITwoKeyHelpers, ITwoKeyUtils} from '../interfaces';
 import {
     IAcquisitionCampaign,
-    IAcquisitionCampaignMeta, IConversionObject,
+    IAcquisitionCampaignMeta, IConstantsLogicHandler, IConversionObject,
     IConvertOpts,
     IJoinLinkOpts,
     IPublicLinkKey,
@@ -1506,6 +1506,44 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 const twoKeyAcquisitionLogicHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyAcquisitionLogicHandler.abi).at(twoKeyAcquisitionLogicHandler);
                 let txHash: string = await promisify(twoKeyAcquisitionLogicHandlerInstance.getPrivateMetaHash,[{from}]);
                 resolve(txHash);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+    /**
+     * This is method to get constant values from conversion handler
+     * @param campaign
+     * @returns {Promise<IConstantsLogicHandler>}
+     */
+    public getConstantsFromLogicHandler(campaign:any) : Promise<IConstantsLogicHandler> {
+        return new Promise<IConstantsLogicHandler>(async(resolve,reject) => {
+            try {
+                const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
+                const twoKeyAcquisitionLogicHandler = await promisify(campaignInstance.twoKeyAcquisitionLogicHandler,[{from}]);
+                const twoKeyAcquisitionLogicHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyAcquisitionLogicHandler.abi).at(twoKeyAcquisitionLogicHandler);
+                let [
+                        campaignStartTime,
+                        campaignEndTime,
+                        minContributionETHorFiatCurrency,
+                        maxContributionETHorFiatCurrency,
+                        unit_decimals,
+                        pricePerUnitInETHWeiOrUSD,
+                        maxConverterBonusPercent
+                ] = await promisify(twoKeyAcquisitionLogicHandlerInstance.getConstantInfo,[]);
+
+                let obj : IConstantsLogicHandler = {
+                    campaignStartTime: campaignStartTime.toNumber(),
+                    campaignEndTime: campaignEndTime.toNumber(),
+                    minContributionETHorFiatCurrency: parseFloat(this.utils.fromWei(minContributionETHorFiatCurrency, 'ether').toString()),
+                    maxContributionETHorFiatCurrency: parseFloat(this.utils.fromWei(maxContributionETHorFiatCurrency, 'ether').toString()),
+                    unit_decimals: unit_decimals.toNumber(),
+                    pricePerUnitInETHWeiOrUSD: parseFloat(this.utils.fromWei(pricePerUnitInETHWeiOrUSD, 'ether').toString()),
+                    maxConverterBonusPercent: parseFloat(this.utils.fromWei(maxConverterBonusPercent, 'ether').toString()),
+                };
+
+                resolve(obj);
             } catch (e) {
                 reject(e);
             }

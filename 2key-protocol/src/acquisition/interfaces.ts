@@ -128,6 +128,16 @@ export interface IJoinLinkOpts extends IPublicLinkOpts{
     progressCallback?: ICreateCampaignProgress,
 }
 
+export interface IConstantsLogicHandler {
+    campaignStartTime: number,
+    campaignEndTime: number,
+    minContributionETHorFiatCurrency: number,
+    maxContributionETHorFiatCurrency: number,
+    unit_decimals: number,
+    pricePerUnitInETHWeiOrUSD: number,
+    maxConverterBonusPercent: number
+}
+
 export interface IReferrerSummary {
     balanceAvailable: number,
     totalEarnings: number,
