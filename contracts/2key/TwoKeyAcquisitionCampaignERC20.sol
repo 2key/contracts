@@ -65,7 +65,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         address _twoKeyUpgradableExchangeContract
     ) TwoKeyCampaignARC (
         _twoKeyEventSource,
-        values[4]
+        values[3]
     )
     public {
         twoKeyLogicHandler = _twoKeyLogicHandler;
@@ -77,7 +77,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         expiryConversionInHours = values[0];
         moderatorFeePercentage = values[1];
         maxReferralRewardPercent = values[2];
-        maxConverterBonusPercent = values[3];
         ITwoKeyConversionHandler(conversionHandler).setTwoKeyAcquisitionCampaignERC20(address(this), _moderator, contractor, _assetContractERC20);
         twoKeyEventSource.created(address(this), contractor, moderator);
     }
@@ -253,7 +252,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         uint bonusTokensForConverterUnits;
 
         (baseTokensForConverterUnits, bonusTokensForConverterUnits)
-        = ITwoKeyAcquisitionLogicHandler(twoKeyLogicHandler).getEstimatedTokenAmount(conversionAmountETHWei, maxConverterBonusPercent);
+        = ITwoKeyAcquisitionLogicHandler(twoKeyLogicHandler).getEstimatedTokenAmount(conversionAmountETHWei);
 
         uint totalTokensForConverterUnits = baseTokensForConverterUnits + bonusTokensForConverterUnits;
 

@@ -26,6 +26,7 @@ contract TwoKeyAcquisitionLogicHandler {
     string public publicMetaHash; // Ipfs hash of json campaign object
     string privateMetaHash; // Ipfs hash of json sensitive (contractor) information
 
+    uint maxConverterBonusPercent;
     string public currency;
 
     modifier onlyContractor {
@@ -39,6 +40,7 @@ contract TwoKeyAcquisitionLogicHandler {
         uint _pricePerUnitInETHWeiOrUSD,
         uint _campaignStartTime,
         uint _campaignEndTime,
+        uint _maxConverterBonusPercent,
         string _currency,
         address _ethUsdExchangeContract,
         address _assetContractERC20
@@ -49,6 +51,7 @@ contract TwoKeyAcquisitionLogicHandler {
         pricePerUnitInETHWeiOrUSD = _pricePerUnitInETHWeiOrUSD;
         campaignStartTime = _campaignStartTime;
         campaignEndTime = _campaignEndTime;
+        maxConverterBonusPercent = _maxConverterBonusPercent;
         currency = _currency;
         ethUSDExchangeContract = _ethUsdExchangeContract;
         unit_decimals = IERC20(_assetContractERC20).decimals();
@@ -93,7 +96,7 @@ contract TwoKeyAcquisitionLogicHandler {
      * @param conversionAmountETHWei is amount of eth in conversion
      * @return tuple containing (base,bonus)
      */
-    function getEstimatedTokenAmount(uint conversionAmountETHWei, uint maxConverterBonusPercent) public view returns (uint, uint) {
+    function getEstimatedTokenAmount(uint conversionAmountETHWei) public view returns (uint, uint) {
         uint value = pricePerUnitInETHWeiOrUSD;
         if(keccak256(currency) != keccak256('ETH')) {
             uint rate;
@@ -163,13 +166,14 @@ contract TwoKeyAcquisitionLogicHandler {
      * @notice Get all constants from the contract
      * @return all constants from the contract
      */
-    function getConstantInfo() public view returns (uint,uint,uint,uint,uint,uint) {
+    function getConstantInfo() public view returns (uint,uint,uint,uint,uint,uint,uint) {
         return (
             campaignStartTime,
             campaignEndTime,
             minContributionETHorFiatCurrency,
             maxContributionETHorFiatCurrency,
             unit_decimals,
-            pricePerUnitInETHWeiOrUSD);
+            pricePerUnitInETHWeiOrUSD,
+            maxConverterBonusPercent);
     }
 }
