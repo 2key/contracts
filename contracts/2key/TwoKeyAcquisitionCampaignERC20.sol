@@ -15,6 +15,7 @@ import "../interfaces/ITwoKeyAcquisitionLogicHandler.sol";
 contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
 
     using Call for *;
+
     address public conversionHandler;
     address public upgradableExchange;
     address public twoKeyAcquisitionLogicHandler;
@@ -40,7 +41,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     uint256 expiryConversionInHours; // How long converter can be pending before it will be automatically rejected and funds will be returned to convertor (hours)
     uint256 moderatorFeePercentage; // Fee which moderator gets
     uint256 maxReferralRewardPercent; // maxReferralRewardPercent is actually bonus percentage in ETH
-    uint maxConverterBonusPercent; //translates to discount - we can add this to constructor
     uint reservedAmountOfTokens = 0;
 
 //    bool public withdrawApproved = false; // Until contractor set this to be true, no one can withdraw funds etc.
@@ -331,6 +331,10 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      */
     function getAmountAddressSent(address _from) public view returns (uint) {
         return balancesConvertersETH[_from];
+    }
+
+    function getConstantInfo() public view returns (uint,uint) {
+        return (conversionQuota, maxReferralRewardPercent);
     }
 
     /**
