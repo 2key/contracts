@@ -1513,7 +1513,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     }
 
     /**
-     * This is method to get constant values from conversion handler
+     * This is method to get constant values from acquisition logic handler
      * @param campaign
      * @returns {Promise<IConstantsLogicHandler>}
      */
