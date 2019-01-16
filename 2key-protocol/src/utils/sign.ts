@@ -1,4 +1,6 @@
 import eth_util, {toBuffer} from 'ethereumjs-util';
+import eth_wallet from 'ethereumjs-wallet';
+import *  as cryptoJS from'crypto-js'
 import assert from 'assert';
 import crypto from 'crypto';
 import sigUtil from 'eth-sig-util';
@@ -13,12 +15,12 @@ import {IPlasmaSignature, ISignedKeys} from './interfaces';
  */
 function add0x(x) {
     if (!x) {
-        return '0x'
+        return '0x';
     }
     if (x.startsWith('0x')) {
-        return x
+        return x;
     } else {
-        return '0x' + x
+        return '0x' + x;
     }
 }
 
@@ -29,15 +31,15 @@ function add0x(x) {
  */
 function remove0x(x) {
     if (!x) {
-        return
+        return;
     }
     if (x.startsWith('0x')) {
         if (x.length == 2) {
-            return
+            return;
         }
-        return x.slice(2)
+        return x.slice(2);
     } else {
-        return x
+        return x;
     }
 }
 
@@ -54,36 +56,73 @@ async function getKey(web3,me) {
             name: 'Password used to generate key',     // Any string label you want
             value: me  // The value to sign
         }
-    ]
+    ];
 
-    let key = await sign_message(web3, msgParams, me)
-    key = remove0x(key)
-    key = key.slice(0,24*2)
-    let keyB = Buffer.from(key, 'hex')
+    let key = await sign_message(web3, msgParams, me);
+    key = remove0x(key);
+    key = key.slice(0,24*2);
+    let keyB = Buffer.from(key, 'hex');
     return keyB;
 }
 
-// function encrypt(web3, address, clear_text) {
-//     return new Promise(async (resolve, reject) => {
-//         if (!clear_text) {
-//             resolve('0x')
-//             return
-//         }
-//         clear_text = remove0x(clear_text)
-//         let iv0 = crypto.randomBytes(16);
-//         let key = await getKey(web3, address);
-//         iv0 = iv0.toString('hex')
-//         let iv = crypto.enc.Hex.parse(iv0)
-//         clear_text = clear_text.toString('hex')
-//         key = key.toString('hex')
-//         var b64 = cryptoJS.AES.encrypt(clear_text, key, {iv}).toString();
-//         var e64 = cryptoJS.enc.Base64.parse(b64);
-//         var eHex = e64.toString(cryptoJS.enc.Hex)
-//         let encrypted = iv0+eHex
-//         encrypted = add0x(encrypted)
-//         resolve(encrypted)
-//     })
-// }
+//TODO: Resolve with Andrii this buffer -> stirng type of issue in proper way
+/**
+ *
+ * @param web3
+ * @param me
+ * @param encrypted
+ * @returns {Promise<any>}
+ */
+function decrypt(web3,me,encrypted) {
+    return new Promise(async (resolve, reject) => {
+        encrypted = remove0x(encrypted);
+        if (!encrypted) {
+            resolve();
+            return;
+        }
+        let key = await getKey(web3, me);
+        let iv0 = encrypted.slice(0,32);
+        let iv = cryptoJS.enc.Hex.parse(iv0);
+        encrypted = encrypted.slice(32);
+
+        key = key.toString('hex');
+        var reb64 = cryptoJS.enc.Hex.parse(encrypted);
+        var bytes = reb64.toString(cryptoJS.enc.Base64);
+        var decrypt = cryptoJS.AES.decrypt(bytes, key, {iv});
+        var plain = decrypt.toString(cryptoJS.enc.Utf8);
+        plain = add0x(plain);
+        resolve(plain);
+    })
+}
+
+/**
+ *
+ * @param web3
+ * @param address
+ * @param clear_text
+ * @returns {Promise<any>}
+ */
+function encrypt(web3, address, clear_text) {
+    return new Promise(async (resolve, reject) => {
+        if (!clear_text) {
+            resolve('0x');
+            return;
+        }
+        clear_text = remove0x(clear_text);
+        let iv0 = crypto.randomBytes(16);
+        let key = await getKey(web3, address);
+        iv0 = iv0.toString('hex');
+        let iv = cryptoJS.enc.Hex.parse(iv0);
+        clear_text = clear_text.toString('hex');
+        key = key.toString('hex');
+        var b64 = cryptoJS.AES.encrypt(clear_text, key, {iv}).toString();
+        var e64 = cryptoJS.enc.Base64.parse(b64);
+        var eHex = e64.toString(cryptoJS.enc.Hex);
+        let encrypted = iv0+eHex;
+        encrypted = add0x(encrypted);
+        resolve(encrypted);
+    })
+}
 
 function generatePrivateKey(): Buffer {
     return crypto.randomBytes(32)
@@ -652,6 +691,7 @@ function sign_name(web3, my_address, name, opts: IOptionalParamsSignMessage = {}
     ];
     return sign_message(web3, msgParams, my_address) // we never use metamask on plasma
 }
+
 
 interface IOptionalParamsSignMessage {
     metamask? : boolean,
