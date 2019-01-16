@@ -192,7 +192,7 @@ describe('TwoKeyProtocol', () => {
                         mainNetId,
                         syncTwoKeyNetId,
                     },
-                    plasmaPK: Sign.generatePrivateKey().toString('hex'),
+                    plasmaPK: Sign.generatePrivateKey(),
                 });
                 const {balance} = twoKeyProtocol.Utils.balanceFromWeiString(await twoKeyProtocol.getBalance(env.AYDNEP_ADDRESS), {inWei: true});
                 const {balance: adminBalance} = twoKeyProtocol.Utils.balanceFromWeiString(await twoKeyProtocol.getBalance(contractsMeta.TwoKeyAdmin.networks[mainNetId].address), {inWei: true});
@@ -318,7 +318,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
-            plasmaPK: Sign.generatePrivateKey().toString('hex'),
+            plasmaPK: Sign.generatePrivateKey(),
         });
         const balance = twoKeyProtocol.Utils.balanceFromWeiString(await twoKeyProtocol.getBalance(from), {inWei: true});
         console.log('SWITCH USER', balance.balance);
@@ -476,7 +476,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
-            plasmaPK: Sign.generatePrivateKey().toString('hex'),
+            plasmaPK: Sign.generatePrivateKey(),
         });
         txHash = await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, refLink);
         console.log('isUserJoined', await twoKeyProtocol.AcquisitionCampaign.isAddressJoined(campaignAddress, from));
@@ -500,7 +500,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
-            plasmaPK: Sign.generatePrivateKey().toString('hex'),
+            plasmaPK: Sign.generatePrivateKey(),
         });
         console.log('isUserJoined', await twoKeyProtocol.AcquisitionCampaign.isAddressJoined(campaignAddress, from));
         let maxReward = await twoKeyProtocol.AcquisitionCampaign.getEstimatedMaximumReferralReward(campaignAddress, from, refLink);
@@ -542,7 +542,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
-            plasmaPK: Sign.generatePrivateKey().toString('hex'),
+            plasmaPK: Sign.generatePrivateKey(),
         });
         const hash = await twoKeyProtocol.AcquisitionCampaign.join(campaignAddress, from, {
             cut: 20,
@@ -568,7 +568,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
-            plasmaPK: Sign.generatePrivateKey().toString('hex'),
+            plasmaPK: Sign.generatePrivateKey(),
         });
         console.log('6) uport buy from REFLINK', refLink);
         const txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD * 1.5, 'ether'), refLink, from);
@@ -600,7 +600,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
-            plasmaPK: Sign.generatePrivateKey().toString('hex'),
+            plasmaPK: Sign.generatePrivateKey(),
         });
         const arcs = await twoKeyProtocol.AcquisitionCampaign.getBalanceOfArcs(campaignAddress, from);
         console.log('GMAIL2 ARCS', arcs);
@@ -619,7 +619,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
-            plasmaPK: Sign.generatePrivateKey().toString('hex'),
+            plasmaPK: Sign.generatePrivateKey(),
         });
         const refReward = await twoKeyProtocol.AcquisitionCampaign.getEstimatedMaximumReferralReward(campaignAddress, from, refLink);
         console.log(`Max estimated referral reward: ${refReward}%`);
@@ -639,7 +639,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
-            plasmaPK: Sign.generatePrivateKey().toString('hex'),
+            plasmaPK: Sign.generatePrivateKey(),
         });
         // txHash = await twoKeyProtocol.transferEther(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD * 1.1, 'ether'), from);
         txHash = await twoKeyProtocol.AcquisitionCampaign.convert(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD * 1.1, 'ether'), from);
@@ -662,7 +662,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
-            plasmaPK: Sign.generatePrivateKey().toString('hex'),
+            plasmaPK: Sign.generatePrivateKey(),
         });
 
         const addresses = await twoKeyProtocol.AcquisitionCampaign.getAllPendingConverters(campaignAddress, from);
@@ -680,7 +680,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
-            plasmaPK: Sign.generatePrivateKey().toString('hex'),
+            plasmaPK: Sign.generatePrivateKey(),
         });
         txHash = await twoKeyProtocol.AcquisitionCampaign.approveConverter(campaignAddress, env.TEST4_ADDRESS, from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
@@ -723,7 +723,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
-            plasmaPK: Sign.generatePrivateKey().toString('hex'),
+            plasmaPK: Sign.generatePrivateKey(),
         });
         // const campaigns = await twoKeyProtocol.Lockup.getCampaignsWhereConverter(from);
         // console.log(campaigns);
@@ -739,7 +739,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
-            plasmaPK: Sign.generatePrivateKey().toString('hex'),
+            plasmaPK: Sign.generatePrivateKey(),
         });
         const txHash = await twoKeyProtocol.AcquisitionCampaign.executeConversion(campaignAddress, 0, from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
@@ -756,7 +756,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
-            plasmaPK: Sign.generatePrivateKey().toString('hex'),
+            plasmaPK: Sign.generatePrivateKey(),
         });
         const addresses = await twoKeyProtocol.AcquisitionCampaign.getLockupContractsForConverter(campaignAddress, env.TEST4_ADDRESS, from);
         console.log('Lockup contracts addresses : ' + addresses);
@@ -775,7 +775,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
-            plasmaPK: Sign.generatePrivateKey().toString('hex'),
+            plasmaPK: Sign.generatePrivateKey(),
         });
 
         const isContractor:boolean = await twoKeyProtocol.AcquisitionCampaign.isAddressContractor(campaignAddress,from);
@@ -829,7 +829,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
-            plasmaPK: Sign.generatePrivateKey().toString('hex'),
+            plasmaPK: Sign.generatePrivateKey(),
         });
         const addresses = await twoKeyProtocol.AcquisitionCampaign.getLockupContractsForConverter(campaignAddress, env.TEST4_ADDRESS, from);
         console.log('Lockup contracts addresses : ' + addresses);

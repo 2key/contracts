@@ -46,8 +46,8 @@ function calcFromCuts(cuts: number[], maxPi: number) {
  */
 function generatePublicMeta(): { private_key: string, public_address: string } {
     let pk = Sign.generatePrivateKey();
-    let public_address = Sign.privateToPublic(pk);
-    const private_key = pk.toString('hex');
+    let public_address = Sign.privateToPublic(Buffer.from(pk,'hex'));
+    const private_key = pk;
     return {private_key, public_address};
 }
 
@@ -537,7 +537,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
             } catch (e) {
                 reject(e)
             }
-        });
+        })
     }
 
     // Join Offchain

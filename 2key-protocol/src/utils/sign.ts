@@ -2,7 +2,6 @@ import eth_util, {toBuffer} from 'ethereumjs-util';
 import eth_wallet from 'ethereumjs-wallet';
 import *  as cryptoJS from'crypto-js'
 import assert from 'assert';
-import crypto from 'crypto';
 import sigUtil from 'eth-sig-util';
 import {IPlasmaSignature, ISignedKeys} from './interfaces';
 
@@ -49,7 +48,7 @@ function remove0x(x) {
  * @param me
  * @returns {Promise<Buffer>}
  */
-async function getKey(web3,me) {
+async function getKey(web3,me,opts: IOptionalParamsSignMessage) {
     let msgParams = [
         {
             type: 'bytes',      // Any valid solidity type
@@ -58,14 +57,66 @@ async function getKey(web3,me) {
         }
     ];
 
-    let key = await sign_message(web3, msgParams, me);
+    let key = await sign_message(web3, msgParams, me, opts);
     key = remove0x(key);
     key = key.slice(0,24*2);
-    let keyB = Buffer.from(key, 'hex');
-    return keyB;
+    return Buffer.from(key, 'hex');
 }
 
-//TODO: Resolve with Andrii this buffer -> stirng type of issue in proper way
+/**
+ *
+ * @param plasma_web3
+ * @param my_address
+ * @param plasma_address
+ * @returns {Promise<string>}
+ */
+function sign_ethereum2plasma(plasma_web3, my_address, plasma_address) : Promise<string> {
+    let msgParams = [
+        {
+            type: 'bytes',      // Any valid solidity type
+            name: 'binding to ethereum address',     // Any string label you want
+            value: my_address  // The value to sign
+        }
+    ];
+
+    return sign_message(plasma_web3, msgParams, plasma_address, {plasma: true}); // we never use metamask on plasma
+}
+
+/**
+ *
+ * @param plasma_address
+ * @param my_address
+ * @returns {Promise<string>}
+ */
+function sign_plasma2ethereum(web3, plasma_address, my_address) : Promise<string> {
+    let msgParams = [
+        {
+            type: 'bytes',      // Any valid solidity type
+            name: 'binding to plasma address',     // Any string label you want
+            value: plasma_address  // The value to sign
+        }
+    ];
+    return sign_message(web3, msgParams, my_address, {plasma: false});
+}
+
+/**
+ *
+ * @param web3
+ * @param my_address
+ * @param ethereum2plasma_sig
+ * @param note
+ * @returns {Promise<string>}
+ */
+function sign_ethereum2plasma_note(web3, my_address, ethereum2plasma_sig, note) : Promise<string> {
+    let msgParams = [
+        {
+            type: 'bytes',      // Any valid solidity type
+            name: 'binding to ethereum-plasma',     // Any string label you want
+            value: ethereum2plasma_sig+remove0x(note)  // The value to sign
+        }
+    ];
+    return sign_message(web3, msgParams, my_address, {plasma: false}) // we never use metamask on plasma
+}
 /**
  *
  * @param web3
@@ -73,19 +124,19 @@ async function getKey(web3,me) {
  * @param encrypted
  * @returns {Promise<any>}
  */
-function decrypt(web3,me,encrypted) {
+function decrypt(web3,me,encrypted, opts: IOptionalParamsSignMessage) : Promise<string> {
     return new Promise(async (resolve, reject) => {
         encrypted = remove0x(encrypted);
         if (!encrypted) {
             resolve();
             return;
         }
-        let key = await getKey(web3, me);
+        let keyBuffer = await getKey(web3, me, opts);
         let iv0 = encrypted.slice(0,32);
         let iv = cryptoJS.enc.Hex.parse(iv0);
         encrypted = encrypted.slice(32);
 
-        key = key.toString('hex');
+        let key = keyBuffer.toString('hex');
         var reb64 = cryptoJS.enc.Hex.parse(encrypted);
         var bytes = reb64.toString(cryptoJS.enc.Base64);
         var decrypt = cryptoJS.AES.decrypt(bytes, key, {iv});
@@ -102,19 +153,19 @@ function decrypt(web3,me,encrypted) {
  * @param clear_text
  * @returns {Promise<any>}
  */
-function encrypt(web3, address, clear_text) {
+function encrypt(web3, address, clear_text, opts: IOptionalParamsSignMessage) : Promise<string> {
     return new Promise(async (resolve, reject) => {
         if (!clear_text) {
             resolve('0x');
             return;
         }
         clear_text = remove0x(clear_text);
-        let iv0 = crypto.randomBytes(16);
-        let key = await getKey(web3, address);
+        let iv0 = cryptoJS.lib.WordArray.random(16);
+        let keyBuffer = await getKey(web3, address, opts);
         iv0 = iv0.toString('hex');
         let iv = cryptoJS.enc.Hex.parse(iv0);
         clear_text = clear_text.toString('hex');
-        key = key.toString('hex');
+        let key = keyBuffer.toString('hex');
         var b64 = cryptoJS.AES.encrypt(clear_text, key, {iv}).toString();
         var e64 = cryptoJS.enc.Base64.parse(b64);
         var eHex = e64.toString(cryptoJS.enc.Hex);
@@ -124,8 +175,9 @@ function encrypt(web3, address, clear_text) {
     })
 }
 
-function generatePrivateKey(): Buffer {
-    return crypto.randomBytes(32)
+function generatePrivateKey(): string {
+    return cryptoJS.lib.WordArray.random(32).toString(cryptoJS.enc.Hex)
+
 }
 
 function privateToPublic(private_key: Buffer) {
@@ -394,6 +446,7 @@ function validate_join(firtsPublicKey: string, f_address: string, f_secret: stri
     return bounty_cuts;
 }
 
+//TODO: Remove this function if we don't use and need it anywhere ASAP change in acquisition
 function sign_plasma2eteherum(plasma_address: string, my_address: string, web3: any): Promise<string> {
     const msgParams = [
         {
@@ -407,7 +460,7 @@ function sign_plasma2eteherum(plasma_address: string, my_address: string, web3: 
         if (!web3 || !web3.currentProvider) {
             reject('No web3 instance');
         }
-        const {isMetaMask} = web3.currentProvider;
+        const {isMetaMask = false} = web3.currentProvider;
         console.log('METAMASK', isMetaMask);
 
         function cb(err, result) {
@@ -623,6 +676,8 @@ function generateSignatureKeys(
  */
 function sign_message(web3, msgParams, from, opts: IOptionalParamsSignMessage = {}) : Promise<string> {
     return new Promise<string>((resolve, reject) => {
+        const {isMetamask = false} = web3.currentProvider;
+
         function sign_message_callback(err, result) {
             if (err) {
                 console.log('Error in sign_message ' + err)
@@ -635,7 +690,7 @@ function sign_message(web3, msgParams, from, opts: IOptionalParamsSignMessage = 
                     result = result.result
                 }
 
-                if (opts.plasma || !opts.metamask) {
+                if (opts.plasma || !isMetamask) {
                     let n = result.length
                     let v = result.slice(n-2)
                     v = parseInt(v,16) + 32
@@ -647,7 +702,7 @@ function sign_message(web3, msgParams, from, opts: IOptionalParamsSignMessage = 
             }
         }
 
-        if (!opts.plasma && opts.metamask) {
+        if (!opts.plasma && isMetamask) {
             assert.ok(typeof msgParams == 'object', 'bad msgParams')
             // metamask uses  web3.eth.sign to sign transaction and not for arbitrary messages
             // instead use https://medium.com/metamask/scaling-web3-with-signtypeddata-91d6efc8b290
@@ -693,12 +748,18 @@ function sign_name(web3, my_address, name, opts: IOptionalParamsSignMessage = {}
 }
 
 
-interface IOptionalParamsSignMessage {
-    metamask? : boolean,
+export interface IOptionalParamsSignMessage {
     plasma? : boolean
 }
 
 export default {
+    sign_ethereum2plasma_note,
+    sign_ethereum2plasma,
+    sign_plasma2ethereum,
+    encrypt,
+    decrypt,
+    remove0x,
+    add0x,
     sign_name,
     free_take,
     free_join,
@@ -706,7 +767,7 @@ export default {
     privateToPublic,
     validate_join,
     generatePrivateKey,
-    sign_plasma2eteherum,
     sign_cut2eteherum,
     generateSignatureKeys,
+    sign_plasma2eteherum, //TODO: DEPRECATED
 };

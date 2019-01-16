@@ -36,8 +36,10 @@ import TwoKeyCongress from "./congress";
 import DecentralizedNation from "./decentralizedNation";
 import TwoKeyWeightedVoteContract from "./veightedVote";
 import TwoKerRegistry from './registry';
+import PlasmaEvents from './plasma';
 import UpgradableExchange from './upgradableExchange';
 import TwoKeyExchangeContract from './exchangeETHUSD';
+import {IPlasmaEvents} from "./plasma/interfaces";
 
 // const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 
@@ -81,6 +83,7 @@ export class TwoKeyProtocol {
     private twoKeyCall: any;
     private twoKeyEvents: any;
     private plasmaAddress: string;
+    private plasmaPrivateKey: string;
     public ERC20: IERC20;
     public Utils: ITwoKeyUtils;
     private Helpers: ITwoKeyHelpers;
@@ -92,6 +95,7 @@ export class TwoKeyProtocol {
     public Registry: ITwoKeyReg;
     public UpgradableExchange: IUpgradableExchange;
     public TwoKeyExchangeContract: ITwoKeyExchangeContract;
+    public PlasmaEvents: IPlasmaEvents;
 
     private _log: any;
 
@@ -127,6 +131,7 @@ export class TwoKeyProtocol {
 
         this._log = initValues.log || console.log;
 
+        this.plasmaPrivateKey = plasmaPK;
         // setWeb3 2KeySyncNet Client
         const private_key = Buffer.from(plasmaPK, 'hex');
         const eventsWallet = eth_wallet.fromPrivateKey(private_key);
@@ -165,7 +170,6 @@ export class TwoKeyProtocol {
         this.twoKeyAdmin = this.web3.eth.contract(contractsMeta.TwoKeyAdmin.abi).at(getDeployedAddress('TwoKeyAdmin', this.networks.mainNetId));
         this.twoKeyCongress = this.web3.eth.contract(contractsMeta.TwoKeyCongress.abi).at(getDeployedAddress('TwoKeyCongress', this.networks.mainNetId));
         this.twoKeyCall = this.web3.eth.contract(contractsMeta.Call.abi).at(getDeployedAddress('Call', this.networks.mainNetId));
-
         this.ipfs = ipfsAPI(ipfsIp, ipfsPort, {protocol});
 
         const twoKeyBase: ITwoKeyBase = {
@@ -183,6 +187,7 @@ export class TwoKeyProtocol {
             twoKeyPlasmaEvents: this.twoKeyPlasmaEvents,
             twoKeyCall: this.twoKeyCall,
             plasmaAddress: this.plasmaAddress,
+            plasmaPrivateKey: this.plasmaPrivateKey,
             _getGasPrice: this._getGasPrice,
             _setGasPrice: this._setGasPrice,
             _setTotalSupply: this._setTotalSupply,
@@ -192,6 +197,7 @@ export class TwoKeyProtocol {
         this.Helpers = new Helpers(twoKeyBase);
         this.ERC20 = new ERC20(twoKeyBase, this.Helpers);
         this.Utils = new Index(twoKeyBase, this.Helpers);
+        this.PlasmaEvents = new PlasmaEvents(twoKeyBase, this.Helpers, this.Utils);
         this.TwoKeyExchangeContract = new TwoKeyExchangeContract(twoKeyBase, this.Helpers, this.Utils);
         this.UpgradableExchange = new UpgradableExchange(twoKeyBase,this.Helpers,this.Utils);
         this.AcquisitionCampaign = new AcquisitionCampaign(twoKeyBase, this.Helpers, this.Utils, this.ERC20);

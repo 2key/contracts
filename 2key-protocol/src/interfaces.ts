@@ -5,6 +5,7 @@ export {ITwoKeyAcquisitionCampaign} from './acquisition/interfaces';
 export {IDecentralizedNation} from './decentralizedNation/interfaces';
 export {ITwoKeyWeightedVoteContract} from './veightedVote/interfaces';
 export {ITwoKeyReg} from './registry/interfaces';
+export {IPlasmaEvents} from './plasma/interfaces';
 export {ITwoKeyHelpers,ITwoKeyUtils,BalanceMeta,IOffchainData} from './utils/interfaces';
 export {IUpgradableExchange} from './upgradableExchange/interfaces';
 export {ITwoKeyExchangeContract} from './exchangeETHUSD/interfaces';
@@ -24,6 +25,7 @@ export interface ITwoKeyBase {
     twoKeyCongress: any;
     twoKeyPlasmaEvents: any;
     plasmaAddress: string;
+    plasmaPrivateKey: string;
     _setGasPrice: (number) => void,
     _getGasPrice: () => number,
     _setTotalSupply: (number) => void,

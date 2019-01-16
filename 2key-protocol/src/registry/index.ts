@@ -2,6 +2,7 @@ import {ITwoKeyBase, ITwoKeyHelpers, ITwoKeyUtils} from '../interfaces';
 import {promisify} from '../utils'
 import {ITwoKeyReg, IUserData} from "./interfaces";
 import Sign from '../utils/sign';
+import {strict} from "assert";
 
 export default class TwoKeyReg implements ITwoKeyReg {
     private readonly base: ITwoKeyBase;
@@ -100,20 +101,85 @@ export default class TwoKeyReg implements ITwoKeyReg {
     }
 
     /**
-     * Reads from public mapping value of note (mapping(address=>bytes))
-     * @param {string} address
+     *
+     * @param {string} from
      * @returns {Promise<string>}
      */
-    public getNotes(address: string) : Promise<string> {
+    public getPlasmaPrivateKeyFromNotes(from: string) : Promise<string> {
         return new Promise<string>(async(resolve,reject) => {
             try {
-                let notes = await promisify(this.base.twoKeyReg.notes,[address]);
+                let notes = await this.getNotes(from);
+                let decrypted = await Sign.decrypt(this.base.web3, from, notes, {});
+                let privateKey = Sign.remove0x(decrypted);
+                resolve(privateKey);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+    /**
+     *
+     * @param {string} from
+     * @returns {Promise<string>}
+     */
+    public getNotes(from:string) : Promise<string> {
+        return new Promise<string>(async(resolve,reject) => {
+            try {
+                let notes = await promisify(this.base.twoKeyReg.notes,[from]);
                 resolve(notes);
             } catch (e) {
                 reject(e);
             }
         })
     }
+
+    /**
+     *
+     * @param {string} note
+     * @param {string} from
+     * @returns {Promise<string>}
+     */
+    public setNoteByUser(note: string, from:string) : Promise<string> {
+        return new Promise<string>(async(resolve,reject) => {
+            try {
+                let txHash = await promisify(this.base.twoKeyReg.setNoteByUser,[note,{from}]);
+                resolve(txHash);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+    /**
+     *
+     * @param {string} from
+     * @returns {Promise<string>}
+     */
+    public addPlasma2EthereumByUser(from: string) : Promise<string> {
+        return new Promise<string>(async(resolve,reject) => {
+            try {
+                let plasmaAddress = this.base.plasmaAddress;
+                let stored_ethereum_address = await promisify(this.base.twoKeyReg.plasma2ethereum,[plasmaAddress]);
+                let plasmaPrivateKey = "";
+                let encryptedPlasmaPrivateKey = "";
+
+                if(stored_ethereum_address != from) {
+                    plasmaPrivateKey = Sign.add0x(this.base.plasmaPrivateKey);
+                    encryptedPlasmaPrivateKey = await Sign.encrypt(this.base.plasmaWeb3, from, plasmaPrivateKey, {plasma: true});
+                    let ethereum2plasmaSignature = await Sign.sign_ethereum2plasma(this.base.plasmaWeb3, from, this.base.plasmaAddress);
+                    let externalSignature = await Sign.sign_ethereum2plasma_note(this.base.web3,from, ethereum2plasmaSignature,plasmaPrivateKey);
+                    let txHash = await promisify(this.base.twoKeyReg.setPlasma2EthereumAndNoteSigned,
+                        [ethereum2plasmaSignature,plasmaPrivateKey,externalSignature,{from}]);
+                    resolve(txHash);
+                }
+
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
     /**
      *
      * @param {string} address
