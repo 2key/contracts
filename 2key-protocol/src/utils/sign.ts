@@ -96,7 +96,7 @@ function sign_plasma2ethereum(web3, plasma_address, my_address) : Promise<string
             value: plasma_address  // The value to sign
         }
     ];
-    return sign_message(web3, msgParams, my_address, {plasma: false});
+    return sign_message(web3, msgParams, my_address, {plasma: true});
 }
 
 /**
@@ -712,7 +712,7 @@ function sign_message(web3, msgParams, from, opts: IOptionalParamsSignMessage = 
                 from: from,
             }, sign_message_callback)
         } else {
-            let hash
+            let hash;
             if (typeof msgParams == 'object') {
                 hash = sigUtil.typedSignatureHash(msgParams)
             } else {
@@ -722,6 +722,7 @@ function sign_message(web3, msgParams, from, opts: IOptionalParamsSignMessage = 
             if (web3.eth.getSign) {
                 web3.eth.getSign(from, hash, sign_message_callback)
             } else {
+                console.log("I AM HEREEEE22!")
                 web3.eth.sign(from, hash, sign_message_callback)
             }
         }

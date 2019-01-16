@@ -19,7 +19,6 @@ const sendETH: any = (recipient) => new Promise(async (resolve, reject) => {
     try {
         console.log('Creating TwoKeyProtocol instance');
         const {web3, address} = await createWeb3(env.MNEMONIC_DEPLOYER, rpcUrl);
-        from = address;
         twoKeyProtocol = new TwoKeyProtocol({
             web3,
             networks: {
@@ -29,7 +28,7 @@ const sendETH: any = (recipient) => new Promise(async (resolve, reject) => {
             plasmaPK: Sign.generatePrivateKey(),
         });
         // console.log(twoKeyProtocol);
-        const txHash = await twoKeyProtocol.transferEther(recipient, twoKeyProtocol.Utils.toWei(100, 'ether'), from);
+        const txHash = await twoKeyProtocol.transferEther(recipient, twoKeyProtocol.Utils.toWei(100, 'ether'), address);
         console.log(`${recipient}: ${txHash}`);
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         console.log(`Status of transfering ether: ' + ${receipt.status}`);
@@ -54,7 +53,8 @@ describe('TwoKeyProtocol LOCAL Registering user test', () => {
     it('should register a random user', async () => {
         const {address} = await createWeb3(randomMnemonic, rpcUrl);
         await sendETH(address);
-        const {web3, address: from} = await createWeb3(randomMnemonic, rpcUrl);
+        const {web3, address: randomAddress} = await createWeb3(randomMnemonic, rpcUrl);
+        from = randomAddress;
         twoKeyProtocol.setWeb3({
             web3,
             networks: {
@@ -77,6 +77,10 @@ describe('TwoKeyProtocol LOCAL Registering user test', () => {
     }).timeout(30000);
 
     it('should register user to plasma', async() => {
-
+        let txHash = await twoKeyProtocol.PlasmaEvents.setPlasmaToEthereumOnPlasma(from);
+        console.log('This is txHash : ' + txHash);
+        let receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash,{web3: twoKeyProtocol.plasmaWeb3});
+        console.log(receipt);
     }).timeout(30000);
+
 });

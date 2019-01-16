@@ -65,7 +65,7 @@ function getDeployedAddress(contract: string, networkId: number | string): strin
 
 export class TwoKeyProtocol {
     private web3: any;
-    private plasmaWeb3: any;
+    public plasmaWeb3: any;
     private ipfs: any;
     public gasPrice: number;
     public totalSupply: number;
