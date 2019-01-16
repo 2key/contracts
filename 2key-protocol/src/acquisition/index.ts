@@ -529,14 +529,15 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @returns {Promise<string>}
      */
     public async getPublicLinkKey(campaign: any, from: string): Promise<string> {
-        try {
-            const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-            console.log(campaignInstance.publicLinkKey);
-            const publicLink = await promisify(campaignInstance.publicLinkKey, [from]);
-            return Promise.resolve(publicLink);
-        } catch (e) {
-            Promise.reject(e)
-        }
+        return new Promise<string>(async(resolve,reject) => {
+            try {
+                const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
+                const publicLink = await promisify(campaignInstance.publicLinkKeyOf, [from]);
+                resolve(publicLink);
+            } catch (e) {
+                reject(e)
+            }
+        });
     }
 
     // Join Offchain

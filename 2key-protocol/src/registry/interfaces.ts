@@ -8,6 +8,7 @@ export interface ITwoKeyReg {
     addName: (username:string, address:string, fullName:string, email:string, from: string) => Promise<string>,
     getUserData: (address: string) => Promise<IUserData>,
     setWalletName: (username: string, address: string, username_walletName: string, from: string, gasPrice?: number) => Promise<string>,
+    addNameSigned: (username: string, externalSig: string) => Promise<string>,
 }
 
 export interface IUserData {

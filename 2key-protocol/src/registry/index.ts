@@ -82,6 +82,23 @@ export default class TwoKeyReg implements ITwoKeyReg {
 
     /**
      *
+     * @param {string} username
+     * @param {string} externalSig
+     * @returns {Promise<string>}
+     */
+    public addNameSigned(username: string, externalSig: string) : Promise<string> {
+        return new Promise<string>(async(resolve,reject) => {
+            try {
+                let txHash = await promisify(this.base.twoKeyReg.addNameSigned,[username,externalSig]);
+                resolve(txHash);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+    /**
+     *
      * @param {string} address
      * @returns {Promise<IUserData>}
      */
