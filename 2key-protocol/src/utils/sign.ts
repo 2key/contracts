@@ -1,8 +1,89 @@
-import eth_util from 'ethereumjs-util';
+import eth_util, {toBuffer} from 'ethereumjs-util';
 import assert from 'assert';
 import crypto from 'crypto';
 import sigUtil from 'eth-sig-util';
 import {IPlasmaSignature, ISignedKeys} from './interfaces';
+
+
+
+/**
+ * Helper function to add 0x at the beginning of the address
+ * @param x
+ * @returns {any}
+ */
+function add0x(x) {
+    if (!x) {
+        return '0x'
+    }
+    if (x.startsWith('0x')) {
+        return x
+    } else {
+        return '0x' + x
+    }
+}
+
+/**
+ * Removes 0x from the beginning
+ * @param x string
+ * @returns {any}
+ */
+function remove0x(x) {
+    if (!x) {
+        return
+    }
+    if (x.startsWith('0x')) {
+        if (x.length == 2) {
+            return
+        }
+        return x.slice(2)
+    } else {
+        return x
+    }
+}
+
+/**
+ * GetKey subFunction
+ * @param web3
+ * @param me
+ * @returns {Promise<Buffer>}
+ */
+async function getKey(web3,me) {
+    let msgParams = [
+        {
+            type: 'bytes',      // Any valid solidity type
+            name: 'Password used to generate key',     // Any string label you want
+            value: me  // The value to sign
+        }
+    ]
+
+    let key = await sign_message(web3, msgParams, me)
+    key = remove0x(key)
+    key = key.slice(0,24*2)
+    let keyB = Buffer.from(key, 'hex')
+    return keyB;
+}
+
+// function encrypt(web3, address, clear_text) {
+//     return new Promise(async (resolve, reject) => {
+//         if (!clear_text) {
+//             resolve('0x')
+//             return
+//         }
+//         clear_text = remove0x(clear_text)
+//         let iv0 = crypto.randomBytes(16);
+//         let key = await getKey(web3, address);
+//         iv0 = iv0.toString('hex')
+//         let iv = crypto.enc.Hex.parse(iv0)
+//         clear_text = clear_text.toString('hex')
+//         key = key.toString('hex')
+//         var b64 = cryptoJS.AES.encrypt(clear_text, key, {iv}).toString();
+//         var e64 = cryptoJS.enc.Base64.parse(b64);
+//         var eHex = e64.toString(cryptoJS.enc.Hex)
+//         let encrypted = iv0+eHex
+//         encrypted = add0x(encrypted)
+//         resolve(encrypted)
+//     })
+// }
 
 function generatePrivateKey(): Buffer {
     return crypto.randomBytes(32)
@@ -492,7 +573,93 @@ function generateSignatureKeys(
     });
 }
 
+
+/**
+ *
+ * @param web3
+ * @param msgParams
+ * @param from
+ * @param {IOptionalParamsSignMessage} opts
+ * @returns {Promise<any>}
+ */
+function sign_message(web3, msgParams, from, opts: IOptionalParamsSignMessage = {}) : Promise<string> {
+    return new Promise<string>((resolve, reject) => {
+        function sign_message_callback(err, result) {
+            if (err) {
+                console.log('Error in sign_message ' + err)
+                reject(err)
+            } else if (!result) {
+                console.log('Error in sign_message no result')
+                reject()
+            } else {
+                if (typeof result != 'string') {
+                    result = result.result
+                }
+
+                if (opts.plasma || !opts.metamask) {
+                    let n = result.length
+                    let v = result.slice(n-2)
+                    v = parseInt(v,16) + 32
+                    v = Buffer.from([v]).toString('hex')
+                    result = result.slice(0,n-2) + v
+                }
+
+                resolve(result)
+            }
+        }
+
+        if (!opts.plasma && opts.metamask) {
+            assert.ok(typeof msgParams == 'object', 'bad msgParams')
+            // metamask uses  web3.eth.sign to sign transaction and not for arbitrary messages
+            // instead use https://medium.com/metamask/scaling-web3-with-signtypeddata-91d6efc8b290
+            web3.currentProvider.sendAsync({
+                method: 'eth_signTypedData',
+                params: [msgParams, from],
+                from: from,
+            }, sign_message_callback)
+        } else {
+            let hash
+            if (typeof msgParams == 'object') {
+                hash = sigUtil.typedSignatureHash(msgParams)
+            } else {
+                assert.ok(msgParams.startsWith('0x'), 'msgParams not 0x')
+                hash = web3.sha3(msgParams)
+            }
+            if (web3.eth.getSign) {
+                web3.eth.getSign(from, hash, sign_message_callback)
+            } else {
+                web3.eth.sign(from, hash, sign_message_callback)
+            }
+        }
+    })
+}
+
+/**
+ *
+ * @param web3
+ * @param my_address
+ * @param name
+ * @param {IOptionalParamsSignMessage} opts
+ * @returns {Promise<any>}
+ */
+function sign_name(web3, my_address, name, opts: IOptionalParamsSignMessage = {}) : Promise<string> {
+    let msgParams = [
+        {
+            type: 'bytes',      // Any valid solidity type
+            name: 'binding to name',     // Any string label you want
+            value: add0x(Buffer.from(name, 'ascii').toString('hex'))  // The value to sign
+        }
+    ];
+    return sign_message(web3, msgParams, my_address) // we never use metamask on plasma
+}
+
+interface IOptionalParamsSignMessage {
+    metamask? : boolean,
+    plasma? : boolean
+}
+
 export default {
+    sign_name,
     free_take,
     free_join,
     free_join_take,
