@@ -25,7 +25,7 @@ const sendETH: any = (recipient) => new Promise(async (resolve, reject) => {
                     mainNetId,
                     syncTwoKeyNetId,
                 },
-                plasmaPK: Sign.generatePrivateKey().toString('hex'),
+                plasmaPK: Sign.generatePrivateKey(),
             });
         }
         // console.log(twoKeyProtocol);

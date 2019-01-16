@@ -16,7 +16,6 @@ document.addEventListener('DOMContentLoaded', () => {
             // @ts-ignore
             window.TWOKEY = new TwoKeyProtocol({
                 web3,
-                address,
                 networks: {
                     // @ts-ignore
                     mainNetId: mainNet.value,

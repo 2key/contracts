@@ -33,7 +33,7 @@ const sendTokens: any = new Promise(async (resolve, reject) => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
-            plasmaPK: Sign.generatePrivateKey().toString('hex'),
+            plasmaPK: Sign.generatePrivateKey(),
         });
         const {balance} = twoKeyProtocol.Utils.balanceFromWeiString(await twoKeyProtocol.getBalance(destinationAddress), {inWei: true});
         if (parseFloat(balance['2KEY'].toString()) <= 20000 || process.env.FORCE) {

@@ -88,11 +88,12 @@ export default class TwoKeyReg implements ITwoKeyReg {
      * @param {string} from
      * @returns {Promise<string>}c
      */
-    public addNameSigned(username: string, from:string) : Promise<string> {
+    public addNameSignedToRegistry(username: string, from:string) : Promise<string> {
         return new Promise<string>(async(resolve,reject) => {
             try {
-                let externalSig = Sign.sign_name(this.base.web3,from,username);
-                let txHash = await promisify(this.base.twoKeyReg.addNameSigned,[username,externalSig,{from}]);
+                let externalSig = await Sign.sign_name(this.base.web3,from,username);
+                console.log(username,externalSig);
+                let txHash = await promisify(this.base.twoKeyReg.addNameSigned,[username, externalSig, {from}]);
                 resolve(txHash);
             } catch (e) {
                 reject(e);

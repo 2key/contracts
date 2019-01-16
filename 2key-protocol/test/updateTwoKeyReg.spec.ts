@@ -36,7 +36,7 @@ describe(`TwoKeyProtocol ${network}`, () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
-            plasmaPK: Sign.generatePrivateKey().toString('hex'),
+            plasmaPK: Sign.generatePrivateKey(),
         });
         const from = address;
         twoKeyProtocol.setWeb3({
@@ -45,7 +45,7 @@ describe(`TwoKeyProtocol ${network}`, () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
-            plasmaPK: Sign.generatePrivateKey().toString('hex'),
+            plasmaPK: Sign.generatePrivateKey(),
         });
 
         let initialAddresses = [
