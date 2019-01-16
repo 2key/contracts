@@ -1,6 +1,7 @@
 import {ITwoKeyBase, ITwoKeyHelpers, ITwoKeyUtils} from '../interfaces';
 import {promisify} from '../utils'
 import {ITwoKeyReg, IUserData} from "./interfaces";
+import Sign from '../utils/sign';
 
 export default class TwoKeyReg implements ITwoKeyReg {
     private readonly base: ITwoKeyBase;
@@ -83,13 +84,14 @@ export default class TwoKeyReg implements ITwoKeyReg {
     /**
      *
      * @param {string} username
-     * @param {string} externalSig should be taken from Sign.sign_name function
-     * @returns {Promise<string>}
+     * @param {string} from
+     * @returns {Promise<string>}c
      */
-    public addNameSigned(username: string, externalSig: string) : Promise<string> {
+    public addNameSigned(username: string, from:string) : Promise<string> {
         return new Promise<string>(async(resolve,reject) => {
             try {
-                let txHash = await promisify(this.base.twoKeyReg.addNameSigned,[username,externalSig]);
+                let externalSig = Sign.sign_name(this.base.web3,from,username);
+                let txHash = await promisify(this.base.twoKeyReg.addNameSigned,[username,externalSig,{from}]);
                 resolve(txHash);
             } catch (e) {
                 reject(e);
@@ -97,6 +99,21 @@ export default class TwoKeyReg implements ITwoKeyReg {
         })
     }
 
+    /**
+     * Reads from public mapping value of note (mapping(address=>bytes))
+     * @param {string} address
+     * @returns {Promise<string>}
+     */
+    public getNotes(address: string) : Promise<string> {
+        return new Promise<string>(async(resolve,reject) => {
+            try {
+                let notes = await promisify(this.base.twoKeyReg.notes,[address]);
+                resolve(notes);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
     /**
      *
      * @param {string} address
