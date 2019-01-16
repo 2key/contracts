@@ -83,7 +83,7 @@ export default class TwoKeyReg implements ITwoKeyReg {
     /**
      *
      * @param {string} username
-     * @param {string} externalSig
+     * @param {string} externalSig should be taken from Sign.sign_name function
      * @returns {Promise<string>}
      */
     public addNameSigned(username: string, externalSig: string) : Promise<string> {
