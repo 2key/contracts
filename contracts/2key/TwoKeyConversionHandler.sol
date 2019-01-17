@@ -19,7 +19,7 @@ import "../interfaces/IUpgradableExchange.sol";
 contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyConverterStates {
 
     using SafeMath for uint256;
-
+    uint raisedFundsEthWei = 0;
     uint numberOfConversions = 0;
     Conversion[] public conversions;
     mapping(address => uint[]) converterToHisConversions;
@@ -253,6 +253,9 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
         conversion.state = ConversionState.EXECUTED;
         conversions[_conversionId] = conversion;
         converterToLockupContracts[conversion.converter].push(lockupContract);
+
+        //Update total raised funds
+        raisedFundsEthWei = raisedFundsEthWei + conversion.contractorProceedsETHWei + conversion.moderatorFeeETHWei + conversion.maxReferralRewardETHWei;
     }
 
     /// @notice Function to check whether converter is approved or not
@@ -484,6 +487,24 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
         ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).sendBackEthWhenConversionCancelled(msg.sender, conversion.conversionAmount);
         conversions[_conversionId] = conversion;
     }
+
+    /**
+     * @notice Get's number of converters per type, and returns tuple, as well as total raised funds
+     */
+    function getNumberOfConvertersPerType() public view returns (uint,uint,uint,uint) {
+        bytes32 pending = convertConverterStateToBytes(ConverterState.PENDING_APPROVAL);
+        bytes32 approved = convertConverterStateToBytes(ConverterState.APPROVED);
+        bytes32 rejected = convertConverterStateToBytes(ConverterState.REJECTED);
+
+        uint numberOfPending = stateToConverter[pending].length;
+        uint numberOfApproved = stateToConverter[approved].length;
+        uint numberOfRejected = stateToConverter[rejected].length;
+
+        return (numberOfPending,numberOfApproved,numberOfRejected,raisedFundsEthWei);
+    }
+
+
+
 
 
 
