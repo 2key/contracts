@@ -82,8 +82,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     }
 
 
-
-
     /**
      * @notice Function which will unpack signature and get referrers, keys, and weights from it
      * @param sig is signature
@@ -154,6 +152,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         }
         return influencers;
     }
+
+
 
     /**
      * @notice Private function which will be executed at the withdraw time to buy 2key tokens from upgradable exchange contract
@@ -226,7 +226,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         setCutOf(msg.sender, cut);
     }
 
-
     /**
      * @notice Function where converter can join and convert
      * @dev payable function
@@ -240,6 +239,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         balancesConvertersETH[_converterPlasma] += msg.value;
         twoKeyEventSource.converted(address(this),_converterPlasma,msg.value);
     }
+
 
     /**
      * @notice Function where converter can convert
