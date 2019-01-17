@@ -242,6 +242,16 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
 //        ITwoKeyConversionHandler(conversionHandler).createAndExecuteOfflineConversion(contractor, _converterPlasma,
 //            conversionAmountETHWei, baseTokensForConverterUnits,bonusTokensForConverterUnits, expiryConversionInHours);
 //    }
+
+    function conversionOffline(address _converterAddress, uint _fiatAmount) public {
+        /**
+         * @notice Function where investor can state how much money he put to the contractorBalance
+         * since we're accepting only fiat, we can do literal calculation of how many tokens he gets
+         * then execute lockups
+         * in this case there are no referral rewards
+
+         */
+    }
     /**
      * @notice Function where converter can join and convert
      * @dev payable function

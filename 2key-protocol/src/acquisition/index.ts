@@ -94,6 +94,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                         data.twoKeyExchangeContract,
                         data.assetContractERC20
                     ]);
+
                 const campaignGas = await this.helpers._estimateSubcontractGas(contractsMeta.TwoKeyAcquisitionCampaignERC20, from, [
                     `0x${public_address}`,
                     this.helpers._getContractDeployedAddress('TwoKeyEventSource'),
