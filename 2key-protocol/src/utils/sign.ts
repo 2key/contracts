@@ -384,38 +384,36 @@ function recoverHash(hash1, p_message) {
     return new_address;
 }
 
-function validate_join(firtsPublicKey: string, f_address: string, f_secret: string, pMessage: string): number[] {
-    console.log('Validate join', firtsPublicKey, f_address, f_secret, pMessage);
+function validate_join(firstPublicKey: string, f_address: string, f_secret: string, pMessage: string, plasmaAddress: string): number[] {
+    console.log('Validate join', firstPublicKey, f_address, f_secret, pMessage);
     const bounty_cuts = [];
 
     let last_private_key;
     let last_public_key;
-    let first_public_key: any = firtsPublicKey;
+    let first_public_key: any = firstPublicKey;
     let p_message = pMessage;
     if (f_secret) {
-        last_private_key = Buffer.from(f_secret, 'hex');
+        last_private_key = Buffer.from(remove0x(f_secret), 'hex');
         assert.ok(eth_util.isValidPrivate(last_private_key), 'last private key not valid');
         last_public_key = privateToPublic(last_private_key);
     }
 
-    if (first_public_key.startsWith('0x')) {
-        first_public_key = first_public_key.slice(2);
+    if (first_public_key) {
+        first_public_key = remove0x(first_public_key)
     }
     if (!p_message) {
         assert.ok(first_public_key == last_public_key, 'keys dont match');
         return bounty_cuts
     }
 
-    if (p_message.startsWith('0x')) {
-        p_message = p_message.slice(2);
-    }
+    p_message = remove0x(p_message);
 
     let version = p_message.slice(0, 2);
     p_message = p_message.slice(2);
     assert.ok(version === '00' || version === '01');
-    if (f_address) {
+    if (!plasmaAddress && f_address) {
         if (version === '00') {
-            p_message += f_address.slice(2);
+            p_message += remove0x(f_address);
         }
         if (last_public_key) {
             p_message += last_public_key;
@@ -427,7 +425,7 @@ function validate_join(firtsPublicKey: string, f_address: string, f_secret: stri
     p_message = p_message.slice(2 * 20);
     let msg_len = (version === '01') ? 86 : 41;
 
-    while (p_message.length >= 2 * (65 + msg_len)) {
+    while (p_message.length >= 2 * 65) {
         // not having the last 41 bytes can happen only for last step of a converter
         // read signature
         let r: any = p_message.slice(0, 32 * 2);
@@ -440,6 +438,17 @@ function validate_join(firtsPublicKey: string, f_address: string, f_secret: stri
         v = Buffer.from(v, 'hex')[0];
         assert.ok(v == 27 || v == 28, 'unknown sig.v');
         p_message = p_message.slice(1 * 2);
+
+        if (p_message.length === 0 && plasmaAddress) {
+            const hash = eth_util.sha3(Buffer.from(remove0x(plasmaAddress), 'hex'));
+            let recovered_address = eth_util.ecrecover(hash, v, r, s);
+            // @ts-ignore
+            recovered_address = eth_util.publicToAddress(recovered_address).toString('hex');
+            assert.ok(!first_public_key || first_public_key == recovered_address, 'signature failed');
+            return bounty_cuts;
+        }
+
+        assert.ok(p_message.length >= 2*msg_len, 'message to short');
 
         let bounty_cut: any = p_message.slice(0, 1 * 2);
         p_message = p_message.slice(1 * 2);
@@ -476,7 +485,7 @@ function validate_join(firtsPublicKey: string, f_address: string, f_secret: stri
     }
 
     assert.ok(p_message.length === 0, 'bad message length');
-
+    assert.ok(!plasmaAddress, 'message did not end with my signature');
     return bounty_cuts;
 }
 
@@ -699,7 +708,6 @@ function generateSignatureKeys(
     });
 }
 
-
 /**
  *
  * @param web3
@@ -756,7 +764,6 @@ function sign_message(web3, msgParams, from, opts: IOptionalParamsSignMessage = 
             if (web3.eth.getSign) {
                 web3.eth.getSign(from, hash, sign_message_callback)
             } else {
-                console.log("I AM HEREEEE22!")
                 web3.eth.sign(from, hash, sign_message_callback)
             }
         }

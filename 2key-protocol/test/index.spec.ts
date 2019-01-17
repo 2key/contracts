@@ -514,7 +514,13 @@ describe('TwoKeyProtocol', () => {
         console.log('isUserJoined', await twoKeyProtocol.AcquisitionCampaign.isAddressJoined(campaignAddress, from));
         let maxReward = await twoKeyProtocol.AcquisitionCampaign.getEstimatedMaximumReferralReward(campaignAddress, from, refLink);
         console.log(`Estimated maximum referral reward: ${maxReward}%`);
-        const hash = await twoKeyProtocol.AcquisitionCampaign.joinAndSetPublicLinkWithCut(campaignAddress, from, refLink, {cut: 33});
+        // const hash = await twoKeyProtocol.AcquisitionCampaign.joinAndSetPublicLinkWithCut(campaignAddress, from, refLink, {cut: 33});
+        const hash = await twoKeyProtocol.AcquisitionCampaign.join(campaignAddress, from, {
+            cut: 33,
+            referralLink: refLink
+        });
+        refLink = hash;
+
         refLink = hash;
         console.log('isUserJoined', await twoKeyProtocol.AcquisitionCampaign.isAddressJoined(campaignAddress, from));
         console.log('3) test4 Cutted REFLINK', refLink);
