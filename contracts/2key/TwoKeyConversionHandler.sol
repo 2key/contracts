@@ -141,41 +141,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
         return state;
     }
 
-    /**
-     * @notice Function to create and execute offline conversion
-     */
-    function createAndExecuteOfflineConversion(
-        address _contractor,
-        address _converterAddress,
-        uint256 _conversionAmount,
-        uint256 baseTokensForConverterUnits,
-        uint256 bonusTokensForConverterUnits,
-        uint256 expiryConversion
-    ) public onlyTwoKeyAcquisitionCampaign {
-        converterToState[_converterAddress] = ConverterState.APPROVED;
-        Conversion memory conversion = Conversion(_contractor, 0, _converterAddress,
-            ConversionState.APPROVED ,_conversionAmount, 0, 0, baseTokensForConverterUnits,
-            bonusTokensForConverterUnits, CampaignType.CPA_FUNGIBLE,
-            now, now + expiryConversion * (1 hours));
-        //Updating converter's array of conversions
-        converterToHisConversions[_converterAddress].push(numberOfConversions);
-
-        //Creating lockup contract for this conversion
-        TwoKeyLockupContract lockupContract = new TwoKeyLockupContract(bonusTokensVestingStartShiftInDaysFromDistributionDate, bonusTokensVestingMonths, tokenDistributionDate, maxDistributionDateShiftInDays,
-            conversion.baseTokenUnits, conversion.bonusTokenUnits, conversion.converter, conversion.contractor, twoKeyAcquisitionCampaignERC20, assetContractERC20);
-
-        allLockUpContracts.push(address(lockupContract));
-
-        uint totalUnits = conversion.baseTokenUnits + conversion.bonusTokenUnits;
-
-        ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).moveFungibleAsset(address(lockupContract), totalUnits);
-
-        conversion.state = ConversionState.EXECUTED;
-        conversions[numberOfConversions] = conversion;
-        numberOfConversions++;
-        converterToLockupContracts[conversion.converter].push(lockupContract);
-    }
-
     /// @notice Support function to create conversion
     /// @dev This function can only be called from TwoKeyAcquisitionCampaign contract address
     /// @param _contractor is the address of campaign contractor
