@@ -15,6 +15,28 @@ export default class PlasmaEvents implements IPlasmaEvents {
         this.utils = utils;
     }
 
+    /**
+     *
+     * @param {string} from
+     * @returns {Promise<string>}
+     */
+    public signPlasmaToEthereum(from: string) : Promise<string> {
+        return new Promise<string>(async(resolve,reject) => {
+            try {
+                let plasmaAddress = this.base.plasmaAddress;
+                let storedEthAddress = await promisify(this.base.twoKeyPlasmaEvents.plasma2ethereum,[plasmaAddress]);
+                if(storedEthAddress != from) {
+                    let plasma2ethereum_sig = await Sign.sign_plasma2ethereum(this.base.web3,this.base.plasmaAddress, from);
+                    resolve(plasma2ethereum_sig);
+                } else {
+                    reject(new Error('Already registered on plasma network!'));
+                }
+
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
 
     /**
      *
@@ -24,19 +46,11 @@ export default class PlasmaEvents implements IPlasmaEvents {
     public setPlasmaToEthereumOnPlasma(from: string) : Promise<string> {
         return new Promise(async(resolve,reject) => {
             try {
-                let txHash = "";
-                let plasmaAddress = this.base.plasmaAddress;
-                console.log(plasmaAddress);
-                console.log(this.base.plasmaPrivateKey);
-                let storedEthAddress = await promisify(this.base.twoKeyPlasmaEvents.plasma2ethereum,[plasmaAddress]);
-                if(storedEthAddress != from) {
-                    let plasma2ethereum_sig = await Sign.sign_plasma2ethereum(this.base.web3,this.base.plasmaAddress, from);
-                    console.log('Plasma 2 ethereum: '+ plasma2ethereum_sig);
-                    txHash = await promisify(this.base.twoKeyPlasmaEvents.add_plasma2ethereum,[plasma2ethereum_sig,
-                        {
-                            from: this.base.plasmaAddress
-                        }]);
-                }
+                let plasma2ethereum_sig = await this.signPlasmaToEthereum(from);
+                let txHash = await promisify(this.base.twoKeyPlasmaEvents.add_plasma2ethereum,[plasma2ethereum_sig,
+                    {
+                        from: this.base.plasmaAddress
+                    }]);
                 resolve(txHash);
             } catch (e) {
                 reject(e);
