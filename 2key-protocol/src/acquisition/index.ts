@@ -323,7 +323,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         return new Promise<any>(async (resolve, reject) => {
             try {
                 const {campaign} = await this.utils.getOffchainDataFromIPFSHash(hash);
-                await this.visit(campaign, hash);
+                // await this.visit(campaign, hash);
                 const campaignMeta = await this.getPublicMeta({campaign, from});
                 resolve(campaignMeta);
             } catch (e) {
@@ -440,20 +440,22 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @param {string} referralLink
      * @returns {Promise<string>}
      */
-    public visit(campaignAddress: string, referralLink: string): Promise<string> {
+    public visit(handle: string, campaignAddress: string, referralLink: string): Promise<string> {
         return new Promise<string>(async (resolve, reject) => {
             try {
                 const {f_address, f_secret, p_message} = await this.utils.getOffchainDataFromIPFSHash(referralLink);
-                const sig = Sign.free_take(this.base.plasmaAddress, f_address, f_secret, p_message);
+                const plasmaAddress = this.base.plasmaAddress;
+                const sig = Sign.free_take(plasmaAddress, f_address, f_secret, p_message);
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaignAddress);
                 const contractor = await promisify(campaignInstance.contractor, []);
                 const txHash: string = await promisify(this.base.twoKeyPlasmaEvents.visited, [
-                    campaignAddress,
+                    campaignInstance.address,
                     contractor,
                     sig,
-                    {from: this.base.plasmaAddress, gasPrice: 0}
+                    {from: plasmaAddress, gasPrice: 0}
                 ]);
-                // await this.utils.getTransactionReceiptMined(txHash, {web3: this.base.plasmaWeb3});
+                const note = await Sign.encrypt(this.base.plasmaWeb3, plasmaAddress, f_secret, { plasma: true });
+                await promisify(this.base.twoKeyPlasmaEvents.setNoteByUser, [campaignInstance.address, note, { from: plasmaAddress}]);
                 resolve(txHash);
             } catch (e) {
                 reject(e);

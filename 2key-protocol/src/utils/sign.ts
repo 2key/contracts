@@ -221,7 +221,18 @@ function privateToPublic(private_key: Buffer) {
     return eth_util.publicToAddress(eth_util.privateToPublic(private_key)).toString('hex');
 }
 
-function free_take(my_address: string, f_address: string, f_secret?: string, p_message?: string) {
+function ecsign(message, private_key) {
+    let msg = Buffer.from(remove0x(message), 'hex');
+    let msgHash = eth_util.sha3(msg);
+    const sig = eth_util.ecsign(msgHash, private_key);
+    assert.ok(sig.v == 27 || sig.v == 28, 'unknown sig.v');
+
+    const signature = Buffer.concat([sig.r, sig.s, Buffer.from([sig.v])]).toString('hex');
+    return `0x${signature}`;
+}
+
+
+function free_take(my_address: string, f_address: string, f_secret?: string, pMessage?: string) {
     // using information in the signed link (f_address,f_secret,p_message)
     // return a new message that can be passed to the transferSig method of the contract
     // to move ARCs arround in the current. For example:
@@ -231,42 +242,34 @@ function free_take(my_address: string, f_address: string, f_secret?: string, p_m
     // f_address - previous influencer
     // f_secret - the secret of the parent (contractor or previous influencer) is passed in the 2key link
     // p_message - the message built by previous influencers
-    const old_private_key = Buffer.from(f_secret, 'hex');
+    const old_private_key = Buffer.from(remove0x(f_secret), 'hex');
     if (!eth_util.isValidPrivate(old_private_key)) {
         throw new Error('old private key not valid');
     }
 
     let m;
-    const version = p_message ? p_message.slice(0, 2) : '00';
+    let version;
+    let p_message = pMessage;
     // let prefix = "00"  // not reall important because it only used when receiving a free link directly from the contractor
 
     if (p_message) {  // the message built by previous influencers
-        m = p_message;
-        if (version === '00') {
-            m += f_address.slice(2);
-        }
-        const old_public_address = privateToPublic(old_private_key);
-        m += old_public_address
+        p_message = remove0x(p_message);
+        version = p_message.slice(0, 2);
     } else {
-        // this happens when receiving a free link directly from the contractor
-        m = `00${f_address.slice(2)}`;
+        version = '00';
     }
 
+    if (p_message) {
+        m = p_message;
+        if (version == '00') {
+            m += remove0x(f_address);
+        }
+        m += privateToPublic(old_private_key);
+    } else {
+        m = version + remove0x(f_address);
+    }
 
-    // the message we want to sign is my address (I'm the converter)
-    // and we will sign with the private key from the previous step (contractor or influencer)
-    // this will prove that I (my address) knew what the previous private key was
-    const msg = Buffer.from(my_address.slice(2), 'hex'); // skip 0x
-    const msgHash = eth_util.sha3(msg);
-    let sig = eth_util.ecsign(msgHash, old_private_key);
-    assert.ok(sig.v === 27 || sig.v === 28, 'unknown sig.v');
-
-    sig = Buffer.concat([sig.r, sig.s, Buffer.from([sig.v])]);
-
-    // TODO: Fix this
-    // @ts-ignore: custom toString() implementation
-    m += sig.toString('hex');
-    m = `0x${m}`;
+    m = `0x${m}${remove0x(ecsign(my_address, old_private_key))}`;
     return m;
 }
 
