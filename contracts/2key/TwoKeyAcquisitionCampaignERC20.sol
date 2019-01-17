@@ -226,22 +226,22 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         setCutOf(msg.sender, cut);
     }
 
-    function createOfflineAcquisition(address _converterAddress, uint256 conversionAmountETHWei) public onlyContractor {
-        address _converterPlasma = twoKeyEventSource.plasmaOf(_converterAddress);
-        uint baseTokensForConverterUnits;
-        uint bonusTokensForConverterUnits;
-
-        (baseTokensForConverterUnits, bonusTokensForConverterUnits)
-        = ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).getEstimatedTokenAmount(conversionAmountETHWei);
-
-        uint totalTokensForConverterUnits = baseTokensForConverterUnits + bonusTokensForConverterUnits;
-
-        uint256 _total_units = getInventoryBalance();
-        require(_total_units - reservedAmountOfTokens >= totalTokensForConverterUnits, 'Inventory balance does not have enough funds');
-        //In this case we're not reserving amount of tokens since the conversion is going to be immediately executed
-        ITwoKeyConversionHandler(conversionHandler).createAndExecuteOfflineConversion(contractor, _converterPlasma,
-            conversionAmountETHWei, baseTokensForConverterUnits,bonusTokensForConverterUnits, expiryConversionInHours);
-    }
+//    function createOfflineAcquisition(address _converterAddress, uint256 conversionAmountETHWei) public onlyContractor {
+//        address _converterPlasma = twoKeyEventSource.plasmaOf(_converterAddress);
+//        uint baseTokensForConverterUnits;
+//        uint bonusTokensForConverterUnits;
+//
+//        (baseTokensForConverterUnits, bonusTokensForConverterUnits)
+//        = ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).getEstimatedTokenAmount(conversionAmountETHWei);
+//
+//        uint totalTokensForConverterUnits = baseTokensForConverterUnits + bonusTokensForConverterUnits;
+//
+//        uint256 _total_units = getInventoryBalance();
+//        require(_total_units - reservedAmountOfTokens >= totalTokensForConverterUnits, 'Inventory balance does not have enough funds');
+//        //In this case we're not reserving amount of tokens since the conversion is going to be immediately executed
+//        ITwoKeyConversionHandler(conversionHandler).createAndExecuteOfflineConversion(contractor, _converterPlasma,
+//            conversionAmountETHWei, baseTokensForConverterUnits,bonusTokensForConverterUnits, expiryConversionInHours);
+//    }
     /**
      * @notice Function where converter can join and convert
      * @dev payable function
