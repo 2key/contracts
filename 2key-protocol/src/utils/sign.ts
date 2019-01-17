@@ -1,10 +1,9 @@
 import eth_util, {toBuffer} from 'ethereumjs-util';
 import eth_wallet from 'ethereumjs-wallet';
-import *  as cryptoJS from'crypto-js'
+import *  as cryptoJS from 'crypto-js'
 import assert from 'assert';
 import sigUtil from 'eth-sig-util';
 import {IPlasmaSignature, ISignedKeys} from './interfaces';
-
 
 
 /**
@@ -48,7 +47,7 @@ function remove0x(x) {
  * @param me
  * @returns {Promise<Buffer>}
  */
-async function getKey(web3,me,opts: IOptionalParamsSignMessage) {
+async function getKey(web3, me, opts: IOptionalParamsSignMessage) {
     let msgParams = [
         {
             type: 'bytes',      // Any valid solidity type
@@ -59,7 +58,7 @@ async function getKey(web3,me,opts: IOptionalParamsSignMessage) {
 
     let key = await sign_message(web3, msgParams, me, opts);
     key = remove0x(key);
-    key = key.slice(0,24*2);
+    key = key.slice(0, 24 * 2);
     return Buffer.from(key, 'hex');
 }
 
@@ -70,7 +69,7 @@ async function getKey(web3,me,opts: IOptionalParamsSignMessage) {
  * @param plasma_address
  * @returns {Promise<string>}
  */
-function sign_ethereum2plasma(plasma_web3, my_address, plasma_address) : Promise<string> {
+function sign_ethereum2plasma(plasma_web3, my_address, plasma_address): Promise<string> {
     let msgParams = [
         {
             type: 'bytes',      // Any valid solidity type
@@ -88,7 +87,7 @@ function sign_ethereum2plasma(plasma_web3, my_address, plasma_address) : Promise
  * @param my_address
  * @returns {Promise<string>}
  */
-function sign_plasma2ethereum(web3, plasma_address, my_address) : Promise<string> {
+function sign_plasma2ethereum(web3, plasma_address, my_address): Promise<string> {
     let msgParams = [
         {
             type: 'bytes',      // Any valid solidity type
@@ -107,16 +106,17 @@ function sign_plasma2ethereum(web3, plasma_address, my_address) : Promise<string
  * @param note
  * @returns {Promise<string>}
  */
-function sign_ethereum2plasma_note(web3, my_address, ethereum2plasma_sig, note) : Promise<string> {
+function sign_ethereum2plasma_note(web3, my_address, ethereum2plasma_sig, note): Promise<string> {
     let msgParams = [
         {
             type: 'bytes',      // Any valid solidity type
             name: 'binding to ethereum-plasma',     // Any string label you want
-            value: ethereum2plasma_sig+remove0x(note)  // The value to sign
+            value: ethereum2plasma_sig + remove0x(note)  // The value to sign
         }
     ];
     return sign_message(web3, msgParams, my_address, {plasma: false}) // we never use metamask on plasma
 }
+
 /**
  *
  * @param web3
@@ -124,7 +124,7 @@ function sign_ethereum2plasma_note(web3, my_address, ethereum2plasma_sig, note) 
  * @param encrypted
  * @returns {Promise<any>}
  */
-function decrypt(web3,me,encrypted, opts: IOptionalParamsSignMessage) : Promise<string> {
+function decrypt(web3, me, encrypted, opts: IOptionalParamsSignMessage): Promise<string> {
     return new Promise(async (resolve, reject) => {
         encrypted = remove0x(encrypted);
         if (!encrypted) {
@@ -132,7 +132,7 @@ function decrypt(web3,me,encrypted, opts: IOptionalParamsSignMessage) : Promise<
             return;
         }
         let keyBuffer = await getKey(web3, me, opts);
-        let iv0 = encrypted.slice(0,32);
+        let iv0 = encrypted.slice(0, 32);
         let iv = cryptoJS.enc.Hex.parse(iv0);
         encrypted = encrypted.slice(32);
 
@@ -153,7 +153,7 @@ function decrypt(web3,me,encrypted, opts: IOptionalParamsSignMessage) : Promise<
  * @param clear_text
  * @returns {Promise<any>}
  */
-function encrypt(web3, address, clear_text, opts: IOptionalParamsSignMessage) : Promise<string> {
+function encrypt(web3, address, clear_text, opts: IOptionalParamsSignMessage): Promise<string> {
     return new Promise(async (resolve, reject) => {
         if (!clear_text) {
             resolve('0x');
@@ -162,14 +162,14 @@ function encrypt(web3, address, clear_text, opts: IOptionalParamsSignMessage) : 
         clear_text = remove0x(clear_text);
         let iv0 = cryptoJS.lib.WordArray.random(16);
         let keyBuffer = await getKey(web3, address, opts);
-        iv0 = iv0.toString('hex');
+        iv0 = iv0.toString(cryptoJS.enc.Hex);
         let iv = cryptoJS.enc.Hex.parse(iv0);
         clear_text = clear_text.toString('hex');
         let key = keyBuffer.toString('hex');
-        var b64 = cryptoJS.AES.encrypt(clear_text, key, {iv}).toString();
-        var e64 = cryptoJS.enc.Base64.parse(b64);
-        var eHex = e64.toString(cryptoJS.enc.Hex);
-        let encrypted = iv0+eHex;
+        let b64 = cryptoJS.AES.encrypt(clear_text, key, {iv}).toString();
+        let e64 = cryptoJS.enc.Base64.parse(b64);
+        let eHex = e64.toString(cryptoJS.enc.Hex);
+        let encrypted = iv0 + eHex;
         encrypted = add0x(encrypted);
         resolve(encrypted);
     })
@@ -674,7 +674,7 @@ function generateSignatureKeys(
  * @param {IOptionalParamsSignMessage} opts
  * @returns {Promise<any>}
  */
-function sign_message(web3, msgParams, from, opts: IOptionalParamsSignMessage = {}) : Promise<string> {
+function sign_message(web3, msgParams, from, opts: IOptionalParamsSignMessage = {}): Promise<string> {
     return new Promise<string>((resolve, reject) => {
         const {isMetamask = false} = web3.currentProvider;
 
@@ -691,11 +691,11 @@ function sign_message(web3, msgParams, from, opts: IOptionalParamsSignMessage = 
                 }
 
                 if (opts.plasma || !isMetamask) {
-                    let n = result.length
-                    let v = result.slice(n-2)
-                    v = parseInt(v,16) + 32
-                    v = Buffer.from([v]).toString('hex')
-                    result = result.slice(0,n-2) + v
+                    let n = result.length;
+                    let v = result.slice(n - 2);
+                    v = parseInt(v, 16) + 32;
+                    v = Buffer.from([v]).toString('hex');
+                    result = result.slice(0, n - 2) + v
                 }
 
                 resolve(result)
@@ -737,7 +737,7 @@ function sign_message(web3, msgParams, from, opts: IOptionalParamsSignMessage = 
  * @param {IOptionalParamsSignMessage} opts
  * @returns {Promise<any>}
  */
-function sign_name(web3, my_address, name, opts: IOptionalParamsSignMessage = {}) : Promise<string> {
+function sign_name(web3, my_address, name, opts: IOptionalParamsSignMessage = {}): Promise<string> {
     let msgParams = [
         {
             type: 'bytes',      // Any valid solidity type
@@ -750,7 +750,7 @@ function sign_name(web3, my_address, name, opts: IOptionalParamsSignMessage = {}
 
 
 export interface IOptionalParamsSignMessage {
-    plasma? : boolean
+    plasma?: boolean
 }
 
 export default {
