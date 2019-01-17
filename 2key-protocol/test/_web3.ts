@@ -58,6 +58,22 @@ export function ledgerWeb3(rpcUrl: string, networkId?: number, path?: string): P
     });
 }
 
+/**
+ *
+ * @param mnemonic
+ * @returns {{address: string; privateKey: string}}
+ */
+export const generatePlasmaFromMnemonic = (mnemonic) => {
+    const plasmaMnemonic = mnemonic.split(' ').reverse().join(' ');
+    const hdwallet = hdkey.fromMasterSeed(bip39.mnemonicToSeed(plasmaMnemonic));
+    const wallet = hdwallet.derivePath('m/44\'/60\'/0\'/0/' + 0).getWallet();
+    const address = `0x${wallet.getAddress().toString('hex')}`;
+    const privateKey = wallet.getPrivateKey().toString('hex');
+    return {
+        address,privateKey
+    };
+};
+
 export default function (mnemonic: string, rpcUrl: string, pk?: string): EthereumWeb3 {
     let wallet;
     if (pk) {
