@@ -398,30 +398,57 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     const cut = await this.getReferrerCut(campaign, from);
                     resolve(cut);
                 } else {
+                    const plasmaAddress = this.base.plasmaAddress;
                     const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
                     const contractorAddress = await promisify(campaignInstance.contractor, []);
-                    const {f_address, f_secret, p_message} = await this.utils.getOffchainDataFromIPFSHash(referralLink);
+                    // const {f_address, f_secret, p_message} = await this.utils.getOffchainDataFromIPFSHash(referralLink);
                     const contractConstants = (await promisify(campaignInstance.getConstantInfo, []));
                     // const decimals = contractConstants[3].toNumber();
                     // this.base._log('Decimals', decimals);
+                    let f_address = await promisify(this.base.twoKeyPlasmaEvents.visited_from, [
+                        campaignInstance.address,
+                        contractorAddress,
+                        plasmaAddress,
+                    ]);
+
+                    let f_secret = await promisify(this.base.twoKeyPlasmaEvents.notes, [
+                        campaignInstance.address,
+                        plasmaAddress,
+                    ]);
+                    f_secret = await Sign.decrypt(this.base.plasmaWeb3, plasmaAddress, f_secret, { plasma: true });
+                    f_secret = Sign.remove0x(f_secret);
+
+                    let p_message = await promisify(this.base.twoKeyPlasmaEvents.visited_sig, [
+                        campaignInstance.address,
+                        contractorAddress,
+                        plasmaAddress,
+                    ]);
+
+
                     this.base._log('getEstimatedMaximumReferralReward', f_address, contractorAddress);
                     // const maxReferralRewardPercent = new BigNumber(contractConstants[1]).div(10 ** decimals).toNumber();
                     const maxReferralRewardPercent = contractConstants[1].toNumber();
-                    this.base._log('maxReferralRewardPercent', maxReferralRewardPercent)
+
+
+                    this.base._log('maxReferralRewardPercent', maxReferralRewardPercent);
                     if (f_address === contractorAddress) {
                         resolve(maxReferralRewardPercent);
                         return;
                     }
-                    const firstAddressInChain = p_message ? `0x${p_message.substring(2, 42)}` : f_address;
+                    const firstAddressInChain = p_message ? `0x${p_message.substring(4, 44)}` : f_address;
                     this.base._log('RefCHAIN', contractorAddress, f_address, firstAddressInChain);
                     let cuts: number[];
-                    const firstPublicLink = await promisify(campaignInstance.publicLinkKey, [firstAddressInChain]);
+                    const firstPublicLink = await promisify(this.base.twoKeyPlasmaEvents.publicLinkKeyOf, [
+                        campaignInstance.address,
+                        contractorAddress,
+                        firstAddressInChain,
+                    ]);
                     if (firstAddressInChain === contractorAddress) {
                         this.base._log('First public Link', firstPublicLink);
-                        cuts = Sign.validate_join(firstPublicLink, f_address, f_secret, p_message);
+                        cuts = Sign.validate_join(firstPublicLink, f_address, f_secret, p_message, plasmaAddress);
                     } else {
                         cuts = (await promisify(campaignInstance.getReferrerCuts, [firstAddressInChain])).map(cut => cut.toNumber());
-                        cuts = cuts.concat(Sign.validate_join(firstPublicLink, f_address, f_secret, p_message));
+                        cuts = cuts.concat(Sign.validate_join(firstPublicLink, f_address, f_secret, p_message, plasmaAddress));
                     }
                     this.base._log('CUTS', cuts, maxReferralRewardPercent);
                     const estimatedMaxReferrerRewardPercent = calcFromCuts(cuts, maxReferralRewardPercent);
