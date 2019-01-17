@@ -1,6 +1,6 @@
 import {ITwoKeyBase, ITwoKeyHelpers, ITwoKeyUtils} from '../interfaces';
 import {promisify} from '../utils'
-import {ITwoKeyReg, IUserData} from "./interfaces";
+import {ISignedPlasma, ITwoKeyReg, IUserData} from "./interfaces";
 import Sign from '../utils/sign';
 import {strict} from "assert";
 
@@ -153,12 +153,12 @@ export default class TwoKeyReg implements ITwoKeyReg {
     }
 
     /**
-     *
+     * Checks if user is already registered, if not -> proceeds
      * @param {string} from
-     * @returns {Promise<string>}
+     * @returns {Promise<ISignedPlasma>}
      */
-    public addPlasma2EthereumByUser(from: string) : Promise<string> {
-        return new Promise<string>(async(resolve,reject) => {
+    public signPlasma2Ethereum(from: string) : Promise<ISignedPlasma> {
+        return new Promise<ISignedPlasma>(async(resolve,reject) => {
             try {
                 let plasmaAddress = this.base.plasmaAddress;
                 let stored_ethereum_address = await promisify(this.base.twoKeyReg.plasma2ethereum,[plasmaAddress]);
@@ -170,10 +170,33 @@ export default class TwoKeyReg implements ITwoKeyReg {
                     encryptedPlasmaPrivateKey = await Sign.encrypt(this.base.plasmaWeb3, from, plasmaPrivateKey, {plasma: true});
                     let ethereum2plasmaSignature = await Sign.sign_ethereum2plasma(this.base.plasmaWeb3, from, this.base.plasmaAddress);
                     let externalSignature = await Sign.sign_ethereum2plasma_note(this.base.web3,from, ethereum2plasmaSignature,plasmaPrivateKey);
-                    let txHash = await promisify(this.base.twoKeyReg.setPlasma2EthereumAndNoteSigned,
-                        [ethereum2plasmaSignature,plasmaPrivateKey,externalSignature,{from}]);
-                    resolve(txHash);
+                    resolve({
+                        plasmaPrivateKey,
+                        ethereum2plasmaSignature,
+                        externalSignature
+                    });
+                } else {
+                    reject(new Error('Already registered!'));
                 }
+
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+    /**
+     *
+     * @param {string} from
+     * @returns {Promise<string>}
+     */
+    public addPlasma2EthereumByUser(from: string) : Promise<string> {
+        return new Promise<string>(async(resolve,reject) => {
+            try {
+                const {plasmaPrivateKey, ethereum2plasmaSignature, externalSignature} = await this.signPlasma2Ethereum(from);
+                let txHash = await promisify(this.base.twoKeyReg.setPlasma2EthereumAndNoteSigned,
+                    [ethereum2plasmaSignature,plasmaPrivateKey,externalSignature,{from}]);
+                resolve(txHash);
 
             } catch (e) {
                 reject(e);

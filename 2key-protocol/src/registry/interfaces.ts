@@ -9,10 +9,17 @@ export interface ITwoKeyReg {
     getUserData: (address: string) => Promise<IUserData>,
     setWalletName: (username: string, address: string, username_walletName: string, from: string, gasPrice?: number) => Promise<string>,
     addNameSignedToRegistry: (username: string, from:string) => Promise<string>,
+    signPlasma2Ethereum: (from: string) => Promise<ISignedPlasma>,
 }
 
 export interface IUserData {
     username: string,
     fullname: string,
     email: string,
+}
+
+export interface ISignedPlasma {
+    plasmaPrivateKey: string,
+    ethereum2plasmaSignature: string,
+    externalSignature: string
 }
