@@ -4,6 +4,7 @@ import {TwoKeyProtocol} from '../src';
 import contractsMeta from '../src/contracts';
 import createWeb3, { generatePlasmaFromMnemonic } from './_web3';
 import Sign from '../src/utils/sign';
+import {promisify} from "../src/utils";
 
 const {env} = process;
 
@@ -484,7 +485,7 @@ describe('TwoKeyProtocol', () => {
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_GMAIL).privateKey,
         });
         await tryToRegisterUser('Gmail', from);
-        txHash = await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, refLink);
+        txHash = await twoKeyProtocol.AcquisitionCampaign.visit('Gmail', campaignAddress, refLink);
         console.log('isUserJoined', await twoKeyProtocol.AcquisitionCampaign.isAddressJoined(campaignAddress, from));
         const hash = await twoKeyProtocol.AcquisitionCampaign.join(campaignAddress, from, {
             cut: 50,
@@ -496,7 +497,6 @@ describe('TwoKeyProtocol', () => {
     }).timeout(30000);
 
     it('should cut link', async () => {
-        txHash = await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, refLink);
         // twoKeyProtocol.unsubscribe2KeyEvents();
         const {web3, address} = web3switcher.test4();
         from = address;
@@ -510,6 +510,7 @@ describe('TwoKeyProtocol', () => {
         });
         await tryToRegisterUser('Test4', from);
 
+        txHash = await twoKeyProtocol.AcquisitionCampaign.visit('Test4', campaignAddress, refLink);
         console.log('isUserJoined', await twoKeyProtocol.AcquisitionCampaign.isAddressJoined(campaignAddress, from));
         let maxReward = await twoKeyProtocol.AcquisitionCampaign.getEstimatedMaximumReferralReward(campaignAddress, from, refLink);
         console.log(`Estimated maximum referral reward: ${maxReward}%`);

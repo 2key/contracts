@@ -6,6 +6,41 @@ import sigUtil from 'eth-sig-util';
 import {IPlasmaSignature, ISignedKeys} from './interfaces';
 
 
+function fixCut(cut) {
+    if (!cut) {
+        return cut
+    }
+    if (typeof cut != 'number') {
+        cut = cut.toNumber()
+    }
+    if (cut > 0 && cut <= 100) {
+        cut = cut + 1
+    } else if (cut < 0 && cut >= -100) {
+        cut = 255 + cut
+    } else if (cut != 255) {
+        cut = 0
+    }
+    return cut
+}
+
+function unfixCut(cut) {
+    if (!cut) {
+        return cut
+    }
+    if (typeof cut != 'number') {
+        cut = cut.toNumber()
+    }
+    if (cut > 1 && cut <= 101) {
+        cut = cut - 1
+    } else if (cut < 255 && cut >= 155) {
+        cut = cut - 255
+    } else if (cut != 255) {
+        cut = 0
+    }
+    return cut
+}
+
+
 /**
  * Helper function to add 0x at the beginning of the address
  * @param x
@@ -186,7 +221,18 @@ function privateToPublic(private_key: Buffer) {
     return eth_util.publicToAddress(eth_util.privateToPublic(private_key)).toString('hex');
 }
 
-function free_take(my_address: string, f_address: string, f_secret?: string, p_message?: string) {
+function ecsign(message, private_key) {
+    let msg = Buffer.from(remove0x(message), 'hex');
+    let msgHash = eth_util.sha3(msg);
+    const sig = eth_util.ecsign(msgHash, private_key);
+    assert.ok(sig.v == 27 || sig.v == 28, 'unknown sig.v');
+
+    const signature = Buffer.concat([sig.r, sig.s, Buffer.from([sig.v])]).toString('hex');
+    return `0x${signature}`;
+}
+
+
+function free_take(my_address: string, f_address: string, f_secret?: string, pMessage?: string) {
     // using information in the signed link (f_address,f_secret,p_message)
     // return a new message that can be passed to the transferSig method of the contract
     // to move ARCs arround in the current. For example:
@@ -196,42 +242,34 @@ function free_take(my_address: string, f_address: string, f_secret?: string, p_m
     // f_address - previous influencer
     // f_secret - the secret of the parent (contractor or previous influencer) is passed in the 2key link
     // p_message - the message built by previous influencers
-    const old_private_key = Buffer.from(f_secret, 'hex');
+    const old_private_key = Buffer.from(remove0x(f_secret), 'hex');
     if (!eth_util.isValidPrivate(old_private_key)) {
         throw new Error('old private key not valid');
     }
 
     let m;
-    const version = p_message ? p_message.slice(0, 2) : '00';
+    let version;
+    let p_message = pMessage;
     // let prefix = "00"  // not reall important because it only used when receiving a free link directly from the contractor
 
     if (p_message) {  // the message built by previous influencers
-        m = p_message;
-        if (version === '00') {
-            m += f_address.slice(2);
-        }
-        const old_public_address = privateToPublic(old_private_key);
-        m += old_public_address
+        p_message = remove0x(p_message);
+        version = p_message.slice(0, 2);
     } else {
-        // this happens when receiving a free link directly from the contractor
-        m = `00${f_address.slice(2)}`;
+        version = '00';
     }
 
+    if (p_message) {
+        m = p_message;
+        if (version == '00') {
+            m += remove0x(f_address);
+        }
+        m += privateToPublic(old_private_key);
+    } else {
+        m = version + remove0x(f_address);
+    }
 
-    // the message we want to sign is my address (I'm the converter)
-    // and we will sign with the private key from the previous step (contractor or influencer)
-    // this will prove that I (my address) knew what the previous private key was
-    const msg = Buffer.from(my_address.slice(2), 'hex'); // skip 0x
-    const msgHash = eth_util.sha3(msg);
-    let sig = eth_util.ecsign(msgHash, old_private_key);
-    assert.ok(sig.v === 27 || sig.v === 28, 'unknown sig.v');
-
-    sig = Buffer.concat([sig.r, sig.s, Buffer.from([sig.v])]);
-
-    // TODO: Fix this
-    // @ts-ignore: custom toString() implementation
-    m += sig.toString('hex');
-    m = `0x${m}`;
+    m = `0x${m}${remove0x(ecsign(my_address, old_private_key))}`;
     return m;
 }
 
@@ -248,7 +286,7 @@ function free_join(my_address: string, public_address: string, f_address: string
     // this will prove that I (my address) knew what the previous private key was
     // and it will link the new private/public key to the previous keys to form a path
     const msg0 = Buffer.from(public_address, 'hex');
-    const msg1 = Buffer.from(my_address.slice(2), 'hex'); // skip 0x
+    const msg1 = Buffer.from(remove0x(my_address), 'hex'); // skip 0x
     let msg = Buffer.concat([msg0, msg1]); // compact msg (as is done in sha3 inside solidity)
     // if not using version prefix to the message:
     let cut: any = rCut;
@@ -258,7 +296,7 @@ function free_join(my_address: string, public_address: string, f_address: string
     cut = Buffer.from([cut]);
     msg = Buffer.concat([cut, msg]); // compact msg (as is done in sha3 inside solidity)
     const msgHash = eth_util.sha3(msg);
-    const old_private_key = Buffer.from(f_secret, 'hex');
+    const old_private_key = Buffer.from(remove0x(f_secret), 'hex');
     let sig = eth_util.ecsign(msgHash, old_private_key);
 
     // check the signature
@@ -277,24 +315,20 @@ function free_join(my_address: string, public_address: string, f_address: string
     let previousMessage = p_message;
     if (previousMessage) {
         if (version === '00') {
-            previousMessage += f_address.slice(2)
+            previousMessage += remove0x(f_address);
         }
         previousMessage += old_public_address;
         // m = previousMessage + f_address.slice(2) + old_public_address + m;
     } else {
-        previousMessage = version + f_address.slice(2);
+        previousMessage = version + remove0x(f_address);
         // this happens when receiving a free link directly from the contractor
         // m = f_address.slice(2) + m;
     }
     assert.ok(previousMessage.startsWith(version));
     m = previousMessage + m;
     if (cutSign) {
-        console.log('CUT SIGN', cutSign);
-        if (cutSign.startsWith('0x')) {
-            m += cutSign.slice(2)
-        } else {
-            m += cutSign
-        }
+        assert.ok(version == '01');
+        m += remove0x(cutSign);
     }
     return m;
 }
@@ -680,10 +714,10 @@ function sign_message(web3, msgParams, from, opts: IOptionalParamsSignMessage = 
 
         function sign_message_callback(err, result) {
             if (err) {
-                console.log('Error in sign_message ' + err)
+                console.log('Error in sign_message ' + err);
                 reject(err)
             } else if (!result) {
-                console.log('Error in sign_message no result')
+                console.log('Error in sign_message no result');
                 reject()
             } else {
                 if (typeof result != 'string') {
@@ -695,7 +729,7 @@ function sign_message(web3, msgParams, from, opts: IOptionalParamsSignMessage = 
                     let v = result.slice(n - 2);
                     v = parseInt(v, 16) + 32;
                     v = Buffer.from([v]).toString('hex');
-                    result = result.slice(0, n - 2) + v
+                    result = result.slice(0, n - 2) + v;
                 }
 
                 resolve(result)
@@ -761,6 +795,9 @@ export default {
     decrypt,
     remove0x,
     add0x,
+    fixCut,
+    unfixCut,
+    sign_message,
     sign_name,
     free_take,
     free_join,
