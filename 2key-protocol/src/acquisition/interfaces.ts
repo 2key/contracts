@@ -144,3 +144,10 @@ export interface IReferrerSummary {
     numberOfConversionsParticipatedIn : number,
     campaignAddress: string,
 }
+
+export interface IConversionStats {
+    pendingConverters: number,
+    approvedConverters: number,
+    rejectedConverters: number,
+    totalETHRaised: number
+}

@@ -1,7 +1,7 @@
 import {ICreateOpts, IERC20, IOffchainData, ITwoKeyBase, ITwoKeyHelpers, ITwoKeyUtils} from '../interfaces';
 import {
     IAcquisitionCampaign,
-    IAcquisitionCampaignMeta, IConstantsLogicHandler, IConversionObject,
+    IAcquisitionCampaignMeta, IConstantsLogicHandler, IConversionObject, IConversionStats,
     IConvertOpts,
     IJoinLinkOpts,
     IPublicLinkKey,
@@ -1507,6 +1507,33 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 const twoKeyAcquisitionLogicHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyAcquisitionLogicHandler.abi).at(twoKeyAcquisitionLogicHandler);
                 let txHash: string = await promisify(twoKeyAcquisitionLogicHandlerInstance.getPrivateMetaHash,[{from}]);
                 resolve(txHash);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+    /**
+     * Gets stats from conversion handler contract
+     * @param campaign
+     * @param {string} from
+     * @returns {Promise<IConversionStats>}
+     */
+    public getNumberOfConvertersPerType(campaign: any, from: string) : Promise<IConversionStats> {
+        return new Promise<IConversionStats>(async(resolve,reject) => {
+            try {
+                const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
+                const conversionHandler = await promisify(campaignInstance.conversionHandler,[{from}]);
+                const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandler);
+                const {pending,approved,rejected,totalRaised} = await promisify(conversionHandlerInstance.getNumberOfConvertersPerType,[{from}]);
+                resolve(
+                    {
+                        pendingConverters: pending,
+                        approvedConverters: approved,
+                        rejectedConverters: rejected,
+                        totalETHRaised: totalRaised
+                    }
+                )
             } catch (e) {
                 reject(e);
             }
