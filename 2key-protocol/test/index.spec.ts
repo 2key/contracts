@@ -168,7 +168,18 @@ const printBalances = (done) => {
         done();
     });
 };
-
+const tryToRegisterUser = async (username,from) => {
+    try {
+        await twoKeyProtocol.Registry.addPlasma2EthereumByUser(from);
+    } catch (e) {
+        console.log('Error in registering user in Registry!!!',e);
+    }
+    try {
+        await twoKeyProtocol.PlasmaEvents.setPlasmaToEthereumOnPlasma(from);
+    } catch (e) {
+        console.log('Error in registering user in Plasma!!!',e);
+    }
+}
 describe('TwoKeyProtocol', () => {
     let from: string;
     before(function () {
@@ -185,6 +196,7 @@ describe('TwoKeyProtocol', () => {
                     },
                     plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
                 });
+                await tryToRegisterUser('Deployer', from);
                 const {balance} = twoKeyProtocol.Utils.balanceFromWeiString(await twoKeyProtocol.getBalance(env.AYDNEP_ADDRESS), {inWei: true});
                 const {balance: adminBalance} = twoKeyProtocol.Utils.balanceFromWeiString(await twoKeyProtocol.getBalance(contractsMeta.TwoKeyAdmin.networks[mainNetId].address), {inWei: true});
                 console.log(adminBalance);
@@ -311,6 +323,7 @@ describe('TwoKeyProtocol', () => {
             },
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
         });
+        await tryToRegisterUser('Aydnep', from);
         const balance = twoKeyProtocol.Utils.balanceFromWeiString(await twoKeyProtocol.getBalance(from), {inWei: true});
         console.log('SWITCH USER', balance.balance);
         return expect(balance).to.exist
@@ -470,6 +483,7 @@ describe('TwoKeyProtocol', () => {
             },
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_GMAIL).privateKey,
         });
+        await tryToRegisterUser('Gmail', from);
         txHash = await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, refLink);
         console.log('isUserJoined', await twoKeyProtocol.AcquisitionCampaign.isAddressJoined(campaignAddress, from));
         const hash = await twoKeyProtocol.AcquisitionCampaign.join(campaignAddress, from, {
@@ -494,6 +508,8 @@ describe('TwoKeyProtocol', () => {
             },
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_TEST4).privateKey,
         });
+        await tryToRegisterUser('Test4', from);
+
         console.log('isUserJoined', await twoKeyProtocol.AcquisitionCampaign.isAddressJoined(campaignAddress, from));
         let maxReward = await twoKeyProtocol.AcquisitionCampaign.getEstimatedMaximumReferralReward(campaignAddress, from, refLink);
         console.log(`Estimated maximum referral reward: ${maxReward}%`);
@@ -536,6 +552,8 @@ describe('TwoKeyProtocol', () => {
             },
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_RENATA).privateKey,
         });
+        await tryToRegisterUser('Renata', from);
+
         const hash = await twoKeyProtocol.AcquisitionCampaign.join(campaignAddress, from, {
             cut: 20,
             referralLink: refLink
@@ -562,6 +580,8 @@ describe('TwoKeyProtocol', () => {
             },
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_UPORT).privateKey,
         });
+        await tryToRegisterUser('Uport', from);
+
         console.log('6) uport buy from REFLINK', refLink);
         const txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD * 1.5, 'ether'), refLink, from);
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
@@ -594,6 +614,8 @@ describe('TwoKeyProtocol', () => {
             },
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_GMAIL2).privateKey,
         });
+        await tryToRegisterUser('Gmail2', from);
+
         const arcs = await twoKeyProtocol.AcquisitionCampaign.getBalanceOfArcs(campaignAddress, from);
         console.log('GMAIL2 ARCS', arcs);
         txHash = await twoKeyProtocol.AcquisitionCampaign.convert(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD * 1.1, 'ether'), from);
@@ -613,6 +635,8 @@ describe('TwoKeyProtocol', () => {
             },
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP2).privateKey,
         });
+        await tryToRegisterUser('Aydnep2', from);
+
         const refReward = await twoKeyProtocol.AcquisitionCampaign.getEstimatedMaximumReferralReward(campaignAddress, from, refLink);
         console.log(`Max estimated referral reward: ${refReward}%`);
         txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndShareARC(campaignAddress, from, refLink, env.TEST_ADDRESS);
@@ -633,6 +657,8 @@ describe('TwoKeyProtocol', () => {
             },
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_TEST).privateKey,
         });
+        await tryToRegisterUser('Test', from);
+
         // txHash = await twoKeyProtocol.transferEther(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD * 1.1, 'ether'), from);
         txHash = await twoKeyProtocol.AcquisitionCampaign.convert(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD * 1.1, 'ether'), from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
