@@ -230,11 +230,10 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     progressCallback('TwoKeyAcquisitionCampaignERC20', true, campaignAddress);
                 }
                 console.log('Campaign created', campaignAddress);
-                const campaignPublicLinkKey = '0x0';
-                // const campaignPublicLinkKey = await this.join(campaignAddress, from, {gasPrice, progressCallback});
-                // if (progressCallback) {
-                //     progressCallback('SetPublicLinkKey', true, campaignPublicLinkKey);
-                // }
+                const campaignPublicLinkKey = await this.join(campaignAddress, from, {gasPrice, progressCallback});
+                if (progressCallback) {
+                    progressCallback('SetPublicLinkKey', true, campaignPublicLinkKey);
+                }
                 resolve({
                     contractor: from,
                     campaignAddress,
@@ -472,47 +471,28 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @param {number} gasPrice
      * @returns {Promise<IPublicLinkKey>}
      */
-    public setPublicLinkKey(campaign: any, from: string, publicLink: string, {cut, gasPrice = this.base._getGasPrice(), progressCallback}: IPublicLinkOpts = {}): Promise<IPublicLinkKey> {
+    public setPublicLinkKey(campaign: any, from: string,  publicLink: string, {cut, gasPrice = this.base._getGasPrice(), progressCallback}: IPublicLinkOpts = {}): Promise<IPublicLinkKey> {
         return new Promise(async (resolve, reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-                const nonce = await this.helpers._getNonce(from);
-                const contractor = await promisify(campaignInstance.contractor, [{from, nonce}]);
-                // this.base._log('SETPUBLICLINK CONTRACTOR', contractor, publicLink);
-                const mainTxHash = await promisify(campaignInstance.setPublicLinkKey, [publicLink, {
-                    from,
-                    gasPrice,
-                }]);
+                // const nonce = await this.helpers._getNonce(from);
+                const contractor = await promisify(campaignInstance.contractor, [{from}]);
+                const txHash = await promisify(this.base.twoKeyPlasmaEvents.setPublicLinkKey, [
+                    campaignInstance.address,
+                    contractor,
+                    publicLink,
+                    { from: this.base.plasmaAddress }
+                ]);
+
                 if (progressCallback) {
-                    progressCallback('setPublicLinkKey', false, mainTxHash);
+                    progressCallback('setPublicLinkKey', false, txHash);
                 }
-                let plasmaTxHash;
-                try {
-                    plasmaTxHash = await promisify(this.base.twoKeyPlasmaEvents.setPublicLinkKey, [campaignInstance.address,
-                        contractor, from, publicLink, {from: this.base.plasmaAddress, gasPrice: 0}
-                    ]);
-                    if (progressCallback) {
-                        progressCallback('TwoKeyPlasmaEvents.setPublicLinkKey', false, plasmaTxHash);
-                    }    
-                } catch (plasmaErr) {
-                    this.base._log('Plasma error:', plasmaErr);
-                }
-                const promises = [];
-                promises.push(this.utils.getTransactionReceiptMined(mainTxHash));
-                if (plasmaTxHash) {
-                    promises.push(this.utils.getTransactionReceiptMined(plasmaTxHash, {web3: this.base.plasmaWeb3}))
-                }
-                await Promise.all(promises);
-                if (promises.length > 1) {
-                    if (progressCallback) {
-                        progressCallback('TwoKeyPlasmaEvents.setPublicLinkKey', true, plasmaTxHash);
-                    }    
-                }
+                await this.utils.getTransactionReceiptMined(txHash, {web3: this.base.plasmaWeb3});
                 if (progressCallback) {
-                    progressCallback('setPublicLinkKey', true, mainTxHash);
+                    progressCallback('setPublicLinkKey', true, txHash);
                 }
-                if (cut > -1) {
-                    await promisify(campaignInstance.setCut, [cut - 1, {from}]);
+                if (cut != null) {
+                    await promisify(campaignInstance.setCut, [cut, {from}]);
                 }
                 resolve({publicLink, contractor});
             } catch (err) {
@@ -558,29 +538,15 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
             try {
                 const campaignAddress = typeof (campaign) === 'string' ? campaign
                     : (await this.helpers._getAcquisitionCampaignInstance(campaign)).address;
-
-                // if (from !== this.base.plasmaAddress) {
-                const sig = await Sign.sign_plasma2eteherum(this.base.plasmaAddress, from, this.base.web3);
-                this.base._log('Signature', sig);
-                this.base._log(campaignAddress, from, this.base.plasmaAddress, cut);
-                let txHash: string;
-                try {
-                    txHash = await promisify(this.base.twoKeyPlasmaEvents.add_plasma2ethereum, [sig, {
-                        from: this.base.plasmaAddress,
-                        gasPrice: 0
-                    }]);
-                    await this.utils.getTransactionReceiptMined(txHash, {web3: this.base.plasmaWeb3, timeout: 300000});
-                    const stored_ethereum_address = await promisify(this.base.twoKeyPlasmaEvents.plasma2ethereum, [this.base.plasmaAddress]);
-                    if (stored_ethereum_address !== from) {
-                        reject(stored_ethereum_address + ' != ' + from)
-                    }
-                } catch (plasmaErr) {
-                    this.base._log('Plasma Error:', plasmaErr);
-                }
-
-                const private_key = this.base.web3.sha3(sig).slice(2, 2 + 32 * 2);
+                const safeCut = Sign.fixCut(cut);
+                const i = 1;
+                const plasmaAddress = this.base.plasmaAddress;
+                const msg = `0xdeadbeef${campaignAddress.slice(2)}${plasmaAddress.slice(2)}${i.toString(16)}`;
+                const signedMessage = await Sign.sign_message(this.base.plasmaWeb3, msg, plasmaAddress, { plasma: true });
+                const private_key = this.base.web3.sha3(signedMessage).slice(2, 2 + 32 * 2);
                 const public_address = Sign.privateToPublic(Buffer.from(private_key, 'hex'));
-
+                this.base._log('Signature', signedMessage);
+                this.base._log(campaignAddress, from, plasmaAddress, safeCut);
                 let new_message;
                 let contractor;
                 let dao;
@@ -588,13 +554,10 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     const {f_address, f_secret, p_message, contractor: campaignContractor, dao: daoAddress} = await this.utils.getOffchainDataFromIPFSHash(referralLink);
                     contractor = campaignContractor;
                     dao = daoAddress;
-                    // this.base._log('New link for', from, f_address, f_secret, p_message);
-                    // this.base._log('P_MESSAGE', p_message);
-                    // TODO: Andrii in AcquisitionCampaign this method was with (cut + 1)
-                    new_message = Sign.free_join(from, public_address, f_address, f_secret, p_message, voting ? cut : cut + 1, cutSign);
+                    new_message = Sign.free_join(plasmaAddress, public_address, f_address, f_secret, p_message, safeCut, cutSign);
                 } else {
                     const {contractor: campaignContractor} = await this.setPublicLinkKey(campaign, from, `0x${public_address}`, {
-                        cut,
+                        cut: safeCut,
                         gasPrice,
                         progressCallback,
                     });
@@ -604,7 +567,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 const linkObject: IOffchainData = {
                     campaign: campaignAddress,
                     contractor,
-                    f_address: from,
+                    f_address: this.base.plasmaAddress,
                     f_secret: private_key,
                     dao,
                 };

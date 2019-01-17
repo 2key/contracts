@@ -6,6 +6,41 @@ import sigUtil from 'eth-sig-util';
 import {IPlasmaSignature, ISignedKeys} from './interfaces';
 
 
+function fixCut(cut) {
+    if (!cut) {
+        return cut
+    }
+    if (typeof cut != 'number') {
+        cut = cut.toNumber()
+    }
+    if (cut > 0 && cut <= 100) {
+        cut = cut + 1
+    } else if (cut < 0 && cut >= -100) {
+        cut = 255 + cut
+    } else if (cut != 255) {
+        cut = 0
+    }
+    return cut
+}
+
+function unfixCut(cut) {
+    if (!cut) {
+        return cut
+    }
+    if (typeof cut != 'number') {
+        cut = cut.toNumber()
+    }
+    if (cut > 1 && cut <= 101) {
+        cut = cut - 1
+    } else if (cut < 255 && cut >= 155) {
+        cut = cut - 255
+    } else if (cut != 255) {
+        cut = 0
+    }
+    return cut
+}
+
+
 /**
  * Helper function to add 0x at the beginning of the address
  * @param x
@@ -248,7 +283,7 @@ function free_join(my_address: string, public_address: string, f_address: string
     // this will prove that I (my address) knew what the previous private key was
     // and it will link the new private/public key to the previous keys to form a path
     const msg0 = Buffer.from(public_address, 'hex');
-    const msg1 = Buffer.from(my_address.slice(2), 'hex'); // skip 0x
+    const msg1 = Buffer.from(remove0x(my_address), 'hex'); // skip 0x
     let msg = Buffer.concat([msg0, msg1]); // compact msg (as is done in sha3 inside solidity)
     // if not using version prefix to the message:
     let cut: any = rCut;
@@ -258,7 +293,7 @@ function free_join(my_address: string, public_address: string, f_address: string
     cut = Buffer.from([cut]);
     msg = Buffer.concat([cut, msg]); // compact msg (as is done in sha3 inside solidity)
     const msgHash = eth_util.sha3(msg);
-    const old_private_key = Buffer.from(f_secret, 'hex');
+    const old_private_key = Buffer.from(remove0x(f_secret), 'hex');
     let sig = eth_util.ecsign(msgHash, old_private_key);
 
     // check the signature
@@ -277,24 +312,20 @@ function free_join(my_address: string, public_address: string, f_address: string
     let previousMessage = p_message;
     if (previousMessage) {
         if (version === '00') {
-            previousMessage += f_address.slice(2)
+            previousMessage += remove0x(f_address);
         }
         previousMessage += old_public_address;
         // m = previousMessage + f_address.slice(2) + old_public_address + m;
     } else {
-        previousMessage = version + f_address.slice(2);
+        previousMessage = version + remove0x(f_address);
         // this happens when receiving a free link directly from the contractor
         // m = f_address.slice(2) + m;
     }
     assert.ok(previousMessage.startsWith(version));
     m = previousMessage + m;
     if (cutSign) {
-        console.log('CUT SIGN', cutSign);
-        if (cutSign.startsWith('0x')) {
-            m += cutSign.slice(2)
-        } else {
-            m += cutSign
-        }
+        assert.ok(version == '01');
+        m += remove0x(cutSign);
     }
     return m;
 }
@@ -680,10 +711,10 @@ function sign_message(web3, msgParams, from, opts: IOptionalParamsSignMessage = 
 
         function sign_message_callback(err, result) {
             if (err) {
-                console.log('Error in sign_message ' + err)
+                console.log('Error in sign_message ' + err);
                 reject(err)
             } else if (!result) {
-                console.log('Error in sign_message no result')
+                console.log('Error in sign_message no result');
                 reject()
             } else {
                 if (typeof result != 'string') {
@@ -695,7 +726,7 @@ function sign_message(web3, msgParams, from, opts: IOptionalParamsSignMessage = 
                     let v = result.slice(n - 2);
                     v = parseInt(v, 16) + 32;
                     v = Buffer.from([v]).toString('hex');
-                    result = result.slice(0, n - 2) + v
+                    result = result.slice(0, n - 2) + v;
                 }
 
                 resolve(result)
@@ -761,6 +792,9 @@ export default {
     decrypt,
     remove0x,
     add0x,
+    fixCut,
+    unfixCut,
+    sign_message,
     sign_name,
     free_take,
     free_join,
