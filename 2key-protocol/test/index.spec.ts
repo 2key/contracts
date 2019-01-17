@@ -4,6 +4,7 @@ import {TwoKeyProtocol} from '../src';
 import contractsMeta from '../src/contracts';
 import createWeb3, { generatePlasmaFromMnemonic } from './_web3';
 import Sign from '../src/utils/sign';
+import {promisify} from "../src/utils";
 
 const {env} = process;
 
@@ -510,6 +511,7 @@ describe('TwoKeyProtocol', () => {
         });
         await tryToRegisterUser('Test4', from);
 
+        txHash = await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, refLink);
         console.log('isUserJoined', await twoKeyProtocol.AcquisitionCampaign.isAddressJoined(campaignAddress, from));
         let maxReward = await twoKeyProtocol.AcquisitionCampaign.getEstimatedMaximumReferralReward(campaignAddress, from, refLink);
         console.log(`Estimated maximum referral reward: ${maxReward}%`);

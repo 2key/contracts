@@ -475,21 +475,41 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         return new Promise(async (resolve, reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-                // const nonce = await this.helpers._getNonce(from);
+                const nonce = await this.helpers._getNonce(from);
                 const contractor = await promisify(campaignInstance.contractor, [{from}]);
-                const txHash = await promisify(this.base.twoKeyPlasmaEvents.setPublicLinkKey, [
-                    campaignInstance.address,
-                    contractor,
+                const txHash = await promisify(campaignInstance.setPublicLinkKey, [
                     publicLink,
-                    { from: this.base.plasmaAddress }
+                    { from, nonce ,gasPrice }
                 ]);
 
-                if (progressCallback) {
-                    progressCallback('setPublicLinkKey', false, txHash);
+                let plasmaTxHash;
+                try {
+                    plasmaTxHash = await promisify(this.base.twoKeyPlasmaEvents.setPublicLinkKey, [
+                        campaignInstance.address,
+                        contractor,
+                        publicLink,
+                        {from: this.base.plasmaAddress}
+                    ]);
+                    if (progressCallback) {
+                        progressCallback('Plasma.setPublicLinkKey', false, plasmaTxHash);
+                    }
+                } catch (e) {
+                    this.base._log('Plasma setPublicLinkKey error', e);
                 }
-                await this.utils.getTransactionReceiptMined(txHash, {web3: this.base.plasmaWeb3});
+
+                const promises = [];
+                promises.push(this.utils.getTransactionReceiptMined(txHash));
+                if (plasmaTxHash) {
+                    promises.push(this.utils.getTransactionReceiptMined(plasmaTxHash, {web3: this.base.plasmaWeb3}));
+                }
+
+                await Promise.all(promises);
+
                 if (progressCallback) {
-                    progressCallback('setPublicLinkKey', true, txHash);
+                    if (plasmaTxHash) {
+                        progressCallback('Plasma.setPublicLinkKey', true, publicLink);
+                    }
+                    progressCallback('setPublicLinkKey', true, publicLink);
                 }
                 if (cut != null) {
                     await promisify(campaignInstance.setCut, [cut, {from}]);
