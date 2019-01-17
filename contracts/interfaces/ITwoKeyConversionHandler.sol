@@ -12,6 +12,15 @@ contract ITwoKeyConversionHandler {
         uint256 bonusTokensForConverterUnits,
         uint256 expiryConversion) external;
 
+    function createAndExecuteOfflineConversion(
+        address _contractor,
+        address _converterAddress,
+        uint256 _conversionAmount,
+        uint256 baseTokensForConverterUnits,
+        uint256 bonusTokensForConverterUnits,
+        uint256 expiryConversion
+    ) public;
+
     function setAnonymous(address _contractor, bool _isAnonymous) external;
     function cancelAndRejectContract() external;
     function setTwoKeyAcquisitionCampaignERC20(address _twoKeyAcquisitionCampaignERC20, address _moderator, address _contractor, address _assetContractERC20) external;

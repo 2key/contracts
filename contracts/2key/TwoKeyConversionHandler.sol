@@ -167,8 +167,8 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
         allLockUpContracts.push(address(lockupContract));
 
         uint totalUnits = conversion.baseTokenUnits + conversion.bonusTokenUnits;
+
         ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).moveFungibleAsset(address(lockupContract), totalUnits);
-        ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateReservedAmountOfTokensIfConversionRejectedOrExecuted(totalUnits);
 
         conversion.state = ConversionState.EXECUTED;
         conversions[numberOfConversions] = conversion;
