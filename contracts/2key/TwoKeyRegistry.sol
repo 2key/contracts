@@ -213,6 +213,19 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
         emit UserNameChanged(_sender, _name);
     }
 
+    /**
+     * @notice Function to concat this 2 functions at once
+     */
+    function addNameAndSetWalletName(
+        string _name,
+        address _sender,
+        string _fullName,
+        string _email,
+        string _username_walletName
+    ) public onlyTwoKeyMaintainer  {
+        addName(_name, _sender, _fullName, _email);
+        setWalletName(_name, _sender, _username_walletName);
+    }
     /// @notice Function where only admin can add a name - address pair
     /// @param _name is name of user
     /// @param _sender is address of user
