@@ -708,7 +708,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         return new Promise<ITokenAmount>(async (resolve, reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-                const campaignLogicHandler = await promisify(campaignInstance.twoKeyLogicHandler,[]);
+                const campaignLogicHandler = await promisify(campaignInstance.twoKeyAcquisitionLogicHandler,[]);
                 const campaignLogicHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyAcquisitionLogicHandler.abi).at(campaignLogicHandler);
                 const constants = await promisify(campaignLogicHandlerInstance.getConstantInfo, []);
                 let [baseTokens, bonusTokens] = await promisify(campaignLogicHandlerInstance.getEstimatedTokenAmount, [value]);
