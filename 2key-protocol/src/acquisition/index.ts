@@ -790,6 +790,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     } catch (plasmaErr) {
                         this.base._log('Plasma Error:', plasmaErr);
                     }
+
                     // const signature = Sign.free_join_take(from, public_address, f_address, f_secret, p_message);
                     const signature = Sign.free_take(from, f_address, f_secret, p_message);
                     txHash = await promisify(campaignInstance.joinAndConvert, [signature,false, {
@@ -891,6 +892,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     this.base._log('joinAndShareARC call Free Join Take');
                     const signature = Sign.free_join_take(from, public_address, f_address, f_secret, p_message);
                     this.base._log(signature, recipient);
+                    //TODO: Wrong link
                     const txHash: string = await promisify(campaignInstance.joinAndShareARC, [signature, recipient, {
                         from,
                         gasPrice,
