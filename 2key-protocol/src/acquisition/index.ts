@@ -794,6 +794,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     */
                     // const signature = Sign.free_join_take(from, public_address, f_address, f_secret, p_message);
                     const signature = Sign.free_take(this.base.plasmaAddress, f_address, f_secret, p_message);
+                    console.log('Sig we want to buy with is: ' + signature);
                     txHash = await promisify(campaignInstance.joinAndConvert, [signature,false, {
                         from,
                         gasPrice,
