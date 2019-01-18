@@ -377,7 +377,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     public async getReferrerCut(campaign: any, from: string): Promise<number> {
         try {
             const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-            const cut = (await promisify(campaignInstance.getReferrerCut, [{from}])).toNumber() + 1;
+            const cut = (await promisify(campaignInstance.getReferrerCut, [from, {from}])).toNumber() + 1;
             return Promise.resolve(cut);
         } catch (e) {
             Promise.reject(e);
@@ -708,7 +708,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         return new Promise<ITokenAmount>(async (resolve, reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-                const campaignLogicHandler = await promisify(campaignInstance.twoKeyAcquisitionLogicHandler,[]);
+                const campaignLogicHandler = await promisify(campaignInstance.twoKeyLogicHandler,[]);
                 const campaignLogicHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyAcquisitionLogicHandler.abi).at(campaignLogicHandler);
                 const constants = await promisify(campaignLogicHandlerInstance.getConstantInfo, []);
                 let [baseTokens, bonusTokens] = await promisify(campaignLogicHandlerInstance.getEstimatedTokenAmount, [value]);
