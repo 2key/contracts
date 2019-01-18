@@ -485,7 +485,7 @@ describe('TwoKeyProtocol', () => {
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_GMAIL).privateKey,
         });
         await tryToRegisterUser('Gmail', from);
-        txHash = await twoKeyProtocol.AcquisitionCampaign.visit('Gmail', campaignAddress, refLink);
+        txHash = await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, refLink);
         console.log('isUserJoined', await twoKeyProtocol.AcquisitionCampaign.isAddressJoined(campaignAddress, from));
         const hash = await twoKeyProtocol.AcquisitionCampaign.join(campaignAddress, from, {
             cut: 50,
@@ -523,7 +523,7 @@ describe('TwoKeyProtocol', () => {
     it('should cut link', async () => {
         // twoKeyProtocol.unsubscribe2KeyEvents();
 
-        txHash = await twoKeyProtocol.AcquisitionCampaign.visit('Test4', campaignAddress, refLink);
+        txHash = await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, refLink);
         console.log('isUserJoined', await twoKeyProtocol.AcquisitionCampaign.isAddressJoined(campaignAddress, from));
         let maxReward = await twoKeyProtocol.AcquisitionCampaign.getEstimatedMaximumReferralReward(campaignAddress, from, refLink);
         console.log(`Estimated maximum referral reward: ${maxReward}%`);

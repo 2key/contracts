@@ -468,7 +468,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @param {string} referralLink
      * @returns {Promise<string>}
      */
-    public visit(handle: string, campaignAddress: string, referralLink: string): Promise<string> {
+    public visit(campaignAddress: string, referralLink: string): Promise<string> {
         return new Promise<string>(async (resolve, reject) => {
             try {
                 const {f_address, f_secret, p_message} = await this.utils.getOffchainDataFromIPFSHash(referralLink);
