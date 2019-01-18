@@ -496,8 +496,7 @@ describe('TwoKeyProtocol', () => {
         expect(hash).to.be.a('string');
     }).timeout(30000);
 
-    it('should cut link', async () => {
-        // twoKeyProtocol.unsubscribe2KeyEvents();
+    it('should buy some tokens', async () => {
         const {web3, address} = web3switcher.test4();
         from = address;
         twoKeyProtocol.setWeb3({
@@ -509,6 +508,20 @@ describe('TwoKeyProtocol', () => {
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_TEST4).privateKey,
         });
         await tryToRegisterUser('Test4', from);
+
+        console.log('4) buy from test4 REFLINK', refLink);
+        const txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD, 'ether'), refLink, from);
+        console.log(txHash);
+        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+
+        // const campaigns = await twoKeyProtocol.getCampaignsWhereConverter(from);
+        // console.log(campaigns);
+        expect(txHash).to.be.a('string');
+    }).timeout(30000);
+
+
+    it('should cut link', async () => {
+        // twoKeyProtocol.unsubscribe2KeyEvents();
 
         txHash = await twoKeyProtocol.AcquisitionCampaign.visit('Test4', campaignAddress, refLink);
         console.log('isUserJoined', await twoKeyProtocol.AcquisitionCampaign.isAddressJoined(campaignAddress, from));
@@ -537,16 +550,6 @@ describe('TwoKeyProtocol', () => {
         expect(tokens.totalTokens).to.gte(0);
     });
 
-    it('should buy some tokens', async () => {
-        console.log('4) buy from test4 REFLINK', refLink);
-        const txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD, 'ether'), refLink, from);
-        console.log(txHash);
-        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-
-        // const campaigns = await twoKeyProtocol.getCampaignsWhereConverter(from);
-        // console.log(campaigns);
-        expect(txHash).to.be.a('string');
-    }).timeout(30000);
 
     it('should joinOffchain after cut', async () => {
         const {web3, address} = web3switcher.renata();

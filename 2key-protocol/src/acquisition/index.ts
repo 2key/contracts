@@ -617,7 +617,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 const linkObject: IOffchainData = {
                     campaign: campaignAddress,
                     contractor,
-                    f_address: this.base.plasmaAddress,
+                    f_address: plasmaAddress,
                     f_secret: private_key,
                     dao,
                 };
@@ -773,6 +773,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 if (!parseInt(prevChain, 16)) {
                     this.base._log('No ARCS call Free Join Take');
                     // const newPublicLink = await this.join(campaignInstance, from, { referralLink: publicLink, cut })
+                    /*
                     const { public_address } = generatePublicMeta();
                     const sig = await Sign.sign_plasma2eteherum(this.base.plasmaAddress, from, this.base.web3);
                     this.base._log('Signature', sig);
@@ -790,8 +791,9 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     } catch (plasmaErr) {
                         this.base._log('Plasma Error:', plasmaErr);
                     }
+                    */
                     // const signature = Sign.free_join_take(from, public_address, f_address, f_secret, p_message);
-                    const signature = Sign.free_take(from, f_address, f_secret, p_message);
+                    const signature = Sign.free_take(this.base.plasmaAddress, f_address, f_secret, p_message);
                     txHash = await promisify(campaignInstance.joinAndConvert, [signature,false, {
                         from,
                         gasPrice,
