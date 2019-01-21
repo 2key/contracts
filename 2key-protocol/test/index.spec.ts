@@ -113,6 +113,72 @@ const links = {
     aydnep2: '',
     test: '',
 };
+
+/*
+const users = {
+        'deployer': {
+            name: 'DEPLOYER',
+            email: 'support@2key.network',
+            fullname:  'deployer account',
+        },
+        'aydnep': {
+            name: 'Aydnep',
+            email: 'aydnep@gmail.com',
+            fullname:  'aydnep account',
+        },
+        'nikola': {
+            name: 'Nikola',
+            email: 'nikola@2key.co',
+            fullname: 'Nikola Madjarevic',
+        },
+        'andrii': {
+            name: 'Andrii',
+            email: 'andrii@2key.co',
+            fullname: 'Andrii Pindiura',
+
+        },
+        'Kiki': {
+            name: 'Kiki',
+            email: 'kiki@2key.co',
+            fullname: 'Erez Ben Kiki',
+        },
+        'gmail': {
+            name: 'gmail',
+            email: 'aydnep@gmail.com',
+            fullname: 'gmail account',
+        },
+        'test4': {
+            name: 'test4',
+            email: 'test4@mailinator.com',
+            fullname: 'test4 account',
+        },
+        'renata': {
+            name: 'renata',
+            email: 'renata.pindiura@gmail.com',
+            fullname: 'renata account',
+        },
+        'uport': {
+            name: 'uport',
+            email: 'aydnep_uport@gmail.com',
+            fullname: 'uport account',
+        },
+        'gmail2': {
+            name: 'gmail2',
+            email: 'aydnep+2@gmail.com',
+            fullname: 'gmail2 account',
+        },
+        'aydnep2': {
+            name: 'aydnep2',
+            email: 'aydnep+2@aydnep.com.ua',
+            fullname: 'aydnep2 account',
+        },
+        'test': {
+            name: 'test',
+            email: 'test@gmail.com',
+            fullname: 'test account',
+        },
+};
+*/
 // console.log('MNEMONICS');
 // Object.keys(env).filter(key => key.includes('MNEMONIC')).forEach((key) => {
 //     console.log(env[key]);
@@ -182,6 +248,14 @@ const printBalances = (done) => {
     });
 };
 const tryToRegisterUser = async (username,from) => {
+    /*
+    try {
+        const user = users[username.toLowerCase()];
+        await twoKeyProtocol.Registry.addName(user.name, from, user.fullname, user.emal, from);
+    } catch (e) {
+      console.log('Error adding userName in Registry', e);
+    }
+    */
     try {
         await twoKeyProtocol.Registry.addPlasma2EthereumByUser(from);
     } catch (e) {
