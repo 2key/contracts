@@ -490,14 +490,29 @@ describe('TwoKeyProtocol', () => {
         expect(maxReward).to.be.gte(7.5);
     }).timeout(30000);
 
+    it('==> should print available amount of tokens before conversion', async() => {
+        const availableAmountOfTokens = await twoKeyProtocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(campaignAddress,from);
+        console.log('Available amount of tokens before conversion is: ' + availableAmountOfTokens);
+        expect(availableAmountOfTokens).to.be.equal(1234);
+    }).timeout(30000);
+
+
     it('should buy some tokens', async () => {
         console.log('4) buy from test4 REFLINK', links.gmail);
         txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD, 'ether'), links.gmail, from);
         console.log(txHash);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
 
         // const campaigns = await twoKeyProtocol.getCampaignsWhereConverter(from);
         // console.log(campaigns);
         expect(txHash).to.be.a('string');
+    }).timeout(30000);
+
+    it('==> should print available amount of tokens before conversion', async() => {
+        const availableAmountOfTokens = await twoKeyProtocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(campaignAddress,from);
+        const { totalTokens } = await twoKeyProtocol.AcquisitionCampaign.getEstimatedTokenAmount(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD, 'ether'));
+        console.log('Available amount of tokens before conversion is: ' + availableAmountOfTokens, totalTokens);
+        expect(availableAmountOfTokens).to.be.lte(1234 - totalTokens);
     }).timeout(30000);
 
 
@@ -544,8 +559,6 @@ describe('TwoKeyProtocol', () => {
 
 
     it('should joinOffchain as Renata', async () => {
-        await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, links.test4, from);
-
         const hash = await twoKeyProtocol.AcquisitionCampaign.join(campaignAddress, from, {
             cut: 20,
             referralLink: links.test4
