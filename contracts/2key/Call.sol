@@ -225,7 +225,7 @@ library Call {
         return (influencers, keys, weights, offsets);
     }
 
-    function recoverSig(bytes sig, address old_key, address _lastAddress) public view returns (address[], address[], uint8[]) {
+    function recoverSig(bytes sig, address old_key, address last_address) public pure returns (address[], address[], uint8[]) {
         // validate sig AND
         // recover the information from the signature: influencers, public_link_keys, weights/cuts
         // influencers may have one more address than the keys and weights arrays
@@ -236,7 +236,7 @@ library Call {
         address[] memory keys;
         uint8[] memory weights;
         uint[] memory offsets;
-        (influencers, keys, weights, offsets) = recoverSigParts(sig, msg.sender);
+        (influencers, keys, weights, offsets) = recoverSigParts(sig, last_address);
 
         // check if we received a valid signature
         for(uint i = 0; i < influencers.length; i++) {
