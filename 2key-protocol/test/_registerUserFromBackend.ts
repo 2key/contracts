@@ -9,6 +9,7 @@ import Web3 from 'web3';
 import Sign from '../src/utils/sign';
 import { TwoKeyProtocol } from '../src';
 import { ISignedPlasma } from '../src/registry/interfaces';
+import {promisify} from "../src/utils";
 
 
 interface IUser {
@@ -61,7 +62,7 @@ async function registerUserFromBackend({ user, signedPlasma, plasma2EthereumSign
             mainNetId,
             syncTwoKeyNetId,
         },
-        plasmaPK: Sign.generatePrivateKey(),
+        plasmaPK: '9125720a89c9297cde4a3cfc92f233da5b22f868b44f78171354d4e0f7fe74ec',
     });
     console.log('registerUserFromBackend.plasmaAddress', twoKeyProtocol.plasmaAddress);
     const txHashes = [];
@@ -72,6 +73,9 @@ async function registerUserFromBackend({ user, signedPlasma, plasma2EthereumSign
         txHashes.push(twoKeyProtocol.Utils.getTransactionReceiptMined(await twoKeyProtocol.Registry.addPlasma2EthereumByUser(address, signedPlasma)));
     }
     if (plasma2EthereumSignature) {
+        const isMaintainer = await promisify(twoKeyProtocol.twoKeyPlasmaEvents.isMaintainer, ['0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7']);
+        console.log('isMaintainer', isMaintainer);
+        console.log(twoKeyProtocol.twoKeyPlasmaEvents.address);
         txHashes.push(twoKeyProtocol.Utils.getTransactionReceiptMined(await  twoKeyProtocol.PlasmaEvents.setPlasmaToEthereumOnPlasma(plasmaAddress, plasma2EthereumSignature), { web3: twoKeyProtocol.plasmaWeb3 }));
     }
     return Promise.all(txHashes);

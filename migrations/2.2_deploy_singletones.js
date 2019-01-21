@@ -30,7 +30,7 @@ module.exports = function deploy(deployer) {
     } else if (deployer.network.startsWith('development')) {
         networkId = 'ganache';
     } else if (deployer.network.startsWith('private')) {
-        networkId = 'plasma-network'
+        networkId = 98052;
     }
 
     /**
@@ -334,7 +334,7 @@ module.exports = function deploy(deployer) {
             .then(async () => {
                 await new Promise(async (resolve,reject) => {
                     try {
-                        console.log('Setting initial params in plasma contract on plasma network');
+                        console.log('Setting initial params in plasma contract on plasma network', maintainerAddress);
                         let txHash = await TwoKeyPlasmaEvents.at(proxyAddressTwoKeyPlasmaEvents).setInitialParams
                         (
                             //TODO: Paste here real maintainer address on plasma network

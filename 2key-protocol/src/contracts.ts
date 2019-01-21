@@ -25,14 +25,14 @@ export default { Maintainers:
          '   then spread i when us that patient  in       out oh let  i     you i go  then' },
      '8086':
       { hash:
-         '5787a178c9f2f7ff24c3f56ea0de832071ddf953ebd635075d603e0d3ab4b257',
+         '9ca2498de99d0078890a69f0dde1f4d763650c9c87fc33f0ea7f2de65c3b6b31',
         humanHash:
-         'to   when     table   i    a it   tedious   restless when and lead then let then   to' },
+         '  you    let when  let i      question do let    retreats   when go  and then i streets' },
      '98052':
       { hash:
-         'd55be4094ed35479e5ce5251e1aa2f90a331705f3c26854274bbc3df5da596dd',
+         '2ddb520ff43c0f9f0be9b7ff3ed0e8ca467d972b48713529d18080e074b3fbc3',
         humanHash:
-         ' and  let you  argument when   follow that   go   streets what and then certain  cheap visit    and   ' } },
+         'go  follow let  then let  let    then    with when  go you it restless go     visit   ' } },
   Call:
    { networks:
       { '3':
@@ -56,15 +56,15 @@ export default { Maintainers:
         '8086':
          { events: {},
            links: {},
-           address: '0x2b21cb3a78210f32eb963f241e5ec1f3bab82c5c',
+           address: '0x83c3b664175f65f85afa8942f1415ea6aaf291e1',
            transactionHash:
-            '0xedff659c8bbd0b3ddd6568ddde163fb75f069c076bead8efade52a7f7d40e72f' },
+            '0xdec62a365d45a6141ef12fd5a01475aadb30d4286b51d700a1b9767067f7c72e' },
         '98052':
          { events: {},
            links: {},
-           address: '0x9ef2a50e23a7014a3262482e05716fd6f02b6521',
+           address: '0xbf8e9f2256a65a006bdb0fdc19e3efaeaa214b52',
            transactionHash:
-            '0xcfe4e6bea8e7f72fe0c17d0807c8e86c3dad193a5a1b249168e6e93ad0b0f13f' } },
+            '0x38519822e16c0aa5886f1df7c8b54dbbe2687b92656cd9438e658162f3b4f68d' } },
      abi:
       [ { constant: true,
           inputs:
@@ -992,10 +992,10 @@ export default { Maintainers:
         '8086':
          { events: {},
            links: {},
-           address: '0x19094172d94b4fdae1c0b164480a2a9e2a9ca0ad',
+           address: '0x811eb6164e9e5524cefa9883fea19861374aeadd',
            transactionHash:
-            '0x985f48c636412e1000d9337eeb2b41c711a34f7ad694eb57fa7a21d34363aff9',
-           Proxy: '0x888a1d2b624a7aae062e55721ca7d48c1f44d079',
+            '0x9b702f0d049304086ad8e84237742d5a2dbaaa712a96f5d96229ec45d9a79ed3',
+           Proxy: '0xab607a8b18fcb4350cc93f2c7ce56be32b6a47cd',
            Version: '1.0',
            maintainer_address: '0x18e1d5ca01141E3a0834101574E5A1e94F0F8F6a' } },
      abi:
@@ -1198,9 +1198,9 @@ export default { Maintainers:
         '8086':
          { events: {},
            links: {},
-           address: '0xe462cb52c565bdda8940c7d717846018440aaecb',
+           address: '0xe64a4b62281a04f88ce8188e5e833ad8a7de9c35',
            transactionHash:
-            '0x8f4645c02ab776811888a92db5527385917e8a596c0a11789a8856ce46086b14' } },
+            '0xef3c6fdfd0680d65f6d1ec69892b055a18142f15130f687e8342a0fcdebfca85' } },
      abi:
       [ { constant: true,
           inputs: [ { name: '', type: 'uint256' } ],
@@ -1746,9 +1746,9 @@ export default { Maintainers:
         '8086':
          { events: {},
            links: {},
-           address: '0x75524504cb4be9166e3636f3f9e73d6761186371',
+           address: '0xfed6890f7843c5187727a92355692a9e5da08cd7',
            transactionHash:
-            '0xfde460f6f60fdda7487f9c270cc5052cf3ea151230f0972b54c400a60853c191' } },
+            '0xe666c6daf7e9e6f0141110f0d05ebb63bb7f898931a720b3f60e759a00f3f741' } },
      abi:
       [ { constant: true,
           inputs: [],
@@ -1961,10 +1961,10 @@ export default { Maintainers:
         '8086':
          { events: {},
            links: {},
-           address: '0xc8094844bd0a981391c632baa1f36704f35bb7ff',
+           address: '0x28749767817bfedcb18d109cfa37ea0fb966e199',
            transactionHash:
-            '0x0c2fd740f009ef94ddad61731d15315f0f6e4f94330f822a38d35b36f01adc84',
-           Proxy: '0x77b0404d3f4f27997afa193fab3eb9c53a8f96a4',
+            '0xe89352eac758a7f1ded3166eaa2bcf80a8662bc8cd26ad60fee25c18d63f9fbe',
+           Proxy: '0x7ddde7810003cda99365833a5ff0ca2da1cf0d3a',
            Version: '1.0',
            maintainer_address: '0x18e1d5ca01141E3a0834101574E5A1e94F0F8F6a' } },
      abi:
@@ -2198,10 +2198,10 @@ export default { Maintainers:
         '8086':
          { events: {},
            links: {},
-           address: '0x50e3a7326f73d1e4b1374bc13db08c66609e7043',
+           address: '0xd02efde29696338f609776b21e04547776ae4603',
            transactionHash:
-            '0xd68a80b8a639ddeb327b364e683c709e2f02b3355b6d2a46eef816a9d9667cea',
-           Proxy: '0xabc75557028e8cf044ded87bad2244b57337a261',
+            '0x9ff7632572f8b53bc3b7f71fdb33f2f7817fab5b0c480d0fb79eea7cd1e5516f',
+           Proxy: '0xef06623dc5f55d19ffec568ad364673cc3de3822',
            Version: '1.0',
            maintainer_address: '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7' } },
      abi:
@@ -2381,10 +2381,13 @@ export default { Maintainers:
             '0x462c7aaa25035f989a6797c4b4e37a160d8984140949159ced5ca3dd3f5ba43c' },
         '98052':
          { events: {},
-           links: { Call: '0x9ef2a50e23a7014a3262482e05716fd6f02b6521' },
-           address: '0x783b9568a5d1d2e1fba0ab6919ecc28b2913823a',
+           links: { Call: '0xbf8e9f2256a65a006bdb0fdc19e3efaeaa214b52' },
+           address: '0xb43ce42a154438480e2dd10fff3af3bdd658114b',
            transactionHash:
-            '0xccb7ea9a86ab746da036986c1bf96de023b9474936ca934b251e0cbd92ec88d7' } },
+            '0xbb8ac8c5c0fc4071ffb2883291d0008f04feb9d3f12408ca042614b4d2cde7b0',
+           Proxy: '0x56a0ffca2213cf2353ad95730110dde02fdbc07a',
+           Version: '1.0',
+           maintainer_address: '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7' } },
      abi:
       [ { constant: true,
           inputs:
@@ -2426,6 +2429,13 @@ export default { Maintainers:
           stateMutability: 'view',
           type: 'function' },
         { constant: true,
+          inputs: [],
+          name: 'implementation',
+          outputs: [ { name: '', type: 'address' } ],
+          payable: false,
+          stateMutability: 'view',
+          type: 'function' },
+        { constant: true,
           inputs: [ { name: '', type: 'address' } ],
           name: 'ethereum2plasma',
           outputs: [ { name: '', type: 'address' } ],
@@ -2447,6 +2457,13 @@ export default { Maintainers:
            [ { name: '', type: 'address' }, { name: '', type: 'address' } ],
           name: 'notes',
           outputs: [ { name: '', type: 'bytes' } ],
+          payable: false,
+          stateMutability: 'view',
+          type: 'function' },
+        { constant: true,
+          inputs: [],
+          name: 'owner',
+          outputs: [ { name: '', type: 'address' } ],
           payable: false,
           stateMutability: 'view',
           type: 'function' },
@@ -2474,6 +2491,13 @@ export default { Maintainers:
           outputs: [ { name: '', type: 'address' } ],
           payable: false,
           stateMutability: 'view',
+          type: 'function' },
+        { constant: false,
+          inputs: [ { name: 'sender', type: 'address' } ],
+          name: 'initialize',
+          outputs: [],
+          payable: true,
+          stateMutability: 'payable',
           type: 'function' },
         { constant: true,
           inputs:
@@ -2523,6 +2547,13 @@ export default { Maintainers:
              { indexed: false, name: 'eth', type: 'address' } ],
           name: 'Plasma2Ethereum',
           type: 'event' },
+        { constant: false,
+          inputs: [ { name: 'maintainers', type: 'address[]' } ],
+          name: 'setInitialParams',
+          outputs: [],
+          payable: false,
+          stateMutability: 'nonpayable',
+          type: 'function' },
         { constant: false,
           inputs:
            [ { name: 'plasma_address', type: 'address' },
@@ -2629,6 +2660,20 @@ export default { Maintainers:
              { name: '', type: 'int256' } ],
           payable: false,
           stateMutability: 'view',
+          type: 'function' },
+        { constant: false,
+          inputs: [ { name: '_maintainers', type: 'address[]' } ],
+          name: 'addMaintainers',
+          outputs: [],
+          payable: false,
+          stateMutability: 'nonpayable',
+          type: 'function' },
+        { constant: false,
+          inputs: [ { name: '_maintainers', type: 'address[]' } ],
+          name: 'removeMaintainers',
+          outputs: [],
+          payable: false,
+          stateMutability: 'nonpayable',
           type: 'function' } ],
      name: 'TwoKeyPlasmaEvents' },
   TwoKeyRegistry:
@@ -2644,11 +2689,11 @@ export default { Maintainers:
            maintainer_address: '0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f' },
         '8086':
          { events: {},
-           links: { Call: '0x2b21cb3a78210f32eb963f241e5ec1f3bab82c5c' },
-           address: '0x229f4f795d2deb5ac1bcc20a9d9d2947cc76d621',
+           links: { Call: '0x83c3b664175f65f85afa8942f1415ea6aaf291e1' },
+           address: '0xa077559d2c14a08fdfc498429e671f1c2223ac69',
            transactionHash:
-            '0xaaaf3266876c4ae9011a77a5d3198e68a67e9d2f365b807e4c37d38c44fccd0f',
-           Proxy: '0x7cb18caa0765a607e6a7c74a1cc3850a92ab884e',
+            '0x4731742f3162116fab1441442f0d733619528ee0c245efd56feaab4e4993c5ae',
+           Proxy: '0x5728322d750b60b551951d8346a923eb3b72c08e',
            Version: '1.0',
            maintainer_address: '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7' } },
      abi:
@@ -3092,9 +3137,9 @@ export default { Maintainers:
                  name: 'VersionAdded',
                  type: 'event' } },
            links: {},
-           address: '0xf5df0616258e5b53366ffa2a999359702cde0326',
+           address: '0xb97e91b411050388b67249b289a69ba0a6a974ae',
            transactionHash:
-            '0x8ef47d1c7532f265cb613473a93fa26274800d8f7e63d376aee7791cf6772f0c' } },
+            '0xabb15fb47846232c5ffb1a4cae8c36ac685837bb14034ab7166b879064966204' } },
      abi:
       [ { constant: true,
           inputs: [],
@@ -3209,10 +3254,10 @@ export default { Maintainers:
         '8086':
          { events: {},
            links: {},
-           address: '0x610970c6be968d141e44107eaf1ce03aa6ca2e16',
+           address: '0x4f8d8c79d90ac9fb649ec88ced76313c718e8ba7',
            transactionHash:
-            '0x337334143c83c827dd0d0a971826daacd0f7adcdde17a0300deedc3a6a964940',
-           Proxy: '0x075e384e74af2e05a6d2ab2c00dcbd727385a6ec',
+            '0x1f656ecd1b2cd2c469d8d169f710b39adad23096ead2dc5999e522fee7ec53fb',
+           Proxy: '0xaee1ff90c527b3a665c657e86e24d5b0e3153fbd',
            Version: '1.0',
            maintainer_address: '0x18e1d5ca01141E3a0834101574E5A1e94F0F8F6a' } },
      abi:

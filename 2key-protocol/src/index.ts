@@ -79,7 +79,7 @@ export class TwoKeyProtocol {
     public twoKeyAdmin: any;
     private twoKeyCongress: any;
     private twoKeyReg: any;
-    private twoKeyPlasmaEvents: any;
+    public twoKeyPlasmaEvents: any;
     private twoKeyCall: any;
     private twoKeyEvents: any;
     public plasmaAddress: string;
