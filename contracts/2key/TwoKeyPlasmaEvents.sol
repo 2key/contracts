@@ -1,9 +1,11 @@
 pragma solidity ^0.4.24; //We have to specify what version of compiler this code will use
 import './Call.sol';
+import "./Upgradeable.sol";
 
-contract TwoKeyPlasmaEvents {
+contract TwoKeyPlasmaEvents is Upgradeable {
 
     address public owner;
+    bool initialized = false;
     // every event we generate contains both the campaign address and the address of the contractor of that campaign
     // both are ethereum address.
     // this plasma contract does not know in itself who is the contractor on the ethereum network
@@ -50,7 +52,9 @@ contract TwoKeyPlasmaEvents {
 
     mapping(address => bool) public isMaintainer;
 
-    constructor(address[] maintainers) {
+    function setInitialParams(address[] maintainers) public {
+        require(initialized == false);
+        initialized = true;
         owner = msg.sender;
         //Adding initial maintainers
         for(uint i=0; i<maintainers.length; i++) {

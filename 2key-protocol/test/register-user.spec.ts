@@ -75,12 +75,12 @@ describe('TwoKeyProtocol LOCAL Registering user test', () => {
         expect(handleFromContract).to.be.equal(from);
         console.log(txHash);
     }).timeout(30000);
-
-    it('should register user to plasma', async() => {
-        let txHash = await twoKeyProtocol.PlasmaEvents.setPlasmaToEthereumOnPlasma(from);
-        console.log('This is txHash : ' + txHash);
-        let receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash,{web3: twoKeyProtocol.plasmaWeb3});
-        console.log(receipt);
-    }).timeout(30000);
+    //
+    // it('should register user to plasma', async() => {
+    //     let txHash = await twoKeyProtocol.PlasmaEvents.setPlasmaToEthereumOnPlasma(from);
+    //     console.log('This is txHash : ' + txHash);
+    //     let receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash,{web3: twoKeyProtocol.plasmaWeb3});
+    //     console.log(receipt);
+    // }).timeout(30000);
 
 });

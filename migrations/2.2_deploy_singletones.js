@@ -8,8 +8,7 @@ const Call = artifacts.require('Call');
 const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
 const TwoKeySingletonesRegistry = artifacts.require('TwoKeySingletonesRegistry');
 const TwoKeyExchangeRateContract = artifacts.require('TwoKeyExchangeRateContract');
-const TwoKeySingletoneAddressStorage = artifacts.require('TwoKeySingletoneAddressStorage');
-
+const TwoKeyPlasmaSingletoneRegistry = artifacts.require('TwoKeyPlasmaSingletoneRegistry');
 const fs = require('fs');
 const path = require('path');
 
@@ -30,6 +29,8 @@ module.exports = function deploy(deployer) {
         networkId = 8086;
     } else if (deployer.network.startsWith('development')) {
         networkId = 'ganache';
+    } else if (deployer.network.startsWith('private')) {
+        networkId = 'plasma-network'
     }
 
     /**
@@ -50,6 +51,11 @@ module.exports = function deploy(deployer) {
     let proxyAddressTwoKeyAdmin;
     let proxyAddressTwoKeyUpgradableExchange;
 
+    /**
+     * Define proxy address for plasma network
+     */
+    let proxyAddressTwoKeyPlasmaEvents;
+
 
     /**
      * Initial variables we need for contracts initial state
@@ -61,11 +67,6 @@ module.exports = function deploy(deployer) {
     ];
     let deployerAddress = '0x18e1d5ca01141E3a0834101574E5A1e94F0F8F6a';
     let maintainerAddress = (deployer.network.startsWith('ropsten') || deployer.network.startsWith('rinkeby') || deployer.network.startsWith('public.test')) ? '0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f' : '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7';
-    // let envToSingletonToMaintainer = {prod:{
-    //         TwoKeyRegistry:
-    //
-    //
-    // }}
 
     let votingPowers = [1, 1];
 
@@ -84,8 +85,6 @@ module.exports = function deploy(deployer) {
             .then(() => deployer.link(Call, TwoKeyRegistry))
             .then(() => deployer.deploy(TwoKeyRegistry)
             .then(() => TwoKeyRegistry.deployed())
-            .then(() => deployer.deploy(TwoKeySingletoneAddressStorage))
-            .then(() => TwoKeySingletoneAddressStorage.deployed())
             .then(() => deployer.deploy(TwoKeyUpgradableExchange))
             .then(() => TwoKeyUpgradableExchange.deployed())
             .then(() => deployer.deploy(TwoKeySingletonesRegistry, [], '0x0')) //adding empty admin address
@@ -295,20 +294,52 @@ module.exports = function deploy(deployer) {
                     }
                 })
             })
+            .then(() => true)
+            .catch((err) => {
+                console.log('\x1b[31m', 'Error:', err.message, '\x1b[0m');
+            }));
+    } else if (deployer.network.startsWith('plasma') || deployer.network.startsWith('private')) {
+        deployer.link(Call, TwoKeyPlasmaEvents);
+        deployer.deploy(TwoKeyPlasmaEvents)
+            .then(() => deployer.deploy(TwoKeyPlasmaSingletoneRegistry, [], '0x0')) //adding empty admin address
+            .then(() => TwoKeyPlasmaSingletoneRegistry.deployed().then(async (registry) => {
+                await new Promise(async(resolve,reject) => {
+                    try {
+                        console.log('... Adding TwoKeyPlasmaEvents to Plasma Proxy registry as valid implementation');
+                        /**
+                         * Adding TwoKeyPlasmaEvents to the registry, deploying 1st proxy for that 1.0 version and setting initial params there
+                         */
+                        let txHash = await registry.addVersion("TwoKeyPlasmaEvents", "1.0", TwoKeyPlasmaEvents.address);
+                        let { logs } = await registry.createProxy("TwoKeyPlasmaEvents", "1.0");
+                        let { proxy } = logs.find(l => l.event === 'ProxyCreated').args;
+                        console.log('Proxy address for the TwoKeyPlasmaEvents is : ' + proxy);
+                        const twoKeyPlasmaEvents = fileObject.TwoKeyPlasmaEvents || {};
+
+                        twoKeyPlasmaEvents[networkId] = {
+                            'address': TwoKeyPlasmaEvents.address,
+                            'Proxy': proxy,
+                            'Version': "1.0",
+                            maintainer_address: maintainerAddress,
+                        };
+
+                        fileObject['TwoKeyPlasmaEvents'] = twoKeyPlasmaEvents;
+                        proxyAddressTwoKeyPlasmaEvents = proxy;
+                        fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
+                        resolve(proxy);
+                    } catch (e) {
+                        reject(e);
+                    }
+                })
+            }))
             .then(async () => {
                 await new Promise(async (resolve,reject) => {
                     try {
-                        console.log('Adding all proxy addresses to contract storage');
-                        let txHash = await TwoKeySingletoneAddressStorage.at(TwoKeySingletoneAddressStorage.address)
-                            .setAddresses([
-                                proxyAddressTwoKeyAdmin,
-                                proxyAddressTwoKeyEventSource,
-                                TwoKeyCongress.address,
-                                TwoKeyEconomy.address,
-                                proxyAddressTwoKeyUpgradableExchange,
-                                proxyAddressTwoKeyExchange,
-                                proxyAddressTwoKeyRegistry
-                            ]);
+                        console.log('Setting initial params in plasma contract on plasma network');
+                        let txHash = await TwoKeyPlasmaEvents.at(proxyAddressTwoKeyPlasmaEvents).setInitialParams
+                        (
+                            //TODO: Paste here real maintainer address on plasma network
+                            [maintainerAddress]
+                        );
                         resolve(txHash);
                     } catch (e) {
                         reject(e);
@@ -318,9 +349,6 @@ module.exports = function deploy(deployer) {
             .then(() => true)
             .catch((err) => {
                 console.log('\x1b[31m', 'Error:', err.message, '\x1b[0m');
-            }));
-    } else if (deployer.network.startsWith('plasma') || deployer.network.startsWith('private')) {
-        deployer.link(Call, TwoKeyPlasmaEvents);
-        deployer.deploy(TwoKeyPlasmaEvents);
+            });
     }
 };
