@@ -392,7 +392,7 @@ export default class DecentralizedNation implements IDecentralizedNation {
                    if (m.length > 40) {
                        let first_address = `0x${m.slice(2, 42)}`;
                        let first_public_key = await promisify(weightedVoteContractInstance.public_link_key, [first_address]);
-                       let cuts = Sign.validate_join(first_public_key, null, null, `0x${m}`);
+                       let cuts = Sign.validate_join(first_public_key, null, null, `0x${m}`, this.base.plasmaAddress);
                        this.base._log(`cuts=${cuts.toString()}`);
                        const txHash = await promisify(weightedVoteContractInstance.transferSig, [`0x${m}`, { from: contractor }]);
                        resolve(txHash);
