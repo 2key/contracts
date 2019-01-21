@@ -267,13 +267,13 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @dev payable function
      */
     function joinAndConvert(bytes signature, bool _isAnonymous) public payable {
-//        ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).requirementForMsgValue(msg.value);
-//        address _converterPlasma = twoKeyEventSource.plasmaOf(msg.sender);
+        ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).requirementForMsgValue(msg.value);
+        address _converterPlasma = twoKeyEventSource.plasmaOf(msg.sender);
         distributeArcsBasedOnSignature(signature);
-//        createConversion(msg.value, _converterPlasma);
-//        ITwoKeyConversionHandler(conversionHandler).setAnonymous(_converterPlasma, _isAnonymous);
-//        balancesConvertersETH[_converterPlasma] += msg.value;
-//        twoKeyEventSource.converted(address(this),_converterPlasma,msg.value);
+        createConversion(msg.value, _converterPlasma);
+        ITwoKeyConversionHandler(conversionHandler).setAnonymous(_converterPlasma, _isAnonymous);
+        balancesConvertersETH[_converterPlasma] += msg.value;
+        twoKeyEventSource.converted(address(this),_converterPlasma,msg.value);
     }
 
 
