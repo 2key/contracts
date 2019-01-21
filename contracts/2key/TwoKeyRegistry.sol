@@ -206,10 +206,11 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
         if (last_name.length != 0) {
             username2currentAddress[keccak256(abi.encodePacked(address2username[_sender]))] = 0;
         }
+        bytes32 usernameHex = stringToBytes32(_name);
         address2username[_sender] = _name;
-        username2currentAddress[keccak256(abi.encodePacked(_name))] = _sender;
+        username2currentAddress[usernameHex] = _sender;
         // Add history of changes
-        username2AddressHistory[keccak256(abi.encodePacked(_name))].push(_sender);
+        username2AddressHistory[usernameHex].push(_sender);
         emit UserNameChanged(_sender, _name);
     }
 
@@ -285,8 +286,9 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
         require(_address != address(0));
         require(username2currentAddress[keccak256(abi.encodePacked(username))] == _address); // validating that username exists
 
-        address2walletTag[_address] = keccak256(abi.encodePacked(_username_walletName));
-        walletTag2address[keccak256(abi.encodePacked(_username_walletName))] = _address;
+        bytes32 walletTag = stringToBytes32(_username_walletName);
+        address2walletTag[_address] = walletTag;
+        walletTag2address[walletTag] = _address;
     }
 
     function addPlasma2EthereumInternal(bytes sig, address eth_address) private {
