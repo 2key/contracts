@@ -26,7 +26,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     mapping(address => uint256) internal referrerTotalEarningsEthWEI; // Total earnings for referrers
     mapping(address => uint256) internal referrerAddressToCounterOfConversions;
 
-    //TODO: Check this
     mapping(address => address) public public_link_key;
 
     uint moderatorBalanceETHWei; //Balance of the moderator which can be withdrawn
@@ -83,8 +82,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         twoKeyEventSource.created(address(this), contractor, moderator);
     }
 
-    address public old_a;
-    address public  old_k;
 
     /**
      * @notice Function which will unpack signature and get referrers, keys, and weights from it
@@ -246,6 +243,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
 
          */
     }
+
     /**
      * @notice Function where converter can join and convert
      * @dev payable function
