@@ -24,6 +24,7 @@ export default class PlasmaEvents implements IPlasmaEvents {
             try {
                 let plasmaAddress = this.base.plasmaAddress;
                 let storedEthAddress = await promisify(this.base.twoKeyPlasmaEvents.plasma2ethereum, [plasmaAddress]);
+                console.log('PLASMA.signPlasmaToEthereum storedETHAddress', storedEthAddress);
                 if (storedEthAddress != from) {
                     let plasma2ethereum_sig = await Sign.sign_plasma2ethereum(this.base.web3, this.base.plasmaAddress, from);
                     resolve(plasma2ethereum_sig);

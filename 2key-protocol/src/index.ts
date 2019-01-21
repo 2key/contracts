@@ -82,7 +82,7 @@ export class TwoKeyProtocol {
     private twoKeyPlasmaEvents: any;
     private twoKeyCall: any;
     private twoKeyEvents: any;
-    private plasmaAddress: string;
+    public plasmaAddress: string;
     private plasmaPrivateKey: string;
     public ERC20: IERC20;
     public Utils: ITwoKeyUtils;

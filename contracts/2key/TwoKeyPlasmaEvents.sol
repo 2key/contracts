@@ -47,12 +47,16 @@ contract TwoKeyPlasmaEvents {
     mapping(address => mapping(address => uint256)) public weighted_yes;
     mapping(address => mapping(address => uint256)) public voted_no;
     mapping(address => mapping(address => uint256)) public weighted_no;
+    mapping(address => bool) public isMaintainer;
 
-    function add_plasma2ethereum(bytes sig) public { // , bool with_prefix) public {
-        address plasma_address = msg.sender;
+    function add_plasma2ethereum(address plasma_address, bytes sig) public { // , bool with_prefix) public {
+//        address plasma_address = msg.sender;
         // add an entry connecting msg.sender to the ethereum address that was used to sign sig.
         // see setup_demo.js on how to generate sig
-        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to plasma address")),keccak256(abi.encodePacked(msg.sender))));
+//        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to plasma address")),keccak256(abi.encodePacked(msg.sender))));
+        //TODO Nikola add next line logic
+//        require(msg.sender = isMaintainer[msg.sender] | plasma_address);
+        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to plasma address")),keccak256(abi.encodePacked(plasma_address))));
         require (sig.length == 65, 'bad plasma signature length');
         address eth_address = Call.recoverHash(hash,sig,0);
         require(plasma2ethereum[plasma_address] == address(0) || plasma2ethereum[plasma_address] == eth_address, "cant change plasma=>eth");
