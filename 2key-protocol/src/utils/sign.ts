@@ -478,7 +478,7 @@ function validate_join(firstPublicKey: string | null, f_address: string | null, 
         let recovered_address = eth_util.ecrecover(hash, v, r, s);
         // @ts-ignore
         recovered_address = eth_util.publicToAddress(recovered_address).toString('hex');
-        assert.ok(first_public_key == recovered_address, 'signature failed');
+        assert.ok(!first_public_key || first_public_key == recovered_address, `signature failed ${first_public_key} != ${recovered_address}`);
 
         old_address = new_address;
         first_public_key = new_public_key.toString('hex');

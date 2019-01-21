@@ -471,8 +471,7 @@ describe('TwoKeyProtocol', () => {
         expect(hash).to.be.a('string');
     }).timeout(30000);
 
-    it('should join as test4', async () => {
-        // twoKeyProtocol.unsubscribe2KeyEvents();
+    it('should show maximum referral reward after ONE referrer', async() => {
         const {web3, address} = web3switcher.test4();
         from = address;
         twoKeyProtocol.setWeb3({
@@ -487,21 +486,9 @@ describe('TwoKeyProtocol', () => {
         txHash = await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, links.gmail, from);
         // console.log('isUserJoined', await twoKeyProtocol.AcquisitionCampaign.isAddressJoined(campaignAddress, from));
         let maxReward = await twoKeyProtocol.AcquisitionCampaign.getEstimatedMaximumReferralReward(campaignAddress, from, links.gmail);
-        console.log(`Estimated maximum referral reward: ${maxReward}%`);
-        // const hash = await twoKeyProtocol.AcquisitionCampaign.joinAndSetPublicLinkWithCut(campaignAddress, from, refLink, {cut: 33});
-        const hash = await twoKeyProtocol.AcquisitionCampaign.join(campaignAddress, from, {
-            cut: 33,
-            referralLink: links.gmail
-        });
-        links.test4 = hash;
-        console.log('isUserJoined', await twoKeyProtocol.AcquisitionCampaign.isAddressJoined(campaignAddress, from));
-        console.log('3) test4 Cutted REFLINK', links.gmail);
-        const cut = await twoKeyProtocol.AcquisitionCampaign.getReferrerCut(campaignAddress, from);
-        console.log('Referrer CUT', env.TEST4_ADDRESS, cut);
-        maxReward = await twoKeyProtocol.AcquisitionCampaign.getEstimatedMaximumReferralReward(campaignAddress, from, links.test4);
-        console.log(`Estimated maximum referral reward: ${maxReward}%`);
-        expect(hash).to.be.a('string');
-    }).timeout(300000);
+        console.log(`TEST4, BEFORE JOIN Estimated maximum referral reward: ${maxReward}%`);
+        expect(maxReward).to.be.gte(7.5);
+    }).timeout(30000);
 
     it('should buy some tokens', async () => {
         console.log('4) buy from test4 REFLINK', links.gmail);
@@ -512,6 +499,21 @@ describe('TwoKeyProtocol', () => {
         // console.log(campaigns);
         expect(txHash).to.be.a('string');
     }).timeout(30000);
+
+
+    it('should join as test4', async () => {
+        // twoKeyProtocol.unsubscribe2KeyEvents();
+        // const hash = await twoKeyProtocol.AcquisitionCampaign.joinAndSetPublicLinkWithCut(campaignAddress, from, refLink, {cut: 33});
+        const hash = await twoKeyProtocol.AcquisitionCampaign.join(campaignAddress, from, {
+            cut: 33,
+            referralLink: links.gmail
+        });
+        links.test4 = hash;
+        console.log('isUserJoined', await twoKeyProtocol.AcquisitionCampaign.isAddressJoined(campaignAddress, from));
+        console.log('3) test4 Cutted REFLINK', links.gmail);
+        expect(hash).to.be.a('string');
+    }).timeout(300000);
+
 
 
     it('should print amount of tokens that user want to buy', async () => {
@@ -533,6 +535,9 @@ describe('TwoKeyProtocol', () => {
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_RENATA).privateKey,
         });
         await tryToRegisterUser('Renata', from);
+        const maxReward = await twoKeyProtocol.AcquisitionCampaign.getEstimatedMaximumReferralReward(campaignAddress, from, links.test4);
+        console.log(`RENATA, Estimated maximum referral reward: ${maxReward}%`);
+
         await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, links.test4, from);
 
         const hash = await twoKeyProtocol.AcquisitionCampaign.join(campaignAddress, from, {

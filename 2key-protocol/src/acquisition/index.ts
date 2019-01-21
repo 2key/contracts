@@ -27,14 +27,13 @@ function calcFromCuts(cuts: number[], maxPi: number) {
     // we have all the cuts up to us. calculate our maximal bounty
     for (let i = 0; i < cuts.length; i++) {
         let cut = cuts[i];
-
         // calculate bounty after taking the part for the i-th influencer
         if ((0 < cut) && (cut <= 101)) {
             cut--;
-            referrerRewardPercent *= (100. - cut) / 100.
+            referrerRewardPercent *= (100. - cut) / 100.;
         } else {  // cut = 0 or 255 inidicate equal divistion down stream
             let n = cuts.length - i + 1; // how many influencers including us will split the bounty
-            referrerRewardPercent *= (n - 1.) / n
+            referrerRewardPercent *= (n - 1.) / n;
         }
     }
     return referrerRewardPercent;
@@ -406,6 +405,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     const contractConstants = (await promisify(campaignInstance.getConstantInfo, []));
                     // const decimals = contractConstants[3].toNumber();
                     // this.base._log('Decimals', decimals);
+                    /*
                     let f_address = await promisify(this.base.twoKeyPlasmaEvents.visited_from, [
                         campaignInstance.address,
                         contractorAddress,
@@ -424,7 +424,10 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                         contractorAddress,
                         plasmaAddress,
                     ]);
+                    */
 
+                    const { f_address, f_secret, p_message } = offchainData;
+                    const sig = Sign.free_take(plasmaAddress, f_address, f_secret, p_message);
 
                     this.base._log('getEstimatedMaximumReferralReward', f_address, contractorAddress);
                     // const maxReferralRewardPercent = new BigNumber(contractConstants[1]).div(10 ** decimals).toNumber();
@@ -436,12 +439,12 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                         resolve(maxReferralRewardPercent);
                         return;
                     }
-                    console.log('OFFCHAIN LINK', offchainData);
-                    console.log('PLASMA LINK', { f_address, f_secret, p_message });
-                    console.log(p_message.length, `0x${offchainData.p_message}`.length);
-                    const firstAddressInChain = p_message ? `0x${p_message.substring(4, 44)}` : f_address;
-                    // const firstAddressInChain = p_message ? `0x${p_message.substring(2, 42)}` : f_address;
-                    console.log('FIRSTADDRESSINCHAIN', firstAddressInChain);
+                    // console.log('OFFCHAIN LINK', offchainData);
+                    // console.log('PLASMA LINK', { f_address, f_secret, p_message });
+                    // console.log(p_message.length, `0x${offchainData.p_message}`.length);
+                    // const firstAddressInChain = p_message ? `0x${p_message.substring(4, 44)}` : f_address;
+                    const firstAddressInChain = p_message ? `0x${p_message.substring(2, 42)}` : f_address;
+                    // console.log('FIRSTADDRESSINCHAIN', firstAddressInChain);
                     this.base._log('RefCHAIN', contractorAddress, f_address, firstAddressInChain);
                     let cuts: number[];
                     const firstPublicLink = await promisify(this.base.twoKeyPlasmaEvents.publicLinkKeyOf, [
@@ -451,11 +454,16 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     ]);
                     if (firstAddressInChain === contractorAddress) {
                         this.base._log('First public Link', firstPublicLink);
-                        cuts = Sign.validate_join(firstPublicLink, f_address, f_secret, p_message, plasmaAddress);
+                        // cuts = Sign.validate_join(firstPublicLink, f_address, f_secret, p_message, plasmaAddress);
+                        cuts = Sign.validate_join(firstPublicLink, f_address, f_secret, sig, plasmaAddress);
                     } else {
                         cuts = (await promisify(campaignInstance.getReferrerCuts, [firstAddressInChain])).map(cut => cut.toNumber());
-                        cuts = cuts.concat(Sign.validate_join(firstPublicLink, f_address, f_secret, p_message, plasmaAddress));
+                        this.base._log('CUTS from', firstAddressInChain, cuts);
+                        // cuts = cuts.concat(Sign.validate_join(firstPublicLink, f_address, f_secret, p_message, plasmaAddress));
+                        cuts = cuts.concat(Sign.validate_join(firstPublicLink, f_address, f_secret, sig, plasmaAddress));
                     }
+                    // TODO: Andrii removing CONTRACTOR 0 cut from cuts;
+                    cuts.shift();
                     this.base._log('CUTS', cuts, maxReferralRewardPercent);
                     const estimatedMaxReferrerRewardPercent = calcFromCuts(cuts, maxReferralRewardPercent);
                     resolve(estimatedMaxReferrerRewardPercent);
@@ -783,27 +791,6 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 let txHash;
                 if (!parseInt(prevChain, 16)) {
                     this.base._log('No ARCS call Free Join Take');
-                    // const newPublicLink = await this.join(campaignInstance, from, { referralLink: publicLink, cut })
-                    /*
-                    const { public_address } = generatePublicMeta();
-                    const sig = await Sign.sign_plasma2eteherum(this.base.plasmaAddress, from, this.base.web3);
-                    this.base._log('Signature', sig);
-                    this.base._log(campaignInstance.address, from, this.base.plasmaAddress);
-                    try {
-                        const stored_ethereum_address = await promisify(this.base.twoKeyPlasmaEvents.plasma2ethereum, [this.base.plasmaAddress]);
-                        if (stored_ethereum_address !== from) {
-                            txHash = await promisify(this.base.twoKeyPlasmaEvents.add_plasma2ethereum, [sig, {
-                                from: this.base.plasmaAddress,
-                                gasPrice: 0
-                            }]);
-                            // await this.utils.getTransactionReceiptMined(txHash, {web3: this.base.plasmaWeb3, timeout: 300000});
-                        }
-
-                    } catch (plasmaErr) {
-                        this.base._log('Plasma Error:', plasmaErr);
-                    }
-                    */
-                    // const signature = Sign.free_join_take(from, public_address, f_address, f_secret, p_message);
                     const plasmaAddress = this.base.plasmaAddress;
                     const signature = Sign.free_take(plasmaAddress, f_address, f_secret, p_message);
 
