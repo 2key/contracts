@@ -83,6 +83,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         twoKeyEventSource.created(address(this), contractor, moderator);
     }
 
+    address public old_a;
+    address public  old_k;
 
     /**
      * @notice Function which will unpack signature and get referrers, keys, and weights from it
@@ -115,7 +117,9 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
             old_address := mload(add(sig, 21))
         }
         old_address = twoKeyEventSource.plasmaOf(old_address);
+        old_a = old_address;
         address old_key = public_link_key[old_address];
+        old_k = old_key;
 
         address[] memory influencers;
         address[] memory keys;

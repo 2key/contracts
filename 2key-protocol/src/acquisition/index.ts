@@ -821,6 +821,8 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
             } catch (e) {
                 this.base._log('joinAndConvert ERROR', e.toString());
                 this.base._log(e);
+                const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
+                console.log(await Promise.all([promisify(campaignInstance.old_a, []), promisify(campaignInstance.old_k, [])]));
                 reject(e);
             }
         });
