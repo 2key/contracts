@@ -2,8 +2,8 @@ pragma solidity ^0.4.24; //We have to specify what version of compiler this code
 import './Call.sol';
 
 contract TwoKeyPlasmaEvents {
-    // REPLICATE INFO FROM ETHEREUM NETWORK
 
+    address public owner;
     // every event we generate contains both the campaign address and the address of the contractor of that campaign
     // both are ethereum address.
     // this plasma contract does not know in itself who is the contractor on the ethereum network
@@ -47,7 +47,16 @@ contract TwoKeyPlasmaEvents {
     mapping(address => mapping(address => uint256)) public weighted_yes;
     mapping(address => mapping(address => uint256)) public voted_no;
     mapping(address => mapping(address => uint256)) public weighted_no;
+
     mapping(address => bool) public isMaintainer;
+
+    constructor(address[] maintainers) {
+        owner = msg.sender;
+        //Adding initial maintainers
+        for(uint i=0; i<maintainers.length; i++) {
+            isMaintainer[maintainers[i]] = true;
+        }
+    }
 
     function add_plasma2ethereum(address plasma_address, bytes sig) public { // , bool with_prefix) public {
 //        address plasma_address = msg.sender;
@@ -55,7 +64,7 @@ contract TwoKeyPlasmaEvents {
         // see setup_demo.js on how to generate sig
 //        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to plasma address")),keccak256(abi.encodePacked(msg.sender))));
         //TODO Nikola add next line logic
-//        require(msg.sender = isMaintainer[msg.sender] | plasma_address);
+        require(msg.sender == plasma_address || isMaintainer[msg.sender]);
         bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to plasma address")),keccak256(abi.encodePacked(plasma_address))));
         require (sig.length == 65, 'bad plasma signature length');
         address eth_address = Call.recoverHash(hash,sig,0);
@@ -65,6 +74,8 @@ contract TwoKeyPlasmaEvents {
 
         emit Plasma2Ethereum(plasma_address, eth_address);
     }
+
+
 
     function plasmaOf(address me) public view returns (address) {
         address plasma = ethereum2plasma[me];
@@ -224,5 +235,29 @@ contract TwoKeyPlasmaEvents {
         voted_yes[c][contractor], weighted_yes[c][contractor], voted_no[c][contractor], weighted_no[c][contractor],
         voted_yes[c][contractor] + voted_no[c][contractor], int(weighted_yes[c][contractor]) - int(weighted_no[c][contractor])
         );
+    }
+
+    /**
+     * @notice Function which can add new maintainers, in general it's array because this supports adding multiple addresses in 1 trnx
+     * @dev only owner contract is eligible to mutate state of maintainers
+     * @param _maintainers is the array of maintainer addresses
+     */
+    function addMaintainers(address [] _maintainers) public {
+        require(msg.sender == owner);
+        for(uint i=0; i<_maintainers.length; i++) {
+            isMaintainer[_maintainers[i]] = true;
+        }
+    }
+
+    /**
+     * @notice Function which can remove some maintainers, in general it's array because this supports adding multiple addresses in 1 trnx
+     * @dev only owner contract is eligible to mutate state of maintainers
+     * @param _maintainers is the array of maintainer addresses
+     */
+    function removeMaintainers(address [] _maintainers) public {
+        require(msg.sender == owner);
+        for(uint i=0; i<_maintainers.length; i++) {
+            isMaintainer[_maintainers[i]] = false;
+        }
     }
 }
