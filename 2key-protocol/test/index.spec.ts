@@ -522,8 +522,7 @@ describe('TwoKeyProtocol', () => {
         expect(tokens.totalTokens).to.gte(0);
     });
 
-
-    it('should joinOffchain after cut', async () => {
+    it('should show maximum referral reward after TWO referrer', async() => {
         const {web3, address} = web3switcher.renata();
         from = address;
         twoKeyProtocol.setWeb3({
@@ -535,9 +534,16 @@ describe('TwoKeyProtocol', () => {
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_RENATA).privateKey,
         });
         await tryToRegisterUser('Renata', from);
+        txHash = await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, links.test4, from);
+        // console.log('isUserJoined', await twoKeyProtocol.AcquisitionCampaign.isAddressJoined(campaignAddress, from));
         const maxReward = await twoKeyProtocol.AcquisitionCampaign.getEstimatedMaximumReferralReward(campaignAddress, from, links.test4);
         console.log(`RENATA, Estimated maximum referral reward: ${maxReward}%`);
 
+        expect(maxReward).to.be.gte(5.025);
+    }).timeout(30000);
+
+
+    it('should joinOffchain as Renata', async () => {
         await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, links.test4, from);
 
         const hash = await twoKeyProtocol.AcquisitionCampaign.join(campaignAddress, from, {

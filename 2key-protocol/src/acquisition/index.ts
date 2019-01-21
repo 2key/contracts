@@ -790,7 +790,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 const nonce = await this.helpers._getNonce(from);
                 let txHash;
                 if (!parseInt(prevChain, 16)) {
-                    this.base._log('No ARCS call Free Join Take');
+                    this.base._log('No ARCS call Free Join');
                     const plasmaAddress = this.base.plasmaAddress;
                     const signature = Sign.free_take(plasmaAddress, f_address, f_secret, p_message);
 
@@ -821,9 +821,11 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
             } catch (e) {
                 this.base._log('joinAndConvert ERROR', e.toString());
                 this.base._log(e);
+                reject(e);
+            }
+            finally {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
                 console.log(await Promise.all([promisify(campaignInstance.old_a, []), promisify(campaignInstance.old_k, [])]));
-                reject(e);
             }
         });
     }
@@ -1486,7 +1488,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
                 let availableBalance = await promisify(campaignInstance.getAvailableAndNonReservedTokensAmount,[{from}]);
-                resolve(availableBalance);
+                resolve(parseFloat(this.utils.fromWei(availableBalance, 'ether').toString()));
             } catch (e) {
                 reject(e);
             }
