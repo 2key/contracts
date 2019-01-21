@@ -3,7 +3,7 @@ import 'mocha';
 import {TwoKeyProtocol} from '../src';
 import contractsMeta from '../src/contracts';
 import createWeb3, { generatePlasmaFromMnemonic } from './_web3';
-import Sign from '../src/utils/sign';
+import registerUserFromBackend, { IRegistryData } from './_registerUserFromBackend';
 import {promisify} from "../src/utils";
 
 const {env} = process;
@@ -114,7 +114,6 @@ const links = {
     test: '',
 };
 
-/*
 const users = {
         'deployer': {
             name: 'DEPLOYER',
@@ -178,7 +177,6 @@ const users = {
             fullname: 'test account',
         },
 };
-*/
 // console.log('MNEMONICS');
 // Object.keys(env).filter(key => key.includes('MNEMONIC')).forEach((key) => {
 //     console.log(env[key]);
@@ -247,26 +245,34 @@ const printBalances = (done) => {
         done();
     });
 };
-const tryToRegisterUser = async (username,from) => {
-    /*
+const tryToRegisterUser = async (username, from) => {
+    console.log('REGISTERING', username);
+    const user = users[username.toLowerCase()];
+    let signedPlasma;
+    let plasma2EthereumSignature;
     try {
-        const user = users[username.toLowerCase()];
-        await twoKeyProtocol.Registry.addName(user.name, from, user.fullname, user.emal, from);
-    } catch (e) {
-      console.log('Error adding userName in Registry', e);
-    }
-    */
-    try {
-        await twoKeyProtocol.Registry.addPlasma2EthereumByUser(from);
+        signedPlasma = await twoKeyProtocol.Registry.signPlasma2Ethereum(from);
     } catch (e) {
         console.log('Error in registering user in Registry!!!',e);
     }
     try {
-        await twoKeyProtocol.PlasmaEvents.setPlasmaToEthereumOnPlasma(from);
+        plasma2EthereumSignature = await twoKeyProtocol.PlasmaEvents.signPlasmaToEthereum(from);
     } catch (e) {
         console.log('Error in registering user in Plasma!!!',e);
     }
-}
+    const registerData: IRegistryData = {};
+    const isAddressRegistered = await twoKeyProtocol.Registry.checkIfAddressIsRegistered(from);
+    const isUserRegistered = await twoKeyProtocol.Registry.checkIfUserIsRegistered(user.name);
+    if (!isAddressRegistered && !parseInt(isUserRegistered, 16)) {
+        user.address = from;
+        registerData.user = user;
+    }
+    registerData.plasma2EthereumSignature = plasma2EthereumSignature;
+    registerData.signedPlasma = signedPlasma;
+    registerData.plasmaAddress = twoKeyProtocol.plasmaAddress;
+    const register = await registerUserFromBackend(registerData);
+    // console.log('REGISTER RESULT', register);
+};
 describe('TwoKeyProtocol', () => {
     let from: string;
     before(function () {
@@ -533,6 +539,7 @@ describe('TwoKeyProtocol', () => {
             },
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_GMAIL).privateKey,
         });
+        console.log('Gmail plasma', await promisify(twoKeyProtocol.plasmaWeb3.eth.getAccounts, []));
         await tryToRegisterUser('Gmail', from);
         txHash = await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, links.deployer, from);
         console.log('isUserJoined', await twoKeyProtocol.AcquisitionCampaign.isAddressJoined(campaignAddress, from));

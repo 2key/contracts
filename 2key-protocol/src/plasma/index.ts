@@ -21,6 +21,7 @@ export default class PlasmaEvents implements IPlasmaEvents {
      */
     public signPlasmaToEthereum(from: string): Promise<string> {
         return new Promise<string>(async (resolve, reject) => {
+            console.log('PLASMA.signPlasmaToEthereum', from);
             try {
                 let plasmaAddress = this.base.plasmaAddress;
                 let storedEthAddress = await promisify(this.base.twoKeyPlasmaEvents.plasma2ethereum, [plasmaAddress]);
@@ -43,22 +44,17 @@ export default class PlasmaEvents implements IPlasmaEvents {
      * @param {string} from
      * @returns {Promise<string>}
      */
-    public setPlasmaToEthereumOnPlasma(from: string): Promise<string | boolean> {
-        return new Promise<string | boolean>(async (resolve, reject) => {
-            let plasma2ethereum_sig;
+    public setPlasmaToEthereumOnPlasma(plasmaAddress: string, plasma2EthereumSignature: string): Promise<string> {
+        return new Promise<string>(async (resolve, reject) => {
             try {
-                plasma2ethereum_sig = await this.signPlasmaToEthereum(from);
-                let txHash = await promisify(this.base.twoKeyPlasmaEvents.add_plasma2ethereum, [plasma2ethereum_sig,
+                console.log('PLASMA.setPlasmaToEthereumOnPlasma', this.base.plasmaAddress);
+                let txHash = await promisify(this.base.twoKeyPlasmaEvents.add_plasma2ethereum, [plasmaAddress, plasma2EthereumSignature,
                     {
                         from: this.base.plasmaAddress
                     }]);
                 resolve(txHash);
             } catch (e) {
-                if (!plasma2ethereum_sig) {
-                    resolve(false);
-                } else {
-                    reject(e);
-                }
+                reject(e);
             }
         })
     }

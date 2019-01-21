@@ -485,23 +485,29 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     public visit(campaignAddress: string, referralLink: string, from: string): Promise<string | boolean> {
         return new Promise<string | boolean>(async (resolve, reject) => {
             try {
+                console.log('VISIT', from);
                 const {f_address, f_secret, p_message} = await this.utils.getOffchainDataFromIPFSHash(referralLink);
                 const plasmaAddress = this.base.plasmaAddress;
                 const sig = Sign.free_take(plasmaAddress, f_address, f_secret, p_message);
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaignAddress);
                 const isAddressJoined = await this.isAddressJoined(campaignAddress, from);
+                const cuts = Sign.validate_join(null, null, null, sig, plasmaAddress);
+                console.log('isAddressJoined', isAddressJoined, cuts);
                 if (isAddressJoined) {
                     resolve(false);
                 } else {
                     const contractor = await promisify(campaignInstance.contractor, []);
+                    console.log('contractor', contractor, plasmaAddress);
                     const txHash: string = await promisify(this.base.twoKeyPlasmaEvents.visited, [
                         campaignInstance.address,
                         contractor,
                         sig,
                         {from: plasmaAddress, gasPrice: 0}
                     ]);
+                    console.log('visit txHash', txHash);
                     const note = await Sign.encrypt(this.base.plasmaWeb3, plasmaAddress, f_secret, {plasma: true});
-                    await promisify(this.base.twoKeyPlasmaEvents.setNoteByUser, [campaignInstance.address, note, {from: plasmaAddress}]);
+                    const noteTxHash = await promisify(this.base.twoKeyPlasmaEvents.setNoteByUser, [campaignInstance.address, note, {from: plasmaAddress}]);
+                    console.log('note txHash', noteTxHash);
                     resolve(txHash);
                 }
             } catch (e) {

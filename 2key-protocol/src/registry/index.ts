@@ -161,9 +161,10 @@ export default class TwoKeyReg implements ITwoKeyReg {
      * @param {string} from
      * @returns {Promise<ISignedPlasma>}
      */
-    public signPlasma2Ethereum(from: string) : Promise<ISignedPlasma> {
-        return new Promise<ISignedPlasma>(async(resolve,reject) => {
+    public signPlasma2Ethereum(from: string) : Promise<ISignedPlasma | boolean> {
+        return new Promise<ISignedPlasma | boolean>(async(resolve,reject) => {
             try {
+                console.log('REGISTRY.signPlasma2Ethereum', from);
                 let plasmaAddress = this.base.plasmaAddress;
                 let stored_ethereum_address = await promisify(this.base.twoKeyReg.getPlasmaToEthereum,[plasmaAddress]);
                 let plasmaPrivateKey = "";
@@ -181,7 +182,7 @@ export default class TwoKeyReg implements ITwoKeyReg {
                         externalSignature
                     });
                 } else {
-                    reject(new Error('Already registered!'));
+                    resolve(false);
                 }
 
             } catch (e) {
@@ -195,26 +196,16 @@ export default class TwoKeyReg implements ITwoKeyReg {
      * @param {string} from
      * @returns {Promise<string>}
      */
-    public addPlasma2EthereumByUser(from: string) : Promise<string | boolean> {
-        return new Promise<string | boolean>(async(resolve,reject) => {
-            let signedPlasma;
+    public addPlasma2EthereumByUser(from: string, signedPlasma: ISignedPlasma) : Promise<string> {
+        return new Promise<string>(async(resolve,reject) => {
             try {
-                signedPlasma = await this.signPlasma2Ethereum(from);
                 const {encryptedPlasmaPrivateKey, ethereum2plasmaSignature, externalSignature} = signedPlasma;
-                console.log('REGISTER PLASMA ON MAINNET');
-                console.log(encryptedPlasmaPrivateKey);
-                console.log(ethereum2plasmaSignature);
-                console.log(externalSignature);
                 let txHash = await promisify(this.base.twoKeyReg.setPlasma2EthereumAndNoteSigned,
                     [ethereum2plasmaSignature,encryptedPlasmaPrivateKey,externalSignature,{from}]);
                 resolve(txHash);
 
             } catch (e) {
-                if (!signedPlasma) {
-                    resolve(false);
-                } else {
-                    reject(e);
-                }
+                reject(e);
             }
         })
     }

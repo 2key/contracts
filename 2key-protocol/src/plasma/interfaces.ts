@@ -1,4 +1,4 @@
 export interface IPlasmaEvents {
     signPlasmaToEthereum: (from: string) => Promise<string>,
-    setPlasmaToEthereumOnPlasma: (from: string) => Promise<string | boolean>,
+    setPlasmaToEthereumOnPlasma: (plasmaAddress: string, plasma2EthereumSignature: string) => Promise<string>,
 }

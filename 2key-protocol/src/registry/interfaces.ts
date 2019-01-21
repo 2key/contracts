@@ -10,8 +10,8 @@ export interface ITwoKeyReg {
     setWalletName: (username: string, address: string, username_walletName: string, from: string, gasPrice?: number) => Promise<string>,
     signUsername : (username: string, from:string) => Promise<string>,
     addNameSignedToRegistry: (username: string, from:string) => Promise<string>,
-    signPlasma2Ethereum: (from: string) => Promise<ISignedPlasma>,
-    addPlasma2EthereumByUser: (from: string) => Promise<string | boolean>,
+    signPlasma2Ethereum: (from: string) => Promise<ISignedPlasma | boolean>,
+    addPlasma2EthereumByUser: (from: string, signedPlasma: ISignedPlasma) => Promise<string>,
 }
 
 export interface IUserData {

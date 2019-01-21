@@ -2,7 +2,7 @@ import {expect} from 'chai';
 import 'mocha';
 import {TwoKeyProtocol} from '../src';
 import contractsMeta from '../src/contracts';
-import createWeb3 from './_web3';
+import createWeb3, {generatePlasmaFromMnemonic} from './_web3';
 import Sign from '../src/utils/sign';
 import {INationalVotingCampaign} from "../src/decentralizedNation/interfaces";
 
@@ -165,7 +165,7 @@ describe('TwoKeyProtocol', () => {
                         mainNetId,
                         syncTwoKeyNetId,
                     },
-                    plasmaPK: Sign.generatePrivateKey().toString('hex'),
+                    plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
                 });
                 const {balance} = twoKeyProtocol.Utils.balanceFromWeiString(await twoKeyProtocol.getBalance(env.AYDNEP_ADDRESS), {inWei: true});
                 const {balance: adminBalance} = twoKeyProtocol.Utils.balanceFromWeiString(await twoKeyProtocol.getBalance(contractsMeta.TwoKeyAdmin.networks[mainNetId].address), {inWei: true});
@@ -362,7 +362,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
-            plasmaPK: Sign.generatePrivateKey().toString('hex'),
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_GMAIL).privateKey,
         });
         referralLink = await twoKeyProtocol.DecentralizedNation.join(votingCampaign, from, { cut: 50, referralLink });
         console.log('GMAIL LINK', referralLink);
@@ -377,7 +377,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
-            plasmaPK: Sign.generatePrivateKey().toString('hex'),
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_TEST4).privateKey,
         });
         referralLink = await twoKeyProtocol.DecentralizedNation.join(votingCampaign, from, { cut: 100, referralLink });
         console.log('TEST4 LINK', referralLink);
@@ -392,7 +392,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
-            plasmaPK: Sign.generatePrivateKey().toString('hex'),
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
         });
         const txHash = await twoKeyProtocol.DecentralizedNation.countPlasmaVotes(votingCampaign, from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
