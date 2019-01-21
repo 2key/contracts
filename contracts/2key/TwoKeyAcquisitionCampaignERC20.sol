@@ -21,10 +21,10 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     address public twoKeyAcquisitionLogicHandler;
 
 
-    mapping(address => uint256) internal referrer2cut; // Mapping representing how much are cuts in percent(0-100) for referrer address
-    mapping(address => uint256) internal referrerBalancesETHWei; // balance of EthWei for each influencer that he can withdraw
-    mapping(address => uint256) internal referrerTotalEarningsEthWEI; // Total earnings for referrers
-    mapping(address => uint256) internal referrerAddressToCounterOfConversions;
+    mapping(address => uint256) internal referrerPlasma2cut; // Mapping representing how much are cuts in percent(0-100) for referrer address
+    mapping(address => uint256) internal referrerPlasma2BalancesEthWEI; // balance of EthWei for each influencer that he can withdraw
+    mapping(address => uint256) internal referrerPlasma2TotalEarningsEthWEI; // Total earnings for referrers
+    mapping(address => uint256) internal referrerPlasmaAddressToCounterOfConversions;
 
     mapping(address => address) public public_link_key;
 
@@ -82,6 +82,15 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         twoKeyEventSource.created(address(this), contractor, moderator);
     }
 
+    /**
+     * @notice Function to join with signature and share 1 arc to the receiver
+     * @param signature is the signature
+     * @param receiver is the address we're sending ARCs to
+     */
+    function joinAndShareARC(bytes signature, address receiver) public {
+        distributeArcsBasedOnSignature(signature);
+        transferFrom(twoKeyEventSource.plasmaOf(msg.sender), twoKeyEventSource.plasmaOf(receiver), 1);
+    }
 
     /**
      * @notice Function which will unpack signature and get referrers, keys, and weights from it
@@ -114,9 +123,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
             old_address := mload(add(sig, 21))
         }
         old_address = twoKeyEventSource.plasmaOf(old_address);
-        old_a = old_address;
         address old_key = public_link_key[old_address];
-        old_k = old_key;
 
         address[] memory influencers;
         address[] memory keys;
@@ -220,8 +227,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         // the value 255 is used to signal equal partition with other influencers
         // A sender can set the value only once in a contract
         address plasma = twoKeyEventSource.plasmaOf(me);
-        require(referrer2cut[plasma] == 0 || referrer2cut[plasma] == cut, 'cut already set differently');
-        referrer2cut[plasma] = cut;
+        require(referrerPlasma2cut[plasma] == 0 || referrerPlasma2cut[plasma] == cut, 'cut already set differently');
+        referrerPlasma2cut[plasma] = cut;
     }
 
     /**
@@ -250,12 +257,11 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      */
     function joinAndConvert(bytes signature, bool _isAnonymous) public payable {
         ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).requirementForMsgValue(msg.value);
-        address _converterPlasma = twoKeyEventSource.plasmaOf(msg.sender);
         distributeArcsBasedOnSignature(signature);
-        createConversion(msg.value, _converterPlasma);
-        ITwoKeyConversionHandler(conversionHandler).setAnonymous(_converterPlasma, _isAnonymous);
-        balancesConvertersETH[_converterPlasma] += msg.value;
-        twoKeyEventSource.converted(address(this),_converterPlasma,msg.value);
+        createConversion(msg.value, msg.sender);
+        ITwoKeyConversionHandler(conversionHandler).setAnonymous(msg.sender, _isAnonymous);
+        balancesConvertersETH[msg.sender] += msg.value;
+        twoKeyEventSource.converted(address(this),msg.sender,msg.value);
     }
 
 
@@ -267,10 +273,10 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).requirementForMsgValue(msg.value);
         address _converterPlasma = twoKeyEventSource.plasmaOf(msg.sender);
         require(received_from[_converterPlasma] != address(0));
-        createConversion(msg.value, _converterPlasma);
-        ITwoKeyConversionHandler(conversionHandler).setAnonymous(_converterPlasma, _isAnonymous);
-        balancesConvertersETH[_converterPlasma] += msg.value;
-        twoKeyEventSource.converted(address(this),_converterPlasma,msg.value);
+        createConversion(msg.value, msg.sender);
+        ITwoKeyConversionHandler(conversionHandler).setAnonymous(msg.sender, _isAnonymous);
+        balancesConvertersETH[msg.sender] += msg.value;
+        twoKeyEventSource.converted(address(this),msg.sender,msg.value);
     }
 
     /*
@@ -279,7 +285,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @param converterAddress is the sender of eth to the contract
      * @dev can be called only internally
      */
-    function createConversion(uint conversionAmountETHWei, address converterPlasmaAddress) internal {
+    function createConversion(uint conversionAmountETHWei, address converterAddress) internal {
         uint baseTokensForConverterUnits;
         uint bonusTokensForConverterUnits;
 
@@ -291,7 +297,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         uint256 _total_units = getInventoryBalance();
         require(_total_units - reservedAmountOfTokens >= totalTokensForConverterUnits, 'Inventory balance does not have enough funds');
 
-        unitsConverterBought[converterPlasmaAddress] = unitsConverterBought[converterPlasmaAddress].add(totalTokensForConverterUnits);
+        unitsConverterBought[converterAddress] = unitsConverterBought[converterAddress].add(totalTokensForConverterUnits);
 
         uint256 maxReferralRewardETHWei = conversionAmountETHWei.mul(maxReferralRewardPercent).div(100);
         uint256 moderatorFeeETHWei = calculateModeratorFee(conversionAmountETHWei);
@@ -300,7 +306,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
 
         reservedAmountOfTokens = reservedAmountOfTokens + totalTokensForConverterUnits;
 
-        ITwoKeyConversionHandler(conversionHandler).supportForCreateConversion(contractor, contractorProceedsETHWei, converterPlasmaAddress,
+        ITwoKeyConversionHandler(conversionHandler).supportForCreateConversion(contractor, contractorProceedsETHWei, converterAddress,
             conversionAmountETHWei, maxReferralRewardETHWei, moderatorFeeETHWei,
             baseTokensForConverterUnits,bonusTokensForConverterUnits,
             expiryConversionInHours);
@@ -324,7 +330,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
                 b = _maxReferralRewardETHWei;
             }
             else {
-                uint256 cut = referrer2cut[influencers[i]];
+                uint256 cut = referrerPlasma2cut[influencers[i]];
                 if (cut > 0 && cut <= 101) {
                     b = _maxReferralRewardETHWei.mul(cut.sub(1)).div(100);
                 } else {// cut == 0 or 255 indicates equal particine of the bounty
@@ -332,9 +338,9 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
                 }
             }
             //All mappings are now stated to plasma addresses
-            referrerBalancesETHWei[influencers[i]] = referrerBalancesETHWei[influencers[i]].add(b);
-            referrerTotalEarningsEthWEI[influencers[i]] = referrerTotalEarningsEthWEI[influencers[i]].add(b);
-            referrerAddressToCounterOfConversions[influencers[i]]++;
+            referrerPlasma2BalancesEthWEI[influencers[i]] = referrerPlasma2BalancesEthWEI[influencers[i]].add(b);
+            referrerPlasma2TotalEarningsEthWEI[influencers[i]] = referrerPlasma2TotalEarningsEthWEI[influencers[i]].add(b);
+            referrerPlasmaAddressToCounterOfConversions[influencers[i]]++;
 //            emit Rewarded(influencers[i], b);
             total_bounty = total_bounty.add(b);
             _maxReferralRewardETHWei = _maxReferralRewardETHWei.sub(b);
@@ -424,7 +430,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @param me is the ethereum address
      */
     function getReferrerCut(address me) public view returns (uint256) {
-        return referrer2cut[twoKeyEventSource.plasmaOf(me)];
+        return referrerPlasma2cut[twoKeyEventSource.plasmaOf(me)];
     }
 
     /**
@@ -518,7 +524,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     function getReferrerBalanceAndTotalEarningsAndNumberOfConversions(address _referrer) public view returns (uint,uint,uint) {
         require(msg.sender == _referrer || msg.sender == contractor || msg.sender == moderator);
         _referrer = twoKeyEventSource.plasmaOf(_referrer);
-        return (referrerBalancesETHWei[_referrer],referrerTotalEarningsEthWEI[_referrer], referrerAddressToCounterOfConversions[_referrer]);
+        return (referrerPlasma2BalancesEthWEI[_referrer], referrerPlasma2TotalEarningsEthWEI[_referrer], referrerPlasmaAddressToCounterOfConversions[_referrer]);
     }
 
     function publicLinkKeyOf(address me) public view returns (address) {
@@ -527,8 +533,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
 
     //{ rewards: number,  tokens_bought: number, isConverter: bool, isReferrer: bool, isContractor: bool, isModerator:bool } right??
     function getAddressStatistic(address _address) public view returns (uint,uint,bool,bool,bool) {
-        _address = twoKeyEventSource.plasmaOf(_address); // Getting plasma address first
-        if(_address == ownerPlasma) {
+        if(_address == contractor) {
             return (0, 0, false, false, true);
         } else {
             bool isConverter;
@@ -536,10 +541,10 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
             if(unitsConverterBought[_address] > 0) {
                 isConverter = true;
             }
-            if(referrerBalancesETHWei[_address] > 0) {
+            if(referrerPlasma2BalancesEthWEI[twoKeyEventSource.plasmaOf(_address)] > 0) {
                 isReferrer = true;
             }
-            return (referrerBalancesETHWei[_address], unitsConverterBought[_address], isConverter, isReferrer, false);
+            return (referrerPlasma2BalancesEthWEI[twoKeyEventSource.plasmaOf(_address)], unitsConverterBought[_address], isConverter, isReferrer, false);
         }
     }
 
@@ -572,9 +577,9 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
             buyTokensFromUpgradableExchange(balance,msg.sender);
         } else {
             address _referrer = twoKeyEventSource.plasmaOf(msg.sender);
-            if(referrerBalancesETHWei[_referrer] != 0) {
-                balance = referrerBalancesETHWei[_referrer];
-                referrerBalancesETHWei[_referrer] = 0;
+            if(referrerPlasma2BalancesEthWEI[_referrer] != 0) {
+                balance = referrerPlasma2BalancesEthWEI[_referrer];
+                referrerPlasma2BalancesEthWEI[_referrer] = 0;
                 buyTokensFromUpgradableExchange(balance, msg.sender);
             } else {
                 revert();

@@ -823,10 +823,6 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 this.base._log(e);
                 reject(e);
             }
-            finally {
-                const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-                console.log(await Promise.all([promisify(campaignInstance.old_a, []), promisify(campaignInstance.old_k, [])]));
-            }
         });
     }
 
