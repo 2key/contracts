@@ -384,7 +384,7 @@ function recoverHash(hash1, p_message) {
     return new_address;
 }
 
-function validate_join(firstPublicKey: string, f_address: string, f_secret: string, pMessage: string, plasmaAddress: string): number[] {
+function validate_join(firstPublicKey: string | null, f_address: string | null, f_secret: string | null, pMessage: string, plasmaAddress: string): number[] {
     console.log('Validate join', firstPublicKey, f_address, f_secret, pMessage);
     const bounty_cuts = [];
 

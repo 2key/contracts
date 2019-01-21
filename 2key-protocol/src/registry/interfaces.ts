@@ -11,7 +11,7 @@ export interface ITwoKeyReg {
     signUsername : (username: string, from:string) => Promise<string>,
     addNameSignedToRegistry: (username: string, from:string) => Promise<string>,
     signPlasma2Ethereum: (from: string) => Promise<ISignedPlasma>,
-    addPlasma2EthereumByUser: (from: string) => Promise<string>,
+    addPlasma2EthereumByUser: (from: string) => Promise<string | boolean>,
 }
 
 export interface IUserData {

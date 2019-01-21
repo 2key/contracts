@@ -195,10 +195,12 @@ export default class TwoKeyReg implements ITwoKeyReg {
      * @param {string} from
      * @returns {Promise<string>}
      */
-    public addPlasma2EthereumByUser(from: string) : Promise<string> {
-        return new Promise<string>(async(resolve,reject) => {
+    public addPlasma2EthereumByUser(from: string) : Promise<string | boolean> {
+        return new Promise<string | boolean>(async(resolve,reject) => {
+            let signedPlasma;
             try {
-                const {encryptedPlasmaPrivateKey, ethereum2plasmaSignature, externalSignature} = await this.signPlasma2Ethereum(from);
+                signedPlasma = await this.signPlasma2Ethereum(from);
+                const {encryptedPlasmaPrivateKey, ethereum2plasmaSignature, externalSignature} = signedPlasma;
                 console.log('REGISTER PLASMA ON MAINNET');
                 console.log(encryptedPlasmaPrivateKey);
                 console.log(ethereum2plasmaSignature);
@@ -208,7 +210,11 @@ export default class TwoKeyReg implements ITwoKeyReg {
                 resolve(txHash);
 
             } catch (e) {
-                reject(e);
+                if (!signedPlasma) {
+                    resolve(false);
+                } else {
+                    reject(e);
+                }
             }
         })
     }
