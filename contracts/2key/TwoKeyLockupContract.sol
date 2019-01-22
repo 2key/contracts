@@ -9,16 +9,16 @@ contract TwoKeyLockupContract {
     uint tokenDistributionDate;
     uint maxDistributionDateShiftInDays;
 
+    uint conversionId;
+
     uint public baseTokens;
     uint public bonusTokens;
-    uint totalTokensLeftOnContract;
-    uint withdrawn = 0;
 
 
     mapping(uint => uint) tokenUnlockingDate;
     mapping(uint => bool) isWithdrawn;
 
-    address converter;
+    address public converter;
     address contractor;
     address twoKeyAcquisitionCampaignERC20Address;
     address twoKeyConversionHandler;
@@ -48,6 +48,7 @@ contract TwoKeyLockupContract {
         uint _maxDistributionDateShiftInDays,
         uint _baseTokens,
         uint _bonusTokens,
+        uint _conversionId,
         address _converter,
         address _contractor,
         address _acquisitionCampaignERC20Address,
@@ -59,19 +60,19 @@ contract TwoKeyLockupContract {
         maxDistributionDateShiftInDays = _maxDistributionDateShiftInDays;
         baseTokens = _baseTokens;
         bonusTokens = _bonusTokens;
+        conversionId = _conversionId;
         converter = _converter;
         contractor = _contractor;
         twoKeyAcquisitionCampaignERC20Address = _acquisitionCampaignERC20Address;
         twoKeyConversionHandler = msg.sender;
         assetContractERC20 = _assetContractERC20;
-        totalTokensLeftOnContract = baseTokens + bonusTokens;
         tokenUnlockingDate[0] = tokenDistributionDate; //base tokens
         for(uint i=1 ;i<bonusTokensVestingMonths + 1; i++) {
-            tokenUnlockingDate[i] = tokenDistributionDate + i*bonusTokensVestingMonths * (30 days); ///bonus tokens
+            tokenUnlockingDate[i] = tokenDistributionDate + i * (30 days); ///bonus tokens
         }
     }
 
-    function getLockupSummary() public onlyConverter returns (uint, uint, uint, uint[], bool[]) {
+    function getLockupSummary() public view returns (uint, uint, uint, uint, uint[], bool[]) {
         uint[] memory dates = new uint[](bonusTokensVestingMonths+1);
         bool[] memory areTokensWithdrawn = new bool[](bonusTokensVestingMonths+1);
 
@@ -81,7 +82,7 @@ contract TwoKeyLockupContract {
         }
         //total = base + bonus
         // monthly bonus = bonus/bonusTokensVestingMonths
-        return (baseTokens, bonusTokens, bonusTokensVestingMonths ,dates,areTokensWithdrawn);
+        return (baseTokens, bonusTokens, bonusTokensVestingMonths, conversionId, dates, areTokensWithdrawn);
     }
 
 
@@ -92,6 +93,13 @@ contract TwoKeyLockupContract {
         require(changed == false);
         require(_newDate - (maxDistributionDateShiftInDays * (1 days)) <= tokenDistributionDate);
         require(now < tokenDistributionDate);
+
+        uint shift = tokenDistributionDate - _newDate;
+        // If the date is changed shifting all tokens unlocking dates for the difference
+        for(uint i=0; i<bonusTokensVestingMonths+1;i++) {
+            tokenUnlockingDate[i] = tokenUnlockingDate[i] + shift;
+        }
+
         changed = true;
         tokenDistributionDate = _newDate;
     }
@@ -100,7 +108,7 @@ contract TwoKeyLockupContract {
     /// @notice Function where converter can withdraw his funds
     /// @return true is if transfer was successful, otherwise will revert
     /// onlyConverter
-    function withdrawTokens(uint part) public returns (bool) {
+    function withdrawTokens(uint part) public onlyConverter returns (bool) {
         require(isWithdrawn[part] == false && part < bonusTokensVestingMonths+1 && block.timestamp > tokenUnlockingDate[part]);
         uint amount;
         if(part == 0) {
