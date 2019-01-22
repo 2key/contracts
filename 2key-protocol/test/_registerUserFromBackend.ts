@@ -19,6 +19,14 @@ interface IUser {
     fullname: string,
 }
 
+/*
+export interface ISignedPlasma {
+    encryptedPlasmaPrivateKey: string,
+    ethereum2plasmaSignature: string,
+    externalSignature: string
+}
+*/
+
 export interface IRegistryData {
     user?: IUser,
     signedPlasma?: ISignedPlasma,
@@ -67,7 +75,7 @@ async function registerUserFromBackend({ user, signedPlasma, plasma2EthereumSign
     console.log('registerUserFromBackend.plasmaAddress', twoKeyProtocol.plasmaAddress);
     const txHashes = [];
     if (user) {
-        txHashes.push(twoKeyProtocol.Utils.getTransactionReceiptMined(await twoKeyProtocol.Registry.addName(user.name, user.address, user.email, user.email, address)));
+        txHashes.push(twoKeyProtocol.Utils.getTransactionReceiptMined(await twoKeyProtocol.Registry.addName(user.name, user.address, user.fullname, user.email, address)));
     }
     if (signedPlasma) {
         txHashes.push(twoKeyProtocol.Utils.getTransactionReceiptMined(await twoKeyProtocol.Registry.addPlasma2EthereumByUser(address, signedPlasma)));
@@ -79,6 +87,14 @@ async function registerUserFromBackend({ user, signedPlasma, plasma2EthereumSign
         txHashes.push(twoKeyProtocol.Utils.getTransactionReceiptMined(await  twoKeyProtocol.PlasmaEvents.setPlasmaToEthereumOnPlasma(plasmaAddress, plasma2EthereumSignature), { web3: twoKeyProtocol.plasmaWeb3 }));
     }
     return Promise.all(txHashes);
+}
+
+console.log(process.argv[2]);
+if (process.argv[2]) {
+    const data = JSON.parse(process.argv[2]);
+    registerUserFromBackend(data).then(() => {
+        console.log('done');
+    })
 }
 
 export default registerUserFromBackend;
