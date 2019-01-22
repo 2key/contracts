@@ -395,6 +395,7 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
         }
     }
 
+
     function stringToBytes32(string memory source) internal pure returns (bytes32 result) {
         bytes memory tempEmptyStringTest = bytes(source);
         if (tempEmptyStringTest.length == 0) {
