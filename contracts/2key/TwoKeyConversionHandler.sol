@@ -206,7 +206,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
          * For the lockup contracts there's no need to save to plasma address, there we'll save ethereum address
          */
         TwoKeyLockupContract lockupContract = new TwoKeyLockupContract(bonusTokensVestingStartShiftInDaysFromDistributionDate, bonusTokensVestingMonths, tokenDistributionDate, maxDistributionDateShiftInDays,
-            conversion.baseTokenUnits, conversion.bonusTokenUnits, conversion.converter, conversion.contractor, twoKeyAcquisitionCampaignERC20, assetContractERC20);
+            conversion.baseTokenUnits, conversion.bonusTokenUnits, _conversionId, conversion.converter, conversion.contractor, twoKeyAcquisitionCampaignERC20, assetContractERC20);
 
         allLockUpContracts.push(address(lockupContract));
 

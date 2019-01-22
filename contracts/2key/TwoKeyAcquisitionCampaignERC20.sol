@@ -174,7 +174,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @param amountOfMoney is the ether balance person has on the contract
      * @param receiver is the address of the person who withdraws money
      */
-    function buyTokensFromUpgradableExchange(uint amountOfMoney, address receiver) private {
+    function buyTokensFromUpgradableExchange(uint amountOfMoney, address receiver) internal {
         IUpgradableExchange(upgradableExchange).buyTokens.value(amountOfMoney)(receiver);
     }
 
