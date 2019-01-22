@@ -430,16 +430,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
     }
 
 
-
-
-    function withdrawModerator() external {
-        if(msg.sender == moderator) {
-            uint balance = moderatorBalanceETHWei;
-            moderatorBalanceETHWei = 0;
-            ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).buyTokensFromUpgradableExchange(moderatorBalanceETHWei,msg.sender);
-        }
-    }
-
     /**
      * @notice Function to cancel conversion and get back money
      * @param _conversionId is the id of the conversion
