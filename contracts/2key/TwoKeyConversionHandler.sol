@@ -34,9 +34,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
     mapping(address => bool) isConverterAnonymous;
     mapping(address => address[]) converterToLockupContracts;
 
-    uint moderatorBalanceETHWei; //Balance of the moderator which can be withdrawn
-    uint moderatorTotalEarningsETHWei; //Total earnings of the moderator all time
-
     address[] offlineAcquisitionsConverters;
 
     address[] allLockUpContracts;
