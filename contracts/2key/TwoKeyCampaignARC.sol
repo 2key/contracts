@@ -48,7 +48,8 @@ contract TwoKeyCampaignARC is ArcERC20 {
      * @param _to address The address which you want to transfer to ALREADY converted to plasma
      * @param _value uint256 the amount of tokens to be transferred
      */
-	function transferFrom(address _from, address _to, uint256 _value) public onlyContractorOrModerator returns (bool) {
+	function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
+		//Add modifier who can call this!! onlyContractorOrModerator || msg.sender == from something like this
 		return transferFromInternal(_from, _to, _value);
 	}
 
@@ -68,7 +69,7 @@ contract TwoKeyCampaignARC is ArcERC20 {
 		emit Transfer(_from, _to, 1);
 		if (received_from[_to] == 0) {
 			// inform the 2key admin contract, once, that an influencer has joined
-			twoKeyEventSource.joined(this, _from, _to);
+//			twoKeyEventSource.joined(this, _from, _to);
 		}
 		received_from[_to] = _from;
 		return true;

@@ -89,7 +89,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      */
     function joinAndShareARC(bytes signature, address receiver) public {
         distributeArcsBasedOnSignature(signature);
-        transferFrom(twoKeyEventSource.plasmaOf(msg.sender), twoKeyEventSource.plasmaOf(receiver), 1);
+        transferFrom(msg.sender, receiver, 1);
     }
 
     /**

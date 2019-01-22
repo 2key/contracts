@@ -459,9 +459,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
 
 
 
-
-
-
     //
     //    /// @notice Function where contractor or moderator can cancel the converter
     //    function cancelConverter() public {

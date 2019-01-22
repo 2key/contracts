@@ -844,21 +844,8 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         return new Promise<string>(async(resolve,reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-                const sig = await Sign.sign_plasma2eteherum(this.base.plasmaAddress, from, this.base.web3);
-                this.base._log('Signature', sig);
+                // const sig = await Sign.sign_plasma2eteherum(this.base.plasmaAddress, from, this.base.web3);
                 this.base._log(campaignInstance.address, from, this.base.plasmaAddress);
-                try {
-                    const stored_ethereum_address = await promisify(this.base.twoKeyPlasmaEvents.plasma2ethereum, [this.base.plasmaAddress]);
-                    if (stored_ethereum_address !== from) {
-                        await promisify(this.base.twoKeyPlasmaEvents.add_plasma2ethereum, [sig, {
-                            from: this.base.plasmaAddress,
-                            gasPrice: 0
-                        }]);
-                        // await this.utils.getTransactionReceiptMined(txHash, {web3: this.base.plasmaWeb3, timeout: 300000});
-                    }
-                } catch (plasmaErr) {
-                    this.base._log('Plasma Error:', plasmaErr);
-                }
                 const nonce = await this.helpers._getNonce(from);
                 const txHash: string = await promisify(campaignInstance.convert, [false,{
                     from,
@@ -900,7 +887,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 if (!arcBalance) {
                     const {public_address} = generatePublicMeta();
                     this.base._log('joinAndShareARC call Free Join Take');
-                    const signature = Sign.free_join_take(from, public_address, f_address, f_secret, p_message);
+                    const signature = Sign.free_take(this.base.plasmaAddress, f_address, f_secret, p_message);
                     this.base._log(signature, recipient);
                     //TODO: Wrong link
                     const txHash: string = await promisify(campaignInstance.joinAndShareARC, [signature, recipient, {
