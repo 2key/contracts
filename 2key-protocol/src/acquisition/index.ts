@@ -1340,9 +1340,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         return new Promise<number>(async (resolve, reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-                const conversionHandler = await promisify(campaignInstance.conversionHandler,[{from}]);
-                const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandler);
-                let [moderatorBalance, moderatorTotalEarnings] = await promisify(conversionHandlerInstance.getModeratorBalanceAndTotalEarnings, [{from}]);
+                let [moderatorBalance, moderatorTotalEarnings] = await promisify(campaignInstance.getModeratorBalanceAndTotalEarnings, [{from}]);
                 resolve(moderatorBalance);
             } catch (e) {
                 reject(e);
