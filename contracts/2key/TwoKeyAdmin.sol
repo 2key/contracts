@@ -83,10 +83,10 @@ contract TwoKeyAdmin is Upgradeable {
 	}
 
 	/// @notice Function to add moderator
-	/// @param _address is address of moderator
-	function addMaintainerForRegistry(address _address) external onlyTwoKeyCongress {
-		require (_address != address(0));
-		twoKeyReg.addTwoKeyMaintainer(_address);
+	/// @param _addresses is address of moderator
+	function addMaintainerForRegistry(address [] _addresses) external onlyTwoKeyCongress {
+		require (_addresses.length != 0);
+		twoKeyReg.addTwoKeyMaintainers(_addresses);
 	}
 
     /// @notice Function to whitelist address as an authorized user for twoKeyEventSource contract

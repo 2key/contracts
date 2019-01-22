@@ -274,7 +274,7 @@ module.exports = function deploy(deployer) {
                         (
                             proxyAddressTwoKeyEventSource,
                             proxyAddressTwoKeyAdmin,
-                            maintainerAddress
+                            [maintainerAddress]
                         );
                         resolve(txHash);
                     } catch (e) {
