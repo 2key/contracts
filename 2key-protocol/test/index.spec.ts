@@ -100,6 +100,7 @@ const web3switcher = {
     gmail2: () => createWeb3(env.MNEMONIC_GMAIL2, rpcUrl),
     aydnep2: () => createWeb3(env.MNEMONIC_AYDNEP2, rpcUrl),
     test: () => createWeb3(env.MNEMONIC_TEST, rpcUrl),
+    guest: () => createWeb3('mnemonic words should be here but for some reason they are missing', rpcUrl),
 };
 
 const links = {
@@ -527,6 +528,22 @@ describe('TwoKeyProtocol', () => {
             throw e;
         }
     }).timeout(10000);
+
+    it('should visit campaign as guest', async () => {
+        const {web3, address} = web3switcher.guest();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            plasmaPK: generatePlasmaFromMnemonic('mnemonic words should be here but for some reason they are missing').privateKey,
+        });
+        txHash = await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, links.deployer, from);
+        console.log(txHash);
+        expect(txHash.length).to.be.gt(0);
+    }).timeout(30000);
 
     it('should create a join link', async () => {
         const {web3, address} = web3switcher.gmail();

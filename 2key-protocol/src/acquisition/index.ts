@@ -753,29 +753,6 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     }
 
     /**
-     * Function to register plasma to ethereum
-     * @param {string} from
-     * @returns {Promise<string>}
-     */
-    public registerPlasmaToEthereum(from: string) : Promise<string> {
-        return new Promise<string>(async(resolve,reject) => {
-            const sig = await Sign.sign_plasma2eteherum(this.base.plasmaAddress, from, this.base.web3);
-            this.base._log('Signature', sig);
-            try {
-                const stored_ethereum_address = await promisify(this.base.twoKeyPlasmaEvents.plasma2ethereum, [this.base.plasmaAddress]);
-                if (stored_ethereum_address !== from) {
-                    let txHash: string = await promisify(this.base.twoKeyPlasmaEvents.add_plasma2ethereum, [sig, {
-                        from: this.base.plasmaAddress,
-                        gasPrice: 0
-                    }]);
-                }
-
-            } catch (plasmaErr) {
-                this.base._log('Plasma Error:', plasmaErr);
-            }
-        });
-    }
-    /**
      *
      * @param campaign
      * @param {string | number | BigNumber} value
@@ -844,7 +821,6 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         return new Promise<string>(async(resolve,reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-                // const sig = await Sign.sign_plasma2eteherum(this.base.plasmaAddress, from, this.base.web3);
                 this.base._log(campaignInstance.address, from, this.base.plasmaAddress);
                 const nonce = await this.helpers._getNonce(from);
                 const txHash: string = await promisify(campaignInstance.convert, [false,{

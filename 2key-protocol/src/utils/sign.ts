@@ -718,7 +718,7 @@ function generateSignatureKeys(
  */
 function sign_message(web3, msgParams, from, opts: IOptionalParamsSignMessage = {}): Promise<string> {
     return new Promise<string>((resolve, reject) => {
-        const { isMetamask = false } = web3.currentProvider;
+        const { isMetaMask = false } = web3.currentProvider;
 
         function sign_message_callback(err, result) {
             if (err) {
@@ -728,24 +728,22 @@ function sign_message(web3, msgParams, from, opts: IOptionalParamsSignMessage = 
                 console.log('Error in sign_message no result');
                 reject()
             } else {
-                if (typeof result != 'string') {
-                    result = result.result
-                }
+                let sig = typeof result != 'string' ? result.result : result;
 
-                if (opts.plasma || !isMetamask) {
-                    let n = result.length;
-                    let v = result.slice(n - 2);
+                if (opts.plasma || !isMetaMask) {
+                    let n = sig.length;
+                    let v = sig.slice(n - 2);
                     v = parseInt(v, 16) + 32;
                     v = Buffer.from([v]).toString('hex');
-                    result = result.slice(0, n - 2) + v;
+                    sig = sig.slice(0, n - 2) + v;
                 }
 
-                resolve(result)
+                resolve(sig)
             }
         }
 
-        if (!opts.plasma && isMetamask) {
-            assert.ok(typeof msgParams == 'object', 'bad msgParams')
+        if (!opts.plasma && isMetaMask) {
+            assert.ok(typeof msgParams == 'object', 'bad msgParams');
             // metamask uses  web3.eth.sign to sign transaction and not for arbitrary messages
             // instead use https://medium.com/metamask/scaling-web3-with-signtypeddata-91d6efc8b290
             web3.currentProvider.sendAsync({
@@ -758,7 +756,7 @@ function sign_message(web3, msgParams, from, opts: IOptionalParamsSignMessage = 
             if (typeof msgParams == 'object') {
                 hash = sigUtil.typedSignatureHash(msgParams)
             } else {
-                assert.ok(msgParams.startsWith('0x'), 'msgParams not 0x')
+                assert.ok(msgParams.startsWith('0x'), 'msgParams not 0x');
                 hash = web3.sha3(msgParams)
             }
             if (web3.eth.getSign) {
@@ -814,5 +812,4 @@ export default {
     generatePrivateKey,
     sign_cut2eteherum,
     generateSignatureKeys,
-    sign_plasma2eteherum, //TODO: DEPRECATED
 };
