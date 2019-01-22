@@ -725,6 +725,21 @@ describe('TwoKeyProtocol', () => {
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(30000);
 
+    it('should register test', async() => {
+        const {web3, address} = web3switcher.test();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_TEST).privateKey,
+        });
+        await tryToRegisterUser('Test', from);
+    }).timeout(30000);
+    
+    
     it('should transfer arcs from new user to test', async () => {
         const {web3, address} = web3switcher.aydnep2();
         from = address;
