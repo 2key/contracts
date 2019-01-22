@@ -492,22 +492,22 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaignAddress);
                 const isAddressJoined = await this.isAddressJoined(campaignAddress, from);
                 const cuts = Sign.validate_join(null, null, null, sig, plasmaAddress);
-                console.log('isAddressJoined', isAddressJoined, cuts);
+                this.base._log('isAddressJoined', isAddressJoined, cuts);
                 if (isAddressJoined) {
                     resolve(false);
                 } else {
                     const contractor = await promisify(campaignInstance.contractor, []);
-                    console.log('contractor', contractor, plasmaAddress);
+                    this.base._log('contractor', contractor, plasmaAddress);
                     const txHash: string = await promisify(this.base.twoKeyPlasmaEvents.visited, [
                         campaignInstance.address,
                         contractor,
                         sig,
                         {from: plasmaAddress, gasPrice: 0}
                     ]);
-                    console.log('visit txHash', txHash);
+                    this.base._log('visit txHash', txHash);
                     const note = await Sign.encrypt(this.base.plasmaWeb3, plasmaAddress, f_secret, {plasma: true});
                     const noteTxHash = await promisify(this.base.twoKeyPlasmaEvents.setNoteByUser, [campaignInstance.address, note, {from: plasmaAddress}]);
-                    console.log('note txHash', noteTxHash);
+                    this.base._log('note txHash', noteTxHash);
                     resolve(txHash);
                 }
             } catch (e) {

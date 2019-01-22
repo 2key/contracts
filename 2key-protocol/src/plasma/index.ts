@@ -47,7 +47,6 @@ export default class PlasmaEvents implements IPlasmaEvents {
     public setPlasmaToEthereumOnPlasma(plasmaAddress: string, plasma2EthereumSignature: string): Promise<string> {
         return new Promise<string>(async (resolve, reject) => {
             try {
-                console.log('PLASMA.setPlasmaToEthereumOnPlasma', this.base.plasmaAddress);
                 let txHash = await promisify(this.base.twoKeyPlasmaEvents.add_plasma2ethereum, [plasmaAddress, plasma2EthereumSignature,
                     {
                         from: this.base.plasmaAddress

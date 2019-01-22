@@ -36,6 +36,7 @@ export interface IRegistryData {
 
 async function registerUserFromBackend({ user, signedPlasma, plasma2EthereumSignature, plasmaAddress }: IRegistryData = {}) {
     console.log('registerUserFromBackend', user, signedPlasma, plasma2EthereumSignature);
+    console.log('\r\n');
     if (!user && ! signedPlasma && !plasma2EthereumSignature) {
         console.log('Nothing todo!');
         return Promise.resolve(true);
@@ -72,28 +73,38 @@ async function registerUserFromBackend({ user, signedPlasma, plasma2EthereumSign
         },
         plasmaPK: '9125720a89c9297cde4a3cfc92f233da5b22f868b44f78171354d4e0f7fe74ec',
     });
+    console.log('PlasmaEvents:', twoKeyProtocol.twoKeyPlasmaEvents.address);
     console.log('registerUserFromBackend.plasmaAddress', twoKeyProtocol.plasmaAddress);
+    console.log('\r\n');
     const txHashes = [];
     if (user) {
-        txHashes.push(twoKeyProtocol.Utils.getTransactionReceiptMined(await twoKeyProtocol.Registry.addName(user.name, user.address, user.fullname, user.email, address)));
+        const txHash = await twoKeyProtocol.Registry.addName(user.name, user.address, user.fullname, user.email, address);
+        console.log('Registry.addName hash', txHash);
+        console.log('\r\n');
+        txHashes.push(twoKeyProtocol.Utils.getTransactionReceiptMined(txHash));
     }
     if (signedPlasma) {
-        txHashes.push(twoKeyProtocol.Utils.getTransactionReceiptMined(await twoKeyProtocol.Registry.addPlasma2EthereumByUser(address, signedPlasma)));
+        const txHash = await twoKeyProtocol.Registry.addPlasma2EthereumByUser(address, signedPlasma);
+        console.log('Registry.addPlasma2EthereumByUser hash', txHash);
+        console.log('\r\n');
+        txHashes.push(twoKeyProtocol.Utils.getTransactionReceiptMined(txHash));
     }
     if (plasma2EthereumSignature) {
-        const isMaintainer = await promisify(twoKeyProtocol.twoKeyPlasmaEvents.isMaintainer, ['0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7']);
-        console.log('isMaintainer', isMaintainer);
-        console.log(twoKeyProtocol.twoKeyPlasmaEvents.address);
-        txHashes.push(twoKeyProtocol.Utils.getTransactionReceiptMined(await  twoKeyProtocol.PlasmaEvents.setPlasmaToEthereumOnPlasma(plasmaAddress, plasma2EthereumSignature), { web3: twoKeyProtocol.plasmaWeb3 }));
+        const txHash = await  twoKeyProtocol.PlasmaEvents.setPlasmaToEthereumOnPlasma(plasmaAddress, plasma2EthereumSignature);
+        console.log('PlasmaEvents.setPlasmaToEthereumOnPlasma hash', txHash);
+        console.log('\r\n');
+        txHashes.push(twoKeyProtocol.Utils.getTransactionReceiptMined(txHash, { web3: twoKeyProtocol.plasmaWeb3 }));
     }
     return Promise.all(txHashes);
 }
 
-console.log(process.argv[2]);
-if (process.argv[2]) {
+console.log(process.argv[2].startsWith('{'));
+if (process.argv[2] && process.argv[2].startsWith('{')) {
+    console.log(process.argv[2]);
     const data = JSON.parse(process.argv[2]);
     registerUserFromBackend(data).then(() => {
         console.log('done');
+        process.exit(0);
     })
 }
 
