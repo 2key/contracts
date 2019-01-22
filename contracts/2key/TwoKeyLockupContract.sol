@@ -68,7 +68,7 @@ contract TwoKeyLockupContract {
         assetContractERC20 = _assetContractERC20;
         tokenUnlockingDate[0] = tokenDistributionDate; //base tokens
         for(uint i=1 ;i<bonusTokensVestingMonths + 1; i++) {
-            tokenUnlockingDate[i] = tokenDistributionDate + i * (30 days); ///bonus tokens
+            tokenUnlockingDate[i] = tokenDistributionDate + i * (1 days); ///bonus tokens
         }
     }
 
