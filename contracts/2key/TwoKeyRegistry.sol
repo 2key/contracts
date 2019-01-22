@@ -97,14 +97,17 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
      * @notice Function which can be called only once
      * @param _twoKeyEventSource is the address of twoKeyEventSource contract
      * @param _twoKeyAdmin is the address of twoKeyAdmin contract
-     * @param _maintainer is the address of initial maintainer
+     * @param _maintainers is the address of initial maintainer
      */
-    function setInitialParams(address _twoKeyEventSource, address _twoKeyAdmin, address _maintainer) external {
+    function setInitialParams(address _twoKeyEventSource, address _twoKeyAdmin, address [] _maintainers) external {
         require(twoKeyEventSource == address(0));
         require(twoKeyAdminContractAddress == address(0));
         twoKeyEventSource = _twoKeyEventSource;
         twoKeyAdminContractAddress = _twoKeyAdmin;
-        isMaintainer[_maintainer] = true;
+
+        for(uint i=0; i<_maintainers.length; i++) {
+            isMaintainer[_maintainers[i]] = true;
+        }
     }
 
     /// @notice Function to check if maintainer exists
@@ -271,21 +274,26 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
 
     /**
      * @notice function to add single maintainer
-     * @param _maintainer is the address of maintainer
+     * @param _maintainers is the address of maintainer
      * @dev only the person who deploys the contract can call this
      */
-    function addTwoKeyMaintainer(address _maintainer) public onlyAdmin {
-        require(_maintainer != address(0));
-        isMaintainer[_maintainer] = true;
+    function addTwoKeyMaintainers(address [] _maintainers) public onlyAdmin {
+        require(_maintainers.length > 0);
+        for(uint i=0; i<_maintainers.length; i++) {
+            isMaintainer[_maintainers[i]] = true;
+        }
     }
 
     /**
      * @notice function to remove single maintainer
-     * @param _maintainer is the address of maintainer
+     * @param _maintainers is the address of maintainer
      * @dev only the person who deploys the contract can call this
      */
-    function removeTwoKeyMaintainer(address _maintainer) public onlyAdmin {
-        isMaintainer[_maintainer] = false;
+    function removeTwoKeyMaintainer(address [] _maintainers) public onlyAdmin {
+        require(_maintainers.length > 0);
+        for(uint i=0; i<_maintainers.length; i++) {
+            isMaintainer[_maintainers[i]] = false;
+        }
     }
 
     /// @notice Function where TwoKeyMaintainer can add walletname to address
