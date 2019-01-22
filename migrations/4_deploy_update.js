@@ -5,6 +5,9 @@ const TwoKeySingletonesRegistry = artifacts.require('TwoKeySingletonesRegistry')
 const TwoKeyExchangeRateContract = artifacts.require('TwoKeyExchangeRateContract');
 const TwoKeyCongress = artifacts.require('TwoKeyCongress');
 const Proxy = artifacts.require('UpgradeabilityProxy');
+const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
+const TwoKeyPlasmaSingletoneRegistry = artifacts.require('TwoKeyPlasmaSingletoneRegistry');
+
 const fs = require('fs');
 const path = require('path');
 
@@ -13,41 +16,14 @@ const proxyFile = path.join(__dirname, '../build/contracts/proxyAddresses.json')
 
 module.exports = function deploy(deployer) {
 
-    /**
-     * Is argument 'update' is found
-     * @type {boolean}
-     */
     let found = false;
 
-    /**
-     * Is Registry contract the one we are updating
-     * @type {boolean}
-     */
     let isRegistry = false;
-
-    /**
-     * Is eventSource contract the one we are updating
-     * @type {boolean}
-     */
     let isEventSource = false;
-
-    /**
-     * Is twoKeyExchangeContract the one we are updating
-     * @type {boolean}
-     */
     let isTwoKeyExchangeContract = false;
-
-    /**
-     * Is twoKeyAdminContract the one we are updating
-     * @type {boolean}
-     */
     let isTwoKeyAdmin = false;
-
-    /**
-     * Is twoKeyCongress contract the one we are updating
-     * @type {boolean}
-     */
     let isTwoKeyCongress = false;
+    let isTwoKeyPlasmaEvents = false;
 
     /**
      * Determining which contract we want to update
@@ -68,8 +44,8 @@ module.exports = function deploy(deployer) {
         else if (argument == 'TwoKeyAdmin') {
             isTwoKeyAdmin = true;
         }
-        else if (argument == 'TwoKeyCongress') {
-            isTwoKeyCongress = true;
+        else if (argument == 'TwoKeyPlasmaEvents') {
+            isTwoKeyPlasmaEvents = false;
         }
     });
 
@@ -88,6 +64,8 @@ module.exports = function deploy(deployer) {
         networkId = 8086;
     } else if(deployer.network.startsWith('development')) {
         networkId = 'ganache';
+    } else if(deployer.network.startsWith('private')) {
+        networkId = 98052;
     }
 
     /**
@@ -281,6 +259,42 @@ module.exports = function deploy(deployer) {
                        })
                     })
                 )
+        } else if (isTwoKeyPlasmaEvents && networkId == 98052) {
+            /**
+             * If contract we're updating is TwoKeyPlasmaEvents (argument) this 'subscript' will be executed
+             */
+            let lastTwoKeyPlasmaEvents;
+            console.log('TwoKeyPlasmaEvents contract on plasma network will be updated now');
+            deployer.deploy(TwoKeyPlasmaEvents)
+            .then(() => TwoKeyPlasmaEvents.deployed()
+                .then((twoKeyPlasmaEventsInstance) => {
+                    lastTwoKeyPlasmaEvents = twoKeyPlasmaEventsInstance.address;
+                })
+                .then(() => TwoKeyPlasmaSingletoneRegistry.deployed)
+                .then(async(registry) => {
+                    await new Promise(async(resolve,reject) => {
+                        try {
+                            console.log('... Adding new version of TwoKeyPlasmaEvents to Registry on Plasma Network');
+                            const twoKeyPlasmaEvents = fileObject.TwoKeyPlasmaEvents || {};
+                            let v = parseInt(twoKeyPlasmaEvents[networkId.toString()].Version.substr(-1)) + 1;
+                            twoKeyPlasmaEvents[networkId.toString()].Version = twoKeyPlasmaEvents[networkId.toString()].Version.substr(0, twoKeyPlasmaEvents[networkId.toString()].Version.length - 1) + v.toString();
+                            console.log('New version : ' + twoKeyPlasmaEvents[networkId.toString()].Version);
+                            let txHash = await registry.addVersion("TwoKeyPlasmaEvents", twoKeyPlasmaEvents[networkId.toString()].Version, TwoKeyPlasmaEvents.address);
+
+                            console.log('... Upgrading proxy to new version');
+                            txHash = await Proxy.at(twoKeyPlasmaEvents[networkId.toString()].Proxy).upgradeTo("TwoKeyPlasmaEvents", twoKeyPlasmaEvents[networkId.toString()].Version);
+                            twoKeyPlasmaEvents[networkId.toString()].address = lastTwoKeyPlasmaEvents;
+
+                            fileObject['TwoKeyPlasmaEvents'] = twoKeyPlasmaEvents;
+                            fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
+                            resolve(txHash);
+                        } catch (e) {
+                            reject(e);
+                        }
+                    })
+                })
+            )
+            .then(() => true);
         }
     } else {
         console.log('Argument is not found - contracts will not be updated!');
