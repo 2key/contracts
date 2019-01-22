@@ -67,8 +67,9 @@ contract TwoKeyLockupContract {
         twoKeyConversionHandler = msg.sender;
         assetContractERC20 = _assetContractERC20;
         tokenUnlockingDate[0] = tokenDistributionDate; //base tokens
-        for(uint i=1 ;i<bonusTokensVestingMonths + 1; i++) {
-            tokenUnlockingDate[i] = tokenDistributionDate + i * (1 days); ///bonus tokens
+        tokenUnlockingDate[1] = tokenDistributionDate + i * (1 days); // first part of bonus in days after tokens
+        for(uint i=2 ;i<bonusTokensVestingMonths + 1; i++) {
+            tokenUnlockingDate[i] = tokenUnlockingDate[1] + (i-1) * (30 days); // All other bonus is month a gap between them
         }
     }
 
