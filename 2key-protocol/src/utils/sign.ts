@@ -130,7 +130,7 @@ function sign_plasma2ethereum(web3, plasma_address, my_address): Promise<string>
             value: plasma_address  // The value to sign
         }
     ];
-    return sign_message(web3, msgParams, my_address, {plasma: true});
+    return sign_message(web3, msgParams, my_address, { plasma: false });
 }
 
 /**
@@ -718,7 +718,7 @@ function generateSignatureKeys(
  */
 function sign_message(web3, msgParams, from, opts: IOptionalParamsSignMessage = {}): Promise<string> {
     return new Promise<string>((resolve, reject) => {
-        const {isMetamask = false} = web3.currentProvider;
+        const { isMetamask = false } = web3.currentProvider;
 
         function sign_message_callback(err, result) {
             if (err) {
