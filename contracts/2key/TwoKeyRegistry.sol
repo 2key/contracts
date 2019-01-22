@@ -269,11 +269,21 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
         addNameInternal(_name, msg.sender);
     }
 
+    /**
+     * @notice function to add single maintainer
+     * @param _maintainer is the address of maintainer
+     * @dev only the person who deploys the contract can call this
+     */
     function addTwoKeyMaintainer(address _maintainer) public onlyAdmin {
         require(_maintainer != address(0));
         isMaintainer[_maintainer] = true;
     }
 
+    /**
+     * @notice function to remove single maintainer
+     * @param _maintainer is the address of maintainer
+     * @dev only the person who deploys the contract can call this
+     */
     function removeTwoKeyMaintainer(address _maintainer) public onlyAdmin {
         isMaintainer[_maintainer] = false;
     }
@@ -394,6 +404,7 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
             return true;
         }
     }
+
 
     function stringToBytes32(string memory source) internal pure returns (bytes32 result) {
         bytes memory tempEmptyStringTest = bytes(source);

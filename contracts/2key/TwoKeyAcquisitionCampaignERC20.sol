@@ -241,13 +241,19 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     }
 
 
+    /**
+     * @notice Function where converter who sent money in advance in fiat can create his conversion
+     * @param _converterAddress is his ethereum address
+     * @param _fiatAmount is the amount in fiat he sent to the seller.
+     * @dev Required is that the fiat is same currency as it's campaign.
+     */
     function conversionOffline(address _converterAddress, uint _fiatAmount) public {
+
         /**
          * @notice Function where investor can state how much money he put to the contractorBalance
          * since we're accepting only fiat, we can do literal calculation of how many tokens he gets
          * then execute lockups
          * in this case there are no referral rewards
-
          */
     }
 
