@@ -58,6 +58,8 @@ contract TwoKeyCampaignARC is ArcERC20 {
 		require(_value == 1, 'can only transfer 1 ARC');
 		require(_from != address(0), '_from undefined');
 		require(_to != address(0), '_to undefined');
+
+		//Addresses are already plasma, don't see the point of next 2 lines!
 		_from = twoKeyEventSource.plasmaOf(_from);
 		_to = twoKeyEventSource.plasmaOf(_to);
 
@@ -69,7 +71,7 @@ contract TwoKeyCampaignARC is ArcERC20 {
 		emit Transfer(_from, _to, 1);
 		if (received_from[_to] == 0) {
 			// inform the 2key admin contract, once, that an influencer has joined
-//			twoKeyEventSource.joined(this, _from, _to);
+			twoKeyEventSource.joined(this, _from, _to);
 		}
 		received_from[_to] = _from;
 		return true;

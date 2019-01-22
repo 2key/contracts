@@ -655,6 +655,20 @@ describe('TwoKeyProtocol', () => {
         console.log('Available amount of tokens before conversion is: ' + availableAmountOfTokens);
     }).timeout(30000);
 
+    it('should register gmail', async() => {
+        const {web3, address} = web3switcher.gmail2();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_GMAIL2).privateKey,
+        });
+        await tryToRegisterUser('Gmail2', from);
+    }).timeout(30000);
+
     it('should buy some tokens from uport', async () => {
         const {web3, address} = web3switcher.uport();
         from = address;
