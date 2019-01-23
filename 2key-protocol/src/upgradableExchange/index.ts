@@ -117,4 +117,20 @@ export default class UpgradableExchange implements IUpgradableExchange {
         })
     }
 
+    /**
+     *
+     * @param {string} contractAddress
+     * @returns {Promise<boolean>}
+     */
+    public checkIfContractIsEligibleToBuyTokens(contractAddress: string) : Promise<boolean> {
+        return new Promise<boolean>(async(resolve,reject) => {
+            try {
+                const isEligible = await promisify(this.base.twoKeyUpgradableExchange.isContractAddressEligibleToBuyTokens,[contractAddress]);
+                resolve(isEligible);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
 }

@@ -962,12 +962,15 @@ describe('TwoKeyProtocol', () => {
     it('==> should add acquisition campaign to be eligible to buy tokens from Upgradable exchange', async() => {
         const txHash: string = await twoKeyProtocol.UpgradableExchange.addContractToBeEligibleToGetTokensFromExchange(campaignAddress,from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        let isEligible = await twoKeyProtocol.UpgradableExchange.checkIfContractIsEligibleToBuyTokens(campaignAddress);
+        expect(isEligible).to.be.equal(true);
         console.log('Added');
     }).timeout(30000);
 
     it('==> should print moderator address', async() => {
         const moderatorAddress: string = await twoKeyProtocol.AcquisitionCampaign.getModeratorAddress(campaignAddress,from);
         console.log("Moderator address is: " + moderatorAddress);
+        expect(moderatorAddress).to.be.equal('0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7');
     }).timeout(30000);
     
     it('==> should moderator withdraw his balances in 2key-tokens', async() => {
@@ -1005,10 +1008,6 @@ describe('TwoKeyProtocol', () => {
         }
     }).timeout(30000);
 
-    it('should get all whitelisted methods from congress', async () => {
-        const methods = await twoKeyProtocol.Congress.getAllowedMethods(from);
-        // console.log(methods);
-    }).timeout(30000);
 
     it('should get all whitelisted addresses', async() => {
         const addresses = await twoKeyProtocol.Congress.getAllMembersForCongress(from);

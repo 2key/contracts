@@ -229,4 +229,13 @@ contract TwoKeyUpgradableExchange is Upgradeable {
             isMaintainer[_maintainers[i]] = false;
         }
     }
+
+    /**
+     * @notice Function to validate if an deployed contract is eligible to buy tokens
+     * @param _deployedContractAddress is the address of the deployed contract
+     */
+    function isContractAddressEligibleToBuyTokens(address _deployedContractAddress) public view returns (bool) {
+        bytes memory code = GetCode.at(_deployedContractAddress);
+        return isContractEligibleToBuyTokens[code];
+    }
 }

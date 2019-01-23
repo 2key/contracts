@@ -12,6 +12,7 @@ contract TwoKeyAcquisitionLogicHandler {
 
     using SafeMath for uint256;
 
+    address twoKeyEventSource;
     address contractor;
     address ethUSDExchangeContract;
 
@@ -43,7 +44,8 @@ contract TwoKeyAcquisitionLogicHandler {
         uint _maxConverterBonusPercent,
         string _currency,
         address _ethUsdExchangeContract,
-        address _assetContractERC20
+        address _assetContractERC20,
+        address _twoKeyEventSource
     ) public {
         contractor = msg.sender;
         minContributionETHorFiatCurrency = _minContribution;
@@ -54,6 +56,7 @@ contract TwoKeyAcquisitionLogicHandler {
         maxConverterBonusPercent = _maxConverterBonusPercent;
         currency = _currency;
         ethUSDExchangeContract = _ethUsdExchangeContract;
+        twoKeyEventSource = _twoKeyEventSource;
         unit_decimals = IERC20(_assetContractERC20).decimals();
     }
 
@@ -176,4 +179,5 @@ contract TwoKeyAcquisitionLogicHandler {
             pricePerUnitInETHWeiOrUSD,
             maxConverterBonusPercent);
     }
+
 }
