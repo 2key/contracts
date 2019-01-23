@@ -236,7 +236,8 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
     /// @notice Function where only admin can add a name - address pair
     /// @param _name is name of user
     /// @param _sender is address of user
-    function addName(string _name, address _sender, string _fullName, string _email, bytes signature) public onlyTwoKeyMaintainer {
+    function addName(string _name, address _sender, string _fullName, string _email, bytes signature) public {
+        require(isMaintainer[msg.sender] == true || msg.sender == address(this));
         require(utfStringLength(_name) >= 3 && utfStringLength(_name) <=25);
 
         string memory concatenatedValues = strConcat(_name,_fullName,_email,"","");
@@ -308,9 +309,11 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
     /// @param username is the username of the user we want to update map for
     /// @param _address is the address of the user we want to update map for
     /// @param _username_walletName is the concatenated username + '_' + walletName, since sending from trusted provider no need to validate
-    function setWalletName(string memory username, address _address, string memory _username_walletName, bytes signature) public onlyTwoKeyMaintainer {
+    function setWalletName(string memory username, address _address, string memory _username_walletName, bytes signature) public {
+        require(isMaintainer[msg.sender] == true || msg.sender == address(this));
         require(_address != address(0));
-        require(username2currentAddress[keccak256(abi.encodePacked(username))] == _address); // validating that username exists
+        bytes32 usernameHex = stringToBytes32(username);
+        require(username2currentAddress[usernameHex] == _address); // validating that username exists
 
         string memory concatenatedValues = strConcat(username,_username_walletName,"","","");
         bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to name")),
