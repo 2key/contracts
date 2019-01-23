@@ -231,7 +231,11 @@ export default class TwoKeyReg implements ITwoKeyReg {
     public addPlasma2EthereumByUser(from: string, signedPlasma: ISignedPlasma) : Promise<string> {
         return new Promise<string>(async(resolve,reject) => {
             try {
-                const {encryptedPlasmaPrivateKey, ethereum2plasmaSignature, externalSignature} = signedPlasma;
+                const { ethereum2plasmaSignature, encryptedPlasmaPrivateKey, externalSignature } = signedPlasma;
+                console.log('addPlasma2EthereumByUser\r\n');
+                console.log(ethereum2plasmaSignature);
+                console.log(encryptedPlasmaPrivateKey);
+                console.log(externalSignature);
                 let txHash = await promisify(this.base.twoKeyReg.setPlasma2EthereumAndNoteSigned,
                     [ethereum2plasmaSignature,encryptedPlasmaPrivateKey,externalSignature,{from}]);
                 resolve(txHash);
