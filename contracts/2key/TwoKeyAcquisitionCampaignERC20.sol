@@ -570,19 +570,20 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     /**
      * @notice Function where moderator or referrer can withdraw their available funds
      */
-    function withdrawModeratorOrReferrer() external {
+    function withdrawModeratorOrReferrer(address _address) external {
         //Creating additional variable to prevent reentrancy attack
+        require(msg.sender == _address || twoKeyEventSource.isAddressMaintainer(_address));
         uint balance;
-        if(msg.sender == moderator) {
+        if(_address == moderator) {
             balance = moderatorBalanceETHWei;
             moderatorBalanceETHWei = 0;
-            buyTokensFromUpgradableExchange(balance,msg.sender);
+            buyTokensFromUpgradableExchange(balance,_address);
         } else {
-            address _referrer = twoKeyEventSource.plasmaOf(msg.sender);
+            address _referrer = twoKeyEventSource.plasmaOf(_address);
             if(referrerPlasma2BalancesEthWEI[_referrer] != 0) {
                 balance = referrerPlasma2BalancesEthWEI[_referrer];
                 referrerPlasma2BalancesEthWEI[_referrer] = 0;
-                buyTokensFromUpgradableExchange(balance, msg.sender);
+                buyTokensFromUpgradableExchange(balance, _address);
             } else {
                 revert();
             }
