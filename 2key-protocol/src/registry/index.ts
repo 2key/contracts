@@ -204,9 +204,9 @@ export default class TwoKeyReg implements ITwoKeyReg {
     public signPlasma2Ethereum(from: string) : Promise<ISignedPlasma> {
         return new Promise<ISignedPlasma>(async(resolve,reject) => {
             try {
-                console.log('REGISTRY.signPlasma2Ethereum', from);
                 let plasmaAddress = this.base.plasmaAddress;
                 let stored_ethereum_address = await promisify(this.base.twoKeyReg.getPlasmaToEthereum,[plasmaAddress]);
+                console.log('REGISTRY.signPlasma2Ethereum', from, stored_ethereum_address);
                 let plasmaPrivateKey = "";
                 let encryptedPlasmaPrivateKey = "";
                 if(stored_ethereum_address != from) {

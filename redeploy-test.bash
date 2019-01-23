@@ -20,8 +20,8 @@ yarn run test:one 2key-protocol/test/sendETH.spec.ts
 #spinner 2
 #echo "Running test to fill some data to 2key-reg"
 #yarn run test:one 2key-protocol/test/updateTwoKeyReg.dev.spec.ts
-spinner 2
-echo "Running test"
-yarn run test
+#spinner 2
+#echo "Running test"
+#yarn run test
 spinner 2
 echo "Bash script finished execution!"
