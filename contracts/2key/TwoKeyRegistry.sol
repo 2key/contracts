@@ -200,20 +200,20 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
     /// @param _name is name of user
     /// @param _sender is address of user
     function addNameInternal(string _name, address _sender) private {
+        bytes32 name = stringToBytes32(_name);
         // check if name is taken
-        if (username2currentAddress[keccak256(abi.encodePacked(_name))] != 0) {
+        if (username2currentAddress[name] != 0) {
             revert();
         }
         // remove previous name
         bytes memory last_name = bytes(address2username[_sender]);
         if (last_name.length != 0) {
-            username2currentAddress[keccak256(abi.encodePacked(address2username[_sender]))] = 0;
+            username2currentAddress[name] = 0;
         }
-        bytes32 usernameHex = stringToBytes32(_name);
         address2username[_sender] = _name;
-        username2currentAddress[usernameHex] = _sender;
+        username2currentAddress[name] = _sender;
         // Add history of changes
-        username2AddressHistory[usernameHex].push(_sender);
+        username2AddressHistory[name].push(_sender);
         emit UserNameChanged(_sender, _name);
     }
 
@@ -225,22 +225,30 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
         address _sender,
         string _fullName,
         string _email,
-        string _username_walletName
+        string _username_walletName,
+        bytes _signatureName,
+        bytes _signatureWalletName
     ) public onlyTwoKeyMaintainer  {
-        addName(_name, _sender, _fullName, _email);
-        setWalletName(_name, _sender, _username_walletName);
+        addName(_name, _sender, _fullName, _email, _signatureName);
+        setWalletName(_name, _sender, _username_walletName, _signatureWalletName);
     }
 
     /// @notice Function where only admin can add a name - address pair
     /// @param _name is name of user
     /// @param _sender is address of user
-    function addName(string _name, address _sender, string _fullName, string _email) public onlyTwoKeyMaintainer {
+    function addName(string _name, address _sender, string _fullName, string _email, bytes signature) public onlyTwoKeyMaintainer {
         require(utfStringLength(_name) >= 3 && utfStringLength(_name) <=25);
+
+        string memory concatenatedValues = strConcat(_name,_fullName,_email,"","");
+        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to name")),
+            keccak256(abi.encodePacked(concatenatedValues))));
+        address message_signer = Call.recoverHash(hash, signature, 0);
+        require(message_signer == _sender);
         addressToUserData[_sender] = UserData({
             username: _name,
             fullName: _fullName,
             email: _email
-            });
+        });
         addNameInternal(_name, _sender);
     }
 
@@ -265,12 +273,12 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
         setNoteInternal(note, msg.sender);
     }
 
-    /// @notice Function where user can add name to his address
-    /// @param _name is name of user
-    function addNameByUser(string _name) external {
-        require(utfStringLength(_name) >= 3 && utfStringLength(_name) <=25);
-        addNameInternal(_name, msg.sender);
-    }
+//    /// @notice Function where user can add name to his address
+//    /// @param _name is name of user
+//    function addNameByUser(string _name) external {
+//        require(utfStringLength(_name) >= 3 && utfStringLength(_name) <=25);
+//        addNameInternal(_name, msg.sender);
+//    }
 
     /**
      * @notice function to add single maintainer
@@ -300,10 +308,15 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
     /// @param username is the username of the user we want to update map for
     /// @param _address is the address of the user we want to update map for
     /// @param _username_walletName is the concatenated username + '_' + walletName, since sending from trusted provider no need to validate
-    function setWalletName(string memory username, address _address, string memory _username_walletName) public onlyTwoKeyMaintainer {
+    function setWalletName(string memory username, address _address, string memory _username_walletName, bytes signature) public onlyTwoKeyMaintainer {
         require(_address != address(0));
         require(username2currentAddress[keccak256(abi.encodePacked(username))] == _address); // validating that username exists
 
+        string memory concatenatedValues = strConcat(username,_username_walletName,"","","");
+        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to name")),
+            keccak256(abi.encodePacked(concatenatedValues))));
+        address message_signer = Call.recoverHash(hash, signature, 0);
+        require(message_signer == _address);
         bytes32 walletTag = stringToBytes32(_username_walletName);
         address2walletTag[_address] = walletTag;
         walletTag2address[walletTag] = _address;
@@ -337,7 +350,8 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
     /// @param _name is name of user
     /// @return address of the user as type address
     function getUserName2UserAddress(string _name) external view returns (address) {
-        return username2currentAddress[keccak256(abi.encodePacked(_name))];
+        bytes32 name = stringToBytes32(_name);
+        return username2currentAddress[name];
     }
 
     /// View function - doesn't cost any gas to be executed
@@ -353,7 +367,8 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
     /// @return array of addresses sorted
     function getHistoryOfChangedAddresses() external view returns (address[]) {
         string memory name = address2username[msg.sender];
-        return username2AddressHistory[keccak256(abi.encodePacked(name))];
+        bytes32 nameHex = stringToBytes32(name);
+        return username2AddressHistory[nameHex];
     }
 
     /// @notice Function to fetch actual length of string
@@ -419,10 +434,26 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
         if (tempEmptyStringTest.length == 0) {
             return 0x0;
         }
-
         assembly {
             result := mload(add(source, 32))
         }
+    }
+
+    function strConcat(string _a, string _b, string _c, string _d, string _e) public pure returns (string){
+        bytes memory _ba = bytes(_a);
+        bytes memory _bb = bytes(_b);
+        bytes memory _bc = bytes(_c);
+        bytes memory _bd = bytes(_d);
+        bytes memory _be = bytes(_e);
+        string memory abcde = new string(_ba.length + _bb.length + _bc.length + _bd.length + _be.length);
+        bytes memory babcde = bytes(abcde);
+        uint k = 0;
+        for (uint i = 0; i < _ba.length; i++) babcde[k++] = _ba[i];
+        for (i = 0; i < _bb.length; i++) babcde[k++] = _bb[i];
+        for (i = 0; i < _bc.length; i++) babcde[k++] = _bc[i];
+        for (i = 0; i < _bd.length; i++) babcde[k++] = _bd[i];
+        for (i = 0; i < _be.length; i++) babcde[k++] = _be[i];
+        return string(babcde);
     }
 
     function getUserData(address _user) external view returns (bytes32,bytes32,bytes32) {

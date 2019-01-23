@@ -42,11 +42,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     uint256 expiryConversionInHours; // How long converter can be pending before it will be automatically rejected and funds will be returned to convertor (hours)
     uint256 moderatorFeePercentage; // Fee which moderator gets
     uint256 maxReferralRewardPercent; // maxReferralRewardPercent is actually bonus percentage in ETH
-    uint public reservedAmountOfTokens = 0;
-
-//    bool public withdrawApproved = false; // Until contractor set this to be true, no one can withdraw funds etc.
-//    bool canceled = false; // This means if contractor cancel everything
-
+    uint reservedAmountOfTokens = 0;
 
     /**
      * @notice Modifier which will enable only twoKeyConversionHandlerContract to execute some functions

@@ -107,8 +107,8 @@ contract TwoKeyAdmin is Upgradeable {
     /// @notice Function to add/update name - address pair from twoKeyAdmin
 	/// @param _name is name of user
 	/// @param _addr is address of user
-    function addNameToReg(string _name, address _addr, string fullName, string email) external {
-    	twoKeyReg.addName(_name, _addr, fullName, email);
+    function addNameToReg(string _name, address _addr, string fullName, string email, bytes signature) external {
+    	twoKeyReg.addName(_name, _addr, fullName, email, signature);
     }
 
     /// @notice Function to update twoKeyUpgradableExchange contract address
