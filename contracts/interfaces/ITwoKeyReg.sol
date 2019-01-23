@@ -21,4 +21,5 @@ contract ITwoKeyReg is Ownable{
     function getOwner2Name(address _sender) public view returns (string);
     function getPlasmaToEthereum(address plasma) public view returns (address);
     function getEthereumToPlasma(address ethereum) public view returns (address);
+    function checkIfTwoKeyMaintainerExists(address _maintainer) public view returns (bool);
 }

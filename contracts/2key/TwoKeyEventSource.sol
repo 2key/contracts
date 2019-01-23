@@ -298,4 +298,13 @@ contract TwoKeyEventSource is Upgradeable, TwoKeyTypes {
         return me;
     }
 
+    /**
+     * @notice Address to check if an address is maintainer in registry
+     * @param _maintainer is the address we're checking this for
+     */
+    function isAddressMaintainer(address _maintainer) public view returns (address) {
+        bool isMaintainer = ITwoKeyReg(twoKeyRegistry).checkIfTwoKeyMaintainerExists(_maintainer);
+        return isMaintainer;
+    }
+
 }
