@@ -2,7 +2,6 @@ import {ITwoKeyBase, ITwoKeyHelpers} from '../interfaces';
 import {promisify} from '../utils';
 import {ILockup, LockupInformation} from './interfaces';
 import {ITwoKeyUtils} from "../utils/interfaces";
-import base = Mocha.reporters.base;
 
 export default class Lockup implements ILockup {
     private readonly base: ITwoKeyBase;
@@ -15,7 +14,6 @@ export default class Lockup implements ILockup {
         this.utils = utils;
     }
 
-
     /**
      * Get information from the Lockup contract, it's only available for the Converter
      * @param {string} twoKeyLockup
@@ -27,14 +25,14 @@ export default class Lockup implements ILockup {
             try {
                 const twoKeyLockupInstance = await this.helpers._getLockupContractInstance(twoKeyLockup);
 
-                let [bonusTokens, baseTokens, vestingMonths, unlockingDates, isWithdrawn] =
-                await promisify(twoKeyLockupInstance.getLockupSummary,[{from}]);
-
+                let [baseTokens, bonusTokens, vestingMonths, conversionId, unlockingDates, isWithdrawn] =
+                    await promisify(twoKeyLockupInstance.getLockupSummary,[{from}]);
                 let obj : LockupInformation = {
-                    baseTokens : baseTokens,
-                    bonusTokens : bonusTokens,
-                    vestingMonths : vestingMonths,
-                    unlockingDays : unlockingDates,
+                    baseTokens : parseFloat(this.utils.fromWei(baseTokens, 'ether').toString()),
+                    bonusTokens : parseFloat(this.utils.fromWei(bonusTokens, 'ether').toString()),
+                    vestingMonths : vestingMonths.toNumber(),
+                    conversionId : conversionId.toNumber(),
+                    unlockingDays : unlockingDates.map(date => parseInt(date.toString(),10)),
                     areWithdrawn : isWithdrawn
                 };
                 resolve(obj);
@@ -43,9 +41,11 @@ export default class Lockup implements ILockup {
             }
         })
     }
+
     /**
-     *
+     * Method to withdraw tokens, converter is sending which part he wants to withdraw - only converter can call this
      * @param {string} twoKeyLockup
+     * @param {number} part
      * @param {string} from
      * @returns {Promise<string>}
      */
@@ -53,7 +53,7 @@ export default class Lockup implements ILockup {
         return new Promise(async(resolve,reject) => {
             try {
                 const twoKeyLockupInstance = await this.helpers._getLockupContractInstance(twoKeyLockup);
-                const txHash = await promisify(twoKeyLockupInstance.transferFungibleAsset, [part,{from}]);
+                const txHash = await promisify(twoKeyLockupInstance.withdrawTokens, [part,{from}]);
                 // await this.utils.getTransactionReceiptMined(txHash);
                 resolve(txHash);
             } catch (e) {

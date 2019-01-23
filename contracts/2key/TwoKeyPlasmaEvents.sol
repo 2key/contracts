@@ -166,6 +166,10 @@ contract TwoKeyPlasmaEvents is Upgradeable {
         notes[c][msg.sender] = note;
     }
 
+    function getVisitedFrom(address c, address contractor, address _address) public view returns (address) {
+        return ethereumOf(visited_from[c][contractor][_address]);
+    }
+
     function visited(address c, address contractor, bytes sig) public {
         // c - addresss of the contract on ethereum
         // contractor - is the ethereum address of the contractor who created c. a dApp can read this information for free from ethereum.
