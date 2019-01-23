@@ -762,6 +762,7 @@ function sign_message(web3, msgParams, from, opts: IOptionalParamsSignMessage = 
             if (web3.eth.getSign) {
                 web3.eth.getSign(from, hash, sign_message_callback)
             } else {
+                // console.log('sign_message', from, hash);
                 web3.eth.sign(from, hash, sign_message_callback)
             }
         }
@@ -786,7 +787,6 @@ function sign_name(web3, my_address, name, opts: IOptionalParamsSignMessage = {}
     ];
     return sign_message(web3, msgParams, my_address) // we never use metamask on plasma
 }
-
 
 export interface IOptionalParamsSignMessage {
     plasma?: boolean

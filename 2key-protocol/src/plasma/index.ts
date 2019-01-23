@@ -1,7 +1,7 @@
 import {ITwoKeyBase, ITwoKeyHelpers, ITwoKeyUtils} from '../interfaces';
 import {promisify} from '../utils'
 import Sign from '../utils/sign';
-import {IPlasmaEvents} from "./interfaces";
+import {IPlasmaEvents, ISignedEthereum} from "./interfaces";
 
 export default class PlasmaEvents implements IPlasmaEvents {
     private readonly base: ITwoKeyBase;
@@ -19,18 +19,21 @@ export default class PlasmaEvents implements IPlasmaEvents {
      * @param {string} from
      * @returns {Promise<string>}
      */
-    public signPlasmaToEthereum(from: string): Promise<string> {
-        return new Promise<string>(async (resolve, reject) => {
+    public signPlasmaToEthereum(from: string): Promise<ISignedEthereum> {
+        return new Promise<ISignedEthereum>(async (resolve, reject) => {
             console.log('PLASMA.signPlasmaToEthereum', from);
             try {
                 let plasmaAddress = this.base.plasmaAddress;
                 let storedEthAddress = await promisify(this.base.twoKeyPlasmaEvents.plasma2ethereum, [plasmaAddress]);
                 console.log('PLASMA.signPlasmaToEthereum storedETHAddress', storedEthAddress);
                 if (storedEthAddress != from) {
-                    let plasma2ethereum_sig = await Sign.sign_plasma2ethereum(this.base.web3, plasmaAddress, from);
-                    resolve(plasma2ethereum_sig);
+                    let plasma2ethereumSignature = await Sign.sign_plasma2ethereum(this.base.web3, plasmaAddress, from);
+                    resolve({
+                        plasmaAddress,
+                        plasma2ethereumSignature
+                    });
                 } else {
-                    reject(new Error('Already registered on plasma network!'));
+                    reject(new Error('Already registered!'));
                 }
 
             } catch (e) {

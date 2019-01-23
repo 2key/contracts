@@ -1,6 +1,6 @@
 import {ITwoKeyBase, ITwoKeyHelpers, ITwoKeyUtils} from '../interfaces';
 import {promisify} from '../utils'
-import {ISignedPlasma, ITwoKeyReg, IUserData} from "./interfaces";
+import {ISignedPlasma, ISignedUser, ISignedWalletData, ITwoKeyReg, IUserData} from "./interfaces";
 import Sign from '../utils/sign';
 import {strict} from "assert";
 
@@ -24,15 +24,16 @@ export default class TwoKeyReg implements ITwoKeyReg {
      * @param {string} from
      * @returns {Promise<string>}
      */
-    public addName(username:string, address:string, fullName:string, email:string, from: string): Promise<string> {
+    public addName(username:string, sender: string, fullName:string, email:string, signature: string, from: string): Promise<string> {
         return new Promise(async(resolve,reject) => {
             try {
                  const nonce = await this.helpers._getNonce(from);
                  let txHash = await promisify(this.base.twoKeyReg.addName,[
                         username,
-                        address,
+                        sender,
                         fullName,
                         email,
+                        signature,
                         {
                             from,
                             nonce
@@ -45,7 +46,6 @@ export default class TwoKeyReg implements ITwoKeyReg {
             }
         })
     }
-
 
     /**
      *
@@ -80,29 +80,6 @@ export default class TwoKeyReg implements ITwoKeyReg {
                 reject(e);
             }
         });
-    }
-
-    public signUsername(username: string, from:string): Promise<string> {
-        return Sign.sign_name(this.base.web3,from,username);
-    }
-
-    /**
-     *
-     * @param {string} username
-     * @param {string} from
-     * @returns {Promise<string>}c
-     */
-    public addNameSignedToRegistry(username: string, from:string) : Promise<string> {
-        return new Promise<string>(async(resolve,reject) => {
-            try {
-                let externalSig = await this.signUsername(from, username);
-                console.log(username,externalSig);
-                let txHash = await promisify(this.base.twoKeyReg.addNameSigned,[username, externalSig, {from}]);
-                resolve(txHash);
-            } catch (e) {
-                reject(e);
-            }
-        })
     }
 
     /**
@@ -156,24 +133,79 @@ export default class TwoKeyReg implements ITwoKeyReg {
         })
     }
 
+    public signUserData2Registry(from: string, name: string, fullname: string, email: string): Promise<ISignedUser> {
+        return new Promise<ISignedUser>(async(resolve, reject) => {
+            try {
+                const [userName, address] = await Promise.all([
+                    promisify(this.base.twoKeyReg.address2username, [from]),
+                    promisify(this.base.twoKeyReg.username2currentAddress, [name]),
+                ]);
+                console.log('REGISTRY.storedData', userName, address);
+                if (userName || parseInt(address, 16)) {
+                    reject(new Error(`Already registered, ${userName}:${address}`));
+                } else {
+                    const userData = `${name}${fullname}${email}`;
+                    const signature = await Sign.sign_name(this.base.web3, from, userData);
+                    resolve({
+                        name,
+                        address: from,
+                        fullname,
+                        email,
+                        signature,
+                    });
+                }
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
+
+    public signWalletData2Registry(from: string, username: string, walletname: string): Promise<ISignedWalletData> {
+        return new Promise<ISignedWalletData>(async(resolve, reject) => {
+            try {
+                const userData = `${username}${walletname}`;
+                const signature = await Sign.sign_name(this.base.web3, from, userData);
+                resolve({
+                    username,
+                    address: from,
+                    walletname,
+                    signature,
+                });
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
+
+    public setWalletName(from: string, signedWallet: ISignedWalletData, gasPrice?: number): Promise<string> {
+        return new Promise<string>(async (resolve, reject) => {
+           try {
+               const nonce = await this.helpers._getNonce(from);
+               const txHash = await promisify(this.base.twoKeyReg.setWalletName, [
+                   signedWallet.username, signedWallet.address, signedWallet.walletname, signedWallet.signature, { from, nonce, gasPrice }]);
+               resolve(txHash);
+           } catch (e) {
+               reject(e);
+           }
+        });
+    }
+
     /**
      * Checks if user is already registered, if not -> proceeds
      * @param {string} from
      * @returns {Promise<ISignedPlasma>}
      */
-    public signPlasma2Ethereum(from: string) : Promise<ISignedPlasma | boolean> {
-        return new Promise<ISignedPlasma | boolean>(async(resolve,reject) => {
+    public signPlasma2Ethereum(from: string) : Promise<ISignedPlasma> {
+        return new Promise<ISignedPlasma>(async(resolve,reject) => {
             try {
                 console.log('REGISTRY.signPlasma2Ethereum', from);
                 let plasmaAddress = this.base.plasmaAddress;
                 let stored_ethereum_address = await promisify(this.base.twoKeyReg.getPlasmaToEthereum,[plasmaAddress]);
                 let plasmaPrivateKey = "";
                 let encryptedPlasmaPrivateKey = "";
-                console.log('Beofre if',plasmaAddress,stored_ethereum_address,from);
                 if(stored_ethereum_address != from) {
                     plasmaPrivateKey = Sign.add0x(this.base.plasmaPrivateKey);
                     encryptedPlasmaPrivateKey = await Sign.encrypt(this.base.web3, from, plasmaPrivateKey, {});
-                    console.log('encryptedPlasmaPrivateKey', encryptedPlasmaPrivateKey);
                     let ethereum2plasmaSignature = await Sign.sign_ethereum2plasma(this.base.plasmaWeb3, from, this.base.plasmaAddress);
                     let externalSignature = await Sign.sign_ethereum2plasma_note(this.base.web3,from, ethereum2plasmaSignature,encryptedPlasmaPrivateKey);
                     resolve({
@@ -182,7 +214,7 @@ export default class TwoKeyReg implements ITwoKeyReg {
                         externalSignature
                     });
                 } else {
-                    resolve(false);
+                    reject(new Error( 'Already registered'));
                 }
 
             } catch (e) {
@@ -298,38 +330,23 @@ export default class TwoKeyReg implements ITwoKeyReg {
         })
     }
 
-
-    /**
-     *
-     * @param {string} username
-     * @param {string} address
-     * @param {string} username_walletName
-     * @param {string} from
-     * @param {number} gasPrice
-     * @returns {Promise<string>}
-     */
-    public setWalletName(username: string, address: string, username_walletName: string, from: string, gasPrice: number = this.base._getGasPrice()) : Promise<string> {
-        return new Promise<string>(async(resolve,reject) => {
+    public addNameAndWalletName(from: string, userName: string, userAddress: string, fullName: string, email: string, walletName: string, signedUserData: string, signedWalletData: string, gasPrice?: number): Promise<string> {
+        return new Promise<string>(async (resolve, reject) => {
             try {
                 const nonce = await this.helpers._getNonce(from);
-                const txHash = await promisify(this.base.twoKeyReg.setWalletName,
-                    [
-                        username,
-                        address,
-                        username_walletName,
-                        {
-                            from,
-                            gasPrice,
-                            nonce
-                        }
-                    ]);
+                const txHash = await promisify(this.base.twoKeyReg.addNameAndSetWalletName, [
+                    userName,
+                    userAddress,
+                    fullName,
+                    email,
+                    walletName,
+                    signedUserData,
+                    signedWalletData,
+                    { from, nonce, gasPrice }]);
                 resolve(txHash);
             } catch (e) {
                 reject(e);
             }
         });
     }
-
-
-
 }
