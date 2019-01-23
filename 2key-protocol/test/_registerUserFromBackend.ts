@@ -78,20 +78,20 @@ async function registerUserFromBackend({ signedUser, signedPlasma, signedEthereu
     console.log('PlasmaEvents:', twoKeyProtocol.twoKeyPlasmaEvents.address);
     console.log('registerUserFromBackend.plasmaAddress', twoKeyProtocol.plasmaAddress);
     console.log('\r\n');
-    const txHashes = [];
+    const receipts = [];
     try {
         if (signedUser && signedWallet) {
             const txHash = await twoKeyProtocol.Registry.addNameAndWalletName(address, signedUser.name, signedUser.address, signedUser.fullname, signedUser.email, signedWallet.walletname, signedUser.signature, signedWallet.signature);
             console.log('Registry.addNameAndWalletName hash', txHash);
             console.log('\r\n');
-            txHashes.push(twoKeyProtocol.Utils.getTransactionReceiptMined(txHash));
+            receipts.push(await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash));
         } else {
             try {
                 if (signedUser) {
                     const txHash = await twoKeyProtocol.Registry.addName(signedUser.name, signedUser.address, signedUser.fullname, signedUser.email, signedUser.signature, address);
                     console.log('Registry.addName hash', txHash);
                     console.log('\r\n');
-                    txHashes.push(twoKeyProtocol.Utils.getTransactionReceiptMined(txHash));
+                    receipts.push(await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash));
                 }
             } catch (e) {
                 console.log('Error in Registry.addName');
@@ -102,7 +102,7 @@ async function registerUserFromBackend({ signedUser, signedPlasma, signedEthereu
                     const txHash = await twoKeyProtocol.Registry.setWalletName(address, signedWallet);
                     console.log('Registry.setWalletName hash', txHash);
                     console.log('\r\n');
-                    txHashes.push(twoKeyProtocol.Utils.getTransactionReceiptMined(txHash));
+                    receipts.push(await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash));
                 } catch (e) {
                     console.log('Error in Registry.setWalletName');
                     throw e;
@@ -118,7 +118,7 @@ async function registerUserFromBackend({ signedUser, signedPlasma, signedEthereu
             const txHash = await twoKeyProtocol.Registry.addPlasma2EthereumByUser(address, signedPlasma);
             console.log('Registry.addPlasma2EthereumByUser hash', txHash);
             console.log('\r\n');
-            txHashes.push(twoKeyProtocol.Utils.getTransactionReceiptMined(txHash));
+            receipts.push(await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash));
         } catch (e) {
             console.log('Error in Registry.addPlasma2EthereumByUser');
             return Promise.reject(e);
@@ -129,13 +129,13 @@ async function registerUserFromBackend({ signedUser, signedPlasma, signedEthereu
             const txHash = await twoKeyProtocol.PlasmaEvents.setPlasmaToEthereumOnPlasma(signedEthereum.plasmaAddress, signedEthereum.plasma2ethereumSignature);
             console.log('PlasmaEvents.setPlasmaToEthereumOnPlasma hash', txHash);
             console.log('\r\n');
-            txHashes.push(twoKeyProtocol.Utils.getTransactionReceiptMined(txHash, {web3: twoKeyProtocol.plasmaWeb3}));
+            receipts.push(await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash, {web3: twoKeyProtocol.plasmaWeb3}));
         } catch (e) {
             console.log('Error in PlasmaEvents.setPlasmaToEthereumOnPlasma');
             return Promise.reject(e);
         }
     }
-    return Promise.all(txHashes);
+    return receipts;
 }
 
 console.log(process.argv[2].startsWith('{'));
