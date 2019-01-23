@@ -37,7 +37,7 @@ export interface IRegistryData {
 }
 
 async function registerUserFromBackend({ signedUser, signedPlasma, signedEthereum, signedWallet }: IRegistryData = {}) {
-    console.log('registerUserFromBackend', signedUser, signedPlasma, signedEthereum, signedWallet);
+    // console.log('registerUserFromBackend', signedUser, signedPlasma, signedEthereum, signedWallet);
     console.log('\r\n');
     if (!signedUser && ! signedPlasma && !signedEthereum) {
         console.log('Nothing todo!');

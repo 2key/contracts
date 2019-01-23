@@ -262,16 +262,6 @@ const tryToRegisterUser = async (username, from) => {
     console.log('REGISTERING', username);
     const user = users[username.toLowerCase()];
     const registerData: IRegistryData = {};
-    try {
-        registerData.signedPlasma = await twoKeyProtocol.Registry.signPlasma2Ethereum(from);
-    } catch {
-        console.log('Error in registering user in Registry!!!');
-    }
-    try {
-        registerData.signedEthereum = await twoKeyProtocol.PlasmaEvents.signPlasmaToEthereum(from);
-    } catch {
-        console.log('Error in registering user in Plasma!!!');
-    }
     try  {
         registerData.signedUser = await twoKeyProtocol.Registry.signUserData2Registry(from, user.name, user.fullname, user.email)
     } catch {
@@ -281,6 +271,16 @@ const tryToRegisterUser = async (username, from) => {
         registerData.signedWallet = await twoKeyProtocol.Registry.signWalletData2Registry(from, user.name, user.walletname);
     } catch (e) {
         console.log('Wallet error', e)
+    }
+    try {
+        registerData.signedPlasma = await twoKeyProtocol.Registry.signPlasma2Ethereum(from);
+    } catch {
+        console.log('Error in registering user in Registry!!!');
+    }
+    try {
+        registerData.signedEthereum = await twoKeyProtocol.PlasmaEvents.signPlasmaToEthereum(from);
+    } catch {
+        console.log('Error in registering user in Plasma!!!');
     }
     const register = await registerUserFromBackend(registerData);
     // console.log('REGISTER RESULT', register);
