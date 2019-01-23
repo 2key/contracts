@@ -442,6 +442,11 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
         }
     }
 
+    /**
+     * @notice Function to concat at most 5 strings
+     * @dev If you want to handle concatenation of less than 5, then pass first their values and for the left pass empty strings
+     * @return string concatenated
+     */
     function strConcat(string _a, string _b, string _c, string _d, string _e) public pure returns (string){
         bytes memory _ba = bytes(_a);
         bytes memory _bb = bytes(_b);
