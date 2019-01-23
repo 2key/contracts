@@ -1344,7 +1344,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 const balance = await this.erc20.getERC20Balance(this.base.twoKeyEconomy.address, this.base.twoKeyUpgradableExchange.address);
                 console.log("Balance of 2keys on upgradable exchange is: " + balance);
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-                const txHash: string = await promisify(campaignInstance.withdrawModeratorOrReferrer,[
+                const txHash: string = await promisify(campaignInstance.withdrawModeratorOrReferrer,[from,
                     {
                         from,
                         gasPrice,

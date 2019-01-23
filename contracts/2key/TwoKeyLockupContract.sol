@@ -1,6 +1,7 @@
 pragma solidity ^0.4.24;
 
 import "../interfaces/IERC20.sol";
+import "../interfaces/ITwoKeyEventSource.sol";
 
 contract TwoKeyLockupContract {
 
@@ -23,6 +24,7 @@ contract TwoKeyLockupContract {
     address twoKeyAcquisitionCampaignERC20Address;
     address twoKeyConversionHandler;
     address assetContractERC20;
+    address twoKeyEventSource;
 
     bool changed = false;
 
@@ -52,7 +54,8 @@ contract TwoKeyLockupContract {
         address _converter,
         address _contractor,
         address _acquisitionCampaignERC20Address,
-        address _assetContractERC20
+        address _assetContractERC20,
+        address _twoKeyEventSource
     ) public {
         bonusTokensVestingStartShiftInDaysFromDistributionDate = _bonusTokensVestingStartShiftInDaysFromDistributionDate;
         bonusTokensVestingMonths = _bonusTokensVestingMonths;
@@ -66,6 +69,7 @@ contract TwoKeyLockupContract {
         twoKeyAcquisitionCampaignERC20Address = _acquisitionCampaignERC20Address;
         twoKeyConversionHandler = msg.sender;
         assetContractERC20 = _assetContractERC20;
+        _twoKeyEventSource = _twoKeyEventSource;
         tokenUnlockingDate[0] = tokenDistributionDate; //base tokens
         tokenUnlockingDate[1] = tokenDistributionDate + i * (1 days); // first part of bonus in days after tokens
         for(uint i=2 ;i<bonusTokensVestingMonths + 1; i++) {
@@ -109,7 +113,8 @@ contract TwoKeyLockupContract {
     /// @notice Function where converter can withdraw his funds
     /// @return true is if transfer was successful, otherwise will revert
     /// onlyConverter
-    function withdrawTokens(uint part) public onlyConverter returns (bool) {
+    function withdrawTokens(uint part) public returns (bool) {
+        require(msg.sender == converter || ITwoKeyEventSource(twoKeyEventSource).isAddressMaintainer(msg.sender) == true);
         require(isWithdrawn[part] == false && part < bonusTokensVestingMonths+1 && block.timestamp > tokenUnlockingDate[part]);
         uint amount;
         if(part == 0) {
@@ -128,7 +133,7 @@ contract TwoKeyLockupContract {
     /// @param _assetContractERC20 is the asset contract address
     function cancelCampaignAndGetBackTokens(address _assetContractERC20) public onlyTwoKeyConversionHandler {
         require(IERC20(_assetContractERC20).transfer(twoKeyAcquisitionCampaignERC20Address, baseTokens+bonusTokens));
-        selfdestruct(twoKeyAcquisitionCampaignERC20Address);
+        selfdestruct(twoKeyAcquisitionCampaignERC20Address); //This will work for money not for erc20's
     }
 
 }
