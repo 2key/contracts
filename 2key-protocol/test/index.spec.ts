@@ -120,62 +120,74 @@ const users = {
             name: 'DEPLOYER',
             email: 'support@2key.network',
             fullname:  'deployer account',
+            walletname: 'DEPLOYER-wallet',
         },
         'aydnep': {
             name: 'Aydnep',
             email: 'aydnep@gmail.com',
             fullname:  'aydnep account',
+            walletname: 'Aydnep-wallet',
         },
         'nikola': {
             name: 'Nikola',
             email: 'nikola@2key.co',
             fullname: 'Nikola Madjarevic',
+            walletname: 'Nikola-wallet',
         },
         'andrii': {
             name: 'Andrii',
             email: 'andrii@2key.co',
             fullname: 'Andrii Pindiura',
+            walletname: 'Andrii-wallet',
 
         },
         'Kiki': {
             name: 'Kiki',
             email: 'kiki@2key.co',
             fullname: 'Erez Ben Kiki',
+            walletname: 'Kiki-wallet',
         },
         'gmail': {
             name: 'gmail',
             email: 'aydnep@gmail.com',
             fullname: 'gmail account',
+            walletname: 'gmail-wallet',
         },
         'test4': {
             name: 'test4',
             email: 'test4@mailinator.com',
             fullname: 'test4 account',
+            walletname: 'test4-wallet',
         },
         'renata': {
             name: 'renata',
             email: 'renata.pindiura@gmail.com',
             fullname: 'renata account',
+            walletname: 'renata-wallet',
         },
         'uport': {
             name: 'uport',
             email: 'aydnep_uport@gmail.com',
             fullname: 'uport account',
+            walletname: 'uport-wallet',
         },
         'gmail2': {
             name: 'gmail2',
             email: 'aydnep+2@gmail.com',
             fullname: 'gmail2 account',
+            walletname: 'gmail2-wallet',
         },
         'aydnep2': {
             name: 'aydnep2',
             email: 'aydnep+2@aydnep.com.ua',
             fullname: 'aydnep2 account',
+            walletname: 'aydnep2-wallet',
         },
         'test': {
             name: 'test',
             email: 'test@gmail.com',
             fullname: 'test account',
+            walletname: 'test-wallet',
         },
 };
 // console.log('MNEMONICS');
@@ -249,28 +261,27 @@ const printBalances = (done) => {
 const tryToRegisterUser = async (username, from) => {
     console.log('REGISTERING', username);
     const user = users[username.toLowerCase()];
-    let signedPlasma;
-    let plasma2EthereumSignature;
-    try {
-        signedPlasma = await twoKeyProtocol.Registry.signPlasma2Ethereum(from);
-    } catch (e) {
-        console.log('Error in registering user in Registry!!!',e);
-    }
-    try {
-        plasma2EthereumSignature = await twoKeyProtocol.PlasmaEvents.signPlasmaToEthereum(from);
-    } catch (e) {
-        console.log('Error in registering user in Plasma!!!',e);
-    }
     const registerData: IRegistryData = {};
-    const isAddressRegistered = await twoKeyProtocol.Registry.checkIfAddressIsRegistered(from);
-    const isUserRegistered = await twoKeyProtocol.Registry.checkIfUserIsRegistered(user.name);
-    if (!isAddressRegistered && !parseInt(isUserRegistered, 16)) {
-        user.address = from;
-        registerData.user = user;
+    try {
+        registerData.signedPlasma = await twoKeyProtocol.Registry.signPlasma2Ethereum(from);
+    } catch {
+        console.log('Error in registering user in Registry!!!');
     }
-    registerData.plasma2EthereumSignature = plasma2EthereumSignature;
-    registerData.signedPlasma = signedPlasma;
-    registerData.plasmaAddress = twoKeyProtocol.plasmaAddress;
+    try {
+        registerData.signedEthereum = await twoKeyProtocol.PlasmaEvents.signPlasmaToEthereum(from);
+    } catch {
+        console.log('Error in registering user in Plasma!!!');
+    }
+    try  {
+        registerData.signedUser = await twoKeyProtocol.Registry.signUserData2Registry(from, user.name, user.fullname, user.email)
+    } catch {
+        console.log('Error in registering user in Registry.addName');
+    }
+    try {
+        registerData.signedWallet = await twoKeyProtocol.Registry.signWalletData2Registry(from, user.name, user.walletname);
+    } catch (e) {
+        console.log('Wallet error', e)
+    }
     const register = await registerUserFromBackend(registerData);
     // console.log('REGISTER RESULT', register);
 };
@@ -291,6 +302,8 @@ describe('TwoKeyProtocol', () => {
                     plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
                 });
                 await tryToRegisterUser('Deployer', from);
+                // const signature = await twoKeyProtocol.Registry.signUserData2Registry(from, 'DEPLOYER','DEPLOYER','aydnep@2key.network');
+                // console.log('SIGNATURE FOR REGISTRY', signature);
                 const {balance} = twoKeyProtocol.Utils.balanceFromWeiString(await twoKeyProtocol.getBalance(env.AYDNEP_ADDRESS), {inWei: true});
                 const {balance: adminBalance} = twoKeyProtocol.Utils.balanceFromWeiString(await twoKeyProtocol.getBalance(contractsMeta.TwoKeyAdmin.networks[mainNetId].address), {inWei: true});
                 console.log(adminBalance);
