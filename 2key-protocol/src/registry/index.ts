@@ -163,14 +163,20 @@ export default class TwoKeyReg implements ITwoKeyReg {
     public signWalletData2Registry(from: string, username: string, walletname: string): Promise<ISignedWalletData> {
         return new Promise<ISignedWalletData>(async(resolve, reject) => {
             try {
-                const userData = `${username}${walletname}`;
-                const signature = await Sign.sign_name(this.base.web3, from, userData);
-                resolve({
-                    username,
-                    address: from,
-                    walletname,
-                    signature,
-                });
+                const walletTag = await promisify(this.base.twoKeyReg.address2walletTag, [from]);
+                console.log('walletTag', walletTag);
+                if (!parseInt(walletTag, 16)) {
+                    const userData = `${username}${walletname}`;
+                    const signature = await Sign.sign_name(this.base.web3, from, userData);
+                    resolve({
+                        username,
+                        address: from,
+                        walletname,
+                        signature,
+                    });
+                } else {
+                    reject(new Error('Wallet Already registered!'));
+                }
             } catch (e) {
                 reject(e);
             }
@@ -206,7 +212,7 @@ export default class TwoKeyReg implements ITwoKeyReg {
                 if(stored_ethereum_address != from) {
                     plasmaPrivateKey = Sign.add0x(this.base.plasmaPrivateKey);
                     encryptedPlasmaPrivateKey = await Sign.encrypt(this.base.web3, from, plasmaPrivateKey, {});
-                    let ethereum2plasmaSignature = await Sign.sign_ethereum2plasma(this.base.plasmaWeb3, from, this.base.plasmaAddress);
+                    let ethereum2plasmaSignature = await Sign.sign_ethereum2plasma(this.base.plasmaWeb3, from, plasmaAddress);
                     let externalSignature = await Sign.sign_ethereum2plasma_note(this.base.web3,from, ethereum2plasmaSignature,encryptedPlasmaPrivateKey);
                     resolve({
                         encryptedPlasmaPrivateKey,
@@ -228,16 +234,17 @@ export default class TwoKeyReg implements ITwoKeyReg {
      * @param {string} from
      * @returns {Promise<string>}
      */
-    public addPlasma2EthereumByUser(from: string, signedPlasma: ISignedPlasma) : Promise<string> {
+    public addPlasma2EthereumByUser(from: string, signedPlasma: ISignedPlasma, gasPrice?: number) : Promise<string> {
         return new Promise<string>(async(resolve,reject) => {
             try {
+                const nonce = await this.helpers._getNonce(from);
                 const { ethereum2plasmaSignature, encryptedPlasmaPrivateKey, externalSignature } = signedPlasma;
                 console.log('addPlasma2EthereumByUser\r\n');
                 console.log(ethereum2plasmaSignature);
                 console.log(encryptedPlasmaPrivateKey);
                 console.log(externalSignature);
                 let txHash = await promisify(this.base.twoKeyReg.setPlasma2EthereumAndNoteSigned,
-                    [ethereum2plasmaSignature,encryptedPlasmaPrivateKey,externalSignature,{from}]);
+                    [ethereum2plasmaSignature,encryptedPlasmaPrivateKey,externalSignature,{from, nonce, gasPrice}]);
                 resolve(txHash);
 
             } catch (e) {

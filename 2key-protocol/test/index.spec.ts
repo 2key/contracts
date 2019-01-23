@@ -265,24 +265,25 @@ const tryToRegisterUser = async (username, from) => {
     try  {
         registerData.signedUser = await twoKeyProtocol.Registry.signUserData2Registry(from, user.name, user.fullname, user.email)
     } catch {
-        console.log('Error in registering user in Registry.addName');
+        console.log('Error in Registry.signUserData');
     }
     try {
         registerData.signedWallet = await twoKeyProtocol.Registry.signWalletData2Registry(from, user.name, user.walletname);
-    } catch (e) {
-        console.log('Wallet error', e)
+    } catch {
+        console.log('Error in Registry.singWalletData');
     }
     try {
         registerData.signedPlasma = await twoKeyProtocol.Registry.signPlasma2Ethereum(from);
     } catch {
-        console.log('Error in registering user in Registry!!!');
+        console.log('Error Registry.signPlasma');
     }
     try {
         registerData.signedEthereum = await twoKeyProtocol.PlasmaEvents.signPlasmaToEthereum(from);
     } catch {
-        console.log('Error in registering user in Plasma!!!');
+        console.log('Error Plasma.signEthereum');
     }
-    const register = await registerUserFromBackend(registerData);
+    const registerReceipts = await registerUserFromBackend(registerData);
+    return registerReceipts;
     // console.log('REGISTER RESULT', register);
 };
 describe('TwoKeyProtocol', () => {

@@ -113,7 +113,7 @@ function sign_ethereum2plasma(plasma_web3, my_address, plasma_address): Promise<
         }
     ];
 
-    return sign_message(plasma_web3, msgParams, plasma_address, {plasma: true}); // we never use metamask on plasma
+    return sign_message(plasma_web3, msgParams, plasma_address, { plasma: true }); // we never use metamask on plasma
 }
 
 /**
