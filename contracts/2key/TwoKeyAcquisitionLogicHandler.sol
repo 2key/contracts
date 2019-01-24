@@ -12,9 +12,10 @@ contract TwoKeyAcquisitionLogicHandler {
 
     using SafeMath for uint256;
 
-    address twoKeyEventSource;
+    address public twoKeyRegistry;
     address contractor;
-    address ethUSDExchangeContract;
+    address public ethUSDExchangeContract;
+    address public twoKeyAcquisitionCampaign;
 
     uint256 campaignStartTime; // Time when campaign start
     uint256 campaignEndTime; // Time when campaign ends
@@ -45,7 +46,7 @@ contract TwoKeyAcquisitionLogicHandler {
         string _currency,
         address _ethUsdExchangeContract,
         address _assetContractERC20,
-        address _twoKeyEventSource
+        address _twoKeyRegistry
     ) public {
         contractor = msg.sender;
         minContributionETHorFiatCurrency = _minContribution;
@@ -56,7 +57,7 @@ contract TwoKeyAcquisitionLogicHandler {
         maxConverterBonusPercent = _maxConverterBonusPercent;
         currency = _currency;
         ethUSDExchangeContract = _ethUsdExchangeContract;
-        twoKeyEventSource = _twoKeyEventSource;
+        twoKeyRegistry = _twoKeyRegistry;
         unit_decimals = IERC20(_assetContractERC20).decimals();
     }
 
@@ -68,6 +69,11 @@ contract TwoKeyAcquisitionLogicHandler {
             return true;
         }
         return false;
+    }
+
+    function setTwoKeyAcquisitionCampaignContract(address _acquisitionCampaignAddress) public {
+        require(twoKeyAcquisitionCampaign == address(0)); // Means it can be set only once
+        twoKeyAcquisitionCampaign = _acquisitionCampaignAddress;
     }
 
     /**

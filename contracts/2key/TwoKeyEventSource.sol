@@ -306,5 +306,4 @@ contract TwoKeyEventSource is Upgradeable, TwoKeyTypes {
         bool isMaintainer = ITwoKeyReg(twoKeyRegistry).checkIfTwoKeyMaintainerExists(_maintainer);
         return isMaintainer;
     }
-
 }

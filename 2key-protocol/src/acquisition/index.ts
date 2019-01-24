@@ -173,7 +173,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                         gasPrice,
                         params: [data.minContributionETHWei, data.maxContributionETHWei,data.pricePerUnitInETHWei,
                             data.campaignStartTime, data.campaignEndTime, data.maxConverterBonusPercentWei,
-                            data.currency, this.base.twoKeyExchangeContract.address, data.assetContractERC20],
+                            data.currency, this.base.twoKeyExchangeContract.address, data.assetContractERC20, this.base.twoKeyReg.address],
                         progressCallback
                     });
                     const predeployReceipt = await this.utils.getTransactionReceiptMined(txHash, {

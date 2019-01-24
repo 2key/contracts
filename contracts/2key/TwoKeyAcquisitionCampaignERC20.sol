@@ -20,7 +20,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     address public upgradableExchange;
     address public twoKeyAcquisitionLogicHandler;
 
-
     mapping(address => uint256) internal referrerPlasma2cut; // Mapping representing how much are cuts in percent(0-100) for referrer address
     mapping(address => uint256) internal referrerPlasma2BalancesEthWEI; // balance of EthWei for each influencer that he can withdraw
     mapping(address => uint256) internal referrerPlasma2TotalEarningsEthWEI; // Total earnings for referrers
@@ -75,6 +74,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         moderatorFeePercentage = values[1];
         maxReferralRewardPercent = values[2];
         ITwoKeyConversionHandler(conversionHandler).setTwoKeyAcquisitionCampaignERC20(address(this), _moderator, contractor, _assetContractERC20, _twoKeyEventSource);
+        ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).setTwoKeyAcquisitionCampaignContract(address(this));
         twoKeyEventSource.created(address(this), contractor, moderator);
     }
 
