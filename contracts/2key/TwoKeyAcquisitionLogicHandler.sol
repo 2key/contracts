@@ -202,7 +202,7 @@ contract TwoKeyAcquisitionLogicHandler {
 
         (username,fullName,email) = ITwoKeyReg(twoKeyRegistry).getUserData(eth_address);
         bool isJoined = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getAddressJoinedStatus(_user);
-        bytes memory stats = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getAddressStatistic(eth_address);
+        bytes memory stats = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getAddressStatistic(_user, plasma);
         return (username, fullName, email, isJoined, stats);
     }
 

@@ -538,19 +538,28 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     }
 
     //{ rewards: number,  tokens_bought: number, isConverter: bool, isReferrer: bool, isContractor: bool, isModerator:bool } right??
-    function getAddressStatistic(address _address) public view returns (bytes) {
+    function getAddressStatistic(address _address, bool plasma) public view returns (bytes) {
+        address eth_address;
+        address plasma_address;
+        eth_address = _address;
+        plasma_address = _address;
+        if (plasma) {
+            eth_address = twoKeyEventSource.ethereumOf(_address);
+        } else {
+            plasma_address = twoKeyEventSource.plasmaOf(_address);
+        }
         if(_address == contractor) {
             abi.encodePacked(0, 0, 0, false, false);
         } else {
             bool isConverter;
             bool isReferrer;
-            if(unitsConverterBought[_address] > 0) {
+            if(unitsConverterBought[eth_address] > 0) {
                 isConverter = true;
             }
-            if(referrerPlasma2BalancesEthWEI[twoKeyEventSource.plasmaOf(_address)] > 0) {
+            if(referrerPlasma2BalancesEthWEI[plasma_address] > 0) {
                 isReferrer = true;
             }
-            return abi.encodePacked(amountConverterSpentEthWEI[_address],referrerPlasma2BalancesEthWEI[twoKeyEventSource.plasmaOf(_address)], unitsConverterBought[_address], isConverter, isReferrer);
+            return abi.encodePacked(amountConverterSpentEthWEI[_address],referrerPlasma2BalancesEthWEI[plasma_address], unitsConverterBought[eth_address], isConverter, isReferrer);
         }
     }
 
