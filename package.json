@@ -13,7 +13,8 @@
     "devnet": "node ethereum.js",
     "test": "node -r dotenv/config ./node_modules/.bin/mocha --exit --bail -r ts-node/register 2key-protocol/test/index.spec.ts",
     "test:one": "node -r dotenv/config ./node_modules/.bin/mocha --exit --bail -r ts-node/register",
-    "ts-node": "ts-node -r dotenv/config"
+    "ts-node": "ts-node -r dotenv/config",
+    "register": "ts-node -r dotenv/config 2key-protocol/test/_registerUserFromBackend.ts"
   },
   "author": "Douglas von Kohorn",
   "license": "MIT",
