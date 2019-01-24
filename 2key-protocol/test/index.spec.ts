@@ -961,7 +961,7 @@ describe('TwoKeyProtocol', () => {
 
     it('==> should get address statistics', async() => {
         const hexedValues = await twoKeyProtocol.AcquisitionCampaign.getAddressStatistic(campaignAddress, env.TEST4_ADDRESS);
-        console.log('Hexed values are: ' + hexedValues);
+        console.log(hexedValues);
     }).timeout(30000);
 
     it('==> should add acquisition campaign to be eligible to buy tokens from Upgradable exchange', async() => {

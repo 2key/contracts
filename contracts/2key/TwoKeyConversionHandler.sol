@@ -19,7 +19,7 @@ import "../interfaces/ITwoKeyEventSource.sol";
 contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyConverterStates {
 
     using SafeMath for uint256;
-    uint raisedFundsEthWei = 0;
+    uint public raisedFundsEthWei = 0;
     uint numberOfConversions = 0;
     Conversion[] public conversions;
     mapping(address => uint[]) converterToHisConversions;
