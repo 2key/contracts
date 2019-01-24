@@ -39,6 +39,7 @@ contract TwoKeyPlasmaEvents is Upgradeable {
     mapping(address => mapping(address => mapping(address => mapping(address => bool)))) public visits;
     // campaign,contractor eth-addr=>to eth or plasma-addr=>from eth-addr=>true/false
     mapping(address => mapping(address => mapping(address => address))) public visited_from;
+    mapping(address => mapping(address => mapping(address => mapping(address => uint)))) public visited_from_time;
     // campaign,contractor eth-addr=>from eth-addr=>list of to eth or plasma address.
     mapping(address => mapping(address => mapping(address => address[]))) public visits_list;
 
@@ -170,6 +171,7 @@ contract TwoKeyPlasmaEvents is Upgradeable {
         return ethereumOf(visited_from[c][contractor][_address]);
     }
 
+
     function visited(address c, address contractor, bytes sig) public {
         // c - addresss of the contract on ethereum
         // contractor - is the ethereum address of the contractor who created c. a dApp can read this information for free from ethereum.
@@ -210,6 +212,8 @@ contract TwoKeyPlasmaEvents is Upgradeable {
             if (!visits[c][contractor][old_address][new_address]) {  // generate event only once for each tripplet
                 visits[c][contractor][old_address][new_address] = true;
                 visited_from[c][contractor][new_address] = old_address;
+                //TODO: Updating visited from time
+                visited_from_time[c][contractor][new_address][old_address] = block.timestamp;
                 visits_list[c][contractor][old_address].push(new_address);
                 emit Visited(new_address, c, contractor, old_address);
             } else {
