@@ -519,7 +519,7 @@ describe('TwoKeyProtocol', () => {
         const hash = await twoKeyProtocol.Utils.ipfsAdd(campaignData);
         txHash = await twoKeyProtocol.AcquisitionCampaign.updateOrSetIpfsHashPublicMeta(campaignAddress, hash, from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-        const campaignMeta = await twoKeyProtocol.AcquisitionCampaign.getPublicMeta(campaignAddress);
+        const campaignMeta = await twoKeyProtocol.AcquisitionCampaign.getPublicMeta(campaignAddress,from);
         console.log('IPFS:', hash, campaignMeta);
         expect(campaignMeta.meta.assetContractERC20).to.be.equal(campaignData.assetContractERC20);
     }).timeout(30000);
@@ -960,9 +960,10 @@ describe('TwoKeyProtocol', () => {
     }).timeout(30000);
 
     it('==> should get address statistics', async() => {
-        const hexedValues = await twoKeyProtocol.AcquisitionCampaign.getAddressStatistic(campaignAddress, from);
+        const hexedValues = await twoKeyProtocol.AcquisitionCampaign.getAddressStatistic(campaignAddress, env.TEST4_ADDRESS);
         console.log('Hexed values are: ' + hexedValues);
     }).timeout(30000);
+
     it('==> should add acquisition campaign to be eligible to buy tokens from Upgradable exchange', async() => {
         const txHash: string = await twoKeyProtocol.UpgradableExchange.addContractToBeEligibleToGetTokensFromExchange(campaignAddress,from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);

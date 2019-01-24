@@ -33,8 +33,9 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     uint256 contractorBalance;
     uint256 contractorTotalProceeds;
 
-    mapping(address => uint256) amountConverterSpentEthWEI; // Amount converter put to the contract in Ether
-    mapping(address => uint256) internal unitsConverterBought; // Number of units (ERC20 tokens) bought
+    //TODO: Put internal back just leave for test
+    mapping(address => uint256) public amountConverterSpentEthWEI; // Amount converter put to the contract in Ether
+    mapping(address => uint256) public unitsConverterBought; // Number of units (ERC20 tokens) bought
 
     address assetContractERC20; // Asset contract is address of ERC20 inventory
 
