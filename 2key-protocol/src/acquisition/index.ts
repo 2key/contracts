@@ -1506,19 +1506,19 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @param {string} from
      * @returns {Promise<IConversionStats>}
      */
-    public getNumberOfConvertersPerType(campaign: any, from: string) : Promise<IConversionStats> {
+    public getCampaignSummary(campaign: any, from: string) : Promise<IConversionStats> {
         return new Promise<IConversionStats>(async(resolve,reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
                 const conversionHandler = await promisify(campaignInstance.conversionHandler,[{from}]);
                 const conversionHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyConversionHandler.abi).at(conversionHandler);
-                const {pending,approved,rejected,totalRaised} = await promisify(conversionHandlerInstance.getNumberOfConvertersPerType,[{from}]);
+                const [pending,approved,rejected,totalRaised] = await promisify(conversionHandlerInstance.getCampaignSummary,[{from}]);
                 resolve(
                     {
-                        pendingConverters: pending,
-                        approvedConverters: approved,
-                        rejectedConverters: rejected,
-                        totalETHRaised: totalRaised
+                        pendingConverters:  pending.toNumber(),
+                        approvedConverters:  approved.toNumber(),
+                        rejectedConverters:  rejected.toNumber(),
+                        totalETHRaised: parseFloat(this.utils.fromWei(totalRaised, 'ether').toString()),
                     }
                 )
             } catch (e) {
@@ -1573,22 +1573,22 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @param {string} address
      * @returns {Promise<IAddressStats>}
      */
-    public getAddressStatistic(campaign: any, address: string) : Promise<IAddressStats>{
+    public getAddressStatistic(campaign: any, address: string, plasma: boolean = false) : Promise<IAddressStats>{
         return new Promise<IAddressStats>(async(resolve,reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
                 const twoKeyAcquisitionLogicHandler = await promisify(campaignInstance.twoKeyAcquisitionLogicHandler,[]);
                 const twoKeyAcquisitionLogicHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyAcquisitionLogicHandler.abi).at(twoKeyAcquisitionLogicHandler);
 
-                let [username, fullname, email, isJoined ,hexedValues] = await promisify(twoKeyAcquisitionLogicHandlerInstance.getSuperStatistics,[address]);
+                let [username, fullname, email, isJoined ,hexedValues] = await promisify(twoKeyAcquisitionLogicHandlerInstance.getSuperStatistics,[address, plasma]);
                 /**
                  * Unpack bytes for statistics
                  */
                 let amountConverterSpent = parseInt(hexedValues.slice(0, 66),16);
                 let rewards = parseInt(hexedValues.slice(66,66+64),16);
                 let unitsConverterBought = parseInt(hexedValues.slice(66+64,66+64+64),16);
-                let isConverter = parseInt(hexedValues.slice(66+64+64,66+64+64+2),16) == 1 ? true:false;
-                let isReferrer = parseInt(hexedValues.slice(66+64+64+2,66+64+64+2+2),16) == 1 ? true:false;
+                let isConverter = parseInt(hexedValues.slice(66+64+64,66+64+64+2),16) == 1;
+                let isReferrer = parseInt(hexedValues.slice(66+64+64+2,66+64+64+2+2),16) == 1;
 
                 let obj : IAddressStats = {
                     amountConverterSpentETH: parseFloat(this.utils.fromWei(amountConverterSpent,'ether').toString()),

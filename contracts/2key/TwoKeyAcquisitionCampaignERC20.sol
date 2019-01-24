@@ -494,7 +494,10 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      */
     function getAddressJoinedStatus(address _address) public view returns (bool) {
         address plasma = twoKeyEventSource.plasmaOf(_address);
-        if(plasma == address(contractor) || _address == address(moderator) || received_from[plasma] != address(0)
+        if (_address == address(0)) {
+            return false;
+        }
+        if (plasma == address(contractor) || _address == address(moderator) || received_from[plasma] != address(0)
             || balanceOf(plasma) > 0) {
             return true;
         }

@@ -192,6 +192,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
      * @notice Function to perform all the logic which has to be done when we're performing conversion
      * @param _conversionId is the id
      */
+
     function performConversion(uint _conversionId) internal {
         Conversion memory conversion = conversions[_conversionId];
         require(conversion.state == ConversionState.APPROVED);
@@ -220,6 +221,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
 
         //Update total raised funds
         raisedFundsEthWei = raisedFundsEthWei + conversion.contractorProceedsETHWei + conversion.moderatorFeeETHWei + conversion.maxReferralRewardETHWei;
+//        raisedFundsEthWei = raisedFundsEthWei + conversion.contractorProceedsETHWei;
     }
 
     /// @notice Function to check whether converter is approved or not
@@ -444,8 +446,9 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
 
     /**
      * @notice Get's number of converters per type, and returns tuple, as well as total raised funds
+     getCampaignSummary
      */
-    function getNumberOfConvertersPerType() public view returns (uint,uint,uint,uint) {
+    function getCampaignSummary() public view returns (uint,uint,uint,uint) {
         bytes32 pending = convertConverterStateToBytes(ConverterState.PENDING_APPROVAL);
         bytes32 approved = convertConverterStateToBytes(ConverterState.APPROVED);
         bytes32 rejected = convertConverterStateToBytes(ConverterState.REJECTED);

@@ -1,7 +1,7 @@
 import {ITwoKeyBase, ITwoKeyHelpers, ITwoKeyUtils} from '../interfaces';
 import {promisify} from '../utils'
 import Sign from '../utils/sign';
-import {IPlasmaEvents, ISignedEthereum} from "./interfaces";
+import {IPlasmaEvents, ISignedEthereum, IVisits} from "./interfaces";
 
 export default class PlasmaEvents implements IPlasmaEvents {
     private readonly base: ITwoKeyBase;
@@ -55,6 +55,30 @@ export default class PlasmaEvents implements IPlasmaEvents {
                         from: this.base.plasmaAddress
                     }]);
                 resolve(txHash);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+    public getVisitsList(campaignAddress: string, contractorAddress: string, address: string): Promise<IVisits> {
+        return new Promise<IVisits>(async (resolve, reject) => {
+            try {
+                let [visits, timestamps] = await promisify(this.base.twoKeyPlasmaEvents.visitsListEx, [campaignAddress, contractorAddress, address]);
+                resolve({
+                    visits,
+                    timestamps: timestamps.map(time => time * 1000),
+                });
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+    public getVisitedFrom(campaignAddress: string, contractorAddress: string, address: string): Promise<string> {
+        return new Promise<string>(async (resolve, reject) => {
+            try {
+                let visitedFrom = promisify(this.base.twoKeyPlasmaEvents.getVisitedFrom, [campaignAddress, contractorAddress, address]);
+                resolve(visitedFrom);
             } catch (e) {
                 reject(e);
             }

@@ -910,6 +910,10 @@ describe('TwoKeyProtocol', () => {
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(30000);
 
+    it('should show campaign summary', async() => {
+        const summary = await twoKeyProtocol.AcquisitionCampaign.getCampaignSummary(campaignAddress, from);
+        console.log(summary);
+    }).timeout(30000);
 
 
     it('should return addresses of lockup contracts for contractor', async () => {
@@ -960,7 +964,9 @@ describe('TwoKeyProtocol', () => {
     }).timeout(30000);
 
     it('==> should get address statistics', async() => {
-        const hexedValues = await twoKeyProtocol.AcquisitionCampaign.getAddressStatistic(campaignAddress, env.TEST4_ADDRESS);
+        let hexedValues = await twoKeyProtocol.AcquisitionCampaign.getAddressStatistic(campaignAddress, env.TEST4_ADDRESS);
+        console.log(hexedValues);
+        hexedValues = await twoKeyProtocol.AcquisitionCampaign.getAddressStatistic(campaignAddress, env.TEST4_ADDRESS, true);
         console.log(hexedValues);
     }).timeout(30000);
 

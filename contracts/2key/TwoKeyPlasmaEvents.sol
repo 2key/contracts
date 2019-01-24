@@ -42,6 +42,7 @@ contract TwoKeyPlasmaEvents is Upgradeable {
     mapping(address => mapping(address => mapping(address => mapping(address => uint)))) public visited_from_time;
     // campaign,contractor eth-addr=>from eth-addr=>list of to eth or plasma address.
     mapping(address => mapping(address => mapping(address => address[]))) public visits_list;
+    mapping(address => mapping(address => mapping(address => uint[]))) public visits_list_timestamps;
 
     mapping(address => mapping(address => mapping(address => bytes))) public visited_sig;
     mapping(address => mapping(address => bytes)) public notes;
@@ -215,6 +216,7 @@ contract TwoKeyPlasmaEvents is Upgradeable {
                 //TODO: Updating visited from time
                 visited_from_time[c][contractor][new_address][old_address] = block.timestamp;
                 visits_list[c][contractor][old_address].push(new_address);
+                visits_list_timestamps[c][contractor][old_address].push(block.timestamp);
                 emit Visited(new_address, c, contractor, old_address);
             } else {
                 require(visited_from[c][contractor][new_address] == old_address, 'User already visited from a different influencer');
@@ -240,6 +242,11 @@ contract TwoKeyPlasmaEvents is Upgradeable {
     function visitsList(address c, address contractor, address from) public view returns (address[]) {
         from = plasmaOf(from);
         return visits_list[c][contractor][from];
+    }
+
+    function visitsListEx(address c, address contractor, address from) public view returns (address[], uint[]) {
+        from = plasmaOf(from);
+        return (visits_list[c][contractor][from], visits_list_timestamps[c][contractor][from]);
     }
 
     function votes(address c, address contractor) public view returns (uint256, uint256, uint256, uint256, uint256, int) {
