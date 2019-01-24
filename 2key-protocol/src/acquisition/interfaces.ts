@@ -93,7 +93,7 @@ export interface ITwoKeyAcquisitionCampaign {
     getModeratorTotalEarnings: (campaign:any, from:string) => Promise<number>,
     getReferrerBalanceAndTotalEarningsAndNumberOfConversions: (campaign:any, referrer: string, from: string) => Promise<IReferrerSummary>,
     getCurrentAvailableAmountOfTokens: (campaign:any, from:string) => Promise<number>,
-    getAddressStatistic(campaign: any, address: string) : Promise<any>,
+    getAddressStatistic(campaign: any, address: string) : Promise<IAddressStats>,
 }
 
 export interface IPublicLinkOpts {
@@ -150,4 +150,16 @@ export interface IConversionStats {
     approvedConverters: number,
     rejectedConverters: number,
     totalETHRaised: number
+}
+
+export interface IAddressStats {
+    amountConverterSpentETH: number,
+    rewards: number,
+    tokensBought: number,
+    isConverter: boolean,
+    isReferrer: boolean,
+    isJoined : boolean,
+    username: string,
+    fullName: string,
+    email: string
 }

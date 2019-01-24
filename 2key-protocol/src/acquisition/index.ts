@@ -1,7 +1,7 @@
 import {ICreateOpts, IERC20, IOffchainData, ITwoKeyBase, ITwoKeyHelpers, ITwoKeyUtils} from '../interfaces';
 import {
     IAcquisitionCampaign,
-    IAcquisitionCampaignMeta, IConstantsLogicHandler, IConversionObject, IConversionStats,
+    IAcquisitionCampaignMeta, IAddressStats, IConstantsLogicHandler, IConversionObject, IConversionStats,
     IConvertOpts,
     IJoinLinkOpts,
     IPublicLinkKey,
@@ -896,7 +896,8 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-                resolve(await promisify(campaignInstance.getAddressJoinedStatus, [from, {from}]));
+                console.log(from);
+                resolve(await promisify(campaignInstance.getAddressJoinedStatus, [from,{from}]));
             } catch (e) {
                 reject(e);
             }
@@ -1572,22 +1573,37 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @param {string} address
      * @returns {Promise<IAddressStats>}
      */
-    public getAddressStatistic(campaign: any, address: string) : Promise<any>{
-        return new Promise<any>(async(resolve,reject) => {
+    public getAddressStatistic(campaign: any, address: string) : Promise<IAddressStats>{
+        return new Promise<IAddressStats>(async(resolve,reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-                let rewards, tokensBought, isConverter, isReferrer, isContractor;
+                const twoKeyAcquisitionLogicHandler = await promisify(campaignInstance.twoKeyAcquisitionLogicHandler,[]);
+                const twoKeyAcquisitionLogicHandlerInstance = this.base.web3.eth.contract(contractsMeta.TwoKeyAcquisitionLogicHandler.abi).at(twoKeyAcquisitionLogicHandler);
 
-                let hexedValues = await promisify(campaignInstance.getAddressStatistic,[address]);
+                let [username, fullname, email, isJoined ,hexedValues] = await promisify(twoKeyAcquisitionLogicHandlerInstance.getSuperStatistics,[address]);
+                /**
+                 * Unpack bytes for statistics
+                 */
+                let amountConverterSpent = parseInt(hexedValues.slice(0, 66),16);
+                let rewards = parseInt(hexedValues.slice(66,66+64),16);
+                let unitsConverterBought = parseInt(hexedValues.slice(66+64,66+64+64),16);
+                let isConverter = parseInt(hexedValues.slice(66+64+64,66+64+64+2),16) == 1 ? true:false ;
+                let isReferrer = parseInt(hexedValues.slice(66+64+64+2,66+64+64+2+2),16) == 1 ? true:false ;
 
-                // let obj : IAddressStats = {
-                //     rewards : parseFloat(this.utils.fromWei(rewards,'ether').toString()),
-                //     tokensBought: parseFloat(this.utils.fromWei(tokensBought, 'ether').toString()),
-                //     isConverter: isConverter,
-                //     isReferrer: isReferrer,
-                //     isContractor : isContractor
-                // };
-                resolve(hexedValues);
+                let obj : IAddressStats = {
+                    amountConverterSpentETH: parseFloat(this.utils.fromWei(amountConverterSpent,'ether').toString()),
+                    rewards : parseFloat(this.utils.fromWei(rewards,'ether').toString()),
+                    tokensBought: parseFloat(this.utils.fromWei(unitsConverterBought, 'ether').toString()),
+                    isConverter: isConverter,
+                    isReferrer: isReferrer,
+                    isJoined: isJoined,
+                    username: this.base.web3.toUtf8(username),
+                    fullName: this.base.web3.toUtf8(fullname),
+                    email: this.base.web3.toUtf8(email)
+                };
+
+                console.log(obj);
+                resolve(obj);
             } catch (e) {
                 reject(e);
             }
