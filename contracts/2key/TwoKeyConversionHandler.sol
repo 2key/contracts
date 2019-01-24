@@ -23,7 +23,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
     uint numberOfConversions = 0;
     Conversion[] public conversions;
     mapping(address => uint[]) converterToHisConversions;
-
+    mapping(uint => uint) conversionIdToTimeCreated;
     event ConversionCreated(uint conversionId);
 
     //State to all converters in that state
@@ -167,7 +167,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
 
         conversions.push(c);
         converterToHisConversions[_converterAddress].push(numberOfConversions);
-
+        conversionIdToTimeCreated[numberOfConversions] = block.timestamp;
         emit ConversionCreated(numberOfConversions);
         numberOfConversions++;
 
@@ -436,6 +436,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
      */
     function converterCancelConversion(uint _conversionId) external {
         Conversion memory conversion = conversions[_conversionId];
+        require(conversionIdToTimeCreated[_conversionId] + 7*(1 days) < block.timestamp);
         require(msg.sender == conversion.converter);
         require(conversion.state == ConversionState.PENDING_APPROVAL);
 
