@@ -959,6 +959,10 @@ describe('TwoKeyProtocol', () => {
         await twoKeyProtocol.Utils.getTransactionReceiptMined(hash);
     }).timeout(30000);
 
+    it('==> should get address statistics', async() => {
+        const hexedValues = await twoKeyProtocol.AcquisitionCampaign.getAddressStatistic(campaignAddress, from);
+        console.log('Hexed values are: ' + hexedValues);
+    }).timeout(30000);
     it('==> should add acquisition campaign to be eligible to buy tokens from Upgradable exchange', async() => {
         const txHash: string = await twoKeyProtocol.UpgradableExchange.addContractToBeEligibleToGetTokensFromExchange(campaignAddress,from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);

@@ -1563,4 +1563,33 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
             }
         })
     }
+
+    /**
+     * Method to get statistics for the address
+     * @param campaign
+     * @param {string} address
+     * @returns {Promise<IAddressStats>}
+     */
+    public getAddressStatistic(campaign: any, address: string) : Promise<any>{
+        return new Promise<any>(async(resolve,reject) => {
+            try {
+                const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
+                let rewards, tokensBought, isConverter, isReferrer, isContractor;
+
+                let hexedValues = await promisify(campaignInstance.getAddressStatistic,[address]);
+
+                // let obj : IAddressStats = {
+                //     rewards : parseFloat(this.utils.fromWei(rewards,'ether').toString()),
+                //     tokensBought: parseFloat(this.utils.fromWei(tokensBought, 'ether').toString()),
+                //     isConverter: isConverter,
+                //     isReferrer: isReferrer,
+                //     isContractor : isContractor
+                // };
+                resolve(hexedValues);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
 }
