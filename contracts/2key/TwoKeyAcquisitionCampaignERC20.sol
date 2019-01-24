@@ -33,7 +33,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     uint256 contractorBalance;
     uint256 contractorTotalProceeds;
 
-    mapping(address => uint256) balancesConvertersETH; // Amount converter put to the contract in Ether
+    mapping(address => uint256) amountConverterSpentEthWEI; // Amount converter put to the contract in Ether
     mapping(address => uint256) internal unitsConverterBought; // Number of units (ERC20 tokens) bought
 
     address assetContractERC20; // Asset contract is address of ERC20 inventory
@@ -262,7 +262,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         distributeArcsBasedOnSignature(signature);
         createConversion(msg.value, msg.sender);
         ITwoKeyConversionHandler(conversionHandler).setAnonymous(msg.sender, _isAnonymous);
-        balancesConvertersETH[msg.sender] += msg.value;
+        amountConverterSpentEthWEI[msg.sender] += msg.value;
         twoKeyEventSource.converted(address(this),msg.sender,msg.value);
     }
 
@@ -277,7 +277,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         require(received_from[_converterPlasma] != address(0));
         createConversion(msg.value, msg.sender);
         ITwoKeyConversionHandler(conversionHandler).setAnonymous(msg.sender, _isAnonymous);
-        balancesConvertersETH[msg.sender] += msg.value;
+        amountConverterSpentEthWEI[msg.sender] += msg.value;
         twoKeyEventSource.converted(address(this),msg.sender,msg.value);
     }
 
@@ -441,7 +441,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @return amount of ether sent to contract from the specified address
      */
     function getAmountAddressSent(address _from) public view returns (uint) {
-        return balancesConvertersETH[_from];
+        return amountConverterSpentEthWEI[_from];
     }
 
     /**
@@ -491,9 +491,9 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @notice Function to check if the msg.sender has already joined
      * @return true/false depending of joined status
      */
-    function getAddressJoinedStatus() public view returns (bool) {
-        address plasma = twoKeyEventSource.plasmaOf(msg.sender);
-        if(plasma == address(contractor) || msg.sender == address(moderator) || received_from[plasma] != address(0)
+    function getAddressJoinedStatus(address _address) public view returns (bool) {
+        address plasma = twoKeyEventSource.plasmaOf(_address);
+        if(plasma == address(contractor) || _address == address(moderator) || received_from[plasma] != address(0)
             || balanceOf(plasma) > 0) {
             return true;
         }
@@ -534,9 +534,9 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     }
 
     //{ rewards: number,  tokens_bought: number, isConverter: bool, isReferrer: bool, isContractor: bool, isModerator:bool } right??
-    function getAddressStatistic(address _address) public view returns (uint,uint,bool,bool,bool) {
+    function getAddressStatistic(address _address) public view returns (bytes) {
         if(_address == contractor) {
-            return (0, 0, false, false, true);
+            abi.encodePacked(0, 0, 0, false, false);
         } else {
             bool isConverter;
             bool isReferrer;
@@ -546,7 +546,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
             if(referrerPlasma2BalancesEthWEI[twoKeyEventSource.plasmaOf(_address)] > 0) {
                 isReferrer = true;
             }
-            return (referrerPlasma2BalancesEthWEI[twoKeyEventSource.plasmaOf(_address)], unitsConverterBought[_address], isConverter, isReferrer, false);
+            return abi.encodePacked(amountConverterSpentEthWEI[_address],referrerPlasma2BalancesEthWEI[twoKeyEventSource.plasmaOf(_address)], unitsConverterBought[_address], isConverter, isReferrer);
         }
     }
 

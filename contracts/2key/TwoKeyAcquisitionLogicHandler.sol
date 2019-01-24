@@ -2,7 +2,8 @@ pragma solidity ^0.4.24;
 import "../interfaces/ITwoKeyExchangeRateContract.sol";
 import "../interfaces/IERC20.sol";
 import "../openzeppelin-solidity/contracts/math/SafeMath.sol";
-
+import "../interfaces/ITwoKeyAcquisitionCampaignERC20.sol";
+import "../interfaces/ITwoKeyReg.sol";
 
 /**
  * @author Nikola Madjarevic
@@ -184,6 +185,20 @@ contract TwoKeyAcquisitionLogicHandler {
             unit_decimals,
             pricePerUnitInETHWeiOrUSD,
             maxConverterBonusPercent);
+    }
+
+    /**
+     * @notice Function to get suepr statistics
+     */
+    function getSuperStatistics(address _user) public view returns (bytes32, bytes32, bytes32, bool, bytes) {
+        bytes32 username;
+        bytes32 fullName;
+        bytes32 email;
+
+        (username,fullName,email) = ITwoKeyReg(twoKeyRegistry).getUserData(_user);
+        bool isJoined = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getAddressJoinedStatus(_user);
+        bytes memory stats = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getAddressStatistic(_user);
+        return (username, fullName, email, isJoined, stats);
     }
 
 }

@@ -12,5 +12,6 @@ contract ITwoKeyAcquisitionCampaignERC20 {
     function updateModeratorBalanceETHWei(uint _value) public;
     function updateReservedAmountOfTokensIfConversionRejectedOrExecuted(uint value) public;
     function refundConverterAndRemoveUnits(address _converter, uint amountOfEther, uint amountOfUnits) external;
-    function buyTokensFromUpgradableExchange(uint amountOfMoney, address receiver) public;
+    function getAddressJoinedStatus(address _address) public view returns (bool);
+    function getAddressStatistic(address _address) public view returns (bytes);
 }

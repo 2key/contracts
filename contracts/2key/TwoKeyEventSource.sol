@@ -303,7 +303,7 @@ contract TwoKeyEventSource is Upgradeable, TwoKeyTypes {
      * @param _maintainer is the address we're checking this for
      */
     function isAddressMaintainer(address _maintainer) public view returns (bool) {
-        bool isMaintainer = ITwoKeyReg(twoKeyRegistry).checkIfTwoKeyMaintainerExists(_maintainer);
-        return isMaintainer;
+        bool _isMaintainer = ITwoKeyReg(twoKeyRegistry).checkIfTwoKeyMaintainerExists(_maintainer);
+        return _isMaintainer;
     }
 }

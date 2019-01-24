@@ -896,7 +896,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-                resolve(await promisify(campaignInstance.getAddressJoinedStatus, [{from}]));
+                resolve(await promisify(campaignInstance.getAddressJoinedStatus, [from, {from}]));
             } catch (e) {
                 reject(e);
             }
