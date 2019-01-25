@@ -608,7 +608,6 @@ describe('TwoKeyProtocol', () => {
         expect(availableAmountOfTokens).to.be.equal(1234);
     }).timeout(30000);
 
-
     it('should buy some tokens', async () => {
         console.log('4) buy from test4 REFLINK', links.gmail);
         txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD, 'ether'), links.gmail, from);
@@ -627,7 +626,6 @@ describe('TwoKeyProtocol', () => {
         expect(availableAmountOfTokens).to.be.lte(1234 - totalTokens);
     }).timeout(30000);
 
-
     it('should join as test4', async () => {
         // twoKeyProtocol.unsubscribe2KeyEvents();
         // const hash = await twoKeyProtocol.AcquisitionCampaign.joinAndSetPublicLinkWithCut(campaignAddress, from, refLink, {cut: 33});
@@ -640,8 +638,6 @@ describe('TwoKeyProtocol', () => {
         console.log('3) test4 Cutted REFLINK', links.gmail);
         expect(hash).to.be.a('string');
     }).timeout(300000);
-
-
 
     it('should print amount of tokens that user want to buy', async () => {
         const tokens = await twoKeyProtocol.AcquisitionCampaign.getEstimatedTokenAmount(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD, 'ether'));
@@ -668,7 +664,6 @@ describe('TwoKeyProtocol', () => {
 
         expect(maxReward).to.be.gte(5.025);
     }).timeout(30000);
-
 
     it('should joinOffchain as Renata', async () => {
         const hash = await twoKeyProtocol.AcquisitionCampaign.join(campaignAddress, from, {
@@ -770,7 +765,6 @@ describe('TwoKeyProtocol', () => {
         await tryToRegisterUser('Test', from);
     }).timeout(30000);
 
-
     it('should transfer arcs from new user to test', async () => {
         const {web3, address} = web3switcher.aydnep2();
         from = address;
@@ -811,7 +805,6 @@ describe('TwoKeyProtocol', () => {
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(30000);
 
-
     it('should return all pending converters', async () => {
         console.log("Test where we'll fetch all pending converters");
         const addresses = await twoKeyProtocol.AcquisitionCampaign.getAllPendingConverters(campaignAddress, from);
@@ -834,7 +827,6 @@ describe('TwoKeyProtocol', () => {
         console.log("Addresses: " + addresses);
     }).timeout(30000);
 
-
     it('should approve converter', async () => {
         console.log('Test where contractor / moderator can approve converter to execute lockup');
         const {web3, address} = web3switcher.aydnep();
@@ -851,9 +843,10 @@ describe('TwoKeyProtocol', () => {
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         txHash = await twoKeyProtocol.AcquisitionCampaign.approveConverter(campaignAddress,env.GMAIL2_ADDRESS, from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        /*
         txHash = await twoKeyProtocol.AcquisitionCampaign.approveConverter(campaignAddress,env.RENATA_ADDRESS, from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-
+        */
         const allApproved = await twoKeyProtocol.AcquisitionCampaign.getApprovedConverters(campaignAddress, from);
         console.log('Approved addresses: ', allApproved);
 
@@ -883,18 +876,21 @@ describe('TwoKeyProtocol', () => {
         expect(allPendingAfterRejected.length).to.be.equal(1);
     }).timeout(30000);
 
+    /*
     it('should be executed conversion by contractor' ,async() => {
         let conversionIdsForRenata = await twoKeyProtocol.AcquisitionCampaign.getConverterConversionIds(campaignAddress, env.RENATA_ADDRESS, from);
         console.log('Conversion ids for Renata' + conversionIdsForRenata);
         const txHash = await twoKeyProtocol.AcquisitionCampaign.executeConversion(campaignAddress, conversionIdsForRenata[0], from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(30000);
+    */
 
     it('should be executed conversion by contractor' ,async() => {
         let conversionIdsForGmail2 = await twoKeyProtocol.AcquisitionCampaign.getConverterConversionIds(campaignAddress, env.GMAIL2_ADDRESS, from);
-        console.log('Conversion ids for Gmail2' + conversionIdsForGmail2);
+        console.log('Conversion ids for Gmail2:', conversionIdsForGmail2);
         const txHash = await twoKeyProtocol.AcquisitionCampaign.executeConversion(campaignAddress, conversionIdsForGmail2[0], from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+    }).timeout(30000);
 
     it('should print campaigns where user converter', async() => {
         const {web3, address} = web3switcher.test4();
@@ -931,7 +927,6 @@ describe('TwoKeyProtocol', () => {
         console.log(summary);
     }).timeout(30000);
 
-
     it('should return addresses of lockup contracts for converter', async () => {
         const {web3, address} = web3switcher.aydnep();
         from = address;
@@ -947,7 +942,6 @@ describe('TwoKeyProtocol', () => {
         console.log('Lockup contracts addresses : ' + addresses);
         expect(addresses.length).to.be.equal(1);
     }).timeout(30000);
-    // it('should print after all tests', printBalances).timeout(15000);
 
     it('should print balances', printBalances).timeout(15000);
 
@@ -1014,7 +1008,6 @@ describe('TwoKeyProtocol', () => {
         }
     }).timeout(30000);
 
-
     it('should print balances of ERC20 on lockupContracts', async () => {
         const {web3, address} = web3switcher.aydnep();
         from = address;
@@ -1034,7 +1027,6 @@ describe('TwoKeyProtocol', () => {
             console.log("Address: " + addressCurrent + " ----- balance: " + balance);
         }
     }).timeout(30000);
-
 
     it('should get all whitelisted addresses', async() => {
         const addresses = await twoKeyProtocol.Congress.getAllMembersForCongress(from);
@@ -1064,5 +1056,4 @@ describe('TwoKeyProtocol', () => {
         let stats = await twoKeyProtocol.AcquisitionCampaign.getAddressStatistic(campaignAddress,env.RENATA_ADDRESS);
         console.log(stats);
     }).timeout(30000);
-    it('should print balances', printBalances).timeout(15000);
 });
