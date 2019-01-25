@@ -14,7 +14,7 @@ const mainNetId = env.MAIN_NET_ID;
 const syncTwoKeyNetId = env.SYNC_NET_ID;
 const destinationAddress = env.AYDNEP_ADDRESS;
 const delay = env.TEST_DELAY;
-// const destinationAddress = env.DESTINATION_ADDRESS || '0xd9ce6800b997a0f26faffc0d74405c841dfc64b7'
+// const destinationAddress = env.DESTINATION_ADDRESS  || '0xd9ce6800b997a0f26faffc0d74405c841dfc64b7'
 console.log(mainNetId);
 const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 const maxConverterBonusPercent = 23;
@@ -473,7 +473,7 @@ describe('TwoKeyProtocol', () => {
         console.log(`Address ${from} ${isAddressRegistered ? 'REGISTERED' : 'NOT REGISTERED'} in TwoKeyReg`);
         expect(isAddressRegistered).to.true;
     }).timeout(30000);
-    
+
 
     it('should create a new campaign Acquisition Contract', async () => {
         campaignData = {
@@ -769,8 +769,8 @@ describe('TwoKeyProtocol', () => {
         });
         await tryToRegisterUser('Test', from);
     }).timeout(30000);
-    
-    
+
+
     it('should transfer arcs from new user to test', async () => {
         const {web3, address} = web3switcher.aydnep2();
         from = address;
@@ -847,15 +847,20 @@ describe('TwoKeyProtocol', () => {
             },
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
         });
-        txHash = await twoKeyProtocol.AcquisitionCampaign.approveConverter(campaignAddress, env.TEST4_ADDRESS, from);
+        let txHash = await twoKeyProtocol.AcquisitionCampaign.approveConverter(campaignAddress, env.TEST4_ADDRESS, from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        txHash = await twoKeyProtocol.AcquisitionCampaign.approveConverter(campaignAddress,env.GMAIL2_ADDRESS, from);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        txHash = await twoKeyProtocol.AcquisitionCampaign.approveConverter(campaignAddress,env.RENATA_ADDRESS, from);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+
         const allApproved = await twoKeyProtocol.AcquisitionCampaign.getApprovedConverters(campaignAddress, from);
         console.log('Approved addresses: ', allApproved);
 
         expect(allApproved[0]).to.be.equal(env.TEST4_ADDRESS);
         const allPendingAfterApproved = await twoKeyProtocol.AcquisitionCampaign.getAllPendingConverters(campaignAddress, from);
         console.log('All pending after approval: ' + allPendingAfterApproved);
-        expect(allPendingAfterApproved.length).to.be.equal(3);
+        expect(allPendingAfterApproved.length).to.be.equal(2);
     }).timeout(30000);
 
     it('should get converter conversion ids', async() => {
@@ -875,9 +880,21 @@ describe('TwoKeyProtocol', () => {
         const allPendingAfterRejected = await twoKeyProtocol.AcquisitionCampaign.getAllPendingConverters(campaignAddress, from);
         console.log('All pending after rejection: ', allPendingAfterRejected);
         expect(allRejected[0]).to.be.equal(env.TEST_ADDRESS);
-        expect(allPendingAfterRejected.length).to.be.equal(2);
-
+        expect(allPendingAfterRejected.length).to.be.equal(1);
     }).timeout(30000);
+
+    it('should be executed conversion by contractor' ,async() => {
+        let conversionIdsForRenata = await twoKeyProtocol.AcquisitionCampaign.getConverterConversionIds(campaignAddress, env.RENATA_ADDRESS, from);
+        console.log('Conversion ids for Renata' + conversionIdsForRenata);
+        const txHash = await twoKeyProtocol.AcquisitionCampaign.executeConversion(campaignAddress, conversionIdsForRenata[0], from);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+    }).timeout(30000);
+
+    it('should be executed conversion by contractor' ,async() => {
+        let conversionIdsForGmail2 = await twoKeyProtocol.AcquisitionCampaign.getConverterConversionIds(campaignAddress, env.GMAIL2_ADDRESS, from);
+        console.log('Conversion ids for Gmail2' + conversionIdsForGmail2);
+        const txHash = await twoKeyProtocol.AcquisitionCampaign.executeConversion(campaignAddress, conversionIdsForGmail2[0], from);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
 
     it('should print campaigns where user converter', async() => {
         const {web3, address} = web3switcher.test4();
@@ -893,7 +910,6 @@ describe('TwoKeyProtocol', () => {
         // const campaigns = await twoKeyProtocol.Lockup.getCampaignsWhereConverter(from);
         // console.log(campaigns);
     });
-
 
     it('should execute conversion and create lockup contract', async () => {
         const {web3, address} = web3switcher.test4();
@@ -916,7 +932,7 @@ describe('TwoKeyProtocol', () => {
     }).timeout(30000);
 
 
-    it('should return addresses of lockup contracts for contractor', async () => {
+    it('should return addresses of lockup contracts for converter', async () => {
         const {web3, address} = web3switcher.aydnep();
         from = address;
         twoKeyProtocol.setWeb3({
@@ -1044,5 +1060,9 @@ describe('TwoKeyProtocol', () => {
         console.log('Moderator total earnings: '+ totalEarnings);
     }).timeout(30000);
 
+    it('should get statistics for the address from the contract', async() => {
+        let stats = await twoKeyProtocol.AcquisitionCampaign.getAddressStatistic(campaignAddress,env.RENATA_ADDRESS);
+        console.log(stats);
+    }).timeout(30000);
     it('should print balances', printBalances).timeout(15000);
 });

@@ -27,6 +27,25 @@ git commit -m <"Commit message">
 yarn run deploy public.test.k8s,private.test.k8s --reset
 ```
 
+- regular deploy
+```
+bash ./redeploy-test.bash
+git add .
+git commit -m <"Commit message">
+yarn run deploy public.test.k8s,private.test.k8s-hdwallet
+```
+
+- deploying with only public network
+```bash
+yarn run deploy --migrate dev-local --reset
+yarn run test:one 2key-protocol/test/sendETH.spec.ts
+yarn run test:one 2key-protocol/test/updateTwoKeyReg.dev.spec.ts
+yarn run test
+git add .
+git commit -m <"Commit message">
+yarn run deploy public.test.k8s
+```
+
 - If the npm publish fails:
 ```
 cd 2key-protocol/dist

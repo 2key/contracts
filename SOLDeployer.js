@@ -227,6 +227,19 @@ const runProcess = (app, args) => new Promise((resolve, reject) => {
   });
 });
 
+const runMigration3 = (network) => new Promise(async(resolve, reject) => {
+  try {
+    if (!process.env.SKIP_3MIGRATION) {
+      await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '3', '--network', network]);
+      resolve(true);
+    } else {
+      resolve(true);
+    }
+  } catch (e) {
+    reject(e);
+  }
+})
+
 async function deploy() {
   try {
     deployment = true;
@@ -288,6 +301,7 @@ async function deploy() {
     for (let i = 0; i < l; i += 1) {
       /* eslint-disable no-await-in-loop */
       await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--network', networks[i]].concat(process.argv.slice(3)));
+      await runMigration3(networks[i]);
       /* eslint-enable no-await-in-loop */
     }
     console.log(commit);
@@ -450,6 +464,15 @@ async function main() {
         process.exit(1);
       }
       break;
+    case '--migration3': {
+      try {
+        const networks = process.argv[3].split(',');
+        runMigration3(networks[0]);
+      } catch (e) {
+        console.log(e);
+      }
+      break;
+    }
     case '--test':
       test();
       break;

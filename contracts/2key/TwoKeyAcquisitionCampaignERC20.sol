@@ -564,6 +564,24 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     }
 
 
+    //{ rewards: number,  tokens_bought: number, isConverter: bool, isReferrer: bool, isContractor: bool, isModerator:bool } right??
+    function getAddressStatistic(address _address) public view returns (uint,uint,bool,bool,bool) {
+        //contractor,moderator,converter,referrer
+        if(_address == contractor) {
+            return (0, 0, false, false, true);
+        } else {
+            bool isConverter;
+            bool isReferrer;
+            if(unitsConverterBought[_address] > 0) {
+                isConverter = true;
+            }
+            if(referrerBalancesETHWei[_address] > 0) {
+                isReferrer = true;
+            }
+            return (referrerBalancesETHWei[_address], unitsConverterBought[_address], isConverter, isReferrer, false);
+        }
+    }
+
     /**
      * @notice Function where contractor can withdraw his funds
      * @dev onlyContractor can call this method

@@ -125,7 +125,7 @@ module.exports = {
     },
 
     'private.test.k8s-hdwallet': {
-      // 0x0E0D3E393B47058c3A85e33EFE542B7fBc51BB07
+      // 0x0E0D3E393B47058c3A85e33EFE542B7fBc51BB07oru
       // http://ext.geth.private.test.k8s.2key.net:8545/
       // provider: () => new PrivateKeyProvider('da16b3f97e1f39ac93788d925e17286f20dc737cc208d57ca4d49b128b69eb85', 'http://ext.geth.private.test.k8s.2key.net:8545'),
       provider: () => new HDWalletProvider(mnemonic, 'https://rpc.private.test.k8s.2key.net'),
