@@ -2,8 +2,9 @@ pragma solidity ^0.4.24;
 
 import './TwoKeyTypes.sol';
 import "./GetCode.sol";
-import "../interfaces/ITwoKeyReg.sol";
 import "./Upgradeable.sol";
+import "../interfaces/ITwoKeyReg.sol";
+import "../interfaces/ITwoKeyAdmin.sol";
 
 contract TwoKeyEventSource is Upgradeable, TwoKeyTypes {
 
@@ -305,5 +306,13 @@ contract TwoKeyEventSource is Upgradeable, TwoKeyTypes {
     function isAddressMaintainer(address _maintainer) public view returns (bool) {
         bool _isMaintainer = ITwoKeyReg(twoKeyRegistry).checkIfTwoKeyMaintainerExists(_maintainer);
         return _isMaintainer;
+    }
+
+    /**
+     * @notice In default TwoKeyAdmin will be moderator and his fee percentage per conversion is predefined
+     */
+    function getTwoKeyDefaultIntegratorFeeFromAdmin() public view returns (uint) {
+        uint integratorFeePercentage = ITwoKeyAdmin(twoKeyAdmin).getDefaultIntegratorFeePercent();
+        return integratorFeePercentage;
     }
 }

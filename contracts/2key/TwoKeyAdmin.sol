@@ -5,7 +5,7 @@ import './TwoKeyUpgradableExchange.sol';
 import "./TwoKeyEventSource.sol";
 import "./TwoKeyRegistry.sol";
 import "./Upgradeable.sol";
-import "../interfaces/IAdminContract.sol";
+import "../interfaces/ITwoKeyAdmin.sol";
 import "../interfaces/IERC20.sol";
 import "../interfaces/IMaintainingPattern.sol";
 
