@@ -71,7 +71,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         moderator = _moderator;
         assetContractERC20 = _assetContractERC20;
         expiryConversionInHours = values[0];
-        moderatorFeePercentage = values[1];
+        moderatorFeePercentage = values[1]; // TODO: Take from Admin contract
         maxReferralRewardPercent = values[2];
         ITwoKeyConversionHandler(conversionHandler).setTwoKeyAcquisitionCampaignERC20(address(this), _moderator, contractor, _assetContractERC20, _twoKeyEventSource);
         ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).setTwoKeyAcquisitionCampaignContract(address(this));
@@ -581,7 +581,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      */
     function withdrawModeratorOrReferrer(address _address) external {
         //Creating additional variable to prevent reentrancy attack
-        require(msg.sender == _address || twoKeyEventSource.isAddressMaintainer(_address));
+        require(msg.sender == _address || twoKeyEventSource.isAddressMaintainer(msg.sender));
         uint balance;
         if(_address == moderator) {
             balance = moderatorBalanceETHWei;
