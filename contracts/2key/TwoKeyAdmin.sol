@@ -20,6 +20,7 @@ contract TwoKeyAdmin is Upgradeable {
 	address public twoKeyCongress;
 	address public newTwoKeyAdminAddress;
 
+	uint twoKeyIntegratorDefaultFeePercent = 2;
     bool private initialized = false;
 
     /// @notice Modifier will revert if calling address is not a member of electorateAdmins
@@ -183,5 +184,13 @@ contract TwoKeyAdmin is Upgradeable {
 	function deleteMaintainersFromSelectedSingletone(address destinationContract, address [] maintainers) external onlyTwoKeyCongress {
 		IMaintainingPattern(destinationContract).removeMaintainers(maintainers);
 	}
-    
+
+	function changeDefaultIntegratorFeePercent(uint newFee) public onlyTwoKeyCongress {
+		twoKeyIntegratorDefaultFeePercent = newFee;
+	}
+
+	function getDefaultIntegratorFeePercent() public view returns (uint) {
+		return twoKeyIntegratorDefaultFeePercent;
+	}
+
 } 
