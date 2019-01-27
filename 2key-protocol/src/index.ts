@@ -178,6 +178,7 @@ export class TwoKeyProtocol {
             ipfs: this.ipfs,
             networks: this.networks,
             contracts: this.contracts,
+            twoKeyAdmin: this.twoKeyAdmin,
             twoKeyEventSource: this.twoKeyEventSource,
             twoKeyExchangeContract: this.twoKeyExchangeContract,
             twoKeyUpgradableExchange: this.twoKeyUpgradableExchange,
