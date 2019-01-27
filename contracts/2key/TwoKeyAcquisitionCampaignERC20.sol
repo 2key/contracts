@@ -33,9 +33,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     uint256 contractorBalance;
     uint256 contractorTotalProceeds;
 
-    //TODO: Put internal back just leave for test
-    mapping(address => uint256) public amountConverterSpentEthWEI; // Amount converter put to the contract in Ether
-    mapping(address => uint256) public unitsConverterBought; // Number of units (ERC20 tokens) bought
+    mapping(address => uint256) internal amountConverterSpentEthWEI; // Amount converter put to the contract in Ether
+    mapping(address => uint256) internal unitsConverterBought; // Number of units (ERC20 tokens) bought
 
     address assetContractERC20; // Asset contract is address of ERC20 inventory
 
@@ -539,10 +538,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
 
     //{ rewards: number,  tokens_bought: number, isConverter: bool, isReferrer: bool, isContractor: bool, isModerator:bool } right??
     function getAddressStatistic(address _address, bool plasma) public view returns (bytes) {
-        address eth_address;
-        address plasma_address;
-        eth_address = _address;
-        plasma_address = _address;
+        address eth_address = _address;
+        address plasma_address = _address;
         if (plasma) {
             eth_address = twoKeyEventSource.ethereumOf(_address);
         } else {
@@ -574,6 +571,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         /**
          * In general transfer by itself prevents against reentrancy attack since it will throw if more than 2300 gas
          * but however it's not bad to practice this pattern of firstly reducing balance and then doing transfer
+         * Also if the contract is contractor, then it can revert every transfer
          */
         contractor.transfer(balance);
     }
