@@ -163,18 +163,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         return influencers;
     }
 
-
-
-    /**
-     * @notice Private function which will be executed at the withdraw time to buy 2key tokens from upgradable exchange contract
-     * @param amountOfMoney is the ether balance person has on the contract
-     * @param receiver is the address of the person who withdraws money
-     */
-    function buyTokensFromUpgradableExchange(uint amountOfMoney, address receiver) internal {
-        IUpgradableExchange(upgradableExchange).buyTokens.value(amountOfMoney)(receiver);
-    }
-
-
     /**
      * @notice Private function to set public link key to plasma address
      * @param me is the ethereum address
@@ -243,8 +231,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @param _fiatAmount is the amount in fiat he sent to the seller.
      * @dev Required is that the fiat is same currency as it's campaign.
      */
-    function conversionOffline(address _converterAddress, uint _fiatAmount) public {
-
+    function convertOffline(address _converterAddress, uint _fiatAmount) public {
         /**
          * @notice Function where investor can state how much money he put to the contractorBalance
          * since we're accepting only fiat, we can do literal calculation of how many tokens he gets
@@ -587,13 +574,13 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         if(_address == moderator) {
             balance = moderatorBalanceETHWei;
             moderatorBalanceETHWei = 0;
-            buyTokensFromUpgradableExchange(balance,_address);
+            IUpgradableExchange(upgradableExchange).buyTokens.value(balance,_address);
         } else {
             address _referrer = twoKeyEventSource.plasmaOf(_address);
             if(referrerPlasma2BalancesEthWEI[_referrer] != 0) {
                 balance = referrerPlasma2BalancesEthWEI[_referrer];
                 referrerPlasma2BalancesEthWEI[_referrer] = 0;
-                buyTokensFromUpgradableExchange(balance, _address);
+                IUpgradableExchange(upgradableExchange).buyTokens.value(balance,_address);
             } else {
                 revert();
             }
