@@ -174,7 +174,6 @@ export default class Helpers implements ITwoKeyHelpers {
                 if (err) {
                     reject(err);
                 } else {
-                    console.log('NONCE', res, from);
                     resolve(res);
                 }
             });
