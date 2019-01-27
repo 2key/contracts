@@ -163,6 +163,18 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         return influencers;
     }
 
+
+
+    /**
+     * @notice Private function which will be executed at the withdraw time to buy 2key tokens from upgradable exchange contract
+     * @param amountOfMoney is the ether balance person has on the contract
+     * @param receiver is the address of the person who withdraws money
+     */
+    function buyTokensFromUpgradableExchange(uint amountOfMoney, address receiver) internal {
+        IUpgradableExchange(upgradableExchange).buyTokens.value(amountOfMoney)(receiver);
+    }
+
+
     /**
      * @notice Private function to set public link key to plasma address
      * @param me is the ethereum address
@@ -574,13 +586,13 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         if(_address == moderator) {
             balance = moderatorBalanceETHWei;
             moderatorBalanceETHWei = 0;
-            IUpgradableExchange(upgradableExchange).buyTokens.value(balance,_address);
+            buyTokensFromUpgradableExchange(balance,_address);
         } else {
             address _referrer = twoKeyEventSource.plasmaOf(_address);
             if(referrerPlasma2BalancesEthWEI[_referrer] != 0) {
                 balance = referrerPlasma2BalancesEthWEI[_referrer];
                 referrerPlasma2BalancesEthWEI[_referrer] = 0;
-                IUpgradableExchange(upgradableExchange).buyTokens.value(balance,_address);
+                buyTokensFromUpgradableExchange(balance, _address);
             } else {
                 revert();
             }
