@@ -25,6 +25,10 @@ function toUint8Array(buffer: Buffer): Uint8Array {
 export default class Helpers implements ITwoKeyHelpers {
     readonly base: ITwoKeyBase;
     gasPrice: number;
+    private AcquisitionCampaign: any;
+    private AcquisitionConversionHandler: any;
+    private AcquisitionLogicHandler: any;
+
 
     constructor(base: ITwoKeyBase) {
         this.base = base;
@@ -222,9 +226,41 @@ export default class Helpers implements ITwoKeyHelpers {
     }
 
     async _getAcquisitionCampaignInstance(campaign: any): Promise<any> {
-        return campaign.address
-            ? campaign
-            : await this._createAndValidate('TwoKeyAcquisitionCampaignERC20', campaign);
+        const address = campaign.address || campaign;
+        this.base._log('Requesting TwoKeyAcquisitionCampaignERC20 at', address);
+        if (this.AcquisitionCampaign && this.AcquisitionCampaign.address === address) {
+            this.base._log('Return from cache TwoKeyAcquisitionCampaignERC20 at', this.AcquisitionCampaign.address);
+            return this.AcquisitionCampaign;
+        }
+        this.base._log('Instantiate new TwoKeyAcquisitionCampaignERC20 at', address, this.AcquisitionCampaign);
+        if (campaign.address) {
+            this.AcquisitionCampaign = campaign;
+        } else {
+            this.AcquisitionCampaign = await this._createAndValidate('TwoKeyAcquisitionCampaignERC20', campaign);
+        }
+        const conversionHandler = await promisify(this.AcquisitionCampaign.conversionHandler, []);
+        this.AcquisitionConversionHandler = this._createAndValidate('TwoKeyConversionHandler', conversionHandler);
+        const twoKeyAcquisitionLogicHandler = await promisify(this.AcquisitionCampaign.twoKeyAcquisitionLogicHandler,[]);
+        this.AcquisitionLogicHandler = this._createAndValidate('TwoKeyAcquisitionLogicHandler', twoKeyAcquisitionLogicHandler);
+        return this.AcquisitionCampaign;
+    }
+
+    async _getAcquisitionConversionHandlerInstance(campaign: any): Promise<any> {
+        const address = campaign.address || campaign;
+        if (this.AcquisitionCampaign && this.AcquisitionCampaign.address === address) {
+            return this.AcquisitionConversionHandler;
+        }
+        await this._getAcquisitionCampaignInstance(campaign);
+        return this.AcquisitionConversionHandler;
+    }
+
+    async _getAcquisitionLogicHandlerInstance(campaign: any): Promise<any> {
+        const address = campaign.address || campaign;
+        if (this.AcquisitionCampaign && this.AcquisitionCampaign.address === address) {
+            return this.AcquisitionLogicHandler;
+        }
+        await this._getAcquisitionCampaignInstance(campaign);
+        return this.AcquisitionLogicHandler;
     }
 
     async _getAirdropCampaignInstance(campaign: any) : Promise<any> {
