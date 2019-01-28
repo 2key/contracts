@@ -1254,7 +1254,8 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         return new Promise<number>(async (resolve, reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-                const value: number = await promisify(campaignInstance.getAmountAddressSent, [from]);
+                let value: number = await promisify(campaignInstance.getAmountAddressSent, [from]);
+                value = parseFloat(this.utils.fromWei(value, 'ether').toString())
                 resolve(value);
             } catch (e) {
                 reject(e);
@@ -1296,8 +1297,9 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         return new Promise<number>(async (resolve, reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-                const balanceinWei = await promisify(campaignInstance.getContractorBalance, [{from}]);
-                resolve(balanceinWei);
+                let balance = await promisify(campaignInstance.getContractorBalance, [{from}]);
+                balance = parseFloat(this.utils.fromWei(balance, 'ether').toString())
+                resolve(balance);
             } catch (e) {
                 reject(e);
             }
@@ -1316,6 +1318,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
                 let [moderatorBalance, moderatorTotalEarnings] = await promisify(campaignInstance.getModeratorBalanceAndTotalEarnings, [{from}]);
+                moderatorBalance = parseFloat(this.utils.fromWei(moderatorBalance, 'ether').toString()),
                 resolve(moderatorBalance);
             } catch (e) {
                 reject(e);
@@ -1340,7 +1343,8 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                  */
                 const nonce = await this.helpers._getNonce(from);
                 console.log('Upgradable exchange address: ' + this.base.twoKeyUpgradableExchange.address);
-                const balance = await this.erc20.getERC20Balance(this.base.twoKeyEconomy.address, this.base.twoKeyUpgradableExchange.address);
+                let balance = await this.erc20.getERC20Balance(this.base.twoKeyEconomy.address, this.base.twoKeyUpgradableExchange.address);
+                balance = parseFloat(this.utils.fromWei(balance, 'ether').toString());
                 console.log("Balance of 2keys on upgradable exchange is: " + balance);
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
                 const txHash: string = await promisify(campaignInstance.withdrawModeratorOrReferrer,[from,

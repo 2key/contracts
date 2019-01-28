@@ -965,9 +965,9 @@ describe('TwoKeyProtocol', () => {
         }).balance);
 
         const contractorBalance = await twoKeyProtocol.AcquisitionCampaign.getContractorBalance(campaignAddress,from);
-        console.log('Contractor balance: ' + twoKeyProtocol.Utils.fromWei(contractorBalance));
+        console.log('Contractor balance: ' + contractorBalance);
         const moderatorBalance = await twoKeyProtocol.AcquisitionCampaign.getModeratorBalance(campaignAddress,from);
-        console.log('Moderator balance: ' + twoKeyProtocol.Utils.fromWei(moderatorBalance));
+        console.log('Moderator balance: ' + moderatorBalance);
         const hash = await twoKeyProtocol.AcquisitionCampaign.contractorWithdraw(campaignAddress,from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(hash);
     }).timeout(30000);
