@@ -1406,6 +1406,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
                 let [moderatorBalance,moderatorBalanceTotal] = await promisify(campaignInstance.getModeratorBalanceAndTotalEarnings,[{from}]);
+                moderatorBalanceTotal = parseFloat(this.utils.fromWei(moderatorBalanceTotal, 'ether').toString()),
                 resolve(moderatorBalanceTotal);
             } catch (e) {
                 reject(e);
