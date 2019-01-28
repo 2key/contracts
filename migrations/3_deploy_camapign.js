@@ -46,7 +46,7 @@ module.exports = function deploy(deployer) {
                 TwoKeyConversionHandler.address,
                 '0xb3fa520368f2df7bed4df5185101f303f6c7decc',
                 ERC20TokenMock.address,
-                [12345, 5, 5,1],
+                [12345, 5, 1],
                 json.TwoKeyUpgradableExchange[networkId.toString()].Proxy)
             )
             .then(() => TwoKeyAcquisitionCampaignERC20.deployed())

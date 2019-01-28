@@ -36,7 +36,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
 
     address[] offlineAcquisitionsConverters;
 
-    address[] allLockUpContracts;
+    mapping(uint => address) conversionId2LockupAddress;
 
     address twoKeyEventSource;
     address twoKeyAcquisitionCampaignERC20;
@@ -140,26 +140,37 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
         return state;
     }
 
+    /**
+     * given the total payout, calculates the moderator fee
+     * @param  _conversionAmountETHWei total payout for escrow
+     * @return moderator fee
+     */
+    function calculateModeratorFee(uint256 _conversionAmountETHWei) public view returns (uint256)  {
+        uint256 fee = _conversionAmountETHWei.mul(ITwoKeyEventSource(twoKeyEventSource).getTwoKeyDefaultIntegratorFeeFromAdmin()).div(100);
+        return fee;
+    }
+
     /// @notice Support function to create conversion
     /// @dev This function can only be called from TwoKeyAcquisitionCampaign contract address
     /// @param _contractor is the address of campaign contractor
-    /// @param _contractorProceeds is the amount which goes to contractor
     /// @param _converterAddress is the address of the converter
     /// @param _conversionAmount is the amount for conversion in ETH
     /// @param expiryConversion is the length of conversion
     function supportForCreateConversion(
         address _contractor,
-        uint256 _contractorProceeds,
         address _converterAddress,
         uint256 _conversionAmount,
         uint256 _maxReferralRewardETHWei,
-        uint256 _moderatorFeeETHWei,
         uint256 baseTokensForConverterUnits,
         uint256 bonusTokensForConverterUnits,
         uint256 expiryConversion) public {
         require(msg.sender == twoKeyAcquisitionCampaignERC20 || msg.sender == address(this));
         require(converterToState[_converterAddress] != ConverterState.REJECTED); // If converter is rejected then can't create conversion
         ConversionState state = determineConversionState(_converterAddress);
+
+        uint _moderatorFeeETHWei = calculateModeratorFee(_conversionAmount);
+        uint256 _contractorProceeds = _conversionAmount - _maxReferralRewardETHWei - _moderatorFeeETHWei;
+
         Conversion memory c = Conversion(_contractor, _contractorProceeds, _converterAddress,
             state ,_conversionAmount, _maxReferralRewardETHWei, _moderatorFeeETHWei, baseTokensForConverterUnits,
             bonusTokensForConverterUnits, CampaignType.CPA_FUNGIBLE,
@@ -209,8 +220,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
         TwoKeyLockupContract lockupContract = new TwoKeyLockupContract(bonusTokensVestingStartShiftInDaysFromDistributionDate, bonusTokensVestingMonths, tokenDistributionDate, maxDistributionDateShiftInDays,
             conversion.baseTokenUnits, conversion.bonusTokenUnits, _conversionId, conversion.converter, conversion.contractor, twoKeyAcquisitionCampaignERC20, assetContractERC20, twoKeyEventSource);
 
-        allLockUpContracts.push(address(lockupContract));
-
+        conversionId2LockupAddress[_conversionId] = address(lockupContract);
         uint totalUnits = conversion.baseTokenUnits + conversion.bonusTokenUnits;
         ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).moveFungibleAsset(address(lockupContract), totalUnits);
         ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateReservedAmountOfTokensIfConversionRejectedOrExecuted(totalUnits);
@@ -461,6 +471,15 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
         return (numberOfPending,numberOfApproved,numberOfRejected,raisedFundsEthWei);
     }
 
+    /**
+     * @notice Fuunction where contractro/converter or mdoerator can see the lockup address for conversion
+     * @param _conversionId is the id of conversion requested
+     */
+    function getLockupContractAddress(uint _conversionId) public view returns (address) {
+        Conversion memory c = conversions[_conversionId];
+        require(msg.sender == contractor || msg.sender == moderator || msg.sender == c.converter);
+        return conversionId2LockupAddress[_conversionId];
+    }
 
 
     //

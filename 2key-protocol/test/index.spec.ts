@@ -484,7 +484,6 @@ describe('TwoKeyProtocol', () => {
             pricePerUnitInETHWei: twoKeyProtocol.Utils.toWei(pricePerUnitInETHOrUSD, 'ether'),
             maxReferralRewardPercentWei: maxReferralRewardPercent,
             assetContractERC20: twoKeyEconomy,
-            moderatorFeePercentageWei: moderatorFeePercentage,
             minContributionETHWei: twoKeyProtocol.Utils.toWei(minContributionETHorUSD, 'ether'),
             maxContributionETHWei: twoKeyProtocol.Utils.toWei(maxContributionETHorUSD, 'ether'),
             currency: acquisitionCurrency,

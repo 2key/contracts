@@ -3,11 +3,9 @@ pragma solidity ^0.4.24;
 contract ITwoKeyConversionHandler {
     function supportForCreateConversion(
         address _contractor,
-        uint256 _contractorProceeds,
         address _converterAddress,
         uint256 _conversionAmount,
         uint256 _maxReferralRewardETHWei,
-        uint256 _moderatorFeeETHWei,
         uint256 baseTokensForConverterUnits,
         uint256 bonusTokensForConverterUnits,
         uint256 expiryConversion) external;

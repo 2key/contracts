@@ -31,7 +31,6 @@ export interface IAcquisitionCampaign {
     campaignStartTime: number, // Timestamp
     campaignEndTime: number, // Timestamp
     expiryConversion: number, // Timestamp
-    moderatorFeePercentageWei: number | string | BigNumber,
     maxReferralRewardPercentWei: number | string | BigNumber,
     maxConverterBonusPercentWei: number | string | BigNumber,
     pricePerUnitInETHWei: number | string | BigNumber,

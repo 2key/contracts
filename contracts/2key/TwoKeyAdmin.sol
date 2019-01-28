@@ -20,7 +20,7 @@ contract TwoKeyAdmin is Upgradeable {
 	address public twoKeyCongress;
 	address public newTwoKeyAdminAddress;
 
-	uint twoKeyIntegratorDefaultFeePercent = 2;
+	uint twoKeyIntegratorDefaultFeePercent; // 2% is default value for this
     bool private initialized = false;
 
     /// @notice Modifier will revert if calling address is not a member of electorateAdmins
@@ -52,6 +52,7 @@ contract TwoKeyAdmin is Upgradeable {
         address _eventSource
     ) external {
         require(initialized == false);
+        twoKeyIntegratorDefaultFeePercent = 2;
         twoKeyCongress = _twoKeyCongress;
         twoKeyReg = TwoKeyRegistry(_twoKeyRegistry);
         twoKeyUpgradableExchange = TwoKeyUpgradableExchange(_exchange);

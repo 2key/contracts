@@ -39,7 +39,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     address assetContractERC20; // Asset contract is address of ERC20 inventory
 
     uint256 expiryConversionInHours; // How long converter can be pending before it will be automatically rejected and funds will be returned to convertor (hours)
-    uint256 moderatorFeePercentage; // Fee which moderator gets
+//    uint256 moderatorFeePercentage; // Fee which moderator gets
     uint256 maxReferralRewardPercent; // maxReferralRewardPercent is actually bonus percentage in ETH
     uint reservedAmountOfTokens = 0;
 
@@ -61,7 +61,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         address _twoKeyUpgradableExchangeContract
     ) TwoKeyCampaignARC (
         _twoKeyEventSource,
-        values[3]
+        values[2]
     )
     public {
         twoKeyAcquisitionLogicHandler = _twoKeyAcquisitionLogicHandler;
@@ -71,8 +71,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         moderator = _moderator;
         assetContractERC20 = _assetContractERC20;
         expiryConversionInHours = values[0];
-        moderatorFeePercentage = values[1]; // TODO: Take from Admin contract
-        maxReferralRewardPercent = values[2];
+//        moderatorFeePercentage = twoKeyEventSource.getTwoKeyDefaultIntegratorFeeFromAdmin(); // TODO: Take from Admin contract
+        maxReferralRewardPercent = values[1];
         ITwoKeyConversionHandler(conversionHandler).setTwoKeyAcquisitionCampaignERC20(address(this), _moderator, contractor, _assetContractERC20, _twoKeyEventSource);
         ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).setTwoKeyAcquisitionCampaignContract(address(this));
         twoKeyEventSource.created(address(this), contractor, moderator);
@@ -301,14 +301,11 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         unitsConverterBought[converterAddress] = unitsConverterBought[converterAddress].add(totalTokensForConverterUnits);
 
         uint256 maxReferralRewardETHWei = conversionAmountETHWei.mul(maxReferralRewardPercent).div(100);
-        uint256 moderatorFeeETHWei = calculateModeratorFee(conversionAmountETHWei);
-
-        uint256 contractorProceedsETHWei = conversionAmountETHWei - maxReferralRewardETHWei - moderatorFeeETHWei;
 
         reservedAmountOfTokens = reservedAmountOfTokens + totalTokensForConverterUnits;
 
-        ITwoKeyConversionHandler(conversionHandler).supportForCreateConversion(contractor, contractorProceedsETHWei, converterAddress,
-            conversionAmountETHWei, maxReferralRewardETHWei, moderatorFeeETHWei,
+        ITwoKeyConversionHandler(conversionHandler).supportForCreateConversion(contractor, converterAddress,
+            conversionAmountETHWei, maxReferralRewardETHWei,
             baseTokensForConverterUnits,bonusTokensForConverterUnits,
             expiryConversionInHours);
     }
@@ -412,18 +409,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         reservedAmountOfTokens = reservedAmountOfTokens - value;
     }
 
-    /**
-    * given the total payout, calculates the moderator fee
-    * @param  _conversionAmountETHWei total payout for escrow
-    * @return moderator fee
-    */
-    function calculateModeratorFee(uint256 _conversionAmountETHWei) internal view returns (uint256)  {
-        if (moderatorFeePercentage > 0) {// send the fee to moderator
-            uint256 fee = _conversionAmountETHWei.mul(moderatorFeePercentage).div(100);
-            return fee;
-        }
-        return 0;
-    }
+
 
 
     /**

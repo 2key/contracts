@@ -103,7 +103,6 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     data.moderator || from,
                     data.assetContractERC20,
                     data.expiryConversion,
-                    data.moderatorFeePercentageWei,
                     data.maxReferralRewardPercentWei,
                     data.referrerQuota || 5,
                     `0x${public_address}`,
@@ -204,7 +203,6 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                         data.assetContractERC20,
                         [
                             data.expiryConversion,
-                            data.moderatorFeePercentageWei,
                             data.maxReferralRewardPercentWei,
                             data.referrerQuota || 5
                         ],
