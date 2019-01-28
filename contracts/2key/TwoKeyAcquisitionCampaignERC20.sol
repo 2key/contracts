@@ -541,7 +541,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
             if(referrerPlasma2BalancesEthWEI[plasma_address] > 0) {
                 isReferrer = true;
             }
-            return abi.encodePacked(amountConverterSpentEthWEI[_address],referrerPlasma2BalancesEthWEI[plasma_address], unitsConverterBought[eth_address], isConverter, isReferrer);
+            return abi.encodePacked(amountConverterSpentEthWEI[eth_address],referrerPlasma2BalancesEthWEI[plasma_address], unitsConverterBought[eth_address], isConverter, isReferrer);
         }
     }
 
