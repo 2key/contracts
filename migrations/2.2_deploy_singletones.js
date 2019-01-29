@@ -66,7 +66,7 @@ module.exports = function deploy(deployer) {
 
     ];
     let deployerAddress = '0x18e1d5ca01141E3a0834101574E5A1e94F0F8F6a';
-    let maintainerAddresses = [(deployer.network.startsWith('ropsten') || deployer.network.startsWith('rinkeby') || deployer.network.startsWith('public.test')) ? '0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f' : '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7'];
+    let maintainerAddresses = [];
 
     if(deployer.network.startsWith('public.test')) {
         maintainerAddresses = [
@@ -76,7 +76,8 @@ module.exports = function deploy(deployer) {
         ]
     } else {
         maintainerAddresses = [
-            '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7'
+            '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7',
+            '0x084d61962273589bf894c7b8794aa8915a06200f'
         ]
     }
     let votingPowers = [1, 1];
@@ -114,7 +115,7 @@ module.exports = function deploy(deployer) {
                         let { proxy } = logs.find(l => l.event === 'ProxyCreated').args;
                         console.log('Proxy address for the TwoKeyRegistry is : ' + proxy);
                         const twoKeyReg = fileObject.TwoKeyRegistry || {};
-
+                        console.log(maintainerAddresses);
                         twoKeyReg[networkId] = {
                             'address': TwoKeyRegistry.address,
                             'Proxy': proxy,
