@@ -14,6 +14,11 @@ export default class PlasmaEvents implements IPlasmaEvents {
         this.utils = utils;
     }
 
+    public getRegisteredAddressForPlasma(plasma: string = this.base.plasmaAddress): Promise<string> {
+        return promisify(this.base.twoKeyPlasmaEvents.plasma2ethereum, [plasma])
+    }
+
+
     /**
      *
      * @param {string} from
@@ -24,7 +29,7 @@ export default class PlasmaEvents implements IPlasmaEvents {
             console.log('PLASMA.signPlasmaToEthereum', from);
             try {
                 let plasmaAddress = this.base.plasmaAddress;
-                let storedEthAddress = await promisify(this.base.twoKeyPlasmaEvents.plasma2ethereum, [plasmaAddress]);
+                let storedEthAddress = await this.getRegisteredAddressForPlasma(plasmaAddress);
                 console.log('PLASMA.signPlasmaToEthereum storedETHAddress', storedEthAddress);
                 if (storedEthAddress != from) {
                     let plasma2ethereumSignature = await Sign.sign_plasma2ethereum(this.base.web3, plasmaAddress, from);

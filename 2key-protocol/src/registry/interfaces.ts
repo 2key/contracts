@@ -1,3 +1,5 @@
+import {promisify} from "../utils";
+
 export interface ITwoKeyReg {
     checkIfAddressIsRegistered: (address: string) => Promise<boolean>,
     checkIfUserIsRegistered: (username: string) => Promise<string>,
@@ -6,6 +8,10 @@ export interface ITwoKeyReg {
     getCampaignsWhereUserIsModerator: (address: string) => Promise<string[]>,
     getCampaignsWhereUserIsReferrer: (address: string) => Promise<string[]>,
     getUserData: (address: string) => Promise<IUserData>,
+    getRegisteredNameForAddress: (from: string) => Promise<string>,
+    getRegisteredAddressForName: (name: string) => Promise<string>,
+    getRegisteredWalletForAddress: (from: string) => Promise<string>,
+    getRegisteredAddressForPlasma: (plasma?: string) => Promise<string>,
     signPlasma2Ethereum: (from: string) => Promise<ISignedPlasma>,
     signUserData2Registry: (from: string, name: string, fullname: string, email: string) => Promise<ISignedUser>,
     signWalletData2Registry: (from: string, username: string, walletname: string) => Promise<ISignedWalletData>,

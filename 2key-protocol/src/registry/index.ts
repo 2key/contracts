@@ -133,12 +133,28 @@ export default class TwoKeyReg implements ITwoKeyReg {
         })
     }
 
+    public getRegisteredNameForAddress(from: string): Promise<string> {
+        return promisify(this.base.twoKeyReg.address2username, [from]);
+    }
+
+    public getRegisteredAddressForName(name: string): Promise<string> {
+        return promisify(this.base.twoKeyReg.username2currentAddress, [name]);
+    }
+
+    public getRegisteredWalletForAddress(from: string): Promise<string> {
+        return promisify(this.base.twoKeyReg.address2walletTag, [from]);
+    }
+
+    public getRegisteredAddressForPlasma(plasma: string = this.base.plasmaAddress): Promise<string> {
+        return promisify(this.base.twoKeyReg.getPlasmaToEthereum,[plasma]);
+    }
+
     public signUserData2Registry(from: string, name: string, fullname: string, email: string): Promise<ISignedUser> {
         return new Promise<ISignedUser>(async(resolve, reject) => {
             try {
                 const [userName, address] = await Promise.all([
-                    promisify(this.base.twoKeyReg.address2username, [from]),
-                    promisify(this.base.twoKeyReg.username2currentAddress, [name]),
+                    this.getRegisteredNameForAddress(from),
+                    this.getRegisteredAddressForName(name),
                 ]);
                 console.log('REGISTRY.storedData', userName, address);
                 if (userName || parseInt(address, 16)) {
@@ -163,7 +179,7 @@ export default class TwoKeyReg implements ITwoKeyReg {
     public signWalletData2Registry(from: string, username: string, walletname: string): Promise<ISignedWalletData> {
         return new Promise<ISignedWalletData>(async(resolve, reject) => {
             try {
-                const walletTag = await promisify(this.base.twoKeyReg.address2walletTag, [from]);
+                const walletTag = await this.getRegisteredWalletForAddress(from);
                 console.log('walletTag', walletTag);
                 if (!parseInt(walletTag, 16)) {
                     const userData = `${username}${walletname}`;
@@ -205,7 +221,7 @@ export default class TwoKeyReg implements ITwoKeyReg {
         return new Promise<ISignedPlasma>(async(resolve,reject) => {
             try {
                 let plasmaAddress = this.base.plasmaAddress;
-                let stored_ethereum_address = await promisify(this.base.twoKeyReg.getPlasmaToEthereum,[plasmaAddress]);
+                let stored_ethereum_address = await this.getRegisteredAddressForPlasma(plasmaAddress);
                 console.log('REGISTRY.signPlasma2Ethereum', from, stored_ethereum_address);
                 let plasmaPrivateKey = "";
                 let encryptedPlasmaPrivateKey = "";
