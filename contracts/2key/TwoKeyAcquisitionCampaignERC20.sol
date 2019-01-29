@@ -307,7 +307,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         ITwoKeyConversionHandler(conversionHandler).supportForCreateConversion(contractor, converterAddress,
             conversionAmountETHWei, maxReferralRewardETHWei,
             baseTokensForConverterUnits,bonusTokensForConverterUnits,
-            expiryConversionInHours);
+            expiryConversionInHours, false);
     }
 
     /**

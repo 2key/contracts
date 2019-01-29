@@ -8,7 +8,9 @@ contract ITwoKeyConversionHandler {
         uint256 _maxReferralRewardETHWei,
         uint256 baseTokensForConverterUnits,
         uint256 bonusTokensForConverterUnits,
-        uint256 expiryConversion) external;
+        uint256 expiryConversion,
+        bool isConversionFiat
+    ) external;
 
 
     function setAnonymous(address _contractor, bool _isAnonymous) external;

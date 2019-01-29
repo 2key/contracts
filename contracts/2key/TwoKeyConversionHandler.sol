@@ -66,6 +66,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
         CampaignType campaignType; // Enumerator representing type of campaign (This one is however acquisition)
         uint256 conversionCreatedAt; // When conversion is created
         uint256 conversionExpiresAt; // When conversion expires
+        bool isConversionFiat;
     }
 
     /// @notice Modifier which allows only TwoKeyAcquisitionCampaign to issue calls
@@ -163,18 +164,27 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
         uint256 _maxReferralRewardETHWei,
         uint256 baseTokensForConverterUnits,
         uint256 bonusTokensForConverterUnits,
-        uint256 expiryConversion) public {
+        uint256 expiryConversion,
+        bool isConversionFiat
+        ) public {
         require(msg.sender == twoKeyAcquisitionCampaignERC20 || msg.sender == address(this));
         require(converterToState[_converterAddress] != ConverterState.REJECTED); // If converter is rejected then can't create conversion
-        ConversionState state = determineConversionState(_converterAddress);
 
-        uint _moderatorFeeETHWei = calculateModeratorFee(_conversionAmount);
-        uint256 _contractorProceeds = _conversionAmount - _maxReferralRewardETHWei - _moderatorFeeETHWei;
+        uint _moderatorFeeETHWei = 0;
+        uint256 _contractorProceeds = _conversionAmount; //In case of fiat conversion, this is going to be fiat value
+        ConversionState state = ConversionState.PENDING_APPROVAL;
+
+        if(isConversionFiat == false) {
+            _moderatorFeeETHWei = calculateModeratorFee(_conversionAmount);
+            _contractorProceeds = _conversionAmount - _maxReferralRewardETHWei - _moderatorFeeETHWei;
+            state = determineConversionState(_converterAddress);
+        }
+
 
         Conversion memory c = Conversion(_contractor, _contractorProceeds, _converterAddress,
             state ,_conversionAmount, _maxReferralRewardETHWei, _moderatorFeeETHWei, baseTokensForConverterUnits,
             bonusTokensForConverterUnits, CampaignType.CPA_FUNGIBLE,
-            now, now + expiryConversion * (1 hours));
+            now, now + expiryConversion * (1 hours), isConversionFiat);
 
         conversions.push(c);
         converterToHisConversions[_converterAddress].push(numberOfConversions);
@@ -206,13 +216,14 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
 
     function performConversion(uint _conversionId) internal {
         Conversion memory conversion = conversions[_conversionId];
-        require(conversion.state == ConversionState.APPROVED);
-        require(msg.sender == conversion.converter || msg.sender == contractor || msg.sender == moderator);
-
-        ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateRefchainRewards(conversion.maxReferralRewardETHWei, conversion.converter);
-
-        // update moderator balances
-        ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateModeratorBalanceETHWei(conversion.moderatorFeeETHWei);
+        if(conversion.isConversionFiat == true) {
+            require(conversion.state == ConversionState.PENDING_APPROVAL);
+            require(msg.sender == contractor);
+        } else {
+            require(conversion.state == ConversionState.APPROVED);
+            require(msg.sender == conversion.converter || msg.sender == contractor);
+        }
+        uint totalUnits = conversion.baseTokenUnits + conversion.bonusTokenUnits;
 
         /**
          * For the lockup contracts there's no need to save to plasma address, there we'll save ethereum address
@@ -221,17 +232,21 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
             conversion.baseTokenUnits, conversion.bonusTokenUnits, _conversionId, conversion.converter, conversion.contractor, twoKeyAcquisitionCampaignERC20, assetContractERC20, twoKeyEventSource);
 
         conversionId2LockupAddress[_conversionId] = address(lockupContract);
-        uint totalUnits = conversion.baseTokenUnits + conversion.bonusTokenUnits;
         ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).moveFungibleAsset(address(lockupContract), totalUnits);
-        ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateReservedAmountOfTokensIfConversionRejectedOrExecuted(totalUnits);
-        ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateContractorProceeds(conversion.contractorProceedsETHWei);
+
         conversion.state = ConversionState.EXECUTED;
         conversions[_conversionId] = conversion;
         converterToLockupContracts[conversion.converter].push(lockupContract);
 
         //Update total raised funds
-        raisedFundsEthWei = raisedFundsEthWei + conversion.contractorProceedsETHWei + conversion.moderatorFeeETHWei + conversion.maxReferralRewardETHWei;
-//        raisedFundsEthWei = raisedFundsEthWei + conversion.contractorProceedsETHWei;
+        if(conversion.isConversionFiat == false) {
+            ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateRefchainRewards(conversion.maxReferralRewardETHWei, conversion.converter);
+            // update moderator balances
+            ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateModeratorBalanceETHWei(conversion.moderatorFeeETHWei);
+            raisedFundsEthWei = raisedFundsEthWei + conversion.contractorProceedsETHWei + conversion.moderatorFeeETHWei + conversion.maxReferralRewardETHWei;
+            ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateReservedAmountOfTokensIfConversionRejectedOrExecuted(totalUnits);
+            ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateContractorProceeds(conversion.contractorProceedsETHWei);
+        }
     }
 
     /// @notice Function to check whether converter is approved or not
@@ -446,7 +461,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
      */
     function converterCancelConversion(uint _conversionId) external {
         Conversion memory conversion = conversions[_conversionId];
-        require(conversionIdToTimeCreated[_conversionId] + 7*(1 days) < block.timestamp);
+        require(conversionIdToTimeCreated[_conversionId] + 10*(1 days) < block.timestamp);
         require(msg.sender == conversion.converter);
         require(conversion.state == ConversionState.PENDING_APPROVAL);
 
