@@ -33,6 +33,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     uint256 contractorBalance;
     uint256 contractorTotalProceeds;
 
+    mapping(address => uint256) internal amountConverterSpentFiatWei;
     mapping(address => uint256) internal amountConverterSpentEthWEI; // Amount converter put to the contract in Ether
     mapping(address => uint256) internal unitsConverterBought; // Number of units (ERC20 tokens) bought
 
@@ -257,7 +258,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     function joinAndConvert(bytes signature, bool _isAnonymous) public payable {
         ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).requirementForMsgValue(msg.value);
         distributeArcsBasedOnSignature(signature);
-        createConversion(msg.value, msg.sender);
+        createConversion(msg.value, msg.sender, false);
         ITwoKeyConversionHandler(conversionHandler).setAnonymous(msg.sender, _isAnonymous);
         amountConverterSpentEthWEI[msg.sender] += msg.value;
         twoKeyEventSource.converted(address(this),msg.sender,msg.value);
@@ -272,24 +273,30 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).requirementForMsgValue(msg.value);
         address _converterPlasma = twoKeyEventSource.plasmaOf(msg.sender);
         require(received_from[_converterPlasma] != address(0));
-        createConversion(msg.value, msg.sender);
+        createConversion(msg.value, msg.sender, false);
         ITwoKeyConversionHandler(conversionHandler).setAnonymous(msg.sender, _isAnonymous);
         amountConverterSpentEthWEI[msg.sender] += msg.value;
         twoKeyEventSource.converted(address(this),msg.sender,msg.value);
     }
 
+    function convertFiat(uint conversionAmountFiatWei, bool _isAnonymous) public {
+        createConversion(conversionAmountFiatWei, msg.sender, true);
+        ITwoKeyConversionHandler(conversionHandler).setAnonymous(msg.sender, _isAnonymous);
+        amountConverterSpentFiatWei[msg.sender] = amountConverterSpentFiatWei[msg.sender].add(conversionAmountFiatWei);
+    }
+
     /*
      * @notice Function which is executed to create conversion
-     * @param conversionAmountETHWei is the amount of the ether sent to the contract
+     * @param conversionAmountETHWeiOrFiat is the amount of the ether sent to the contract
      * @param converterAddress is the sender of eth to the contract
      * @dev can be called only internally
      */
-    function createConversion(uint conversionAmountETHWei, address converterAddress) internal {
+    function createConversion(uint conversionAmountETHWeiOrFiat, address converterAddress, bool isFiatConversion) internal {
         uint baseTokensForConverterUnits;
         uint bonusTokensForConverterUnits;
 
         (baseTokensForConverterUnits, bonusTokensForConverterUnits)
-        = ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).getEstimatedTokenAmount(conversionAmountETHWei);
+        = ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).getEstimatedTokenAmount(conversionAmountETHWeiOrFiat, isFiatConversion);
 
         uint totalTokensForConverterUnits = baseTokensForConverterUnits + bonusTokensForConverterUnits;
 
@@ -297,15 +304,16 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         require(_total_units - reservedAmountOfTokens >= totalTokensForConverterUnits, 'Inventory balance does not have enough funds');
 
         unitsConverterBought[converterAddress] = unitsConverterBought[converterAddress].add(totalTokensForConverterUnits);
-
-        uint256 maxReferralRewardETHWei = conversionAmountETHWei.mul(maxReferralRewardPercent).div(100);
-
-        reservedAmountOfTokens = reservedAmountOfTokens + totalTokensForConverterUnits;
+        uint256 maxReferralRewardETHWei = 0;
+        if(isFiatConversion == false) {
+            maxReferralRewardETHWei = conversionAmountETHWeiOrFiat.mul(maxReferralRewardPercent).div(100);
+            reservedAmountOfTokens = reservedAmountOfTokens + totalTokensForConverterUnits;
+        }
 
         ITwoKeyConversionHandler(conversionHandler).supportForCreateConversion(contractor, converterAddress,
-            conversionAmountETHWei, maxReferralRewardETHWei,
+            conversionAmountETHWeiOrFiat, maxReferralRewardETHWei,
             baseTokensForConverterUnits,bonusTokensForConverterUnits,
-            expiryConversionInHours, false);
+            expiryConversionInHours, isFiatConversion);
     }
 
     /**

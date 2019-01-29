@@ -404,7 +404,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
         for(uint i=0; i<converterToHisConversions[_converter].length; i++) {
             uint conversionId = converterToHisConversions[_converter][i];
             Conversion memory c = conversions[conversionId];
-            if(c.state == ConversionState.PENDING_APPROVAL) {
+            if(c.state == ConversionState.PENDING_APPROVAL && c.isConversionFiat == false) {
                 c.state = ConversionState.APPROVED;
                 conversions[conversionId] = c;
             }

@@ -724,12 +724,12 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @param {string | number | BigNumber} value
      * @returns {Promise<ITokenAmount>}
      */
-    public getEstimatedTokenAmount(campaign: any, value: string | number | BigNumber): Promise<ITokenAmount> {
+    public getEstimatedTokenAmount(campaign: any, isPaymentFiat: boolean, value: string | number | BigNumber): Promise<ITokenAmount> {
         return new Promise<ITokenAmount>(async (resolve, reject) => {
             try {
                 const twoKeyAcquisitionLogicHandlerInstance = await this.helpers._getAcquisitionLogicHandlerInstance(campaign);
                 const constants = await promisify(twoKeyAcquisitionLogicHandlerInstance.getConstantInfo, []);
-                let [baseTokens, bonusTokens] = await promisify(twoKeyAcquisitionLogicHandlerInstance.getEstimatedTokenAmount, [value]);
+                let [baseTokens, bonusTokens] = await promisify(twoKeyAcquisitionLogicHandlerInstance.getEstimatedTokenAmount, [value, isPaymentFiat]);
                 baseTokens = this.utils.fromWei(baseTokens, constants[4]);
                 baseTokens = BigNumber.isBigNumber(baseTokens) ? baseTokens.toNumber() : parseFloat(baseTokens);
                 bonusTokens = this.utils.fromWei(bonusTokens, constants[4]);

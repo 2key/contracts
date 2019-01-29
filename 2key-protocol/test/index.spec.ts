@@ -620,7 +620,7 @@ describe('TwoKeyProtocol', () => {
 
     it('==> should print available amount of tokens before conversion', async() => {
         const availableAmountOfTokens = await twoKeyProtocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(campaignAddress,from);
-        const { totalTokens } = await twoKeyProtocol.AcquisitionCampaign.getEstimatedTokenAmount(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD, 'ether'));
+        const { totalTokens } = await twoKeyProtocol.AcquisitionCampaign.getEstimatedTokenAmount(campaignAddress, false, twoKeyProtocol.Utils.toWei(minContributionETHorUSD, 'ether'));
         console.log('Available amount of tokens before conversion is: ' + availableAmountOfTokens, totalTokens);
         expect(availableAmountOfTokens).to.be.lte(1234 - totalTokens);
     }).timeout(30000);
@@ -639,7 +639,7 @@ describe('TwoKeyProtocol', () => {
     }).timeout(300000);
 
     it('should print amount of tokens that user want to buy', async () => {
-        const tokens = await twoKeyProtocol.AcquisitionCampaign.getEstimatedTokenAmount(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD, 'ether'));
+        const tokens = await twoKeyProtocol.AcquisitionCampaign.getEstimatedTokenAmount(campaignAddress, false, twoKeyProtocol.Utils.toWei(minContributionETHorUSD, 'ether'));
         console.log(tokens);
         expect(tokens.totalTokens).to.gte(0);
     });

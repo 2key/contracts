@@ -103,23 +103,31 @@ contract TwoKeyAcquisitionLogicHandler {
 
     /**
      * @notice Function which will calculate the base amount, bonus amount
-     * @param conversionAmountETHWei is amount of eth in conversion
+     * @param conversionAmountETHWeiOrFiat is amount of eth in conversion
      * @return tuple containing (base,bonus)
      */
-    function getEstimatedTokenAmount(uint conversionAmountETHWei) public view returns (uint, uint) {
+    function getEstimatedTokenAmount(uint conversionAmountETHWeiOrFiat, bool isFiatConversion) public view returns (uint, uint) {
         uint value = pricePerUnitInETHWeiOrUSD;
-        if(keccak256(currency) != keccak256('ETH')) {
-            uint rate;
-            bool flag;
-            (rate,flag,,) = ITwoKeyExchangeRateContract(ethUSDExchangeContract).getFiatCurrencyDetails(currency);
-            if(flag) {
-                conversionAmountETHWei = (conversionAmountETHWei * rate).div(10 ** 18); //converting eth to $wei
-            } else {
-                value = (value * rate).div(10 ** 18); //converting dollar wei to eth
+        uint baseTokensForConverterUnits;
+        uint bonusTokensForConverterUnits;
+        if(isFiatConversion == true) {
+            baseTokensForConverterUnits = conversionAmountETHWeiOrFiat.div(value);
+            bonusTokensForConverterUnits = baseTokensForConverterUnits.mul(maxConverterBonusPercent).div(100);
+        } else {
+            if(keccak256(currency) != keccak256('ETH')) {
+                uint rate;
+                bool flag;
+                (rate,flag,,) = ITwoKeyExchangeRateContract(ethUSDExchangeContract).getFiatCurrencyDetails(currency);
+                if(flag) {
+                    conversionAmountETHWeiOrFiat = (conversionAmountETHWeiOrFiat * rate).div(10 ** 18); //converting eth to $wei
+                } else {
+                    value = (value * rate).div(10 ** 18); //converting dollar wei to eth
+                }
             }
         }
-        uint baseTokensForConverterUnits = conversionAmountETHWei.mul(10 ** unit_decimals).div(value);
-        uint bonusTokensForConverterUnits = baseTokensForConverterUnits.mul(maxConverterBonusPercent).div(100);
+
+        baseTokensForConverterUnits = conversionAmountETHWeiOrFiat.mul(10 ** unit_decimals).div(value);
+        bonusTokensForConverterUnits = baseTokensForConverterUnits.mul(maxConverterBonusPercent).div(100);
         return (baseTokensForConverterUnits, bonusTokensForConverterUnits);
     }
 
