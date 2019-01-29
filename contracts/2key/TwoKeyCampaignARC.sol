@@ -27,11 +27,6 @@ contract TwoKeyCampaignARC is ArcERC20 {
         _;
     }
 
-    // @notice Modifier which allows only contractor or moderator to call methods
-    modifier onlyContractorOrModerator() {
-        require(msg.sender == contractor || msg.sender == moderator);
-        _;
-    }
 
     constructor(address _twoKeyEventSource, uint256 _conversionQuota) ArcERC20() public {
 		require(_twoKeyEventSource != address(0));

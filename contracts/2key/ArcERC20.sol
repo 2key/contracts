@@ -13,9 +13,7 @@ contract ArcERC20  {
 
     uint256 internal totalSupply_;
 
-    mapping (address => mapping (address => uint256)) internal allowed;
     mapping(address => uint256) internal balances;
-
 
     /**
     * @dev Total number of tokens in existence

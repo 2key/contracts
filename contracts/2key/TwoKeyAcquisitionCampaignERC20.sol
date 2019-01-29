@@ -39,7 +39,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     address assetContractERC20; // Asset contract is address of ERC20 inventory
 
     uint256 expiryConversionInHours; // How long converter can be pending before it will be automatically rejected and funds will be returned to convertor (hours)
-//    uint256 moderatorFeePercentage; // Fee which moderator gets
     uint256 maxReferralRewardPercent; // maxReferralRewardPercent is actually bonus percentage in ETH
     uint reservedAmountOfTokens = 0;
 
@@ -71,7 +70,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         moderator = _moderator;
         assetContractERC20 = _assetContractERC20;
         expiryConversionInHours = values[0];
-//        moderatorFeePercentage = twoKeyEventSource.getTwoKeyDefaultIntegratorFeeFromAdmin(); // TODO: Take from Admin contract
         maxReferralRewardPercent = values[1];
         ITwoKeyConversionHandler(conversionHandler).setTwoKeyAcquisitionCampaignERC20(address(this), _moderator, contractor, _assetContractERC20, _twoKeyEventSource);
         ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).setTwoKeyAcquisitionCampaignContract(address(this));
@@ -468,7 +466,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @dev only contractor or moderator are eligible to call this function
      * @return value of his balance in ETH
      */
-    function getModeratorBalanceAndTotalEarnings() external onlyContractorOrModerator view returns (uint,uint) {
+    function getModeratorBalanceAndTotalEarnings() external view returns (uint,uint) {
+        require(msg.sender == contractor);
         return (moderatorBalanceETHWei,moderatorTotalEarningsETHWei);
     }
 
@@ -512,7 +511,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @return tuple containing this 3 information
      */
     function getReferrerBalanceAndTotalEarningsAndNumberOfConversions(address _referrer) public view returns (uint,uint,uint) {
-        require(msg.sender == _referrer || msg.sender == contractor || msg.sender == moderator);
+        require(msg.sender == _referrer || msg.sender == contractor);
         _referrer = twoKeyEventSource.plasmaOf(_referrer);
         return (referrerPlasma2BalancesEthWEI[_referrer], referrerPlasma2TotalEarningsEthWEI[_referrer], referrerPlasmaAddressToCounterOfConversions[_referrer]);
     }
