@@ -376,12 +376,13 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
 
     /**
      */
-    function deleteUserByAddress(address _ethereumAddress) public onlyTwoKeyMaintainer {
-        string memory userName = address2username[_ethereumAddress];
-        address2username[_ethereumAddress] = "";
-
+    function deleteUser(string userName) public onlyTwoKeyMaintainer {
         bytes32 userNameHex = stringToBytes32(userName);
+        username2AddressHistory[userNameHex] = new address[](0);
+        address _ethereumAddress = username2currentAddress[userNameHex];
         username2currentAddress[userNameHex] = address(0);
+
+        address2username[_ethereumAddress] = "";
 
         bytes32 walletTag = address2walletTag[_ethereumAddress];
         address2walletTag[_ethereumAddress] = bytes32(0);
