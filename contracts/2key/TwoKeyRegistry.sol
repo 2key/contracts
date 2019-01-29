@@ -240,7 +240,7 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
         require(isMaintainer[msg.sender] == true || msg.sender == address(this));
 //        require(utfStringLength(_name) >= 3 && utfStringLength(_name) <=25);
 
-        string memory concatenatedValues = strConcat(_name,_fullName,_email,"","");
+        string memory concatenatedValues = strConcat(_name,_fullName,_email);
         bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to name")),
             keccak256(abi.encodePacked(concatenatedValues))));
         address message_signer = Call.recoverHash(hash, signature, 0);
@@ -315,7 +315,7 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
         bytes32 usernameHex = stringToBytes32(username);
         require(username2currentAddress[usernameHex] == _address); // validating that username exists
 
-        string memory concatenatedValues = strConcat(username,_username_walletName,"","","");
+        string memory concatenatedValues = strConcat(username,_username_walletName,"");
         bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to name")),
             keccak256(abi.encodePacked(concatenatedValues))));
         address message_signer = Call.recoverHash(hash, signature, 0);
@@ -400,6 +400,7 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
         notes[_ethereumAddress] = "";
     }
 
+
 //    /// @notice Function to fetch actual length of string
 //    /// @param str is the string we'd like to get length of
 //    /// @return length of the string
@@ -473,20 +474,16 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
      * @dev If you want to handle concatenation of less than 5, then pass first their values and for the left pass empty strings
      * @return string concatenated
      */
-    function strConcat(string _a, string _b, string _c, string _d, string _e) public pure returns (string){
+    function strConcat(string _a, string _b, string _c) public pure returns (string){
         bytes memory _ba = bytes(_a);
         bytes memory _bb = bytes(_b);
         bytes memory _bc = bytes(_c);
-        bytes memory _bd = bytes(_d);
-        bytes memory _be = bytes(_e);
-        string memory abcde = new string(_ba.length + _bb.length + _bc.length + _bd.length + _be.length);
+        string memory abcde = new string(_ba.length + _bb.length + _bc.length);
         bytes memory babcde = bytes(abcde);
         uint k = 0;
         for (uint i = 0; i < _ba.length; i++) babcde[k++] = _ba[i];
         for (i = 0; i < _bb.length; i++) babcde[k++] = _bb[i];
         for (i = 0; i < _bc.length; i++) babcde[k++] = _bc[i];
-        for (i = 0; i < _bd.length; i++) babcde[k++] = _bd[i];
-        for (i = 0; i < _be.length; i++) babcde[k++] = _be[i];
         return string(babcde);
     }
 

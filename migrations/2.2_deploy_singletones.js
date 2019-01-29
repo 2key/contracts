@@ -76,8 +76,7 @@ module.exports = function deploy(deployer) {
         ]
     } else {
         maintainerAddresses = [
-            '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7',
-            '0x084d61962273589bf894c7b8794aa8915a06200f'
+            '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7'
         ]
     }
     let votingPowers = [1, 1];
