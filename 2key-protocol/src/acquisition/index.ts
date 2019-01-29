@@ -1584,4 +1584,28 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         })
     }
 
+
+    /**
+     *
+     * @param campaign
+     * @param {string} from
+     * @param {number} conversionAmountFiat
+     * @param {boolean} isConverterAnonymous
+     * @param {number} gasPrice
+     * @returns {Promise<string>}
+     */
+    public convertOffline(campaign: any, from: string, conversionAmountFiat: number, {gasPrice = this.base._getGasPrice(), isConverterAnonymous}) : Promise<string> {
+        return new Promise<string>(async(resolve,reject) => {
+            try {
+                const nonce = await this.helpers._getNonce(from);
+                const twoKeyAcquisitionCampaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
+                conversionAmountFiat = parseFloat(this.utils.toWei(conversionAmountFiat, 'ether').toString());
+                let txHash = await promisify(twoKeyAcquisitionCampaignInstance.convertFiat,[conversionAmountFiat, isConverterAnonymous, {from}]);
+                resolve(txHash);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
 }
