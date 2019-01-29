@@ -238,7 +238,7 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
     /// @param _sender is address of user
     function addName(string _name, address _sender, string _fullName, string _email, bytes signature) public {
         require(isMaintainer[msg.sender] == true || msg.sender == address(this));
-        require(utfStringLength(_name) >= 3 && utfStringLength(_name) <=25);
+//        require(utfStringLength(_name) >= 3 && utfStringLength(_name) <=25);
 
         string memory concatenatedValues = strConcat(_name,_fullName,_email,"","");
         bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to name")),
@@ -374,29 +374,55 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
         return username2AddressHistory[nameHex];
     }
 
-    /// @notice Function to fetch actual length of string
-    /// @param str is the string we'd like to get length of
-    /// @return length of the string
-    function utfStringLength(string str) internal pure returns (uint length) {
-        uint i=0;
-        bytes memory string_rep = bytes(str);
+    /**
+     */
+    function deleteUserByAddress(address _ethereumAddress) public onlyTwoKeyMaintainer {
+        string memory userName = address2username[_ethereumAddress];
+        address2username[_ethereumAddress] = "";
 
-        while (i<string_rep.length)
-        {
-            if (string_rep[i]>>7==0)
-                i+=1;
-            else if (string_rep[i]>>5==0x6)
-                i+=2;
-            else if (string_rep[i]>>4==0xE)
-                i+=3;
-            else if (string_rep[i]>>3==0x1E)
-                i+=4;
-            else
-            //For safety
-                i+=1;
-            length++;
-        }
+        bytes32 userNameHex = stringToBytes32(userName);
+        username2currentAddress[userNameHex] = address(0);
+
+        bytes32 walletTag = address2walletTag[_ethereumAddress];
+        address2walletTag[_ethereumAddress] = bytes32(0);
+        walletTag2address[walletTag] = address(0);
+
+        address plasma = ethereum2plasma[_ethereumAddress];
+        ethereum2plasma[_ethereumAddress] = address(0);
+        plasma2ethereum[plasma] = address(0);
+
+        UserData memory userdata = addressToUserData[_ethereumAddress];
+        userdata.username = "";
+        userdata.fullName = "";
+        userdata.email = "";
+        addressToUserData[_ethereumAddress] = userdata;
+
+        notes[_ethereumAddress] = "";
     }
+
+//    /// @notice Function to fetch actual length of string
+//    /// @param str is the string we'd like to get length of
+//    /// @return length of the string
+//    function utfStringLength(string str) internal pure returns (uint length) {
+//        uint i=0;
+//        bytes memory string_rep = bytes(str);
+//
+//        while (i<string_rep.length)
+//        {
+//            if (string_rep[i]>>7==0)
+//                i+=1;
+//            else if (string_rep[i]>>5==0x6)
+//                i+=2;
+//            else if (string_rep[i]>>4==0xE)
+//                i+=3;
+//            else if (string_rep[i]>>3==0x1E)
+//                i+=4;
+//            else
+//            //For safety
+//                i+=1;
+//            length++;
+//        }
+//    }
 
     /**
      * @notice Reading from mapping ethereum 2 plasma
