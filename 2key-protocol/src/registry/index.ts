@@ -376,4 +376,23 @@ export default class TwoKeyReg implements ITwoKeyReg {
             }
         });
     }
+
+    /**
+     * Function to delete everything related to user address, only maintainer can call this
+     * @param {string} from
+     * @param {string} userAddress
+     * @param {number} gasPrice
+     * @returns {Promise<string>}
+     */
+    public deleteUserByAddress(from: string, userAddress: string, gasPrice ?:number) : Promise<string> {
+        return new Promise<string>(async(resolve,reject) => {
+            try {
+                const nonce = await this.helpers._getNonce(from);
+                let txHash = await promisify(this.base.twoKeyReg.deleteUserByAddress,[userAddress, { from,nonce,gasPrice }]);
+                resolve(txHash);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
 }

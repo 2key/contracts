@@ -19,6 +19,7 @@ export interface ITwoKeyReg {
     addPlasma2EthereumByUser: (from: string, signedPlasma: ISignedPlasma, gasPrice?: number) => Promise<string>,
     setWalletName(from: string, signedWallet: ISignedWalletData, gasPrice?: number): Promise<string>
     addNameAndWalletName: (from: string, userName: string, userAddress: string, fullName: string, email: string, walletName: string, signedUserData: string, signedWalletData: string, gasPrice?: number) => Promise<string>,
+    deleteUserByAddress: (from: string, userAddress: string, gasPrice ?:number) => Promise<string>
 }
 
 export interface IUserData {
