@@ -1055,4 +1055,5 @@ describe('TwoKeyProtocol', () => {
         let stats = await twoKeyProtocol.AcquisitionCampaign.getAddressStatistic(campaignAddress,env.RENATA_ADDRESS);
         console.log(stats);
     }).timeout(30000);
+
 });

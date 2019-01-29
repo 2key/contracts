@@ -1599,7 +1599,9 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
             try {
                 const nonce = await this.helpers._getNonce(from);
                 const twoKeyAcquisitionCampaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
+                console.log('Converter with address : ' + from + 'is trying to perform offline conversion with amount of: ' +conversionAmountFiat);
                 conversionAmountFiat = parseFloat(this.utils.toWei(conversionAmountFiat, 'ether').toString());
+                console.log('Conversion amount fiat converted to wei is: ' + conversionAmountFiat);
                 let txHash = await promisify(twoKeyAcquisitionCampaignInstance.convertFiat,[conversionAmountFiat, isConverterAnonymous, {from}]);
                 resolve(txHash);
             } catch (e) {
