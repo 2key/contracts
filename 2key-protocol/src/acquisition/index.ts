@@ -1586,10 +1586,10 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
 
 
     /**
-     *
+     * Enables converter to do offline conversion
      * @param campaign
      * @param {string} from
-     * @param {number} conversionAmountFiat
+     * @param {number} conversionAmountFiat Will be float amount of dollars (example 2345,5$)
      * @param {boolean} isConverterAnonymous
      * @param {number} gasPrice
      * @returns {Promise<string>}
