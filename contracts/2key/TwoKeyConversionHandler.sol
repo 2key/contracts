@@ -245,42 +245,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
         }
     }
 
-    /// @notice Function to check whether converter is approved or not
-    /// @dev only contractor or maintainer are eligible to call this function
-    /// @param _converter is the address of converter
-    /// @return true if yes, otherwise false
-    function isConverterApproved(address _converter) public onlyContractorOrMaintainer view  returns (bool) {
-        if(converterToState[_converter] == ConverterState.APPROVED) {
-            return true;
-        }
-        return false;
-    }
-
-
-    /// @notice Function to check whether converter is rejected or not
-    /// @dev only contractor or maintainer are eligible to call this function
-    /// @param _converter is the address of converter
-    /// @return true if yes, otherwise false
-    function isConverterRejected(address _converter) public view onlyContractorOrMaintainer returns (bool) {
-        if(converterToState[_converter] == ConverterState.REJECTED) {
-            return true;
-        }
-        return false;
-    }
-
-
-    /// @notice Function to check whether converter is cancelled or not
-    /// @dev only contractor or maintainer are eligible to call this function
-    /// @param _converter is the address of converter
-    /// @return true if yes, otherwise false
-    function isConverterPendingApproval(address _converter) public view onlyContractorOrMaintainer returns (bool) {
-        if(converterToState[_converter] == ConverterState.PENDING_APPROVAL) {
-            return true;
-        }
-        return false;
-    }
-
-
     /**
      * @notice Function to get conversion details by id
      * @param conversionId is the id of conversion
@@ -429,8 +393,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
                 conversions[conversionId] = c;
                 ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateReservedAmountOfTokensIfConversionRejectedOrExecuted(c.baseTokenUnits + c.bonusTokenUnits);
                 //TODO: Add refund method in the Acquisition to return all the money to converter
-//                uint totalTokens = c.baseTokenUnits + c.bonusTokenUnits;
-//                ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).refundConverterAndRemoveUnits(_converter, c.conversionAmount, totalTokens);
+                ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).sendBackEthWhenConversionCancelled(_converter, c.conversionAmount);
             }
         }
     }
@@ -496,24 +459,4 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
         require(msg.sender == contractor || msg.sender == c.converter);
         return conversionId2LockupAddress[_conversionId];
     }
-
-
-    //
-    //    /// @notice Function where contractor or moderator can cancel the converter
-    //    function cancelConverter() public {
-    //        require(converterToState[msg.sender] == ConversionState.REJECTED ||
-    //        converterToState[msg.sender] == ConversionState.PENDING);
-    //        moveFromPendingOrRejectedToCancelledState(msg.sender);
-    //
-    //        Conversion memory conversion = conversions[msg.sender];
-    //        ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).sendBackEthWhenConversionCancelled(msg.sender, conversion.conversionAmount);
-    //    }
-    //
-    //
-    //    function cancelAndRejectContract() external onlyTwoKeyAcquisitionCampaign {
-    //        for(uint i=0; i<allLockUpContracts.length; i++) {
-    //            TwoKeyLockupContract(allLockUpContracts[i]).cancelCampaignAndGetBackTokens(assetContractERC20);
-    //        }
-    //    }
-
 }
