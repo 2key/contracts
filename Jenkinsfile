@@ -5,9 +5,7 @@ pipeline {
       reuseNode true
       args '-e npm_config_cache=npm-cache -e HOME=.'
     }
-  }
-  environment {
-        GITHUB_TOKEN = credentials('github')
+
   }
   stages {
     stage('build-solidity-docs') {
@@ -20,5 +18,8 @@ pipeline {
         sh 'cd documentation/website && npm install && npm run build && yarn run publish-gh-pages'
       }
     }
+  }
+  environment {
+    GITHUB_TOKEN = credentials('github')
   }
 }
