@@ -68,17 +68,38 @@ module.exports = function deploy(deployer) {
     let deployerAddress = '0x18e1d5ca01141E3a0834101574E5A1e94F0F8F6a';
     let maintainerAddresses = [];
 
+
+
     if(deployer.network.startsWith('public.test')) {
+        /**
+         * Network configuration for ropsten
+         */
         maintainerAddresses = [
             '0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f',
             '0x098a12404fd3f5a06cfb016eb7669b1c41419705' ,
             '0x1d55762a320e6826cf00c4f2121b7e53d23f6822'
-        ]
-    } else {
+        ];
+    } else if (deployer.network.startsWith('private.test') && !deployer.network.endsWith('k8s-hdwallet')) {
+        /**
+         * Network configuration for plasma
+         */
         maintainerAddresses = [
+            '0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f',
+            '0x098a12404fd3f5a06cfb016eb7669b1c41419705',
+            '0x1d55762a320e6826cf00c4f2121b7e53d23f6822',
+        ];
+    } else {
+        /**
+         * Network configuration for the dev-local testing purposes and plasma testing purposes
+         */
+        maintainerAddresses = [
+            '0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f',
+            '0x098a12404fd3f5a06cfb016eb7669b1c41419705' ,
+            '0x1d55762a320e6826cf00c4f2121b7e53d23f6822',
             '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7'
-        ]
+        ];
     }
+
     let votingPowers = [1, 1];
 
     /**
@@ -349,8 +370,7 @@ module.exports = function deploy(deployer) {
                         console.log('Setting initial params in plasma contract on plasma network', maintainerAddresses);
                         let txHash = await TwoKeyPlasmaEvents.at(proxyAddressTwoKeyPlasmaEvents).setInitialParams
                         (
-                            //TODO: Paste here real maintainer address on plasma network
-                            [maintainerAddresses]
+                            maintainerAddresses
                         );
                         resolve(txHash);
                     } catch (e) {

@@ -216,6 +216,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
 
     function performConversion(uint _conversionId) internal {
         Conversion memory conversion = conversions[_conversionId];
+        uint totalUnits = conversion.baseTokenUnits + conversion.bonusTokenUnits;
         if(conversion.isConversionFiat == true) {
             require(conversion.state == ConversionState.PENDING_APPROVAL);
             require(msg.sender == contractor);
@@ -223,7 +224,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
             require(conversion.state == ConversionState.APPROVED);
             require(msg.sender == conversion.converter || msg.sender == contractor);
         }
-        uint totalUnits = conversion.baseTokenUnits + conversion.bonusTokenUnits;
 
         /**
          * For the lockup contracts there's no need to save to plasma address, there we'll save ethereum address
