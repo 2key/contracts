@@ -80,7 +80,6 @@ const rmDir = (dir) => new Promise((resolve) => {
   })
 });
 
-
 const archiveBuild = () => new Promise(async (resolve, reject) => {
   try {
     if (fs.existsSync(buildPath)) {
@@ -373,7 +372,11 @@ async function deploy() {
        */
     if(!local) {
         process.chdir(twoKeyProtocolDist);
-        await runProcess('npm',['version', 'patch']);
+        if (process.env.NODE_ENV === 'production') {
+          await runProcess('npm', ['version', 'patch']);
+        } else {
+          await runProcess('npm', ['version', 'patch', '--suffix', contractsStatus.current])
+        }
         var json = JSON.parse(fs.readFileSync('package.json', 'utf8'));
         let npmVersionTag = json.version;
         console.log(npmVersionTag);
