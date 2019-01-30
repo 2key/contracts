@@ -945,19 +945,21 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         return new Promise<IConversionObject>(async(resolve,reject) => {
             try {
                 const conversionHandlerInstance = await this.helpers._getAcquisitionConversionHandlerInstance(campaign);
-                let [contractor, contractorProceedsETHWei, converter, state, conversionAmount, maxReferralRewardEthWei, baseTokenUnits,
-                bonusTokenUnits, conversionCreatedAt, conversionExpiresAt] = await promisify(conversionHandlerInstance.getConversion,[conversionId,{from}]);
+                let [contractor, contractorProceedsETHWei, converter, state, conversionAmount, maxReferralRewardEthWei, moderatorFeeETHWei, baseTokenUnits,
+                bonusTokenUnits, conversionCreatedAt, conversionExpiresAt, isConversionFiat] = await promisify(conversionHandlerInstance.getConversion,[conversionId,{from}]);
                 let obj : IConversionObject = {
                     'contractor' : contractor,
-                    'contractorProceedsETHWei' : contractorProceedsETHWei,
+                    'contractorProceedsETHWei' : parseFloat(this.utils.fromWei(contractorProceedsETHWei, 'ether').toString()),
                     'converter' : converter,
-                    'state' : state,
-                    'conversionAmount' : conversionAmount,
-                    'maxReferralRewardEthWei' : maxReferralRewardEthWei,
-                    'baseTokenUnits' : baseTokenUnits,
-                    'bonusTokenUnits' : bonusTokenUnits,
+                    'state' : parseInt(state,10).toString(),
+                    'conversionAmount' : parseFloat(this.utils.fromWei(conversionAmount, 'ether').toString()),
+                    'maxReferralRewardEthWei' : parseFloat(this.utils.fromWei(maxReferralRewardEthWei, 'ether').toString()),
+                    'moderatorFeeETHWei' : parseFloat(this.utils.fromWei(moderatorFeeETHWei, 'ether').toString()),
+                    'baseTokenUnits' : parseFloat(this.utils.fromWei(baseTokenUnits, 'ether').toString()),
+                    'bonusTokenUnits' : parseFloat(this.utils.fromWei(bonusTokenUnits, 'ether').toString()),
                     'conversionCreatedAt' : conversionCreatedAt,
-                    'conversionExpiresAt' : conversionExpiresAt
+                    'conversionExpiresAt' : conversionExpiresAt,
+                    'isConversionFiat' : isConversionFiat,
                 };
                 resolve(obj);
             } catch (e) {

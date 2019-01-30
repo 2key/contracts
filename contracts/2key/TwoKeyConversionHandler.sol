@@ -180,7 +180,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
             state = determineConversionState(_converterAddress);
         }
 
-
         Conversion memory c = Conversion(_contractor, _contractorProceeds, _converterAddress,
             state ,_conversionAmount, _maxReferralRewardETHWei, _moderatorFeeETHWei, baseTokensForConverterUnits,
             bonusTokensForConverterUnits, CampaignType.CPA_FUNGIBLE,
@@ -218,6 +217,8 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
         Conversion memory conversion = conversions[_conversionId];
         uint totalUnits = conversion.baseTokenUnits + conversion.bonusTokenUnits;
         if(conversion.isConversionFiat == true) {
+            uint availableTokens = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).getAvailableAndNonReservedTokensAmount();
+            require(totalUnits < availableTokens);
             require(conversion.state == ConversionState.PENDING_APPROVAL);
             require(msg.sender == contractor);
         } else {
@@ -298,7 +299,8 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
         uint256,
         uint256,
         uint256,
-        uint256) {
+        uint256,
+        bool) {
             Conversion memory conversion = conversions[conversionId];
             address empty = address(0);
             if(isConverterAnonymous[conversion.converter] == false) {
@@ -315,7 +317,8 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
                 conversion.baseTokenUnits,
                 conversion.bonusTokenUnits,
                 conversion.conversionCreatedAt,
-                conversion.conversionExpiresAt
+                conversion.conversionExpiresAt,
+                conversion.isConversionFiat
             );
     }
 

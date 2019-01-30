@@ -110,10 +110,12 @@ export interface IConversionObject {
     'state' : string,
     'conversionAmount' : number,
     'maxReferralRewardEthWei' : number,
+    'moderatorFeeETHWei' : number,
     'baseTokenUnits' : number,
     'bonusTokenUnits' : number,
     'conversionCreatedAt' : number,
     'conversionExpiresAt' : number
+    'isConversionFiat' : boolean
 }
 
 export interface IConvertOpts {

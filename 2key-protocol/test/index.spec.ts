@@ -1061,6 +1061,12 @@ describe('TwoKeyProtocol', () => {
         console.log(balance);
     }).timeout(30000);
 
+    it('should check the amount of tokens for the offline conversion', async() => {
+        console.log('Trying to resolve base and bonus amount of tokens for this kind of conversion');
+        let obj = await twoKeyProtocol.AcquisitionCampaign.getEstimatedTokenAmount(campaignAddress,true,twoKeyProtocol.Utils.toWei(50, 'ether'));
+        console.log(obj);
+    }).timeout(30000);
+
     it('should create an offline(fiat) conversion', async() => {
         const {web3, address} = web3switcher.gmail2();
         from = address;
@@ -1073,8 +1079,17 @@ describe('TwoKeyProtocol', () => {
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
         });
         console.log('Trying to perform offline conversion from gmail2');
-        let txHash = await twoKeyProtocol.AcquisitionCampaign.convertOffline(campaignAddress, from, 50, );
+        let txHash = await twoKeyProtocol.AcquisitionCampaign.convertOffline(campaignAddress, from, 50);
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(30000);
 
+    it('should check conversion ids conversion handler after conversion is created', async() => {
+        let conversionIds = await twoKeyProtocol.AcquisitionCampaign.getConverterConversionIds(campaignAddress, env.GMAIL2_ADDRESS, from);
+        console.log('Conversion ids for the Gmail 2 are: ' + conversionIds);
+    }).timeout(30000);
+
+    it('should check conversion object for the created fiat conversion', async() => {
+        let conversion = await twoKeyProtocol.AcquisitionCampaign.getConversion(campaignAddress,4,from);
+        console.log(conversion);
+    })
 });
