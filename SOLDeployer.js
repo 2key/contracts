@@ -370,7 +370,7 @@ async function deploy() {
        * Get version of package
        * put the tag
        */
-    if(!local) {
+    if(!local || process.env.FORCE_NPM) {
         process.chdir(twoKeyProtocolDist);
         if (process.env.NODE_ENV === 'production') {
           await runProcess('npm', ['version', 'patch']);
