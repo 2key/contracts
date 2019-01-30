@@ -370,7 +370,7 @@ module.exports = function deploy(deployer) {
                         console.log('Setting initial params in plasma contract on plasma network', maintainerAddresses);
                         let txHash = await TwoKeyPlasmaEvents.at(proxyAddressTwoKeyPlasmaEvents).setInitialParams
                         (
-                            [maintainerAddresses]
+                            maintainerAddresses
                         );
                         resolve(txHash);
                     } catch (e) {
