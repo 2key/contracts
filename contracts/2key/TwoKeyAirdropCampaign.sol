@@ -10,6 +10,8 @@ import "../interfaces/IERC20.sol";
  */
 //TODO: Inherit arc contract
 contract TwoKeyAirdropCampaign is TwoKeyConversionStates {
+
+
     // Campaign is activated once the 2key fee requirement is satisfied
     bool isActivated = false;
     // Here will be static address of the economy previously deployed (ropsten version)
@@ -228,5 +230,22 @@ contract TwoKeyAirdropCampaign is TwoKeyConversionStates {
         require(referrerBalances[msg.sender] > 0);
         IERC20(erc20ContractAddress).transfer(msg.sender, referrerBalances[msg.sender]);
         referrerBalances[msg.sender] = 0;
+    }
+
+
+    function convertConversionStateToBytes(ConversionState state) internal pure returns (bytes32) {
+        if(state == ConversionState.PENDING_APPROVAL) {
+            return bytes32("PENDING_APPROVAL");
+        } else if(state == ConversionState.APPROVED) {
+            return bytes32("APPROVED");
+        } else if(state == ConversionState.EXECUTED) {
+            return bytes32("EXECUTED");
+        } else if(state == ConversionState.REJECTED) {
+            return bytes32("REJECTED");
+        } else if(state == ConversionState.CANCELLED_BY_CONVERTER) {
+            return bytes32("CANCELLED_BY_CONVERTER");
+        } else {
+            return bytes32(0);
+        }
     }
 }

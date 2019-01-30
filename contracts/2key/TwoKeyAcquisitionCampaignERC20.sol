@@ -72,7 +72,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         assetContractERC20 = _assetContractERC20;
         expiryConversionInHours = values[0];
         maxReferralRewardPercent = values[1];
-        ITwoKeyConversionHandler(conversionHandler).setTwoKeyAcquisitionCampaignERC20(address(this), _moderator, contractor, _assetContractERC20, _twoKeyEventSource);
+        ITwoKeyConversionHandler(conversionHandler).setTwoKeyAcquisitionCampaignERC20(address(this), contractor, _assetContractERC20, _twoKeyEventSource);
         ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).setTwoKeyAcquisitionCampaignContract(address(this));
         twoKeyEventSource.created(address(this), contractor, moderator);
     }
