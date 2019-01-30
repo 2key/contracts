@@ -204,7 +204,7 @@ const eventEmited = (error, event) => {
 };
 
 const addresses = [env.AYDNEP_ADDRESS, env.GMAIL_ADDRESS, env.TEST4_ADDRESS, env.RENATA_ADDRESS, env.UPORT_ADDRESS, env.GMAIL2_ADDRESS, env.AYDNEP2_ADDRESS, env.TEST_ADDRESS];
-const acquisitionCurrency = 'ETH';
+const acquisitionCurrency = 'USD';
 let twoKeyProtocol: TwoKeyProtocol;
 
 const printBalances = (done) => {
@@ -1054,6 +1054,27 @@ describe('TwoKeyProtocol', () => {
     it('should get statistics for the address from the contract', async() => {
         let stats = await twoKeyProtocol.AcquisitionCampaign.getAddressStatistic(campaignAddress,env.RENATA_ADDRESS);
         console.log(stats);
+    }).timeout(30000);
+
+    it('should print balance of left ERC20 on the Acquisition contract', async() => {
+        let balance = await twoKeyProtocol.ERC20.getERC20Balance(twoKeyEconomy, campaignAddress);
+        console.log(balance);
+    }).timeout(30000);
+
+    it('should create an offline(fiat) conversion', async() => {
+        const {web3, address} = web3switcher.gmail2();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+        });
+        console.log('Trying to perform offline conversion from gmail2');
+        let txHash = await twoKeyProtocol.AcquisitionCampaign.convertOffline(campaignAddress, from, 50, );
+        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(30000);
 
 });
