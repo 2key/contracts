@@ -386,7 +386,7 @@ async function deploy() {
           console.log(newVersion);
           await runProcess('npm', ['version', newVersion])
         }
-        var json = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+        const json = JSON.parse(fs.readFileSync('package.json', 'utf8'));
         let npmVersionTag = json.version;
         console.log(npmVersionTag);
         process.chdir('../../');
@@ -395,7 +395,11 @@ async function deploy() {
         await twoKeyProtocolLibGit.pushTags('origin');
         await contractsGit.pushTags('origin');
         process.chdir(twoKeyProtocolDist);
-        await runProcess('npm',['publish']);
+        if (process.env.NODE_ENV === 'production') {
+          await runProcess('npm', ['publish']);
+        } else {
+          await runProcess('npm', ['publish', '--tag', contractsStatus.current]);
+        }
         await twoKeyProtocolLibGit.push('origin', contractsStatus.current);
     }
   } catch (e) {
