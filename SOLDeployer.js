@@ -375,7 +375,16 @@ async function deploy() {
         if (process.env.NODE_ENV === 'production') {
           await runProcess('npm', ['version', 'patch']);
         } else {
-          await runProcess('npm', ['version', 'patch', '--suffix', contractsStatus.current])
+          const { version } = JSON.parse(fs.readFileSync(path.join(twoKeyProtocolDist, 'package.json'), 'utf8'));
+          console.log(version);
+          const versionArray = version.split('-')[0].split('.');
+          console.log(versionArray);
+          const patch = parseInt(versionArray.pop(), 10) + 1;
+          console.log(patch);
+          versionArray.push(patch);
+          const newVersion = `${versionArray.join('.')}-${contractsStatus.current}`;
+          console.log(newVersion);
+          await runProcess('npm', ['version', newVersion])
         }
         var json = JSON.parse(fs.readFileSync('package.json', 'utf8'));
         let npmVersionTag = json.version;
