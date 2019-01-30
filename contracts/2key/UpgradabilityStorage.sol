@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-import './ITwoKeySingletonesRegistry.sol';
+import '../interfaces/ITwoKeySingletonesRegistry.sol';
 
 /**
  * @title UpgradeabilityStorage
