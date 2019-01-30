@@ -246,7 +246,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
     }
 
     /// @notice Function to check whether converter is approved or not
-    /// @dev only contractor or moderator are eligible to call this function
+    /// @dev only contractor or maintainer are eligible to call this function
     /// @param _converter is the address of converter
     /// @return true if yes, otherwise false
     function isConverterApproved(address _converter) public onlyContractorOrMaintainer view  returns (bool) {
@@ -258,7 +258,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
 
 
     /// @notice Function to check whether converter is rejected or not
-    /// @dev only contractor or moderator are eligible to call this function
+    /// @dev only contractor or maintainer are eligible to call this function
     /// @param _converter is the address of converter
     /// @return true if yes, otherwise false
     function isConverterRejected(address _converter) public view onlyContractorOrMaintainer returns (bool) {
@@ -270,7 +270,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
 
 
     /// @notice Function to check whether converter is cancelled or not
-    /// @dev only contractor or moderator are eligible to call this function
+    /// @dev only contractor or maintainer are eligible to call this function
     /// @param _converter is the address of converter
     /// @return true if yes, otherwise false
     function isConverterPendingApproval(address _converter) public view onlyContractorOrMaintainer returns (bool) {
@@ -346,7 +346,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
 
 
     /// @notice Function to get array of lockup contract addresses for converter
-    /// @dev only contractor or moderator can call this function
+    /// @dev only contractor or maintainer can call this function
     /// @param _converter is the address of converter
     /// @return array of addresses
     function getLockupContractsForConverter(address _converter) public view returns (address[]){
@@ -395,7 +395,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
 
 
     /// @notice Function where we are approving converter
-    /// @dev only moderator or contractor can call this method
+    /// @dev only maintainer or contractor can call this method
     /// @param _converter is the address of converter
     function approveConverter(address _converter) public onlyContractorOrMaintainer {
         require(converterToState[_converter] == ConverterState.PENDING_APPROVAL || converterToState[_converter] == ConverterState.REJECTED);
@@ -412,7 +412,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
 
 
     /// @notice Function where we can reject converter
-    /// @dev only moderator or contractor can call this function
+    /// @dev only maintainer or contractor can call this function
     /// @param _converter is the address of converter
     function rejectConverter(address _converter) public onlyContractorOrMaintainer  {
         require(converterToState[_converter] == ConverterState.PENDING_APPROVAL);
@@ -435,7 +435,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
      * @notice Function to get all conversion ids for the converter
      * @param _converter is the address of the converter
      * @return array of conversion ids
-     * @dev can only be called by converter itself or moderator/contractor
+     * @dev can only be called by converter itself or maintainer/contractor
      */
     function getConverterConversionIds(address _converter) external view returns (uint[]) {
         require(msg.sender == contractor || ITwoKeyEventSource(twoKeyEventSource).isAddressMaintainer(msg.sender) || msg.sender == _converter);
@@ -444,7 +444,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
 
     /**
      * @notice Function to get number of conversions
-     * @dev Can only be called by contractor or moderator
+     * @dev Can only be called by contractor or maintainer
      */
     function getNumberOfConversions() external view returns (uint) {
         return numberOfConversions;
