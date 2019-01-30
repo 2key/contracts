@@ -95,6 +95,7 @@ export interface ITwoKeyAcquisitionCampaign {
     getCurrentAvailableAmountOfTokens: (campaign:any, from:string) => Promise<number>,
     getAddressStatistic: (campaign: any, address: string, plasma?: boolean) => Promise<IAddressStats>,
     getCampaignSummary: (campaign: any, from: string) => Promise<IConversionStats>,
+    getLockupContractAddress: (campaign:any, conversionId: number, from:string) => Promise<string>,
 }
 
 export interface IPublicLinkOpts {

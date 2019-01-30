@@ -1618,4 +1618,23 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         })
     }
 
+    /**
+     * Get lockup contract for the conversion id
+     * @param campaign
+     * @param {string} from
+     * @param {number} conversionId
+     * @returns {Promise<string>}
+     */
+    public getLockupContractAddress(campaign:any, conversionId: number, from:string) : Promise<string> {
+        return new Promise<string>(async(resolve,reject) => {
+            try {
+                const conversionHandlerInstance = await this.helpers._getAcquisitionConversionHandlerInstance(campaign);
+                let lockupAddress = await promisify(conversionHandlerInstance.getLockupContractAddress,[conversionId,{from}]);
+                resolve(lockupAddress);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
 }

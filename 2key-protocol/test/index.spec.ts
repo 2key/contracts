@@ -1091,5 +1091,23 @@ describe('TwoKeyProtocol', () => {
     it('should check conversion object for the created fiat conversion', async() => {
         let conversion = await twoKeyProtocol.AcquisitionCampaign.getConversion(campaignAddress,4,from);
         console.log(conversion);
-    })
+    }).timeout(30000);
+
+    it('should execute conversion from contractor', async() => {
+        const {web3, address} = web3switcher.aydnep();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+        });
+        console.log('Trying to execute fiat conversion from Contractor');
+        let txHash = await twoKeyProtocol.AcquisitionCampaign.executeConversion(campaignAddress,4,from);
+        let lockupContractAddress = await twoKeyProtocol.AcquisitionCampaign.getLockupContractAddress(campaignAddress,4,from);
+        expect(lockupContractAddress).not.to.be.equal(0);
+        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+    }).timeout(30000);
 });
