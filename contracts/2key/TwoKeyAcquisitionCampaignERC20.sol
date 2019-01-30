@@ -264,6 +264,12 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         twoKeyEventSource.converted(address(this),msg.sender,msg.value);
     }
 
+    /**
+     * @notice Function to convert if the conversion is in fiat
+     * @dev This can be executed only in case currency is fiat
+     * @param conversionAmountFiatWei is the amount of conversion converted to wei units
+     * @param _isAnonymous if converter chooses to be anonymous
+     */
     function convertFiat(uint conversionAmountFiatWei, bool _isAnonymous) public {
         createConversion(conversionAmountFiatWei, msg.sender, true);
         ITwoKeyConversionHandler(conversionHandler).setAnonymous(msg.sender, _isAnonymous);
@@ -336,7 +342,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         }
     }
 
-
     /**
      * @notice Function to send ether back to converter if his conversion is cancelled
      * @param _cancelledConverter is the address of cancelled converter
@@ -400,9 +405,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         reservedAmountOfTokens = reservedAmountOfTokens - value;
     }
 
-
-
-
     /**
      * @notice Function to get cut for an (ethereum) address
      * @param me is the ethereum address
@@ -442,7 +444,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         cuts[influencers.length] = getReferrerCut(last_influencer);
         return cuts;
     }
-
 
     /**
      * @notice Function to check balance of the ERC20 inventory (view - no gas needed to call this function)
@@ -509,6 +510,10 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         return (referrerPlasma2BalancesEthWEI[_referrer], referrerPlasma2TotalEarningsEthWEI[_referrer], referrerPlasmaAddressToCounterOfConversions[_referrer]);
     }
 
+    /**
+     * @notice Function to get public link key of an address
+     * @param me is the address we're checking public link key
+     */
     function publicLinkKeyOf(address me) public view returns (address) {
         return public_link_key[twoKeyEventSource.plasmaOf(me)];
     }
@@ -556,6 +561,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
 
     /**
      * @notice Function where moderator or referrer can withdraw their available funds
+     * @param _address is the address we're withdrawing funds to
+     * @dev It can be called by the address specified in the param or by the one of two key maintainers
      */
     function withdrawModeratorOrReferrer(address _address) external {
         //Creating additional variable to prevent reentrancy attack

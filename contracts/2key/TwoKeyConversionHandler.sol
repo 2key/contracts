@@ -281,6 +281,10 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
     }
 
 
+    /**
+     * @notice Function to get conversion details by id
+     * @param conversionId is the id of conversion
+     */
     function getConversion(
         uint conversionId
     ) external view returns (
