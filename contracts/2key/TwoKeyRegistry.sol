@@ -453,7 +453,7 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
     function checkIfUserExists(address _userAddress) external view returns (bool) {
         bytes memory tempEmptyStringTest = bytes(address2username[_userAddress]);
         //notes[_userAddress].length == 0
-        if(tempEmptyStringTest.length == 0 || address2walletTag[_userAddress] != 0 || ethereum2plasma[_userAddress] == address(0)) {
+        if(tempEmptyStringTest.length == 0 || address2walletTag[_userAddress] == 0 || ethereum2plasma[_userAddress] == address(0) || notes[_userAddress].length == 0) {
             return false;
         }
         return true;

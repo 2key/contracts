@@ -49,6 +49,7 @@ contract TwoKeyAcquisitionLogicHandler {
         address _assetContractERC20,
         address _twoKeyRegistry
     ) public {
+
         contractor = msg.sender;
         minContributionETHorFiatCurrency = _minContribution;
         maxContributionETHorFiatCurrency = _maxContribution;
