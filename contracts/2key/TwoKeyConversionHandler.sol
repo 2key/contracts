@@ -251,38 +251,26 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
      */
     function getConversion(
         uint conversionId
-    ) external view returns (
-        address,
-        uint256,
-        address,
-        ConversionState,
-        uint256,
-        uint256,
-        uint256,
-        uint256,
-        uint256,
-        uint256,
-        uint256,
-        bool) {
-            Conversion memory conversion = conversions[conversionId];
-            address empty = address(0);
-            if(isConverterAnonymous[conversion.converter] == false) {
-                empty = conversion.converter;
-            }
-            return(
-                conversion.contractor,
-                conversion.contractorProceedsETHWei,
-                empty,
-                conversion.state,
-                conversion.conversionAmount,
-                conversion.maxReferralRewardETHWei,
-                conversion.moderatorFeeETHWei,
-                conversion.baseTokenUnits,
-                conversion.bonusTokenUnits,
-                conversion.conversionCreatedAt,
-                conversion.conversionExpiresAt,
-                conversion.isConversionFiat
-            );
+    ) external view returns (bytes) {
+        Conversion memory conversion = conversions[conversionId];
+        address empty = address(0);
+        if(isConverterAnonymous[conversion.converter] == false) {
+            empty = conversion.converter;
+        }
+        return abi.encodePacked (
+            conversion.contractor,
+            conversion.contractorProceedsETHWei,
+            empty,
+            conversion.state,
+            conversion.conversionAmount,
+            conversion.maxReferralRewardETHWei,
+            conversion.moderatorFeeETHWei,
+            conversion.baseTokenUnits,
+            conversion.bonusTokenUnits,
+            conversion.conversionCreatedAt,
+            conversion.conversionExpiresAt,
+            conversion.isConversionFiat
+        );
     }
 
 

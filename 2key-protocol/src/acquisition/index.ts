@@ -945,8 +945,23 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         return new Promise<IConversionObject>(async(resolve,reject) => {
             try {
                 const conversionHandlerInstance = await this.helpers._getAcquisitionConversionHandlerInstance(campaign);
-                let [contractor, contractorProceedsETHWei, converter, state, conversionAmount, maxReferralRewardEthWei, moderatorFeeETHWei, baseTokenUnits,
-                bonusTokenUnits, conversionCreatedAt, conversionExpiresAt, isConversionFiat] = await promisify(conversionHandlerInstance.getConversion,[conversionId,{from}]);
+                let contractor, contractorProceedsETHWei, converter, state, conversionAmount, maxReferralRewardEthWei, moderatorFeeETHWei, baseTokenUnits,
+                bonusTokenUnits, conversionCreatedAt, conversionExpiresAt, isConversionFiat;
+                let hexedValues = await promisify(conversionHandlerInstance.getConversion,[conversionId,{from}]);
+                console.log(hexedValues);
+                contractor = hexedValues.slice(0, 42);
+                contractorProceedsETHWei = parseInt(hexedValues.slice(42, 42+64),16);
+                converter = '0x' + hexedValues.slice(42+64,42+64+40);
+                state = parseInt(hexedValues.slice(42+64+40,42+64+40+2),16);
+                conversionAmount = parseInt(hexedValues.slice(42+64+40+2,42+64+40+2+64),16);
+                maxReferralRewardEthWei = parseInt(hexedValues.slice(42+64+40+2+64,42+64+40+2+64+64),16);
+                moderatorFeeETHWei = parseInt(hexedValues.slice(42+64+40+2+64+64,42+64+40+2+64+64+64),16);
+                baseTokenUnits = parseInt(hexedValues.slice(42+64+40+2+64+64+64,42+64+40+2+64+64+64+64),16);
+                bonusTokenUnits = parseInt(hexedValues.slice(42+64+40+2+64+64+64+64,42+64+40+2+64+64+64+64+64),16);
+                conversionCreatedAt = parseInt(hexedValues.slice(42+64+40+2+64+64+64+64+64,42+64+40+2+64+64+64+64+64+64),16);
+                conversionExpiresAt = parseInt(hexedValues.slice(42+64+40+2+64+64+64+64+64+64,42+64+40+2+64+64+64+64+64+64+64),16);
+                isConversionFiat = parseInt(hexedValues.slice(42+64+40+2+64+64+64+64+64+64+64,42+64+40+2+64+64+64+64+64+64+64+2),16) == 1;
+
                 let obj : IConversionObject = {
                     'contractor' : contractor,
                     'contractorProceedsETHWei' : parseFloat(this.utils.fromWei(contractorProceedsETHWei, 'ether').toString()),
