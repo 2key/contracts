@@ -948,7 +948,6 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 let contractor, contractorProceedsETHWei, converter, state, conversionAmount, maxReferralRewardEthWei, moderatorFeeETHWei, baseTokenUnits,
                 bonusTokenUnits, conversionCreatedAt, conversionExpiresAt, isConversionFiat;
                 let hexedValues = await promisify(conversionHandlerInstance.getConversion,[conversionId,{from}]);
-                console.log(hexedValues);
                 contractor = hexedValues.slice(0, 42);
                 contractorProceedsETHWei = parseInt(hexedValues.slice(42, 42+64),16);
                 converter = '0x' + hexedValues.slice(42+64,42+64+40);
