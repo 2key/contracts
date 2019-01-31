@@ -119,9 +119,9 @@ contract TwoKeyAcquisitionLogicHandler {
                 bool flag;
                 (rate,flag,,) = ITwoKeyExchangeRateContract(ethUSDExchangeContract).getFiatCurrencyDetails(currency);
                 if(flag) {
-                    conversionAmountETHWeiOrFiat = (conversionAmountETHWeiOrFiat * rate).div(10 ** 18); //converting eth to $wei
+                    conversionAmountETHWeiOrFiat = (conversionAmountETHWeiOrFiat.mul(rate)).div(10 ** 18); //converting eth to $wei
                 } else {
-                    value = (value * rate).div(10 ** 18); //converting dollar wei to eth
+                    value = (value.mul(rate)).div(10 ** 18); //converting dollar wei to eth
                 }
             }
         }
@@ -138,7 +138,7 @@ contract TwoKeyAcquisitionLogicHandler {
      */
     function updateMinContributionETHOrUSD(uint value) public onlyContractor {
         minContributionETHorFiatCurrency = value;
-//        twoKeyEventSource.updatedData(block.timestamp, value, "Updated maxContribution");
+        //        twoKeyEventSource.updatedData(block.timestamp, value, "Updated maxContribution");
     }
 
     /**
@@ -148,7 +148,7 @@ contract TwoKeyAcquisitionLogicHandler {
      */
     function updateMaxContributionETHorUSD(uint value) external onlyContractor {
         maxContributionETHorFiatCurrency = value;
-//        twoKeyEventSource.updatedData(block.timestamp, value, "Updated maxContribution");
+        //        twoKeyEventSource.updatedData(block.timestamp, value, "Updated maxContribution");
     }
 
     /**
@@ -158,7 +158,7 @@ contract TwoKeyAcquisitionLogicHandler {
      */
     function updateOrSetIpfsHashPublicMeta(string value) public onlyContractor {
         publicMetaHash = value;
-//        twoKeyEventSource.updatedPublicMetaHash(block.timestamp, value);
+        //        twoKeyEventSource.updatedPublicMetaHash(block.timestamp, value);
     }
 
 
@@ -186,13 +186,13 @@ contract TwoKeyAcquisitionLogicHandler {
      */
     function getConstantInfo() public view returns (uint,uint,uint,uint,uint,uint,uint) {
         return (
-            campaignStartTime,
-            campaignEndTime,
-            minContributionETHorFiatCurrency,
-            maxContributionETHorFiatCurrency,
-            unit_decimals,
-            pricePerUnitInETHWeiOrUSD,
-            maxConverterBonusPercent);
+        campaignStartTime,
+        campaignEndTime,
+        minContributionETHorFiatCurrency,
+        maxContributionETHorFiatCurrency,
+        unit_decimals,
+        pricePerUnitInETHWeiOrUSD,
+        maxConverterBonusPercent);
     }
 
     /**
