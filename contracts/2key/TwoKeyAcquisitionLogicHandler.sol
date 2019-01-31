@@ -198,7 +198,7 @@ contract TwoKeyAcquisitionLogicHandler {
     /**
      * @notice Function to get suepr statistics
      */
-    function getSuperStatistics(address _user, bool plasma) public view returns (bytes32, bytes32, bytes32, bool, bytes) {
+    function getSuperStatistics(address _user, bool plasma) public view returns (bytes32, bytes32, bytes32, bool, bytes, address) {
         bytes32 username;
         bytes32 fullName;
         bytes32 email;
@@ -211,7 +211,7 @@ contract TwoKeyAcquisitionLogicHandler {
         (username,fullName,email) = ITwoKeyReg(twoKeyRegistry).getUserData(eth_address);
         bool isJoined = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getAddressJoinedStatus(_user);
         bytes memory stats = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getAddressStatistic(_user, plasma);
-        return (username, fullName, email, isJoined, stats);
+        return (username, fullName, email, isJoined, stats, eth_address);
     }
 
 }

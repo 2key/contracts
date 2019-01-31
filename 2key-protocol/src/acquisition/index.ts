@@ -1556,7 +1556,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
             try {
                 const twoKeyAcquisitionLogicHandlerInstance = await this.helpers._getAcquisitionLogicHandlerInstance(campaign);
 
-                let [username, fullname, email, isJoined ,hexedValues] = await promisify(twoKeyAcquisitionLogicHandlerInstance.getSuperStatistics,[address, plasma]);
+                let [username, fullname, email, isJoined ,hexedValues, ethereumof] = await promisify(twoKeyAcquisitionLogicHandlerInstance.getSuperStatistics,[address, plasma]);
                 /**
                  * Unpack bytes for statistics
                  */
@@ -1565,7 +1565,6 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 let unitsConverterBought = parseInt(hexedValues.slice(66+64,66+64+64),16);
                 let isConverter = parseInt(hexedValues.slice(66+64+64,66+64+64+2),16) == 1;
                 let isReferrer = parseInt(hexedValues.slice(66+64+64+2,66+64+64+2+2),16) == 1;
-
                 let obj : IAddressStats = {
                     amountConverterSpentETH: parseFloat(this.utils.fromWei(amountConverterSpent,'ether').toString()),
                     rewards : parseFloat(this.utils.fromWei(rewards,'ether').toString()),
@@ -1575,7 +1574,8 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     isJoined: isJoined,
                     username: this.base.web3.toUtf8(username),
                     fullName: this.base.web3.toUtf8(fullname),
-                    email: this.base.web3.toUtf8(email)
+                    email: this.base.web3.toUtf8(email),
+                    ethereumOf: ethereumof
                 };
 
                 console.log(obj);

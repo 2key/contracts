@@ -166,4 +166,5 @@ export interface IAddressStats {
     username: string,
     fullName: string,
     email: string
+    ethereumOf: string,
 }
