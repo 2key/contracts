@@ -444,7 +444,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
      */
     function getLockupContractAddress(uint _conversionId) public view returns (address) {
         Conversion memory c = conversions[_conversionId];
-        require(msg.sender == contractor || msg.sender == c.converter);
+        require(msg.sender == contractor || msg.sender == c.converter || ITwoKeyEventSource(twoKeyEventSource).isAddressMaintainer(msg.sender));
         return conversionId2LockupAddress[_conversionId];
     }
 }
