@@ -4,7 +4,7 @@ import "../interfaces/IERC20.sol";
 import "../openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "../interfaces/ITwoKeyAcquisitionCampaignERC20.sol";
 import "../interfaces/ITwoKeyReg.sol";
-import "../interfaces/IAcquisitionFetchReferrers.sol";
+import "../interfaces/IAcquisitionGetReceivedFrom.sol";
 /**
  * @author Nikola Madjarevic
  * Created at 1/15/19
@@ -220,7 +220,7 @@ contract TwoKeyAcquisitionLogicHandler {
         address influencer = plasmaOf(customer);
         uint n_influencers = 0;
         while (true) {
-            influencer = plasmaOf(IAcquisitionFetchReferrers(acquisitionCampaignContract).getReceivedFrom(influencer));
+            influencer = plasmaOf(IAcquisitionGetReceivedFrom(acquisitionCampaignContract).getReceivedFrom(influencer));
             if (influencer == plasmaOf(contractor)) {
                 break;
             }
@@ -229,7 +229,7 @@ contract TwoKeyAcquisitionLogicHandler {
         address[] memory influencers = new address[](n_influencers);
         influencer = plasmaOf(customer);
         while (n_influencers > 0) {
-            influencer = plasmaOf(IAcquisitionFetchReferrers(acquisitionCampaignContract).getReceivedFrom(influencer));
+            influencer = plasmaOf(IAcquisitionGetReceivedFrom(acquisitionCampaignContract).getReceivedFrom(influencer));
             n_influencers--;
             influencers[n_influencers] = influencer;
         }
