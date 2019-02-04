@@ -33,7 +33,7 @@ contract TwoKeyBaseReputationRegistry is Upgradeable {
     function updateOnConversionCreatedEvent(address converter, address contractor, address acquisitionCampaign) public {
         validateCall(acquisitionCampaign);
         int d = 1;
-        int initialRewardWei = 5000000000000000000;
+        int initialRewardWei = 5*(10**18);
 
         address logicHandlerAddress = getLogicHandlerAddress(acquisitionCampaign);
         address2contractorGlobalReputationScoreWei[contractor] = address2contractorGlobalReputationScoreWei[contractor] + initialRewardWei;
@@ -50,7 +50,7 @@ contract TwoKeyBaseReputationRegistry is Upgradeable {
     function updateOnConversionExecutedEvent(address converter, address contractor, address acquisitionCampaign) public {
         validateCall(acquisitionCampaign);
         int d = 1;
-        int initialRewardWei = 10000000000000000000;
+        int initialRewardWei = 10*(10**18);
 
         address logicHandlerAddress = getLogicHandlerAddress(acquisitionCampaign);
         address2contractorGlobalReputationScoreWei[contractor] = address2contractorGlobalReputationScoreWei[contractor] + initialRewardWei;
@@ -67,11 +67,11 @@ contract TwoKeyBaseReputationRegistry is Upgradeable {
     function updateOnConversionRejectedEvent(address converter, address contractor, address acquisitionCampaign) public {
         validateCall(acquisitionCampaign);
         int d = 1;
-        int initialPenaltyWei = 10000000000000000000;
+        int initialPenaltyWei = 10*(10**18);
 
         address logicHandlerAddress = getLogicHandlerAddress(acquisitionCampaign);
-        address2contractorGlobalReputationScoreWei[contractor] = address2contractorGlobalReputationScoreWei[contractor] - 5000000000000000000;
-        address2converterGlobalReputationScoreWei[converter] = address2converterGlobalReputationScoreWei[converter] - 3000000000000000000;
+        address2contractorGlobalReputationScoreWei[contractor] = address2contractorGlobalReputationScoreWei[contractor] - 5*(10**18);
+        address2converterGlobalReputationScoreWei[converter] = address2converterGlobalReputationScoreWei[converter] - 3*(10**18);
 
         address[] memory referrers = ITwoKeyAcquisitionLogicHandler(logicHandlerAddress).getReferrers(converter, acquisitionCampaign);
 
