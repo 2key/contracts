@@ -762,7 +762,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     reject('Broken Link');
                 }
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
-                const prevChain = await promisify(campaignInstance.received_from, [from]);
+                const prevChain = await promisify(campaignInstance.getReceivedFrom, [from]);
                 const nonce = await this.helpers._getNonce(from);
                 let txHash;
                 if (!parseInt(prevChain, 16)) {
@@ -848,7 +848,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 }
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
                 const arcBalance = parseFloat((await promisify(campaignInstance.balanceOf, [from])).toString());
-                const prevChain = await promisify(campaignInstance.received_from, [recipient]);
+                const prevChain = await promisify(campaignInstance.getReceivedFrom, [recipient]);
                 if (parseInt(prevChain, 16)) {
                     reject(new Error('User already in chain'));
                 }

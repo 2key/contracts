@@ -8,6 +8,7 @@ import "../interfaces/IERC20.sol";
 import "../interfaces/IUpgradableExchange.sol";
 import "../interfaces/ITwoKeyConversionHandler.sol";
 import "../interfaces/ITwoKeyAcquisitionLogicHandler.sol";
+
 /**
  * @author Nikola Madjarevic
  * @notice Campaign which will sell ERC20 tokens
@@ -50,6 +51,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         require(msg.sender == address(conversionHandler));
         _;
     }
+
 
     constructor(
         address _twoKeyAcquisitionLogicHandler,
@@ -133,7 +135,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
             contractor == msg.sender,'only the contractor or the last in the link can call transferSig');
         uint i;
         address new_address;
-        // move ARCs based on signature information
+        // move ARCs based on signature informationc
         for (i = 0; i < influencers.length; i++) {
             new_address = twoKeyEventSource.plasmaOf(influencers[i]);
 
@@ -315,8 +317,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      */
     function updateRefchainRewards(uint256 _maxReferralRewardETHWei, address _converter) public onlyTwoKeyConversionHandler {
         require(_maxReferralRewardETHWei > 0, 'Max referral reward in ETH must be > 0');
-        address converter = _converter;
-        address[] memory influencers = getReferrers(converter);
+        address[] memory influencers = ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).getReferrers(_converter,address(this));
 
         uint256 total_bounty = 0;
         for (uint i = 0; i < influencers.length; i++) {
@@ -435,7 +436,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @return array of integers containing cuts respectively
      */
     function getReferrerCuts(address last_influencer) public view returns (uint256[]) {
-        address[] memory influencers = getReferrers(last_influencer);
+        address[] memory influencers = ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).getReferrers(last_influencer,address(this));
         uint256[] memory cuts = new uint256[](influencers.length + 1);
         for (uint i = 0; i < influencers.length; i++) {
             address influencer = influencers[i];
@@ -505,7 +506,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @return tuple containing this 3 information
      */
     function getReferrerBalanceAndTotalEarningsAndNumberOfConversions(address _referrer) public view returns (uint,uint,uint) {
-        require(msg.sender == _referrer || msg.sender == contractor || twoKeyEventSource.isAddressMaintainer(msg.sender));
+        //twoKeyEventSource.isAddressMaintainer(msg.sender)
+        require(msg.sender == _referrer || msg.sender == contractor);
         _referrer = twoKeyEventSource.plasmaOf(_referrer);
         return (referrerPlasma2BalancesEthWEI[_referrer], referrerPlasma2TotalEarningsEthWEI[_referrer], referrerPlasmaAddressToCounterOfConversions[_referrer]);
     }

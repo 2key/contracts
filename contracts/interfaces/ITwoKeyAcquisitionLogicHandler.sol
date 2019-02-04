@@ -7,4 +7,5 @@ contract ITwoKeyAcquisitionLogicHandler {
     function requirementForMsgValue(uint msgValue) public view returns (bool);
     function getEstimatedTokenAmount(uint conversionAmountETHWei, bool isFiatConversion) public view returns (uint, uint);
     function setTwoKeyAcquisitionCampaignContract(address _acquisitionCampaignAddress) public;
+    function getReferrers(address customer, address acquisitionCampaignContract) public view returns (address[]);
 }

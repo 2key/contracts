@@ -22,23 +22,25 @@ contract TwoKeyBaseReputationRegistry is Upgradeable{
     mapping(address => int) address2converterGlobalReputationScoreWei;
     mapping(address => int) address2referrerGlobalReputationScoreWei;
 
-    function updateOnConversionCreatedEvent(address converter, address contractor, address [] referrers) public {
+    function updateOnConversionCreatedEvent(address converter, address contractor, address acquisitionCampaign) public {
         uint d = 0;
         address2contractorGlobalReputationScoreWei[contractor] = address2contractorGlobalReputationScoreWei[contractor] + 5;
         address2converterGlobalReputationScoreWei[converter] = address2converterGlobalReputationScoreWei[converter] + 5;
     }
 
-    function updateOnConversionExecutedEvent(address converter, address contractor, address [] referrers) public {
+    function updateOnConversionExecutedEvent(address converter, address contractor, address acquisitionCampaign) public {
         uint d = 0;
         address2contractorGlobalReputationScoreWei[contractor] = address2contractorGlobalReputationScoreWei[contractor] + 10;
         address2converterGlobalReputationScoreWei[converter] = address2converterGlobalReputationScoreWei[converter] + 10;
     }
 
-    function updateOnConversionRejectedEvent(address converter, address contractor, address [] referrers) public {
+    function updateOnConversionRejectedEvent(address converter, address contractor, address acquisitionCampaign) public {
         uint d = 0;
         address2contractorGlobalReputationScoreWei[contractor] = address2contractorGlobalReputationScoreWei[contractor] - 5;
         address2converterGlobalReputationScoreWei[converter] = address2converterGlobalReputationScoreWei[converter] + 3;
     }
+
+
 
 
 }

@@ -10,7 +10,7 @@ contract TwoKeyCampaignARC is ArcERC20 {
 
 	address public contractor;
     address public moderator;
-	address ownerPlasma;
+	address public ownerPlasma;
 
 	uint256 totalSupply_ = 1000000;
 
@@ -19,7 +19,7 @@ contract TwoKeyCampaignARC is ArcERC20 {
 	uint256 conversionQuota;  // maximal ARC tokens that can be passed in transferFrom
 
 	// referral graph, who did you receive the referral from
-	mapping(address => address) public received_from;
+	mapping(address => address) internal received_from;
 
     // @notice Modifier which allows only contractor to call methods
     modifier onlyContractor() {
@@ -74,37 +74,46 @@ contract TwoKeyCampaignARC is ArcERC20 {
 
 
 
-	/**
-	 * @notice Function to get referrers for the converter
-	 * @param customer is the converter ETH address
-	 * @dev inside method we're converting it to plasma address
-	 */
-	function getReferrers(address customer) internal view returns (address[]) {
-		// build a list of all influencers from converter back to to contractor
-		// dont count the conveter and contractor themselves
-		address influencer = twoKeyEventSource.plasmaOf(customer);
-		// first count how many influencers
-		uint n_influencers = 0;
-		while (true) {
-			influencer = twoKeyEventSource.plasmaOf(received_from[influencer]);
-			// Owner is owner of campaign (contractor)
-			if (influencer == ownerPlasma) {
-				break;
-			}
-			n_influencers++;
-		}
-		// allocate temporary memory to hold the influencers
-		address[] memory influencers = new address[](n_influencers);
-		// fill the array of influencers in reverse order, from the last influencer just before the converter to the
-		// first influencer just after the contractor
-		influencer = twoKeyEventSource.plasmaOf(customer);
-		while (n_influencers > 0) {
-			influencer = twoKeyEventSource.plasmaOf(received_from[influencer]);
-			n_influencers--;
-			influencers[n_influencers] = influencer;
-		}
+//	/**
+//	 * @notice Function to get referrers for the converter
+//	 * @param customer is the converter ETH address
+//	 * @dev inside method we're converting it to plasma address
+//	 */
+//	function getReferrers(address customer) internal view returns (address[]) {
+//		// build a list of all influencers from converter back to to contractor
+//		// dont count the conveter and contractor themselves
+//		address influencer = twoKeyEventSource.plasmaOf(customer);
+//		// first count how many influencers
+//		uint n_influencers = 0;
+//		while (true) {
+//			influencer = twoKeyEventSource.plasmaOf(received_from[influencer]);
+//			// Owner is owner of campaign (contractor)
+//			if (influencer == ownerPlasma) {
+//				break;
+//			}
+//			n_influencers++;
+//		}
+//		// allocate temporary memory to hold the influencers
+//		address[] memory influencers = new address[](n_influencers);
+//		// fill the array of influencers in reverse order, from the last influencer just before the converter to the
+//		// first influencer just after the contractor
+//		influencer = twoKeyEventSource.plasmaOf(customer);
+//		while (n_influencers > 0) {
+//			influencer = twoKeyEventSource.plasmaOf(received_from[influencer]);
+//			n_influencers--;
+//			influencers[n_influencers] = influencer;
+//		}
+//
+//		return influencers;
+//	}
 
-		return influencers;
+
+	/**
+	 * @notice Getter for the referral chain
+	 * @param _receiver is address we want to check who he has received link from
+	 */
+	function getReceivedFrom(address _receiver) public view returns (address) {
+		return received_from[_receiver];
 	}
 
 }

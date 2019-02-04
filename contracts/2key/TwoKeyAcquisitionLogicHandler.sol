@@ -4,7 +4,7 @@ import "../interfaces/IERC20.sol";
 import "../openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "../interfaces/ITwoKeyAcquisitionCampaignERC20.sol";
 import "../interfaces/ITwoKeyReg.sol";
-
+import "../interfaces/IAcquisitionFetchReferrers.sol";
 /**
  * @author Nikola Madjarevic
  * Created at 1/15/19
@@ -15,6 +15,7 @@ contract TwoKeyAcquisitionLogicHandler {
 
     address public twoKeyRegistry;
     address contractor;
+    address public ownerPlasma;
     address public ethUSDExchangeContract;
     address public twoKeyAcquisitionCampaign;
 
@@ -49,7 +50,6 @@ contract TwoKeyAcquisitionLogicHandler {
         address _assetContractERC20,
         address _twoKeyRegistry
     ) public {
-
         contractor = msg.sender;
         minContributionETHorFiatCurrency = _minContribution;
         maxContributionETHorFiatCurrency = _maxContribution;
@@ -61,6 +61,7 @@ contract TwoKeyAcquisitionLogicHandler {
         ethUSDExchangeContract = _ethUsdExchangeContract;
         twoKeyRegistry = _twoKeyRegistry;
         unit_decimals = IERC20(_assetContractERC20).decimals();
+        ownerPlasma = plasmaOf(msg.sender);
     }
 
     /**
@@ -213,6 +214,58 @@ contract TwoKeyAcquisitionLogicHandler {
         bool isJoined = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getAddressJoinedStatus(_user);
         bytes memory stats = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getAddressStatistic(_user, plasma);
         return (username, fullName, email, isJoined, stats, eth_address);
+    }
+
+    function getReferrers(address customer, address acquisitionCampaignContract) public view returns (address[]) {
+        address influencer = plasmaOf(customer);
+        uint n_influencers = 0;
+        while (true) {
+            influencer = plasmaOf(IAcquisitionFetchReferrers(acquisitionCampaignContract).getReceivedFrom(influencer));
+            if (influencer == plasmaOf(contractor)) {
+                break;
+            }
+            n_influencers++;
+        }
+        address[] memory influencers = new address[](n_influencers);
+        influencer = plasmaOf(customer);
+        while (n_influencers > 0) {
+            influencer = plasmaOf(IAcquisitionFetchReferrers(acquisitionCampaignContract).getReceivedFrom(influencer));
+            n_influencers--;
+            influencers[n_influencers] = influencer;
+        }
+        return influencers; //reverse ordered array
+    }
+
+    /**
+     * @notice Function to determine plasma address of ethereum address
+     * @param me is the address (ethereum) of the user
+     * @return an address
+     */
+    function plasmaOf(address me) public view returns (address) {
+        if (twoKeyRegistry == address(0)) {
+            me;
+        }
+        address plasma = ITwoKeyReg(twoKeyRegistry).getEthereumToPlasma(me);
+        if (plasma != address(0)) {
+            return plasma;
+        }
+        return me;
+    }
+
+    /**
+     * @notice Function to determine ethereum address of plasma address
+     * @param me is the plasma address of the user
+     * @return ethereum address
+     */
+    function ethereumOf(address me) public view returns (address) {
+        if (twoKeyRegistry == address(0)) {
+            return me;
+        }
+        address ethereum = ITwoKeyReg(twoKeyRegistry).getPlasmaToEthereum(me);
+        if (ethereum != address(0)) {
+            return ethereum;
+        }
+        return me;
     }
 
 }
