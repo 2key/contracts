@@ -571,7 +571,7 @@ describe('TwoKeyProtocol', () => {
         });
         console.log('Gmail plasma', await promisify(twoKeyProtocol.plasmaWeb3.eth.getAccounts, []));
         await tryToRegisterUser('Gmail', from);
-        // txHash = await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, links.deployer, from);
+        txHash = await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, links.deployer, from);
         console.log('isUserJoined', await twoKeyProtocol.AcquisitionCampaign.isAddressJoined(campaignAddress, from));
         const hash = await twoKeyProtocol.AcquisitionCampaign.join(campaignAddress, from, {
             cut: 50,
@@ -663,8 +663,9 @@ describe('TwoKeyProtocol', () => {
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_RENATA).privateKey,
         });
         await tryToRegisterUser('Renata', from);
+        console.log('isUserJoined', await twoKeyProtocol.AcquisitionCampaign.isAddressJoined(campaignAddress, from));
         txHash = await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, links.test4, from);
-        // console.log('isUserJoined', await twoKeyProtocol.AcquisitionCampaign.isAddressJoined(campaignAddress, from));
+        console.log('VISIT', txHash);
         const maxReward = await twoKeyProtocol.AcquisitionCampaign.getEstimatedMaximumReferralReward(campaignAddress, from, links.test4);
         console.log(`RENATA, Estimated maximum referral reward: ${maxReward}%`);
 

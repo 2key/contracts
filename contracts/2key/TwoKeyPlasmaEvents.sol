@@ -267,9 +267,9 @@ contract TwoKeyPlasmaEvents is Upgradeable {
                     visits_list_timestamps[c][contractor][old_address].push(block.timestamp);
                 }
                 emit Visited(new_address, c, contractor, old_address);
-            } else {
+            } /* else {
                 require(visited_from[c][contractor][new_address] == old_address, 'User already visited from a different influencer');
-            }
+            }*/
 
             old_address = new_address;
         }

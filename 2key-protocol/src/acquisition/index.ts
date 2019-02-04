@@ -507,6 +507,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     resolve(txHash);
                 // }
             } catch (e) {
+                console.error(e);
                 reject(e);
             }
         });
@@ -632,7 +633,8 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                         const sig = Sign.free_take(plasmaAddress, f_address, f_secret, p_message);
                         console.log('INFLUENCERS FROM SIG', await promisify(this.base.twoKeyPlasmaEvents.getInfluencersFromSig, [campaignInstance.address, contractorAddress, sig, { from: plasmaAddress }]));
                         console.log('twoKeyPlasmaEvents.joinAcquisitionCampaign join', campaignInstance.address, contractorAddress, sig, plasmaAddress);
-                        await promisify(this.base.twoKeyPlasmaEvents.joinAcquisitionCampaign, [campaignInstance.address, contractorAddress, sig, { from: plasmaAddress, gasPrice: 0 }]);
+                        const txHash = await promisify(this.base.twoKeyPlasmaEvents.joinAcquisitionCampaign, [campaignInstance.address, contractorAddress, sig, { from: plasmaAddress, gasPrice: 0 }]);
+                        await this.utils.getTransactionReceiptMined(txHash, { web3: this.base.plasmaWeb3 });
                     } catch (e) {
                         console.log('Plasma joinAcquisitionCampaign error', e);
                     }
