@@ -6,6 +6,7 @@ contract TwoKeyPlasmaEvents is Upgradeable {
 
     address public owner;
     bool initialized = false;
+
     // every event we generate contains both the campaign address and the address of the contractor of that campaign
     // both are ethereum address.
     // this plasma contract does not know in itself who is the contractor on the ethereum network
@@ -215,7 +216,7 @@ contract TwoKeyPlasmaEvents is Upgradeable {
         if (influencers.length > 1) {
             referrer = influencers[influencers.length - 2];
         }
-        joined_from[acquisitionCampaignAddress][contractor][last_address] == referrer;
+        joined_from[acquisitionCampaignAddress][contractor][last_address] = referrer;
     }
 
 
