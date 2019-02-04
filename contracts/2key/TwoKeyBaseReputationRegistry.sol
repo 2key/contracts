@@ -13,6 +13,7 @@ import "../interfaces/ITwoKeyAcquisitionCampaignGetStaticAddresses.sol";
  * Created at 1/31/19
  */
 contract TwoKeyBaseReputationRegistry is Upgradeable {
+
     address twoKeyRegistry;
 
     constructor() {
@@ -93,5 +94,11 @@ contract TwoKeyBaseReputationRegistry is Upgradeable {
         address conversionHandler = getConversionHandlerAddress(acquisitionCampaign);
         require(msg.sender == conversionHandler);
     }
+
+    function getMyRewards() public returns (int,int,int) {
+
+    }
+
+
 
 }
