@@ -177,6 +177,24 @@ contract TwoKeyPlasmaEvents is Upgradeable {
         return ethereumOf(joined_from[c][contractor][_address]);
     }
 
+    function getInfluencersFromSig(address acquisitionCampaignAddress, address contractor, bytes sig) public view returns (address[]) {
+        address old_address;
+        assembly
+        {
+            old_address := mload(add(sig, 21))
+        }
+        old_address = plasmaOf(old_address);
+        // validate an existing visit path from contractor address to the old_address
+        require(test_path(acquisitionCampaignAddress, contractor, old_address), 'no path to contractor');
+        address old_key = publicLinkKeyOf(acquisitionCampaignAddress, contractor, old_address);
+        address[] memory influencers;
+        address[] memory keys;
+        uint8[] memory weights;
+        address last_address = msg.sender;
+        (influencers, keys, weights) = Call.recoverSig(sig, old_key, last_address);
+        return influencers;
+    }
+
     function joinAcquisitionCampaign(address acquisitionCampaignAddress, address contractor, bytes sig) public {
         address old_address;
         assembly
@@ -192,16 +210,12 @@ contract TwoKeyPlasmaEvents is Upgradeable {
         uint8[] memory weights;
         address last_address = msg.sender;
         (influencers, keys, weights) = Call.recoverSig(sig, old_key, last_address);
-
+        address referrer = contractor;
         require(influencers[influencers.length-1] == last_address, 'only the last in the link can call visited');
-
-        if(influencers.length == 1) {
-            joined_from[acquisitionCampaignAddress][contractor][last_address] = contractor;
-        } else {
-            address referrer = influencers[influencers.length - 2];
-            joined_from[acquisitionCampaignAddress][contractor][last_address] == referrer;
+        if (influencers.length > 1) {
+            referrer = influencers[influencers.length - 2];
         }
-
+        joined_from[acquisitionCampaignAddress][contractor][last_address] == referrer;
     }
 
 

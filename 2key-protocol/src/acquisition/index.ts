@@ -630,6 +630,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                         const contractorAddress = await promisify(campaignInstance.contractor, []);
                         const plasmaAddress = this.base.plasmaAddress;
                         const sig = Sign.free_take(plasmaAddress, f_address, f_secret, p_message);
+                        console.log('INFLUENCERS FROM SIG', await promisify(this.base.twoKeyPlasmaEvents.getInfluencersFromSig, [campaignInstance.address, contractorAddress, sig, { from: plasmaAddress }]));
                         console.log('twoKeyPlasmaEvents.joinAcquisitionCampaign join', campaignInstance.address, contractorAddress, sig, plasmaAddress);
                         await promisify(this.base.twoKeyPlasmaEvents.joinAcquisitionCampaign, [campaignInstance.address, contractorAddress, sig, { from: plasmaAddress, gasPrice: 0 }]);
                     } catch (e) {

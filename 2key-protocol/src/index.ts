@@ -46,10 +46,10 @@ import {IPlasmaEvents} from "./plasma/interfaces";
 const TwoKeyDefaults = {
     // ipfsIp: '192.168.47.100',
     // ipfsIp: 'ipfs.aydnep.com.ua',
-    ipfsIp: 'ipfs.infura.io',
+    ipfsIp: 'ipfs.2key.net',
     ipfsPort: '5001',
     // ipfsPort: '15001',
-    ipfsProtocol: 'https',
+    ipfsProtocol: 'http',
     mainNetId: 3,
     syncTwoKeyNetId: 98052,
     // twoKeySyncUrl: 'https://test.plasma.2key.network/',

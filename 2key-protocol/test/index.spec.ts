@@ -609,13 +609,10 @@ describe('TwoKeyProtocol', () => {
 
     it('should buy some tokens', async () => {
         console.log('4) buy from test4 REFLINK', links.gmail);
-        const { contractor } = await twoKeyProtocol.Utils.getOffchainDataFromIPFSHash(links.gmail);
-        console.log('joined_from', await twoKeyProtocol.PlasmaEvents.getJoinedFrom(campaignAddress, contractor, twoKeyProtocol.plasmaAddress));
 
         txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD, 'ether'), links.gmail, from);
         console.log(txHash);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-        console.log('joined_from', await twoKeyProtocol.PlasmaEvents.getJoinedFrom(campaignAddress, contractor, twoKeyProtocol.plasmaAddress));
 
         // const campaigns = await twoKeyProtocol.getCampaignsWhereConverter(from);
         // console.log(campaigns);
@@ -647,6 +644,12 @@ describe('TwoKeyProtocol', () => {
         console.log(tokens);
         expect(tokens.totalTokens).to.gte(0);
     });
+
+    it('should print joined_from', async () => {
+        const { contractor } = await twoKeyProtocol.Utils.getOffchainDataFromIPFSHash(links.gmail);
+        console.log('joined_from test4', await twoKeyProtocol.PlasmaEvents.getJoinedFrom(campaignAddress, contractor, twoKeyProtocol.plasmaAddress));
+    }).timeout(30000);
+
 
     it('should show maximum referral reward after TWO referrer', async() => {
         const {web3, address} = web3switcher.renata();
