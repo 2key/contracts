@@ -6,7 +6,7 @@ import '../openzeppelin-solidity/contracts/math/SafeMath.sol';
 
 import "../interfaces/ITwoKeyReg.sol";
 import "../interfaces/ITwoKeyAcquisitionLogicHandler.sol";
-import "../interfaces/ITwoKeyAcquisitionCampaignGetLogicHandler.sol";
+import "../interfaces/ITwoKeyAcquisitionCampaignGetStaticAddresses.sol";
 
 /**
  * @author Nikola Madjarevic
@@ -29,6 +29,7 @@ contract TwoKeyBaseReputationRegistry is Upgradeable {
     mapping(address => int) plasmaAddress2referrerGlobalReputationScoreWei;
 
     function updateOnConversionCreatedEvent(address converter, address contractor, address acquisitionCampaign) public {
+        validateCall(acquisitionCampaign);
         int d = 1;
         int initialRewardWei = 5000000000000000000;
 
@@ -45,6 +46,7 @@ contract TwoKeyBaseReputationRegistry is Upgradeable {
     }
 
     function updateOnConversionExecutedEvent(address converter, address contractor, address acquisitionCampaign) public {
+        validateCall(acquisitionCampaign);
         int d = 1;
         int initialRewardWei = 10000000000000000000;
 
@@ -62,6 +64,7 @@ contract TwoKeyBaseReputationRegistry is Upgradeable {
     }
 
     function updateOnConversionRejectedEvent(address converter, address contractor, address acquisitionCampaign) public {
+        validateCall(acquisitionCampaign);
         int d = 1;
         int initialPenaltyWei = 10000000000000000000;
 
@@ -79,10 +82,16 @@ contract TwoKeyBaseReputationRegistry is Upgradeable {
 
 
     function getLogicHandlerAddress(address acquisitionCampaign) internal view returns (address) {
-        return ITwoKeyAcquisitionCampaignGetLogicHandler(acquisitionCampaign).twoKeyAcquisitionLogicHandler();
+        return ITwoKeyAcquisitionCampaignGetStaticAddresses(acquisitionCampaign).twoKeyAcquisitionLogicHandler();
     }
 
+    function getConversionHandlerAddress(address acquisitionCampaign) internal view returns (address) {
+        return ITwoKeyAcquisitionCampaignGetStaticAddresses(acquisitionCampaign).conversionHandler();
+    }
 
-
+    function validateCall(address acquisitionCampaign, address caller) internal {
+        address conversionHandler = getConversionHandlerAddress(acquisitionCampaign);
+        require(msg.sender == conversionHandler);
+    }
 
 }

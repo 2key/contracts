@@ -157,7 +157,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
         uint256 expiryConversion,
         bool isConversionFiat
         ) public {
-        require(msg.sender == twoKeyAcquisitionCampaignERC20 || msg.sender == address(this));
+        require(msg.sender == twoKeyAcquisitionCampaignERC20);
         require(converterToState[_converterAddress] != ConverterState.REJECTED); // If converter is rejected then can't create conversion
 
         uint _moderatorFeeETHWei = 0;
