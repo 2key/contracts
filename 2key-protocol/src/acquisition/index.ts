@@ -15,6 +15,7 @@ import {BigNumber} from 'bignumber.js';
 import contractsMeta, {default as contracts} from '../contracts';
 import {promisify} from '../utils';
 import Sign from '../utils/sign';
+import sign from "../utils/sign";
 
 /**
  *
@@ -485,12 +486,12 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 const plasmaAddress = this.base.plasmaAddress;
                 const sig = Sign.free_take(plasmaAddress, f_address, f_secret, p_message);
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaignAddress);
-                const isAddressJoined = await this.isAddressJoined(campaignAddress, from);
-                const cuts = Sign.validate_join(null, null, null, sig, plasmaAddress);
-                this.base._log('isAddressJoined', isAddressJoined, cuts);
-                if (isAddressJoined) {
-                    resolve(false);
-                } else {
+                // const isAddressJoined = await this.isAddressJoined(campaignAddress, from);
+                // const cuts = Sign.validate_join(null, null, null, sig, plasmaAddress);
+                // this.base._log('isAddressJoined', isAddressJoined, cuts);
+                // if (isAddressJoined) {
+                //     resolve(false);
+                // } else {
                     const contractor = await promisify(campaignInstance.contractor, []);
                     this.base._log('contractor', contractor, plasmaAddress);
                     const txHash: string = await promisify(this.base.twoKeyPlasmaEvents.visited, [
@@ -504,7 +505,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     const noteTxHash = await promisify(this.base.twoKeyPlasmaEvents.setNoteByUser, [campaignInstance.address, note, {from: plasmaAddress}]);
                     this.base._log('note txHash', noteTxHash);
                     resolve(txHash);
-                }
+                // }
             } catch (e) {
                 reject(e);
             }
@@ -624,11 +625,16 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     const {f_address, f_secret, p_message, contractor: campaignContractor, dao: daoAddress} = await this.utils.getOffchainDataFromIPFSHash(referralLink);
                     contractor = campaignContractor;
                     dao = daoAddress;
-                    const plasmaAddress = this.base.plasmaAddress;
-                    const sig = Sign.free_take(plasmaAddress, f_address, f_secret, p_message);
                     try {
-                        await this.base.twoKeyPlasmaEvents.joinAcquisitionCampaign(campaignAddress, campaignContractor, sig);
-                    } catch {}
+                        const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaignAddress);
+                        const contractorAddress = await promisify(campaignInstance.contractor, []);
+                        const plasmaAddress = this.base.plasmaAddress;
+                        const sig = Sign.free_take(plasmaAddress, f_address, f_secret, p_message);
+                        console.log('twoKeyPlasmaEvents.joinAcquisitionCampaign join', campaignInstance.address, contractorAddress, sig, plasmaAddress);
+                        await promisify(this.base.twoKeyPlasmaEvents.joinAcquisitionCampaign, [campaignInstance.address, contractorAddress, sig, { from: plasmaAddress, gasPrice: 0 }]);
+                    } catch (e) {
+                        console.log('Plasma joinAcquisitionCampaign error', e);
+                    }
                     new_message = Sign.free_join(plasmaAddress, public_address, f_address, f_secret, p_message, safeCut, cutSign);
                 } else {
                     const {contractor: campaignContractor} = await this.setPublicLinkKey(campaign, from, `0x${public_address}`, {
@@ -762,7 +768,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     public joinAndConvert(campaign: any, value: string | number | BigNumber, publicLink: string, from: string, {gasPrice = this.base._getGasPrice(), isConverterAnonymous}: IConvertOpts = {}): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
-                const {f_address, f_secret, p_message, contractor} = await this.utils.getOffchainDataFromIPFSHash(publicLink);
+                const {f_address, f_secret, p_message} = await this.utils.getOffchainDataFromIPFSHash(publicLink);
                 if (!f_address || !f_secret) {
                     reject('Broken Link');
                 }
@@ -786,8 +792,13 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     }]);
 
                     try {
-                        await this.base.twoKeyPlasmaEvents.joinAcquisitionCampaign(campaignInstance.address, contractor, signature);
-                    } catch {}
+                        const contractor = await promisify(campaignInstance.contractor, []);
+
+                        console.log('twoKeyPlasmaEvents.joinAcquisitionCampaign convert', campaignInstance.address, contractor, signature, plasmaAddress);
+                        await promisify(this.base.twoKeyPlasmaEvents.joinAcquisitionCampaign, [campaignInstance.address, contractor, signature, { from: plasmaAddress, gasPrice: 0 }]);
+                    } catch (e) {
+                        console.log('Plasma joinAcquisitionCampaign error', e);
+                    }
 
                     const receipt = await this.utils.getTransactionReceiptMined(txHash);
                     console.log(receipt);

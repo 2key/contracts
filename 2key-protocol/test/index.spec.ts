@@ -571,7 +571,7 @@ describe('TwoKeyProtocol', () => {
         });
         console.log('Gmail plasma', await promisify(twoKeyProtocol.plasmaWeb3.eth.getAccounts, []));
         await tryToRegisterUser('Gmail', from);
-        txHash = await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, links.deployer, from);
+        // txHash = await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, links.deployer, from);
         console.log('isUserJoined', await twoKeyProtocol.AcquisitionCampaign.isAddressJoined(campaignAddress, from));
         const hash = await twoKeyProtocol.AcquisitionCampaign.join(campaignAddress, from, {
             cut: 50,
