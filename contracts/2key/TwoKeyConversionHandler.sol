@@ -184,7 +184,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
         emit ConversionCreated(numberOfConversions);
         numberOfConversions++;
 
-        ITwoKeyBaseReputationRegistry(twoKeyBaseReputationRegistry).updateOnConversionCreatedEvent(_converterAddress, _contractor, twoKeyAcquisitionCampaignERC20);
+        ITwoKeyBaseReputationRegistry(twoKeyBaseReputationRegistry).updateOnConversionCreatedEvent(_converterAddress, contractor, twoKeyAcquisitionCampaignERC20);
         if(converterToState[_converterAddress] == ConverterState.NOT_EXISTING) {
             converterToState[_converterAddress] = ConverterState.PENDING_APPROVAL;
             stateToConverter[bytes32("PENDING_APPROVAL")].push(_converterAddress);
@@ -233,8 +233,10 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
         conversions[_conversionId] = conversion;
         converterToLockupContracts[conversion.converter].push(lockupContract);
 
+
         //Update total raised funds
         if(conversion.isConversionFiat == false) {
+            ITwoKeyBaseReputationRegistry(twoKeyBaseReputationRegistry).updateOnConversionExecutedEvent(conversion.converter, contractor, twoKeyAcquisitionCampaignERC20);
             ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateRefchainRewards(conversion.maxReferralRewardETHWei, conversion.converter);
             // update moderator balances
             ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateModeratorBalanceETHWei(conversion.moderatorFeeETHWei);
@@ -376,6 +378,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
             uint conversionId = converterToHisConversions[_converter][i];
             Conversion memory c = conversions[conversionId];
             if(c.state == ConversionState.PENDING_APPROVAL) {
+                ITwoKeyBaseReputationRegistry(twoKeyBaseReputationRegistry).updateOnConversionRejectedEvent(_converter, contractor, twoKeyAcquisitionCampaignERC20);
                 c.state = ConversionState.REJECTED;
                 conversions[conversionId] = c;
                 ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateReservedAmountOfTokensIfConversionRejectedOrExecuted(c.baseTokenUnits + c.bonusTokenUnits);

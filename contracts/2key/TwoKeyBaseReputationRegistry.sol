@@ -62,7 +62,6 @@ contract TwoKeyBaseReputationRegistry is Upgradeable {
             plasmaAddress2referrerGlobalReputationScoreWei[referrers[i]] += initialRewardWei/d;
             d = d + 1;
         }
-
     }
 
     function updateOnConversionRejectedEvent(address converter, address contractor, address acquisitionCampaign) public {
