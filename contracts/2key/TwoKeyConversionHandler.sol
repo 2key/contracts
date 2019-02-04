@@ -24,6 +24,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
 
     uint raisedFundsEthWei = 0;
     uint numberOfConversions = 0;
+
     Conversion[] conversions;
     mapping(address => uint[]) converterToHisConversions;
 
@@ -113,14 +114,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
         twoKeyEventSource = _twoKeyEventSource;
     }
 
-
-    /// @notice Function which checks if converter has converted
-    /// @dev will throw if not
-    function isConversionNotExecuted(uint _conversionId) public view returns (bool) {
-        Conversion memory c = conversions[_conversionId];
-        require(c.state == ConversionState.PENDING_APPROVAL || c.state == ConversionState.APPROVED);
-        return true;
-    }
 
     /**
      * @notice Determine the state of conversion based on converter address
