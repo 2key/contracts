@@ -11,6 +11,7 @@ import "../interfaces/ITwoKeyAcquisitionCampaignERC20.sol";
 import "../interfaces/IUpgradableExchange.sol";
 import "../interfaces/ITwoKeyEventSource.sol";
 
+
 /**
  * @notice Contract to handle logic related for Acquisition
  * @dev There will be 1 conversion handler per Acquisition Campaign
@@ -24,6 +25,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
 
     uint raisedFundsEthWei = 0;
     uint numberOfConversions = 0;
+
     Conversion[] conversions;
     mapping(address => uint[]) converterToHisConversions;
 
@@ -114,14 +116,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
     }
 
 
-    /// @notice Function which checks if converter has converted
-    /// @dev will throw if not
-    function isConversionNotExecuted(uint _conversionId) public view returns (bool) {
-        Conversion memory c = conversions[_conversionId];
-        require(c.state == ConversionState.PENDING_APPROVAL || c.state == ConversionState.APPROVED);
-        return true;
-    }
-
     /**
      * @notice Determine the state of conversion based on converter address
      * @param _converterAddress is the address of converter
@@ -163,7 +157,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
         uint256 expiryConversion,
         bool isConversionFiat
         ) public {
-        require(msg.sender == twoKeyAcquisitionCampaignERC20 || msg.sender == address(this));
+        require(msg.sender == twoKeyAcquisitionCampaignERC20);
         require(converterToState[_converterAddress] != ConverterState.REJECTED); // If converter is rejected then can't create conversion
 
         uint _moderatorFeeETHWei = 0;
