@@ -9,6 +9,8 @@ const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
 const TwoKeySingletonesRegistry = artifacts.require('TwoKeySingletonesRegistry');
 const TwoKeyExchangeRateContract = artifacts.require('TwoKeyExchangeRateContract');
 const TwoKeyPlasmaSingletoneRegistry = artifacts.require('TwoKeyPlasmaSingletoneRegistry');
+const TwoKeyBaseReputationRegistry = artifacts.require('TwoKeyBaseReputationRegistry');
+
 const fs = require('fs');
 const path = require('path');
 
@@ -50,6 +52,7 @@ module.exports = function deploy(deployer) {
     let proxyAddressTwoKeyExchange;
     let proxyAddressTwoKeyAdmin;
     let proxyAddressTwoKeyUpgradableExchange;
+    let proxyAddressTwoKeyBaseReputationRegistry;
 
     /**
      * Define proxy address for plasma network
@@ -117,6 +120,8 @@ module.exports = function deploy(deployer) {
             .then(() => deployer.link(Call, TwoKeyRegistry))
             .then(() => deployer.deploy(TwoKeyRegistry)
             .then(() => TwoKeyRegistry.deployed())
+            .then(() => deployer.deploy(TwoKeyBaseReputationRegistry))
+            .then(() => TwoKeyBaseReputationRegistry.deployed())
             .then(() => deployer.deploy(TwoKeyUpgradableExchange))
             .then(() => TwoKeyUpgradableExchange.deployed())
             .then(() => deployer.deploy(TwoKeySingletonesRegistry, [], '0x0')) //adding empty admin address
@@ -146,6 +151,33 @@ module.exports = function deploy(deployer) {
 
                         fileObject['TwoKeyRegistry'] = twoKeyReg;
                         proxyAddressTwoKeyRegistry = proxy;
+                        resolve(proxy);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
+
+                await new Promise(async (resolve, reject) => {
+                    try {
+                        console.log('... Adding TwoKeyBaseReputationRegistry to Proxy registry as valid implementation');
+                        /**
+                         * Adding TwoKeyBaseReputationRegistry to the registry, deploying 1st proxy for that 1.0 version and setting initial params there
+                         */
+                        let txHash = await registry.addVersion("TwoKeyBaseReputationRegistry", "1.0", TwoKeyBaseReputationRegistry.address);
+                        let { logs } = await registry.createProxy("TwoKeyBaseReputationRegistry", "1.0");
+                        let { proxy } = logs.find(l => l.event === 'ProxyCreated').args;
+                        console.log('Proxy address for the TwoKeyBaseReputationRegistry is : ' + proxy);
+                        const twoKeyBaseRepReg = fileObject.TwoKeyBaseReputationRegistry || {};
+                        console.log(maintainerAddresses);
+                        twoKeyBaseRepReg[networkId] = {
+                            'address': TwoKeyBaseReputationRegistry.address,
+                            'Proxy': proxy,
+                            'Version': "1.0",
+                            // maintainer_address: maintainerAddresses,
+                        };
+
+                        fileObject['TwoKeyBaseReputationRegistry'] = twoKeyBaseRepReg;
+                        proxyAddressTwoKeyBaseReputationRegistry = proxy;
                         resolve(proxy);
                     } catch (e) {
                         reject(e);
@@ -281,6 +313,12 @@ module.exports = function deploy(deployer) {
                             [],
                             proxyAddressTwoKeyRegistry
                         );
+
+                        await TwoKeyBaseReputationRegistry.at(proxyAddressTwoKeyBaseReputationRegistry).setInitialParams
+                        (
+                            proxyAddressTwoKeyRegistry
+                        );
+
                         await TwoKeyExchangeRateContract.at(proxyAddressTwoKeyExchange).setInitialParams
                         (
 

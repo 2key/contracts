@@ -32,7 +32,7 @@ module.exports = function deploy(deployer) {
         console.log(networkId);
         let x = 1;
         let json = JSON.parse(fs.readFileSync(proxyFile, {encoding: 'utf-8'}));
-        deployer.deploy(TwoKeyConversionHandler, 1012019, 180, 6, 180)
+        deployer.deploy(TwoKeyConversionHandler, 1012019, 180, 6, 180, json.TwoKeyBaseReputationRegistry[networkId.toString()].Proxy)
             .then(() => TwoKeyConversionHandler.deployed())
             .then(() => deployer.deploy(ERC20TokenMock))
             .then(() => deployer.link(Call, TwoKeyAcquisitionCampaignERC20))

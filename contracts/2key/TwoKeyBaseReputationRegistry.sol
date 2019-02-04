@@ -91,7 +91,7 @@ contract TwoKeyBaseReputationRegistry is Upgradeable {
         return ITwoKeyAcquisitionCampaignGetStaticAddresses(acquisitionCampaign).conversionHandler();
     }
 
-    function validateCall(address acquisitionCampaign, address caller) internal {
+    function validateCall(address acquisitionCampaign) internal {
         address conversionHandler = getConversionHandlerAddress(acquisitionCampaign);
         require(msg.sender == conversionHandler);
     }

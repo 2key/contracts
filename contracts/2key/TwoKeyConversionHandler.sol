@@ -44,6 +44,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
     address contractor;
 
     address assetContractERC20;
+    address twoKeyBaseReputationRegistry;
 
     uint tokenDistributionDate; // January 1st 2019
     uint maxDistributionDateShiftInDays; // 180 days
@@ -97,11 +98,13 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
     constructor(uint _tokenDistributionDate, // January 1st 2019
         uint _maxDistributionDateShiftInDays, // 180 days
         uint _bonusTokensVestingMonths, // 6 months
-        uint _bonusTokensVestingStartShiftInDaysFromDistributionDate) public {
+        uint _bonusTokensVestingStartShiftInDaysFromDistributionDate,
+        address _twoKeyBaseReputationRegistry) public {
         tokenDistributionDate = _tokenDistributionDate;
         maxDistributionDateShiftInDays = _maxDistributionDateShiftInDays;
         bonusTokensVestingMonths = _bonusTokensVestingMonths;
         bonusTokensVestingStartShiftInDaysFromDistributionDate = _bonusTokensVestingStartShiftInDaysFromDistributionDate;
+        twoKeyBaseReputationRegistry = _twoKeyBaseReputationRegistry;
     }
 
     /// @notice Method which will be called inside constructor of TwoKeyAcquisitionCampaignERC20
