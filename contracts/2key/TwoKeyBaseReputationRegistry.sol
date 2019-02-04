@@ -25,9 +25,10 @@ contract TwoKeyBaseReputationRegistry is Upgradeable {
         twoKeyRegistry = _twoKeyRegistry;
     }
 
-    mapping(address => int) address2contractorGlobalReputationScoreWei;
-    mapping(address => int) address2converterGlobalReputationScoreWei;
-    mapping(address => int) plasmaAddress2referrerGlobalReputationScoreWei;
+    //TODO: Leave public just for testing, later remove it
+    mapping(address => int) public address2contractorGlobalReputationScoreWei;
+    mapping(address => int) public address2converterGlobalReputationScoreWei;
+    mapping(address => int) public plasmaAddress2referrerGlobalReputationScoreWei;
 
     function updateOnConversionCreatedEvent(address converter, address contractor, address acquisitionCampaign) public {
         validateCall(acquisitionCampaign);
