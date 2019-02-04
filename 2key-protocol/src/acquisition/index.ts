@@ -147,7 +147,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     this.base._log([data.tokenDistributionDate, data.maxDistributionDateShiftInDays, data.bonusTokensVestingMonths, data.bonusTokensVestingStartShiftInDaysFromDistributionDate], gasPrice);
                     txHash = await this.helpers._createContract(contractsMeta.TwoKeyConversionHandler, from, {
                         gasPrice,
-                        params: [data.tokenDistributionDate, data.maxDistributionDateShiftInDays, data.bonusTokensVestingMonths, data.bonusTokensVestingStartShiftInDaysFromDistributionDate],
+                        params: [data.tokenDistributionDate, data.maxDistributionDateShiftInDays, data.bonusTokensVestingMonths, data.bonusTokensVestingStartShiftInDaysFromDistributionDate, this.base.twoKeyBaseReputationRegistry.address],
                         progressCallback
                     });
                     const predeployReceipt = await this.utils.getTransactionReceiptMined(txHash, {

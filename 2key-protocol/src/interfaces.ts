@@ -25,6 +25,7 @@ export interface ITwoKeyBase {
     twoKeyReg: any;
     twoKeyCongress: any;
     twoKeyPlasmaEvents: any;
+    twoKeyBaseReputationRegistry: any;
     plasmaAddress: string;
     plasmaPrivateKey: string;
     _setGasPrice: (number) => void,

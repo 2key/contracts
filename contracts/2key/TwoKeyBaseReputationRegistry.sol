@@ -31,7 +31,7 @@ contract TwoKeyBaseReputationRegistry is Upgradeable {
     mapping(address => int) public plasmaAddress2referrerGlobalReputationScoreWei;
 
     function updateOnConversionCreatedEvent(address converter, address contractor, address acquisitionCampaign) public {
-        validateCall(acquisitionCampaign);
+        // validateCall(acquisitionCampaign);
         int d = 1;
         int initialRewardWei = 5000000000000000000;
 

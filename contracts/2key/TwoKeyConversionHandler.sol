@@ -10,6 +10,7 @@ import "../interfaces/IERC20.sol";
 import "../interfaces/ITwoKeyAcquisitionCampaignERC20.sol";
 import "../interfaces/IUpgradableExchange.sol";
 import "../interfaces/ITwoKeyEventSource.sol";
+import "../interfaces/ITwoKeyBaseReputationRegistry.sol";
 
 
 /**
@@ -183,6 +184,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
         emit ConversionCreated(numberOfConversions);
         numberOfConversions++;
 
+        ITwoKeyBaseReputationRegistry(twoKeyBaseReputationRegistry).updateOnConversionCreatedEvent(_converterAddress, _contractor, twoKeyAcquisitionCampaignERC20);
         if(converterToState[_converterAddress] == ConverterState.NOT_EXISTING) {
             converterToState[_converterAddress] = ConverterState.PENDING_APPROVAL;
             stateToConverter[bytes32("PENDING_APPROVAL")].push(_converterAddress);

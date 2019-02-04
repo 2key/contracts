@@ -192,9 +192,16 @@ contract TwoKeyPlasmaEvents is Upgradeable {
         uint8[] memory weights;
         address last_address = msg.sender;
         (influencers, keys, weights) = Call.recoverSig(sig, old_key, last_address);
+
         require(influencers[influencers.length-1] == last_address, 'only the last in the link can call visited');
-        address referrer = influencers[influencers.length - 2];
-        joined_from[acquisitionCampaignAddress][contractor][last_address] == referrer;
+
+        if(influencers.length == 1) {
+            joined_from[acquisitionCampaignAddress][contractor][last_address] = contractor;
+        } else {
+            address referrer = influencers[influencers.length - 2];
+            joined_from[acquisitionCampaignAddress][contractor][last_address] == referrer;
+        }
+
     }
 
 

@@ -76,6 +76,7 @@ export class TwoKeyProtocol {
     private twoKeyExchangeContract: any;
     private twoKeyUpgradableExchange: any;
     private twoKeyEconomy: any;
+    private twoKeyBaseReputationRegistry: any;
     public twoKeyAdmin: any;
     private twoKeyCongress: any;
     private twoKeyReg: any;
@@ -170,6 +171,7 @@ export class TwoKeyProtocol {
         this.twoKeyAdmin = this.web3.eth.contract(contractsMeta.TwoKeyAdmin.abi).at(getDeployedAddress('TwoKeyAdmin', this.networks.mainNetId));
         this.twoKeyCongress = this.web3.eth.contract(contractsMeta.TwoKeyCongress.abi).at(getDeployedAddress('TwoKeyCongress', this.networks.mainNetId));
         this.twoKeyCall = this.web3.eth.contract(contractsMeta.Call.abi).at(getDeployedAddress('Call', this.networks.mainNetId));
+        this.twoKeyBaseReputationRegistry = this.web3.eth.contract(contractsMeta.TwoKeyCongress.abi).at(getDeployedAddress('TwoKeyBaseReputationRegistry', this.networks.mainNetId));
         this.ipfs = ipfsAPI(ipfsIp, ipfsPort, {protocol});
 
         const twoKeyBase: ITwoKeyBase = {
@@ -187,6 +189,7 @@ export class TwoKeyProtocol {
             twoKeyCongress: this.twoKeyCongress,
             twoKeyPlasmaEvents: this.twoKeyPlasmaEvents,
             twoKeyCall: this.twoKeyCall,
+            twoKeyBaseReputationRegistry: this.twoKeyBaseReputationRegistry,
             plasmaAddress: this.plasmaAddress,
             plasmaPrivateKey: this.plasmaPrivateKey,
             _getGasPrice: this._getGasPrice,
