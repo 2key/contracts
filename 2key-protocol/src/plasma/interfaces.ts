@@ -4,6 +4,7 @@ export interface IPlasmaEvents {
     setPlasmaToEthereumOnPlasma: (plasmaAddress: string, plasma2EthereumSignature: string) => Promise<string>,
     getVisitsList: (campaignAddress: string, contractorAddress: string, address: string) => Promise<IVisits>,
     getVisitedFrom: (campaignAddress: string, contractorAddress: string, address: string) => Promise<string>,
+    getJoinedFrom: (campaignAddress: string, contractorAddress: string, address: string) => Promise<string>,
 }
 
 export interface ISignedEthereum {

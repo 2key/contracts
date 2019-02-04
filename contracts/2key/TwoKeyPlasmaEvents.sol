@@ -39,6 +39,7 @@ contract TwoKeyPlasmaEvents is Upgradeable {
     mapping(address => mapping(address => mapping(address => mapping(address => bool)))) public visits;
     // campaign,contractor eth-addr=>to eth or plasma-addr=>from eth-addr=>true/false
     mapping(address => mapping(address => mapping(address => address))) public visited_from;
+    mapping(address => mapping(address => mapping(address => address))) public joined_from;
     mapping(address => mapping(address => mapping(address => mapping(address => uint)))) public visited_from_time;
     // campaign,contractor eth-addr=>from eth-addr=>list of to eth or plasma address.
     mapping(address => mapping(address => mapping(address => address[]))) public visits_list;
@@ -172,6 +173,30 @@ contract TwoKeyPlasmaEvents is Upgradeable {
         return ethereumOf(visited_from[c][contractor][_address]);
     }
 
+    function getJoinedFrom(address c, address contractor, address _address) public view returns (address) {
+        return ethereumOf(joined_from[c][contractor][_address]);
+    }
+
+    function joinAcquisitionCampaign(address acquisitionCampaignAddress, address contractor, bytes sig) public {
+        address old_address;
+        assembly
+        {
+            old_address := mload(add(sig, 21))
+        }
+        old_address = plasmaOf(old_address);
+        // validate an existing visit path from contractor address to the old_address
+        require(test_path(acquisitionCampaignAddress, contractor, old_address), 'no path to contractor');
+        address old_key = publicLinkKeyOf(acquisitionCampaignAddress, contractor, old_address);
+        address[] memory influencers;
+        address[] memory keys;
+        uint8[] memory weights;
+        address last_address = msg.sender;
+        (influencers, keys, weights) = Call.recoverSig(sig, old_key, last_address);
+        require(influencers[influencers.length-1] == last_address, 'only the last in the link can call visited');
+        address referrer = influencers[influencers.length - 2];
+        joined_from[acquisitionCampaignAddress][contractor][last_address] == referrer;
+    }
+
 
     function visited(address c, address contractor, bytes sig) public {
         // c - addresss of the contract on ethereum
@@ -212,11 +237,13 @@ contract TwoKeyPlasmaEvents is Upgradeable {
             // as a result the same user with a plasma_address can appear later with an etherum address
             if (!visits[c][contractor][old_address][new_address]) {  // generate event only once for each tripplet
                 visits[c][contractor][old_address][new_address] = true;
-                visited_from[c][contractor][new_address] = old_address;
-                //TODO: Updating visited from time
-                visited_from_time[c][contractor][new_address][old_address] = block.timestamp;
-                visits_list[c][contractor][old_address].push(new_address);
-                visits_list_timestamps[c][contractor][old_address].push(block.timestamp);
+                if (joined_from[c][contractor][new_address] == address(0)) {
+                    visited_from[c][contractor][new_address] = old_address;
+                    //TODO: Updating visited from time
+                    visited_from_time[c][contractor][new_address][old_address] = block.timestamp;
+                    visits_list[c][contractor][old_address].push(new_address);
+                    visits_list_timestamps[c][contractor][old_address].push(block.timestamp);
+                }
                 emit Visited(new_address, c, contractor, old_address);
             } else {
                 require(visited_from[c][contractor][new_address] == old_address, 'User already visited from a different influencer');

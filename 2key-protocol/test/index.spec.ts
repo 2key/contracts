@@ -609,9 +609,13 @@ describe('TwoKeyProtocol', () => {
 
     it('should buy some tokens', async () => {
         console.log('4) buy from test4 REFLINK', links.gmail);
+        const { contractor } = await twoKeyProtocol.Utils.getOffchainDataFromIPFSHash(links.gmail);
+        console.log('joined_from', await twoKeyProtocol.PlasmaEvents.getJoinedFrom(campaignAddress, contractor, twoKeyProtocol.plasmaAddress));
+
         txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD, 'ether'), links.gmail, from);
         console.log(txHash);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        console.log('joined_from', await twoKeyProtocol.PlasmaEvents.getJoinedFrom(campaignAddress, contractor, twoKeyProtocol.plasmaAddress));
 
         // const campaigns = await twoKeyProtocol.getCampaignsWhereConverter(from);
         // console.log(campaigns);

@@ -89,4 +89,16 @@ export default class PlasmaEvents implements IPlasmaEvents {
             }
         })
     }
+
+    public getJoinedFrom(campaignAddress: string, contractorAddress: string, address: string): Promise<string> {
+        return new Promise<string>(async (resolve, reject) => {
+            try {
+                // let visitedFrom = promisify(this.base.twoKeyPlasmaEvents.getJoinedFrom, [campaignAddress, contractorAddress, address]);
+                let joinedFrom = promisify(this.base.twoKeyPlasmaEvents.joined_from, [campaignAddress, contractorAddress, address]);
+                resolve(joinedFrom);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
 }

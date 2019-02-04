@@ -624,6 +624,11 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     const {f_address, f_secret, p_message, contractor: campaignContractor, dao: daoAddress} = await this.utils.getOffchainDataFromIPFSHash(referralLink);
                     contractor = campaignContractor;
                     dao = daoAddress;
+                    const plasmaAddress = this.base.plasmaAddress;
+                    const sig = Sign.free_take(plasmaAddress, f_address, f_secret, p_message);
+                    try {
+                        await this.base.twoKeyPlasmaEvents.joinAcquisitionCampaign(campaignAddress, campaignContractor, sig);
+                    } catch {}
                     new_message = Sign.free_join(plasmaAddress, public_address, f_address, f_secret, p_message, safeCut, cutSign);
                 } else {
                     const {contractor: campaignContractor} = await this.setPublicLinkKey(campaign, from, `0x${public_address}`, {
@@ -757,7 +762,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     public joinAndConvert(campaign: any, value: string | number | BigNumber, publicLink: string, from: string, {gasPrice = this.base._getGasPrice(), isConverterAnonymous}: IConvertOpts = {}): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
-                const {f_address, f_secret, p_message} = await this.utils.getOffchainDataFromIPFSHash(publicLink);
+                const {f_address, f_secret, p_message, contractor} = await this.utils.getOffchainDataFromIPFSHash(publicLink);
                 if (!f_address || !f_secret) {
                     reject('Broken Link');
                 }
@@ -779,6 +784,11 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                         value,
                         nonce,
                     }]);
+
+                    try {
+                        await this.base.twoKeyPlasmaEvents.joinAcquisitionCampaign(campaignInstance.address, contractor, signature);
+                    } catch {}
+
                     const receipt = await this.utils.getTransactionReceiptMined(txHash);
                     console.log(receipt);
                     resolve(txHash);
