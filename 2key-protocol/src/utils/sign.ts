@@ -122,7 +122,7 @@ function sign_ethereum2plasma(plasma_web3, my_address, plasma_address): Promise<
  * @param my_address
  * @returns {Promise<string>}
  */
-function sign_plasma2ethereum(web3, plasma_address, my_address): Promise<string> {
+function sign_plasma2ethereum(web3: any, plasma_address: string, my_address: string): Promise<string> {
     let msgParams = [
         {
             type: 'bytes',      // Any valid solidity type
