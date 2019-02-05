@@ -3,6 +3,7 @@ import Web3 from 'web3';
 import ProviderEngine from 'web3-provider-engine';
 import RpcSubprovider from 'web3-provider-engine/subproviders/rpc';
 import WSSubprovider from 'web3-provider-engine/subproviders/websocket';
+import NonceSubprovider from 'web3-provider-engine/subproviders/nonce-tracker';
 import WalletSubprovider from 'ethereumjs-wallet/provider-engine';
 import * as eth_wallet from 'ethereumjs-wallet';
 import {BigNumber} from "bignumber.js";
@@ -140,6 +141,7 @@ export class TwoKeyProtocol {
         const plasmaEngine = new ProviderEngine();
         const plasmaProvider = eventsNetUrl.startsWith('http') ? new RpcSubprovider({rpcUrl: eventsNetUrl}) : new WSSubprovider({rpcUrl: eventsNetUrl});
         plasmaEngine.addProvider(new WalletSubprovider(eventsWallet, {}));
+        plasmaEngine.addProvider(new NonceSubprovider());
         plasmaEngine.addProvider(plasmaProvider);
 
         plasmaEngine.start();
@@ -156,6 +158,7 @@ export class TwoKeyProtocol {
             this.web3 = new Web3(mainEngine);
             const mainProvider = rpcUrl.startsWith('http') ? new RpcSubprovider({rpcUrl}) : new WSSubprovider({rpcUrl});
             // mainEngine.addProvider(new WalletSubprovider(eventsWallet, {}));
+            mainEngine.addProvider(new NonceSubprovider());
             mainEngine.addProvider(mainProvider);
             mainEngine.start();
         } else {
