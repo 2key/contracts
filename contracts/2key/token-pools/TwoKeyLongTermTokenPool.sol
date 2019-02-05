@@ -7,4 +7,5 @@ import "./TokenPool.sol";
  */
 contract TwoKeyLongTermTokenPool is TokenPool {
 
+
 }
