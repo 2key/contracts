@@ -10,7 +10,7 @@ const TwoKeySingletonesRegistry = artifacts.require('TwoKeySingletonesRegistry')
 const TwoKeyExchangeRateContract = artifacts.require('TwoKeyExchangeRateContract');
 const TwoKeyPlasmaSingletoneRegistry = artifacts.require('TwoKeyPlasmaSingletoneRegistry');
 const TwoKeyBaseReputationRegistry = artifacts.require('TwoKeyBaseReputationRegistry');
-
+const UtilsLib = artifacts.require('UtilsLib');
 const fs = require('fs');
 const path = require('path');
 
@@ -316,7 +316,9 @@ module.exports = function deploy(deployer) {
 
                         await TwoKeyBaseReputationRegistry.at(proxyAddressTwoKeyBaseReputationRegistry).setInitialParams
                         (
-                            proxyAddressTwoKeyRegistry
+                            proxyAddressTwoKeyRegistry,
+                            proxyAddressTwoKeyAdmin,
+                            maintainerAddresses
                         );
 
                         await TwoKeyExchangeRateContract.at(proxyAddressTwoKeyExchange).setInitialParams

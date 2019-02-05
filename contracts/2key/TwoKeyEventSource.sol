@@ -5,8 +5,9 @@ import "./GetCode.sol";
 import "./Upgradeable.sol";
 import "../interfaces/ITwoKeyReg.sol";
 import "../interfaces/ITwoKeyAdmin.sol";
+import "./MaintainingPattern.sol";
 
-contract TwoKeyEventSource is Upgradeable, TwoKeyTypes {
+contract TwoKeyEventSource is Upgradeable, MaintainingPattern, TwoKeyTypes {
 
     /**
      * Address of TwoKeyRegistry contract
@@ -17,16 +18,6 @@ contract TwoKeyEventSource is Upgradeable, TwoKeyTypes {
      * Mapping which will map contract code to true/false depending if that code is eligible to emit events
      */
     mapping(bytes => bool) canEmit;
-
-    /**
-     * Mapping which will store maintainers who are eligible to update contract state
-     */
-    mapping(address => bool) public isMaintainer;
-
-    /**
-     * Address of TwoKeyAdmin contract, which will be the only one eligible to manipulate the maintainers
-     */
-    address public twoKeyAdmin;
 
 
     event Created(
@@ -82,29 +73,9 @@ contract TwoKeyEventSource is Upgradeable, TwoKeyTypes {
     );
 
 
-    /**
-     * @notice Modifier to restrict calling the method to anyone but maintainers
-     */
-    modifier onlyMaintainer {
-        require(isMaintainer[msg.sender] == true);
-        _;
-    }
 
-    /**
-     * @notice Modifier to restrict calling the method to anyone but twoKeyAdmin
-     */
-    modifier onlyTwoKeyAdmin {
-        require(msg.sender == address(twoKeyAdmin));
-        _;
-    }
 
-    /**
-     * @notice Modifier to restrict calling the method to anyone but authorized people
-     */
-    modifier onlyMaintainerOrTwoKeyAdmin {
-        require(isMaintainer[msg.sender] == true || msg.sender == address(twoKeyAdmin));
-        _;
-    }
+
 
     /**
      * Modifier which will allow only specific contracts to emit events
@@ -138,7 +109,7 @@ contract TwoKeyEventSource is Upgradeable, TwoKeyTypes {
      * @dev We first fetch bytes contract code and then update our mapping
      * @dev only admin can call this or an authorized person
      */
-    function addContract(address _contractAddress) external onlyMaintainerOrTwoKeyAdmin {
+    function addContract(address _contractAddress) external onlyMaintainer {
         require(_contractAddress != address(0));
         bytes memory _contractCode = GetCode.at(_contractAddress);
         canEmit[_contractCode] = true;
@@ -151,33 +122,13 @@ contract TwoKeyEventSource is Upgradeable, TwoKeyTypes {
      * @dev We first fetch bytes contract code and then update our mapping
      * @dev only admin can call this or an authorized person
      */
-    function removeContract(address _contractAddress) external onlyMaintainerOrTwoKeyAdmin {
+    function removeContract(address _contractAddress) external onlyMaintainer {
         require(_contractAddress != address(0));
         bytes memory _contractCode = GetCode.at(_contractAddress);
         canEmit[_contractCode] = false;
     }
 
-    /**
-    * @notice Function which can add new maintainers, in general it's array because this supports adding multiple addresses in 1 trnx
-    * @dev only twoKeyAdmin contract is eligible to mutate state of maintainers
-    * @param _maintainers is the array of maintainer addresses
-    */
-    function addMaintainers(address [] _maintainers) external onlyTwoKeyAdmin {
-        for(uint i=0; i<_maintainers.length; i++) {
-            isMaintainer[_maintainers[i]] = true;
-        }
-    }
 
-    /**
-     * @notice Function which can remove some maintainers, in general it's array because this supports adding multiple addresses in 1 trnx
-     * @dev only twoKeyAdmin contract is eligible to mutate state of maintainers
-     * @param _maintainers is the array of maintainer addresses
-     */
-    function removeMaintainers(address [] _maintainers) external onlyTwoKeyAdmin {
-        for(uint i=0; i<_maintainers.length; i++) {
-            isMaintainer[_maintainers[i]] = false;
-        }
-    }
 
     /**
      * @notice Function to emit created event every time campaign is created
@@ -304,7 +255,7 @@ contract TwoKeyEventSource is Upgradeable, TwoKeyTypes {
      * @param _maintainer is the address we're checking this for
      */
     function isAddressMaintainer(address _maintainer) public view returns (bool) {
-        bool _isMaintainer = ITwoKeyReg(twoKeyRegistry).checkIfTwoKeyMaintainerExists(_maintainer);
+        bool _isMaintainer = ITwoKeyReg(twoKeyRegistry).isMaintainer(_maintainer);
         return _isMaintainer;
     }
 

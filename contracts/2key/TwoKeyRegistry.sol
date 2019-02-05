@@ -2,8 +2,9 @@ pragma solidity ^0.4.24;
 
 import "./Upgradeable.sol";
 import './Call.sol';
+import "./MaintainingPattern.sol";
 
-contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriting from MaintainerPattern?
+contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
 
     using Call for *;
 
@@ -59,11 +60,6 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
     /// (Address is enough, there is no need to spend sufficient gas and instantiate whole contract)
     address public twoKeyEventSource;
 
-    /// Address for contract maintainer
-    /// Should be the array of addresses - will have permission on some of the mappings to update
-    mapping(address => bool) public isMaintainer;
-
-    address twoKeyAdminContractAddress;
 
     /// @notice Event is emitted when a user's name is changed
     event UserNameChanged(address owner, string name);
@@ -75,24 +71,6 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
         _;
     }
 
-    /// Modifier which will allow only 2keyAdmin or maintainer to invoke function calls
-    modifier onlyTwoKeyAuthorized {
-        require(msg.sender == twoKeyAdminContractAddress || checkIfTwoKeyMaintainerExists(msg.sender));
-        _;
-    }
-
-
-    /// Modifier which will allow only 2keyMaintainer to invoke function calls
-    modifier onlyTwoKeyMaintainer {
-        require(checkIfTwoKeyMaintainerExists(msg.sender));
-        _;
-    }
-
-    modifier onlyAdmin {
-        require(msg.sender == twoKeyAdminContractAddress);
-        _;
-    }
-
     /**
      * @notice Function which can be called only once
      * @param _twoKeyEventSource is the address of twoKeyEventSource contract
@@ -101,20 +79,12 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
      */
     function setInitialParams(address _twoKeyEventSource, address _twoKeyAdmin, address [] _maintainers) external {
         require(twoKeyEventSource == address(0));
-        require(twoKeyAdminContractAddress == address(0));
         twoKeyEventSource = _twoKeyEventSource;
-        twoKeyAdminContractAddress = _twoKeyAdmin;
+        twoKeyAdmin = _twoKeyAdmin;
 
         for(uint i=0; i<_maintainers.length; i++) {
             isMaintainer[_maintainers[i]] = true;
         }
-    }
-
-    /// @notice Function to check if maintainer exists
-    /// @param _maintainer is the address of maintainer we're checking occurence
-    /// @return true if exists otherwise false
-    function checkIfTwoKeyMaintainerExists(address _maintainer) public view returns (bool) {
-        return isMaintainer[_maintainer];
     }
 
 
@@ -199,7 +169,7 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
     /// @dev private function
     /// @param _name is name of user
     /// @param _sender is address of user
-    function addNameInternal(string _name, address _sender) private {
+    function addNameInternal(string _name, address _sender) internal {
         bytes32 name = stringToBytes32(_name);
         // check if name is taken
         if (username2currentAddress[name] != 0) {
@@ -228,7 +198,7 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
         string _username_walletName,
         bytes _signatureName,
         bytes _signatureWalletName
-    ) public onlyTwoKeyMaintainer  {
+    ) public onlyMaintainer  {
         addName(_name, _sender, _fullName, _email, _signatureName);
         setWalletName(_name, _sender, _username_walletName, _signatureWalletName);
     }
@@ -238,7 +208,6 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
     /// @param _sender is address of user
     function addName(string _name, address _sender, string _fullName, string _email, bytes signature) public {
         require(isMaintainer[msg.sender] == true || msg.sender == address(this));
-//        require(utfStringLength(_name) >= 3 && utfStringLength(_name) <=25);
 
         string memory concatenatedValues = strConcat(_name,_fullName,_email);
         bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to name")),
@@ -281,29 +250,7 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
 //        addNameInternal(_name, msg.sender);
 //    }
 
-    /**
-     * @notice function to add single maintainer
-     * @param _maintainers is the address of maintainer
-     * @dev only the person who deploys the contract can call this
-     */
-    function addTwoKeyMaintainers(address [] _maintainers) public onlyAdmin {
-        require(_maintainers.length > 0);
-        for(uint i=0; i<_maintainers.length; i++) {
-            isMaintainer[_maintainers[i]] = true;
-        }
-    }
 
-    /**
-     * @notice function to remove single maintainer
-     * @param _maintainers is the address of maintainer
-     * @dev only the person who deploys the contract can call this
-     */
-    function removeTwoKeyMaintainer(address [] _maintainers) public onlyAdmin {
-        require(_maintainers.length > 0);
-        for(uint i=0; i<_maintainers.length; i++) {
-            isMaintainer[_maintainers[i]] = false;
-        }
-    }
 
     /// @notice Function where TwoKeyMaintainer can add walletname to address
     /// @param username is the username of the user we want to update map for
@@ -366,17 +313,17 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
     }
 
 
-    /// Get history of changed addresses
-    /// @return array of addresses sorted
-    function getHistoryOfChangedAddresses() external view returns (address[]) {
-        string memory name = address2username[msg.sender];
-        bytes32 nameHex = stringToBytes32(name);
-        return username2AddressHistory[nameHex];
-    }
+//    /// Get history of changed addresses
+//    /// @return array of addresses sorted
+//    function getHistoryOfChangedAddresses() external view returns (address[]) {
+//        string memory name = address2username[msg.sender];
+//        bytes32 nameHex = stringToBytes32(name);
+//        return username2AddressHistory[nameHex];
+//    }
 
     /**
      */
-    function deleteUser(string userName) public onlyTwoKeyMaintainer {
+    function deleteUser(string userName) public onlyMaintainer {
         bytes32 userNameHex = stringToBytes32(userName);
         username2AddressHistory[userNameHex] = new address[](0);
         address _ethereumAddress = username2currentAddress[userNameHex];
@@ -432,7 +379,10 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
      * @return ethereum address if exist otherwise 0x0 (address(0))
      */
     function getPlasmaToEthereum(address plasma) public view returns (address) {
-        return plasma2ethereum[plasma];
+        if(plasma2ethereum[plasma] != address(0)) {
+            return plasma2ethereum[plasma];
+        }
+        return plasma;
     }
 
     /**
@@ -441,7 +391,10 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
      * @return plasma address if exist otherwise 0x0 (address(0))
      */
     function getEthereumToPlasma(address ethereum) public view returns (address) {
-        return ethereum2plasma[ethereum];
+        if(ethereum2plasma[ethereum] != address(0)) {
+            return ethereum2plasma[ethereum];
+        }
+        return ethereum;
     }
 
 

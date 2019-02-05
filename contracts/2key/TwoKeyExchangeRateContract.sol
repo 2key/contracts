@@ -9,57 +9,9 @@ import "./Upgradeable.sol";
  * This is going to be the contract on which we will store exchange rates between USD and ETH
  * Will be maintained, and updated by our trusted server and CMC api every 8 hours.
  */
-contract TwoKeyExchangeRateContract is Upgradeable {
+contract TwoKeyExchangeRateContract is Upgradeable, MaintainingPattern {
 
 
-    /**
-     * Mapping which will store maintainers who are eligible to update contract state
-     */
-    mapping(address => bool) public isMaintainer;
-
-    /**
-     * Address of TwoKeyAdmin contract, which will be the only one eligible to manipulate the maintainers
-     */
-    address public twoKeyAdmin;
-
-    /**
-     * @notice Modifier to restrict calling the method to anyone but maintainers
-     */
-    modifier onlyMaintainer {
-        require(isMaintainer[msg.sender] == true);
-        _;
-    }
-
-    /**
-     * @notice Modifier to restrict calling the method to anyone but twoKeyAdmin
-     */
-    modifier onlyTwoKeyAdmin {
-        require(msg.sender == address(twoKeyAdmin));
-        _;
-    }
-
-
-    /**
-     * @notice Function which can add new maintainers, in general it's array because this supports adding multiple addresses in 1 trnx
-     * @dev only twoKeyAdmin contract is eligible to mutate state of maintainers
-     * @param _maintainers is the array of maintainer addresses
-     */
-    function addMaintainers(address [] _maintainers) public onlyTwoKeyAdmin {
-        for(uint i=0; i<_maintainers.length; i++) {
-            isMaintainer[_maintainers[i]] = true;
-        }
-    }
-
-    /**
-     * @notice Function which can remove some maintainers, in general it's array because this supports adding multiple addresses in 1 trnx
-     * @dev only twoKeyAdmin contract is eligible to mutate state of maintainers
-     * @param _maintainers is the array of maintainer addresses
-     */
-    function removeMaintainers(address [] _maintainers) public onlyTwoKeyAdmin {
-        for(uint i=0; i<_maintainers.length; i++) {
-            isMaintainer[_maintainers[i]] = false;
-        }
-    }
     /**
      * @notice Event will be emitted every time we update the price for the fiat
      */

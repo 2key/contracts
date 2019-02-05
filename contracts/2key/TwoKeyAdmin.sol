@@ -21,6 +21,8 @@ contract TwoKeyAdmin is Upgradeable {
 	address public newTwoKeyAdminAddress;
 
 	uint twoKeyIntegratorDefaultFeePercent; // 2% is default value for this
+	uint twoKeyNetworkTaxPercent;
+
     bool private initialized = false;
 
     /// @notice Modifier will revert if calling address is not a member of electorateAdmins
@@ -53,6 +55,7 @@ contract TwoKeyAdmin is Upgradeable {
     ) external {
         require(initialized == false);
         twoKeyIntegratorDefaultFeePercent = 2;
+		twoKeyNetworkTaxPercent = 2;
         twoKeyCongress = _twoKeyCongress;
         twoKeyReg = TwoKeyRegistry(_twoKeyRegistry);
         twoKeyUpgradableExchange = TwoKeyUpgradableExchange(_exchange);
@@ -84,19 +87,6 @@ contract TwoKeyAdmin is Upgradeable {
         selfdestruct(twoKeyCongress);
 	}
 
-	/// @notice Function to add moderator
-	/// @param _addresses is address of moderator
-	function addMaintainerForRegistry(address [] _addresses) external onlyTwoKeyCongress {
-		require (_addresses.length != 0);
-		twoKeyReg.addTwoKeyMaintainers(_addresses);
-	}
-
-    /// @notice Function to whitelist address as an authorized user for twoKeyEventSource contract
-	/// @param _maintainers is array of addresses of maintainers
-	function twoKeyEventSourceAddMaintainer(address [] _maintainers) external onlyTwoKeyCongress{
-		require(_maintainers.length > 0);
-		twoKeyEventSource.addMaintainers(_maintainers);
-	}
 
     /// @notice Function to whitelist contract address for Event Source contract
 	/// @dev We're requiring contract address different from address 0 as it is required to be deployed before calling this method
@@ -192,6 +182,14 @@ contract TwoKeyAdmin is Upgradeable {
 
 	function getDefaultIntegratorFeePercent() public view returns (uint) {
 		return twoKeyIntegratorDefaultFeePercent;
+	}
+
+	function changeDefaulTwoKeyNetworkTaxPercent(uint newTaxPercent) public onlyTwoKeyCongress {
+		twoKeyNetworkTaxPercent = newTaxPercent;
+	}
+
+	function getDefaultNetworkTaxPercent() public view returns (uint) {
+		return twoKeyNetworkTaxPercent;
 	}
 
 } 
