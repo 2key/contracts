@@ -21,6 +21,8 @@ contract TwoKeyAdmin is Upgradeable {
 	address public newTwoKeyAdminAddress;
 
 	uint twoKeyIntegratorDefaultFeePercent; // 2% is default value for this
+	uint twoKeyNetworkTaxPercent;
+
     bool private initialized = false;
 
     /// @notice Modifier will revert if calling address is not a member of electorateAdmins
@@ -53,6 +55,7 @@ contract TwoKeyAdmin is Upgradeable {
     ) external {
         require(initialized == false);
         twoKeyIntegratorDefaultFeePercent = 2;
+		twoKeyNetworkTaxPercent = 2;
         twoKeyCongress = _twoKeyCongress;
         twoKeyReg = TwoKeyRegistry(_twoKeyRegistry);
         twoKeyUpgradableExchange = TwoKeyUpgradableExchange(_exchange);
@@ -179,6 +182,14 @@ contract TwoKeyAdmin is Upgradeable {
 
 	function getDefaultIntegratorFeePercent() public view returns (uint) {
 		return twoKeyIntegratorDefaultFeePercent;
+	}
+
+	function changeDefaulTwoKeyNetworkTaxPercent(uint newTaxPercent) public onlyTwoKeyCongress {
+		twoKeyNetworkTaxPercent = newTaxPercent;
+	}
+
+	function getDefaultNetworkTaxPercent() public view returns (uint) {
+		return twoKeyNetworkTaxPercent;
 	}
 
 } 
