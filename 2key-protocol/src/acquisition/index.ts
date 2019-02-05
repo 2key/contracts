@@ -1455,7 +1455,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                const obj = {
                    balanceAvailable: parseFloat(this.utils.fromWei(referrerBalanceAvailable, 'ether').toString()),
                    totalEarnings: parseFloat(this.utils.fromWei(referrerTotalEarnings, 'ether').toString()),
-                   numberOfConversionsParticipatedIn : parseFloat(this.utils.fromWei(referrerInCountOfConversions, 'ether').toString()),
+                   numberOfConversionsParticipatedIn : parseFloat(referrerInCountOfConversions.toString()),
                    campaignAddress: campaignInstance.address,
                };
                resolve(obj)
