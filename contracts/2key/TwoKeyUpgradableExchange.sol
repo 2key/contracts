@@ -7,15 +7,13 @@ import "./MaintainingPattern.sol";
 import "../interfaces/ITwoKeyExchangeRateContract.sol";
 import "./Upgradeable.sol";
 
-contract TwoKeyUpgradableExchange is Upgradeable {
+contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
 
     using GetCode for *;
     using SafeMath for uint256;
     using SafeERC20 for ERC20;
 
-    mapping(address => bool) public isMaintainer;
 
-    address twoKeyAdmin;
     address twoKeyExchangeContract;
 
     // The token being sold
@@ -68,23 +66,6 @@ contract TwoKeyUpgradableExchange is Upgradeable {
         for(uint i=0; i<_maintainers.length; i++) {
             isMaintainer[_maintainers[i]] = true;
         }
-    }
-
-
-    /**
-     * @notice Modifier to restrict calling the method to anyone but maintainers
-     */
-    modifier onlyMaintainer {
-        require(isMaintainer[msg.sender] == true);
-        _;
-    }
-
-    /**
-     * @notice Modifier to restrict calling the method to anyone but twoKeyAdmin
-     */
-    modifier onlyTwoKeyAdmin {
-        require(msg.sender == address(twoKeyAdmin));
-        _;
     }
 
     /**
@@ -207,27 +188,6 @@ contract TwoKeyUpgradableExchange is Upgradeable {
 
     function () public payable onlyEligibleContracts {
         buyTokens(msg.sender);
-    }
-    /**
-     * @notice Function which can add new maintainers, in general it's array because this supports adding multiple addresses in 1 trnx
-     * @dev only twoKeyAdmin contract is eligible to mutate state of maintainers
-     * @param _maintainers is the array of maintainer addresses
-     */
-    function addMaintainers(address [] _maintainers) public onlyTwoKeyAdmin {
-        for(uint i=0; i<_maintainers.length; i++) {
-            isMaintainer[_maintainers[i]] = true;
-        }
-    }
-
-    /**
-     * @notice Function which can remove some maintainers, in general it's array because this supports adding multiple addresses in 1 trnx
-     * @dev only twoKeyAdmin contract is eligible to mutate state of maintainers
-     * @param _maintainers is the array of maintainer addresses
-     */
-    function removeMaintainers(address [] _maintainers) public onlyTwoKeyAdmin {
-        for(uint i=0; i<_maintainers.length; i++) {
-            isMaintainer[_maintainers[i]] = false;
-        }
     }
 
     /**

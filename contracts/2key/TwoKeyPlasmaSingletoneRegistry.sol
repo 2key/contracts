@@ -20,8 +20,12 @@ contract TwoKeyPlasmaSingletoneRegistry is MaintainingPattern, ITwoKeySingletone
     /**
      * @notice Calling super constructor from maintaining pattern
      */
-    constructor(address [] _maintainers, address _twoKeyAdmin) MaintainingPattern(_maintainers, _twoKeyAdmin) public {
-
+    constructor(address [] _maintainers, address _twoKeyAdmin) public {
+        twoKeyAdmin = _twoKeyAdmin;
+        isMaintainer[msg.sender] = true; //for truffle deployment
+        for(uint i=0; i<_maintainers.length; i++) {
+            isMaintainer[_maintainers[i]] = true;
+        }
     }
 
     /**

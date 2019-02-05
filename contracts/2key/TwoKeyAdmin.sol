@@ -84,19 +84,6 @@ contract TwoKeyAdmin is Upgradeable {
         selfdestruct(twoKeyCongress);
 	}
 
-	/// @notice Function to add moderator
-	/// @param _addresses is address of moderator
-	function addMaintainerForRegistry(address [] _addresses) external onlyTwoKeyCongress {
-		require (_addresses.length != 0);
-		twoKeyReg.addTwoKeyMaintainers(_addresses);
-	}
-
-    /// @notice Function to whitelist address as an authorized user for twoKeyEventSource contract
-	/// @param _maintainers is array of addresses of maintainers
-	function twoKeyEventSourceAddMaintainer(address [] _maintainers) external onlyTwoKeyCongress{
-		require(_maintainers.length > 0);
-		twoKeyEventSource.addMaintainers(_maintainers);
-	}
 
     /// @notice Function to whitelist contract address for Event Source contract
 	/// @dev We're requiring contract address different from address 0 as it is required to be deployed before calling this method

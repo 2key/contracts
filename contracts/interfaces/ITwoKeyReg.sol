@@ -3,6 +3,7 @@ pragma solidity ^0.4.24;
 import "../openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 contract ITwoKeyReg {
+    mapping(address => bool) public isMaintainer;
     function addWhereContractor(address _userAddress, address _contractAddress) public;
     function addWhereModerator(address _userAddress, address _contractAddress) public;
     function addWhereReferrer(address _userAddress, address _contractAddress) public;
@@ -11,6 +12,5 @@ contract ITwoKeyReg {
     function getOwner2Name(address _sender) public view returns (string);
     function getPlasmaToEthereum(address plasma) public view returns (address);
     function getEthereumToPlasma(address ethereum) public view returns (address);
-    function checkIfTwoKeyMaintainerExists(address _maintainer) public view returns (bool);
     function getUserData(address _user) external view returns (bytes32,bytes32,bytes32);
 }

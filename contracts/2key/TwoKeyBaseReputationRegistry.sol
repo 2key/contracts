@@ -7,12 +7,13 @@ import '../openzeppelin-solidity/contracts/math/SafeMath.sol';
 import "../interfaces/ITwoKeyReg.sol";
 import "../interfaces/ITwoKeyAcquisitionLogicHandler.sol";
 import "../interfaces/ITwoKeyAcquisitionCampaignGetStaticAddresses.sol";
+import "./MaintainingPattern.sol";
 
 /**
  * @author Nikola Madjarevic
  * Created at 1/31/19
  */
-contract TwoKeyBaseReputationRegistry is Upgradeable {
+contract TwoKeyBaseReputationRegistry is Upgradeable, MaintainingPattern {
 
     address twoKeyRegistry;
 
@@ -24,9 +25,15 @@ contract TwoKeyBaseReputationRegistry is Upgradeable {
      * @notice Since using singletone pattern, this is replacement for the constructor
      * @param _twoKeyRegistry is the address of twoKeyRegistry contract
      */
-    function setInitialParams(address _twoKeyRegistry) {
+    function setInitialParams(address _twoKeyRegistry, address _twoKeyAdmin, address[] _maintainers) {
         require(twoKeyRegistry == address(0));
+        require(twoKeyAdmin == address(0));
+        twoKeyAdmin = _twoKeyAdmin;
         twoKeyRegistry = _twoKeyRegistry;
+        isMaintainer[msg.sender] = true; //also the deployer will be authorized maintainer
+        for(uint i=0; i<_maintainers.length; i++) {
+            isMaintainer[_maintainers[i]] = true;
+        }
     }
 
     mapping(address => int) address2contractorGlobalReputationScoreWei;

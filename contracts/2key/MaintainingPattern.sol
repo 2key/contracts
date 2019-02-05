@@ -34,23 +34,6 @@ contract MaintainingPattern {
     }
 
     /**
-    * @notice Modifier to restrict calling the method to anyone but authorized people
-    */
-    modifier onlyMaintainerOrTwoKeyAdmin {
-        require(isMaintainer[msg.sender] == true || msg.sender == address(twoKeyAdmin));
-        _;
-    }
-
-
-    constructor(address [] _maintainers, address _twoKeyAdmin) public {
-        twoKeyAdmin = _twoKeyAdmin;
-        isMaintainer[msg.sender] = true; //for truffle deployment
-        for(uint i=0; i<_maintainers.length; i++) {
-            isMaintainer[_maintainers[i]] = true;
-        }
-    }
-
-    /**
      * @notice Function which can add new maintainers, in general it's array because this supports adding multiple addresses in 1 trnx
      * @dev only twoKeyAdmin contract is eligible to mutate state of maintainers
      * @param _maintainers is the array of maintainer addresses
@@ -71,4 +54,5 @@ contract MaintainingPattern {
             isMaintainer[_maintainers[i]] = false;
         }
     }
+
 }
