@@ -432,7 +432,10 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
      * @return ethereum address if exist otherwise 0x0 (address(0))
      */
     function getPlasmaToEthereum(address plasma) public view returns (address) {
-        return plasma2ethereum[plasma];
+        if(plasma2ethereum[plasma] != address(0)) {
+            return plasma2ethereum[plasma];
+        }
+        return plasma;
     }
 
     /**
@@ -441,7 +444,10 @@ contract TwoKeyRegistry is Upgradeable {  //TODO Nikola why is this not inheriti
      * @return plasma address if exist otherwise 0x0 (address(0))
      */
     function getEthereumToPlasma(address ethereum) public view returns (address) {
-        return ethereum2plasma[ethereum];
+        if(ethereum2plasma[ethereum] != address(0)) {
+            return ethereum2plasma[ethereum];
+        }
+        return ethereum;
     }
 
 
