@@ -1001,6 +1001,10 @@ describe('TwoKeyProtocol', () => {
         await twoKeyProtocol.Utils.getTransactionReceiptMined(hash);
     }).timeout(30000);
 
+    it('==> should show referrer stats per request with signature', async() => {
+
+    }).timeout(30000);
+
     it('==> should get address statistics', async() => {
         let hexedValues = await twoKeyProtocol.AcquisitionCampaign.getAddressStatistic(campaignAddress, env.TEST4_ADDRESS);
         console.log(hexedValues);

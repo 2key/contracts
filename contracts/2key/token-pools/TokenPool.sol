@@ -9,8 +9,8 @@ import "../../interfaces/IERC20.sol";
  */
 contract TokenPool is Upgradeable, MaintainingPattern {
 
+    bool initialized = false;
     address public erc20Address;
-    address public twoKeyRegistry;
 
     /**
      * @notice Function to retrieve the balance of tokens on the contract
