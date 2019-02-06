@@ -9,7 +9,7 @@ import "../../interfaces/ITwoKeyRegistry.sol";
 contract TwoKeyCommunityTokenPool is TokenPool {
 
     bool initialized = false;
-    uint totalAmount2keys = 200000000;
+    uint public constant totalAmount2keys = 200000000;
     uint public constant annualTransferAmount = totalAmount2keys / 10;
     uint startingDate;
     uint transferedDuringCurrentYear;
@@ -41,6 +41,7 @@ contract TwoKeyCommunityTokenPool is TokenPool {
      */
     function transferTokensToAddress(address _receiver, uint _amount) public onlyTwoKeyAdmin {
         require(validateRegistrationOfReceiver(_receiver) == true);
+        require(getContractBalance() > _amount);
         if(startingDate + 365 * (1 days) > block.timestamp) {
             require(annualTransferAmount - transferedDuringCurrentYear > _amount);
         } else {
@@ -50,6 +51,7 @@ contract TwoKeyCommunityTokenPool is TokenPool {
         }
         super.transferTokens(_receiver,_amount);
     }
+
 
 
 
