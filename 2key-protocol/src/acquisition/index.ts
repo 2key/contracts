@@ -139,6 +139,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     reject('Invalid ERC20 address');
                     return;
                 }
+                console.log('twoKeyBaseReputationRegistry', this.base.twoKeyBaseReputationRegistry.address);
                 /**
                  * Creating and deploying conversion handler contract
                  */
@@ -614,7 +615,6 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                         const contractorAddress = await promisify(campaignInstance.contractor, []);
                         const plasmaAddress = this.base.plasmaAddress;
                         const sig = Sign.free_take(plasmaAddress, f_address, f_secret, p_message);
-                        console.log('INFLUENCERS FROM SIG', await promisify(this.base.twoKeyPlasmaEvents.getInfluencersFromSig, [campaignInstance.address, contractorAddress, sig, { from: plasmaAddress }]));
                         console.log('twoKeyPlasmaEvents.joinAcquisitionCampaign join', campaignInstance.address, contractorAddress, sig, plasmaAddress);
                         const txHash = await promisify(this.base.twoKeyPlasmaEvents.joinAcquisitionCampaign, [campaignInstance.address, contractorAddress, sig, { from: plasmaAddress, gasPrice: 0 }]);
                         await this.utils.getTransactionReceiptMined(txHash, { web3: this.base.plasmaWeb3 });
@@ -772,6 +772,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     const cuts = Sign.validate_join(null, null, null, signature, plasmaAddress);
                     console.log('CUTS', cuts);
                     console.log('Sig we want to buy with is: ' + signature);
+                    console.log(`Plasma of ${from} is`, await promisify(this.base.twoKeyReg.getEthereumToPlasma, [from]));
                     txHash = await promisify(campaignInstance.joinAndConvert, [signature,false, {
                         from,
                         gasPrice,

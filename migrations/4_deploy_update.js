@@ -261,12 +261,12 @@ module.exports = function deploy(deployer) {
                        })
                     })
                 )
-        } else if (isTwoKeyPlasmaEvents && networkId == 98052) {
+        } else if (isTwoKeyPlasmaEvents && (networkId === 98052 || networkId === 8087)) {
             /**
              * If contract we're updating is TwoKeyPlasmaEvents (argument) this 'subscript' will be executed
              */
             let lastTwoKeyPlasmaEvents;
-            console.log('TwoKeyPlasmaEvents contract on plasma network will be updated now');
+            console.log('TwoKeyPlasmaEvents contract on plasma network will be updated now', networkId);
             deployer.deploy(TwoKeyPlasmaEvents)
             .then(() => TwoKeyPlasmaEvents.deployed()
                 .then((twoKeyPlasmaEventsInstance) => {
@@ -301,4 +301,4 @@ module.exports = function deploy(deployer) {
     } else {
         console.log('Argument is not found - contracts will not be updated!');
     }
-}
+};

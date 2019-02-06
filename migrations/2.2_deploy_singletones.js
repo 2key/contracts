@@ -395,7 +395,7 @@ module.exports = function deploy(deployer) {
                             'Version': "1.0",
                             maintainer_address: maintainerAddresses,
                         };
-
+                        console.log('TwoKeyPlasmaEvents', networkId);
                         fileObject['TwoKeyPlasmaEvents'] = twoKeyPlasmaEvents;
                         proxyAddressTwoKeyPlasmaEvents = proxy;
                         fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));

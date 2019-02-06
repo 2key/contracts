@@ -705,6 +705,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
+            eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_GMAIL2).privateKey,
         });
         await tryToRegisterUser('Gmail2', from);
