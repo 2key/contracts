@@ -17,7 +17,7 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, MaintainingPattern {
 
     using SafeMath for uint;
     address twoKeyRegistry;
-
+    uint public x = 0;
     constructor() {
 
     }
@@ -105,17 +105,18 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, MaintainingPattern {
      */
     function updateOnConversionRejectedEvent(address converter, address contractor, address acquisitionCampaign) public {
         validateCall(acquisitionCampaign);
-        int d = 1;
-        int initialPenaltyWei = 10*(10**18);
+        uint d = 1;
+        uint initialRewardWei = 10*(10**18);
 
         address logicHandlerAddress = getLogicHandlerAddress(acquisitionCampaign);
-        address2contractorGlobalReputationScoreWei[contractor] = subFromReputationScore(5*(10**18), address2contractorGlobalReputationScoreWei[contractor]);
-        address2converterGlobalReputationScoreWei[converter] = subFromReputationScore(3*(10**18), address2converterGlobalReputationScoreWei[converter]);
+
+        address2contractorGlobalReputationScoreWei[contractor] = subFromReputationScore(initialRewardWei, address2contractorGlobalReputationScoreWei[contractor]);
+        address2converterGlobalReputationScoreWei[converter] = subFromReputationScore(initialRewardWei, address2converterGlobalReputationScoreWei[converter]);
 
         address[] memory referrers = ITwoKeyAcquisitionLogicHandler(logicHandlerAddress).getReferrers(converter, acquisitionCampaign);
 
         for(uint i=0; i<referrers.length; i++) {
-            plasmaAddress2referrerGlobalReputationScoreWei[referrers[i]] = subFromReputationScore(initialPenaltyWei/d,plasmaAddress2referrerGlobalReputationScoreWei[referrers[i]]);
+            plasmaAddress2referrerGlobalReputationScoreWei[referrers[i]] = subFromReputationScore(initialRewardWei/d,plasmaAddress2referrerGlobalReputationScoreWei[referrers[i]]);
             d = d + 1;
         }
     }
@@ -126,6 +127,10 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, MaintainingPattern {
      * @param score is the reputation score we want to modify
      */
     function addToReputationScore(uint value, ReputationScore memory score) internal view returns (ReputationScore) {
+        if(score.points == 0) {
+            score.points = value;
+            score.isPositive = true;
+        }
         if(score.isPositive) {
             score.points = score.points.add(value);
         } else {
@@ -145,7 +150,10 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, MaintainingPattern {
      * @param score is the score we want to modify
      */
     function subFromReputationScore(uint value, ReputationScore memory score) internal view returns (ReputationScore) {
-        if(score.isPositive) {
+        if(score.points == 0) {
+            score.points = value;
+            score.isPositive = false;
+        } else if(score.isPositive) {
             if(score.points > value) {
                 score.points = score.points.sub(value);
             } else {

@@ -872,6 +872,7 @@ describe('TwoKeyProtocol', () => {
     it('should reject converter', async () => {
         console.log("Test where contractor / moderator can reject converter to execute lockup");
         txHash = await twoKeyProtocol.AcquisitionCampaign.rejectConverter(campaignAddress, env.TEST_ADDRESS, from);
+        console.log(txHash);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
 
         const allRejected = await twoKeyProtocol.AcquisitionCampaign.getAllRejectedConverters(campaignAddress, from);
