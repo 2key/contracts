@@ -153,7 +153,6 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
               ? {networks: mergedNetworks, abi, name: contractName} : {bytecode, abi, name: contractName};
 
             let networkKeys = Object.keys(networks);
-
             networkKeys.forEach((key) => {
                 if (Array.isArray(data[key.toString()])) {
                     data[key.toString()].push({
@@ -177,7 +176,9 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
             });
             let mergedString = [];
             arrayOfAddresses.forEach((address) => {
-                mergedString = mergedString + address.toString();
+              if(address) {
+                  mergedString = mergedString + address.toString();
+              }
             });
 
             let hash = sha256(mergedString);
