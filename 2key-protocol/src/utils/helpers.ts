@@ -323,6 +323,24 @@ export default class Helpers implements ITwoKeyHelpers {
         return this.base.web3.eth.contract(contractsMeta[contractName].abi).at(address);
     }
 
+    _awaitPlasmaMethod(plasmaPromiseMethod: Promise<any>, timeout: number = 30000): Promise<any> {
+        return new Promise(async(resolve, reject) => {
+            let isTimeoutReached = false;
+            let fallback = setTimeout(() => {
+                isTimeoutReached = true;
+                reject(new Error('Plasma call timeout!'))
+            }, timeout);
+            const promiseResult = await plasmaPromiseMethod;
+            if (!isTimeoutReached) {
+                if (fallback) {
+                    clearTimeout(fallback);
+                    fallback = null;
+                }
+                resolve(promiseResult);
+            }
+        });
+    }
+
     _checkIPFS(): Promise<boolean> {
         return new Promise<boolean>(async (resolve, reject) => {
             try {

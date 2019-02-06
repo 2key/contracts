@@ -116,6 +116,7 @@ export interface ITwoKeyHelpers {
     _createAndValidate: (contractName: string, address: string) => Promise<any>,
     _checkIPFS: () => Promise<boolean>,
     _getNonce: (from: string) => Promise<number>,
+    _awaitPlasmaMethod: (plasmaPromiseMethod: Promise<any>, timeout?: number) => Promise<any>,
 }
 
 export interface ITwoKeyUtils {
