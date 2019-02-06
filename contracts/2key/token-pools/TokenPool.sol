@@ -10,6 +10,7 @@ import "../../interfaces/IERC20.sol";
 contract TokenPool is Upgradeable, MaintainingPattern {
 
     address public erc20Address;
+    address public twoKeyRegistry;
 
     /**
      * @notice Function to retrieve the balance of tokens on the contract
@@ -21,12 +22,8 @@ contract TokenPool is Upgradeable, MaintainingPattern {
     /**
      * @notice Function to transfer tokens
      */
-    function transferTokens(address receiver, uint tokenAmount) internal {
-        IERC20(erc20Address).transfer(receiver,tokenAmount);
+    function transferTokens(address receiver, uint amount) internal {
+        IERC20(erc20Address).transfer(receiver,amount);
     }
 
-    modifier onlyTwoKeyAdmin {
-        require(msg.sender == twoKeyAdmin);
-        _;
-    }
 }
