@@ -15,7 +15,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
 
 
     address twoKeyExchangeContract;
-
+    
     // The token being sold
     ERC20 public token;
 
