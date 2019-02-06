@@ -15,7 +15,7 @@ export default class PlasmaEvents implements IPlasmaEvents {
     }
 
     public getRegisteredAddressForPlasma(plasma: string = this.base.plasmaAddress): Promise<string> {
-        return promisify(this.base.twoKeyPlasmaEvents.plasma2ethereum, [plasma])
+        return this.helpers._awaitPlasmaMethod(promisify(this.base.twoKeyPlasmaEvents.plasma2ethereum, [plasma]))
     }
 
 
@@ -29,7 +29,7 @@ export default class PlasmaEvents implements IPlasmaEvents {
             console.log('PLASMA.signPlasmaToEthereum', from);
             try {
                 let plasmaAddress = this.base.plasmaAddress;
-                let storedEthAddress = await this.getRegisteredAddressForPlasma(plasmaAddress);
+                let storedEthAddress = await this.helpers._awaitPlasmaMethod(this.getRegisteredAddressForPlasma(plasmaAddress));
                 console.log('PLASMA.signPlasmaToEthereum storedETHAddress', storedEthAddress);
                 if (storedEthAddress != from) {
                     let plasma2ethereumSignature = await Sign.sign_plasma2ethereum(this.base.web3, plasmaAddress, from);
@@ -55,10 +55,12 @@ export default class PlasmaEvents implements IPlasmaEvents {
     public setPlasmaToEthereumOnPlasma(plasmaAddress: string, plasma2EthereumSignature: string): Promise<string> {
         return new Promise<string>(async (resolve, reject) => {
             try {
-                let txHash = await promisify(this.base.twoKeyPlasmaEvents.add_plasma2ethereum, [plasmaAddress, plasma2EthereumSignature,
+                let txHash = await this.helpers._awaitPlasmaMethod(promisify(this.base.twoKeyPlasmaEvents.add_plasma2ethereum, [
+                    plasmaAddress,
+                    plasma2EthereumSignature,
                     {
                         from: this.base.plasmaAddress
-                    }]);
+                    }]));
                 resolve(txHash);
             } catch (e) {
                 reject(e);
@@ -69,7 +71,7 @@ export default class PlasmaEvents implements IPlasmaEvents {
     public getVisitsList(campaignAddress: string, contractorAddress: string, address: string): Promise<IVisits> {
         return new Promise<IVisits>(async (resolve, reject) => {
             try {
-                let [visits, timestamps] = await promisify(this.base.twoKeyPlasmaEvents.visitsListEx, [campaignAddress, contractorAddress, address]);
+                let [visits, timestamps] = await this.helpers._awaitPlasmaMethod(promisify(this.base.twoKeyPlasmaEvents.visitsListEx, [campaignAddress, contractorAddress, address]));
                 resolve({
                     visits,
                     timestamps: timestamps.map(time => time * 1000),
@@ -82,7 +84,7 @@ export default class PlasmaEvents implements IPlasmaEvents {
     public getVisitedFrom(campaignAddress: string, contractorAddress: string, address: string): Promise<string> {
         return new Promise<string>(async (resolve, reject) => {
             try {
-                let visitedFrom = promisify(this.base.twoKeyPlasmaEvents.getVisitedFrom, [campaignAddress, contractorAddress, address]);
+                let visitedFrom = this.helpers._awaitPlasmaMethod(promisify(this.base.twoKeyPlasmaEvents.getVisitedFrom, [campaignAddress, contractorAddress, address]));
                 resolve(visitedFrom);
             } catch (e) {
                 reject(e);
@@ -93,8 +95,8 @@ export default class PlasmaEvents implements IPlasmaEvents {
     public getJoinedFrom(campaignAddress: string, contractorAddress: string, address: string): Promise<string> {
         return new Promise<string>(async (resolve, reject) => {
             try {
-                let joined_From = promisify(this.base.twoKeyPlasmaEvents.getJoinedFrom, [campaignAddress, contractorAddress, address]);
-                let joinedFrom = promisify(this.base.twoKeyPlasmaEvents.joined_from, [campaignAddress, contractorAddress, address]);
+                let joined_From = this.helpers._awaitPlasmaMethod(promisify(this.base.twoKeyPlasmaEvents.getJoinedFrom, [campaignAddress, contractorAddress, address]));
+                let joinedFrom = this.helpers._awaitPlasmaMethod(promisify(this.base.twoKeyPlasmaEvents.joined_from, [campaignAddress, contractorAddress, address]));
                 this.base._log('JOINED FROM', await Promise.all([joined_From, joinedFrom]));
                 resolve(joinedFrom);
             } catch (e) {
