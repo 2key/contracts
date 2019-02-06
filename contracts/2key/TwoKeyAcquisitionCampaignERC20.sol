@@ -499,17 +499,15 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         return contractorBalance;
     }
 
-    /**
-     * @notice Function to fetch for the referrer his balance, his total earnings, and how many conversions he participated in
-     * @dev only referrer by himself, moderator, or contractor can call this
-     * @param _referrer is the address of referrer we're checking for
-     * @return tuple containing this 3 information
-     */
-    function getReferrerBalanceAndTotalEarningsAndNumberOfConversions(address _referrer) public view returns (uint,uint,uint) {
-        require(msg.sender == _referrer || msg.sender == contractor || twoKeyEventSource.isAddressMaintainer(msg.sender));
-        _referrer = twoKeyEventSource.plasmaOf(_referrer);
-        return (referrerPlasma2BalancesEthWEI[_referrer], referrerPlasma2TotalEarningsEthWEI[_referrer], referrerPlasmaAddressToCounterOfConversions[_referrer]);
+
+    function getReferrerBalanceAndTotalEarningsAndNumberOfConversions(bytes signature) public view returns (uint,uint,uint) {
+        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding referrer to plasma")),
+            keccak256(abi.encodePacked("GET_REFERRER_REWARDS"))));
+        address message_signer = Call.recoverHash(hash, signature, 0);
+
+        return (referrerPlasma2BalancesEthWEI[message_signer], referrerPlasma2TotalEarningsEthWEI[message_signer], referrerPlasmaAddressToCounterOfConversions[message_signer]);
     }
+
 
     /**
      * @notice Function to get public link key of an address
