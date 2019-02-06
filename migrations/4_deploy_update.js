@@ -66,6 +66,8 @@ module.exports = function deploy(deployer) {
         networkId = 'ganache';
     } else if(deployer.network.startsWith('private')) {
         networkId = 98052;
+    } else if (deployer.network.startsWith('plasma')) {
+        networkId = 8087;
     }
 
     /**

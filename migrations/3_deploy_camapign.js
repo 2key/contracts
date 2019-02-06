@@ -16,7 +16,7 @@ const proxyFile = path.join(__dirname, '../build/contracts/proxyAddresses.json')
 
 
 module.exports = function deploy(deployer) {
-    if(!deployer.network.startsWith('private')) {
+    if(!deployer.network.startsWith('private') && !deployer.network.startsWith('plasma')) {
         let networkId;
         if (deployer.network.startsWith('ropsten')) {
             networkId = 3;

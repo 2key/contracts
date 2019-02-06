@@ -55,7 +55,7 @@ const TwoKeyDefaults = {
     syncTwoKeyNetId: 98052,
     // twoKeySyncUrl: 'https://test.plasma.2key.network/',
     twoKeySyncUrl: 'https://rpc.private.test.k8s.2key.net',
-    twoKeyMainUrl: 'https://rpc.public.test.k8s.2key.net'
+    twoKeyMainUrl: 'https://rpc.public.test.k8s.2key.net',
 };
 
 function getDeployedAddress(contract: string, networkId: number | string): string {
@@ -132,6 +132,7 @@ export class TwoKeyProtocol {
         }
 
         this._log = initValues.log || console.log;
+        this._log('Plasma RPC', eventsNetUrl);
 
         this.plasmaPrivateKey = plasmaPK;
         // setWeb3 2KeySyncNet Client

@@ -10,6 +10,7 @@ const {env} = process;
 
 // const artifacts = require('../src/contracts_deployed.json');
 const rpcUrl = env.RPC_URL;
+const eventsNetUrl = env.PLASMA_RPC_URL;
 const mainNetId = env.MAIN_NET_ID;
 const syncTwoKeyNetId = env.SYNC_NET_ID;
 const destinationAddress = env.AYDNEP_ADDRESS;
@@ -43,6 +44,7 @@ function makeHandle(max: number = 8): string {
 
 console.log(rpcUrl);
 console.log(mainNetId);
+console.log(syncTwoKeyNetId);
 console.log(contractsMeta.TwoKeyEventSource.networks[mainNetId].address);
 console.log(contractsMeta.TwoKeyEconomy.networks[mainNetId].address);
 
@@ -300,6 +302,7 @@ describe('TwoKeyProtocol', () => {
                         mainNetId,
                         syncTwoKeyNetId,
                     },
+                    eventsNetUrl,
                     plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
                 });
                 await tryToRegisterUser('Deployer', from);
@@ -429,6 +432,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
+            eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
         });
         await tryToRegisterUser('Aydnep', from);
@@ -551,6 +555,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
+            eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic('mnemonic words should be here but for some reason they are missing').privateKey,
         });
         txHash = await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, links.deployer, from);
@@ -567,6 +572,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
+            eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_GMAIL).privateKey,
         });
         console.log('Gmail plasma', await promisify(twoKeyProtocol.plasmaWeb3.eth.getAccounts, []));
@@ -591,6 +597,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
+            eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_TEST4).privateKey,
         });
         await tryToRegisterUser('Test4', from);
@@ -660,6 +667,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
+            eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_RENATA).privateKey,
         });
         await tryToRegisterUser('Renata', from);
@@ -711,6 +719,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
+            eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_UPORT).privateKey,
         });
         await tryToRegisterUser('Uport', from);
@@ -746,6 +755,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
+            eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_GMAIL2).privateKey,
         });
         await tryToRegisterUser('Gmail2', from);
@@ -767,6 +777,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
+            eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_TEST).privateKey,
         });
         await tryToRegisterUser('Test', from);
@@ -781,6 +792,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
+            eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP2).privateKey,
         });
         await tryToRegisterUser('Aydnep2', from);
@@ -803,6 +815,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
+            eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_TEST).privateKey,
         });
         await tryToRegisterUser('Test', from);
@@ -827,6 +840,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
+            eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
         });
 
@@ -844,6 +858,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
+            eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
         });
         let txHash = await twoKeyProtocol.AcquisitionCampaign.approveConverter(campaignAddress, env.TEST4_ADDRESS, from);
@@ -909,6 +924,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
+            eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_TEST4).privateKey,
         });
         // const campaigns = await twoKeyProtocol.Lockup.getCampaignsWhereConverter(from);
@@ -924,6 +940,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
+            eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_TEST4).privateKey,
         });
         const txHash = await twoKeyProtocol.AcquisitionCampaign.executeConversion(campaignAddress, 0, from);
@@ -944,6 +961,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
+            eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
         });
         const addresses = await twoKeyProtocol.AcquisitionCampaign.getLockupContractsForConverter(campaignAddress, env.TEST4_ADDRESS, from);
@@ -962,6 +980,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
+            eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
         });
 
@@ -1025,6 +1044,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
+            eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
         });
         const addresses = await twoKeyProtocol.AcquisitionCampaign.getLockupContractsForConverter(campaignAddress, env.TEST4_ADDRESS, from);
@@ -1085,6 +1105,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
+            eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
         });
         console.log('Trying to perform offline conversion from gmail2');
@@ -1111,6 +1132,7 @@ describe('TwoKeyProtocol', () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
+            eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
         });
         console.log('Trying to execute fiat conversion from Contractor');

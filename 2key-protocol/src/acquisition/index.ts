@@ -399,29 +399,6 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     // const {f_address, f_secret, p_message} = await this.utils.getOffchainDataFromIPFSHash(referralLink);
                     const offchainData = await this.utils.getOffchainDataFromIPFSHash(referralLink);
                     const contractConstants = (await promisify(campaignInstance.getConstantInfo, []));
-                    // const decimals = contractConstants[3].toNumber();
-                    // this.base._log('Decimals', decimals);
-                    /*
-                    let f_address = await promisify(this.base.twoKeyPlasmaEvents.visited_from, [
-                        campaignInstance.address,
-                        contractorAddress,
-                        plasmaAddress,
-                    ]);
-
-                    let f_secret = await promisify(this.base.twoKeyPlasmaEvents.notes, [
-                        campaignInstance.address,
-                        plasmaAddress,
-                    ]);
-                    f_secret = await Sign.decrypt(this.base.plasmaWeb3, plasmaAddress, f_secret, { plasma: true });
-                    f_secret = Sign.remove0x(f_secret);
-
-                    let p_message = await promisify(this.base.twoKeyPlasmaEvents.visited_sig, [
-                        campaignInstance.address,
-                        contractorAddress,
-                        plasmaAddress,
-                    ]);
-                    */
-
                     const { f_address, f_secret, p_message } = offchainData;
                     const sig = Sign.free_take(plasmaAddress, f_address, f_secret, p_message);
 
@@ -435,27 +412,17 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                         resolve(maxReferralRewardPercent);
                         return;
                     }
-                    // console.log('OFFCHAIN LINK', offchainData);
-                    // console.log('PLASMA LINK', { f_address, f_secret, p_message });
-                    // console.log(p_message.length, `0x${offchainData.p_message}`.length);
-                    // const firstAddressInChain = p_message ? `0x${p_message.substring(4, 44)}` : f_address;
                     const firstAddressInChain = p_message ? `0x${p_message.substring(2, 42)}` : f_address;
-                    // console.log('FIRSTADDRESSINCHAIN', firstAddressInChain);
                     this.base._log('RefCHAIN', contractorAddress, f_address, firstAddressInChain);
                     let cuts: number[];
-                    const firstPublicLink = await promisify(this.base.twoKeyPlasmaEvents.publicLinkKeyOf, [
-                        campaignInstance.address,
-                        contractorAddress,
-                        firstAddressInChain,
-                    ]);
+                    const firstPublicLink = await promisify(campaignInstance.publicLinkKeyOf, [firstAddressInChain]);
+                    this.base._log('Plasma publicLink', firstPublicLink);
                     if (firstAddressInChain === contractorAddress) {
                         this.base._log('First public Link', firstPublicLink);
-                        // cuts = Sign.validate_join(firstPublicLink, f_address, f_secret, p_message, plasmaAddress);
                         cuts = Sign.validate_join(firstPublicLink, f_address, f_secret, sig, plasmaAddress);
                     } else {
                         cuts = (await promisify(campaignInstance.getReferrerCuts, [firstAddressInChain])).map(cut => cut.toNumber());
                         this.base._log('CUTS from', firstAddressInChain, cuts);
-                        // cuts = cuts.concat(Sign.validate_join(firstPublicLink, f_address, f_secret, p_message, plasmaAddress));
                         cuts = cuts.concat(Sign.validate_join(firstPublicLink, f_address, f_secret, sig, plasmaAddress));
                     }
                     // TODO: Andrii removing CONTRACTOR 0 cut from cuts;
@@ -811,6 +778,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                         value,
                         nonce,
                     }]);
+                    this.base._log('joinAndConvert txHash', txHash);
 
                     try {
                         const contractor = await promisify(campaignInstance.contractor, []);
