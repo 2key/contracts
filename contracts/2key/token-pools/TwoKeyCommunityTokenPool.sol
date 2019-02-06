@@ -12,11 +12,18 @@ contract TwoKeyCommunityTokenPool is TokenPool {
     uint startingDate;
     uint transferedDuringYear;
 
-    function setInitialParams(address _twoKeyAdmin) public {
+    function setInitialParams(address _twoKeyAdmin, address _erc20Address) public {
         require(twoKeyAdmin == address(0));
         twoKeyAdmin = _twoKeyAdmin;
+        erc20Address = _erc20Address;
         startingDate = block.timestamp;
     }
+
+
+
+
+
+
 
 
 

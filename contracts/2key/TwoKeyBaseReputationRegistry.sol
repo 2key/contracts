@@ -163,6 +163,7 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, MaintainingPattern {
         } else {
             score.points = score.points.add(value);
         }
+        return score;
     }
 
 

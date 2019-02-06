@@ -25,4 +25,8 @@ contract TokenPool is Upgradeable, MaintainingPattern {
         IERC20(erc20Address).transfer(receiver,tokenAmount);
     }
 
+    modifier onlyTwoKeyAdmin {
+        require(msg.sender == twoKeyAdmin);
+        _;
+    }
 }
