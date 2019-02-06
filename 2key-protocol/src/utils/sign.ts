@@ -118,12 +118,12 @@ function sign_ethereum2plasma(plasma_web3, my_address, plasma_address): Promise<
 
 
 
-function sign_referrerWithPlasma(plasma_web3, plasma_address): Promise<string> {
+function sign_referrerWithPlasma(plasma_web3, plasma_address, action): Promise<string> {
     let msgParams = [
         {
             type: 'bytes',      // Any valid solidity type
             name: 'binding referrer to plasma',     // Any string label you want
-            value: add0x(Buffer.from('WITHDRAW_REFERRER_REWARDS', 'ascii').toString('hex'))  // The value to sign
+            value: add0x(Buffer.from(action, 'ascii').toString('hex'))  // The value to sign
         }
     ];
     return sign_message(plasma_web3, msgParams, plasma_address, { plasma: true }) // we never use metamask on plasma

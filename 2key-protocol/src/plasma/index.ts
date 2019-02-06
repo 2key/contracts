@@ -18,8 +18,12 @@ export default class PlasmaEvents implements IPlasmaEvents {
         return this.helpers._awaitPlasmaMethod(promisify(this.base.twoKeyPlasmaEvents.plasma2ethereum, [plasma]))
     }
 
-    public signReferrerForWithrawRewards(): Promise<string> {
-        return Sign.sign_referrerWithPlasma(this.base.plasmaWeb3, this.base.plasmaAddress);
+    public signReferrerToWithdrawRewards(): Promise<string> {
+        return Sign.sign_referrerWithPlasma(this.base.plasmaWeb3, this.base.plasmaAddress, 'WITHDRAW_REFERRER_REWARDS');
+    }
+
+    public signReferrerToGetRewards(): Promise<string> {
+        return Sign.sign_referrerWithPlasma(this.base.plasmaWeb3, this.base.plasmaAddress, 'GET_REFERRER_REWARDS');
     }
     /**
      *
