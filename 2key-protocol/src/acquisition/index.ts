@@ -229,7 +229,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     progressCallback('TwoKeyAcquisitionCampaignERC20', true, campaignAddress);
                 }
                 console.log('Campaign created', campaignAddress);
-                const campaignPublicLinkKey = await this.join(campaignAddress, from, {gasPrice, progressCallback});
+                const campaignPublicLinkKey = await this.join(campaignAddress, from, {gasPrice, progressCallback, interval, timeout});
                 if (progressCallback) {
                     progressCallback('SetPublicLinkKey', true, campaignPublicLinkKey);
                 }
@@ -523,7 +523,13 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @param {number} gasPrice
      * @returns {Promise<IPublicLinkKey>}
      */
-    public setPublicLinkKey(campaign: any, from: string,  publicLink: string, {cut, gasPrice = this.base._getGasPrice(), progressCallback}: IPublicLinkOpts = {}): Promise<IPublicLinkKey> {
+    public setPublicLinkKey(campaign: any, from: string,  publicLink: string, {
+        cut,
+        gasPrice = this.base._getGasPrice(),
+        progressCallback,
+        interval,
+        timeout,
+    }: IPublicLinkOpts = {}): Promise<IPublicLinkKey> {
         return new Promise(async (resolve, reject) => {
             try {
                 const campaignInstance = await this.helpers._getAcquisitionCampaignInstance(campaign);
@@ -550,7 +556,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 }
 
                 const promises = [];
-                promises.push(this.utils.getTransactionReceiptMined(txHash));
+                promises.push(this.utils.getTransactionReceiptMined(txHash, { interval, timeout }));
                 if (plasmaTxHash) {
                     promises.push(this.utils.getTransactionReceiptMined(plasmaTxHash, {web3: this.base.plasmaWeb3}));
                 }
@@ -605,7 +611,17 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @param {string} daoContract
      * @returns {Promise<string>}
      */
-    public join(campaign: any, from: string, {cut, gasPrice = this.base._getGasPrice(), referralLink, cutSign, voting, daoContract, progressCallback}: IJoinLinkOpts = {}): Promise<string> {
+    public join(campaign: any, from: string, {
+        cut,
+        gasPrice = this.base._getGasPrice(),
+        referralLink,
+        cutSign,
+        voting,
+        daoContract,
+        progressCallback,
+        interval,
+        timeout,
+        }: IJoinLinkOpts = {}): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
                 const campaignAddress = typeof (campaign) === 'string' ? campaign
@@ -644,6 +660,8 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                         cut: safeCut,
                         gasPrice,
                         progressCallback,
+                        interval,
+                        timeout,
                     });
                     dao = voting ? daoContract : undefined;
                     contractor = campaignContractor;

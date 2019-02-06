@@ -102,6 +102,8 @@ export interface IPublicLinkOpts {
     cut?: number,
     gasPrice?: number,
     progressCallback?: ICreateCampaignProgress,
+    interval?: number,
+    timeout?: number,
 }
 
 export interface IConversionObject {
@@ -130,6 +132,8 @@ export interface IJoinLinkOpts extends IPublicLinkOpts{
     voting?: boolean,
     daoContract?: string,
     progressCallback?: ICreateCampaignProgress,
+    interval?: number,
+    timeout?: number,
 }
 
 export interface IConstantsLogicHandler {
