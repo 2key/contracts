@@ -212,5 +212,12 @@ module.exports = {
       gas: 7000000,
       gasPrice: 0
     },
+
+    'azure': {
+        provider: () => new HDWalletProvider(mnemonic, 'http://eth7w5hyd-dns-reg1.westeurope.cloudapp.azure.com:8540'),
+        network_id: 11112222,
+        gas: 8000000,
+        gasPrice: '0x0',
+    }
   }
 };
