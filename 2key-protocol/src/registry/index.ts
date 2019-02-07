@@ -277,7 +277,11 @@ export default class TwoKeyReg implements ITwoKeyReg {
     public getUserData(address: string) : Promise<IUserData> {
         return new Promise(async(resolve,reject) => {
             try {
-                const [username, fullname, email] = await promisify(this.base.twoKeyReg.getUserData, [address]);
+                let username, fullname, email;
+                const hexed = await promisify(this.base.twoKeyReg.getUserData, [address]);
+                username = hexed.slice(0,42);
+                fullname = hexed.slice(42,42+40);
+                email = hexed.slice(42+40,42+40+40);
                 resolve({
                     username,
                     fullname,

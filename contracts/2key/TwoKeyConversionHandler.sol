@@ -26,6 +26,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
 
     uint raisedFundsEthWei = 0;
     uint numberOfConversions = 0;
+    uint256 expiryConversionInHours; // How long converter can be pending before it will be automatically rejected and funds will be returned to convertor (hours)
 
     Conversion[] conversions;
     mapping(address => uint[]) converterToHisConversions;
@@ -96,11 +97,14 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
      * @param _bonusTokensVestingMonths is the number of bonus token vesting months
      * @param _bonusTokensVestingStartShiftInDaysFromDistributionDate is
      */
-    constructor(uint _tokenDistributionDate, // January 1st 2019
+    constructor(
+        uint _expiryConversionInHours,
+        uint _tokenDistributionDate, // January 1st 2019
         uint _maxDistributionDateShiftInDays, // 180 days
         uint _bonusTokensVestingMonths, // 6 months
         uint _bonusTokensVestingStartShiftInDaysFromDistributionDate,
         address _twoKeyBaseReputationRegistry) public {
+        expiryConversionInHours = _expiryConversionInHours;
         tokenDistributionDate = _tokenDistributionDate;
         maxDistributionDateShiftInDays = _maxDistributionDateShiftInDays;
         bonusTokensVestingMonths = _bonusTokensVestingMonths;
@@ -150,7 +154,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
     /// @param _contractor is the address of campaign contractor
     /// @param _converterAddress is the address of the converter
     /// @param _conversionAmount is the amount for conversion in ETH
-    /// @param expiryConversion is the length of conversion
     function supportForCreateConversion(
         address _contractor,
         address _converterAddress,
@@ -158,7 +161,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
         uint256 _maxReferralRewardETHWei,
         uint256 baseTokensForConverterUnits,
         uint256 bonusTokensForConverterUnits,
-        uint256 expiryConversion,
         bool isConversionFiat
         ) public {
         require(msg.sender == twoKeyAcquisitionCampaignERC20);
@@ -177,7 +179,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
         Conversion memory c = Conversion(_contractor, _contractorProceeds, _converterAddress,
             state ,_conversionAmount, _maxReferralRewardETHWei, _moderatorFeeETHWei, baseTokensForConverterUnits,
             bonusTokensForConverterUnits, CampaignType.CPA_FUNGIBLE,
-            now, now + expiryConversion * (1 hours), isConversionFiat);
+            now, now + expiryConversionInHours * (1 hours), isConversionFiat);
 
         conversions.push(c);
         converterToHisConversions[_converterAddress].push(numberOfConversions);

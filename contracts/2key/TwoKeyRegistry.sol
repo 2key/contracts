@@ -440,13 +440,13 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
         for (i = 0; i < _bc.length; i++) babcde[k++] = _bc[i];
         return string(babcde);
     }
-
-    function getUserData(address _user) external view returns (bytes32,bytes32,bytes32) {
+    //TODO: Major change notify backends and FEDS
+    function getUserData(address _user) external view returns (bytes) {
         UserData memory data = addressToUserData[_user];
         bytes32 username = stringToBytes32(data.username);
         bytes32 fullName = stringToBytes32(data.fullName);
         bytes32 email = stringToBytes32(data.email);
-        return (username, fullName, email);
+        return (abi.encodePacked(username, fullName, email));
     }
 
 }

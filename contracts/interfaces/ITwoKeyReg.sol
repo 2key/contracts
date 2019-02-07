@@ -12,5 +12,5 @@ contract ITwoKeyReg {
     function getOwner2Name(address _sender) public view returns (string);
     function getPlasmaToEthereum(address plasma) public view returns (address);
     function getEthereumToPlasma(address ethereum) public view returns (address);
-    function getUserData(address _user) external view returns (bytes32,bytes32,bytes32);
+    function getUserData(address _user) external view returns (bytes);
 }
