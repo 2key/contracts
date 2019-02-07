@@ -57,6 +57,13 @@ module.exports = {
       gasPrice: 2000000000
     },
 
+    'dev-ap': {
+      provider: new HDWalletProvider(mnemonic, 'http://astring.aydnep.com.ua:8545'),
+      network_id: 8086, // Match any network id
+      gas: 8000000,
+      gasPrice: 2000000000
+    },
+
     'development' : {
         host: "localhost",
         port: 8545,
@@ -199,7 +206,14 @@ module.exports = {
       gasPrice: 0
     },
 
-    'plasma-dev': {
+    'dev-ap': {
+      provider: new HDWalletProvider(mnemonic, 'http://astring.aydnep.com.ua:8545'),
+      network_id: 8086, // Match any network id
+      gas: 8000000,
+      gasPrice: 2000000000
+    },
+
+    'plasma-ap': {
       provider: () => new HDWalletProvider(mnemonic, 'http://astring.aydnep.com.ua:38545'),
       network_id: 8087,
       gas: 7000000,
