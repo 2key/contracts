@@ -1,10 +1,12 @@
 pragma solidity ^0.4.24;
+import "../openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "../interfaces/ITwoKeyExchangeRateContract.sol";
 import "../interfaces/IERC20.sol";
-import "../openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "../interfaces/ITwoKeyAcquisitionCampaignERC20.sol";
 import "../interfaces/ITwoKeyReg.sol";
 import "../interfaces/IAcquisitionGetReceivedFrom.sol";
+import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
+
 /**
  * @author Nikola Madjarevic
  * Created at 1/15/19
@@ -13,10 +15,11 @@ contract TwoKeyAcquisitionLogicHandler {
 
     using SafeMath for uint256;
 
-    address public twoKeyRegistry;
+    address public twoKeySingletoneRegistry;
+//    address public twoKeyRegistry;
     address contractor;
     address public ownerPlasma;
-    address public ethUSDExchangeContract;
+//    address public ethUSDExchangeContract;
     address public twoKeyAcquisitionCampaign;
 
     uint256 campaignStartTime; // Time when campaign start
@@ -46,9 +49,8 @@ contract TwoKeyAcquisitionLogicHandler {
         uint _campaignEndTime,
         uint _maxConverterBonusPercent,
         string _currency,
-        address _ethUsdExchangeContract,
         address _assetContractERC20,
-        address _twoKeyRegistry
+        address _twoKeySingletoneRegistry
     ) public {
         contractor = msg.sender;
         minContributionETHorFiatCurrency = _minContribution;
@@ -58,8 +60,7 @@ contract TwoKeyAcquisitionLogicHandler {
         campaignEndTime = _campaignEndTime;
         maxConverterBonusPercent = _maxConverterBonusPercent;
         currency = _currency;
-        ethUSDExchangeContract = _ethUsdExchangeContract;
-        twoKeyRegistry = _twoKeyRegistry;
+        twoKeySingletoneRegistry = _twoKeySingletoneRegistry;
         unit_decimals = IERC20(_assetContractERC20).decimals();
         ownerPlasma = plasmaOf(msg.sender);
     }
@@ -89,6 +90,7 @@ contract TwoKeyAcquisitionLogicHandler {
             require(msgValue >= minContributionETHorFiatCurrency);
             require(msgValue <= maxContributionETHorFiatCurrency);
         } else {
+            address ethUSDExchangeContract = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyExchangeRateContract");
             uint val;
             bool flag;
             (val, flag,,) = ITwoKeyExchangeRateContract(ethUSDExchangeContract).getFiatCurrencyDetails(currency);
@@ -117,6 +119,7 @@ contract TwoKeyAcquisitionLogicHandler {
             bonusTokensForConverterUnits = baseTokensForConverterUnits.mul(maxConverterBonusPercent).div(100);
         } else {
             if(keccak256(currency) != keccak256('ETH')) {
+                address ethUSDExchangeContract = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyExchangeRateContract");
                 uint rate;
                 bool flag;
                 (rate,flag,,) = ITwoKeyExchangeRateContract(ethUSDExchangeContract).getFiatCurrencyDetails(currency);
@@ -200,20 +203,20 @@ contract TwoKeyAcquisitionLogicHandler {
     /**
      * @notice Function to get suepr statistics
      */
-    function getSuperStatistics(address _user, bool plasma) public view returns (bytes32, bytes32, bytes32, bool, bytes, address) {
-        bytes32 username;
-        bytes32 fullName;
-        bytes32 email;
-        address eth_address;
-        eth_address = _user;
+    function getSuperStatistics(address _user, bool plasma) public view returns (bytes, bool, bytes, address) {
+        address eth_address = _user;
+
+        address twoKeyRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyRegistry");
+
         if (plasma) {
             (eth_address) = ITwoKeyReg(twoKeyRegistry).getPlasmaToEthereum(_user);
         }
 
-        (username,fullName,email) = ITwoKeyReg(twoKeyRegistry).getUserData(eth_address);
+        bytes memory userData = ITwoKeyReg(twoKeyRegistry).getUserData(eth_address);
+
         bool isJoined = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getAddressJoinedStatus(_user);
         bytes memory stats = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getAddressStatistic(_user, plasma);
-        return (username, fullName, email, isJoined, stats, eth_address);
+        return (userData, isJoined, stats, eth_address);
     }
 
     function getReferrers(address customer, address acquisitionCampaignContract) public view returns (address[]) {
@@ -242,6 +245,7 @@ contract TwoKeyAcquisitionLogicHandler {
      * @return an address
      */
     function plasmaOf(address me) public view returns (address) {
+        address twoKeyRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyRegistry");
         if (twoKeyRegistry == address(0)) {
             me;
         }
@@ -258,6 +262,7 @@ contract TwoKeyAcquisitionLogicHandler {
      * @return ethereum address
      */
     function ethereumOf(address me) public view returns (address) {
+        address twoKeyRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyRegistry");
         if (twoKeyRegistry == address(0)) {
             return me;
         }

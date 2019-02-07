@@ -3,6 +3,7 @@ pragma solidity ^0.4.24;
 import '../openzeppelin-solidity/contracts/math/SafeMath.sol';
 import './TwoKeyEventSource.sol';
 import "./ArcERC20.sol";
+import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 
 contract TwoKeyCampaignARC is ArcERC20 {
 
@@ -12,7 +13,9 @@ contract TwoKeyCampaignARC is ArcERC20 {
     address public moderator;
 	address public ownerPlasma;
 
-	uint256 totalSupply_ = 1000000;
+	address public twoKeySingletonesRegistry;
+
+	uint256 internal totalSupply_ = 1000000;
 
 	TwoKeyEventSource twoKeyEventSource;
 
@@ -28,13 +31,13 @@ contract TwoKeyCampaignARC is ArcERC20 {
     }
 
 
-    constructor(address _twoKeyEventSource, uint256 _conversionQuota) ArcERC20() public {
-		require(_twoKeyEventSource != address(0));
-		twoKeyEventSource = TwoKeyEventSource(_twoKeyEventSource);
+    constructor(uint256 _conversionQuota, address _twoKeySingletonesRegistry) ArcERC20() public {
+		twoKeyEventSource = TwoKeyEventSource(ITwoKeySingletoneRegistryFetchAddress(_twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyEventSource"));
 		ownerPlasma = twoKeyEventSource.plasmaOf(msg.sender);
 		received_from[ownerPlasma] = ownerPlasma;
 		conversionQuota = _conversionQuota;
 		balances[ownerPlasma] = totalSupply_;
+        twoKeySingletonesRegistry = _twoKeySingletonesRegistry;
 	}
 
 	/**

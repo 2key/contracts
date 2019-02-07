@@ -47,8 +47,8 @@ import {IPlasmaEvents} from "./plasma/interfaces";
 const TwoKeyDefaults = {
     // ipfsIp: '192.168.47.100',
     // ipfsIp: 'ipfs.aydnep.com.ua',
-    ipfsIp: 'ipfs.2key.net',
-    ipfsPort: '443',
+    ipfsIp: 'ipfs.infura.io',
+    ipfsPort: '5001',
     // ipfsPort: '15001',
     ipfsProtocol: 'https',
     mainNetId: 3,
@@ -78,6 +78,7 @@ export class TwoKeyProtocol {
     private twoKeyUpgradableExchange: any;
     private twoKeyEconomy: any;
     private twoKeyBaseReputationRegistry: any;
+    private twoKeySingletonesRegistry: any;
     public twoKeyAdmin: any;
     private twoKeyCongress: any;
     private twoKeyReg: any;
@@ -167,6 +168,7 @@ export class TwoKeyProtocol {
         }
 
         //contractsMeta.TwoKeyRegLogic.networks[this.networks.mainNetId].address
+        this.twoKeySingletonesRegistry = this.web3.eth.contract(contractsMeta.TwoKeySingletonesRegistry.abi).at(getDeployedAddress('TwoKeySingletonesRegistry', this.networks.mainNetId))
         this.twoKeyExchangeContract = this.web3.eth.contract(contractsMeta.TwoKeyExchangeRateContract.abi).at(getDeployedAddress('TwoKeyExchangeRateContract', this.networks.mainNetId));
         this.twoKeyUpgradableExchange = this.web3.eth.contract(contractsMeta.TwoKeyUpgradableExchange.abi).at(getDeployedAddress('TwoKeyUpgradableExchange', this.networks.mainNetId));
         this.twoKeyEconomy = this.web3.eth.contract(contractsMeta.TwoKeyEconomy.abi).at(getDeployedAddress('TwoKeyEconomy', this.networks.mainNetId));
@@ -184,6 +186,7 @@ export class TwoKeyProtocol {
             ipfs: this.ipfs,
             networks: this.networks,
             contracts: this.contracts,
+            twoKeySingletonesRegistry: this.twoKeySingletonesRegistry,
             twoKeyAdmin: this.twoKeyAdmin,
             twoKeyEventSource: this.twoKeyEventSource,
             twoKeyExchangeContract: this.twoKeyExchangeContract,

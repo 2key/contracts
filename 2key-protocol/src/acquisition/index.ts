@@ -148,7 +148,14 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     this.base._log([data.tokenDistributionDate, data.maxDistributionDateShiftInDays, data.bonusTokensVestingMonths, data.bonusTokensVestingStartShiftInDaysFromDistributionDate], gasPrice);
                     txHash = await this.helpers._createContract(contractsMeta.TwoKeyConversionHandler, from, {
                         gasPrice,
-                        params: [data.tokenDistributionDate, data.maxDistributionDateShiftInDays, data.bonusTokensVestingMonths, data.bonusTokensVestingStartShiftInDaysFromDistributionDate, this.base.twoKeyBaseReputationRegistry.address],
+                        params: [
+                            data.expiryConversion,
+                            data.tokenDistributionDate,
+                            data.maxDistributionDateShiftInDays,
+                            data.bonusTokensVestingMonths,
+                            data.bonusTokensVestingStartShiftInDaysFromDistributionDate,
+                            this.base.twoKeyBaseReputationRegistry.address
+                        ],
                         progressCallback
                     });
                     const predeployReceipt = await this.utils.getTransactionReceiptMined(txHash, {
@@ -172,9 +179,17 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 if(!twoKeyAcquisitionLogicHandlerAddress) {
                     txHash = await this.helpers._createContract(contractsMeta.TwoKeyAcquisitionLogicHandler, from, {
                         gasPrice,
-                        params: [data.minContributionETHWei, data.maxContributionETHWei,data.pricePerUnitInETHWei,
-                            data.campaignStartTime, data.campaignEndTime, data.maxConverterBonusPercentWei,
-                            data.currency, this.base.twoKeyExchangeContract.address, data.assetContractERC20, this.base.twoKeyReg.address],
+                        params: [
+                            data.minContributionETHWei,
+                            data.maxContributionETHWei,
+                            data.pricePerUnitInETHWei,
+                            data.campaignStartTime,
+                            data.campaignEndTime,
+                            data.maxConverterBonusPercentWei,
+                            data.currency,
+                            data.assetContractERC20,
+                            this.base.twoKeySingletonesRegistry.address
+                        ],
                         progressCallback
                     });
                     const predeployReceipt = await this.utils.getTransactionReceiptMined(txHash, {
@@ -192,23 +207,15 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     }
 
                 }
-
                 txHash = await this.helpers._createContract(contractsMeta.TwoKeyAcquisitionCampaignERC20, from, {
                     gasPrice,
                     params: [
+                        this.base.twoKeySingletonesRegistry.address,
                         twoKeyAcquisitionLogicHandlerAddress,
-                        this.base.twoKeyEventSource.address,
-                        // proxyInfo.TwoKeyEventSource.Proxy,
-                        // this.helpers._getContractDeployedAddress('TwoKeyEventSource'),
                         conversionHandlerAddress,
                         data.moderator || from,
                         data.assetContractERC20,
-                        [
-                            data.expiryConversion,
-                            data.maxReferralRewardPercentWei,
-                            data.referrerQuota || 5
-                        ],
-                        this.base.twoKeyUpgradableExchange.address,
+                        [data.maxReferralRewardPercentWei, data.referrerQuota || 5],
                         ],
                     progressCallback,
                     link: {
@@ -1130,12 +1137,13 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
                 const conversionHandlerInstance = this.base.web3.eth.contract(contracts.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
                 const nonce = await this.helpers._getNonce(from);
+                console.log('Nonce is' + nonce);
                 const txHash: string = await promisify(conversionHandlerInstance.executeConversion, [conversion_id, {
                     from,
                     gasPrice,
                     nonce
                 }]);
-                this.base._log(txHash);
+                console.log(txHash);
                 resolve(txHash);
             } catch (e) {
                 reject(e);
@@ -1582,10 +1590,15 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
             try {
                 const twoKeyAcquisitionLogicHandlerInstance = await this.helpers._getAcquisitionLogicHandlerInstance(campaign);
 
-                let [username, fullname, email, isJoined ,hexedValues, ethereumof] = await promisify(twoKeyAcquisitionLogicHandlerInstance.getSuperStatistics,[address, plasma]);
+                let username, fullname, email;
+                let [hexedV, isJoined ,hexedValues, ethereumof] = await promisify(twoKeyAcquisitionLogicHandlerInstance.getSuperStatistics,[address, plasma]);
                 /**
                  * Unpack bytes for statistics
                  */
+                username = hexedV.slice(0,42);
+                fullname = hexedV.slice(42,42+40);
+                email = hexedV.slice(42+40,42+40+40);
+
                 let amountConverterSpent = parseInt(hexedValues.slice(0, 66),16);
                 let rewards = parseInt(hexedValues.slice(66,66+64),16);
                 let unitsConverterBought = parseInt(hexedValues.slice(66+64,66+64+64),16);

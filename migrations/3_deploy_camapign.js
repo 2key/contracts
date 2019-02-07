@@ -8,7 +8,7 @@ const TwoKeyExchangeRateContract = artifacts.require('TwoKeyExchangeRateContract
 const TwoKeyUpgradableExchange = artifacts.require('TwoKeyUpgradableExchange');
 const TwoKeyAcquisitionLogicHandler = artifacts.require('TwoKeyAcquisitionLogicHandler');
 const TwoKeyRegistry = artifacts.require('TwoKeyRegistry');
-
+const TwoKeySingletonesRegistry = artifacts.require('TwoKeySingletonesRegistry');
 const fs = require('fs');
 const path = require('path');
 
@@ -32,22 +32,22 @@ module.exports = function deploy(deployer) {
         console.log(networkId);
         let x = 1;
         let json = JSON.parse(fs.readFileSync(proxyFile, {encoding: 'utf-8'}));
-        deployer.deploy(TwoKeyConversionHandler, 1012019, 180, 6, 180, json.TwoKeyBaseReputationRegistry[networkId.toString()].Proxy)
+        deployer.deploy(TwoKeyConversionHandler, 12345, 1012019, 180, 6, 180, json.TwoKeyBaseReputationRegistry[networkId.toString()].Proxy)
             .then(() => TwoKeyConversionHandler.deployed())
             .then(() => deployer.deploy(ERC20TokenMock))
             .then(() => deployer.link(Call, TwoKeyAcquisitionCampaignERC20))
             .then(() => deployer.deploy(TwoKeyAcquisitionLogicHandler,
                 12, 15, 1, 12345, 15345, 5, 'USD',
-                json.TwoKeyExchangeRateContract[networkId.toString()].Proxy,
-                ERC20TokenMock.address, json.TwoKeyRegistry[networkId.toString()].Proxy))
-            .then(() => deployer.deploy(TwoKeyAcquisitionCampaignERC20,
+                ERC20TokenMock.address, TwoKeySingletonesRegistry.address))
+            .then(() => deployer.deploy(
+                TwoKeyAcquisitionCampaignERC20,
+                TwoKeySingletonesRegistry.address,
                 TwoKeyAcquisitionLogicHandler.address,
-                json.TwoKeyEventSource[networkId.toString()].Proxy,
                 TwoKeyConversionHandler.address,
                 '0xb3fa520368f2df7bed4df5185101f303f6c7decc',
                 ERC20TokenMock.address,
-                [12345, 5, 1],
-                json.TwoKeyUpgradableExchange[networkId.toString()].Proxy)
+                [5, 1],
+                )
             )
             .then(() => TwoKeyAcquisitionCampaignERC20.deployed())
             .then(() => true)

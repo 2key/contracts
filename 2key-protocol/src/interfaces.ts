@@ -16,6 +16,7 @@ export interface ITwoKeyBase {
     ipfs: any;
     networks: IEhtereumNetworks;
     contracts: IContractsAddresses;
+    twoKeySingletonesRegistry: any,
     twoKeyAdmin: any,
     twoKeyEventSource: any;
     twoKeyExchangeContract: any;

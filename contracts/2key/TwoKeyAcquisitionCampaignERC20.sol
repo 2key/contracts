@@ -18,7 +18,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     using Call for *;
 
     address public conversionHandler;
-    address public upgradableExchange;
     address public twoKeyAcquisitionLogicHandler;
 
     mapping(address => uint256) internal referrerPlasma2cut; // Mapping representing how much are cuts in percent(0-100) for referrer address
@@ -40,7 +39,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
 
     address assetContractERC20; // Asset contract is address of ERC20 inventory
 
-    uint256 expiryConversionInHours; // How long converter can be pending before it will be automatically rejected and funds will be returned to convertor (hours)
     uint256 maxReferralRewardPercent; // maxReferralRewardPercent is actually bonus percentage in ETH
     uint reservedAmountOfTokens = 0;
 
@@ -54,27 +52,24 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
 
 
     constructor(
+        address _twoKeySingletoneRegistry,
         address _twoKeyAcquisitionLogicHandler,
-        address _twoKeyEventSource,
         address _conversionHandler,
         address _moderator,
         address _assetContractERC20,
-        uint [] values,
-        address _twoKeyUpgradableExchangeContract
+        uint [] values
     ) TwoKeyCampaignARC (
-        _twoKeyEventSource,
-        values[2]
+        values[1],
+        _twoKeySingletoneRegistry
     )
     public {
         twoKeyAcquisitionLogicHandler = _twoKeyAcquisitionLogicHandler;
         conversionHandler = _conversionHandler;
-        upgradableExchange = _twoKeyUpgradableExchangeContract;
         contractor = msg.sender;
         moderator = _moderator;
         assetContractERC20 = _assetContractERC20;
-        expiryConversionInHours = values[0];
-        maxReferralRewardPercent = values[1];
-        ITwoKeyConversionHandler(conversionHandler).setTwoKeyAcquisitionCampaignERC20(address(this), contractor, _assetContractERC20, _twoKeyEventSource);
+        maxReferralRewardPercent = values[0];
+        ITwoKeyConversionHandler(conversionHandler).setTwoKeyAcquisitionCampaignERC20(address(this), contractor, _assetContractERC20, address(twoKeyEventSource));
         ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).setTwoKeyAcquisitionCampaignContract(address(this));
         twoKeyEventSource.created(address(this), contractor, moderator);
     }
@@ -172,6 +167,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @param receiver is the address of the person who withdraws money
      */
     function buyTokensFromUpgradableExchange(uint amountOfMoney, address receiver) internal {
+        address upgradableExchange = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyUpgradableExchange");
         IUpgradableExchange(upgradableExchange).buyTokens.value(amountOfMoney)(receiver);
     }
 
@@ -305,8 +301,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
 
         ITwoKeyConversionHandler(conversionHandler).supportForCreateConversion(contractor, converterAddress,
             conversionAmountETHWeiOrFiat, maxReferralRewardETHWei,
-            baseTokensForConverterUnits,bonusTokensForConverterUnits,
-            expiryConversionInHours, isFiatConversion);
+            baseTokensForConverterUnits,bonusTokensForConverterUnits, isFiatConversion);
     }
 
     /**
@@ -360,10 +355,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @param _amount is the amount of ERC20's we're going to transfer
      * @return true if successful, otherwise reverts
      */
-    function moveFungibleAsset(address _to, uint256 _amount) public onlyTwoKeyConversionHandler returns (bool) {
-        require(getInventoryBalance() >= _amount, 'Campaign inventory should be greater than amount');
-        require(IERC20(assetContractERC20).transfer(_to,_amount),'Transfer of ERC20 failed');
-        return true;
+    function moveFungibleAsset(address _to, uint256 _amount) public onlyTwoKeyConversionHandler {
+        require(IERC20(assetContractERC20).transfer(_to,_amount));
     }
 
     /**
@@ -566,6 +559,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     function withdrawModeratorOrReferrer(address _address) external {
         //Creating additional variable to prevent reentrancy attack
         require(msg.sender == _address || twoKeyEventSource.isAddressMaintainer(msg.sender));
+        address upgradableExchange = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyUpgradableExchange");
         uint balance;
         if(_address == moderator) {
             balance = moderatorBalanceETHWei.mul(98).div(100);
