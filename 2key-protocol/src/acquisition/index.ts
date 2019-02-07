@@ -1593,11 +1593,12 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 let username, fullname, email;
                 let [hexedV, isJoined ,hexedValues, ethereumof] = await promisify(twoKeyAcquisitionLogicHandlerInstance.getSuperStatistics,[address, plasma]);
                 /**
+                 *
                  * Unpack bytes for statistics
                  */
-                username = hexedV.slice(0,42);
-                fullname = hexedV.slice(42,42+40);
-                email = hexedV.slice(42+40,42+40+40);
+                username = hexedV.slice(0,66);
+                fullname = hexedV.slice(66,66+64);
+                email = hexedV.slice(66+64,66+64+64);
 
                 let amountConverterSpent = parseInt(hexedValues.slice(0, 66),16);
                 let rewards = parseInt(hexedValues.slice(66,66+64),16);
@@ -1616,8 +1617,6 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     email: this.base.web3.toUtf8(email),
                     ethereumOf: ethereumof
                 };
-
-                console.log(obj);
                 resolve(obj);
             } catch (e) {
                 reject(e);
