@@ -10,10 +10,9 @@ contract TwoKeyDeepFreezeTokenPool is TokenPool {
     uint tokensReleaseDate;
     address public twoKeyCommunityTokenPool;
 
-    function setInitialParams(address _erc20Address, address _twoKeyAdmin, address _twoKeyCommunityTokenPool) public {
+    function setInitialParams(address _twoKeyAdmin, address _erc20Address, address [] _maintainers, address _twoKeyCommunityTokenPool) public {
         require(initialized == false);
-        erc20Address = _erc20Address;
-        twoKeyAdmin = _twoKeyAdmin;
+        super.setInitialParams(_twoKeyAdmin, _erc20Address, _maintainers);
         twoKeyCommunityTokenPool = _twoKeyCommunityTokenPool;
         tokensReleaseDate = block.timestamp + 10 * (1 years);
         initialized = true;
