@@ -10,6 +10,11 @@ const TwoKeySingletonesRegistry = artifacts.require('TwoKeySingletonesRegistry')
 const TwoKeyExchangeRateContract = artifacts.require('TwoKeyExchangeRateContract');
 const TwoKeyPlasmaSingletoneRegistry = artifacts.require('TwoKeyPlasmaSingletoneRegistry');
 const TwoKeyBaseReputationRegistry = artifacts.require('TwoKeyBaseReputationRegistry');
+const TwoKeyCommunityTokenPool = artifacts.require('TwoKeyCommunityTokenPool');
+const TwoKeyDeepFreezeTokenPool = artifacts.require('TwoKeyDeepFreezeTokenPool');
+const TwoKeyLongTermTokenPool = artifacts.require('TwoKeyLongTermTokenPool');
+
+
 const fs = require('fs');
 const path = require('path');
 
@@ -35,7 +40,6 @@ module.exports = function deploy(deployer) {
     } else if (deployer.network.startsWith('plasma')) {
         networkId = 8087;
     }
-
     /**
      * Read the proxy file into fileObject
      * @type {{}}
@@ -54,7 +58,6 @@ module.exports = function deploy(deployer) {
     let proxyAddressTwoKeyAdmin;
     let proxyAddressTwoKeyUpgradableExchange;
     let proxyAddressTwoKeyBaseReputationRegistry;
-
     /**
      * Define proxy address for plasma network
      */
@@ -372,7 +375,7 @@ module.exports = function deploy(deployer) {
             .catch((err) => {
                 console.log('\x1b[31m', 'Error:', err.message, '\x1b[0m');
             }));
-    } else if (deployer.network.startsWith('plasma') || deployer.network.startsWith('private')) {
+    } else if (deployer.network.startsWith('plasma') || deployer.network.startsWith('azure') || deployer.network.startsWith('private')) {
         deployer.link(Call, TwoKeyPlasmaEvents);
         deployer.deploy(TwoKeyPlasmaEvents)
             .then(() => deployer.deploy(TwoKeyPlasmaSingletoneRegistry, [], '0x0')) //adding empty admin address
