@@ -210,7 +210,7 @@ export default class DecentralizedNation implements IDecentralizedNation {
                 const decentralizedNationInstance = await this.helpers._getDecentralizedNationInstance(decentralizedNation);
                 const [name, constitution, metaIPFS] = await promisify(decentralizedNationInstance.getNameAndIpfsHashes,[]);
                 console.log(name, constitution, metaIPFS);
-                const meta = JSON.parse((await promisify(this.base.ipfs.cat, [metaIPFS])).toString());
+                const meta = JSON.parse((await promisify(this.base.ipfsR.cat, [metaIPFS])).toString());
                 resolve({
                     name,
                     constitution,

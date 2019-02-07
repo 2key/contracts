@@ -395,6 +395,13 @@ describe('TwoKeyProtocol', () => {
         });
     }).timeout(30000);
 
+    it('should read from ipfs', () => {
+        return twoKeyProtocol.Utils.getOffchainDataFromIPFSHash('QmTiZzUGHaQz6np6WpFwMv5zKqLLgW3uM6a4ow2tht642j').then((data) => {
+            console.log('IPFS data', data);
+            // expect(hash).to.be.a('string');
+        });
+    }).timeout(30000);
+
     const rnd = Math.floor(Math.random() * 8);
     console.log('Random', rnd, addresses[rnd]);
     const ethDstAddress = addresses[rnd];
@@ -519,6 +526,7 @@ describe('TwoKeyProtocol', () => {
 
     it('should save campaign to IPFS', async () => {
         const hash = await twoKeyProtocol.Utils.ipfsAdd(campaignData);
+        console.log('HASH', hash);
         txHash = await twoKeyProtocol.AcquisitionCampaign.updateOrSetIpfsHashPublicMeta(campaignAddress, hash, from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const campaignMeta = await twoKeyProtocol.AcquisitionCampaign.getPublicMeta(campaignAddress,from);

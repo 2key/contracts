@@ -50,7 +50,7 @@ export default class Utils implements ITwoKeyUtils {
                 // const compressed = LZString.compress(dataString);
                 // console.log('Compressed length', compressed.length, compressed);
                 // console.log('Compressed length', compressed.length);
-                const [pinned]= await promisify(this.base.ipfs.add, [[Buffer.from(dataString)], { pin: true }]);
+                const [pinned]= await promisify(this.base.ipfsW.add, [[Buffer.from(dataString)], { pin: true }]);
                 // const pin = await promisify(this.base.ipfs.pin.add, [hash[0].hash]);
                 resolve(pinned.hash);
             } catch (e) {
@@ -62,7 +62,7 @@ export default class Utils implements ITwoKeyUtils {
     public getOffchainDataFromIPFSHash(hash: string): Promise<IOffchainData> {
         return new Promise<IOffchainData>(async (resolve, reject) => {
             try {
-                const offchainObj = JSON.parse((await promisify(this.base.ipfs.cat, [hash])).toString());
+                const offchainObj = JSON.parse((await promisify(this.base.ipfsR.cat, [hash])).toString());
                 // console.log('GETOFFCHAIN', hash, compressed);
                 // const ab = new Uint8Array(compressed);
                 // console.log(ab);

@@ -45,12 +45,12 @@ import {IPlasmaEvents} from "./plasma/interfaces";
 // const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 
 const TwoKeyDefaults = {
-    // ipfsIp: '192.168.47.100',
-    // ipfsIp: 'ipfs.aydnep.com.ua',
-    ipfsIp: 'ipfs.infura.io',
-    ipfsPort: '5001',
-    // ipfsPort: '15001',
-    ipfsProtocol: 'https',
+    ipfsRIp: 'ipfs.io',
+    ipfsRPort: '443',
+    ipfsRProtocol: 'https',
+    ipfsWIp: 'ipfs.infura.io',
+    ipfsWPort: '5001',
+    ipfsWProtocol: 'https',
     mainNetId: 3,
     syncTwoKeyNetId: 98052,
     // twoKeySyncUrl: 'https://test.plasma.2key.network/',
@@ -67,7 +67,8 @@ function getDeployedAddress(contract: string, networkId: number | string): strin
 export class TwoKeyProtocol {
     private web3: any;
     public plasmaWeb3: any;
-    private ipfs: any;
+    private ipfsW: any;
+    private ipfsR: any;
     public gasPrice: number;
     public totalSupply: number;
     public gas: number;
@@ -114,9 +115,12 @@ export class TwoKeyProtocol {
             web3,
             rpcUrl,
             eventsNetUrl = TwoKeyDefaults.twoKeySyncUrl,
-            ipfsIp = TwoKeyDefaults.ipfsIp,
-            ipfsPort = TwoKeyDefaults.ipfsPort,
-            ipfsProtocol: protocol = TwoKeyDefaults.ipfsProtocol,
+            ipfsRIp = TwoKeyDefaults.ipfsRIp,
+            ipfsRPort = TwoKeyDefaults.ipfsRPort,
+            ipfsRProtocol = TwoKeyDefaults.ipfsRProtocol,
+            ipfsWIp = TwoKeyDefaults.ipfsWIp,
+            ipfsWPort = TwoKeyDefaults.ipfsWPort,
+            ipfsWProtocol = TwoKeyDefaults.ipfsWProtocol,
             contracts,
             networks,
             plasmaPK,
@@ -178,12 +182,14 @@ export class TwoKeyProtocol {
         this.twoKeyCongress = this.web3.eth.contract(contractsMeta.TwoKeyCongress.abi).at(getDeployedAddress('TwoKeyCongress', this.networks.mainNetId));
         this.twoKeyCall = this.web3.eth.contract(contractsMeta.Call.abi).at(getDeployedAddress('Call', this.networks.mainNetId));
         this.twoKeyBaseReputationRegistry = this.web3.eth.contract(contractsMeta.TwoKeyCongress.abi).at(getDeployedAddress('TwoKeyBaseReputationRegistry', this.networks.mainNetId));
-        this.ipfs = ipfsAPI(ipfsIp, ipfsPort, {protocol});
+        this.ipfsR = ipfsAPI(ipfsRIp, ipfsRPort, {protocol: ipfsRProtocol});
+        this.ipfsW = ipfsAPI(ipfsWIp, ipfsWPort, {protocol: ipfsWProtocol});
 
         const twoKeyBase: ITwoKeyBase = {
             web3: this.web3,
             plasmaWeb3: this.plasmaWeb3,
-            ipfs: this.ipfs,
+            ipfsR: this.ipfsR,
+            ipfsW: this.ipfsW,
             networks: this.networks,
             contracts: this.contracts,
             twoKeySingletonesRegistry: this.twoKeySingletonesRegistry,

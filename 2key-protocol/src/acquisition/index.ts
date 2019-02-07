@@ -309,7 +309,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 const isAddressJoined = await this.isAddressJoined(campaignInstance, from);
                 const twoKeyAcquisitionLogicHandlerInstance = await this.helpers._getAcquisitionLogicHandlerInstance(campaign);
                 const ipfsHash = await promisify(twoKeyAcquisitionLogicHandlerInstance.publicMetaHash, []);
-                const meta = JSON.parse((await promisify(this.base.ipfs.cat, [ipfsHash])).toString());
+                const meta = JSON.parse((await promisify(this.base.ipfsR.cat, [ipfsHash])).toString());
                 resolve({meta, isAddressJoined});
             } catch (e) {
                 reject(e);

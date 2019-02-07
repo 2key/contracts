@@ -344,7 +344,7 @@ export default class Helpers implements ITwoKeyHelpers {
     _checkIPFS(): Promise<boolean> {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
-                const ipfs = await promisify(this.base.ipfs.id, []);
+                const ipfs = await promisify(this.base.ipfsR.id, []);
                 resolve(Boolean(ipfs && ipfs.id));
             } catch (e) {
                 reject(e);

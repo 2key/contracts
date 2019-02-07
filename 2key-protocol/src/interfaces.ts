@@ -13,7 +13,8 @@ export {ITwoKeyExchangeContract} from './exchangeETHUSD/interfaces';
 export interface ITwoKeyBase {
     web3: any;
     plasmaWeb3: any;
-    ipfs: any;
+    ipfsR: any;
+    ipfsW: any;
     networks: IEhtereumNetworks;
     contracts: IContractsAddresses;
     twoKeySingletonesRegistry: any,
@@ -59,9 +60,12 @@ export interface IEhtereumNetworks {
 
 export interface ITwoKeyInit {
     web3?: any,
-    ipfsIp?: string,
-    ipfsPort?: string | number,
-    ipfsProtocol?: string,
+    ipfsRIp?: string,
+    ipfsRPort?: string | number,
+    ipfsRProtocol?: string,
+    ipfsWIp?: string,
+    ipfsWPort?: string | number,
+    ipfsWProtocol?: string,
     contracts?: IContractsAddresses,
     networks?: IEhtereumNetworks,
     rpcUrl?: string,
