@@ -193,23 +193,17 @@ module.exports = {
       gasPrice: 3000000000
     },
     'plasma-local': {
-      // host: 'localhost',
-      // port: 8545,
       provider: () => new HDWalletProvider(mnemonic, 'http://localhost:18545'),
-      network_id: 8087, // Match any network id
+      network_id: 8087,
       gas: 7000000,
       gasPrice: 0
-      // gasPrice: 2000000000
     },
 
     'plasma-dev': {
-      // host: '107.23.249.140',
-      // port: 8090,
-      provider: () => new HDWalletProvider(mnemonic, 'https://test.plasma.2key.network/'),
-      network_id: 17, // Match any network id
+      provider: () => new HDWalletProvider(mnemonic, 'http://astring.aydnep.com.ua:38545'),
+      network_id: 8087,
       gas: 7000000,
-      gasPrice: 0,
-      // gasPrice: 2000000000
+      gasPrice: 0
     },
   }
 };

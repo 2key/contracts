@@ -1,8 +1,5 @@
-const fs = require('fs');
-const path = require('path');
 const childProcess = require('child_process');
 const Docker = require('dockerode');
-const rmDir = require('rimraf');
 
 if (process.argv.length < 3) {
   console.log('Usage: node geth.plasma.js start|stop|reset');
@@ -11,7 +8,9 @@ if (process.argv.length < 3) {
 }
 
 // const datadir = path.join(os.tmpdir(), 'geth.plasma');
-const datadir = path.join(__dirname, '../build', 'geth.plasma');
+// const datadir = path.join(__dirname, '../../build', 'geth.plasma');
+const containerName = '2key/geth:plasma';
+const volumeName = 'gethplasma';
 const docker = new Docker({ socketPath: process.platform === 'win32' ? 'npipe:////./pipe/docker_engine' : '/var/run/docker.sock' });
 
 const runDocker = args => new Promise((resolve, reject) => {
@@ -39,7 +38,7 @@ function stop() {
     let found = false;
     docker.listContainers({ all: true }, (err, containers) => {
       containers.forEach((containerInfo) => {
-        if (containerInfo.Image === '2key/geth:plasma') {
+        if (containerInfo.Image === containerName) {
           found = true;
           console.log('Stopping private network...', containerInfo.Id);
           docker.getContainer(containerInfo.Id).stop(() => {
@@ -54,36 +53,19 @@ function stop() {
   });
 }
 
-// function buildImage() {
-//   return new Promise((resolve, reject) => {
-//     docker.buildImage({
-//       context: __dirname,
-//       src: ['Dockerfile'],
-//     }, { t: '2key/geth:plasma' }, (err, res) => {
-//       if (err) {
-//         reject(err);
-//       } else {
-//         resolve(res);
-//       }
-//     });
-//   });
-// }
-
 async function start() {
-  const gethdir = path.join(__dirname, 'docker');
-  const buildDockerArgs = ['build', '-t', '2key/geth:plasma', __dirname];
+  const buildDockerArgs = ['build', '-t', containerName, __dirname];
   const runDockerArgs = [
     'run',
     '--name=GETH_PLASMA',
     '--cpus=0.5',
     `-p${process.env.RPC_PORT || '18545'}:8545`,
     `-p${process.env.WS_PORT || '18546'}:8546`,
-    '-v',
-    `${datadir}:/geth/data`,
-    '-v',
-    `${gethdir}:/opt/geth`,
-    '2key/geth:plasma',
-    '--datadir=/geth/data',
+    // '-v',
+    // `${datadir}:/geth/data`,
+    '--mount',
+    `type=volume,source=${volumeName},target=/geth/data`,
+    containerName,
     '--nodiscover',
     '--rpc',
     '--rpcapi',
@@ -96,39 +78,40 @@ async function start() {
     '8545',
     '--rpcvhosts',
     '*',
-    `--networkid=${process.argv[3] || '8086'}`,
+    `--networkid=${process.argv[3] || '8087'}`,
     '--ws',
     '--wsaddr=0.0.0.0',
     '--wsport=8546',
     '--wsorigins',
     '*',
     '--mine',
-    // '--miner.threads',
     '--minerthreads',
     '1',
-    // '--miner.gasprice',
-    // '2000000000',
-    // '--miner.gastarget',
-    // '8000000',
     '--gasprice',
     '0',
     '--targetgaslimit',
     '8000000',
-    '--unlock',
-    '0,1,2,3,4,5,6,7,8,9,10,11',
-    '--password',
-    '/opt/geth/passwords',
-    // '--verbosity',
-    // '5',
-    // 'console',
   ];
+  /*
   if (!fs.existsSync(datadir)) {
     fs.mkdirSync(datadir);
   }
+  */
   try {
     await stop();
     console.log('Starting local private network...');
     await runDocker(buildDockerArgs);
+    let volume = docker.getVolume(volumeName);
+    let volumeInfo;
+    try {
+      volumeInfo = await volume.inspect();
+    } catch {}
+
+    if (!volumeInfo) {
+      volume = await docker.createVolume({ name: volumeName });
+      console.log('\r\n');
+      console.log(volume);
+    }
     // await buildImage();
     await runDocker(runDockerArgs);
   } catch (err) {
@@ -141,6 +124,19 @@ async function reset() {
   try {
     await stop();
     console.log('Starting local private network...');
+    const volume = docker.getVolume(volumeName);
+    let volumeInfo;
+    try {
+      volumeInfo = await volume.inspect();
+    } catch {}
+    console.log('volumeInfo', volumeInfo);
+    if (volumeInfo) {
+      await volume.remove({});
+      // console.log('VOLUME', volume);
+      // docker.pruneVolumes()
+    }
+    start();
+    /*
     if (fs.existsSync(datadir)) {
       rmDir(datadir, (err) => {
         if (err) {
@@ -151,6 +147,7 @@ async function reset() {
         }
       });
     }
+    */
   } catch (err) {
     console.log(err.toString('utf8'));
     process.exit(1);
