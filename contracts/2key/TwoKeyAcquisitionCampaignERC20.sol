@@ -568,9 +568,12 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         require(msg.sender == _address || twoKeyEventSource.isAddressMaintainer(msg.sender));
         uint balance;
         if(_address == moderator) {
-            balance = moderatorBalanceETHWei;
+            balance = moderatorBalanceETHWei.mul(98).div(100);
+            uint networkFee = moderatorBalanceETHWei.mul(2).div(100);
             moderatorBalanceETHWei = 0;
             buyTokensFromUpgradableExchange(balance,_address);
+            //TODO: Instead of address put address of twokeydeepfreezetokenpool
+            buyTokensFromUpgradableExchange(networkFee,_address);
         } else {
             address _referrer = twoKeyEventSource.plasmaOf(_address);
             if(referrerPlasma2BalancesEthWEI[_referrer] != 0) {
