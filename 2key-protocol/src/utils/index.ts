@@ -9,6 +9,7 @@ import {
     ITwoKeyUtils,
     ITxReceiptOpts,
 } from './interfaces';
+import { promisify } from './promisify';
 
 const units = {
     3: 'kwei',
@@ -21,15 +22,6 @@ const units = {
     24: 'mether',
     27: 'gether',
     30: 'tether',
-}
-
-export function promisify(func: any, args: any): Promise<any> {
-    return new Promise((res, rej) => {
-        func(...args, (err: any, data: any) => {
-            if (err) return rej(err);
-            return res(data);
-        });
-    });
 }
 
 export default class Utils implements ITwoKeyUtils {

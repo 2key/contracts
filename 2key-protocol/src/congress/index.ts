@@ -1,6 +1,6 @@
 import {ITwoKeyBase, ITwoKeyHelpers, ITwoKeyUtils} from '../interfaces';
 import {IMemberInfo, ITwoKeyCongress} from './interfaces';
-import {promisify} from '../utils'
+import {promisify} from '../utils/promisify'
 
 
 export default class TwoKeyCongress implements ITwoKeyCongress {

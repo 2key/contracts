@@ -9,7 +9,7 @@ import {
     ITwoKeyWeightedVoteConstructor,
 } from "./interfaces";
 import {ITwoKeyUtils} from "../utils/interfaces";
-import {promisify} from "../utils";
+import {promisify} from '../utils/promisify';
 import daoContracts from '../contracts/dao';
 import {IJoinLinkOpts} from "../acquisition/interfaces";
 import Sign from '../utils/sign';

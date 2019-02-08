@@ -10,7 +10,7 @@ import Sign from '../src/utils/sign';
 import { TwoKeyProtocol } from '../src';
 import { ISignedPlasma, ISignedWalletData } from '../src/registry/interfaces';
 import { ISignedEthereum } from '../src/plasma/interfaces';
-import {promisify} from "../src/utils";
+import {promisify} from '../src/utils/promisify';
 
 
 interface IUser {

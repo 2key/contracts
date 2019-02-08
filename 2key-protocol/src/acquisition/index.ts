@@ -14,7 +14,7 @@ import {
 
 import { BigNumber } from 'bignumber.js/bignumber';
 import acquisitionContracts from '../contracts/acquisition';
-import { promisify } from '../utils';
+import { promisify } from '../utils/promisify';
 import Sign from '../utils/sign';
 
 /**

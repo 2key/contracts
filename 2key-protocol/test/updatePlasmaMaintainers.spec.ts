@@ -1,7 +1,7 @@
 import 'mocha';
 import {TwoKeyProtocol} from '../src';
 import web3switcher from './_web3';
-import {promisify} from "../src/utils";
+import {promisify} from '../src/utils/promisify';
 
 const { env } = process;
 

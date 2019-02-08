@@ -4,7 +4,7 @@ import {TwoKeyProtocol} from '../src';
 import singletons from '../src/contracts/singletons';
 import createWeb3, { generatePlasmaFromMnemonic } from './_web3';
 import registerUserFromBackend, { IRegistryData } from './_registerUserFromBackend';
-import {promisify} from "../src/utils";
+import {promisify} from '../src/utils/promisify';
 
 const {env} = process;
 
