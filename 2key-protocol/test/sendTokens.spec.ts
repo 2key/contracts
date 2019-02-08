@@ -1,7 +1,7 @@
 import {expect} from 'chai';
 import 'mocha';
 import {TwoKeyProtocol} from '../src';
-import contractsMeta from '../src/contracts';
+import singletons from '../src/contracts/singletons';
 import createWeb3, { ledgerWeb3 } from './_web3';
 import Sign from '../src/utils/sign';
 
@@ -18,8 +18,8 @@ const network = process.env.RINKEBY ? 'RINKEBY' : 'ROPSTEN';
 const gasPrice = process.env.GASPRICE || 5000000000;
 console.log(rpcUrl);
 console.log(mainNetId);
-console.log(contractsMeta.TwoKeyEventSource.networks[mainNetId].address);
-console.log(contractsMeta.TwoKeyEconomy.networks[mainNetId].address);
+console.log(singletons.TwoKeyEventSource.networks[mainNetId].address);
+console.log(singletons.TwoKeyEconomy.networks[mainNetId].address);
 
 const sendTokens: any = new Promise(async (resolve, reject) => {
     try {

@@ -15,6 +15,12 @@ export default class AcquisitionCampaign implements ITwoKeyAirDropCampaign {
         this.erc20 = erc20;
     }
 
+    async _getAirdropCampaignInstance(campaign: any) : Promise<any> {
+        return campaign.address
+            ? campaign
+            : await this.helpers._createAndValidate('TwoKeyAirdropCampaign', campaign);
+    }
+
     /**
      * This function can only be called by the contractor, and we suppose that previously he sent the required amount of 2keys to contract
      * Also, probably activate campaign should check if the erc's are on the contract
@@ -25,7 +31,7 @@ export default class AcquisitionCampaign implements ITwoKeyAirDropCampaign {
     public activateCampaign(airdrop: any, from: string) : Promise<string> {
         return new Promise<string>(async(resolve,reject) => {
            try {
-               const airdropInstance = await this.helpers._getAirdropCampaignInstance(airdrop);
+               const airdropInstance = await this._getAirdropCampaignInstance(airdrop);
                let txHash = await promisify(airdropInstance.activateCampaign,[{from}]);
                resolve(txHash);
            } catch (e){
@@ -44,7 +50,7 @@ export default class AcquisitionCampaign implements ITwoKeyAirDropCampaign {
     public approveConversion(airdrop: any, conversionId: number, from: string) : Promise<string> {
         return new Promise<string>(async(resolve,reject) => {
             try {
-                const airdropInstance = await this.helpers._getAirdropCampaignInstance(airdrop);
+                const airdropInstance = await this._getAirdropCampaignInstance(airdrop);
                 let txHash = await promisify(airdropInstance.approveConversion,[conversionId,{from}]);
                 resolve(txHash);
             } catch (e) {
@@ -63,7 +69,7 @@ export default class AcquisitionCampaign implements ITwoKeyAirDropCampaign {
     public rejectConversion(airdrop: any, conversionId: number, from: string) : Promise<string> {
         return new Promise<string>(async(resolve,reject) => {
             try {
-                const airdropInstance = await this.helpers._getAirdropCampaignInstance(airdrop);
+                const airdropInstance = await this._getAirdropCampaignInstance(airdrop);
                 let txHash = await promisify(airdropInstance.rejectConversion,[conversionId,{from}]);
                 resolve(txHash);
             } catch (e) {
@@ -81,7 +87,7 @@ export default class AcquisitionCampaign implements ITwoKeyAirDropCampaign {
     public getContractInformations(airdrop: any, from: string) : Promise<any> {
         return new Promise<any>(async(resolve,reject) => {
             try {
-                const airdropInstance = await this.helpers._getAirdropCampaignInstance(airdrop);
+                const airdropInstance = await this._getAirdropCampaignInstance(airdrop);
                 let campaignInformations : string = await promisify(airdropInstance.getContractInformations,[{from}]);
                 let contractor = campaignInformations.slice(0,42);
                 let inventoryAmount = parseInt(campaignInformations.slice(42, 42+64),16);
@@ -119,7 +125,7 @@ export default class AcquisitionCampaign implements ITwoKeyAirDropCampaign {
     public getReferrerBalanceAndTotalEarnings(airdrop: any, referrer: string, from: string) : Promise<any> {
         return new Promise<any>(async(resolve,reject) => {
            try {
-               const airdropInstance = await this.helpers._getAirdropCampaignInstance(airdrop);
+               const airdropInstance = await this._getAirdropCampaignInstance(airdrop);
                let txHash = await promisify(airdropInstance.getReferrerBalanceAndTotalEarnings, [referrer,{from}]);
                resolve(txHash);
            } catch (e) {
@@ -139,7 +145,7 @@ export default class AcquisitionCampaign implements ITwoKeyAirDropCampaign {
     public getConversion(airdrop: any, conversionId: number, from: string) : Promise<any> {
         return new Promise<any>(async(resolve,reject) => {
             try {
-                const airdropInstance = await this.helpers._getAirdropCampaignInstance(airdrop);
+                const airdropInstance = await this._getAirdropCampaignInstance(airdrop);
                 let [converter, conversionTime, conversionState] = await promisify(airdropInstance.getConversion,
                     [conversionId,{from}]);
                 let conversion = {
@@ -164,7 +170,7 @@ export default class AcquisitionCampaign implements ITwoKeyAirDropCampaign {
     public getConverterBalance(airdrop: any, converter:string, from:string) : Promise<number> {
         return new Promise<number>(async(resolve,reject) => {
             try {
-                const airdropInstance = await this.helpers._getAirdropCampaignInstance(airdrop);
+                const airdropInstance = await this._getAirdropCampaignInstance(airdrop);
                 let converterBalance = await promisify(airdropInstance.getConverterBalance,[converter,{from}]);
                 resolve(converterBalance);
             } catch (e) {

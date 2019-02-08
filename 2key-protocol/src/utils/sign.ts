@@ -1,9 +1,8 @@
-import eth_util, {toBuffer} from 'ethereumjs-util';
-import eth_wallet from 'ethereumjs-wallet';
+import eth_util from 'ethereumjs-util';
 import *  as cryptoJS from 'crypto-js'
 import assert from 'assert';
 import sigUtil from 'eth-sig-util';
-import {IPlasmaSignature, ISignedKeys} from './interfaces';
+import { ISignedKeys } from './interfaces';
 
 
 function fixCut(cut) {

@@ -6,12 +6,11 @@ import {
     IMember,
     INationalVotingCampaign,
     IVotingCampaign,
+    ITwoKeyWeightedVoteConstructor,
 } from "./interfaces";
 import {ITwoKeyUtils} from "../utils/interfaces";
 import {promisify} from "../utils";
-import contracts from '../contracts';
-import {ITwoKeyWeightedVoteConstructor} from "../veightedVote/interfaces";
-import {ITwoKeyWeightedVoteContract} from "../veightedVote";
+import daoContracts from '../contracts/dao';
 import {IJoinLinkOpts} from "../acquisition/interfaces";
 import Sign from '../utils/sign';
 
@@ -19,17 +18,27 @@ export default class DecentralizedNation implements IDecentralizedNation {
     private readonly base: ITwoKeyBase;
     private readonly helpers: ITwoKeyHelpers;
     private readonly utils: ITwoKeyUtils;
-    private readonly veightedVode: ITwoKeyWeightedVoteContract;
     private readonly acquisitionCampaign: ITwoKeyAcquisitionCampaign;
 
-    constructor(twoKeyProtocol: ITwoKeyBase, helpers: ITwoKeyHelpers, utils: ITwoKeyUtils, veightedVote: ITwoKeyWeightedVoteContract, acquisitionCampaign: ITwoKeyAcquisitionCampaign) {
+    constructor(twoKeyProtocol: ITwoKeyBase, helpers: ITwoKeyHelpers, utils: ITwoKeyUtils, acquisitionCampaign: ITwoKeyAcquisitionCampaign) {
         this.base = twoKeyProtocol;
         this.helpers = helpers;
         this.utils = utils;
-        this.veightedVode = veightedVote;
         this.acquisitionCampaign = acquisitionCampaign;
     }
 
+    async _getDecentralizedNationInstance(decentralizedNation: any) : Promise<any> {
+        return decentralizedNation.address
+            ? decentralizedNation
+            : await this.helpers._createAndValidate(daoContracts.DecentralizedNation.abi, decentralizedNation);
+    }
+
+    async _getWeightedVoteContract(campaign: any): Promise<any> {
+        return campaign.address
+            ? campaign
+            : await this.helpers._createAndValidate(daoContracts.TwoKeyWeightedVoteContract.abi, campaign);
+    }
+    
     _convertMembersFromBytes(members: any): IMember[] {
         const result: IMember[] = [];
         const [ addresses, usernames, fullnames, emails, types ] = members;
@@ -72,7 +81,7 @@ export default class DecentralizedNation implements IDecentralizedNation {
     public create(data: IDecentralizedNationConstructor, from: string, { gasPrice, progressCallback, interval, timeout = 60000 }: ICreateOpts = {}) : Promise<string> {
         return new Promise(async(resolve,reject) => {
             try {
-                let txHash = await this.helpers._createContract(contracts.DecentralizedNation ,from, {params: [
+                let txHash = await this.helpers._createContract(daoContracts.DecentralizedNation ,from, {params: [
                     data.nationName,
                     data.ipfsHashForConstitution,
                     data.ipfsHashForDAOPublicInfo,
@@ -114,7 +123,7 @@ export default class DecentralizedNation implements IDecentralizedNation {
         * */
         return new Promise(async(resolve,reject) => {
             try {
-                const decentralizedNationInstance = await this.helpers._getDecentralizedNationInstance(decentralizedNation);
+                const decentralizedNationInstance = await this._getDecentralizedNationInstance(decentralizedNation);
                 // const members:IMember[] = [];
                 // const [ addresses, usernames, fullnames, emails, types ] = await promisify(decentralizedNationInstance.getAllMembers, [{from}]);
                 const members = this._convertMembersFromBytes(await promisify(decentralizedNationInstance.getAllMembers, []));
@@ -146,7 +155,7 @@ export default class DecentralizedNation implements IDecentralizedNation {
     public getAllMembersForSpecificType(decentralizedNation:any, memberType:string, from:string) : Promise<any> {
         return new Promise(async(resolve,reject) => {
            try {
-                let decentralizedNationInstance = await this.helpers._getDecentralizedNationInstance(decentralizedNation);
+                let decentralizedNationInstance = await this._getDecentralizedNationInstance(decentralizedNation);
                memberType = this.base.web3.toHex(memberType);
                 let allMembersForType = await promisify(decentralizedNationInstance.getAllMembersForType,[memberType,{from}]);
                 resolve(allMembersForType);
@@ -166,7 +175,7 @@ export default class DecentralizedNation implements IDecentralizedNation {
     public getVotingPointsForTheMember(decentralizedNation: any, address: string, from: string) : Promise<number> {
         return new Promise (async(resolve,reject) => {
             try {
-                let decentralizedNationInstance = await this.helpers._getDecentralizedNationInstance(decentralizedNation);
+                let decentralizedNationInstance = await this._getDecentralizedNationInstance(decentralizedNation);
                 let votingPoints = await promisify(decentralizedNationInstance.getMembersVotingPoints,[address,{from}]);
                 resolve(votingPoints);
             } catch (e) {
@@ -187,7 +196,7 @@ export default class DecentralizedNation implements IDecentralizedNation {
         return new Promise(async(resolve,reject) => {
            try {
                memberType = this.base.web3.toHex(memberType);
-               let decentralizedNationInstance = await this.helpers._getDecentralizedNationInstance(decentralizedNation);
+               let decentralizedNationInstance = await this._getDecentralizedNationInstance(decentralizedNation);
                let txHash = await promisify(decentralizedNationInstance.addMembersByFounders,[newMemberAddress,memberType,{from}]);
                console.log(txHash);
                resolve(txHash);
@@ -207,7 +216,7 @@ export default class DecentralizedNation implements IDecentralizedNation {
     public getNameAndIpfsHashesForDAO(decentralizedNation: any) : Promise<IDaoMeta> {
         return new Promise( async(resolve, reject) => {
             try {
-                const decentralizedNationInstance = await this.helpers._getDecentralizedNationInstance(decentralizedNation);
+                const decentralizedNationInstance = await this._getDecentralizedNationInstance(decentralizedNation);
                 const [name, constitution, metaIPFS] = await promisify(decentralizedNationInstance.getNameAndIpfsHashes,[]);
                 console.log(name, constitution, metaIPFS);
                 const meta = JSON.parse((await promisify(this.base.ipfsR.cat, [metaIPFS])).toString());
@@ -236,7 +245,7 @@ export default class DecentralizedNation implements IDecentralizedNation {
     public createCampaign(decentralizedNation: any, data: INationalVotingCampaign, from: string, { gasPrice, progressCallback, interval, timeout = 60000 }: ICreateOpts = {}) : Promise<any> {
         return new Promise(async(resolve, reject) => {
             try{
-                const decentralizedNationInstance = await this.helpers._getDecentralizedNationInstance(decentralizedNation);
+                const decentralizedNationInstance = await this._getDecentralizedNationInstance(decentralizedNation);
                 let addressOfVoteToken = await promisify(decentralizedNationInstance.votingToken,[]);
 
                 this.base._log("ADDRESS OF VOTE TOKEN: " + addressOfVoteToken);
@@ -247,7 +256,7 @@ export default class DecentralizedNation implements IDecentralizedNation {
                     erc20: addressOfVoteToken
                 };
 
-                let addressOfVotingContract = await this.veightedVode.createWeightedVoteContract(dataForVotingContract, from, {
+                let addressOfVotingContract = await this.createWeightedVoteContract(dataForVotingContract, from, {
                     gasPrice, progressCallback, interval, timeout
                 });
 
@@ -280,7 +289,7 @@ export default class DecentralizedNation implements IDecentralizedNation {
         return new Promise(async(resolve,reject) => {
             try {
                 memberType = this.base.web3.toHex(memberType);
-                let decentralizedNationInstance = await this.helpers._getDecentralizedNationInstance(decentralizedNation);
+                let decentralizedNationInstance = await this._getDecentralizedNationInstance(decentralizedNation);
                 let isEligible = await promisify(decentralizedNationInstance.isMemberTypeEligibleToCreateVotingCampaign, [memberType]);
                 resolve(isEligible);
             } catch (e) {
@@ -298,7 +307,7 @@ export default class DecentralizedNation implements IDecentralizedNation {
     public getAllCampaigns(decentralizedNation:any) : Promise<IVotingCampaign[]> {
         return new Promise(async(resolve,reject) => {
            try {
-               let decentralizedNationInstance = await this.helpers._getDecentralizedNationInstance(decentralizedNation);
+               let decentralizedNationInstance = await this._getDecentralizedNationInstance(decentralizedNation);
                let numberOfCampaigns = await promisify(decentralizedNationInstance.getNumberOfVotingCampaigns,[]);
                const promises = [];
                for (let i=0; i<numberOfCampaigns; i++) {
@@ -327,7 +336,7 @@ export default class DecentralizedNation implements IDecentralizedNation {
     async plasma_bdfs(weightedVoteContract: any, contractor: string, start_address: string[], cb: (from: string) => void) {
         for (let i = 0; i < start_address.length; i++) {
             let from = start_address[i];
-            const weightedVoteContractInstance = await this.helpers._getWeightedVoteContract(weightedVoteContract);
+            const weightedVoteContractInstance = await this._getWeightedVoteContract(weightedVoteContract);
             const given_to = await promisify(this.base.twoKeyPlasmaEvents.get_visits_list, [from, weightedVoteContractInstance.address, contractor]);
             console.log('plasma_bdfs', given_to, from, contractor, start_address.length);
             if (given_to.length > 0) {
@@ -376,7 +385,7 @@ export default class DecentralizedNation implements IDecentralizedNation {
            try {
                await this.plasma_bdfs(weightedVoteContract, contractor, [contractor], async (from) => {
                    // check if "from" is off-chain
-                   const weightedVoteContractInstance = await this.helpers._getWeightedVoteContract(weightedVoteContract);
+                   const weightedVoteContractInstance = await this._getWeightedVoteContract(weightedVoteContract);
                    let arcs = await promisify(weightedVoteContractInstance.balanceOf, [from]);
                    if (arcs.toNumber()) return;
                    console.log('visited_sig', weightedVoteContractInstance.address, contractor, from);
@@ -443,7 +452,7 @@ export default class DecentralizedNation implements IDecentralizedNation {
     public getVotingResults(weightedVoteContract: any): Promise<any> {
         return new Promise<any>(async (resolve, reject) => {
             try {
-                const weightedVoteContractInstance = await this.helpers._getWeightedVoteContract(weightedVoteContract);
+                const weightedVoteContractInstance = await this._getWeightedVoteContract(weightedVoteContract);
                 const results = await promisify(weightedVoteContractInstance.getDynamicData, []);
                 resolve(results);
             } catch (e) {
@@ -461,7 +470,7 @@ export default class DecentralizedNation implements IDecentralizedNation {
     public getCampaignByVotingContractAddress(decentralizedNation: any, weightedVoteContractAddress:string) : Promise<any> {
         return new Promise<any>(async(resolve,reject) => {
             try {
-                let decentralizedNationInstance = await this.helpers._getDecentralizedNationInstance(decentralizedNation);
+                let decentralizedNationInstance = await this._getDecentralizedNationInstance(decentralizedNation);
                 const prom = new Promise(async(cResolve,cReject) => {
                     let [votingReason, finished, votesYes, votesNo, votingResultForYes, votingResultForNo, votingCampaignLengthInDays, campaignType, votingCampaignContractAddress]
                         = await promisify(decentralizedNationInstance.getCampaignByAddressOfVoteContract, [weightedVoteContractAddress]);
@@ -495,7 +504,7 @@ export default class DecentralizedNation implements IDecentralizedNation {
     public executeCampaign(decentralizedNation: any, campaignId: number, signature: string, from:string) : Promise<any> {
         return new Promise(async(resolve, reject) => {
             try {
-                const decentralizedNationInstance = await this.helpers._getDecentralizedNationInstance(decentralizedNation);
+                const decentralizedNationInstance = await this._getDecentralizedNationInstance(decentralizedNation);
 
                 const txHash = await promisify(decentralizedNationInstance.executeVoting,[campaignId,signature,{from}]);
                 resolve(txHash);
@@ -514,7 +523,7 @@ export default class DecentralizedNation implements IDecentralizedNation {
     public getLimitsForCampaign(decentralizedNation: any) : Promise<any> {
         return new Promise(async(resolve,reject) => {
             try {
-                const decentralizedNationInstance = await this.helpers._getDecentralizedNationInstance(decentralizedNation);
+                const decentralizedNationInstance = await this._getDecentralizedNationInstance(decentralizedNation);
                 let [minimalNumberVoting,minimalPercentVoting, minimalNumberPetitioning,minimalPercentPetitioning]
                 = await promisify(decentralizedNationInstance.getLimitsForDAO, []);
 
@@ -531,4 +540,25 @@ export default class DecentralizedNation implements IDecentralizedNation {
         })
     }
 
+    public createWeightedVoteContract(data: ITwoKeyWeightedVoteConstructor, from: string,  { gasPrice, progressCallback, interval, timeout = 60000 }: ICreateOpts = {}) : Promise<string> {
+        return new Promise(async(resolve, reject) => {
+            try {
+                let txHash = await this.helpers._createContract(daoContracts.TwoKeyWeightedVoteContract ,from, {params: [
+                            data.descriptionForVoting,
+                            data.addressOfDAO,
+                            data.erc20
+                        ],
+                        gasPrice,
+                        progressCallback
+                    },
+
+                );
+                let receipt = await this.utils.getTransactionReceiptMined(txHash, { interval, timeout, web3: this.base.web3 });
+                let address = receipt.contractAddress;
+                resolve(address);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
 }

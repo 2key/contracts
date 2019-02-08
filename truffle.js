@@ -134,9 +134,9 @@ module.exports = {
       // network_id: 98052, // Match any network id
       network_id: 98052,
       gas: 7000000,
-      gasPrice: 0,
+      // gasPrice: 0,
       // gasPrice: 100000000000,
-      // gasPrice: 2000000000
+      gasPrice: 2000000000
     },
 
 

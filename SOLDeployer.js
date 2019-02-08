@@ -124,7 +124,9 @@ const restoreFromArchive = () => new Promise(async (resolve, reject) => {
 const generateSOLInterface = () => new Promise((resolve, reject) => {
   console.log('Generating abi');
   if (fs.existsSync(buildPath)) {
-    let contracts = {};
+    let contracts = {
+      'contracts': {},
+    };
     const proxyFile = path.join(buildPath, 'proxyAddresses.json');
     let json = {};
     let hashMap = {};
@@ -140,6 +142,7 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
             networks, contractName, bytecode, abi
           } = JSON.parse(fs.readFileSync(path.join(buildPath, file), { encoding: 'utf-8' }));
           if (whitelist[contractName]) {
+            const whiteListedContract = whitelist[contractName];
             // contracts[contractName] = whitelist[contractName].deployed
             //   ? { abi, networks } : { abi, networks, bytecode };
             const proxyNetworks = proxyAddresses[contractName] || {};
@@ -147,9 +150,21 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
             Object.keys(networks).forEach(key => {
               mergedNetworks[key] = { ...networks[key], ...proxyNetworks[key] };
             });
-            contracts[contractName] = whitelist[contractName].singletone
+            if (!contracts.contracts[whiteListedContract.file]) {
+              contracts.contracts[whiteListedContract.file] = {};
+            }
+            contracts.contracts[whiteListedContract.file][contractName] = { abi, name: contractName };
+            if (whiteListedContract.networks) {
+              contracts.contracts[whiteListedContract.file][contractName].networks = mergedNetworks;
+            }
+            if (whiteListedContract.bytecode) {
+              contracts.contracts[whiteListedContract.file][contractName].bytecode = bytecode;
+            }
+            /*
+              whitelist[contractName].singleton
               ? {networks: mergedNetworks, abi, name: contractName} : {bytecode, abi, name: contractName};
-            json[contractName] = whitelist[contractName].singletone
+            */
+            json[contractName] = whitelist[contractName].singleton
               ? {networks: mergedNetworks, abi, name: contractName} : {bytecode, abi, name: contractName};
 
             let networkKeys = Object.keys(networks);
@@ -166,7 +181,7 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
             });
           }
         });
-        let keyHash = {}
+        let keyHash = {};
         let keys = Object.keys(data);
         keys.forEach((key) => {
             let arr = data[key];
@@ -193,10 +208,13 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
 
         let obj1 = {};
         obj1['Maintainers'] = maintainerAddress;
-        contracts = Object.assign(obj, contracts);
-        contracts = Object.assign(obj1, contracts);
+        contracts.contracts.singletons = Object.assign(obj, contracts.contracts.singletons);
+        contracts.contracts.singletons = Object.assign(obj1, contracts.contracts.singletons);
         console.log('Writing contracts.ts...');
-        fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts.ts'), `export default ${util.inspect(contracts, {depth: 10})}`);
+        Object.keys(contracts.contracts).forEach(file => {
+          fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts', `${file}.ts`), `export default ${util.inspect(contracts.contracts[file], {depth: 10})}`)
+        });
+        // fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts.ts'), `export default ${util.inspect(contracts, {depth: 10})}`);
         if (deployment) {
             json = Object.assign(obj,json);
             json = Object.assign(obj1,json);

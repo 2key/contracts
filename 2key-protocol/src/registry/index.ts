@@ -2,7 +2,6 @@ import {ITwoKeyBase, ITwoKeyHelpers, ITwoKeyUtils} from '../interfaces';
 import {promisify} from '../utils'
 import {ISignedPlasma, ISignedUser, ISignedWalletData, ITwoKeyReg, IUserData} from "./interfaces";
 import Sign from '../utils/sign';
-import {strict} from "assert";
 
 export default class TwoKeyReg implements ITwoKeyReg {
     private readonly base: ITwoKeyBase;

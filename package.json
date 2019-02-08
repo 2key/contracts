@@ -6,6 +6,7 @@
     "start": "webpack-dev-server --config ./webpack.config.dev.js --colors --mode development --open",
     "lint": "eslint ./",
     "build": "webpack",
+    "build:submodules": "webpack --config ./webpack.config.submodules.js --mode production --colors",
     "deploy": "node SOLDeployer.js",
     "geth": "node geth/mainnet/geth.mainnet.js start",
     "geth:stop": "node geth/mainnet/geth.mainnet.js stop",

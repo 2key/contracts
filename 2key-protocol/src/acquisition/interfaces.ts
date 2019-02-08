@@ -1,4 +1,4 @@
-import {BigNumber} from 'bignumber.js';
+import {BigNumber} from 'bignumber.js/bignumber';
 import {ICreateOpts} from '../interfaces';
 
 export interface IPublicLinkKey {
@@ -45,8 +45,20 @@ export interface IAcquisitionCampaign {
     bonusTokensVestingStartShiftInDaysFromDistributionDate: number
 }
 
+export interface ILockupInformation {
+    'baseTokens' : number,
+    'bonusTokens' : number,
+    'vestingMonths' : number,
+    'conversionId' : number,
+    'unlockingDays' : number[],
+    'areWithdrawn' : boolean[]
+}
 
 export interface ITwoKeyAcquisitionCampaign {
+    _getCampaignInstance: (campaign: any) => Promise<any>,
+    _getConversionHandlerInstance: (campaign: any) => Promise<any>,
+    _getLogicHandlerInstance: (campaign: any) => Promise<any>,
+    _getLockupContractInstance: (lockupContract: any) => Promise<any>,
     estimateCreation: (data: IAcquisitionCampaign, from: string) => Promise<number>,
     create: (data: IAcquisitionCampaign, from: string, opts?: ICreateOpts) => Promise<IAcquisitionCampaignMeta>,
     updateOrSetIpfsHashPublicMeta: (campaign: any, hash: string, from: string, gasPrice?: number) => Promise<string>,
@@ -96,6 +108,9 @@ export interface ITwoKeyAcquisitionCampaign {
     getAddressStatistic: (campaign: any, address: string, plasma?: boolean) => Promise<IAddressStats>,
     getCampaignSummary: (campaign: any, from: string) => Promise<IConversionStats>,
     getLockupContractAddress: (campaign:any, conversionId: number, from:string) => Promise<string>,
+    withdrawTokens: (twoKeyLockup: string, part: number, from:string) => Promise<string>,
+    changeTokenDistributionDate: (twoKeyLockup: string, newDate: number, from: string) => Promise<string>,
+    getLockupInformations: (twoKeyLockup: string, from:string) => Promise<ILockupInformation>,
 }
 
 export interface IPublicLinkOpts {

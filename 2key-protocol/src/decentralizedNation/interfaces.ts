@@ -2,6 +2,8 @@ import {ICreateOpts} from '../interfaces';
 import {IJoinLinkOpts} from "../acquisition/interfaces";
 
 export interface IDecentralizedNation {
+    _getDecentralizedNationInstance(decentralizedNation: any) : Promise<any>,
+    _getWeightedVoteContract: (campaign: any) => Promise<any>,
     create: (data: IDecentralizedNationConstructor, from: string, opts?: ICreateOpts) => Promise<string>,
     check: (address: string, from:string) => Promise<boolean>,
     getAllMembersFromDAO: (decentralizedNation:any) => Promise<IMember[]>,
@@ -16,6 +18,13 @@ export interface IDecentralizedNation {
     countPlasmaVotes: (weightedVoteContract: any, contractor: string) => Promise<string>,
     getVotingResults: (weightedVoteContract: any) => Promise<any>,
     getCampaignByVotingContractAddress: (decentralizedNation: any, weightedVoteContractAddress:string) => Promise<any>,
+    createWeightedVoteContract: (data: ITwoKeyWeightedVoteConstructor, from: string, opts?: ICreateOpts) => Promise<string>,
+}
+
+export interface ITwoKeyWeightedVoteConstructor {
+    descriptionForVoting: string,
+    addressOfDAO: string
+    erc20: string
 }
 
 export interface IMember {
