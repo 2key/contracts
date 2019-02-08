@@ -7,6 +7,7 @@
     "lint": "eslint ./",
     "build": "webpack",
     "build:submodules": "webpack --config ./webpack.config.submodules.js --mode production --colors",
+    "build:analyze": "webpack --config ./webpack.config.analyze.js --mode production --colors",
     "deploy": "node SOLDeployer.js",
     "geth": "node geth/mainnet/geth.mainnet.js start",
     "geth:stop": "node geth/mainnet/geth.mainnet.js stop",
@@ -66,6 +67,7 @@
     "typescript": "3.0.1",
     "uglifyjs-webpack-plugin": "1.3.0",
     "webpack": "4.17.1",
+    "webpack-bundle-analyzer": "^3.0.3",
     "webpack-cli": "3.1.0",
     "webpack-dev-server": "^3.1.9",
     "webpack-node-externals": "1.7.2"

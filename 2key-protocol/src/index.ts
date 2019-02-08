@@ -218,6 +218,10 @@ export class TwoKeyProtocol {
         this.Registry = new TwoKerRegistry(twoKeyBase, this.Helpers, this.Utils);
     }
 
+    public replaceAcquisition(acquisitionCampaign: AcquisitionCampaign) {
+        this.AcquisitionCampaign = acquisitionCampaign;
+    }
+
     public getBalance(address: string, erc20address?: string): Promise<BalanceMeta> {
         const promises = [
             this.Helpers._getEthBalance(address),
