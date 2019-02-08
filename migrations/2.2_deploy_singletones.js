@@ -58,6 +58,10 @@ module.exports = function deploy(deployer) {
     let proxyAddressTwoKeyAdmin;
     let proxyAddressTwoKeyUpgradableExchange;
     let proxyAddressTwoKeyBaseReputationRegistry;
+    let proxyAddressTwoKeyCommunityTokenPool;
+    let proxyAddressTwoKeyLongTermTokenPool;
+    let proxyAddressTwoKeyDeepFreezeTokenPool;
+
     /**
      * Define proxy address for plasma network
      */
@@ -86,7 +90,7 @@ module.exports = function deploy(deployer) {
             '0x098a12404fd3f5a06cfb016eb7669b1c41419705' ,
             '0x1d55762a320e6826cf00c4f2121b7e53d23f6822'
         ];
-    } else if (deployer.network.startsWith('private.test') && !deployer.network.endsWith('k8s-hdwallet')) {
+    } else if ((deployer.network.startsWith('private.test') || deployer.network.startsWith('azure')) && !deployer.network.endsWith('k8s-hdwallet')) {
         /**
          * Network configuration for plasma
          */
@@ -128,6 +132,12 @@ module.exports = function deploy(deployer) {
             .then(() => TwoKeyBaseReputationRegistry.deployed())
             .then(() => deployer.deploy(TwoKeyUpgradableExchange))
             .then(() => TwoKeyUpgradableExchange.deployed())
+            .then(() => deployer.deploy(TwoKeyCommunityTokenPool))
+            .then(() => TwoKeyCommunityTokenPool.deployed())
+            .then(() => deployer.deploy(TwoKeyDeepFreezeTokenPool))
+            .then(() => TwoKeyDeepFreezeTokenPool.deployed())
+            .then(() => deployer.deploy(TwoKeyLongTermTokenPool))
+            .then(() => TwoKeyLongTermTokenPool.deployed())
             .then(() => deployer.deploy(TwoKeySingletonesRegistry, [], '0x0')) //adding empty admin address
             .then(() => TwoKeySingletonesRegistry.deployed().then(async (registry) => {
                 /**
@@ -144,7 +154,6 @@ module.exports = function deploy(deployer) {
                         let { proxy } = logs.find(l => l.event === 'ProxyCreated').args;
                         console.log('Proxy address for the TwoKeyRegistry is : ' + proxy);
                         const twoKeyReg = fileObject.TwoKeyRegistry || {};
-                        console.log(maintainerAddresses);
                         twoKeyReg[networkId] = {
                             'address': TwoKeyRegistry.address,
                             'Proxy': proxy,
@@ -160,6 +169,91 @@ module.exports = function deploy(deployer) {
                         reject(e);
                     }
                 });
+
+                await new Promise(async (resolve, reject) => {
+                    try {
+                        console.log('... Adding TwoKeyCommunityTokenPool to Proxy registry as valid implementation');
+                        /**
+                         * Adding TwoKeyCommunityTokenPool to the registry, deploying 1st proxy for that 1.0 version and setting initial params there
+                         */
+                        let txHash = await registry.addVersion("TwoKeyCommunityTokenPool", "1.0", TwoKeyCommunityTokenPool.address);
+                        let { logs } = await registry.createProxy("TwoKeyCommunityTokenPool", "1.0");
+                        let { proxy } = logs.find(l => l.event === 'ProxyCreated').args;
+                        console.log('Proxy address for the TwoKeyCommunityTokenPool is : ' + proxy);
+                        const twoKeyCommunityTokenPool = fileObject.TwoKeyCommunityTokenPool || {};
+                        twoKeyCommunityTokenPool[networkId] = {
+                            'address': TwoKeyCommunityTokenPool.address,
+                            'Proxy': proxy,
+                            'Version': "1.0",
+                            maintainer_address: maintainerAddresses,
+                        };
+
+
+                        fileObject['TwoKeyCommunityTokenPool'] = twoKeyCommunityTokenPool;
+                        proxyAddressTwoKeyCommunityTokenPool = proxy;
+                        resolve(proxy);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
+
+                await new Promise(async (resolve, reject) => {
+                    try {
+                        console.log('... Adding TwoKeyLongTermTokenPool to Proxy registry as valid implementation');
+                        /**
+                         * Adding TwoKeyLongTermTokenPool to the registry, deploying 1st proxy for that 1.0 version and setting initial params there
+                         */
+                        let txHash = await registry.addVersion("TwoKeyLongTermTokenPool", "1.0", TwoKeyLongTermTokenPool.address);
+                        let { logs } = await registry.createProxy("TwoKeyLongTermTokenPool", "1.0");
+                        let { proxy } = logs.find(l => l.event === 'ProxyCreated').args;
+                        console.log('Proxy address for the TwoKeyLongTermTokenPool is : ' + proxy);
+                        const twoKeyLongTermTokenPool = fileObject.TwoKeyLongTermTokenPool || {};
+                        twoKeyLongTermTokenPool[networkId] = {
+                            'address': TwoKeyLongTermTokenPool.address,
+                            'Proxy': proxy,
+                            'Version': "1.0",
+                            maintainer_address: maintainerAddresses,
+                        };
+
+
+                        fileObject['TwoKeyLongTermTokenPool'] = twoKeyLongTermTokenPool;
+                        proxyAddressTwoKeyLongTermTokenPool = proxy;
+                        resolve(proxy);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
+
+                await new Promise(async (resolve, reject) => {
+                    try {
+                        console.log('... Adding TwoKeyDeepFreezeTokenPool to Proxy registry as valid implementation');
+                        /**
+                         * Adding TwoKeyLongTermTokenPool to the registry, deploying 1st proxy for that 1.0 version and setting initial params there
+                         */
+                        let txHash = await registry.addVersion("TwoKeyDeepFreezeTokenPool", "1.0", TwoKeyDeepFreezeTokenPool.address);
+                        let { logs } = await registry.createProxy("TwoKeyDeepFreezeTokenPool", "1.0");
+                        let { proxy } = logs.find(l => l.event === 'ProxyCreated').args;
+                        console.log('Proxy address for the TwoKeyDeepFreezeTokenPool is : ' + proxy);
+                        const twoKeyDeepFreezeTokenPool = fileObject.TwoKeyDeepFreezeTokenPool || {};
+                        twoKeyDeepFreezeTokenPool[networkId] = {
+                            'address': TwoKeyDeepFreezeTokenPool.address,
+                            'Proxy': proxy,
+                            'Version': "1.0",
+                            maintainer_address: maintainerAddresses,
+                        };
+
+
+                        fileObject['TwoKeyDeepFreezeTokenPool'] = twoKeyDeepFreezeTokenPool;
+                        proxyAddressTwoKeyDeepFreezeTokenPool = proxy;
+                        resolve(proxy);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
+
+
+
+
 
                 await new Promise(async (resolve, reject) => {
                     try {
@@ -308,9 +402,29 @@ module.exports = function deploy(deployer) {
                 await new Promise(async (resolve, reject) => {
                     console.log('... Setting Initial params in all singletone proxy contracts');
                     try {
-                        /**
-                         * Setting initial parameters in event source and twoKeyRegistry contract
-                         */
+                        await TwoKeyCommunityTokenPool.at(proxyAddressTwoKeyCommunityTokenPool).setInitialParams
+                        (
+                            proxyAddressTwoKeyAdmin,
+                            TwoKeyEconomy.address,
+                            maintainerAddresses,
+                            proxyAddressTwoKeyRegistry
+                        );
+
+                        await TwoKeyLongTermTokenPool.at(proxyAddressTwoKeyLongTermTokenPool).setInitialParams
+                        (
+                            proxyAddressTwoKeyAdmin,
+                            TwoKeyEconomy.address,
+                            maintainerAddresses,
+                        );
+
+                        await TwoKeyDeepFreezeTokenPool.at(proxyAddressTwoKeyDeepFreezeTokenPool).setInitialParams
+                        (
+                            proxyAddressTwoKeyAdmin,
+                            TwoKeyEconomy.address,
+                            maintainerAddresses,
+                            proxyAddressTwoKeyCommunityTokenPool
+                        );
+
                         await EventSource.at(proxyAddressTwoKeyEventSource).setInitialParams
                         (
                             proxyAddressTwoKeyAdmin,
@@ -331,6 +445,7 @@ module.exports = function deploy(deployer) {
                             maintainerAddresses,
                             proxyAddressTwoKeyAdmin
                         );
+
                         await TwoKeyUpgradableExchange.at(proxyAddressTwoKeyUpgradableExchange).setInitialParams
                         (
                             95,
@@ -339,6 +454,7 @@ module.exports = function deploy(deployer) {
                             proxyAddressTwoKeyExchange,
                             []
                         );
+
                         await TwoKeyAdmin.at(proxyAddressTwoKeyAdmin).setInitialParams
                         (
                             TwoKeyCongress.address,
@@ -347,6 +463,7 @@ module.exports = function deploy(deployer) {
                             proxyAddressTwoKeyRegistry,
                             proxyAddressTwoKeyEventSource
                         );
+
                         let txHash = await TwoKeyRegistry.at(proxyAddressTwoKeyRegistry).setInitialParams
                         (
                             proxyAddressTwoKeyEventSource,

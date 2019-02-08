@@ -12,8 +12,7 @@ contract TokenPool is Upgradeable, MaintainingPattern {
     bool initialized = false;
     address public erc20Address;
 
-    function setInitialParams(address _twoKeyAdmin, address _erc20Address, address [] _maintainers) public {
-        require(initialized = false);
+    function setInitialParameters(address _twoKeyAdmin, address _erc20Address, address [] _maintainers) internal {
         twoKeyAdmin = _twoKeyAdmin;
         erc20Address = _erc20Address;
         for(uint i=0; i<_maintainers.length; i++) {

@@ -19,7 +19,7 @@ contract TwoKeyCommunityTokenPool is TokenPool {
 
     function setInitialParams(address _twoKeyAdmin, address _erc20Address, address [] _maintainers, address _twoKeyRegistry) public {
         require(initialized == false);
-        super.setInitialParams(_twoKeyAdmin, _erc20Address, _maintainers);
+        setInitialParameters(_twoKeyAdmin, _erc20Address, _maintainers);
         twoKeyRegistry = _twoKeyRegistry;
         startingDate = block.timestamp;
         transferedDuringCurrentYear = 0;
