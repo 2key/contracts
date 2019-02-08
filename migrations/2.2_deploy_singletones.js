@@ -479,9 +479,16 @@ module.exports = function deploy(deployer) {
             .then(async () => {
                 await new Promise(async (resolve, reject) => {
                     try {
-                        console.log('Transfering 2key-tokens');
-                        let txHash = await TwoKeyAdmin.at(proxyAddressTwoKeyAdmin).transfer2KeyTokens(proxyAddressTwoKeyUpgradableExchange, 10000000000000000000);
+                        console.log('Transfering 2key-tokens to Upgradable Exchange');
+                        let txHash = await TwoKeyAdmin.at(proxyAddressTwoKeyAdmin).transfer2KeyTokens(proxyAddressTwoKeyUpgradableExchange, 1000000000000000000000);
                         console.log('... Successfully transfered 2key tokens');
+
+                        console.log('Transfering 200k 2key-tokens (20% of total supply) to TwoKeyCommunityTokenPool');
+                        txHash = await TwoKeyAdmin.at(proxyAddressTwoKeyAdmin).transfer2KeyTokens(proxyAddressTwoKeyCommunityTokenPool,2000000000000000000000000);
+
+                        console.log('Transfering 400k 2key-tokens (40% of total supply) to TwoKeyLongTermTokenPool');
+                        txHash = await TwoKeyAdmin.at(proxyAddressTwoKeyAdmin).transfer2KeyTokens(proxyAddressTwoKeyLongTermTokenPool,4000000000000000000000000);
+
                         resolve(txHash);
                     } catch (e) {
                         reject(e);
