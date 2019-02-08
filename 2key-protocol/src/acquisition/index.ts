@@ -1,4 +1,4 @@
-import {ICreateOpts, IERC20, IOffchainData, ITwoKeyBase, ITwoKeyHelpers, ITwoKeyUtils} from '../interfaces';
+import {ICreateOpts, IERC20, ITwoKeyBase, ITwoKeyHelpers, ITwoKeyUtils} from '../interfaces';
 import {
     IAcquisitionCampaign,
     IAcquisitionCampaignMeta, IAddressStats, IConstantsLogicHandler, IConversionObject, IConversionStats,
@@ -9,7 +9,9 @@ import {
     IReferrerSummary,
     ITokenAmount,
     ITwoKeyAcquisitionCampaign,
-    ILockupInformation, IPublicMeta
+    ILockupInformation,
+    IPublicMeta,
+    IOffchainData,
 } from './interfaces';
 
 import { BigNumber } from 'bignumber.js/bignumber';
@@ -41,6 +43,7 @@ function calcFromCuts(cuts: number[], maxPi: number) {
 }
 
 export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
+    public readonly version: string;
     private readonly base: ITwoKeyBase;
     private readonly helpers: ITwoKeyHelpers;
     private readonly utils: ITwoKeyUtils;
@@ -51,11 +54,14 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     private AcquisitionLogicHandler: any;
 
     constructor(twoKeyProtocol: ITwoKeyBase, helpers: ITwoKeyHelpers, utils: ITwoKeyUtils, erc20: IERC20, sign: ISign) {
+        const bytecodes = Object.values(acquisitionContracts).reduce((prev, curr) => `${prev}${curr.bytecode || ''}`, '');
         this.base = twoKeyProtocol;
         this.helpers = helpers;
         this.utils = utils;
         this.erc20 = erc20;
         this.sign = sign;
+        this.version = this.sign.md5(bytecodes);
+        console.log('ACQUISITION', this.version, this.version.length);
     }
 
     /**
@@ -483,7 +489,6 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                         cuts = (await promisify(campaignInstance.getReferrerCuts, [firstAddressInChain])).map(cut => cut.toNumber());
                         this.base._log('CUTS from', firstAddressInChain, cuts);
                         cuts = cuts.concat(this.sign.validate_join(firstPublicLink, f_address, f_secret, sig, plasmaAddress));
-                        this.base._log('VALIDATE_JOIN', this.sign.validate_join(firstPublicLink, f_address, f_secret, sig, plasmaAddress));
                     }
                     // TODO: Andrii removing CONTRACTOR 0 cut from cuts;
                     cuts.shift();
@@ -691,6 +696,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     contractor,
                     f_address: plasmaAddress,
                     f_secret: private_key,
+                    bytecode: this.version,
                     dao,
                 };
                 if (new_message) {

@@ -1,10 +1,10 @@
 export {IERC20} from './erc20/interfaces';
 export {ITwoKeyCongress} from './congress/interfaces';
-export {ITwoKeyAcquisitionCampaign} from './acquisition/interfaces';
+export {ITwoKeyAcquisitionCampaign, IOffchainData} from './acquisition/interfaces';
 export {IDecentralizedNation} from './decentralizedNation/interfaces';
 export {ITwoKeyReg} from './registry/interfaces';
 export {IPlasmaEvents} from './plasma/interfaces';
-export {ITwoKeyHelpers,ITwoKeyUtils,BalanceMeta,IOffchainData} from './utils/interfaces';
+export {ITwoKeyHelpers,ITwoKeyUtils,BalanceMeta} from './utils/interfaces';
 export {IUpgradableExchange} from './upgradableExchange/interfaces';
 export {ITwoKeyExchangeContract} from './exchangeETHUSD/interfaces';
 

@@ -23,6 +23,16 @@ export interface ITokenAmount {
     totalTokens: number,
 }
 
+export interface IOffchainData {
+    campaign: string,
+    contractor?: string,
+    f_address: string,
+    f_secret: string,
+    p_message?: string,
+    bytecode?: string,
+    dao?: string,
+}
+
 export interface IAcquisitionCampaign {
     generatePublicMeta: () => IPublicMeta,
     moderator?: string, // Address of the moderator - it's a contract that works (operates) as admin of whitelists contracts

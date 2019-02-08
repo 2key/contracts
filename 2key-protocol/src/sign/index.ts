@@ -1,9 +1,12 @@
 import eth_util from 'ethereumjs-util';
-import *  as cryptoJS from 'crypto-js'
+import *  as cryptoJS from 'crypto-js';
 import assert from 'assert';
 import sigUtil from 'eth-sig-util';
 import {IOptionalParamsSignMessage, ISignedKeys, ISign, IMsgParam} from './interface';
 
+function md5(text: string): string {
+    return cryptoJS.MD5(text).toString(cryptoJS.enc.Base64);
+}
 
 function fixCut(cut: number | string): number {
     if (!cut) {
@@ -740,6 +743,7 @@ function sign_name(web3: any, my_address: string, name: string, opts: IOptionalP
 
 
 const Sign: ISign = {
+    md5,
     sign_ethereum2plasma_note,
     sign_ethereum2plasma,
     sign_plasma2ethereum,

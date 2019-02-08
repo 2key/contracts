@@ -1,4 +1,5 @@
 export interface ISign {
+    md5: (text: string) => string,
     fixCut: (cut: number | string) => number,
     unfixCut: (cut: number | string) => number,
     add0x: (x: string) => string,

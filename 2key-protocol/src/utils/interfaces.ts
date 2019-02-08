@@ -1,5 +1,5 @@
 import {BigNumber} from 'bignumber.js';
-import {ICreateCampaignProgress,} from '../interfaces';
+import {ICreateCampaignProgress, IOffchainData,} from '../interfaces';
 
 interface IBalance {
     ETH: number | string | BigNumber,
@@ -21,15 +21,6 @@ export interface IBalanceNormalized {
     },
     local_address: string,
     gasPrice: string | number,
-}
-
-export interface IOffchainData {
-    campaign: string,
-    contractor?: string,
-    f_address: string,
-    f_secret: string,
-    p_message?: string,
-    dao?: string,
 }
 
 export interface ITransaction {
