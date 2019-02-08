@@ -1,4 +1,4 @@
-import {promisify} from "../utils";
+import {promisify} from '../utils/promisify';
 
 export interface ITwoKeyReg {
     checkIfAddressIsRegistered: (address: string) => Promise<boolean>,

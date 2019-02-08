@@ -26,7 +26,8 @@ import {
     ITwoKeyUtils,
     IUpgradableExchange
 } from './interfaces';
-import Index, {promisify} from './utils';
+import { promisify } from './utils/promisify';
+import Index from './utils';
 import Helpers from './utils/helpers';
 import AcquisitionCampaign from './acquisition';
 import ERC20 from './erc20';

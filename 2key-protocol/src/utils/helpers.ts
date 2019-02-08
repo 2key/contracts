@@ -1,6 +1,6 @@
 import {BigNumber} from 'bignumber.js';
 import singletons from '../contracts/singletons';
-import {promisify} from './index';
+import {promisify} from './promisify';
 import {ITwoKeyBase, ITwoKeyHelpers} from '../interfaces';
 import {IContract, ICreateContractOpts, IRawTransaction, ITransaction} from './interfaces';
 

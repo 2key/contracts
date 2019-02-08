@@ -1,7 +1,7 @@
 import {IUpgradableExchange} from "./interfaces";
 import {ITwoKeyUtils} from "../utils/interfaces";
 import {ITwoKeyBase, ITwoKeyHelpers} from "../interfaces";
-import {promisify} from '../utils';
+import {promisify} from '../utils/promisify';
 
 
 export default class UpgradableExchange implements IUpgradableExchange {

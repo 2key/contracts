@@ -1,5 +1,5 @@
 import {ITwoKeyBase, ITwoKeyHelpers, ITwoKeyUtils} from '../interfaces';
-import {promisify} from '../utils'
+import {promisify} from '../utils/promisify'
 import {ISignedPlasma, ISignedUser, ISignedWalletData, ITwoKeyReg, IUserData} from "./interfaces";
 import Sign from '../utils/sign';
 

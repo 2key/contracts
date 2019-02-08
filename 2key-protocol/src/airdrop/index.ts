@@ -1,6 +1,6 @@
 import {ITwoKeyAirDropCampaign} from "./interfaces";
 import {IERC20, ITwoKeyBase, ITwoKeyHelpers, ITwoKeyUtils} from "../interfaces";
-import {promisify} from '../utils';
+import {promisify} from '../utils/promisify';
 
 export default class AcquisitionCampaign implements ITwoKeyAirDropCampaign {
     private readonly base: ITwoKeyBase;

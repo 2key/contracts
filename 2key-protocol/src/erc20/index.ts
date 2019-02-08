@@ -1,5 +1,5 @@
 import {ITwoKeyBase, ITwoKeyHelpers} from '../interfaces';
-import {promisify} from '../utils'
+import {promisify} from '../utils/promisify'
 import {IERC20} from './interfaces';
 
 export default class ERC20 implements IERC20 {
