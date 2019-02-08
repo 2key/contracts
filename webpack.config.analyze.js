@@ -18,7 +18,7 @@ const config = {
     path: path.join(__dirname, '2key-protocol', 'dist', 'submodules'),
     filename: '[name].js',
     library: ['TwoKeyProtocol', '[name]'],
-    libraryTarget: 'var',
+    libraryTarget: 'umd',
     umdNamedDefine: true,
   },
   module: {

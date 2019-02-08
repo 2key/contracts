@@ -1,9 +1,8 @@
 import {BigNumber} from 'bignumber.js';
-import {BalanceMeta, ITwoKeyBase,} from '../interfaces';
+import { BalanceMeta, ITwoKeyBase, IOffchainData } from '../interfaces';
 import {
     IBalanceFromWeiOpts,
     IBalanceNormalized,
-    IOffchainData,
     ITransactionReceipt,
     ITwoKeyHelpers,
     ITwoKeyUtils,
