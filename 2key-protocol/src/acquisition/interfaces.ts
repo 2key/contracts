@@ -24,6 +24,7 @@ export interface ITokenAmount {
 }
 
 export interface IAcquisitionCampaign {
+    generatePublicMeta: () => IPublicMeta,
     moderator?: string, // Address of the moderator - it's a contract that works (operates) as admin of whitelists contracts
     conversionHandlerAddress?: string,
     twoKeyAcquisitionLogicHandler?: string,
@@ -43,6 +44,11 @@ export interface IAcquisitionCampaign {
     maxDistributionDateShiftInDays: number,
     bonusTokensVestingMonths: number,
     bonusTokensVestingStartShiftInDaysFromDistributionDate: number
+}
+
+export interface IPublicMeta {
+    private_key: string,
+    public_address: string,
 }
 
 export interface ILockupInformation {

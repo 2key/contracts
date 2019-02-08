@@ -83,11 +83,6 @@ export interface IPlasmaSignature {
     with_prefix: boolean,
 }
 
-export interface ISignedKeys {
-    private_key: string,
-    public_address: string,
-}
-
 export interface ITwoKeyHelpers {
     _normalizeString: (value: number | string | BigNumber, inWei: boolean) => string,
     _normalizeNumber: (value: number | string | BigNumber, inWei: boolean) => number,

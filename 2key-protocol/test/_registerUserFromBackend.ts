@@ -6,11 +6,9 @@ import RpcSubprovider from 'web3-provider-engine/subproviders/rpc';
 import WSSubprovider from 'web3-provider-engine/subproviders/websocket';
 import WalletSubprovider from 'ethereumjs-wallet/provider-engine';
 import Web3 from 'web3';
-import Sign from '../src/utils/sign';
 import { TwoKeyProtocol } from '../src';
 import { ISignedPlasma, ISignedWalletData } from '../src/registry/interfaces';
 import { ISignedEthereum } from '../src/plasma/interfaces';
-import {promisify} from '../src/utils/promisify';
 
 
 interface IUser {

@@ -37,8 +37,8 @@ import TwoKerRegistry from './registry';
 import PlasmaEvents from './plasma';
 import UpgradableExchange from './upgradableExchange';
 import TwoKeyExchangeContract from './exchangeETHUSD';
-import {IPlasmaEvents} from "./plasma/interfaces";
-
+import {IPlasmaEvents} from './plasma/interfaces';
+import Sign from './sign';
 // const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 
 const TwoKeyDefaults = {
@@ -217,14 +217,14 @@ export class TwoKeyProtocol {
         this.Registry = new TwoKerRegistry(this.twoKeyBase, this.Helpers, this.Utils);
         // TODO: Add here replace AcquisitionSubmodule mechanism
         this.AcquisitionCampaign = this.AcquisitionSubmodule
-            ? new this.AcquisitionSubmodule(this.twoKeyBase, this.Helpers, this.Utils, this.ERC20)
-            : new AcquisitionCampaign(this.twoKeyBase, this.Helpers, this.Utils, this.ERC20);
+            ? new this.AcquisitionSubmodule(this.twoKeyBase, this.Helpers, this.Utils, this.ERC20, Sign)
+            : new AcquisitionCampaign(this.twoKeyBase, this.Helpers, this.Utils, this.ERC20, Sign);
         this.DecentralizedNation = new DecentralizedNation(this.twoKeyBase, this.Helpers, this.Utils, this.AcquisitionCampaign);
     }
 
     public replaceAcquisition(AcquisitionSubmodule) {
         this.AcquisitionSubmodule = AcquisitionSubmodule;
-        this.AcquisitionCampaign = new AcquisitionSubmodule(this.twoKeyBase, this.Helpers, this.Utils, this.ERC20);
+        this.AcquisitionCampaign = new AcquisitionSubmodule(this.twoKeyBase, this.Helpers, this.Utils, this.ERC20, Sign);
     }
 
     public getBalance(address: string, erc20address?: string): Promise<BalanceMeta> {

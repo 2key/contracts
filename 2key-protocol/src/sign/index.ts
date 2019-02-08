@@ -2,41 +2,41 @@ import eth_util from 'ethereumjs-util';
 import *  as cryptoJS from 'crypto-js'
 import assert from 'assert';
 import sigUtil from 'eth-sig-util';
-import { ISignedKeys } from './interfaces';
+import {IOptionalParamsSignMessage, ISignedKeys, ISign, IMsgParam} from './interface';
 
 
-function fixCut(cut) {
+function fixCut(cut: number | string): number {
     if (!cut) {
-        return cut
+        return 0;
     }
     if (typeof cut != 'number') {
-        cut = cut.toNumber()
+        cut = parseInt(cut, 10);
     }
     if (cut > 0 && cut <= 100) {
-        cut = cut + 1
+        cut += 1;
     } else if (cut < 0 && cut >= -100) {
         cut = 255 + cut
     } else if (cut != 255) {
         cut = 0
     }
-    return cut
+    return cut;
 }
 
-function unfixCut(cut) {
+function unfixCut(cut: number | string): number  {
     if (!cut) {
-        return cut
+        return 0;
     }
     if (typeof cut != 'number') {
-        cut = cut.toNumber()
+        cut = parseInt(cut, 10);
     }
     if (cut > 1 && cut <= 101) {
-        cut = cut - 1
+        cut -= 1;
     } else if (cut < 255 && cut >= 155) {
         cut = cut - 255
     } else if (cut != 255) {
         cut = 0
     }
-    return cut
+    return cut;
 }
 
 
@@ -45,7 +45,7 @@ function unfixCut(cut) {
  * @param x
  * @returns {any}
  */
-function add0x(x) {
+function add0x(x: string): string {
     if (!x) {
         return '0x';
     }
@@ -61,7 +61,7 @@ function add0x(x) {
  * @param x string
  * @returns {any}
  */
-function remove0x(x) {
+function remove0x(x: string): string {
     if (!x) {
         return;
     }
@@ -81,7 +81,7 @@ function remove0x(x) {
  * @param me
  * @returns {Promise<Buffer>}
  */
-async function getKey(web3, me, opts: IOptionalParamsSignMessage) {
+async function getKey(web3: any, me: string, opts: IOptionalParamsSignMessage): Promise<Buffer> {
     let msgParams = [
         {
             type: 'bytes',      // Any valid solidity type
@@ -103,7 +103,7 @@ async function getKey(web3, me, opts: IOptionalParamsSignMessage) {
  * @param plasma_address
  * @returns {Promise<string>}
  */
-function sign_ethereum2plasma(plasma_web3, my_address, plasma_address): Promise<string> {
+function sign_ethereum2plasma(plasma_web3: any, my_address: string, plasma_address: string): Promise<string> {
     let msgParams = [
         {
             type: 'bytes',      // Any valid solidity type
@@ -117,7 +117,7 @@ function sign_ethereum2plasma(plasma_web3, my_address, plasma_address): Promise<
 
 
 
-function sign_referrerWithPlasma(plasma_web3, plasma_address, action): Promise<string> {
+function sign_referrerWithPlasma(plasma_web3: any, plasma_address: string, action: string): Promise<string> {
     let msgParams = [
         {
             type: 'bytes',      // Any valid solidity type
@@ -153,7 +153,7 @@ function sign_plasma2ethereum(web3: any, plasma_address: string, my_address: str
  * @param note
  * @returns {Promise<string>}
  */
-function sign_ethereum2plasma_note(web3, my_address, ethereum2plasma_sig, note): Promise<string> {
+function sign_ethereum2plasma_note(web3: any, my_address: string, ethereum2plasma_sig: string, note: string): Promise<string> {
     let msgParams = [
         {
             type: 'bytes',      // Any valid solidity type
@@ -171,7 +171,7 @@ function sign_ethereum2plasma_note(web3, my_address, ethereum2plasma_sig, note):
  * @param encrypted
  * @returns {Promise<any>}
  */
-function decrypt(web3, me, encrypted, opts: IOptionalParamsSignMessage): Promise<string> {
+function decrypt(web3: any, me: string, encrypted: string, opts: IOptionalParamsSignMessage): Promise<string> {
     return new Promise(async (resolve, reject) => {
         encrypted = remove0x(encrypted);
         if (!encrypted) {
@@ -200,7 +200,7 @@ function decrypt(web3, me, encrypted, opts: IOptionalParamsSignMessage): Promise
  * @param clear_text
  * @returns {Promise<any>}
  */
-function encrypt(web3, address, clear_text, opts: IOptionalParamsSignMessage): Promise<string> {
+function encrypt(web3: any, address: string, clear_text: string, opts: IOptionalParamsSignMessage): Promise<string> {
     return new Promise(async (resolve, reject) => {
         if (!clear_text) {
             resolve('0x');
@@ -211,7 +211,7 @@ function encrypt(web3, address, clear_text, opts: IOptionalParamsSignMessage): P
         let keyBuffer = await getKey(web3, address, opts);
         iv0 = iv0.toString(cryptoJS.enc.Hex);
         let iv = cryptoJS.enc.Hex.parse(iv0);
-        clear_text = clear_text.toString('hex');
+        // clear_text = clear_text.toString('hex');
         let key = keyBuffer.toString('hex');
         let b64 = cryptoJS.AES.encrypt(clear_text, key, {iv}).toString();
         let e64 = cryptoJS.enc.Base64.parse(b64);
@@ -224,16 +224,15 @@ function encrypt(web3, address, clear_text, opts: IOptionalParamsSignMessage): P
 
 function generatePrivateKey(): string {
     return cryptoJS.lib.WordArray.random(32).toString(cryptoJS.enc.Hex)
-
 }
 
-function privateToPublic(private_key: Buffer) {
+function privateToPublic(private_key: Buffer): string {
     // convert a private_key buffer to a public address string
     // @ts-ignore: Missing declaration of publicToAddress in ethereumjs-util
     return eth_util.publicToAddress(eth_util.privateToPublic(private_key)).toString('hex');
 }
 
-function ecsign(message, private_key) {
+function ecsign(message: string, private_key: Buffer): string {
     let msg = Buffer.from(remove0x(message), 'hex');
     let msgHash = eth_util.sha3(msg);
     const sig = eth_util.ecsign(msgHash, private_key);
@@ -241,129 +240,6 @@ function ecsign(message, private_key) {
 
     const signature = Buffer.concat([sig.r, sig.s, Buffer.from([sig.v])]).toString('hex');
     return `0x${signature}`;
-}
-
-
-function free_take(my_address: string, f_address: string, f_secret?: string, pMessage?: string) {
-    // using information in the signed link (f_address,f_secret,p_message)
-    // return a new message that can be passed to the transferSig method of the contract
-    // to move ARCs arround in the current. For example:
-    //   campaign_contract.transferSig(free_take (my_address,f_address,f_secret,p_message))
-    //
-    // my_address - I'm a new influencer or a converter
-    // f_address - previous influencer
-    // f_secret - the secret of the parent (contractor or previous influencer) is passed in the 2key link
-    // p_message - the message built by previous influencers
-    const old_private_key = Buffer.from(remove0x(f_secret), 'hex');
-    if (!eth_util.isValidPrivate(old_private_key)) {
-        throw new Error('old private key not valid');
-    }
-
-    let m;
-    let version;
-    let p_message = pMessage;
-    // let prefix = "00"  // not reall important because it only used when receiving a free link directly from the contractor
-
-    if (p_message) {  // the message built by previous influencers
-        p_message = remove0x(p_message);
-        version = p_message.slice(0, 2);
-    } else {
-        version = '00';
-    }
-
-    if (p_message) {
-        m = p_message;
-        if (version == '00') {
-            m += remove0x(f_address);
-        }
-        m += privateToPublic(old_private_key);
-    } else {
-        m = version + remove0x(f_address);
-    }
-
-    m = `0x${m}${remove0x(ecsign(my_address, old_private_key))}`;
-    return m;
-}
-
-function free_join(my_address: string, public_address: string, f_address: string, f_secret: string, p_message: string, rCut: number, cutSign?: string): string {
-    // let cut = fcut;
-    // Input:
-    //   my_address - I'm an influencer that wants to generate my own link
-    //   public_address - the public address of my private key
-    // return - my new message
-
-    // the message we want to sign is my address (I'm the influencer or converter)
-    // and the public key of the private key which I will put in the link
-    // and we will sign all of this with the private key from the previous step,
-    // this will prove that I (my address) knew what the previous private key was
-    // and it will link the new private/public key to the previous keys to form a path
-    const msg0 = Buffer.from(public_address, 'hex');
-    const msg1 = Buffer.from(remove0x(my_address), 'hex'); // skip 0x
-    let msg = Buffer.concat([msg0, msg1]); // compact msg (as is done in sha3 inside solidity)
-    // if not using version prefix to the message:
-    let cut: any = rCut;
-    if (cut == null) {
-        cut = 255; // equal partition
-    }
-    cut = Buffer.from([cut]);
-    msg = Buffer.concat([cut, msg]); // compact msg (as is done in sha3 inside solidity)
-    const msgHash = eth_util.sha3(msg);
-    const old_private_key = Buffer.from(remove0x(f_secret), 'hex');
-    let sig = eth_util.ecsign(msgHash, old_private_key);
-
-    // check the signature
-    // this is what the contract will do
-    let recovered_address = eth_util.ecrecover(msgHash, sig.v, sig.r, sig.s);
-    // @ts-ignore: Missing declaration of publicToAddress in ethereumjs-util
-    recovered_address = eth_util.publicToAddress(recovered_address).toString('hex');
-    const old_public_address = privateToPublic(old_private_key);
-    assert.equal(recovered_address, old_public_address, 'sig failed');
-
-    sig = Buffer.concat([sig.r, sig.s, Buffer.from([sig.v])]);
-    let m: Buffer | string = Buffer.concat([sig, cut]);
-    m = m.toString('hex');
-
-    const version = cutSign ? '01' : '00';
-    let previousMessage = p_message;
-    if (previousMessage) {
-        if (version === '00') {
-            previousMessage += remove0x(f_address);
-        }
-        previousMessage += old_public_address;
-        // m = previousMessage + f_address.slice(2) + old_public_address + m;
-    } else {
-        previousMessage = version + remove0x(f_address);
-        // this happens when receiving a free link directly from the contractor
-        // m = f_address.slice(2) + m;
-    }
-    assert.ok(previousMessage.startsWith(version));
-    m = previousMessage + m;
-    if (cutSign) {
-        assert.ok(version == '01');
-        m += remove0x(cutSign);
-    }
-    return m;
-}
-
-function free_join_take(my_address: string, public_address: string, f_address: string, f_secret: string, p_message: string, cut?: number): string {
-    // using information in the signed link (f_address,f_secret,p_message)
-    // return a new message that can be passed to the transferSig method of the contract
-    // to move ARCs arround in the current. For example:
-    //   campaign_contract.transferSig(free_take (my_address,f_address,f_secret,p_message))
-    // unlike free_take, this function will give information to transferSig so in the future, if I want,
-    // I can also become an influencer
-    //
-    // my_address - I'm a new influencer or a converter
-    // public_address - the public key of my secret that I will put in a link that I will generate
-    // f_address - previous influencer
-    // f_secret - the secret of the parent (contractor or previous influencer) is passed in the 2key link
-    // p_message - the message built by previous influencers
-    // cut - this should be a number between 0 and 255.
-    //   value from 1 to 101 are translated to percentage in the contract by removing 1.
-    //   all other values are used to say use default behaviour
-    let m = free_join(my_address, public_address, f_address, f_secret, p_message, cut);
-    m += my_address.slice(2) + public_address;
-    return `0x${m}`;
 }
 
 function recoverHash(hash1, p_message) {
@@ -501,64 +377,126 @@ function validate_join(firstPublicKey: string | null, f_address: string | null, 
     return bounty_cuts;
 }
 
-//TODO: Remove this function if we don't use and need it anywhere ASAP change in acquisition
-function sign_plasma2eteherum(plasma_address: string, my_address: string, web3: any): Promise<string> {
-    const msgParams = [
-        {
-            type: 'bytes',      // Any valid solidity type
-            name: 'binding to plasma address',     // Any string label you want
-            value: plasma_address  // The value to sign
+function free_join(my_address: string, public_address: string, f_address: string, f_secret: string, p_message: string, rCut: number, cutSign?: string): string {
+    // let cut = fcut;
+    // Input:
+    //   my_address - I'm an influencer that wants to generate my own link
+    //   public_address - the public address of my private key
+    // return - my new message
+
+    // the message we want to sign is my address (I'm the influencer or converter)
+    // and the public key of the private key which I will put in the link
+    // and we will sign all of this with the private key from the previous step,
+    // this will prove that I (my address) knew what the previous private key was
+    // and it will link the new private/public key to the previous keys to form a path
+    const msg0 = Buffer.from(public_address, 'hex');
+    const msg1 = Buffer.from(remove0x(my_address), 'hex'); // skip 0x
+    let msg = Buffer.concat([msg0, msg1]); // compact msg (as is done in sha3 inside solidity)
+    // if not using version prefix to the message:
+    let cut: any = rCut;
+    if (cut == null) {
+        cut = 255; // equal partition
+    }
+    cut = Buffer.from([cut]);
+    msg = Buffer.concat([cut, msg]); // compact msg (as is done in sha3 inside solidity)
+    const msgHash = eth_util.sha3(msg);
+    const old_private_key = Buffer.from(remove0x(f_secret), 'hex');
+    let sig = eth_util.ecsign(msgHash, old_private_key);
+
+    // check the signature
+    // this is what the contract will do
+    let recovered_address = eth_util.ecrecover(msgHash, sig.v, sig.r, sig.s);
+    // @ts-ignore: Missing declaration of publicToAddress in ethereumjs-util
+    recovered_address = eth_util.publicToAddress(recovered_address).toString('hex');
+    const old_public_address = privateToPublic(old_private_key);
+    assert.equal(recovered_address, old_public_address, 'sig failed');
+
+    sig = Buffer.concat([sig.r, sig.s, Buffer.from([sig.v])]);
+    let m: Buffer | string = Buffer.concat([sig, cut]);
+    m = m.toString('hex');
+
+    const version = cutSign ? '01' : '00';
+    let previousMessage = p_message;
+    if (previousMessage) {
+        if (version === '00') {
+            previousMessage += remove0x(f_address);
         }
-    ];
+        previousMessage += old_public_address;
+        // m = previousMessage + f_address.slice(2) + old_public_address + m;
+    } else {
+        previousMessage = version + remove0x(f_address);
+        // this happens when receiving a free link directly from the contractor
+        // m = f_address.slice(2) + m;
+    }
+    assert.ok(previousMessage.startsWith(version));
+    m = previousMessage + m;
+    if (cutSign) {
+        assert.ok(version == '01');
+        m += remove0x(cutSign);
+    }
+    return m;
+}
 
-    return new Promise((resolve, reject) => {
-        if (!web3 || !web3.currentProvider) {
-            reject('No web3 instance');
+function free_join_take(my_address: string, public_address: string, f_address: string, f_secret: string, p_message: string, cut?: number): string {
+    // using information in the signed link (f_address,f_secret,p_message)
+    // return a new message that can be passed to the transferSig method of the contract
+    // to move ARCs arround in the current. For example:
+    //   campaign_contract.transferSig(free_take (my_address,f_address,f_secret,p_message))
+    // unlike free_take, this function will give information to transferSig so in the future, if I want,
+    // I can also become an influencer
+    //
+    // my_address - I'm a new influencer or a converter
+    // public_address - the public key of my secret that I will put in a link that I will generate
+    // f_address - previous influencer
+    // f_secret - the secret of the parent (contractor or previous influencer) is passed in the 2key link
+    // p_message - the message built by previous influencers
+    // cut - this should be a number between 0 and 255.
+    //   value from 1 to 101 are translated to percentage in the contract by removing 1.
+    //   all other values are used to say use default behaviour
+    let m = free_join(my_address, public_address, f_address, f_secret, p_message, cut);
+    m += my_address.slice(2) + public_address;
+    return `0x${m}`;
+}
+
+function free_take(my_address: string, f_address: string, f_secret?: string, pMessage?: string): string {
+    // using information in the signed link (f_address,f_secret,p_message)
+    // return a new message that can be passed to the transferSig method of the contract
+    // to move ARCs arround in the current. For example:
+    //   campaign_contract.transferSig(free_take (my_address,f_address,f_secret,p_message))
+    //
+    // my_address - I'm a new influencer or a converter
+    // f_address - previous influencer
+    // f_secret - the secret of the parent (contractor or previous influencer) is passed in the 2key link
+    // p_message - the message built by previous influencers
+    const old_private_key = Buffer.from(remove0x(f_secret), 'hex');
+    if (!eth_util.isValidPrivate(old_private_key)) {
+        throw new Error('old private key not valid');
+    }
+
+    let m;
+    let version;
+    let p_message = pMessage;
+    // let prefix = "00"  // not reall important because it only used when receiving a free link directly from the contractor
+
+    if (p_message) {  // the message built by previous influencers
+        p_message = remove0x(p_message);
+        version = p_message.slice(0, 2);
+    } else {
+        version = '00';
+    }
+
+    if (p_message) {
+        m = p_message;
+        if (version == '00') {
+            m += remove0x(f_address);
         }
-        const {isMetaMask = false} = web3.currentProvider;
-        console.log('METAMASK', isMetaMask);
+        m += privateToPublic(old_private_key);
+    } else {
+        m = version + remove0x(f_address);
+    }
 
-        function cb(err, result) {
-            if (err) {
-                console.log('Error in sign_plasma2eteherum ' + err);
-                reject(err)
-            } else if (!result) {
-                console.log('Error in sign_plasma2eteherum no result');
-                reject();
-            } else {
-                let sig = typeof result != 'string' ? result.result : result;
-
-                if (!isMetaMask) {
-                    let n = sig.length;
-                    let v = sig.slice(n - 2);
-                    v = parseInt(v, 16) + 32;
-                    v = Buffer.from([v]).toString('hex');
-                    sig = sig.slice(0, n - 2) + v;
-                }
-
-                resolve(sig)
-            }
-        }
-
-        if (isMetaMask) {
-            // metamask uses  web3.eth.sign to sign transaction and not for arbitrary messages
-            // instead use https://medium.com/metamask/scaling-web3-with-signtypeddata-91d6efc8b290
-            web3.currentProvider.sendAsync({
-                method: 'eth_signTypedData',
-                params: [msgParams, my_address],
-                from: my_address,
-            }, cb)
-        } else {
-            let msg = sigUtil.typedSignatureHash(msgParams);
-            // console.log(msg);
-            if (web3.eth.getSign) {
-                web3.eth.getSign(my_address, msg, cb)
-            } else {
-                // TODO Crazy bug in Web3 in doc it is said that msg should come first https://github.com/ethereum/wiki/wiki/JavaScript-API#web3ethsign
-                web3.eth.sign(my_address, msg, cb)
-            }
-        }
-    })
+    m = `0x${m}${remove0x(ecsign(my_address, old_private_key))}`;
+    return m;
 }
 
 function sign_cut2eteherum(userCut: number, my_address: string, web3: any): Promise<string> {
@@ -728,7 +666,7 @@ function generateSignatureKeys(
  * @param {IOptionalParamsSignMessage} opts
  * @returns {Promise<any>}
  */
-function sign_message(web3, msgParams, from, opts: IOptionalParamsSignMessage = {}): Promise<string> {
+function sign_message(web3: any, msgParams: IMsgParam[] | string, from, opts: IOptionalParamsSignMessage = {}): Promise<string> {
     return new Promise<string>((resolve, reject) => {
         const { isMetaMask = false } = web3.currentProvider;
 
@@ -789,7 +727,7 @@ function sign_message(web3, msgParams, from, opts: IOptionalParamsSignMessage = 
  * @param {IOptionalParamsSignMessage} opts
  * @returns {Promise<any>}
  */
-function sign_name(web3, my_address, name, opts: IOptionalParamsSignMessage = {}): Promise<string> {
+function sign_name(web3: any, my_address: string, name: string, opts: IOptionalParamsSignMessage = {}): Promise<string> {
     let msgParams = [
         {
             type: 'bytes',      // Any valid solidity type
@@ -800,11 +738,8 @@ function sign_name(web3, my_address, name, opts: IOptionalParamsSignMessage = {}
     return sign_message(web3, msgParams, my_address) // we never use metamask on plasma
 }
 
-export interface IOptionalParamsSignMessage {
-    plasma?: boolean
-}
 
-export default {
+const Sign: ISign = {
     sign_ethereum2plasma_note,
     sign_ethereum2plasma,
     sign_plasma2ethereum,
@@ -826,3 +761,5 @@ export default {
     generateSignatureKeys,
     sign_referrerWithPlasma,
 };
+
+export default Sign;

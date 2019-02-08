@@ -2,7 +2,7 @@ import {expect} from 'chai';
 import 'mocha';
 import {TwoKeyProtocol} from '../src';
 import createWeb3 from './_web3';
-import Sign from '../src/utils/sign';
+import Sign from '../src/sign';
 
 const { env } = process;
 

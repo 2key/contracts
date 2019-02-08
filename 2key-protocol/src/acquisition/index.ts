@@ -9,13 +9,13 @@ import {
     IReferrerSummary,
     ITokenAmount,
     ITwoKeyAcquisitionCampaign,
-    ILockupInformation
+    ILockupInformation, IPublicMeta
 } from './interfaces';
 
 import { BigNumber } from 'bignumber.js/bignumber';
 import acquisitionContracts from '../contracts/acquisition';
 import { promisify } from '../utils/promisify';
-import Sign from '../utils/sign';
+import { ISign } from '../sign/interface';
 
 /**
  *
@@ -40,32 +40,35 @@ function calcFromCuts(cuts: number[], maxPi: number) {
     return referrerRewardPercent;
 }
 
-/**
- *
- * @returns {{private_key: string; public_address: string}}
- */
-function generatePublicMeta(): { private_key: string, public_address: string } {
-    let pk = Sign.generatePrivateKey();
-    let public_address = Sign.privateToPublic(Buffer.from(pk,'hex'));
-    const private_key = pk;
-    return {private_key, public_address};
-}
-
 export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     private readonly base: ITwoKeyBase;
     private readonly helpers: ITwoKeyHelpers;
     private readonly utils: ITwoKeyUtils;
     private readonly erc20: IERC20;
+    private readonly sign: ISign;
     private AcquisitionCampaign: any;
     private AcquisitionConversionHandler: any;
     private AcquisitionLogicHandler: any;
 
-    constructor(twoKeyProtocol: ITwoKeyBase, helpers: ITwoKeyHelpers, utils: ITwoKeyUtils, erc20: IERC20) {
+    constructor(twoKeyProtocol: ITwoKeyBase, helpers: ITwoKeyHelpers, utils: ITwoKeyUtils, erc20: IERC20, sign: ISign) {
         this.base = twoKeyProtocol;
         this.helpers = helpers;
         this.utils = utils;
         this.erc20 = erc20;
+        this.sign = sign;
     }
+
+    /**
+     *
+     * @returns {{private_key: string; public_address: string}}
+     */
+    generatePublicMeta(): IPublicMeta {
+        let pk = this.sign.generatePrivateKey();
+        let public_address = this.sign.privateToPublic(Buffer.from(pk,'hex'));
+        const private_key = pk;
+        return {private_key, public_address};
+    }
+
 
     async _getLockupContractInstance(lockupContract: any) : Promise<any> {
         return lockupContract.address
@@ -121,7 +124,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     public estimateCreation(data: IAcquisitionCampaign, from: string): Promise<number> {
         return new Promise(async (resolve, reject) => {
             try {
-                const {public_address} = generatePublicMeta();
+                const {public_address} = this.generatePublicMeta();
                 const predeployGasConversionHandler = await this.helpers._estimateSubcontractGas(acquisitionContracts.TwoKeyConversionHandler, from,
                     [
                         data.tokenDistributionDate,
@@ -456,7 +459,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     const offchainData = await this.utils.getOffchainDataFromIPFSHash(referralLink);
                     const contractConstants = (await promisify(campaignInstance.getConstantInfo, []));
                     const { f_address, f_secret, p_message } = offchainData;
-                    const sig = Sign.free_take(plasmaAddress, f_address, f_secret, p_message);
+                    const sig = this.sign.free_take(plasmaAddress, f_address, f_secret, p_message);
 
                     this.base._log('getEstimatedMaximumReferralReward', f_address, contractorAddress);
                     // const maxReferralRewardPercent = new BigNumber(contractConstants[1]).div(10 ** decimals).toNumber();
@@ -475,11 +478,12 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     this.base._log('Plasma publicLink', firstPublicLink);
                     if (firstAddressInChain === contractorAddress) {
                         this.base._log('First public Link', firstPublicLink);
-                        cuts = Sign.validate_join(firstPublicLink, f_address, f_secret, sig, plasmaAddress);
+                        cuts = this.sign.validate_join(firstPublicLink, f_address, f_secret, sig, plasmaAddress);
                     } else {
                         cuts = (await promisify(campaignInstance.getReferrerCuts, [firstAddressInChain])).map(cut => cut.toNumber());
                         this.base._log('CUTS from', firstAddressInChain, cuts);
-                        cuts = cuts.concat(Sign.validate_join(firstPublicLink, f_address, f_secret, sig, plasmaAddress));
+                        cuts = cuts.concat(this.sign.validate_join(firstPublicLink, f_address, f_secret, sig, plasmaAddress));
+                        this.base._log('VALIDATE_JOIN', this.sign.validate_join(firstPublicLink, f_address, f_secret, sig, plasmaAddress));
                     }
                     // TODO: Andrii removing CONTRACTOR 0 cut from cuts;
                     cuts.shift();
@@ -507,28 +511,21 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 console.log('VISIT', from);
                 const {f_address, f_secret, p_message} = await this.utils.getOffchainDataFromIPFSHash(referralLink);
                 const plasmaAddress = this.base.plasmaAddress;
-                const sig = Sign.free_take(plasmaAddress, f_address, f_secret, p_message);
+                const sig = this.sign.free_take(plasmaAddress, f_address, f_secret, p_message);
                 const campaignInstance = await this._getCampaignInstance(campaignAddress);
-                // const isAddressJoined = await this.isAddressJoined(campaignAddress, from);
-                // const cuts = Sign.validate_join(null, null, null, sig, plasmaAddress);
-                // this.base._log('isAddressJoined', isAddressJoined, cuts);
-                // if (isAddressJoined) {
-                //     resolve(false);
-                // } else {
-                    const contractor = await promisify(campaignInstance.contractor, []);
-                    this.base._log('contractor', contractor, plasmaAddress);
-                    const txHash: string = await promisify(this.base.twoKeyPlasmaEvents.visited, [
-                        campaignInstance.address,
-                        contractor,
-                        sig,
-                        {from: plasmaAddress, gasPrice: 0}
-                    ]);
-                    this.base._log('visit txHash', txHash);
-                    const note = await Sign.encrypt(this.base.plasmaWeb3, plasmaAddress, f_secret, {plasma: true});
-                    const noteTxHash = await promisify(this.base.twoKeyPlasmaEvents.setNoteByUser, [campaignInstance.address, note, {from: plasmaAddress}]);
-                    this.base._log('note txHash', noteTxHash);
-                    resolve(txHash);
-                // }
+                const contractor = await promisify(campaignInstance.contractor, []);
+                this.base._log('contractor', contractor, plasmaAddress);
+                const txHash: string = await promisify(this.base.twoKeyPlasmaEvents.visited, [
+                    campaignInstance.address,
+                    contractor,
+                    sig,
+                    {from: plasmaAddress, gasPrice: 0}
+                ]);
+                this.base._log('visit txHash', txHash);
+                const note = await this.sign.encrypt(this.base.plasmaWeb3, plasmaAddress, f_secret, {plasma: true});
+                const noteTxHash = await promisify(this.base.twoKeyPlasmaEvents.setNoteByUser, [campaignInstance.address, note, {from: plasmaAddress}]);
+                this.base._log('note txHash', noteTxHash);
+                resolve(txHash);
             } catch (e) {
                 console.error(e);
                 reject(e);
@@ -650,13 +647,13 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
             try {
                 const campaignAddress = typeof (campaign) === 'string' ? campaign
                     : (await this._getCampaignInstance(campaign)).address;
-                const safeCut = Sign.fixCut(cut);
+                const safeCut = this.sign.fixCut(cut);
                 const i = 1;
                 const plasmaAddress = this.base.plasmaAddress;
                 const msg = `0xdeadbeef${campaignAddress.slice(2)}${plasmaAddress.slice(2)}${i.toString(16)}`;
-                const signedMessage = await Sign.sign_message(this.base.plasmaWeb3, msg, plasmaAddress, { plasma: true });
+                const signedMessage = await this.sign.sign_message(this.base.plasmaWeb3, msg, plasmaAddress, { plasma: true });
                 const private_key = this.base.web3.sha3(signedMessage).slice(2, 2 + 32 * 2);
-                const public_address = Sign.privateToPublic(Buffer.from(private_key, 'hex'));
+                const public_address = this.sign.privateToPublic(Buffer.from(private_key, 'hex'));
                 this.base._log('Signature', signedMessage);
                 this.base._log(campaignAddress, from, plasmaAddress, safeCut);
                 let new_message;
@@ -670,14 +667,14 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                         const campaignInstance = await this._getCampaignInstance(campaignAddress);
                         const contractorAddress = await promisify(campaignInstance.contractor, []);
                         const plasmaAddress = this.base.plasmaAddress;
-                        const sig = Sign.free_take(plasmaAddress, f_address, f_secret, p_message);
+                        const sig = this.sign.free_take(plasmaAddress, f_address, f_secret, p_message);
                         console.log('twoKeyPlasmaEvents.joinAcquisitionCampaign join', campaignInstance.address, contractorAddress, sig, plasmaAddress);
                         const txHash = await this.helpers._awaitPlasmaMethod(promisify(this.base.twoKeyPlasmaEvents.joinAcquisitionCampaign, [campaignInstance.address, contractorAddress, sig, { from: plasmaAddress, gasPrice: 0 }]));
                         await this.utils.getTransactionReceiptMined(txHash, { web3: this.base.plasmaWeb3 });
                     } catch (e) {
                         console.log('Plasma joinAcquisitionCampaign error', e);
                     }
-                    new_message = Sign.free_join(plasmaAddress, public_address, f_address, f_secret, p_message, safeCut, cutSign);
+                    new_message = this.sign.free_join(plasmaAddress, public_address, f_address, f_secret, p_message, safeCut, cutSign);
                 } else {
                     const {contractor: campaignContractor} = await this.setPublicLinkKey(campaign, from, `0x${public_address}`, {
                         cut: safeCut,
@@ -727,11 +724,11 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
             try {
                 const campaignInstance = await this._getCampaignInstance(campaign);
                 let arcBalance = parseFloat((await promisify(campaignInstance.balanceOf, [from])).toString());
-                const {public_address, private_key} = generatePublicMeta();
+                const {public_address, private_key} = this.generatePublicMeta();
 
                 if (!arcBalance) {
                     this.base._log('No Arcs', arcBalance, 'Call Free Join Take');
-                    const signature = Sign.free_join_take(from, public_address, f_address, f_secret, p_message, cut + 1);
+                    const signature = this.sign.free_join_take(from, public_address, f_address, f_secret, p_message, cut + 1);
                     const nonce = await this.helpers._getNonce(from);
                     const txHash: string = await promisify(campaignInstance.distributeArcsBasedOnSignature, [signature, {
                         from,
@@ -823,9 +820,9 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 if (!parseInt(prevChain, 16)) {
                     this.base._log('No ARCS call Free Join');
                     const plasmaAddress = this.base.plasmaAddress;
-                    const signature = Sign.free_take(plasmaAddress, f_address, f_secret, p_message);
+                    const signature = this.sign.free_take(plasmaAddress, f_address, f_secret, p_message);
 
-                    const cuts = Sign.validate_join(null, null, null, signature, plasmaAddress);
+                    const cuts = this.sign.validate_join(null, null, null, signature, plasmaAddress);
                     console.log('CUTS', cuts);
                     console.log('Sig we want to buy with is: ' + signature);
                     console.log(`Plasma of ${from} is`, await promisify(this.base.twoKeyReg.getEthereumToPlasma, [from]));
@@ -921,9 +918,9 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 }
                 const nonce = await this.helpers._getNonce(from);
                 if (!arcBalance) {
-                    const {public_address} = generatePublicMeta();
+                    const {public_address} = this.generatePublicMeta();
                     this.base._log('joinAndShareARC call Free Join Take');
-                    const signature = Sign.free_take(this.base.plasmaAddress, f_address, f_secret, p_message);
+                    const signature = this.sign.free_take(this.base.plasmaAddress, f_address, f_secret, p_message);
                     this.base._log(signature, recipient);
                     //TODO: Wrong link
                     const txHash: string = await promisify(campaignInstance.joinAndShareARC, [signature, recipient, {

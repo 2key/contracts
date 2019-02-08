@@ -1,6 +1,6 @@
 import {ITwoKeyBase, ITwoKeyHelpers, ITwoKeyUtils} from '../interfaces';
 import {promisify} from '../utils/promisify'
-import Sign from '../utils/sign';
+import Sign from '../sign';
 import {IPlasmaEvents, ISignedEthereum, IVisits} from "./interfaces";
 
 export default class PlasmaEvents implements IPlasmaEvents {

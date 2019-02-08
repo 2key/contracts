@@ -3,7 +3,7 @@ import 'mocha';
 import {TwoKeyProtocol} from '../src';
 import singletons from '../src/contracts/singletons';
 import createWeb3 from './_web3';
-import Sign from '../src/utils/sign';
+import Sign from '../src/sign';
 
 const { env } = process;
 const rpcUrl = env.RPC_URL;

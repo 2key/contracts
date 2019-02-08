@@ -3,7 +3,7 @@ import 'mocha';
 import {TwoKeyProtocol} from '../src';
 import singletons from '../src/contracts/singletons';
 import createWeb3, { ledgerWeb3 } from './_web3';
-import Sign from '../src/utils/sign';
+import Sign from '../src/sign';
 
 const rpcUrl = process.env.RINKEBY ? 'https://rpc.public.test.k8s.2key.net' : 'wss://ropsten.infura.io/ws';
 // const rpcUrl = 'wss://ropsten.infura.io/ws';

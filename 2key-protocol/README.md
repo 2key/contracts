@@ -24,7 +24,7 @@
 |    |----utils - utils and helpers functions
 |    |    |----helpers.ts - common private methods used in 2key-protocol class and all nested subclasses
 |    |    |----index.ts - entrypoint that imported as Utils subclass to our 2key-protocol class
-|    |    |----sign.ts - Udi math|crypto stuff for offchain joining
+|    |    |----index.ts - Udi math|crypto stuff for offchain joining
 |    |----contracts.json - abi of whitelisted contracts generated with SOLDeployer (currently unused)
 |    |----contracts.tar.gz - backup of deployed contracts to staging (ropsten.infura)
 |    |----contracts.ts - our solidity abi interface that also contains bytecodes and networks address of all our
