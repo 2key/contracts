@@ -72,6 +72,7 @@ export class TwoKeyProtocol {
     private networks: IEhtereumNetworks;
     private contracts: IContractsAddresses;
     public twoKeyEventSource: any;
+    private twoKeyBase: ITwoKeyBase;
     private twoKeyExchangeContract: any;
     private twoKeyUpgradableExchange: any;
     private twoKeyEconomy: any;
@@ -95,7 +96,7 @@ export class TwoKeyProtocol {
     public UpgradableExchange: IUpgradableExchange;
     public TwoKeyExchangeContract: ITwoKeyExchangeContract;
     public PlasmaEvents: IPlasmaEvents;
-
+    private AcquisitionSubmodule: any;
     private _log: any;
 
     // private twoKeyReg: any;
@@ -180,7 +181,7 @@ export class TwoKeyProtocol {
         this.ipfsR = ipfsAPI(ipfsRIp, ipfsRPort, {protocol: ipfsRProtocol});
         this.ipfsW = ipfsAPI(ipfsWIp, ipfsWPort, {protocol: ipfsWProtocol});
 
-        const twoKeyBase: ITwoKeyBase = {
+        this.twoKeyBase = {
             web3: this.web3,
             plasmaWeb3: this.plasmaWeb3,
             ipfsR: this.ipfsR,
@@ -206,20 +207,24 @@ export class TwoKeyProtocol {
             _log: this._log,
         };
 
-        this.Helpers = new Helpers(twoKeyBase);
-        this.ERC20 = new ERC20(twoKeyBase, this.Helpers);
-        this.Utils = new Index(twoKeyBase, this.Helpers);
-        this.PlasmaEvents = new PlasmaEvents(twoKeyBase, this.Helpers, this.Utils);
-        this.TwoKeyExchangeContract = new TwoKeyExchangeContract(twoKeyBase, this.Helpers, this.Utils);
-        this.UpgradableExchange = new UpgradableExchange(twoKeyBase,this.Helpers,this.Utils);
-        this.AcquisitionCampaign = new AcquisitionCampaign(twoKeyBase, this.Helpers, this.Utils, this.ERC20);
-        this.DecentralizedNation = new DecentralizedNation(twoKeyBase, this.Helpers, this.Utils, this.AcquisitionCampaign);
-        this.Congress = new TwoKeyCongress(twoKeyBase, this.Helpers, this.Utils);
-        this.Registry = new TwoKerRegistry(twoKeyBase, this.Helpers, this.Utils);
+        this.Helpers = new Helpers(this.twoKeyBase);
+        this.ERC20 = new ERC20(this.twoKeyBase, this.Helpers);
+        this.Utils = new Index(this.twoKeyBase, this.Helpers);
+        this.PlasmaEvents = new PlasmaEvents(this.twoKeyBase, this.Helpers, this.Utils);
+        this.TwoKeyExchangeContract = new TwoKeyExchangeContract(this.twoKeyBase, this.Helpers, this.Utils);
+        this.UpgradableExchange = new UpgradableExchange(this.twoKeyBase,this.Helpers,this.Utils);
+        this.Congress = new TwoKeyCongress(this.twoKeyBase, this.Helpers, this.Utils);
+        this.Registry = new TwoKerRegistry(this.twoKeyBase, this.Helpers, this.Utils);
+        // TODO: Add here replace AcquisitionSubmodule mechanism
+        this.AcquisitionCampaign = this.AcquisitionSubmodule
+            ? new this.AcquisitionSubmodule(this.twoKeyBase, this.Helpers, this.Utils, this.ERC20)
+            : new AcquisitionCampaign(this.twoKeyBase, this.Helpers, this.Utils, this.ERC20);
+        this.DecentralizedNation = new DecentralizedNation(this.twoKeyBase, this.Helpers, this.Utils, this.AcquisitionCampaign);
     }
 
-    public replaceAcquisition(acquisitionCampaign: AcquisitionCampaign) {
-        this.AcquisitionCampaign = acquisitionCampaign;
+    public replaceAcquisition(AcquisitionSubmodule) {
+        this.AcquisitionSubmodule = AcquisitionSubmodule;
+        this.AcquisitionCampaign = new AcquisitionSubmodule(this.twoKeyBase, this.Helpers, this.Utils, this.ERC20);
     }
 
     public getBalance(address: string, erc20address?: string): Promise<BalanceMeta> {
