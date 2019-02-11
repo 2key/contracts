@@ -15,6 +15,7 @@ export interface IAcquisitionCampaignMeta {
     campaignAddress: string,
     conversionHandlerAddress: string,
     campaignPublicLinkKey: string
+    ephemeralContractsVersion: string,
 }
 
 export interface ITokenAmount {
@@ -29,7 +30,7 @@ export interface IOffchainData {
     f_address: string,
     f_secret: string,
     p_message?: string,
-    bytecode?: string,
+    ephemeralContractsVersion?: string,
     dao?: string,
 }
 
