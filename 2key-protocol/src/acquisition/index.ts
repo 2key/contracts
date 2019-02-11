@@ -305,6 +305,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     campaignAddress,
                     conversionHandlerAddress,
                     campaignPublicLinkKey,
+                    ephemeralContractsVersion: this.version,
                 });
             } catch (err) {
                 reject(err);
@@ -697,7 +698,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     contractor,
                     f_address: plasmaAddress,
                     f_secret: private_key,
-                    bytecode: this.version,
+                    ephemeralContractsVersion: this.version,
                     dao,
                 };
                 if (new_message) {
