@@ -210,7 +210,10 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
         obj1['Maintainers'] = maintainerAddress;
         contracts.contracts.singletons = Object.assign(obj, contracts.contracts.singletons);
         contracts.contracts.singletons = Object.assign(obj1, contracts.contracts.singletons);
-        console.log('Writing contracts.ts...');
+        console.log('Writing contracts for submodules...');
+        if(!fs.existsSync(path.join(twoKeyProtocolDir, 'contracts'))) {
+          fs.mkdirSync(path.join(twoKeyProtocolDir, 'contracts'));
+        }
         Object.keys(contracts.contracts).forEach(file => {
           fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts', `${file}.ts`), `export default ${util.inspect(contracts.contracts[file], {depth: 10})}`)
         });
