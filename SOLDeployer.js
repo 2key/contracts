@@ -129,7 +129,6 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
     };
     const proxyFile = path.join(buildPath, 'proxyAddresses.json');
     let json = {};
-    let hashMap = {};
     let data = {};
     let proxyAddresses = {};
     if (fs.existsSync(proxyFile)) {
@@ -181,6 +180,16 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
             });
           }
         });
+        const nonSingletonBytecodes = [];
+        Object.keys(contracts.contracts).forEach(key => {
+          if (key !== 'singletons') {
+            nonSingletonBytecodes.push(contracts.contracts[key].bytecode);
+          }
+        });
+        const nonSingletonHash = sha256(nonSingletonBytecodes.join(''));
+        Object.keys(contracts.contracts).forEach(key => {
+          contracts.contracts[key]['NonSingletonHash'] = nonSingletonHash;
+        });
         let keyHash = {};
         let keys = Object.keys(data);
         keys.forEach((key) => {
@@ -203,8 +212,10 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
                     humanHash: rhd.humanizeDigest(hash,8)
                 };
         });
-        let obj = {};
-        obj['NetworkHashes'] = keyHash;
+        let obj = {
+          'NetworkHashes': keyHash,
+          'NonSingletonHash': nonSingletonHash,
+        };
 
         let obj1 = {};
         obj1['Maintainers'] = maintainerAddress;
