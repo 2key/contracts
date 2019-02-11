@@ -14,6 +14,8 @@ contract TwoKeyCommunityTokenPool is TokenPool {
 
     uint startingDate;
     uint transferedDuringCurrentYear;
+    //TODO: add way to monitor which year we're in from the total years (put "10" in a dedicated var)
+    //and add accounting of which year we're currently in, and how much was paid "this" year up till now.
 
     uint256 [] annualTransfers;
 

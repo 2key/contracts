@@ -312,7 +312,7 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
         return address2username[_sender];
     }
 
-
+    //TODO we'll eventually need to get previous addresses of user, and might need to support multiple "active" addresses per user
 //    /// Get history of changed addresses
 //    /// @return array of addresses sorted
 //    function getHistoryOfChangedAddresses() external view returns (address[]) {

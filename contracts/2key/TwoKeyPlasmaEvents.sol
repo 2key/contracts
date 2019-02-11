@@ -37,6 +37,7 @@ contract TwoKeyPlasmaEvents is Upgradeable {
     // campaign,contractor eth-addr=>from eth-addr=>to eth or plasma address=>true/false
     // not that the "to" addrss in an edge of the graph can be either a plasma or an ethereum address
     // the from address is always an ethereum address
+    //TODO check with Udi whether the second address in the mapping is superfluous and can be removed (will it always be the contractor? we always have just 1 contractor per contract
     mapping(address => mapping(address => mapping(address => mapping(address => bool)))) public visits;
     // campaign,contractor eth-addr=>to eth or plasma-addr=>from eth-addr=>true/false
     mapping(address => mapping(address => mapping(address => address))) public visited_from;

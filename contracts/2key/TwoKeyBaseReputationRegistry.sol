@@ -31,6 +31,9 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, MaintainingPattern {
         require(twoKeyAdmin == address(0));
         twoKeyAdmin = _twoKeyAdmin;
         twoKeyRegistry = _twoKeyRegistry;
+        //TODO instantiate with singletonRegistry, take event source from there
+        //TODO accept calls to update reputation only from event source, and make sure this event source is the "right one" via the singleton registry.
+        //TODO add to 2key-protocol ability to get reputation by role and address
         isMaintainer[msg.sender] = true; //also the deployer will be authorized maintainer
         for(uint i=0; i<_maintainers.length; i++) {
             isMaintainer[_maintainers[i]] = true;

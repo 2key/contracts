@@ -492,8 +492,24 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         return contractorBalance;
     }
 
+    /**
+     * @notice Function to fetch for the referrer his balance, his total earnings, and how many conversions he participated in
+     * @dev only referrer by himself, moderator, or contractor can call this
+     * @param _referrer is the address of referrer we're checking for
+     * @return tuple containing this 3 information
+     */
+    //TODO: scenario 2: referrer wants to claim rewards (via backend which pays for the tx), backend as maintainer, wants to
+    //check that the referrer balance is above some threshold. here - should be called just with referrer address, and conditioned
+    //that caller is referrer/contractor/maintainer
+    function getReferrerBalanceAndTotalEarningsAndNumberOfConversions(address _referrer) public view returns (uint,uint,uint) {
+        require(msg.sender == _referrer || msg.sender == contractor || twoKeyEventSource.isAddressMaintainer(msg.sender));
+        _referrer = twoKeyEventSource.plasmaOf(_referrer);
+        return (referrerPlasma2BalancesEthWEI[_referrer], referrerPlasma2TotalEarningsEthWEI[_referrer], referrerPlasmaAddressToCounterOfConversions[_referrer]);
+    }
 
-    function getReferrerBalanceAndTotalEarningsAndNumberOfConversions(bytes signature) public view returns (uint,uint,uint) {
+    //TODO: scenario 1: referrer has rewards, but did not open public address wallet. Has only plasma, wants to
+    //call this function directly from frontend, and signs it to prove he is owner of the plasma address - no maintainer involved
+    function getReferrerBalanceAndTotalEarningsAndNumberOfConversionsWithPlasmaSig(bytes signature) public view returns (uint,uint,uint) {
         bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding referrer to plasma")),
             keccak256(abi.encodePacked("GET_REFERRER_REWARDS"))));
         address message_signer = Call.recoverHash(hash, signature, 0);
@@ -563,6 +579,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         uint balance;
         if(_address == moderator) {
             balance = moderatorBalanceETHWei.mul(98).div(100);
+            //TODO: make the networkFee configurable from the AdminContract - take it from there
             uint networkFee = moderatorBalanceETHWei.mul(2).div(100);
             moderatorBalanceETHWei = 0;
             buyTokensFromUpgradableExchange(balance,_address);
