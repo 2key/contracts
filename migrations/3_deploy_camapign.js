@@ -38,13 +38,13 @@ module.exports = function deploy(deployer) {
             .then(() => deployer.link(Call, TwoKeyAcquisitionCampaignERC20))
             .then(() => deployer.deploy(TwoKeyAcquisitionLogicHandler,
                 12, 15, 1, 12345, 15345, 5, 'USD',
-                ERC20TokenMock.address, TwoKeySingletonesRegistry.address))
+                ERC20TokenMock.address, TwoKeySingletonesRegistry.address, json.TwoKeyAdmin[networkId.toString()].Proxy))
             .then(() => deployer.deploy(
                 TwoKeyAcquisitionCampaignERC20,
                 TwoKeySingletonesRegistry.address,
                 TwoKeyAcquisitionLogicHandler.address,
                 TwoKeyConversionHandler.address,
-                '0xb3fa520368f2df7bed4df5185101f303f6c7decc',
+                json.TwoKeyAdmin[networkId.toString()].Proxy,
                 ERC20TokenMock.address,
                 [5, 1],
                 )

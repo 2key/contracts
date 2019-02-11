@@ -4,7 +4,7 @@ import "../interfaces/ITwoKeyExchangeRateContract.sol";
 import "../interfaces/IERC20.sol";
 import "../interfaces/ITwoKeyAcquisitionCampaignERC20.sol";
 import "../interfaces/ITwoKeyReg.sol";
-import "../interfaces/IAcquisitionGetReceivedFrom.sol";
+import "../interfaces/ITwoKeyAcquisitionARC.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 
 /**
@@ -16,11 +16,12 @@ contract TwoKeyAcquisitionLogicHandler {
     using SafeMath for uint256;
 
     address public twoKeySingletoneRegistry;
-//    address public twoKeyRegistry;
-    address contractor;
-    address public ownerPlasma;
-//    address public ethUSDExchangeContract;
     address public twoKeyAcquisitionCampaign;
+
+    address contractor;
+    address moderator;
+
+    address public ownerPlasma;
 
     uint256 campaignStartTime; // Time when campaign start
     uint256 campaignEndTime; // Time when campaign ends
@@ -33,8 +34,8 @@ contract TwoKeyAcquisitionLogicHandler {
     string public publicMetaHash; // Ipfs hash of json campaign object
     string privateMetaHash; // Ipfs hash of json sensitive (contractor) information
 
-    uint maxConverterBonusPercent;
-    string public currency;
+    uint maxConverterBonusPercent; // Maximal bonus percent per converter
+    string public currency; // Currency campaign is currently in
 
     modifier onlyContractor {
         require(msg.sender == contractor);
@@ -50,7 +51,8 @@ contract TwoKeyAcquisitionLogicHandler {
         uint _maxConverterBonusPercent,
         string _currency,
         address _assetContractERC20,
-        address _twoKeySingletoneRegistry
+        address _twoKeySingletoneRegistry,
+        address _moderator
     ) public {
         contractor = msg.sender;
         minContributionETHorFiatCurrency = _minContribution;
@@ -61,6 +63,7 @@ contract TwoKeyAcquisitionLogicHandler {
         maxConverterBonusPercent = _maxConverterBonusPercent;
         currency = _currency;
         twoKeySingletoneRegistry = _twoKeySingletoneRegistry;
+        moderator = _moderator;
         unit_decimals = IERC20(_assetContractERC20).decimals();
         ownerPlasma = plasmaOf(msg.sender);
     }
@@ -201,6 +204,52 @@ contract TwoKeyAcquisitionLogicHandler {
     }
 
     /**
+     * @notice Function to check if the msg.sender has already joined
+     * @return true/false depending of joined status
+     */
+    function getAddressJoinedStatus(address _address) public view returns (bool) {
+        address plasma = plasmaOf(_address);
+        if (_address == address(0)) {
+            return false;
+        }
+        if (plasma == ownerPlasma || _address == address(moderator) ||
+        ITwoKeyAcquisitionARC(twoKeyAcquisitionCampaign).getReceivedFrom(plasma) != address(0)
+        || ITwoKeyAcquisitionARC(twoKeyAcquisitionCampaign).balanceOf(plasma) > 0) {
+            return true;
+        }
+        return false;
+    }
+
+
+    function getAddressStatistic(address _address, bool plasma) public view returns (bytes) {
+        address eth_address = _address;
+        address plasma_address = _address;
+        if (plasma) {
+            eth_address = ethereumOf(_address);
+        } else {
+            plasma_address = plasmaOf(_address);
+        }
+        if(_address == contractor) {
+            abi.encodePacked(0, 0, 0, false, false);
+        } else {
+            bool isConverter;
+            bool isReferrer;
+            uint unitsConverterBought;
+            uint referrerBalance;
+            uint amountConverterSpent;
+            (amountConverterSpent, referrerBalance, unitsConverterBought) = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getStatistics(eth_address, plasma_address);
+            if(unitsConverterBought> 0) {
+                isConverter = true;
+            }
+            if(referrerBalance > 0) {
+                isReferrer = true;
+            }
+
+            return abi.encodePacked(amountConverterSpent,referrerBalance, unitsConverterBought, isConverter, isReferrer);
+        }
+    }
+
+    /**
      * @notice Function to get suepr statistics
      */
     function getSuperStatistics(address _user, bool plasma) public view returns (bytes, bool, bytes, address) {
@@ -214,8 +263,8 @@ contract TwoKeyAcquisitionLogicHandler {
 
         bytes memory userData = ITwoKeyReg(twoKeyRegistry).getUserData(eth_address);
 
-        bool isJoined = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getAddressJoinedStatus(_user);
-        bytes memory stats = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getAddressStatistic(_user, plasma);
+        bool isJoined = getAddressJoinedStatus(_user);
+        bytes memory stats = getAddressStatistic(_user, plasma);
         return (userData, isJoined, stats, eth_address);
     }
 
@@ -223,7 +272,7 @@ contract TwoKeyAcquisitionLogicHandler {
         address influencer = plasmaOf(customer);
         uint n_influencers = 0;
         while (true) {
-            influencer = plasmaOf(IAcquisitionGetReceivedFrom(acquisitionCampaignContract).getReceivedFrom(influencer));
+            influencer = plasmaOf(ITwoKeyAcquisitionARC(acquisitionCampaignContract).getReceivedFrom(influencer));
             if (influencer == plasmaOf(contractor)) {
                 break;
             }
@@ -232,7 +281,7 @@ contract TwoKeyAcquisitionLogicHandler {
         address[] memory influencers = new address[](n_influencers);
         influencer = plasmaOf(customer);
         while (n_influencers > 0) {
-            influencer = plasmaOf(IAcquisitionGetReceivedFrom(acquisitionCampaignContract).getReceivedFrom(influencer));
+            influencer = plasmaOf(ITwoKeyAcquisitionARC(acquisitionCampaignContract).getReceivedFrom(influencer));
             n_influencers--;
             influencers[n_influencers] = influencer;
         }

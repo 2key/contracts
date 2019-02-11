@@ -10,12 +10,18 @@ contract TwoKeyCommunityTokenPool is TokenPool {
 
     address public twoKeyRegistry;
     uint public constant totalAmount2keys = 200000000;
-    uint public constant annualTransferAmount = totalAmount2keys / 10;
+    uint public constant annualTransferAmountLimit = totalAmount2keys / 10;
 
     uint startingDate;
-    uint transferedDuringCurrentYear;
     //TODO: add way to monitor which year we're in from the total years (put "10" in a dedicated var)
     //and add accounting of which year we're currently in, and how much was paid "this" year up till now.
+
+    struct AnnualReport {
+        uint startingDate;
+        uint transferedThisYear;
+    }
+
+    mapping(uint => AnnualReport) yearToAnnualReport;
 
     uint256 [] annualTransfers;
 
@@ -24,7 +30,9 @@ contract TwoKeyCommunityTokenPool is TokenPool {
         setInitialParameters(_twoKeyAdmin, _erc20Address, _maintainers);
         twoKeyRegistry = _twoKeyRegistry;
         startingDate = block.timestamp;
-        transferedDuringCurrentYear = 0;
+        for(uint i=1;i<=10;i++) {
+            yearToAnnualReport[i] = AnnualReport({startingDate: startingDate + i*(1 years),transferedThisYear: 0});
+        }
         initialized = true;
     }
 
@@ -43,15 +51,34 @@ contract TwoKeyCommunityTokenPool is TokenPool {
      */
     function transferTokensToAddress(address _receiver, uint _amount) public onlyTwoKeyAdmin {
         require(validateRegistrationOfReceiver(_receiver) == true);
-        require(getContractBalance() > _amount);
-        if(startingDate + 365 * (1 days) > block.timestamp) {
-            require(annualTransferAmount - transferedDuringCurrentYear > _amount);
-        } else {
-            annualTransfers.push(transferedDuringCurrentYear);
-            transferedDuringCurrentYear = 0;
-            require(annualTransferAmount > _amount);
-        }
+        require(_amount > 0);
+
+        uint year = checkInWhichYearIsTheTransfer();
+        require(year >= 1 && year <= 10);
+
+        AnnualReport memory report = yearToAnnualReport[year];
+
+//        require(block.timestamp > report.startingDate);
+
+        require(report.transferedThisYear + _amount <= annualTransferAmountLimit);
         super.transferTokens(_receiver,_amount);
+        report.transferedThisYear = report.transferedThisYear + _amount;
+
+        yearToAnnualReport[year] = report;
+    }
+
+    function checkInWhichYearIsTheTransfer() public view returns (uint) {
+        if(block.timestamp > startingDate && block.timestamp < startingDate + 1 years) {
+            return 1;
+        } else {
+            uint counter = 1;
+            uint start = startingDate + 1 years; //means we're checking for the second year
+            while(block.timestamp > start || counter == 10) {
+                start = start + 1 years;
+                counter ++;
+            }
+            return counter;
+        }
     }
 
 

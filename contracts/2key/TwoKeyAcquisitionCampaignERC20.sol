@@ -459,21 +459,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         return (moderatorBalanceETHWei,moderatorTotalEarningsETHWei);
     }
 
-    /**
-     * @notice Function to check if the msg.sender has already joined
-     * @return true/false depending of joined status
-     */
-    function getAddressJoinedStatus(address _address) public view returns (bool) {
-        address plasma = twoKeyEventSource.plasmaOf(_address);
-        if (_address == address(0)) {
-            return false;
-        }
-        if (plasma == address(contractor) || _address == address(moderator) || received_from[plasma] != address(0)
-            || balanceOf(plasma) > 0) {
-            return true;
-        }
-        return false;
-    }
+
 
     /**
      * @notice Function to check available amount of the tokens on the contract
@@ -498,16 +484,12 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @param _referrer is the address of referrer we're checking for
      * @return tuple containing this 3 information
      */
-    //TODO: scenario 2: referrer wants to claim rewards (via backend which pays for the tx), backend as maintainer, wants to
-    //check that the referrer balance is above some threshold. here - should be called just with referrer address, and conditioned
-    //that caller is referrer/contractor/maintainer
     function getReferrerBalanceAndTotalEarningsAndNumberOfConversions(address _referrer) public view returns (uint,uint,uint) {
         require(msg.sender == _referrer || msg.sender == contractor || twoKeyEventSource.isAddressMaintainer(msg.sender));
         _referrer = twoKeyEventSource.plasmaOf(_referrer);
         return (referrerPlasma2BalancesEthWEI[_referrer], referrerPlasma2TotalEarningsEthWEI[_referrer], referrerPlasmaAddressToCounterOfConversions[_referrer]);
     }
 
-    //TODO: scenario 1: referrer has rewards, but did not open public address wallet. Has only plasma, wants to
     //call this function directly from frontend, and signs it to prove he is owner of the plasma address - no maintainer involved
     function getReferrerBalanceAndTotalEarningsAndNumberOfConversionsWithPlasmaSig(bytes signature) public view returns (uint,uint,uint) {
         bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding referrer to plasma")),
@@ -526,28 +508,10 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         return public_link_key[twoKeyEventSource.plasmaOf(me)];
     }
 
-    //{ rewards: number,  tokens_bought: number, isConverter: bool, isReferrer: bool, isContractor: bool, isModerator:bool } right??
-    function getAddressStatistic(address _address, bool plasma) public view returns (bytes) {
-        address eth_address = _address;
-        address plasma_address = _address;
-        if (plasma) {
-            eth_address = twoKeyEventSource.ethereumOf(_address);
-        } else {
-            plasma_address = twoKeyEventSource.plasmaOf(_address);
-        }
-        if(_address == contractor) {
-            abi.encodePacked(0, 0, 0, false, false);
-        } else {
-            bool isConverter;
-            bool isReferrer;
-            if(unitsConverterBought[eth_address] > 0) {
-                isConverter = true;
-            }
-            if(referrerPlasma2BalancesEthWEI[plasma_address] > 0) {
-                isReferrer = true;
-            }
-            return abi.encodePacked(amountConverterSpentEthWEI[eth_address],referrerPlasma2BalancesEthWEI[plasma_address], unitsConverterBought[eth_address], isConverter, isReferrer);
-        }
+
+    function getStatistics(address ethereum, address plasma) public view returns (uint,uint,uint) {
+        require(msg.sender == twoKeyAcquisitionLogicHandler);
+        return (amountConverterSpentEthWEI[ethereum], referrerPlasma2BalancesEthWEI[plasma],unitsConverterBought[ethereum]);
     }
 
     /**
@@ -573,18 +537,16 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @dev It can be called by the address specified in the param or by the one of two key maintainers
      */
     function withdrawModeratorOrReferrer(address _address) external {
-        //Creating additional variable to prevent reentrancy attack
         require(msg.sender == _address || twoKeyEventSource.isAddressMaintainer(msg.sender));
-        address upgradableExchange = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyUpgradableExchange");
         uint balance;
         if(_address == moderator) {
-            balance = moderatorBalanceETHWei.mul(98).div(100);
-            //TODO: make the networkFee configurable from the AdminContract - take it from there
-            uint networkFee = moderatorBalanceETHWei.mul(2).div(100);
+            address twoKeyDeepFreezeTokenPool = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyDeepFreezeTokenPool");
+            uint integratorFee = twoKeyEventSource.getTwoKeyDefaultIntegratorFeeFromAdmin();
+            balance = moderatorBalanceETHWei.mul(100-integratorFee).div(100);
+            uint networkFee = moderatorBalanceETHWei.mul(integratorFee).div(100);
             moderatorBalanceETHWei = 0;
             buyTokensFromUpgradableExchange(balance,_address);
-            //TODO: Instead of address put address of twokeydeepfreezetokenpool
-            buyTokensFromUpgradableExchange(networkFee,_address);
+            buyTokensFromUpgradableExchange(networkFee,twoKeyDeepFreezeTokenPool);
         } else {
             address _referrer = twoKeyEventSource.plasmaOf(_address);
             if(referrerPlasma2BalancesEthWEI[_referrer] != 0) {
@@ -595,6 +557,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
                 revert();
             }
         }
+
     }
 
 }

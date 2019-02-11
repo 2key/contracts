@@ -246,7 +246,8 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                             data.maxConverterBonusPercentWei,
                             data.currency,
                             data.assetContractERC20,
-                            this.base.twoKeySingletonesRegistry.address
+                            this.base.twoKeySingletonesRegistry.address,
+                            data.moderator
                         ],
                         progressCallback
                     });
@@ -958,9 +959,9 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     public isAddressJoined(campaign: any, from: string): Promise<boolean> {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
-                const campaignInstance = await this._getCampaignInstance(campaign);
+                const logicHandlerInstance = await this._getLogicHandlerInstance(campaign);
                 console.log(from);
-                resolve(await promisify(campaignInstance.getAddressJoinedStatus, [from,{from}]));
+                resolve(await promisify(logicHandlerInstance.getAddressJoinedStatus, [from,{from}]));
             } catch (e) {
                 reject(e);
             }
