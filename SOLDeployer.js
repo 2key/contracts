@@ -5,6 +5,7 @@ const tar = require('tar');
 const rimraf = require('rimraf');
 const sha256 = require('js-sha256');
 const rhd = require('node-humanhash');
+const { networks: truffleNetworks } = require('./truffle');
 
 
 // const compressor = require('node-minify');
@@ -25,6 +26,7 @@ const twoKeyProtocolLibDir = path.join(__dirname, '2key-protocol', 'dist');
 const deploymentHistoryPath = path.join(__dirname, 'history.json');
 
 let deployment = false;
+const deployedTo = [];
 
 const contractsGit = simpleGit();
 const twoKeyProtocolLibGit = simpleGit(twoKeyProtocolLibDir);
@@ -40,7 +42,13 @@ maintainerAddress['local'] = '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7';
 
 async function handleExit(p) {
   console.log(p);
-  if (p !== 0 && (process.argv[2] !== '--migrate' && process.argv[2] !== '--update' && process.argv[2] !== '--test' && process.argv[2] !== '--ledger')) {
+  if (p !== 0
+    && (process.argv[2] !== '--migrate'
+    && process.argv[2] !== '--update'
+    && process.argv[2] !== '--test'
+    && process.argv[2] !== '--ledger'
+    && process.argv[2] !== '--submodules'
+  )) {
     await contractsGit.reset('hard');
     await twoKeyProtocolLibGit.reset('hard');
   }
@@ -122,7 +130,7 @@ const restoreFromArchive = () => new Promise(async (resolve, reject) => {
 });
 
 const generateSOLInterface = () => new Promise((resolve, reject) => {
-  console.log('Generating abi');
+  console.log('Generating abi', deployedTo);
   if (fs.existsSync(buildPath)) {
     let contracts = {
       'contracts': {},
@@ -270,7 +278,16 @@ const runMigration3 = (network) => new Promise(async(resolve, reject) => {
   } catch (e) {
     reject(e);
   }
-})
+});
+
+const updateIPFSHashes = async() => {
+  // TODO: Get current list IPFS address
+  // TODO: Load list from IPFS
+  // TODO: Upload submodules to IPFS by one
+  // TODO: Update list with new items
+  // TODO: Upload new list to IPFS
+  // TODO: Update current list IPFS address in ./2key-protocol/src/versions.ts
+};
 
 async function deploy() {
   try {
@@ -333,6 +350,7 @@ async function deploy() {
     for (let i = 0; i < l; i += 1) {
       /* eslint-disable no-await-in-loop */
       await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--network', networks[i]].concat(process.argv.slice(3)));
+      deployedTo.push(truffleNetworks[networks[i]].network_id);
       await runMigration3(networks[i]);
       /* eslint-enable no-await-in-loop */
     }
@@ -381,8 +399,10 @@ async function deploy() {
       fs.writeFileSync(deploymentHistoryPath, JSON.stringify(deployedHistory, null, 2));
     }
     await generateSOLInterface();
-    // await runProcess(path.join(__dirname, 'node_modules/.bin/typechain'), ['--force', '--outDir', path.join(twoKeyProtocolDir, 'contracts'), `${buildPath}/*.json`]);
     if (!local) {
+      await buildSubmodules();
+      // TODO: Add implementation for updateIPFSHashes
+      await updateIPFSHashes();
       await runProcess(path.join(__dirname, 'node_modules/.bin/webpack'));
     }
     // TODO: Archive build
@@ -470,6 +490,10 @@ const test = () => new Promise(async (resolve, reject) => {
   // }
 });
 
+const buildSubmodules = async() => {
+  await runProcess(path.join(__dirname, 'node_modules/.bin/webpack'), ['--config', './webpack.config.submodules.js', '--mode production', '--colors']);
+};
+
 async function main() {
   const mode = process.argv[2];
   switch (mode) {
@@ -494,6 +518,7 @@ async function main() {
         for (let i = 0; i < l; i += 1) {
           /* eslint-disable no-await-in-loop */
           await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--network', networks[i]].concat(process.argv.slice(4)));
+          deployedTo.push(truffleNetworks[networks[i]].network_id);
           /* eslint-enable no-await-in-loop */
           if(networks[i] === 'public.test.k8s' || networks[i] === 'public.test.k8s-hdwallet' || networks[i] == 'ropsten') {
               flag = true;
@@ -528,7 +553,6 @@ async function main() {
     case '--generate':
       generateSOLInterface();
       break;
-
     case '--archive':
       archiveBuild();
       break;
@@ -537,6 +561,10 @@ async function main() {
       break;
     case '--ledger':
       ledgerProvider('https://ropsten.infura.io/v3/71d39c30bc984e8a8a0d8adca84620ad', { networkId: 3 });
+      break;
+    case '--submodules':
+      await buildSubmodules();
+      process.exit(0);
       break;
     default:
       deploy();

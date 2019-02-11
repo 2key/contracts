@@ -54,13 +54,12 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     private AcquisitionLogicHandler: any;
 
     constructor(twoKeyProtocol: ITwoKeyBase, helpers: ITwoKeyHelpers, utils: ITwoKeyUtils, erc20: IERC20, sign: ISign) {
-        const bytecodes = Object.values(acquisitionContracts).reduce((prev, curr) => `${prev}${curr.bytecode || ''}`, '');
         this.base = twoKeyProtocol;
         this.helpers = helpers;
         this.utils = utils;
         this.erc20 = erc20;
         this.sign = sign;
-        this.version = this.sign.md5(bytecodes);
+        this.version = acquisitionContracts.NonSingletonHash;
         console.log('ACQUISITION', this.version, this.version.length);
     }
 
