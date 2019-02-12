@@ -211,7 +211,6 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                             data.maxDistributionDateShiftInDays,
                             data.bonusTokensVestingMonths,
                             data.bonusTokensVestingStartShiftInDaysFromDistributionDate,
-                            this.base.twoKeyBaseReputationRegistry.address
                         ],
                         progressCallback
                     });
@@ -245,7 +244,6 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                             data.maxConverterBonusPercentWei,
                             data.currency,
                             data.assetContractERC20,
-                            this.base.twoKeySingletonesRegistry.address,
                             data.moderator
                         ],
                         progressCallback
