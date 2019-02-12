@@ -409,7 +409,6 @@ async function deploy() {
       await runMigration3(networks[i]);
       /* eslint-enable no-await-in-loop */
     }
-    console.log(commit);
     const sessionDeployedContracts = await getCurrentDeployedAddresses();
     const lastDeployed = Object.keys(deployedHistory).filter(key => key !== 'initial').sort((a, b) => {
       if (a > b) {
@@ -456,8 +455,9 @@ async function deploy() {
     const contracts = await generateSOLInterface();
     await archiveBuild();
     await commitAndPushContractsFolder(`Contracts deployed to ${network} ${now.format('lll')}`);
+    console.log('Changes commited');
+    await buildSubmodules(contracts);
     if (!local) {
-      await buildSubmodules(contracts);
       await runProcess(path.join(__dirname, 'node_modules/.bin/webpack'));
     }
 
