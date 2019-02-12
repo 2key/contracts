@@ -30,7 +30,7 @@ import "./Upgradeable.sol";
  * @author Nikola Madjarevic
  * Created at 2/12/19
  */
-contract CampaignValidator is Upgradeable {
+contract TwoKeyCampaignValidator is Upgradeable {
 
     address public twoKeySingletoneRegistry;
 
