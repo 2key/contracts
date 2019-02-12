@@ -454,13 +454,12 @@ async function deploy() {
       fs.writeFileSync(deploymentHistoryPath, JSON.stringify(deployedHistory, null, 2));
     }
     const contracts = await generateSOLInterface();
+    await archiveBuild();
     await commitAndPushContractsFolder(`Contracts deployed to ${network} ${now.format('lll')}`);
     if (!local) {
       await buildSubmodules(contracts);
       await runProcess(path.join(__dirname, 'node_modules/.bin/webpack'));
     }
-    // TODO: Archive build
-    await archiveBuild();
 
     contractsStatus = await contractsGit.status();
     twoKeyProtocolStatus = await twoKeyProtocolLibGit.status();
