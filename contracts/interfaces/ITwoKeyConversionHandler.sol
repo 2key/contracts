@@ -14,11 +14,14 @@ contract ITwoKeyConversionHandler {
 
     function setAnonymous(address _contractor, bool _isAnonymous) external;
     function cancelAndRejectContract() external;
+
     function setTwoKeyAcquisitionCampaignERC20(
         address _twoKeyAcquisitionCampaignERC20,
         address _contractor,
         address _assetContractERC20,
-        address _twoKeyEventSource) external;
+        address _twoKeyEventSource,
+        address _twoKeyBaseReputationRegistry
+    ) external;
 
     function getModeratorBalanceAndTotalEarnings() external view returns (uint,uint);
 }

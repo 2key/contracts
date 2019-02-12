@@ -12,7 +12,6 @@ import "../interfaces/IUpgradableExchange.sol";
 import "../interfaces/ITwoKeyEventSource.sol";
 import "../interfaces/ITwoKeyBaseReputationRegistry.sol";
 
-
 /**
  * @notice Contract to handle logic related for Acquisition
  * @dev There will be 1 conversion handler per Acquisition Campaign
@@ -44,7 +43,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
     address twoKeyEventSource;
     address twoKeyAcquisitionCampaignERC20;
     address contractor;
-
     address assetContractERC20;
     address twoKeyBaseReputationRegistry;
 
@@ -102,25 +100,31 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
         uint _tokenDistributionDate, // January 1st 2019
         uint _maxDistributionDateShiftInDays, // 180 days
         uint _bonusTokensVestingMonths, // 6 months
-        uint _bonusTokensVestingStartShiftInDaysFromDistributionDate,
-        address _twoKeyBaseReputationRegistry) public {
+        uint _bonusTokensVestingStartShiftInDaysFromDistributionDate
+        ) public {
         expiryConversionInHours = _expiryConversionInHours;
         tokenDistributionDate = _tokenDistributionDate;
         maxDistributionDateShiftInDays = _maxDistributionDateShiftInDays;
         bonusTokensVestingMonths = _bonusTokensVestingMonths;
         bonusTokensVestingStartShiftInDaysFromDistributionDate = _bonusTokensVestingStartShiftInDaysFromDistributionDate;
-        twoKeyBaseReputationRegistry = _twoKeyBaseReputationRegistry;
     }
 
     /// @notice Method which will be called inside constructor of TwoKeyAcquisitionCampaignERC20
     /// @param _twoKeyAcquisitionCampaignERC20 is the address of TwoKeyAcquisitionCampaignERC20 contract
     /// @param _contractor is the address of the contractor
-    function setTwoKeyAcquisitionCampaignERC20(address _twoKeyAcquisitionCampaignERC20, address _contractor, address _assetContractERC20, address _twoKeyEventSource) public {
+    function setTwoKeyAcquisitionCampaignERC20(
+        address _twoKeyAcquisitionCampaignERC20,
+        address _contractor,
+        address _assetContractERC20,
+        address _twoKeyEventSource,
+        address _twoKeyBaseReputationRegistry) public {
         require(twoKeyAcquisitionCampaignERC20 == address(0));
         twoKeyAcquisitionCampaignERC20 = _twoKeyAcquisitionCampaignERC20;
         contractor = _contractor;
         assetContractERC20 =_assetContractERC20;
         twoKeyEventSource = _twoKeyEventSource;
+        twoKeyBaseReputationRegistry = _twoKeyBaseReputationRegistry;
+
     }
 
 

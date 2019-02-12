@@ -69,8 +69,18 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         moderator = _moderator;
         assetContractERC20 = _assetContractERC20;
         maxReferralRewardPercent = values[0];
-        ITwoKeyConversionHandler(conversionHandler).setTwoKeyAcquisitionCampaignERC20(address(this), contractor, _assetContractERC20, address(twoKeyEventSource));
-        ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).setTwoKeyAcquisitionCampaignContract(address(this));
+        ITwoKeyConversionHandler(conversionHandler).setTwoKeyAcquisitionCampaignERC20(
+            address(this),
+            contractor,
+            _assetContractERC20,
+            address(twoKeyEventSource),
+            ITwoKeySingletoneRegistryFetchAddress(_twoKeySingletoneRegistry)
+                .getContractProxyAddress("TwoKeyBaseReputationRegistry")
+        );
+        ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).setTwoKeyAcquisitionCampaignContract(
+            address(this),
+            _twoKeySingletoneRegistry
+        );
         twoKeyEventSource.created(address(this), contractor, moderator);
     }
 

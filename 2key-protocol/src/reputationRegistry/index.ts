@@ -48,9 +48,9 @@ export default class TwoKeyBaseReputationRegistry implements ITwoKeyBaseReputati
                 }
 
                 let obj: IReputationStatsPerAddress = {
-                    reputationPointsAsContractor : contractorPoints,
-                    reputationPointsAsConverter : converterPoints,
-                    reputationPointsAsReferrer : referrerPoints
+                    reputationPointsAsContractor : parseFloat(this.utils.fromWei(contractorPoints,'ether').toString()),
+                    reputationPointsAsConverter : parseFloat(this.utils.fromWei(converterPoints,'ether').toString()),
+                    reputationPointsAsReferrer : parseFloat(this.utils.fromWei(referrerPoints,'ether').toString())
                 };
                 resolve(obj);
             } catch (e) {

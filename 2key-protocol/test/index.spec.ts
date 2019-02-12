@@ -1158,4 +1158,24 @@ describe('TwoKeyProtocol', () => {
         expect(lockupContractAddress).not.to.be.equal(0);
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(30000);
+
+    it('should check reputation points for a couple of addresses', async() => {
+        console.log('Checking stats for Renata');
+        let renataStats = await twoKeyProtocol.TwoKeyBaseReputation.getReputationPointsForAllRolesPerAddress(env.RENATA_ADDRESS);
+        console.log(renataStats);
+
+        console.log('Checking stats for Test4');
+        let test4Stats = await twoKeyProtocol.TwoKeyBaseReputation.getReputationPointsForAllRolesPerAddress(env.TEST4_ADDRESS);
+        console.log(test4Stats);
+
+        console.log('Checking stats for contractor');
+        let contractorStats = await twoKeyProtocol.TwoKeyBaseReputation.getReputationPointsForAllRolesPerAddress(env.AYDNEP_ADDRESS);
+        console.log(contractorStats);
+
+        console.log('Checking stats for test address');
+        let rejectedConverterStats = await twoKeyProtocol.TwoKeyBaseReputation.getReputationPointsForAllRolesPerAddress(env.TEST_ADDRESS);
+        console.log(rejectedConverterStats);
+
+
+    }).timeout(30000);
 });

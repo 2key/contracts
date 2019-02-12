@@ -13,6 +13,7 @@ const TwoKeyBaseReputationRegistry = artifacts.require('TwoKeyBaseReputationRegi
 const TwoKeyCommunityTokenPool = artifacts.require('TwoKeyCommunityTokenPool');
 const TwoKeyDeepFreezeTokenPool = artifacts.require('TwoKeyDeepFreezeTokenPool');
 const TwoKeyLongTermTokenPool = artifacts.require('TwoKeyLongTermTokenPool');
+const TwoKeyCampaignValidator = artifacts.require('TwoKeyCampaignValidator');
 
 
 const fs = require('fs');
@@ -43,6 +44,7 @@ module.exports = function deploy(deployer) {
     let proxyAddressTwoKeyCommunityTokenPool;
     let proxyAddressTwoKeyLongTermTokenPool;
     let proxyAddressTwoKeyDeepFreezeTokenPool;
+    let proxyAddressTwoKeyCampaignValidator;
 
     /**
      * Define proxy address for plasma network
@@ -102,6 +104,8 @@ module.exports = function deploy(deployer) {
     if (deployer.network.startsWith('dev') || deployer.network.startsWith('public.') || deployer.network.startsWith('rinkeby') || deployer.network.startsWith('ropsten')) {
         deployer.deploy(TwoKeyCongress, 50, initialCongressMembers, votingPowers)
             .then(() => TwoKeyCongress.deployed())
+            .then(() => deployer.deploy(TwoKeyCampaignValidator))
+            .then(() => TwoKeyCampaignValidator.deployed())
             .then(() => deployer.deploy(TwoKeyAdmin))
             .then(() => TwoKeyAdmin.deployed())
             .then(() => deployer.deploy(TwoKeyExchangeRateContract))
@@ -147,6 +151,33 @@ module.exports = function deploy(deployer) {
 
                         fileObject['TwoKeyRegistry'] = twoKeyReg;
                         proxyAddressTwoKeyRegistry = proxy;
+                        resolve(proxy);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
+
+                await new Promise(async (resolve, reject) => {
+                    try {
+                        console.log('... Adding TwoKeyCampaignValidator to Proxy registry as valid implementation');
+                        /**
+                         * Adding TwoKeyCampaignValidator to the registry, deploying 1st proxy for that 1.0 version and setting initial params there
+                         */
+                        let txHash = await registry.addVersion("TwoKeyCampaignValidator", "1.0", TwoKeyCampaignValidator.address);
+                        let { logs } = await registry.createProxy("TwoKeyCampaignValidator", "1.0");
+                        let { proxy } = logs.find(l => l.event === 'ProxyCreated').args;
+                        console.log('Proxy address for the TwoKeyCampaignValidator is : ' + proxy);
+                        const twoKeyValidator = fileObject.TwoKeyCampaignValidator || {};
+                        twoKeyValidator[networkId] = {
+                            'address': TwoKeyCampaignValidator.address,
+                            'Proxy': proxy,
+                            'Version': "1.0",
+                            maintainer_address: maintainerAddresses,
+                        };
+
+
+                        fileObject['TwoKeyCampaignValidator'] = twoKeyValidator;
+                        proxyAddressTwoKeyCampaignValidator = proxy;
                         resolve(proxy);
                     } catch (e) {
                         reject(e);
@@ -406,6 +437,11 @@ module.exports = function deploy(deployer) {
                             TwoKeyEconomy.address,
                             maintainerAddresses,
                             proxyAddressTwoKeyCommunityTokenPool
+                        );
+
+                        await TwoKeyCampaignValidator.at(proxyAddressTwoKeyCampaignValidator).setInitialParams
+                        (
+                            TwoKeySingletonesRegistry.address
                         );
 
                         await EventSource.at(proxyAddressTwoKeyEventSource).setInitialParams

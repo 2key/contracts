@@ -24,7 +24,8 @@ import {
     ITwoKeyInit,
     ITwoKeyReg,
     ITwoKeyUtils,
-    IUpgradableExchange
+    IUpgradableExchange,
+    ITwoKeyBaseReputationRegistry
 } from './interfaces';
 import { promisify } from './utils/promisify';
 import Index from './utils';
@@ -34,6 +35,7 @@ import ERC20 from './erc20';
 import TwoKeyCongress from "./congress";
 import DecentralizedNation from "./decentralizedNation";
 import TwoKerRegistry from './registry';
+import TwoKeyBaseReputationRegistry from "./reputationRegistry";
 import PlasmaEvents from './plasma';
 import UpgradableExchange from './upgradableExchange';
 import TwoKeyExchangeContract from './exchangeETHUSD';
@@ -96,6 +98,7 @@ export class TwoKeyProtocol {
     public UpgradableExchange: IUpgradableExchange;
     public TwoKeyExchangeContract: ITwoKeyExchangeContract;
     public PlasmaEvents: IPlasmaEvents;
+    public TwoKeyBaseReputation: ITwoKeyBaseReputationRegistry;
     private AcquisitionSubmodule: any;
     private _log: any;
 
@@ -177,7 +180,7 @@ export class TwoKeyProtocol {
         this.twoKeyAdmin = this.web3.eth.contract(singletons.TwoKeyAdmin.abi).at(getDeployedAddress('TwoKeyAdmin', this.networks.mainNetId));
         this.twoKeyCongress = this.web3.eth.contract(singletons.TwoKeyCongress.abi).at(getDeployedAddress('TwoKeyCongress', this.networks.mainNetId));
         this.twoKeyCall = this.web3.eth.contract(singletons.Call.abi).at(getDeployedAddress('Call', this.networks.mainNetId));
-        this.twoKeyBaseReputationRegistry = this.web3.eth.contract(singletons.TwoKeyCongress.abi).at(getDeployedAddress('TwoKeyBaseReputationRegistry', this.networks.mainNetId));
+        this.twoKeyBaseReputationRegistry = this.web3.eth.contract(singletons.TwoKeyBaseReputationRegistry.abi).at(getDeployedAddress('TwoKeyBaseReputationRegistry', this.networks.mainNetId));
         this.ipfsR = ipfsAPI(ipfsRIp, ipfsRPort, {protocol: ipfsRProtocol});
         this.ipfsW = ipfsAPI(ipfsWIp, ipfsWPort, {protocol: ipfsWProtocol});
 
@@ -219,6 +222,7 @@ export class TwoKeyProtocol {
         this.UpgradableExchange = new UpgradableExchange(this.twoKeyBase,this.Helpers,this.Utils);
         this.Congress = new TwoKeyCongress(this.twoKeyBase, this.Helpers, this.Utils);
         this.Registry = new TwoKerRegistry(this.twoKeyBase, this.Helpers, this.Utils);
+        this.TwoKeyBaseReputation = new TwoKeyBaseReputationRegistry(this.twoKeyBase, this.Helpers, this.Utils);
         // TODO: Add here replace AcquisitionSubmodule mechanism
         this.AcquisitionCampaign = this.AcquisitionSubmodule
             ? new this.AcquisitionSubmodule(this.twoKeyBase, this.Helpers, this.Utils, this.ERC20, Sign)

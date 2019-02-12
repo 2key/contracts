@@ -51,9 +51,12 @@ contract TwoKeyAcquisitionLogicHandler {
         uint _maxConverterBonusPercent,
         string _currency,
         address _assetContractERC20,
-        address _twoKeySingletoneRegistry,
         address _moderator
     ) public {
+        require(_minContribution > 0);
+        require(_maxContribution >= _minContribution);
+        require(_campaignEndTime > _campaignStartTime);
+        require(_maxConverterBonusPercent > 0);
         contractor = msg.sender;
         minContributionETHorFiatCurrency = _minContribution;
         maxContributionETHorFiatCurrency = _maxContribution;
@@ -62,11 +65,10 @@ contract TwoKeyAcquisitionLogicHandler {
         campaignEndTime = _campaignEndTime;
         maxConverterBonusPercent = _maxConverterBonusPercent;
         currency = _currency;
-        twoKeySingletoneRegistry = _twoKeySingletoneRegistry;
         moderator = _moderator;
         unit_decimals = IERC20(_assetContractERC20).decimals();
-        ownerPlasma = plasmaOf(msg.sender);
     }
+
 
     /**
      * @notice Requirement for the checking if the campaign is active or not
@@ -78,9 +80,11 @@ contract TwoKeyAcquisitionLogicHandler {
         return false;
     }
 
-    function setTwoKeyAcquisitionCampaignContract(address _acquisitionCampaignAddress) public {
+    function setTwoKeyAcquisitionCampaignContract(address _acquisitionCampaignAddress, address _twoKeySingletoneRegistry) public {
         require(twoKeyAcquisitionCampaign == address(0)); // Means it can be set only once
         twoKeyAcquisitionCampaign = _acquisitionCampaignAddress;
+        twoKeySingletoneRegistry = _twoKeySingletoneRegistry;
+        ownerPlasma = plasmaOf(contractor);
     }
 
     /**

@@ -7,6 +7,7 @@ export {IPlasmaEvents} from './plasma/interfaces';
 export {ITwoKeyHelpers,ITwoKeyUtils,BalanceMeta} from './utils/interfaces';
 export {IUpgradableExchange} from './upgradableExchange/interfaces';
 export {ITwoKeyExchangeContract} from './exchangeETHUSD/interfaces';
+export {ITwoKeyBaseReputationRegistry} from "./reputationRegistry/interfaces";
 
 export interface ITwoKeyBase {
     web3: any;

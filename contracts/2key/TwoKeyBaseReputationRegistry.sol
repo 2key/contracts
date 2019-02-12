@@ -7,7 +7,7 @@ import "./MaintainingPattern.sol";
 
 import "../interfaces/ITwoKeyReg.sol";
 import "../interfaces/ITwoKeyAcquisitionLogicHandler.sol";
-import "../interfaces/ITwoKeyAcquisitionCampaignGetStaticAddresses.sol";
+import "../interfaces/ITwoKeyAcquisitionCampaignStateVariables.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 
 /**
@@ -109,7 +109,6 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, MaintainingPattern {
 
         address2contractorGlobalReputationScoreWei[contractor] = subFromReputationScore(initialRewardWei, address2contractorGlobalReputationScoreWei[contractor]);
         address2converterGlobalReputationScoreWei[converter] = subFromReputationScore(initialRewardWei, address2converterGlobalReputationScoreWei[converter]);
-
         address[] memory referrers = ITwoKeyAcquisitionLogicHandler(logicHandlerAddress).getReferrers(converter, acquisitionCampaign);
 
         for(uint i=0; i<referrers.length; i++) {
@@ -123,7 +122,7 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, MaintainingPattern {
      * @param value is value we want to add
      * @param score is the reputation score we want to modify
      */
-    function addToReputationScore(uint value, ReputationScore memory score) internal view returns (ReputationScore) {
+    function addToReputationScore(uint value, ReputationScore score) internal view returns (ReputationScore) {
         if(score.points == 0) {
             score.points = value;
             score.isPositive = true;
@@ -146,7 +145,7 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, MaintainingPattern {
      * @param value is the value we want to substract
      * @param score is the score we want to modify
      */
-    function subFromReputationScore(uint value, ReputationScore memory score) internal view returns (ReputationScore) {
+    function subFromReputationScore(uint value, ReputationScore score) internal view returns (ReputationScore) {
         if(score.points == 0) {
             score.points = value;
             score.isPositive = false;
@@ -163,19 +162,18 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, MaintainingPattern {
         return score;
     }
 
-
     /**
      * @notice Internal getter from Acquisition campaign to fetch logic handler address
      */
     function getLogicHandlerAddress(address acquisitionCampaign) internal view returns (address) {
-        return ITwoKeyAcquisitionCampaignGetStaticAddresses(acquisitionCampaign).twoKeyAcquisitionLogicHandler();
+        return ITwoKeyAcquisitionCampaignStateVariables(acquisitionCampaign).twoKeyAcquisitionLogicHandler();
     }
 
     /**
      * @notice Internal getter from Acquisition campaign to fetch conersion handler address
      */
     function getConversionHandlerAddress(address acquisitionCampaign) internal view returns (address) {
-        return ITwoKeyAcquisitionCampaignGetStaticAddresses(acquisitionCampaign).conversionHandler();
+        return ITwoKeyAcquisitionCampaignStateVariables(acquisitionCampaign).conversionHandler();
     }
 
     /**
@@ -198,7 +196,7 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, MaintainingPattern {
      */
     function getRewardsByAddress(address _address) public view returns (bytes) {
         address twoKeyRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyRegistry");
-        address plasma = ITwoKeyReg(twoKeyRegistry).getEthereumToPlasma(msg.sender);
+        address plasma = ITwoKeyReg(twoKeyRegistry).getEthereumToPlasma(_address);
 
         ReputationScore memory reputationAsContractor = address2contractorGlobalReputationScoreWei[_address];
         ReputationScore memory reputationAsConverter = address2converterGlobalReputationScoreWei[_address];
