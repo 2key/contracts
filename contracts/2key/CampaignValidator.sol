@@ -30,8 +30,7 @@ import "./Upgradeable.sol";
  * @author Nikola Madjarevic
  * Created at 2/12/19
  */
-contract AcquisitionValidator is Upgradeable {
-
+contract CampaignValidator is Upgradeable {
 
     address public twoKeySingletoneRegistry;
 
@@ -39,8 +38,8 @@ contract AcquisitionValidator is Upgradeable {
     mapping(bytes => bool) conversionHandlerToEligibleCode;
     mapping(bytes => bool) acquisitionLogicHandlerToEligibleCode;
 
-
-    constructor(address _twoKeySingletoneRegistry) {
+    function setInitialParams(address _twoKeySingletoneRegistry) {
+        require(_twoKeySingletoneRegistry == address(0));
         twoKeySingletoneRegistry = _twoKeySingletoneRegistry;
     }
 
@@ -54,7 +53,7 @@ contract AcquisitionValidator is Upgradeable {
      * @param campaign is the address of the campaign, in this particular case it's acquisition
      * @dev Validates all the required stuff, if the campaign is not validated, it can't touch our singletones
      */
-    function validateCampaign(address campaign) public {
+    function validateAcquisitionCampaign(address campaign) public {
         address contractor = ITwoKeyAcquisitionCampaignStateVariables(campaign).contractor();
         //Validating that the msg.sender is the contractor of the campaign provided
         require(msg.sender == contractor);
