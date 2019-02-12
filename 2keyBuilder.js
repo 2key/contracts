@@ -30,7 +30,7 @@ const twoKeyProtocolSubmodulesDir = path.join(__dirname, '2key-protocol', 'dist'
 const deploymentHistoryPath = path.join(__dirname, 'history.json');
 
 let deployment = false;
-const deployedTo = [];
+const deployedTo = {};
 
 const contractsGit = simpleGit();
 const twoKeyProtocolLibGit = simpleGit(twoKeyProtocolLibDir);
@@ -193,9 +193,11 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
           }
         });
         const nonSingletonBytecodes = [];
-        Object.keys(contracts.contracts).forEach(key => {
-          if (key !== 'singletons') {
-            nonSingletonBytecodes.push(contracts.contracts[key].bytecode);
+        Object.keys(contracts.contracts).forEach(submodule => {
+          if (submodule !== 'singletons') {
+            Object.values(contracts.contracts[submodule]).forEach(({ bytecode, abi }) => {
+              nonSingletonBytecodes.push(bytecode || JSON.stringify(abi));
+            });
           }
         });
         const nonSingletonHash = sha256(nonSingletonBytecodes.join(''));
@@ -203,8 +205,8 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
           contracts.contracts[key]['NonSingletonHash'] = nonSingletonHash;
         });
         let keyHash = {};
-        let keys = Object.keys(data);
-        keys.forEach((key) => {
+        // deployedTo
+        Object.keys(data).forEach((key) => {
             let arr = data[key];
             let arrayOfAddresses = [];
             arr.forEach((element) => {
@@ -223,6 +225,9 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
                     hash: hash,
                     humanHash: rhd.humanizeDigest(hash,8)
                 };
+            if (deployedTo[key.toString()]) {
+              keyHash[key]['NonSingletonHash'] = nonSingletonHash;
+            }
         });
         let obj = {
           'NetworkHashes': keyHash,
@@ -285,12 +290,6 @@ const runMigration3 = (network) => new Promise(async(resolve, reject) => {
 });
 
 const updateIPFSHashes = async(contracts) => {
-  // TODO: Get current list IPFS address
-  // TODO: Load list from IPFS
-  // TODO: Upload submodules to IPFS by one
-  // TODO: Update list with new items
-  // TODO: Upload new list to IPFS
-  // TODO: Update current list IPFS address in ./2key-protocol/src/versions.ts
   const ipfs = new IPFS('ipfs.infura.io', 5001, { protocol: 'https' });
   const nonSingletonHash = contracts.contracts.singletons.NonSingletonHash;
   console.log(nonSingletonHash);
@@ -314,12 +313,12 @@ const updateIPFSHashes = async(contracts) => {
     });
   });
 
-  let versionList = {};
+  let versionsList = {};
   if (TwoKeyVersionHandler) {
     versionsList = JSON.parse((await ipfsCat(TwoKeyVersionHandler)).toString());
     console.log('VERSION LIST', versionsList);
   }
-  versionList[nonSingletonHash] = {};
+  versionsList[nonSingletonHash] = {};
   const files = (await readdir(twoKeyProtocolSubmodulesDir)).filter(file => file.endsWith('.js'));
   for (let i = 0, l = files.length; i < l; i++) {
     const js = fs.readFileSync(path.join(twoKeyProtocolSubmodulesDir, files[i]), { encoding: 'utf-8' });
@@ -330,10 +329,10 @@ const updateIPFSHashes = async(contracts) => {
     console.time('Upload');
     const [{ hash }] = await ipfsAdd(compressedJS);
     console.timeEnd('Upload');
-    versionList[nonSingletonHash][files[i].replace('.js', '')] = hash;
+    versionsList[nonSingletonHash][files[i].replace('.js', '')] = hash;
   }
-  console.log(versionList);
-  const [{ hash: newTwoKeyVersionHandler }] = await ipfsAdd(JSON.stringify(versionList));
+  console.log(versionsList);
+  const [{ hash: newTwoKeyVersionHandler }] = await ipfsAdd(JSON.stringify(versionsList));
   fs.writeFileSync(path.join(twoKeyProtocolDir, 'versions.json'), JSON.stringify({ TwoKeyVersionHandler: newTwoKeyVersionHandler }, null, 4));
   console.log('TwoKeyVersionHandler', newTwoKeyVersionHandler);
 };
@@ -406,7 +405,7 @@ async function deploy() {
     for (let i = 0; i < l; i += 1) {
       /* eslint-disable no-await-in-loop */
       await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--network', networks[i]].concat(process.argv.slice(3)));
-      deployedTo.push(truffleNetworks[networks[i]].network_id);
+      deployedTo[truffleNetworks[networks[i]].network_id.toString()] = truffleNetworks[networks[i]].network_id;
       await runMigration3(networks[i]);
       /* eslint-enable no-await-in-loop */
     }
@@ -574,7 +573,7 @@ async function main() {
         for (let i = 0; i < l; i += 1) {
           /* eslint-disable no-await-in-loop */
           await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--network', networks[i]].concat(process.argv.slice(4)));
-          deployedTo.push(truffleNetworks[networks[i]].network_id);
+          deployedTo[truffleNetworks[networks[i]].network_id.toString()] = truffleNetworks[networks[i]].network_id;
           /* eslint-enable no-await-in-loop */
           if(networks[i] === 'public.test.k8s' || networks[i] === 'public.test.k8s-hdwallet' || networks[i] == 'ropsten') {
               flag = true;

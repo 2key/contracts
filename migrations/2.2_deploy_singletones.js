@@ -168,7 +168,7 @@ module.exports = function deploy(deployer) {
                         let { proxy } = logs.find(l => l.event === 'ProxyCreated').args;
                         console.log('Proxy address for the TwoKeyCampaignValidator is : ' + proxy);
                         const twoKeyValidator = fileObject.TwoKeyCampaignValidator || {};
-                        twoKeyValidator[networkId] = {
+                        twoKeyValidator[network_id] = {
                             'address': TwoKeyCampaignValidator.address,
                             'Proxy': proxy,
                             'Version': "1.0",

@@ -338,7 +338,7 @@ describe('TwoKeyProtocol', () => {
     let txHash;
 
     it('should return acquisition submodule', async () => {
-        const submoduleJS = await twoKeyProtocol.Utils.getSubmodule('e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855', 'acquisition');
+        const submoduleJS = await twoKeyProtocol.Utils.getSubmodule('cba508abbecc7f07ea7f5303279b631c418db248257c51800b5beeb0c13663cb', 'acquisition');
         expect(submoduleJS.length).to.be.gt(0);
     }).timeout(30000);
 
