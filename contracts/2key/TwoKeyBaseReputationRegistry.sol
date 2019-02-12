@@ -198,7 +198,7 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, MaintainingPattern {
      */
     function getRewardsByAddress(address _address) public view returns (bytes) {
         address twoKeyRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyRegistry");
-        address plasma = ITwoKeyReg(twoKeyRegistry).getEthereumToPlasma(msg.sender);
+        address plasma = ITwoKeyReg(twoKeyRegistry).getEthereumToPlasma(_address);
 
         ReputationScore memory reputationAsContractor = address2contractorGlobalReputationScoreWei[_address];
         ReputationScore memory reputationAsConverter = address2converterGlobalReputationScoreWei[_address];
