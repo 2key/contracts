@@ -506,6 +506,8 @@ async function deploy() {
           await runProcess('npm', ['publish', '--tag', contractsStatus.current]);
         }
         await twoKeyProtocolLibGit.push('origin', contractsStatus.current);
+    } else {
+      process.exit(0);
     }
   } catch (e) {
     if (e.output) {
