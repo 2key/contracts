@@ -39,7 +39,7 @@ contract TwoKeyCampaignValidator is Upgradeable {
     mapping(bytes => bool) acquisitionLogicHandlerToEligibleCode;
 
     function setInitialParams(address _twoKeySingletoneRegistry) {
-        require(_twoKeySingletoneRegistry == address(0));
+        require(twoKeySingletoneRegistry == address(0));
         twoKeySingletoneRegistry = _twoKeySingletoneRegistry;
     }
 
