@@ -164,6 +164,24 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, MaintainingPattern {
     }
 
 
+    function subFromReputationScoreRS(uint value) public view returns (uint,bool) {
+        ReputationScore memory score = ReputationScore({points: 0,isPositive:false});
+        if(score.points == 0) {
+            score.points = value;
+            score.isPositive = false;
+        } else if(score.isPositive) {
+            if(score.points > value) {
+                score.points = score.points.sub(value);
+            } else {
+                score.points = value.sub(score.points);
+                score.isPositive = false;
+            }
+        } else {
+            score.points = score.points.add(value);
+        }
+        return (score.points, score.isPositive);
+    }
+
     /**
      * @notice Internal getter from Acquisition campaign to fetch logic handler address
      */
