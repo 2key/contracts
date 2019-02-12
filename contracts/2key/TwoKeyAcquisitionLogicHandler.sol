@@ -53,6 +53,10 @@ contract TwoKeyAcquisitionLogicHandler {
         address _assetContractERC20,
         address _moderator
     ) public {
+        require(_minContribution > 0);
+        require(_maxContribution >= _minContribution);
+        require(_campaignEndTime > _campaignStartTime);
+        require(_maxConverterBonusPercent > 0);
         contractor = msg.sender;
         minContributionETHorFiatCurrency = _minContribution;
         maxContributionETHorFiatCurrency = _maxContribution;
