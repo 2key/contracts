@@ -7,7 +7,7 @@ import "./MaintainingPattern.sol";
 
 import "../interfaces/ITwoKeyReg.sol";
 import "../interfaces/ITwoKeyAcquisitionLogicHandler.sol";
-import "../interfaces/ITwoKeyAcquisitionCampaignGetStaticAddresses.sol";
+import "../interfaces/ITwoKeyAcquisitionCampaignStateVariables.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 
 /**
@@ -166,14 +166,14 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, MaintainingPattern {
      * @notice Internal getter from Acquisition campaign to fetch logic handler address
      */
     function getLogicHandlerAddress(address acquisitionCampaign) internal view returns (address) {
-        return ITwoKeyAcquisitionCampaignGetStaticAddresses(acquisitionCampaign).twoKeyAcquisitionLogicHandler();
+        return ITwoKeyAcquisitionCampaignStateVariables(acquisitionCampaign).twoKeyAcquisitionLogicHandler();
     }
 
     /**
      * @notice Internal getter from Acquisition campaign to fetch conersion handler address
      */
     function getConversionHandlerAddress(address acquisitionCampaign) internal view returns (address) {
-        return ITwoKeyAcquisitionCampaignGetStaticAddresses(acquisitionCampaign).conversionHandler();
+        return ITwoKeyAcquisitionCampaignStateVariables(acquisitionCampaign).conversionHandler();
     }
 
     /**
