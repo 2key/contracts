@@ -434,8 +434,7 @@ module.exports = function deploy(deployer) {
 
                         await TwoKeyBaseReputationRegistry.at(proxyAddressTwoKeyBaseReputationRegistry).setInitialParams
                         (
-                            proxyAddressTwoKeyRegistry,
-                            proxyAddressTwoKeyAdmin,
+                            TwoKeySingletonesRegistry.address,
                             maintainerAddresses
                         );
 

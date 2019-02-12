@@ -1,13 +1,14 @@
 pragma solidity ^0.4.24;
 
-import "./Upgradeable.sol";
-
 import '../openzeppelin-solidity/contracts/math/SafeMath.sol';
+
+import "./Upgradeable.sol";
+import "./MaintainingPattern.sol";
 
 import "../interfaces/ITwoKeyReg.sol";
 import "../interfaces/ITwoKeyAcquisitionLogicHandler.sol";
 import "../interfaces/ITwoKeyAcquisitionCampaignGetStaticAddresses.sol";
-import "./MaintainingPattern.sol";
+import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 
 /**
  * @author Nikola Madjarevic
@@ -16,24 +17,17 @@ import "./MaintainingPattern.sol";
 contract TwoKeyBaseReputationRegistry is Upgradeable, MaintainingPattern {
 
     using SafeMath for uint;
-    address twoKeyRegistry;
-    uint public x = 0;
-    constructor() {
 
-    }
+    address twoKeySingletoneRegistry;
 
     /**
      * @notice Since using singletone pattern, this is replacement for the constructor
-     * @param _twoKeyRegistry is the address of twoKeyRegistry contract
+     * @param _twoKeySingletoneRegistry is the address of registry of all singleton contracts
      */
-    function setInitialParams(address _twoKeyRegistry, address _twoKeyAdmin, address[] _maintainers) {
-        require(twoKeyRegistry == address(0));
-        require(twoKeyAdmin == address(0));
-        twoKeyAdmin = _twoKeyAdmin;
-        twoKeyRegistry = _twoKeyRegistry;
-        //TODO instantiate with singletonRegistry, take event source from there
-        //TODO accept calls to update reputation only from event source, and make sure this event source is the "right one" via the singleton registry.
-        //TODO add to 2key-protocol ability to get reputation by role and address
+    function setInitialParams(address _twoKeySingletoneRegistry, address[] _maintainers) {
+        require(twoKeySingletoneRegistry == address(0));
+        twoKeySingletoneRegistry = _twoKeySingletoneRegistry;
+        twoKeyAdmin = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyAdmin");
         isMaintainer[msg.sender] = true; //also the deployer will be authorized maintainer
         for(uint i=0; i<_maintainers.length; i++) {
             isMaintainer[_maintainers[i]] = true;
@@ -197,19 +191,28 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, MaintainingPattern {
         return ITwoKeyAcquisitionLogicHandler(logicHandlerAddress).getReferrers(converter, acquisitionCampaign);
     }
 
-//    /**
-//     * @notice Function where user can check his reputation points
-//     * TODO: See how to handle integer overflows
-//     */
-//    function getMyRewards() public returns (int,int,int) {
-//        address plasma = ITwoKeyReg(twoKeyRegistry).getEthereumToPlasma(msg.sender);
-//        return(
-//            address2contractorGlobalReputationScoreWei[msg.sender],
-//            address2converterGlobalReputationScoreWei[msg.sender],
-//            plasmaAddress2referrerGlobalReputationScoreWei[plasma]
-//        );
-//    }
+    /**
+     * @notice Function to fetch reputation points per address
+     * @param _address is the address of the user we want to check points for
+     * @return encoded values in type bytes, unpackable by slices of 66,2,64,2,64,2 parsed to int / bool
+     */
+    function getRewardsByAddress(address _address) public view returns (bytes) {
+        address twoKeyRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyRegistry");
+        address plasma = ITwoKeyReg(twoKeyRegistry).getEthereumToPlasma(msg.sender);
 
+        ReputationScore memory reputationAsContractor = address2contractorGlobalReputationScoreWei[_address];
+        ReputationScore memory reputationAsConverter = address2converterGlobalReputationScoreWei[_address];
+        ReputationScore memory reputationAsReferrer = plasmaAddress2referrerGlobalReputationScoreWei[plasma];
 
+        return abi.encodePacked(
+            reputationAsContractor.points,
+            reputationAsContractor.isPositive,
+            reputationAsConverter.points,
+            reputationAsConverter.isPositive,
+            reputationAsReferrer.points,
+            reputationAsReferrer.isPositive
+        );
+
+    }
 
 }

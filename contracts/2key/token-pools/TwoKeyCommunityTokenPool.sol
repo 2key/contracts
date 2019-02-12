@@ -13,15 +13,13 @@ contract TwoKeyCommunityTokenPool is TokenPool {
     uint public constant annualTransferAmountLimit = totalAmount2keys / 10;
 
     uint startingDate;
-    //TODO: add way to monitor which year we're in from the total years (put "10" in a dedicated var)
-    //and add accounting of which year we're currently in, and how much was paid "this" year up till now.
 
     struct AnnualReport {
         uint startingDate;
         uint transferedThisYear;
     }
 
-    mapping(uint => AnnualReport) yearToAnnualReport;
+    mapping(uint => AnnualReport) public yearToAnnualReport;
 
     uint256 [] annualTransfers;
 
@@ -57,8 +55,6 @@ contract TwoKeyCommunityTokenPool is TokenPool {
         require(year >= 1 && year <= 10);
 
         AnnualReport memory report = yearToAnnualReport[year];
-
-//        require(block.timestamp > report.startingDate);
 
         require(report.transferedThisYear + _amount <= annualTransferAmountLimit);
         super.transferTokens(_receiver,_amount);
