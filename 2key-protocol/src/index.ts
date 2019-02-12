@@ -181,6 +181,9 @@ export class TwoKeyProtocol {
         this.ipfsR = ipfsAPI(ipfsRIp, ipfsRPort, {protocol: ipfsRProtocol});
         this.ipfsW = ipfsAPI(ipfsWIp, ipfsWPort, {protocol: ipfsWProtocol});
 
+        console.log('IPFS Read', `${ipfsRProtocol}://${ipfsRIp}:${ipfsRPort}`);
+        console.log('IPFS Write', `${ipfsWProtocol}://${ipfsWIp}:${ipfsWPort}`);
+
         this.twoKeyBase = {
             web3: this.web3,
             plasmaWeb3: this.plasmaWeb3,
@@ -205,6 +208,7 @@ export class TwoKeyProtocol {
             _setGasPrice: this._setGasPrice,
             _setTotalSupply: this._setTotalSupply,
             _log: this._log,
+            nonSingletonsHash: singletons.NonSingletonHash,
         };
 
         this.Helpers = new Helpers(this.twoKeyBase);
@@ -225,6 +229,11 @@ export class TwoKeyProtocol {
     public replaceAcquisition(AcquisitionSubmodule) {
         this.AcquisitionSubmodule = AcquisitionSubmodule;
         this.AcquisitionCampaign = new AcquisitionSubmodule(this.twoKeyBase, this.Helpers, this.Utils, this.ERC20, Sign);
+    }
+
+    public setLatestAcquisition() {
+        this.AcquisitionSubmodule = AcquisitionCampaign;
+        this.AcquisitionCampaign = new AcquisitionCampaign(this.twoKeyBase, this.Helpers, this.Utils, this.ERC20, Sign);
     }
 
     public getBalance(address: string, erc20address?: string): Promise<BalanceMeta> {

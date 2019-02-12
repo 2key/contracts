@@ -421,7 +421,7 @@ Enter into geth console:
        }
     );
 
-# SOLDeployer
+# 2keyBuilder
 
 How to deploy contracts to any network except local dev
 

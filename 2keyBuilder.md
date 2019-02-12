@@ -1,4 +1,4 @@
-# SOLDeployer
+# 2keyBuilder
 
 ```
 brew install node@10
@@ -39,7 +39,7 @@ yarn run deploy public.test.k8s,private.test.k8s-hdwallet --reset
 
 * edit `ContractDeploymentWhiteList.json`
 
-### SOLDeployer commands
+### 2keyBuilder commands
 
 * ```--migrate``` - runs truffle migrate --network with generating ```contracts.ts``` abi interface and without running tests
 * ```--test``` - runs tests from ```2key-protocol/test/index.spec.ts```

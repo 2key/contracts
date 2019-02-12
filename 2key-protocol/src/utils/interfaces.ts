@@ -98,6 +98,8 @@ export interface ITwoKeyHelpers {
 }
 
 export interface ITwoKeyUtils {
+    getVersionHandler: () => Promise<boolean>,
+    getSubmodule: (nonSingletonHash: string, submoduleName: string) => Promise<string>,
     transferEther: (to: string, value: number | string | BigNumber, from: string) => Promise<string>
     ipfsAdd: (data: any) => Promise<string>,
     getOffchainDataFromIPFSHash: (hash: string) => Promise<IOffchainData>,

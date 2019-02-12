@@ -12,9 +12,9 @@ export interface ITwoKeyReg {
     getRegisteredAddressForName: (name: string) => Promise<string>,
     getRegisteredWalletForAddress: (from: string) => Promise<string>,
     getRegisteredAddressForPlasma: (plasma?: string) => Promise<string>,
-    signPlasma2Ethereum: (from: string) => Promise<ISignedPlasma>,
-    signUserData2Registry: (from: string, name: string, fullname: string, email: string) => Promise<ISignedUser>,
-    signWalletData2Registry: (from: string, username: string, walletname: string) => Promise<ISignedWalletData>,
+    signPlasma2Ethereum: (from: string, force?: boolean) => Promise<ISignedPlasma>,
+    signUserData2Registry: (from: string, name: string, fullname: string, email: string, force?: boolean) => Promise<ISignedUser>,
+    signWalletData2Registry: (from: string, username: string, walletname: string, force?: boolean) => Promise<ISignedWalletData>,
     addName: (username:string, sender: string, fullName:string, email:string, signature: string, from: string, gasPrice?: number) => Promise<string>,
     addPlasma2EthereumByUser: (from: string, signedPlasma: ISignedPlasma, gasPrice?: number) => Promise<string>,
     setWalletName(from: string, signedWallet: ISignedWalletData, gasPrice?: number): Promise<string>

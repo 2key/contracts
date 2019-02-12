@@ -30,14 +30,17 @@ export default class PlasmaEvents implements IPlasmaEvents {
      * @param {string} from
      * @returns {Promise<string>}
      */
-    public signPlasmaToEthereum(from: string): Promise<ISignedEthereum> {
+    public signPlasmaToEthereum(from: string, force?: string): Promise<ISignedEthereum> {
         return new Promise<ISignedEthereum>(async (resolve, reject) => {
             console.log('PLASMA.signPlasmaToEthereum', from);
             try {
                 let plasmaAddress = this.base.plasmaAddress;
-                let storedEthAddress = await this.helpers._awaitPlasmaMethod(this.getRegisteredAddressForPlasma(plasmaAddress));
-                console.log('PLASMA.signPlasmaToEthereum storedETHAddress', storedEthAddress);
-                if (storedEthAddress != from) {
+                let storedEthAddress;
+                if (!force) {
+                    storedEthAddress = await this.helpers._awaitPlasmaMethod(this.getRegisteredAddressForPlasma(plasmaAddress));
+                    console.log('PLASMA.signPlasmaToEthereum storedETHAddress', storedEthAddress);
+                }
+                if (force || storedEthAddress != from) {
                     let plasma2ethereumSignature = await Sign.sign_plasma2ethereum(this.base.web3, plasmaAddress, from);
                     resolve({
                         plasmaAddress,

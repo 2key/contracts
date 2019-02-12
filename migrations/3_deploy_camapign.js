@@ -17,34 +17,22 @@ const proxyFile = path.join(__dirname, '../build/contracts/proxyAddresses.json')
 
 module.exports = function deploy(deployer) {
     if(!deployer.network.startsWith('private') && !deployer.network.startsWith('plasma')) {
-        let networkId;
-        if (deployer.network.startsWith('ropsten')) {
-            networkId = 3;
-        } else if (deployer.network.startsWith('rinkeby')) {
-            networkId = 4;
-        } else if (deployer.network.startsWith('public')) {
-            networkId = 3;
-        } else if (deployer.network.startsWith('dev-local') || deployer.network.startsWith('dev-ap')) {
-            networkId = 8086;
-        } else if (deployer.network.startsWith('development')) {
-            networkId = 'ganache';
-        }
-        console.log(networkId);
+        const { network_id } = deployer;
         let x = 1;
         let json = JSON.parse(fs.readFileSync(proxyFile, {encoding: 'utf-8'}));
-        deployer.deploy(TwoKeyConversionHandler, 12345, 1012019, 180, 6, 180, json.TwoKeyBaseReputationRegistry[networkId.toString()].Proxy)
+        deployer.deploy(TwoKeyConversionHandler, 12345, 1012019, 180, 6, 180, json.TwoKeyBaseReputationRegistry[network_id].Proxy)
             .then(() => TwoKeyConversionHandler.deployed())
             .then(() => deployer.deploy(ERC20TokenMock))
             .then(() => deployer.link(Call, TwoKeyAcquisitionCampaignERC20))
             .then(() => deployer.deploy(TwoKeyAcquisitionLogicHandler,
                 12, 15, 1, 12345, 15345, 5, 'USD',
-                ERC20TokenMock.address, TwoKeySingletonesRegistry.address, json.TwoKeyAdmin[networkId.toString()].Proxy))
+                ERC20TokenMock.address, TwoKeySingletonesRegistry.address, json.TwoKeyAdmin[network_id].Proxy))
             .then(() => deployer.deploy(
                 TwoKeyAcquisitionCampaignERC20,
                 TwoKeySingletonesRegistry.address,
                 TwoKeyAcquisitionLogicHandler.address,
                 TwoKeyConversionHandler.address,
-                json.TwoKeyAdmin[networkId.toString()].Proxy,
+                json.TwoKeyAdmin[network_id].Proxy,
                 ERC20TokenMock.address,
                 [5, 1],
                 )
@@ -55,19 +43,19 @@ module.exports = function deploy(deployer) {
                 console.log("... Adding TwoKeyAcquisitionCampaign to EventSource");
                 await new Promise(async (resolve, reject) => {
                     try {
-                        let txHash = await EventSource.at(json.TwoKeyEventSource[networkId.toString()].Proxy).addContract(TwoKeyAcquisitionCampaignERC20.address, {gas: 7000000});
+                        let txHash = await EventSource.at(json.TwoKeyEventSource[network_id].Proxy).addContract(TwoKeyAcquisitionCampaignERC20.address, {gas: 7000000});
                         resolve(txHash);
                     } catch (e) {
                         reject(e);
                     }
                 });
-                console.log("Added TwoKeyAcquisition: " + TwoKeyAcquisitionCampaignERC20.address + "  to EventSource : " + json.TwoKeyEventSource[networkId.toString()].Proxy + "!");
+                console.log("Added TwoKeyAcquisition: " + TwoKeyAcquisitionCampaignERC20.address + "  to EventSource : " + json.TwoKeyEventSource[network_id].Proxy + "!");
             })
             .then(async () => {
                 console.log("... Adding TwoKeyAcquisitionCampaign to be eligible to buy tokens from Upgradable Exchange");
                 await new Promise(async (resolve,reject) => {
                     try {
-                        let txHash = await TwoKeyUpgradableExchange.at(json.TwoKeyUpgradableExchange[networkId.toString()].Proxy)
+                        let txHash = await TwoKeyUpgradableExchange.at(json.TwoKeyUpgradableExchange[network_id].Proxy)
                             .addContractToBeEligibleToBuyTokens(TwoKeyAcquisitionCampaignERC20.address);
                         resolve(txHash);
                     } catch (e) {

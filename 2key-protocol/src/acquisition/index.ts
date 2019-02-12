@@ -190,6 +190,10 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     public create(data: IAcquisitionCampaign, from: string, {progressCallback, gasPrice, interval, timeout = 60000}: ICreateOpts = {}): Promise<IAcquisitionCampaignMeta> {
         return new Promise(async (resolve, reject) => {
             try {
+                if (this.version !== this.base.nonSingletonsHash) {
+                    reject(new Error('To start new campaign please switch to latest version of AcquisitionSubmodule'));
+                    return;
+                }
                 let txHash: string;
                 const symbol = await this.erc20.getERC20Symbol(data.assetContractERC20);
                 if (!symbol) {
@@ -341,12 +345,15 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         return new Promise<string>(async (resolve, reject) => {
             try {
                 const nonce = await this.helpers._getNonce(from);
+                console.log('updateOrSetIpfsHashPublicMeta', hash);
                 const twoKeyAcquisitionLogicHandlerInstance = await this._getLogicHandlerInstance(campaign);
+                console.log('twoKeyAcquisitionLogicHandlerInstance', twoKeyAcquisitionLogicHandlerInstance.address);
                 const txHash: string = await promisify(twoKeyAcquisitionLogicHandlerInstance.updateOrSetIpfsHashPublicMeta, [hash, {
                     from,
                     gasPrice,
                     nonce,
                 }]);
+                console.log('txHash', txHash);
                 resolve(txHash);
             } catch (e) {
                 reject(e);

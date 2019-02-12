@@ -213,8 +213,8 @@ module.exports = {
       gasPrice: 0
     },
 
-    'azure': {
-        provider: () => new HDWalletProvider(mnemonic, 'http://52.166.255.192:8540'),
+    'plasma-azure': {
+        provider: () => new HDWalletProvider(mnemonic, 'https://test.poa.2key.net'),
         network_id: 11112222,
         gas: 8000000,
         gasPrice: '0x0',

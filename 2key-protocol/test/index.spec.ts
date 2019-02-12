@@ -304,6 +304,7 @@ describe('TwoKeyProtocol', () => {
                     eventsNetUrl,
                     plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
                 });
+                // console.log('JS IPFS', await twoKeyProtocol.Utils.ipfsAdd(`alert('Hello FROM IPFS'); console.log('Hello from IPFS'); window.helloIPFS = 'hello from ipfs';`));
                 await tryToRegisterUser('Deployer', from);
                 // const signature = await twoKeyProtocol.Registry.signUserData2Registry(from, 'DEPLOYER','DEPLOYER','aydnep@2key.network');
                 // console.log('SIGNATURE FOR REGISTRY', signature);
@@ -336,7 +337,10 @@ describe('TwoKeyProtocol', () => {
     let aydnepBalance;
     let txHash;
 
-
+    it('should return acquisition submodule', async () => {
+        const submoduleJS = await twoKeyProtocol.Utils.getSubmodule('e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855', 'acquisition');
+        expect(submoduleJS.length).to.be.gt(0);
+    }).timeout(30000);
 
     it('should return a balance for address', async () => {
         const business = twoKeyProtocol.Utils.balanceFromWeiString(await twoKeyProtocol.getBalance(twoKeyAdmin), {
@@ -528,11 +532,12 @@ describe('TwoKeyProtocol', () => {
         const hash = await twoKeyProtocol.Utils.ipfsAdd(campaignData);
         console.log('HASH', hash);
         txHash = await twoKeyProtocol.AcquisitionCampaign.updateOrSetIpfsHashPublicMeta(campaignAddress, hash, from);
+        console.log(txHash);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const campaignMeta = await twoKeyProtocol.AcquisitionCampaign.getPublicMeta(campaignAddress,from);
         console.log('IPFS:', hash, campaignMeta);
         expect(campaignMeta.meta.assetContractERC20).to.be.equal(campaignData.assetContractERC20);
-    }).timeout(30000);
+    }).timeout(60000);
     // it('should print balance after campaign created', printBalances).timeout(15000);
 
     it('should transfer assets to campaign', async () => {

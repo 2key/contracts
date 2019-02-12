@@ -5,7 +5,10 @@ const tar = require('tar');
 const rimraf = require('rimraf');
 const sha256 = require('js-sha256');
 const rhd = require('node-humanhash');
+const IPFS = require('ipfs-http-client');
+const LZString = require('lz-string');
 const { networks: truffleNetworks } = require('./truffle');
+const { TwoKeyVersionHandler } = require('./2key-protocol/src/versions');
 
 
 // const compressor = require('node-minify');
@@ -22,6 +25,7 @@ const twoKeyProtocolDir = path.join(__dirname, '2key-protocol', 'src');
 const twoKeyProtocolDist = path.join(__dirname, '2key-protocol', 'dist');
 const buildArchPath = path.join(twoKeyProtocolDir, 'contracts.tar.gz');
 const twoKeyProtocolLibDir = path.join(__dirname, '2key-protocol', 'dist');
+const twoKeyProtocolSubmodulesDir = path.join(__dirname, '2key-protocol', 'dist', 'submodules');
 
 const deploymentHistoryPath = path.join(__dirname, 'history.json');
 
@@ -246,7 +250,7 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
             console.log('Copying this to 2key-protcol/dist...');
         }
         console.log('Done');
-        resolve();
+        resolve(contracts);
       } catch (err) {
         reject(err);
       }
@@ -280,13 +284,65 @@ const runMigration3 = (network) => new Promise(async(resolve, reject) => {
   }
 });
 
-const updateIPFSHashes = async() => {
+const updateIPFSHashes = async(contracts) => {
   // TODO: Get current list IPFS address
   // TODO: Load list from IPFS
   // TODO: Upload submodules to IPFS by one
   // TODO: Update list with new items
   // TODO: Upload new list to IPFS
   // TODO: Update current list IPFS address in ./2key-protocol/src/versions.ts
+  const ipfs = new IPFS('ipfs.infura.io', 5001, { protocol: 'https' });
+  const nonSingletonHash = contracts.contracts.singletons.NonSingletonHash;
+  console.log(nonSingletonHash);
+  const ipfsCat = (hash) => new Promise((resolve, reject) => {
+    ipfs.cat(hash, (err, res) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(res);
+      }
+    });
+  });
+
+  const ipfsAdd = (data) => new Promise((resolve, reject) => {
+    ipfs.add(ipfs.types.Buffer.from(data), { pin: deployment }, (err, res) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(res);
+      }
+    });
+  });
+
+  let versionList = {};
+  if (TwoKeyVersionHandler) {
+    versionsList = JSON.parse((await ipfsCat(TwoKeyVersionHandler)).toString());
+    console.log('VERSION LIST', versionsList);
+  }
+  versionList[nonSingletonHash] = {};
+  const files = (await readdir(twoKeyProtocolSubmodulesDir)).filter(file => file.endsWith('.js'));
+  for (let i = 0, l = files.length; i < l; i++) {
+    const js = fs.readFileSync(path.join(twoKeyProtocolSubmodulesDir, files[i]), { encoding: 'utf-8' });
+    console.time('Compress');
+    const compressedJS = LZString.compressToUTF16(js);
+    console.timeEnd('Compress');
+    console.log(files[i], (js.length / 1024).toFixed(3), (compressedJS.length / 1024).toFixed(3));
+    console.time('Upload');
+    const [{ hash }] = await ipfsAdd(compressedJS);
+    console.timeEnd('Upload');
+    versionList[nonSingletonHash][files[i].replace('.js', '')] = hash;
+  }
+  console.log(versionList);
+  const [{ hash: newTwoKeyVersionHandler }] = await ipfsAdd(JSON.stringify(versionList));
+  fs.writeFileSync(path.join(twoKeyProtocolDir, 'versions.json'), JSON.stringify({ TwoKeyVersionHandler: newTwoKeyVersionHandler }, null, 4));
+  console.log('TwoKeyVersionHandler', newTwoKeyVersionHandler);
+};
+
+const commitAndPushContractsFolder = async(commitMessage) => {
+  const contractsStatus = await contractsGit.status();
+  await contractsGit.add(contractsStatus.files.map(item => item.path));
+  await contractsGit.commit(commitMessage);
+  await contractsGit.push('origin', contractsStatus.current);
 };
 
 async function deploy() {
@@ -398,11 +454,10 @@ async function deploy() {
       deployedHistory[tag] = deployedUpdates;
       fs.writeFileSync(deploymentHistoryPath, JSON.stringify(deployedHistory, null, 2));
     }
-    await generateSOLInterface();
+    const contracts = await generateSOLInterface();
+    await commitAndPushContractsFolder(`Contracts deployed to ${network} ${now.format('lll')}`);
     if (!local) {
-      await buildSubmodules();
-      // TODO: Add implementation for updateIPFSHashes
-      await updateIPFSHashes();
+      await buildSubmodules(contracts);
       await runProcess(path.join(__dirname, 'node_modules/.bin/webpack'));
     }
     // TODO: Archive build
@@ -411,12 +466,11 @@ async function deploy() {
     contractsStatus = await contractsGit.status();
     twoKeyProtocolStatus = await twoKeyProtocolLibGit.status();
     console.log(commit, tag);
+
     await twoKeyProtocolLibGit.add(twoKeyProtocolStatus.files.map(item => item.path));
     await twoKeyProtocolLibGit.commit(commit);
-    await contractsGit.add(contractsStatus.files.map(item => item.path));
-    await contractsGit.commit(commit);
+    await commitAndPushContractsFolder(commit);
     await twoKeyProtocolLibGit.push('origin', contractsStatus.current);
-    await contractsGit.push('origin', contractsStatus.current);
 
       /**
        * Npm patch & public
@@ -490,8 +544,10 @@ const test = () => new Promise(async (resolve, reject) => {
   // }
 });
 
-const buildSubmodules = async() => {
+const buildSubmodules = async(contracts) => {
   await runProcess(path.join(__dirname, 'node_modules/.bin/webpack'), ['--config', './webpack.config.submodules.js', '--mode production', '--colors']);
+  // TODO: Add implementation for updateIPFSHashes
+  await updateIPFSHashes(contracts);
 };
 
 async function main() {
@@ -563,7 +619,8 @@ async function main() {
       ledgerProvider('https://ropsten.infura.io/v3/71d39c30bc984e8a8a0d8adca84620ad', { networkId: 3 });
       break;
     case '--submodules':
-      await buildSubmodules();
+      const contracts = await generateSOLInterface();
+      await buildSubmodules(contracts);
       process.exit(0);
       break;
     default:

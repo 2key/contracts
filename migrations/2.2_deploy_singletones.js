@@ -21,25 +21,7 @@ const path = require('path');
 const proxyFile = path.join(__dirname, '../build/contracts/proxyAddresses.json');
 
 module.exports = function deploy(deployer) {
-    /**
-     * Determine network id first
-     */
-    let networkId;
-    if (deployer.network.startsWith('ropsten')) {
-        networkId = 3;
-    } else if (deployer.network.startsWith('rinkeby')) {
-        networkId = 4;
-    } else if (deployer.network.startsWith('public')) {
-        networkId = 3;
-    } else if (deployer.network.startsWith('dev-local') || deployer.network.startsWith('dev-ap')) {
-        networkId = 8086;
-    } else if (deployer.network.startsWith('development')) {
-        networkId = 'ganache';
-    } else if (deployer.network.startsWith('private')) {
-        networkId = 98052;
-    } else if (deployer.network.startsWith('plasma')) {
-        networkId = 8087;
-    }
+    const { network_id } = deployer;
     /**
      * Read the proxy file into fileObject
      * @type {{}}
@@ -153,8 +135,9 @@ module.exports = function deploy(deployer) {
                         let { logs } = await registry.createProxy("TwoKeyRegistry", "1.0");
                         let { proxy } = logs.find(l => l.event === 'ProxyCreated').args;
                         console.log('Proxy address for the TwoKeyRegistry is : ' + proxy);
+                        console.log('Network ID', network_id);
                         const twoKeyReg = fileObject.TwoKeyRegistry || {};
-                        twoKeyReg[networkId] = {
+                        twoKeyReg[network_id] = {
                             'address': TwoKeyRegistry.address,
                             'Proxy': proxy,
                             'Version': "1.0",
@@ -181,7 +164,7 @@ module.exports = function deploy(deployer) {
                         let { proxy } = logs.find(l => l.event === 'ProxyCreated').args;
                         console.log('Proxy address for the TwoKeyCommunityTokenPool is : ' + proxy);
                         const twoKeyCommunityTokenPool = fileObject.TwoKeyCommunityTokenPool || {};
-                        twoKeyCommunityTokenPool[networkId] = {
+                        twoKeyCommunityTokenPool[network_id] = {
                             'address': TwoKeyCommunityTokenPool.address,
                             'Proxy': proxy,
                             'Version': "1.0",
@@ -208,7 +191,7 @@ module.exports = function deploy(deployer) {
                         let { proxy } = logs.find(l => l.event === 'ProxyCreated').args;
                         console.log('Proxy address for the TwoKeyLongTermTokenPool is : ' + proxy);
                         const twoKeyLongTermTokenPool = fileObject.TwoKeyLongTermTokenPool || {};
-                        twoKeyLongTermTokenPool[networkId] = {
+                        twoKeyLongTermTokenPool[network_id] = {
                             'address': TwoKeyLongTermTokenPool.address,
                             'Proxy': proxy,
                             'Version': "1.0",
@@ -235,7 +218,7 @@ module.exports = function deploy(deployer) {
                         let { proxy } = logs.find(l => l.event === 'ProxyCreated').args;
                         console.log('Proxy address for the TwoKeyDeepFreezeTokenPool is : ' + proxy);
                         const twoKeyDeepFreezeTokenPool = fileObject.TwoKeyDeepFreezeTokenPool || {};
-                        twoKeyDeepFreezeTokenPool[networkId] = {
+                        twoKeyDeepFreezeTokenPool[network_id] = {
                             'address': TwoKeyDeepFreezeTokenPool.address,
                             'Proxy': proxy,
                             'Version': "1.0",
@@ -267,7 +250,7 @@ module.exports = function deploy(deployer) {
                         console.log('Proxy address for the TwoKeyBaseReputationRegistry is : ' + proxy);
                         const twoKeyBaseRepReg = fileObject.TwoKeyBaseReputationRegistry || {};
                         console.log(maintainerAddresses);
-                        twoKeyBaseRepReg[networkId] = {
+                        twoKeyBaseRepReg[network_id] = {
                             'address': TwoKeyBaseReputationRegistry.address,
                             'Proxy': proxy,
                             'Version': "1.0",
@@ -295,7 +278,7 @@ module.exports = function deploy(deployer) {
 
                         const twoKeyEventS = fileObject.TwoKeyEventSource || {};
 
-                        twoKeyEventS[networkId] = {
+                        twoKeyEventS[network_id] = {
                             'address': EventSource.address,
                             'Proxy': proxy,
                             'Version': "1.0",
@@ -322,7 +305,7 @@ module.exports = function deploy(deployer) {
 
                         const twoKeyExchangeRate = fileObject.TwoKeyExchange || {};
 
-                        twoKeyExchangeRate[networkId] = {
+                        twoKeyExchangeRate[network_id] = {
                             'address': TwoKeyExchangeRateContract.address,
                             'Proxy': proxy,
                             'Version': "1.0",
@@ -351,7 +334,7 @@ module.exports = function deploy(deployer) {
 
                         // txHash = await TwoKeyAdmin.at(proxy).transfer2KeyTokens(proxyAddressTwoKeyRegistry, 1000000000000000);
                         const twoKeyAdmin = fileObject.TwoKeyAdmin || {};
-                        twoKeyAdmin[networkId] = {
+                        twoKeyAdmin[network_id] = {
                             'address': TwoKeyAdmin.address,
                             'Proxy': proxy,
                             'Version': "1.0",
@@ -380,7 +363,7 @@ module.exports = function deploy(deployer) {
                         console.log('Proxy address for the TwoKeyUpgradableExchange contract is : ' + proxy);
 
                         const twoKeyUpgradableExchange = fileObject.TwoKeyUpgradableExchange || {};
-                        twoKeyUpgradableExchange[networkId] = {
+                        twoKeyUpgradableExchange[network_id] = {
                             'address' : TwoKeyUpgradableExchange.address,
                             'Proxy' : proxy,
                             'Version' : "1.0",
@@ -498,7 +481,7 @@ module.exports = function deploy(deployer) {
             .catch((err) => {
                 console.log('\x1b[31m', 'Error:', err.message, '\x1b[0m');
             }));
-    } else if (deployer.network.startsWith('plasma') || deployer.network.startsWith('azure') || deployer.network.startsWith('private')) {
+    } else if (deployer.network.startsWith('plasma') || deployer.network.startsWith('private')) {
         deployer.link(Call, TwoKeyPlasmaEvents);
         deployer.deploy(TwoKeyPlasmaEvents)
             .then(() => deployer.deploy(TwoKeyPlasmaSingletoneRegistry, [], '0x0')) //adding empty admin address
@@ -515,13 +498,13 @@ module.exports = function deploy(deployer) {
                         console.log('Proxy address for the TwoKeyPlasmaEvents is : ' + proxy);
                         const twoKeyPlasmaEvents = fileObject.TwoKeyPlasmaEvents || {};
 
-                        twoKeyPlasmaEvents[networkId] = {
+                        twoKeyPlasmaEvents[network_id] = {
                             'address': TwoKeyPlasmaEvents.address,
                             'Proxy': proxy,
                             'Version': "1.0",
                             maintainer_address: maintainerAddresses,
                         };
-                        console.log('TwoKeyPlasmaEvents', networkId);
+                        console.log('TwoKeyPlasmaEvents', network_id);
                         fileObject['TwoKeyPlasmaEvents'] = twoKeyPlasmaEvents;
                         proxyAddressTwoKeyPlasmaEvents = proxy;
                         fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));

@@ -32,6 +32,7 @@ export interface ITwoKeyBase {
     _getGasPrice: () => number,
     _setTotalSupply: (number) => void,
     _log: any,
+    nonSingletonsHash: string,
 }
 
 export interface ICreateOpts {

@@ -1,4 +1,5 @@
 import {BigNumber} from 'bignumber.js';
+import LZString from 'lz-string';
 import { BalanceMeta, ITwoKeyBase, IOffchainData } from '../interfaces';
 import {
     IBalanceFromWeiOpts,
@@ -9,6 +10,8 @@ import {
     ITxReceiptOpts,
 } from './interfaces';
 import { promisify } from './promisify';
+
+const { TwoKeyVersionHandler } = require( '../versions.json');
 
 const units = {
     3: 'kwei',
@@ -21,16 +24,57 @@ const units = {
     24: 'mether',
     27: 'gether',
     30: 'tether',
-}
+};
 
 export default class Utils implements ITwoKeyUtils {
     private readonly base: ITwoKeyBase;
     private readonly helpers: ITwoKeyHelpers;
+    public versions: any;
 
     constructor(twoKeyProtocol: ITwoKeyBase, helpers: ITwoKeyHelpers) {
         this.base = twoKeyProtocol;
         this.helpers = helpers;
+        try {
+            this.getVersionHandler();
+        } catch {}
     }
+
+    public getVersionHandler(): Promise<boolean> {
+        return new Promise<boolean>(async (resolve, reject) => {
+            try {
+                this.versions = JSON.parse(await promisify(this.base.ipfsR.cat, [TwoKeyVersionHandler]));
+                console.log('UTILS Versions', this.versions);
+                resolve(true);
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
+
+    public getSubmodule(nonSingletonsHash: string, submoduleName: string): Promise<string> {
+        return new Promise<string>(async (resolve, reject) => {
+            if (!this.versions) {
+                await this.getVersionHandler();
+            }
+            const submodules = this.versions[nonSingletonsHash];
+            if (!submodules || !submodules[submoduleName]) {
+                reject(new Error(`Missing submodule ${submoduleName} for hash ${nonSingletonsHash}`));
+            } else {
+                // console.log('IPFS Address', submodules[submoduleName]);
+                console.time('loadSubmodule');
+                console.time('loadIPFS');
+                const compressedJS = (await promisify(this.base.ipfsR.cat, [submodules[submoduleName]])).toString();
+                console.timeEnd('loadIPFS');
+                console.time('decompress');
+                const submoduleJS = LZString.decompressFromUTF16(compressedJS);
+                console.timeEnd('decompress');
+                console.timeEnd('loadSubmodule');
+                // console.log(compressedJS);
+                resolve(submoduleJS);
+            }
+        });
+    }
+
     /* UTILS */
     public ipfsAdd(data: any): Promise<string> {
         return new Promise<string>(async (resolve, reject) => {
