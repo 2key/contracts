@@ -236,6 +236,34 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
 
         let obj1 = {};
         obj1['Maintainers'] = maintainerAddress;
+
+        //Handle updating contracts_deployed.json
+        let existingFile = path.join(twoKeyProtocolDir, 'contracts_deployed.json');
+        let fileObject = {};
+        if (fs.existsSync(existingFile)) {
+            fileObject = JSON.parse(fs.readFileSync(existingFile, { encoding: 'utf8' }));
+        }
+
+        /**
+         * Handle network hashes
+         */
+        let networkHashes = fileObject.NetworkHashes;
+        Object.keys(networkHashes).forEach((key) => {
+          let hashPerNetwork = networkHashes[key];
+          if(obj['NetworkHashes'][key]['hash']) {
+            hashPerNetwork['hash'] = obj['NetworkHashes'][key]['hash'];
+          }
+          if(obj['NetworkHashes'][key]['humanHash']) {
+            hashPerNetwork['humanHash'] = obj['NetworkHashes'][key]['humanHash'];
+          }
+          if(obj['NetworkHashes'][key]['NonSingletonHash']) {
+            hashPerNetwork['NonSingletonHash'] = obj['NetworkHashes'][key]['NonSingletonHash'];
+          }
+          networkHashes[key] = hashPerNetwork;
+        });
+
+        obj['NetworkHashes'] = networkHashes;
+
         contracts.contracts.singletons = Object.assign(obj, contracts.contracts.singletons);
         contracts.contracts.singletons = Object.assign(obj1, contracts.contracts.singletons);
         console.log('Writing contracts for submodules...');
