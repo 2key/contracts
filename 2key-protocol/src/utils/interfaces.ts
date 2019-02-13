@@ -93,7 +93,7 @@ export interface ITwoKeyHelpers {
     _getUpgradableExchangeInstance(upgradableExchange: any) : Promise<any>,
     _createAndValidate: (abi: any, address: string) => Promise<any>,
     _checkIPFS: () => Promise<boolean>,
-    _getNonce: (from: string) => Promise<number>,
+    _getNonce: (from: string, pending?: boolean) => Promise<number>,
     _awaitPlasmaMethod: (plasmaPromiseMethod: Promise<any>, timeout?: number) => Promise<any>,
 }
 
