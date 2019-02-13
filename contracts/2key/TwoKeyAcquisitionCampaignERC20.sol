@@ -81,7 +81,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
             address(this),
             _twoKeySingletoneRegistry
         );
-        twoKeyEventSource.created(address(this), contractor, moderator);
     }
 
     /**

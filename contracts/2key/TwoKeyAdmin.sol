@@ -87,15 +87,6 @@ contract TwoKeyAdmin is Upgradeable {
         selfdestruct(twoKeyCongress);
 	}
 
-
-    /// @notice Function to whitelist contract address for Event Source contract
-	/// @dev We're requiring contract address different from address 0 as it is required to be deployed before calling this method
-	/// @param _contractAddress is address of a contract
-	function twoKeyEventSourceWhitelistContract(address _contractAddress) external onlyTwoKeyCongress {
-		require(_contractAddress != address(0));
-		twoKeyEventSource.addContract(_contractAddress);
-	}
-
     /// @notice Function to add/update name - address pair from twoKeyAdmin
 	/// @param _name is name of user
 	/// @param _addr is address of user

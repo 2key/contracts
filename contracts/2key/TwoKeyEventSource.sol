@@ -3,9 +3,10 @@ pragma solidity ^0.4.24;
 import './TwoKeyTypes.sol';
 import "./GetCode.sol";
 import "./Upgradeable.sol";
+import "./MaintainingPattern.sol";
 import "../interfaces/ITwoKeyReg.sol";
 import "../interfaces/ITwoKeyAdmin.sol";
-import "./MaintainingPattern.sol";
+import "../interfaces/ITwoKeyCampaignValidator.sol";
 
 contract TwoKeyEventSource is Upgradeable, MaintainingPattern, TwoKeyTypes {
 
@@ -13,12 +14,7 @@ contract TwoKeyEventSource is Upgradeable, MaintainingPattern, TwoKeyTypes {
      * Address of TwoKeyRegistry contract
      */
     address twoKeyRegistry;
-
-    /**
-     * Mapping which will map contract code to true/false depending if that code is eligible to emit events
-     */
-    mapping(bytes => bool) canEmit;
-
+    address twoKeyCampaignValidator;
 
     event Created(
         address indexed _campaign,
@@ -72,63 +68,34 @@ contract TwoKeyEventSource is Upgradeable, MaintainingPattern, TwoKeyTypes {
         uint value
     );
 
-
-
-
-
-
     /**
-     * Modifier which will allow only specific contracts to emit events
+     * Modifier which will allow only completely verified and validated contracts to emit the events
      */
     modifier onlyAllowedContracts {
-        bytes memory code = GetCode.at(msg.sender);
-        require(canEmit[code] == true,'Contract code is not supported to emit the events');
+        require(ITwoKeyCampaignValidator(twoKeyCampaignValidator).isCampaignValidated(msg.sender) == true);
         _;
     }
 
+    modifier onlyValidator {
+        require(msg.sender == twoKeyCampaignValidator);
+        _;
+    }
     /**
      * @notice Function to set initial params in the contract
      * @param _twoKeyAdmin is the address of twoKeyAdmin contract
      * @param _maintainers is the array containing addresses of maintainers
      * @param _twoKeyRegistry is the address of twoKeyRegistry contract
      */
-    function setInitialParams(address _twoKeyAdmin, address [] _maintainers, address _twoKeyRegistry) external {
+    function setInitialParams(address _twoKeyAdmin, address [] _maintainers, address _twoKeyRegistry, address _twoKeyCampaignValidator) external {
         require(twoKeyAdmin == address(0));
         twoKeyAdmin = _twoKeyAdmin;
         twoKeyRegistry = _twoKeyRegistry;
+        twoKeyCampaignValidator = _twoKeyCampaignValidator;
         isMaintainer[msg.sender] = true; //also the deployer will be authorized maintainer
         for(uint i=0; i<_maintainers.length; i++) {
             isMaintainer[_maintainers[i]] = true;
         }
     }
-
-
-    /**
-     * @notice function where admin or any maintainer can add more contracts to allow them call methods
-     * @param _contractAddress is actually the address of contract we'd like to allow
-     * @dev We first fetch bytes contract code and then update our mapping
-     * @dev only admin can call this or an authorized person
-     */
-    function addContract(address _contractAddress) external onlyMaintainer {
-        require(_contractAddress != address(0));
-        bytes memory _contractCode = GetCode.at(_contractAddress);
-        canEmit[_contractCode] = true;
-    }
-
-
-    /**
-     * @notice function where admin or any maintainer can remove contract from whitelist
-     * @param _contractAddress is actually the address of contract we'd like to disallow
-     * @dev We first fetch bytes contract code and then update our mapping
-     * @dev only admin can call this or an authorized person
-     */
-    function removeContract(address _contractAddress) external onlyMaintainer {
-        require(_contractAddress != address(0));
-        bytes memory _contractCode = GetCode.at(_contractAddress);
-        canEmit[_contractCode] = false;
-    }
-
-
 
     /**
      * @notice Function to emit created event every time campaign is created
@@ -137,8 +104,7 @@ contract TwoKeyEventSource is Upgradeable, MaintainingPattern, TwoKeyTypes {
      * @param _moderator is the address of the moderator in campaign
      * @dev this function updates values in TwoKeyRegistry contract
      */
-    function created(address _campaign, address _owner, address _moderator) external {
-        //TODO: Add validation layer for this function
+    function created(address _campaign, address _owner, address _moderator) external onlyValidator {
         ITwoKeyReg(twoKeyRegistry).addWhereContractor(_owner, _campaign);
         ITwoKeyReg(twoKeyRegistry).addWhereModerator(_moderator, _campaign);
         emit Created(_campaign, _owner, _moderator);
@@ -208,15 +174,6 @@ contract TwoKeyEventSource is Upgradeable, MaintainingPattern, TwoKeyTypes {
         emit UpdatedData(timestamp, value, action);
     }
 
-    /**
-     * @notice Function to check if the contract deployed at passed address is eligible to emit events through this contract
-     * @param _contractAddress is the address of contract we're checking
-     * @return true if eligible otherwise will return false
-     */
-    function isAddressWhitelistedToEmitEvents(address _contractAddress) external view returns (bool) {
-        bytes memory code = GetCode.at(_contractAddress);
-        return canEmit[code];
-    }
 
     /**
      * @notice Function to determine plasma address of ethereum address

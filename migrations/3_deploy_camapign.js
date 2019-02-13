@@ -9,6 +9,8 @@ const TwoKeyUpgradableExchange = artifacts.require('TwoKeyUpgradableExchange');
 const TwoKeyAcquisitionLogicHandler = artifacts.require('TwoKeyAcquisitionLogicHandler');
 const TwoKeyRegistry = artifacts.require('TwoKeyRegistry');
 const TwoKeySingletonesRegistry = artifacts.require('TwoKeySingletonesRegistry');
+const TwoKeyCampaignValidator = artifacts.require('TwoKeyCampaignValidator');
+
 const fs = require('fs');
 const path = require('path');
 
@@ -40,10 +42,15 @@ module.exports = function deploy(deployer) {
             .then(() => TwoKeyAcquisitionCampaignERC20.deployed())
             .then(() => true)
             .then(async () => {
-                console.log("... Adding TwoKeyAcquisitionCampaign to EventSource");
+                console.log("... Adding TwoKeyAcquisitionCampaign bytecodes to be valid in the TwoKeyValidator contract");
                 await new Promise(async (resolve, reject) => {
                     try {
-                        let txHash = await EventSource.at(json.TwoKeyEventSource[network_id].Proxy).addContract(TwoKeyAcquisitionCampaignERC20.address, {gas: 7000000});
+                        let txHash = await TwoKeyCampaignValidator.at(json.TwoKeyCampaignValidator[network_id].Proxy)
+                            .addValidBytecodes(
+                                TwoKeyAcquisitionCampaignERC20.address,
+                                TwoKeyConversionHandler.address,
+                                TwoKeyAcquisitionLogicHandler.address
+                            );
                         resolve(txHash);
                     } catch (e) {
                         reject(e);

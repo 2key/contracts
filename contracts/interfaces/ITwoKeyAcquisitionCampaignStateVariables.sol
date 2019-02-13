@@ -5,6 +5,7 @@ pragma solidity ^0.4.24;
  */
 contract ITwoKeyAcquisitionCampaignStateVariables {
     address public contractor;
+    address public moderator;
     address public twoKeySingletonesRegistry;
     address public twoKeyAcquisitionLogicHandler;
     address public conversionHandler;

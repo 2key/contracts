@@ -441,14 +441,16 @@ module.exports = function deploy(deployer) {
 
                         await TwoKeyCampaignValidator.at(proxyAddressTwoKeyCampaignValidator).setInitialParams
                         (
-                            TwoKeySingletonesRegistry.address
+                            TwoKeySingletonesRegistry.address,
+                            maintainerAddresses
                         );
 
                         await EventSource.at(proxyAddressTwoKeyEventSource).setInitialParams
                         (
                             proxyAddressTwoKeyAdmin,
                             [],
-                            proxyAddressTwoKeyRegistry
+                            proxyAddressTwoKeyRegistry,
+                            proxyAddressTwoKeyCampaignValidator
                         );
 
                         await TwoKeyBaseReputationRegistry.at(proxyAddressTwoKeyBaseReputationRegistry).setInitialParams

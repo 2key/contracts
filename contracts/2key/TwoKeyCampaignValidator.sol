@@ -1,36 +1,40 @@
 pragma solidity ^0.4.24;
 
-import "../interfaces/ITwoKeyAcquisitionCampaignStateVariables.sol";
 import "./GetCode.sol";
 import "./Upgradeable.sol";
+import "./MaintainingPattern.sol";
+
+import "../interfaces/ITwoKeyAcquisitionCampaignStateVariables.sol";
+import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
+import "../interfaces/ITwoKeyEventSourceEvents.sol";
 
 
-    /*******************************************************************************************************************
-     *       General purpose of this contract is to validate the layer we can't control,
-     *
-     *
-     *            *****************************************
-     *            *  Contracts which are deployed by user *
-     *            *  - TwoKeyAcquisitionCampaign          *
-     *            *  - TwoKeyAcquisitionLogicHandler      *
-     *            *  - TwoKeyConversionHandler            *
-     *            *****************************************
-     *                               |
-     *                               |
-     *                               |
-     *            *****************************************
-     *            *   Contract that validates everything  *      Permits        ************************************
-     *            *   in the contracts deployed above     * ------------------> * Interaction with our singletones *
-     *            *****************************************                     ************************************
-     *
-     ******************************************************************************************************************/
+/*******************************************************************************************************************
+ *       General purpose of this contract is to validate the layer we can't control,
+ *
+ *
+ *            *****************************************
+ *            *  Contracts which are deployed by user *
+ *            *  - TwoKeyAcquisitionCampaign          *
+ *            *  - TwoKeyAcquisitionLogicHandler      *
+ *            *  - TwoKeyConversionHandler            *
+ *            *****************************************
+ *                               |
+ *                               |
+ *                               |
+ *            *****************************************
+ *            *   Contract that validates everything  *      Permits        ************************************
+ *            *   in the contracts deployed above     * ------------------> * Interaction with our singletones *
+ *            *****************************************                     ************************************
+ *
+ ******************************************************************************************************************/
 
 
 /**
  * @author Nikola Madjarevic
  * Created at 2/12/19
  */
-contract TwoKeyCampaignValidator is Upgradeable {
+contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
 
     address public twoKeySingletoneRegistry;
 
@@ -38,9 +42,14 @@ contract TwoKeyCampaignValidator is Upgradeable {
     mapping(bytes => bool) conversionHandlerToEligibleCode;
     mapping(bytes => bool) acquisitionLogicHandlerToEligibleCode;
 
-    function setInitialParams(address _twoKeySingletoneRegistry) {
+    function setInitialParams(address _twoKeySingletoneRegistry, address [] _maintainers) {
         require(twoKeySingletoneRegistry == address(0));
         twoKeySingletoneRegistry = _twoKeySingletoneRegistry;
+        twoKeyAdmin =  ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyAdmin");
+        isMaintainer[msg.sender] = true;
+        for(uint i=0; i<_maintainers.length; i++) {
+            isMaintainer[_maintainers[i]] = true;
+        }
     }
 
     // Will store the mapping between campaign address and if it satisfies all the criteria
@@ -54,7 +63,10 @@ contract TwoKeyCampaignValidator is Upgradeable {
      * @dev Validates all the required stuff, if the campaign is not validated, it can't touch our singletones
      */
     function validateAcquisitionCampaign(address campaign) public {
+        require(isCampaignValidated[campaign] == false);
         address contractor = ITwoKeyAcquisitionCampaignStateVariables(campaign).contractor();
+        address moderator = ITwoKeyAcquisitionCampaignStateVariables(campaign).moderator(); //Moderator we'll need for emit event
+
         //Validating that the msg.sender is the contractor of the campaign provided
         require(msg.sender == contractor);
         //Validating that the Acquisition campaign holds exactly same TwoKeyLogicHandlerAddress
@@ -78,6 +90,23 @@ contract TwoKeyCampaignValidator is Upgradeable {
 
         //If the campaign passes all this validation steps means it's valid one, and it can be proceeded forward
         isCampaignValidated[campaign] = true;
+
+        //Get the event source address
+        address twoKeyEventSource = ITwoKeySingletoneRegistryFetchAddress
+                                    (twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyEventSource");
+
+        ITwoKeyEventSourceEvents(twoKeyEventSource).created(campaign,contractor,moderator);
+    }
+
+    function addValidBytecodes(address campaign, address conversionHandler, address logicHandler) public onlyMaintainer {
+        bytes memory campaignCode = GetCode.at(campaign);
+        bytes memory conversionHandlerCode = GetCode.at(conversionHandler);
+        bytes memory logicHandlerCode = GetCode.at(logicHandler);
+
+        //TODO: If we're going to support different versions combined, in that particular case, use the superhash enough
+        acquisitionToEligibleCode[campaignCode] = true;
+        conversionHandlerToEligibleCode[conversionHandlerCode] = true;
+        acquisitionLogicHandlerToEligibleCode[logicHandlerCode] = true;
     }
 
 }
