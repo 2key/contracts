@@ -8,6 +8,7 @@ export {ITwoKeyHelpers,ITwoKeyUtils,BalanceMeta} from './utils/interfaces';
 export {IUpgradableExchange} from './upgradableExchange/interfaces';
 export {ITwoKeyExchangeContract} from './exchangeETHUSD/interfaces';
 export {ITwoKeyBaseReputationRegistry} from "./reputationRegistry/interfaces";
+export {ITwoKeyCampaignValidator} from "./campaignValidator/interfaces";
 
 export interface ITwoKeyBase {
     web3: any;
@@ -27,6 +28,7 @@ export interface ITwoKeyBase {
     twoKeyCongress: any;
     twoKeyPlasmaEvents: any;
     twoKeyBaseReputationRegistry: any;
+    twoKeyCampaignValidator: any;
     plasmaAddress: string;
     plasmaPrivateKey: string;
     _setGasPrice: (number) => void,

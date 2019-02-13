@@ -25,7 +25,8 @@ import {
     ITwoKeyReg,
     ITwoKeyUtils,
     IUpgradableExchange,
-    ITwoKeyBaseReputationRegistry
+    ITwoKeyBaseReputationRegistry,
+    ITwoKeyCampaignValidator
 } from './interfaces';
 import { promisify } from './utils/promisify';
 import Index from './utils';
@@ -41,6 +42,7 @@ import UpgradableExchange from './upgradableExchange';
 import TwoKeyExchangeContract from './exchangeETHUSD';
 import {IPlasmaEvents} from './plasma/interfaces';
 import Sign from './sign';
+import TwoKeyCampaignValidator from "./campaignValidator";
 // const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 
 const TwoKeyDefaults = {
@@ -79,6 +81,7 @@ export class TwoKeyProtocol {
     private twoKeyUpgradableExchange: any;
     private twoKeyEconomy: any;
     private twoKeyBaseReputationRegistry: any;
+    private twoKeyCampaignValidator: any;
     private twoKeySingletonesRegistry: any;
     public twoKeyAdmin: any;
     private twoKeyCongress: any;
@@ -99,6 +102,7 @@ export class TwoKeyProtocol {
     public TwoKeyExchangeContract: ITwoKeyExchangeContract;
     public PlasmaEvents: IPlasmaEvents;
     public TwoKeyBaseReputation: ITwoKeyBaseReputationRegistry;
+    public TwoKeyCampaignValidator: ITwoKeyCampaignValidator;
     private AcquisitionSubmodule: any;
     private _log: any;
 
@@ -181,6 +185,8 @@ export class TwoKeyProtocol {
         this.twoKeyCongress = this.web3.eth.contract(singletons.TwoKeyCongress.abi).at(getDeployedAddress('TwoKeyCongress', this.networks.mainNetId));
         this.twoKeyCall = this.web3.eth.contract(singletons.Call.abi).at(getDeployedAddress('Call', this.networks.mainNetId));
         this.twoKeyBaseReputationRegistry = this.web3.eth.contract(singletons.TwoKeyBaseReputationRegistry.abi).at(getDeployedAddress('TwoKeyBaseReputationRegistry', this.networks.mainNetId));
+        this.twoKeyCampaignValidator = this.web3.eth.contract(singletons.TwoKeyCampaignValidator.abi).at(getDeployedAddress('TwoKeyCampaignValidator', this.networks.mainNetId));
+
         this.ipfsR = ipfsAPI(ipfsRIp, ipfsRPort, {protocol: ipfsRProtocol});
         this.ipfsW = ipfsAPI(ipfsWIp, ipfsWPort, {protocol: ipfsWProtocol});
 
@@ -205,6 +211,7 @@ export class TwoKeyProtocol {
             twoKeyPlasmaEvents: this.twoKeyPlasmaEvents,
             twoKeyCall: this.twoKeyCall,
             twoKeyBaseReputationRegistry: this.twoKeyBaseReputationRegistry,
+            twoKeyCampaignValidator: this.twoKeyCampaignValidator,
             plasmaAddress: this.plasmaAddress,
             plasmaPrivateKey: this.plasmaPrivateKey,
             _getGasPrice: this._getGasPrice,
@@ -223,6 +230,7 @@ export class TwoKeyProtocol {
         this.Congress = new TwoKeyCongress(this.twoKeyBase, this.Helpers, this.Utils);
         this.Registry = new TwoKerRegistry(this.twoKeyBase, this.Helpers, this.Utils);
         this.TwoKeyBaseReputation = new TwoKeyBaseReputationRegistry(this.twoKeyBase, this.Helpers, this.Utils);
+        this.TwoKeyCampaignValidator = new TwoKeyCampaignValidator(this.twoKeyBase, this.Helpers, this.Utils);
         // TODO: Add here replace AcquisitionSubmodule mechanism
         this.AcquisitionCampaign = this.AcquisitionSubmodule
             ? new this.AcquisitionSubmodule(this.twoKeyBase, this.Helpers, this.Utils, this.ERC20, Sign)

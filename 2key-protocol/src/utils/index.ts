@@ -43,7 +43,7 @@ export default class Utils implements ITwoKeyUtils {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
                 this.versions = JSON.parse(await promisify(this.base.ipfsR.cat, [TwoKeyVersionHandler]));
-                console.log('UTILS Versions', this.versions);
+                // console.log('UTILS Versions', this.versions);
                 resolve(true);
             } catch (e) {
                 reject(e);

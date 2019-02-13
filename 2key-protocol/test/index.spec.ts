@@ -283,7 +283,13 @@ const tryToRegisterUser = async (username, from) => {
     } catch {
         console.log('Error Plasma.signEthereum');
     }
-    const registerReceipts = await registerUserFromBackend(registerData);
+    let registerReceipts;
+    try {
+        registerReceipts = await registerUserFromBackend(registerData);
+    } catch (e) {
+        console.log(e);
+    }
+
     return registerReceipts;
     // console.log('REGISTER RESULT', register);
 };
@@ -304,6 +310,7 @@ describe('TwoKeyProtocol', () => {
                     eventsNetUrl,
                     plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
                 });
+
                 // console.log('JS IPFS', await twoKeyProtocol.Utils.ipfsAdd(`alert('Hello FROM IPFS'); console.log('Hello from IPFS'); window.helloIPFS = 'hello from ipfs';`));
                 await tryToRegisterUser('Deployer', from);
                 // const signature = await twoKeyProtocol.Registry.signUserData2Registry(from, 'DEPLOYER','DEPLOYER','aydnep@2key.network');
@@ -518,15 +525,6 @@ describe('TwoKeyProtocol', () => {
         return expect(addressRegex.test(campaignAddress)).to.be.true;
     }).timeout(1200000);
 
-    it('should check for the moderator and contractor in registry after campaign is created', async() => {
-        console.log(from);
-        const addressesWhereUserIsContractor = await twoKeyProtocol.Registry.getCampaignsWhereUserIsContractor(from);
-        const addressesWhereUserIsModerator = await twoKeyProtocol.Registry.getCampaignsWhereUserIsModerator(from);
-
-        console.log("Contractor: " + addressesWhereUserIsContractor);
-        console.log("Moderator: " + addressesWhereUserIsModerator);
-    }).timeout(30000);
-
 
     it('should save campaign to IPFS', async () => {
         const hash = await twoKeyProtocol.Utils.ipfsAdd(campaignData);
@@ -557,6 +555,21 @@ describe('TwoKeyProtocol', () => {
             throw e;
         }
     }).timeout(10000);
+
+    it('should proff that campaign is validated and registered properly', async() => {
+        let txhash = await twoKeyProtocol.TwoKeyCampaignValidator.validateCampaign(campaignAddress,from);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        console.log('Transaction succeeded, campaign is validated');
+    }).timeout(30000);
+
+    it('should check for the moderator and contractor in registry after campaign is created and registered', async() => {
+        console.log(from);
+        const addressesWhereUserIsContractor = await twoKeyProtocol.Registry.getCampaignsWhereUserIsContractor(from);
+        const addressesWhereUserIsModerator = await twoKeyProtocol.Registry.getCampaignsWhereUserIsModerator(from);
+
+        console.log("Contractor: " + addressesWhereUserIsContractor);
+        console.log("Moderator: " + addressesWhereUserIsModerator);
+    }).timeout(30000);
 
     it('should visit campaign as guest', async () => {
         const {web3, address} = web3switcher.guest();
