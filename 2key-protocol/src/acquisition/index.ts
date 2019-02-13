@@ -516,10 +516,9 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @param {string} referralLink
      * @returns {Promise<string>}
      */
-    public visit(campaignAddress: string, referralLink: string, from: string): Promise<string | boolean> {
+    public visit(campaignAddress: string, referralLink: string): Promise<string | boolean> {
         return new Promise<string | boolean>(async (resolve, reject) => {
             try {
-                console.log('VISIT', from);
                 const {f_address, f_secret, p_message} = await this.utils.getOffchainDataFromIPFSHash(referralLink);
                 const plasmaAddress = this.base.plasmaAddress;
                 const sig = this.sign.free_take(plasmaAddress, f_address, f_secret, p_message);
@@ -533,6 +532,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     {from: plasmaAddress, gasPrice: 0}
                 ]);
                 this.base._log('visit txHash', txHash);
+                await this.utils.getTransactionReceiptMined(txHash, { web3: this.base.plasmaWeb3 });
                 const note = await this.sign.encrypt(this.base.plasmaWeb3, plasmaAddress, f_secret, {plasma: true});
                 const noteTxHash = await promisify(this.base.twoKeyPlasmaEvents.setNoteByUser, [campaignInstance.address, note, {from: plasmaAddress}]);
                 this.base._log('note txHash', noteTxHash);

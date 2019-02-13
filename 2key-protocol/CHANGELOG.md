@@ -10,6 +10,7 @@
 * getLockupInformations: (twoKeyLockup: string, from:string) => Promise<ILockupInformation>,
 
 **Changes methods**
+* visit: (campaignAddress: string, referralLink: string) => Promise<string | boolean>,
 * getReferrerBalanceAndTotalEarningsAndNumberOfConversions: (campaign:any, signature) => Promise<IReferrerSummary>,
 
 ####Airdrop

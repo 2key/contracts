@@ -106,7 +106,7 @@ export interface ITwoKeyAcquisitionCampaign {
     getTwoKeyConversionHandlerAddress: (campaign: any) => Promise<string>,
     approveConverter: (campaign: any, converter: string, from: string, gasPrice? :number) => Promise<string>,
     rejectConverter: (campaign: any, converter: string, from: string, gasPrice? :number) => Promise<string>,
-    visit: (campaignAddress: string, referralLink: string, from: string) => Promise<string | boolean>,
+    visit: (campaignAddress: string, referralLink: string) => Promise<string | boolean>,
     executeConversion: (campaign: any, conversion_id: number, from: string, gasPrice? :number) => Promise<string>,
     getLockupContractsForConverter: (campaign: any, converter: string, from: string) => Promise<string[]>,
     addFungibleAssetsToInventoryOfCampaign: (campaign: any, amount: number, from: string, gasPrice? :number) => Promise<string>,
