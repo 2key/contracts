@@ -6,7 +6,7 @@ contract TwoKeyPlasmaEvents is Upgradeable {
 
     address public owner;
     bool initialized = false;
-
+    mapping(address => uint) public campaign2numberOfVisits;
     // every event we generate contains both the campaign address and the address of the contractor of that campaign
     // both are ethereum address.
     // this plasma contract does not know in itself who is the contractor on the ethereum network
@@ -261,6 +261,8 @@ contract TwoKeyPlasmaEvents is Upgradeable {
             // NOTE!!!! for the last user in the sig the  new_address can be a plasma_address
             // as a result the same user with a plasma_address can appear later with an etherum address
             if (!visits[c][contractor][old_address][new_address]) {  // generate event only once for each tripplet
+                //TODO: Review this and test
+                campaign2numberOfVisits[c] = campaign2numberOfVisits[c] + 1;
                 visits[c][contractor][old_address][new_address] = true;
                 if (joined_from[c][contractor][new_address] == address(0)) {
                     visited_from[c][contractor][new_address] = old_address;
@@ -289,6 +291,7 @@ contract TwoKeyPlasmaEvents is Upgradeable {
         for (i = 0; i < weights.length; i++) {
             setCutOf(c, contractor, influencers[i], weights[i]);
         }
+
     }
 
     function visitsList(address c, address contractor, address from) public view returns (address[]) {

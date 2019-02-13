@@ -58,6 +58,21 @@ export default class PlasmaEvents implements IPlasmaEvents {
 
     /**
      *
+     * @param {string} campaignAddress
+     * @returns {Promise<number>}
+     */
+    public getVisitsPerCampaign(campaignAddress: string) : Promise<number> {
+        return new Promise<number>(async(resolve,reject) => {
+            try {
+                let numberOfVisits = await promisify(this.base.twoKeyPlasmaEvents.campaign2numberOfVisits,[campaignAddress]);
+                resolve(numberOfVisits);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+    /**
+     *
      * @param {string} from
      * @returns {Promise<string>}
      */

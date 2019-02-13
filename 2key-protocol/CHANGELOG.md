@@ -21,6 +21,8 @@
 *New methods*
 * validateCampaign: (campaignAddress: string, from:string) => Promise<string>,
 * isCampaignValidated: (campaignAddress:string) => Promise<boolean>,
+* getCampaignNonSingletonHash: (campaignAddress:string) => Promise<string>,
+
 
 ####DAO
 *New methods*
@@ -40,6 +42,7 @@
 * signReferrerToWithdrawRewards: () => Promise<string>,
 * signReferrerToGetRewards: () => Promise<string>,
 * getJoinedFrom: (campaignAddress: string, contractorAddress: string, address: string) => Promise<string>,
+* getVisitsPerCampaign(campaignAddress: string) => Promise<number>
 
 **Changed methods**
 * signPlasmaToEthereum: (from: string, force?: string) => Promise<ISignedEthereum>,
