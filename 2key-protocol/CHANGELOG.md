@@ -16,6 +16,11 @@
     #### New methods
     * _getAirdropCampaignInstance: (campaign: any) => Promise<any>,
 
+###CampaignValidator
+    #### New methods
+    * validateCampaign: (campaignAddress: string, from:string) => Promise<string>,
+    * isCampaignValidated: (campaignAddress:string) => Promise<boolean>,
+
 ###DAO
     #### New methods
     * _getDecentralizedNationInstance(decentralizedNation: any) : Promise<any>,
