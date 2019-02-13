@@ -30,4 +30,20 @@ export default class TwoKeyCampaignValidator implements ITwoKeyCampaignValidator
             }
         })
     }
+
+    /**
+     * Function which will determine if the campaign address is validated or not
+     * @param {string} campaignAddress
+     * @returns {Promise<boolean>}
+     */
+    public isCampaignValidated(campaignAddress:string) : Promise<boolean> {
+        return new Promise<boolean>(async(resolve,reject) => {
+            try {
+                let status = await promisify(this.base.twoKeyCampaignValidator.isCampaignValidated,[campaignAddress]);
+                resolve(status);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
 }

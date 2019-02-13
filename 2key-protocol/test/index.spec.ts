@@ -559,7 +559,10 @@ describe('TwoKeyProtocol', () => {
     it('should proff that campaign is validated and registered properly', async() => {
         let txhash = await twoKeyProtocol.TwoKeyCampaignValidator.validateCampaign(campaignAddress,from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-        console.log('Transaction succeeded, campaign is validated');
+
+        let isValidated = await twoKeyProtocol.TwoKeyCampaignValidator.isCampaignValidated(campaignAddress);
+        expect(isValidated).to.be.equal(true);
+        console.log('Campaign is validatedi');
     }).timeout(30000);
 
     it('should check for the moderator and contractor in registry after campaign is created and registered', async() => {
