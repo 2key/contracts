@@ -526,6 +526,12 @@ describe('TwoKeyProtocol', () => {
     }).timeout(1200000);
 
 
+    it('should proff that campaign is validated and registered properly', async() => {
+        let isValidated = await twoKeyProtocol.TwoKeyCampaignValidator.isCampaignValidated(campaignAddress);
+        expect(isValidated).to.be.equal(true);
+        console.log('Campaign is validatedi');
+    }).timeout(30000);
+
     it('should save campaign to IPFS', async () => {
         const hash = await twoKeyProtocol.Utils.ipfsAdd(campaignData);
         console.log('HASH', hash);
@@ -556,14 +562,7 @@ describe('TwoKeyProtocol', () => {
         }
     }).timeout(10000);
 
-    it('should proff that campaign is validated and registered properly', async() => {
-        let txhash = await twoKeyProtocol.TwoKeyCampaignValidator.validateCampaign(campaignAddress,from);
-        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
 
-        let isValidated = await twoKeyProtocol.TwoKeyCampaignValidator.isCampaignValidated(campaignAddress);
-        expect(isValidated).to.be.equal(true);
-        console.log('Campaign is validatedi');
-    }).timeout(30000);
 
     it('should check for the moderator and contractor in registry after campaign is created and registered', async() => {
         console.log(from);

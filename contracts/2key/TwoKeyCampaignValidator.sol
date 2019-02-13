@@ -85,8 +85,6 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
 
         //Validate that public link key is set
         require(ITwoKeyAcquisitionCampaignStateVariables(campaign).publicLinkKeyOf(contractor) != address(0));
-        //Validate that inventory is added and asset contract is set at the same time
-        require(ITwoKeyAcquisitionCampaignStateVariables(campaign).getInventoryBalance() > 0);
 
         //If the campaign passes all this validation steps means it's valid one, and it can be proceeded forward
         isCampaignValidated[campaign] = true;
