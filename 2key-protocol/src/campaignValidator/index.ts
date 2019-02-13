@@ -53,7 +53,7 @@ export default class TwoKeyCampaignValidator implements ITwoKeyCampaignValidator
      * @param {string} campaignAddress
      * @returns {Promise<string>}
      */
-    public getCampaignNonSingletonHash(campaignAddress:string) : Promise<string> {
+    public getCampaignNonSingletonsHash(campaignAddress:string) : Promise<string> {
         return new Promise<string>(async(resolve,reject) => {
             try {
                 let nonSingletonHash = await promisify(this.base.twoKeyCampaignValidator.campaign2nonSingletonHash,[campaignAddress]);

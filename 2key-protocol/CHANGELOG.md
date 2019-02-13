@@ -1,6 +1,7 @@
 ##Current
 ####Acquisition
 *New methods*
+* getNonSingletonsHash: () => Promise<string>,
 * _getCampaignInstance: (campaign: any) => Promise<any>,
 * _getConversionHandlerInstance: (campaign: any) => Promise<any>,
 * _getLogicHandlerInstance: (campaign: any) => Promise<any>,
@@ -21,7 +22,7 @@
 *New methods*
 * validateCampaign: (campaignAddress: string, from:string) => Promise<string>,
 * isCampaignValidated: (campaignAddress:string) => Promise<boolean>,
-* getCampaignNonSingletonHash: (campaignAddress:string) => Promise<string>,
+* getCampaignNonSingletonsHash: (campaignAddress:string) => Promise<string>,
 
 
 ####DAO

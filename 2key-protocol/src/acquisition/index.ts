@@ -43,7 +43,7 @@ function calcFromCuts(cuts: number[], maxPi: number) {
 }
 
 export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
-    public readonly version: string;
+    public readonly nonSingletonsHash: string;
     private readonly base: ITwoKeyBase;
     private readonly helpers: ITwoKeyHelpers;
     private readonly utils: ITwoKeyUtils;
@@ -59,8 +59,8 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         this.utils = utils;
         this.erc20 = erc20;
         this.sign = sign;
-        this.version = acquisitionContracts.NonSingletonHash;
-        console.log('ACQUISITION', this.version, this.version.length);
+        this.nonSingletonsHash = acquisitionContracts.NonSingletonsHash;
+        console.log('ACQUISITION', this.nonSingletonsHash, this.nonSingletonsHash.length);
     }
 
     /**
@@ -74,8 +74,8 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         return {private_key, public_address};
     }
 
-    public getNonSingletonVersion() : string {
-        return this.version;
+    public getNonSingletonsHash() : string {
+        return this.nonSingletonsHash;
     }
 
 
@@ -194,7 +194,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     public create(data: IAcquisitionCampaign, from: string, {progressCallback, gasPrice, interval, timeout = 60000}: ICreateOpts = {}): Promise<IAcquisitionCampaignMeta> {
         return new Promise(async (resolve, reject) => {
             try {
-                if (this.version !== this.base.nonSingletonsHash) {
+                if (this.nonSingletonsHash !== this.base.nonSingletonsHash) {
                     reject(new Error('To start new campaign please switch to latest version of AcquisitionSubmodule'));
                     return;
                 }
@@ -306,7 +306,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     progressCallback('SetPublicLinkKey', true, campaignPublicLinkKey);
                 }
                 //Here I need also a hash of non singletone at the moment
-                txHash = await promisify(this.base.twoKeyCampaignValidator.validateAcquisitionCampaign,[campaignAddress,this.version,{from}]);
+                txHash = await promisify(this.base.twoKeyCampaignValidator.validateAcquisitionCampaign,[campaignAddress,this.nonSingletonsHash,{from}]);
                 if (progressCallback) {
                     progressCallback('ValidateCampaign', false, txHash);
                 }
@@ -320,7 +320,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     campaignAddress,
                     conversionHandlerAddress,
                     campaignPublicLinkKey,
-                    ephemeralContractsVersion: this.version,
+                    ephemeralContractsVersion: this.nonSingletonsHash,
                 });
             } catch (err) {
                 reject(err);
@@ -716,7 +716,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     contractor,
                     f_address: plasmaAddress,
                     f_secret: private_key,
-                    ephemeralContractsVersion: this.version,
+                    ephemeralContractsVersion: this.nonSingletonsHash,
                     dao,
                 };
                 if (new_message) {

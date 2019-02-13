@@ -235,7 +235,7 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
                     humanHash: rhd.humanizeDigest(hash,8)
                 };
             if (deployedTo[key.toString()]) {
-              keyHash[key]['NonSingletonHash'] = nonSingletonsHash;
+              keyHash[key]['NonSingletonsHash'] = nonSingletonsHash;
             }
         });
         */

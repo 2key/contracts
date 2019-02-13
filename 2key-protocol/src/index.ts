@@ -221,7 +221,7 @@ export class TwoKeyProtocol {
             _setGasPrice: this._setGasPrice,
             _setTotalSupply: this._setTotalSupply,
             _log: this._log,
-            nonSingletonsHash: singletons.NonSingletonHash,
+            nonSingletonsHash: singletons.NonSingletonsHash,
         };
 
         this.Helpers = new Helpers(this.twoKeyBase);

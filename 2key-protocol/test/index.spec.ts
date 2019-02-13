@@ -533,8 +533,8 @@ describe('TwoKeyProtocol', () => {
     }).timeout(60000);
 
     it('should proof that non singleton hash is set for the campaign', async() => {
-        let nonSingletonHash = await twoKeyProtocol.TwoKeyCampaignValidator.getCampaignNonSingletonHash(campaignAddress);
-        expect(nonSingletonHash).to.be.equal(twoKeyProtocol.AcquisitionCampaign.getNonSingletonVersion());
+        let nonSingletonHash = await twoKeyProtocol.TwoKeyCampaignValidator.getCampaignNonSingletonsHash(campaignAddress);
+        expect(nonSingletonHash).to.be.equal(twoKeyProtocol.AcquisitionCampaign.getNonSingletonsHash());
     }).timeout(60000);
 
     it('should save campaign to IPFS', async () => {
