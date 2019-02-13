@@ -13,7 +13,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
     using SafeMath for uint256;
     using SafeERC20 for ERC20;
 
-    event TokensWithdrawnFromAcquisition(address receiver, uint weiReceived, uint tokensBought);
     address twoKeyExchangeContract;
     
     // The token being sold
@@ -46,7 +45,8 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         address indexed purchaser,
         address indexed receiver,
         uint256 weiReceived,
-        uint256 tokensBought
+        uint256 tokensBought,
+        uint256 rate
     );
 
     /**
@@ -181,7 +181,8 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
             msg.sender,
             _beneficiary,
             weiAmount,
-            tokens
+            tokens,
+            rate
         );
         _forwardFunds(twoKeyAdmin);
     }
