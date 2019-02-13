@@ -302,13 +302,13 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     progressCallback('SetPublicLinkKey', true, campaignPublicLinkKey);
                 }
 
-                let tx = await promisify(this.base.twoKeyCampaignValidator.validateAcquisitionCampaign,[campaignAddress,{from}]);
+                txHash = await promisify(this.base.twoKeyCampaignValidator.validateAcquisitionCampaign,[campaignAddress,{from}]);
                 if (progressCallback) {
-                    progressCallback('ValidateCampaign', false, tx);
+                    progressCallback('ValidateCampaign', false, txHash);
                 }
-                await this.utils.getTransactionReceiptMined(tx);
+                await this.utils.getTransactionReceiptMined(txHash);
                 if (progressCallback) {
-                    progressCallback('ValidateCampaign', true, tx);
+                    progressCallback('ValidateCampaign', true, txHash);
                 }
 
                 resolve({
