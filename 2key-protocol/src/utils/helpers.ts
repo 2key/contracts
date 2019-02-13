@@ -147,17 +147,12 @@ export default class Helpers implements ITwoKeyHelpers {
         });
     }
 
-    _getNonce(from: string): Promise<number> {
-        return new Promise((resolve, reject) => {
-            this.base.web3.eth.getTransactionCount(from, 'pending', (err, res) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(res);
-                }
-            });
-        });
+    _getNonce(from: string, pending?: boolean): Promise<number> {
+        return pending
+            ? promisify(this.base.web3.eth.getTransactionCount, [from, 'pending'])
+            : promisify(this.base.web3.eth.getTransactionCount, [from]);
     }
+
 
     // _getBlock(block: string | number): Promise<ITransaction> {
     //     return new Promise((resolve, reject) => {
