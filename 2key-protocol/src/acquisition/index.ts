@@ -301,6 +301,10 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 if (progressCallback) {
                     progressCallback('SetPublicLinkKey', true, campaignPublicLinkKey);
                 }
+
+                let tx = await promisify(this.base.twoKeyCampaignValidator.validateAcquisitionCampaign,[campaignAddress,{from}]);
+                await this.utils.getTransactionReceiptMined(tx);
+
                 resolve({
                     contractor: from,
                     campaignAddress,
