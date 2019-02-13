@@ -585,7 +585,7 @@ describe('TwoKeyProtocol', () => {
             eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic('mnemonic words should be here but for some reason they are missing').privateKey,
         });
-        txHash = await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, links.deployer, from);
+        txHash = await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, links.deployer);
         console.log(txHash);
         expect(txHash.length).to.be.gt(0);
     }).timeout(30000);
@@ -604,7 +604,7 @@ describe('TwoKeyProtocol', () => {
         });
         console.log('Gmail plasma', await promisify(twoKeyProtocol.plasmaWeb3.eth.getAccounts, []));
         await tryToRegisterUser('Gmail', from);
-        txHash = await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, links.deployer, from);
+        txHash = await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, links.deployer);
         console.log('isUserJoined', await twoKeyProtocol.AcquisitionCampaign.isAddressJoined(campaignAddress, from));
         const hash = await twoKeyProtocol.AcquisitionCampaign.join(campaignAddress, from, {
             cut: 50,
@@ -628,7 +628,7 @@ describe('TwoKeyProtocol', () => {
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_TEST4).privateKey,
         });
         await tryToRegisterUser('Test4', from);
-        txHash = await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, links.gmail, from);
+        txHash = await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, links.gmail);
         // console.log('isUserJoined', await twoKeyProtocol.AcquisitionCampaign.isAddressJoined(campaignAddress, from));
         let maxReward = await twoKeyProtocol.AcquisitionCampaign.getEstimatedMaximumReferralReward(campaignAddress, from, links.gmail);
         console.log(`TEST4, BEFORE JOIN Estimated maximum referral reward: ${maxReward}%`);
@@ -699,7 +699,7 @@ describe('TwoKeyProtocol', () => {
         });
         await tryToRegisterUser('Renata', from);
         console.log('isUserJoined', await twoKeyProtocol.AcquisitionCampaign.isAddressJoined(campaignAddress, from));
-        txHash = await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, links.test4, from);
+        txHash = await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, links.test4);
         console.log('VISIT', txHash);
         const maxReward = await twoKeyProtocol.AcquisitionCampaign.getEstimatedMaximumReferralReward(campaignAddress, from, links.test4);
         console.log(`RENATA, Estimated maximum referral reward: ${maxReward}%`);
@@ -751,7 +751,7 @@ describe('TwoKeyProtocol', () => {
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_UPORT).privateKey,
         });
         await tryToRegisterUser('Uport', from);
-        await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, links.renata, from);
+        await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, links.renata);
 
         console.log('6) uport buy from REFLINK', links.renata);
         const txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD * 1.5, 'ether'), links.renata, from);
