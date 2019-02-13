@@ -9,6 +9,7 @@ import "../interfaces/ITwoKeyReg.sol";
 import "../interfaces/ITwoKeyAcquisitionLogicHandler.sol";
 import "../interfaces/ITwoKeyAcquisitionCampaignStateVariables.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
+import "../interfaces/ITwoKeyCampaignValidator.sol";
 
 /**
  * @author Nikola Madjarevic
@@ -19,6 +20,7 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, MaintainingPattern {
     using SafeMath for uint;
 
     address twoKeySingletoneRegistry;
+    address twoKeyCampaignValidator;
 
     /**
      * @notice Since using singletone pattern, this is replacement for the constructor
@@ -27,7 +29,10 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, MaintainingPattern {
     function setInitialParams(address _twoKeySingletoneRegistry, address[] _maintainers) {
         require(twoKeySingletoneRegistry == address(0));
         twoKeySingletoneRegistry = _twoKeySingletoneRegistry;
-        twoKeyAdmin = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyAdmin");
+        twoKeyAdmin =
+            ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyAdmin");
+        twoKeyCampaignValidator =
+            ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyCampaignValidator");
         isMaintainer[msg.sender] = true; //also the deployer will be authorized maintainer
         for(uint i=0; i<_maintainers.length; i++) {
             isMaintainer[_maintainers[i]] = true;
@@ -182,6 +187,7 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, MaintainingPattern {
     function validateCall(address acquisitionCampaign) internal {
         address conversionHandler = getConversionHandlerAddress(acquisitionCampaign);
         require(msg.sender == conversionHandler);
+        require(ITwoKeyCampaignValidator(twoKeyCampaignValidator).isCampaignValidated(acquisitionCampaign) == true);
     }
 
     function getReferrers(address converter, address acquisitionCampaign) public view returns (address[]) {
