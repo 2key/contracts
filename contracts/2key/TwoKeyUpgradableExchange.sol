@@ -37,9 +37,10 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
     /**
      * Event for token purchase logging
      * @param purchaser who paid for the tokens
-     * @param beneficiary who got the tokens
-     * @param value weis paid for purchase
-     * @param amount amount of tokens purchased
+     * @param receiver is who got the tokens
+     * @param weiReceived is how weis paid for purchase
+     * @param tokensBought is the amount of tokens purchased
+     * @param rate is the global variable rate on the contract
      */
     event TokenPurchase(
         address indexed purchaser,
