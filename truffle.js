@@ -139,14 +139,12 @@ module.exports = {
       gasPrice: 2000000000
     },
 
-
     'rinkeby-test' : {
         provider: () => new HDWalletProvider(mnemonic, 'https://rinkeby.infura.io/v3/904c762bd6984606bf8ae7f30d7cb28c'),
         network_id: 4,
         gas: 7000000,
         gasPrice: 50000000000
     },
-
 
     'ropsten' : {
         provider: () => new HDWalletProvider(mnemonic, `https://ropsten.infura.io/v3/904c762bd6984606bf8ae7f30d7cb28c`),
@@ -170,7 +168,6 @@ module.exports = {
       gasPrice: 50000000000
     },
 
-
     'staging-2key': {
       provider: () => LedgerProvider('http://18.233.2.70:8500/ropsten', {
         networkId: 3,
@@ -192,6 +189,7 @@ module.exports = {
       gas: 7000000,
       gasPrice: 3000000000
     },
+
     'plasma-local': {
       provider: () => new HDWalletProvider(mnemonic, 'http://localhost:18545'),
       network_id: 8087,
