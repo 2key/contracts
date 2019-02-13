@@ -74,6 +74,10 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         return {private_key, public_address};
     }
 
+    public getNonSingletonVersion() : string {
+        return this.version;
+    }
+
 
     async _getLockupContractInstance(lockupContract: any) : Promise<any> {
         return lockupContract.address
@@ -301,8 +305,8 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 if (progressCallback) {
                     progressCallback('SetPublicLinkKey', true, campaignPublicLinkKey);
                 }
-
-                txHash = await promisify(this.base.twoKeyCampaignValidator.validateAcquisitionCampaign,[campaignAddress,{from}]);
+                //Here I need also a hash of non singletone at the moment
+                txHash = await promisify(this.base.twoKeyCampaignValidator.validateAcquisitionCampaign,[campaignAddress,this.version,{from}]);
                 if (progressCallback) {
                     progressCallback('ValidateCampaign', false, txHash);
                 }

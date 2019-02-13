@@ -14,16 +14,17 @@ export default class TwoKeyCampaignValidator implements ITwoKeyCampaignValidator
     }
 
     /**
-     * Function which should be called by contractor of campaign in order to proof that the campaign is valid
-     * @param {string} address
+     *
+     * @param {string} campaignAddress
+     * @param {string} nonSingletonHash
      * @param {string} from
      * @returns {Promise<string>}
      */
-    public validateCampaign(campaignAddress: string, from:string) : Promise<string> {
+    public validateCampaign(campaignAddress: string, nonSingletonHash: string, from:string) : Promise<string> {
         return new Promise<string>(async(resolve,reject) => {
             try {
                 let txHash = await promisify(this.base.twoKeyCampaignValidator.validateAcquisitionCampaign,
-                    [campaignAddress,{from}]);
+                    [campaignAddress,nonSingletonHash,{from}]);
                 resolve(txHash);
             } catch (e) {
                 reject(e);
@@ -41,6 +42,22 @@ export default class TwoKeyCampaignValidator implements ITwoKeyCampaignValidator
             try {
                 let status = await promisify(this.base.twoKeyCampaignValidator.isCampaignValidated,[campaignAddress]);
                 resolve(status);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+    /**
+     *
+     * @param {string} campaignAddress
+     * @returns {Promise<string>}
+     */
+    public getCampaignNonSingletonHash(campaignAddress:string) : Promise<string> {
+        return new Promise<string>(async(resolve,reject) => {
+            try {
+                let nonSingletonHash = await promisify(this.base.twoKeyCampaignValidator.campaign2nonSingletonHash,[campaignAddress]);
+                resolve(nonSingletonHash);
             } catch (e) {
                 reject(e);
             }

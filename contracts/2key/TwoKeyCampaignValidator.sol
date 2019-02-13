@@ -37,6 +37,7 @@ import "../interfaces/ITwoKeyEventSourceEvents.sol";
 contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
 
     address public twoKeySingletoneRegistry;
+    mapping(address => string) public campaign2nonSingletonHash;
 
     mapping(bytes => bool) acquisitionToEligibleCode;
     mapping(bytes => bool) conversionHandlerToEligibleCode;
@@ -62,7 +63,7 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
      * @param campaign is the address of the campaign, in this particular case it's acquisition
      * @dev Validates all the required stuff, if the campaign is not validated, it can't touch our singletones
      */
-    function validateAcquisitionCampaign(address campaign) public {
+    function validateAcquisitionCampaign(address campaign, string nonSingletonHash) public {
         require(isCampaignValidated[campaign] == false);
         address contractor = ITwoKeyAcquisitionCampaignStateVariables(campaign).contractor();
         address moderator = ITwoKeyAcquisitionCampaignStateVariables(campaign).moderator(); //Moderator we'll need for emit event
@@ -89,6 +90,9 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
         //If the campaign passes all this validation steps means it's valid one, and it can be proceeded forward
         isCampaignValidated[campaign] = true;
 
+        //Adding campaign 2 non singleton hash at the moment
+        campaign2nonSingletonHash[campaign] = nonSingletonHash;
+
         //Get the event source address
         address twoKeyEventSource = ITwoKeySingletoneRegistryFetchAddress
                                     (twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyEventSource");
@@ -106,6 +110,8 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
         conversionHandlerToEligibleCode[conversionHandlerCode] = true;
         acquisitionLogicHandlerToEligibleCode[logicHandlerCode] = true;
     }
+
+    //TODO: Add option to remove eligible bytecode per contract
 
     function isConversionHandlerCodeValid(address conversionHandler) public view returns (bool) {
         bytes memory code = GetCode.at(conversionHandler);

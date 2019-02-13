@@ -128,6 +128,7 @@ export interface ITwoKeyAcquisitionCampaign {
     withdrawTokens: (twoKeyLockup: string, part: number, from:string) => Promise<string>,
     changeTokenDistributionDate: (twoKeyLockup: string, newDate: number, from: string) => Promise<string>,
     getLockupInformations: (twoKeyLockup: string, from:string) => Promise<ILockupInformation>,
+    getNonSingletonVersion: () => string,
 }
 
 export interface IPublicLinkOpts {
