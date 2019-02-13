@@ -46,8 +46,11 @@ import TwoKeyCampaignValidator from "./campaignValidator";
 // const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 
 const TwoKeyDefaults = {
-    ipfsRIp: 'ipfs.io',
-    ipfsRPort: '443',
+    // ipfsRIp: 'ipfs.io',
+    // ipfsRPort: '443',
+    // ipfsRProtocol: 'https',
+    ipfsRIp: 'ipfs.infura.io',
+    ipfsRPort: '5001',
     ipfsRProtocol: 'https',
     ipfsWIp: 'ipfs.infura.io',
     ipfsWPort: '5001',

@@ -538,6 +538,7 @@ describe('TwoKeyProtocol', () => {
         txHash = await twoKeyProtocol.AcquisitionCampaign.updateOrSetIpfsHashPublicMeta(campaignAddress, hash, from);
         console.log(txHash);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        console.log(`TX ${txHash} mined`);
         const campaignMeta = await twoKeyProtocol.AcquisitionCampaign.getPublicMeta(campaignAddress,from);
         console.log('IPFS:', hash, campaignMeta);
         expect(campaignMeta.meta.assetContractERC20).to.be.equal(campaignData.assetContractERC20);
