@@ -48,6 +48,7 @@ async function handleExit(p) {
   console.log(p);
   if (p !== 0
     && (process.argv[2] !== '--migrate'
+    && process.argv[2] !== '--generate'
     && process.argv[2] !== '--update'
     && process.argv[2] !== '--test'
     && process.argv[2] !== '--ledger'
@@ -192,18 +193,26 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
             });
           }
         });
-        const nonSingletonBytecodes = [];
+        const nonSingletonsBytecodes = [];
+        const singletonsBytecodes = [];
         Object.keys(contracts.contracts).forEach(submodule => {
           if (submodule !== 'singletons') {
             Object.values(contracts.contracts[submodule]).forEach(({ bytecode, abi }) => {
-              nonSingletonBytecodes.push(bytecode || JSON.stringify(abi));
+              nonSingletonsBytecodes.push(bytecode || JSON.stringify(abi));
+            });
+          } else {
+            Object.values(contracts.contracts[submodule]).forEach(({ address, abi }) => {
+              singletonsBytecodes.push(address || JSON.stringify(abi));
             });
           }
         });
-        const nonSingletonHash = sha256(nonSingletonBytecodes.join(''));
+        const nonSingletonsHash = sha256(nonSingletonsBytecodes.join(''));
+        const singletonsHash = sha256(singletonsBytecodes.join(''));
         Object.keys(contracts.contracts).forEach(key => {
-          contracts.contracts[key]['NonSingletonHash'] = nonSingletonHash;
+          contracts.contracts[key]['NonSingletonsHash'] = nonSingletonsHash;
+          contracts.contracts[key]['SingletonsHash'] = singletonsHash;
         });
+        /*
         let keyHash = {};
         // deployedTo
         Object.keys(data).forEach((key) => {
@@ -226,27 +235,31 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
                     humanHash: rhd.humanizeDigest(hash,8)
                 };
             if (deployedTo[key.toString()]) {
-              keyHash[key]['NonSingletonHash'] = nonSingletonHash;
+              keyHash[key]['NonSingletonHash'] = nonSingletonsHash;
             }
         });
+        */
         let obj = {
-          'NetworkHashes': keyHash,
-          'NonSingletonHash': nonSingletonHash,
+          'NonSingletonsHash': nonSingletonsHash,
+          'SingletonsHash': singletonsHash,
+          // 'NetworkHashes': keyHash,
         };
 
         let obj1 = {};
         obj1['Maintainers'] = maintainerAddress;
 
         //Handle updating contracts_deployed.json
+        /*
         let existingFile = path.join(twoKeyProtocolDir, 'contracts_deployed.json');
         let fileObject = {};
         if (fs.existsSync(existingFile)) {
             fileObject = JSON.parse(fs.readFileSync(existingFile, { encoding: 'utf8' }));
         }
-
+        */
         /**
          * Handle network hashes
          */
+        /*
         let networkHashes = fileObject.NetworkHashes;
         Object.keys(networkHashes).forEach((key) => {
           let hashPerNetwork = networkHashes[key];
@@ -256,13 +269,13 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
           if(obj['NetworkHashes'][key]['humanHash']) {
             hashPerNetwork['humanHash'] = obj['NetworkHashes'][key]['humanHash'];
           }
-          if(obj['NetworkHashes'][key]['NonSingletonHash']) {
-            hashPerNetwork['NonSingletonHash'] = obj['NetworkHashes'][key]['NonSingletonHash'];
+          if(obj['NetworkHashes'][key]['NonSingletonsHash']) {
+            hashPerNetwork['NonSingletonsHash'] = obj['NetworkHashes'][key]['NonSingletonsHash'];
           }
           networkHashes[key] = hashPerNetwork;
         });
-
         obj['NetworkHashes'] = networkHashes;
+        */
 
         contracts.contracts.singletons = Object.assign(obj, contracts.contracts.singletons);
         contracts.contracts.singletons = Object.assign(obj1, contracts.contracts.singletons);
@@ -274,11 +287,11 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
           fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts', `${file}.ts`), `export default ${util.inspect(contracts.contracts[file], {depth: 10})}`)
         });
         // fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts.ts'), `export default ${util.inspect(contracts, {depth: 10})}`);
-        if (deployment) {
             json = Object.assign(obj,json);
             json = Object.assign(obj1,json);
             fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts_deployed.json'), JSON.stringify(json, null, 2));
             console.log('Writing contracts_deployed.json...');
+        if (deployment) {
             fs.copyFileSync(path.join(twoKeyProtocolDir, 'contracts_deployed.json'),path.join(twoKeyProtocolDist,'contracts_deployed.json'));
             console.log('Copying this to 2key-protcol/dist...');
         }
@@ -319,7 +332,7 @@ const runMigration3 = (network) => new Promise(async(resolve, reject) => {
 
 const updateIPFSHashes = async(contracts) => {
   const ipfs = new IPFS('ipfs.infura.io', 5001, { protocol: 'https' });
-  const nonSingletonHash = contracts.contracts.singletons.NonSingletonHash;
+  const nonSingletonHash = contracts.contracts.singletons.NonSingletonsHash;
   console.log(nonSingletonHash);
   const ipfsCat = (hash) => new Promise((resolve, reject) => {
     ipfs.cat(hash, (err, res) => {
@@ -635,7 +648,8 @@ async function main() {
       test();
       break;
     case '--generate':
-      generateSOLInterface();
+      await generateSOLInterface();
+      process.exit(0);
       break;
     case '--archive':
       archiveBuild();
