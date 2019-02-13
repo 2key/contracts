@@ -109,4 +109,10 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
         acquisitionLogicHandlerToEligibleCode[logicHandlerCode] = true;
     }
 
+    function isConversionHandlerCodeValid(address conversionHandler) public view returns (bool) {
+        bytes memory code = GetCode.at(conversionHandler);
+        require(conversionHandlerToEligibleCode[code]);
+        return true;
+    }
+
 }

@@ -188,6 +188,7 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, MaintainingPattern {
         address conversionHandler = getConversionHandlerAddress(acquisitionCampaign);
         require(msg.sender == conversionHandler);
         require(ITwoKeyCampaignValidator(twoKeyCampaignValidator).isCampaignValidated(acquisitionCampaign) == true);
+        require(ITwoKeyCampaignValidator(twoKeyCampaignValidator).isConversionHandlerCodeValid(conversionHandler) == true);
     }
 
     function getReferrers(address converter, address acquisitionCampaign) public view returns (address[]) {

@@ -6,4 +6,5 @@ pragma solidity ^0.4.24;
 contract ITwoKeyCampaignValidator {
     mapping(address => bool) public isCampaignValidated;
     function validateAcquisitionCampaign(address campaign) public;
+    function isConversionHandlerCodeValid(address conversionHandler) public view returns (bool);
 }
