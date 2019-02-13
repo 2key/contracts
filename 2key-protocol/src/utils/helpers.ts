@@ -147,7 +147,7 @@ export default class Helpers implements ITwoKeyHelpers {
         });
     }
 
-    _getNonce(from: string, pending?: boolean): Promise<number> {
+    _getNonce(from: string, pending: boolean = true): Promise<number> {
         return pending
             ? promisify(this.base.web3.eth.getTransactionCount, [from, 'pending'])
             : promisify(this.base.web3.eth.getTransactionCount, [from]);
