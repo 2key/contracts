@@ -7,6 +7,7 @@ const TwoKeyCongress = artifacts.require('TwoKeyCongress');
 const Proxy = artifacts.require('UpgradeabilityProxy');
 const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
 const TwoKeyPlasmaSingletoneRegistry = artifacts.require('TwoKeyPlasmaSingletoneRegistry');
+const Call = artifacts.require('Call');
 
 const fs = require('fs');
 const path = require('path');
@@ -24,12 +25,13 @@ module.exports = function deploy(deployer) {
     let isTwoKeyAdmin = false;
     let isTwoKeyCongress = false;
     let isTwoKeyPlasmaEvents = false;
-
+    console.log(process.argv)
     /**
      * Determining which contract we want to update
      */
     process.argv.forEach((argument) => {
         if (argument == 'update') {
+            console.log('Works');
             found = true
         }
         else if (argument == 'TwoKeyRegistry') {
@@ -45,7 +47,8 @@ module.exports = function deploy(deployer) {
             isTwoKeyAdmin = true;
         }
         else if (argument == 'TwoKeyPlasmaEvents') {
-            isTwoKeyPlasmaEvents = false;
+            console.log('Works2');
+            isTwoKeyPlasmaEvents = true;
         }
     });
 
@@ -246,12 +249,13 @@ module.exports = function deploy(deployer) {
              */
             let lastTwoKeyPlasmaEvents;
             console.log('TwoKeyPlasmaEvents contract on plasma network will be updated now', network_id);
+            deployer.link(Call, TwoKeyPlasmaEvents);
             deployer.deploy(TwoKeyPlasmaEvents)
             .then(() => TwoKeyPlasmaEvents.deployed()
                 .then((twoKeyPlasmaEventsInstance) => {
                     lastTwoKeyPlasmaEvents = twoKeyPlasmaEventsInstance.address;
                 })
-                .then(() => TwoKeyPlasmaSingletoneRegistry.deployed)
+                .then(() => TwoKeyPlasmaSingletoneRegistry.deployed())
                 .then(async(registry) => {
                     await new Promise(async(resolve,reject) => {
                         try {
@@ -260,7 +264,8 @@ module.exports = function deploy(deployer) {
                             let v = parseInt(twoKeyPlasmaEvents[network_id].Version.substr(-1)) + 1;
                             twoKeyPlasmaEvents[network_id].Version = twoKeyPlasmaEvents[network_id].Version.substr(0, twoKeyPlasmaEvents[network_id].Version.length - 1) + v.toString();
                             console.log('New version : ' + twoKeyPlasmaEvents[network_id].Version);
-                            let txHash = await registry.addVersion("TwoKeyPlasmaEvents", twoKeyPlasmaEvents[network_id].Version, TwoKeyPlasmaEvents.address);
+                            //
+                            let txHash = await registry.addVersion("TwoKeyPlasmaEvents",twoKeyPlasmaEvents[network_id].Version, TwoKeyPlasmaEvents.address);
 
                             console.log('... Upgrading proxy to new version');
                             txHash = await Proxy.at(twoKeyPlasmaEvents[network_id].Proxy).upgradeTo("TwoKeyPlasmaEvents", twoKeyPlasmaEvents[network_id].Version);

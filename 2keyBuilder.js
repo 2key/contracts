@@ -596,10 +596,16 @@ async function main() {
   switch (mode) {
     case '--update':
       try {
+          //truffle migrate --network=plasma-azure --f 4 update TwoKeyPlasmaEvents
+
+          await restoreFromArchive();
         const networks = process.argv[3];
+        const contractName = process.argv[4];
+        let str = contractName.toString()+".json";
+        console.log(str);
         //truffle migrate --network=dev-local --f 4 update
-        fs.unlinkSync(path.join(buildPath, 'TwoKeyRegistry.json'));
-        await runProcess('truffle',['migrate',`--network=${networks}`,'--f 4','update']);
+        fs.unlinkSync(path.join(buildPath, str));
+        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'),['migrate',`--network=${networks}`,'--f', 4,'update',contractName]);
         await generateSOLInterface();
         process.exit(0);
       } catch (err) {
