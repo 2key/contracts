@@ -104,8 +104,8 @@ export class TwoKeyProtocol {
     public UpgradableExchange: IUpgradableExchange;
     public TwoKeyExchangeContract: ITwoKeyExchangeContract;
     public PlasmaEvents: IPlasmaEvents;
-    public TwoKeyBaseReputation: ITwoKeyBaseReputationRegistry;
-    public TwoKeyCampaignValidator: ITwoKeyCampaignValidator;
+    public BaseReputation: ITwoKeyBaseReputationRegistry;
+    public CampaignValidator: ITwoKeyCampaignValidator;
     private AcquisitionSubmodule: any;
     private _log: any;
 
@@ -232,8 +232,8 @@ export class TwoKeyProtocol {
         this.UpgradableExchange = new UpgradableExchange(this.twoKeyBase,this.Helpers,this.Utils);
         this.Congress = new TwoKeyCongress(this.twoKeyBase, this.Helpers, this.Utils);
         this.Registry = new TwoKerRegistry(this.twoKeyBase, this.Helpers, this.Utils);
-        this.TwoKeyBaseReputation = new TwoKeyBaseReputationRegistry(this.twoKeyBase, this.Helpers, this.Utils);
-        this.TwoKeyCampaignValidator = new TwoKeyCampaignValidator(this.twoKeyBase, this.Helpers, this.Utils);
+        this.BaseReputation = new TwoKeyBaseReputationRegistry(this.twoKeyBase, this.Helpers, this.Utils);
+        this.CampaignValidator = new TwoKeyCampaignValidator(this.twoKeyBase, this.Helpers, this.Utils);
         // TODO: Add here replace AcquisitionSubmodule mechanism
         this.AcquisitionCampaign = this.AcquisitionSubmodule
             ? new this.AcquisitionSubmodule(this.twoKeyBase, this.Helpers, this.Utils, this.ERC20, Sign)
