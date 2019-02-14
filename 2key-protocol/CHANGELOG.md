@@ -1,4 +1,8 @@
 ##Current
+####TwoKeyCampaignValidator -> CampaignValidator
+####TwoKeyBaseReputation -> BaseReputation
+
+##1.0.74-develop
 ####Acquisition
 *New methods*
 * getNonSingletonsHash: () => Promise<string>,
