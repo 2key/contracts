@@ -56,19 +56,6 @@ module.exports = function deploy(deployer) {
                         reject(e);
                     }
                 });
-                console.log("Added TwoKeyAcquisition: " + TwoKeyAcquisitionCampaignERC20.address + "  to EventSource : " + json.TwoKeyEventSource[network_id].Proxy + "!");
-            })
-            .then(async () => {
-                console.log("... Adding TwoKeyAcquisitionCampaign to be eligible to buy tokens from Upgradable Exchange");
-                await new Promise(async (resolve,reject) => {
-                    try {
-                        let txHash = await TwoKeyUpgradableExchange.at(json.TwoKeyUpgradableExchange[network_id].Proxy)
-                            .addContractToBeEligibleToBuyTokens(TwoKeyAcquisitionCampaignERC20.address);
-                        resolve(txHash);
-                    } catch (e) {
-                        reject(e);
-                    }
-                })
             })
             .then(() => true);
     }
