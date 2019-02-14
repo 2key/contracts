@@ -268,9 +268,10 @@ contract TwoKeyPlasmaEvents is Upgradeable {
                     visited_from[c][contractor][new_address] = old_address;
                     //TODO: Updating visited from time
                     visited_from_time[c][contractor][new_address][old_address] = block.timestamp;
-                    visits_list[c][contractor][old_address].push(new_address);
-                    visits_list_timestamps[c][contractor][old_address].push(block.timestamp);
+
                 }
+                visits_list[c][contractor][old_address].push(new_address);
+                visits_list_timestamps[c][contractor][old_address].push(block.timestamp);
                 emit Visited(new_address, c, contractor, old_address);
             } /* else {
                 require(visited_from[c][contractor][new_address] == old_address, 'User already visited from a different influencer');
