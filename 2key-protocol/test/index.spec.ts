@@ -527,13 +527,13 @@ describe('TwoKeyProtocol', () => {
 
 
     it('should proff that campaign is validated and registered properly', async() => {
-        let isValidated = await twoKeyProtocol.TwoKeyCampaignValidator.isCampaignValidated(campaignAddress);
+        let isValidated = await twoKeyProtocol.CampaignValidator.isCampaignValidated(campaignAddress);
         expect(isValidated).to.be.equal(true);
         console.log('Campaign is validated');
     }).timeout(60000);
 
     it('should proof that non singleton hash is set for the campaign', async() => {
-        let nonSingletonHash = await twoKeyProtocol.TwoKeyCampaignValidator.getCampaignNonSingletonsHash(campaignAddress);
+        let nonSingletonHash = await twoKeyProtocol.CampaignValidator.getCampaignNonSingletonsHash(campaignAddress);
         expect(nonSingletonHash).to.be.equal(twoKeyProtocol.AcquisitionCampaign.getNonSingletonsHash());
     }).timeout(60000);
 
@@ -1182,19 +1182,19 @@ describe('TwoKeyProtocol', () => {
 
     it('should check reputation points for a couple of addresses', async() => {
         console.log('Checking stats for Renata');
-        let renataStats = await twoKeyProtocol.TwoKeyBaseReputation.getReputationPointsForAllRolesPerAddress(env.RENATA_ADDRESS);
+        let renataStats = await twoKeyProtocol.BaseReputation.getReputationPointsForAllRolesPerAddress(env.RENATA_ADDRESS);
         console.log(renataStats);
 
         console.log('Checking stats for Test4');
-        let test4Stats = await twoKeyProtocol.TwoKeyBaseReputation.getReputationPointsForAllRolesPerAddress(env.TEST4_ADDRESS);
+        let test4Stats = await twoKeyProtocol.BaseReputation.getReputationPointsForAllRolesPerAddress(env.TEST4_ADDRESS);
         console.log(test4Stats);
 
         console.log('Checking stats for contractor');
-        let contractorStats = await twoKeyProtocol.TwoKeyBaseReputation.getReputationPointsForAllRolesPerAddress(env.AYDNEP_ADDRESS);
+        let contractorStats = await twoKeyProtocol.BaseReputation.getReputationPointsForAllRolesPerAddress(env.AYDNEP_ADDRESS);
         console.log(contractorStats);
 
         console.log('Checking stats for test address');
-        let rejectedConverterStats = await twoKeyProtocol.TwoKeyBaseReputation.getReputationPointsForAllRolesPerAddress(env.TEST_ADDRESS);
+        let rejectedConverterStats = await twoKeyProtocol.BaseReputation.getReputationPointsForAllRolesPerAddress(env.TEST_ADDRESS);
         console.log(rejectedConverterStats);
 
 
