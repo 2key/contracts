@@ -266,9 +266,11 @@ module.exports = function deploy(deployer) {
                             console.log('New version : ' + twoKeyPlasmaEvents[network_id].Version);
                             //
                             let txHash = await registry.addVersion("TwoKeyPlasmaEvents",twoKeyPlasmaEvents[network_id].Version, TwoKeyPlasmaEvents.address);
+                            // let txHash = await registry.addVersion("TwoKeyPlasmaEvents", '1.10', TwoKeyPlasmaEvents.address);
 
                             console.log('... Upgrading proxy to new version');
                             txHash = await Proxy.at(twoKeyPlasmaEvents[network_id].Proxy).upgradeTo("TwoKeyPlasmaEvents", twoKeyPlasmaEvents[network_id].Version);
+                            // txHash = await Proxy.at(twoKeyPlasmaEvents[network_id].Proxy).upgradeTo("TwoKeyPlasmaEvents", '1.10');
                             twoKeyPlasmaEvents[network_id].address = lastTwoKeyPlasmaEvents;
 
                             fileObject['TwoKeyPlasmaEvents'] = twoKeyPlasmaEvents;
