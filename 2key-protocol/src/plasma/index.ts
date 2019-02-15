@@ -119,9 +119,9 @@ export default class PlasmaEvents implements IPlasmaEvents {
     public getJoinedFrom(campaignAddress: string, contractorAddress: string, address: string): Promise<string> {
         return new Promise<string>(async (resolve, reject) => {
             try {
-                let joined_From = this.helpers._awaitPlasmaMethod(promisify(this.base.twoKeyPlasmaEvents.getJoinedFrom, [campaignAddress, contractorAddress, address]));
+                // let joined_From = this.helpers._awaitPlasmaMethod(promisify(this.base.twoKeyPlasmaEvents.getJoinedFrom, [campaignAddress, contractorAddress, address]));
                 let joinedFrom = this.helpers._awaitPlasmaMethod(promisify(this.base.twoKeyPlasmaEvents.joined_from, [campaignAddress, contractorAddress, address]));
-                this.base._log('JOINED FROM', await Promise.all([joined_From, joinedFrom]));
+                // this.base._log('JOINED FROM', await Promise.all([joined_From, joinedFrom]));
                 resolve(joinedFrom);
             } catch (e) {
                 reject(e);

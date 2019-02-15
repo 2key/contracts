@@ -481,14 +481,12 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     const plasmaAddress = this.base.plasmaAddress;
                     const campaignInstance = await this._getCampaignInstance(campaign);
                     const contractorAddress = await promisify(campaignInstance.contractor, []);
-                    // const {f_address, f_secret, p_message} = await this.utils.getOffchainDataFromIPFSHash(referralLink);
                     const offchainData = await this.utils.getOffchainDataFromIPFSHash(referralLink);
                     const contractConstants = (await promisify(campaignInstance.getConstantInfo, []));
                     const { f_address, f_secret, p_message } = offchainData;
                     const sig = this.sign.free_take(plasmaAddress, f_address, f_secret, p_message);
 
                     this.base._log('getEstimatedMaximumReferralReward', f_address, contractorAddress);
-                    // const maxReferralRewardPercent = new BigNumber(contractConstants[1]).div(10 ** decimals).toNumber();
                     const maxReferralRewardPercent = contractConstants[1].toNumber();
 
 
@@ -530,14 +528,15 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @param {string} referralLink
      * @returns {Promise<string>}
      */
-    public visit(campaignAddress: string, referralLink: string): Promise<string | boolean> {
-        return new Promise<string | boolean>(async (resolve, reject) => {
+    public visit(campaignAddress: string, referralLink: string): Promise<string> {
+        return new Promise<string>(async (resolve, reject) => {
             try {
                 const {f_address, f_secret, p_message} = await this.utils.getOffchainDataFromIPFSHash(referralLink);
                 const plasmaAddress = this.base.plasmaAddress;
                 const sig = this.sign.free_take(plasmaAddress, f_address, f_secret, p_message);
                 const campaignInstance = await this._getCampaignInstance(campaignAddress);
                 const contractor = await promisify(campaignInstance.contractor, []);
+                const joinedFrom = await promisify(this.base.twoKeyPlasmaEvents.joined_from, [campaignInstance.address, contractor, plasmaAddress]);
                 this.base._log('contractor', contractor, plasmaAddress);
                 const txHash: string = await promisify(this.base.twoKeyPlasmaEvents.visited, [
                     campaignInstance.address,
@@ -546,10 +545,12 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     {from: plasmaAddress, gasPrice: 0}
                 ]);
                 this.base._log('visit txHash', txHash);
-                await this.utils.getTransactionReceiptMined(txHash, { web3: this.base.plasmaWeb3 });
-                const note = await this.sign.encrypt(this.base.plasmaWeb3, plasmaAddress, f_secret, {plasma: true});
-                const noteTxHash = await promisify(this.base.twoKeyPlasmaEvents.setNoteByUser, [campaignInstance.address, note, {from: plasmaAddress}]);
-                this.base._log('note txHash', noteTxHash);
+                if (!parseInt(joinedFrom, 16)) {
+                    await this.utils.getTransactionReceiptMined(txHash, {web3: this.base.plasmaWeb3});
+                    const note = await this.sign.encrypt(this.base.plasmaWeb3, plasmaAddress, f_secret, {plasma: true});
+                    const noteTxHash = await promisify(this.base.twoKeyPlasmaEvents.setNoteByUser, [campaignInstance.address, note, {from: plasmaAddress}]);
+                    this.base._log('note txHash', noteTxHash);
+                }
                 resolve(txHash);
             } catch (e) {
                 console.error(e);
