@@ -176,7 +176,7 @@ contract TwoKeyPlasmaEvents is Upgradeable {
     }
 
     function getJoinedFrom(address c, address contractor, address _address) public view returns (address) {
-        return joined_from[c][contractor][_address];
+        return plasmaOf(joined_from[c][contractor][_address]);
     }
 
 //    function getInfluencersFromSig(address acquisitionCampaignAddress, address contractor, bytes sig) public view returns (address[]) {
