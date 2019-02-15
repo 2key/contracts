@@ -1,4 +1,4 @@
-##Current
+##1.0.75-develop
 ####TwoKeyCampaignValidator -> CampaignValidator
 ####TwoKeyBaseReputation -> BaseReputation
 
