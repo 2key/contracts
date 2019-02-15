@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
 import "./TokenPool.sol";
-import "../../interfaces/ITwoKeyRegistry.sol";
+import "../interfaces/ITwoKeyRegistry.sol";
 /**
  * @author Nikola Madjarevic
  * Created at 2/5/19

@@ -210,7 +210,7 @@ export default class Helpers implements ITwoKeyHelpers {
     async _getTwoKeyRegInstance(twoKeyReg: any) : Promise<any> {
         return twoKeyReg.address
             ? twoKeyReg
-            : await this._createAndValidate(singletons.TwoKeyRegLogic.abi, twoKeyReg);
+            : await this._createAndValidate(singletons.TwoKeyRegistry.abi, twoKeyReg);
     }
 
     async _getTwoKeyAdminInstance(twoKeyAdmin: any) : Promise<any> {

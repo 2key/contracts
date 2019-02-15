@@ -1,11 +1,11 @@
 pragma solidity ^0.4.24;
-import "../../openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "../../interfaces/ITwoKeyExchangeRateContract.sol";
-import "../../interfaces/IERC20.sol";
-import "../../interfaces/ITwoKeyAcquisitionCampaignERC20.sol";
-import "../../interfaces/ITwoKeyReg.sol";
-import "../../interfaces/ITwoKeyAcquisitionARC.sol";
-import "../../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
+import "../interfaces/ITwoKeyExchangeRateContract.sol";
+import "../interfaces/IERC20.sol";
+import "../interfaces/ITwoKeyAcquisitionCampaignERC20.sol";
+import "../interfaces/ITwoKeyReg.sol";
+import "../interfaces/ITwoKeyAcquisitionARC.sol";
+import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
+import "../libraries/SafeMath.sol";
 
 /**
  * @author Nikola Madjarevic

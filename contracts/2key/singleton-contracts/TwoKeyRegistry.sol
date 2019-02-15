@@ -1,8 +1,8 @@
 pragma solidity ^0.4.24;
 
-import "./Upgradeable.sol";
-import './Call.sol';
-import "./MaintainingPattern.sol";
+import "../Upgradeable.sol";
+import "../MaintainingPattern.sol";
+import "../libraries/Call.sol";
 
 contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
 

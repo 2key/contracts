@@ -1,15 +1,15 @@
 pragma solidity ^0.4.24;
 
-import '../openzeppelin-solidity/contracts/math/SafeMath.sol';
 
-import "./Upgradeable.sol";
-import "./MaintainingPattern.sol";
+import "../Upgradeable.sol";
+import "../MaintainingPattern.sol";
 
 import "../interfaces/ITwoKeyReg.sol";
 import "../interfaces/ITwoKeyAcquisitionLogicHandler.sol";
 import "../interfaces/ITwoKeyAcquisitionCampaignStateVariables.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyCampaignValidator.sol";
+import "../libraries/SafeMath.sol";
 
 /**
  * @author Nikola Madjarevic

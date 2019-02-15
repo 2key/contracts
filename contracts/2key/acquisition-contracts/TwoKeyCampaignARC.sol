@@ -1,9 +1,9 @@
 pragma solidity ^0.4.24;
 
-import '../openzeppelin-solidity/contracts/math/SafeMath.sol';
-import './TwoKeyEventSource.sol';
 import "./ArcERC20.sol";
+import "../singleton-contracts/TwoKeyEventSource.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
+import "../libraries/SafeMath.sol";
 
 contract TwoKeyCampaignARC is ArcERC20 {
 

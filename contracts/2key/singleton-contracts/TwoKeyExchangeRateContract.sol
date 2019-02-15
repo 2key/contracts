@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
-import "./MaintainingPattern.sol";
-import "./Upgradeable.sol";
+import "../MaintainingPattern.sol";
+import "../Upgradeable.sol";
 
 
 /**

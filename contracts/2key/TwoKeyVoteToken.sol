@@ -5,9 +5,9 @@ import '../openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol';
 import '../openzeppelin-solidity/contracts/token/ERC20/ERC20.sol';
 import '../openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import '../openzeppelin-solidity/contracts/math/SafeMath.sol';
-import '../interfaces/IDecentralizedNation.sol';
-import './TwoKeyRegistry.sol';
-import "./GetCode.sol";
+
+import './interfaces/IDecentralizedNation.sol';
+import "./libraries/GetCode.sol";
 
 contract TwoKeyVoteToken is StandardToken, Ownable {
     using SafeMath for uint256;

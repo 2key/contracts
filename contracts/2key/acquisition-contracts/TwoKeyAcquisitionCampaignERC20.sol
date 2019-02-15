@@ -1,13 +1,14 @@
 pragma solidity ^0.4.24;
 
-import "../../openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "../TwoKeyCampaignARC.sol";
-import "../TwoKeyEventSource.sol";
-import "../Call.sol";
-import "../../interfaces/IERC20.sol";
-import "../../interfaces/IUpgradableExchange.sol";
-import "../../interfaces/ITwoKeyConversionHandler.sol";
-import "../../interfaces/ITwoKeyAcquisitionLogicHandler.sol";
+import "../singleton-contracts/TwoKeyEventSource.sol";
+import "./TwoKeyCampaignARC.sol";
+
+import "../interfaces/IERC20.sol";
+import "../interfaces/IUpgradableExchange.sol";
+import "../interfaces/ITwoKeyConversionHandler.sol";
+import "../interfaces/ITwoKeyAcquisitionLogicHandler.sol";
+import "../libraries/Call.sol";
+import "../libraries/SafeMath.sol";
 
 /**
  * @author Nikola Madjarevic
@@ -16,6 +17,7 @@ import "../../interfaces/ITwoKeyAcquisitionLogicHandler.sol";
 contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
 
     using Call for *;
+    using SafeMath for uint;
 
     address public conversionHandler;
     address public twoKeyAcquisitionLogicHandler;

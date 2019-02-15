@@ -4,10 +4,10 @@ import './TwoKeyEconomy.sol';
 import './TwoKeyUpgradableExchange.sol';
 import "./TwoKeyEventSource.sol";
 import "./TwoKeyRegistry.sol";
-import "./Upgradeable.sol";
 import "../interfaces/ITwoKeyAdmin.sol";
 import "../interfaces/IERC20.sol";
 import "../interfaces/IMaintainingPattern.sol";
+import "../Upgradeable.sol";
 
 //TODO: Add all the missing functions from other singletones which can be called by TwoKeyAdmin
 contract TwoKeyAdmin is Upgradeable {

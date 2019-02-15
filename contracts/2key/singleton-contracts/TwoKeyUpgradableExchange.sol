@@ -1,14 +1,14 @@
 pragma solidity ^0.4.24;
 
-import '../openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol';
-import '../openzeppelin-solidity/contracts/token/ERC20/ERC20.sol';
-
-import "./GetCode.sol";
-import "./MaintainingPattern.sol";
-import "./Upgradeable.sol";
-
+import "../../openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
+import "../MaintainingPattern.sol";
+import "../Upgradeable.sol";
 import "../interfaces/ITwoKeyExchangeRateContract.sol";
 import "../interfaces/ITwoKeyCampaignValidator.sol";
+import "../libraries/SafeMath.sol";
+import "../libraries/GetCode.sol";
+import "../libraries/SafeERC20.sol";
+
 
 contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
 

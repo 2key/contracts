@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
-import '../openzeppelin-solidity/contracts/math/SafeMath.sol';
-import "./Upgradeable.sol";
+import "../Upgradeable.sol";
+import "../libraries/SafeMath.sol";
 
 contract TwoKeyCongress is Upgradeable {
 

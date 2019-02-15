@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
-import "../TwoKeyConversionStates.sol";
-import "../../interfaces/IERC20.sol";
+import "./TwoKeyConversionStates.sol";
+import "./interfaces/IERC20.sol";
 
 /**
  * @notice Contract for the airdrop campaigns

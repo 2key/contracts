@@ -1,8 +1,8 @@
 pragma solidity ^0.4.24;
 
-import "./GetCode.sol";
-import "./Upgradeable.sol";
-import "./MaintainingPattern.sol";
+import "../libraries/GetCode.sol";
+import "../Upgradeable.sol";
+import "../MaintainingPattern.sol";
 
 import "../interfaces/ITwoKeyAcquisitionCampaignStateVariables.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";

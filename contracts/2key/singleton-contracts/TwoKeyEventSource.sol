@@ -1,9 +1,8 @@
 pragma solidity ^0.4.24;
 
-import './TwoKeyTypes.sol';
-import "./GetCode.sol";
-import "./Upgradeable.sol";
-import "./MaintainingPattern.sol";
+import '../TwoKeyTypes.sol';
+import "../Upgradeable.sol";
+import "../MaintainingPattern.sol";
 import "../interfaces/ITwoKeyReg.sol";
 import "../interfaces/ITwoKeyAdmin.sol";
 import "../interfaces/ITwoKeyCampaignValidator.sol";
