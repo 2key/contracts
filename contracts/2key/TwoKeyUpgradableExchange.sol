@@ -2,19 +2,22 @@ pragma solidity ^0.4.24;
 
 import '../openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol';
 import '../openzeppelin-solidity/contracts/token/ERC20/ERC20.sol';
+
 import "./GetCode.sol";
 import "./MaintainingPattern.sol";
-import "../interfaces/ITwoKeyExchangeRateContract.sol";
 import "./Upgradeable.sol";
+
+import "../interfaces/ITwoKeyExchangeRateContract.sol";
+import "../interfaces/ITwoKeyCampaignValidator.sol";
 
 contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
 
-    using GetCode for *;
     using SafeMath for uint256;
     using SafeERC20 for ERC20;
 
     address twoKeyExchangeContract;
-    
+    address twoKeyCampaignValidator;
+
     // The token being sold
     ERC20 public token;
 
@@ -23,11 +26,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
     uint256 public transactionCounter = 0;
 
     uint256 public weiRaised = 0;
-
-    /**
-     * @notice Mapping which will map contract bytecode to boolean if that bytecode is eligible to buy tokens
-     */
-    mapping(bytes => bool) isContractEligibleToBuyTokens;
 
     /**
      * @notice Event will be fired every time someone buys tokens
@@ -53,7 +51,14 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
     /**
      * @notice Constructor of the contract
      */
-    function setInitialParams(uint256 _rate, address _twoKeyAdmin, ERC20 _token, address _twoKeyExchangeContract, address[] _maintainers) public {
+    function setInitialParams(
+        uint256 _rate,
+        address _twoKeyAdmin,
+        ERC20 _token,
+        address _twoKeyExchangeContract,
+        address _twoKeyCampaignValidator,
+        address[] _maintainers
+    ) public {
         //Validating that this can be called only once
         require(rate == 0);
         require(_rate != 0);
@@ -61,7 +66,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         rate = _rate;
         token = _token;
         twoKeyExchangeContract = _twoKeyExchangeContract;
-
+        twoKeyCampaignValidator = _twoKeyCampaignValidator;
         twoKeyAdmin = _twoKeyAdmin;
         isMaintainer[msg.sender] = true; //for truffle deployment
         for(uint i=0; i<_maintainers.length; i++) {
@@ -74,6 +79,14 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
     */
     modifier onlyMaintainerOrTwoKeyAdmin {
         require(isMaintainer[msg.sender] == true || msg.sender == address(twoKeyAdmin));
+        _;
+    }
+
+    /**
+     * @notice Modifier which will validate if contract is allowed to buy tokens
+     */
+    modifier onlyValidatedContracts {
+        require(ITwoKeyCampaignValidator(twoKeyCampaignValidator).isCampaignValidated(msg.sender) == true);
         _;
     }
 
@@ -142,32 +155,11 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         _twoKeyAdmin.transfer(msg.value);
     }
 
-
-    /**
-     * @notice Modifier which will validate if contract is eligible to buy tokens
-     */
-    modifier onlyEligibleContracts {
-        bytes memory code = GetCode.at(msg.sender);
-        require(isContractEligibleToBuyTokens[code] == true);
-        _;
-    }
-
-    /**
-     * @notice Function to add contract code to be eligible to buyTokens
-     * @param _contractAddress is the address of the deployed contract
-     * @dev only maintainer / admin can call this function
-     */
-    function addContractToBeEligibleToBuyTokens(address _contractAddress) public {
-        require(_contractAddress != address(0));
-        bytes memory _contractCode = GetCode.at(_contractAddress);
-        isContractEligibleToBuyTokens[_contractCode] = true;
-    }
-
     /**
      * @notice Function to buyTokens
      * @param _beneficiary to get
      */
-    function buyTokens(address _beneficiary) public payable onlyEligibleContracts {
+    function buyTokens(address _beneficiary) public payable onlyValidatedContracts {
         uint256 weiAmount = msg.value;
         _preValidatePurchase(_beneficiary, weiAmount);
 
@@ -188,16 +180,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         _forwardFunds(twoKeyAdmin);
     }
 
-    function () public payable onlyEligibleContracts {
+    function () public payable onlyValidatedContracts {
         buyTokens(msg.sender);
-    }
-
-    /**
-     * @notice Function to validate if an deployed contract is eligible to buy tokens
-     * @param _deployedContractAddress is the address of the deployed contract
-     */
-    function isContractAddressEligibleToBuyTokens(address _deployedContractAddress) public view returns (bool) {
-        bytes memory code = GetCode.at(_deployedContractAddress);
-        return isContractEligibleToBuyTokens[code];
     }
 }

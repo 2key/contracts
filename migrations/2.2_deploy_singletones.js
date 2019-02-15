@@ -472,7 +472,8 @@ module.exports = function deploy(deployer) {
                             proxyAddressTwoKeyAdmin,
                             TwoKeyEconomy.address,
                             proxyAddressTwoKeyExchange,
-                            []
+                            proxyAddressTwoKeyCampaignValidator,
+                            maintainerAddresses,
                         );
 
                         await TwoKeyAdmin.at(proxyAddressTwoKeyAdmin).setInitialParams

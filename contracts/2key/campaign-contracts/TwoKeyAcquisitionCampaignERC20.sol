@@ -1,13 +1,13 @@
 pragma solidity ^0.4.24;
 
-import "../openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "./TwoKeyCampaignARC.sol";
-import "./TwoKeyEventSource.sol";
-import "./Call.sol";
-import "../interfaces/IERC20.sol";
-import "../interfaces/IUpgradableExchange.sol";
-import "../interfaces/ITwoKeyConversionHandler.sol";
-import "../interfaces/ITwoKeyAcquisitionLogicHandler.sol";
+import "../../openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "../TwoKeyCampaignARC.sol";
+import "../TwoKeyEventSource.sol";
+import "../Call.sol";
+import "../../interfaces/IERC20.sol";
+import "../../interfaces/IUpgradableExchange.sol";
+import "../../interfaces/ITwoKeyConversionHandler.sol";
+import "../../interfaces/ITwoKeyAcquisitionLogicHandler.sol";
 
 /**
  * @author Nikola Madjarevic

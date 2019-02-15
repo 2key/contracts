@@ -1,16 +1,16 @@
 pragma solidity ^0.4.24;
-import "./TwoKeyTypes.sol";
-import "./TwoKeyConversionStates.sol";
-import "./TwoKeyLockupContract.sol";
-import "./TwoKeyConverterStates.sol";
+import "../TwoKeyTypes.sol";
+import "../TwoKeyConversionStates.sol";
+import "../TwoKeyLockupContract.sol";
+import "../TwoKeyConverterStates.sol";
 
-import "../openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "../../openzeppelin-solidity/contracts/math/SafeMath.sol";
 
-import "../interfaces/IERC20.sol";
-import "../interfaces/ITwoKeyAcquisitionCampaignERC20.sol";
-import "../interfaces/IUpgradableExchange.sol";
-import "../interfaces/ITwoKeyEventSource.sol";
-import "../interfaces/ITwoKeyBaseReputationRegistry.sol";
+import "../../interfaces/IERC20.sol";
+import "../../interfaces/ITwoKeyAcquisitionCampaignERC20.sol";
+import "../../interfaces/IUpgradableExchange.sol";
+import "../../interfaces/ITwoKeyEventSource.sol";
+import "../../interfaces/ITwoKeyBaseReputationRegistry.sol";
 
 /**
  * @notice Contract to handle logic related for Acquisition
