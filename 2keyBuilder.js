@@ -672,8 +672,11 @@ async function main() {
       process.exit(0);
       break;
     default:
-      deploy();
+      await deploy();
   }
 }
 
-main();
+main().catch((e) => {
+  console.log(e);
+  process.exit(1);
+});
