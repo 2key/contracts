@@ -322,7 +322,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @param _converter is the address of the converter
      * @dev This function can only be called by TwoKeyConversionHandler contract
      */
-    function updateRefchainRewards(uint256 _maxReferralRewardETHWei, address _converter) public onlyTwoKeyConversionHandler {
+    function updateRefchainRewards(uint256 _maxReferralRewardETHWei, address _converter, uint _conversionId) public onlyTwoKeyConversionHandler {
         require(_maxReferralRewardETHWei > 0, 'Max referral reward in ETH must be > 0');
         address[] memory influencers = ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).getReferrers(_converter,address(this));
         uint numberOfInfluencers = influencers.length;
@@ -341,6 +341,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
                 }
             }
             //All mappings are now stated to plasma addresses
+            referrerPlasma2EarningsPerConversion[influencers[i]][_conversionId] = b;
             referrerPlasma2BalancesEthWEI[influencers[i]] = referrerPlasma2BalancesEthWEI[influencers[i]].add(b);
             referrerPlasma2TotalEarningsEthWEI[influencers[i]] = referrerPlasma2TotalEarningsEthWEI[influencers[i]].add(b);
             referrerPlasmaAddressToCounterOfConversions[influencers[i]]++;
@@ -494,23 +495,26 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @notice Function to fetch for the referrer his balance, his total earnings, and how many conversions he participated in
      * @dev only referrer by himself, moderator, or contractor can call this
      * @param _referrer is the address of referrer we're checking for
+     * @param signature is the signature if calling functions from FE without ETH address
+     * @param conversionIds are the ids of conversions this referrer participated in
      * @return tuple containing this 3 information
      */
-    function getReferrerBalanceAndTotalEarningsAndNumberOfConversions(address _referrer) public view returns (uint,uint,uint) {
-        require(msg.sender == _referrer || msg.sender == contractor || twoKeyEventSource.isAddressMaintainer(msg.sender));
-        _referrer = twoKeyEventSource.plasmaOf(_referrer);
-        return (referrerPlasma2BalancesEthWEI[_referrer], referrerPlasma2TotalEarningsEthWEI[_referrer], referrerPlasmaAddressToCounterOfConversions[_referrer]);
+    function getReferrerBalanceAndTotalEarningsAndNumberOfConversions(address _referrer, bytes signature, uint[] conversionIds) public view returns (uint,uint,uint,uint[]) {
+        if(_referrer != address(0)) {
+            require(msg.sender == _referrer || msg.sender == contractor || twoKeyEventSource.isAddressMaintainer(msg.sender));
+            _referrer = twoKeyEventSource.plasmaOf(_referrer);
+        } else {
+            bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding referrer to plasma")),
+                keccak256(abi.encodePacked("GET_REFERRER_REWARDS"))));
+            _referrer = Call.recoverHash(hash, signature, 0);
+        }
+        uint length = conversionIds.length;
+        uint[] memory earnings = new uint[](length);
+        for(uint i=0; i<length; i++) {
+            earnings[i] = referrerPlasma2EarningsPerConversion[_referrer][conversionIds[i]];
+        }
+        return (referrerPlasma2BalancesEthWEI[_referrer], referrerPlasma2TotalEarningsEthWEI[_referrer], referrerPlasmaAddressToCounterOfConversions[_referrer], earnings);
     }
-
-    //call this function directly from frontend, and signs it to prove he is owner of the plasma address - no maintainer involved
-    function getReferrerBalanceAndTotalEarningsAndNumberOfConversionsWithPlasmaSig(bytes signature) public view returns (uint,uint,uint) {
-        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding referrer to plasma")),
-            keccak256(abi.encodePacked("GET_REFERRER_REWARDS"))));
-        address message_signer = Call.recoverHash(hash, signature, 0);
-
-        return (referrerPlasma2BalancesEthWEI[message_signer], referrerPlasma2TotalEarningsEthWEI[message_signer], referrerPlasmaAddressToCounterOfConversions[message_signer]);
-    }
-
 
     /**
      * @notice Function to get public link key of an address
