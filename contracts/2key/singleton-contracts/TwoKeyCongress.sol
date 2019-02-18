@@ -3,7 +3,7 @@ pragma solidity ^0.4.24;
 import "../Upgradeable.sol";
 import "../libraries/SafeMath.sol";
 
-contract TwoKeyCongress is Upgradeable {
+contract TwoKeyCongress {
 
     event ReceivedEther(address sender, uint amount);
     using SafeMath for uint;
