@@ -571,6 +571,9 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @param {string} publicLink
      * @param {number} cut
      * @param {number} gasPrice
+     * @param {ICreateCampaignProgress} progressCallback
+     * @param {number} interval
+     * @param {number} timeout
      * @returns {Promise<IPublicLinkKey>}
      */
     public setPublicLinkKey(campaign: any, from: string,  publicLink: string, {
@@ -660,6 +663,9 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @param {string} cutSign
      * @param {boolean} voting
      * @param {string} daoContract
+     * @param {ICreateCampaignProgress} progressCallback
+     * @param {number} interval
+     * @param {number} timeout
      * @returns {Promise<string>}
      */
     public join(campaign: any, from: string, {
@@ -804,6 +810,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     /**
      *
      * @param campaign
+     * @param {boolean} isPaymentFiat
      * @param {string | number | BigNumber} value
      * @returns {Promise<ITokenAmount>}
      */
@@ -835,6 +842,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @param {string} publicLink
      * @param {string} from
      * @param {number} gasPrice
+     * @param {boolean} isConverterAnonymous
      * @returns {Promise<string>}
      */
     public joinAndConvert(campaign: any, value: string | number | BigNumber, publicLink: string, from: string, {gasPrice = this.base._getGasPrice(), isConverterAnonymous}: IConvertOpts = {}): Promise<string> {
@@ -903,6 +911,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @param {string | number | BigNumber} value
      * @param {string} from
      * @param {number} gasPrice
+     * @param {boolean} isConverterAnonymous
      * @returns {Promise<string>}
      */
     public convert(campaign: any, value: string | number | BigNumber, from: string, {gasPrice = this.base._getGasPrice(), isConverterAnonymous}: IConvertOpts = {}) : Promise<string> {
@@ -1078,8 +1087,9 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     }
 
     /**
-     * Function to get conversion handler address from the Acquisition campaign
+     *
      * @param campaign
+     * @param {boolean} skipCache
      * @returns {Promise<string>}
      */
     public getTwoKeyConversionHandlerAddress(campaign: any, skipCache?: boolean): Promise<string> {
@@ -1202,7 +1212,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     /**
      *
      * @param campaign
-     * @param {string} converter
+     * @param {number} conversion_id
      * @param {string} from
      * @param {number} gasPrice
      * @returns {Promise<string>}
@@ -1258,6 +1268,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @param campaign
      * @param {string} converter
      * @param {string} from
+     * @param {boolean} skipCache
      * @returns {Promise<string[]>}
      */
     public getLockupContractsForConverter(campaign: any, converter: string, from: string, skipCache?: boolean): Promise<string[]> {
@@ -1350,7 +1361,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
             try {
                 const campaignInstance = await this._getCampaignInstance(campaign);
                 let value: number = await promisify(campaignInstance.getAmountAddressSent, [from]);
-                value = parseFloat(this.utils.fromWei(value, 'ether').toString())
+                value = parseFloat(this.utils.fromWei(value, 'ether').toString());
                 resolve(value);
             } catch (e) {
                 reject(e);
@@ -1413,7 +1424,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
             try {
                 const campaignInstance = await this._getCampaignInstance(campaign);
                 let [moderatorBalance, moderatorTotalEarnings] = await promisify(campaignInstance.getModeratorBalanceAndTotalEarnings, [{from}]);
-                moderatorBalance = parseFloat(this.utils.fromWei(moderatorBalance, 'ether').toString()),
+                moderatorBalance = parseFloat(this.utils.fromWei(moderatorBalance, 'ether').toString());
                 resolve(moderatorBalance);
             } catch (e) {
                 reject(e);
@@ -1503,7 +1514,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
             try {
                 const campaignInstance = await this._getCampaignInstance(campaign);
                 let [moderatorBalance,moderatorBalanceTotal] = await promisify(campaignInstance.getModeratorBalanceAndTotalEarnings,[{from}]);
-                moderatorBalanceTotal = parseFloat(this.utils.fromWei(moderatorBalanceTotal, 'ether').toString()),
+                moderatorBalanceTotal = parseFloat(this.utils.fromWei(moderatorBalanceTotal, 'ether').toString());
                 resolve(moderatorBalanceTotal);
             } catch (e) {
                 reject(e);
@@ -1514,17 +1525,17 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     /**
      *
      * @param campaign
-     * @param {string} referrer
-     * @param {string} from
+     * @param {string} signature
+     * @param {boolean} skipCache
      * @returns {Promise<IReferrerSummary>}
      */
-    public getReferrerBalanceAndTotalEarningsAndNumberOfConversions(campaign:any, referrerAddress: string, signature: string, conversionIds: number[], skipCache?: boolean) : Promise<IReferrerSummary> {
+    public getReferrerBalanceAndTotalEarningsAndNumberOfConversions(campaign:any, signature: string, skipCache?: boolean) : Promise<IReferrerSummary> {
         return new Promise<any>(async(resolve,reject) => {
            try {
                const campaignInstance = await this._getCampaignInstance(campaign, skipCache);
                let referrerConversionIds = [];
-               let [referrerBalanceAvailable, referrerTotalEarnings, referrerInCountOfConversions] =
-                   await promisify(campaignInstance.getReferrerBalanceAndTotalEarningsAndNumberOfConversionsWithPlasmaSig,[referrerAddress, signature, conversionIds]);
+               let [referrerBalanceAvailable, referrerTotalEarnings, referrerInCountOfConversions, contributions] =
+                   await promisify(campaignInstance.getReferrerBalanceAndTotalEarningsAndNumberOfConversionsWithPlasmaSig,['0x0',signature, []]);
                const obj = {
                    balanceAvailable: parseFloat(this.utils.fromWei(referrerBalanceAvailable, 'ether').toString()),
                    totalEarnings: parseFloat(this.utils.fromWei(referrerTotalEarnings, 'ether').toString()),
@@ -1657,9 +1668,10 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     }
 
     /**
-     * Method to get statistics for the address
+     *
      * @param campaign
      * @param {string} address
+     * @param {boolean} plasma
      * @returns {Promise<IAddressStats>}
      */
     public getAddressStatistic(campaign: any, address: string, plasma: boolean = false) : Promise<IAddressStats>{

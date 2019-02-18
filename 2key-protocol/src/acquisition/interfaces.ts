@@ -120,7 +120,7 @@ export interface ITwoKeyAcquisitionCampaign {
     getModeratorAddress: (campaign: any, from: string) => Promise<string>,
     getAcquisitionCampaignCurrency: (campaign: any, from: string) => Promise<string>,
     getModeratorTotalEarnings: (campaign:any, from:string) => Promise<number>,
-    getReferrerBalanceAndTotalEarningsAndNumberOfConversions: (campaign:any, referrerAddress: string, signature: string, conversionIds: number[], skipCache?: boolean) => Promise<IReferrerSummary>,
+    getReferrerBalanceAndTotalEarningsAndNumberOfConversions: (campaign:any, signature, skipCache?: boolean) => Promise<IReferrerSummary>,
     getCurrentAvailableAmountOfTokens: (campaign:any, from:string) => Promise<number>,
     getAddressStatistic: (campaign: any, address: string, plasma?: boolean) => Promise<IAddressStats>,
     getCampaignSummary: (campaign: any, from: string) => Promise<IConversionStats>,
