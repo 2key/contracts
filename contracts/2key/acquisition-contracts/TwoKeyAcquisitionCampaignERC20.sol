@@ -25,8 +25,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     mapping(address => uint256) internal referrerPlasma2cut; // Mapping representing how much are cuts in percent(0-100) for referrer address
     mapping(address => uint256) internal referrerPlasma2BalancesEthWEI; // balance of EthWei for each influencer that he can withdraw
     mapping(address => uint256) internal referrerPlasma2TotalEarningsEthWEI; // Total earnings for referrers
-    mapping(address => uint256) internal referrerPlasmaAddressToCounterOfConversions;
-
+    mapping(address => uint256) internal referrerPlasmaAddressToCounterOfConversions; // [referrer][conversionId]
+    mapping(address => mapping(uint => uint)) referrerPlasma2EarningsPerConversion;
     mapping(address => address) public public_link_key;
 
     uint moderatorBalanceETHWei; //Balance of the moderator which can be withdrawn
@@ -142,7 +142,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         uint i;
         address new_address;
         // move ARCs based on signature informationc
-        for (i = 0; i < influencers.length; i++) {
+        uint numberOfInfluencers = influencers.length;
+        for (i = 0; i < numberOfInfluencers; i++) {
             new_address = twoKeyEventSource.plasmaOf(influencers[i]);
 
             if (received_from[new_address] == 0) {
@@ -324,9 +325,9 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     function updateRefchainRewards(uint256 _maxReferralRewardETHWei, address _converter) public onlyTwoKeyConversionHandler {
         require(_maxReferralRewardETHWei > 0, 'Max referral reward in ETH must be > 0');
         address[] memory influencers = ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).getReferrers(_converter,address(this));
-
+        uint numberOfInfluencers = influencers.length;
         uint256 total_bounty = 0;
-        for (uint i = 0; i < influencers.length; i++) {
+        for (uint i = 0; i < numberOfInfluencers; i++) {
             uint256 b;
             if (i == influencers.length - 1) {  // if its the last influencer then all the bounty goes to it.
                 b = _maxReferralRewardETHWei;
