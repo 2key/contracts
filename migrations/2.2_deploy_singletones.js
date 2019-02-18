@@ -71,8 +71,15 @@ module.exports = function deploy(deployer) {
          */
         maintainerAddresses = [
             '0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f',
-            '0x098a12404fd3f5a06cfb016eb7669b1c41419705' ,
-            '0x1d55762a320e6826cf00c4f2121b7e53d23f6822'
+            '0x098a12404fd3f5a06cfb016eb7669b1c41419705',
+            '0x1d55762a320e6826cf00c4f2121b7e53d23f6822',
+            '0xbddd873d7945f67d1689fd7870649b81744badd6',
+            '0xbf31911c8b9be1b5632fe52022e553fc7fe48a5d',
+            '0x7a6ea86e08d20bc56885a30c379f6e12aafede26',
+            '0xde205f05f5a50d5690959864dc3df4c1a6ac938c',
+            '0xd128786ef2372cbd2629908226ddd0b712c540e7',
+            '0x52e87d01b1c610424951281ebd1b00a3bcf3b681',
+            '0x5be04cc75b52c6ae5bb4858d58fd57dd15f354e3'
         ];
     } else if ((deployer.network.startsWith('private.test') || deployer.network.startsWith('azure')) && !deployer.network.endsWith('k8s-hdwallet')) {
         /**
