@@ -85,9 +85,13 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
             : await this.helpers._createAndValidate(acquisitionContracts.TwoKeyLockupContract.abi, lockupContract);
     }
 
-    async _getCampaignInstance(campaign: any): Promise<any> {
+    async _getCampaignInstance(campaign: any, skipCache?: boolean): Promise<any> {
         const address = campaign.address || campaign;
         this.base._log('Requesting TwoKeyAcquisitionCampaignERC20 at', address);
+        if (skipCache) {
+            const campaignInstance = await this.helpers._createAndValidate(acquisitionContracts.TwoKeyAcquisitionCampaignERC20.abi, campaign);
+            return campaignInstance;
+        }
         if (this.AcquisitionCampaign && this.AcquisitionCampaign.address === address) {
             this.base._log('Return from cache TwoKeyAcquisitionCampaignERC20 at', this.AcquisitionCampaign.address);
             return this.AcquisitionCampaign;
@@ -1078,10 +1082,10 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @param campaign
      * @returns {Promise<string>}
      */
-    public getTwoKeyConversionHandlerAddress(campaign: any): Promise<string> {
+    public getTwoKeyConversionHandlerAddress(campaign: any, skipCache?: boolean): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
-                const campaignInstance = await this._getCampaignInstance(campaign);
+                const campaignInstance = await this._getCampaignInstance(campaign, skipCache);
                 const conversionHandler = await promisify(campaignInstance.conversionHandler, []);
                 resolve(conversionHandler);
             } catch (e) {
@@ -1256,10 +1260,10 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @param {string} from
      * @returns {Promise<string[]>}
      */
-    public getLockupContractsForConverter(campaign: any, converter: string, from: string): Promise<string[]> {
+    public getLockupContractsForConverter(campaign: any, converter: string, from: string, skipCache?: boolean): Promise<string[]> {
         return new Promise(async (resolve, reject) => {
             try {
-                const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign);
+                const conversionHandlerAddress = await this.getTwoKeyConversionHandlerAddress(campaign, skipCache);
                 const conversionHandlerInstance = this.base.web3.eth.contract(acquisitionContracts.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
                 const lockupContractAddresses = await promisify(conversionHandlerInstance.getLockupContractsForConverter, [converter, {from}]);
                 resolve(lockupContractAddresses);
@@ -1514,10 +1518,10 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @param {string} from
      * @returns {Promise<IReferrerSummary>}
      */
-    public getReferrerBalanceAndTotalEarningsAndNumberOfConversions(campaign:any, signature: string) : Promise<IReferrerSummary> {
+    public getReferrerBalanceAndTotalEarningsAndNumberOfConversions(campaign:any, signature: string, skipCache?: boolean) : Promise<IReferrerSummary> {
         return new Promise<any>(async(resolve,reject) => {
            try {
-               const campaignInstance = await this._getCampaignInstance(campaign);
+               const campaignInstance = await this._getCampaignInstance(campaign, skipCache);
                let [referrerBalanceAvailable, referrerTotalEarnings, referrerInCountOfConversions] =
                    await promisify(campaignInstance.getReferrerBalanceAndTotalEarningsAndNumberOfConversionsWithPlasmaSig,[signature]);
                const obj = {

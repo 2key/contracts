@@ -72,7 +72,7 @@ export interface ILockupInformation {
 }
 
 export interface ITwoKeyAcquisitionCampaign {
-    _getCampaignInstance: (campaign: any) => Promise<any>,
+    _getCampaignInstance: (campaign: any, skipCache?: boolean) => Promise<any>,
     _getConversionHandlerInstance: (campaign: any) => Promise<any>,
     _getLogicHandlerInstance: (campaign: any) => Promise<any>,
     _getLockupContractInstance: (lockupContract: any) => Promise<any>,
@@ -103,12 +103,12 @@ export interface ITwoKeyAcquisitionCampaign {
     convert: (campaign: any, value: string | number | BigNumber, from: string, opts?: IConvertOpts) => Promise<string>
     convertOffline: (campaign: any, from: string, conversionAmountFiat: number, opts?: IConvertOpts) => Promise<string>
     getEstimatedTokenAmount: (campaign: any, isPaymentFiat: boolean, value: string | number | BigNumber) => Promise<ITokenAmount>,
-    getTwoKeyConversionHandlerAddress: (campaign: any) => Promise<string>,
+    getTwoKeyConversionHandlerAddress: (campaign: any, skipCache?: boolean) => Promise<string>,
     approveConverter: (campaign: any, converter: string, from: string, gasPrice? :number) => Promise<string>,
     rejectConverter: (campaign: any, converter: string, from: string, gasPrice? :number) => Promise<string>,
     visit: (campaignAddress: string, referralLink: string) => Promise<string>,
     executeConversion: (campaign: any, conversion_id: number, from: string, gasPrice? :number) => Promise<string>,
-    getLockupContractsForConverter: (campaign: any, converter: string, from: string) => Promise<string[]>,
+    getLockupContractsForConverter: (campaign: any, converter: string, from: string, skipCache?: boolean) => Promise<string[]>,
     addFungibleAssetsToInventoryOfCampaign: (campaign: any, amount: number, from: string, gasPrice? :number) => Promise<string>,
     cancel: (campaign: any, from: string, gasPrice?: number) => Promise<string>,
     isAddressContractor: (campaign:any, from:string) => Promise<boolean>,
@@ -120,7 +120,7 @@ export interface ITwoKeyAcquisitionCampaign {
     getModeratorAddress: (campaign: any, from: string) => Promise<string>,
     getAcquisitionCampaignCurrency: (campaign: any, from: string) => Promise<string>,
     getModeratorTotalEarnings: (campaign:any, from:string) => Promise<number>,
-    getReferrerBalanceAndTotalEarningsAndNumberOfConversions: (campaign:any, signature) => Promise<IReferrerSummary>,
+    getReferrerBalanceAndTotalEarningsAndNumberOfConversions: (campaign:any, signature, skipCache?: boolean) => Promise<IReferrerSummary>,
     getCurrentAvailableAmountOfTokens: (campaign:any, from:string) => Promise<number>,
     getAddressStatistic: (campaign: any, address: string, plasma?: boolean) => Promise<IAddressStats>,
     getCampaignSummary: (campaign: any, from: string) => Promise<IConversionStats>,

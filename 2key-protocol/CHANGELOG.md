@@ -1,3 +1,11 @@
+##1.0.78-develop
+####Acquisition
+**Change methods**
+* _getCampaignInstance: (campaign: any, skipCache?: boolean) => Promise<any>
+* getTwoKeyConversionHandlerAddress: (campaign: any, skipCache?: boolean) => Promise<string>
+* getLockupContractsForConverter: (campaign: any, converter: string, from: string, skipCache?: boolean) => Promise<string[]>,
+* getReferrerBalanceAndTotalEarningsAndNumberOfConversions: (campaign:any, signature, skipCache?: boolean) => Promise<IReferrerSummary>,
+
 ##1.0.75-develop
 ####TwoKeyCampaignValidator -> CampaignValidator
 ####TwoKeyBaseReputation -> BaseReputation
