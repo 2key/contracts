@@ -389,7 +389,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
                 c.state = ConversionState.REJECTED;
                 conversions[conversionId] = c;
                 ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateReservedAmountOfTokensIfConversionRejectedOrExecuted(c.baseTokenUnits + c.bonusTokenUnits);
-                //TODO: Add refund method in the Acquisition to return all the money to converter
                 ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).sendBackEthWhenConversionCancelled(_converter, c.conversionAmount);
             }
         }
