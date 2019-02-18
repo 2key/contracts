@@ -161,13 +161,13 @@ export default class TwoKeyReg implements ITwoKeyReg {
                     console.log('REGISTRY.storedData', userName, address);
                 }
                 if (force || (!userName && !parseInt(address, 16))) {
-                    const userData = `${name}${Sign.md5(fullname, true)}${Sign.md5(email, true)}`;
+                    const userData = `${name}${Sign.md5(fullname)}${Sign.md5(email)}`;
                     const signature = await Sign.sign_name(this.base.web3, from, userData);
                     resolve({
                         name,
                         address: from,
-                        fullname: Sign.md5(fullname, true),
-                        email: Sign.md5(email, true),
+                        fullname: Sign.md5(fullname),
+                        email: Sign.md5(email),
                         signature,
                     });
                 } else {
