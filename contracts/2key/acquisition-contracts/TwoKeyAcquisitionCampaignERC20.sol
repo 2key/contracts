@@ -322,7 +322,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @param _converter is the address of the converter
      * @dev This function can only be called by TwoKeyConversionHandler contract
      */
-    function updateRefchainRewards(uint256 _maxReferralRewardETHWei, address _converter) public onlyTwoKeyConversionHandler {
+    function updateRefchainRewards(uint256 _maxReferralRewardETHWei, address _converter, uint _conversionId) public onlyTwoKeyConversionHandler {
         require(_maxReferralRewardETHWei > 0, 'Max referral reward in ETH must be > 0');
         address[] memory influencers = ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).getReferrers(_converter,address(this));
         uint numberOfInfluencers = influencers.length;
@@ -341,6 +341,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
                 }
             }
             //All mappings are now stated to plasma addresses
+            referrerPlasma2EarningsPerConversion[influencers[i]][_conversionId] = b;
             referrerPlasma2BalancesEthWEI[influencers[i]] = referrerPlasma2BalancesEthWEI[influencers[i]].add(b);
             referrerPlasma2TotalEarningsEthWEI[influencers[i]] = referrerPlasma2TotalEarningsEthWEI[influencers[i]].add(b);
             referrerPlasmaAddressToCounterOfConversions[influencers[i]]++;
@@ -511,6 +512,14 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         return (referrerPlasma2BalancesEthWEI[message_signer], referrerPlasma2TotalEarningsEthWEI[message_signer], referrerPlasmaAddressToCounterOfConversions[message_signer]);
     }
 
+    function getReferrerEarningsPerConversions(address _referrer, uint[] conversionIds) public view returns (uint[]) {
+        uint length = conversionIds.length;
+        uint[] memory earnings = new uint[](length);
+        for(uint i=0; i<length; i++) {
+            earnings[i] = referrerPlasma2EarningsPerConversion[_referrer][conversionIds[i]];
+        }
+        return earnings;
+    }
 
     /**
      * @notice Function to get public link key of an address

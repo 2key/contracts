@@ -3,7 +3,7 @@ pragma solidity ^0.4.24;
 // @author Nikola Madjarevic
 // @notice Contract which will act as an interface for only methods we need from AcquisitionCampaign in other contracts
 contract ITwoKeyAcquisitionCampaignERC20 {
-    function updateRefchainRewards(uint256 _maxReferralRewardETHWei, address _converter) public;
+    function updateRefchainRewards(uint256 _maxReferralRewardETHWei, address _converter, uint _conversionId) public;
     function moveFungibleAsset(address _to, uint256 _amount) public;
     function updateContractorProceeds(uint value) public;
     function sendBackEthWhenConversionCancelled(address _cancelledConverter, uint _conversionAmount) public;
