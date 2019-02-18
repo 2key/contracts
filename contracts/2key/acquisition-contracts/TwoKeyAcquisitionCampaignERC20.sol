@@ -495,30 +495,25 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
      * @notice Function to fetch for the referrer his balance, his total earnings, and how many conversions he participated in
      * @dev only referrer by himself, moderator, or contractor can call this
      * @param _referrer is the address of referrer we're checking for
+     * @param signature is the signature if calling functions from FE without ETH address
+     * @param conversionIds are the ids of conversions this referrer participated in
      * @return tuple containing this 3 information
      */
-    function getReferrerBalanceAndTotalEarningsAndNumberOfConversions(address _referrer) public view returns (uint,uint,uint) {
-        require(msg.sender == _referrer || msg.sender == contractor || twoKeyEventSource.isAddressMaintainer(msg.sender));
-        _referrer = twoKeyEventSource.plasmaOf(_referrer);
-        return (referrerPlasma2BalancesEthWEI[_referrer], referrerPlasma2TotalEarningsEthWEI[_referrer], referrerPlasmaAddressToCounterOfConversions[_referrer]);
-    }
-
-    //call this function directly from frontend, and signs it to prove he is owner of the plasma address - no maintainer involved
-    function getReferrerBalanceAndTotalEarningsAndNumberOfConversionsWithPlasmaSig(bytes signature) public view returns (uint,uint,uint) {
-        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding referrer to plasma")),
-            keccak256(abi.encodePacked("GET_REFERRER_REWARDS"))));
-        address message_signer = Call.recoverHash(hash, signature, 0);
-
-        return (referrerPlasma2BalancesEthWEI[message_signer], referrerPlasma2TotalEarningsEthWEI[message_signer], referrerPlasmaAddressToCounterOfConversions[message_signer]);
-    }
-
-    function getReferrerEarningsPerConversions(address _referrer, uint[] conversionIds) public view returns (uint[]) {
+    function getReferrerBalanceAndTotalEarningsAndNumberOfConversions(address _referrer, bytes signature, uint[] conversionIds) public view returns (uint,uint,uint,uint[]) {
+        if(_referrer != address(0)) {
+            require(msg.sender == _referrer || msg.sender == contractor || twoKeyEventSource.isAddressMaintainer(msg.sender));
+            _referrer = twoKeyEventSource.plasmaOf(_referrer);
+        } else {
+            bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding referrer to plasma")),
+                keccak256(abi.encodePacked("GET_REFERRER_REWARDS"))));
+            _referrer = Call.recoverHash(hash, signature, 0);
+        }
         uint length = conversionIds.length;
         uint[] memory earnings = new uint[](length);
         for(uint i=0; i<length; i++) {
             earnings[i] = referrerPlasma2EarningsPerConversion[_referrer][conversionIds[i]];
         }
-        return earnings;
+        return (referrerPlasma2BalancesEthWEI[_referrer], referrerPlasma2TotalEarningsEthWEI[_referrer], referrerPlasmaAddressToCounterOfConversions[_referrer], earnings);
     }
 
     /**
