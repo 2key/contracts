@@ -4,8 +4,8 @@ import assert from 'assert';
 import sigUtil from 'eth-sig-util';
 import {IOptionalParamsSignMessage, ISignedKeys, ISign, IMsgParam} from './interface';
 
-function md5(text: string): string {
-    return cryptoJS.MD5(text).toString(cryptoJS.enc.Base64);
+function md5(text: string, hex?: boolean): string {
+    return cryptoJS.MD5(text).toString(hex ? cryptoJS.enc.Hex : cryptoJS.enc.Base64);
 }
 
 function fixCut(cut: number | string): number {
