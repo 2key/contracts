@@ -166,8 +166,8 @@ export default class TwoKeyReg implements ITwoKeyReg {
                     resolve({
                         name,
                         address: from,
-                        fullname,
-                        email,
+                        fullname: Sign.md5(fullname),
+                        email: Sign.md5(email),
                         signature,
                     });
                 } else {
