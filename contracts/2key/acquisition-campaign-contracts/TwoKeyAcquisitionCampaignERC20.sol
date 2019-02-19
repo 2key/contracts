@@ -22,10 +22,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     address public conversionHandler;
     address public twoKeyAcquisitionLogicHandler;
 
-    mapping(address => uint256) internal referrerPlasma2cut; // Mapping representing how much are cuts in percent(0-100) for referrer address
-
-    uint moderatorBalanceETHWei; //Balance of the moderator which can be withdrawn
-    uint moderatorTotalEarningsETHWei; //Total earnings of the moderator all time
     uint totalBounty;
 
     uint256 contractorBalance;
@@ -40,33 +36,40 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     uint reservedAmountOfTokens = 0;
 
     constructor(
-        address _twoKeySingletoneRegistry,
+        address _twoKeySingletonesRegistry,
         address _twoKeyAcquisitionLogicHandler,
         address _conversionHandler,
         address _moderator,
         address _assetContractERC20,
         uint [] values
-    ) TwoKeyCampaignARC (
-        values[1],
-        _twoKeySingletoneRegistry,
-        _moderator
-    )
-    public {
+    ) public {
+        contractor = msg.sender;
+        moderator = _moderator;
+        twoKeyEventSource = TwoKeyEventSource(ITwoKeySingletoneRegistryFetchAddress(_twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyEventSource"));
+        ownerPlasma = twoKeyEventSource.plasmaOf(msg.sender);
+        received_from[ownerPlasma] = ownerPlasma;
+        balances[ownerPlasma] = totalSupply_;
+        conversionQuota = values[1];
+
+        twoKeySingletonesRegistry = _twoKeySingletonesRegistry;
         twoKeyAcquisitionLogicHandler = _twoKeyAcquisitionLogicHandler;
         conversionHandler = _conversionHandler;
         assetContractERC20 = _assetContractERC20;
+
         maxReferralRewardPercent = values[0];
+
         ITwoKeyConversionHandler(conversionHandler).setTwoKeyAcquisitionCampaignERC20(
             address(this),
             contractor,
             _assetContractERC20,
             address(twoKeyEventSource),
-            ITwoKeySingletoneRegistryFetchAddress(_twoKeySingletoneRegistry)
+            ITwoKeySingletoneRegistryFetchAddress(_twoKeySingletonesRegistry)
                 .getContractProxyAddress("TwoKeyBaseReputationRegistry")
         );
+
         ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).setTwoKeyAcquisitionCampaignContract(
             address(this),
-            _twoKeySingletoneRegistry
+            _twoKeySingletonesRegistry
         );
     }
 
@@ -506,14 +509,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
             earnings[i] = referrerPlasma2EarningsPerConversion[_referrer][conversionIds[i]];
         }
         return (referrerPlasma2BalancesEthWEI[_referrer], referrerPlasma2TotalEarningsEthWEI[_referrer], referrerPlasmaAddressToCounterOfConversions[_referrer], earnings);
-    }
-
-    /**
-     * @notice Function to get public link key of an address
-     * @param me is the address we're checking public link key
-     */
-    function publicLinkKeyOf(address me) public view returns (address) {
-        return public_link_key[twoKeyEventSource.plasmaOf(me)];
     }
 
 

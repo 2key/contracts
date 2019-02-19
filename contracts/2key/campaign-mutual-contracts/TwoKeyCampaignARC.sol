@@ -16,12 +16,17 @@ contract TwoKeyCampaignARC is ArcERC20 {
     address public moderator; //moderator address
 	address public ownerPlasma; //contractor plasma address
 
+	uint moderatorBalanceETHWei; //Balance of the moderator which can be withdrawn
+	uint moderatorTotalEarningsETHWei; //Total earnings of the moderator all time
 
+
+    mapping(address => uint256) internal referrerPlasma2cut; // Mapping representing how much are cuts in percent(0-100) for referrer address
 	mapping(address => uint256) internal referrerPlasma2BalancesEthWEI; // balance of EthWei for each influencer that he can withdraw
 	mapping(address => uint256) internal referrerPlasma2TotalEarningsEthWEI; // Total earnings for referrers
 	mapping(address => uint256) internal referrerPlasmaAddressToCounterOfConversions; // [referrer][conversionId]
 	mapping(address => mapping(uint => uint)) referrerPlasma2EarningsPerConversion;
 	mapping(address => address) public public_link_key;
+
 
 	uint256 maxReferralRewardPercent; // maxReferralRewardPercent is actually bonus percentage in ETH
 	uint256 conversionQuota;  // maximal ARC tokens that can be passed in transferFrom
@@ -33,18 +38,6 @@ contract TwoKeyCampaignARC is ArcERC20 {
         require(msg.sender == contractor);
         _;
     }
-
-
-    constructor(uint256 _conversionQuota, address _twoKeySingletonesRegistry, address _moderator) ArcERC20() public {
-		twoKeyEventSource = TwoKeyEventSource(ITwoKeySingletoneRegistryFetchAddress(_twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyEventSource"));
-		moderator = _moderator;
-		contractor = msg.sender;
-		ownerPlasma = twoKeyEventSource.plasmaOf(msg.sender);
-		received_from[ownerPlasma] = ownerPlasma;
-		conversionQuota = _conversionQuota;
-		balances[ownerPlasma] = totalSupply_;
-        twoKeySingletonesRegistry = _twoKeySingletonesRegistry;
-	}
 
 	/**
      * @dev Transfer tokens from one address to another
@@ -88,5 +81,16 @@ contract TwoKeyCampaignARC is ArcERC20 {
 	function getReceivedFrom(address _receiver) public view returns (address) {
 		return received_from[_receiver];
 	}
+
+
+	/**
+     * @notice Function to get public link key of an address
+     * @param me is the address we're checking public link key
+     */
+	function publicLinkKeyOf(address me) public view returns (address) {
+		return public_link_key[twoKeyEventSource.plasmaOf(me)];
+	}
+
+
 
 }
