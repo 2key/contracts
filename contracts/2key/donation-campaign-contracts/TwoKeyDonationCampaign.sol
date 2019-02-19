@@ -63,10 +63,16 @@ contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaign {
         uint _campaignGoal,
         bool _mustReachGoal,
         uint _conversionQuota,
-        address _twoKeySingletoneRegistry
-    ) TwoKeyCampaignARC(
-        _conversionQuota, _twoKeySingletoneRegistry, _moderator
+        address _twoKeySingletonesRegistry
     ) public {
+        contractor = msg.sender;
+        moderator = _moderator;
+        twoKeyEventSource = TwoKeyEventSource(ITwoKeySingletoneRegistryFetchAddress(_twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyEventSource"));
+        ownerPlasma = twoKeyEventSource.plasmaOf(msg.sender);
+        received_from[ownerPlasma] = ownerPlasma;
+        balances[ownerPlasma] = totalSupply_;
+        conversionQuota = _conversionQuota;
+        twoKeySingletonesRegistry = _twoKeySingletonesRegistry;
         erc20InvoiceToken = _erc20InvoiceToken;
         campaignName = _campaignName;
         publicMetaHash = _publicMetaHash;

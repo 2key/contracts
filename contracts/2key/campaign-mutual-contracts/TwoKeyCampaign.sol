@@ -81,7 +81,7 @@ contract TwoKeyCampaign is ArcERC20 {
      * @param me is the ethereum address
      * @param new_public_key is the new key user want's to set as his public key
      */
-    function setPublicLinkKeyOf(address me, address new_public_key) private {
+    function setPublicLinkKeyOf(address me, address new_public_key) internal {
         me = twoKeyEventSource.plasmaOf(me);
         require(balanceOf(me) > 0,'no ARCs');
         address old_address = public_link_key[me];
