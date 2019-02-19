@@ -1,9 +1,9 @@
 pragma solidity ^0.4.24;
 
-import "./ArcERC20.sol";
 import "../singleton-contracts/TwoKeyEventSource.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../libraries/SafeMath.sol";
+import "../acquisition-campaign-contracts/ArcERC20.sol";
 
 contract TwoKeyCampaignARC is ArcERC20 {
 
@@ -31,8 +31,10 @@ contract TwoKeyCampaignARC is ArcERC20 {
     }
 
 
-    constructor(uint256 _conversionQuota, address _twoKeySingletonesRegistry) ArcERC20() public {
+    constructor(uint256 _conversionQuota, address _twoKeySingletonesRegistry, address _moderator) ArcERC20() public {
 		twoKeyEventSource = TwoKeyEventSource(ITwoKeySingletoneRegistryFetchAddress(_twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyEventSource"));
+		moderator = _moderator;
+		contractor = msg.sender;
 		ownerPlasma = twoKeyEventSource.plasmaOf(msg.sender);
 		received_from[ownerPlasma] = ownerPlasma;
 		conversionQuota = _conversionQuota;
@@ -74,42 +76,6 @@ contract TwoKeyCampaignARC is ArcERC20 {
 		received_from[_to] = _from;
 		return true;
 	}
-
-
-
-//	/**
-//	 * @notice Function to get referrers for the converter
-//	 * @param customer is the converter ETH address
-//	 * @dev inside method we're converting it to plasma address
-//	 */
-//	function getReferrers(address customer) internal view returns (address[]) {
-//		// build a list of all influencers from converter back to to contractor
-//		// dont count the conveter and contractor themselves
-//		address influencer = twoKeyEventSource.plasmaOf(customer);
-//		// first count how many influencers
-//		uint n_influencers = 0;
-//		while (true) {
-//			influencer = twoKeyEventSource.plasmaOf(received_from[influencer]);
-//			// Owner is owner of campaign (contractor)
-//			if (influencer == ownerPlasma) {
-//				break;
-//			}
-//			n_influencers++;
-//		}
-//		// allocate temporary memory to hold the influencers
-//		address[] memory influencers = new address[](n_influencers);
-//		// fill the array of influencers in reverse order, from the last influencer just before the converter to the
-//		// first influencer just after the contractor
-//		influencer = twoKeyEventSource.plasmaOf(customer);
-//		while (n_influencers > 0) {
-//			influencer = twoKeyEventSource.plasmaOf(received_from[influencer]);
-//			n_influencers--;
-//			influencers[n_influencers] = influencer;
-//		}
-//
-//		return influencers;
-//	}
-
 
 	/**
 	 * @notice Getter for the referral chain

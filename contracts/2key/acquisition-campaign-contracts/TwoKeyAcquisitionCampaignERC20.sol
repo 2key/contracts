@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
 import "../singleton-contracts/TwoKeyEventSource.sol";
-import "./TwoKeyCampaignARC.sol";
+import "../campaign-mutual-contracts/TwoKeyCampaignARC.sol";
 
 import "../interfaces/IERC20.sol";
 import "../interfaces/IUpgradableExchange.sol";
@@ -62,13 +62,12 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         uint [] values
     ) TwoKeyCampaignARC (
         values[1],
-        _twoKeySingletoneRegistry
+        _twoKeySingletoneRegistry,
+        _moderator
     )
     public {
         twoKeyAcquisitionLogicHandler = _twoKeyAcquisitionLogicHandler;
         conversionHandler = _conversionHandler;
-        contractor = msg.sender;
-        moderator = _moderator;
         assetContractERC20 = _assetContractERC20;
         maxReferralRewardPercent = values[0];
         ITwoKeyConversionHandler(conversionHandler).setTwoKeyAcquisitionCampaignERC20(
