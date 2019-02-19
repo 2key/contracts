@@ -34,6 +34,19 @@ contract TwoKeyPlasmaEvents is Upgradeable {
     mapping(address => address) public plasma2ethereum;
     mapping(address => address) public ethereum2plasma;
 
+    mapping(address => string) addressToUsername;
+    mapping(string => address) usernameToAddress;
+
+    function linkUsernameAndAddress(bytes signature, address plasma_address, string username) public {
+        require(msg.sender == plasma_address || isMaintainer[msg.sender]);
+        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to plasma address")),keccak256(abi.encodePacked(plasma_address))));
+        require (signature.length == 65, 'bad plasma signature length');
+        address plasma = Call.recoverHash(hash,signature,0);
+        require(plasma == plasma_address);
+        addressToUsername[plasma_address] = username;
+        usernameToAddress[username] = plasma_address;
+    }
+
     // campaign,contractor eth-addr=>from eth-addr=>to eth or plasma address=>true/false
     // not that the "to" addrss in an edge of the graph can be either a plasma or an ethereum address
     // the from address is always an ethereum address
