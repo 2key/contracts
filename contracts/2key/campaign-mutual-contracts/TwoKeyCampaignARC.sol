@@ -9,20 +9,24 @@ contract TwoKeyCampaignARC is ArcERC20 {
 
 	using SafeMath for uint256;
 
-	address public contractor;
-    address public moderator;
-	address public ownerPlasma;
-
-	mapping(address => address) public public_link_key;
-
 	TwoKeyEventSource twoKeyEventSource;
 	address public twoKeySingletonesRegistry;
 
+	address public contractor; //contractor address
+    address public moderator; //moderator address
+	address public ownerPlasma; //contractor plasma address
 
+
+	mapping(address => uint256) internal referrerPlasma2BalancesEthWEI; // balance of EthWei for each influencer that he can withdraw
+	mapping(address => uint256) internal referrerPlasma2TotalEarningsEthWEI; // Total earnings for referrers
+	mapping(address => uint256) internal referrerPlasmaAddressToCounterOfConversions; // [referrer][conversionId]
+	mapping(address => mapping(uint => uint)) referrerPlasma2EarningsPerConversion;
+	mapping(address => address) public public_link_key;
+
+	uint256 maxReferralRewardPercent; // maxReferralRewardPercent is actually bonus percentage in ETH
 	uint256 conversionQuota;  // maximal ARC tokens that can be passed in transferFrom
+	mapping(address => address) internal received_from; // referral graph, who did you receive the referral from
 
-	// referral graph, who did you receive the referral from
-	mapping(address => address) internal received_from;
 
     // @notice Modifier which allows only contractor to call methods
     modifier onlyContractor() {

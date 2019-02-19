@@ -127,6 +127,7 @@ contract TwoKeyPlasmaEvents is Upgradeable {
             require(old_address == new_public_key,'public key can not be modified');
         }
     }
+
     // have a different setPublicLinkKey method that a plasma user can call with a new contract,public_link_key
     // The steps are as follow:
     // 1. make sure you have an ethereum address

@@ -23,14 +23,11 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     address public twoKeyAcquisitionLogicHandler;
 
     mapping(address => uint256) internal referrerPlasma2cut; // Mapping representing how much are cuts in percent(0-100) for referrer address
-    mapping(address => uint256) internal referrerPlasma2BalancesEthWEI; // balance of EthWei for each influencer that he can withdraw
-    mapping(address => uint256) internal referrerPlasma2TotalEarningsEthWEI; // Total earnings for referrers
-    mapping(address => uint256) internal referrerPlasmaAddressToCounterOfConversions; // [referrer][conversionId]
-    mapping(address => mapping(uint => uint)) referrerPlasma2EarningsPerConversion;
 
     uint moderatorBalanceETHWei; //Balance of the moderator which can be withdrawn
     uint moderatorTotalEarningsETHWei; //Total earnings of the moderator all time
     uint totalBounty;
+
     uint256 contractorBalance;
     uint256 contractorTotalProceeds;
 
@@ -40,17 +37,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
 
     address assetContractERC20; // Asset contract is address of ERC20 inventory
 
-    uint256 maxReferralRewardPercent; // maxReferralRewardPercent is actually bonus percentage in ETH
     uint reservedAmountOfTokens = 0;
-
-    /**
-     * @notice Modifier which will enable only twoKeyConversionHandlerContract to execute some functions
-     */
-    modifier onlyTwoKeyConversionHandler() {
-        require(msg.sender == address(conversionHandler));
-        _;
-    }
-
 
     constructor(
         address _twoKeySingletoneRegistry,
@@ -81,6 +68,14 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
             address(this),
             _twoKeySingletoneRegistry
         );
+    }
+
+    /**
+     * @notice Modifier which will enable only twoKeyConversionHandlerContract to execute some functions
+     */
+    modifier onlyTwoKeyConversionHandler() {
+        require(msg.sender == address(conversionHandler));
+        _;
     }
 
     /**
