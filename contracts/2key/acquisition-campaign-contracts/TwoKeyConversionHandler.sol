@@ -22,8 +22,10 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
 
     using SafeMath for uint256;
 
-    event ConversionCreated(uint conversionId);
+    //TODO: Add tokens sold to Campaign Summary here and total bounty to the acquisition somewhere to some getter
 
+    event ConversionCreated(uint conversionId);
+    uint tokensSold = 0;
     uint raisedFundsEthWei = 0;
     uint numberOfConversions = 0;
     uint256 expiryConversionInHours; // How long converter can be pending before it will be automatically rejected and funds will be returned to convertor (hours)
@@ -251,6 +253,8 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
             ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateReservedAmountOfTokensIfConversionRejectedOrExecuted(totalUnits);
             ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateContractorProceeds(conversion.contractorProceedsETHWei);
         }
+
+        tokensSold = tokensSold + conversion.baseTokenUnits + conversion.bonusTokenUnits; //update sold tokens once conversion is executed
     }
 
     /**
@@ -434,7 +438,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
      * @notice Get's number of converters per type, and returns tuple, as well as total raised funds
      getCampaignSummary
      */
-    function getCampaignSummary() public view returns (uint,uint,uint,uint) {
+    function getCampaignSummary() public view returns (uint,uint,uint,uint,uint) {
         bytes32 pending = convertConverterStateToBytes(ConverterState.PENDING_APPROVAL);
         bytes32 approved = convertConverterStateToBytes(ConverterState.APPROVED);
         bytes32 rejected = convertConverterStateToBytes(ConverterState.REJECTED);
@@ -443,7 +447,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
         uint numberOfApproved = stateToConverter[approved].length;
         uint numberOfRejected = stateToConverter[rejected].length;
 
-        return (numberOfPending,numberOfApproved,numberOfRejected,raisedFundsEthWei);
+        return (numberOfPending,numberOfApproved,numberOfRejected,raisedFundsEthWei, tokensSold);
     }
 
     /**

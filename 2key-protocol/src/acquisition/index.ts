@@ -1639,13 +1639,14 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         return new Promise<IConversionStats>(async(resolve,reject) => {
             try {
                 const conversionHandlerInstance = await this._getConversionHandlerInstance(campaign);
-                const [pending,approved,rejected,totalRaised] = await promisify(conversionHandlerInstance.getCampaignSummary,[{from}]);
+                const [pending,approved,rejected,totalRaised,tokensSold] = await promisify(conversionHandlerInstance.getCampaignSummary,[{from}]);
                 resolve(
                     {
                         pendingConverters:  pending.toNumber(),
                         approvedConverters:  approved.toNumber(),
                         rejectedConverters:  rejected.toNumber(),
                         totalETHRaised: parseFloat(this.utils.fromWei(totalRaised, 'ether').toString()),
+                        tokensSold: parseFloat(this.utils.fromWei(tokensSold,'ether').toString())
                     }
                 )
             } catch (e) {

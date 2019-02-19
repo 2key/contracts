@@ -192,6 +192,7 @@ export interface IConversionStats {
     approvedConverters: number,
     rejectedConverters: number,
     totalETHRaised: number
+    tokensSold: number
 }
 
 export interface IAddressStats {
