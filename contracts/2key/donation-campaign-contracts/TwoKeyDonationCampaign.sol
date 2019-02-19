@@ -21,8 +21,9 @@ contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaignARC
     bool mustReachGoal; // If not, all the funds are returned to the senders
 
     address erc20InvoiceToken; // ERC20 token which will be issued as an invoice
-    mapping(address => uint) erc20ToAmountTransfered;
     uint maxReferralRewardPercent;
+
+    uint balance;
 
     mapping(address => uint) amountUserContributed;
 
@@ -83,12 +84,20 @@ contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaignARC
         _;
     }
 
-    function joinAndDonate(bytes signature, bool isAnonymous) public payable {
+    function joinAndDonateERC20(bytes signature, bool isAnonymous, address erc20Contract, uint amount) public {
 
     }
 
-    function donate(bool isAnonymous) public payable {
+    function donateERC20(bool isAnonymous, address erc20Contract, uint amount) public {
 
+    }
+
+    function joinAndDonate(bytes signature, bool isAnonymous) public payable {
+        amountUserContributed[msg.sender] += msg.value;
+    }
+
+    function donate(bool isAnonymous) public payable {
+        amountUserContributed[msg.sender] += msg.value;
     }
 
 
