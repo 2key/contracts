@@ -20,8 +20,8 @@ contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaignARC
     uint campaignGoal; // Goal of the campaign, how many funds to raise
     bool mustReachGoal; // If not, all the funds are returned to the senders
 
-    address erc20InvoiceToken;
-    uint balanceOfEtherAndERC20;
+    address erc20InvoiceToken; // ERC20 token which will be issued as an invoice
+    mapping(address => uint) erc20ToAmountTransfered;
     uint maxReferralRewardPercent;
 
     mapping(address => uint) amountUserContributed;
@@ -58,6 +58,10 @@ contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaignARC
     modifier isGoalReached {
         require(campaignGoal < balance);
         _;
+    }
+
+    function donate(bytes signature) public payable {
+
     }
 
 
