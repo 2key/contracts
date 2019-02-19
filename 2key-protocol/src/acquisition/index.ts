@@ -314,7 +314,11 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 if (progressCallback) {
                     progressCallback('ValidateCampaign', false, txHash);
                 }
-                await this.utils.getTransactionReceiptMined(txHash);
+                await this.utils.getTransactionReceiptMined(txHash, {
+                    web3: this.base.web3,
+                    interval,
+                    timeout
+                });
                 if (progressCallback) {
                     progressCallback('ValidateCampaign', true, txHash);
                 }
