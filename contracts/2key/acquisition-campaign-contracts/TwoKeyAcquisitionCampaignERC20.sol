@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
 import "../singleton-contracts/TwoKeyEventSource.sol";
-import "../campaign-mutual-contracts/TwoKeyCampaignARC.sol";
+import "../campaign-mutual-contracts/TwoKeyCampaign.sol";
 
 import "../interfaces/IERC20.sol";
 import "../interfaces/IUpgradableExchange.sol";
@@ -14,7 +14,7 @@ import "../libraries/SafeMath.sol";
  * @author Nikola Madjarevic
  * @notice Campaign which will sell ERC20 tokens
  */
-contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
+contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
 
     using Call for *;
     using SafeMath for uint;

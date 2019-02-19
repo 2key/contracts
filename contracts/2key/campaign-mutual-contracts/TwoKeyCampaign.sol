@@ -5,7 +5,7 @@ import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../libraries/SafeMath.sol";
 import "../acquisition-campaign-contracts/ArcERC20.sol";
 
-contract TwoKeyCampaignARC is ArcERC20 {
+contract TwoKeyCampaign is ArcERC20 {
 
 	using SafeMath for uint256;
 

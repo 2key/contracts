@@ -1,12 +1,12 @@
 pragma solidity ^0.4.24;
 
 import "./TwoKeyDonationCampaignType.sol";
-import "../campaign-mutual-contracts/TwoKeyCampaignARC.sol";
+import "../campaign-mutual-contracts/TwoKeyCampaign.sol";
 /**
  * @author Nikola Madjarevic
  * Created at 2/19/19
  */
-contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaignARC {
+contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaign {
 
     DonationType campaignType; //Type of campaign
 
