@@ -28,6 +28,8 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
     uint tokensSold = 0;
     uint raisedFundsEthWei = 0;
     uint numberOfConversions = 0;
+    uint totalBounty;
+
     uint256 expiryConversionInHours; // How long converter can be pending before it will be automatically rejected and funds will be returned to convertor (hours)
 
     Conversion[] conversions;
@@ -247,6 +249,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
         if(conversion.isConversionFiat == false) {
             ITwoKeyBaseReputationRegistry(twoKeyBaseReputationRegistry).updateOnConversionExecutedEvent(conversion.converter, contractor, twoKeyAcquisitionCampaignERC20);
             ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateRefchainRewards(conversion.maxReferralRewardETHWei, conversion.converter, _conversionId);
+            totalBounty = totalBounty.add(conversion.maxReferralRewardETHWei);
             // update moderator balances
             ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateModeratorBalanceETHWei(conversion.moderatorFeeETHWei);
             raisedFundsEthWei = raisedFundsEthWei + conversion.contractorProceedsETHWei + conversion.moderatorFeeETHWei + conversion.maxReferralRewardETHWei;
@@ -438,7 +441,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
      * @notice Get's number of converters per type, and returns tuple, as well as total raised funds
      getCampaignSummary
      */
-    function getCampaignSummary() public view returns (uint,uint,uint,uint,uint) {
+    function getCampaignSummary() public view returns (uint,uint,uint,uint,uint,uint) {
         bytes32 pending = convertConverterStateToBytes(ConverterState.PENDING_APPROVAL);
         bytes32 approved = convertConverterStateToBytes(ConverterState.APPROVED);
         bytes32 rejected = convertConverterStateToBytes(ConverterState.REJECTED);
@@ -447,7 +450,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
         uint numberOfApproved = stateToConverter[approved].length;
         uint numberOfRejected = stateToConverter[rejected].length;
 
-        return (numberOfPending,numberOfApproved,numberOfRejected,raisedFundsEthWei, tokensSold);
+        return (numberOfPending,numberOfApproved,numberOfRejected,raisedFundsEthWei, tokensSold, totalBounty);
     }
 
     /**

@@ -191,8 +191,9 @@ export interface IConversionStats {
     pendingConverters: number,
     approvedConverters: number,
     rejectedConverters: number,
-    totalETHRaised: number
-    tokensSold: number
+    totalETHRaised: number,
+    tokensSold: number,
+    totalBounty: number,
 }
 
 export interface IAddressStats {
