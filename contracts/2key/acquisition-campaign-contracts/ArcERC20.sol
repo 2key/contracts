@@ -7,7 +7,7 @@ contract ArcERC20  {
 
     event Transfer(address indexed from, address indexed to, uint256 value);
 
-    uint256 internal totalSupply_;
+    uint256 internal totalSupply_ = 1000000;
 
     mapping(address => uint256) internal balances;
 

@@ -13,11 +13,11 @@ contract TwoKeyCampaignARC is ArcERC20 {
     address public moderator;
 	address public ownerPlasma;
 
-	address public twoKeySingletonesRegistry;
-
-	uint256 internal totalSupply_ = 1000000;
+	mapping(address => address) public public_link_key;
 
 	TwoKeyEventSource twoKeyEventSource;
+	address public twoKeySingletonesRegistry;
+
 
 	uint256 conversionQuota;  // maximal ARC tokens that can be passed in transferFrom
 

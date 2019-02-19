@@ -27,7 +27,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     mapping(address => uint256) internal referrerPlasma2TotalEarningsEthWEI; // Total earnings for referrers
     mapping(address => uint256) internal referrerPlasmaAddressToCounterOfConversions; // [referrer][conversionId]
     mapping(address => mapping(uint => uint)) referrerPlasma2EarningsPerConversion;
-    mapping(address => address) public public_link_key;
 
     uint moderatorBalanceETHWei; //Balance of the moderator which can be withdrawn
     uint moderatorTotalEarningsETHWei; //Total earnings of the moderator all time
