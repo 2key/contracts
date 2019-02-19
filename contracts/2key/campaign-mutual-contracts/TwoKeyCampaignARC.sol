@@ -50,6 +50,7 @@ contract TwoKeyCampaignARC is ArcERC20 {
 		return transferFromInternal(_from, _to, _value);
 	}
 
+
 	function transferFromInternal(address _from, address _to, uint256 _value) internal returns (bool) {
 		// _from and _to are assumed to be already converted to plasma address (e.g. using plasmaOf)
 		require(_value == 1, 'can only transfer 1 ARC');
@@ -74,10 +75,38 @@ contract TwoKeyCampaignARC is ArcERC20 {
 		return true;
 	}
 
-	/**
-	 * @notice Getter for the referral chain
-	 * @param _receiver is address we want to check who he has received link from
-	 */
+
+    /**
+     * @notice Private function to set public link key to plasma address
+     * @param me is the ethereum address
+     * @param new_public_key is the new key user want's to set as his public key
+     */
+    function setPublicLinkKeyOf(address me, address new_public_key) private {
+        me = twoKeyEventSource.plasmaOf(me);
+        require(balanceOf(me) > 0,'no ARCs');
+        address old_address = public_link_key[me];
+        if (old_address == address(0)) {
+            public_link_key[me] = new_public_key;
+        } else {
+            require(old_address == new_public_key,'public key can not be modified');
+        }
+        public_link_key[me] = new_public_key;
+    }
+
+
+    /**
+     * @notice Function to set public link key
+     * @param new_public_key is the new public key
+     */
+    function setPublicLinkKey(address new_public_key) public {
+        setPublicLinkKeyOf(msg.sender, new_public_key);
+    }
+
+
+    /**
+     * @notice Getter for the referral chain
+     * @param _receiver is address we want to check who he has received link from
+     */
 	function getReceivedFrom(address _receiver) public view returns (address) {
 		return received_from[_receiver];
 	}
@@ -92,5 +121,22 @@ contract TwoKeyCampaignARC is ArcERC20 {
 	}
 
 
+    /**
+     * @notice Function to return the constants from the contract
+     */
+    function getConstantInfo() public view returns (uint,uint) {
+        return (conversionQuota, maxReferralRewardPercent);
+    }
+
+
+    /**
+     * @notice Function to fetch moderator balance in ETH and his total earnings
+     * @dev only contractor or moderator are eligible to call this function
+     * @return value of his balance in ETH
+     */
+    function getModeratorBalanceAndTotalEarnings() external view returns (uint,uint) {
+        require(msg.sender == contractor);
+        return (moderatorBalanceETHWei,moderatorTotalEarningsETHWei);
+    }
 
 }

@@ -179,34 +179,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         IUpgradableExchange(upgradableExchange).buyTokens.value(amountOfMoney)(receiver);
     }
 
-
-    /**
-     * @notice Private function to set public link key to plasma address
-     * @param me is the ethereum address
-     * @param new_public_key is the new key user want's to set as his public key
-     */
-    function setPublicLinkKeyOf(address me, address new_public_key) private {
-        me = twoKeyEventSource.plasmaOf(me);
-        require(balanceOf(me) > 0,'no ARCs');
-        address old_address = public_link_key[me];
-        if (old_address == address(0)) {
-            public_link_key[me] = new_public_key;
-        } else {
-            require(old_address == new_public_key,'public key can not be modified');
-        }
-        public_link_key[me] = new_public_key;
-    }
-
-
-    /**
-     * @notice Function to set public link key
-     * @param new_public_key is the new public key
-     */
-    function setPublicLinkKey(address new_public_key) public {
-        setPublicLinkKeyOf(msg.sender, new_public_key);
-    }
-
-
     /**
      * @notice Method to add fungible asset to our contract
      * @dev When user calls this method, he just says the actual amount of ERC20 he'd like to transfer to us
@@ -425,13 +397,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
     }
 
     /**
-     * @notice Function to return the constants from the contract
-     */
-    function getConstantInfo() public view returns (uint,uint) {
-        return (conversionQuota, maxReferralRewardPercent);
-    }
-
-    /**
      * @notice Function which acts like getter for all cuts in array
      * @param last_influencer is the last influencer
      * @return array of integers containing cuts respectively
@@ -456,17 +421,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         uint balance = IERC20(assetContractERC20).balanceOf(address(this));
         return balance;
     }
-
-    /**
-     * @notice Function to fetch moderator balance in ETH and his total earnings
-     * @dev only contractor or moderator are eligible to call this function
-     * @return value of his balance in ETH
-     */
-    function getModeratorBalanceAndTotalEarnings() external view returns (uint,uint) {
-        require(msg.sender == contractor);
-        return (moderatorBalanceETHWei,moderatorTotalEarningsETHWei);
-    }
-
 
 
     /**
