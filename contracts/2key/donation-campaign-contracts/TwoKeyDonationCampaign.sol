@@ -26,6 +26,29 @@ contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaignARC
 
     mapping(address => uint) amountUserContributed;
 
+    mapping(address => uint[]) donatorToHisDonationsInEther;
+    mapping(address => uint[]) donatorToHisDonationsInERC20;
+
+    uint numberOfDonationsEther;
+    uint numberOfDonationsERC20;
+
+    DonationEther[] donationsEther;
+    DonationERC20[] donationsERC20;
+
+    struct DonationEther {
+        address donator;
+        uint amount;
+        uint donationTimestamp;
+    }
+
+    struct DonationERC20 {
+        address donator;
+        address erc20Contract;
+        uint amount;
+        uint donationTimestamp;
+    }
+
+
     constructor(
         address _erc20InvoiceToken,
         address _moderator,
@@ -60,7 +83,11 @@ contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaignARC
         _;
     }
 
-    function donate(bytes signature) public payable {
+    function joinAndDonate(bytes signature, bool isAnonymous) public payable {
+
+    }
+
+    function donate(bool isAnonymous) public payable {
 
     }
 
