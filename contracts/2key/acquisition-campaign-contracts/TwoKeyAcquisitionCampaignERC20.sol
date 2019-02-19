@@ -30,7 +30,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
 
     uint moderatorBalanceETHWei; //Balance of the moderator which can be withdrawn
     uint moderatorTotalEarningsETHWei; //Total earnings of the moderator all time
-
+    uint totalBounty;
     uint256 contractorBalance;
     uint256 contractorTotalProceeds;
 
@@ -324,7 +324,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
         require(_maxReferralRewardETHWei > 0, 'Max referral reward in ETH must be > 0');
         address[] memory influencers = ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).getReferrers(_converter,address(this));
         uint numberOfInfluencers = influencers.length;
-        uint256 total_bounty = 0;
         for (uint i = 0; i < numberOfInfluencers; i++) {
             uint256 b;
             if (i == influencers.length - 1) {  // if its the last influencer then all the bounty goes to it.
@@ -344,7 +343,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaignARC {
             referrerPlasma2TotalEarningsEthWEI[influencers[i]] = referrerPlasma2TotalEarningsEthWEI[influencers[i]].add(b);
             referrerPlasmaAddressToCounterOfConversions[influencers[i]]++;
 //            emit Rewarded(influencers[i], b);
-            total_bounty = total_bounty.add(b);
+            totalBounty = totalBounty.add(b);
             _maxReferralRewardETHWei = _maxReferralRewardETHWei.sub(b);
         }
     }

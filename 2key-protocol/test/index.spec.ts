@@ -205,7 +205,7 @@ const eventEmited = (error, event) => {
 };
 
 const addresses = [env.AYDNEP_ADDRESS, env.GMAIL_ADDRESS, env.TEST4_ADDRESS, env.RENATA_ADDRESS, env.UPORT_ADDRESS, env.GMAIL2_ADDRESS, env.AYDNEP2_ADDRESS, env.TEST_ADDRESS];
-const acquisitionCurrency = 'USD';
+const acquisitionCurrency = 'ETH';
 let twoKeyProtocol: TwoKeyProtocol;
 
 const printBalances = (done) => {
