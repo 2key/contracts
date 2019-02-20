@@ -5,6 +5,7 @@ import "../interfaces/ITwoKeyAcquisitionCampaignERC20.sol";
 import "../interfaces/ITwoKeyReg.sol";
 import "../interfaces/ITwoKeyAcquisitionARC.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
+import "../interfaces/ITwoKeyConversionHandlerGetConverterState.sol";
 import "../libraries/SafeMath.sol";
 
 /**
@@ -228,6 +229,7 @@ contract TwoKeyAcquisitionLogicHandler {
     function getAddressStatistic(address _address, bool plasma) public view returns (bytes) {
         address eth_address = _address;
         address plasma_address = _address;
+        bytes32 state; // NOT-EXISTING AS CONVERTER DEFAULT STATE
         if (plasma) {
             eth_address = ethereumOf(_address);
         } else {
@@ -244,12 +246,14 @@ contract TwoKeyAcquisitionLogicHandler {
             (amountConverterSpent, referrerBalance, unitsConverterBought) = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getStatistics(eth_address, plasma_address);
             if(unitsConverterBought> 0) {
                 isConverter = true;
+                address conversionHandlerContract = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).conversionHandler();
+                state = ITwoKeyConversionHandlerGetConverterState(conversionHandlerContract).getStateForConverter(eth_address);
             }
             if(referrerBalance > 0) {
                 isReferrer = true;
             }
 
-            return abi.encodePacked(amountConverterSpent,referrerBalance, unitsConverterBought, isConverter, isReferrer);
+            return abi.encodePacked(amountConverterSpent,referrerBalance, unitsConverterBought, isConverter, isReferrer, state);
         }
     }
 

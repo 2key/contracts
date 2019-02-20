@@ -207,4 +207,5 @@ export interface IAddressStats {
     fullName: string,
     email: string
     ethereumOf: string,
+    converterState: string,
 }

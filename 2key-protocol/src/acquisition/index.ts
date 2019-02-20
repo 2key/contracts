@@ -1721,6 +1721,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 let unitsConverterBought = parseInt(hexedValues.slice(66+64,66+64+64),16);
                 let isConverter = parseInt(hexedValues.slice(66+64+64,66+64+64+2),16) == 1;
                 let isReferrer = parseInt(hexedValues.slice(66+64+64+2,66+64+64+2+2),16) == 1;
+                let converterState = hexedValues.slice(66+64+64+2+2);
                 let obj : IAddressStats = {
                     amountConverterSpentETH: parseFloat(this.utils.fromWei(amountConverterSpent,'ether').toString()),
                     rewards : parseFloat(this.utils.fromWei(rewards,'ether').toString()),
@@ -1731,7 +1732,8 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     username: this.base.web3.toUtf8(username),
                     fullName: this.base.web3.toUtf8(fullname),
                     email: this.base.web3.toUtf8(email),
-                    ethereumOf: ethereumof
+                    ethereumOf: ethereumof,
+                    converterState: this.base.web3.toUtf8(converterState)
                 };
                 resolve(obj);
             } catch (e) {

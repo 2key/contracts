@@ -462,4 +462,13 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
         require(msg.sender == contractor || msg.sender == c.converter || ITwoKeyEventSource(twoKeyEventSource).isAddressMaintainer(msg.sender));
         return conversionId2LockupAddress[_conversionId];
     }
+
+    /**
+     * @notice Function to get converter state
+     * @param _converter is the address of the requested converter
+     * @return hexed string of the state
+     */
+    function getStateForConverter(address _converter) public view returns (bytes32) {
+        return convertConverterStateToBytes(converterToState[_converter]);
+    }
 }
