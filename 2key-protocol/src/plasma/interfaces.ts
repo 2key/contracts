@@ -8,6 +8,7 @@ export interface IPlasmaEvents {
     getVisitedFrom: (campaignAddress: string, contractorAddress: string, address: string) => Promise<string>,
     getJoinedFrom: (campaignAddress: string, contractorAddress: string, address: string) => Promise<string>,
     getVisitsPerCampaign: (campaignAddress: string) => Promise<number>,
+    getNumberOfVisitsAndJoins: (campaignAddress: string) => Promise<IVisitsAndJoins>,
 }
 
 export interface ISignedEthereum {
@@ -18,4 +19,9 @@ export interface ISignedEthereum {
 export interface IVisits {
     visits: string[],
     timestamps: number[],
+}
+
+export interface IVisitsAndJoins {
+    visits: number
+    joins: number,
 }

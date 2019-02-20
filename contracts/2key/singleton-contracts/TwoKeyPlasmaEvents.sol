@@ -7,6 +7,8 @@ contract TwoKeyPlasmaEvents is Upgradeable {
     address public owner;
     bool initialized = false;
     mapping(address => uint) public campaign2numberOfVisits;
+    mapping(address => uint) public campaign2numberOfJoins;
+
     // every event we generate contains both the campaign address and the address of the contractor of that campaign
     // both are ethereum address.
     // this plasma contract does not know in itself who is the contractor on the ethereum network
@@ -231,6 +233,7 @@ contract TwoKeyPlasmaEvents is Upgradeable {
         if (influencers.length > 1) {
             referrer = influencers[influencers.length - 2];
         }
+        campaign2numberOfJoins[acquisitionCampaignAddress]+= 1;
         joined_from[acquisitionCampaignAddress][contractor][last_address] = referrer;
         visited_from[acquisitionCampaignAddress][contractor][last_address] = referrer;
         visits_list[acquisitionCampaignAddress][contractor][referrer].push(last_address);
@@ -276,7 +279,7 @@ contract TwoKeyPlasmaEvents is Upgradeable {
             // as a result the same user with a plasma_address can appear later with an etherum address
             if (!visits[c][contractor][old_address][new_address]) {  // generate event only once for each tripplet
                 //TODO: Review this and test
-                campaign2numberOfVisits[c] = campaign2numberOfVisits[c] + 1;
+                campaign2numberOfVisits[c] += 1;
                 visits[c][contractor][old_address][new_address] = true;
                 if (joined_from[c][contractor][new_address] == address(0)) {
                     visited_from[c][contractor][new_address] = old_address;
@@ -324,6 +327,10 @@ contract TwoKeyPlasmaEvents is Upgradeable {
         voted_yes[c][contractor], weighted_yes[c][contractor], voted_no[c][contractor], weighted_no[c][contractor],
         voted_yes[c][contractor] + voted_no[c][contractor], int(weighted_yes[c][contractor]) - int(weighted_no[c][contractor])
         );
+    }
+
+    function getNumberOfVisitsAndJoinsPerCampaign(address _campaignAddress) public view returns (uint,uint) {
+        return (campaign2numberOfVisits[_campaignAddress], campaign2numberOfJoins[_campaignAddress]);
     }
 
     /**

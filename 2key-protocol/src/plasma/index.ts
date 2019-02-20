@@ -1,7 +1,7 @@
 import {ITwoKeyBase, ITwoKeyHelpers, ITwoKeyUtils} from '../interfaces';
 import {promisify} from '../utils/promisify'
 import Sign from '../sign';
-import {IPlasmaEvents, ISignedEthereum, IVisits} from "./interfaces";
+import {IPlasmaEvents, ISignedEthereum, IVisits, IVisitsAndJoins} from "./interfaces";
 
 export default class PlasmaEvents implements IPlasmaEvents {
     private readonly base: ITwoKeyBase;
@@ -99,6 +99,25 @@ export default class PlasmaEvents implements IPlasmaEvents {
                 resolve({
                     visits,
                     timestamps: timestamps.map(time => time * 1000),
+                });
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+    /**
+     *
+     * @param {string} campaignAddress
+     * @returns {Promise<>}
+     */
+    public getNumberOfVisitsAndJoins(campaignAddress: string) : Promise<IVisitsAndJoins> {
+        return new Promise<IVisitsAndJoins>(async(resolve,reject) => {
+            try {
+                let [visits,joins] = await this.helpers._awaitPlasmaMethod(promisify(this.base.twoKeyPlasmaEvents.getNumberOfVisitsAndJoinsPerCampaign,[campaignAddress]));
+                resolve({
+                    visits,
+                    joins
                 });
             } catch (e) {
                 reject(e);
