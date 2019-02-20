@@ -34,21 +34,12 @@ contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaign {
     uint numberOfDonationsERC20;
 
     DonationEther[] donationsEther;
-    DonationERC20[] donationsERC20;
 
     struct DonationEther {
         address donator;
         uint amount;
         uint donationTimestamp;
     }
-
-    struct DonationERC20 {
-        address donator;
-        address erc20Contract;
-        uint amount;
-        uint donationTimestamp;
-    }
-
 
     constructor(
         address _erc20InvoiceToken,
@@ -85,18 +76,15 @@ contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaign {
         mustReachGoal = _mustReachGoal;
     }
 
+    modifier isOngoing {
+        require(now >= campaignStartTime && now <= campaignEndTime);
+        _;
+    }
     modifier isGoalReached {
         require(campaignGoal < balance);
         _;
     }
 
-    function joinAndDonateERC20(bytes signature, bool isAnonymous, address erc20Contract, uint amount) public {
-
-    }
-
-    function donateERC20(bool isAnonymous, address erc20Contract, uint amount) public {
-
-    }
 
     function joinAndDonate(bytes signature, bool isAnonymous) public payable {
         amountUserContributed[msg.sender] += msg.value;
@@ -112,18 +100,9 @@ contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaign {
         require(now >= campaignStartTime && now <= campaignEndTime);
     }
 
-    function getEtherDonation(uint donationId) public view returns (bytes) {
+    function getDonation(uint donationId) public view returns (bytes) {
         DonationEther memory donation = donationsEther[donationId];
         return abi.encodePacked(donation.donator, donation.amount, donation.donationTimestamp);
-    }
-
-    function getERC20Donation(uint donationId) public view returns (bytes) {
-        DonationERC20 memory donation = donationsERC20[donationId];
-        return abi.encodePacked(donation.donator, donation.erc20Contract, donation.amount, donation.donationTimestamp);
-    }
-
-    function getDonationIdsPerUser(address user) public view returns (uint[], uint[]) {
-        return (donatorToHisDonationsInERC20[user], donatorToHisDonationsInEther[user]);
     }
 
 

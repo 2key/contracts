@@ -16,7 +16,12 @@ contract TwoKeyCampaign is ArcERC20 {
     address public moderator; //moderator address
 	address public ownerPlasma; //contractor plasma address
 
-	uint moderatorBalanceETHWei; //Balance of the moderator which can be withdrawn
+
+    uint256 contractorBalance;
+    uint256 contractorTotalProceeds;
+
+
+    uint moderatorBalanceETHWei; //Balance of the moderator which can be withdrawn
 	uint moderatorTotalEarningsETHWei; //Total earnings of the moderator all time
 
 
@@ -137,6 +142,31 @@ contract TwoKeyCampaign is ArcERC20 {
     function getModeratorBalanceAndTotalEarnings() external view returns (uint,uint) {
         require(msg.sender == contractor);
         return (moderatorBalanceETHWei,moderatorTotalEarningsETHWei);
+    }
+
+    /**
+     * @notice Function to fetch contractor balance in ETH
+     * @dev only contractor can call this function, otherwise it will revert
+     * @return value of contractor balance in ETH WEI
+     */
+    function getContractorBalanceAndTotalProceeds() external onlyContractor view returns (uint,uint) {
+        return (contractorBalance, contractorTotalProceeds);
+    }
+
+    /**
+     * @notice Function where contractor can withdraw his funds
+     * @dev onlyContractor can call this method
+     * @return true if successful otherwise will 'revert'
+     */
+    function withdrawContractor() external onlyContractor {
+        uint balance = contractorBalance;
+        contractorBalance = 0;
+        /**
+         * In general transfer by itself prevents against reentrancy attack since it will throw if more than 2300 gas
+         * but however it's not bad to practice this pattern of firstly reducing balance and then doing transfer
+         * Also if the contract is contractor, then it can revert every transfer
+         */
+        contractor.transfer(balance);
     }
 
 }

@@ -24,9 +24,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
 
     uint totalBounty;
 
-    uint256 contractorBalance;
-    uint256 contractorTotalProceeds;
-
     mapping(address => uint256) internal amountConverterSpentFiatWei;
     mapping(address => uint256) internal amountConverterSpentEthWEI; // Amount converter put to the contract in Ether
     mapping(address => uint256) internal unitsConverterBought; // Number of units (ERC20 tokens) bought
@@ -471,21 +468,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
         return (amountConverterSpentEthWEI[ethereum], referrerPlasma2BalancesEthWEI[plasma],unitsConverterBought[ethereum]);
     }
 
-    /**
-     * @notice Function where contractor can withdraw his funds
-     * @dev onlyContractor can call this method
-     * @return true if successful otherwise will 'revert'
-     */
-    function withdrawContractor() external onlyContractor {
-        uint balance = contractorBalance;
-        contractorBalance = 0;
-        /**
-         * In general transfer by itself prevents against reentrancy attack since it will throw if more than 2300 gas
-         * but however it's not bad to practice this pattern of firstly reducing balance and then doing transfer
-         * Also if the contract is contractor, then it can revert every transfer
-         */
-        contractor.transfer(balance);
-    }
 
 
     /**
