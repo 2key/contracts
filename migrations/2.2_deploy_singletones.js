@@ -109,7 +109,7 @@ module.exports = function deploy(deployer) {
      */
     deployer.deploy(Call);
     if (deployer.network.startsWith('dev') || deployer.network.startsWith('public.') || deployer.network.startsWith('rinkeby') || deployer.network.startsWith('ropsten')) {
-        deployer.deploy(TwoKeyCongress, 50, initialCongressMembers, votingPowers)
+        deployer.deploy(TwoKeyCongress, 24*60, initialCongressMembers, votingPowers)
             .then(() => TwoKeyCongress.deployed())
             .then(() => deployer.deploy(TwoKeyCampaignValidator))
             .then(() => TwoKeyCampaignValidator.deployed())
