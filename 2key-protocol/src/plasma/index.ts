@@ -14,17 +14,31 @@ export default class PlasmaEvents implements IPlasmaEvents {
         this.utils = utils;
     }
 
+    /**
+     *
+     * @param {string} plasma
+     * @returns {Promise<string>}
+     */
     public getRegisteredAddressForPlasma(plasma: string = this.base.plasmaAddress): Promise<string> {
         return this.helpers._awaitPlasmaMethod(promisify(this.base.twoKeyPlasmaEvents.plasma2ethereum, [plasma]))
     }
 
+    /**
+     *
+     * @returns {Promise<string>}
+     */
     public signReferrerToWithdrawRewards(): Promise<string> {
         return Sign.sign_referrerWithPlasma(this.base.plasmaWeb3, this.base.plasmaAddress, 'WITHDRAW_REFERRER_REWARDS');
     }
 
+    /**
+     *
+     * @returns {Promise<string>}
+     */
     public signReferrerToGetRewards(): Promise<string> {
         return Sign.sign_referrerWithPlasma(this.base.plasmaWeb3, this.base.plasmaAddress, 'GET_REFERRER_REWARDS');
     }
+
     /**
      *
      * @param {string} from
@@ -92,6 +106,13 @@ export default class PlasmaEvents implements IPlasmaEvents {
         })
     }
 
+    /**
+     *
+     * @param {string} campaignAddress
+     * @param {string} contractorAddress
+     * @param {string} address
+     * @returns {Promise<IVisits>}
+     */
     public getVisitsList(campaignAddress: string, contractorAddress: string, address: string): Promise<IVisits> {
         return new Promise<IVisits>(async (resolve, reject) => {
             try {
@@ -124,6 +145,14 @@ export default class PlasmaEvents implements IPlasmaEvents {
             }
         })
     }
+
+    /**
+     *
+     * @param {string} campaignAddress
+     * @param {string} contractorAddress
+     * @param {string} address
+     * @returns {Promise<string>}
+     */
     public getVisitedFrom(campaignAddress: string, contractorAddress: string, address: string): Promise<string> {
         return new Promise<string>(async (resolve, reject) => {
             try {
@@ -135,6 +164,13 @@ export default class PlasmaEvents implements IPlasmaEvents {
         })
     }
 
+    /**
+     *
+     * @param {string} campaignAddress
+     * @param {string} contractorAddress
+     * @param {string} address
+     * @returns {Promise<string>}
+     */
     public getJoinedFrom(campaignAddress: string, contractorAddress: string, address: string): Promise<string> {
         return new Promise<string>(async (resolve, reject) => {
             try {
