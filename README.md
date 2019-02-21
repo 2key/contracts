@@ -7,8 +7,22 @@ In order to test app locally you will need running docker container
 ```
 yarn run geth
 ```
+#### Network configuration
 
-##### In order to update npm package run the following: 
+- In order to deploy contracts make sure you have in the root directory 
+file named `accountsConfig.json`. If not, create one with the following:
+```
+{
+  "address" : <your deployer address> //feature-> NOT NECESARRY
+  "mnemonic" : <MNEMONIC> 
+  "mnemonic_private" : NOT NECESARRY FOR NOW
+  "infuraApiKey" : <INFURA_API_KEY>
+}
+
+```
+
+
+#### In order to update npm package run the following: 
 - If there are no changes in singletones & plasma run following:
 ```
 yarn run deploy --migrate dev-local,private.test.k8s
