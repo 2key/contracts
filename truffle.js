@@ -1,16 +1,12 @@
 // Allows us to use ES6 in our migrations and tests.
 require('babel-register');
-// https://github.com/trufflesuite/truffle-hdwallet-provider
 const HDWalletProvider = require('truffle-hdwallet-provider');
-const PrivateKeyProvider = require('truffle-privatekey-provider');
-// const HDWalletProvider = require('./WalletProvider');
 const LedgerProvider = require('./LedgerProvider');
+const config = require('./accountsConfig.json');
 
-const mnemonic = 'laundry version question endless august scatter desert crew memory toy attract cruel';
-//const mnemonic_private = 'north depend loyal purpose because theme funny script debris divert kitchen junk diary angry method';
-// make sure you have Ether on rinkeby address 0xb3fa520368f2df7bed4df5185101f303f6c7decc
-const infuraApiKey = 'db719ec4fd734e798e74782bce13bbca';
-
+const mnemonic = config.mnemonic;
+const mnemonicPrivate = config.mnemonic_private;
+const infuraApiKey = config.infuraApiKey;
 const ledgerOptions = {
   networkId: 3, // ropsten testnet
   accountsOffset: 0 // we use the first address
@@ -47,7 +43,7 @@ const ledgerOptions = {
 
 */
 
-
+console.log("Starting deployment process from address : " + config.address);
 module.exports = {
   networks: {
     'dev-local': {
@@ -125,9 +121,6 @@ module.exports = {
     },
 
     'private.test.k8s-hdwallet': {
-      // 0x0E0D3E393B47058c3A85e33EFE542B7fBc51BB07oru
-      // http://ext.geth.private.test.k8s.2key.net:8545/
-      // provider: () => new PrivateKeyProvider('da16b3f97e1f39ac93788d925e17286f20dc737cc208d57ca4d49b128b69eb85', 'http://ext.geth.private.test.k8s.2key.net:8545'),
       provider: () => new HDWalletProvider(mnemonic, 'https://rpc.private.test.k8s.2key.net'),
       // host: 'https://ext.geth.private.test.k8s.2key.net',
       // port: 8545,
