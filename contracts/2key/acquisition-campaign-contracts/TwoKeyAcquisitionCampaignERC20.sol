@@ -181,7 +181,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
             referrerPlasma2BalancesEthWEI[influencers[i]] = referrerPlasma2BalancesEthWEI[influencers[i]].add(b);
             referrerPlasma2TotalEarningsEthWEI[influencers[i]] = referrerPlasma2TotalEarningsEthWEI[influencers[i]].add(b);
             referrerPlasmaAddressToCounterOfConversions[influencers[i]]++;
-//            emit Rewarded(influencers[i], b);
             totalBounty = totalBounty.add(b);
             _maxReferralRewardETHWei = _maxReferralRewardETHWei.sub(b);
         }
