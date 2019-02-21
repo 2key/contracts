@@ -49,6 +49,7 @@ async function handleExit(p) {
   if (p !== 0
     && (process.argv[2] !== '--migrate'
     && process.argv[2] !== '--generate'
+    && process.argv[2] !== '--extract'
     && process.argv[2] !== '--update'
     && process.argv[2] !== '--test'
     && process.argv[2] !== '--ledger'
@@ -287,10 +288,10 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
           fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts', `${file}.ts`), `export default ${util.inspect(contracts.contracts[file], {depth: 10})}`)
         });
         // fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts.ts'), `export default ${util.inspect(contracts, {depth: 10})}`);
-            json = Object.assign(obj,json);
-            json = Object.assign(obj1,json);
-            fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts_deployed.json'), JSON.stringify(json, null, 2));
-            console.log('Writing contracts_deployed.json...');
+        json = Object.assign(obj,json);
+        json = Object.assign(obj1,json);
+        fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts_deployed.json'), JSON.stringify(json, null, 2));
+        console.log('Writing contracts_deployed.json...');
         if (deployment) {
             fs.copyFileSync(path.join(twoKeyProtocolDir, 'contracts_deployed.json'),path.join(twoKeyProtocolDist,'contracts_deployed.json'));
             console.log('Copying this to 2key-protcol/dist...');
@@ -645,6 +646,7 @@ async function main() {
       try {
         const networks = process.argv[3].split(',');
         runMigration3(networks[0]);
+        // process.exit(0);
       } catch (e) {
         console.log(e);
       }
@@ -659,12 +661,15 @@ async function main() {
       break;
     case '--archive':
       archiveBuild();
+      process.exit(0);
       break;
     case '--extract':
       restoreFromArchive();
+      process.exit(0);
       break;
     case '--ledger':
       ledgerProvider('https://ropsten.infura.io/v3/71d39c30bc984e8a8a0d8adca84620ad', { networkId: 3 });
+      process.exit(0);
       break;
     case '--submodules':
       const contracts = await generateSOLInterface();
@@ -673,6 +678,7 @@ async function main() {
       break;
     default:
       await deploy();
+      process.exit(0);
   }
 }
 

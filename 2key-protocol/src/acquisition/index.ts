@@ -103,9 +103,9 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
             this.AcquisitionCampaign = await this.helpers._createAndValidate(acquisitionContracts.TwoKeyAcquisitionCampaignERC20.abi, campaign);
         }
         const conversionHandler = await promisify(this.AcquisitionCampaign.conversionHandler, []);
-        this.AcquisitionConversionHandler = this.helpers._createAndValidate(acquisitionContracts.TwoKeyConversionHandler.abi, conversionHandler);
+        this.AcquisitionConversionHandler = await this.helpers._createAndValidate(acquisitionContracts.TwoKeyConversionHandler.abi, conversionHandler);
         const twoKeyAcquisitionLogicHandler = await promisify(this.AcquisitionCampaign.twoKeyAcquisitionLogicHandler,[]);
-        this.AcquisitionLogicHandler = this.helpers._createAndValidate(acquisitionContracts.TwoKeyAcquisitionLogicHandler.abi, twoKeyAcquisitionLogicHandler);
+        this.AcquisitionLogicHandler = await this.helpers._createAndValidate(acquisitionContracts.TwoKeyAcquisitionLogicHandler.abi, twoKeyAcquisitionLogicHandler);
         return this.AcquisitionCampaign;
     }
 
