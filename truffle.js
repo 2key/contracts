@@ -5,8 +5,8 @@ const LedgerProvider = require('./LedgerProvider');
 const config = require('./accountsConfig.json');
 
 const mnemonic = config.mnemonic;
-const mnemonicPrivate = config.mnemonic_private;
 const infuraApiKey = config.infuraApiKey;
+
 const ledgerOptions = {
   networkId: 3, // ropsten testnet
   accountsOffset: 0 // we use the first address
