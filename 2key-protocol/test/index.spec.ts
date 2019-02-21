@@ -1057,6 +1057,25 @@ describe('TwoKeyProtocol', () => {
         console.log(txHash);
     }).timeout(60000);
 
+
+    it('==> should referrer withdraw his balances in 2key-tokens', async() => {
+        const {web3, address} = web3switcher.renata();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+        });
+        const txHash = await twoKeyProtocol.AcquisitionCampaign.moderatorAndReferrerWithdraw(campaignAddress,from);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        console.log(txHash);
+    }).timeout(60000);
+
+
     it('should print balances before cancelation', async() => {
         for (let i = 0; i < addresses.length; i++) {
             let addressCurrent = addresses[i].toString();
