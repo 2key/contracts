@@ -47,6 +47,11 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
     mapping(address => bool) public isCampaignValidated;
 
 
+    /**
+     * @notice Function to set initial parameters in this contract
+     * @param _twoKeySingletoneRegistry is the address of TwoKeySingletoneRegistry contract
+     * @param _maintainers is the array of initial maintainer addresses
+     */
     function setInitialParams(address _twoKeySingletoneRegistry, address [] _maintainers) {
         require(twoKeySingletoneRegistry == address(0));
         twoKeySingletoneRegistry = _twoKeySingletoneRegistry;
@@ -100,6 +105,12 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
         ITwoKeyEventSourceEvents(twoKeyEventSource).created(campaign,contractor,moderator);
     }
 
+    /**
+     * @notice Function to add valid bytecodes for the contracts
+     * @param contracts is the array of contracts (deployed)
+     * @names is the array of hexed contract names
+     * @dev Only maintainer can issue calls to this function
+     */
     function addValidBytecodes(address[] contracts, bytes32[] names) public onlyMaintainer {
         require(contracts.length == names.length);
         uint length = contracts.length;
@@ -110,10 +121,18 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
         }
     }
 
+    /**
+     * @notice Function to remove bytecode of the contract from whitelisted ones
+     */
     function removeBytecode(bytes _bytecode) public onlyMaintainer {
         isCodeValid[_bytecode] = false;
     }
 
+    /**
+     * @notice Function to validate if specific conversion handler code is valid
+     * @param _conversionHandler is the address of already deployed conversion handler
+     * @return true if code is valid and responds to conversion handler contract
+     */
     function isConversionHandlerCodeValid(address _conversionHandler) public view returns (bool) {
         bytes memory contractCode = GetCode.at(_conversionHandler);
         require(isCodeValid[contractCode]);
@@ -122,6 +141,11 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
         return true;
     }
 
+
+    /**
+     * @notice Pure function to convert input string to hex
+     * @param source is the input string
+     */
     function stringToBytes32(string memory source) internal pure returns (bytes32 result) {
         bytes memory tempEmptyStringTest = bytes(source);
         if (tempEmptyStringTest.length == 0) {
