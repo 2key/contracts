@@ -45,7 +45,7 @@ library IncentiveModels {
 
     /**
      * @notice Function to calculate base for all rewards in power law model
-     * @param sum is the total reward to be splited in Wei
+     * @param sumWei is the total reward to be splited in Wei
      * @param numberOfElements is the number of referrers in the chain
      * @return wei value of base for the rewards in power law
      */
