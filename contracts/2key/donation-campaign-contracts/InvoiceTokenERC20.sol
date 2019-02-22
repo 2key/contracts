@@ -30,12 +30,12 @@ contract InvoiceTokenERC20 is ERC20 {
     }
 
 
-    constructor(string _name, string _symbol, uint _totalSupply_) public {
-        owner = msg.sender;
+    constructor(string _name, string _symbol, uint _totalSupply_, address _tokensOwner) public {
+        owner = _tokensOwner;
         name = _name;
         symbol = _symbol;
         totalSupply_ = _totalSupply_.mul(10**decimals);
-        balances[msg.sender] = totalSupply_;
+        balances[_tokensOwner] = totalSupply_;
     }
 
     /**
