@@ -5,7 +5,7 @@
     "local": "0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7"
   },
   "NonSingletonsHash": "c672164fa5608cef77275179a106e998799529336ffd871d3c93c4dc1b7830f9",
-  "SingletonsHash": "a966db7dbcbd902ddbc7478f189a464edd86f3217b88f7ec9e786d181af8d1fd",
+  "SingletonsHash": "388c6b3284374a5afb4bc91ca2cbeeffab03d121f8c6c870fe84af50fd82b757",
   "Call": {
     "networks": {
       "3": {
@@ -29,8 +29,8 @@
       "8086": {
         "events": {},
         "links": {},
-        "address": "0x8d7e0e468f82eff3ef283137ac1be9f00ee8fa33",
-        "transactionHash": "0x46d9ed7442aabd2e9f25e9aa25ae66b748b70ec0dcea51ec41115fc4e025d81e"
+        "address": "0xe256a9e7343af52c8a155c02f224b9b09db01d30",
+        "transactionHash": "0x0c63dfcceef3da6706caffeb378603966804478d6a41fba1fc98c9256d01ba84"
       },
       "98052": {
         "events": {},
@@ -41,8 +41,8 @@
       "11112222": {
         "events": {},
         "links": {},
-        "address": "0x6b5bac15b47d26427b889039ef9c5e3b598b23bd",
-        "transactionHash": "0x3b542544853e1146a65b650b6697798ca84f7b4de9a8718d28a892c2d038a93e"
+        "address": "0x4eed9b544bd7a1ea5891a65611d1382cb7d95e8f",
+        "transactionHash": "0x10a0b98eee0b5c799ea37e215c27c743ad7d892a011c4ab556acdffea36043f9"
       }
     },
     "abi": [
@@ -531,9 +531,9 @@
       "8086": {
         "events": {},
         "links": {},
-        "address": "0x38ecdbb0c14919a635abdec9437017fea95d6e29",
-        "transactionHash": "0xc25e035d9b0392159391462d6c08c9601daf3091ee315127a8bae59efbc761d6",
-        "Proxy": "0xe13a03f5f14b771d2ca1adc08c842b2bb3be6140",
+        "address": "0xdff4ac7ec804cb40bd27ed56d5984654ec324033",
+        "transactionHash": "0x1cb8822a317a7f1e1e4d42d3e50d44d4b4ab8089997c4077d0c5bab745eb2c8d",
+        "Proxy": "0x89ce7c60f317cb41dc43f060e158476a1e8ab9af",
         "Version": "1.0",
         "maintainer_address": "0x18e1d5ca01141E3a0834101574E5A1e94F0F8F6a"
       }
@@ -938,9 +938,9 @@
       "8086": {
         "events": {},
         "links": {},
-        "address": "0x56b4e4e04f38556d401d61b9edab615480a96c0c",
-        "transactionHash": "0xb7a864437a5c79b5cdecb73c6dc5cb73dc440cb768d839ac3a9c0071745a53db",
-        "Proxy": "0x2f70425b739126fcb4e617f3a96fa29aa73faf0a",
+        "address": "0xe6bf8f3a6a7a9fff9c2871579956486137116e4a",
+        "transactionHash": "0xe29d59c4107edf1a51f658f297d7a1f26328ee5e3b52cf6c77bd6e564ea339fd",
+        "Proxy": "0xa8b96700bbcee1fa61549d456ffb55b8aa47286f",
         "Version": "1.0"
       }
     },
@@ -1250,9 +1250,9 @@
       "8086": {
         "events": {},
         "links": {},
-        "address": "0xffd26c3740d00a5c47bf569726ab53760f61bf3c",
-        "transactionHash": "0x2b055edaf68c16042d529fbf2ed28caf61b48067391df694aa2d6929512e820f",
-        "Proxy": "0x71074b8081028d10b0066ab159587fb452293c1c",
+        "address": "0xa43e82c4a71464b96359d3f046c53d026c86f2db",
+        "transactionHash": "0x10013ea6832398fa7c2bd526405344a4520a3a2a3c3c094b4d955982eee9ec83",
+        "Proxy": "0x5662f782a7766893b4f60dacff2016baa120b02b",
         "Version": "1.0",
         "maintainer_address": [
           "0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f",
@@ -1444,16 +1444,12 @@
         "constant": false,
         "inputs": [
           {
-            "name": "campaign",
-            "type": "address"
+            "name": "contracts",
+            "type": "address[]"
           },
           {
-            "name": "conversionHandler",
-            "type": "address"
-          },
-          {
-            "name": "logicHandler",
-            "type": "address"
+            "name": "names",
+            "type": "bytes32[]"
           }
         ],
         "name": "addValidBytecodes",
@@ -1463,10 +1459,24 @@
         "type": "function"
       },
       {
+        "constant": false,
+        "inputs": [
+          {
+            "name": "_bytecode",
+            "type": "bytes"
+          }
+        ],
+        "name": "removeBytecode",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
         "constant": true,
         "inputs": [
           {
-            "name": "conversionHandler",
+            "name": "_conversionHandler",
             "type": "address"
           }
         ],
@@ -1501,8 +1511,8 @@
       "8086": {
         "events": {},
         "links": {},
-        "address": "0x38360374687fd76bed3087a4d617f18d2e71a892",
-        "transactionHash": "0x2732ac652b83f5c3c20d694196a87d1c2472b9de83ce09dd458b8bc747e20eee"
+        "address": "0xf47e6e05d3f7008d8550d46a9609a1fb5bb548bc",
+        "transactionHash": "0x63e7b8f9549bac26fc263b23d5e454ebaebc57e9f69b5a82324cb85ba82130f6"
       }
     },
     "abi": [
@@ -2302,8 +2312,8 @@
       "8086": {
         "events": {},
         "links": {},
-        "address": "0x7ec86c769bd69eda41f1477bec40158ffe59c8b1",
-        "transactionHash": "0x6313e7ddc20e1e425fb095e9420141a3046424ec8d4bc0ea133a295f340d444f"
+        "address": "0x905f896a98b71655348032fc4a7998034a90d1ac",
+        "transactionHash": "0x87f18842218e2c0dcc604864edc059157787d6a41963eac6785f12e005f024ce"
       }
     },
     "abi": [
@@ -2752,9 +2762,9 @@
       "8086": {
         "events": {},
         "links": {},
-        "address": "0xf9fc24e1bff457bc7e2e51b9bfc039cae012addc",
-        "transactionHash": "0x2fd01f9d9f74c5547ad3074416ef82be7371dc568c0ad23878f356396ed5287b",
-        "Proxy": "0xd4d1a1bf9b33e3a19d17fbf04b2b21cc9f932176",
+        "address": "0xeaac3422a0cc861b82409e2921887221ed007506",
+        "transactionHash": "0x3a226cda766ecc15d66b4bb04b21ba5fdbfecdf2fe0b020d8888ccc197e12e18",
+        "Proxy": "0x21b960dcc45cc1ebaaa5f7e20c84954aaf037fe3",
         "Version": "1.0",
         "maintainer_address": "0x18e1d5ca01141E3a0834101574E5A1e94F0F8F6a"
       }
@@ -3302,9 +3312,9 @@
       "8086": {
         "events": {},
         "links": {},
-        "address": "0xbc4b37f795b968b811056904fa338ba629c31e27",
-        "transactionHash": "0x5c51edced0e52757f5345a2021d9cfde2943ba76c23240aa780091decec4430f",
-        "Proxy": "0xcb2443371399ba34ee1d04bb8f82263411c562e4",
+        "address": "0xfe88456973c0ce6debba59095a85c73e4b70c0d5",
+        "transactionHash": "0x7de07f8ef0154f4321187b73c899d3cba61f042c03e4bfc98b636102a61e8936",
+        "Proxy": "0xfc04b7eddc81d09a99cf07298084c69414001dfc",
         "Version": "1.0",
         "maintainer_address": [
           "0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f",
@@ -3541,11 +3551,11 @@
       "11112222": {
         "events": {},
         "links": {
-          "Call": "0x6b5bac15b47d26427b889039ef9c5e3b598b23bd"
+          "Call": "0x4eed9b544bd7a1ea5891a65611d1382cb7d95e8f"
         },
-        "address": "0xf445ed60afd9a7bd790763edd48c1ae82b5bab25",
-        "transactionHash": "0x6417c9cf3b29cdaf177b8c9015d38880e318b88a057a4cba78406b110d362906",
-        "Proxy": "0x0c3e071e08ec62f4fb09e3bc81d9c1902be9debd",
+        "address": "0x7b3d007204c21f2ccf217a29991f3e7aac060128",
+        "transactionHash": "0xd97e3120cf5fbcfaad96bba7b0775130a2df996975a9a64dbc79437eb7430365",
+        "Proxy": "0x3ed9954a21a88f0839797ff058f1cd88848443a4",
         "Version": "1.0",
         "maintainer_address": [
           "0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f",
@@ -4643,8 +4653,8 @@
           }
         },
         "links": {},
-        "address": "0xba29414a788f0f29d4068a518b2f4a412db0a941",
-        "transactionHash": "0xb1952d23be2f9c942c699ab81be98bed06dd7f38c27f11a9b9c3ea7f835df2a9"
+        "address": "0x7e847f401114eacad7d5e29d5491f8637f88c577",
+        "transactionHash": "0x589efc6e4644ec514aff48045facf553c9c0ee9c336483d9f92a4052ee6b4594"
       }
     },
     "abi": [
@@ -5597,11 +5607,11 @@
       "8086": {
         "events": {},
         "links": {
-          "Call": "0x8d7e0e468f82eff3ef283137ac1be9f00ee8fa33"
+          "Call": "0xe256a9e7343af52c8a155c02f224b9b09db01d30"
         },
-        "address": "0x2b89ded51ba777cf2c3fa87c9ff4e45e319bab6d",
-        "transactionHash": "0x67d3081b6eba9d7ac58bb961a9ca06e3c81c15ff9e673eeb322a73d7a9c63ebf",
-        "Proxy": "0x969b5c2e4e7e59b5d6eca87a91ca0894cf4aa4d0",
+        "address": "0x2838d5cca640b14870e48ff132a571b9711bf30e",
+        "transactionHash": "0xd088847e5464faaa772c4edfa6b2c95ac308dd88eb952ad4db314d8890072e83",
+        "Proxy": "0x2396891d60919a0b178cfc76a9b9e379a03a1198",
         "Version": "1.0",
         "maintainer_address": [
           "0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f",
@@ -6639,8 +6649,8 @@
           }
         },
         "links": {},
-        "address": "0x7dce4be5f7e7005534d8860d6afee8782b5d93a8",
-        "transactionHash": "0x50167d7ced361147a41fcf4211a180a3d3cb781188b98cbd44643331ec128f6e"
+        "address": "0x357a323e01aa47179cc3ae9ff9b91c8b60e70e30",
+        "transactionHash": "0x181af36f9be4a0698eb48d04f3025b0502b3619c06414febdbf95f67fa93e097"
       }
     },
     "abi": [
@@ -6884,9 +6894,9 @@
       "8086": {
         "events": {},
         "links": {},
-        "address": "0x68c3f9e01b1d3c5ee3829c60e953e7d0826050aa",
-        "transactionHash": "0xee7b442a26f009766404cc1df48889b0bf803b6c249b55c8c247251ca50e5b7d",
-        "Proxy": "0x97b20cc27a09538e8518953cb826669431324226",
+        "address": "0x8046e7a52d4eefe1643bb01cacbf8c04c00a109c",
+        "transactionHash": "0x4d04a7f71a19513aee1b5e6f83f64a858231191e480c560d679f31ff2ec85d51",
+        "Proxy": "0xf03118338409235a52582f9b6b61b6e1370d38a9",
         "Version": "1.0",
         "maintainer_address": "0x18e1d5ca01141E3a0834101574E5A1e94F0F8F6a"
       }

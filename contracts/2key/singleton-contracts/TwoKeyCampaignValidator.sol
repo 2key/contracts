@@ -39,9 +39,13 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
     address public twoKeySingletoneRegistry;
     mapping(address => string) public campaign2nonSingletonHash;
 
-    mapping(bytes => bool) acquisitionToEligibleCode;
-    mapping(bytes => bool) conversionHandlerToEligibleCode;
-    mapping(bytes => bool) acquisitionLogicHandlerToEligibleCode;
+
+    mapping(bytes => bool) isCodeValid;
+    mapping(bytes => bytes32) contractCodeToName;
+
+    // Will store the mapping between campaign address and if it satisfies all the criteria
+    mapping(address => bool) public isCampaignValidated;
+
 
     function setInitialParams(address _twoKeySingletoneRegistry, address [] _maintainers) {
         require(twoKeySingletoneRegistry == address(0));
@@ -52,10 +56,6 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
             isMaintainer[_maintainers[i]] = true;
         }
     }
-
-    // Will store the mapping between campaign address and if it satisfies all the criteria
-    mapping(address => bool) public isCampaignValidated;
-
 
     /**
      * @notice Function which is in charge to validate if the campaign contract is ready
@@ -80,9 +80,9 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
         bytes memory codeHandler = GetCode.at(conversionHandler);
         bytes memory codeLogicHandler = GetCode.at(logicHandler);
 
-        require(acquisitionToEligibleCode[codeAcquisition] == true);
-        require(conversionHandlerToEligibleCode[codeHandler] == true);
-        require(acquisitionLogicHandlerToEligibleCode[codeLogicHandler] == true);
+        require(isCodeValid[codeAcquisition] == true);
+        require(isCodeValid[codeHandler] == true);
+        require(isCodeValid[codeLogicHandler] == true);
 
         //Validate that public link key is set
         require(ITwoKeyAcquisitionCampaignStateVariables(campaign).publicLinkKeyOf(contractor) != address(0));
@@ -100,23 +100,35 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
         ITwoKeyEventSourceEvents(twoKeyEventSource).created(campaign,contractor,moderator);
     }
 
-    function addValidBytecodes(address campaign, address conversionHandler, address logicHandler) public onlyMaintainer {
-        bytes memory campaignCode = GetCode.at(campaign);
-        bytes memory conversionHandlerCode = GetCode.at(conversionHandler);
-        bytes memory logicHandlerCode = GetCode.at(logicHandler);
-
-        //TODO: If we're going to support different versions combined, in that particular case, use the superhash enough
-        acquisitionToEligibleCode[campaignCode] = true;
-        conversionHandlerToEligibleCode[conversionHandlerCode] = true;
-        acquisitionLogicHandlerToEligibleCode[logicHandlerCode] = true;
+    function addValidBytecodes(address[] contracts, bytes32[] names) public onlyMaintainer {
+        require(contracts.length == names.length);
+        uint length = contracts.length;
+        for(uint i=0; i<length; i++) {
+            bytes memory contractCode = GetCode.at(contracts[i]);
+            isCodeValid[contractCode] = true;
+            contractCodeToName[contractCode] = names[i];
+        }
     }
 
-    //TODO: Add option to remove eligible bytecode per contract
+    function removeBytecode(bytes _bytecode) public onlyMaintainer {
+        isCodeValid[_bytecode] = false;
+    }
 
-    function isConversionHandlerCodeValid(address conversionHandler) public view returns (bool) {
-        bytes memory code = GetCode.at(conversionHandler);
-        require(conversionHandlerToEligibleCode[code]);
+    function isConversionHandlerCodeValid(address _conversionHandler) public view returns (bool) {
+        bytes memory contractCode = GetCode.at(_conversionHandler);
+        require(isCodeValid[contractCode]);
+        bytes32 name = stringToBytes32("TWO_KEY_CONVERSION_HANDLER");
+        require(contractCodeToName[contractCode] == name);
         return true;
     }
 
+    function stringToBytes32(string memory source) internal pure returns (bytes32 result) {
+        bytes memory tempEmptyStringTest = bytes(source);
+        if (tempEmptyStringTest.length == 0) {
+            return 0x0;
+        }
+        assembly {
+            result := mload(add(source, 32))
+        }
+    }
 }
