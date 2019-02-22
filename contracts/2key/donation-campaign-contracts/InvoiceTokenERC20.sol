@@ -5,6 +5,7 @@ import "../libraries/SafeMath.sol";
 
 /**
  * @author Nikola Madjarevic
+ * @notice Token implementation which will be used as invoice for donation, in general, doesn't have any concrete value
  * Created at 2/22/19
  */
 contract InvoiceTokenERC20 is ERC20 {
@@ -28,11 +29,12 @@ contract InvoiceTokenERC20 is ERC20 {
         _;
     }
 
+
     constructor(string _name, string _symbol, uint _totalSupply_) public {
         owner = msg.sender;
         name = _name;
         symbol = _symbol;
-        totalSupply_ = _totalSupply_;
+        totalSupply_ = _totalSupply_.mul(10**decimals);
         balances[msg.sender] = totalSupply_;
     }
 
