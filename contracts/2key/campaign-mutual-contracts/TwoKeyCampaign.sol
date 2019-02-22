@@ -81,15 +81,6 @@ contract TwoKeyCampaign is ArcERC20 {
 		return true;
 	}
 
-	/**
-   	 * @notice Function to join with signature and share 1 arc to the receiver
-   	 * @param signature is the signature
-   	 * @param receiver is the address we're sending ARCs to
-   	 */
-	function joinAndShareARC(bytes signature, address receiver) public {
-		distributeArcsBasedOnSignature(signature);
-		transferFrom(twoKeyEventSource.plasmaOf(msg.sender), twoKeyEventSource.plasmaOf(receiver), 1);
-	}
 
     /**
      * @notice Private function to set public link key to plasma address
@@ -112,7 +103,7 @@ contract TwoKeyCampaign is ArcERC20 {
  	 * @notice Function which will unpack signature and get referrers, keys, and weights from it
  	 * @param sig is signature
  	 */
-	function distributeArcsBasedOnSignature(bytes sig) internal returns (address[]) {
+	function getInfluencersKeysAndWeightsFromSignature(bytes sig) internal returns (address[],address[],uint8[],address) {
 		// move ARCs and set public_link keys and weights/cuts based on signature information
 		// returns the last address in the sig
 
@@ -138,6 +129,7 @@ contract TwoKeyCampaign is ArcERC20 {
 		{
 			old_address := mload(add(sig, 21))
 		}
+
 		old_address = twoKeyEventSource.plasmaOf(old_address);
 		address old_key = public_link_key[old_address];
 
@@ -152,36 +144,8 @@ contract TwoKeyCampaign is ArcERC20 {
 		require(// influencers[influencers.length-1] == msg.sender ||
 			influencers[influencers.length-1] == twoKeyEventSource.plasmaOf(msg.sender) ||
 			contractor == msg.sender,'only the contractor or the last in the link can call transferSig');
-		uint i;
-		address new_address;
-		// move ARCs based on signature informationc
-		uint numberOfInfluencers = influencers.length;
-		for (i = 0; i < numberOfInfluencers; i++) {
-			new_address = twoKeyEventSource.plasmaOf(influencers[i]);
 
-			if (received_from[new_address] == 0) {
-				transferFromInternal(old_address, new_address, 1);
-			} else {
-				require(received_from[new_address] == old_address,'only tree ARCs allowed');
-			}
-			old_address = new_address;
-
-			// TODO Updating the public key of influencers may not be a good idea because it will require the influencers to use
-			// a deterministic private/public key in the link and this might require user interaction (MetaMask signature)
-			// TODO a possible solution is change public_link_key to address=>address[]
-			// update (only once) the public address used by each influencer
-			// we will need this in case one of the influencers will want to start his own off-chain link
-			if (i < keys.length) {
-				setPublicLinkKeyOf(new_address, keys[i]);
-			}
-
-			// update (only once) the cut used by each influencer
-			// we will need this in case one of the influencers will want to start his own off-chain link
-			if (i < weights.length) {
-				setCutOf(new_address, uint256(weights[i]));
-			}
-		}
-		return influencers;
+		return (influencers, keys, weights, old_address);
 	}
 
     /**

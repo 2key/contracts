@@ -70,8 +70,53 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
         _;
     }
 
+    function distributeArcsBasedOnSignature(bytes sig) private returns (address[]) {
+        address[] memory influencers;
+        address[] memory keys;
+        uint8[] memory weights;
+        address old_address;
+        (influencers, keys, weights, old_address) = super.getInfluencersKeysAndWeightsFromSignature(sig);
+        uint i;
+        address new_address;
+        // move ARCs based on signature information
+        // TODO: Handle failing of this function if the referral chain is too big
+        uint numberOfInfluencers = influencers.length;
+        for (i = 0; i < numberOfInfluencers; i++) {
+            new_address = twoKeyEventSource.plasmaOf(influencers[i]);
 
+            if (received_from[new_address] == 0) {
+                transferFromInternal(old_address, new_address, 1);
+            } else {
+                require(received_from[new_address] == old_address,'only tree ARCs allowed');
+            }
+            old_address = new_address;
 
+            // TODO Updating the public key of influencers may not be a good idea because it will require the influencers to use
+            // a deterministic private/public key in the link and this might require user interaction (MetaMask signature)
+            // TODO a possible solution is change public_link_key to address=>address[]
+            // update (only once) the public address used by each influencer
+            // we will need this in case one of the influencers will want to start his own off-chain link
+            if (i < keys.length) {
+                setPublicLinkKeyOf(new_address, keys[i]);
+            }
+
+            // update (only once) the cut used by each influencer
+            // we will need this in case one of the influencers will want to start his own off-chain link
+            if (i < weights.length) {
+                setCutOf(new_address, uint256(weights[i]));
+            }
+        }
+    }
+
+    /**
+    * @notice Function to join with signature and share 1 arc to the receiver
+    * @param signature is the signature
+    * @param receiver is the address we're sending ARCs to
+    */
+    function joinAndShareARC(bytes signature, address receiver) public {
+        distributeArcsBasedOnSignature(signature);
+        transferFrom(twoKeyEventSource.plasmaOf(msg.sender), twoKeyEventSource.plasmaOf(receiver), 1);
+    }
 
     /**
      * @notice Method to add fungible asset to our contract
