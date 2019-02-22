@@ -21,18 +21,14 @@ contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaign {
     bool mustReachGoal; // If not, all the funds are returned to the senders
 
     address erc20InvoiceToken; // ERC20 token which will be issued as an invoice
-    uint maxReferralRewardPercent;
+    uint maxReferralRewardPercent; // Percent per conversion which goes to referrers
 
-    uint balance;
+    uint donationsBalance; // Balance earned by donations -> locked
 
     mapping(address => uint) amountUserContributed;
 
     mapping(address => uint[]) donatorToHisDonationsInEther;
-    mapping(address => uint[]) donatorToHisDonationsInERC20;
-
     uint numberOfDonationsEther;
-    uint numberOfDonationsERC20;
-
     DonationEther[] donationsEther;
 
     struct DonationEther {
@@ -88,20 +84,35 @@ contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaign {
     }
 
 
+    /**
+     * @notice Function where user can join to campaign and donate funds
+     * @param signature is signature he's joining with
+     * @param isAnonymous is representing if he wishes his name in the stats to be hidden
+     */
     function joinAndDonate(bytes signature, bool isAnonymous) public onlyInDonationLimit isOngoing payable {
-        require(balance.add(msg.value) <= campaignGoal);
+        require(donationsBalance.add(msg.value) <= campaignGoal);
         amountUserContributed[msg.sender] += msg.value;
     }
 
+    /**
+     * @notice Function where user has already joined and want to donate
+     * @param isAnonymous is representing if he wishes his name in the stats to be hidden
+     */
     function donate(bool isAnonymous) public onlyInDonationLimit isOngoing payable {
-        require(balance.add(msg.value) <= campaignGoal);
+        require(donationsBalance.add(msg.value) <= campaignGoal);
         amountUserContributed[msg.sender] += msg.value;
     }
 
+    /**
+     * @notice Fallback function to handle input payments -> no referrer rewards in this case
+     */
     function () isOngoing payable {
-        require(balance.add(msg.value) <= campaignGoal);
+        require(donationsBalance.add(msg.value) <= campaignGoal);
     }
 
+    /**
+     * @notice Function to read donation
+     */
     function getDonation(uint donationId) public view returns (bytes) {
         DonationEther memory donation = donationsEther[donationId];
         return abi.encodePacked(donation.donator, donation.amount, donation.donationTimestamp);
