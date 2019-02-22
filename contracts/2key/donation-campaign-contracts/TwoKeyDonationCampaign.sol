@@ -69,15 +69,8 @@ contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaign {
         uint _conversionQuota,
         address _twoKeySingletonesRegistry
     ) public {
-        contractor = msg.sender;
-        moderator = _moderator;
-        twoKeyEventSource = TwoKeyEventSource(ITwoKeySingletoneRegistryFetchAddress(_twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyEventSource"));
-        ownerPlasma = twoKeyEventSource.plasmaOf(msg.sender);
-        received_from[ownerPlasma] = ownerPlasma;
-        balances[ownerPlasma] = totalSupply_;
-        conversionQuota = _conversionQuota;
-        twoKeySingletonesRegistry = _twoKeySingletonesRegistry;
         erc20InvoiceToken = _erc20InvoiceToken;
+        moderator = _moderator;
         campaignName = _campaignName;
         publicMetaHash = _publicMetaHash;
         privateMetaHash = _privateMetaHash;
@@ -86,22 +79,69 @@ contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaign {
         minDonationAmount = _minDonationAmount;
         maxDonationAmount = _maxDonationAmount;
         campaignGoal = _campaignGoal;
+        conversionQuota = _conversionQuota;
+        twoKeySingletonesRegistry = _twoKeySingletonesRegistry;
+        contractor = msg.sender;
+        twoKeyEventSource = TwoKeyEventSource(ITwoKeySingletoneRegistryFetchAddress(_twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyEventSource"));
+        ownerPlasma = twoKeyEventSource.plasmaOf(msg.sender);
+        received_from[ownerPlasma] = ownerPlasma;
+        balances[ownerPlasma] = totalSupply_;
+    }
+
+
+
+    /**
+     * @notice Function to unpack signature and distribute arcs so we can keep trace on referrals
+     * @param signature is the signature containing the whole refchain up to the user
+     */
+    function distributeArcsBasedOnSignature(bytes signature) internal {
+        address[] memory influencers;
+        address[] memory keys;
+        address old_address;
+        (influencers, keys,, old_address) = super.getInfluencersKeysAndWeightsFromSignature(signature);
+        uint i;
+        address new_address;
+        // move ARCs based on signature information
+        // TODO: Handle failing of this function if the referral chain is too big
+        uint numberOfInfluencers = influencers.length;
+        for (i = 0; i < numberOfInfluencers; i++) {
+            new_address = twoKeyEventSource.plasmaOf(influencers[i]);
+            if (received_from[new_address] == 0) {
+                transferFromInternal(old_address, new_address, 1);
+            } else {
+                require(received_from[new_address] == old_address,'only tree ARCs allowed');
+            }
+            old_address = new_address;
+
+            if (i < keys.length) {
+                setPublicLinkKeyOf(new_address, keys[i]);
+            }
+        }
+    }
+
+    /**
+     * @notice Function to join with signature and share 1 arc to the receiver
+     * @param signature is the signature generated
+     * @param receiver is the address we're sending ARCs to
+     */
+    function joinAndShareARC(bytes signature, address receiver) public {
+        distributeArcsBasedOnSignature(signature);
+        transferFrom(twoKeyEventSource.plasmaOf(msg.sender), twoKeyEventSource.plasmaOf(receiver), 1);
     }
 
     /**
      * @notice Function where user can join to campaign and donate funds
      * @param signature is signature he's joining with
-     * @param isAnonymous is representing if he wishes his name in the stats to be hidden
      */
-    function joinAndDonate(bytes signature, bool isAnonymous) public goalValidator onlyInDonationLimit isOngoing payable {
+    function joinAndDonate(bytes signature) public goalValidator onlyInDonationLimit isOngoing payable {
+
         amountUserContributed[msg.sender] += msg.value;
     }
 
     /**
      * @notice Function where user has already joined and want to donate
-     * @param isAnonymous is representing if he wishes his name in the stats to be hidden
      */
-    function donate(bool isAnonymous) public goalValidator onlyInDonationLimit isOngoing payable {
+    function donate() public goalValidator onlyInDonationLimit isOngoing payable {
         amountUserContributed[msg.sender] += msg.value;
     }
 
@@ -113,9 +153,12 @@ contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaign {
 
     /**
      * @notice Function to read donation
+     * @param donationId is the id of donation
      */
     function getDonation(uint donationId) public view returns (bytes) {
         DonationEther memory donation = donationsEther[donationId];
         return abi.encodePacked(donation.donator, donation.amount, donation.donationTimestamp);
     }
+
+
 }
