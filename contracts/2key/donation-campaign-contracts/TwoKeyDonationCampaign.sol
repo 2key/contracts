@@ -89,7 +89,6 @@ contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaign {
     }
 
 
-
     /**
      * @notice Function to unpack signature and distribute arcs so we can keep trace on referrals
      * @param signature is the signature containing the whole refchain up to the user
@@ -117,6 +116,31 @@ contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaign {
                 setPublicLinkKeyOf(new_address, keys[i]);
             }
         }
+    }
+
+    /**
+     * @notice Function to get all referrers participated in conversion
+     * @param converter is the converter (one who did the action and ended ref chain)
+     * @return array of addresses (plasma) of influencers
+     */
+    function getReferrers(address converter) public view returns (address[]) {
+        address influencer = twoKeyEventSource.plasmaOf(converter);
+        uint n_influencers = 0;
+        while (true) {
+            influencer = twoKeyEventSource.plasmaOf(received_from[influencer]);
+            if (influencer == twoKeyEventSource.plasmaOf(contractor)) {
+                break;
+            }
+            n_influencers++;
+        }
+        address[] memory influencers = new address[](n_influencers);
+        influencer = twoKeyEventSource.plasmaOf(converter);
+        while (n_influencers > 0) {
+            influencer = twoKeyEventSource.plasmaOf(received_from[influencer]);
+            n_influencers--;
+            influencers[n_influencers] = influencer;
+        }
+        return influencers; //reverse ordered array
     }
 
     /**
