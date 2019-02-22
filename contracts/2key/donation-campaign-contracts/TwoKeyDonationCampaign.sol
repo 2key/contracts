@@ -18,7 +18,6 @@ contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaign {
     uint minDonationAmount; // Minimal donation amount
     uint maxDonationAmount; // Maximal donation amount
     uint campaignGoal; // Goal of the campaign, how many funds to raise
-    bool mustReachGoal; // If not, all the funds are returned to the senders
 
     address erc20InvoiceToken; // ERC20 token which will be issued as an invoice
     uint maxReferralRewardPercent; // Percent per conversion which goes to referrers
@@ -30,6 +29,25 @@ contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaign {
     mapping(address => uint[]) donatorToHisDonationsInEther;
     uint numberOfDonationsEther;
     DonationEther[] donationsEther;
+
+
+    modifier isOngoing {
+        require(now >= campaignStartTime && now <= campaignEndTime);
+        _;
+    }
+
+
+    modifier onlyInDonationLimit {
+        require(msg.value >= minDonationAmount && msg.value <= maxDonationAmount);
+        _;
+    }
+
+    modifier goalValidator {
+        if(campaignGoal != 0) {
+            require(donationsBalance.add(msg.value) <= campaignGoal);
+        }
+        _;
+    }
 
     struct DonationEther {
         address donator;
@@ -48,7 +66,6 @@ contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaign {
         uint _minDonationAmount,
         uint _maxDonationAmount,
         uint _campaignGoal,
-        bool _mustReachGoal,
         uint _conversionQuota,
         address _twoKeySingletonesRegistry
     ) public {
@@ -69,28 +86,14 @@ contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaign {
         minDonationAmount = _minDonationAmount;
         maxDonationAmount = _maxDonationAmount;
         campaignGoal = _campaignGoal;
-        mustReachGoal = _mustReachGoal;
     }
-
-    modifier isOngoing {
-        require(now >= campaignStartTime && now <= campaignEndTime);
-        _;
-    }
-
-
-    modifier onlyInDonationLimit {
-        require(msg.value >= minDonationAmount && msg.value <= maxDonationAmount);
-        _;
-    }
-
 
     /**
      * @notice Function where user can join to campaign and donate funds
      * @param signature is signature he's joining with
      * @param isAnonymous is representing if he wishes his name in the stats to be hidden
      */
-    function joinAndDonate(bytes signature, bool isAnonymous) public onlyInDonationLimit isOngoing payable {
-        require(donationsBalance.add(msg.value) <= campaignGoal);
+    function joinAndDonate(bytes signature, bool isAnonymous) public goalValidator onlyInDonationLimit isOngoing payable {
         amountUserContributed[msg.sender] += msg.value;
     }
 
@@ -98,16 +101,14 @@ contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaign {
      * @notice Function where user has already joined and want to donate
      * @param isAnonymous is representing if he wishes his name in the stats to be hidden
      */
-    function donate(bool isAnonymous) public onlyInDonationLimit isOngoing payable {
-        require(donationsBalance.add(msg.value) <= campaignGoal);
+    function donate(bool isAnonymous) public goalValidator onlyInDonationLimit isOngoing payable {
         amountUserContributed[msg.sender] += msg.value;
     }
 
     /**
      * @notice Fallback function to handle input payments -> no referrer rewards in this case
      */
-    function () isOngoing payable {
-        require(donationsBalance.add(msg.value) <= campaignGoal);
+    function () goalValidator onlyInDonationLimit isOngoing payable {
     }
 
     /**
