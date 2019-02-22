@@ -4,8 +4,8 @@ import "./ERC20.sol";
 import "../libraries/SafeMath.sol";
 
 /**
+ * @title Contract to handle ERC20 invoices
  * @author Nikola Madjarevic
- * @notice Token implementation which will be used as invoice for donation, in general, doesn't have any concrete value
  * Created at 2/22/19
  */
 contract InvoiceTokenERC20 is ERC20 {
