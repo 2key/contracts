@@ -30,13 +30,13 @@ library IncentiveModels {
 
     /**
      * @notice Function to return array of corresponding values with rewards in power law schema
-     * @param totalReward is totalReward
+     * @param totalRewardEthWEI is totalReward
      * @param numberOfInfluencers is the total number of influencers
      * @return rewards in wei
      */
-    function powerLawRewards(uint totalReward, uint numberOfInfluencers) internal pure returns (uint[]) {
+    function powerLawRewards(uint totalRewardEthWEI, uint numberOfInfluencers) internal pure returns (uint[]) {
         uint[] memory rewards = new uint[](numberOfInfluencers);
-        uint x = calculateX(totalReward,numberOfInfluencers);
+        uint x = calculateX(totalRewardEthWEI,numberOfInfluencers);
         for(uint i=0; i<numberOfInfluencers;i++) {
             rewards[i] = x / (2**i);
         }
@@ -45,19 +45,18 @@ library IncentiveModels {
 
     /**
      * @notice Function to calculate base for all rewards in power law model
-     * @param sum is the total reward to be splited
+     * @param sum is the total reward to be splited in Wei
      * @param numberOfElements is the number of referrers in the chain
      * @return wei value of base for the rewards in power law
      */
-    function calculateX(uint sum, uint numberOfElements) private pure returns (uint) {
-        sum = sum * (10**18);
+    function calculateX(uint sumWei, uint numberOfElements) private pure returns (uint) {
         uint a = 1;
         uint sumOfFactors = 1;
         for(uint i=1; i<numberOfElements; i++) {
             a = a*2;
             sumOfFactors += a;
         }
-        return (sum*a) / sumOfFactors;
+        return (sumWei*a) / sumOfFactors;
     }
 
 
