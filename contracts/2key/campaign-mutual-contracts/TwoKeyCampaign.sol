@@ -31,7 +31,6 @@ contract TwoKeyCampaign is ArcERC20 {
 	uint256 moderatorTotalEarningsETHWei; //Total earnings of the moderator all time
 
 
-    mapping(address => uint256) internal referrerPlasma2cut; // Mapping representing how much are cuts in percent(0-100) for referrer address
 	mapping(address => uint256) internal referrerPlasma2BalancesEthWEI; // balance of EthWei for each influencer that he can withdraw
 	mapping(address => uint256) internal referrerPlasma2TotalEarningsEthWEI; // Total earnings for referrers
 	mapping(address => uint256) internal referrerPlasmaAddressToCounterOfConversions; // [referrer][conversionId]
@@ -155,37 +154,6 @@ contract TwoKeyCampaign is ArcERC20 {
     function setPublicLinkKey(address new_public_key) public {
         setPublicLinkKeyOf(msg.sender, new_public_key);
     }
-
-	/**
-     * @notice Function to get cut for an (ethereum) address
-     * @param me is the ethereum address
-     */
-	function getReferrerCut(address me) public view returns (uint256) {
-		return referrerPlasma2cut[twoKeyEventSource.plasmaOf(me)];
-	}
-
-	/**
- 	 * @notice Function to set cut of
- 	 * @param me is the address (ethereum)
- 	 * @param cut is the cut value
- 	 */
-	function setCutOf(address me, uint256 cut) internal {
-		// what is the percentage of the bounty s/he will receive when acting as an influencer
-		// the value 255 is used to signal equal partition with other influencers
-		// A sender can set the value only once in a contract
-		address plasma = twoKeyEventSource.plasmaOf(me);
-		require(referrerPlasma2cut[plasma] == 0 || referrerPlasma2cut[plasma] == cut, 'cut already set differently');
-		referrerPlasma2cut[plasma] = cut;
-	}
-
-	/**
-     * @notice Function to set cut
-     * @param cut is the cut value
-     * @dev Executes internal setCutOf method
-     */
-	function setCut(uint256 cut) public {
-		setCutOf(msg.sender, cut);
-	}
 
 
 	/**

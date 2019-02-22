@@ -19,6 +19,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
     mapping(address => uint256) private amountConverterSpentFiatWei;
     mapping(address => uint256) private amountConverterSpentEthWEI; // Amount converter put to the contract in Ether
     mapping(address => uint256) private unitsConverterBought; // Number of units (ERC20 tokens) bought
+    mapping(address => uint256) internal referrerPlasma2cut; // Mapping representing how much are cuts in percent(0-100) for referrer address
 
     address assetContractERC20; // Asset contract is address of ERC20 inventory
 
@@ -69,6 +70,31 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
         require(msg.sender == address(conversionHandler));
         _;
     }
+
+
+    /**
+     * @notice Function to set cut of
+     * @param me is the address (ethereum)
+     * @param cut is the cut value
+     */
+    function setCutOf(address me, uint256 cut) internal {
+        // what is the percentage of the bounty s/he will receive when acting as an influencer
+        // the value 255 is used to signal equal partition with other influencers
+        // A sender can set the value only once in a contract
+        address plasma = twoKeyEventSource.plasmaOf(me);
+        require(referrerPlasma2cut[plasma] == 0 || referrerPlasma2cut[plasma] == cut, 'cut already set differently');
+        referrerPlasma2cut[plasma] = cut;
+    }
+
+    /**
+     * @notice Function to set cut
+     * @param cut is the cut value
+     * @dev Executes internal setCutOf method
+     */
+    function setCut(uint256 cut) public {
+        setCutOf(msg.sender, cut);
+    }
+
 
     function distributeArcsBasedOnSignature(bytes sig) private returns (address[]) {
         address[] memory influencers;
@@ -303,6 +329,14 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
         }
         cuts[influencers.length] = getReferrerCut(last_influencer);
         return cuts;
+    }
+
+    /**
+     * @notice Function to get cut for an (ethereum) address
+     * @param me is the ethereum address
+     */
+    function getReferrerCut(address me) public view returns (uint256) {
+        return referrerPlasma2cut[twoKeyEventSource.plasmaOf(me)];
     }
 
     /**
