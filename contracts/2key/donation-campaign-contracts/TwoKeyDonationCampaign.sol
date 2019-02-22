@@ -158,7 +158,6 @@ contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaign {
      * @param signature is signature he's joining with
      */
     function joinAndDonate(bytes signature) public goalValidator onlyInDonationLimit isOngoing payable {
-
         amountUserContributed[msg.sender] += msg.value;
     }
 
