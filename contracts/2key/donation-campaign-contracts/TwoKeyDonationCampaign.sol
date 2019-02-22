@@ -80,31 +80,30 @@ contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaign {
         require(now >= campaignStartTime && now <= campaignEndTime);
         _;
     }
-    modifier isGoalReached {
-        require(campaignGoal < balance);
+
+
+    modifier onlyInDonationLimit {
+        require(msg.value >= minDonationAmount && msg.value <= maxDonationAmount);
         _;
     }
 
 
-    function joinAndDonate(bytes signature, bool isAnonymous) public payable {
+    function joinAndDonate(bytes signature, bool isAnonymous) public onlyInDonationLimit isOngoing payable {
+        require(balance.add(msg.value) <= campaignGoal);
         amountUserContributed[msg.sender] += msg.value;
     }
 
-    function donate(bool isAnonymous) public payable {
+    function donate(bool isAnonymous) public onlyInDonationLimit isOngoing payable {
+        require(balance.add(msg.value) <= campaignGoal);
         amountUserContributed[msg.sender] += msg.value;
     }
 
-
-    function () payable {
-        require(balance + msg.value <= campaignGoal);
-        require(now >= campaignStartTime && now <= campaignEndTime);
+    function () isOngoing payable {
+        require(balance.add(msg.value) <= campaignGoal);
     }
 
     function getDonation(uint donationId) public view returns (bytes) {
         DonationEther memory donation = donationsEther[donationId];
         return abi.encodePacked(donation.donator, donation.amount, donation.donationTimestamp);
     }
-
-
-
 }

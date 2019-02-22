@@ -193,7 +193,7 @@ contract TwoKeyCampaign is ArcERC20 {
      * @dev only Contractor can call this method, otherwise it will revert - emits Event when updated
      * @param value is the new referral percent value
      */
-	function updateMaxReferralRewardPercent(uint value) external onlyContractor {
+	function updateMaxReferralRewardPercent(uint value) public onlyContractor {
 		maxReferralRewardPercent = value;
 		twoKeyEventSource.updatedData(block.timestamp, value, "Updated maxReferralRewardPercent");
 	}
@@ -226,7 +226,7 @@ contract TwoKeyCampaign is ArcERC20 {
      * @dev only contractor or moderator are eligible to call this function
      * @return value of his balance in ETH
      */
-    function getModeratorBalanceAndTotalEarnings() external view returns (uint,uint) {
+    function getModeratorBalanceAndTotalEarnings() public view returns (uint,uint) {
         require(msg.sender == contractor);
         return (moderatorBalanceETHWei,moderatorTotalEarningsETHWei);
     }
@@ -255,7 +255,7 @@ contract TwoKeyCampaign is ArcERC20 {
      * @dev onlyContractor can call this method
      * @return true if successful otherwise will 'revert'
      */
-    function withdrawContractor() external onlyContractor {
+    function withdrawContractor() public onlyContractor {
         uint balance = contractorBalance;
         contractorBalance = 0;
         /**
@@ -270,7 +270,7 @@ contract TwoKeyCampaign is ArcERC20 {
  	 * @param _address is the address we're withdrawing funds to
  	 * @dev It can be called by the address specified in the param or by the one of two key maintainers
  	 */
-	function withdrawModeratorOrReferrer(address _address) external {
+	function withdrawModeratorOrReferrer(address _address) public {
 		require(msg.sender == _address || twoKeyEventSource.isAddressMaintainer(msg.sender));
 		uint balance;
 		if(_address == moderator) {
