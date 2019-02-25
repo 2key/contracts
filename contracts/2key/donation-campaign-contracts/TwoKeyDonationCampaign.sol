@@ -226,10 +226,52 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
     }
 
     /**
+     * @notice Function where contractor can update power law factor for the rewards
+     */
+    function updatePowerLawFactor(uint _newPowerLawFactor) public onlyContractor {
+        require(_newPowerLawFactor> 0);
+        powerLawFactor = _newPowerLawFactor;
+    }
+
+    /**
      * @notice Fallback function to handle input payments -> no referrer rewards in this case
      */
     function () goalValidator onlyInDonationLimit isOngoing payable {
+        //TODO: What is the requirement just to donate money
+    }
 
+    function getAmountUserContributed(address _donator) public view returns (uint) {
+        require(
+            msg.sender == contractor ||
+            msg.sender == _donator ||
+            twoKeyEventSource.isAddressMaintainer(msg.sender)
+        );
+        return amountUserContributed[_donator];
+    }
+
+    /**
+    * @notice Function to fetch for the referrer his balance, his total earnings, and how many conversions he participated in
+    * @dev only referrer by himself, moderator, or contractor can call this
+    * @param _referrer is the address of referrer we're checking for
+    * @param signature is the signature if calling functions from FE without ETH address
+    * @param donationIds are the ids of conversions this referrer participated in
+    * @return tuple containing this 3 information
+    */
+    function getReferrerBalanceAndTotalEarningsAndNumberOfConversions(address _referrer, bytes signature, uint[] donationIds) public view returns (uint,uint,uint,uint[]) {
+        if(_referrer != address(0)) {
+            require(msg.sender == _referrer || msg.sender == contractor || twoKeyEventSource.isAddressMaintainer(msg.sender));
+            _referrer = twoKeyEventSource.plasmaOf(_referrer);
+        } else {
+            bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding referrer to plasma")),
+                keccak256(abi.encodePacked("GET_REFERRER_REWARDS"))));
+            _referrer = Call.recoverHash(hash, signature, 0);
+        }
+        uint length = donationIds.length;
+        uint[] memory earnings = new uint[](length);
+        for(uint i=0; i<length; i++) {
+            earnings[i] = referrerPlasma2EarningsPerConversion[_referrer][donationIds[i]];
+        }
+        return (referrerPlasma2BalancesEthWEI[_referrer], referrerPlasma2TotalEarningsEthWEI[_referrer], referrerPlasmaAddressToCounterOfConversions[_referrer], earnings);
     }
 
     /**
