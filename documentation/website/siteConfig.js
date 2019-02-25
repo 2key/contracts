@@ -39,7 +39,7 @@ const siteConfig = {
 
   // For no header links in the top nav bar -> headerLinks: [],
   headerLinks: [
-    {doc: '2key_ArcERC20', label: 'Docs'},
+    {doc: '2key_DecentralizedNation', label: 'Docs'},
   ],
 
   // If you have users set above, you add it here:
