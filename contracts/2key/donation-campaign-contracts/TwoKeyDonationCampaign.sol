@@ -152,9 +152,10 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
      * @param referrerPlasma is referrer plasma address
      * @param reward is the reward referrer earned
      */
-    function updateReferrerMappings(address referrerPlasma, uint reward) internal {
+    function updateReferrerMappings(address referrerPlasma, uint reward, uint donationId) internal {
         referrerPlasma2BalancesEthWEI[referrerPlasma] = reward;
         referrerPlasma2TotalEarningsEthWEI[referrerPlasma] += reward;
+        referrerPlasma2EarningsPerConversion[referrerPlasma][donationId] = reward;
         referrerPlasmaAddressToCounterOfConversions[referrerPlasma] += 1;
     }
 
@@ -163,26 +164,26 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
      * @param converter is the address of the converter
      * @param totalBountyForConversion is total bounty for the conversion
      */
-    function distributeReferrerRewards(address converter, uint totalBountyForConversion) internal {
+    function distributeReferrerRewards(address converter, uint totalBountyForConversion, uint donationId) internal {
         address[] memory referrers = getReferrers(converter);
         uint numberOfReferrers = referrers.length;
         if(rewardsModel == IncentiveModel.AVERAGE) {
             uint reward = IncentiveModels.averageModelRewards(totalBountyForConversion, numberOfReferrers);
             for(uint i=0; i<numberOfReferrers; i++) {
-                updateReferrerMappings(referrers[i], reward);
+                updateReferrerMappings(referrers[i], reward, donationId);
             }
         } else if(rewardsModel == IncentiveModel.AVERAGE_LAST_3X) {
             uint rewardPerReferrer;
             uint rewardForLast;
             (rewardPerReferrer, rewardForLast)= IncentiveModels.averageLast3xRewards(totalBountyForConversion, numberOfReferrers);
             for(i=0; i<numberOfReferrers - 1; i++) {
-                updateReferrerMappings(referrers[i], rewardPerReferrer);
+                updateReferrerMappings(referrers[i], rewardPerReferrer, donationId);
             }
-            updateReferrerMappings(referrers[numberOfReferrers-1], rewardForLast);
+            updateReferrerMappings(referrers[numberOfReferrers-1], rewardForLast, donationId);
         } else if(rewardsModel == IncentiveModel.POWER_LAW) {
             uint[] memory rewards = IncentiveModels.powerLawRewards(totalBountyForConversion, numberOfReferrers, powerLawFactor);
             for(i=0; i<numberOfReferrers; i++) {
-                updateReferrerMappings(referrers[i], rewards[i]);
+                updateReferrerMappings(referrers[i], rewards[i], donationId);
             }
         }
     }
