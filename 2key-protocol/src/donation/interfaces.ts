@@ -1,3 +1,5 @@
+import {ICreateCampaignProgress} from "../interfaces";
+
 export interface IDonationCampaign {
 
 }
@@ -28,4 +30,14 @@ export interface ICreateCampaign {
 export interface InvoiceERC20 {
     tokenName: string,
     tokenSymbol: string
+}
+
+/**
+ * Optional params
+ */
+export interface ICreateOpts {
+    progressCallback?: ICreateCampaignProgress,
+    gasPrice?: number,
+    interval?: number,
+    timeout?: number
 }
