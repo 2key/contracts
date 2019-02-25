@@ -85,7 +85,6 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         conversionQuota = _conversionQuota;
         twoKeySingletonesRegistry = _twoKeySingletonesRegistry;
         rewardsModel = _rewardsModel;
-        // Calculating manual stuff
         contractor = msg.sender;
         twoKeyEventSource = TwoKeyEventSource(ITwoKeySingletoneRegistryFetchAddress(_twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyEventSource"));
         ownerPlasma = twoKeyEventSource.plasmaOf(msg.sender);
@@ -159,6 +158,11 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         referrerPlasmaAddressToCounterOfConversions[referrerPlasma] += 1;
     }
 
+    /**
+     * @notice Function to distribute referrer rewards depending on selected model
+     * @param converter is the address of the converter
+     * @param totalBountyForConversion is total bounty for the conversion
+     */
     function distributeReferrerRewards(address converter, uint totalBountyForConversion) internal {
         address[] memory referrers = getReferrers(converter);
         uint numberOfReferrers = referrers.length;
