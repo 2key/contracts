@@ -111,13 +111,15 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
             this.helpers._createAndValidate(acquisitionContracts.TwoKeyAcquisitionLogicHandler.abi, twoKeyAcquisitionLogicHandler),
         ]);
         this.AcquisitionConversionHandler = AcquisitionConversionHandler;
+        this.AcquisitionConversionHandler.acquisitionAddress = this.AcquisitionCampaign.address;
         this.AcquisitionLogicHandler = AcquisitionLogicHandler;
+        this.AcquisitionLogicHandler.acquisitionAddress = this.AcquisitionCampaign.address;
         return this.AcquisitionCampaign;
     }
 
     async _getConversionHandlerInstance(campaign: any): Promise<any> {
         const address = campaign.address || campaign;
-        if (this.AcquisitionCampaign && this.AcquisitionCampaign.address === address) {
+        if (this.AcquisitionConversionHandler && this.AcquisitionConversionHandler.acquisitionAddress === address) {
             return this.AcquisitionConversionHandler;
         }
         await this._getCampaignInstance(campaign);
@@ -126,7 +128,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
 
     async _getLogicHandlerInstance(campaign: any): Promise<any> {
         const address = campaign.address || campaign;
-        if (this.AcquisitionCampaign && this.AcquisitionCampaign.address === address) {
+        if (this.AcquisitionLogicHandler && this.AcquisitionLogicHandler.acquisitionAddress === address) {
             return this.AcquisitionLogicHandler;
         }
         await this._getCampaignInstance(campaign);
