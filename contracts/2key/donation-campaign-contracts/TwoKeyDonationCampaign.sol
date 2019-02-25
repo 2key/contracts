@@ -23,7 +23,7 @@ contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaign, T
     uint minDonationAmount; // Minimal donation amount
     uint maxDonationAmount; // Maximal donation amount
     uint campaignGoal; // Goal of the campaign, how many funds to raise
-
+    IncentiveModel rewardsModel; //Incentive model for rewards
     address erc20InvoiceToken; // ERC20 token which will be issued as an invoice
     uint maxReferralRewardPercent; // Percent per conversion which goes to referrers
 
@@ -73,7 +73,8 @@ contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaign, T
         uint _maxDonationAmount,
         uint _campaignGoal,
         uint _conversionQuota,
-        address _twoKeySingletonesRegistry
+        address _twoKeySingletonesRegistry,
+        IncentiveModel _rewardsModel
     ) public {
         erc20InvoiceToken = new InvoiceTokenERC20(tokenName,tokenSymbol,address(this));
         moderator = _moderator;
@@ -87,6 +88,8 @@ contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaign, T
         campaignGoal = _campaignGoal;
         conversionQuota = _conversionQuota;
         twoKeySingletonesRegistry = _twoKeySingletonesRegistry;
+        rewardsModel = _rewardsModel;
+        // Calculating manual stuff
         contractor = msg.sender;
         twoKeyEventSource = TwoKeyEventSource(ITwoKeySingletoneRegistryFetchAddress(_twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyEventSource"));
         ownerPlasma = twoKeyEventSource.plasmaOf(msg.sender);
