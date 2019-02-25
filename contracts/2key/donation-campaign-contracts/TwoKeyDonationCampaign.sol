@@ -74,7 +74,7 @@ contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaign, T
         uint _campaignGoal,
         uint _conversionQuota,
         address _twoKeySingletonesRegistry,
-        IncentiveModel _rewardsModel
+        IncentiveModel _rewardsModel //Handled as uint on the FE
     ) public {
         erc20InvoiceToken = new InvoiceTokenERC20(tokenName,tokenSymbol,address(this));
         moderator = _moderator;
@@ -149,8 +149,13 @@ contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaign, T
             n_influencers--;
             influencers[n_influencers] = influencer;
         }
-        return influencers; //reverse ordered array
+        return influencers;
     }
+
+//    function distributeReferrerRewards(address converter) internal {
+//        address[] memory referrers = getReferrers(converter);
+//
+//    }
 
     /**
      * @notice Function to join with signature and share 1 arc to the receiver
