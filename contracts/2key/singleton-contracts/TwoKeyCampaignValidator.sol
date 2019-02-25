@@ -66,7 +66,7 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
      * @notice Function which is in charge to validate if the campaign contract is ready
      * It should be called by contractor after he finish all the stuff necessary for campaign to work
      * @param campaign is the address of the campaign, in this particular case it's acquisition
-     * @dev Validates all the required stuff, if the campaign is not validated, it can't touch our singletones
+     * @dev Validates all the required stuff, if the campaign is not validated, it can't update our singletones
      */
     function validateAcquisitionCampaign(address campaign, string nonSingletonHash) public {
         require(isCampaignValidated[campaign] == false);
@@ -103,6 +103,19 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
                                     (twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyEventSource");
 
         ITwoKeyEventSourceEvents(twoKeyEventSource).created(campaign,contractor,moderator);
+    }
+
+    /**
+     * @notice Function to validate Donation campaign if it is ready
+     * @param campaign is the campaign address
+     * @dev Validates all the required stuff, if the campaign is not validated, it can't update our singletones
+     */
+    function validateDonationCampaign(address campaign, string nonSingletoneHash) public {
+        require(isCampaignValidated[campaign] == false);
+        /**
+         * TODO: Validate if erc20 address passed to the campaign has all the funds at the campaign address
+         * TODO: Validate bytecode
+         */
     }
 
     /**
