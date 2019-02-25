@@ -1,13 +1,17 @@
 pragma solidity ^0.4.24;
 
 import "./TwoKeyDonationCampaignType.sol";
-import "../campaign-mutual-contracts/TwoKeyCampaign.sol";
 import "./InvoiceTokenERC20.sol";
+
+import "../campaign-mutual-contracts/TwoKeyCampaign.sol";
+import "../libraries/IncentiveModels.sol";
+import "../campaign-mutual-contracts/TwoKeyCampaignIncentiveModels.sol";
+
 /**
  * @author Nikola Madjarevic
  * Created at 2/19/19
  */
-contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaign {
+contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaign, TwoKeyCampaignIncentiveModels {
 
     DonationType campaignType; //Type of campaign
 
@@ -184,6 +188,4 @@ contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaign {
         DonationEther memory donation = donationsEther[donationId];
         return abi.encodePacked(donation.donator, donation.amount, donation.donationTimestamp);
     }
-
-
 }
