@@ -21,21 +21,7 @@ export default class DonationCampaign implements IDonationCampaign {
         //TODO: Generate non singletone hash
     }
 
-    /**
-     * moderator: string,
-     campaignName: string,
-     publicMetaHash: string,
-     privateMetaHash: string,
-     invoiceToken: InvoiceERC20,
-     campaignStartTime: number,
-     campaignEndTime: number,
-     minDonationAmount: number,
-     maxDonationAmount: number,
-     campaignGoal: number,
-     conversionQuota: number,
-     singletoneRegistry: string,
-     incentiveModel: number
-     */
+
     /**
      *
      * @param {ICreateCampaign} data
