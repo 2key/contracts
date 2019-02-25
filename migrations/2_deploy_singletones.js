@@ -4,7 +4,6 @@ const TwoKeyAdmin = artifacts.require('TwoKeyAdmin');
 const EventSource = artifacts.require('TwoKeyEventSource');
 const TwoKeyRegistry = artifacts.require('TwoKeyRegistry');
 const TwoKeyCongress = artifacts.require('TwoKeyCongress');
-const Call = artifacts.require('Call');
 const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
 const TwoKeySingletonesRegistry = artifacts.require('TwoKeySingletonesRegistry');
 const TwoKeyExchangeRateContract = artifacts.require('TwoKeyExchangeRateContract');
@@ -14,7 +13,8 @@ const TwoKeyCommunityTokenPool = artifacts.require('TwoKeyCommunityTokenPool');
 const TwoKeyDeepFreezeTokenPool = artifacts.require('TwoKeyDeepFreezeTokenPool');
 const TwoKeyLongTermTokenPool = artifacts.require('TwoKeyLongTermTokenPool');
 const TwoKeyCampaignValidator = artifacts.require('TwoKeyCampaignValidator');
-
+const Call = artifacts.require('Call');
+const IncentiveModels = artifacts.require('IncentiveModels');
 
 const fs = require('fs');
 const path = require('path');
@@ -108,6 +108,7 @@ module.exports = function deploy(deployer) {
      * Deployment process
      */
     deployer.deploy(Call);
+    deployer.deploy(IncentiveModels);
     if (deployer.network.startsWith('dev') || deployer.network.startsWith('public.') || deployer.network.startsWith('rinkeby') || deployer.network.startsWith('ropsten')) {
         deployer.deploy(TwoKeyCongress, 24*60, initialCongressMembers, votingPowers)
             .then(() => TwoKeyCongress.deployed())
