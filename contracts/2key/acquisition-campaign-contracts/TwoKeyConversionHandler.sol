@@ -388,6 +388,8 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
     function rejectConverter(address _converter) public onlyContractorOrMaintainer  {
         require(converterToState[_converter] == ConverterState.PENDING_APPROVAL);
         moveFromPendingToRejectedState(_converter);
+        uint reservedAmount = 0;
+        uint refundAmount = 0;
         for(uint i=0; i<converterToHisConversions[_converter].length; i++) {
             uint conversionId = converterToHisConversions[_converter][i];
             Conversion memory c = conversions[conversionId];
@@ -395,9 +397,14 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
                 ITwoKeyBaseReputationRegistry(twoKeyBaseReputationRegistry).updateOnConversionRejectedEvent(_converter, contractor, twoKeyAcquisitionCampaignERC20);
                 c.state = ConversionState.REJECTED;
                 conversions[conversionId] = c;
-                ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateReservedAmountOfTokensIfConversionRejectedOrExecuted(c.baseTokenUnits + c.bonusTokenUnits);
-                ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).sendBackEthWhenConversionCancelled(_converter, c.conversionAmount);
+                reservedAmount += c.baseTokenUnits + c.bonusTokenUnits;
+                refundAmount += c.conversionAmount;
             }
+        }
+        //If there's an amount to be returned and reserved tokens, update state and execute cashback
+        if(reservedAmount > 0 && refundAmount > 0) {
+            ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateReservedAmountOfTokensIfConversionRejectedOrExecuted(reservedAmount);
+            ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).sendBackEthWhenConversionCancelled(_converter, refundAmount);
         }
     }
 
