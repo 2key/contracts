@@ -145,7 +145,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         uint value;
         bool flag;
         (value,flag,,) = ITwoKeyExchangeRateContract(twoKeyExchangeContract).getFiatCurrencyDetails("USD");
-        return (_weiAmount*value).div(rate * 1000).div(10**18);
+        return (_weiAmount*value).mul(1000).div(rate).div(10**18);
     }
 
     /**
