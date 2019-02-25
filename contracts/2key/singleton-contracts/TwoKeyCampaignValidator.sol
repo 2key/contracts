@@ -121,7 +121,7 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
     /**
      * @notice Function to add valid bytecodes for the contracts
      * @param contracts is the array of contracts (deployed)
-     * @names is the array of hexed contract names
+     * @param names is the array of hexed contract names
      * @dev Only maintainer can issue calls to this function
      */
     function addValidBytecodes(address[] contracts, bytes32[] names) public onlyMaintainer {
