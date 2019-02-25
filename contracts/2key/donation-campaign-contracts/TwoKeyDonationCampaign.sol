@@ -2,6 +2,7 @@ pragma solidity ^0.4.24;
 
 import "./TwoKeyDonationCampaignType.sol";
 import "../campaign-mutual-contracts/TwoKeyCampaign.sol";
+import "./InvoiceTokenERC20.sol";
 /**
  * @author Nikola Madjarevic
  * Created at 2/19/19
@@ -56,11 +57,12 @@ contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaign {
     }
 
     constructor(
-        address _erc20InvoiceToken,
         address _moderator,
         string _campaignName,
         string _publicMetaHash,
         string _privateMetaHash,
+        string tokenName,
+        string tokenSymbol,
         uint _campaignStartTime,
         uint _campaignEndTime,
         uint _minDonationAmount,
@@ -69,7 +71,7 @@ contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaign {
         uint _conversionQuota,
         address _twoKeySingletonesRegistry
     ) public {
-        erc20InvoiceToken = _erc20InvoiceToken;
+        erc20InvoiceToken = new InvoiceTokenERC20(tokenName,tokenSymbol,address(this));
         moderator = _moderator;
         campaignName = _campaignName;
         publicMetaHash = _publicMetaHash;

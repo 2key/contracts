@@ -12,7 +12,7 @@ contract InvoiceTokenERC20 is ERC20 {
 
     using SafeMath for uint256;
 
-    uint256 internal totalSupply_;
+    uint256 internal totalSupply_ = 10000000000000000;
     string public name;
     string public symbol;
     uint8 public decimals = 18;
@@ -30,11 +30,10 @@ contract InvoiceTokenERC20 is ERC20 {
     }
 
 
-    constructor(string _name, string _symbol, uint _totalSupply_, address _tokensOwner) public {
+    constructor(string _name, string _symbol, address _tokensOwner) public {
         owner = _tokensOwner;
         name = _name;
         symbol = _symbol;
-        totalSupply_ = _totalSupply_.mul(10**decimals);
         balances[_tokensOwner] = totalSupply_;
     }
 
