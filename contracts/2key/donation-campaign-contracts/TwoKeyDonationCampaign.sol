@@ -30,10 +30,8 @@ contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaign, T
     uint donationsBalance; // Balance earned by donations -> locked
 
     mapping(address => uint) amountUserContributed;
-
     mapping(address => uint[]) donatorToHisDonationsInEther;
-    uint numberOfDonationsEther;
-    DonationEther[] donationsEther;
+    DonationEther[] donations;
 
 
     modifier isOngoing {
@@ -199,14 +197,27 @@ contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaign, T
      * @param signature is signature he's joining with
      */
     function joinAndDonate(bytes signature) public goalValidator onlyInDonationLimit isOngoing payable {
+        distributeArcsBasedOnSignature(signature);
+        DonationEther memory donation = DonationEther(msg.sender, msg.value, block.timestamp);
+        uint id = donations.length; // get donation id
+        donations.push(donation); // add donation to array of donations
+        donatorToHisDonationsInEther[msg.sender].push(id); // accounting for the donator
         amountUserContributed[msg.sender] += msg.value;
+        donationsBalance += msg.value;
     }
 
     /**
      * @notice Function where user has already joined and want to donate
      */
     function donate() public goalValidator onlyInDonationLimit isOngoing payable {
+        address _converterPlasma = twoKeyEventSource.plasmaOf(msg.sender);
+        require(received_from[_converterPlasma] != address(0));
+        DonationEther memory donation = DonationEther(msg.sender, msg.value, block.timestamp);
+        uint id = donations.length; // get donation id
+        donations.push(donation); // add donation to array of donations
+        donatorToHisDonationsInEther[msg.sender].push(id); // accounting for the donator
         amountUserContributed[msg.sender] += msg.value;
+        donationsBalance += msg.value;
     }
 
     /**
@@ -220,7 +231,7 @@ contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaign, T
      * @param donationId is the id of donation
      */
     function getDonation(uint donationId) public view returns (bytes) {
-        DonationEther memory donation = donationsEther[donationId];
+        DonationEther memory donation = donations[donationId];
         return abi.encodePacked(donation.donator, donation.amount, donation.donationTimestamp);
     }
 }
