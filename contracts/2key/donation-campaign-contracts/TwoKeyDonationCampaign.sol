@@ -152,10 +152,37 @@ contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaign, T
         return influencers;
     }
 
-//    function distributeReferrerRewards(address converter) internal {
-//        address[] memory referrers = getReferrers(converter);
-//
-//    }
+    /**
+     * @notice Internal function to update referrer mappings with value
+     * @param referrerPlasma is referrer plasma address
+     * @param reward is the reward referrer earned
+     */
+    function updateReferrerMappings(address referrerPlasma, uint reward) internal {
+        referrerPlasma2BalancesEthWEI[referrerPlasma] = reward;
+        referrerPlasma2TotalEarningsEthWEI[referrerPlasma] += reward;
+        referrerPlasmaAddressToCounterOfConversions[referrerPlasma] += 1;
+    }
+
+    function distributeReferrerRewards(address converter, uint totalBountyForConversion) internal {
+        address[] memory referrers = getReferrers(converter);
+        uint numberOfReferrers = referrers.length;
+        if(rewardsModel == IncentiveModel.AVERAGE) {
+            uint reward = IncentiveModels.averageModelRewards(totalBountyForConversion, numberOfReferrers);
+            for(uint i=0; i<numberOfReferrers; i++) {
+                updateReferrerMappings(referrers[i], reward);
+            }
+        } else if(rewardsModel == IncentiveModel.AVERAGE_LAST_3X) {
+            uint rewardPerReferrer;
+            uint rewardForLast;
+            (rewardPerReferrer, rewardForLast)= IncentiveModels.averageLast3xRewards(totalBountyForConversion, numberOfReferrers);
+            for(uint j=0; i<numberOfReferrers - 1; j++) {
+                updateReferrerMappings(referrers[j], rewardPerReferrer);
+            }
+            updateReferrerMappings(referrers[numberOfReferrers-1], rewardForLast);
+        } else if(rewardsModel == IncentiveModel.POWER_LAW) {
+            //TODO: Handle this just figure out order is reversed or not
+        }
+    }
 
     /**
      * @notice Function to join with signature and share 1 arc to the receiver
