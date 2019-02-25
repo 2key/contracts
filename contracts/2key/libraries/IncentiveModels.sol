@@ -11,7 +11,10 @@ library IncentiveModels {
      * @param totalRewardEthWEI is total reward for the influencers
      * @param numberOfInfluencers is how many influencers we're splitting reward between
      */
-    function averageModelRewards(uint totalRewardEthWEI, uint numberOfInfluencers) internal pure returns (uint) {
+    function averageModelRewards(
+        uint totalRewardEthWEI,
+        uint numberOfInfluencers
+    ) internal pure returns (uint) {
         uint equalPart = totalRewardEthWEI / numberOfInfluencers;
         return equalPart;
     }
@@ -22,7 +25,10 @@ library IncentiveModels {
      * @param numberOfInfluencers is how many influencers we're splitting reward between
      * @return two values, first is reward per regular referrer, and second is reward for last referrer in the chain
      */
-    function averageLast3xRewards(uint totalRewardEthWEI, uint numberOfInfluencers) internal pure returns (uint,uint) {
+    function averageLast3xRewards(
+        uint totalRewardEthWEI,
+        uint numberOfInfluencers
+    ) internal pure returns (uint,uint) {
         uint rewardPerReferrer = totalRewardEthWEI / (numberOfInfluencers + 2);
         uint rewardForLast = rewardPerReferrer*3;
         return (rewardPerReferrer, rewardForLast);
@@ -34,9 +40,13 @@ library IncentiveModels {
      * @param numberOfInfluencers is the total number of influencers
      * @return rewards in wei
      */
-    function powerLawRewards(uint totalRewardEthWEI, uint numberOfInfluencers) internal pure returns (uint[]) {
+    function powerLawRewards(
+        uint totalRewardEthWEI,
+        uint numberOfInfluencers,
+        uint factor
+    ) internal pure returns (uint[]) {
         uint[] memory rewards = new uint[](numberOfInfluencers);
-        uint x = calculateX(totalRewardEthWEI,numberOfInfluencers);
+        uint x = calculateX(totalRewardEthWEI,numberOfInfluencers,factor);
         for(uint i=0; i<numberOfInfluencers;i++) {
             rewards[i] = x / (2**i);
         }
@@ -49,15 +59,17 @@ library IncentiveModels {
      * @param numberOfElements is the number of referrers in the chain
      * @return wei value of base for the rewards in power law
      */
-    function calculateX(uint sumWei, uint numberOfElements) private pure returns (uint) {
+    function calculateX(
+        uint sumWei,
+        uint numberOfElements,
+        uint factor
+    ) private pure returns (uint) {
         uint a = 1;
         uint sumOfFactors = 1;
         for(uint i=1; i<numberOfElements; i++) {
-            a = a*2;
+            a = a*factor;
             sumOfFactors += a;
         }
         return (sumWei*a) / sumOfFactors;
     }
-
-
 }
