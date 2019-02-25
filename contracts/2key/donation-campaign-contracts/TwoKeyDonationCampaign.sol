@@ -1,6 +1,5 @@
 pragma solidity ^0.4.24;
 
-import "./TwoKeyDonationCampaignType.sol";
 import "./InvoiceTokenERC20.sol";
 
 import "../campaign-mutual-contracts/TwoKeyCampaign.sol";
@@ -11,9 +10,11 @@ import "../campaign-mutual-contracts/TwoKeyCampaignIncentiveModels.sol";
  * @author Nikola Madjarevic
  * Created at 2/19/19
  */
-contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaign, TwoKeyCampaignIncentiveModels {
+contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels {
 
-    DonationType campaignType; //Type of campaign
+    address public erc20InvoiceToken; // ERC20 token which will be issued as an invoice
+
+    uint powerLawFactor = 2;
 
     string campaignName; // Name of the campaign
     string publicMetaHash; // Ipfs hash of public informations
@@ -22,12 +23,9 @@ contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaign, T
     uint campaignEndTime; // Time when campaign ends
     uint minDonationAmount; // Minimal donation amount
     uint maxDonationAmount; // Maximal donation amount
+    uint maxReferralRewardPercent; // Percent per conversion which goes to referrers
     uint campaignGoal; // Goal of the campaign, how many funds to raise
     IncentiveModel rewardsModel; //Incentive model for rewards
-    address erc20InvoiceToken; // ERC20 token which will be issued as an invoice
-    uint maxReferralRewardPercent; // Percent per conversion which goes to referrers
-
-    uint donationsBalance; // Balance earned by donations -> locked
 
     mapping(address => uint) amountUserContributed;
     mapping(address => uint[]) donatorToHisDonationsInEther;
@@ -35,19 +33,18 @@ contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaign, T
 
 
     modifier isOngoing {
-        require(now >= campaignStartTime && now <= campaignEndTime);
+        require(now >= campaignStartTime && now <= campaignEndTime, "Campaign expired or not started yet");
         _;
     }
 
-
     modifier onlyInDonationLimit {
-        require(msg.value >= minDonationAmount && msg.value <= maxDonationAmount);
+        require(msg.value >= minDonationAmount && msg.value <= maxDonationAmount, "Wrong contribution amount");
         _;
     }
 
     modifier goalValidator {
         if(campaignGoal != 0) {
-            require(donationsBalance.add(msg.value) <= campaignGoal);
+            require(this.balance.add(msg.value) <= campaignGoal,"Goal reached");
         }
         _;
     }
@@ -56,6 +53,7 @@ contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaign, T
         address donator;
         uint amount;
         uint donationTimestamp;
+        uint referrerRewards;
     }
 
     constructor(
@@ -173,12 +171,15 @@ contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaign, T
             uint rewardPerReferrer;
             uint rewardForLast;
             (rewardPerReferrer, rewardForLast)= IncentiveModels.averageLast3xRewards(totalBountyForConversion, numberOfReferrers);
-            for(uint j=0; i<numberOfReferrers - 1; j++) {
-                updateReferrerMappings(referrers[j], rewardPerReferrer);
+            for(i=0; i<numberOfReferrers - 1; i++) {
+                updateReferrerMappings(referrers[i], rewardPerReferrer);
             }
             updateReferrerMappings(referrers[numberOfReferrers-1], rewardForLast);
         } else if(rewardsModel == IncentiveModel.POWER_LAW) {
-            //TODO: Handle this just figure out order is reversed or not
+            uint[] memory rewards = IncentiveModels.powerLawRewards(totalBountyForConversion, numberOfReferrers, powerLawFactor);
+            for(i=0; i<numberOfReferrers; i++) {
+                updateReferrerMappings(referrers[i], rewards[i]);
+            }
         }
     }
 
@@ -198,12 +199,12 @@ contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaign, T
      */
     function joinAndDonate(bytes signature) public goalValidator onlyInDonationLimit isOngoing payable {
         distributeArcsBasedOnSignature(signature);
-        DonationEther memory donation = DonationEther(msg.sender, msg.value, block.timestamp);
+        uint referrerReward = (msg.value).mul(maxReferralRewardPercent).div(100);
+        DonationEther memory donation = DonationEther(msg.sender, msg.value, block.timestamp, referrerReward);
         uint id = donations.length; // get donation id
         donations.push(donation); // add donation to array of donations
         donatorToHisDonationsInEther[msg.sender].push(id); // accounting for the donator
         amountUserContributed[msg.sender] += msg.value;
-        donationsBalance += msg.value;
     }
 
     /**
@@ -212,18 +213,19 @@ contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaign, T
     function donate() public goalValidator onlyInDonationLimit isOngoing payable {
         address _converterPlasma = twoKeyEventSource.plasmaOf(msg.sender);
         require(received_from[_converterPlasma] != address(0));
-        DonationEther memory donation = DonationEther(msg.sender, msg.value, block.timestamp);
+        uint referrerReward = (msg.value).mul(maxReferralRewardPercent).div(100);
+        DonationEther memory donation = DonationEther(msg.sender, msg.value, block.timestamp, referrerReward);
         uint id = donations.length; // get donation id
         donations.push(donation); // add donation to array of donations
         donatorToHisDonationsInEther[msg.sender].push(id); // accounting for the donator
         amountUserContributed[msg.sender] += msg.value;
-        donationsBalance += msg.value;
     }
 
     /**
      * @notice Fallback function to handle input payments -> no referrer rewards in this case
      */
     function () goalValidator onlyInDonationLimit isOngoing payable {
+
     }
 
     /**
@@ -232,6 +234,24 @@ contract TwoKeyDonationCampaign is TwoKeyDonationCampaignType, TwoKeyCampaign, T
      */
     function getDonation(uint donationId) public view returns (bytes) {
         DonationEther memory donation = donations[donationId];
-        return abi.encodePacked(donation.donator, donation.amount, donation.donationTimestamp);
+        return abi.encodePacked(
+            donation.donator,
+            donation.amount,
+            donation.donationTimestamp,
+            donation.referrerRewards
+        );
+    }
+
+    function getCampaignData() public view returns (bytes) {
+        return abi.encodePacked(
+            campaignStartTime,
+            campaignEndTime,
+            minDonationAmount,
+            maxDonationAmount,
+            maxReferralRewardPercent,
+            campaignName,
+            publicMetaHash,
+            privateMetaHash
+        );
     }
 }
