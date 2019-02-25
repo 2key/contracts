@@ -30,7 +30,6 @@ contract TwoKeyCampaign is ArcERC20 {
     uint256 moderatorBalanceETHWei; //Balance of the moderator which can be withdrawn
 	uint256 moderatorTotalEarningsETHWei; //Total earnings of the moderator all time
 
-
 	mapping(address => uint256) internal referrerPlasma2BalancesEthWEI; // balance of EthWei for each influencer that he can withdraw
 	mapping(address => uint256) internal referrerPlasma2TotalEarningsEthWEI; // Total earnings for referrers
 	mapping(address => uint256) internal referrerPlasmaAddressToCounterOfConversions; // [referrer][conversionId]
