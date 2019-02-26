@@ -29,7 +29,7 @@ const web3switcher = {
  * Donation campaign parameters
  */
 
-let campaignDescription = 'Donation for Some Services';
+let campaignName = 'Donation for Some Services';
 let publicMetaHash = 'QmABCDE';
 let privateMetaHash = 'QmABCD';
 let tokenName = 'Nikoloken';
@@ -46,7 +46,18 @@ let incentiveModel = 0;
 
 describe('TwoKeyDonationCampaign', () => {
    it('should create a donation campaign', async() => {
+
+        let invoiceToken: InvoiceERC20 = {
+
+        }
+
         let campaign: ICreateCampaign = {
+            moderator: env.AYDNEP_ADDRESS,
+            campaignName,
+            publicMetaHash,
+            privateMetaHash,
+
+
 
         }
    }).timeout(30000);
