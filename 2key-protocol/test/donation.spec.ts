@@ -36,7 +36,7 @@ let tokenName = 'Nikoloken';
 let tokenSymbol = 'NTKN';
 let campaignStartTime = 12345;
 let campaignEndTime = 1234567;
-let minDonationnAmount = 10000;
+let minDonationAmount = 10000;
 let maxDonationAmount = 10000000000000000000;
 let campaignGoal = 100000000000000000000000000;
 let conversionQuota = 1;
@@ -48,17 +48,25 @@ describe('TwoKeyDonationCampaign', () => {
    it('should create a donation campaign', async() => {
 
         let invoiceToken: InvoiceERC20 = {
+            tokenName,
+            tokenSymbol
+        };
 
-        }
-
+        let moderator = env.AYDNEP_ADDRESS;
         let campaign: ICreateCampaign = {
-            moderator: env.AYDNEP_ADDRESS,
+            moderator,
             campaignName,
             publicMetaHash,
             privateMetaHash,
+            invoiceToken,
+            campaignStartTime,
+            campaignEndTime,
+            minDonationAmount,
+            maxDonationAmount,
+            campaignGoal,
+            conversionQuota,
+            incentiveModel
+        };
 
-
-
-        }
    }).timeout(30000);
 });

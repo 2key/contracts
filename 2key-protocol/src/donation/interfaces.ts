@@ -1,7 +1,7 @@
 import {ICreateCampaignProgress} from "../interfaces";
 
 export interface IDonationCampaign {
-
+    create: (data: ICreateCampaign, from: string, opts?: ICreateOpts) => Promise<string>
 }
 
 /**
@@ -19,7 +19,6 @@ export interface ICreateCampaign {
     maxDonationAmount: number,
     campaignGoal: number,
     conversionQuota: number,
-    singletoneRegistry: string,
     incentiveModel: number
 }
 
