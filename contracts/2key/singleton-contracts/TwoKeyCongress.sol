@@ -91,8 +91,11 @@ contract TwoKeyCongress {
     constructor(uint256 _minutesForDebate, address[] initialMembers, uint[] votingPowers) payable public {
         changeVotingRules(0, _minutesForDebate);
         addMember(0,'',0);
-        addMember(initialMembers[0], 'Eitan', votingPowers[0]);
-        addMember(initialMembers[1], 'Kiki', votingPowers[1]);
+        for(uint i=0; i<initialMembers.length; i++) {
+            addMember(initialMembers[i], 'NAME', votingPowers[i]);
+        }
+//        addMember(initialMembers[0], 'Eitan', votingPowers[0]);
+//        addMember(initialMembers[1], 'Kiki', votingPowers[1]);
         initialized = true;
         addInitialWhitelistedMethods();
     }
@@ -100,7 +103,7 @@ contract TwoKeyCongress {
 
     /// @notice Function to add initial whitelisted methods during the deployment
     /// @dev Function is internal, it can't be called outside of the contract
-    //TODO: Maybe we can hardcode this values instead of hardcoding method names, even saves us gas during the deployment
+    
     function addInitialWhitelistedMethods() internal {
         hashAllowedMethods("transferByAdmins(address,uint256)");
         hashAllowedMethods("transferEtherByAdmins(address,uint256)");
@@ -252,7 +255,6 @@ contract TwoKeyCongress {
     returns (uint proposalID)
     {
         require(onlyAllowedMethods(transactionBytecode)); // security layer
-
         proposalID = proposals.length++;
         Proposal storage p = proposals[proposalID];
         p.recipient = beneficiary;
@@ -373,12 +375,12 @@ contract TwoKeyCongress {
         Proposal storage p = proposals[proposalNumber];
 
         require(
-            block.timestamp > p.minExecutionDate                                            // If it is past the voting deadline
-        && !p.executed                                                         // and it has not already been executed
-        && p.proposalHash == keccak256(abi.encodePacked(p.recipient, p.amount, transactionBytecode))  // and the supplied code matches the proposal
-        && p.numberOfVotes >= minimumQuorum // and a minimum quorum has been reached...
-        && uint(p.currentResult) >= maxVotingPower.mul(51).div(100)
-        && p.currentResult > 0
+//            block.timestamp > p.minExecutionDate  &&                             // If it is past the voting deadline
+             !p.executed                                                         // and it has not already been executed
+            && p.proposalHash == keccak256(abi.encodePacked(p.recipient, p.amount, transactionBytecode))  // and the supplied code matches the proposal
+            && p.numberOfVotes >= minimumQuorum // and a minimum quorum has been reached...
+            && uint(p.currentResult) >= maxVotingPower.mul(51).div(100)
+            && p.currentResult > 0
         );
 
         // ...then execute result

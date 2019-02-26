@@ -62,6 +62,7 @@ module.exports = function deploy(deployer) {
     ];
     let deployerAddress = '0x18e1d5ca01141E3a0834101574E5A1e94F0F8F6a';
     let maintainerAddresses = [];
+    let votingPowers = [1, 1];
 
 
 
@@ -100,9 +101,16 @@ module.exports = function deploy(deployer) {
             '0x1d55762a320e6826cf00c4f2121b7e53d23f6822',
             '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7'
         ];
+
+        initialCongressMembers = [
+            '0xb3fa520368f2df7bed4df5185101f303f6c7decc',
+            '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7',
+            '0xf3c7641096bc9dc50d94c572bb455e56efc85412'
+        ];
+
+        votingPowers = [1,1,1];
     }
 
-    let votingPowers = [1, 1];
 
     /**
      * Deployment process
@@ -504,25 +512,6 @@ module.exports = function deploy(deployer) {
                         reject(e);
                     }
                 });
-            })
-            .then(async () => {
-                await new Promise(async (resolve, reject) => {
-                    try {
-                        console.log('Transfering 2key-tokens to Upgradable Exchange');
-                        let txHash = await TwoKeyAdmin.at(proxyAddressTwoKeyAdmin).transfer2KeyTokens(proxyAddressTwoKeyUpgradableExchange, 1000000000000000000000);
-                        console.log('... Successfully transfered 2key tokens');
-
-                        console.log('Transfering 200k 2key-tokens (20% of total supply) to TwoKeyCommunityTokenPool');
-                        txHash = await TwoKeyAdmin.at(proxyAddressTwoKeyAdmin).transfer2KeyTokens(proxyAddressTwoKeyCommunityTokenPool,2000000000000000000000000);
-
-                        console.log('Transfering 400k 2key-tokens (40% of total supply) to TwoKeyLongTermTokenPool');
-                        txHash = await TwoKeyAdmin.at(proxyAddressTwoKeyAdmin).transfer2KeyTokens(proxyAddressTwoKeyLongTermTokenPool,4000000000000000000000000);
-
-                        resolve(txHash);
-                    } catch (e) {
-                        reject(e);
-                    }
-                })
             })
             .then(() => true)
             .catch((err) => {

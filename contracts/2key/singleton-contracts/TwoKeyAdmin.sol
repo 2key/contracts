@@ -125,8 +125,7 @@ contract TwoKeyAdmin is Upgradeable {
 		IERC20(address(twoKeyEconomy)).unfreezeTransfers();
 	}
 
-	//TODO: Backdoor function, delete (modify) once
-    function transfer2KeyTokens(address _to, uint256 _amount) external returns (bool) {
+    function transfer2KeyTokens(address _to, uint256 _amount) public onlyTwoKeyCongress returns (bool) {
 		bool completed = twoKeyEconomy.transfer(_to, _amount);
 		return completed;
 	}

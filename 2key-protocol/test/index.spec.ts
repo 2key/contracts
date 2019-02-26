@@ -318,19 +318,20 @@ describe('TwoKeyProtocol', () => {
                 const {balance} = twoKeyProtocol.Utils.balanceFromWeiString(await twoKeyProtocol.getBalance(env.AYDNEP_ADDRESS), {inWei: true});
                 const {balance: adminBalance} = twoKeyProtocol.Utils.balanceFromWeiString(await twoKeyProtocol.getBalance(singletons.TwoKeyAdmin.networks[mainNetId].address), {inWei: true});
                 console.log(adminBalance);
-                if (parseFloat(balance['2KEY'].toString()) <= 20000) {
-                    console.log('NO BALANCE at aydnep account');
+                let numberOfProposals = await twoKeyProtocol.Congress.getNumberOfProposals();
+                console.log('Number of proposals is: ' + numberOfProposals);
+                if (numberOfProposals == 0) {
+                    console.log('Contractor does not have enough 2key tokens. Submitting a proposal to transfer');
                     const admin = twoKeyProtocol.twoKeyAdmin;
-                    admin.transfer2KeyTokens(destinationAddress, twoKeyProtocol.Utils.toWei(100000, 'ether'), {from: env.DEPLOYER_ADDRESS}, async (err, res) => {
-                        if (err) {
-                            reject(err);
-                        } else {
-                            console.log('Send Tokens', res);
-                            console.log("Admin address: " + singletons.TwoKeyAdmin.networks[mainNetId].address);
-                            const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(res);
-                            resolve(receipt);
-                        }
-                    });
+                    let transactionBytecode =
+                        "0x9ffe94d9e31c0ffa000000000000000000000000b3fa520368f2df7bed4df5185101f303f6c7decc000000000000000000000000000000000000000000000000002386f26fc10000";
+                    let txHash = twoKeyProtocol.Congress.newProposal(
+                        twoKeyProtocol.twoKeyAdmin.address,
+                        "Send some tokens to contractor",
+                        transactionBytecode,
+                        from);
+
+                    resolve(txHash);
                 } else {
                     resolve(balance['2KEY']);
                 }
@@ -473,19 +474,6 @@ describe('TwoKeyProtocol', () => {
         expect(tokenSymbol).to.be.equal('2KEY');
     }).timeout(10000);
 
-    it('should return estimated gas for transfer2KeyTokens', async () => {
-        const gas = await twoKeyProtocol.getERC20TransferGas(ethDstAddress, twoKeyProtocol.Utils.toWei(123, 'ether'), from);
-        console.log('Gas required for Token transfer', gas);
-        return expect(gas).to.exist.to.be.greaterThan(0);
-    }).timeout(60000);
-
-    it('should transfer 2KeyTokens', async function () {
-        txHash = await twoKeyProtocol.transfer2KEYTokens(ethDstAddress, twoKeyProtocol.Utils.toWei(123, 'ether'), from, 6000000000);
-        console.log('Transfer 2Key Tokens', txHash, typeof txHash);
-        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-        const status = receipt && receipt.status;
-        expect(status).to.be.equal('0x1');
-    }).timeout(60000);
 
     let campaignData;
 
@@ -552,6 +540,7 @@ describe('TwoKeyProtocol', () => {
 
     it('should transfer assets to campaign', async () => {
         txHash = await twoKeyProtocol.transfer2KEYTokens(campaignAddress, twoKeyProtocol.Utils.toWei(1234, 'ether'), from);
+        console.log(twoKeyProtocol.Utils.toWei(1234, 'ether'));
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const balance = twoKeyProtocol.Utils.fromWei(await twoKeyProtocol.AcquisitionCampaign.checkInventoryBalance(campaignAddress, from)).toString();
         console.log('Campaign Balance', balance);
@@ -1108,7 +1097,7 @@ describe('TwoKeyProtocol', () => {
     it('should get all whitelisted addresses', async() => {
         const addresses = await twoKeyProtocol.Congress.getAllMembersForCongress(from);
         // console.log(addresses);
-        expect(addresses.length).to.be.equal(2);
+        expect(addresses.length).to.be.equal(3);
     }).timeout(60000);
 
     it('should get rate from upgradable exchange', async() => {

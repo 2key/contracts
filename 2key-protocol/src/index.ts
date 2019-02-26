@@ -239,10 +239,12 @@ export class TwoKeyProtocol {
         this.BaseReputation = new TwoKeyBaseReputationRegistry(this.twoKeyBase, this.Helpers, this.Utils);
         this.CampaignValidator = new TwoKeyCampaignValidator(this.twoKeyBase, this.Helpers, this.Utils);
         // TODO: Add here replace AcquisitionSubmodule mechanism
+
         this.AcquisitionCampaign = this.AcquisitionSubmodule
             ? new this.AcquisitionSubmodule(this.twoKeyBase, this.Helpers, this.Utils, this.ERC20, Sign)
             : new AcquisitionCampaign(this.twoKeyBase, this.Helpers, this.Utils, this.ERC20, Sign);
-        this.DonationSubmodule = this.DonationSubmodule
+
+        this.DonationCampaign = this.DonationSubmodule
             ? new this.DonationSubmodule(this.twoKeyBase, this.Helpers, this.Utils, this.ERC20, Sign)
             : new DonationCampaign(this.twoKeyBase, this.Helpers, this.Utils, this.ERC20, Sign);
 
