@@ -289,6 +289,9 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         );
     }
 
+    /**
+     * @notice Function to get encoded money
+     */
     function getCampaignData() public view returns (bytes) {
         return abi.encodePacked(
             campaignStartTime,
