@@ -17,10 +17,9 @@ def generate_bytecode(method_name_and_params,types,values):
 
 if __name__ == "__main__":
     deployer_address = sys.argv[1]
-    token_amount = int(sys.argv[2])
+    token_amount = int(sys.argv[2]) * (10**18)
     method_name_and_params = "transfer2KeyTokens(address,uint256)"
     types = ["address","uint256"]
     values = [deployer_address,token_amount]
 
-    ### The following bytecode will transfer 10000000000000000 tokens from Admin to deployer_address
     print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
