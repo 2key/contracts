@@ -4,6 +4,7 @@ pragma solidity ^0.4.24;
  * Created at 1/15/19
  */
 contract ITwoKeyAcquisitionLogicHandler {
+    function requirementIsOnActive() public view returns (bool);
     function requirementForMsgValue(uint msgValue) public view returns (bool);
     function getEstimatedTokenAmount(uint conversionAmountETHWei, bool isFiatConversion) public view returns (uint, uint);
     function setTwoKeyAcquisitionCampaignContract(address _acquisitionCampaignAddress, address twoKeySingletoneRegistry) public;

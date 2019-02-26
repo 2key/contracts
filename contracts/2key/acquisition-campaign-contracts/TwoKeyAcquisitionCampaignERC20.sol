@@ -71,7 +71,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
         _;
     }
 
-
     /**
      * @notice Function to set cut of
      * @param me is the address (ethereum)
