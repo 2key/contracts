@@ -123,7 +123,7 @@ contract TwoKeyLockupContract {
             amount = bonusTokens / bonusTokensVestingMonths;
         }
         isWithdrawn[part] = true;
-        require(IERC20(assetContractERC20).transfer(msg.sender,amount));
+        require(IERC20(assetContractERC20).transfer(converter,amount));
         return true;
     }
 
