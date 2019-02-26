@@ -44,24 +44,24 @@ module.exports = function deploy(deployer) {
             )
             .then(() => TwoKeyAcquisitionCampaignERC20.deployed())
             .then(() => true)
-            .then(() => deployer.link(IncentiveModels, TwoKeyDonationCampaign))
-            .then(() => deployer.link(Call, TwoKeyDonationCampaign))
-            .then(() => deployer.deploy(TwoKeyDonationCampaign,
-                json.TwoKeyAdmin[network_id].Proxy,
-                'Donation for Something',
-                'QmABC',
-                'QmABCD',
-                'Nikoloken',
-                'NTKN',
-                12345,
-                1231112,
-                10000,
-                100000000,
-                10000000000000,
-                5,
-                TwoKeySingletonesRegistry.address,
-                0
-                ))
+            // .then(() => deployer.link(IncentiveModels, TwoKeyDonationCampaign))
+            // .then(() => deployer.link(Call, TwoKeyDonationCampaign))
+            // .then(() => deployer.deploy(TwoKeyDonationCampaign,
+            //     json.TwoKeyAdmin[network_id].Proxy,
+            //     'Donation for Something',
+            //     'QmABC',
+            //     'QmABCD',
+            //     'Nikoloken',
+            //     'NTKN',
+            //     12345,
+            //     1231112,
+            //     10000,
+            //     100000000,
+            //     10000000000000,
+            //     5,
+            //     TwoKeySingletonesRegistry.address,
+            //     0
+            //     ))
             .then(async () => {
                 console.log("... Adding TwoKeyAcquisitionCampaign bytecodes to be valid in the TwoKeyValidator contract");
                 await new Promise(async (resolve, reject) => {
