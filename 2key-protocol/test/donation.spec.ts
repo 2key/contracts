@@ -1,6 +1,7 @@
 import createWeb3, {generatePlasmaFromMnemonic} from "./_web3";
 import {TwoKeyProtocol} from "../src";
 import {expect} from "chai";
+import {ICreateCampaign, InvoiceERC20} from "../src/donation/interfaces";
 const { env } = process;
 
 const rpcUrl = env.RPC_URL;
@@ -35,10 +36,18 @@ let tokenName = 'Nikoloken';
 let tokenSymbol = 'NTKN';
 let campaignStartTime = 12345;
 let campaignEndTime = 1234567;
+let minDonationnAmount = 10000;
+let maxDonationAmount = 10000000000000000000;
+let campaignGoal = 100000000000000000000000000;
+let conversionQuota = 1;
+let incentiveModel = 0;
+
 
 
 describe('TwoKeyDonationCampaign', () => {
    it('should create a donation campaign', async() => {
+        let campaign: ICreateCampaign = {
 
+        }
    }).timeout(30000);
 });
