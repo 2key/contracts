@@ -4,13 +4,15 @@ const ProgressBarPlugin = require('progress-bar-webpack-plugin');
 const nodeExternals = require('webpack-node-externals');
 
 const libraryName = {
-  acquisition: 'Acquisition'
+  acquisition: 'Acquisition',
+    donation: 'Donation'
 };
 
 const config = {
   entry: {
     acquisition: './2key-protocol/src/acquisition/index.ts',
     dao: './2key-protocol/src/decentralizedNation/index.ts',
+    donation: './2key-protocol/src/donation/index.ts'
   },
   devtool: 'none',
   output: {

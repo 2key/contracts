@@ -18,7 +18,7 @@ export default class DonationCampaign implements IDonationCampaign {
         this.utils = utils;
         this.erc20 = erc20;
         this.sign = sign;
-        //TODO: Generate non singletone hash
+        this.nonSingletonsHash = donationContracts.NonSingletonsHash;
     }
 
 

@@ -43,6 +43,8 @@ import TwoKeyExchangeContract from './exchangeETHUSD';
 import {IPlasmaEvents} from './plasma/interfaces';
 import Sign from './sign';
 import TwoKeyCampaignValidator from "./campaignValidator";
+import DonationCampaign from "./donation";
+import {IDonationCampaign} from "./donation/interfaces";
 // const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 
 const TwoKeyDefaults = {
@@ -98,6 +100,7 @@ export class TwoKeyProtocol {
     public Utils: ITwoKeyUtils;
     private Helpers: ITwoKeyHelpers;
     public AcquisitionCampaign: ITwoKeyAcquisitionCampaign;
+    public DonationCampaign: IDonationCampaign;
     public DecentralizedNation: IDecentralizedNation;
     public Congress: ITwoKeyCongress;
     public Registry: ITwoKeyReg;
@@ -107,6 +110,7 @@ export class TwoKeyProtocol {
     public BaseReputation: ITwoKeyBaseReputationRegistry;
     public CampaignValidator: ITwoKeyCampaignValidator;
     private AcquisitionSubmodule: any;
+    private DonationSubmodule: any;
     private _log: any;
 
     // private twoKeyReg: any;
@@ -238,17 +242,45 @@ export class TwoKeyProtocol {
         this.AcquisitionCampaign = this.AcquisitionSubmodule
             ? new this.AcquisitionSubmodule(this.twoKeyBase, this.Helpers, this.Utils, this.ERC20, Sign)
             : new AcquisitionCampaign(this.twoKeyBase, this.Helpers, this.Utils, this.ERC20, Sign);
+        this.DonationSubmodule = this.DonationSubmodule
+            ? new this.DonationSubmodule(this.twoKeyBase, this.Helpers, this.Utils, this.ERC20, Sign)
+            : new DonationCampaign(this.twoKeyBase, this.Helpers, this.Utils, this.ERC20, Sign);
+
         this.DecentralizedNation = new DecentralizedNation(this.twoKeyBase, this.Helpers, this.Utils, this.AcquisitionCampaign);
     }
 
+    /**
+     * Replace Acquisition submodule
+     * @param AcquisitionSubmodule
+     */
     public replaceAcquisition(AcquisitionSubmodule) {
         this.AcquisitionSubmodule = AcquisitionSubmodule;
         this.AcquisitionCampaign = new AcquisitionSubmodule(this.twoKeyBase, this.Helpers, this.Utils, this.ERC20, Sign);
     }
 
+    /**
+     * Set latest Acquisition submodule
+     */
     public setLatestAcquisition() {
         this.AcquisitionSubmodule = AcquisitionCampaign;
         this.AcquisitionCampaign = new AcquisitionCampaign(this.twoKeyBase, this.Helpers, this.Utils, this.ERC20, Sign);
+    }
+
+    /**
+     * Replace Donation submodule
+     * @param DonationSubmodule
+     */
+    public replaceDonation(DonationSubmodule) {
+        this.DonationSubmodule = DonationSubmodule;
+        this.DonationCampaign = new DonationSubmodule(this.twoKeyBase, this.Helpers, this.Utils, this.ERC20, Sign);
+    }
+
+    /**
+     * Set Donation Submodule
+     */
+    public setLatestDonation() {
+        this.DonationSubmodule = DonationCampaign;
+        this.DonationCampaign = new DonationCampaign(this.twoKeyBase, this.Helpers, this.Utils, this.ERC20, Sign);
     }
 
     public getBalance(address: string, erc20address?: string): Promise<BalanceMeta> {
