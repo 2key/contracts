@@ -82,17 +82,17 @@ export default class Helpers implements ITwoKeyHelpers {
         });
     }
 
+
+
     _createContract(contract: IContract, from: string, {gasPrice = this.gasPrice, params, progressCallback, link}: ICreateContractOpts = {}): Promise<string> {
         return new Promise(async (resolve, reject) => {
             const {abi, name} = contract;
             let data = contract.bytecode;
             if (link) {
-                console.log('LINK', Object.keys(link));
-                let template = `__${link.name}`;
-                for (let i = 0; i < 40 - link.name.length - 2; i++) {
-                    template += '_';
-                }
-                data = data.replace(new RegExp(template, 'g'), link.address.substring(2));
+                console.log(link);
+                link.forEach((l)=> {
+                    data = this.linkBytecode(data, l.name, l.address);
+                })
             }
             const nonce = await this._getNonce(from);
             const createParams = params ? [...params] : [];
@@ -153,6 +153,18 @@ export default class Helpers implements ITwoKeyHelpers {
             : promisify(this.base.web3.eth.getTransactionCount, [from]);
     }
 
+    /**
+     * Function to link bytecode with libraries
+     * @param bytecode
+     * @param libName
+     * @param libAddress
+     * @returns {any}
+     */
+    linkBytecode(bytecode, libName, libAddress) : any {
+        let symbol = "__" + libName + "_".repeat(40 - libName.length - 2);
+        return bytecode.split(symbol).join(libAddress.toLowerCase().substr(2))
+    }
+
 
     // _getBlock(block: string | number): Promise<ITransaction> {
     //     return new Promise((resolve, reject) => {
@@ -175,6 +187,7 @@ export default class Helpers implements ITwoKeyHelpers {
         });
         return params;
     }
+
 
     async _checkBalanceBeforeTransaction(gasRequired: number, gasPrice: number, from: string): Promise<boolean> {
         if (!this.gasPrice) {

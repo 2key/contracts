@@ -120,7 +120,7 @@ export interface ICreateContractOpts {
     nonce?: number,
     params?: any[],
     progressCallback?: ICreateCampaignProgress,
-    link?: ILink,
+    link?: ILink[],
 }
 
 export interface IBalanceFromWeiOpts {

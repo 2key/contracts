@@ -54,10 +54,17 @@ export default class DonationCampaign implements IDonationCampaign {
                         data.incentiveModel
                     ],
                     progressCallback,
-                    link: {
-                        name: 'Call',
-                        address: this.base.twoKeyCall.address,
-                    },
+                    link: [
+                        {
+                            name: 'Call',
+                            address: this.base.twoKeyCall.address,
+                        },
+                        {
+                            //TODO: Handle address of incentive model contract (library)
+                            name: 'IncentiveModel',
+                            address: this.base.twoKeyCall.address
+                        }
+                    ],
                 });
 
 

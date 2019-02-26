@@ -294,10 +294,12 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                         [data.maxReferralRewardPercentWei, data.referrerQuota || 5],
                         ],
                     progressCallback,
-                    link: {
-                        name: 'Call',
-                        address: this.base.twoKeyCall.address,
-                    },
+                    link: [
+                            {
+                                name: 'Call',
+                                address: this.base.twoKeyCall.address,
+                            },
+                        ]
                 });
                 const campaignReceipt = await this.utils.getTransactionReceiptMined(txHash, {
                     web3: this.base.web3,
