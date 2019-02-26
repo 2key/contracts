@@ -301,4 +301,19 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
             privateMetaHash
         );
     }
+
+    /**
+     * @notice Contractor can withdraw funds only if criteria is satisfied
+     */
+    function withdrawContractor() public onlyContractor {
+        require(this.balance >= campaignGoal); //Making sure goal is reached
+        require(block.timestamp > campaignEndTime); //Making sure time has expired
+        super.withdrawContractor();
+    }
+
+    function withdrawModeratorOrReferrer(address _address) public {
+        require(this.balance >= campaignGoal); //Making sure goal is reached
+        require(block.timestamp > campaignEndTime); //Making sure time has expired
+        super.withdrawModeratorOrReferrer(_address);
+    }
 }
