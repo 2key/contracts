@@ -8,7 +8,7 @@ import {promisify} from '../src/utils/promisify';
 
 const {env} = process;
 
-// const artifacts = require('../src/contracts_deployed.json');
+// const artifacts = require('../src/contracts_deployed-develop.json');
 const rpcUrl = env.RPC_URL;
 const eventsNetUrl = env.PLASMA_RPC_URL;
 const mainNetId = env.MAIN_NET_ID;

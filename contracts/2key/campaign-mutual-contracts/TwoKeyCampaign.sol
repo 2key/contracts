@@ -51,11 +51,6 @@ contract TwoKeyCampaign is ArcERC20 {
      * @param _value uint256 the amount of tokens to be transferred
      */
 	function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
-		//Add modifier who can call this!! onlyContractorOrModerator || msg.sender == from something like this
-		return transferFromInternal(_from, _to, _value);
-	}
-
-	function transferFromInternal(address _from, address _to, uint256 _value) internal returns (bool) {
 		// _from and _to are assumed to be already converted to plasma address (e.g. using plasmaOf)
 		require(_value == 1, 'can only transfer 1 ARC');
 		require(_from != address(0), '_from undefined');

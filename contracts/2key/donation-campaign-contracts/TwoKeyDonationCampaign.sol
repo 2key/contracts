@@ -110,7 +110,7 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         for (i = 0; i < numberOfInfluencers; i++) {
             new_address = twoKeyEventSource.plasmaOf(influencers[i]);
             if (received_from[new_address] == 0) {
-                transferFromInternal(old_address, new_address, 1);
+                transferFrom(old_address, new_address, 1);
             } else {
                 require(received_from[new_address] == old_address,'only tree ARCs allowed');
             }

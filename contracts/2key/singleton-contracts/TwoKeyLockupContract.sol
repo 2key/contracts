@@ -28,6 +28,15 @@ contract TwoKeyLockupContract {
 
     bool changed = false;
 
+
+    event TokensWithdrawn(
+        uint timestamp,
+        address methodCaller,
+        address tokensReceiver,
+        uint portionId,
+        uint portionAmount
+    );
+
     modifier onlyContractor() {
         require(msg.sender == contractor);
         _;
@@ -124,6 +133,16 @@ contract TwoKeyLockupContract {
         }
         isWithdrawn[part] = true;
         require(IERC20(assetContractERC20).transfer(converter,amount));
+
+        // Emit an event after tokens are transfered
+        emit TokensWithdrawn(
+            block.timestamp,
+            msg.sender,
+            converter,
+            part,
+            amount
+        );
+
         return true;
     }
 

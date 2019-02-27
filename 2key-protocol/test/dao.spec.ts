@@ -8,7 +8,7 @@ import {INationalVotingCampaign} from "../src/decentralizedNation/interfaces";
 
 const {env} = process;
 
-// const artifacts = require('../src/contracts_deployed.json');
+// const artifacts = require('../src/contracts_deployed-develop.json');
 const rpcUrl = env.RPC_URL;
 const mainNetId = env.MAIN_NET_ID;
 const syncTwoKeyNetId = env.SYNC_NET_ID;

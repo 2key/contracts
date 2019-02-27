@@ -43,7 +43,7 @@ module.exports = function deploy(deployer) {
                 )
             )
             .then(() => TwoKeyAcquisitionCampaignERC20.deployed())
-            .then(() => true)
+            // .then(() => true)
             // .then(() => deployer.link(IncentiveModels, TwoKeyDonationCampaign))
             // .then(() => deployer.link(Call, TwoKeyDonationCampaign))
             // .then(() => deployer.deploy(TwoKeyDonationCampaign,
