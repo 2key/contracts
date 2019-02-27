@@ -24,6 +24,7 @@ export interface ITwoKeyBase {
     twoKeyUpgradableExchange: any;
     twoKeyEconomy: any;
     twoKeyCall: any;
+    twoKeyIncentiveModel: any;
     twoKeyReg: any;
     twoKeyCongress: any;
     twoKeyPlasmaEvents: any;

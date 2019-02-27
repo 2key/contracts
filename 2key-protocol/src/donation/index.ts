@@ -60,14 +60,32 @@ export default class DonationCampaign implements IDonationCampaign {
                             address: this.base.twoKeyCall.address,
                         },
                         {
-                            //TODO: Handle address of incentive model contract (library)
-                            name: 'IncentiveModel',
-                            address: this.base.twoKeyCall.address
+                            name: 'IncentiveModels',
+                            address: this.base.twoKeyIncentiveModel.address
                         }
                     ],
                 });
 
+                const campaignReceipt = await this.utils.getTransactionReceiptMined(txHash, {
+                    web3: this.base.web3,
+                    interval,
+                    timeout
+                });
+                if (campaignReceipt.status !== '0x1') {
+                    reject(campaignReceipt);
+                    return;
+                }
+                const campaignAddress = campaignReceipt && campaignReceipt.contractAddress;
+                if (progressCallback) {
+                    progressCallback('TwoKeyDonationCampaign', true, campaignAddress);
+                }
+                console.log('Campaign created', campaignAddress);
 
+                // const campaignPublicLinkKey = await this.join(campaignAddress, from, {gasPrice, progressCallback, interval, timeout});
+                // if (progressCallback) {
+                //     progressCallback('SetPublicLinkKey', true, campaignPublicLinkKey);
+                // }
+                resolve(txHash);
             } catch (e) {
                 reject(e);
             }

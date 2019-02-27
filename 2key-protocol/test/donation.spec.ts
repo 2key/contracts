@@ -38,21 +38,41 @@ let campaignStartTime = 12345;
 let campaignEndTime = 1234567;
 let minDonationAmount = 10000;
 let maxDonationAmount = 10000000000000000000;
-let campaignGoal = 100000000000000000000000000;
+let campaignGoal = 100000000000000000000000;
 let conversionQuota = 1;
 let incentiveModel = 0;
 
-
+const progressCallback = (name: string, mined: boolean, transactionResult: string): void => {
+    console.log(`Contract ${name} ${mined ? `deployed with address ${transactionResult}` : `placed to EVM. Hash ${transactionResult}`}`);
+};
 
 describe('TwoKeyDonationCampaign', () => {
+
    it('should create a donation campaign', async() => {
 
+       const {web3, address} = web3switcher.deployer();
+       from = address;
+       twoKeyProtocol = new TwoKeyProtocol({
+           web3,
+           networks: {
+               mainNetId,
+               syncTwoKeyNetId,
+           },
+           eventsNetUrl,
+           plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
+       });
+
+
+       //Describe structure of invoice token
         let invoiceToken: InvoiceERC20 = {
             tokenName,
             tokenSymbol
         };
 
+        //Moderator will be AYDNEP in this case
         let moderator = env.AYDNEP_ADDRESS;
+
+        //Describe initial params and attributes for the campaign
         let campaign: ICreateCampaign = {
             moderator,
             campaignName,
@@ -68,5 +88,11 @@ describe('TwoKeyDonationCampaign', () => {
             incentiveModel
         };
 
+        let txHash = await twoKeyProtocol.DonationCampaign.create(campaign, from, {
+            progressCallback,
+            gasPrice: 150000000000,
+            interval: 500,
+            timeout: 600000
+        });
    }).timeout(30000);
 });

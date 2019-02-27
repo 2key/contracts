@@ -192,7 +192,7 @@ export class TwoKeyProtocol {
         this.twoKeyAdmin = this.web3.eth.contract(singletons.TwoKeyAdmin.abi).at(getDeployedAddress('TwoKeyAdmin', this.networks.mainNetId));
         this.twoKeyCongress = this.web3.eth.contract(singletons.TwoKeyCongress.abi).at(getDeployedAddress('TwoKeyCongress', this.networks.mainNetId));
         this.twoKeyCall = this.web3.eth.contract(singletons.Call.abi).at(getDeployedAddress('Call', this.networks.mainNetId));
-        // this.twoKeyIncentiveModel = this.web3.eth.contract(singletons.IncentiveModels.abi).at(getDeployedAddress('Call', this.networks.mainNetId));
+        this.twoKeyIncentiveModel = this.web3.eth.contract(singletons.IncentiveModels.abi).at(getDeployedAddress('IncentiveModels', this.networks.mainNetId));
         this.twoKeyBaseReputationRegistry = this.web3.eth.contract(singletons.TwoKeyBaseReputationRegistry.abi).at(getDeployedAddress('TwoKeyBaseReputationRegistry', this.networks.mainNetId));
         this.twoKeyCampaignValidator = this.web3.eth.contract(singletons.TwoKeyCampaignValidator.abi).at(getDeployedAddress('TwoKeyCampaignValidator', this.networks.mainNetId));
 
@@ -219,6 +219,7 @@ export class TwoKeyProtocol {
             twoKeyCongress: this.twoKeyCongress,
             twoKeyPlasmaEvents: this.twoKeyPlasmaEvents,
             twoKeyCall: this.twoKeyCall,
+            twoKeyIncentiveModel: this.twoKeyIncentiveModel,
             twoKeyBaseReputationRegistry: this.twoKeyBaseReputationRegistry,
             twoKeyCampaignValidator: this.twoKeyCampaignValidator,
             plasmaAddress: this.plasmaAddress,
