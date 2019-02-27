@@ -34,31 +34,31 @@ const deployedTo = {};
 let contractsStatus;
 
 const getBuildArchPath = () => {
-  if(contractsStatus && contractsStatus.status) {
-    return buildArchPath.replace('{branch}',`-${contractsStatus.status}`);
+  if(contractsStatus && contractsStatus.current) {
+    return buildArchPath.replace('{branch}',`-${contractsStatus.current}`);
   }
   return buildArchPath;
 };
 
 const getDeploymentHistoryPath = () => {
-    if(contractsStatus && contractsStatus.status) {
-        return deploymentHistoryPath.replace('{branch}',`-${contractsStatus.status}`);
+    if(contractsStatus && contractsStatus.current) {
+        return deploymentHistoryPath.replace('{branch}',`-${contractsStatus.current}`);
     }
     return deploymentHistoryPath;
 };
 
 const getContractsDeployedPath = () => {
     const result = path.join(twoKeyProtocolDir,'contracts_deployed{branch}.json');
-    if(contractsStatus && contractsStatus.status) {
-        return result.replace('{branch}',`-${contractsStatus.status}`);
+    if(contractsStatus && contractsStatus.current) {
+        return result.replace('{branch}',`-${contractsStatus.current}`);
     }
     return result;
 };
 
 const getContractsDeployedDistPath = () => {
     const result = path.join(twoKeyProtocolDist,'contracts_deployed{branch}.json');
-    if(contractsStatus && contractsStatus.status) {
-        return result.replace('{branch}',`-${contractsStatus.status}`);
+    if(contractsStatus && contractsStatus.current) {
+        return result.replace('{branch}',`-${contractsStatus.current}`);
     }
     return result;
 }
