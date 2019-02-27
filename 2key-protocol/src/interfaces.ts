@@ -9,6 +9,7 @@ export {IUpgradableExchange} from './upgradableExchange/interfaces';
 export {ITwoKeyExchangeContract} from './exchangeETHUSD/interfaces';
 export {ITwoKeyBaseReputationRegistry} from "./reputationRegistry/interfaces";
 export {ITwoKeyCampaignValidator} from "./campaignValidator/interfaces";
+export {IDonationCampaign} from "./donation/interfaces";
 
 export interface ITwoKeyBase {
     web3: any;

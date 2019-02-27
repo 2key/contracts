@@ -26,7 +26,8 @@ import {
     ITwoKeyUtils,
     IUpgradableExchange,
     ITwoKeyBaseReputationRegistry,
-    ITwoKeyCampaignValidator
+    ITwoKeyCampaignValidator,
+    IDonationCampaign
 } from './interfaces';
 import { promisify } from './utils/promisify';
 import Index from './utils';
@@ -44,7 +45,6 @@ import {IPlasmaEvents} from './plasma/interfaces';
 import Sign from './sign';
 import TwoKeyCampaignValidator from "./campaignValidator";
 import DonationCampaign from "./donation";
-import {IDonationCampaign} from "./donation/interfaces";
 // const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 
 const TwoKeyDefaults = {
