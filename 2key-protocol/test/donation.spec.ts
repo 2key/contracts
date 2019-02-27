@@ -34,6 +34,7 @@ let publicMetaHash = 'QmABCDE';
 let privateMetaHash = 'QmABCD';
 let tokenName = 'NikolaToken';
 let tokenSymbol = 'NTKN';
+let maxReferralRewardPercent = 5;
 let campaignStartTime = 12345;
 let campaignEndTime = 1234567;
 let minDonationAmount = 10000;
@@ -41,6 +42,9 @@ let maxDonationAmount = 10000000000000000000;
 let campaignGoal = 100000000000000000000000;
 let conversionQuota = 1;
 let incentiveModel = 0;
+
+let campaignAddress: string;
+
 
 const progressCallback = (name: string, mined: boolean, transactionResult: string): void => {
     console.log(`Contract ${name} ${mined ? `deployed with address ${transactionResult}` : `placed to EVM. Hash ${transactionResult}`}`);
@@ -88,11 +92,19 @@ describe('TwoKeyDonationCampaign', () => {
             incentiveModel
         };
 
-        let txHash = await twoKeyProtocol.DonationCampaign.create(campaign, from, {
+        campaignAddress = await twoKeyProtocol.DonationCampaign.create(campaign, from, {
             progressCallback,
             gasPrice: 150000000000,
             interval: 500,
             timeout: 600000
         });
+
    }).timeout(30000);
+
+
+   it('should get contract stored data', async() => {
+        let data = await twoKeyProtocol.DonationCampaign.getContractData(campaignAddress);
+        console.log(data);
+   }).timeout(30000);
+
 });

@@ -1,7 +1,8 @@
 import {ICreateCampaignProgress} from "../interfaces";
 
 export interface IDonationCampaign {
-    create: (data: ICreateCampaign, from: string, opts?: ICreateOpts) => Promise<string>
+    create: (data: ICreateCampaign, from: string, opts?: ICreateOpts) => Promise<string>,
+    getContractData: (campaignAddress: string) => Promise<ICampaignData>,
 }
 
 /**
@@ -29,6 +30,16 @@ export interface ICreateCampaign {
 export interface InvoiceERC20 {
     tokenName: string,
     tokenSymbol: string
+}
+
+export interface ICampaignData {
+    campaignStartTime: number,
+    campaignEndTime: number,
+    minDonationAmount: number,
+    maxDonationAmount: number,
+    maxReferralRewardPercent: number,
+    campaignName: string
+    publicMetaHash: string
 }
 
 /**

@@ -1,7 +1,10 @@
-import {ICreateCampaign, IDonationCampaign, InvoiceERC20} from "./interfaces";
+import {ICampaignData, ICreateCampaign, IDonationCampaign, InvoiceERC20} from "./interfaces";
 import {ICreateOpts, IERC20, ITwoKeyBase, ITwoKeyHelpers, ITwoKeyUtils} from "../interfaces";
 import {ISign} from "../sign/interface";
-import donationContracts from '../contracts/donation';
+import donationContracts, {default as donation} from '../contracts/donation';
+import { promisify } from '../utils/promisify';
+import acquisitionContracts from "../contracts/acquisition";
+
 
 
 export default class DonationCampaign implements IDonationCampaign {
@@ -11,6 +14,7 @@ export default class DonationCampaign implements IDonationCampaign {
     private readonly utils: ITwoKeyUtils;
     private readonly erc20: IERC20;
     private readonly sign: ISign;
+    private DonationCampaign: any;
 
     constructor(twoKeyProtocol: ITwoKeyBase, helpers: ITwoKeyHelpers, utils: ITwoKeyUtils, erc20: IERC20, sign: ISign) {
         this.base = twoKeyProtocol;
@@ -21,6 +25,33 @@ export default class DonationCampaign implements IDonationCampaign {
         this.nonSingletonsHash = donationContracts.NonSingletonsHash;
     }
 
+    /**
+     * Function to get Donation campaign instance
+     * @param campaign
+     * @param {boolean} skipCache
+     * @returns {Promise<any>}
+     * @private
+     */
+    async _getCampaignInstance(campaign: any, skipCache?: boolean): Promise<any> {
+        const address = campaign.address || campaign;
+        this.base._log('Requesting TwoKeyDonationCampaign at', address);
+        if (skipCache) {
+            const campaignInstance = await this.helpers._createAndValidate(donationContracts.TwoKeyDonationCampaign.abi, campaign);
+            return campaignInstance;
+        }
+        if (this.DonationCampaign && this.DonationCampaign.address === address) {
+            this.base._log('Return from cache TwoKeyDonationCampaign at', this.DonationCampaign.address);
+            return this.DonationCampaign;
+        }
+        this.base._log('Instantiate new TwoKeyDonationCampaign at', address, this.DonationCampaign);
+        if (campaign.address) {
+            this.DonationCampaign = campaign;
+        } else {
+            this.DonationCampaign = await this.helpers._createAndValidate(donationContracts.TwoKeyDonationCampaign.abi, campaign);
+        }
+
+        return this.DonationCampaign;
+    }
 
     /**
      *
@@ -85,7 +116,42 @@ export default class DonationCampaign implements IDonationCampaign {
                 // if (progressCallback) {
                 //     progressCallback('SetPublicLinkKey', true, campaignPublicLinkKey);
                 // }
-                resolve(txHash);
+                resolve(campaignAddress);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+
+    /**
+     *
+     * @param {string} campaignAddress
+     * @returns {Promise<ICampaignData>}
+     */
+    public getContractData(campaignAddress: string) : Promise<ICampaignData> {
+        return new Promise<ICampaignData>(async(resolve,reject) => {
+            try {
+                let donationCampaignInstance = await this._getCampaignInstance(campaignAddress);
+                let data = await promisify(donationCampaignInstance.getCampaignData,[]);
+                console.log(data);
+                let campaignStartTime = parseInt(data.slice(0,66),16);
+                let campaignEndTime = parseInt(data.slice(66,66+64), 16);
+                let minDonationAmount = parseInt(data.slice(66+64,66+64+64),16);
+                let maxDonationAmount = parseInt(data.slice(66+64+64,66+64+64+64),16);
+                let maxReferralRewardPercent = parseInt(data.slice(66+64+64+64,66+64+64+64+64),16);
+                let campaignName = "";
+                let publicMetaHash = "";
+                let obj : ICampaignData = {
+                    campaignStartTime,
+                    campaignEndTime,
+                    minDonationAmount,
+                    maxDonationAmount,
+                    maxReferralRewardPercent,
+                    campaignName,
+                    publicMetaHash
+                };
+                resolve(obj);
             } catch (e) {
                 reject(e);
             }

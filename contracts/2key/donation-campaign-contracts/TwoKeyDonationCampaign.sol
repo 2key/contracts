@@ -300,8 +300,7 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
             maxDonationAmount,
             maxReferralRewardPercent,
             campaignName,
-            publicMetaHash,
-            privateMetaHash
+            publicMetaHash
         );
     }
 
