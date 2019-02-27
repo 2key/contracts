@@ -355,8 +355,10 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
     /// @dev only maintainer or contractor can call this method
     /// @param _converter is the address of converter
     function approveConverter(address _converter) public onlyContractorOrMaintainer {
+        uint numberOfConversions = converterToHisConversions[_converter].length;
+        require(numberOfConversions > 0);
         require(converterToState[_converter] == ConverterState.PENDING_APPROVAL || converterToState[_converter] == ConverterState.REJECTED);
-        for(uint i=0; i<converterToHisConversions[_converter].length; i++) {
+        for(uint i=0; i<numberOfConversions; i++) {
             uint conversionId = converterToHisConversions[_converter][i];
             Conversion memory c = conversions[conversionId];
             if(c.state == ConversionState.PENDING_APPROVAL && c.isConversionFiat == false) {
