@@ -23,14 +23,46 @@ const buildPath = path.join(__dirname, 'build', 'contracts');
 const buildBackupPath = path.join(__dirname, 'build', 'contracts.bak');
 const twoKeyProtocolDir = path.join(__dirname, '2key-protocol', 'src');
 const twoKeyProtocolDist = path.join(__dirname, '2key-protocol', 'dist');
-const buildArchPath = path.join(twoKeyProtocolDir, 'contracts.tar.gz');
 const twoKeyProtocolLibDir = path.join(__dirname, '2key-protocol', 'dist');
 const twoKeyProtocolSubmodulesDir = path.join(__dirname, '2key-protocol', 'dist', 'submodules');
 
-const deploymentHistoryPath = path.join(__dirname, 'history.json');
-
+const deploymentHistoryPath = path.join(__dirname, 'history{branch}.json');
+const buildArchPath = path.join(twoKeyProtocolDir, 'contracts{branch}.tar.gz');
 let deployment = false;
 const deployedTo = {};
+
+let contractsStatus;
+
+const getBuildArchPath = () => {
+  if(contractsStatus && contractsStatus.status) {
+    return buildArchPath.replace('{branch}',`-${contractsStatus.status}`);
+  }
+  return buildArchPath;
+};
+
+const getDeploymentHistoryPath = () => {
+    if(contractsStatus && contractsStatus.status) {
+        return deploymentHistoryPath.replace('{branch}',`-${contractsStatus.status}`);
+    }
+    return deploymentHistoryPath;
+};
+
+const getContractsDeployedPath = () => {
+    const result = path.join(twoKeyProtocolDir,'contracts_deployed{branch}.json');
+    if(contractsStatus && contractsStatus.status) {
+        return result.replace('{branch}',`-${contractsStatus.status}`);
+    }
+    return result;
+};
+
+const getContractsDeployedDistPath = () => {
+    const result = path.join(twoKeyProtocolDist,'contracts_deployed{branch}.json');
+    if(contractsStatus && contractsStatus.status) {
+        return result.replace('{branch}',`-${contractsStatus.status}`);
+    }
+    return result;
+}
+
 
 const contractsGit = simpleGit();
 const twoKeyProtocolLibGit = simpleGit(twoKeyProtocolLibDir);
@@ -97,11 +129,11 @@ const rmDir = (dir) => new Promise((resolve) => {
 const archiveBuild = () => new Promise(async (resolve, reject) => {
   try {
     if (fs.existsSync(buildPath)) {
-      console.log('Archiving current artifacts to', buildArchPath);
+      console.log('Archiving current artifacts to', getBuildArchPath());
       tar.c({
         gzip: true, sync: true, cwd: path.join(__dirname, 'build')
       }, ['contracts'])
-        .pipe(fs.createWriteStream(buildArchPath));
+        .pipe(fs.createWriteStream(getBuildArchPath()));
 
 
       await rmDir(buildPath);
@@ -125,9 +157,9 @@ const restoreFromArchive = () => new Promise(async (resolve, reject) => {
       }
       fs.renameSync(buildPath, buildBackupPath);
     }
-    if (fs.existsSync(buildArchPath)) {
-      console.log('Excracting', buildArchPath)
-      tar.x({file: buildArchPath, gzip: true, sync: true, cwd: path.join(__dirname, 'build')});
+    if (fs.existsSync(getBuildArchPath())) {
+      console.log('Excracting', getBuildArchPath())
+      tar.x({file: getBuildArchPath(), gzip: true, sync: true, cwd: path.join(__dirname, 'build')});
     }
     resolve()
   } catch (e) {
@@ -249,9 +281,9 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
         let obj1 = {};
         obj1['Maintainers'] = maintainerAddress;
 
-        //Handle updating contracts_deployed.json
+        //Handle updating contracts_deployed-develop.json
         /*
-        let existingFile = path.join(twoKeyProtocolDir, 'contracts_deployed.json');
+        let existingFile = path.join(twoKeyProtocolDir, 'contracts_deployed-develop.json');
         let fileObject = {};
         if (fs.existsSync(existingFile)) {
             fileObject = JSON.parse(fs.readFileSync(existingFile, { encoding: 'utf8' }));
@@ -290,11 +322,11 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
         // fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts.ts'), `export default ${util.inspect(contracts, {depth: 10})}`);
         json = Object.assign(obj,json);
         json = Object.assign(obj1,json);
-        fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts_deployed.json'), JSON.stringify(json, null, 2));
-        console.log('Writing contracts_deployed.json...');
+        fs.writeFileSync(getContractsDeployedPath(), JSON.stringify(json, null, 2));
+        console.log('Writing contracts_deployed-develop.json...');
         if (deployment) {
-            fs.copyFileSync(path.join(twoKeyProtocolDir, 'contracts_deployed.json'),path.join(twoKeyProtocolDist,'contracts_deployed.json'));
-            console.log('Copying this to 2key-protcol/dist...');
+            fs.copyFileSync(getContractsDeployedPath(),getContractsDeployedDistPath());
+            console.log('Copying this to 2key-protocol/dist...');
         }
         console.log('Done');
         resolve(contracts);
@@ -391,7 +423,6 @@ async function deploy() {
     deployment = true;
     await contractsGit.fetch();
     await contractsGit.submoduleUpdate();
-    let contractsStatus = await contractsGit.status();
     let twoKeyProtocolStatus = await twoKeyProtocolLibGit.status();
     if (twoKeyProtocolStatus.current !== contractsStatus.current) {
       const twoKeyProtocolBranches = await twoKeyProtocolLibGit.branch();
@@ -406,7 +437,7 @@ async function deploy() {
     twoKeyProtocolStatus = await twoKeyProtocolLibGit.status();
     const localChanges = contractsStatus.files
       // .filter(item => !(item.path.includes('2key-protocol-npm')
-      .filter(item => !(item.path.includes('dist') || item.path.includes('contracts.ts') || item.path.includes('contracts_deployed.json')
+      .filter(item => !(item.path.includes('dist') || item.path.includes('contracts.ts') || item.path.includes('contracts_deployed')
         || (process.env.NODE_ENV === 'development' && item.path.includes(process.argv[1].split('/').pop()))));
     if (contractsStatus.behind || localChanges.length) {
       console.log('You have unsynced changes!', localChanges);
@@ -427,8 +458,8 @@ async function deploy() {
     const commit = `SOL Deployed to ${network} ${now.format('lll')}`;
     const tag = `${network}-${now.format('YYYYMMDDHHmmss')}`;
 
-    const deployedHistory = fs.existsSync(deploymentHistoryPath)
-      ? JSON.parse(fs.readFileSync(deploymentHistoryPath)) : {};
+    const deployedHistory = fs.existsSync(getDeploymentHistoryPath())
+      ? JSON.parse(fs.readFileSync(getDeploymentHistoryPath())) : {};
     const artifacts = await getCurrentDeployedAddresses();
     if (Object.keys(artifacts).length) {
       if (!Object.keys(deployedHistory).length) {
@@ -492,7 +523,7 @@ async function deploy() {
       deployedUpdates.data = now.format();
       deployedUpdates.networks = networks;
       deployedHistory[tag] = deployedUpdates;
-      fs.writeFileSync(deploymentHistoryPath, JSON.stringify(deployedHistory, null, 2));
+      fs.writeFileSync(getDeploymentHistoryPath(), JSON.stringify(deployedHistory, null, 2));
     }
     const contracts = await generateSOLInterface();
     await archiveBuild();
@@ -593,6 +624,7 @@ const buildSubmodules = async(contracts) => {
 };
 
 async function main() {
+  contractsStatus = await contractsGit.status(); // Fetching branch
   const mode = process.argv[2];
   switch (mode) {
     case '--update':
@@ -630,7 +662,7 @@ async function main() {
         }
 
         if(flag) {
-            Console.log('Generating new contracts_version.json for 2key-protocol and config.json file for 2key-backend...');
+            Console.log('Generating new contracts_version-develop.json for 2key-protocol and config.json file for 2key-backend...');
             versioning.wrapper(4);
         }
         // await runProcess(path.join(_dirname,'generateContractsVersioning.js'), ['--network'], networks[0]);

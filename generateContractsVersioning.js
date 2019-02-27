@@ -111,7 +111,7 @@ function writeToFile() {
     dict["nonSingletones"] = nonSingletonesDict;
 
     let dictstring = JSON.stringify(dict);
-    fs.writeFileSync("./2key-protocol/contracts_version.json", dictstring);
+    fs.writeFileSync("./2key-protocol/contracts_version-develop.json", dictstring);
 }
 
 function wrapper(idOfNetwork) {
