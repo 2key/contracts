@@ -1,9 +1,9 @@
 import {expect} from 'chai';
 import 'mocha';
 import {TwoKeyProtocol} from '../src';
-import contractsMeta from '../src/contracts';
+import singletons from '../src/contracts/singletons';
 import createWeb3, {generatePlasmaFromMnemonic} from './_web3';
-import Sign from '../src/utils/sign';
+import Sign from '../src/sign';
 import {INationalVotingCampaign} from "../src/decentralizedNation/interfaces";
 
 const {env} = process;
@@ -14,15 +14,15 @@ const mainNetId = env.MAIN_NET_ID;
 const syncTwoKeyNetId = env.SYNC_NET_ID;
 const destinationAddress = env.AYDNEP_ADDRESS;
 // const destinationAddress = env.DESTINATION_ADDRESS || '0xd9ce6800b997a0f26faffc0d74405c841dfc64b7'
-const twoKeyEconomy = contractsMeta.TwoKeyEconomy.networks[mainNetId].address;
-const twoKeyAdmin = contractsMeta.TwoKeyAdmin.networks[mainNetId].address;
+const twoKeyEconomy = singletons.TwoKeyEconomy.networks[mainNetId].address;
+const twoKeyAdmin = singletons.TwoKeyAdmin.networks[mainNetId].address;
 
 // console.log(makeHandle(4096));
 
 console.log(rpcUrl);
 console.log(mainNetId);
-console.log(contractsMeta.TwoKeyEventSource.networks[mainNetId].address);
-console.log(contractsMeta.TwoKeyEconomy.networks[mainNetId].address);
+console.log(singletons.TwoKeyEventSource.networks[mainNetId].address);
+console.log(singletons.TwoKeyEconomy.networks[mainNetId].address);
 
 const progressCallback = (name: string, mined: boolean, transactionResult: string): void => {
     console.log(`Contract ${name} ${mined ? `deployed with address ${transactionResult}` : `placed to EVM. Hash ${transactionResult}`}`);
@@ -168,11 +168,11 @@ describe('TwoKeyProtocol', () => {
                     plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
                 });
                 const {balance} = twoKeyProtocol.Utils.balanceFromWeiString(await twoKeyProtocol.getBalance(env.AYDNEP_ADDRESS), {inWei: true});
-                const {balance: adminBalance} = twoKeyProtocol.Utils.balanceFromWeiString(await twoKeyProtocol.getBalance(contractsMeta.TwoKeyAdmin.networks[mainNetId].address), {inWei: true});
+                const {balance: adminBalance} = twoKeyProtocol.Utils.balanceFromWeiString(await twoKeyProtocol.getBalance(singletons.TwoKeyAdmin.networks[mainNetId].address), {inWei: true});
                 console.log(adminBalance);
                 if (parseFloat(balance['2KEY'].toString()) <= 20000) {
                     console.log('NO BALANCE at aydnep account');
-                    const admin = web3.eth.contract(contractsMeta.TwoKeyAdmin.abi).at(contractsMeta.TwoKeyAdmin.networks[mainNetId].address);
+                    const admin = web3.eth.contract(singletons.TwoKeyAdmin.abi).at(singletons.TwoKeyAdmin.networks[mainNetId].address);
                     admin.transfer2KeyTokens(twoKeyEconomy, destinationAddress, twoKeyProtocol.Utils.toWei(100000, 'ether'), {from: env.DEPLOYER_ADDRESS}, async (err, res) => {
                         if (err) {
                             reject(err);

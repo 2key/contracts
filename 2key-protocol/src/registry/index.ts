@@ -1,8 +1,7 @@
 import {ITwoKeyBase, ITwoKeyHelpers, ITwoKeyUtils} from '../interfaces';
-import {promisify} from '../utils'
+import {promisify} from '../utils/promisify'
 import {ISignedPlasma, ISignedUser, ISignedWalletData, ITwoKeyReg, IUserData} from "./interfaces";
-import Sign from '../utils/sign';
-import {strict} from "assert";
+import Sign from '../sign';
 
 export default class TwoKeyReg implements ITwoKeyReg {
     private readonly base: ITwoKeyBase;
@@ -149,26 +148,30 @@ export default class TwoKeyReg implements ITwoKeyReg {
         return promisify(this.base.twoKeyReg.getPlasmaToEthereum,[plasma]);
     }
 
-    public signUserData2Registry(from: string, name: string, fullname: string, email: string): Promise<ISignedUser> {
+    public signUserData2Registry(from: string, name: string, fullname: string, email: string, force?: boolean): Promise<ISignedUser> {
         return new Promise<ISignedUser>(async(resolve, reject) => {
             try {
-                const [userName, address] = await Promise.all([
-                    this.getRegisteredNameForAddress(from),
-                    this.getRegisteredAddressForName(name),
-                ]);
-                console.log('REGISTRY.storedData', userName, address);
-                if (userName || parseInt(address, 16)) {
-                    reject(new Error(`Already registered, ${userName}:${address}`));
-                } else {
-                    const userData = `${name}${fullname}${email}`;
+                let userName;
+                let address;
+                if (!force) {
+                    [userName, address] = await Promise.all([
+                        this.getRegisteredNameForAddress(from),
+                        this.getRegisteredAddressForName(name),
+                    ]);
+                    console.log('REGISTRY.storedData', userName, address);
+                }
+                if (force || (!userName && !parseInt(address, 16))) {
+                    const userData = `${name}${Sign.md5(fullname)}${Sign.md5(email)}`;
                     const signature = await Sign.sign_name(this.base.web3, from, userData);
                     resolve({
                         name,
                         address: from,
-                        fullname,
-                        email,
+                        fullname: Sign.md5(fullname),
+                        email: Sign.md5(email),
                         signature,
                     });
+                } else {
+                    reject(new Error(`Already registered, ${userName}:${address}`));
                 }
             } catch (e) {
                 reject(e);
@@ -176,12 +179,15 @@ export default class TwoKeyReg implements ITwoKeyReg {
         });
     }
 
-    public signWalletData2Registry(from: string, username: string, walletname: string): Promise<ISignedWalletData> {
+    public signWalletData2Registry(from: string, username: string, walletname: string, force?: boolean): Promise<ISignedWalletData> {
         return new Promise<ISignedWalletData>(async(resolve, reject) => {
             try {
-                const walletTag = await this.getRegisteredWalletForAddress(from);
-                console.log('walletTag', walletTag);
-                if (!parseInt(walletTag, 16)) {
+                let walletTag;
+                if (!force) {
+                    walletTag = await this.getRegisteredWalletForAddress(from);
+                    console.log('walletTag', walletTag);
+                }
+                if (force || !parseInt(walletTag, 16)) {
                     const userData = `${username}${walletname}`;
                     const signature = await Sign.sign_name(this.base.web3, from, userData);
                     resolve({
@@ -217,15 +223,18 @@ export default class TwoKeyReg implements ITwoKeyReg {
      * @param {string} from
      * @returns {Promise<ISignedPlasma>}
      */
-    public signPlasma2Ethereum(from: string) : Promise<ISignedPlasma> {
+    public signPlasma2Ethereum(from: string, force?: boolean) : Promise<ISignedPlasma> {
         return new Promise<ISignedPlasma>(async(resolve,reject) => {
             try {
                 let plasmaAddress = this.base.plasmaAddress;
-                let stored_ethereum_address = await this.getRegisteredAddressForPlasma(plasmaAddress);
-                console.log('REGISTRY.signPlasma2Ethereum', from, stored_ethereum_address);
+                let stored_ethereum_address;
+                if (!force) {
+                    stored_ethereum_address = await this.getRegisteredAddressForPlasma(plasmaAddress);
+                    console.log('REGISTRY.signPlasma2Ethereum', from, stored_ethereum_address);
+                }
                 let plasmaPrivateKey = "";
                 let encryptedPlasmaPrivateKey = "";
-                if(stored_ethereum_address != from) {
+                if (force || stored_ethereum_address != from) {
                     plasmaPrivateKey = Sign.add0x(this.base.plasmaPrivateKey);
                     encryptedPlasmaPrivateKey = await Sign.encrypt(this.base.web3, from, plasmaPrivateKey, {});
                     let ethereum2plasmaSignature = await Sign.sign_ethereum2plasma(this.base.plasmaWeb3, from, plasmaAddress);
@@ -277,7 +286,11 @@ export default class TwoKeyReg implements ITwoKeyReg {
     public getUserData(address: string) : Promise<IUserData> {
         return new Promise(async(resolve,reject) => {
             try {
-                const [username, fullname, email] = await promisify(this.base.twoKeyReg.getUserData, [address]);
+                let username, fullname, email;
+                const hexed = await promisify(this.base.twoKeyReg.getUserData, [address]);
+                username = hexed.slice(0,42);
+                fullname = hexed.slice(42,42+40);
+                email = hexed.slice(42+40,42+40+40);
                 resolve({
                     username,
                     fullname,

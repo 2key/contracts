@@ -1,14 +1,17 @@
 import {BigNumber} from 'bignumber.js';
-import {BalanceMeta, ITwoKeyBase,} from '../interfaces';
+import LZString from 'lz-string';
+import { BalanceMeta, ITwoKeyBase, IOffchainData } from '../interfaces';
 import {
     IBalanceFromWeiOpts,
     IBalanceNormalized,
-    IOffchainData,
     ITransactionReceipt,
     ITwoKeyHelpers,
     ITwoKeyUtils,
     ITxReceiptOpts,
 } from './interfaces';
+import { promisify } from './promisify';
+
+const { TwoKeyVersionHandler } = require( '../versions.json');
 
 const units = {
     3: 'kwei',
@@ -21,25 +24,57 @@ const units = {
     24: 'mether',
     27: 'gether',
     30: 'tether',
-}
-
-export function promisify(func: any, args: any): Promise<any> {
-    return new Promise((res, rej) => {
-        func(...args, (err: any, data: any) => {
-            if (err) return rej(err);
-            return res(data);
-        });
-    });
-}
+};
 
 export default class Utils implements ITwoKeyUtils {
     private readonly base: ITwoKeyBase;
     private readonly helpers: ITwoKeyHelpers;
+    public versions: any;
 
     constructor(twoKeyProtocol: ITwoKeyBase, helpers: ITwoKeyHelpers) {
         this.base = twoKeyProtocol;
         this.helpers = helpers;
+        try {
+            this.getVersionHandler();
+        } catch {}
     }
+
+    public getVersionHandler(): Promise<boolean> {
+        return new Promise<boolean>(async (resolve, reject) => {
+            try {
+                this.versions = JSON.parse(await promisify(this.base.ipfsR.cat, [TwoKeyVersionHandler]));
+                // console.log('UTILS Versions', this.versions);
+                resolve(true);
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
+
+    public getSubmodule(nonSingletonsHash: string, submoduleName: string): Promise<string> {
+        return new Promise<string>(async (resolve, reject) => {
+            if (!this.versions) {
+                await this.getVersionHandler();
+            }
+            const submodules = this.versions[nonSingletonsHash];
+            if (!submodules || !submodules[submoduleName]) {
+                reject(new Error(`Missing submodule ${submoduleName} for hash ${nonSingletonsHash}`));
+            } else {
+                // console.log('IPFS Address', submodules[submoduleName]);
+                console.time('loadSubmodule');
+                console.time('loadIPFS');
+                const compressedJS = (await promisify(this.base.ipfsR.cat, [submodules[submoduleName]])).toString();
+                console.timeEnd('loadIPFS');
+                console.time('decompress');
+                const submoduleJS = LZString.decompressFromUTF16(compressedJS);
+                console.timeEnd('decompress');
+                console.timeEnd('loadSubmodule');
+                // console.log(compressedJS);
+                resolve(submoduleJS);
+            }
+        });
+    }
+
     /* UTILS */
     public ipfsAdd(data: any): Promise<string> {
         return new Promise<string>(async (resolve, reject) => {
@@ -50,7 +85,7 @@ export default class Utils implements ITwoKeyUtils {
                 // const compressed = LZString.compress(dataString);
                 // console.log('Compressed length', compressed.length, compressed);
                 // console.log('Compressed length', compressed.length);
-                const [pinned]= await promisify(this.base.ipfs.add, [[Buffer.from(dataString)], { pin: true }]);
+                const [pinned]= await promisify(this.base.ipfsW.add, [[Buffer.from(dataString)], { pin: true }]);
                 // const pin = await promisify(this.base.ipfs.pin.add, [hash[0].hash]);
                 resolve(pinned.hash);
             } catch (e) {
@@ -62,7 +97,7 @@ export default class Utils implements ITwoKeyUtils {
     public getOffchainDataFromIPFSHash(hash: string): Promise<IOffchainData> {
         return new Promise<IOffchainData>(async (resolve, reject) => {
             try {
-                const offchainObj = JSON.parse((await promisify(this.base.ipfs.cat, [hash])).toString());
+                const offchainObj = JSON.parse((await promisify(this.base.ipfsR.cat, [hash])).toString());
                 // console.log('GETOFFCHAIN', hash, compressed);
                 // const ab = new Uint8Array(compressed);
                 // console.log(ab);

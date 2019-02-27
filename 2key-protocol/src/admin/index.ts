@@ -1,6 +1,6 @@
 import {ITwoKeyUtils} from "../utils/interfaces";
 import {ITwoKeyBase, ITwoKeyHelpers} from "../interfaces";
-import {promisify} from '../utils';
+import {promisify} from '../utils/promisify';
 import {ITwoKeyAdmin} from "./interfaces";
 
 

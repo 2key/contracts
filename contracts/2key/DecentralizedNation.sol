@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
-import "../interfaces/ITwoKeyWeightedVoteContract.sol";
-import "../interfaces/ITwoKeyRegistry.sol";
+import "./interfaces/ITwoKeyWeightedVoteContract.sol";
+import "./interfaces/ITwoKeyRegistry.sol";
 import "./TwoKeyVoteToken.sol";
 
 contract DecentralizedNation {

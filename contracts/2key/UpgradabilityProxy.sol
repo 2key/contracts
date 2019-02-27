@@ -1,7 +1,7 @@
 pragma solidity ^0.4.18;
 
 import './Proxy.sol';
-import '../interfaces/ITwoKeySingletonesRegistry.sol';
+import './interfaces/ITwoKeySingletonesRegistry.sol';
 import "./UpgradabilityStorage.sol";
 
 /**

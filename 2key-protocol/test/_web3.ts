@@ -5,6 +5,7 @@ import hdkey from 'ethereumjs-wallet/hdkey';
 import ProviderEngine from 'web3-provider-engine';
 import RpcSubprovider from 'web3-provider-engine/subproviders/rpc';
 import WSSubprovider from 'web3-provider-engine/subproviders/websocket';
+import NonceSubprovider from 'web3-provider-engine/subproviders/nonce-tracker';
 import WalletSubprovider from 'ethereumjs-wallet/provider-engine';
 import TransportNodeJs from '@ledgerhq/hw-transport-node-hid';
 import ProviderSubprovider from 'web3-provider-engine/subproviders/provider.js';
@@ -38,6 +39,7 @@ export function ledgerWeb3(rpcUrl: string, networkId?: number, path?: string): P
             let engine = new ProviderEngine();
             engine.addProvider(ledger);
             engine.addProvider(new FiltersSubprovider());
+            engine.addProvider(new NonceSubprovider());
             const mainProvider = rpcUrl.startsWith('http') ? new RpcSubprovider({rpcUrl}) : new WSSubprovider({rpcUrl});
             engine.addProvider(mainProvider);
             // engine.addProvider(new ProviderSubprovider(new Web3.providers.HttpProvider(rpcUrl)));
@@ -87,6 +89,7 @@ export default function (mnemonic: string, rpcUrl: string, pk?: string): Ethereu
     const engine = new ProviderEngine();
     const mainProvider = rpcUrl.startsWith('http') ? new RpcSubprovider({rpcUrl}) : new WSSubprovider({rpcUrl});
     engine.addProvider(new WalletSubprovider(wallet, {}));
+    engine.addProvider(new NonceSubprovider());
     engine.addProvider(mainProvider);
     engine.start();
     const web3 = new Web3(engine);

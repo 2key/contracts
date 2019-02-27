@@ -1,7 +1,5 @@
-import { TwoKeyProtocol } from '../src';
 import createWeb3 from './_web3';
-import Sign from '../src/utils/sign';
-import contractsMeta from '../src/contracts';
+import singletons from '../src/contracts/singletons';
 
 const { env } = process;
 
@@ -23,10 +21,10 @@ const { web3: plasmaWeb3 } = createWeb3(env.MNEMONIC_DEPLOYER, 'https://test.pla
 //     plasmaPK: Sign.generatePrivateKey().toString('hex'),
 // });
 
-const eventsInstance = web3.eth.contract(contractsMeta.TwoKeyEventSource.abi).at(contractsMeta.TwoKeyEventSource.networks[mainNetId].address);
+const eventsInstance = web3.eth.contract(singletons.TwoKeyEventSource.abi).at(singletons.TwoKeyEventSource.networks[mainNetId].address);
 const events = eventsInstance.allEvents();
 
-const plasmaInstance = plasmaWeb3.eth.contract(contractsMeta.TwoKeyPlasmaEvents.abi).at(contractsMeta.TwoKeyPlasmaEvents.networks[syncTwoKeyNetId].address);
+const plasmaInstance = plasmaWeb3.eth.contract(singletons.TwoKeyPlasmaEvents.abi).at(singletons.TwoKeyPlasmaEvents.networks[syncTwoKeyNetId].address);
 const plasma = plasmaInstance.allEvents();
 
 

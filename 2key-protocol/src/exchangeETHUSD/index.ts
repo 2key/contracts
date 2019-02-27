@@ -1,7 +1,7 @@
 import {ITwoKeyExchangeContract, RateObject} from "./interfaces";
 import {ITwoKeyBase, ITwoKeyHelpers} from "../interfaces";
 import {ITwoKeyUtils} from "../utils/interfaces";
-import {promisify} from "../utils";
+import {promisify} from '../utils/promisify';
 import {BigNumber} from "bignumber.js";
 
 export default class TwoKeyExchangeContract implements ITwoKeyExchangeContract {

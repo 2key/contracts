@@ -1,5 +1,5 @@
 import {BigNumber} from 'bignumber.js';
-import {ICreateCampaignProgress,} from '../interfaces';
+import {ICreateCampaignProgress, IOffchainData,} from '../interfaces';
 
 interface IBalance {
     ETH: number | string | BigNumber,
@@ -21,15 +21,6 @@ export interface IBalanceNormalized {
     },
     local_address: string,
     gasPrice: string | number,
-}
-
-export interface IOffchainData {
-    campaign: string,
-    contractor?: string,
-    f_address: string,
-    f_secret: string,
-    p_message?: string,
-    dao?: string,
 }
 
 export interface ITransaction {
@@ -83,15 +74,9 @@ export interface IPlasmaSignature {
     with_prefix: boolean,
 }
 
-export interface ISignedKeys {
-    private_key: string,
-    public_address: string,
-}
-
 export interface ITwoKeyHelpers {
     _normalizeString: (value: number | string | BigNumber, inWei: boolean) => string,
     _normalizeNumber: (value: number | string | BigNumber, inWei: boolean) => number,
-    _getContractDeployedAddress: (contract: string) => string,
     _getGasPrice: () => Promise<number | string | BigNumber>,
     _getEthBalance: (address: string) => Promise<number | string | BigNumber>,
     _getTokenBalance: (address: string, erc20address?: string) => Promise<number | string | BigNumber>,
@@ -102,23 +87,19 @@ export interface ITwoKeyHelpers {
     _estimateTransactionGas: (data: IRawTransaction) => Promise<number>,
     _getUrlParams: (url: string) => any,
     _checkBalanceBeforeTransaction: (gasRequired: number, gasPrice: number, from: string) => Promise<boolean>,
-    _getAcquisitionCampaignInstance: (campaign: any) => Promise<any>,
-    _getAcquisitionConversionHandlerInstance: (campaign: any) => Promise<any>
-    _getAcquisitionLogicHandlerInstance: (campaign: any) => Promise<any>
-    _getAirdropCampaignInstance: (campaign: any) => Promise<any>,
-    _getWeightedVoteContract: (campaign: any) => Promise<any>,
     _getERC20Instance: (erc20: any) => Promise<any>,
     _getTwoKeyAdminInstance(twoKeyAdmin: any) : Promise<any>,
     _getTwoKeyCongressInstance(congress: any) : Promise<any>,
-    _getDecentralizedNationInstance(decentralizedNation: any) : Promise<any>,
-    _getLockupContractInstance(twoKeyLockup: any) : Promise<any>,
     _getUpgradableExchangeInstance(upgradableExchange: any) : Promise<any>,
-    _createAndValidate: (contractName: string, address: string) => Promise<any>,
+    _createAndValidate: (abi: any, address: string) => Promise<any>,
     _checkIPFS: () => Promise<boolean>,
-    _getNonce: (from: string) => Promise<number>,
+    _getNonce: (from: string, pending?: boolean) => Promise<number>,
+    _awaitPlasmaMethod: (plasmaPromiseMethod: Promise<any>, timeout?: number) => Promise<any>,
 }
 
 export interface ITwoKeyUtils {
+    getVersionHandler: () => Promise<boolean>,
+    getSubmodule: (nonSingletonHash: string, submoduleName: string) => Promise<string>,
     transferEther: (to: string, value: number | string | BigNumber, from: string) => Promise<string>
     ipfsAdd: (data: any) => Promise<string>,
     getOffchainDataFromIPFSHash: (hash: string) => Promise<IOffchainData>,
@@ -139,7 +120,7 @@ export interface ICreateContractOpts {
     nonce?: number,
     params?: any[],
     progressCallback?: ICreateCampaignProgress,
-    link?: ILink,
+    link?: ILink[],
 }
 
 export interface IBalanceFromWeiOpts {

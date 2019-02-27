@@ -1,6 +1,6 @@
 import {ITwoKeyBase, ITwoKeyHelpers, ITwoKeyUtils} from '../interfaces';
 import {IMemberInfo, ITwoKeyCongress} from './interfaces';
-import {promisify} from '../utils'
+import {promisify} from '../utils/promisify'
 
 
 export default class TwoKeyCongress implements ITwoKeyCongress {
@@ -58,12 +58,12 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
      * @param {string} from
      * @returns {Promise<number>}
      */
-    public newProposalInWei(beneficiary: string, weiAmount: number, jobDescription: string, transactionBytecode: string, from:string) : Promise<number> {
+    public newProposal(beneficiary: string, jobDescription: string, transactionBytecode: string, from:string) : Promise<string> {
         return new Promise( async(resolve, reject) => {
             try {
                 const nonce = await this.helpers._getNonce(from);
-                let proposalId = await promisify(this.congress.newProposal,[beneficiary,weiAmount,jobDescription,transactionBytecode,{from, nonce}]);
-                resolve(proposalId);
+                let txHash = await promisify(this.congress.newProposal,[beneficiary,0,jobDescription,transactionBytecode,{from, nonce}]);
+                resolve(txHash);
             } catch(e) {
                 reject(e);
             }
@@ -114,16 +114,31 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
      * @param {string} from
      * @returns {Promise<number>}
      */
-    public vote(proposalNumber:number, supportsProposal: boolean, justificationText:string, from:string): Promise<number> {
+    public vote(proposalNumber:number, supportsProposal: boolean, justificationText:string, from:string): Promise<string> {
         return new Promise(async(resolve,reject) => {
             try {
                 const nonce = await this.helpers._getNonce(from);
-                let voteId = await promisify(this.congress.vote, [proposalNumber, supportsProposal, justificationText, {from, nonce}]);
-                resolve(voteId);
+                let txHash = await promisify(this.congress.vote, [proposalNumber, supportsProposal, justificationText, {from, nonce}]);
+                resolve(txHash);
             } catch (e) {
                 reject(e);
             }
         });
+    }
+
+    /**
+     *
+     * @returns {Promise<number>}
+     */
+    public getNumberOfProposals() : Promise<number> {
+        return new Promise<number>(async(resolve,reject) => {
+            try {
+                let numberOfProp = await promisify(this.congress.numProposals,[]);
+                resolve(numberOfProp);
+            } catch (e) {
+                reject(e);
+            }
+        })
     }
 
     /**
@@ -225,15 +240,7 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
     public getProposalInformations(proposalId: number, from: string) : Promise<any> {
         return new Promise( async(resolve, reject) => {
             try {
-                let proposalAmount,
-                    proposalDescription,
-                    proposalExecutionDate,
-                    proposalIsExecuted,
-                    proposalNumberOfVotes,
-                    proposalCurrentResult,
-                    proposalTransactionBytecode;
-
-                [
+                let [
                     proposalAmount,
                     proposalDescription,
                     proposalExecutionDate,

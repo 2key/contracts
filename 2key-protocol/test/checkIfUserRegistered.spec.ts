@@ -1,7 +1,7 @@
 import 'mocha';
 import {TwoKeyProtocol} from '../src';
 import createWeb3 from './_web3';
-import Sign from '../src/utils/sign';
+import Sign from '../src/sign';
 
 
 
@@ -26,7 +26,7 @@ describe(`TwoKeyProtocol ${network}`, () => {
                 mainNetId,
                 syncTwoKeyNetId,
             },
-            plasmaPK: Sign.generatePrivateKey().toString('hex'),
+            plasmaPK: Sign.generatePrivateKey(),
         });
         const isAddressRegistered = await twoKeyProtocol.Registry.checkIfAddressIsRegistered(userAddress);
         const isUserRegistered = await twoKeyProtocol.Registry.checkIfUserIsRegistered(userName);

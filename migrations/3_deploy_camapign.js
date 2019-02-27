@@ -2,12 +2,17 @@ const TwoKeyAcquisitionCampaignERC20 = artifacts.require('TwoKeyAcquisitionCampa
 const EventSource = artifacts.require('TwoKeyEventSource');
 const TwoKeyConversionHandler = artifacts.require('TwoKeyConversionHandler');
 const ERC20TokenMock = artifacts.require('ERC20TokenMock');
-const Call = artifacts.require('Call');
 const TwoKeyHackEventSource = artifacts.require('TwoKeyHackEventSource');
 const TwoKeyExchangeRateContract = artifacts.require('TwoKeyExchangeRateContract');
 const TwoKeyUpgradableExchange = artifacts.require('TwoKeyUpgradableExchange');
 const TwoKeyAcquisitionLogicHandler = artifacts.require('TwoKeyAcquisitionLogicHandler');
 const TwoKeyRegistry = artifacts.require('TwoKeyRegistry');
+const TwoKeySingletonesRegistry = artifacts.require('TwoKeySingletonesRegistry');
+const TwoKeyCampaignValidator = artifacts.require('TwoKeyCampaignValidator');
+const TwoKeyDonationCampaign = artifacts.require('TwoKeyDonationCampaign');
+
+const Call = artifacts.require('Call');
+const IncentiveModels = artifacts.require('IncentiveModels');
 
 const fs = require('fs');
 const path = require('path');
@@ -16,65 +21,70 @@ const proxyFile = path.join(__dirname, '../build/contracts/proxyAddresses.json')
 
 
 module.exports = function deploy(deployer) {
-    if(!deployer.network.startsWith('private')) {
-        let networkId;
-        if (deployer.network.startsWith('ropsten')) {
-            networkId = 3;
-        } else if (deployer.network.startsWith('rinkeby')) {
-            networkId = 4;
-        } else if (deployer.network.startsWith('public')) {
-            networkId = 3;
-        } else if (deployer.network.startsWith('dev-local')) {
-            networkId = 8086;
-        } else if (deployer.network.startsWith('development')) {
-            networkId = 'ganache';
-        }
-        console.log(networkId);
+    if(!deployer.network.startsWith('private') && !deployer.network.startsWith('plasma')) {
+        const { network_id } = deployer;
         let x = 1;
         let json = JSON.parse(fs.readFileSync(proxyFile, {encoding: 'utf-8'}));
-        deployer.deploy(TwoKeyConversionHandler, 1012019, 180, 6, 180)
+        deployer.deploy(TwoKeyConversionHandler,
+            12345, 1012019, 180, 6, 180)
             .then(() => TwoKeyConversionHandler.deployed())
             .then(() => deployer.deploy(ERC20TokenMock))
             .then(() => deployer.link(Call, TwoKeyAcquisitionCampaignERC20))
             .then(() => deployer.deploy(TwoKeyAcquisitionLogicHandler,
                 12, 15, 1, 12345, 15345, 5, 'USD',
-                json.TwoKeyExchangeRateContract[networkId.toString()].Proxy,
-                ERC20TokenMock.address, json.TwoKeyRegistry[networkId.toString()].Proxy))
+                ERC20TokenMock.address, json.TwoKeyAdmin[network_id].Proxy))
             .then(() => deployer.deploy(TwoKeyAcquisitionCampaignERC20,
+                TwoKeySingletonesRegistry.address,
                 TwoKeyAcquisitionLogicHandler.address,
-                json.TwoKeyEventSource[networkId.toString()].Proxy,
                 TwoKeyConversionHandler.address,
-                '0xb3fa520368f2df7bed4df5185101f303f6c7decc',
+                json.TwoKeyAdmin[network_id].Proxy,
                 ERC20TokenMock.address,
-                [12345, 5, 1],
-                json.TwoKeyUpgradableExchange[networkId.toString()].Proxy)
+                [5, 1],
+                )
             )
             .then(() => TwoKeyAcquisitionCampaignERC20.deployed())
             .then(() => true)
-            .then(async () => {
-                console.log("... Adding TwoKeyAcquisitionCampaign to EventSource");
-                await new Promise(async (resolve, reject) => {
-                    try {
-                        let txHash = await EventSource.at(json.TwoKeyEventSource[networkId.toString()].Proxy).addContract(TwoKeyAcquisitionCampaignERC20.address, {gas: 7000000});
-                        resolve(txHash);
-                    } catch (e) {
-                        reject(e);
-                    }
-                });
-                console.log("Added TwoKeyAcquisition: " + TwoKeyAcquisitionCampaignERC20.address + "  to EventSource : " + json.TwoKeyEventSource[networkId.toString()].Proxy + "!");
-            })
-            .then(async () => {
-                console.log("... Adding TwoKeyAcquisitionCampaign to be eligible to buy tokens from Upgradable Exchange");
-                await new Promise(async (resolve,reject) => {
-                    try {
-                        let txHash = await TwoKeyUpgradableExchange.at(json.TwoKeyUpgradableExchange[networkId.toString()].Proxy)
-                            .addContractToBeEligibleToBuyTokens(TwoKeyAcquisitionCampaignERC20.address);
-                        resolve(txHash);
-                    } catch (e) {
-                        reject(e);
-                    }
-                })
-            })
+            // .then(() => deployer.link(IncentiveModels, TwoKeyDonationCampaign))
+            // .then(() => deployer.link(Call, TwoKeyDonationCampaign))
+            // .then(() => deployer.deploy(TwoKeyDonationCampaign,
+            //     json.TwoKeyAdmin[network_id].Proxy,
+            //     'Donation for Something',
+            //     'QmABC',
+            //     'QmABCD',
+            //     'Nikoloken',
+            //     'NTKN',
+            //     12345,
+            //     1231112,
+            //     10000,
+            //     100000000,
+            //     10000000000000,
+            //     5,
+            //     TwoKeySingletonesRegistry.address,
+            //     0
+            //     ))
+            // .then(async () => {
+            //     console.log("... Adding TwoKeyAcquisitionCampaign bytecodes to be valid in the TwoKeyValidator contract");
+            //     await new Promise(async (resolve, reject) => {
+            //         try {
+            //             let txHash = await TwoKeyCampaignValidator.at(json.TwoKeyCampaignValidator[network_id].Proxy)
+            //                 .addValidBytecodes(
+            //                     [
+            //                         TwoKeyAcquisitionCampaignERC20.address,
+            //                         TwoKeyConversionHandler.address,
+            //                         TwoKeyAcquisitionLogicHandler.address
+            //                     ],
+            //                     [
+            //                         '0x54574f5f4b45595f4143515549534954494f4e5f43414d504149474e00000000',
+            //                         '0x54574f5f4b45595f434f4e56455253494f4e5f48414e444c4552000000000000',
+            //                         '0x54574f5f4b45595f4143515549534954494f4e5f4c4f4749435f48414e444c45',
+            //                     ]
+            //                 );
+            //             resolve(txHash);
+            //         } catch (e) {
+            //             reject(e);
+            //         }
+            //     });
+            // })
             .then(() => true);
     }
 }

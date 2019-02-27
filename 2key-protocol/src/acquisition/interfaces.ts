@@ -1,4 +1,4 @@
-import {BigNumber} from 'bignumber.js';
+import {BigNumber} from 'bignumber.js/bignumber';
 import {ICreateOpts} from '../interfaces';
 
 export interface IPublicLinkKey {
@@ -15,6 +15,7 @@ export interface IAcquisitionCampaignMeta {
     campaignAddress: string,
     conversionHandlerAddress: string,
     campaignPublicLinkKey: string
+    ephemeralContractsVersion: string,
 }
 
 export interface ITokenAmount {
@@ -23,7 +24,18 @@ export interface ITokenAmount {
     totalTokens: number,
 }
 
+export interface IOffchainData {
+    campaign: string,
+    contractor?: string,
+    f_address: string,
+    f_secret: string,
+    p_message?: string,
+    ephemeralContractsVersion?: string,
+    dao?: string,
+}
+
 export interface IAcquisitionCampaign {
+    generatePublicMeta: () => IPublicMeta,
     moderator?: string, // Address of the moderator - it's a contract that works (operates) as admin of whitelists contracts
     conversionHandlerAddress?: string,
     twoKeyAcquisitionLogicHandler?: string,
@@ -45,8 +57,25 @@ export interface IAcquisitionCampaign {
     bonusTokensVestingStartShiftInDaysFromDistributionDate: number
 }
 
+export interface IPublicMeta {
+    private_key: string,
+    public_address: string,
+}
+
+export interface ILockupInformation {
+    'baseTokens' : number,
+    'bonusTokens' : number,
+    'vestingMonths' : number,
+    'conversionId' : number,
+    'unlockingDays' : number[],
+    'areWithdrawn' : boolean[]
+}
 
 export interface ITwoKeyAcquisitionCampaign {
+    _getCampaignInstance: (campaign: any, skipCache?: boolean) => Promise<any>,
+    _getConversionHandlerInstance: (campaign: any) => Promise<any>,
+    _getLogicHandlerInstance: (campaign: any) => Promise<any>,
+    _getLockupContractInstance: (lockupContract: any) => Promise<any>,
     estimateCreation: (data: IAcquisitionCampaign, from: string) => Promise<number>,
     create: (data: IAcquisitionCampaign, from: string, opts?: ICreateOpts) => Promise<IAcquisitionCampaignMeta>,
     updateOrSetIpfsHashPublicMeta: (campaign: any, hash: string, from: string, gasPrice?: number) => Promise<string>,
@@ -74,12 +103,12 @@ export interface ITwoKeyAcquisitionCampaign {
     convert: (campaign: any, value: string | number | BigNumber, from: string, opts?: IConvertOpts) => Promise<string>
     convertOffline: (campaign: any, from: string, conversionAmountFiat: number, opts?: IConvertOpts) => Promise<string>
     getEstimatedTokenAmount: (campaign: any, isPaymentFiat: boolean, value: string | number | BigNumber) => Promise<ITokenAmount>,
-    getTwoKeyConversionHandlerAddress: (campaign: any) => Promise<string>,
+    getTwoKeyConversionHandlerAddress: (campaign: any, skipCache?: boolean) => Promise<string>,
     approveConverter: (campaign: any, converter: string, from: string, gasPrice? :number) => Promise<string>,
     rejectConverter: (campaign: any, converter: string, from: string, gasPrice? :number) => Promise<string>,
-    visit: (campaignAddress: string, referralLink: string, from: string) => Promise<string | boolean>,
+    visit: (campaignAddress: string, referralLink: string) => Promise<string>,
     executeConversion: (campaign: any, conversion_id: number, from: string, gasPrice? :number) => Promise<string>,
-    getLockupContractsForConverter: (campaign: any, converter: string, from: string) => Promise<string[]>,
+    getLockupContractsForConverter: (campaign: any, converter: string, from: string, skipCache?: boolean) => Promise<string[]>,
     addFungibleAssetsToInventoryOfCampaign: (campaign: any, amount: number, from: string, gasPrice? :number) => Promise<string>,
     cancel: (campaign: any, from: string, gasPrice?: number) => Promise<string>,
     isAddressContractor: (campaign:any, from:string) => Promise<boolean>,
@@ -91,17 +120,24 @@ export interface ITwoKeyAcquisitionCampaign {
     getModeratorAddress: (campaign: any, from: string) => Promise<string>,
     getAcquisitionCampaignCurrency: (campaign: any, from: string) => Promise<string>,
     getModeratorTotalEarnings: (campaign:any, from:string) => Promise<number>,
-    getReferrerBalanceAndTotalEarningsAndNumberOfConversions: (campaign:any, referrer: string, from: string) => Promise<IReferrerSummary>,
+    getReferrerBalanceAndTotalEarningsAndNumberOfConversions: (campaign:any, signature, skipCache?: boolean) => Promise<IReferrerSummary>,
+    getReferrerRewardsPerConversion: (campaign:any, signature: string, conversionIds: number[], skipCache?: boolean) => Promise<number[]>,
     getCurrentAvailableAmountOfTokens: (campaign:any, from:string) => Promise<number>,
     getAddressStatistic: (campaign: any, address: string, plasma?: boolean) => Promise<IAddressStats>,
     getCampaignSummary: (campaign: any, from: string) => Promise<IConversionStats>,
     getLockupContractAddress: (campaign:any, conversionId: number, from:string) => Promise<string>,
+    withdrawTokens: (twoKeyLockup: string, part: number, from:string) => Promise<string>,
+    changeTokenDistributionDate: (twoKeyLockup: string, newDate: number, from: string) => Promise<string>,
+    getLockupInformations: (twoKeyLockup: string, from:string) => Promise<ILockupInformation>,
+    getNonSingletonsHash: () => string,
 }
 
 export interface IPublicLinkOpts {
     cut?: number,
     gasPrice?: number,
     progressCallback?: ICreateCampaignProgress,
+    interval?: number,
+    timeout?: number,
 }
 
 export interface IConversionObject {
@@ -130,6 +166,8 @@ export interface IJoinLinkOpts extends IPublicLinkOpts{
     voting?: boolean,
     daoContract?: string,
     progressCallback?: ICreateCampaignProgress,
+    interval?: number,
+    timeout?: number,
 }
 
 export interface IConstantsLogicHandler {
@@ -153,7 +191,9 @@ export interface IConversionStats {
     pendingConverters: number,
     approvedConverters: number,
     rejectedConverters: number,
-    totalETHRaised: number
+    totalETHRaised: number,
+    tokensSold: number,
+    totalBounty: number,
 }
 
 export interface IAddressStats {
@@ -167,4 +207,5 @@ export interface IAddressStats {
     fullName: string,
     email: string
     ethereumOf: string,
+    converterState: string,
 }

@@ -1,7 +1,6 @@
 pragma solidity ^0.4.24;
 
-import "../2key/Upgradeable.sol";
-import "../2key/TwoKeyRegistry.sol";
+import "../2key/singleton-contracts/TwoKeyRegistry.sol";
 
 contract TwoKeyRegistryV1 is TwoKeyRegistry {
     function getMaintainers() public view returns (address[]) {

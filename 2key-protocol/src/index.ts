@@ -3,11 +3,12 @@ import Web3 from 'web3';
 import ProviderEngine from 'web3-provider-engine';
 import RpcSubprovider from 'web3-provider-engine/subproviders/rpc';
 import WSSubprovider from 'web3-provider-engine/subproviders/websocket';
+import NonceSubprovider from 'web3-provider-engine/subproviders/nonce-tracker';
 import WalletSubprovider from 'ethereumjs-wallet/provider-engine';
 import * as eth_wallet from 'ethereumjs-wallet';
 import {BigNumber} from "bignumber.js";
 // import ethers from 'ethers';
-import contractsMeta from './contracts';
+import singletons from './contracts/singletons';
 import {
     BalanceMeta,
     IContractEvent,
@@ -15,7 +16,6 @@ import {
     IDecentralizedNation,
     IEhtereumNetworks,
     IERC20,
-    ILockup,
     ITwoKeyAcquisitionCampaign,
     ITwoKeyBase,
     ITwoKeyCongress,
@@ -24,41 +24,48 @@ import {
     ITwoKeyInit,
     ITwoKeyReg,
     ITwoKeyUtils,
-    ITwoKeyWeightedVoteContract,
-    IUpgradableExchange
+    IUpgradableExchange,
+    ITwoKeyBaseReputationRegistry,
+    ITwoKeyCampaignValidator
 } from './interfaces';
-import Index, {promisify} from './utils';
+import { promisify } from './utils/promisify';
+import Index from './utils';
 import Helpers from './utils/helpers';
 import AcquisitionCampaign from './acquisition';
 import ERC20 from './erc20';
-import Lockup from './lockup';
 import TwoKeyCongress from "./congress";
 import DecentralizedNation from "./decentralizedNation";
-import TwoKeyWeightedVoteContract from "./veightedVote";
 import TwoKerRegistry from './registry';
+import TwoKeyBaseReputationRegistry from "./reputationRegistry";
 import PlasmaEvents from './plasma';
 import UpgradableExchange from './upgradableExchange';
 import TwoKeyExchangeContract from './exchangeETHUSD';
-import {IPlasmaEvents} from "./plasma/interfaces";
-
+import {IPlasmaEvents} from './plasma/interfaces';
+import Sign from './sign';
+import TwoKeyCampaignValidator from "./campaignValidator";
+import DonationCampaign from "./donation";
+import {IDonationCampaign} from "./donation/interfaces";
 // const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 
 const TwoKeyDefaults = {
-    // ipfsIp: '192.168.47.100',
-    // ipfsIp: 'ipfs.aydnep.com.ua',
-    ipfsIp: 'ipfs.infura.io',
-    ipfsPort: '5001',
-    // ipfsPort: '15001',
-    ipfsProtocol: 'https',
+    // ipfsRIp: 'ipfs.io',
+    // ipfsRPort: '443',
+    // ipfsRProtocol: 'https',
+    ipfsRIp: 'ipfs.infura.io',
+    ipfsRPort: '5001',
+    ipfsRProtocol: 'https',
+    ipfsWIp: 'ipfs.infura.io',
+    ipfsWPort: '5001',
+    ipfsWProtocol: 'https',
     mainNetId: 3,
     syncTwoKeyNetId: 98052,
     // twoKeySyncUrl: 'https://test.plasma.2key.network/',
     twoKeySyncUrl: 'https://rpc.private.test.k8s.2key.net',
-    twoKeyMainUrl: 'https://rpc.public.test.k8s.2key.net'
+    twoKeyMainUrl: 'https://rpc.public.test.k8s.2key.net',
 };
 
 function getDeployedAddress(contract: string, networkId: number | string): string {
-    const network = contractsMeta[contract] && contractsMeta[contract].networks[networkId] || {};
+    const network = singletons[contract] && singletons[contract].networks[networkId] || {};
     return network.Proxy || network.address;
 }
 
@@ -66,21 +73,27 @@ function getDeployedAddress(contract: string, networkId: number | string): strin
 export class TwoKeyProtocol {
     private web3: any;
     public plasmaWeb3: any;
-    private ipfs: any;
+    private ipfsW: any;
+    private ipfsR: any;
     public gasPrice: number;
     public totalSupply: number;
     public gas: number;
     private networks: IEhtereumNetworks;
     private contracts: IContractsAddresses;
     public twoKeyEventSource: any;
+    private twoKeyBase: ITwoKeyBase;
     private twoKeyExchangeContract: any;
     private twoKeyUpgradableExchange: any;
     private twoKeyEconomy: any;
+    private twoKeyBaseReputationRegistry: any;
+    private twoKeyCampaignValidator: any;
+    private twoKeySingletonesRegistry: any;
     public twoKeyAdmin: any;
     private twoKeyCongress: any;
     private twoKeyReg: any;
     public twoKeyPlasmaEvents: any;
     private twoKeyCall: any;
+    private twoKeyIncentiveModel: any;
     private twoKeyEvents: any;
     public plasmaAddress: string;
     public plasmaPrivateKey: string;
@@ -88,15 +101,17 @@ export class TwoKeyProtocol {
     public Utils: ITwoKeyUtils;
     private Helpers: ITwoKeyHelpers;
     public AcquisitionCampaign: ITwoKeyAcquisitionCampaign;
+    public DonationCampaign: IDonationCampaign;
     public DecentralizedNation: IDecentralizedNation;
-    public TwoKeyWeightedVoteContract: ITwoKeyWeightedVoteContract;
     public Congress: ITwoKeyCongress;
-    public Lockup: ILockup;
     public Registry: ITwoKeyReg;
     public UpgradableExchange: IUpgradableExchange;
     public TwoKeyExchangeContract: ITwoKeyExchangeContract;
     public PlasmaEvents: IPlasmaEvents;
-
+    public BaseReputation: ITwoKeyBaseReputationRegistry;
+    public CampaignValidator: ITwoKeyCampaignValidator;
+    private AcquisitionSubmodule: any;
+    private DonationSubmodule: any;
     private _log: any;
 
     // private twoKeyReg: any;
@@ -111,9 +126,12 @@ export class TwoKeyProtocol {
             web3,
             rpcUrl,
             eventsNetUrl = TwoKeyDefaults.twoKeySyncUrl,
-            ipfsIp = TwoKeyDefaults.ipfsIp,
-            ipfsPort = TwoKeyDefaults.ipfsPort,
-            ipfsProtocol: protocol = TwoKeyDefaults.ipfsProtocol,
+            ipfsRIp = TwoKeyDefaults.ipfsRIp,
+            ipfsRPort = TwoKeyDefaults.ipfsRPort,
+            ipfsRProtocol = TwoKeyDefaults.ipfsRProtocol,
+            ipfsWIp = TwoKeyDefaults.ipfsWIp,
+            ipfsWPort = TwoKeyDefaults.ipfsWPort,
+            ipfsWProtocol = TwoKeyDefaults.ipfsWProtocol,
             contracts,
             networks,
             plasmaPK,
@@ -130,6 +148,7 @@ export class TwoKeyProtocol {
         }
 
         this._log = initValues.log || console.log;
+        this._log('Plasma RPC', eventsNetUrl);
 
         this.plasmaPrivateKey = plasmaPK;
         // setWeb3 2KeySyncNet Client
@@ -139,12 +158,13 @@ export class TwoKeyProtocol {
         const plasmaEngine = new ProviderEngine();
         const plasmaProvider = eventsNetUrl.startsWith('http') ? new RpcSubprovider({rpcUrl: eventsNetUrl}) : new WSSubprovider({rpcUrl: eventsNetUrl});
         plasmaEngine.addProvider(new WalletSubprovider(eventsWallet, {}));
+        plasmaEngine.addProvider(new NonceSubprovider());
         plasmaEngine.addProvider(plasmaProvider);
 
         plasmaEngine.start();
         this.plasmaWeb3 = new Web3(plasmaEngine);
         this.plasmaAddress = `0x${eventsWallet.getAddress().toString('hex')}`;
-        this.twoKeyPlasmaEvents = this.plasmaWeb3.eth.contract(contractsMeta.TwoKeyPlasmaEvents.abi).at(getDeployedAddress('TwoKeyPlasmaEvents', this.networks.syncTwoKeyNetId));
+        this.twoKeyPlasmaEvents = this.plasmaWeb3.eth.contract(singletons.TwoKeyPlasmaEvents.abi).at(getDeployedAddress('TwoKeyPlasmaEvents', this.networks.syncTwoKeyNetId));
 
         if (web3) {
             this.web3 = new Web3(web3.currentProvider);
@@ -155,6 +175,7 @@ export class TwoKeyProtocol {
             this.web3 = new Web3(mainEngine);
             const mainProvider = rpcUrl.startsWith('http') ? new RpcSubprovider({rpcUrl}) : new WSSubprovider({rpcUrl});
             // mainEngine.addProvider(new WalletSubprovider(eventsWallet, {}));
+            mainEngine.addProvider(new NonceSubprovider());
             mainEngine.addProvider(mainProvider);
             mainEngine.start();
         } else {
@@ -162,22 +183,33 @@ export class TwoKeyProtocol {
         }
 
         //contractsMeta.TwoKeyRegLogic.networks[this.networks.mainNetId].address
-        this.twoKeyExchangeContract = this.web3.eth.contract(contractsMeta.TwoKeyExchangeRateContract.abi).at(getDeployedAddress('TwoKeyExchangeRateContract', this.networks.mainNetId));
-        this.twoKeyUpgradableExchange = this.web3.eth.contract(contractsMeta.TwoKeyUpgradableExchange.abi).at(getDeployedAddress('TwoKeyUpgradableExchange', this.networks.mainNetId));
-        this.twoKeyEconomy = this.web3.eth.contract(contractsMeta.TwoKeyEconomy.abi).at(getDeployedAddress('TwoKeyEconomy', this.networks.mainNetId));
-        this.twoKeyReg = this.web3.eth.contract(contractsMeta.TwoKeyRegistry.abi).at(getDeployedAddress('TwoKeyRegistry', this.networks.mainNetId));
-        this.twoKeyEventSource = this.web3.eth.contract(contractsMeta.TwoKeyEventSource.abi).at(getDeployedAddress('TwoKeyEventSource', this.networks.mainNetId));
-        this.twoKeyAdmin = this.web3.eth.contract(contractsMeta.TwoKeyAdmin.abi).at(getDeployedAddress('TwoKeyAdmin', this.networks.mainNetId));
-        this.twoKeyCongress = this.web3.eth.contract(contractsMeta.TwoKeyCongress.abi).at(getDeployedAddress('TwoKeyCongress', this.networks.mainNetId));
-        this.twoKeyCall = this.web3.eth.contract(contractsMeta.Call.abi).at(getDeployedAddress('Call', this.networks.mainNetId));
-        this.ipfs = ipfsAPI(ipfsIp, ipfsPort, {protocol});
+        this.twoKeySingletonesRegistry = this.web3.eth.contract(singletons.TwoKeySingletonesRegistry.abi).at(getDeployedAddress('TwoKeySingletonesRegistry', this.networks.mainNetId))
+        this.twoKeyExchangeContract = this.web3.eth.contract(singletons.TwoKeyExchangeRateContract.abi).at(getDeployedAddress('TwoKeyExchangeRateContract', this.networks.mainNetId));
+        this.twoKeyUpgradableExchange = this.web3.eth.contract(singletons.TwoKeyUpgradableExchange.abi).at(getDeployedAddress('TwoKeyUpgradableExchange', this.networks.mainNetId));
+        this.twoKeyEconomy = this.web3.eth.contract(singletons.TwoKeyEconomy.abi).at(getDeployedAddress('TwoKeyEconomy', this.networks.mainNetId));
+        this.twoKeyReg = this.web3.eth.contract(singletons.TwoKeyRegistry.abi).at(getDeployedAddress('TwoKeyRegistry', this.networks.mainNetId));
+        this.twoKeyEventSource = this.web3.eth.contract(singletons.TwoKeyEventSource.abi).at(getDeployedAddress('TwoKeyEventSource', this.networks.mainNetId));
+        this.twoKeyAdmin = this.web3.eth.contract(singletons.TwoKeyAdmin.abi).at(getDeployedAddress('TwoKeyAdmin', this.networks.mainNetId));
+        this.twoKeyCongress = this.web3.eth.contract(singletons.TwoKeyCongress.abi).at(getDeployedAddress('TwoKeyCongress', this.networks.mainNetId));
+        this.twoKeyCall = this.web3.eth.contract(singletons.Call.abi).at(getDeployedAddress('Call', this.networks.mainNetId));
+        this.twoKeyIncentiveModel = this.web3.eth.contract(singletons.IncentiveModels.abi).at(getDeployedAddress('IncentiveModels', this.networks.mainNetId));
+        this.twoKeyBaseReputationRegistry = this.web3.eth.contract(singletons.TwoKeyBaseReputationRegistry.abi).at(getDeployedAddress('TwoKeyBaseReputationRegistry', this.networks.mainNetId));
+        this.twoKeyCampaignValidator = this.web3.eth.contract(singletons.TwoKeyCampaignValidator.abi).at(getDeployedAddress('TwoKeyCampaignValidator', this.networks.mainNetId));
 
-        const twoKeyBase: ITwoKeyBase = {
+        this.ipfsR = ipfsAPI(ipfsRIp, ipfsRPort, {protocol: ipfsRProtocol});
+        this.ipfsW = ipfsAPI(ipfsWIp, ipfsWPort, {protocol: ipfsWProtocol});
+
+        console.log('IPFS Read', `${ipfsRProtocol}://${ipfsRIp}:${ipfsRPort}`);
+        console.log('IPFS Write', `${ipfsWProtocol}://${ipfsWIp}:${ipfsWPort}`);
+
+        this.twoKeyBase = {
             web3: this.web3,
             plasmaWeb3: this.plasmaWeb3,
-            ipfs: this.ipfs,
+            ipfsR: this.ipfsR,
+            ipfsW: this.ipfsW,
             networks: this.networks,
             contracts: this.contracts,
+            twoKeySingletonesRegistry: this.twoKeySingletonesRegistry,
             twoKeyAdmin: this.twoKeyAdmin,
             twoKeyEventSource: this.twoKeyEventSource,
             twoKeyExchangeContract: this.twoKeyExchangeContract,
@@ -187,26 +219,73 @@ export class TwoKeyProtocol {
             twoKeyCongress: this.twoKeyCongress,
             twoKeyPlasmaEvents: this.twoKeyPlasmaEvents,
             twoKeyCall: this.twoKeyCall,
+            twoKeyIncentiveModel: this.twoKeyIncentiveModel,
+            twoKeyBaseReputationRegistry: this.twoKeyBaseReputationRegistry,
+            twoKeyCampaignValidator: this.twoKeyCampaignValidator,
             plasmaAddress: this.plasmaAddress,
             plasmaPrivateKey: this.plasmaPrivateKey,
             _getGasPrice: this._getGasPrice,
             _setGasPrice: this._setGasPrice,
             _setTotalSupply: this._setTotalSupply,
             _log: this._log,
+            nonSingletonsHash: singletons.NonSingletonsHash,
         };
 
-        this.Helpers = new Helpers(twoKeyBase);
-        this.ERC20 = new ERC20(twoKeyBase, this.Helpers);
-        this.Utils = new Index(twoKeyBase, this.Helpers);
-        this.PlasmaEvents = new PlasmaEvents(twoKeyBase, this.Helpers, this.Utils);
-        this.TwoKeyExchangeContract = new TwoKeyExchangeContract(twoKeyBase, this.Helpers, this.Utils);
-        this.UpgradableExchange = new UpgradableExchange(twoKeyBase,this.Helpers,this.Utils);
-        this.AcquisitionCampaign = new AcquisitionCampaign(twoKeyBase, this.Helpers, this.Utils, this.ERC20);
-        this.TwoKeyWeightedVoteContract = new TwoKeyWeightedVoteContract(twoKeyBase, this.Helpers, this.Utils);
-        this.DecentralizedNation = new DecentralizedNation(twoKeyBase, this.Helpers, this.Utils, this.TwoKeyWeightedVoteContract, this.AcquisitionCampaign);
-        this.Congress = new TwoKeyCongress(twoKeyBase, this.Helpers, this.Utils);
-        this.Lockup = new Lockup(twoKeyBase, this.Helpers, this.Utils);
-        this.Registry = new TwoKerRegistry(twoKeyBase, this.Helpers, this.Utils);
+        this.Helpers = new Helpers(this.twoKeyBase);
+        this.ERC20 = new ERC20(this.twoKeyBase, this.Helpers);
+        this.Utils = new Index(this.twoKeyBase, this.Helpers);
+        this.PlasmaEvents = new PlasmaEvents(this.twoKeyBase, this.Helpers, this.Utils);
+        this.TwoKeyExchangeContract = new TwoKeyExchangeContract(this.twoKeyBase, this.Helpers, this.Utils);
+        this.UpgradableExchange = new UpgradableExchange(this.twoKeyBase,this.Helpers,this.Utils);
+        this.Congress = new TwoKeyCongress(this.twoKeyBase, this.Helpers, this.Utils);
+        this.Registry = new TwoKerRegistry(this.twoKeyBase, this.Helpers, this.Utils);
+        this.BaseReputation = new TwoKeyBaseReputationRegistry(this.twoKeyBase, this.Helpers, this.Utils);
+        this.CampaignValidator = new TwoKeyCampaignValidator(this.twoKeyBase, this.Helpers, this.Utils);
+        // TODO: Add here replace AcquisitionSubmodule mechanism
+
+        this.AcquisitionCampaign = this.AcquisitionSubmodule
+            ? new this.AcquisitionSubmodule(this.twoKeyBase, this.Helpers, this.Utils, this.ERC20, Sign)
+            : new AcquisitionCampaign(this.twoKeyBase, this.Helpers, this.Utils, this.ERC20, Sign);
+
+        this.DonationCampaign = this.DonationSubmodule
+            ? new this.DonationSubmodule(this.twoKeyBase, this.Helpers, this.Utils, this.ERC20, Sign)
+            : new DonationCampaign(this.twoKeyBase, this.Helpers, this.Utils, this.ERC20, Sign);
+
+        this.DecentralizedNation = new DecentralizedNation(this.twoKeyBase, this.Helpers, this.Utils, this.AcquisitionCampaign);
+    }
+
+    /**
+     * Replace Acquisition submodule
+     * @param AcquisitionSubmodule
+     */
+    public replaceAcquisition(AcquisitionSubmodule) {
+        this.AcquisitionSubmodule = AcquisitionSubmodule;
+        this.AcquisitionCampaign = new AcquisitionSubmodule(this.twoKeyBase, this.Helpers, this.Utils, this.ERC20, Sign);
+    }
+
+    /**
+     * Set latest Acquisition submodule
+     */
+    public setLatestAcquisition() {
+        this.AcquisitionSubmodule = AcquisitionCampaign;
+        this.AcquisitionCampaign = new AcquisitionCampaign(this.twoKeyBase, this.Helpers, this.Utils, this.ERC20, Sign);
+    }
+
+    /**
+     * Replace Donation submodule
+     * @param DonationSubmodule
+     */
+    public replaceDonation(DonationSubmodule) {
+        this.DonationSubmodule = DonationSubmodule;
+        this.DonationCampaign = new DonationSubmodule(this.twoKeyBase, this.Helpers, this.Utils, this.ERC20, Sign);
+    }
+
+    /**
+     * Set Donation Submodule
+     */
+    public setLatestDonation() {
+        this.DonationSubmodule = DonationCampaign;
+        this.DonationCampaign = new DonationCampaign(this.twoKeyBase, this.Helpers, this.Utils, this.ERC20, Sign);
     }
 
     public getBalance(address: string, erc20address?: string): Promise<BalanceMeta> {

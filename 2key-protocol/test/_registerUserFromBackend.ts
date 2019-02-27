@@ -6,11 +6,9 @@ import RpcSubprovider from 'web3-provider-engine/subproviders/rpc';
 import WSSubprovider from 'web3-provider-engine/subproviders/websocket';
 import WalletSubprovider from 'ethereumjs-wallet/provider-engine';
 import Web3 from 'web3';
-import Sign from '../src/utils/sign';
 import { TwoKeyProtocol } from '../src';
 import { ISignedPlasma, ISignedWalletData } from '../src/registry/interfaces';
 import { ISignedEthereum } from '../src/plasma/interfaces';
-import {promisify} from "../src/utils";
 
 
 interface IUser {
@@ -46,6 +44,7 @@ async function registerUserFromBackend({ signedUser, signedPlasma, signedEthereu
     const mainNetId = process.env.MAIN_NET_ID;
     const syncTwoKeyNetId = process.env.SYNC_NET_ID;
     const deployerMnemonic = process.env.MNEMONIC_AYDNEP;
+    const eventsNetUrl = process.env.PLASMA_RPC_URL;
     const deployerPK = process.env.MNEMONIC_AYDNEP ? null : '9125720a89c9297cde4a3cfc92f233da5b22f868b44f78171354d4e0f7fe74ec';
 
     const rpcUrl = process.env.RPC_URL;
@@ -73,9 +72,10 @@ async function registerUserFromBackend({ signedUser, signedPlasma, signedEthereu
             mainNetId,
             syncTwoKeyNetId,
         },
+        eventsNetUrl,
         plasmaPK: '9125720a89c9297cde4a3cfc92f233da5b22f868b44f78171354d4e0f7fe74ec',
     });
-    console.log('PlasmaEvents:', twoKeyProtocol.twoKeyPlasmaEvents.address);
+    console.log('PlasmaEvents:', twoKeyProtocol.twoKeyPlasmaEvents.address, syncTwoKeyNetId, eventsNetUrl);
     console.log('registerUserFromBackend.plasmaAddress', twoKeyProtocol.plasmaAddress);
     console.log('\r\n');
     const receipts = [];
