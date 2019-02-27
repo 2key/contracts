@@ -43,48 +43,48 @@ module.exports = function deploy(deployer) {
                 )
             )
             .then(() => TwoKeyAcquisitionCampaignERC20.deployed())
-            .then(() => true)
-            .then(() => deployer.link(IncentiveModels, TwoKeyDonationCampaign))
-            .then(() => deployer.link(Call, TwoKeyDonationCampaign))
-            .then(() => deployer.deploy(TwoKeyDonationCampaign,
-                json.TwoKeyAdmin[network_id].Proxy,
-                'Donation for Something',
-                'QmABC',
-                'QmABCD',
-                'Nikoloken',
-                'NTKN',
-                12345,
-                1231112,
-                10000,
-                100000000,
-                10000000000000,
-                5,
-                TwoKeySingletonesRegistry.address,
-                0
-                ))
-            .then(async () => {
-                console.log("... Adding TwoKeyAcquisitionCampaign bytecodes to be valid in the TwoKeyValidator contract");
-                await new Promise(async (resolve, reject) => {
-                    try {
-                        let txHash = await TwoKeyCampaignValidator.at(json.TwoKeyCampaignValidator[network_id].Proxy)
-                            .addValidBytecodes(
-                                [
-                                    TwoKeyAcquisitionCampaignERC20.address,
-                                    TwoKeyConversionHandler.address,
-                                    TwoKeyAcquisitionLogicHandler.address
-                                ],
-                                [
-                                    '0x54574f5f4b45595f4143515549534954494f4e5f43414d504149474e00000000',
-                                    '0x54574f5f4b45595f434f4e56455253494f4e5f48414e444c4552000000000000',
-                                    '0x54574f5f4b45595f4143515549534954494f4e5f4c4f4749435f48414e444c45',
-                                ]
-                            );
-                        resolve(txHash);
-                    } catch (e) {
-                        reject(e);
-                    }
-                });
-            })
+            // .then(() => true)
+            // .then(() => deployer.link(IncentiveModels, TwoKeyDonationCampaign))
+            // .then(() => deployer.link(Call, TwoKeyDonationCampaign))
+            // .then(() => deployer.deploy(TwoKeyDonationCampaign,
+            //     json.TwoKeyAdmin[network_id].Proxy,
+            //     'Donation for Something',
+            //     'QmABC',
+            //     'QmABCD',
+            //     'Nikoloken',
+            //     'NTKN',
+            //     12345,
+            //     1231112,
+            //     10000,
+            //     100000000,
+            //     10000000000000,
+            //     5,
+            //     TwoKeySingletonesRegistry.address,
+            //     0
+            //     ))
+            // .then(async () => {
+            //     console.log("... Adding TwoKeyAcquisitionCampaign bytecodes to be valid in the TwoKeyValidator contract");
+            //     await new Promise(async (resolve, reject) => {
+            //         try {
+            //             let txHash = await TwoKeyCampaignValidator.at(json.TwoKeyCampaignValidator[network_id].Proxy)
+            //                 .addValidBytecodes(
+            //                     [
+            //                         TwoKeyAcquisitionCampaignERC20.address,
+            //                         TwoKeyConversionHandler.address,
+            //                         TwoKeyAcquisitionLogicHandler.address
+            //                     ],
+            //                     [
+            //                         '0x54574f5f4b45595f4143515549534954494f4e5f43414d504149474e00000000',
+            //                         '0x54574f5f4b45595f434f4e56455253494f4e5f48414e444c4552000000000000',
+            //                         '0x54574f5f4b45595f4143515549534954494f4e5f4c4f4749435f48414e444c45',
+            //                     ]
+            //                 );
+            //             resolve(txHash);
+            //         } catch (e) {
+            //             reject(e);
+            //         }
+            //     });
+            // })
             .then(() => true);
     }
 }
