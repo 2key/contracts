@@ -1872,4 +1872,21 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
             }
         })
     }
+
+    /**
+     * Get number of conversions executed on the contract
+     * @param {string} campaign
+     * @returns {Promise<number>}
+     */
+    public getNumberOfExecutedConversions(campaign: string) : Promise<number> {
+        return new Promise<number>(async(resolve,reject) => {
+            try {
+                const conversionHandlerInstance = await this._getConversionHandlerInstance(campaign);
+                let numberOfConv = await promisify(conversionHandlerInstance.getNumberOfExecutedConversions,[]);
+                resolve(numberOfConv);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
 }

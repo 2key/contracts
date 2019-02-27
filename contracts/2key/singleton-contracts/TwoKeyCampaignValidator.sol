@@ -7,6 +7,7 @@ import "../MaintainingPattern.sol";
 import "../interfaces/ITwoKeyAcquisitionCampaignStateVariables.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyEventSourceEvents.sol";
+import "../interfaces/ITwoKeyCampaignPublicAddresses.sol";
 
 
 /*******************************************************************************************************************
@@ -110,12 +111,26 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
      * @param campaign is the campaign address
      * @dev Validates all the required stuff, if the campaign is not validated, it can't update our singletones
      */
-    function validateDonationCampaign(address campaign, string nonSingletoneHash) public {
+    function validateDonationCampaign(address campaign, string nonSingletonHash) public {
+        address contractor = ITwoKeyCampaignPublicAddresses(campaign).contractor();
+        address moderator = ITwoKeyCampaignPublicAddresses(campaign).moderator();
+
         require(isCampaignValidated[campaign] == false);
-        /**
-         * TODO: Validate if erc20 address passed to the campaign has all the funds at the campaign address
-         * TODO: Validate bytecode
-         */
+        bytes memory donationCampaignCode = GetCode.at(campaign);
+
+        //Validate that this bytecode is validated and added
+        require(isCodeValid[donationCampaignCode] == true);
+
+        //Validate that public link key is set
+        require(ITwoKeyCampaignPublicAddresses(campaign).publicLinkKeyOf(contractor) != address(0));
+        campaign2nonSingletonHash[campaign] = nonSingletonHash;
+
+        //Get the event source
+        address twoKeyEventSource = ITwoKeySingletoneRegistryFetchAddress
+        (twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyEventSource");
+
+        //Emit the event that campaign is created
+        ITwoKeyEventSourceEvents(twoKeyEventSource).created(campaign,contractor,moderator);
     }
 
     /**

@@ -1180,6 +1180,11 @@ describe('TwoKeyProtocol', () => {
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(60000);
 
+    it('should return number of executed conversions', async() => {
+        let number = await twoKeyProtocol.AcquisitionCampaign.getNumberOfExecutedConversions(campaignAddress);
+        console.log('Number of executed conversions: ' + number);
+    }).timeout(60000);
+
     it('should check reputation points for a couple of addresses', async() => {
         console.log('Checking stats for Renata');
         let renataStats = await twoKeyProtocol.BaseReputation.getReputationPointsForAllRolesPerAddress(env.RENATA_ADDRESS);

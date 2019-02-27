@@ -1,5 +1,4 @@
 pragma solidity ^0.4.24;
-import "../TwoKeyTypes.sol";
 import "../TwoKeyConversionStates.sol";
 import "../TwoKeyConverterStates.sol";
 
@@ -18,7 +17,7 @@ import "../libraries/SafeMath.sol";
  * @dev There will be 1 conversion handler per Acquisition Campaign
  * @author Nikola Madjarevic
  */
-contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyConverterStates {
+contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterStates {
 
     using SafeMath for uint256;
 
@@ -27,6 +26,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
     uint raisedFundsEthWei = 0;
     uint numberOfConversions = 0;
     uint totalBounty;
+    uint numberOfExecutedConversions = 0;
 
     uint256 expiryConversionInHours; // How long converter can be pending before it will be automatically rejected and funds will be returned to convertor (hours)
 
@@ -67,7 +67,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
         uint256 moderatorFeeETHWei;
         uint256 baseTokenUnits;
         uint256 bonusTokenUnits;
-        CampaignType campaignType; // Enumerator representing type of campaign (This one is however acquisition)
         uint256 conversionCreatedAt; // When conversion is created
         uint256 conversionExpiresAt; // When conversion expires
         bool isConversionFiat;
@@ -185,7 +184,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
 
         Conversion memory c = Conversion(_contractor, _contractorProceeds, _converterAddress,
             state ,_conversionAmount, _maxReferralRewardETHWei, _moderatorFeeETHWei, baseTokensForConverterUnits,
-            bonusTokensForConverterUnits, CampaignType.CPA_FUNGIBLE,
+            bonusTokensForConverterUnits,
             now, now + expiryConversionInHours * (1 hours), isConversionFiat);
 
         conversions.push(c);
@@ -243,7 +242,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
             ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateReservedAmountOfTokensIfConversionRejectedOrExecuted(totalUnits);
             ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateContractorProceeds(conversion.contractorProceedsETHWei);
         }
-
+        numberOfExecutedConversions++;
         tokensSold = tokensSold + conversion.baseTokenUnits + conversion.bonusTokenUnits; //update sold tokens once conversion is executed
     }
 
@@ -464,5 +463,13 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
      */
     function getStateForConverter(address _converter) public view returns (bytes32) {
         return convertConverterStateToBytes(converterToState[_converter]);
+    }
+
+    /**
+     * @notice Function to get number of executed functions
+     * @return number of executed conversions on this contract
+     */
+    function getNumberOfExecutedConversions() public view returns (uint) {
+        return numberOfExecutedConversions;
     }
 }
