@@ -22,8 +22,6 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
 
     using SafeMath for uint256;
 
-    //TODO: Add tokens sold to Campaign Summary here and total bounty to the acquisition somewhere to some getter
-
     event ConversionCreated(uint conversionId);
     uint tokensSold = 0;
     uint raisedFundsEthWei = 0;
@@ -153,7 +151,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
      * @param  _conversionAmountETHWei total payout for escrow
      * @return moderator fee
      */
-    function calculateModeratorFee(uint256 _conversionAmountETHWei) public view returns (uint256)  {
+    function calculateModeratorFee(uint256 _conversionAmountETHWei) private view returns (uint256)  {
         uint256 fee = _conversionAmountETHWei.mul(ITwoKeyEventSource(twoKeyEventSource).getTwoKeyDefaultIntegratorFeeFromAdmin()).div(100);
         return fee;
     }
@@ -195,30 +193,19 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
         emit ConversionCreated(numberOfConversions);
         numberOfConversions++;
 
-         ITwoKeyBaseReputationRegistry(twoKeyBaseReputationRegistry).updateOnConversionCreatedEvent(_converterAddress, contractor, twoKeyAcquisitionCampaignERC20);
+        ITwoKeyBaseReputationRegistry(twoKeyBaseReputationRegistry).updateOnConversionCreatedEvent(_converterAddress, contractor, twoKeyAcquisitionCampaignERC20);
         if(converterToState[_converterAddress] == ConverterState.NOT_EXISTING) {
             converterToState[_converterAddress] = ConverterState.PENDING_APPROVAL;
             stateToConverter[bytes32("PENDING_APPROVAL")].push(_converterAddress);
         }
     }
 
-
-    /**
-     * @notice Function to execute conversion
-     * @param _conversionId is the id of the conversion
-     * @dev this can be called only by approved converter
-     */
-    function executeConversion(uint _conversionId) external {
-        performConversion(_conversionId);
-    }
-
-
     /**
      * @notice Function to perform all the logic which has to be done when we're performing conversion
      * @param _conversionId is the id
      */
 
-    function performConversion(uint _conversionId) internal {
+    function executeConversion(uint _conversionId) internal {
         Conversion memory conversion = conversions[_conversionId];
         uint totalUnits = conversion.baseTokenUnits + conversion.bonusTokenUnits;
         if(conversion.isConversionFiat == true) {
