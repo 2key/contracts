@@ -8,6 +8,9 @@ contract TwoKeyPlasmaEvents is Upgradeable {
     bool initialized = false;
     mapping(address => uint) public campaign2numberOfVisits;
     mapping(address => uint) public campaign2numberOfJoins;
+    //if 0 means he is not counted as forwarder otherwise he is counted
+    mapping(address => mapping(address => bool)) campaignToReferrerToCounted;
+    mapping(address => uint) public campaign2numberOfForwarders;
 
     // every event we generate contains both the campaign address and the address of the contractor of that campaign
     // both are ethereum address.
@@ -237,6 +240,11 @@ contract TwoKeyPlasmaEvents is Upgradeable {
         joined_from[acquisitionCampaignAddress][contractor][last_address] = referrer;
         visited_from[acquisitionCampaignAddress][contractor][last_address] = referrer;
         visits_list[acquisitionCampaignAddress][contractor][referrer].push(last_address);
+
+        if(campaignToReferrerToCounted[acquisitionCampaignAddress][referrer] == false) {
+            campaignToReferrerToCounted[acquisitionCampaignAddress][referrer] == true;
+            campaign2numberOfForwarders[acquisitionCampaignAddress] ++;
+        }
     }
 
 
