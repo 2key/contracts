@@ -205,7 +205,7 @@ contract TwoKeyConversionHandler is TwoKeyTypes, TwoKeyConversionStates, TwoKeyC
      * @param _conversionId is the id
      */
 
-    function executeConversion(uint _conversionId) internal {
+    function executeConversion(uint _conversionId) public {
         Conversion memory conversion = conversions[_conversionId];
         uint totalUnits = conversion.baseTokenUnits + conversion.bonusTokenUnits;
         if(conversion.isConversionFiat == true) {

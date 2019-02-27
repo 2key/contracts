@@ -61,7 +61,7 @@ const getContractsDeployedDistPath = () => {
         return result.replace('{branch}',`-${contractsStatus.current}`);
     }
     return result;
-}
+};
 
 
 const contractsGit = simpleGit();
