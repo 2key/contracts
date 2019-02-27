@@ -1185,6 +1185,11 @@ describe('TwoKeyProtocol', () => {
         console.log('Number of executed conversions: ' + number);
     }).timeout(60000);
 
+    it('should return number of forwarders for the campaign', async() => {
+        let numberOfForwarders = await twoKeyProtocol.PlasmaEvents.getForwardersPerCampaign(campaignAddress);
+        console.log('Number of forwarders stored on plasma: ' + numberOfForwarders);
+    }).timeout(60000);
+
     it('should check reputation points for a couple of addresses', async() => {
         console.log('Checking stats for Renata');
         let renataStats = await twoKeyProtocol.BaseReputation.getReputationPointsForAllRolesPerAddress(env.RENATA_ADDRESS);
