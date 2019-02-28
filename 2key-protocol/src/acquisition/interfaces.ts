@@ -26,12 +26,14 @@ export interface ITokenAmount {
 
 export interface IOffchainData {
     campaign: string,
+    campaign_web3_address: string,
     contractor?: string,
     f_address: string,
     f_secret: string,
     p_message?: string,
     ephemeralContractsVersion?: string,
     dao?: string,
+    campaign_type: string,
 }
 
 export interface IAcquisitionCampaign {

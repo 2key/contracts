@@ -744,10 +744,12 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 }
                 const linkObject: IOffchainData = {
                     campaign: campaignAddress,
+                    campaign_web3_address: campaignAddress,
                     contractor,
                     f_address: plasmaAddress,
                     f_secret: private_key,
                     ephemeralContractsVersion: this.nonSingletonsHash,
+                    campaign_type: 'acquisition',
                     dao,
                 };
                 if (new_message) {
