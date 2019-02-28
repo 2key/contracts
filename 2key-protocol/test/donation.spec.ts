@@ -83,6 +83,7 @@ describe('TwoKeyDonationCampaign', () => {
             publicMetaHash,
             privateMetaHash,
             invoiceToken,
+            maxReferralRewardPercent,
             campaignStartTime,
             campaignEndTime,
             minDonationAmount,

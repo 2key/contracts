@@ -63,6 +63,7 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         string _privateMetaHash,
         string tokenName,
         string tokenSymbol,
+        uint _maxReferralRewardPercent,
         uint _campaignStartTime,
         uint _campaignEndTime,
         uint _minDonationAmount,
@@ -77,6 +78,7 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         campaignName = _campaignName;
         publicMetaHash = _publicMetaHash;
         privateMetaHash = _privateMetaHash;
+        maxReferralRewardPercent = _maxReferralRewardPercent;
         campaignStartTime = _campaignStartTime;
         campaignEndTime = _campaignEndTime;
         minDonationAmount = _minDonationAmount;

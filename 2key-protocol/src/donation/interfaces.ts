@@ -14,6 +14,7 @@ export interface ICreateCampaign {
     publicMetaHash: string,
     privateMetaHash: string,
     invoiceToken: InvoiceERC20,
+    maxReferralRewardPercent: number,
     campaignStartTime: number,
     campaignEndTime: number,
     minDonationAmount: number,
