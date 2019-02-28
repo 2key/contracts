@@ -313,6 +313,42 @@ export default class DonationCampaign implements IDonationCampaign {
         });
     }
 
+    /**
+     *
+     * @param {string} campaignAddress
+     * @param {string} referralLink
+     * @returns {Promise<string>}
+     */
+    public visit(campaignAddress: string, referralLink: string): Promise<string> {
+        return new Promise<string>(async (resolve, reject) => {
+            try {
+                const {f_address, f_secret, p_message} = await this.utils.getOffchainDataFromIPFSHash(referralLink);
+                const plasmaAddress = this.base.plasmaAddress;
+                const sig = this.sign.free_take(plasmaAddress, f_address, f_secret, p_message);
+                const campaignInstance = await this._getCampaignInstance(campaignAddress);
+                const contractor = await promisify(campaignInstance.contractor, []);
+                const joinedFrom = await promisify(this.base.twoKeyPlasmaEvents.joined_from, [campaignInstance.address, contractor, plasmaAddress]);
+                this.base._log('contractor', contractor, plasmaAddress);
+                const txHash: string = await promisify(this.base.twoKeyPlasmaEvents.visited, [
+                    campaignInstance.address,
+                    contractor,
+                    sig,
+                    {from: plasmaAddress, gasPrice: 0}
+                ]);
+                this.base._log('visit txHash', txHash);
+                if (!parseInt(joinedFrom, 16)) {
+                    await this.utils.getTransactionReceiptMined(txHash, {web3: this.base.plasmaWeb3});
+                    const note = await this.sign.encrypt(this.base.plasmaWeb3, plasmaAddress, f_secret, {plasma: true});
+                    const noteTxHash = await promisify(this.base.twoKeyPlasmaEvents.setNoteByUser, [campaignInstance.address, note, {from: plasmaAddress}]);
+                    this.base._log('note txHash', noteTxHash);
+                }
+                resolve(txHash);
+            } catch (e) {
+                console.error(e);
+                reject(e);
+            }
+        });
+    }
 
 
     /**

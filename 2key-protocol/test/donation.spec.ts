@@ -25,6 +25,17 @@ const web3switcher = {
     guest: () => createWeb3('mnemonic words should be here bu   t for some reason they are missing', rpcUrl),
 };
 
+const links = {
+    deployer: '',
+    aydnep: '',
+    gmail: '',
+    test4: '',
+    renata: '',
+    uport: '',
+    gmail2: '',
+    aydnep2: '',
+    test: '',
+};
 /**
  * Donation campaign parameters
  */
@@ -127,5 +138,20 @@ describe('TwoKeyDonationCampaign', () => {
        }
    }).timeout(10000);
 
-
+   it('should visit campaign as guest', async () => {
+       const {web3, address} = web3switcher.guest();
+       from = address;
+       twoKeyProtocol.setWeb3({
+           web3,
+           networks: {
+               mainNetId,
+               syncTwoKeyNetId,
+           },
+           eventsNetUrl,
+           plasmaPK: generatePlasmaFromMnemonic('mnemonic words should be here but for some reason they are missing').privateKey,
+       });
+       let txHash = await twoKeyProtocol.DonationCampaign.visit(campaignAddress, links.deployer);
+       console.log(txHash);
+       expect(txHash.length).to.be.gt(0);
+    }).timeout(60000);
 });
