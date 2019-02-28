@@ -300,6 +300,7 @@ export default class DonationCampaign implements IDonationCampaign {
                 let minDonationAmount = parseInt(data.slice(66+64,66+64+64),16);
                 let maxDonationAmount = parseInt(data.slice(66+64+64,66+64+64+64),16);
                 let maxReferralRewardPercent = parseInt(data.slice(66+64+64+64,66+64+64+64+64),16);
+                console.log(data.slice(66+64+64+64+64));
                 let campaignName = "";
                 let publicMetaHash = "";
                 let obj : ICampaignData = {
