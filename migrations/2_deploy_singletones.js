@@ -464,7 +464,7 @@ module.exports = function deploy(deployer) {
                         await EventSource.at(proxyAddressTwoKeyEventSource).setInitialParams
                         (
                             proxyAddressTwoKeyAdmin,
-                            [],
+                            maintainerAddresses,
                             proxyAddressTwoKeyRegistry,
                             proxyAddressTwoKeyCampaignValidator
                         );
