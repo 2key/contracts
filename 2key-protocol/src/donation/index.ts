@@ -119,6 +119,18 @@ export default class DonationCampaign implements IDonationCampaign {
                     progressCallback('SetPublicLinkKey', true, campaignPublicLinkKey);
                 }
 
+                txHash = await promisify(this.base.twoKeyCampaignValidator.validateDonationCampaign,[campaignAddress,this.nonSingletonsHash,{from}]);
+                if (progressCallback) {
+                    progressCallback('ValidateCampaign', false, txHash);
+                }
+                await this.utils.getTransactionReceiptMined(txHash, {
+                    web3: this.base.web3,
+                    interval,
+                    timeout
+                });
+                if (progressCallback) {
+                    progressCallback('ValidateCampaign', true, txHash);
+                }
                 resolve(campaignAddress);
             } catch (e) {
                 reject(e);

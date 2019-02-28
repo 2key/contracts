@@ -125,6 +125,7 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
         require(ITwoKeyCampaignPublicAddresses(campaign).publicLinkKeyOf(contractor) != address(0));
         campaign2nonSingletonHash[campaign] = nonSingletonHash;
 
+        isCampaignValidated[campaign] = true;
         //Get the event source
         address twoKeyEventSource = ITwoKeySingletoneRegistryFetchAddress
         (twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyEventSource");
@@ -169,6 +170,10 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
         return true;
     }
 
+    function isContractCodeAddressValidated(address _contract) public view returns (bool) {
+        bytes memory contractCode = GetCode.at(_contract);
+        return isCodeValid[contractCode];
+    }
 
     /**
      * @notice Pure function to convert input string to hex

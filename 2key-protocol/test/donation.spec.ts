@@ -99,13 +99,18 @@ describe('TwoKeyDonationCampaign', () => {
             interval: 500,
             timeout: 600000
         });
+   }).timeout(60000);
 
-   }).timeout(30000);
-
+   it('should proof that campaign is set and validated properly', async() => {
+       console.log(campaignAddress);
+       let isValidated = await twoKeyProtocol.CampaignValidator.isCampaignValidated(campaignAddress);
+       expect(isValidated).to.be.equal(true);
+       console.log('Campaign is validated');
+   }).timeout(60000);
 
    it('should get contract stored data', async() => {
         let data = await twoKeyProtocol.DonationCampaign.getContractData(campaignAddress);
         console.log(data);
-   }).timeout(30000);
+   }).timeout(60000);
 
 });
