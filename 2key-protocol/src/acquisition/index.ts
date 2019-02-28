@@ -92,7 +92,9 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
             const campaignInstance = await this.helpers._createAndValidate(acquisitionContracts.TwoKeyAcquisitionCampaignERC20.abi, campaign);
             return campaignInstance;
         }
-        if (this.AcquisitionCampaign && this.AcquisitionCampaign.address === address) {
+        if (this.AcquisitionCampaign && this.AcquisitionCampaign.address === address
+            && this.AcquisitionConversionHandler && this.AcquisitionConversionHandler.acquisitionAddress === address
+            && this.AcquisitionLogicHandler && this.AcquisitionLogicHandler.acquisitionAddress === address) {
             this.base._log('Return from cache TwoKeyAcquisitionCampaignERC20 at', this.AcquisitionCampaign.address);
             return this.AcquisitionCampaign;
         }
