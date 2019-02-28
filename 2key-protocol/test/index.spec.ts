@@ -496,7 +496,7 @@ describe('TwoKeyProtocol', () => {
             minContributionETHWei: twoKeyProtocol.Utils.toWei(minContributionETHorUSD, 'ether'),
             maxContributionETHWei: twoKeyProtocol.Utils.toWei(maxContributionETHorUSD, 'ether'),
             currency: acquisitionCurrency,
-            tokenDistributionDate: 1541109593669,
+            tokenDistributionDate: 1,
             maxDistributionDateShiftInDays: 180,
             bonusTokensVestingMonths: 6,
             bonusTokensVestingStartShiftInDaysFromDistributionDate: 180
@@ -990,6 +990,22 @@ describe('TwoKeyProtocol', () => {
         const addresses = await twoKeyProtocol.AcquisitionCampaign.getLockupContractsForConverter(campaignAddress, env.TEST4_ADDRESS, from);
         console.log('Lockup contracts addresses : ' + addresses);
         expect(addresses.length).to.be.equal(1);
+    }).timeout(60000);
+
+    it('should pull down base tokens amount from lockup from maintainer address', async() => {
+        const {web3, address} = web3switcher.aydnep();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+        });
+        const addresses = await twoKeyProtocol.AcquisitionCampaign.getLockupContractsForConverter(campaignAddress, env.TEST4_ADDRESS, from);
+        let txHash = await twoKeyProtocol.AcquisitionCampaign.withdrawTokens(addresses[0],0,from);
     }).timeout(60000);
 
     it('should print balances', printBalances).timeout(15000);
