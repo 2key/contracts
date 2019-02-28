@@ -108,9 +108,15 @@ describe('TwoKeyDonationCampaign', () => {
        console.log('Campaign is validated');
    }).timeout(60000);
 
+   it('should proof that non singleton hash is set for the campaign', async() => {
+        let nonSingletonHash = await twoKeyProtocol.CampaignValidator.getCampaignNonSingletonsHash(campaignAddress);
+        expect(nonSingletonHash).to.be.equal(twoKeyProtocol.AcquisitionCampaign.getNonSingletonsHash());
+    }).timeout(60000);
+
    it('should get contract stored data', async() => {
         let data = await twoKeyProtocol.DonationCampaign.getContractData(campaignAddress);
         console.log(data);
    }).timeout(60000);
+
 
 });
