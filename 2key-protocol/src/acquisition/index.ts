@@ -718,11 +718,11 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                         const contractorAddress = await promisify(campaignInstance.contractor, []);
                         const plasmaAddress = this.base.plasmaAddress;
                         const sig = this.sign.free_take(plasmaAddress, f_address, f_secret, p_message);
-                        console.log('twoKeyPlasmaEvents.joinAcquisitionCampaign join', campaignInstance.address, contractorAddress, sig, plasmaAddress);
-                        const txHash = await this.helpers._awaitPlasmaMethod(promisify(this.base.twoKeyPlasmaEvents.joinAcquisitionCampaign, [campaignInstance.address, contractorAddress, sig, { from: plasmaAddress, gasPrice: 0 }]));
+                        console.log('twoKeyPlasmaEvents.joinCampaign join', campaignInstance.address, contractorAddress, sig, plasmaAddress);
+                        const txHash = await this.helpers._awaitPlasmaMethod(promisify(this.base.twoKeyPlasmaEvents.joinCampaign, [campaignInstance.address, contractorAddress, sig, { from: plasmaAddress, gasPrice: 0 }]));
                         await this.utils.getTransactionReceiptMined(txHash, { web3: this.base.plasmaWeb3 });
                     } catch (e) {
-                        console.log('Plasma joinAcquisitionCampaign error', e);
+                        console.log('Plasma joinCampaign error', e);
                     }
                     new_message = this.sign.free_join(plasmaAddress, public_address, f_address, f_secret, p_message, safeCut, cutSign);
                 } else {
@@ -890,10 +890,10 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     try {
                         const contractor = await promisify(campaignInstance.contractor, []);
 
-                        console.log('twoKeyPlasmaEvents.joinAcquisitionCampaign convert', campaignInstance.address, contractor, signature, plasmaAddress);
-                        await this.helpers._awaitPlasmaMethod(promisify(this.base.twoKeyPlasmaEvents.joinAcquisitionCampaign, [campaignInstance.address, contractor, signature, { from: plasmaAddress, gasPrice: 0 }]));
+                        console.log('twoKeyPlasmaEvents.joinCampaign convert', campaignInstance.address, contractor, signature, plasmaAddress);
+                        await this.helpers._awaitPlasmaMethod(promisify(this.base.twoKeyPlasmaEvents.joinCampaign, [campaignInstance.address, contractor, signature, { from: plasmaAddress, gasPrice: 0 }]));
                     } catch (e) {
-                        console.log('Plasma joinAcquisitionCampaign error', e);
+                        console.log('Plasma joinCampaign error', e);
                     }
 
                     const receipt = await this.utils.getTransactionReceiptMined(txHash);
