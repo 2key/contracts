@@ -227,6 +227,25 @@ export default class DonationCampaign implements IDonationCampaign {
         });
     }
 
+
+    /**
+     * Get the public link key for message sender
+     * @param campaign
+     * @param {string} from
+     * @returns {Promise<string>}
+     */
+    public getPublicLinkKey(campaign: any, from: string): Promise<string> {
+        return new Promise<string>(async(resolve,reject) => {
+            try {
+                const campaignInstance = await this._getCampaignInstance(campaign);
+                const publicLink = await promisify(campaignInstance.publicLinkKeyOf, [from]);
+                resolve(publicLink);
+            } catch (e) {
+                reject(e)
+            }
+        })
+    }
+
     // Set Public Link
     /**
      *

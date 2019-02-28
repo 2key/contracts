@@ -557,7 +557,7 @@ describe('TwoKeyProtocol', () => {
         }
     }).timeout(10000);
 
-
+s
 
     it('should check for the moderator and contractor in registry after campaign is created and registered', async() => {
         console.log(from);

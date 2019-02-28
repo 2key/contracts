@@ -45,6 +45,32 @@ let incentiveModel = 0;
 
 let campaignAddress: string;
 
+//Describe structure of invoice token
+let invoiceToken: InvoiceERC20 = {
+    tokenName,
+    tokenSymbol
+};
+
+//Moderator will be AYDNEP in this case
+let moderator = env.AYDNEP_ADDRESS;
+
+//Describe initial params and attributes for the campaign
+
+let campaign: ICreateCampaign = {
+    moderator,
+    campaignName,
+    publicMetaHash,
+    privateMetaHash,
+    invoiceToken,
+    maxReferralRewardPercent,
+    campaignStartTime,
+    campaignEndTime,
+    minDonationAmount,
+    maxDonationAmount,
+    campaignGoal,
+    conversionQuota,
+    incentiveModel
+};
 
 const progressCallback = (name: string, mined: boolean, transactionResult: string): void => {
     console.log(`Contract ${name} ${mined ? `deployed with address ${transactionResult}` : `placed to EVM. Hash ${transactionResult}`}`);
@@ -65,33 +91,6 @@ describe('TwoKeyDonationCampaign', () => {
            eventsNetUrl,
            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
        });
-
-
-       //Describe structure of invoice token
-        let invoiceToken: InvoiceERC20 = {
-            tokenName,
-            tokenSymbol
-        };
-
-        //Moderator will be AYDNEP in this case
-        let moderator = env.AYDNEP_ADDRESS;
-
-        //Describe initial params and attributes for the campaign
-        let campaign: ICreateCampaign = {
-            moderator,
-            campaignName,
-            publicMetaHash,
-            privateMetaHash,
-            invoiceToken,
-            maxReferralRewardPercent,
-            campaignStartTime,
-            campaignEndTime,
-            minDonationAmount,
-            maxDonationAmount,
-            campaignGoal,
-            conversionQuota,
-            incentiveModel
-        };
 
         campaignAddress = await twoKeyProtocol.DonationCampaign.create(campaign, from, {
             progressCallback,
@@ -117,6 +116,16 @@ describe('TwoKeyDonationCampaign', () => {
         let data = await twoKeyProtocol.DonationCampaign.getContractData(campaignAddress);
         console.log(data);
    }).timeout(60000);
+
+   it('should get user public link', async () => {
+       try {
+           const publicLink = await twoKeyProtocol.DonationCampaign.getPublicLinkKey(campaignAddress, from);
+           console.log('User Public Link', publicLink);
+           expect(parseInt(publicLink, 16)).to.be.greaterThan(0);
+       } catch (e) {
+           throw e;
+       }
+   }).timeout(10000);
 
 
 });
