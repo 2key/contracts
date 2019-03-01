@@ -207,13 +207,15 @@ export default class DonationCampaign implements IDonationCampaign {
                     dao = voting ? daoContract : undefined;
                     contractor = campaignContractor;
                 }
+
                 const linkObject: IOffchainData = {
                     campaign: campaignAddress,
+                    campaign_web3_address: campaignAddress,
                     contractor,
                     f_address: plasmaAddress,
                     f_secret: private_key,
                     ephemeralContractsVersion: this.nonSingletonsHash,
-                    dao,
+                    campaign_type: 'donation',
                 };
                 if (new_message) {
                     linkObject.p_message = new_message;
