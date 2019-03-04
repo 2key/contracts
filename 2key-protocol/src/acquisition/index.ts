@@ -903,9 +903,6 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     } catch (e) {
                         console.log('Plasma joinCampaign error', e);
                     }
-
-                    const receipt = await this.utils.getTransactionReceiptMined(txHash);
-                    console.log(receipt);
                     resolve(txHash);
                 } else {
                     this.base._log('Previous referrer', prevChain, value);
@@ -915,8 +912,6 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                         value,
                         nonce,
                     }]);
-                    const receipt = await this.utils.getTransactionReceiptMined(txHash);
-                    console.log(receipt);
                     resolve(txHash);
                 }
             } catch (e) {
