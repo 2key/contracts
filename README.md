@@ -64,7 +64,7 @@ yarn run deploy public.test.k8s
 - If the npm publish fails:
 ```
 cd 2key-protocol/dist
-npm publish
+npm publish (if develop/staging : npm public --tag branch_name)
 git push
 ```
 
