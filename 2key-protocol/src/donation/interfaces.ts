@@ -3,6 +3,8 @@ import {ICreateCampaignProgress} from "../interfaces";
 export interface IDonationCampaign {
     create: (data: ICreateCampaign, from: string, opts?: ICreateOpts) => Promise<string>,
     getContractData: (campaignAddress: string) => Promise<ICampaignData>,
+    getPublicLinkKey: (campaign: any, from: string) => Promise<string>,
+    visit: (campaignAddress: string, referralLink: string)=> Promise<string>,
 }
 
 /**
@@ -14,6 +16,7 @@ export interface ICreateCampaign {
     publicMetaHash: string,
     privateMetaHash: string,
     invoiceToken: InvoiceERC20,
+    maxReferralRewardPercent: number,
     campaignStartTime: number,
     campaignEndTime: number,
     minDonationAmount: number,

@@ -8,6 +8,9 @@ contract TwoKeyPlasmaEvents is Upgradeable {
     bool initialized = false;
     mapping(address => uint) public campaign2numberOfVisits;
     mapping(address => uint) public campaign2numberOfJoins;
+    //if 0 means he is not counted as forwarder otherwise he is counted
+    mapping(address => mapping(address => bool)) campaignToReferrerToCounted;
+    mapping(address => uint) public campaign2numberOfForwarders;
 
     // every event we generate contains both the campaign address and the address of the contractor of that campaign
     // both are ethereum address.
@@ -213,7 +216,7 @@ contract TwoKeyPlasmaEvents is Upgradeable {
 //        return influencers;
 //    }
 
-    function joinAcquisitionCampaign(address acquisitionCampaignAddress, address contractor, bytes sig) public {
+    function joinCampaign(address campaignAddress, address contractor, bytes sig) public {
         address old_address;
         assembly
         {
@@ -221,8 +224,8 @@ contract TwoKeyPlasmaEvents is Upgradeable {
         }
         old_address = plasmaOf(old_address);
         // validate an existing visit path from contractor address to the old_address
-        require(test_path(acquisitionCampaignAddress, contractor, old_address), 'no path to contractor');
-        address old_key = publicLinkKeyOf(acquisitionCampaignAddress, contractor, old_address);
+        require(test_path(campaignAddress, contractor, old_address), 'no path to contractor');
+        address old_key = publicLinkKeyOf(campaignAddress, contractor, old_address);
         address[] memory influencers;
         address[] memory keys;
         uint8[] memory weights;
@@ -233,10 +236,15 @@ contract TwoKeyPlasmaEvents is Upgradeable {
         if (influencers.length > 1) {
             referrer = influencers[influencers.length - 2];
         }
-        campaign2numberOfJoins[acquisitionCampaignAddress]+= 1;
-        joined_from[acquisitionCampaignAddress][contractor][last_address] = referrer;
-        visited_from[acquisitionCampaignAddress][contractor][last_address] = referrer;
-        visits_list[acquisitionCampaignAddress][contractor][referrer].push(last_address);
+        campaign2numberOfJoins[campaignAddress]+= 1;
+        joined_from[campaignAddress][contractor][last_address] = referrer;
+        visited_from[campaignAddress][contractor][last_address] = referrer;
+        visits_list[campaignAddress][contractor][referrer].push(last_address);
+
+        if(campaignToReferrerToCounted[campaignAddress][referrer] == false) {
+            campaignToReferrerToCounted[campaignAddress][referrer] == true;
+            campaign2numberOfForwarders[campaignAddress] ++;
+        }
     }
 
 

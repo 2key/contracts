@@ -26,12 +26,14 @@ export interface ITokenAmount {
 
 export interface IOffchainData {
     campaign: string,
+    campaign_web3_address: string,
     contractor?: string,
     f_address: string,
     f_secret: string,
     p_message?: string,
     ephemeralContractsVersion?: string,
     dao?: string,
+    campaign_type: string,
 }
 
 export interface IAcquisitionCampaign {
@@ -130,6 +132,7 @@ export interface ITwoKeyAcquisitionCampaign {
     changeTokenDistributionDate: (twoKeyLockup: string, newDate: number, from: string) => Promise<string>,
     getLockupInformations: (twoKeyLockup: string, from:string) => Promise<ILockupInformation>,
     getNonSingletonsHash: () => string,
+    getNumberOfExecutedConversions: (campaign: string) => Promise<number>,
 }
 
 export interface IPublicLinkOpts {

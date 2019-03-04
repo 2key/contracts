@@ -496,7 +496,7 @@ describe('TwoKeyProtocol', () => {
             minContributionETHWei: twoKeyProtocol.Utils.toWei(minContributionETHorUSD, 'ether'),
             maxContributionETHWei: twoKeyProtocol.Utils.toWei(maxContributionETHorUSD, 'ether'),
             currency: acquisitionCurrency,
-            tokenDistributionDate: 1541109593669,
+            tokenDistributionDate: 1,
             maxDistributionDateShiftInDays: 180,
             bonusTokensVestingMonths: 6,
             bonusTokensVestingStartShiftInDaysFromDistributionDate: 180
@@ -556,8 +556,6 @@ describe('TwoKeyProtocol', () => {
             throw e;
         }
     }).timeout(10000);
-
-
 
     it('should check for the moderator and contractor in registry after campaign is created and registered', async() => {
         console.log(from);
@@ -992,6 +990,23 @@ describe('TwoKeyProtocol', () => {
         expect(addresses.length).to.be.equal(1);
     }).timeout(60000);
 
+    it('should pull down base tokens amount from lockup from maintainer address', async() => {
+        const {web3, address} = web3switcher.aydnep();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+        });
+        const addresses = await twoKeyProtocol.AcquisitionCampaign.getLockupContractsForConverter(campaignAddress, env.TEST4_ADDRESS, from);
+        let txHash = await twoKeyProtocol.AcquisitionCampaign.withdrawTokens(addresses[0],0,from);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+    }).timeout(60000);
+
     it('should print balances', printBalances).timeout(15000);
 
     it('==> should contractor withdraw his earnings', async() => {
@@ -1178,6 +1193,16 @@ describe('TwoKeyProtocol', () => {
         let lockupContractAddress = await twoKeyProtocol.AcquisitionCampaign.getLockupContractAddress(campaignAddress,4,from);
         expect(lockupContractAddress).not.to.be.equal(0);
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+    }).timeout(60000);
+
+    it('should return number of executed conversions', async() => {
+        let number = await twoKeyProtocol.AcquisitionCampaign.getNumberOfExecutedConversions(campaignAddress);
+        console.log('Number of executed conversions: ' + number);
+    }).timeout(60000);
+
+    it('should return number of forwarders for the campaign', async() => {
+        let numberOfForwarders = await twoKeyProtocol.PlasmaEvents.getForwardersPerCampaign(campaignAddress);
+        console.log('Number of forwarders stored on plasma: ' + numberOfForwarders);
     }).timeout(60000);
 
     it('should check reputation points for a couple of addresses', async() => {

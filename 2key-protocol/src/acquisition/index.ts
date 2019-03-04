@@ -92,7 +92,9 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
             const campaignInstance = await this.helpers._createAndValidate(acquisitionContracts.TwoKeyAcquisitionCampaignERC20.abi, campaign);
             return campaignInstance;
         }
-        if (this.AcquisitionCampaign && this.AcquisitionCampaign.address === address) {
+        if (this.AcquisitionCampaign && this.AcquisitionCampaign.address === address
+            && this.AcquisitionConversionHandler && this.AcquisitionConversionHandler.acquisitionAddress === address
+            && this.AcquisitionLogicHandler && this.AcquisitionLogicHandler.acquisitionAddress === address) {
             this.base._log('Return from cache TwoKeyAcquisitionCampaignERC20 at', this.AcquisitionCampaign.address);
             return this.AcquisitionCampaign;
         }
@@ -102,14 +104,17 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         } else {
             this.AcquisitionCampaign = await this.helpers._createAndValidate(acquisitionContracts.TwoKeyAcquisitionCampaignERC20.abi, campaign);
         }
+        this.base._log('Requesting Acquisitions helpers contract addresses');
         const [conversionHandler, twoKeyAcquisitionLogicHandler] = await Promise.all([
             promisify(this.AcquisitionCampaign.conversionHandler, []),
             promisify(this.AcquisitionCampaign.twoKeyAcquisitionLogicHandler,[])
         ]);
+        this.base._log('Requesting ConversionHandler and LogicHandler', conversionHandler, twoKeyAcquisitionLogicHandler);
         const [AcquisitionConversionHandler, AcquisitionLogicHandler] = await Promise.all([
             this.helpers._createAndValidate(acquisitionContracts.TwoKeyConversionHandler.abi, conversionHandler),
             this.helpers._createAndValidate(acquisitionContracts.TwoKeyAcquisitionLogicHandler.abi, twoKeyAcquisitionLogicHandler),
         ]);
+        this.base._log('ConversionHandler and LogicHandler', AcquisitionConversionHandler, AcquisitionLogicHandler);
         this.AcquisitionConversionHandler = AcquisitionConversionHandler;
         this.AcquisitionConversionHandler.acquisitionAddress = this.AcquisitionCampaign.address;
         this.AcquisitionLogicHandler = AcquisitionLogicHandler;
@@ -123,6 +128,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
             return this.AcquisitionConversionHandler;
         }
         await this._getCampaignInstance(campaign);
+        this.base._log('Return ConversionHandler', this.AcquisitionConversionHandler);
         return this.AcquisitionConversionHandler;
     }
 
@@ -132,6 +138,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
             return this.AcquisitionLogicHandler;
         }
         await this._getCampaignInstance(campaign);
+        this.base._log('Return LogicHandler', this.AcquisitionLogicHandler);
         return this.AcquisitionLogicHandler;
     }
 
@@ -404,8 +411,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 const twoKeyAcquisitionLogicHandlerInstance = await this._getLogicHandlerInstance(campaign);
                 const ipfsHash = await promisify(twoKeyAcquisitionLogicHandlerInstance.publicMetaHash, []);
                 const meta = JSON.parse((await promisify(this.base.ipfsR.cat, [ipfsHash])).toString());
-                const isAddressJoined = await this.isAddressJoined(campaignInstance, from);
-                resolve({meta, isAddressJoined});
+                resolve({meta});
             } catch (e) {
                 reject(e);
             }
@@ -718,11 +724,11 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                         const contractorAddress = await promisify(campaignInstance.contractor, []);
                         const plasmaAddress = this.base.plasmaAddress;
                         const sig = this.sign.free_take(plasmaAddress, f_address, f_secret, p_message);
-                        console.log('twoKeyPlasmaEvents.joinAcquisitionCampaign join', campaignInstance.address, contractorAddress, sig, plasmaAddress);
-                        const txHash = await this.helpers._awaitPlasmaMethod(promisify(this.base.twoKeyPlasmaEvents.joinAcquisitionCampaign, [campaignInstance.address, contractorAddress, sig, { from: plasmaAddress, gasPrice: 0 }]));
+                        console.log('twoKeyPlasmaEvents.joinCampaign join', campaignInstance.address, contractorAddress, sig, plasmaAddress);
+                        const txHash = await this.helpers._awaitPlasmaMethod(promisify(this.base.twoKeyPlasmaEvents.joinCampaign, [campaignInstance.address, contractorAddress, sig, { from: plasmaAddress, gasPrice: 0 }]));
                         await this.utils.getTransactionReceiptMined(txHash, { web3: this.base.plasmaWeb3 });
                     } catch (e) {
-                        console.log('Plasma joinAcquisitionCampaign error', e);
+                        console.log('Plasma joinCampaign error', e);
                     }
                     new_message = this.sign.free_join(plasmaAddress, public_address, f_address, f_secret, p_message, safeCut, cutSign);
                 } else {
@@ -738,10 +744,12 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 }
                 const linkObject: IOffchainData = {
                     campaign: campaignAddress,
+                    campaign_web3_address: campaignAddress,
                     contractor,
                     f_address: plasmaAddress,
                     f_secret: private_key,
                     ephemeralContractsVersion: this.nonSingletonsHash,
+                    campaign_type: 'acquisition',
                     dao,
                 };
                 if (new_message) {
@@ -890,10 +898,10 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     try {
                         const contractor = await promisify(campaignInstance.contractor, []);
 
-                        console.log('twoKeyPlasmaEvents.joinAcquisitionCampaign convert', campaignInstance.address, contractor, signature, plasmaAddress);
-                        await this.helpers._awaitPlasmaMethod(promisify(this.base.twoKeyPlasmaEvents.joinAcquisitionCampaign, [campaignInstance.address, contractor, signature, { from: plasmaAddress, gasPrice: 0 }]));
+                        console.log('twoKeyPlasmaEvents.joinCampaign convert', campaignInstance.address, contractor, signature, plasmaAddress);
+                        await this.helpers._awaitPlasmaMethod(promisify(this.base.twoKeyPlasmaEvents.joinCampaign, [campaignInstance.address, contractor, signature, { from: plasmaAddress, gasPrice: 0 }]));
                     } catch (e) {
-                        console.log('Plasma joinAcquisitionCampaign error', e);
+                        console.log('Plasma joinCampaign error', e);
                     }
 
                     const receipt = await this.utils.getTransactionReceiptMined(txHash);
@@ -1867,6 +1875,23 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 const twoKeyLockupInstance = await this._getLockupContractInstance(twoKeyLockup);
                 let txHash = await promisify(twoKeyLockupInstance.changeTokenDistributionDate,[newDate,{from}]);
                 resolve(txHash);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+    /**
+     * Get number of conversions executed on the contract
+     * @param {string} campaign
+     * @returns {Promise<number>}
+     */
+    public getNumberOfExecutedConversions(campaign: string) : Promise<number> {
+        return new Promise<number>(async(resolve,reject) => {
+            try {
+                const conversionHandlerInstance = await this._getConversionHandlerInstance(campaign);
+                let numberOfConv = await promisify(conversionHandlerInstance.getNumberOfExecutedConversions,[]);
+                resolve(numberOfConv);
             } catch (e) {
                 reject(e);
             }

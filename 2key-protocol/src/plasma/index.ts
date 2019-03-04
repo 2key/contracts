@@ -85,6 +85,23 @@ export default class PlasmaEvents implements IPlasmaEvents {
             }
         })
     }
+
+    /**
+     * Function to get number of forwarders per campaign
+     * @param {string} campaignAddress
+     * @returns {Promise<number>}
+     */
+    public getForwardersPerCampaign(campaignAddress: string) : Promise<number> {
+        return new Promise<number>(async(resolve,reject) => {
+            try {
+                let numberOfForwards = await promisify(this.base.twoKeyPlasmaEvents.campaign2numberOfForwarders,[campaignAddress]);
+                resolve(numberOfForwards);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
     /**
      *
      * @param {string} from
