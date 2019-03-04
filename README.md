@@ -5,7 +5,7 @@ In order to test app locally you will need running docker container
     - Make sure before running this that you have installed all dependencies
         - (npm install || yarn && yarn install)
 ```
-yarn run geth
+yarn run geth:reset
 ```
 #### Network configuration
 
@@ -25,9 +25,9 @@ file named `accountsConfig.json`. If not, create one with the following:
 #### In order to update npm package run the following: 
 - If there are no changes in singletones & plasma run following:
 ```
-yarn run deploy --migrate dev-local,private.test.k8s
+yarn run deploy --migrate dev-local,plasma-azure   (add --reset if this is hard reset)
 yarn run test:one 2key-protocol/test/sendETH.spec.ts
-yarn run test:one 2key-protocol/test/updateTwoKeyReg.dev.spec.ts
+yarn run test:one 2key-protocol/test/congressVote.spec.ts
 yarn run test
 git add .
 git commit -m <"Commit message">
