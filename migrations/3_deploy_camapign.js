@@ -69,6 +69,7 @@ module.exports = function deploy(deployer) {
                     try {
                         let txHash = await TwoKeyCampaignValidator.at(json.TwoKeyCampaignValidator[network_id].Proxy)
                             .addValidBytecodes(
+                                [
                                     TwoKeyAcquisitionCampaignERC20.address,
                                     TwoKeyConversionHandler.address,
                                     TwoKeyAcquisitionLogicHandler.address,
