@@ -5,6 +5,7 @@ In order to test app locally you will need running docker container
     - Make sure before running this that you have installed all dependencies
         - (npm install || yarn && yarn install)
 ```
+rm -rf build
 yarn run geth:reset
 ```
 #### Network configuration
