@@ -31,7 +31,7 @@ yarn run test:one 2key-protocol/test/congressVote.spec.ts
 yarn run test
 git add .
 git commit -m <"Commit message">
-yarn run deploy public.test.k8s,private.test.k8s
+yarn run deploy public.test.k8s,plasma-azure  (add --reset if this is a hard reset)
 ```
 - If there are changes in singletones and plasma (hard reset):
 ```
