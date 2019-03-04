@@ -9,14 +9,17 @@ import "../singleton-contracts/TwoKeyEventSource.sol";
 import "../libraries/SafeMath.sol";
 import "../libraries/Call.sol";
 
+/**
+ * @title Contract which describes all 2key campaigns
+ * @author Nikola Madjarevic (https://github.com/madjarevicn)
+ */
 contract TwoKeyCampaign is ArcERC20 {
-
 
 	using SafeMath for uint256;
 	using Call for *;
 
-	TwoKeyEventSource twoKeyEventSource;
-	address public twoKeySingletonesRegistry;
+	TwoKeyEventSource twoKeyEventSource; // Address of TwoKeyEventSource contract
+	address public twoKeySingletonesRegistry; // Address of Registry of all singleton contracts
 
 	address public contractor; //contractor address
     address public moderator; //moderator address

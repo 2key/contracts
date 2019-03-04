@@ -21,7 +21,6 @@ contract TwoKeyLockupContract {
 
     address public converter;
     address contractor;
-    address twoKeyAcquisitionCampaignERC20Address;
     address twoKeyConversionHandler;
     address assetContractERC20;
     address twoKeyEventSource;
@@ -62,7 +61,6 @@ contract TwoKeyLockupContract {
         uint _conversionId,
         address _converter,
         address _contractor,
-        address _acquisitionCampaignERC20Address,
         address _assetContractERC20,
         address _twoKeyEventSource
     ) public {
@@ -75,7 +73,6 @@ contract TwoKeyLockupContract {
         conversionId = _conversionId;
         converter = _converter;
         contractor = _contractor;
-        twoKeyAcquisitionCampaignERC20Address = _acquisitionCampaignERC20Address;
         twoKeyConversionHandler = msg.sender;
         assetContractERC20 = _assetContractERC20;
         twoKeyEventSource = _twoKeyEventSource;
@@ -144,15 +141,6 @@ contract TwoKeyLockupContract {
         );
 
         return true;
-    }
-
-
-
-    /// @notice This function can only be called by conversion handler and that's when contractor want to cancel his campaign
-    /// @param _assetContractERC20 is the asset contract address
-    function cancelCampaignAndGetBackTokens(address _assetContractERC20) public onlyTwoKeyConversionHandler {
-        require(IERC20(_assetContractERC20).transfer(twoKeyAcquisitionCampaignERC20Address, baseTokens+bonusTokens));
-        selfdestruct(twoKeyAcquisitionCampaignERC20Address); //This will work for money not for erc20's
     }
 
 }
