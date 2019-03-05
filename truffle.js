@@ -209,6 +209,21 @@ module.exports = {
         network_id: 11112222,
         gas: 8000000,
         gasPrice: '0x0',
+    },
+
+    'plasma-azure-ledger': {
+        provider: () => LedgerProvider('https://test.poa.2key.net', {
+            networkId: 11112222,
+            // https://github.com/LedgerHQ/ledgerjs/issues/200
+            path: "44'/60'/0'/0",
+            // askConfirm: true,
+            askConfirm: false,
+            accountsLength: 1,
+            accountsOffset: 0,
+        }),
+        network_id: 11112222,
+        gas: 8000000,
+        gasPrice: '0x0',
     }
   }
 };

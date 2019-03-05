@@ -90,7 +90,7 @@ async function start() {
     '--gasprice',
     '0',
     '--targetgaslimit',
-    '8000000',
+    '9000000',
   ];
   /*
   if (!fs.existsSync(datadir)) {
