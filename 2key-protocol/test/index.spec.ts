@@ -322,7 +322,6 @@ describe('TwoKeyProtocol', () => {
                 console.log('Number of proposals is: ' + numberOfProposals);
                 if (numberOfProposals == 0) {
                     console.log('Contractor does not have enough 2key tokens. Submitting a proposal to transfer');
-                    const admin = twoKeyProtocol.twoKeyAdmin;
                     let transactionBytecode =
                         "0x9ffe94d9e31c0ffa000000000000000000000000b3fa520368f2df7bed4df5185101f303f6c7decc000000000000000000000000000000000000000000000000002386f26fc10000";
                     let txHash = twoKeyProtocol.Congress.newProposal(

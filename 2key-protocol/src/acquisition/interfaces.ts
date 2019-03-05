@@ -188,6 +188,7 @@ export interface IReferrerSummary {
     totalEarnings: number,
     numberOfConversionsParticipatedIn : number,
     campaignAddress: string,
+    rewardsPerConversions: number[],
 }
 
 export interface IConversionStats {
