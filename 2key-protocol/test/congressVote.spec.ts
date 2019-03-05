@@ -64,8 +64,9 @@ describe('Start and execute voting' , () => {
             eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
         });
+        let numberOfProposals = await twoKeyProtocol.Congress.getNumberOfProposals();
 
-        let txHash: string = await twoKeyProtocol.Congress.vote(0,true, "I support sending tokens", from);
+        let txHash: string = await twoKeyProtocol.Congress.vote(numberOfProposals-1,true, "I support sending tokens", from);
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const status = receipt && receipt.status;
         expect(status).to.be.equal('0x1');
@@ -83,8 +84,9 @@ describe('Start and execute voting' , () => {
             eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
         });
+        let numberOfProposals = await twoKeyProtocol.Congress.getNumberOfProposals();
 
-        let txHash: string = await twoKeyProtocol.Congress.vote(0,true, "I also support sending tokens", from);
+        let txHash: string = await twoKeyProtocol.Congress.vote(numberOfProposals-1,true, "I also support sending tokens", from);
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const status = receipt && receipt.status;
         expect(status).to.be.equal('0x1');
@@ -102,15 +104,17 @@ describe('Start and execute voting' , () => {
             eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
         });
+        let numberOfProposals = await twoKeyProtocol.Congress.getNumberOfProposals();
 
-        let txHash: string = await twoKeyProtocol.Congress.vote(0,true, "I also support sending tokens", from);
+        let txHash: string = await twoKeyProtocol.Congress.vote(numberOfProposals-1,true, "I also support sending tokens", from);
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const status = receipt && receipt.status;
         expect(status).to.be.equal('0x1');
     }).timeout(60000);
 
     it('should advance time and execute proposal',async() => {
-        let txHash: string = await twoKeyProtocol.Congress.executeProposal(0, transactionBytecode, from);
+        let numberOfProposals = await twoKeyProtocol.Congress.getNumberOfProposals();
+        let txHash: string = await twoKeyProtocol.Congress.executeProposal(numberOfProposals-1, transactionBytecode, from);
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const status = receipt && receipt.status;
         expect(status).to.be.equal('0x1');
