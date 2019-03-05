@@ -114,7 +114,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
             this.helpers._createAndValidate(acquisitionContracts.TwoKeyConversionHandler.abi, conversionHandler),
             this.helpers._createAndValidate(acquisitionContracts.TwoKeyAcquisitionLogicHandler.abi, twoKeyAcquisitionLogicHandler),
         ]);
-        this.base._log('ConversionHandler and LogicHandler', AcquisitionConversionHandler, AcquisitionLogicHandler);
+        // this.base._log('ConversionHandler and LogicHandler', AcquisitionConversionHandler, AcquisitionLogicHandler);
         this.AcquisitionConversionHandler = AcquisitionConversionHandler;
         this.AcquisitionConversionHandler.acquisitionAddress = this.AcquisitionCampaign.address;
         this.AcquisitionLogicHandler = AcquisitionLogicHandler;
@@ -128,7 +128,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
             return this.AcquisitionConversionHandler;
         }
         await this._getCampaignInstance(campaign);
-        this.base._log('Return ConversionHandler', this.AcquisitionConversionHandler);
+        // this.base._log('Return ConversionHandler', this.AcquisitionConversionHandler);
         return this.AcquisitionConversionHandler;
     }
 
@@ -138,7 +138,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
             return this.AcquisitionLogicHandler;
         }
         await this._getCampaignInstance(campaign);
-        this.base._log('Return LogicHandler', this.AcquisitionLogicHandler);
+        // this.base._log('Return LogicHandler', this.AcquisitionLogicHandler);
         return this.AcquisitionLogicHandler;
     }
 
