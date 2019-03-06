@@ -27,7 +27,8 @@ let transactionBytecode =
     "0x9ffe94d9000000000000000000000000bae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7000000000000000000000000000000000000000000001a218703f6c783200000";
 
 describe('Start and execute voting' , () => {
-    it('should create a proposal', async() => {
+
+    it('should get all members from congress', async() => {
         const {web3, address} = web3switcher.deployer();
         from = address;
         twoKeyProtocol = new TwoKeyProtocol({
@@ -40,6 +41,16 @@ describe('Start and execute voting' , () => {
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
         });
 
+        let members = await twoKeyProtocol.Congress.getAllMembersForCongress(from);
+        expect(members.length).to.be.equal(3);
+    }).timeout(30000);
+
+    it('should get member info from congress', async() => {
+        let memberInfo = await twoKeyProtocol.Congress.getMemberInfo(from);
+        console.log(memberInfo);
+    }).timeout(30000);
+
+    it('should create a proposal', async() => {
         console.log('Contractor does not have enough 2key tokens. Submitting a proposal to transfer');
         const admin = twoKeyProtocol.twoKeyAdmin;
         let txHash: string = await twoKeyProtocol.Congress.newProposal(

@@ -148,7 +148,7 @@ export class TwoKeyProtocol {
         }
 
         this._log = initValues.log || console.log;
-        this._log('Plasma RPC', eventsNetUrl);
+        // this._log('Plasma RPC', eventsNetUrl);
 
         this.plasmaPrivateKey = plasmaPK;
         // setWeb3 2KeySyncNet Client
@@ -199,8 +199,8 @@ export class TwoKeyProtocol {
         this.ipfsR = ipfsAPI(ipfsRIp, ipfsRPort, {protocol: ipfsRProtocol});
         this.ipfsW = ipfsAPI(ipfsWIp, ipfsWPort, {protocol: ipfsWProtocol});
 
-        console.log('IPFS Read', `${ipfsRProtocol}://${ipfsRIp}:${ipfsRPort}`);
-        console.log('IPFS Write', `${ipfsWProtocol}://${ipfsWIp}:${ipfsWPort}`);
+        // console.log('IPFS Read', `${ipfsRProtocol}://${ipfsRIp}:${ipfsRPort}`);
+        // console.log('IPFS Write', `${ipfsWProtocol}://${ipfsWIp}:${ipfsWPort}`);
 
         this.twoKeyBase = {
             web3: this.web3,

@@ -58,8 +58,13 @@ module.exports = function deploy(deployer) {
     let initialCongressMembers = [
         '0x4216909456e770FFC737d987c273a0B8cE19C13e', // Eitan
         '0x5e2B2b278445AaA649a6b734B0945Bd9177F4F03', // Kiki
-
     ];
+
+    let initialCongressMemberNames = [
+        '0x456974616e000000000000000000000000000000000000000000000000000000', //Eitan hexed
+        '0x4b696b6900000000000000000000000000000000000000000000000000000000', //Kiki hexed
+    ];
+
     let deployerAddress = '0x18e1d5ca01141E3a0834101574E5A1e94F0F8F6a';
     let maintainerAddresses = [];
     let votingPowers = [1, 1];
@@ -108,6 +113,12 @@ module.exports = function deploy(deployer) {
             '0xf3c7641096bc9dc50d94c572bb455e56efc85412'
         ];
 
+        initialCongressMemberNames = [
+            '0x456974616e000000000000000000000000000000000000000000000000000000', //Eitan hexed
+            '0x4b696b6900000000000000000000000000000000000000000000000000000000', //Kiki hexed
+            '0x4b696b6900000000000000000000000000000000000000000000000000000000' // Kiki
+        ];
+
         votingPowers = [1,1,1];
     }
 
@@ -118,7 +129,7 @@ module.exports = function deploy(deployer) {
     deployer.deploy(Call);
     deployer.deploy(IncentiveModels);
     if (deployer.network.startsWith('dev') || deployer.network.startsWith('public.') || deployer.network.startsWith('rinkeby') || deployer.network.startsWith('ropsten')) {
-        deployer.deploy(TwoKeyCongress, 24*60, initialCongressMembers, votingPowers)
+        deployer.deploy(TwoKeyCongress, 24*60, initialCongressMembers, initialCongressMemberNames, votingPowers)
             .then(() => TwoKeyCongress.deployed())
             .then(() => deployer.deploy(TwoKeyCampaignValidator))
             .then(() => TwoKeyCampaignValidator.deployed())

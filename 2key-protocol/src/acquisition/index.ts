@@ -60,7 +60,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         this.erc20 = erc20;
         this.sign = sign;
         this.nonSingletonsHash = acquisitionContracts.NonSingletonsHash;
-        console.log('ACQUISITION', this.nonSingletonsHash, this.nonSingletonsHash.length);
+        // console.log('ACQUISITION', this.nonSingletonsHash, this.nonSingletonsHash.length);
     }
 
     /**

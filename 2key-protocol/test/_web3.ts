@@ -95,6 +95,6 @@ export default function (mnemonic: string, rpcUrl: string, pk?: string): Ethereu
     const web3 = new Web3(engine);
     const address = `0x${wallet.getAddress().toString('hex')}`;
     const privateKey = wallet.getPrivateKey().toString('hex');
-    console.log('new Web3', address, privateKey);
+    // console.log('new Web3', address, privateKey);
     return {web3, address, privateKey};
 }
