@@ -3,7 +3,6 @@ pragma solidity ^0.4.24;
 import "../singleton-contracts/TwoKeyEventSource.sol";
 import "../campaign-mutual-contracts/TwoKeyCampaign.sol";
 
-import "../interfaces/IERC20.sol";
 import "../interfaces/ITwoKeyConversionHandler.sol";
 import "../interfaces/ITwoKeyAcquisitionLogicHandler.sol";
 
@@ -230,29 +229,29 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
      * @dev This function can only be called by TwoKeyConversionHandler contract
      */
     function updateRefchainRewards(uint256 _maxReferralRewardETHWei, address _converter, uint _conversionId) public onlyTwoKeyConversionHandler {
-        require(_maxReferralRewardETHWei > 0, 'Max referral reward in ETH must be > 0');
         address[] memory influencers = ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).getReferrers(_converter,address(this));
         uint numberOfInfluencers = influencers.length;
+        uint totalBounty2keys = buyTokensFromUpgradableExchange(_maxReferralRewardETHWei, address(this));
         for (uint i = 0; i < numberOfInfluencers; i++) {
             uint256 b;
             if (i == influencers.length - 1) {  // if its the last influencer then all the bounty goes to it.
-                b = _maxReferralRewardETHWei;
+                b = totalBounty2keys;
             }
             else {
                 uint256 cut = referrerPlasma2cut[influencers[i]];
                 if (cut > 0 && cut <= 101) {
-                    b = _maxReferralRewardETHWei.mul(cut.sub(1)).div(100);
+                    b = totalBounty2keys.mul(cut.sub(1)).div(100);
                 } else {// cut == 0 or 255 indicates equal particine of the bounty
-                    b = _maxReferralRewardETHWei.div(influencers.length - i);
+                    b = totalBounty2keys.div(influencers.length - i);
                 }
             }
             //All mappings are now stated to plasma addresses
             referrerPlasma2EarningsPerConversion[influencers[i]][_conversionId] = b;
-            referrerPlasma2BalancesEthWEI[influencers[i]] = referrerPlasma2BalancesEthWEI[influencers[i]].add(b);
-            referrerPlasma2TotalEarningsEthWEI[influencers[i]] = referrerPlasma2TotalEarningsEthWEI[influencers[i]].add(b);
+            referrerPlasma2Balances2key[influencers[i]] = referrerPlasma2Balances2key[influencers[i]].add(b);
+            referrerPlasma2TotalEarnings2key[influencers[i]] = referrerPlasma2TotalEarnings2key[influencers[i]].add(b);
             referrerPlasmaAddressToCounterOfConversions[influencers[i]]++;
             totalBounty = totalBounty.add(b);
-            _maxReferralRewardETHWei = _maxReferralRewardETHWei.sub(b);
+            totalBounty2keys = totalBounty2keys.sub(b);
         }
     }
 
@@ -387,7 +386,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
         for(uint i=0; i<length; i++) {
             earnings[i] = referrerPlasma2EarningsPerConversion[_referrer][conversionIds[i]];
         }
-        return (referrerPlasma2BalancesEthWEI[_referrer], referrerPlasma2TotalEarningsEthWEI[_referrer], referrerPlasmaAddressToCounterOfConversions[_referrer], earnings);
+        return (referrerPlasma2Balances2key[_referrer], referrerPlasma2TotalEarnings2key[_referrer], referrerPlasmaAddressToCounterOfConversions[_referrer], earnings);
     }
 
     /**
@@ -397,7 +396,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
      */
     function getStatistics(address ethereum, address plasma) public view returns (uint,uint,uint) {
         require(msg.sender == twoKeyAcquisitionLogicHandler);
-        return (amountConverterSpentEthWEI[ethereum], referrerPlasma2BalancesEthWEI[plasma],unitsConverterBought[ethereum]);
+        return (amountConverterSpentEthWEI[ethereum], referrerPlasma2Balances2key[plasma],unitsConverterBought[ethereum]);
     }
 
 }

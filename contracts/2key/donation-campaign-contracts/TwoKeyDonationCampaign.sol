@@ -155,8 +155,8 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
      * @param reward is the reward referrer earned
      */
     function updateReferrerMappings(address referrerPlasma, uint reward, uint donationId) internal {
-        referrerPlasma2BalancesEthWEI[referrerPlasma] = reward;
-        referrerPlasma2TotalEarningsEthWEI[referrerPlasma] += reward;
+        referrerPlasma2Balances2key[referrerPlasma] = reward;
+        referrerPlasma2TotalEarnings2key[referrerPlasma] += reward;
         referrerPlasma2EarningsPerConversion[referrerPlasma][donationId] = reward;
         referrerPlasmaAddressToCounterOfConversions[referrerPlasma] += 1;
     }
@@ -274,7 +274,7 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         for(uint i=0; i<length; i++) {
             earnings[i] = referrerPlasma2EarningsPerConversion[_referrer][donationIds[i]];
         }
-        return (referrerPlasma2BalancesEthWEI[_referrer], referrerPlasma2TotalEarningsEthWEI[_referrer], referrerPlasmaAddressToCounterOfConversions[_referrer], earnings);
+        return (referrerPlasma2Balances2key[_referrer], referrerPlasma2TotalEarnings2key[_referrer], referrerPlasmaAddressToCounterOfConversions[_referrer], earnings);
     }
 
     /**

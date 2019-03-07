@@ -158,8 +158,9 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
     /**
      * @notice Function to buyTokens
      * @param _beneficiary to get
+     * @return amount of tokens bought
      */
-    function buyTokens(address _beneficiary) public payable onlyValidatedContracts {
+    function buyTokens(address _beneficiary) public payable onlyValidatedContracts returns (uint) {
         uint256 weiAmount = msg.value;
         _preValidatePurchase(_beneficiary, weiAmount);
 
@@ -178,6 +179,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
             rate
         );
         _forwardFunds(twoKeyAdmin);
+        return tokens;
     }
 
     function () public payable onlyValidatedContracts {

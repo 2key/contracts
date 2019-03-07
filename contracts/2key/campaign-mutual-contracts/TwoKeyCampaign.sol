@@ -4,6 +4,7 @@ import "./ArcERC20.sol";
 
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/IUpgradableExchange.sol";
+import "../interfaces/IERC20.sol";
 
 import "../singleton-contracts/TwoKeyEventSource.sol";
 import "../libraries/SafeMath.sol";
@@ -33,8 +34,8 @@ contract TwoKeyCampaign is ArcERC20 {
     uint256 moderatorBalanceETHWei; //Balance of the moderator which can be withdrawn
 	uint256 moderatorTotalEarningsETHWei; //Total earnings of the moderator all time
 
-	mapping(address => uint256) internal referrerPlasma2BalancesEthWEI; // balance of EthWei for each influencer that he can withdraw
-	mapping(address => uint256) internal referrerPlasma2TotalEarningsEthWEI; // Total earnings for referrers
+	mapping(address => uint256) internal referrerPlasma2Balances2key; // balance of EthWei for each influencer that he can withdraw
+	mapping(address => uint256) internal referrerPlasma2TotalEarnings2key; // Total earnings for referrers
 	mapping(address => uint256) internal referrerPlasmaAddressToCounterOfConversions; // [referrer][conversionId]
 	mapping(address => mapping(uint256 => uint256)) referrerPlasma2EarningsPerConversion;
 
@@ -210,9 +211,10 @@ contract TwoKeyCampaign is ArcERC20 {
  	 * @param amountOfMoney is the ether balance person has on the contract
  	 * @param receiver is the address of the person who withdraws money
  	 */
-	function buyTokensFromUpgradableExchange(uint amountOfMoney, address receiver) internal {
+	function buyTokensFromUpgradableExchange(uint amountOfMoney, address receiver) internal returns (uint) {
 		address upgradableExchange = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyUpgradableExchange");
-		IUpgradableExchange(upgradableExchange).buyTokens.value(amountOfMoney)(receiver);
+		uint amountBought = IUpgradableExchange(upgradableExchange).buyTokens.value(amountOfMoney)(receiver);
+		return amountBought;
 	}
 
     /**
@@ -239,6 +241,7 @@ contract TwoKeyCampaign is ArcERC20 {
 		require(msg.sender == _address || twoKeyEventSource.isAddressMaintainer(msg.sender));
 		uint balance;
 		if(_address == moderator) {
+			//TODO: Handle returning money
 			address twoKeyDeepFreezeTokenPool = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyDeepFreezeTokenPool");
 			uint integratorFee = twoKeyEventSource.getTwoKeyDefaultIntegratorFeeFromAdmin();
 			balance = moderatorBalanceETHWei.mul(100-integratorFee).div(100);
@@ -248,9 +251,9 @@ contract TwoKeyCampaign is ArcERC20 {
 			buyTokensFromUpgradableExchange(networkFee,twoKeyDeepFreezeTokenPool);
 		} else {
 			address _referrer = twoKeyEventSource.plasmaOf(_address);
-			if(referrerPlasma2BalancesEthWEI[_referrer] != 0) {
-				balance = referrerPlasma2BalancesEthWEI[_referrer];
-				referrerPlasma2BalancesEthWEI[_referrer] = 0;
+			if(referrerPlasma2Balances2key[_referrer] != 0) {
+				balance = referrerPlasma2Balances2key[_referrer];
+				referrerPlasma2Balances2key[_referrer] = 0;
 				buyTokensFromUpgradableExchange(balance, _address);
 			} else {
 				revert();
