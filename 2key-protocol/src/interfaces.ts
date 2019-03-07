@@ -9,7 +9,14 @@ export {IUpgradableExchange} from './upgradableExchange/interfaces';
 export {ITwoKeyExchangeContract} from './exchangeETHUSD/interfaces';
 export {ITwoKeyBaseReputationRegistry} from "./reputationRegistry/interfaces";
 export {ITwoKeyCampaignValidator} from "./campaignValidator/interfaces";
-export {IDonationCampaign} from "./donation/interfaces";
+export {IDonationCampaign} from './donation/interfaces';
+
+export interface IIPFS {
+    host: string,
+    port: number,
+    protocol: string,
+    headers: any,
+};
 
 export interface ITwoKeyBase {
     web3: any;
@@ -64,12 +71,8 @@ export interface IEhtereumNetworks {
 
 export interface ITwoKeyInit {
     web3?: any,
-    ipfsRIp?: string,
-    ipfsRPort?: string | number,
-    ipfsRProtocol?: string,
-    ipfsWIp?: string,
-    ipfsWPort?: string | number,
-    ipfsWProtocol?: string,
+    ipfsAPI?: IIPFS,
+    ipfsGW?: IIPFS,
     contracts?: IContractsAddresses,
     networks?: IEhtereumNetworks,
     rpcUrl?: string,
