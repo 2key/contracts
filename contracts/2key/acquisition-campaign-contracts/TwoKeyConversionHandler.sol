@@ -21,11 +21,11 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
 
     using SafeMath for uint256;
 
-    event ConversionCreated(uint conversionId);
+    event ConversionCreated(uint indexed conversionId);
     uint tokensSold = 0;
     uint raisedFundsEthWei = 0;
     uint numberOfConversions = 0;
-    uint totalBounty;
+    uint totalBounty = 0;
     uint numberOfExecutedConversions = 0;
 
     uint256 expiryConversionInHours; // How long converter can be pending before it will be automatically rejected and funds will be returned to convertor (hours)
@@ -275,6 +275,11 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
     }
 
 
+    /**
+     * @notice Function where converter can say if he want's to be "anonymous" (not shown in the UI)
+     * @param _converter is the converter address
+     * @param _isAnonymous is his decision true/false
+     */
     function setAnonymous(address _converter, bool _isAnonymous) external onlyTwoKeyAcquisitionCampaign {
         isConverterAnonymous[_converter] = _isAnonymous;
     }
