@@ -319,7 +319,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
      * @param last_influencer is the last influencer
      * @return array of integers containing cuts respectively
      */
-    function getReferrerCuts(address last_influencer) public view returns (uint256[]) {
+    function getReferrerCuts(address last_influencer) internal view returns (uint256[]) {
         address[] memory influencers = ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).getReferrers(last_influencer,address(this));
         uint256[] memory cuts = new uint256[](influencers.length + 1);
         for (uint i = 0; i < influencers.length; i++) {
@@ -347,7 +347,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
         uint balance = IERC20(assetContractERC20).balanceOf(address(this));
         return balance;
     }
-
 
     /**
      * @notice Function to check available amount of the tokens on the contract
