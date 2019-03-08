@@ -1030,7 +1030,7 @@ describe('TwoKeyProtocol', () => {
         }).balance);
 
         const contractorBalance = await twoKeyProtocol.AcquisitionCampaign.getContractorBalance(campaignAddress,from);
-        console.log('Contractor balance: ' + contractorBalance);
+        console.log('Contractor balance: ' + contractorBalance.available);
         const moderatorBalance = await twoKeyProtocol.AcquisitionCampaign.getModeratorBalance(campaignAddress,from);
         console.log('Moderator balance: ' + moderatorBalance);
         const hash = await twoKeyProtocol.AcquisitionCampaign.contractorWithdraw(campaignAddress,from);

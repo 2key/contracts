@@ -11,7 +11,7 @@ import {
     ITwoKeyAcquisitionCampaign,
     ILockupInformation,
     IPublicMeta,
-    IOffchainData,
+    IOffchainData, IContractorBalance,
 } from './interfaces';
 
 import { BigNumber } from 'bignumber.js/bignumber';
@@ -1433,13 +1433,14 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @param {string} from
      * @returns {Promise<number>}
      */
-    public getContractorBalance(campaign: any, from: string): Promise<number> {
-        return new Promise<number>(async (resolve, reject) => {
+    public getContractorBalance(campaign: any, from: string): Promise<IContractorBalance> {
+        return new Promise<IContractorBalance>(async (resolve, reject) => {
             try {
                 const campaignInstance = await this._getCampaignInstance(campaign);
-                let balance = await promisify(campaignInstance.getContractorBalance, [{from}]);
-                balance = parseFloat(this.utils.fromWei(balance, 'ether').toString())
-                resolve(balance);
+                let [available, total] = await promisify(campaignInstance.getContractorBalanceAndTotalProceeds, [{from}]);
+                available = parseFloat(this.utils.fromWei(available, 'ether').toString());
+                total = parseFloat(this.utils.fromWei(total, 'ether').toString());
+                resolve({ available, total });
             } catch (e) {
                 reject(e);
             }

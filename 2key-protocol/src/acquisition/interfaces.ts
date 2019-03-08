@@ -116,7 +116,7 @@ export interface ITwoKeyAcquisitionCampaign {
     isAddressContractor: (campaign:any, from:string) => Promise<boolean>,
     getAmountOfEthAddressSentToAcquisition: (campaign: any, from: string) => Promise<number>,
     contractorWithdraw: (campaign:any, from: string, gasPrice?: number) => Promise<string>,
-    getContractorBalance: (campaign:any, from:string) => Promise<number>,
+    getContractorBalance: (campaign:any, from:string) => Promise<IContractorBalance>,
     getModeratorBalance: (campaign:any, from:string) => Promise<number>,
     moderatorAndReferrerWithdraw: (campaign: any, from: string, gasPrice? : number) => Promise<string>,
     getModeratorAddress: (campaign: any, from: string) => Promise<string>,
@@ -212,4 +212,9 @@ export interface IAddressStats {
     email: string
     ethereumOf: string,
     converterState: string,
+}
+
+export interface IContractorBalance {
+    available: number,
+    total: number,
 }
