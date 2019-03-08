@@ -63,7 +63,6 @@ module.exports = function deploy(deployer) {
             //     TwoKeySingletonesRegistry.address,
             //     0
             //     ))
-          /*
             .then(async () => {
                 console.log("... Adding TwoKeyAcquisitionCampaign bytecodes to be valid in the TwoKeyValidator contract");
                 await new Promise(async (resolve, reject) => {
@@ -87,7 +86,6 @@ module.exports = function deploy(deployer) {
                     }
                 });
             })
-            */
             .then(() => true);
     }
 }
