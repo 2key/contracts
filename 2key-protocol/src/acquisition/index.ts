@@ -88,6 +88,12 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     async _getCampaignInstance(campaign: any, skipCache?: boolean): Promise<any> {
         const address = campaign.address || campaign;
         this.base._log('Requesting TwoKeyAcquisitionCampaignERC20 at', address);
+        if (campaign.address) {
+            return campaign;
+        } else {
+            return (await this.helpers._createAndValidate(acquisitionContracts.TwoKeyAcquisitionCampaignERC20.abi, campaign));
+        }
+        /*
         if (skipCache) {
             const campaignInstance = await this.helpers._createAndValidate(acquisitionContracts.TwoKeyAcquisitionCampaignERC20.abi, campaign);
             return campaignInstance;
@@ -120,9 +126,14 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         this.AcquisitionLogicHandler = AcquisitionLogicHandler;
         this.AcquisitionLogicHandler.acquisitionAddress = this.AcquisitionCampaign.address;
         return this.AcquisitionCampaign;
+        */
     }
 
     async _getConversionHandlerInstance(campaign: any): Promise<any> {
+        const acquisitionInstance = await this._getCampaignInstance(campaign);
+        const conversionHandlerAddress = await promisify(acquisitionInstance.conversionHandler, []);
+        return this.base.web3.eth.contract(acquisitionContracts.TwoKeyConversionHandler.abi).at(conversionHandlerAddress);
+        /*
         const address = campaign.address || campaign;
         if (this.AcquisitionConversionHandler && this.AcquisitionConversionHandler.acquisitionAddress === address) {
             return this.AcquisitionConversionHandler;
@@ -130,9 +141,14 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         await this._getCampaignInstance(campaign);
         // this.base._log('Return ConversionHandler', this.AcquisitionConversionHandler);
         return this.AcquisitionConversionHandler;
+        */
     }
 
     async _getLogicHandlerInstance(campaign: any): Promise<any> {
+        const acquisitionInstance = await this._getCampaignInstance(campaign);
+        const logicHandlerAddress = await promisify(acquisitionInstance.twoKeyAcquisitionLogicHandler, []);
+        return this.base.web3.eth.contract(acquisitionContracts.TwoKeyAcquisitionLogicHandler.abi).at(logicHandlerAddress);
+        /*
         const address = campaign.address || campaign;
         if (this.AcquisitionLogicHandler && this.AcquisitionLogicHandler.acquisitionAddress === address) {
             return this.AcquisitionLogicHandler;
@@ -140,6 +156,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         await this._getCampaignInstance(campaign);
         // this.base._log('Return LogicHandler', this.AcquisitionLogicHandler);
         return this.AcquisitionLogicHandler;
+        */
     }
 
 
