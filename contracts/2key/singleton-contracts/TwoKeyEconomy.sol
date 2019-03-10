@@ -39,7 +39,7 @@ contract TwoKeyEconomy is StandardTokenModified {
         balances[_twoKeyAdmin] = totalSupply_.mul(35).div(100);
     }
 
-    function changeAdmin(address _newAdmin) public onlyTwoKeyAdmin { //TODO Nikola this is probably no longer required since we have the proxy address maintaining the singleton address changes
+    function changeAdmin(address _newAdmin) public onlyTwoKeyAdmin {
         require(_newAdmin != address(0));
         twoKeyAdmin = _newAdmin;
     }
