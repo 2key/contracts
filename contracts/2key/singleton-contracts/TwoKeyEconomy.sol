@@ -12,16 +12,17 @@ contract TwoKeyEconomy is StandardTokenModified {
     address public twoKeyAdmin;
     address public twoKeySingletonRegistry;
 
-    modifier onlyTwoKeyAdmin { //TODO: Nikola why not use only the twoKeySingletoneRegistry to get all required singletons like the admin?
+    modifier onlyTwoKeyAdmin {
         require(msg.sender == twoKeyAdmin);
-        require(address(twoKeyAdmin) != 0);
         _;
     }
 
     constructor (address _twoKeyAdmin, address _twoKeySingletonRegistry) public {
         require(_twoKeyAdmin != address(0));
-        twoKeyAdmin = _twoKeyAdmin;
         twoKeySingletonRegistry = _twoKeySingletonRegistry;
+
+        twoKeyAdmin = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonRegistry).
+        getContractProxyAddress("TwoKeyAdmin");
 
         address twoKeyUpgradableExchange = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonRegistry).
             getContractProxyAddress("TwoKeyUpgradableExchange");
