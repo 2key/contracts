@@ -153,32 +153,6 @@ module.exports = function deploy(deployer) {
             .then(() => TwoKeyLongTermTokenPool.deployed())
             .then(() => deployer.deploy(TwoKeySingletonesRegistry, [], '0x0')) //adding empty admin address
             .then(() => TwoKeySingletonesRegistry.deployed().then(async (registry) => {
-
-                /**
-                 * Here we will add congress contract to the registry
-                 */
-                await new Promise(async (resolve,reject) => {
-                    try {
-                        console.log('Adding non-upgradable contracts to the registry');
-                        console.log('Adding TwoKeyCongress to the registry as non-upgradable contract');
-                        let txHash = await registry.addNonUpgradableContractToAddress('TwoKeyCongress', TwoKeyCongress.address);
-                        resolve(txHash);
-                    } catch (e) {
-                        reject(e);
-                    }
-                });
-                /**
-                 * Here we will add economy contract to the registry
-                 */
-                await new Promise(async (resolve,reject) => {
-                    try {
-                        console.log('Adding TwoKeyEconomy to the registry as non-upgradable contract');
-                        let txHash = await registry.addNonUpgradableContractToAddress('TwoKeyEconomy', TwoKeyEconomy.address);
-                        resolve(txHash);
-                    } catch (e) {
-                        reject(e);
-                    }
-                });
                 /**
                  * Here we will be adding all contracts to the Registry and create a Proxies for them
                  */
@@ -466,6 +440,33 @@ module.exports = function deploy(deployer) {
             .then(() => deployer.deploy(TwoKeyEconomy,proxyAddressTwoKeyAdmin, TwoKeySingletonesRegistry.address))
             .then(() => TwoKeyEconomy.deployed())
             .then(async () => {
+
+                // /**
+                //  * Here we will add congress contract to the registry
+                //  */
+                // await new Promise(async (resolve,reject) => {
+                //     try {
+                //         console.log('Adding non-upgradable contracts to the registry');
+                //         console.log('Adding TwoKeyCongress to the registry as non-upgradable contract');
+                //         let txHash = await registry.addNonUpgradableContractToAddress('TwoKeyCongress', TwoKeyCongress.address);
+                //         resolve(txHash);
+                //     } catch (e) {
+                //         reject(e);
+                //     }
+                // });
+                // /**
+                //  * Here we will add economy contract to the registry
+                //  */
+                // await new Promise(async (resolve,reject) => {
+                //     try {
+                //         console.log('Adding TwoKeyEconomy to the registry as non-upgradable contract');
+                //         let txHash = await registry.addNonUpgradableContractToAddress('TwoKeyEconomy', TwoKeyEconomy.address);
+                //         resolve(txHash);
+                //     } catch (e) {
+                //         reject(e);
+                //     }
+                // });
+
                 await new Promise(async (resolve, reject) => {
                     console.log('... Setting Initial params in all singletone proxy contracts');
                     try {

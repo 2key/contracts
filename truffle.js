@@ -186,7 +186,7 @@ module.exports = {
     'plasma-local': {
       provider: () => new HDWalletProvider(mnemonic, 'http://localhost:18545'),
       network_id: 8087,
-      gas: 7000000,
+      gas: 8000000,
       gasPrice: 0
     },
 

@@ -4,7 +4,7 @@ import "../../openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 
 
-contract TwoKeyEconomy is StandardTokenModified, Ownable {
+contract TwoKeyEconomy is StandardTokenModified {
     string public name = 'TwoKeyEconomy';
     string public symbol= '2KEY';
     uint8 public decimals= 18;
@@ -18,7 +18,7 @@ contract TwoKeyEconomy is StandardTokenModified, Ownable {
         _;
     }
 
-    constructor (address _twoKeyAdmin, address _twoKeySingletonRegistry) Ownable() public {
+    constructor (address _twoKeyAdmin, address _twoKeySingletonRegistry) public {
         require(_twoKeyAdmin != address(0));
         twoKeyAdmin = _twoKeyAdmin;
         twoKeySingletonRegistry = _twoKeySingletonRegistry;
