@@ -241,8 +241,8 @@ contract TwoKeyPlasmaEvents is Upgradeable {
         visited_from[campaignAddress][contractor][last_address] = referrer;
         visits_list[campaignAddress][contractor][referrer].push(last_address);
 
-        if(campaignToReferrerToCounted[campaignAddress][last_address] == false) {
-            campaignToReferrerToCounted[campaignAddress][last_address] == true;
+        if(campaignToReferrerToCounted[campaignAddress][referrer] == false && referrer != contractor) {
+            campaignToReferrerToCounted[campaignAddress][referrer] == true;
             campaign2numberOfForwarders[campaignAddress] ++;
         }
     }
