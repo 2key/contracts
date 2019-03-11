@@ -8,7 +8,7 @@ contract TwoKeyPlasmaEvents is Upgradeable {
     bool initialized = false;
     mapping(address => uint) public campaign2numberOfVisits;
     mapping(address => uint) public campaign2numberOfJoins;
-    //if 0 means he is not counted as forwarder otherwise he is counted
+
     mapping(address => mapping(address => bool)) campaignToReferrerToCounted;
     mapping(address => uint) public campaign2numberOfForwarders;
 
@@ -241,8 +241,8 @@ contract TwoKeyPlasmaEvents is Upgradeable {
         visited_from[campaignAddress][contractor][last_address] = referrer;
         visits_list[campaignAddress][contractor][referrer].push(last_address);
 
-        if(campaignToReferrerToCounted[campaignAddress][referrer] == false) {
-            campaignToReferrerToCounted[campaignAddress][referrer] == true;
+        if(campaignToReferrerToCounted[campaignAddress][last_address] == false) {
+            campaignToReferrerToCounted[campaignAddress][last_address] == true;
             campaign2numberOfForwarders[campaignAddress] ++;
         }
     }
