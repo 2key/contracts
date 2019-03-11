@@ -87,7 +87,7 @@ module.exports = function deploy(deployer) {
             '0x52e87d01b1c610424951281ebd1b00a3bcf3b681',
             '0x5be04cc75b52c6ae5bb4858d58fd57dd15f354e3'
         ];
-    } else if ((deployer.network.startsWith('private.test') || deployer.network.startsWith('azure')) && !deployer.network.endsWith('k8s-hdwallet')) {
+    } else if ((deployer.network.startsWith('private.test') || deployer.network.startsWith('plasma-azure')) && !deployer.network.endsWith('k8s-hdwallet')) {
         /**
          * Network configuration for plasma
          */
