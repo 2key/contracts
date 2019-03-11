@@ -16,6 +16,9 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
     mapping (string => mapping(string => address)) internal versions;
     mapping (string => address) contractToProxy;
     mapping (string => string) contractNameToLatestVersionName;
+    mapping (string => address) nonUpgradableContractToAddress;
+
+    address[] allVerified2keyContracts;
 
     /**
      * @notice Calling super constructor from maintaining pattern
@@ -26,6 +29,16 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
         for(uint i=0; i<_maintainers.length; i++) {
             isMaintainer[_maintainers[i]] = true;
         }
+    }
+
+    /**
+     * @notice Function to add non upgradable contract in registry of all contracts
+     * @param contractName is the name of the contract
+     * @param contractAddress is the contract address
+     * @dev only maintainer can issue call to this method
+     */
+    function addNonUpgradableContractToAddress(string contractName, address contractAddress) public onlyMaintainer {
+        nonUpgradableContractToAddress[contractName] = contractAddress;
     }
 
     /**
@@ -58,6 +71,11 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
         return contractNameToLatestVersionName[contractName];
     }
 
+
+    function getNonUpgradableContractAddress(string contractName) public view returns (address) {
+        return nonUpgradableContractToAddress[contractName];
+    }
+
     /**
      * @notice Function to return address of proxy for specific contract
      * @param _contractName is the name of the contract we'd like to get proxy address
@@ -78,5 +96,13 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
         contractToProxy[contractName] = proxy;
         emit ProxyCreated(proxy);
         return proxy;
+    }
+
+    /**
+     * @notice Function to return all 2key running contract addresses
+     * @return array with all contract addresses
+     */
+    function getAll2keyContracts() public view returns (address[]) {
+        return allVerified2keyContracts;
     }
 }

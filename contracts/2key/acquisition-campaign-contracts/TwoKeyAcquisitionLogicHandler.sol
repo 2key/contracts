@@ -6,6 +6,7 @@ import "../interfaces/ITwoKeyReg.sol";
 import "../interfaces/ITwoKeyAcquisitionARC.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyConversionHandlerGetConverterState.sol";
+import "../interfaces/ITwoKeyEventSource.sol";
 import "../libraries/SafeMath.sol";
 
 /**
@@ -18,6 +19,7 @@ contract TwoKeyAcquisitionLogicHandler {
 
     address public twoKeySingletoneRegistry;
     address public twoKeyAcquisitionCampaign;
+    address twoKeyEventSource;
 
     address contractor;
     address moderator;
@@ -85,8 +87,11 @@ contract TwoKeyAcquisitionLogicHandler {
         require(twoKeyAcquisitionCampaign == address(0)); // Means it can be set only once
         twoKeyAcquisitionCampaign = _acquisitionCampaignAddress;
         twoKeySingletoneRegistry = _twoKeySingletoneRegistry;
+        twoKeyEventSource = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry)
+            .getContractProxyAddress("TwoKeyEventSource");
         ownerPlasma = plasmaOf(contractor);
     }
+
 
     /**
      * @notice internal function to validate the request is proper
@@ -252,8 +257,27 @@ contract TwoKeyAcquisitionLogicHandler {
             if(referrerBalance > 0) {
                 isReferrer = true;
             }
+            if(ITwoKeyEventSource(twoKeyEventSource).isAddressMaintainer(msg.sender) ||
+                contractor == msg.sender) {
+                return abi.encodePacked(
+                    amountConverterSpent,
+                    referrerBalance,
+                    unitsConverterBought,
+                    isConverter,
+                    isReferrer,
+                    state
+                );
+            } else {
+                return abi.encodePacked(
+                    0,
+                    0,
+                    0,
+                    isConverter,
+                    isReferrer,
+                    state
+                );
+            }
 
-            return abi.encodePacked(amountConverterSpent,referrerBalance, unitsConverterBought, isConverter, isReferrer, state);
         }
     }
 

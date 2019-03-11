@@ -4,6 +4,7 @@ import {promisify} from '../utils/promisify'
 
 
 export default class TwoKeyCongress implements ITwoKeyCongress {
+
     private readonly base: ITwoKeyBase;
     private readonly helpers: ITwoKeyHelpers;
     private readonly utils: ITwoKeyUtils;
@@ -203,9 +204,9 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
 
                 let member: IMemberInfo = {
                     memberAddress: address,
-                    memberName: name,
-                    memberVotingPower: votingPower,
-                    memberSince: memberSince
+                    memberName: this.base.web3.toUtf8(name), //TODO: Convert name to utf8
+                    memberVotingPower: votingPower.toNumber(),
+                    memberSince: new Date(memberSince.toNumber())
                 };
                 resolve(member);
             } catch(e) {
@@ -281,7 +282,4 @@ export default class TwoKeyCongress implements ITwoKeyCongress {
             }
         })
     }
-
-
-
 }

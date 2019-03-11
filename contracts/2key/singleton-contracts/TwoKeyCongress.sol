@@ -20,10 +20,12 @@ contract TwoKeyCongress {
     Proposal[] public proposals;
     //Number of proposals
     uint public numProposals;
+
+    mapping (address => bool) public isMemberInCongress;
     // Mapping address to memberId
-    mapping (address => uint) public memberId;
-    // Array of members
-    Member[] public members;
+    mapping(address => Member) public address2Member;
+    // Mapping to store all members addresses
+    address[] public allMembers;
     // Array of allowed methods
     bytes32[] allowedMethodSignatures;
 
@@ -52,7 +54,7 @@ contract TwoKeyCongress {
 
     struct Member {
         address memberAddress;
-        string name;
+        bytes32 name;
         uint votingPower;
         uint memberSince;
     }
@@ -65,7 +67,7 @@ contract TwoKeyCongress {
 
     // Modifier that allows only shareholders to vote and create new proposals
     modifier onlyMembers {
-        require(memberId[msg.sender] != 0);
+        require(isMemberInCongress[msg.sender] == true);
         _;
     }
 
@@ -88,14 +90,11 @@ contract TwoKeyCongress {
      * @param votingPowers is the array of unassigned integers containing voting powers respectively
      * @dev initialMembers.length must be equal votingPowers.length
      */
-    constructor(uint256 _minutesForDebate, address[] initialMembers, uint[] votingPowers) payable public {
+    constructor(uint256 _minutesForDebate, address[] initialMembers, bytes32[] initialMemberNames, uint[] votingPowers) payable public {
         changeVotingRules(0, _minutesForDebate);
-        addMember(0,'',0);
         for(uint i=0; i<initialMembers.length; i++) {
-            addMember(initialMembers[i], 'NAME', votingPowers[i]);
+            addMember(initialMembers[i], initialMemberNames[i], votingPowers[i]);
         }
-//        addMember(initialMembers[0], 'Eitan', votingPowers[0]);
-//        addMember(initialMembers[1], 'Kiki', votingPowers[1]);
         initialized = true;
         addInitialWhitelistedMethods();
     }
@@ -103,7 +102,6 @@ contract TwoKeyCongress {
 
     /// @notice Function to add initial whitelisted methods during the deployment
     /// @dev Function is internal, it can't be called outside of the contract
-    
     function addInitialWhitelistedMethods() internal {
         hashAllowedMethods("transferByAdmins(address,uint256)");
         hashAllowedMethods("transferEtherByAdmins(address,uint256)");
@@ -153,13 +151,28 @@ contract TwoKeyCongress {
     /// @param _newMemberAddress is the new address we'd like to set for us
     function replaceMemberAddress(address _newMemberAddress) public {
         require(_newMemberAddress != address(0));
-        uint id = memberId[msg.sender];
-        require(id != 0); //requiring that member already exists
-        memberId[msg.sender] = 0;
-        memberId[_newMemberAddress] = id;
-        Member memory _currentMember = members[id];
-        _currentMember.memberAddress = _newMemberAddress;
-        members[id] = _currentMember;
+        // Update is member in congress state
+        isMemberInCongress[_newMemberAddress] = true;
+        isMemberInCongress[msg.sender] = false;
+
+        //Update array containing all members addresses
+        for(uint i=0; i<allMembers.length; i++) {
+            if(allMembers[i] == msg.sender) {
+                allMembers[i] = _newMemberAddress;
+            }
+        }
+
+        //Update member object
+        Member memory m = address2Member[msg.sender];
+        address2Member[_newMemberAddress] = m;
+        address2Member[msg.sender] = Member(
+            {
+            memberAddress: address(0),
+            memberSince: block.timestamp,
+            votingPower: 0,
+            name: "0x0"
+            }
+        );
     }
 
     /**
@@ -170,18 +183,22 @@ contract TwoKeyCongress {
      * @param targetMember ethereum address to be added
      * @param memberName public name for that member
      */
-    function addMember(address targetMember, string memberName, uint _votingPower) public {
+    function addMember(address targetMember, bytes32 memberName, uint _votingPower) public {
         if(initialized == true) {
             require(msg.sender == address(this));
         }
-        uint id = memberId[targetMember];
-        if (id == 0) {
-            memberId[targetMember] = members.length;
-            id = members.length++;
-        }
-        minimumQuorum = members.length - 1; //TODO: check this lione
+        minimumQuorum = allMembers.length;
         maxVotingPower += _votingPower;
-        members[id] = Member({memberAddress: targetMember, memberSince: block.timestamp, votingPower: _votingPower, name: memberName});
+        address2Member[targetMember] = Member(
+            {
+                memberAddress: targetMember,
+                memberSince: block.timestamp,
+                votingPower: _votingPower,
+                name: memberName
+            }
+        );
+        allMembers.push(targetMember);
+        isMemberInCongress[targetMember] = true;
         emit MembershipChanged(targetMember, true);
     }
 
@@ -194,18 +211,42 @@ contract TwoKeyCongress {
      */
     function removeMember(address targetMember) public {
         require(msg.sender == address(this));
-        require(memberId[targetMember] != 0);
+        require(isMemberInCongress[targetMember] == true);
 
+        //Remove member voting power from max voting power
         uint votingPower = getMemberVotingPower(targetMember);
         maxVotingPower-= votingPower;
 
-        for (uint i = memberId[targetMember]; i<members.length-1; i++){
-            members[i] = members[i+1];
+        uint i=0;
+        //Find selected member
+        while(allMembers[i] != targetMember) {
+            if(i == allMembers.length) {
+                revert();
+            }
+            i++;
         }
-        delete members[members.length-1];
+        //After member is found, remove his address from all members
+        for (uint j = i; j< allMembers.length; j++){
+            allMembers[j] = allMembers[j+1];
+        }
+        //After reduce array size
+        delete allMembers[allMembers.length-1];
+        allMembers.length--;
+
+        //Remove him from state mapping
+        isMemberInCongress[targetMember] = false;
+
+        //Remove his state to empty member
+        address2Member[targetMember] = Member(
+            {
+                memberAddress: address(0),
+                memberSince: block.timestamp,
+                votingPower: 0,
+                name: "0x0"
+            }
+        );
+        //Reduce 1 member from quorum
         minimumQuorum -= 1;
-        memberId[targetMember] = 0;
-        members.length--;
     }
 
     /**
@@ -357,9 +398,8 @@ contract TwoKeyCongress {
     }
 
     /// Basic getter function
-    function getMemberInfo() public view returns (address, string, uint, uint) {
-        uint _id = memberId[msg.sender];
-        Member memory member = members[_id];
+    function getMemberInfo() public view returns (address, bytes32, uint, uint) {
+        Member memory member = address2Member[msg.sender];
         return (member.memberAddress, member.name, member.votingPower, member.memberSince);
     }
 
@@ -397,25 +437,14 @@ contract TwoKeyCongress {
     /// @param _memberAddress is the address of the member
     /// @return integer representing voting power
     function getMemberVotingPower(address _memberAddress) public view returns (uint) {
-        uint _memberId = memberId[_memberAddress];
-        Member memory _member = members[_memberId];
+        Member memory _member = address2Member[msg.sender];
         return _member.votingPower;
     }
-
-    /// @notice Function getter for member id
-    /// @return uint representation of memberId
-    function getMemberId() public view returns (uint) {
-        return memberId[msg.sender];
-    }
-
 
     /// @notice to check if an address is member
     /// @param _member is the address we're checking for
     function checkIsMember(address _member) public view returns (bool) {
-        if(memberId[_member] == 0) {
-            return false;
-        }
-        return true;
+        return isMemberInCongress[_member];
     }
 
     /// @notice Fallback function
@@ -432,7 +461,7 @@ contract TwoKeyCongress {
     /// @notice Getter for length for how many members are currently
     /// @return length of members
     function getMembersLength() public view returns (uint) {
-        return members.length;
+        return allMembers.length;
     }
 
     /// @notice Function / Getter for hashes of allowed methods
@@ -447,7 +476,6 @@ contract TwoKeyCongress {
         return methodHashToMethodName[_methodHash];
     }
 
-
     /// @notice Function to get major proposal data
     /// @param proposalId is the id of proposal
     /// @return tuple containing all the data for proposal
@@ -456,18 +484,11 @@ contract TwoKeyCongress {
         return (p.amount, p.description, p.minExecutionDate, p.executed, p.numberOfVotes, p.currentResult, p.transactionBytecode);
     }
 
-
     /// @notice Function to get addresses of all members in congress
     /// @return array of addresses
     function getAllMemberAddresses() public view returns (address[]) {
-        uint length = getMembersLength();
-        address[] memory membersAddresses = new address[](length-1);
-
-        for(uint i=1; i<length; i++) {
-            Member memory m = members[i];
-            membersAddresses[i-1] = m.memberAddress;
-        }
-        return membersAddresses;
+        return allMembers;
     }
+
 }
 

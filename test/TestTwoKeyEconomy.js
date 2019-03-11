@@ -1,143 +1,47 @@
-
-const TwoKeyAdmin = artifacts.require("TwoKeyAdmin");
 const TwoKeyEconomy = artifacts.require("TwoKeyEconomy");
-const TwoKeyExchange = artifacts.require("TwoKeyUpgradableExchange");
+
+contract("TestTwoKeyEconomy", async (accounts) => {
 
 
-const BigNumber = web3.BigNumber;
+    let randomActorAddress1 = '0xb3FA520368f2Df7BED4dF5185101f303f6c7decc';
+    let randomActorAddress2 = '0xbEde520368f2Df7BED4dF5185101f303f6c7d4cc';
 
-   contract('TestTwoKeyEconomy', async (accounts) => {
+    let deployerAdrress = '0xb3FA520368f2Df7BED4dF5185101f303f6c7decc';
+    
+    let economyContract;
+    const tokenName = 'TwoKeyEconomy';
+    const symbol = '2KEY';
+    const decimals = 18;
+    const totalSupply = 1000000000000000000000000000;
 
-        let adminContract;
-        let exchangeContarct;
-        let deployerAdrress = '0xb3FA520368f2Df7BED4dF5185101f303f6c7decc';
-        const null_address = '0x0000000000000000000000000000000000000000';   
-        const tokenName = 'TwoKeyEconomy';
-        const  symbol = '2Key';
-        const  decimals = 18;
-        const totalSupply = 1000000000000000000000000;
+    
 
-        before(async() => {
-              adminContract = await TwoKeyAdmin.new(deployerAdrress); 
-        });
+    it("Test: Admin and SingletonRegistry contract addresses should be properly set", async () => {
+        console.log('CAO');
 
-        /// TwokeyAdmin should be assigned as Admin Role for TwoKeyEconomy
-        it('Case 1 : TwokeyAdmin should be assigned as Admin Role for TwoKeyEconomy', async () => {
-              let economy = await TwoKeyEconomy.new(adminContract.address);
-              let isAdmin = await economy.hasRole(adminContract.address, "admin");
-              assert.equal(isAdmin, true, "should be the admin");
-        });
+        economyContract = await TwoKeyEconomy.new(randomActorAddress1, randomActorAddress2);
+        //Validate admin address
+        let admin = await economyContract.twoKeyAdmin();
+        assert.equal(randomActorAddress1, admin, 'admin address is not properly set');
 
-        /// Any accont holder other than the TwokeyAdmin should not be assigned as Admin Role for TwoKeyEconomy
-        it('Case 2 : Any accont holder other than the TwokeyAdmin should not be assigned as Admin Role for TwoKeyEconomy ', async () => {
-              let economy = await TwoKeyEconomy.new(adminContract.address);
-              let isAdmin = await economy.hasRole(accounts[0], "admin");
-              assert.notEqual(isAdmin, true, "should not be the admin");
-        });
+        //Validate singleton registry address
+        let singletonReg = await economyContract.twoKeySingletonRegistry();
+        assert.equal(randomActorAddress2, singletonReg, 'singleton registry address is not properly set');
+    });
 
-        /// TwoKeyAdmin account should be assigned Initial Balance
-        it('Case 3 : TwoKeyAdmin account should be assigned Initial Balance', async () => {
-              let economy = await TwoKeyEconomy.new(adminContract.address);
-              const notExpected =  0; 
-              let initialBalance = await economy.balanceOf(adminContract.address);
-              assert.notEqual(initialBalance, notExpected, 'Two Key Admin  should have '+ initialBalance+   ' Coins initially ' );
-        });
+    it('Test: Token name and token symbol should be properly set', async () => {
+        let name = await TwoKeyEconomy.name();
+        assert.equal(name, tokenName, 'token name is not properly assigned');
 
-        /// Deployer account should not be assigned Initial Balance
-        it('Case 4 : Deployer account should not be assigned Initial Balance', async () => {
-              let economy = await TwoKeyEconomy.new(adminContract.address);
-              const expected =  0; 
-              let initialBalance = await economy.balanceOf(accounts[0]);
-              assert.equal(initialBalance, expected, 'Deployer account should have '+ 0 +   ' Coins initially ' );
-        });
+        let sym = await TwoKeyEconomy.symbol();
+        assert.equal(sym, symbol, 'token symbol is not properly set');
+    })
 
-        /// TwoKeyAdmin account initial balance positive testCase
-        it('Case 5 : TwoKeyAdmin account initial balance positive testCase', async () => {
-              let economy = await TwoKeyEconomy.new(adminContract.address);
-                
-              let expected =  await economy.totalSupply();
-              let expected_string = JSON.stringify(expected);
-                
-              let initialBalance = await economy.balanceOf(adminContract.address);
-              let initialBalance_string = JSON.stringify(initialBalance);
-                
-              assert.equal(expected_string, initialBalance_string, 'TwoKeyAdmin should have '+ expected+   ' Coins initially');
-        });
+    it('Test: Token decimals should be properly set', async () => {
+        let dec = await TwoKeyEconomy.decimals();
+        assert.equal(dec, decimals, 'token decimals should be properly set');
+    })
 
-        /// TwoKeyAdmin account initial balance negative testCase
-        it('Case 6 : TwoKeyAdmin account initial balance negative testCase', async () => {
-              let economy = await TwoKeyEconomy.new(adminContract.address);
-              const expected =  await economy.totalSupply();
-              const not_expected = expected / 10;
 
-              let initialBalance = await economy.balanceOf(adminContract.address);
-              assert.notEqual(initialBalance, not_expected, 'TwoKeyAdmin should have '+ expected + '  Coins initially');
-        });
-
-        /// totalSupply positive test case
-        it('Case 7 : totalSupply positive test case', async () => {
-              let economy = await TwoKeyEconomy.new(adminContract.address);
-                
-              const expected = totalSupply;
-              let _totalSupply = await economy.totalSupply();
-              
-              assert.equal (_totalSupply, expected, 'Owner should have '+ expected+  ' Total Supply');
-        });
-
-        /// token name positive test case
-        it('Case 8 : token name positive test case', async () => {
-              let economy = await TwoKeyEconomy.new(adminContract.address);
-              const expected =  tokenName;
-
-              let name = await economy.getTokenName();
-              assert.equal(name, expected, 'Owner should have '+ expected + ' Token name');
-        });  
-
-        /// token name negative test case
-        it('Case 9 : token name negative test case', async () => {
-              let economy = await TwoKeyEconomy.new(adminContract.address);
-              const notExpected =  "xxxx";
-
-              let name = await economy.getTokenName();
-              assert.notEqual(name, notExpected, 'Owner should not have '+ notExpected+ ' as token name');
-        });  
-
-        /// symbol positive test case
-        it('Case 10 : symbol positive test case', async () => {
-              let economy = await TwoKeyEconomy.new(adminContract.address);
-              const expected = symbol;
-
-              let symbol_val = await economy.getTokenSymbol();
-
-              assert.equal(symbol_val, expected, 'Owner should have '+ expected+ ' as Token symbol');
-        });  
-
-        /// symbol negative test case
-        it('Case 11 : symbol negative test case', async () => {
-              let economy = await TwoKeyEconomy.new(adminContract.address);
-              const notExpected =  "xxxx";
-
-              let symbol = await economy.getTokenSymbol();
-              assert.notEqual(symbol, notExpected, 'Owner should not have '+ notExpected + 'as Token symbol');
-        });  
-
-        /// decimals positive test case
-        it('Case 12 : decimals positive test case', async () => {
-              let economy = await TwoKeyEconomy.new(adminContract.address);
-              const expected = decimals;
-
-              let decimal = await economy.getTokenDecimals();
-
-              assert.equal(decimal, expected, 'Owner should have '+ expected+   'Token decimals');
-        });  
-
-        /// decimals negative test case
-        it('Case 13 : decimals negative test case', async () => {
-              let economy = await TwoKeyEconomy.new(adminContract.address);
-              const notExpected =  10;
-
-              let totalSupply = await economy.totalSupply();
-              assert.notEqual(totalSupply, notExpected, 'Owner should not have '+ notExpected + ' Total Supply');
-        });         
 });
 

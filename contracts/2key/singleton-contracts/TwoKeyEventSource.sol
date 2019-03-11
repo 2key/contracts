@@ -155,26 +155,6 @@ contract TwoKeyEventSource is Upgradeable, MaintainingPattern, TwoKeyTypes {
     }
 
     /**
-     * @notice Function which will emit updated public meta hash event
-     * @param timestamp is the moment of execution
-     * @param value is the new value of public meta hash (in this case it's ipfs hash bytes32)
-     */
-    function updatedPublicMetaHash(uint timestamp, string value) external onlyAllowedContracts {
-        emit UpdatedPublicMetaHash(timestamp, value);
-    }
-
-    /**
-     * @notice Function which will emit updated data event
-     * @param timestamp is the moment of execution
-     * @param value is the new value
-     * @param action is the string describing action what was updated exactly
-     */
-    function updatedData(uint timestamp, uint value, string action) external onlyAllowedContracts {
-        emit UpdatedData(timestamp, value, action);
-    }
-
-
-    /**
      * @notice Function to determine plasma address of ethereum address
      * @param me is the address (ethereum) of the user
      * @return an address
