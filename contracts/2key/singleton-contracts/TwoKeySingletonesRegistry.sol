@@ -71,6 +71,11 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
         return contractNameToLatestVersionName[contractName];
     }
 
+
+    function getNonUpgradableContractAddress(string contractName) public view returns (address) {
+        return nonUpgradableContractToAddress[contractName];
+    }
+
     /**
      * @notice Function to return address of proxy for specific contract
      * @param _contractName is the name of the contract we'd like to get proxy address

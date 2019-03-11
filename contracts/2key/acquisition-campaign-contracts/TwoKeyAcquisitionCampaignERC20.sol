@@ -250,7 +250,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
             referrerPlasma2Balances2key[influencers[i]] = referrerPlasma2Balances2key[influencers[i]].add(b);
             referrerPlasma2TotalEarnings2key[influencers[i]] = referrerPlasma2TotalEarnings2key[influencers[i]].add(b);
             referrerPlasmaAddressToCounterOfConversions[influencers[i]]++;
-            totalBounty = totalBounty.add(b);
             totalBounty2keys = totalBounty2keys.sub(b);
         }
     }
@@ -318,7 +317,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
      * @param last_influencer is the last influencer
      * @return array of integers containing cuts respectively
      */
-    function getReferrerCuts(address last_influencer) internal view returns (uint256[]) {
+    function getReferrerCuts(address last_influencer) public view returns (uint256[]) {
         address[] memory influencers = ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).getReferrers(last_influencer,address(this));
         uint256[] memory cuts = new uint256[](influencers.length + 1);
         for (uint i = 0; i < influencers.length; i++) {

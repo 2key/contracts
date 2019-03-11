@@ -26,7 +26,6 @@ contract TwoKeyCampaign is ArcERC20 {
     address public moderator; //moderator address
 	address public ownerPlasma; //contractor plasma address
 
-	uint256 totalBounty; //Total bounty distributed to referrers ever
 	uint256 contractorBalance; // Contractor balance
     uint256 contractorTotalProceeds; // Contractor total earnings
 	uint256 maxReferralRewardPercent; // maxReferralRewardPercent is actually bonus percentage in ETH
@@ -161,7 +160,6 @@ contract TwoKeyCampaign is ArcERC20 {
      */
 	function updateMaxReferralRewardPercent(uint value) public onlyContractor {
 		maxReferralRewardPercent = value;
-		twoKeyEventSource.updatedData(block.timestamp, value, "Updated maxReferralRewardPercent");
 	}
 
     /**
@@ -241,8 +239,10 @@ contract TwoKeyCampaign is ArcERC20 {
 		require(msg.sender == _address || twoKeyEventSource.isAddressMaintainer(msg.sender));
 		uint balance;
 		if(_address == moderator) {
-			//TODO: Handle returning money
-			address twoKeyDeepFreezeTokenPool = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyDeepFreezeTokenPool");
+			address twoKeyDeepFreezeTokenPool =
+				ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry)
+				.getContractProxyAddress("TwoKeyDeepFreezeTokenPool");
+
 			uint integratorFee = twoKeyEventSource.getTwoKeyDefaultIntegratorFeeFromAdmin();
 			balance = moderatorBalanceETHWei.mul(100-integratorFee).div(100);
 			uint networkFee = moderatorBalanceETHWei.mul(integratorFee).div(100);
@@ -252,9 +252,12 @@ contract TwoKeyCampaign is ArcERC20 {
 		} else {
 			address _referrer = twoKeyEventSource.plasmaOf(_address);
 			if(referrerPlasma2Balances2key[_referrer] != 0) {
+				address twoKeyEconomy =
+					ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry)
+					.getNonUpgradableContractAddress("TwoKeyEconomy");
 				balance = referrerPlasma2Balances2key[_referrer];
 				referrerPlasma2Balances2key[_referrer] = 0;
-				buyTokensFromUpgradableExchange(balance, _address);
+				IERC20(twoKeyEconomy).transfer(_address,balance);
 			} else {
 				revert();
 			}
