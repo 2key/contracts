@@ -28,7 +28,6 @@ module.exports = function deploy(deployer) {
     let isTwoKeyPlasmaEvents = false;
     let isTwoKeyUpgradableExchange = false;
 
-    console.log(process.argv)
     /**
      * Determining which contract we want to update
      */
