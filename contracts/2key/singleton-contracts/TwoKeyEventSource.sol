@@ -1,13 +1,12 @@
 pragma solidity ^0.4.24;
 
-import '../TwoKeyTypes.sol';
 import "../Upgradeable.sol";
 import "../MaintainingPattern.sol";
 import "../interfaces/ITwoKeyReg.sol";
 import "../interfaces/ITwoKeyAdmin.sol";
 import "../interfaces/ITwoKeyCampaignValidator.sol";
 
-contract TwoKeyEventSource is Upgradeable, MaintainingPattern, TwoKeyTypes {
+contract TwoKeyEventSource is Upgradeable, MaintainingPattern {
 
     /**
      * Address of TwoKeyRegistry contract
@@ -42,8 +41,7 @@ contract TwoKeyEventSource is Upgradeable, MaintainingPattern, TwoKeyTypes {
     event Cancelled(
         address indexed _campaign,
         address indexed _converter,
-        uint256 _indexOrAmount,
-        CampaignType _type
+        uint256 _indexOrAmount
     );
 
     event Rejected(
@@ -79,6 +77,7 @@ contract TwoKeyEventSource is Upgradeable, MaintainingPattern, TwoKeyTypes {
         require(msg.sender == twoKeyCampaignValidator);
         _;
     }
+
     /**
      * @notice Function to set initial params in the contract
      * @param _twoKeyAdmin is the address of twoKeyAdmin contract
@@ -148,10 +147,9 @@ contract TwoKeyEventSource is Upgradeable, MaintainingPattern, TwoKeyTypes {
      * @param _campaign is the address of the cancelled campaign
      * @param _converter is the address of the converter
      * @param _indexOrAmount is the amount of campaign
-     * @param _type is the campaign type
      */
-    function cancelled(address  _campaign, address _converter, uint256 _indexOrAmount, CampaignType _type) external onlyAllowedContracts{
-        emit Cancelled(_campaign, _converter, _indexOrAmount, _type);
+    function cancelled(address  _campaign, address _converter, uint256 _indexOrAmount) external onlyAllowedContracts {
+        emit Cancelled(_campaign, _converter, _indexOrAmount);
     }
 
     /**
