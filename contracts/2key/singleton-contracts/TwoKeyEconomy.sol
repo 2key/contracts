@@ -1,6 +1,5 @@
 pragma solidity ^0.4.24;
 import "./StandardTokenModified.sol";
-import "../../openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 
 
