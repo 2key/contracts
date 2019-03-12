@@ -22,7 +22,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
 
     address assetContractERC20; // Asset contract is address of ERC20 inventory
 
-    uint reservedAmountOfTokens = 0;
+    uint reservedAmountOfTokens;
 
     constructor(
         address _twoKeySingletonesRegistry,
@@ -80,7 +80,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
         // the value 255 is used to signal equal partition with other influencers
         // A sender can set the value only once in a contract
         address plasma = twoKeyEventSource.plasmaOf(me);
-        require(referrerPlasma2cut[plasma] == 0 || referrerPlasma2cut[plasma] == cut, 'cut already set differently');
+        require(referrerPlasma2cut[plasma] == 0 || referrerPlasma2cut[plasma] == cut);
         referrerPlasma2cut[plasma] = cut;
     }
 
@@ -149,7 +149,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
      * @return true if successful, otherwise transaction will revert
      */
     function addUnitsToInventory(uint256 _amount) public returns (bool) {
-        require(IERC20(assetContractERC20).transferFrom(msg.sender, address(this), _amount),'Failed adding units to inventory');
+        require(IERC20(assetContractERC20).transferFrom(msg.sender, address(this), _amount));
         return true;
     }
 
@@ -208,7 +208,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
         uint totalTokensForConverterUnits = baseTokensForConverterUnits + bonusTokensForConverterUnits;
 
         uint256 _total_units = getInventoryBalance();
-        require(_total_units - reservedAmountOfTokens >= totalTokensForConverterUnits, 'Inventory balance does not have enough funds');
+        require(_total_units - reservedAmountOfTokens >= totalTokensForConverterUnits);
 
         unitsConverterBought[converterAddress] = unitsConverterBought[converterAddress].add(totalTokensForConverterUnits);
         uint256 maxReferralRewardETHWei = 0;
