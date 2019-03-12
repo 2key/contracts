@@ -1755,7 +1755,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 let converterState = hexedValues.slice(66+64+64+2+2);
                 let obj : IAddressStats = {
                     amountConverterSpentETH: parseFloat(this.utils.fromWei(amountConverterSpent,'ether').toString()),
-                    rewards : parseFloat(this.utils.fromWei(rewards,'ether').toString()),
+                    referrerRewards : parseFloat(this.utils.fromWei(rewards,'ether').toString()),
                     tokensBought: parseFloat(this.utils.fromWei(unitsConverterBought, 'ether').toString()),
                     isConverter: isConverter,
                     isReferrer: isReferrer,

@@ -202,7 +202,7 @@ export interface IConversionStats {
 
 export interface IAddressStats {
     amountConverterSpentETH: number,
-    rewards: number,
+    referrerRewards: number,
     tokensBought: number,
     isConverter: boolean,
     isReferrer: boolean,
