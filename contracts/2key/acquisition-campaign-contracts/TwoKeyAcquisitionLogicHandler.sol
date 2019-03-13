@@ -31,7 +31,7 @@ contract TwoKeyAcquisitionLogicHandler {
 
     uint minContributionETHorFiatCurrency;
     uint maxContributionETHorFiatCurrency;
-    uint256 pricePerUnitInETHWeiOrUSD; // There's single price for the unit ERC20 (Should be in WEI)
+    uint pricePerUnitInETHWeiOrUSD; // There's single price for the unit ERC20 (Should be in WEI)
     uint unit_decimals; // ERC20 selling data
 
     string public publicMetaHash; // Ipfs hash of json campaign object
