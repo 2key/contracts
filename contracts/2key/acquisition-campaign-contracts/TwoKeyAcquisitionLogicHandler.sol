@@ -339,9 +339,6 @@ contract TwoKeyAcquisitionLogicHandler {
      */
     function plasmaOf(address me) public view returns (address) {
         address twoKeyRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyRegistry");
-        if (twoKeyRegistry == address(0)) {
-            me;
-        }
         address plasma = ITwoKeyReg(twoKeyRegistry).getEthereumToPlasma(me);
         if (plasma != address(0)) {
             return plasma;
@@ -356,9 +353,6 @@ contract TwoKeyAcquisitionLogicHandler {
      */
     function ethereumOf(address me) public view returns (address) {
         address twoKeyRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyRegistry");
-        if (twoKeyRegistry == address(0)) {
-            return me;
-        }
         address ethereum = ITwoKeyReg(twoKeyRegistry).getPlasmaToEthereum(me);
         if (ethereum != address(0)) {
             return ethereum;

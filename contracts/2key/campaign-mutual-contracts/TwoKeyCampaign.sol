@@ -37,7 +37,7 @@ contract TwoKeyCampaign is ArcERC20 {
 	mapping(address => uint256) internal referrerPlasma2Balances2key; // balance of EthWei for each influencer that he can withdraw
 	mapping(address => uint256) internal referrerPlasma2TotalEarnings2key; // Total earnings for referrers
 	mapping(address => uint256) internal referrerPlasmaAddressToCounterOfConversions; // [referrer][conversionId]
-	mapping(address => mapping(uint256 => uint256)) referrerPlasma2EarningsPerConversion;
+	mapping(address => mapping(uint256 => uint256)) internal referrerPlasma2EarningsPerConversion;
 
 	mapping(address => address) public public_link_key;
 	mapping(address => address) internal received_from; // referral graph, who did you receive the referral from
