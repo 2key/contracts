@@ -200,20 +200,26 @@ library Call {
                 idx++;
 
 
-                if (msg_len == 41)  // 1+20+20
+                if (msg_len == 41)  // 1+20+20 version 0
                 {
                     influencers[count_influencers] = loadAddress(sig, idx);
                     idx += 20;
-                } else if (msg_len == 86)  // 1+65+20
+                    keys[count_influencers] = loadAddress(sig, idx);
+                    idx += 20;
+                } else if (msg_len == 86)  // 1+65+20 version 1
                 {
+                    keys[count_influencers] = loadAddress(sig, idx+65);
                     influencers[count_influencers] = recoverHash(
-                        keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to weight")),keccak256(abi.encodePacked(weights[count_influencers])))),
-                            sig,idx);
+                        keccak256(
+                            abi.encodePacked(
+                                keccak256(abi.encodePacked("bytes binding to weight","bytes binding to public")),
+                                keccak256(abi.encodePacked(weights[count_influencers],keys[count_influencers]))
+                            )
+                        ),sig,idx);
                     idx += 65;
+                    idx += 20;
                 }
 
-                keys[count_influencers] = loadAddress(sig, idx);
-                idx += 20;
             } else {
                 // handle short signatures generated with free_take
                 influencers[count_influencers] = last_address;
