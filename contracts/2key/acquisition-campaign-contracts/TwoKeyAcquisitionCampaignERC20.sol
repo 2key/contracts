@@ -378,6 +378,16 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
         return (referrerPlasma2Balances2key[_referrer], referrerPlasma2TotalEarnings2key[_referrer], referrerPlasmaAddressToCounterOfConversions[_referrer], earnings);
     }
 
+
+    function getTotalReferrerEarnings(address _referrer, uint[] conversionIds) public view returns (uint) {
+        require(msg.sender == twoKeyAcquisitionLogicHandler);
+        uint sum = 0;
+        for(uint i=0; i<conversionIds.length; i++) {
+            sum += referrerPlasma2EarningsPerConversion[_referrer][conversionIds[i]];
+        }
+        return sum;
+    }
+
     /**
      * @notice Function to get statistic for the address
      * @param ethereum is the ethereum address we want to get stats for

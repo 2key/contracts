@@ -408,7 +408,7 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
      * @dev can only be called by converter itself or maintainer/contractor
      */
     function getConverterConversionIds(address _converter) external view returns (uint[]) {
-        require(msg.sender == contractor || ITwoKeyEventSource(twoKeyEventSource).isAddressMaintainer(msg.sender) || msg.sender == _converter);
+//        require(msg.sender == contractor || ITwoKeyEventSource(twoKeyEventSource).isAddressMaintainer(msg.sender) || msg.sender == _converter);
         return converterToHisConversions[_converter];
     }
 

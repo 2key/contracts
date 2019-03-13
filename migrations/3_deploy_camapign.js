@@ -29,6 +29,7 @@ module.exports = function deploy(deployer) {
             12345, 1012019, 180, 6, 180)
             .then(() => TwoKeyConversionHandler.deployed())
             .then(() => deployer.deploy(ERC20TokenMock))
+            .then(() => deployer.link(Call, TwoKeyAcquisitionLogicHandler))
             .then(() => deployer.link(Call, TwoKeyAcquisitionCampaignERC20))
             .then(() => deployer.deploy(TwoKeyAcquisitionLogicHandler,
                 12, 15, 1, 12345, 15345, 5, 'USD',

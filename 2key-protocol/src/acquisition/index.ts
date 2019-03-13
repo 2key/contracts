@@ -290,7 +290,13 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                             data.assetContractERC20,
                             data.moderator
                         ],
-                        progressCallback
+                        progressCallback,
+                        link: [
+                            {
+                                name: 'Call',
+                                address: this.base.twoKeyCall.address,
+                            },
+                        ]
                     });
                     const predeployReceipt = await this.utils.getTransactionReceiptMined(txHash, {
                         web3: this.base.web3,
@@ -1732,27 +1738,31 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @param {boolean} plasma
      * @returns {Promise<IAddressStats>}
      */
-    public getAddressStatistic(campaign: any, address: string, from: string, plasma: boolean = false) : Promise<IAddressStats>{
+    public getAddressStatistic(campaign: any, address: string, signature: string, from: string, plasma: boolean = false) : Promise<IAddressStats>{
         return new Promise<IAddressStats>(async(resolve,reject) => {
             try {
                 const twoKeyAcquisitionLogicHandlerInstance = await this._getLogicHandlerInstance(campaign);
 
                 let username, fullname, email;
-                let [hexedV, isJoined ,hexedValues, ethereumof] = await promisify(twoKeyAcquisitionLogicHandlerInstance.getSuperStatistics,[address, plasma,{from}]);
+                let hex= await promisify(twoKeyAcquisitionLogicHandlerInstance.getSuperStatistics,[address, plasma, signature,{from}]);
                 /**
                  *
                  * Unpack bytes for statistics
                  */
-                username = hexedV.slice(0,66);
-                fullname = hexedV.slice(66,66+64);
-                email = hexedV.slice(66+64,66+64+64);
+                username = hex.slice(0,66);
+                fullname = hex.slice(66,66+64);
+                email = hex.slice(66+64,66+64+64);
 
-                let amountConverterSpent = parseInt(hexedValues.slice(0, 66),16);
-                let rewards = parseInt(hexedValues.slice(66,66+64),16);
-                let unitsConverterBought = parseInt(hexedValues.slice(66+64,66+64+64),16);
-                let isConverter = parseInt(hexedValues.slice(66+64+64,66+64+64+2),16) == 1;
-                let isReferrer = parseInt(hexedValues.slice(66+64+64+2,66+64+64+2+2),16) == 1;
-                let converterState = hexedValues.slice(66+64+64+2+2);
+
+                let isJoined = parseInt(hex.slice(66+64+64,66+64+64+2),16) == 1;
+                let ethereumof = '0x' + hex.slice(66+64+64+2, 66+64+64+2+40);
+                let amountConverterSpent = parseInt(hex.slice(66+64+64+2+40, 66+64+64+2+40+64),16);
+                let rewards = parseInt(hex.slice(66+64+64+2+40+64,66+64+64+2+40+64+64),16);
+                let unitsConverterBought = parseInt(hex.slice(66+64+64+2+40+64+64,66+64+64+2+40+64+64+64),16);
+                let isConverter = parseInt(hex.slice(66+64+64+2+40+64+64+64,66+64+64+2+40+64+64+64+2),16) == 1;
+                let isReferrer = parseInt(hex.slice(66+64+64+2+40+64+64+64+2,66+64+64+2+40+64+64+64+2+2),16) == 1;
+                let converterState = hex.slice(66+64+64+2+40+64+64+64+2+2);
+
                 let obj : IAddressStats = {
                     amountConverterSpentETH: parseFloat(this.utils.fromWei(amountConverterSpent,'ether').toString()),
                     referrerRewards : parseFloat(this.utils.fromWei(rewards,'ether').toString()),

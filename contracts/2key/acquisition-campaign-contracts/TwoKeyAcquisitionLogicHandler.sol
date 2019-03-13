@@ -8,6 +8,7 @@ import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyConversionHandlerGetConverterState.sol";
 import "../interfaces/ITwoKeyEventSource.sol";
 import "../libraries/SafeMath.sol";
+import "../libraries/Call.sol";
 
 /**
  * @author Nikola Madjarevic
@@ -245,7 +246,7 @@ contract TwoKeyAcquisitionLogicHandler {
     }
 
 
-    function getAddressStatistic(address _address, bool plasma, bool flag) internal view returns (bytes) {
+    function getAddressStatistic(address _address, bool plasma, bool flag, address referrer) internal view returns (bytes) {
         address eth_address = _address;
         address plasma_address = _address;
         bytes32 state; // NOT-EXISTING AS CONVERTER DEFAULT STATE
@@ -273,8 +274,12 @@ contract TwoKeyAcquisitionLogicHandler {
             }
 
             if(flag == false) {
-                referrerTotalBalance = 0;
+                //Get all conversions for the plasma address for requested address
+                uint[] memory conversionIds = ITwoKeyConversionHandlerGetConverterState(conversionHandlerContract)
+                    .getConverterConversionIds(plasma_address);
+                referrerTotalBalance  = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getTotalReferrerEarnings(referrer, conversionIds);
             }
+
             return abi.encodePacked(
                 amountConverterSpent,
                 referrerTotalBalance,
@@ -289,7 +294,7 @@ contract TwoKeyAcquisitionLogicHandler {
     /**
      * @notice Function to get super statistics
      */
-    function getSuperStatistics(address _user, bool plasma) public view returns (bytes, bool, bytes, address) {
+    function getSuperStatistics(address _user, bool plasma, bytes signature) public view returns (bytes) {
         address eth_address = _user;
         /**
          msg.sender != _user != contractor
@@ -305,11 +310,19 @@ contract TwoKeyAcquisitionLogicHandler {
 
         bool isJoined = getAddressJoinedStatus(_user);
         bool flag;
+
+        address referrer;
+
         if(msg.sender == contractor || msg.sender == eth_address) {
             flag = true;
+        } else {
+            bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding referrer to plasma")),
+                keccak256(abi.encodePacked("REF_ADDRESS"))));
+            referrer = Call.recoverHash(hash, signature, 0);
         }
-        bytes memory stats = getAddressStatistic(_user, plasma, flag);
-        return (userData, isJoined, stats, eth_address);
+
+        bytes memory stats = getAddressStatistic(_user, plasma, flag, referrer);
+        return abi.encodePacked(userData, isJoined, eth_address, stats);
     }
 
     function getReferrers(address customer, address acquisitionCampaignContract) public view returns (address[]) {
