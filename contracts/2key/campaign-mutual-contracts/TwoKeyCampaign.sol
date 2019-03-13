@@ -32,6 +32,7 @@ contract TwoKeyCampaign is ArcERC20 {
 	uint256 maxReferralRewardPercent; // maxReferralRewardPercent is actually bonus percentage in ETH
     uint256 moderatorBalanceETHWei; //Balance of the moderator which can be withdrawn
 	uint256 moderatorTotalEarningsETHWei; //Total earnings of the moderator all time
+	uint256 reservedAmountForRewards; //Reserved amount of 2key tokens for rewards distribution
 
 	mapping(address => uint256) internal referrerPlasma2Balances2key; // balance of EthWei for each influencer that he can withdraw
 	mapping(address => uint256) internal referrerPlasma2TotalEarnings2key; // Total earnings for referrers
@@ -258,6 +259,7 @@ contract TwoKeyCampaign is ArcERC20 {
 				balance = referrerPlasma2Balances2key[_referrer];
 				referrerPlasma2Balances2key[_referrer] = 0;
 				IERC20(twoKeyEconomy).transfer(_address,balance);
+				reservedAmountForRewards -= balance;
 			} else {
 				revert();
 			}

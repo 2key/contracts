@@ -463,8 +463,8 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     public getInventoryBalance(campaign: any, from: string): Promise<number | string | BigNumber> {
         return new Promise<number>(async (resolve, reject) => {
             try {
-                const campaignInstance = await this._getCampaignInstance(campaign);
-                const balance = await promisify(campaignInstance.getInventoryBalance, [{from}]);
+                const logicHandlerInstance = await this._getLogicHandlerInstance(campaign);
+                const balance = await promisify(logicHandlerInstance.getInventoryBalance, [{from}]);
                 resolve(balance);
             } catch (e) {
                 reject(e);

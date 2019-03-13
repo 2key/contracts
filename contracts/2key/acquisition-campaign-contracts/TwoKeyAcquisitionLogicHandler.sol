@@ -20,6 +20,7 @@ contract TwoKeyAcquisitionLogicHandler {
     address public twoKeySingletoneRegistry;
     address public twoKeyAcquisitionCampaign;
     address twoKeyEventSource;
+    address assetContractERC20;
 
     address contractor;
     address moderator;
@@ -69,6 +70,7 @@ contract TwoKeyAcquisitionLogicHandler {
         maxConverterBonusPercent = _maxConverterBonusPercent;
         currency = _currency;
         moderator = _moderator;
+        assetContractERC20 = _assetContractERC20;
         unit_decimals = IERC20(_assetContractERC20).decimals();
     }
 
@@ -213,6 +215,18 @@ contract TwoKeyAcquisitionLogicHandler {
         maxConverterBonusPercent);
     }
 
+
+    /**
+    * @notice Function to check balance of the ERC20 inventory (view - no gas needed to call this function)
+    * @dev we're using Utils contract and fetching the balance of this contract address
+    * @return balance value as uint
+    */
+    function getInventoryBalance() public view returns (uint) {
+        uint balance = IERC20(assetContractERC20).balanceOf(twoKeyAcquisitionCampaign);
+        return balance;
+    }
+
+
     /**
      * @notice Function to check if the msg.sender has already joined
      * @return true/false depending of joined status
@@ -248,7 +262,7 @@ contract TwoKeyAcquisitionLogicHandler {
             uint unitsConverterBought;
             uint referrerTotalBalance;
             uint amountConverterSpent;
-            (amountConverterSpent, referrerBalance, unitsConverterBought) = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getStatistics(eth_address, plasma_address);
+            (amountConverterSpent, referrerTotalBalance, unitsConverterBought) = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getStatistics(eth_address, plasma_address);
             if(unitsConverterBought> 0) {
                 isConverter = true;
                 address conversionHandlerContract = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).conversionHandler();

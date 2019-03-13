@@ -11,7 +11,6 @@ import "../interfaces/ITwoKeyAcquisitionLogicHandler.sol";
  * @notice Campaign which will sell ERC20 tokens
  */
 contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
-
     address public conversionHandler;
     address public twoKeyAcquisitionLogicHandler;
 
@@ -207,8 +206,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
 
         uint totalTokensForConverterUnits = baseTokensForConverterUnits + bonusTokensForConverterUnits;
 
-        uint256 _total_units = getInventoryBalance();
-        require(_total_units - reservedAmountOfTokens >= totalTokensForConverterUnits);
+        uint256 _total_units = getAvailableAndNonReservedTokensAmount();
+        require(_total_units >= totalTokensForConverterUnits);
 
         unitsConverterBought[converterAddress] = unitsConverterBought[converterAddress].add(totalTokensForConverterUnits);
         uint256 maxReferralRewardETHWei = 0;
@@ -232,6 +231,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
         address[] memory influencers = ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).getReferrers(_converter,address(this));
         uint numberOfInfluencers = influencers.length;
         uint totalBounty2keys = buyTokensFromUpgradableExchange(_maxReferralRewardETHWei, address(this));
+        reservedAmountForRewards += totalBounty2keys;
         for (uint i = 0; i < numberOfInfluencers; i++) {
             uint256 b;
             if (i == influencers.length - 1) {  // if its the last influencer then all the bounty goes to it.
@@ -337,21 +337,11 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
     }
 
     /**
-     * @notice Function to check balance of the ERC20 inventory (view - no gas needed to call this function)
-     * @dev we're using Utils contract and fetching the balance of this contract address
-     * @return balance value as uint
-     */
-    function getInventoryBalance() public view returns (uint) {
-        uint balance = IERC20(assetContractERC20).balanceOf(address(this));
-        return balance;
-    }
-
-    /**
      * @notice Function to check available amount of the tokens on the contract
      */
-    function getAvailableAndNonReservedTokensAmount() external view returns (uint) {
-        uint inventoryBalance = getInventoryBalance();
-        return (inventoryBalance - reservedAmountOfTokens);
+    function getAvailableAndNonReservedTokensAmount() public view returns (uint) {
+        uint inventoryBalance = IERC20(assetContractERC20).balanceOf(address(this));
+        return (inventoryBalance - reservedAmountOfTokens - reservedAmountForRewards);
     }
 
     /**

@@ -1037,14 +1037,8 @@ describe('TwoKeyProtocol', () => {
         await twoKeyProtocol.Utils.getTransactionReceiptMined(hash);
     }).timeout(60000);
 
-    it('==> should show referrer stats per request with signature', async() => {
-
-    }).timeout(60000);
-
     it('==> should get address statistics', async() => {
         let hexedValues = await twoKeyProtocol.AcquisitionCampaign.getAddressStatistic(campaignAddress, env.TEST4_ADDRESS);
-        console.log(hexedValues);
-        hexedValues = await twoKeyProtocol.AcquisitionCampaign.getAddressStatistic(campaignAddress, env.TEST4_ADDRESS, true);
         console.log(hexedValues);
     }).timeout(60000);
 
@@ -1053,7 +1047,7 @@ describe('TwoKeyProtocol', () => {
         console.log("Moderator address is: " + moderatorAddress);
         expect(moderatorAddress).to.be.equal('0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7');
     }).timeout(60000);
-    
+
     it('==> should moderator withdraw his balances in 2key-tokens', async() => {
         const txHash = await twoKeyProtocol.AcquisitionCampaign.moderatorAndReferrerWithdraw(campaignAddress,from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
