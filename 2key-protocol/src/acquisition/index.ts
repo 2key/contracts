@@ -74,11 +74,20 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         return {private_key, public_address};
     }
 
+    /**
+     *
+     * @returns {string}
+     */
     public getNonSingletonsHash() : string {
         return this.nonSingletonsHash;
     }
 
-
+    /**
+     *
+     * @param lockupContract
+     * @returns {Promise<any>}
+     * @private
+     */
     async _getLockupContractInstance(lockupContract: any) : Promise<any> {
         return lockupContract.address
             ? lockupContract
@@ -1763,6 +1772,10 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 let isReferrer = parseInt(hex.slice(66+64+64+2+40+64+64+64+2,66+64+64+2+40+64+64+64+2+2),16) == 1;
                 let converterState = hex.slice(66+64+64+2+40+64+64+64+2+2);
 
+                converterState = this.base.web3.toUtf8(converterState);
+                if(converterState == '') {
+                    converterState = 'NOT_CONVERTER';
+                }
                 let obj : IAddressStats = {
                     amountConverterSpentETH: parseFloat(this.utils.fromWei(amountConverterSpent,'ether').toString()),
                     referrerRewards : parseFloat(this.utils.fromWei(rewards,'ether').toString()),
@@ -1774,7 +1787,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     fullName: this.base.web3.toUtf8(fullname),
                     email: this.base.web3.toUtf8(email),
                     ethereumOf: ethereumof,
-                    converterState: this.base.web3.toUtf8(converterState)
+                    converterState: converterState
                 };
                 resolve(obj);
             } catch (e) {

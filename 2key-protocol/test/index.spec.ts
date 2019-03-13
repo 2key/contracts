@@ -1138,7 +1138,7 @@ describe('TwoKeyProtocol', () => {
     }).timeout(60000);
 
     it('should get statistics for the address from the contract', async() => {
-        const {web3, address} = web3switcher.renata();
+        const {web3, address} = web3switcher.gmail();
         from = address;
         twoKeyProtocol.setWeb3({
             web3,

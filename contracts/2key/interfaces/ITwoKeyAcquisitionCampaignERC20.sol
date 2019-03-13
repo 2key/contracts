@@ -13,5 +13,5 @@ contract ITwoKeyAcquisitionCampaignERC20 {
     function refundConverterAndRemoveUnits(address _converter, uint amountOfEther, uint amountOfUnits) external;
     function getStatistics(address ethereum, address plasma) public view returns (uint,uint,uint);
     function getAvailableAndNonReservedTokensAmount() external view returns (uint);
-    function getTotalReferrerEarnings(address _referrer, uint[] conversionIds) public view returns (uint);
+    function getTotalReferrerEarnings(address _referrer, address plasma_address) public view returns (uint);
 }

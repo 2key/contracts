@@ -24,4 +24,5 @@ contract ITwoKeyConversionHandler {
     ) external;
 
     function getModeratorBalanceAndTotalEarnings() external view returns (uint,uint);
+    function getConverterConversionIds(address _converter) external view returns (uint[]);
 }

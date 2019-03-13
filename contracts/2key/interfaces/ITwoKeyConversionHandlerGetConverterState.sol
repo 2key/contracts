@@ -7,5 +7,4 @@ import "../TwoKeyConverterStates.sol";
  */
 contract ITwoKeyConversionHandlerGetConverterState {
     function getStateForConverter(address _converter) public view returns (bytes32);
-    function getConverterConversionIds(address _converter) external view returns (uint[]);
 }

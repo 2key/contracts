@@ -274,10 +274,8 @@ contract TwoKeyAcquisitionLogicHandler {
             }
 
             if(flag == false) {
-                //Get all conversions for the plasma address for requested address
-                uint[] memory conversionIds = ITwoKeyConversionHandlerGetConverterState(conversionHandlerContract)
-                    .getConverterConversionIds(plasma_address);
-                referrerTotalBalance  = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getTotalReferrerEarnings(referrer, conversionIds);
+                //Get all conversions for the plasma address for
+                referrerTotalBalance  = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getTotalReferrerEarnings(referrer, plasma_address);
             }
 
             return abi.encodePacked(
@@ -316,9 +314,10 @@ contract TwoKeyAcquisitionLogicHandler {
         if(msg.sender == contractor || msg.sender == eth_address) {
             flag = true;
         } else {
-            bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding referrer to plasma")),
-                keccak256(abi.encodePacked("REF_ADDRESS"))));
-            referrer = Call.recoverHash(hash, signature, 0);
+//            bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding referrer to plasma")),
+//                    keccak256(abi.encodePacked("REF_ADDRESS"))));
+//            referrer = Call.recoverHash(hash, signature, 0);
+            referrer = msg.sender;
         }
 
         bytes memory stats = getAddressStatistic(_user, plasma, flag, referrer);
