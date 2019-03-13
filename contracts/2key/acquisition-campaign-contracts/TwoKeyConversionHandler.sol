@@ -22,11 +22,11 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
     using SafeMath for uint256;
 
     event ConversionCreated(uint indexed conversionId);
-    uint tokensSold = 0;
-    uint raisedFundsEthWei = 0;
-    uint numberOfConversions = 0;
-    uint totalBounty = 0;
-    uint numberOfExecutedConversions = 0;
+    uint tokensSold;
+    uint raisedFundsEthWei;
+    uint numberOfConversions;
+    uint totalBounty;
+    uint numberOfExecutedConversions;
 
     uint256 expiryConversionInHours; // How long converter can be pending before it will be automatically rejected and funds will be returned to convertor (hours)
 
@@ -238,12 +238,12 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
             totalBounty = totalBounty.add(conversion.maxReferralRewardETHWei);
             // update moderator balances
             ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateModeratorBalanceETHWei(conversion.moderatorFeeETHWei);
-            raisedFundsEthWei = raisedFundsEthWei + conversion.contractorProceedsETHWei + conversion.moderatorFeeETHWei + conversion.maxReferralRewardETHWei;
+            raisedFundsEthWei = raisedFundsEthWei + conversion.conversionAmount;
             ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateReservedAmountOfTokensIfConversionRejectedOrExecuted(totalUnits);
             ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateContractorProceeds(conversion.contractorProceedsETHWei);
         }
         numberOfExecutedConversions++;
-        tokensSold = tokensSold + conversion.baseTokenUnits + conversion.bonusTokenUnits; //update sold tokens once conversion is executed
+        tokensSold = tokensSold + totalUnits; //update sold tokens once conversion is executed
     }
 
     /**

@@ -231,7 +231,7 @@ contract TwoKeyAcquisitionLogicHandler {
     }
 
 
-    function getAddressStatistic(address _address, bool plasma) public view returns (bytes) {
+    function getAddressStatistic(address _address, bool plasma, bool flag) internal view returns (bytes) {
         address eth_address = _address;
         address plasma_address = _address;
         bytes32 state; // NOT-EXISTING AS CONVERTER DEFAULT STATE
@@ -246,7 +246,7 @@ contract TwoKeyAcquisitionLogicHandler {
             bool isConverter;
             bool isReferrer;
             uint unitsConverterBought;
-            uint referrerBalance;
+            uint referrerTotalBalance;
             uint amountConverterSpent;
             (amountConverterSpent, referrerBalance, unitsConverterBought) = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getStatistics(eth_address, plasma_address);
             if(unitsConverterBought> 0) {
@@ -254,39 +254,33 @@ contract TwoKeyAcquisitionLogicHandler {
                 address conversionHandlerContract = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).conversionHandler();
                 state = ITwoKeyConversionHandlerGetConverterState(conversionHandlerContract).getStateForConverter(eth_address);
             }
-            if(referrerBalance > 0) {
+            if(referrerTotalBalance > 0) {
                 isReferrer = true;
             }
-            if(ITwoKeyEventSource(twoKeyEventSource).isAddressMaintainer(msg.sender) ||
-                contractor == msg.sender) {
-                return abi.encodePacked(
-                    amountConverterSpent,
-                    referrerBalance,
-                    unitsConverterBought,
-                    isConverter,
-                    isReferrer,
-                    state
-                );
-            } else {
-                return abi.encodePacked(
-                    0,
-                    0,
-                    0,
-                    isConverter,
-                    isReferrer,
-                    state
-                );
-            }
 
+            if(flag == false) {
+                referrerTotalBalance = 0;
+            }
+            return abi.encodePacked(
+                amountConverterSpent,
+                    referrerTotalBalance,
+                unitsConverterBought,
+                isConverter,
+                isReferrer,
+                state
+            );
         }
     }
 
     /**
-     * @notice Function to get suepr statistics
+     * @notice Function to get super statistics
      */
     function getSuperStatistics(address _user, bool plasma) public view returns (bytes, bool, bytes, address) {
         address eth_address = _user;
-
+        /**
+         msg.sender != _user != contractor
+         return my rewards as referrer for the conversions of _user
+         */
         address twoKeyRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyRegistry");
 
         if (plasma) {
@@ -296,7 +290,11 @@ contract TwoKeyAcquisitionLogicHandler {
         bytes memory userData = ITwoKeyReg(twoKeyRegistry).getUserData(eth_address);
 
         bool isJoined = getAddressJoinedStatus(_user);
-        bytes memory stats = getAddressStatistic(_user, plasma);
+        bool flag;
+        if(msg.sender == contractor || msg.sender == eth_address) {
+            flag = true;
+        }
+        bytes memory stats = getAddressStatistic(_user, plasma, flag);
         return (userData, isJoined, stats, eth_address);
     }
 

@@ -395,7 +395,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
      */
     function getStatistics(address ethereum, address plasma) public view returns (uint,uint,uint) {
         require(msg.sender == twoKeyAcquisitionLogicHandler);
-        return (amountConverterSpentEthWEI[ethereum], referrerPlasma2Balances2key[plasma],unitsConverterBought[ethereum]);
+        return (amountConverterSpentEthWEI[ethereum], referrerPlasma2TotalEarnings2key[plasma],unitsConverterBought[ethereum]);
     }
 
 }
