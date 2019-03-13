@@ -263,7 +263,7 @@ contract TwoKeyAcquisitionLogicHandler {
             }
             return abi.encodePacked(
                 amountConverterSpent,
-                    referrerTotalBalance,
+                referrerTotalBalance,
                 unitsConverterBought,
                 isConverter,
                 isReferrer,
