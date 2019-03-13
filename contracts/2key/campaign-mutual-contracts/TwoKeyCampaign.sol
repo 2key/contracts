@@ -26,10 +26,10 @@ contract TwoKeyCampaign is ArcERC20 {
     address public moderator; //moderator address
 	address public ownerPlasma; //contractor plasma address
 
-	uint256 contractorBalance; // Contractor balance
-    uint256 contractorTotalProceeds; // Contractor total earnings
-	uint256 maxReferralRewardPercent; // maxReferralRewardPercent is actually bonus percentage in ETH
 	uint256 conversionQuota;  // maximal ARC tokens that can be passed in transferFrom
+	uint256 contractorBalance; // Contractor balance
+	uint256 contractorTotalProceeds; // Contractor total earnings
+	uint256 maxReferralRewardPercent; // maxReferralRewardPercent is actually bonus percentage in ETH
     uint256 moderatorBalanceETHWei; //Balance of the moderator which can be withdrawn
 	uint256 moderatorTotalEarningsETHWei; //Total earnings of the moderator all time
 
@@ -53,7 +53,7 @@ contract TwoKeyCampaign is ArcERC20 {
      * @param _to address The address which you want to transfer to ALREADY converted to plasma
      * @param _value uint256 the amount of tokens to be transferred
      */
-	function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
+	function transferFrom(address _from, address _to, uint256 _value) internal returns (bool) {
 		// _from and _to are assumed to be already converted to plasma address (e.g. using plasmaOf)
 		require(_value == 1);
 		require(_from != address(0));
