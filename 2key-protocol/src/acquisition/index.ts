@@ -1732,13 +1732,13 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @param {boolean} plasma
      * @returns {Promise<IAddressStats>}
      */
-    public getAddressStatistic(campaign: any, address: string, plasma: boolean = false) : Promise<IAddressStats>{
+    public getAddressStatistic(campaign: any, address: string, from: string, plasma: boolean = false) : Promise<IAddressStats>{
         return new Promise<IAddressStats>(async(resolve,reject) => {
             try {
                 const twoKeyAcquisitionLogicHandlerInstance = await this._getLogicHandlerInstance(campaign);
 
                 let username, fullname, email;
-                let [hexedV, isJoined ,hexedValues, ethereumof] = await promisify(twoKeyAcquisitionLogicHandlerInstance.getSuperStatistics,[address, plasma]);
+                let [hexedV, isJoined ,hexedValues, ethereumof] = await promisify(twoKeyAcquisitionLogicHandlerInstance.getSuperStatistics,[address, plasma,{from}]);
                 /**
                  *
                  * Unpack bytes for statistics
