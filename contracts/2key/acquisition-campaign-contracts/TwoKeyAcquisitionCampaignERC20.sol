@@ -387,6 +387,13 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
     }
 
 
+
+    /**
+     * @notice Helper function to get how much _referrer address earned for all conversions for eth_address
+     * @param _referrer is the address we're checking the earnings
+     * @param eth_address is the converter address we're getting all conversion ids for
+     * @return sum of all earnings
+     */
     function getTotalReferrerEarnings(address _referrer, address eth_address) public view returns (uint) {
         require(msg.sender == twoKeyAcquisitionLogicHandler);
         uint[] memory conversionIds = ITwoKeyConversionHandler(conversionHandler).getConverterConversionIds(eth_address);
@@ -398,6 +405,11 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
     }
 
 
+    /**
+     * @notice Function to get balance and total earnings for all referrer addresses passed in arg
+     * @param _referrerPlasmaList is the array of plasma addresses of referrer
+     * @return two arrays. 1st contains current plasma balance and 2nd contains total plasma balances
+     */
     function getReferrersBalancesAndTotalEarnings(address[] _referrerPlasmaList) public view returns (uint256[], uint256[]) {
         require(twoKeyEventSource.isAddressMaintainer(msg.sender));
 

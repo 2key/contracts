@@ -246,6 +246,10 @@ contract TwoKeyAcquisitionLogicHandler {
     }
 
 
+
+    /**
+     * @notice Function to fetch stats for the address
+     */
     function getAddressStatistic(address _address, bool plasma, bool flag, address referrer) internal view returns (bytes) {
         bytes32 state; // NOT-EXISTING AS CONVERTER DEFAULT STATE
 
