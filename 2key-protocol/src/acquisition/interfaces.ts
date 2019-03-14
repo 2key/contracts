@@ -125,7 +125,7 @@ export interface ITwoKeyAcquisitionCampaign {
     getReferrerBalanceAndTotalEarningsAndNumberOfConversions: (campaign:any, signature, skipCache?: boolean) => Promise<IReferrerSummary>,
     getReferrerRewardsPerConversion: (campaign:any, signature: string, conversionIds: number[], skipCache?: boolean) => Promise<number[]>,
     getCurrentAvailableAmountOfTokens: (campaign:any, from:string) => Promise<number>,
-    getAddressStatistic: (campaign: any, address: string, signature: string, from: string, plasma?: boolean) => Promise<IAddressStats>,
+    getAddressStatistic: (campaign: any, address: string, signature: string, opts?: IGetStatsOpts) => Promise<IAddressStats>,
     getCampaignSummary: (campaign: any, from: string) => Promise<IConversionStats>,
     getLockupContractAddress: (campaign:any, conversionId: number, from:string) => Promise<string>,
     withdrawTokens: (twoKeyLockup: string, part: number, from:string) => Promise<string>,
@@ -134,6 +134,11 @@ export interface ITwoKeyAcquisitionCampaign {
     getNonSingletonsHash: () => string,
     getNumberOfExecutedConversions: (campaign: string) => Promise<number>,
     testRecover: (campaign:string) => Promise<string>
+}
+
+export interface IGetStatsOpts {
+    from?: string,
+    plasma?: boolean
 }
 
 export interface IPublicLinkOpts {

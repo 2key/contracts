@@ -321,7 +321,7 @@ contract TwoKeyAcquisitionLogicHandler {
                 flag = true;
             }
         }
-        bytes memory stats = getAddressStatistic(_user, plasma, flag, referrer);
+        bytes memory stats = getAddressStatistic(_user, plasma, flag, _address);
         return abi.encodePacked(userData, isJoined, eth_address, stats);
     }
 

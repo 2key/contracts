@@ -11,7 +11,7 @@ import {
     ITwoKeyAcquisitionCampaign,
     ILockupInformation,
     IPublicMeta,
-    IOffchainData, IContractorBalance,
+    IOffchainData, IContractorBalance, IGetStatsOpts,
 } from './interfaces';
 
 import { BigNumber } from 'bignumber.js/bignumber';
@@ -1747,7 +1747,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @param {boolean} plasma
      * @returns {Promise<IAddressStats>}
      */
-    public getAddressStatistic(campaign: any, address: string, signature: string, from: string, plasma: boolean = false) : Promise<IAddressStats>{
+    public getAddressStatistic(campaign: any, address: string, signature: string, {from , plasma = false} : IGetStatsOpts = {}) : Promise<IAddressStats>{
         return new Promise<IAddressStats>(async(resolve,reject) => {
             try {
                 const twoKeyAcquisitionLogicHandlerInstance = await this._getLogicHandlerInstance(campaign);
