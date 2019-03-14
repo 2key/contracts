@@ -247,14 +247,11 @@ contract TwoKeyAcquisitionLogicHandler {
 
 
     function getAddressStatistic(address _address, bool plasma, bool flag, address referrer) internal view returns (bytes) {
-        address eth_address = _address;
-        address plasma_address = _address;
         bytes32 state; // NOT-EXISTING AS CONVERTER DEFAULT STATE
-        if (plasma) {
-            eth_address = ethereumOf(_address);
-        } else {
-            plasma_address = plasmaOf(_address);
-        }
+
+        address eth_address = ethereumOf(_address);
+        address plasma_address = plasmaOf(_address);
+
         if(_address == contractor) {
             abi.encodePacked(0, 0, 0, false, false);
         } else {
@@ -274,8 +271,9 @@ contract TwoKeyAcquisitionLogicHandler {
             }
 
             if(flag == false) {
-                //Get all conversions for the plasma address for requested address
-                referrerTotalBalance  = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getTotalReferrerEarnings(referrer, plasma_address);
+                //referrer is address in signature
+                //plasma_address is plasma address of the address requested in method
+                referrerTotalBalance  = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getTotalReferrerEarnings(referrer, eth_address);
             }
 
             return abi.encodePacked(
@@ -313,14 +311,16 @@ contract TwoKeyAcquisitionLogicHandler {
         bool isJoined = getAddressJoinedStatus(_user);
         bool flag;
 
-        address referrer;
+        address _address;
 
         if(msg.sender == contractor || msg.sender == eth_address) {
             flag = true;
         } else {
-            referrer = recover(signature);
+            _address = recover(signature);
+            if(_address == ownerPlasma) {
+                flag = true;
+            }
         }
-
         bytes memory stats = getAddressStatistic(_user, plasma, flag, referrer);
         return abi.encodePacked(userData, isJoined, eth_address, stats);
     }

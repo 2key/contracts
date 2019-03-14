@@ -379,14 +379,28 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
     }
 
 
-    function getTotalReferrerEarnings(address _referrer, address plasma_address) public view returns (uint) {
+    function getTotalReferrerEarnings(address _referrer, address eth_address) public view returns (uint) {
         require(msg.sender == twoKeyAcquisitionLogicHandler);
-        uint[] memory conversionIds = ITwoKeyConversionHandler(conversionHandler).getConverterConversionIds(_referrer);
+        uint[] memory conversionIds = ITwoKeyConversionHandler(conversionHandler).getConverterConversionIds(eth_address);
         uint sum = 0;
         for(uint i=0; i<conversionIds.length; i++) {
             sum += referrerPlasma2EarningsPerConversion[_referrer][conversionIds[i]];
         }
         return sum;
+    }
+
+
+    function getReferrersBalancesAndTotalEarnings(address[] _referrerPlasmaList) public view returns (uint256[]) {
+        require(twoKeyEventSource.isAddressMaintainer(msg.sender));
+
+        uint numberOfAddresses = _referrerPlasmaList.length;
+        uint256[] memory referrersPlasmaAddressBalance = new uint256[](numberOfAddresses);
+
+        for (uint i=0; i<numberOfAddresses; i++){
+            //I checked and saw that even empty mapping returns 0 value
+            referrersPlasmaAddressBalance[i] = referrerPlasma2Balances2key[_referrerPlasmaList[i]];
+        }
+        return referrersPlasmaAddressBalance;
     }
 
     /**
