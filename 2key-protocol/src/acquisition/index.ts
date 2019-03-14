@@ -1098,7 +1098,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         return new Promise<IConversionObject>(async(resolve,reject) => {
             try {
                 const conversionHandlerInstance = await this._getConversionHandlerInstance(campaign);
-                let contractor, contractorProceedsETHWei, converter, state, conversionAmount, maxReferralRewardEthWei, moderatorFeeETHWei, baseTokenUnits,
+                let contractor, contractorProceedsETHWei, converter, state, conversionAmount, maxReferralRewardEthWei, maxReferralRewardTwoKey, moderatorFeeETHWei, baseTokenUnits,
                 bonusTokenUnits, conversionCreatedAt, conversionExpiresAt, isConversionFiat;
                 let hexedValues = await promisify(conversionHandlerInstance.getConversion,[conversionId,{from}]);
                 contractor = hexedValues.slice(0, 42);
@@ -1107,12 +1107,13 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 state = parseInt(hexedValues.slice(42+64+40,42+64+40+2),16);
                 conversionAmount = parseInt(hexedValues.slice(42+64+40+2,42+64+40+2+64),16);
                 maxReferralRewardEthWei = parseInt(hexedValues.slice(42+64+40+2+64,42+64+40+2+64+64),16);
-                moderatorFeeETHWei = parseInt(hexedValues.slice(42+64+40+2+64+64,42+64+40+2+64+64+64),16);
-                baseTokenUnits = parseInt(hexedValues.slice(42+64+40+2+64+64+64,42+64+40+2+64+64+64+64),16);
-                bonusTokenUnits = parseInt(hexedValues.slice(42+64+40+2+64+64+64+64,42+64+40+2+64+64+64+64+64),16);
-                conversionCreatedAt = parseInt(hexedValues.slice(42+64+40+2+64+64+64+64+64,42+64+40+2+64+64+64+64+64+64),16);
+                maxReferralRewardTwoKey = parseInt(hexedValues.slice(42+64+40+2+64+64,42+64+40+2+64+64+64),16);
+                moderatorFeeETHWei = parseInt(hexedValues.slice(42+64+40+2+64+64+64,42+64+40+2+64+64+64+64),16);
+                baseTokenUnits = parseInt(hexedValues.slice(42+64+40+2+64+64+64+64,42+64+40+2+64+64+64+64+64),16);
+                bonusTokenUnits = parseInt(hexedValues.slice(42+64+40+2+64+64+64+64+64,42+64+40+2+64+64+64+64+64+64),16);
+                conversionCreatedAt = parseInt(hexedValues.slice(42+64+40+2+64+64+64+64+64+64,42+64+40+2+64+64+64+64+64+64+64),16);
                 conversionExpiresAt = parseInt(hexedValues.slice(42+64+40+2+64+64+64+64+64+64,42+64+40+2+64+64+64+64+64+64+64),16);
-                isConversionFiat = parseInt(hexedValues.slice(42+64+40+2+64+64+64+64+64+64+64,42+64+40+2+64+64+64+64+64+64+64+2),16) == 1;
+                isConversionFiat = parseInt(hexedValues.slice(42+64+40+2+64+64+64+64+64+64+64+64,42+64+40+2+64+64+64+64+64+64+64+2+64),16) == 1;
 
                 let obj : IConversionObject = {
                     'contractor' : contractor,
@@ -1121,6 +1122,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     'state' : parseInt(state,10).toString(),
                     'conversionAmount' : parseFloat(this.utils.fromWei(conversionAmount, 'ether').toString()),
                     'maxReferralRewardEthWei' : parseFloat(this.utils.fromWei(maxReferralRewardEthWei, 'ether').toString()),
+                    'maxReferralReward2key' : parseFloat(this.utils.fromWei(maxReferralRewardTwoKey, 'ether').toString()),
                     'moderatorFeeETHWei' : parseFloat(this.utils.fromWei(moderatorFeeETHWei, 'ether').toString()),
                     'baseTokenUnits' : parseFloat(this.utils.fromWei(baseTokenUnits, 'ether').toString()),
                     'bonusTokenUnits' : parseFloat(this.utils.fromWei(bonusTokenUnits, 'ether').toString()),

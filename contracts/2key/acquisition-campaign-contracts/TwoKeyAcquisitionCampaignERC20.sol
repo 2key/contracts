@@ -227,13 +227,17 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
      * @param _converter is the address of the converter
      * @dev This function can only be called by TwoKeyConversionHandler contract
      */
-    function updateRefchainRewards(uint256 _maxReferralRewardETHWei, address _converter, uint _conversionId) public onlyTwoKeyConversionHandler {
+    function updateRefchainRewards(uint256 _maxReferralRewardETHWei, address _converter, uint _conversionId) public onlyTwoKeyConversionHandler returns (uint) {
         address[] memory influencers = ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).getReferrers(_converter,address(this));
+
         uint numberOfInfluencers = influencers.length;
         uint totalBounty2keys = buyTokensFromUpgradableExchange(_maxReferralRewardETHWei, address(this));
+        uint cpy = totalBounty2keys;
         reservedAmountForRewards += totalBounty2keys;
+
         for (uint i = 0; i < numberOfInfluencers; i++) {
             uint256 b;
+
             if (i == influencers.length - 1) {  // if its the last influencer then all the bounty goes to it.
                 b = totalBounty2keys;
             }
@@ -245,6 +249,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
                     b = totalBounty2keys.div(influencers.length - i);
                 }
             }
+
             //All mappings are now stated to plasma addresses
             referrerPlasma2EarningsPerConversion[influencers[i]][_conversionId] = b;
             referrerPlasma2Balances2key[influencers[i]] = referrerPlasma2Balances2key[influencers[i]].add(b);
@@ -252,6 +257,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
             referrerPlasmaAddressToCounterOfConversions[influencers[i]]++;
             totalBounty2keys = totalBounty2keys.sub(b);
         }
+
+        return cpy;
     }
 
     /**

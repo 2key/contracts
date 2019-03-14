@@ -156,6 +156,7 @@ export interface IConversionObject {
     'state' : string,
     'conversionAmount' : number,
     'maxReferralRewardEthWei' : number,
+    'maxReferralReward2key' : number,
     'moderatorFeeETHWei' : number,
     'baseTokenUnits' : number,
     'bonusTokenUnits' : number,

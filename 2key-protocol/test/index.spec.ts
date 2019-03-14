@@ -461,7 +461,7 @@ describe('TwoKeyProtocol', () => {
     }).timeout(60000);
 
     it('should set eth-dolar rate', async() => {
-        txHash = await twoKeyProtocol.TwoKeyExchangeContract.setValue('USD', true, 91287027178099998720, from);
+        txHash = await twoKeyProtocol.TwoKeyExchangeContract.setValue('USD', true, 100000000000000000000, from);
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         let value = await twoKeyProtocol.TwoKeyExchangeContract.getRatesETHFiat('USD', from);
         console.log(value);
@@ -1193,9 +1193,27 @@ describe('TwoKeyProtocol', () => {
 
 
     it('should check conversion object for the created fiat conversion', async() => {
+        console.log("Fiat conversion is this: ");
         let conversion = await twoKeyProtocol.AcquisitionCampaign.getConversion(campaignAddress,4,from);
         console.log(conversion);
     }).timeout(60000);
+
+    it('should check conversion object', async() => {
+        const {web3, address} = web3switcher.test4();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+        });
+        console.log('Regular executed conversion is: ');
+        let conversion = await twoKeyProtocol.AcquisitionCampaign.getConversion(campaignAddress,0,from);
+        console.log(conversion);
+    })
 
     it('should execute conversion from contractor', async() => {
         const {web3, address} = web3switcher.aydnep();
