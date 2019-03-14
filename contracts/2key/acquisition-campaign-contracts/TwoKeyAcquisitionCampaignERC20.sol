@@ -11,13 +11,14 @@ import "../interfaces/ITwoKeyAcquisitionLogicHandler.sol";
  * @notice Campaign which will sell ERC20 tokens
  */
 contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
+
     address public conversionHandler;
     address public twoKeyAcquisitionLogicHandler;
 
     mapping(address => uint256) private amountConverterSpentFiatWei;
     mapping(address => uint256) private amountConverterSpentEthWEI; // Amount converter put to the contract in Ether
     mapping(address => uint256) private unitsConverterBought; // Number of units (ERC20 tokens) bought
-    mapping(address => uint256) internal referrerPlasma2cut; // Mapping representing how much are cuts in percent(0-100) for referrer address
+    mapping(address => uint256) private referrerPlasma2cut; // Mapping representing how much are cuts in percent(0-100) for referrer address
 
     address assetContractERC20; // Asset contract is address of ERC20 inventory
 
@@ -397,17 +398,19 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
     }
 
 
-    function getReferrersBalancesAndTotalEarnings(address[] _referrerPlasmaList) public view returns (uint256[]) {
+    function getReferrersBalancesAndTotalEarnings(address[] _referrerPlasmaList) public view returns (uint256[], uint256[]) {
         require(twoKeyEventSource.isAddressMaintainer(msg.sender));
 
         uint numberOfAddresses = _referrerPlasmaList.length;
-        uint256[] memory referrersPlasmaAddressBalance = new uint256[](numberOfAddresses);
+        uint256[] memory referrersPendingPlasmaBalance = new uint256[](numberOfAddresses);
+        uint256[] memory referrersTotalEarningsPlasmaBalance = new uint256[](numberOfAddresses);
 
         for (uint i=0; i<numberOfAddresses; i++){
-            //I checked and saw that even empty mapping returns 0 value
-            referrersPlasmaAddressBalance[i] = referrerPlasma2Balances2key[_referrerPlasmaList[i]];
+            referrersPendingPlasmaBalance[i] = referrerPlasma2Balances2key[_referrerPlasmaList[i]];
+            referrersTotalEarningsPlasmaBalance[i] = referrerPlasma2TotalEarnings2key[_referrerPlasmaList[i]];
         }
-        return referrersPlasmaAddressBalance;
+
+        return (referrersPendingPlasmaBalance, referrersTotalEarningsPlasmaBalance);
     }
 
     /**
