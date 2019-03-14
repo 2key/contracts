@@ -381,7 +381,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
 
     function getTotalReferrerEarnings(address _referrer, address plasma_address) public view returns (uint) {
         require(msg.sender == twoKeyAcquisitionLogicHandler);
-        uint[] memory conversionIds = ITwoKeyConversionHandler(conversionHandler).getConverterConversionIds(plasma_address);
+        uint[] memory conversionIds = ITwoKeyConversionHandler(conversionHandler).getConverterConversionIds(_referrer);
         uint sum = 0;
         for(uint i=0; i<conversionIds.length; i++) {
             sum += referrerPlasma2EarningsPerConversion[_referrer][conversionIds[i]];

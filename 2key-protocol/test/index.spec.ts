@@ -1049,7 +1049,7 @@ describe('TwoKeyProtocol', () => {
             eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
         });
-        let hexedValues = await twoKeyProtocol.AcquisitionCampaign.getAddressStatistic(campaignAddress, env.TEST4_ADDRESS,'0x0',from);
+        let hexedValues = await twoKeyProtocol.AcquisitionCampaign.getAddressStatistic(campaignAddress, env.TEST4_ADDRESS,'0x0000000000000000000000000000000000000000',from);
         console.log(hexedValues);
     }).timeout(60000);
 
@@ -1137,8 +1137,13 @@ describe('TwoKeyProtocol', () => {
         console.log('Moderator total earnings: '+ totalEarnings);
     }).timeout(60000);
 
+    it('should test recover', async() => {
+        let a = await twoKeyProtocol.AcquisitionCampaign.testRecover(campaignAddress);
+        console.log(a);
+    }).timeout(30000);
+
     it('should get statistics for the address from the contract', async() => {
-        const {web3, address} = web3switcher.gmail();
+        const {web3, address} = web3switcher.renata();
         from = address;
         twoKeyProtocol.setWeb3({
             web3,
@@ -1149,7 +1154,7 @@ describe('TwoKeyProtocol', () => {
             eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
         });
-        let stats = await twoKeyProtocol.AcquisitionCampaign.getAddressStatistic(campaignAddress,env.RENATA_ADDRESS, '0x0',from);
+        let stats = await twoKeyProtocol.AcquisitionCampaign.getAddressStatistic(campaignAddress,env.RENATA_ADDRESS, '0x0000000000000000000000000000000000000000',from);
         console.log(stats);
     }).timeout(60000);
 
@@ -1185,6 +1190,7 @@ describe('TwoKeyProtocol', () => {
         let conversionIds = await twoKeyProtocol.AcquisitionCampaign.getConverterConversionIds(campaignAddress, env.GMAIL2_ADDRESS, from);
         console.log('Conversion ids for the Gmail 2 are: ' + conversionIds);
     }).timeout(60000);
+
 
     it('should check conversion object for the created fiat conversion', async() => {
         let conversion = await twoKeyProtocol.AcquisitionCampaign.getConversion(campaignAddress,4,from);

@@ -1933,4 +1933,16 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
             }
         })
     }
+
+    public testRecover(campaign:string) : Promise<string> {
+        return new Promise<string>(async(resolve,reject) => {
+            try {
+                const logicHandler = await this._getLogicHandlerInstance(campaign);
+                let add = await promisify(logicHandler.recover,['0x0']);
+                resolve(add);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
 }

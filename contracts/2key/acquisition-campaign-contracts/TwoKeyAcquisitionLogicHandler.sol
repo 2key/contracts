@@ -274,7 +274,7 @@ contract TwoKeyAcquisitionLogicHandler {
             }
 
             if(flag == false) {
-                //Get all conversions for the plasma address for
+                //Get all conversions for the plasma address for requested address
                 referrerTotalBalance  = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getTotalReferrerEarnings(referrer, plasma_address);
             }
 
@@ -289,15 +289,19 @@ contract TwoKeyAcquisitionLogicHandler {
         }
     }
 
+    function recover(bytes signature) public view returns (address) {
+        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding referrer to plasma")),
+            keccak256(abi.encodePacked("GET_REFERRER_REWARDS"))));
+        address x = Call.recoverHash(hash, signature, 0);
+        return x;
+    }
+
     /**
      * @notice Function to get super statistics
      */
     function getSuperStatistics(address _user, bool plasma, bytes signature) public view returns (bytes) {
         address eth_address = _user;
-        /**
-         msg.sender != _user != contractor
-         return my rewards as referrer for the conversions of _user
-         */
+
         address twoKeyRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyRegistry");
 
         if (plasma) {
@@ -314,10 +318,7 @@ contract TwoKeyAcquisitionLogicHandler {
         if(msg.sender == contractor || msg.sender == eth_address) {
             flag = true;
         } else {
-//            bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding referrer to plasma")),
-//                    keccak256(abi.encodePacked("REF_ADDRESS"))));
-//            referrer = Call.recoverHash(hash, signature, 0);
-            referrer = msg.sender;
+            referrer = recover(signature);
         }
 
         bytes memory stats = getAddressStatistic(_user, plasma, flag, referrer);
@@ -327,6 +328,7 @@ contract TwoKeyAcquisitionLogicHandler {
     function getReferrers(address customer, address acquisitionCampaignContract) public view returns (address[]) {
         address influencer = plasmaOf(customer);
         uint n_influencers = 0;
+
         while (true) {
             influencer = plasmaOf(ITwoKeyAcquisitionARC(acquisitionCampaignContract).getReceivedFrom(influencer));
             if (influencer == plasmaOf(contractor)) {
@@ -334,13 +336,16 @@ contract TwoKeyAcquisitionLogicHandler {
             }
             n_influencers++;
         }
+
         address[] memory influencers = new address[](n_influencers);
         influencer = plasmaOf(customer);
+
         while (n_influencers > 0) {
             influencer = plasmaOf(ITwoKeyAcquisitionARC(acquisitionCampaignContract).getReceivedFrom(influencer));
             n_influencers--;
             influencers[n_influencers] = influencer;
         }
+
         return influencers; //reverse ordered array
     }
 
