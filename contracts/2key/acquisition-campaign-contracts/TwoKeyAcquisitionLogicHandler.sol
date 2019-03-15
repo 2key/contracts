@@ -102,6 +102,7 @@ contract TwoKeyAcquisitionLogicHandler {
      * @dev validates if msg.Value is in interval of [minContribution, maxContribution]
      */
     function requirementForMsgValue(uint msgValue) public view returns (bool) {
+        //TODO: Add timestamp validation -> conversions
         if(keccak256(currency) == keccak256('ETH')) {
             require(msgValue >= minContributionETHorFiatCurrency);
             require(msgValue <= maxContributionETHorFiatCurrency);

@@ -25,6 +25,7 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
     uint maxDonationAmount; // Maximal donation amount
     uint maxReferralRewardPercent; // Percent per conversion which goes to referrers
     uint campaignGoal; // Goal of the campaign, how many funds to raise
+    bool shouldConvertToRefer; // If yes, means that referrer must be converter in order to be referrer
     IncentiveModel rewardsModel; //Incentive model for rewards
 
     mapping(address => uint) amountUserContributed;
