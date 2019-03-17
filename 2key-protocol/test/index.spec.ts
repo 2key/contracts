@@ -1244,6 +1244,24 @@ describe('TwoKeyProtocol', () => {
         console.log('Number of forwarders stored on plasma: ' + numberOfForwarders);
     }).timeout(60000);
 
+    it('should create an offline(fiat) conversion from maintainer address', async() => {
+        const {web3, address} = web3switcher.aydnep();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+        });
+        console.log('Trying to perform offline conversion from gmail2');
+        let txHash = await twoKeyProtocol.AcquisitionCampaign.convertOffline(campaignAddress,env.TEST4_ADDRESS, from, 50);
+        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+    }).timeout(60000);
+
+
     it('should check reputation points for a couple of addresses', async() => {
         console.log('Checking stats for Renata');
         let renataStats = await twoKeyProtocol.BaseReputation.getReputationPointsForAllRolesPerAddress(env.RENATA_ADDRESS);
