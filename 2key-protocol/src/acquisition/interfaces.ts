@@ -103,7 +103,7 @@ export interface ITwoKeyAcquisitionCampaign {
     joinAndShareARC: (campaign: any, from: string, referralLink: string, recipient: string, opts?: IPublicLinkOpts) => Promise<string>,
     joinAndConvert: (campaign: any, value: string | number | BigNumber, publicLink: string, from: string, opts?: IConvertOpts) => Promise<string>,
     convert: (campaign: any, value: string | number | BigNumber, from: string, opts?: IConvertOpts) => Promise<string>
-    convertOffline: (campaign: any, from: string, conversionAmountFiat: number, opts?: IConvertOpts) => Promise<string>
+    convertOffline: (campaign: any,  _converter: string, from: string, conversionAmountFiat: number, opts?: IConvertOpts) => Promise<string>
     getEstimatedTokenAmount: (campaign: any, isPaymentFiat: boolean, value: string | number | BigNumber) => Promise<ITokenAmount>,
     getTwoKeyConversionHandlerAddress: (campaign: any, skipCache?: boolean) => Promise<string>,
     approveConverter: (campaign: any, converter: string, from: string, gasPrice? :number) => Promise<string>,

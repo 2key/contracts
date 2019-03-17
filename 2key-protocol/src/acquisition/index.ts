@@ -1808,7 +1808,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @param {number} gasPrice
      * @returns {Promise<string>}
      */
-    public convertOffline(campaign: any, from: string, conversionAmountFiat: number, {gasPrice = this.base._getGasPrice(), isConverterAnonymous}: IConvertOpts = {}) : Promise<string> {
+    public convertOffline(campaign: any, _converter: string, from: string, conversionAmountFiat: number, {gasPrice = this.base._getGasPrice(), isConverterAnonymous}: IConvertOpts = {}) : Promise<string> {
         return new Promise<string>(async(resolve,reject) => {
             try {
                 const nonce = await this.helpers._getNonce(from);
@@ -1817,7 +1817,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 conversionAmountFiat = parseFloat(this.utils.toWei(conversionAmountFiat, 'ether').toString());
                 console.log('Conversion amount fiat converted to wei is: ' + conversionAmountFiat);
                 console.log(conversionAmountFiat, isConverterAnonymous);
-                let txHash = await promisify(twoKeyAcquisitionCampaignInstance.convertFiat,[conversionAmountFiat, false,
+                let txHash = await promisify(twoKeyAcquisitionCampaignInstance.convertFiat,[_converter, conversionAmountFiat, false,
                     {
                         from,
                         gasPrice,

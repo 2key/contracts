@@ -1182,7 +1182,7 @@ describe('TwoKeyProtocol', () => {
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
         });
         console.log('Trying to perform offline conversion from gmail2');
-        let txHash = await twoKeyProtocol.AcquisitionCampaign.convertOffline(campaignAddress, from, 50);
+        let txHash = await twoKeyProtocol.AcquisitionCampaign.convertOffline(campaignAddress, from, from, 50);
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(60000);
 

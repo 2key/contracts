@@ -184,13 +184,16 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
     /**
      * @notice Function to convert if the conversion is in fiat
      * @dev This can be executed only in case currency is fiat
+     * @param _converter is the address of converter who want's fiat conversion
      * @param conversionAmountFiatWei is the amount of conversion converted to wei units
      * @param _isAnonymous if converter chooses to be anonymous
      */
-    function convertFiat(uint conversionAmountFiatWei, bool _isAnonymous) public {
-        createConversion(conversionAmountFiatWei, msg.sender, true);
-        ITwoKeyConversionHandler(conversionHandler).setAnonymous(msg.sender, _isAnonymous);
-        amountConverterSpentFiatWei[msg.sender] = amountConverterSpentFiatWei[msg.sender].add(conversionAmountFiatWei);
+    function convertFiat(address _converter, uint conversionAmountFiatWei, bool _isAnonymous) public {
+        // Validate that sender is either _converter or maintainer
+        require(msg.sender == _converter || twoKeyEventSource.isAddressMaintainer(msg.sender));
+        createConversion(conversionAmountFiatWei, _converter, true);
+        ITwoKeyConversionHandler(conversionHandler).setAnonymous(_converter, _isAnonymous);
+        amountConverterSpentFiatWei[_converter] = amountConverterSpentFiatWei[_converter].add(conversionAmountFiatWei);
     }
 
     /*
