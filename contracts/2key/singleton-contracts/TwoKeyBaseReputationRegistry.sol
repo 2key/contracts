@@ -43,9 +43,10 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, MaintainingPattern {
     mapping(address => ReputationScore) public address2converterGlobalReputationScoreWei;
     mapping(address => ReputationScore) public plasmaAddress2referrerGlobalReputationScoreWei;
 
+    // Struct to represent reputation score
     struct ReputationScore {
-        uint points;
-        bool isPositive;
+        uint points; //number of points
+        bool isPositive; //are points negative/positive
     }
 
 
@@ -163,6 +164,12 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, MaintainingPattern {
         require(ITwoKeyCampaignValidator(twoKeyCampaignValidator).isConversionHandlerCodeValid(conversionHandler) == true);
     }
 
+    /**
+     * @notice Function to get all referrers in the chain for specific converter
+     * @param converter is the converter we want to get referral chain
+     * @param acquisitionCampaign is the acquisition campaign contract
+     * @return array of addresses (referrers)
+     */
     function getReferrers(address converter, address acquisitionCampaign) public view returns (address[]) {
         address logicHandlerAddress = getLogicHandlerAddress(acquisitionCampaign);
         return ITwoKeyAcquisitionLogicHandler(logicHandlerAddress).getReferrers(converter, acquisitionCampaign);

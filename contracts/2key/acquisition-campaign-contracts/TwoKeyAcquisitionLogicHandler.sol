@@ -95,6 +95,7 @@ contract TwoKeyAcquisitionLogicHandler {
     }
 
 
+
     function setTwoKeyAcquisitionCampaignContract(address _acquisitionCampaignAddress, address _twoKeySingletoneRegistry) public {
         require(twoKeyAcquisitionCampaign == address(0)); // Means it can be set only once
         twoKeyAcquisitionCampaign = _acquisitionCampaignAddress;
@@ -105,6 +106,10 @@ contract TwoKeyAcquisitionLogicHandler {
     }
 
 
+    /**
+     * @notice Function to get investment rules
+     * @return tuple containing if investment amount is fixed, and lower/upper bound of the same if not (if yes lower = upper)
+     */
     function getInvestmentRules() public view returns (bool,uint,uint) {
         return (isFixedInvestmentAmount, minContributionETHorFiatCurrency, maxContributionETHorFiatCurrency);
     }
@@ -315,6 +320,9 @@ contract TwoKeyAcquisitionLogicHandler {
 
     /**
      * @notice Function to get super statistics
+     * @param _user is the user address we want stats for
+     * @param plasma is if that address is plasma or not
+     * @param is signature in case we're calling this from referrer who doesn't have yet opened wallet
      */
     function getSuperStatistics(address _user, bool plasma, bytes signature) public view returns (bytes) {
         address eth_address = _user;
@@ -344,6 +352,12 @@ contract TwoKeyAcquisitionLogicHandler {
         return abi.encodePacked(userData, isJoined, eth_address, stats);
     }
 
+    /**
+     * @notice Function to return referrers participated in the referral chain
+     * @param customer is the one who converted (bought tokens)
+     * @param acquisitionCampaignContract is the acquisition campaign address
+     * @return array of referrer addresses
+     */
     function getReferrers(address customer, address acquisitionCampaignContract) public view returns (address[]) {
         address influencer = plasmaOf(customer);
         uint n_influencers = 0;
@@ -365,7 +379,7 @@ contract TwoKeyAcquisitionLogicHandler {
             influencers[n_influencers] = influencer;
         }
 
-        return influencers; //reverse ordered array
+        return influencers;
     }
 
     /**
