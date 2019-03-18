@@ -17,7 +17,7 @@ class Conversion(object):
     conversionCreatedAt = 0
     conversionExpiresAt = 0
     isConversionFiat = 0
-    lockupAddress = 0
+    lockupAddress = "0x"
 
     # The class "constructor" - It's actually an initializer
     def __init__(self, contractor, contractorProceedsETHWei, converter, state, conversionAmount,
