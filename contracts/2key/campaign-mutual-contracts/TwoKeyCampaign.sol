@@ -233,6 +233,7 @@ contract TwoKeyCampaign is ArcERC20 {
         contractor.transfer(balance);
     }
 
+
 	/**
  	 * @notice Function where moderator or referrer can withdraw their available funds
  	 * @param _address is the address we're withdrawing funds to

@@ -322,7 +322,7 @@ contract TwoKeyAcquisitionLogicHandler {
      * @notice Function to get super statistics
      * @param _user is the user address we want stats for
      * @param plasma is if that address is plasma or not
-     * @param is signature in case we're calling this from referrer who doesn't have yet opened wallet
+     * @param signature in case we're calling this from referrer who doesn't have yet opened wallet
      */
     function getSuperStatistics(address _user, bool plasma, bytes signature) public view returns (bytes) {
         address eth_address = _user;
