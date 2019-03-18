@@ -33,6 +33,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
         contractor = msg.sender;
         moderator = _moderator;
         twoKeyEventSource = TwoKeyEventSource(ITwoKeySingletoneRegistryFetchAddress(_twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyEventSource"));
+        twoKeyEconomy = TwoKeyEventSource(ITwoKeySingletoneRegistryFetchAddress(_twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyEconomy"));
         ownerPlasma = twoKeyEventSource.plasmaOf(msg.sender);
         received_from[ownerPlasma] = ownerPlasma;
         balances[ownerPlasma] = totalSupply_;
@@ -235,7 +236,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
         uint numberOfInfluencers = influencers.length;
         uint totalBounty2keys = buyTokensFromUpgradableExchange(_maxReferralRewardETHWei, address(this));
         uint cpy = totalBounty2keys;
-        reservedAmountForRewards += totalBounty2keys;
+        reservedAmount2keyForRewards += totalBounty2keys;
 
         for (uint i = 0; i < numberOfInfluencers; i++) {
             uint256 b;
@@ -350,7 +351,10 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
      */
     function getAvailableAndNonReservedTokensAmount() public view returns (uint) {
         uint inventoryBalance = IERC20(assetContractERC20).balanceOf(address(this));
-        return (inventoryBalance - reservedAmountOfTokens - reservedAmountForRewards);
+        if(assetContractERC20 == twoKeyEconomy) {
+            return (inventoryBalance - reservedAmountOfTokens - reservedAmount2keyForRewards);
+        }
+        return (inventoryBalance - reservedAmountOfTokens);
     }
 
     /**
