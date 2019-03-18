@@ -244,6 +244,9 @@ contract TwoKeyPlasmaEvents is Upgradeable {
     }
 
 
+    /**
+    Udi -> Andri ->Eitan ->Nikola
+     */
     function visited(address c, address contractor, bytes sig) public {
         // c - addresss of the contract on ethereum
         // contractor - is the ethereum address of the contractor who created c. a dApp can read this information for free from ethereum.
@@ -273,8 +276,8 @@ contract TwoKeyPlasmaEvents is Upgradeable {
         require(influencers[influencers.length-1] == last_address, 'only the last in the link can call visited');
         visited_sig[c][contractor][last_address] = sig;
 
-        if(campaignToReferrerToCounted[c][old_address] == false && old_address != contractor) {
-            campaignToReferrerToCounted[c][old_address] == true;
+        if(influencers.length > 1 && campaignToReferrerToCounted[c][influencers[influencers.length-2]] == false && influencers[influencers.length-2] != contractor) {
+            campaignToReferrerToCounted[c][influencers[influencers.length-2]] = true;
             campaign2numberOfForwarders[c] ++;
         }
 
