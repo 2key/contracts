@@ -1099,7 +1099,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
             try {
                 const conversionHandlerInstance = await this._getConversionHandlerInstance(campaign);
                 let contractor, contractorProceedsETHWei, converter, state, conversionAmount, maxReferralRewardEthWei, maxReferralRewardTwoKey, moderatorFeeETHWei, baseTokenUnits,
-                bonusTokenUnits, conversionCreatedAt, conversionExpiresAt, isConversionFiat;
+                bonusTokenUnits, conversionCreatedAt, conversionExpiresAt, isConversionFiat, lockupContractAddress;
                 let hexedValues = await promisify(conversionHandlerInstance.getConversion,[conversionId,{from}]);
                 contractor = hexedValues.slice(0, 42);
                 contractorProceedsETHWei = parseInt(hexedValues.slice(42, 42+64),16);
@@ -1114,6 +1114,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 conversionCreatedAt = parseInt(hexedValues.slice(42+64+40+2+64+64+64+64+64+64,42+64+40+2+64+64+64+64+64+64+64),16);
                 conversionExpiresAt = parseInt(hexedValues.slice(42+64+40+2+64+64+64+64+64+64,42+64+40+2+64+64+64+64+64+64+64),16);
                 isConversionFiat = parseInt(hexedValues.slice(42+64+40+2+64+64+64+64+64+64+64+64,42+64+40+2+64+64+64+64+64+64+64+2+64),16) == 1;
+                lockupContractAddress = '0x' + hexedValues.slice(42+64+40+2+64+64+64+64+64+64+64+2+64);
 
                 let obj : IConversionObject = {
                     'contractor' : contractor,
@@ -1129,6 +1130,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     'conversionCreatedAt' : conversionCreatedAt,
                     'conversionExpiresAt' : conversionExpiresAt,
                     'isConversionFiat' : isConversionFiat,
+                    'lockupContractAddress' : lockupContractAddress
                 };
                 resolve(obj);
             } catch (e) {

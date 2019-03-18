@@ -161,8 +161,9 @@ export interface IConversionObject {
     'baseTokenUnits' : number,
     'bonusTokenUnits' : number,
     'conversionCreatedAt' : number,
-    'conversionExpiresAt' : number
-    'isConversionFiat' : boolean
+    'conversionExpiresAt' : number,
+    'isConversionFiat' : boolean,
+    'lockupContractAddress': string,
 }
 
 export interface IConvertOpts {

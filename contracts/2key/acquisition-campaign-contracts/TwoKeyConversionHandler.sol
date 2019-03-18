@@ -257,6 +257,7 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
         uint conversionId
     ) external view returns (bytes) {
         Conversion memory conversion = conversions[conversionId];
+        address lockup = conversionId2LockupAddress[conversionId];
         address empty = address(0);
         if(isConverterAnonymous[conversion.converter] == false) {
             empty = conversion.converter;
@@ -274,7 +275,8 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
             conversion.bonusTokenUnits,
             conversion.conversionCreatedAt,
             conversion.conversionExpiresAt,
-            conversion.isConversionFiat
+            conversion.isConversionFiat,
+            lockup
         );
     }
 
