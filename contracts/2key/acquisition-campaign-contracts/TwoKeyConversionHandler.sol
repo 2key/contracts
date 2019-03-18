@@ -21,7 +21,7 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
 
     using SafeMath for uint256;
 
-    event ConversionCreated(uint indexed conversionId);
+    event ConversionCreated(uint conversionId);
     uint tokensSold;
     uint raisedFundsEthWei;
     uint numberOfConversions;
