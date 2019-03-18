@@ -16,7 +16,15 @@ There should be found `2key/geth:mainnet` under IMAGE. If not, you should run it
 ```angular2html
 yarn run geth:reset
 ```
-
+Create file named `accountsConfig.json` and fill it with following: ---> This is cs
+```angular2html
+{
+  "address" : "<SOME_ADDRESS>",
+  "mnemonic" : "<MNEMONIC_FOR_THAT_ADDRESS>",
+  "mnemonic_private" : "<EMPTY_FOR_NOW>",
+  "infuraApiKey" : "<EMPTY_FOR_NOW>"
+}
+```
 Make sure all the addresses on your geth have some ETH with following command
 ```angular2html
 yarn run test:one 2key-protocol/test/sendETH.spec.ts
