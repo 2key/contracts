@@ -28,6 +28,9 @@ contract TwoKeyAcquisitionLogicHandler {
 
     address public ownerPlasma;
 
+    bool isFixedInvestmentAmount; // This means that minimal contribution is equal maximal contribution
+    bool isAcceptingFiatOnly; // Means that only fiat conversions will be able to execute -> no referral rewards at all
+
     uint256 campaignStartTime; // Time when campaign start
     uint256 campaignEndTime; // Time when campaign ends
 
@@ -62,6 +65,11 @@ contract TwoKeyAcquisitionLogicHandler {
         require(_maxContribution >= _minContribution, "max contribution criteria not satisfied");
         require(_campaignEndTime > _campaignStartTime, "campaign start time can't be greater than end time");
         require(_maxConverterBonusPercent > 0, "max converter bonus percent should be 0");
+
+        if(_minContribution == _maxContribution) {
+            isFixedInvestmentAmount = true;
+        }
+
         contractor = msg.sender;
         minContributionETHorFiatCurrency = _minContribution;
         maxContributionETHorFiatCurrency = _maxContribution;
@@ -86,6 +94,7 @@ contract TwoKeyAcquisitionLogicHandler {
         return false;
     }
 
+
     function setTwoKeyAcquisitionCampaignContract(address _acquisitionCampaignAddress, address _twoKeySingletoneRegistry) public {
         require(twoKeyAcquisitionCampaign == address(0)); // Means it can be set only once
         twoKeyAcquisitionCampaign = _acquisitionCampaignAddress;
@@ -93,6 +102,11 @@ contract TwoKeyAcquisitionLogicHandler {
         twoKeyEventSource = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry)
             .getContractProxyAddress("TwoKeyEventSource");
         ownerPlasma = plasmaOf(contractor);
+    }
+
+
+    function getInvestmentRules() public view returns (bool,uint,uint) {
+        return (isFixedInvestmentAmount, minContributionETHorFiatCurrency, maxContributionETHorFiatCurrency);
     }
 
 
