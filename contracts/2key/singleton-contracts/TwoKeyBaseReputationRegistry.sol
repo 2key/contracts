@@ -48,30 +48,6 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, MaintainingPattern {
         bool isPositive;
     }
 
-    /**
-     * @notice If the conversion created event occured, 5 points for the converter and contractor + 5/distance to referrer
-     * @dev This function can only be called by TwoKeyConversionHandler contract assigned to the Acquisition from method param
-     * @param converter is the address of the converter
-     * @param contractor is the address of the contractor
-     * @param acquisitionCampaign is the address of the acquisition campaign so we can get referrers from there
-     */
-    function updateOnConversionCreatedEvent(address converter, address contractor, address acquisitionCampaign) public {
-        validateCall(acquisitionCampaign);
-        uint d = 1;
-        uint initialRewardWei = 5*(10**18);
-
-        address logicHandlerAddress = getLogicHandlerAddress(acquisitionCampaign);
-
-        address2contractorGlobalReputationScoreWei[contractor] = addToReputationScore(initialRewardWei, address2contractorGlobalReputationScoreWei[contractor]);
-        address2converterGlobalReputationScoreWei[converter] = addToReputationScore(initialRewardWei, address2converterGlobalReputationScoreWei[converter]);
-
-        address[] memory referrers = ITwoKeyAcquisitionLogicHandler(logicHandlerAddress).getReferrers(converter, acquisitionCampaign);
-
-        for(uint i=0; i<referrers.length; i++) {
-            plasmaAddress2referrerGlobalReputationScoreWei[referrers[i]] = addToReputationScore(initialRewardWei/d,plasmaAddress2referrerGlobalReputationScoreWei[referrers[i]]);
-            d = d + 1;
-        }
-    }
 
     /**
      * @notice If the conversion executed event occured, 10 points for the converter and contractor + 10/distance to referrer
@@ -108,18 +84,14 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, MaintainingPattern {
     function updateOnConversionRejectedEvent(address converter, address contractor, address acquisitionCampaign) public {
         validateCall(acquisitionCampaign);
         uint d = 1;
-        uint initialRewardWei = 10*(10**18);
+        uint initialPenaltyWei = 5*(10**18);
 
         address logicHandlerAddress = getLogicHandlerAddress(acquisitionCampaign);
 
-        address2contractorGlobalReputationScoreWei[contractor] = subFromReputationScore(initialRewardWei, address2contractorGlobalReputationScoreWei[contractor]);
-        address2converterGlobalReputationScoreWei[converter] = subFromReputationScore(initialRewardWei, address2converterGlobalReputationScoreWei[converter]);
+        address2contractorGlobalReputationScoreWei[contractor] = subFromReputationScore(initialPenaltyWei, address2contractorGlobalReputationScoreWei[contractor]);
+        address2converterGlobalReputationScoreWei[converter] = subFromReputationScore(initialPenaltyWei, address2converterGlobalReputationScoreWei[converter]);
         address[] memory referrers = ITwoKeyAcquisitionLogicHandler(logicHandlerAddress).getReferrers(converter, acquisitionCampaign);
-
-        for(uint i=0; i<referrers.length; i++) {
-            plasmaAddress2referrerGlobalReputationScoreWei[referrers[i]] = subFromReputationScore(initialRewardWei/d,plasmaAddress2referrerGlobalReputationScoreWei[referrers[i]]);
-            d = d + 1;
-        }
+        plasmaAddress2referrerGlobalReputationScoreWei[referrers[0]] = subFromReputationScore(initialPenaltyWei,plasmaAddress2referrerGlobalReputationScoreWei[referrers[0]]);
     }
 
     /**
