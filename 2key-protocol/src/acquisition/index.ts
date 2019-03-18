@@ -1087,6 +1087,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         })
     }
 
+
     /**
      * Function which gets conversion object, if converter is anonymous will return empty address for him
      * @param campaign
@@ -1116,11 +1117,25 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 isConversionFiat = parseInt(hexedValues.slice(42+64+40+2+64+64+64+64+64+64+64+64,42+64+40+2+64+64+64+64+64+64+64+2+64),16) == 1;
                 lockupContractAddress = '0x' + hexedValues.slice(42+64+40+2+64+64+64+64+64+64+64+2+64);
 
+
+                if(state == 0) {
+                    state = 'PENDING_APPROVAL';
+                } else if(state == 1) {
+                    state = 'APPROVED';
+                } else if(state == 2) {
+                    state = 'EXECUTED';
+                } else if(state == 3) {
+                    state = 'REJECTED';
+                } else if(state == 4) {
+                    state = 'CANCELLED_BY_CONVERTER';
+                }
+
+
                 let obj : IConversionObject = {
                     'contractor' : contractor,
                     'contractorProceedsETHWei' : parseFloat(this.utils.fromWei(contractorProceedsETHWei, 'ether').toString()),
                     'converter' : converter,
-                    'state' : parseInt(state,10).toString(),
+                    'state' : state.toString(),
                     'conversionAmount' : parseFloat(this.utils.fromWei(conversionAmount, 'ether').toString()),
                     'maxReferralRewardEthWei' : parseFloat(this.utils.fromWei(maxReferralRewardEthWei, 'ether').toString()),
                     'maxReferralReward2key' : parseFloat(this.utils.fromWei(maxReferralRewardTwoKey, 'ether').toString()),
