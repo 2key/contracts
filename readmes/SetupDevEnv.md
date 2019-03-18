@@ -16,7 +16,7 @@ There should be found `2key/geth:mainnet` under IMAGE. If not, you should run it
 ```angular2html
 yarn run geth:reset
 ```
-Create file named `accountsConfig.json` and fill it with following: ---> This is cs
+Create file named `accountsConfig.json` and fill it with following:
 ```angular2html
 {
   "address" : "<SOME_ADDRESS>",
