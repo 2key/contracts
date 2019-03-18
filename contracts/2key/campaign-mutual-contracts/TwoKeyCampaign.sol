@@ -22,6 +22,8 @@ contract TwoKeyCampaign is ArcERC20 {
 	TwoKeyEventSource twoKeyEventSource; // Address of TwoKeyEventSource contract
 
 	address public twoKeySingletonesRegistry; // Address of Registry of all singleton contracts
+	address assetContractERC20; // Asset contract is address of ERC20 inventory
+
 
 	address public contractor; //contractor address
     address public moderator; //moderator address
@@ -253,12 +255,9 @@ contract TwoKeyCampaign is ArcERC20 {
 		} else {
 			address _referrer = twoKeyEventSource.plasmaOf(_address);
 			if(referrerPlasma2Balances2key[_referrer] != 0) {
-				address twoKeyEconomy =
-					ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry)
-					.getNonUpgradableContractAddress("TwoKeyEconomy");
 				balance = referrerPlasma2Balances2key[_referrer];
 				referrerPlasma2Balances2key[_referrer] = 0;
-				IERC20(twoKeyEconomy).transfer(_address,balance);
+				IERC20(assetContractERC20).transfer(_address,balance);
 				reservedAmountForRewards -= balance;
 			} else {
 				revert();

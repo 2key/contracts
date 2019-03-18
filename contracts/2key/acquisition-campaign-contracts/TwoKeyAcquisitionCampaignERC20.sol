@@ -20,8 +20,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
     mapping(address => uint256) private unitsConverterBought; // Number of units (ERC20 tokens) bought
     mapping(address => uint256) private referrerPlasma2cut; // Mapping representing how much are cuts in percent(0-100) for referrer address
 
-    address assetContractERC20; // Asset contract is address of ERC20 inventory
-
     uint reservedAmountOfTokens;
 
     constructor(
