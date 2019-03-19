@@ -494,14 +494,15 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @returns {Promise<number | string | BigNumber>}
      */
     public async checkInventoryBalance(campaign: any, from: string): Promise<number | string | BigNumber> {
-        try {
-            const campaignInstance = await this._getCampaignInstance(campaign);
-
-            const balance = await this.erc20.getERC20Balance(this.base.twoKeyEconomy.address, campaignInstance.address);
-            return Promise.resolve(balance);
-        } catch (err) {
-            Promise.reject(err);
-        }
+        return new Promise(async(resolve,reject) => {
+            try {
+                const campaignInstance = await this._getCampaignInstance(campaign);
+                let availableBalance = await promisify(campaignInstance.getAvailableAndNonReservedTokensAmount,[{from}]);
+                resolve(parseFloat(this.utils.fromWei(availableBalance, 'ether').toString()));
+            } catch (e) {
+                reject(e);
+            }
+        })
     }
 
     /**
