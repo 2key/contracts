@@ -17,8 +17,8 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
     uint powerLawFactor = 2;
 
     string campaignName; // Name of the campaign
-    string publicMetaHash; // Ipfs hash of public informations
-    string privateMetaHash; //TODO: Is there a need for private
+    bytes32 publicMetaHash; // Ipfs hash of public informations
+    bytes32 privateMetaHash; //TODO: Is there a need for private
     uint campaignStartTime; // Time when campaign starts
     uint campaignEndTime; // Time when campaign ends
     uint minDonationAmount; // Minimal donation amount
@@ -55,14 +55,15 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         address donator;
         uint amount;
         uint donationTimestamp;
-        uint referrerRewards;
+        uint referrerRewardsEthWei;
+        uint totalBounty2key;
     }
 
     constructor(
         address _moderator,
         string _campaignName,
-        string _publicMetaHash,
-        string _privateMetaHash,
+        bytes32 _publicMetaHash,
+        bytes32 _privateMetaHash,
         string tokenName,
         string tokenSymbol,
         uint [] values,
@@ -184,6 +185,14 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
     function distributeReferrerRewards(address converter, uint totalBountyForConversion, uint donationId) internal {
         address[] memory referrers = getReferrers(converter);
         uint numberOfReferrers = referrers.length;
+
+        uint totalBountyTokens = buyTokensFromUpgradableExchange(totalBountyForConversion, address(this));
+
+        // Update donation object
+        DonationEther d = donations[donationId];
+        d.totalBounty2key = totalBountyTokens;
+
+        //Distribute rewards based on model selected
         if(rewardsModel == IncentiveModel.AVERAGE) {
             uint reward = IncentiveModels.averageModelRewards(totalBountyForConversion, numberOfReferrers);
             for(uint i=0; i<numberOfReferrers; i++) {
@@ -222,7 +231,7 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
     function joinAndDonate(bytes signature) public goalValidator onlyInDonationLimit isOngoing payable {
         distributeArcsBasedOnSignature(signature);
         uint referrerReward = (msg.value).mul(maxReferralRewardPercent).div(100);
-        DonationEther memory donation = DonationEther(msg.sender, msg.value, block.timestamp, referrerReward);
+        DonationEther memory donation = DonationEther(msg.sender, msg.value, block.timestamp, referrerReward, 0);
         uint id = donations.length; // get donation id
         donations.push(donation); // add donation to array of donations
         donatorToHisDonationsInEther[msg.sender].push(id); // accounting for the donator
@@ -236,7 +245,7 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         address _converterPlasma = twoKeyEventSource.plasmaOf(msg.sender);
         require(received_from[_converterPlasma] != address(0));
         uint referrerReward = (msg.value).mul(maxReferralRewardPercent).div(100);
-        DonationEther memory donation = DonationEther(msg.sender, msg.value, block.timestamp, referrerReward);
+        DonationEther memory donation = DonationEther(msg.sender, msg.value, block.timestamp, referrerReward, 0);
         uint id = donations.length; // get donation id
         donations.push(donation); // add donation to array of donations
         donatorToHisDonationsInEther[msg.sender].push(id); // accounting for the donator
@@ -302,7 +311,8 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
             donation.donator,
             donation.amount,
             donation.donationTimestamp,
-            donation.referrerRewards
+            donation.referrerRewardsEthWei,
+            donation.totalBounty2key
         );
     }
 
