@@ -55,10 +55,8 @@ contract TwoKeyContract is BasicToken, Ownable {
       return me;
     }
     address plasma = registry.ethereum2plasma(me);
-    if (plasma == address(0)) {
-      return me;
-    }
-//    require(plasma != address(0), 'unregistered user');
+    require(plasma != address(0),'your plasma address was not found in registry');
+
     return plasma;
   }
 
