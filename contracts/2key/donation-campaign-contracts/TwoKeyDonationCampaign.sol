@@ -188,7 +188,7 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
 
         uint totalBountyTokens = buyTokensFromUpgradableExchange(totalBountyForConversion, address(this));
 
-        // Update donation object
+        // Update donation object (directly in the storage)
         DonationEther d = donations[donationId];
         d.totalBounty2key = totalBountyTokens;
 
