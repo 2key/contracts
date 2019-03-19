@@ -5,6 +5,7 @@ import "./InvoiceTokenERC20.sol";
 import "../campaign-mutual-contracts/TwoKeyCampaign.sol";
 import "../libraries/IncentiveModels.sol";
 import "../campaign-mutual-contracts/TwoKeyCampaignIncentiveModels.sol";
+import "../TwoKeyConverterStates.sol";
 
 /**
  * @author Nikola Madjarevic
@@ -31,9 +32,10 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
 
     mapping(address => uint) amountUserContributed; //If amount user contributed is > 0 means he's a converter
     mapping(address => uint[]) donatorToHisDonationsInEther;
+
     DonationEther[] donations;
 
-
+    
     modifier isOngoing {
         require(now >= campaignStartTime && now <= campaignEndTime, "Campaign expired or not started yet");
         _;
@@ -67,13 +69,6 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         string tokenName,
         string tokenSymbol,
         uint [] values,
-//        uint _maxReferralRewardPercent,
-//        uint _campaignStartTime,
-//        uint _campaignEndTime,
-//        uint _minDonationAmount,
-//        uint _maxDonationAmount,
-//        uint _campaignGoal,
-//        uint _conversionQuota,
         bool _shouldConvertToReffer,
         bool _isKYCRequired,
         address _twoKeySingletonesRegistry,
@@ -235,7 +230,7 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         uint id = donations.length; // get donation id
         donations.push(donation); // add donation to array of donations
         donatorToHisDonationsInEther[msg.sender].push(id); // accounting for the donator
-        amountUserContributed[msg.sender] += msg.value;
+        amountUserContributed[msg.sender] += msg.value; // user contributions
     }
 
     /**
@@ -267,7 +262,7 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         //TODO: What is the requirement just to donate money
     }
 
-    function getAmountUserContributed(address _donator) public view returns (uint) {
+    function getAmountUserDonated(address _donator) public view returns (uint) {
         require(
             msg.sender == contractor ||
             msg.sender == _donator ||
@@ -327,7 +322,8 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
             maxDonationAmount,
             maxReferralRewardPercent,
             campaignName,
-            publicMetaHash
+            publicMetaHash,
+            shouldConvertToRefer
         );
     }
 
