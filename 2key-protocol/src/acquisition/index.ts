@@ -1633,6 +1633,9 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 const campaignInstance = await this._getCampaignInstance(campaign, skipCache);
                 let [,,,contributionsPerReferrer] =
                     await promisify(campaignInstance.getReferrerBalanceAndTotalEarningsAndNumberOfConversions,['0x0',signature, conversionIds]);
+                for(let i=0; i<contributionsPerReferrer.length; i++) {
+                    contributionsPerReferrer[i] = parseFloat(this.utils.fromWei(contributionsPerReferrer[i], 'ether').toString())
+                }
                 resolve(contributionsPerReferrer);
             } catch (e) {
                 reject(e);
