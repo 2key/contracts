@@ -447,22 +447,3 @@ How to deploy contracts to any network except local dev
 * wait until process finish
 * check both repos contracts and 2key-protocol should have same tags
 
-
-
-# Docker testnet
-
-You need docker installed on your machine [See here](https://www.docker.com)
-
-```
-npm run geth:stop
-rm -rf ./build/geth.dev
-npm run geth
-```
-
-
-Chaindata stored in ```./build/geth.dev``` you can remove it if need clean
-To run docker
-```npm run geth```
-you can close console if needed docker will continue work
-To stop docker
-```npm run geth:stop```
