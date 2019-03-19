@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 import './TwoKeyContract.sol';
 import './TwoKeySignedContract.sol';
-import './Call.sol';
+import '../../libraries/Call.sol';
 
 contract TwoKeyWeightedVoteContract is TwoKeySignedPresellContract {
   constructor(TwoKeyReg _reg, TwoKeyEventSource _eventSource, string _name, string _symbol,

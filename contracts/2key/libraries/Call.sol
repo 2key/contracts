@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
 library Call {
-    function params0(address c, bytes _method) public view returns (uint answer) {
+   function params0(address c, bytes _method) public view returns (uint answer) {
         // https://medium.com/@blockchain101/calling-the-function-of-another-contract-in-solidity-f9edfa921f4c
         //    dc = c;
         bytes4 sig = bytes4(keccak256(_method));
@@ -81,10 +81,10 @@ library Call {
             ptr,  //Store output over input
             0x20) //Outputs are 1 uint long
 
-        // TODO cause revert
-        //            if eq(result, 0) {
-        //                revert(0, 0)
-        //            }
+            // TODO cause revert
+//            if eq(result, 0) {
+//                revert(0, 0)
+//            }
 
             answer := mload(ptr) // Assign output to answer var
             mstore(0x40,add(ptr,0x20)) // Set storage pointer to new space
@@ -200,20 +200,26 @@ library Call {
                 idx++;
 
 
-                if (msg_len == 41)  // 1+20+20
+                if (msg_len == 41)  // 1+20+20 version 0
                 {
                     influencers[count_influencers] = loadAddress(sig, idx);
                     idx += 20;
-                } else if (msg_len == 86)  // 1+65+20
+                    keys[count_influencers] = loadAddress(sig, idx);
+                    idx += 20;
+                } else if (msg_len == 86)  // 1+65+20 version 1
                 {
+                    keys[count_influencers] = loadAddress(sig, idx+65);
                     influencers[count_influencers] = recoverHash(
-                        keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to weight")),keccak256(abi.encodePacked(weights[count_influencers])))),
-                        sig,idx);
+                        keccak256(
+                            abi.encodePacked(
+                                keccak256(abi.encodePacked("bytes binding to weight","bytes binding to public")),
+                                keccak256(abi.encodePacked(weights[count_influencers],keys[count_influencers]))
+                            )
+                        ),sig,idx);
                     idx += 65;
+                    idx += 20;
                 }
 
-                keys[count_influencers] = loadAddress(sig, idx);
-                idx += 20;
             } else {
                 // handle short signatures generated with free_take
                 influencers[count_influencers] = last_address;

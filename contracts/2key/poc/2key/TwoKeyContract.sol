@@ -5,7 +5,7 @@ import '../../../openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import "../../../openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
 import './TwoKeyEventSource.sol';
 import './TwoKeyReg.sol';
-import './Call.sol';
+import '../../libraries/Call.sol';
 
 /**
  * @title Standard ERC20 token
