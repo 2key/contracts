@@ -26,9 +26,10 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
     uint maxReferralRewardPercent; // Percent per conversion which goes to referrers
     uint campaignGoal; // Goal of the campaign, how many funds to raise
     bool shouldConvertToRefer; // If yes, means that referrer must be converter in order to be referrer
+    bool isKYCRequired;
     IncentiveModel rewardsModel; //Incentive model for rewards
 
-    mapping(address => uint) amountUserContributed;
+    mapping(address => uint) amountUserContributed; //If amount user contributed is > 0 means he's a converter
     mapping(address => uint[]) donatorToHisDonationsInEther;
     DonationEther[] donations;
 
@@ -71,10 +72,13 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         uint _maxDonationAmount,
         uint _campaignGoal,
         uint _conversionQuota,
+        bool _shouldConvertToReffer,
+        bool _isKYCRequired,
         address _twoKeySingletonesRegistry,
-        IncentiveModel _rewardsModel //Handled as uint on the FE
+        IncentiveModel _rewardsModel
     ) public {
         erc20InvoiceToken = new InvoiceTokenERC20(tokenName,tokenSymbol,address(this));
+
         moderator = _moderator;
         campaignName = _campaignName;
         publicMetaHash = _publicMetaHash;
@@ -86,6 +90,10 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         maxDonationAmount = _maxDonationAmount;
         campaignGoal = _campaignGoal;
         conversionQuota = _conversionQuota;
+
+        shouldConvertToRefer = _shouldConvertToReffer;
+        isKYCRequired = _isKYCRequired;
+
         twoKeySingletonesRegistry = _twoKeySingletonesRegistry;
         rewardsModel = _rewardsModel;
         contractor = msg.sender;
@@ -111,6 +119,11 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         // TODO: Handle failing of this function if the referral chain is too big
         uint numberOfInfluencers = influencers.length;
         for (i = 0; i < numberOfInfluencers; i++) {
+            //Validate that the user is converter in order to join
+            if(shouldConvertToRefer == true) {
+                address eth_address_influencer = twoKeyEventSource.ethereumOf(influencers[i]);
+                require(amountUserContributed[eth_address_influencer] > 0);
+            }
             new_address = twoKeyEventSource.plasmaOf(influencers[i]);
             if (received_from[new_address] == 0) {
                 transferFrom(old_address, new_address, 1);

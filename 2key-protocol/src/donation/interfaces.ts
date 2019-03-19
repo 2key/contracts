@@ -23,6 +23,8 @@ export interface ICreateCampaign {
     maxDonationAmount: number,
     campaignGoal: number,
     conversionQuota: number,
+    shouldConvertToRefer: boolean,
+    isKYCRequired: boolean,
     incentiveModel: number
 }
 

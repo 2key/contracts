@@ -83,6 +83,8 @@ export default class DonationCampaign implements IDonationCampaign {
                         data.maxDonationAmount,
                         data.campaignGoal,
                         data.conversionQuota,
+                        data.shouldConvertToRefer,
+                        data.isKYCRequired,
                         this.base.twoKeySingletonesRegistry.address,
                         data.incentiveModel
                     ],
