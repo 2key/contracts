@@ -358,14 +358,13 @@ Assuming we previously created 5 acounts. The password file should have a line w
 ## TESTNET Docker
 To run geth in docker please follow next steps:
 * [Install Docker](https://www.docker.com/get-started)
-* ```npm run geth``` - to run build & run docker container
-* ```npm run geth:stop``` - to stop docker container
-* ```npm run geth:reset``` - to reset geth data folder (be carefull it will destroy all private node data)
+* ```yarn run geth``` - to run build & run docker container
+* ```yarn run geth:stop``` - to stop docker container
+* ```yarn run geth:reset``` - to reset geth data folder (be carefull it will destroy all private node data)
 * Please notice that mining take a lot of hardware recources
 * Default exposed ports 8585 - rpc, 8546 - websockets
 * geth runs with 12 addresses if you need more please change ./geth/docker/genesis.2key.json ./geth/docker/key.prv ./geth/docker/passwords and ./geth/docker/geth.bash
 * First time run takes some time to generate all neccessary data
-* All steps before valid only for unix based OS if you have Windows based ping Adnrii Pindiura for a help
 
 ## Remix
 
