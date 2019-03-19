@@ -15,6 +15,8 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
     address public conversionHandler;
     address public twoKeyAcquisitionLogicHandler;
 
+    address assetContractERC20; // Asset contract is address of ERC20 inventory
+
     mapping(address => uint256) private amountConverterSpentFiatWei;
     mapping(address => uint256) private amountConverterSpentEthWEI; // Amount converter put to the contract in Ether
     mapping(address => uint256) private unitsConverterBought; // Number of units (ERC20 tokens) bought

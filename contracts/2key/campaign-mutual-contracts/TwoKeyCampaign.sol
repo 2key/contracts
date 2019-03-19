@@ -20,10 +20,7 @@ contract TwoKeyCampaign is ArcERC20 {
 	using Call for *;
 
 	TwoKeyEventSource twoKeyEventSource; // Address of TwoKeyEventSource contract
-	address twoKeyEconomy;
 	address public twoKeySingletonesRegistry; // Address of Registry of all singleton contracts
-	address assetContractERC20; // Asset contract is address of ERC20 inventory
-
 
 	address public contractor; //contractor address
     address public moderator; //moderator address
@@ -234,6 +231,7 @@ contract TwoKeyCampaign is ArcERC20 {
     }
 
 
+
 	/**
  	 * @notice Function where moderator or referrer can withdraw their available funds
  	 * @param _address is the address we're withdrawing funds to
@@ -255,10 +253,13 @@ contract TwoKeyCampaign is ArcERC20 {
 			buyTokensFromUpgradableExchange(networkFee,twoKeyDeepFreezeTokenPool);
 		} else {
 			address _referrer = twoKeyEventSource.plasmaOf(_address);
+			address twoKeyEconomy =
+			ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry)
+			.getContractProxyAddress("TwoKeyDeepFreezeTokenPool");
 			if(referrerPlasma2Balances2key[_referrer] != 0) {
 				balance = referrerPlasma2Balances2key[_referrer];
 				referrerPlasma2Balances2key[_referrer] = 0;
-				IERC20(assetContractERC20).transfer(_address,balance);
+				IERC20(twoKeyEconomy).transfer(_address,balance);
 				reservedAmount2keyForRewards -= balance;
 			} else {
 				revert();
