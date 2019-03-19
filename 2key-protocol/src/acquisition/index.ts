@@ -494,11 +494,11 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @returns {Promise<number | string | BigNumber>}
      */
     public async checkInventoryBalance(campaign: any, from: string): Promise<number | string | BigNumber> {
-        return new Promise(async(resolve,reject) => {
+        return new Promise<number>(async(resolve,reject) => {
             try {
                 const campaignInstance = await this._getCampaignInstance(campaign);
                 let availableBalance = await promisify(campaignInstance.getAvailableAndNonReservedTokensAmount,[{from}]);
-                resolve(parseFloat(this.utils.fromWei(availableBalance, 'ether').toString()));
+                resolve(availableBalance);
             } catch (e) {
                 reject(e);
             }
