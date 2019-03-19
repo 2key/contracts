@@ -12,8 +12,9 @@ Make sure you have local geth running.
 docker ps
 ```
 There should be found `2key/geth:mainnet` under IMAGE. If not, you should run it: 
-```
+
 To run geth in docker please follow next steps:
+
 * [Install Docker](https://www.docker.com/get-started)
 * ```yarn run geth``` - to run build & run docker container
 * ```yarn run geth:stop``` - to stop docker container
@@ -22,7 +23,7 @@ To run geth in docker please follow next steps:
 * Default exposed ports 8585 - rpc, 8546 - websockets
 * geth runs with 12 addresses if you need more please change ./geth/docker/genesis.2key.json ./geth/docker/key.prv ./geth/docker/passwords and ./geth/docker/geth.bash
 * First time run takes some time to generate all neccessary data
-```
+
 
 Create file named `accountsConfig.json` in the root and fill it with following:
 ```angular2html
