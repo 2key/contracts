@@ -15,38 +15,38 @@ contract TwoKeyEventSource is Upgradeable, MaintainingPattern {
     address twoKeyCampaignValidator;
 
     event Created(
-        address indexed _campaign,
-        address indexed _owner,
-        address indexed _moderator
+        address _campaign,
+        address _owner,
+        address _moderator
     );
 
     event Joined(
-        address indexed _campaign,
-        address indexed _from,
-        address indexed _to
+        address _campaign,
+        address _from,
+        address _to
     );
 
     event Converted(
-        address indexed _campaign,
-        address indexed _converter,
+        address _campaign,
+        address _converter,
         uint256 _amount
     );
 
     event Rewarded(
-        address indexed _campaign,
-        address indexed _to,
+        address _campaign,
+        address _to,
         uint256 _amount
     );
 
     event Cancelled(
-        address indexed _campaign,
-        address indexed _converter,
+        address _campaign,
+        address _converter,
         uint256 _indexOrAmount
     );
 
     event Rejected(
-        address indexed _campaign,
-        address indexed _converter
+        address _campaign,
+        address _converter
     );
 
     event UpdatedPublicMetaHash(
@@ -158,9 +158,6 @@ contract TwoKeyEventSource is Upgradeable, MaintainingPattern {
      * @return an address
      */
     function plasmaOf(address me) public view returns (address) {
-        if (twoKeyRegistry == address(0)) {
-            me;
-        }
         address plasma = ITwoKeyReg(twoKeyRegistry).getEthereumToPlasma(me);
         if (plasma != address(0)) {
             return plasma;
@@ -174,9 +171,6 @@ contract TwoKeyEventSource is Upgradeable, MaintainingPattern {
      * @return ethereum address
      */
     function ethereumOf(address me) public view returns (address) {
-        if (twoKeyRegistry == address(0)) {
-            return me;
-        }
         address ethereum = ITwoKeyReg(twoKeyRegistry).getPlasmaToEthereum(me);
         if (ethereum != address(0)) {
             return ethereum;
