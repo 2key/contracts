@@ -65,13 +65,14 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         string _privateMetaHash,
         string tokenName,
         string tokenSymbol,
-        uint _maxReferralRewardPercent,
-        uint _campaignStartTime,
-        uint _campaignEndTime,
-        uint _minDonationAmount,
-        uint _maxDonationAmount,
-        uint _campaignGoal,
-        uint _conversionQuota,
+        uint [] values,
+//        uint _maxReferralRewardPercent,
+//        uint _campaignStartTime,
+//        uint _campaignEndTime,
+//        uint _minDonationAmount,
+//        uint _maxDonationAmount,
+//        uint _campaignGoal,
+//        uint _conversionQuota,
         bool _shouldConvertToReffer,
         bool _isKYCRequired,
         address _twoKeySingletonesRegistry,
@@ -83,13 +84,13 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         campaignName = _campaignName;
         publicMetaHash = _publicMetaHash;
         privateMetaHash = _privateMetaHash;
-        maxReferralRewardPercent = _maxReferralRewardPercent;
-        campaignStartTime = _campaignStartTime;
-        campaignEndTime = _campaignEndTime;
-        minDonationAmount = _minDonationAmount;
-        maxDonationAmount = _maxDonationAmount;
-        campaignGoal = _campaignGoal;
-        conversionQuota = _conversionQuota;
+        maxReferralRewardPercent = values[0];
+        campaignStartTime = values[1];
+        campaignEndTime = values[2];
+        minDonationAmount = values[3];
+        maxDonationAmount = values[4];
+        campaignGoal = values[5];
+        conversionQuota = values[6];
 
         shouldConvertToRefer = _shouldConvertToReffer;
         isKYCRequired = _isKYCRequired;
