@@ -1,8 +1,8 @@
 pragma solidity ^0.4.24; //We have to specify what version of compiler this code will use
 
-import "../openzeppelin-solidity/contracts/token/ERC20/BasicToken.sol";
-import '../openzeppelin-solidity/contracts/ownership/Ownable.sol';
-import "../openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
+import "../../../openzeppelin-solidity/contracts/token/ERC20/BasicToken.sol";
+import '../../../openzeppelin-solidity/contracts/ownership/Ownable.sol';
+import "../../../openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
 import './TwoKeyEventSource.sol';
 import './TwoKeyReg.sol';
 import './Call.sol';
@@ -14,7 +14,7 @@ import './Call.sol';
  * @dev https://github.com/ethereum/EIPs/issues/20
  * @dev Based on code by FirstBlood: https://github.com/Firstbloodio/token/blob/master/smart_contract/FirstBloodToken.sol
  */
-contract TwoKeyContract is BasicToken, Ownable {
+contract TwoKeyContract is StandardToken, Ownable {
   event Fulfilled(address indexed to, uint256 units);
   event Rewarded(address indexed to, uint256 amount);
   event Log1(string s, uint256 units);

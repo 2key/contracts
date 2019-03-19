@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
-import '../openzeppelin-solidity/contracts/lifecycle/Destructible.sol';
-import '../openzeppelin-solidity/contracts/ownership/Ownable.sol';
+import '../../../openzeppelin-solidity/contracts/lifecycle/Destructible.sol';
+import '../../../openzeppelin-solidity/contracts/ownership/Ownable.sol';
 
 import './TwoKeyEconomy.sol';
 import './TwoKeyUpgradableExchange.sol';
