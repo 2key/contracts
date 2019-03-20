@@ -33,13 +33,6 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
     mapping(address => uint) amountUserContributed; //If amount user contributed is > 0 means he's a converter
     mapping(address => uint[]) donatorToHisDonationsInEther;
 
-    //Referral accounting stuff
-    mapping(address => uint256) internal referrerPlasma2TotalEarnings2key; // Total earnings for referrers
-    mapping(address => uint256) internal referrerPlasmaAddressToCounterOfConversions; // [referrer][conversionId]
-    mapping(address => mapping(uint256 => uint256)) internal referrerPlasma2EarningsPerConversion;
-
-
-
     DonationEther[] donations;
 
 
