@@ -231,7 +231,7 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
         if(conversion.isConversionFiat == false) {
             ITwoKeyBaseReputationRegistry(twoKeyBaseReputationRegistry).updateOnConversionExecutedEvent(conversion.converter, contractor, twoKeyAcquisitionCampaignERC20);
             totalReward2keys = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateRefchainRewards(conversion.maxReferralRewardETHWei, conversion.converter, _conversionId);
-            totalBounty = totalBounty.add(conversion.maxReferralRewardETHWei);
+            totalBounty = totalBounty.add(totalReward2keys);
             // update moderator balances
             ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateModeratorBalanceETHWei(conversion.moderatorFeeETHWei);
             raisedFundsEthWei = raisedFundsEthWei + conversion.conversionAmount;
