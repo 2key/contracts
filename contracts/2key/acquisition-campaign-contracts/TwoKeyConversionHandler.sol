@@ -230,13 +230,14 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
         //Update total raised funds
         if(conversion.isConversionFiat == false) {
             ITwoKeyBaseReputationRegistry(twoKeyBaseReputationRegistry).updateOnConversionExecutedEvent(conversion.converter, contractor, twoKeyAcquisitionCampaignERC20);
-            totalReward2keys = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateRefchainRewards(conversion.maxReferralRewardETHWei, conversion.converter, _conversionId);
+            totalReward2keys = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).buyTokensAndDistributeReferrerRewards(conversion.maxReferralRewardETHWei, conversion.converter, _conversionId);
             totalBounty = totalBounty.add(totalReward2keys);
             // update moderator balances
             ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateModeratorBalanceETHWei(conversion.moderatorFeeETHWei);
-            raisedFundsEthWei = raisedFundsEthWei + conversion.conversionAmount;
             ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateReservedAmountOfTokensIfConversionRejectedOrExecuted(totalUnits);
             ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateContractorProceeds(conversion.contractorProceedsETHWei);
+            raisedFundsEthWei = raisedFundsEthWei + conversion.conversionAmount;
+
         }
 
         conversion.maxReferralReward2key = totalReward2keys;
@@ -383,7 +384,7 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
     /// @notice Function where we can reject converter
     /// @dev only maintainer or contractor can call this function
     /// @param _converter is the address of converter
-    function rejectConverter(address _converter) public onlyContractorOrMaintainer  {
+    function rejectConverter(address _converter) public onlyContractorOrMaintainer {
         require(converterToState[_converter] == ConverterState.PENDING_APPROVAL);
         moveFromPendingToRejectedState(_converter);
         uint reservedAmount = 0;
