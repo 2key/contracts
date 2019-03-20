@@ -5,7 +5,6 @@ import "../MaintainingPattern.sol";
 import "../interfaces/ITwoKeyReg.sol";
 import "../interfaces/ITwoKeyAdmin.sol";
 import "../interfaces/ITwoKeyCampaignValidator.sol";
-import "../interfaces/ITwoKeyRegistryEvents.sol";
 
 contract TwoKeyEventSource is Upgradeable, MaintainingPattern {
 
@@ -104,8 +103,8 @@ contract TwoKeyEventSource is Upgradeable, MaintainingPattern {
      * @dev this function updates values in TwoKeyRegistry contract
      */
     function created(address _campaign, address _owner, address _moderator) external onlyValidator {
-        ITwoKeyRegistryEvents(twoKeyRegistry).addWhereContractor(_owner, _campaign);
-        ITwoKeyRegistryEvents(twoKeyRegistry).addWhereModerator(_moderator, _campaign);
+        ITwoKeyReg(twoKeyRegistry).addWhereContractor(_owner, _campaign);
+        ITwoKeyReg(twoKeyRegistry).addWhereModerator(_moderator, _campaign);
         emit Created(_campaign, _owner, _moderator);
     }
 
@@ -117,7 +116,7 @@ contract TwoKeyEventSource is Upgradeable, MaintainingPattern {
      * @dev this function updates values in TwoKeyRegistry contract
      */
     function joined(address _campaign, address _from, address _to) external onlyAllowedContracts {
-        ITwoKeyRegistryEvents(twoKeyRegistry).addWhereReferrer(_campaign, _from);
+        ITwoKeyReg(twoKeyRegistry).addWhereReferrer(_campaign, _from);
         emit Joined(_campaign, _from, _to);
     }
 
@@ -129,7 +128,7 @@ contract TwoKeyEventSource is Upgradeable, MaintainingPattern {
      * @dev this function updates values in TwoKeyRegistry contract
      */
     function converted(address _campaign, address _converter, uint256 _amountETHWei) external onlyAllowedContracts {
-        ITwoKeyRegistryEvents(twoKeyRegistry).addWhereConverter(_converter, _campaign);
+        ITwoKeyReg(twoKeyRegistry).addWhereConverter(_converter, _campaign);
         emit Converted(_campaign, _converter, _amountETHWei);
     }
 
@@ -153,13 +152,12 @@ contract TwoKeyEventSource is Upgradeable, MaintainingPattern {
         emit Cancelled(_campaign, _converter, _indexOrAmount);
     }
 
-    /**
-     * @notice Function to determine plasma address of ethereum address
-     * @param me is the address (ethereum) of the user
-     * @return an address
-     */
     function plasmaOf(address me) public view returns (address) {
-        return ITwoKeyRegistryEvents(twoKeyRegistry).getEthereumToPlasma(me);
+        address plasma = ITwoKeyReg(twoKeyRegistry).getEthereumToPlasma(me);
+        if (plasma != address(0)) {
+            return plasma;
+        }
+        return me;
     }
 
     /**
@@ -168,8 +166,11 @@ contract TwoKeyEventSource is Upgradeable, MaintainingPattern {
      * @return ethereum address
      */
     function ethereumOf(address me) public view returns (address) {
-        return ITwoKeyRegistryEvents(twoKeyRegistry).getPlasmaToEthereum(me);
-
+        address ethereum = ITwoKeyReg(twoKeyRegistry).getPlasmaToEthereum(me);
+        if (ethereum != address(0)) {
+            return ethereum;
+        }
+        return me;
     }
 
     /**
