@@ -35,7 +35,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
         contractor = msg.sender;
         moderator = _moderator;
         twoKeyEventSource = TwoKeyEventSource(ITwoKeySingletoneRegistryFetchAddress(_twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyEventSource"));
-        twoKeyEconomy = TwoKeyEventSource(ITwoKeySingletoneRegistryFetchAddress(_twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyEconomy"));
+        twoKeyEconomy = ITwoKeySingletoneRegistryFetchAddress(_twoKeySingletonesRegistry).getNonUpgradableContractAddress("TwoKeyEconomy");
         ownerPlasma = twoKeyEventSource.plasmaOf(msg.sender);
         received_from[ownerPlasma] = ownerPlasma;
         balances[ownerPlasma] = totalSupply_;
