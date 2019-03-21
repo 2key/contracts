@@ -42,8 +42,6 @@ contract TwoKeyAcquisitionLogicHandler {
     uint unit_decimals; // ERC20 selling data
     uint maxConverterBonusPercent; // Maximal bonus percent per converter
 
-    string public publicMetaHash; // Ipfs hash of json campaign object
-    string public privateMetaHash; // Ipfs hash of json sensitive (contractor) information
     string public currency; // Currency campaign is currently in
 
     //Referral accounting stuff
@@ -205,27 +203,6 @@ contract TwoKeyAcquisitionLogicHandler {
         maxContributionETHorFiatCurrency = value;
         //        twoKeyEventSource.updatedData(block.timestamp, value, "Updated maxContribution");
     }
-
-    /**
-     * @notice Function to update /set publicMetaHash
-     * @dev only Contractor can call this function, otherwise it will revert - emits Event when set/updated
-     * @param value is the value for the publicMetaHash
-     */
-    function updateOrSetIpfsHashPublicMeta(string value) public onlyContractor {
-        publicMetaHash = value;
-        //        twoKeyEventSource.updatedPublicMetaHash(block.timestamp, value);
-    }
-
-
-    /**
-     * @notice Setter for privateMetaHash
-     * @dev only Contractor can call this method, otherwise function will revert
-     * @param _privateMetaHash is string representation of private metadata hash
-     */
-    function setPrivateMetaHash(string _privateMetaHash) public onlyContractor {
-        privateMetaHash = _privateMetaHash;
-    }
-
 
     /**
      * @notice Get all constants from the contract
