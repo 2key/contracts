@@ -41,8 +41,6 @@ const links = {
  */
 
 let campaignName = 'Donation for Some Services';
-let publicMetaHash = 'QmWWQSuPMS6aXCbZKpEjPHPUZN2NjB3YrhJTHsV4X3vb2t';
-let privateMetaHash = 'QmWWQSuPMS6aXCbZKpEjPHPUZN2NjB3YrhJTHsV4X3vb2t';
 let tokenName = 'NikolaToken';
 let tokenSymbol = 'NTKN';
 let maxReferralRewardPercent = 5;
@@ -72,8 +70,6 @@ let moderator = env.AYDNEP_ADDRESS;
 let campaign: ICreateCampaign = {
     moderator,
     campaignName,
-    publicMetaHash,
-    privateMetaHash,
     invoiceToken,
     maxReferralRewardPercent,
     campaignStartTime,
@@ -94,7 +90,6 @@ const progressCallback = (name: string, mined: boolean, transactionResult: strin
 describe('TwoKeyDonationCampaign', () => {
 
    it('should create a donation campaign', async() => {
-
        const {web3, address} = web3switcher.deployer();
        from = address;
        twoKeyProtocol = new TwoKeyProtocol({
@@ -127,9 +122,16 @@ describe('TwoKeyDonationCampaign', () => {
         expect(nonSingletonHash).to.be.equal(twoKeyProtocol.AcquisitionCampaign.getNonSingletonsHash());
     }).timeout(60000);
 
-   it('should get contract stored data', async() => {
-        let data = await twoKeyProtocol.DonationCampaign.getContractData(campaignAddress);
-        console.log(data);
+   it('should upload campaign to ipfsHash', async() => {
+       const hash = await twoKeyProtocol.Utils.ipfsAdd(campaign);
+       console.log('HASH', hash);
+       let txHash = await twoKeyProtocol.DonationCampaign.updateOrSetIpfsHashPublicMeta(campaignAddress,hash, from);
+
+       await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+       console.log(`TX ${txHash} mined`);
+
+       let meta = await twoKeyProtocol.DonationCampaign.getPublicMeta(campaignAddress);
+       console.log(meta);
    }).timeout(60000);
 
    it('should get user public link', async () => {

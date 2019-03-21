@@ -565,6 +565,19 @@ describe('TwoKeyProtocol', () => {
         console.log("Moderator: " + addressesWhereUserIsModerator);
     }).timeout(60000);
 
+    it('should save contractor link as the private meta hash', async() => {
+        console.log(links.deployer);
+        let txHash = await twoKeyProtocol.AcquisitionCampaign.setPrivateMetaHash(campaignAddress, links.deployer, from);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+    }).timeout(60000);
+
+    it('should get and decrypt ipfs hash', async() => {
+        let data = await twoKeyProtocol.AcquisitionCampaign.getPrivateMetaHash(campaignAddress, from);
+        console.log(data);
+        expect(data).to.be.equal(links.deployer);
+    }).timeout(60000);
+
+
     it('should visit campaign as guest', async () => {
         const {web3, address} = web3switcher.guest();
         from = address;
@@ -606,6 +619,7 @@ describe('TwoKeyProtocol', () => {
         links.gmail = hash;
         expect(hash).to.be.a('string');
     }).timeout(60000);
+
 
     it('should show maximum referral reward after ONE referrer', async() => {
         const {web3, address} = web3switcher.test4();

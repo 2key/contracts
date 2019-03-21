@@ -43,7 +43,7 @@ contract TwoKeyAcquisitionLogicHandler {
     uint maxConverterBonusPercent; // Maximal bonus percent per converter
 
     string public publicMetaHash; // Ipfs hash of json campaign object
-    string privateMetaHash; // Ipfs hash of json sensitive (contractor) information
+    string public privateMetaHash; // Ipfs hash of json sensitive (contractor) information
     string public currency; // Currency campaign is currently in
 
     //Referral accounting stuff
@@ -226,14 +226,6 @@ contract TwoKeyAcquisitionLogicHandler {
         privateMetaHash = _privateMetaHash;
     }
 
-    /**
-     * @notice Getter for privateMetaHash
-     * @dev only Contractor can call this method, otherwise function will revert
-     * @return string representation of private metadata hash
-     */
-    function getPrivateMetaHash() public view onlyContractor returns (string) {
-        return privateMetaHash;
-    }
 
     /**
      * @notice Get all constants from the contract
