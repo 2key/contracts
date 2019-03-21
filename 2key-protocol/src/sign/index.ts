@@ -353,7 +353,15 @@ function validate_join(firstPublicKey: string | null, f_address: string | null, 
             p_message = p_message.slice(20 * 2);
             new_address = Buffer.from(new_address, 'hex');
         } else {
-            let hash1 = eth_util.sha3(Buffer.concat([eth_util.sha3(Buffer.from("bytes binding to weight")), eth_util.sha3(bounty_cut)]));
+            // let hash1 = eth_util.sha3(Buffer.concat([eth_util.sha3(Buffer.from("bytes binding to weight")), eth_util.sha3(bounty_cut)]));
+            let new_public_key_0 = p_message.slice(65*2,65*2+20*2)
+            let new_public_key = Buffer.from(new_public_key_0, 'hex')
+
+            let hash1 = eth_util.sha3(Buffer.concat([
+                eth_util.sha3(Buffer.concat([
+                    Buffer.from("bytes binding to weight"),
+                    Buffer.from("bytes binding to public")
+                ])),eth_util.sha3(Buffer.concat([bounty_cut,new_public_key]))]))
             new_address = recoverHash(hash1, p_message);
             p_message = p_message.slice(65 * 2);
             new_address = Buffer.from(new_address, 'hex');

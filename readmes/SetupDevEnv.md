@@ -1,6 +1,10 @@
 ##### Setup development env
 
-Every call assume you're in the root of the project
+Every call assume you're in the root of the project.
+Use node version `10.9.0` for example:
+```angular2
+nvm use 10.9.0
+```
 
 Before all: 
 ```angular2html
@@ -34,11 +38,11 @@ Create file named `accountsConfig.json` in the root and fill it with following:
   "infuraApiKey" : "<EMPTY_FOR_NOW>"
 }
 ```
+
 Make sure you have deployed contracts to local geth.
-
 Bear in mind every time you reset geth you should deploy contracts again. 
-
-Reset flag has the same functionality as in truffle -> override previous deployment
+Reset flag has the same functionality as in truffle -> override previous deployment.
+You can deply using:
 ```angular2html
 yarn run deploy --migrate dev-local,plasma-azure --reset
 ```
