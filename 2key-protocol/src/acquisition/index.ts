@@ -11,7 +11,7 @@ import {
     ITwoKeyAcquisitionCampaign,
     ILockupInformation,
     IPublicMeta,
-    IOffchainData, IContractorBalance, IGetStatsOpts,
+    IOffchainData, IContractorBalance, IGetStatsOpts, IInventoryStatus,
 } from './interfaces';
 
 import { BigNumber } from 'bignumber.js/bignumber';
@@ -1602,7 +1602,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     public getReferrerBalanceAndTotalEarningsAndNumberOfConversions(campaign:any, signature: string, skipCache?: boolean) : Promise<IReferrerSummary> {
         return new Promise<any>(async(resolve,reject) => {
            try {
-               const campaignInstance = await this._getCampaignInstance(campaign, skipCache);
+               const campaignInstance = await this._getLogicHandlerInstance(campaign);
                let [referrerBalanceAvailable, referrerTotalEarnings, referrerInCountOfConversions, contributions] =
                    await promisify(campaignInstance.getReferrerBalanceAndTotalEarningsAndNumberOfConversions,['0x0',signature, []]);
                const obj = {
@@ -1622,6 +1622,29 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     /**
      *
      * @param campaign
+     * @returns {Promise<IInventoryStatus>}
+     */
+    public getInventoryStatus(campaign:any) : Promise<IInventoryStatus> {
+        return new Promise<IInventoryStatus>(async(resolve,reject) => {
+           try {
+               const campaignInstance = await this._getCampaignInstance(campaign);
+               let [totalBalance, reservedForConverters, reservedForReferrerRewards] = await promisify(campaignInstance.getInventoryStatus,[]);
+               const obj: IInventoryStatus = {
+                   totalBalance: parseFloat(this.utils.fromWei(totalBalance, 'ether').toString()),
+                   reservedForConverters: parseFloat(this.utils.fromWei(reservedForConverters, 'ether').toString()),
+                   reservedForReferrerRewards: parseFloat(this.utils.fromWei(reservedForReferrerRewards, 'ether').toString())
+               };
+               resolve(obj);
+           } catch (e) {
+               reject(e);
+           }
+        });
+    }
+
+
+    /**
+     *
+     * @param campaign
      * @param {string} signature
      * @param {number[]} conversionIds
      * @param {boolean} skipCache
@@ -1630,9 +1653,12 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     public getReferrerRewardsPerConversion(campaign:any, signature: string, conversionIds: number[], skipCache?: boolean) : Promise<number[]> {
         return new Promise<number[]>(async(resolve,reject) => {
             try {
-                const campaignInstance = await this._getCampaignInstance(campaign, skipCache);
+                const campaignInstance = await this._getLogicHandlerInstance(campaign);
                 let [,,,contributionsPerReferrer] =
                     await promisify(campaignInstance.getReferrerBalanceAndTotalEarningsAndNumberOfConversions,['0x0',signature, conversionIds]);
+                for(let i=0; i<contributionsPerReferrer.length; i++) {
+                    contributionsPerReferrer[i] = parseFloat(this.utils.fromWei(contributionsPerReferrer[i], 'ether').toString())
+                }
                 resolve(contributionsPerReferrer);
             } catch (e) {
                 reject(e);

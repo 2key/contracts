@@ -1282,6 +1282,14 @@ describe('TwoKeyProtocol', () => {
 
     }).timeout(60000);
 
+
+    it('should get inventory stats', async() => {
+        let stats = await twoKeyProtocol.AcquisitionCampaign.getInventoryStatus(campaignAddress);
+        console.log(stats);
+    }).timeout(60000);
+
+
+
     it('should build refgraph', async() => {
         const {web3, address} = web3switcher.gmail();
         from = address;

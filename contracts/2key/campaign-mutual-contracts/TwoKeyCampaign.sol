@@ -21,7 +21,7 @@ contract TwoKeyCampaign is ArcERC20 {
 
 	TwoKeyEventSource twoKeyEventSource; // Address of TwoKeyEventSource contract
 	address public twoKeySingletonesRegistry; // Address of Registry of all singleton contracts
-
+	address public twoKeyEconomy;
 	address public contractor; //contractor address
     address public moderator; //moderator address
 	address ownerPlasma; //contractor plasma address
@@ -35,9 +35,6 @@ contract TwoKeyCampaign is ArcERC20 {
 	uint256 reservedAmount2keyForRewards; //Reserved amount of 2key tokens for rewards distribution
 
 	mapping(address => uint256) internal referrerPlasma2Balances2key; // balance of EthWei for each influencer that he can withdraw
-	mapping(address => uint256) internal referrerPlasma2TotalEarnings2key; // Total earnings for referrers
-	mapping(address => uint256) internal referrerPlasmaAddressToCounterOfConversions; // [referrer][conversionId]
-	mapping(address => mapping(uint256 => uint256)) internal referrerPlasma2EarningsPerConversion;
 
 	mapping(address => address) public public_link_key;
 	mapping(address => address) internal received_from; // referral graph, who did you receive the referral from
@@ -231,7 +228,6 @@ contract TwoKeyCampaign is ArcERC20 {
     }
 
 
-
 	/**
  	 * @notice Function where moderator or referrer can withdraw their available funds
  	 * @param _address is the address we're withdrawing funds to
@@ -253,9 +249,6 @@ contract TwoKeyCampaign is ArcERC20 {
 			buyTokensFromUpgradableExchange(networkFee,twoKeyDeepFreezeTokenPool);
 		} else {
 			address _referrer = twoKeyEventSource.plasmaOf(_address);
-			address twoKeyEconomy =
-			ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry)
-			.getContractProxyAddress("TwoKeyDeepFreezeTokenPool");
 			if(referrerPlasma2Balances2key[_referrer] != 0) {
 				balance = referrerPlasma2Balances2key[_referrer];
 				referrerPlasma2Balances2key[_referrer] = 0;

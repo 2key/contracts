@@ -132,6 +132,7 @@ export interface ITwoKeyAcquisitionCampaign {
     changeTokenDistributionDate: (twoKeyLockup: string, newDate: number, from: string) => Promise<string>,
     getLockupInformations: (twoKeyLockup: string, from:string) => Promise<ILockupInformation>,
     getNonSingletonsHash: () => string,
+    getInventoryStatus: (campaign:any) => Promise<IInventoryStatus>,
     getNumberOfExecutedConversions: (campaign: string) => Promise<number>,
     testRecover: (campaign:string) => Promise<string>
 }
@@ -220,6 +221,12 @@ export interface IAddressStats {
     email: string
     ethereumOf: string,
     converterState: string,
+}
+
+export interface IInventoryStatus {
+    totalBalance : number,
+    reservedForConverters: number,
+    reservedForReferrerRewards: number
 }
 
 export interface IContractorBalance {

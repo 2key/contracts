@@ -7,6 +7,13 @@ contract ITwoKeyAcquisitionLogicHandler {
     function requirementIsOnActive() public view returns (bool);
     function requirementForMsgValue(uint msgValue) public view returns (bool);
     function getEstimatedTokenAmount(uint conversionAmountETHWei, bool isFiatConversion) public view returns (uint, uint);
-    function setTwoKeyAcquisitionCampaignContract(address _acquisitionCampaignAddress, address twoKeySingletoneRegistry) public;
+
+    function setTwoKeyAcquisitionCampaignContract(
+        address _acquisitionCampaignAddress,
+        address twoKeySingletoneRegistry,
+        address _twoKeyConversionHandler) public;
+
     function getReferrers(address customer, address acquisitionCampaignContract) public view returns (address[]);
+    function updateRefchainRewards(uint256 _maxReferralRewardETHWei, address _converter, uint _conversionId, uint totalBounty2keys) public;
+    function getReferrerPlasmaTotalEarnings(address _referrer) public view returns (uint);
 }

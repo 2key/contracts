@@ -1,6 +1,7 @@
 pragma solidity ^0.4.24;
 import "../interfaces/ITwoKeyExchangeRateContract.sol";
 import "../interfaces/IERC20.sol";
+import "../interfaces/ITwoKeyConversionHandler.sol";
 import "../interfaces/ITwoKeyAcquisitionCampaignERC20.sol";
 import "../interfaces/ITwoKeyReg.sol";
 import "../interfaces/ITwoKeyAcquisitionARC.sol";
@@ -20,30 +21,36 @@ contract TwoKeyAcquisitionLogicHandler {
 
     address public twoKeySingletoneRegistry;
     address public twoKeyAcquisitionCampaign;
+    address public twoKeyConversionHandler;
+    address twoKeyRegistry;
+    address public ownerPlasma;
+
     address twoKeyEventSource;
     address assetContractERC20;
-
     address contractor;
     address moderator;
 
-    address public ownerPlasma;
 
     bool isFixedInvestmentAmount; // This means that minimal contribution is equal maximal contribution
     bool isAcceptingFiatOnly; // Means that only fiat conversions will be able to execute -> no referral rewards at all
 
-    uint256 campaignStartTime; // Time when campaign start
-    uint256 campaignEndTime; // Time when campaign ends
-
-    uint minContributionETHorFiatCurrency;
-    uint maxContributionETHorFiatCurrency;
+    uint campaignStartTime; // Time when campaign start
+    uint campaignEndTime; // Time when campaign ends
+    uint minContributionETHorFiatCurrency; //Minimal contribution
+    uint maxContributionETHorFiatCurrency; //Maximal contribution
     uint pricePerUnitInETHWeiOrUSD; // There's single price for the unit ERC20 (Should be in WEI)
     uint unit_decimals; // ERC20 selling data
+    uint maxConverterBonusPercent; // Maximal bonus percent per converter
 
     string public publicMetaHash; // Ipfs hash of json campaign object
     string privateMetaHash; // Ipfs hash of json sensitive (contractor) information
-
-    uint maxConverterBonusPercent; // Maximal bonus percent per converter
     string public currency; // Currency campaign is currently in
+
+    //Referral accounting stuff
+    mapping(address => uint256) internal referrerPlasma2TotalEarnings2key; // Total earnings for referrers
+    mapping(address => uint256) internal referrerPlasmaAddressToCounterOfConversions; // [referrer][conversionId]
+    mapping(address => mapping(uint256 => uint256)) internal referrerPlasma2EarningsPerConversion;
+
 
     modifier onlyContractor {
         require(msg.sender == contractor);
@@ -96,13 +103,20 @@ contract TwoKeyAcquisitionLogicHandler {
 
 
 
-    function setTwoKeyAcquisitionCampaignContract(address _acquisitionCampaignAddress, address _twoKeySingletoneRegistry) public {
+    function setTwoKeyAcquisitionCampaignContract(
+        address _acquisitionCampaignAddress,
+        address _twoKeySingletoneRegistry,
+        address _twoKeyConversionHandler
+    ) public {
         require(twoKeyAcquisitionCampaign == address(0)); // Means it can be set only once
         twoKeyAcquisitionCampaign = _acquisitionCampaignAddress;
         twoKeySingletoneRegistry = _twoKeySingletoneRegistry;
         twoKeyEventSource = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry)
             .getContractProxyAddress("TwoKeyEventSource");
+        twoKeyRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyRegistry");
+
         ownerPlasma = plasmaOf(contractor);
+        twoKeyConversionHandler = _twoKeyConversionHandler;
     }
 
 
@@ -287,8 +301,7 @@ contract TwoKeyAcquisitionLogicHandler {
             (amountConverterSpent, referrerTotalBalance, unitsConverterBought) = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getStatistics(eth_address, plasma_address);
             if(unitsConverterBought> 0) {
                 isConverter = true;
-                address conversionHandlerContract = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).conversionHandler();
-                state = ITwoKeyConversionHandlerGetConverterState(conversionHandlerContract).getStateForConverter(eth_address);
+                state = ITwoKeyConversionHandlerGetConverterState(twoKeyConversionHandler).getStateForConverter(eth_address);
             }
             if(referrerTotalBalance > 0) {
                 isReferrer = true;
@@ -297,7 +310,7 @@ contract TwoKeyAcquisitionLogicHandler {
             if(flag == false) {
                 //referrer is address in signature
                 //plasma_address is plasma address of the address requested in method
-                referrerTotalBalance  = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getTotalReferrerEarnings(referrer, eth_address);
+                referrerTotalBalance  = getTotalReferrerEarnings(referrer, eth_address);
             }
 
             return abi.encodePacked(
@@ -326,8 +339,6 @@ contract TwoKeyAcquisitionLogicHandler {
      */
     function getSuperStatistics(address _user, bool plasma, bytes signature) public view returns (bytes) {
         address eth_address = _user;
-
-        address twoKeyRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyRegistry");
 
         if (plasma) {
             (eth_address) = ITwoKeyReg(twoKeyRegistry).getPlasmaToEthereum(_user);
@@ -383,12 +394,123 @@ contract TwoKeyAcquisitionLogicHandler {
     }
 
     /**
+     * @notice Update refferal chain with rewards (update state variables)
+     * @param _maxReferralRewardETHWei is the max referral reward set
+     * @param _converter is the address of the converter
+     * @dev This function can only be called by TwoKeyConversionHandler contract
+     */
+    function updateRefchainRewards(uint256 _maxReferralRewardETHWei, address _converter, uint _conversionId, uint totalBounty2keys) public {
+        require(msg.sender == twoKeyAcquisitionCampaign);
+        address[] memory influencers = getReferrers(_converter,twoKeyAcquisitionCampaign);
+        uint numberOfInfluencers = influencers.length;
+
+        for (uint i = 0; i < numberOfInfluencers; i++) {
+            uint256 b;
+
+            if (i == influencers.length - 1) {  // if its the last influencer then all the bounty goes to it.
+                b = totalBounty2keys;
+            }
+            else {
+                uint256 cut = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getReferrerCut(influencers[i]);
+                if (cut > 0 && cut <= 101) {
+                    b = totalBounty2keys.mul(cut.sub(1)).div(100);
+                } else {// cut == 0 or 255 indicates equal particine of the bounty
+                    b = totalBounty2keys.div(influencers.length - i);
+                }
+            }
+
+            //Update referrer current balance stored on Acquisition contract
+            ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).updateReferrerPlasmaBalance(influencers[i],b);
+
+            //All mappings are now stated to plasma addresses
+            //Update values for accounting purpose
+            referrerPlasma2EarningsPerConversion[influencers[i]][_conversionId] = b;
+            referrerPlasma2TotalEarnings2key[influencers[i]] = referrerPlasma2TotalEarnings2key[influencers[i]].add(b);
+            referrerPlasmaAddressToCounterOfConversions[influencers[i]]++;
+
+            //Decrease bounty for distributed
+            totalBounty2keys = totalBounty2keys.sub(b);
+        }
+    }
+
+
+    /**
+     * @notice Helper function to get how much _referrer address earned for all conversions for eth_address
+     * @param _referrer is the address we're checking the earnings
+     * @param eth_address is the converter address we're getting all conversion ids for
+     * @return sum of all earnings
+     */
+    function getTotalReferrerEarnings(address _referrer, address eth_address) internal view returns (uint) {
+        uint[] memory conversionIds = ITwoKeyConversionHandler(twoKeyConversionHandler).getConverterConversionIds(eth_address);
+        uint sum = 0;
+        for(uint i=0; i<conversionIds.length; i++) {
+            sum += referrerPlasma2EarningsPerConversion[_referrer][conversionIds[i]];
+        }
+        return sum;
+    }
+
+
+    /**
+     * @notice Function to get balance and total earnings for all referrer addresses passed in arg
+     * @param _referrerPlasmaList is the array of plasma addresses of referrer
+     * @return two arrays. 1st contains current plasma balance and 2nd contains total plasma balances
+     */
+    function getReferrersBalancesAndTotalEarnings(address[] _referrerPlasmaList) public view returns (uint256[], uint256[]) {
+        require(ITwoKeyReg(twoKeyRegistry).isMaintainer(msg.sender));
+
+        uint numberOfAddresses = _referrerPlasmaList.length;
+        uint256[] memory referrersPendingPlasmaBalance = new uint256[](numberOfAddresses);
+        uint256[] memory referrersTotalEarningsPlasmaBalance = new uint256[](numberOfAddresses);
+
+        for (uint i=0; i<numberOfAddresses; i++){
+            referrersPendingPlasmaBalance[i] = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getReferrerPlasmaBalance(_referrerPlasmaList[i]);
+            referrersTotalEarningsPlasmaBalance[i] = referrerPlasma2TotalEarnings2key[_referrerPlasmaList[i]];
+        }
+
+        return (referrersPendingPlasmaBalance, referrersTotalEarningsPlasmaBalance);
+    }
+
+
+    /**
+     * @notice Function to fetch for the referrer his balance, his total earnings, and how many conversions he participated in
+     * @dev only referrer by himself, moderator, or contractor can call this
+     * @param _referrer is the address of referrer we're checking for
+     * @param signature is the signature if calling functions from FE without ETH address
+     * @param conversionIds are the ids of conversions this referrer participated in
+     * @return tuple containing this 3 information
+     */
+    function getReferrerBalanceAndTotalEarningsAndNumberOfConversions(address _referrer, bytes signature, uint[] conversionIds) public view returns (uint,uint,uint,uint[]) {
+        if(_referrer != address(0)) {
+            require(msg.sender == _referrer || msg.sender == contractor || ITwoKeyReg(twoKeyRegistry).isMaintainer(msg.sender));
+            _referrer = plasmaOf(_referrer);
+        } else {
+            bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding referrer to plasma")),
+                keccak256(abi.encodePacked("GET_REFERRER_REWARDS"))));
+            _referrer = Call.recoverHash(hash, signature, 0);
+        }
+
+        uint[] memory earnings = new uint[](conversionIds.length);
+
+        for(uint i=0; i<conversionIds.length; i++) {
+            earnings[i] = referrerPlasma2EarningsPerConversion[_referrer][conversionIds[i]];
+        }
+
+        uint referrerBalance = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getReferrerPlasmaBalance(_referrer);
+        return (referrerBalance, referrerPlasma2TotalEarnings2key[_referrer], referrerPlasmaAddressToCounterOfConversions[_referrer], earnings);
+    }
+
+
+    function getReferrerPlasmaTotalEarnings(address _referrer) public view returns (uint) {
+        require(msg.sender == twoKeyAcquisitionCampaign);
+        return referrerPlasma2TotalEarnings2key[_referrer];
+    }
+
+    /**
      * @notice Function to determine plasma address of ethereum address
      * @param me is the address (ethereum) of the user
      * @return an address
      */
     function plasmaOf(address me) public view returns (address) {
-        address twoKeyRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyRegistry");
         address plasma = ITwoKeyReg(twoKeyRegistry).getEthereumToPlasma(me);
         if (plasma != address(0)) {
             return plasma;
@@ -402,7 +524,6 @@ contract TwoKeyAcquisitionLogicHandler {
      * @return ethereum address
      */
     function ethereumOf(address me) public view returns (address) {
-        address twoKeyRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyRegistry");
         address ethereum = ITwoKeyReg(twoKeyRegistry).getPlasmaToEthereum(me);
         if (ethereum != address(0)) {
             return ethereum;

@@ -3,8 +3,10 @@ pragma solidity ^0.4.24;
 import "./InvoiceTokenERC20.sol";
 
 import "../campaign-mutual-contracts/TwoKeyCampaign.sol";
-import "../libraries/IncentiveModels.sol";
 import "../campaign-mutual-contracts/TwoKeyCampaignIncentiveModels.sol";
+
+import "../libraries/IncentiveModels.sol";
+import "../TwoKeyConverterStates.sol";
 
 /**
  * @author Nikola Madjarevic
@@ -12,6 +14,7 @@ import "../campaign-mutual-contracts/TwoKeyCampaignIncentiveModels.sol";
  */
 contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels {
 
+    event InvoiceTokenCreated(address token, string tokenName, string tokenSymbol);
     address public erc20InvoiceToken; // ERC20 token which will be issued as an invoice
 
     uint powerLawFactor = 2;
@@ -21,15 +24,22 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
     string privateMetaHash; //TODO: Is there a need for private
     uint campaignStartTime; // Time when campaign starts
     uint campaignEndTime; // Time when campaign ends
-    uint minDonationAmount; // Minimal donation amount
-    uint maxDonationAmount; // Maximal donation amount
+    uint minDonationAmountWei; // Minimal donation amount
+    uint maxDonationAmountWei; // Maximal donation amount
     uint maxReferralRewardPercent; // Percent per conversion which goes to referrers
     uint campaignGoal; // Goal of the campaign, how many funds to raise
     bool shouldConvertToRefer; // If yes, means that referrer must be converter in order to be referrer
+    bool isKYCRequired;
     IncentiveModel rewardsModel; //Incentive model for rewards
 
-    mapping(address => uint) amountUserContributed;
+    mapping(address => uint) amountUserContributed; //If amount user contributed is > 0 means he's a converter
     mapping(address => uint[]) donatorToHisDonationsInEther;
+
+    //Referral accounting stuff
+    mapping(address => uint256) internal referrerPlasma2TotalEarnings2key; // Total earnings for referrers
+    mapping(address => uint256) internal referrerPlasmaAddressToCounterOfConversions; // [referrer][conversionId]
+    mapping(address => mapping(uint256 => uint256)) internal referrerPlasma2EarningsPerConversion;
+
     DonationEther[] donations;
 
 
@@ -39,7 +49,7 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
     }
 
     modifier onlyInDonationLimit {
-        require(msg.value >= minDonationAmount && msg.value <= maxDonationAmount, "Wrong contribution amount");
+        require(msg.value >= minDonationAmountWei && msg.value <= maxDonationAmountWei, "Wrong contribution amount");
         _;
     }
 
@@ -50,11 +60,13 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         _;
     }
 
+    //Struct to represent donation in Ether
     struct DonationEther {
-        address donator;
-        uint amount;
-        uint donationTimestamp;
-        uint referrerRewards;
+        address donator; //donator -> address who donated
+        uint amount; //donation amount ETH
+        uint donationTimestamp; //When was donation created
+        uint referrerRewardsEthWei;
+        uint totalBounty2key;
     }
 
     constructor(
@@ -64,28 +76,35 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         string _privateMetaHash,
         string tokenName,
         string tokenSymbol,
-        uint _maxReferralRewardPercent,
-        uint _campaignStartTime,
-        uint _campaignEndTime,
-        uint _minDonationAmount,
-        uint _maxDonationAmount,
-        uint _campaignGoal,
-        uint _conversionQuota,
+        uint [] values,
+        bool _shouldConvertToReffer,
+        bool _isKYCRequired,
         address _twoKeySingletonesRegistry,
-        IncentiveModel _rewardsModel //Handled as uint on the FE
+        IncentiveModel _rewardsModel
     ) public {
+        //Validate that the IPFS hash is valid
+        require(bytes(_publicMetaHash).length == 46);
+
         erc20InvoiceToken = new InvoiceTokenERC20(tokenName,tokenSymbol,address(this));
+
+        //Emit an event with deployed token address, name, and symbol
+        emit InvoiceTokenCreated(erc20InvoiceToken, tokenName, tokenSymbol);
+
         moderator = _moderator;
         campaignName = _campaignName;
         publicMetaHash = _publicMetaHash;
         privateMetaHash = _privateMetaHash;
-        maxReferralRewardPercent = _maxReferralRewardPercent;
-        campaignStartTime = _campaignStartTime;
-        campaignEndTime = _campaignEndTime;
-        minDonationAmount = _minDonationAmount;
-        maxDonationAmount = _maxDonationAmount;
-        campaignGoal = _campaignGoal;
-        conversionQuota = _conversionQuota;
+        maxReferralRewardPercent = values[0];
+        campaignStartTime = values[1];
+        campaignEndTime = values[2];
+        minDonationAmountWei = values[3];
+        maxDonationAmountWei = values[4];
+        campaignGoal = values[5];
+        conversionQuota = values[6];
+
+        shouldConvertToRefer = _shouldConvertToReffer;
+        isKYCRequired = _isKYCRequired;
+
         twoKeySingletonesRegistry = _twoKeySingletonesRegistry;
         rewardsModel = _rewardsModel;
         contractor = msg.sender;
@@ -111,6 +130,11 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         // TODO: Handle failing of this function if the referral chain is too big
         uint numberOfInfluencers = influencers.length;
         for (i = 0; i < numberOfInfluencers; i++) {
+            //Validate that the user is converter in order to join
+            if(shouldConvertToRefer == true) {
+                address eth_address_influencer = twoKeyEventSource.ethereumOf(influencers[i]);
+                require(amountUserContributed[eth_address_influencer] > 0);
+            }
             new_address = twoKeyEventSource.plasmaOf(influencers[i]);
             if (received_from[new_address] == 0) {
                 transferFrom(old_address, new_address, 1);
@@ -170,6 +194,14 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
     function distributeReferrerRewards(address converter, uint totalBountyForConversion, uint donationId) internal {
         address[] memory referrers = getReferrers(converter);
         uint numberOfReferrers = referrers.length;
+
+        uint totalBountyTokens = buyTokensFromUpgradableExchange(totalBountyForConversion, address(this));
+
+        // Update donation object (directly in the storage)
+        DonationEther d = donations[donationId];
+        d.totalBounty2key = totalBountyTokens;
+
+        //Distribute rewards based on model selected
         if(rewardsModel == IncentiveModel.AVERAGE) {
             uint reward = IncentiveModels.averageModelRewards(totalBountyForConversion, numberOfReferrers);
             for(uint i=0; i<numberOfReferrers; i++) {
@@ -208,11 +240,14 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
     function joinAndDonate(bytes signature) public goalValidator onlyInDonationLimit isOngoing payable {
         distributeArcsBasedOnSignature(signature);
         uint referrerReward = (msg.value).mul(maxReferralRewardPercent).div(100);
-        DonationEther memory donation = DonationEther(msg.sender, msg.value, block.timestamp, referrerReward);
+        DonationEther memory donation = DonationEther(msg.sender, msg.value, block.timestamp, referrerReward, 0);
         uint id = donations.length; // get donation id
         donations.push(donation); // add donation to array of donations
         donatorToHisDonationsInEther[msg.sender].push(id); // accounting for the donator
-        amountUserContributed[msg.sender] += msg.value;
+        amountUserContributed[msg.sender] += msg.value; // user contributions
+
+        //How many ethers sent, that much invoice tokens you get
+        InvoiceTokenERC20(erc20InvoiceToken).transfer(msg.sender, msg.value);
     }
 
     /**
@@ -222,11 +257,14 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         address _converterPlasma = twoKeyEventSource.plasmaOf(msg.sender);
         require(received_from[_converterPlasma] != address(0));
         uint referrerReward = (msg.value).mul(maxReferralRewardPercent).div(100);
-        DonationEther memory donation = DonationEther(msg.sender, msg.value, block.timestamp, referrerReward);
+        DonationEther memory donation = DonationEther(msg.sender, msg.value, block.timestamp, referrerReward, 0);
         uint id = donations.length; // get donation id
         donations.push(donation); // add donation to array of donations
         donatorToHisDonationsInEther[msg.sender].push(id); // accounting for the donator
         amountUserContributed[msg.sender] += msg.value;
+
+        //How many ethers sent, that much invoice tokens you get
+        InvoiceTokenERC20(erc20InvoiceToken).transfer(msg.sender, msg.value);
     }
 
     /**
@@ -244,7 +282,7 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         //TODO: What is the requirement just to donate money
     }
 
-    function getAmountUserContributed(address _donator) public view returns (uint) {
+    function getAmountUserDonated(address _donator) public view returns (uint) {
         require(
             msg.sender == contractor ||
             msg.sender == _donator ||
@@ -288,7 +326,8 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
             donation.donator,
             donation.amount,
             donation.donationTimestamp,
-            donation.referrerRewards
+            donation.referrerRewardsEthWei,
+            donation.totalBounty2key
         );
     }
 
@@ -299,11 +338,12 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         return abi.encodePacked(
             campaignStartTime,
             campaignEndTime,
-            minDonationAmount,
-            maxDonationAmount,
+            minDonationAmountWei,
+            maxDonationAmountWei,
             maxReferralRewardPercent,
-            campaignName,
-            publicMetaHash
+            publicMetaHash,
+            shouldConvertToRefer,
+            campaignName
         );
     }
 
@@ -316,9 +356,14 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         super.withdrawContractor();
     }
 
+    /**
+     * @notice Function interface for moderator or referrer to withdraw their earnings
+     * @param _address is the one who wants to withdraw
+     */
     function withdrawModeratorOrReferrer(address _address) public {
         require(this.balance >= campaignGoal); //Making sure goal is reached
         require(block.timestamp > campaignEndTime); //Making sure time has expired
+        require(msg.sender == _address);
         super.withdrawModeratorOrReferrer(_address);
     }
 }

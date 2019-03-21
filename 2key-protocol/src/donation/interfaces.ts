@@ -3,6 +3,7 @@ import {ICreateCampaignProgress} from "../interfaces";
 export interface IDonationCampaign {
     create: (data: ICreateCampaign, from: string, opts?: ICreateOpts) => Promise<string>,
     getContractData: (campaignAddress: string) => Promise<ICampaignData>,
+    getDonation: (campaignAddress: string, donationId: number, from: string) => Promise<IDonation>
     getPublicLinkKey: (campaign: any, from: string) => Promise<string>,
     visit: (campaignAddress: string, referralLink: string)=> Promise<string>,
 }
@@ -23,6 +24,8 @@ export interface ICreateCampaign {
     maxDonationAmount: number,
     campaignGoal: number,
     conversionQuota: number,
+    shouldConvertToRefer: boolean,
+    isKYCRequired: boolean,
     incentiveModel: number
 }
 
@@ -35,14 +38,23 @@ export interface InvoiceERC20 {
     tokenSymbol: string
 }
 
+export interface IDonation {
+    donator: string,
+    donationAmount: number
+    donationTime: number,
+    bountyEthWei: number,
+    bounty2key: number
+}
+
 export interface ICampaignData {
     campaignStartTime: number,
     campaignEndTime: number,
-    minDonationAmount: number,
-    maxDonationAmount: number,
+    minDonationAmountWei: number,
+    maxDonationAmountWei: number,
     maxReferralRewardPercent: number,
+    publicMetaHash: string,
+    shouldConvertToRefer: boolean,
     campaignName: string
-    publicMetaHash: string
 }
 
 /**
