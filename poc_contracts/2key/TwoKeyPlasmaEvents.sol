@@ -1,5 +1,5 @@
 pragma solidity ^0.4.24; //We have to specify what version of compiler this code will use
-import '../../singleton-contracts/TwoKeyPlasmaEvents.sol';
+import '../../contracts/2key/singleton-contracts/TwoKeyPlasmaEvents.sol';
 
 /*
 import '../../libraries/Call.sol';

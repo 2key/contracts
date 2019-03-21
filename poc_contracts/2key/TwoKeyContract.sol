@@ -1,11 +1,11 @@
 pragma solidity ^0.4.24; //We have to specify what version of compiler this code will use
 
-import "../../../openzeppelin-solidity/contracts/token/ERC20/BasicToken.sol";
-import '../../../openzeppelin-solidity/contracts/ownership/Ownable.sol';
-import "../../../openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
+import "../../contracts/openzeppelin-solidity/contracts/token/ERC20/BasicToken.sol";
+import '../../contracts/openzeppelin-solidity/contracts/ownership/Ownable.sol';
+import "../../contracts/openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
 import './TwoKeyEventSource.sol';
 import './TwoKeyReg.sol';
-import '../../libraries/Call.sol';
+import '../../contracts/2key/libraries/Call.sol';
 
 /**
  * @title Standard ERC20 token

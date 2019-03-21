@@ -1,13 +1,13 @@
 pragma solidity ^0.4.24;
 
-import '../../../openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol';
+import '../../contracts/openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol';
 
-import '../../../openzeppelin-solidity/contracts/token/ERC20/ERC20.sol';
-import '../../../openzeppelin-solidity/contracts/ownership/Ownable.sol';
-import '../../../openzeppelin-solidity/contracts/math/SafeMath.sol';
+import '../../contracts/openzeppelin-solidity/contracts/token/ERC20/ERC20.sol';
+import '../../contracts/openzeppelin-solidity/contracts/ownership/Ownable.sol';
+import '../../contracts/openzeppelin-solidity/contracts/math/SafeMath.sol';
 
 import './TwoKeyReg.sol';
-import "../../libraries/GetCode.sol";
+import "../../contracts/2key/libraries/GetCode.sol";
 
 contract TwoKeyVoteToken is StandardToken, Ownable {
   using SafeMath for uint256;

@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
 library Call {
-   function params0(address c, bytes _method) public view returns (uint answer) {
+    function params0(address c, bytes _method) public view returns (uint answer) {
         // https://medium.com/@blockchain101/calling-the-function-of-another-contract-in-solidity-f9edfa921f4c
         //    dc = c;
         bytes4 sig = bytes4(keccak256(_method));
@@ -81,10 +81,10 @@ library Call {
             ptr,  //Store output over input
             0x20) //Outputs are 1 uint long
 
-            // TODO cause revert
-//            if eq(result, 0) {
-//                revert(0, 0)
-//            }
+        // TODO cause revert
+        //            if eq(result, 0) {
+        //                revert(0, 0)
+        //            }
 
             answer := mload(ptr) // Assign output to answer var
             mstore(0x40,add(ptr,0x20)) // Set storage pointer to new space

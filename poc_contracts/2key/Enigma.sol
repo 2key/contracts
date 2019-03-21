@@ -1,10 +1,10 @@
 pragma solidity ^0.4.24;
 
-import "../../../openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "../../../openzeppelin-solidity/contracts/ECRecovery.sol";
+import "../../contracts/openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "../../contracts/openzeppelin-solidity/contracts/ECRecovery.sol";
 //import "../../../enigmampc/secret-contracts/contracts/utils/GetCode2.sol";
-import "../../../openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
-import "../../libraries/GetCode.sol";
+import "../../contracts/openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
+import "../../contracts/2key/libraries/GetCode.sol";
 
 contract IERC20 {
     function balanceOf(address who) public view returns (uint256);

@@ -2,7 +2,7 @@ pragma solidity ^0.4.24;
 
 import './TwoKeyTypes.sol';
 import "./TwoKeyAdmin.sol";
-import "../../libraries/GetCode.sol";
+import "../../contracts/2key/libraries/GetCode.sol";
 
 contract TwoKeyEventSource is TwoKeyTypes {
 
