@@ -7,7 +7,7 @@ import '../../../openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import '../../../openzeppelin-solidity/contracts/math/SafeMath.sol';
 
 import './TwoKeyReg.sol';
-import "./GetCode.sol";
+import "../../libraries/GetCode.sol";
 
 contract TwoKeyVoteToken is StandardToken, Ownable {
   using SafeMath for uint256;

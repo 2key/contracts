@@ -4,7 +4,7 @@ import "../../../openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "../../../openzeppelin-solidity/contracts/ECRecovery.sol";
 //import "../../../enigmampc/secret-contracts/contracts/utils/GetCode2.sol";
 import "../../../openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
-import "./GetCode.sol";
+import "../../libraries/GetCode.sol";
 
 contract IERC20 {
     function balanceOf(address who) public view returns (uint256);

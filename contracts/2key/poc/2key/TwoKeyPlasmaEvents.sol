@@ -1,4 +1,7 @@
 pragma solidity ^0.4.24; //We have to specify what version of compiler this code will use
+import '../../singleton-contracts/TwoKeyPlasmaEvents.sol';
+
+/*
 import '../../libraries/Call.sol';
 
 contract TwoKeyPlasmaEvents {
@@ -208,6 +211,7 @@ contract TwoKeyPlasmaEvents {
         for (i = 0; i < weights.length; i++) {
             setCutOf(c, contractor, influencers[i], weights[i]);
         }
+
     }
 
     function visitsList(address c, address contractor, address from) public view returns (address[]) {
@@ -217,8 +221,9 @@ contract TwoKeyPlasmaEvents {
 
     function votes(address c, address contractor) public view returns (uint256, uint256, uint256, uint256, uint256, int) {
         return (
-            voted_yes[c][contractor], weighted_yes[c][contractor], voted_no[c][contractor], weighted_no[c][contractor],
-            voted_yes[c][contractor] + voted_no[c][contractor], int(weighted_yes[c][contractor]) - int(weighted_no[c][contractor])
+        voted_yes[c][contractor], weighted_yes[c][contractor], voted_no[c][contractor], weighted_no[c][contractor],
+        voted_yes[c][contractor] + voted_no[c][contractor], int(weighted_yes[c][contractor]) - int(weighted_no[c][contractor])
         );
     }
 }
+*/
