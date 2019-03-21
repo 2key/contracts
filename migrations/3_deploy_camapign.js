@@ -50,8 +50,6 @@ module.exports = function deploy(deployer) {
             .then(() => deployer.deploy(TwoKeyDonationCampaign,
                 json.TwoKeyAdmin[network_id].Proxy,
                 'Donation for Something',
-                'QmABC',
-                'QmABCD',
                 'Nikoloken',
                 'NTKN',
                 [5,

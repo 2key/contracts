@@ -20,7 +20,7 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
     uint powerLawFactor = 2;
 
     string campaignName; // Name of the campaign
-    string publicMetaHash; // Ipfs hash of public informations
+    string public publicMetaHash; // Ipfs hash of public informations
     string privateMetaHash; //TODO: Is there a need for private
     uint campaignStartTime; // Time when campaign starts
     uint campaignEndTime; // Time when campaign ends
@@ -72,8 +72,6 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
     constructor(
         address _moderator,
         string _campaignName,
-        string _publicMetaHash,
-        string _privateMetaHash,
         string tokenName,
         string tokenSymbol,
         uint [] values,
@@ -82,9 +80,6 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         address _twoKeySingletonesRegistry,
         IncentiveModel _rewardsModel
     ) public {
-        //Validate that the IPFS hash is valid
-        require(bytes(_publicMetaHash).length == 46);
-
         erc20InvoiceToken = new InvoiceTokenERC20(tokenName,tokenSymbol,address(this));
 
         //Emit an event with deployed token address, name, and symbol
@@ -92,8 +87,6 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
 
         moderator = _moderator;
         campaignName = _campaignName;
-        publicMetaHash = _publicMetaHash;
-        privateMetaHash = _privateMetaHash;
         maxReferralRewardPercent = values[0];
         campaignStartTime = values[1];
         campaignEndTime = values[2];
@@ -292,6 +285,35 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
     }
 
     /**
+     * @notice Function to set or update public meta hash
+     * @param _publicMetaHash is the hash of the campaign
+     * @dev Only contractor can call this
+     */
+    function updateOrSetPublicMetaHash(string _publicMetaHash) public onlyContractor {
+        require(bytes(_publicMetaHash).length == 46);
+        publicMetaHash = _publicMetaHash;
+    }
+
+    /**
+     * @notice Function to update or set private meta hash
+     * @param _privateMetaHash is the private meta hash containing contractor public link key
+     */
+    function updateOrSetPrivateMetaHash(string _privateMetaHash) public onlyContractor {
+        require(bytes(_privateMetaHash).length == 46);
+        privateMetaHash = _privateMetaHash;
+    }
+
+
+    /**
+     * @notice Function to get private meta hash
+     * @dev Visible only to contractor
+     */
+    function getPrivateMetaHash() public view onlyContractor returns (string) {
+        return privateMetaHash;
+    }
+
+
+    /**
     * @notice Function to fetch for the referrer his balance, his total earnings, and how many conversions he participated in
     * @dev only referrer by himself, moderator, or contractor can call this
     * @param _referrer is the address of referrer we're checking for
@@ -328,22 +350,6 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
             donation.donationTimestamp,
             donation.referrerRewardsEthWei,
             donation.totalBounty2key
-        );
-    }
-
-    /**
-     * @notice Function to get encoded money
-     */
-    function getCampaignData() public view returns (bytes) {
-        return abi.encodePacked(
-            campaignStartTime,
-            campaignEndTime,
-            minDonationAmountWei,
-            maxDonationAmountWei,
-            maxReferralRewardPercent,
-            publicMetaHash,
-            shouldConvertToRefer,
-            campaignName
         );
     }
 

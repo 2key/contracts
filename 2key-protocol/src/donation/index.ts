@@ -7,7 +7,6 @@ import acquisitionContracts from "../contracts/acquisition";
 import {IJoinLinkOpts, IOffchainData, IPublicLinkKey, IPublicLinkOpts} from "../acquisition/interfaces";
 
 
-
 export default class DonationCampaign implements IDonationCampaign {
     public readonly nonSingletonsHash: string;
     private readonly base: ITwoKeyBase;
@@ -72,8 +71,6 @@ export default class DonationCampaign implements IDonationCampaign {
                     params: [
                         data.moderator,
                         data.campaignName,
-                        data.publicMetaHash,
-                        data.privateMetaHash,
                         data.invoiceToken.tokenName,
                         data.invoiceToken.tokenSymbol,
                         [
@@ -229,6 +226,51 @@ export default class DonationCampaign implements IDonationCampaign {
             } catch (err) {
                 this.base._log('ERRORORRR', err, err.toString());
                 reject(err);
+            }
+        });
+    }
+
+    /**
+     *
+     * @param campaign
+     * @param {string} hash
+     * @param {string} from
+     * @param {number} gasPrice
+     * @returns {Promise<string>}
+     */
+    public updateOrSetIpfsHashPublicMeta(campaign: any, hash: string, from: string, gasPrice: number = this.base._getGasPrice()): Promise<string> {
+        return new Promise<string>(async (resolve, reject) => {
+            try {
+                const campaignInstance = await this._getCampaignInstance(campaign);
+                const nonce = await this.helpers._getNonce(from);
+                const txHash: string = await promisify(campaignInstance.updateOrSetPublicMetaHash, [hash, {
+                    from,
+                    gasPrice,
+                    nonce,
+                }]);
+                console.log('txHash', txHash);
+                resolve(txHash);
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
+
+    /**
+     *
+     * @param campaign
+     * @param {string} from
+     * @returns {Promise<any>}
+     */
+    public getPublicMeta(campaign: any, from?: string): Promise<any> {
+        return new Promise<any>(async (resolve, reject) => {
+            try {
+                const campaignInstance = await this._getCampaignInstance(campaign);
+                const ipfsHash = await promisify(campaignInstance.publicMetaHash, []);
+                const meta = JSON.parse((await promisify(this.base.ipfsR.cat, [ipfsHash])).toString());
+                resolve({meta});
+            } catch (e) {
+                reject(e);
             }
         });
     }
@@ -441,7 +483,6 @@ export default class DonationCampaign implements IDonationCampaign {
                 };
 
                 resolve(obj);
-
             } catch (e) {
                 reject(e);
             }
