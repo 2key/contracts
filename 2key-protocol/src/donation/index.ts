@@ -277,6 +277,61 @@ export default class DonationCampaign implements IDonationCampaign {
 
 
     /**
+     * Only contractor or moderator can get it
+     * @param campaign
+     * @param {string} from
+     * @returns {Promise<string>}
+     */
+    public getPrivateMetaHash(campaign: any, from: string) : Promise<string> {
+        return new Promise<string>(async(resolve,reject) => {
+            try {
+                const donationCampaignInstance = await this._getCampaignInstance(campaign);
+                let ipfsHash: string = await promisify(donationCampaignInstance.privateMetaHash,[{from}]);
+
+
+                let privateHashEncrypted = await promisify(this.base.ipfsR.cat, [ipfsHash]);
+                privateHashEncrypted = privateHashEncrypted.toString();
+
+
+                let privateMetaHashDecrypted = await this.sign.decrypt(this.base.web3,from,privateHashEncrypted,{plasma : false});
+                resolve(privateMetaHashDecrypted.slice(2)); //remove 0x from the beginning
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+    /**
+     * Only contractor or moderator can set it
+     * @param campaign
+     * @param {string} privateMetaHash
+     * @param {string} from
+     * @returns {Promise<string>}
+     */
+    public setPrivateMetaHash(campaign: any, data: any, from:string) : Promise<string> {
+        return new Promise<string>(async(resolve,reject) => {
+            try {
+                //Convert data to string
+                const dataString = typeof data === 'string' ? data : JSON.stringify(data);
+
+                //Encrypt the string
+                let encryptedString = await this.sign.encrypt(this.base.web3, from, dataString, {plasma:false});
+
+                const hash = await this.utils.ipfsAdd(encryptedString);
+
+                console.log('Hash sent to contract is: ' + hash);
+
+                const donationCampaignInstance = await this._getCampaignInstance(campaign);
+                let txHash: string = await promisify(donationCampaignInstance.updateOrSetPrivateMetaHash,[hash,{from}]);
+                resolve(txHash);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+
+    /**
      * Get the public link key for message sender
      * @param campaign
      * @param {string} from
@@ -399,54 +454,6 @@ export default class DonationCampaign implements IDonationCampaign {
     }
 
 
-    /**
-     *
-     campaignStartTime,
-     campaignEndTime,
-     minDonationAmount,
-     maxDonationAmount,
-     maxReferralRewardPercent,
-     publicMetaHash,
-     shouldConvertToRefer,
-     campaignName
-     */
-
-
-    /**
-     *
-     * @param {string} campaignAddress
-     * @returns {Promise<ICampaignData>}
-     */
-    public getContractData(campaignAddress: string) : Promise<ICampaignData> {
-        return new Promise<ICampaignData>(async(resolve,reject) => {
-            try {
-                let donationCampaignInstance = await this._getCampaignInstance(campaignAddress);
-                let data = await promisify(donationCampaignInstance.getCampaignData,[]);
-                let campaignStartTime = parseInt(data.slice(0, 66),16);
-                let campaignEndTime = parseInt(data.slice(66, 66+64), 16);
-                let minDonationAmountWei= parseInt(data.slice(66+64, 66+64+64),16);
-                let maxDonationAmountWei = parseInt(data.slice(66+64+64, 66+64+64+64),16);
-                let maxReferralRewardPercent = parseInt(data.slice(66+64+64+64, 66+64+64+64+64),16);
-                let publicMetaHash = this.base.web3.toUtf8(data.slice(66+64+64+64+64, 66+64+64+64+64+92));
-                let shouldConvertToRefer = parseInt(data.slice(66+64+64+64+64+92, 66+64+64+64+64+92+2),16) == 1;
-                let campaignName = this.base.web3.toUtf8(data.slice(66+64+64+64+64+92+2));
-
-                let obj : ICampaignData = {
-                    campaignStartTime,
-                    campaignEndTime,
-                    'minDonationAmountWei' : parseFloat(this.utils.fromWei(minDonationAmountWei,'ether').toString()),
-                    'maxDonationAmountWei' : parseFloat(this.utils.fromWei(maxDonationAmountWei,'ether').toString()),
-                    'maxReferralRewardPercent': parseFloat(this.utils.fromWei(maxReferralRewardPercent,'ether').toString()),
-                    publicMetaHash,
-                    shouldConvertToRefer,
-                    campaignName
-                };
-                resolve(obj);
-            } catch (e) {
-                reject(e);
-            }
-        })
-    }
 
     /**
      *

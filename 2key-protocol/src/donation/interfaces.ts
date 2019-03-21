@@ -2,11 +2,13 @@ import {ICreateCampaignProgress} from "../interfaces";
 
 export interface IDonationCampaign {
     create: (data: ICreateCampaign, from: string, opts?: ICreateOpts) => Promise<string>,
-    updateOrSetIpfsHashPublicMeta: (campaign: any, hash: string, from: string, gasPrice?: number) => Promise<string>,
-    getPublicMeta: (campaign: any, from?: string) => Promise<any>,
     getDonation: (campaignAddress: string, donationId: number, from: string) => Promise<IDonation>,
     getPublicLinkKey: (campaign: any, from: string) => Promise<string>,
     visit: (campaignAddress: string, referralLink: string)=> Promise<string>,
+    updateOrSetIpfsHashPublicMeta: (campaign: any, hash: string, from: string, gasPrice?: number) => Promise<string>,
+    getPublicMeta: (campaign: any, from?: string) => Promise<any>,
+    getPrivateMetaHash: (campaign: any, from: string) => Promise<string>,
+    setPrivateMetaHash: (campaign: any, data: any, from:string) => Promise<string>,
 }
 
 /**
