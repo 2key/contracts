@@ -1,4 +1,4 @@
-import {ICampaignData, ICreateCampaign, IDonationCampaign, InvoiceERC20} from "./interfaces";
+import {ICampaignData, ICreateCampaign, IDonation, IDonationCampaign, InvoiceERC20} from "./interfaces";
 import {ICreateOpts, IERC20, ITwoKeyBase, ITwoKeyHelpers, ITwoKeyUtils} from "../interfaces";
 import {ISign} from "../sign/interface";
 import donationContracts, {default as donation} from '../contracts/donation';
@@ -77,12 +77,12 @@ export default class DonationCampaign implements IDonationCampaign {
                         data.invoiceToken.tokenName,
                         data.invoiceToken.tokenSymbol,
                         [
-                            data.maxReferralRewardPercent,
+                            this.utils.toWei(data.maxReferralRewardPercent),
                             data.campaignStartTime,
                             data.campaignEndTime,
-                            data.minDonationAmount,
-                            data.maxDonationAmount,
-                            data.campaignGoal,
+                            this.utils.toWei(data.minDonationAmount),
+                            this.utils.toWei(data.maxDonationAmount),
+                            this.utils.toWei(data.campaignGoal),
                             data.conversionQuota
                         ],
                         data.shouldConvertToRefer,
@@ -380,11 +380,10 @@ export default class DonationCampaign implements IDonationCampaign {
             try {
                 let donationCampaignInstance = await this._getCampaignInstance(campaignAddress);
                 let data = await promisify(donationCampaignInstance.getCampaignData,[]);
-                console.log(data);
                 let campaignStartTime = parseInt(data.slice(0, 66),16);
                 let campaignEndTime = parseInt(data.slice(66, 66+64), 16);
-                let minDonationAmount = parseInt(data.slice(66+64, 66+64+64),16);
-                let maxDonationAmount = parseInt(data.slice(66+64+64, 66+64+64+64),16);
+                let minDonationAmountWei= parseInt(data.slice(66+64, 66+64+64),16);
+                let maxDonationAmountWei = parseInt(data.slice(66+64+64, 66+64+64+64),16);
                 let maxReferralRewardPercent = parseInt(data.slice(66+64+64+64, 66+64+64+64+64),16);
                 let publicMetaHash = this.base.web3.toUtf8(data.slice(66+64+64+64+64, 66+64+64+64+64+92));
                 let shouldConvertToRefer = parseInt(data.slice(66+64+64+64+64+92, 66+64+64+64+64+92+2),16) == 1;
@@ -393,14 +392,56 @@ export default class DonationCampaign implements IDonationCampaign {
                 let obj : ICampaignData = {
                     campaignStartTime,
                     campaignEndTime,
-                    minDonationAmount,
-                    maxDonationAmount,
-                    maxReferralRewardPercent,
+                    'minDonationAmountWei' : parseFloat(this.utils.fromWei(minDonationAmountWei,'ether').toString()),
+                    'maxDonationAmountWei' : parseFloat(this.utils.fromWei(maxDonationAmountWei,'ether').toString()),
+                    'maxReferralRewardPercent': parseFloat(this.utils.fromWei(maxReferralRewardPercent,'ether').toString()),
                     publicMetaHash,
                     shouldConvertToRefer,
                     campaignName
                 };
                 resolve(obj);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+    /**
+     *
+     * @param {string} campaignAddress
+     * @param {number} donationId
+     * @param {string} from
+     * @returns {Promise<IDonation>}
+     */
+    public getDonation(campaignAddress: string, donationId: number, from: string) : Promise<IDonation> {
+        return new Promise<IDonation>(async(resolve,reject) => {
+            try {
+                let donationCampaignInstance = await this._getCampaignInstance(campaignAddress);
+                let data = await promisify(donationCampaignInstance.getDonation,[donationId,{from}]);
+                /**
+                 donator: string,
+                 donationAmount: number
+                 donationTime: number,
+                 bountyEthWei: number,
+                 bounty2key: number
+                 */
+
+                let donator = data.slice(0,42);
+                let donationAmount = data.slice(42,42+64);
+                let donationTime = data.slice(42+64,42+64+64);
+                let bountyEthWei = data.slice(42+64+64,42+64+64+64);
+                let bounty2key = data.slice(42+64+64+64);
+
+                let obj: IDonation = {
+                    donator,
+                    'donationAmount' : parseFloat(this.utils.fromWei(donationAmount,'ether').toString()),
+                    donationTime,
+                    'bountyEthWei' : parseFloat(this.utils.fromWei(bountyEthWei,'ether').toString()),
+                    'bounty2key' : parseFloat(this.utils.fromWei(bounty2key,'ether').toString())
+                };
+
+                resolve(obj);
+
             } catch (e) {
                 reject(e);
             }

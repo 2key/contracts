@@ -24,8 +24,8 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
     string privateMetaHash; //TODO: Is there a need for private
     uint campaignStartTime; // Time when campaign starts
     uint campaignEndTime; // Time when campaign ends
-    uint minDonationAmount; // Minimal donation amount
-    uint maxDonationAmount; // Maximal donation amount
+    uint minDonationAmountWei; // Minimal donation amount
+    uint maxDonationAmountWei; // Maximal donation amount
     uint maxReferralRewardPercent; // Percent per conversion which goes to referrers
     uint campaignGoal; // Goal of the campaign, how many funds to raise
     bool shouldConvertToRefer; // If yes, means that referrer must be converter in order to be referrer
@@ -49,7 +49,7 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
     }
 
     modifier onlyInDonationLimit {
-        require(msg.value >= minDonationAmount && msg.value <= maxDonationAmount, "Wrong contribution amount");
+        require(msg.value >= minDonationAmountWei && msg.value <= maxDonationAmountWei, "Wrong contribution amount");
         _;
     }
 
@@ -97,8 +97,8 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         maxReferralRewardPercent = values[0];
         campaignStartTime = values[1];
         campaignEndTime = values[2];
-        minDonationAmount = values[3];
-        maxDonationAmount = values[4];
+        minDonationAmountWei = values[3];
+        maxDonationAmountWei = values[4];
         campaignGoal = values[5];
         conversionQuota = values[6];
 
@@ -338,8 +338,8 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         return abi.encodePacked(
             campaignStartTime,
             campaignEndTime,
-            minDonationAmount,
-            maxDonationAmount,
+            minDonationAmountWei,
+            maxDonationAmountWei,
             maxReferralRewardPercent,
             publicMetaHash,
             shouldConvertToRefer,
