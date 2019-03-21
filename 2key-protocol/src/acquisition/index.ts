@@ -1723,7 +1723,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         return new Promise<string>(async(resolve,reject) => {
             try {
                 const twoKeyAcquisitionLogicHandlerInstance = await this._getLogicHandlerInstance(campaign);
-                let ipfsHash: string = await promisify(twoKeyAcquisitionLogicHandlerInstance.getPrivateMetaHash,[{from}]);
+                let ipfsHash: string = await promisify(twoKeyAcquisitionLogicHandlerInstance.privateMetaHash,[{from}]);
                 console.log('Hash taken from contract is: ' + ipfsHash);
                 let privateHashEncrypted = await promisify(this.base.ipfsR.cat, [ipfsHash]);
                 privateHashEncrypted = privateHashEncrypted.toString();
