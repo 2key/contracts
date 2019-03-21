@@ -1691,11 +1691,21 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @param {string} from
      * @returns {Promise<string>}
      */
-    public setPrivateMetaHash(campaign: any, privateMetaHash: string, from:string) : Promise<string> {
+    public setPrivateMetaHash(campaign: any, data: any, from:string) : Promise<string> {
         return new Promise<string>(async(resolve,reject) => {
             try {
+                //Convert data to string
+                const dataString = typeof data === 'string' ? data : JSON.stringify(data);
+
+                //Encrypt the string
+                let encryptedString = await this.sign.encrypt(this.base.web3, from, dataString, {plasma:false});
+
+                const hash = await this.utils.ipfsAdd(encryptedString);
+
+                console.log('Hash sent to contract is: ' + hash);
+
                 const twoKeyAcquisitionLogicHandlerInstance = await this._getLogicHandlerInstance(campaign);
-                let txHash: string = await promisify(twoKeyAcquisitionLogicHandlerInstance.setPrivateMetaHash,[privateMetaHash,{from}]);
+                let txHash: string = await promisify(twoKeyAcquisitionLogicHandlerInstance.setPrivateMetaHash,[hash,{from}]);
                 resolve(txHash);
             } catch (e) {
                 reject(e);
@@ -1713,8 +1723,13 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         return new Promise<string>(async(resolve,reject) => {
             try {
                 const twoKeyAcquisitionLogicHandlerInstance = await this._getLogicHandlerInstance(campaign);
-                let txHash: string = await promisify(twoKeyAcquisitionLogicHandlerInstance.getPrivateMetaHash,[{from}]);
-                resolve(txHash);
+                let ipfsHash: string = await promisify(twoKeyAcquisitionLogicHandlerInstance.getPrivateMetaHash,[{from}]);
+                console.log('Hash taken from contract is: ' + ipfsHash);
+                let privateHashEncrypted = await promisify(this.base.ipfsR.cat, [ipfsHash]);
+                privateHashEncrypted = privateHashEncrypted.toString();
+                console.log(privateHashEncrypted);
+                let privateMetaHashDecrypted = await this.sign.decrypt(this.base.web3,from,privateHashEncrypted,{plasma : false});
+                resolve(privateMetaHashDecrypted.slice(2)); //remove 0x from the beginning
             } catch (e) {
                 reject(e);
             }
