@@ -415,9 +415,8 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
             try {
                 const nonce = await this.helpers._getNonce(from);
                 console.log('updateOrSetIpfsHashPublicMeta', hash);
-                const twoKeyAcquisitionLogicHandlerInstance = await this._getLogicHandlerInstance(campaign);
-                console.log('twoKeyAcquisitionLogicHandlerInstance', twoKeyAcquisitionLogicHandlerInstance.address);
-                const txHash: string = await promisify(twoKeyAcquisitionLogicHandlerInstance.updateOrSetIpfsHashPublicMeta, [hash, {
+                const twoKeyAcquisitionCampaign = await this._getCampaignInstance(campaign);
+                const txHash: string = await promisify(twoKeyAcquisitionCampaign.updateOrSetPublicMetaHash, [hash, {
                     from,
                     gasPrice,
                     nonce,
@@ -439,9 +438,8 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     public getPublicMeta(campaign: any, from?: string): Promise<any> {
         return new Promise<any>(async (resolve, reject) => {
             try {
-                const campaignInstance = await this._getCampaignInstance(campaign);
-                const twoKeyAcquisitionLogicHandlerInstance = await this._getLogicHandlerInstance(campaign);
-                const ipfsHash = await promisify(twoKeyAcquisitionLogicHandlerInstance.publicMetaHash, []);
+                const acquisitionCampaignInstance = await this._getCampaignInstance(campaign)
+                const ipfsHash = await promisify(acquisitionCampaignInstance.publicMetaHash, []);
                 const meta = JSON.parse((await promisify(this.base.ipfsR.cat, [ipfsHash])).toString());
                 resolve({meta});
             } catch (e) {
@@ -1704,8 +1702,8 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
 
                 console.log('Hash sent to contract is: ' + hash);
 
-                const twoKeyAcquisitionLogicHandlerInstance = await this._getLogicHandlerInstance(campaign);
-                let txHash: string = await promisify(twoKeyAcquisitionLogicHandlerInstance.setPrivateMetaHash,[hash,{from}]);
+                const acquisitionCampaignInstance = await this._getCampaignInstance(campaign);
+                let txHash: string = await promisify(acquisitionCampaignInstance.updateOrSetPrivateMetaHash,[hash,{from}]);
                 resolve(txHash);
             } catch (e) {
                 reject(e);
@@ -1722,8 +1720,8 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
     public getPrivateMetaHash(campaign: any, from: string) : Promise<string> {
         return new Promise<string>(async(resolve,reject) => {
             try {
-                const twoKeyAcquisitionLogicHandlerInstance = await this._getLogicHandlerInstance(campaign);
-                let ipfsHash: string = await promisify(twoKeyAcquisitionLogicHandlerInstance.privateMetaHash,[{from}]);
+                const acquisitionCampaignInstance = await this._getCampaignInstance(campaign);
+                let ipfsHash: string = await promisify(acquisitionCampaignInstance.privateMetaHash,[{from}]);
                 console.log('Hash taken from contract is: ' + ipfsHash);
                 let privateHashEncrypted = await promisify(this.base.ipfsR.cat, [ipfsHash]);
                 privateHashEncrypted = privateHashEncrypted.toString();

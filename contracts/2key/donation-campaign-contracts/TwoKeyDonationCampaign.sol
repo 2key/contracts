@@ -284,34 +284,6 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         return amountUserContributed[_donator];
     }
 
-    /**
-     * @notice Function to set or update public meta hash
-     * @param _publicMetaHash is the hash of the campaign
-     * @dev Only contractor can call this
-     */
-    function updateOrSetPublicMetaHash(string _publicMetaHash) public onlyContractor {
-        require(bytes(_publicMetaHash).length == 46);
-        publicMetaHash = _publicMetaHash;
-    }
-
-    /**
-     * @notice Function to update or set private meta hash
-     * @param _privateMetaHash is the private meta hash containing contractor public link key
-     */
-    function updateOrSetPrivateMetaHash(string _privateMetaHash) public onlyContractor {
-        require(bytes(_privateMetaHash).length == 46);
-        privateMetaHash = _privateMetaHash;
-    }
-
-
-    /**
-     * @notice Function to get private meta hash
-     * @dev Visible only to contractor
-     */
-    function getPrivateMetaHash() public view onlyContractor returns (string) {
-        return privateMetaHash;
-    }
-
 
     /**
     * @notice Function to fetch for the referrer his balance, his total earnings, and how many conversions he participated in

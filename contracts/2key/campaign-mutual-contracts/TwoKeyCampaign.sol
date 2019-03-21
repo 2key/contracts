@@ -34,6 +34,9 @@ contract TwoKeyCampaign is ArcERC20 {
 	uint256 moderatorTotalEarningsETHWei; //Total earnings of the moderator all time
 	uint256 reservedAmount2keyForRewards; //Reserved amount of 2key tokens for rewards distribution
 
+	string public publicMetaHash; // Ipfs hash of json campaign object
+	string public privateMetaHash; // Ipfs hash of json sensitive (contractor) information
+
 	mapping(address => uint256) internal referrerPlasma2Balances2key; // balance of EthWei for each influencer that he can withdraw
 
 	mapping(address => address) public public_link_key;
@@ -159,7 +162,38 @@ contract TwoKeyCampaign is ArcERC20 {
 		maxReferralRewardPercent = value;
 	}
 
-    /**
+	/**
+     * @notice Function to set or update public meta hash
+     * @param _publicMetaHash is the hash of the campaign
+     * @dev Only contractor can call this
+     */
+	function updateOrSetPublicMetaHash(string _publicMetaHash) public onlyContractor {
+		require(bytes(_publicMetaHash).length == 46);
+		publicMetaHash = _publicMetaHash;
+	}
+
+	/**
+     * @notice Function to update or set private meta hash
+     * @param _privateMetaHash is the private meta hash containing contractor public link key
+     */
+	function updateOrSetPrivateMetaHash(string _privateMetaHash) public onlyContractor {
+		require(bytes(_privateMetaHash).length == 46);
+		privateMetaHash = _privateMetaHash;
+	}
+
+	/**
+ 	 * @notice Private function which will be executed at the withdraw time to buy 2key tokens from upgradable exchange contract
+ 	 * @param amountOfMoney is the ether balance person has on the contract
+ 	 * @param receiver is the address of the person who withdraws money
+ 	 */
+	function buyTokensFromUpgradableExchange(uint amountOfMoney, address receiver) internal returns (uint) {
+		address upgradableExchange = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyUpgradableExchange");
+		uint amountBought = IUpgradableExchange(upgradableExchange).buyTokens.value(amountOfMoney)(receiver);
+		return amountBought;
+	}
+
+
+	/**
      * @notice Getter for the referral chain
      * @param _receiver is address we want to check who he has received link from
      */
@@ -201,16 +235,6 @@ contract TwoKeyCampaign is ArcERC20 {
         return (contractorBalance, contractorTotalProceeds);
     }
 
-	/**
- 	 * @notice Private function which will be executed at the withdraw time to buy 2key tokens from upgradable exchange contract
- 	 * @param amountOfMoney is the ether balance person has on the contract
- 	 * @param receiver is the address of the person who withdraws money
- 	 */
-	function buyTokensFromUpgradableExchange(uint amountOfMoney, address receiver) internal returns (uint) {
-		address upgradableExchange = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyUpgradableExchange");
-		uint amountBought = IUpgradableExchange(upgradableExchange).buyTokens.value(amountOfMoney)(receiver);
-		return amountBought;
-	}
 
     /**
      * @notice Function where contractor can withdraw his funds
