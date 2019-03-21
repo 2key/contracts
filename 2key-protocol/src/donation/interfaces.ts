@@ -43,8 +43,9 @@ export interface ICampaignData {
     minDonationAmount: number,
     maxDonationAmount: number,
     maxReferralRewardPercent: number,
+    publicMetaHash: string,
+    shouldConvertToRefer: boolean,
     campaignName: string
-    publicMetaHash: string
 }
 
 /**

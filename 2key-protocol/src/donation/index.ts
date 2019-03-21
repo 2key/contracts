@@ -359,6 +359,19 @@ export default class DonationCampaign implements IDonationCampaign {
 
     /**
      *
+     campaignStartTime,
+     campaignEndTime,
+     minDonationAmount,
+     maxDonationAmount,
+     maxReferralRewardPercent,
+     publicMetaHash,
+     shouldConvertToRefer,
+     campaignName
+     */
+
+
+    /**
+     *
      * @param {string} campaignAddress
      * @returns {Promise<ICampaignData>}
      */
@@ -368,22 +381,24 @@ export default class DonationCampaign implements IDonationCampaign {
                 let donationCampaignInstance = await this._getCampaignInstance(campaignAddress);
                 let data = await promisify(donationCampaignInstance.getCampaignData,[]);
                 console.log(data);
-                let campaignStartTime = parseInt(data.slice(0,66),16);
-                let campaignEndTime = parseInt(data.slice(66,66+64), 16);
-                let minDonationAmount = parseInt(data.slice(66+64,66+64+64),16);
-                let maxDonationAmount = parseInt(data.slice(66+64+64,66+64+64+64),16);
-                let maxReferralRewardPercent = parseInt(data.slice(66+64+64+64,66+64+64+64+64),16);
-                console.log(data.slice(66+64+64+64+64));
-                let campaignName = "";
-                let publicMetaHash = "";
+                let campaignStartTime = parseInt(data.slice(0, 66),16);
+                let campaignEndTime = parseInt(data.slice(66, 66+64), 16);
+                let minDonationAmount = parseInt(data.slice(66+64, 66+64+64),16);
+                let maxDonationAmount = parseInt(data.slice(66+64+64, 66+64+64+64),16);
+                let maxReferralRewardPercent = parseInt(data.slice(66+64+64+64, 66+64+64+64+64),16);
+                let publicMetaHash = this.base.web3.toUtf8(data.slice(66+64+64+64+64, 66+64+64+64+64+92));
+                let shouldConvertToRefer = parseInt(data.slice(66+64+64+64+64+92, 66+64+64+64+64+92+2),16) == 1;
+                let campaignName = this.base.web3.toUtf8(data.slice(66+64+64+64+64+92+2));
+
                 let obj : ICampaignData = {
                     campaignStartTime,
                     campaignEndTime,
                     minDonationAmount,
                     maxDonationAmount,
                     maxReferralRewardPercent,
-                    campaignName,
-                    publicMetaHash
+                    publicMetaHash,
+                    shouldConvertToRefer,
+                    campaignName
                 };
                 resolve(obj);
             } catch (e) {

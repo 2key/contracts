@@ -41,8 +41,8 @@ const links = {
  */
 
 let campaignName = 'Donation for Some Services';
-let publicMetaHash = 'QmABCDE';
-let privateMetaHash = 'QmABCD';
+let publicMetaHash = 'QmWWQSuPMS6aXCbZKpEjPHPUZN2NjB3YrhJTHsV4X3vb2t';
+let privateMetaHash = 'QmWWQSuPMS6aXCbZKpEjPHPUZN2NjB3YrhJTHsV4X3vb2t';
 let tokenName = 'NikolaToken';
 let tokenSymbol = 'NTKN';
 let maxReferralRewardPercent = 5;
@@ -53,7 +53,7 @@ let maxDonationAmount = 10000000000000000000;
 let campaignGoal = 100000000000000000000000;
 let conversionQuota = 1;
 let isKYCRequired = false;
-let shouldConvertToRefer = false;
+let shouldConvertToRefer = true;
 let incentiveModel = 0;
 
 let campaignAddress: string;
@@ -142,20 +142,4 @@ describe('TwoKeyDonationCampaign', () => {
        }
    }).timeout(10000);
 
-   // it('should visit campaign as guest', async () => {
-   //     const {web3, address} = web3switcher.guest();
-   //     from = address;
-   //     twoKeyProtocol.setWeb3({
-   //         web3,
-   //         networks: {
-   //             mainNetId,
-   //             syncTwoKeyNetId,
-   //         },
-   //         eventsNetUrl,
-   //         plasmaPK: generatePlasmaFromMnemonic('mnemonic words should be here but for some reason they are missing').privateKey,
-   //     });
-   //     let txHash = await twoKeyProtocol.DonationCampaign.visit(campaignAddress, links.deployer);
-   //     console.log(txHash);
-   //     expect(txHash.length).to.be.gt(0);
-   //  }).timeout(60000);
 });
