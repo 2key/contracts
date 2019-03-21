@@ -1,7 +1,7 @@
 import {ICreateCampaignProgress} from "../interfaces";
 
 export interface IDonationCampaign {
-    create: (data: ICreateCampaign, from: string, opts?: ICreateOpts) => Promise<string>,
+    create: (data: ICreateCampaign, from: string, opts?: ICreateOpts) => Promise<any>,
     getDonation: (campaignAddress: string, donationId: number, from: string) => Promise<IDonation>,
     getPublicLinkKey: (campaign: any, from: string) => Promise<string>,
     visit: (campaignAddress: string, referralLink: string)=> Promise<string>,

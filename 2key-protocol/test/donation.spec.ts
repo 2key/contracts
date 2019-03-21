@@ -102,12 +102,16 @@ describe('TwoKeyDonationCampaign', () => {
            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
        });
 
-        campaignAddress = await twoKeyProtocol.DonationCampaign.create(campaign, from, {
+        let result = await twoKeyProtocol.DonationCampaign.create(campaign, from, {
             progressCallback,
             gasPrice: 150000000000,
             interval: 500,
             timeout: 600000
         });
+
+        campaignAddress = result.campaignAddress;
+        links.deployer = result.campaignPublicLinkKey;
+        console.log(links.deployer);
    }).timeout(60000);
 
    it('should proof that campaign is set and validated properly', async() => {
@@ -122,14 +126,14 @@ describe('TwoKeyDonationCampaign', () => {
         expect(nonSingletonHash).to.be.equal(twoKeyProtocol.AcquisitionCampaign.getNonSingletonsHash());
     }).timeout(60000);
 
-   it('should upload campaign to ipfsHash', async() => {
+   it('should upload campaign to ipfsHash and save it on the contract', async() => {
        const hash = await twoKeyProtocol.Utils.ipfsAdd(campaign);
        console.log('HASH', hash);
        let txHash = await twoKeyProtocol.DonationCampaign.updateOrSetIpfsHashPublicMeta(campaignAddress,hash, from);
-
        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-       console.log(`TX ${txHash} mined`);
+   }).timeout(60000);
 
+   it('should get public meta hash from the contract', async() => {
        let meta = await twoKeyProtocol.DonationCampaign.getPublicMeta(campaignAddress);
        console.log(meta);
    }).timeout(60000);
@@ -143,5 +147,7 @@ describe('TwoKeyDonationCampaign', () => {
            throw e;
        }
    }).timeout(10000);
+
+
 
 });

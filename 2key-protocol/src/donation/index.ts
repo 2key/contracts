@@ -63,8 +63,8 @@ export default class DonationCampaign implements IDonationCampaign {
      * @param {number} timeout
      * @returns {Promise<string>}
      */
-    public create(data: ICreateCampaign, from: string, {progressCallback, gasPrice, interval, timeout = 60000}: ICreateOpts = {}): Promise<string> {
-        return new Promise<string>(async(resolve,reject) => {
+    public create(data: ICreateCampaign, from: string, {progressCallback, gasPrice, interval, timeout = 60000}: ICreateOpts = {}): Promise<any> {
+        return new Promise<any>(async(resolve,reject) => {
             try {
                 let txHash: string = await this.helpers._createContract(donationContracts.TwoKeyDonationCampaign, from, {
                     gasPrice,
@@ -132,7 +132,12 @@ export default class DonationCampaign implements IDonationCampaign {
                 if (progressCallback) {
                     progressCallback('ValidateCampaign', true, txHash);
                 }
-                resolve(campaignAddress);
+                resolve({
+                    contractor: from,
+                    campaignAddress,
+                    campaignPublicLinkKey,
+                    ephemeralContractsVersion: this.nonSingletonsHash,
+                });
             } catch (e) {
                 reject(e);
             }
@@ -267,6 +272,7 @@ export default class DonationCampaign implements IDonationCampaign {
             try {
                 const campaignInstance = await this._getCampaignInstance(campaign);
                 const ipfsHash = await promisify(campaignInstance.publicMetaHash, []);
+                console.log('Public meta hash: ' + ipfsHash);
                 const meta = JSON.parse((await promisify(this.base.ipfsR.cat, [ipfsHash])).toString());
                 resolve({meta});
             } catch (e) {

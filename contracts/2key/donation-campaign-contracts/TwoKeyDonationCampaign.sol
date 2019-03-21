@@ -20,8 +20,6 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
     uint powerLawFactor = 2;
 
     string campaignName; // Name of the campaign
-    string public publicMetaHash; // Ipfs hash of public informations
-    string privateMetaHash; //TODO: Is there a need for private
     uint campaignStartTime; // Time when campaign starts
     uint campaignEndTime; // Time when campaign ends
     uint minDonationAmountWei; // Minimal donation amount

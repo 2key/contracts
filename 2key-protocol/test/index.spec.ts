@@ -320,20 +320,7 @@ describe('TwoKeyProtocol', () => {
                 console.log(adminBalance);
                 let numberOfProposals = await twoKeyProtocol.Congress.getNumberOfProposals();
                 console.log('Number of proposals is: ' + numberOfProposals);
-                if (numberOfProposals == 0) {
-                    console.log('Contractor does not have enough 2key tokens. Submitting a proposal to transfer');
-                    let transactionBytecode =
-                        "0x9ffe94d9e31c0ffa000000000000000000000000b3fa520368f2df7bed4df5185101f303f6c7decc000000000000000000000000000000000000000000000000002386f26fc10000";
-                    let txHash = twoKeyProtocol.Congress.newProposal(
-                        twoKeyProtocol.twoKeyAdmin.address,
-                        "Send some tokens to contractor",
-                        transactionBytecode,
-                        from);
-
-                    resolve(txHash);
-                } else {
-                    resolve(balance['2KEY']);
-                }
+                resolve(balance['2KEY']);
             } catch (err) {
                 reject(err);
             }
