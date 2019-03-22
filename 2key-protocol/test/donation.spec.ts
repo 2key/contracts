@@ -47,12 +47,12 @@ let tokenSymbol = 'NTKN';
 let maxReferralRewardPercent = 5;
 let campaignStartTime = 12345;
 let campaignEndTime = 1234567;
-let minDonationAmount = 100;
+let minDonationAmount = 0.001;
 let maxDonationAmount = 1000;
 let campaignGoal = 10000;
 let conversionQuota = 1;
 let isKYCRequired = false;
-let shouldConvertToRefer = true;
+let shouldConvertToRefer = false;
 let incentiveModel = 0;
 
 let campaignAddress: string;
@@ -198,6 +198,33 @@ describe('TwoKeyDonationCampaign', () => {
        });
        console.log('2) gmail offchain REFLINK', hash);
        links.gmail = hash;
-   }).timeout(60000)
+   }).timeout(60000);
+
+   it('should visit before donate', async() => {
+       const {web3, address} = web3switcher.test4();
+       from = address;
+       twoKeyProtocol.setWeb3({
+           web3,
+           networks: {
+               mainNetId,
+               syncTwoKeyNetId,
+           },
+           eventsNetUrl,
+           plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_TEST4).privateKey,
+       });
+       let txHash = await twoKeyProtocol.DonationCampaign.visit(campaignAddress, links.gmail);
+   }).timeout(60000);
+
+    it('should join and donate', async () => {
+        let txHash = await twoKeyProtocol.DonationCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(10*minDonationAmount, 'ether'), links.gmail, from);
+        console.log(txHash);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        expect(txHash).to.be.a('string');
+    }).timeout(60000);
+
+    it('should get donation', async() => {
+        let donation = await twoKeyProtocol.DonationCampaign.getDonation(campaignAddress,0,from);
+        console.log(donation);
+    })
 
 });

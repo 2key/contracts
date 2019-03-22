@@ -4,7 +4,8 @@ import {ISign} from "../sign/interface";
 import donationContracts, {default as donation} from '../contracts/donation';
 import { promisify } from '../utils/promisify';
 import acquisitionContracts from "../contracts/acquisition";
-import {IJoinLinkOpts, IOffchainData, IPublicLinkKey, IPublicLinkOpts} from "../acquisition/interfaces";
+import {IConvertOpts, IJoinLinkOpts, IOffchainData, IPublicLinkKey, IPublicLinkOpts} from "../acquisition/interfaces";
+import {BigNumber} from "bignumber.js";
 
 
 export default class DonationCampaign implements IDonationCampaign {
@@ -458,6 +459,70 @@ export default class DonationCampaign implements IDonationCampaign {
         });
     }
 
+    /**
+     *
+     * @param campaign
+     * @param {string | number | BigNumber} value
+     * @param {string} publicLink
+     * @param {string} from
+     * @param {number} gasPrice
+     * @param {boolean} isConverterAnonymous
+     * @returns {Promise<string>}
+     */
+    public joinAndConvert(campaign: any, value: string | number | BigNumber, publicLink: string, from: string, {gasPrice = this.base._getGasPrice(), isConverterAnonymous}: IConvertOpts = {}): Promise<string> {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const {f_address, f_secret, p_message} = await this.utils.getOffchainDataFromIPFSHash(publicLink);
+                if (!f_address || !f_secret) {
+                    reject('Broken Link');
+                }
+                const campaignInstance = await this._getCampaignInstance(campaign);
+                const prevChain = await promisify(campaignInstance.getReceivedFrom, [from]);
+                const nonce = await this.helpers._getNonce(from);
+                let txHash;
+                if (!parseInt(prevChain, 16)) {
+                    this.base._log('No ARCS call Free Join');
+                    const plasmaAddress = this.base.plasmaAddress;
+                    const signature = this.sign.free_take(plasmaAddress, f_address, f_secret, p_message);
+
+                    const cuts = this.sign.validate_join(null, null, null, signature, plasmaAddress);
+                    console.log('CUTS', cuts);
+                    console.log('Sig we want to buy with is: ' + signature);
+                    console.log(`Plasma of ${from} is`, await promisify(this.base.twoKeyReg.getEthereumToPlasma, [from]));
+                    txHash = await promisify(campaignInstance.joinAndDonate, [signature, {
+                        from,
+                        gasPrice,
+                        value,
+                        nonce,
+                    }]);
+                    this.base._log('joinAndConvert txHash', txHash);
+
+                    try {
+                        const contractor = await promisify(campaignInstance.contractor, []);
+
+                        console.log('twoKeyPlasmaEvents.joinCampaign convert', campaignInstance.address, contractor, signature, plasmaAddress);
+                        await this.helpers._awaitPlasmaMethod(promisify(this.base.twoKeyPlasmaEvents.joinCampaign, [campaignInstance.address, contractor, signature, { from: plasmaAddress, gasPrice: 0 }]));
+                    } catch (e) {
+                        console.log('Plasma joinCampaign error', e);
+                    }
+                    resolve(txHash);
+                } else {
+                    this.base._log('Previous referrer', prevChain, value);
+                    const txHash: string = await promisify(campaignInstance.convert, [false,{
+                        from,
+                        gasPrice,
+                        value,
+                        nonce,
+                    }]);
+                    resolve(txHash);
+                }
+            } catch (e) {
+                this.base._log('joinAndConvert ERROR', e.toString());
+                this.base._log(e);
+                reject(e);
+            }
+        });
+    }
 
 
     /**
@@ -481,10 +546,10 @@ export default class DonationCampaign implements IDonationCampaign {
                  */
 
                 let donator = data.slice(0,42);
-                let donationAmount = data.slice(42,42+64);
-                let donationTime = data.slice(42+64,42+64+64);
-                let bountyEthWei = data.slice(42+64+64,42+64+64+64);
-                let bounty2key = data.slice(42+64+64+64);
+                let donationAmount = parseInt(data.slice(42,42+64),16);
+                let donationTime = parseInt(data.slice(42+64,42+64+64),16);
+                let bountyEthWei = parseInt(data.slice(42+64+64,42+64+64+64),16);
+                let bounty2key = parseInt(data.slice(42+64+64+64),16);
 
                 let obj: IDonation = {
                     donator,

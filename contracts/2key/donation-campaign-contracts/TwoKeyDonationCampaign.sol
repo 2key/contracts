@@ -216,7 +216,7 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
 
     /**
      * @notice Function to join with signature and share 1 arc to the receiver
-     * @param signature is the signature generated
+     * @param signature is the signature generatedD
      * @param receiver is the address we're sending ARCs to
      */
     function joinAndShareARC(bytes signature, address receiver) public {
@@ -228,9 +228,10 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
      * @notice Function where user can join to campaign and donate funds
      * @param signature is signature he's joining with
      */
-    function joinAndDonate(bytes signature) public goalValidator onlyInDonationLimit isOngoing payable {
+    //TOOO: Get bakc modifiers isOngoing
+    function joinAndDonate(bytes signature) public goalValidator onlyInDonationLimit payable {
         distributeArcsBasedOnSignature(signature);
-        uint referrerReward = (msg.value).mul(maxReferralRewardPercent).div(100);
+        uint referrerReward = (msg.value).mul(maxReferralRewardPercent).div(100 * (10**18));
         DonationEther memory donation = DonationEther(msg.sender, msg.value, block.timestamp, referrerReward, 0);
         uint id = donations.length; // get donation id
         donations.push(donation); // add donation to array of donations

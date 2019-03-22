@@ -1,4 +1,6 @@
 import {ICreateCampaignProgress} from "../interfaces";
+import {IConvertOpts} from "../acquisition/interfaces";
+import {BigNumber} from "bignumber.js";
 
 export interface IDonationCampaign {
     create: (data: ICreateCampaign, from: string, opts?: ICreateOpts) => Promise<any>,
@@ -7,6 +9,7 @@ export interface IDonationCampaign {
     visit: (campaignAddress: string, referralLink: string)=> Promise<string>,
     updateOrSetIpfsHashPublicMeta: (campaign: any, hash: string, from: string, gasPrice?: number) => Promise<string>,
     getPublicMeta: (campaign: any, from?: string) => Promise<any>,
+    joinAndConvert: (campaign: any, value: string | number | BigNumber, publicLink: string, from: string, opts?: IConvertOpts) => Promise<string>,
     getPrivateMetaHash: (campaign: any, from: string) => Promise<string>,
     setPrivateMetaHash: (campaign: any, data: any, from:string) => Promise<string>,
 }
@@ -56,6 +59,12 @@ export interface ICampaignData {
     publicMetaHash: string,
     shouldConvertToRefer: boolean,
     campaignName: string
+}
+
+
+export interface IConvertOpts {
+    gasPrice?: number,
+    isConverterAnonymous?: boolean
 }
 
 /**
