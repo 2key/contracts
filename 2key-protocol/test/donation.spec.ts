@@ -2,6 +2,7 @@ import createWeb3, {generatePlasmaFromMnemonic} from "./_web3";
 import {TwoKeyProtocol} from "../src";
 import {expect} from "chai";
 import {ICreateCampaign, InvoiceERC20} from "../src/donation/interfaces";
+import {promisify} from "../src/utils/promisify";
 const { env } = process;
 
 const rpcUrl = env.RPC_URL;
@@ -177,8 +178,26 @@ describe('TwoKeyDonationCampaign', () => {
        expect(txHash.length).to.be.gt(0);
     }).timeout(60000);
 
-   it('should convert from contractor', async() => {
-
-   })
+   it('should join from contractor', async() => {
+       const {web3, address} = web3switcher.gmail();
+       from = address;
+       twoKeyProtocol.setWeb3({
+           web3,
+           networks: {
+               mainNetId,
+               syncTwoKeyNetId,
+           },
+           eventsNetUrl,
+           plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_GMAIL).privateKey,
+       });
+       console.log('Gmail plasma', await promisify(twoKeyProtocol.plasmaWeb3.eth.getAccounts, []));
+       let txHash = await twoKeyProtocol.DonationCampaign.visit(campaignAddress, links.deployer);
+       const hash = await twoKeyProtocol.AcquisitionCampaign.join(campaignAddress, from, {
+           cut: 2,
+           referralLink: links.deployer
+       });
+       console.log('2) gmail offchain REFLINK', hash);
+       links.gmail = hash;
+   }).timeout(60000)
 
 });
