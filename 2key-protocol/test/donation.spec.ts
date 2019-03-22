@@ -225,6 +225,6 @@ describe('TwoKeyDonationCampaign', () => {
     it('should get donation', async() => {
         let donation = await twoKeyProtocol.DonationCampaign.getDonation(campaignAddress,0,from);
         console.log(donation);
-    })
+    }).timeout(60000);
 
 });
