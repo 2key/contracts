@@ -53,7 +53,7 @@ let campaignGoal = 10000;
 let conversionQuota = 1;
 let isKYCRequired = false;
 let shouldConvertToRefer = false;
-let incentiveModel = 0;
+let incentiveModel = 1;
 
 let campaignAddress: string;
 
@@ -160,6 +160,11 @@ describe('TwoKeyDonationCampaign', () => {
            throw e;
        }
    }).timeout(10000);
+
+   it('should get incentive model from contract', async() => {
+       let incentiveModel = await twoKeyProtocol.DonationCampaign.getIncentiveModel(campaignAddress);
+       console.log(incentiveModel);
+   }).timeout(60000);
 
    it('should visit campaign as guest', async () => {
        const {web3, address} = web3switcher.guest();

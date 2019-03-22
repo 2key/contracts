@@ -238,6 +238,8 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         donatorToHisDonationsInEther[msg.sender].push(id); // accounting for the donator
         amountUserContributed[msg.sender] += msg.value; // user contributions
 
+        //Distribute referrer rewards between influencers regarding selected incentive model
+        distributeReferrerRewards(msg.sender, referrerReward, id);
         //How many ethers sent, that much invoice tokens you get
         InvoiceTokenERC20(erc20InvoiceToken).transfer(msg.sender, msg.value);
     }
@@ -254,6 +256,9 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         donations.push(donation); // add donation to array of donations
         donatorToHisDonationsInEther[msg.sender].push(id); // accounting for the donator
         amountUserContributed[msg.sender] += msg.value;
+
+        //Distribute referrer rewards between influencers regarding selected incentive model
+        distributeReferrerRewards(msg.sender, referrerReward, id);
 
         //How many ethers sent, that much invoice tokens you get
         InvoiceTokenERC20(erc20InvoiceToken).transfer(msg.sender, msg.value);
@@ -333,6 +338,9 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         super.withdrawContractor();
     }
 
+    function getIncentiveModel() public view returns (IncentiveModel) {
+        return rewardsModel;
+    }
     /**
      * @notice Function interface for moderator or referrer to withdraw their earnings
      * @param _address is the one who wants to withdraw

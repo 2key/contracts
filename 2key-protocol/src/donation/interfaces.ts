@@ -6,6 +6,7 @@ export interface IDonationCampaign {
     create: (data: ICreateCampaign, from: string, opts?: ICreateOpts) => Promise<any>,
     getDonation: (campaignAddress: string, donationId: number, from: string) => Promise<IDonation>,
     getPublicLinkKey: (campaign: any, from: string) => Promise<string>,
+    getIncentiveModel: (campaignAddress: string) => Promise<string>,
     visit: (campaignAddress: string, referralLink: string)=> Promise<string>,
     updateOrSetIpfsHashPublicMeta: (campaign: any, hash: string, from: string, gasPrice?: number) => Promise<string>,
     getPublicMeta: (campaign: any, from?: string) => Promise<any>,
