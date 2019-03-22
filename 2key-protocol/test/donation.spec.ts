@@ -138,6 +138,18 @@ describe('TwoKeyDonationCampaign', () => {
        console.log(meta);
    }).timeout(60000);
 
+    it('should save contractor link as the private meta hash', async() => {
+        console.log(links.deployer);
+        let txHash = await twoKeyProtocol.DonationCampaign.setPrivateMetaHash(campaignAddress, links.deployer, from);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+    }).timeout(60000);
+
+    it('should get and decrypt ipfs hash', async() => {
+        let data = await twoKeyProtocol.DonationCampaign.getPrivateMetaHash(campaignAddress, from);
+        console.log(data);
+        expect(data).to.be.equal(links.deployer);
+    }).timeout(60000);
+
    it('should get user public link', async () => {
        try {
            const publicLink = await twoKeyProtocol.DonationCampaign.getPublicLinkKey(campaignAddress, from);

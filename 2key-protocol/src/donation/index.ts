@@ -281,7 +281,6 @@ export default class DonationCampaign implements IDonationCampaign {
         });
     }
 
-
     /**
      * Only contractor or moderator can get it
      * @param campaign
