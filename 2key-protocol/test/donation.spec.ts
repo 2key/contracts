@@ -160,6 +160,21 @@ describe('TwoKeyDonationCampaign', () => {
        }
    }).timeout(10000);
 
-
+    it('should visit campaign as guest', async () => {
+        const {web3, address} = web3switcher.guest();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic('mnemonic words should be here but for some reason they are missing').privateKey,
+        });
+        let txHash = await twoKeyProtocol.DonationCampaign.visit(campaignAddress, links.deployer);
+        console.log(txHash);
+        expect(txHash.length).to.be.gt(0);
+    }).timeout(60000);
 
 });
