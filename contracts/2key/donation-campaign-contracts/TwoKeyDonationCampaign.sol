@@ -338,9 +338,14 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         super.withdrawContractor();
     }
 
+    /**
+     * @notice Function to get rewards model present in contract for referrers
+     * @return position of the model inside enum IncentiveModel
+     */
     function getIncentiveModel() public view returns (IncentiveModel) {
         return rewardsModel;
     }
+
     /**
      * @notice Function interface for moderator or referrer to withdraw their earnings
      * @param _address is the one who wants to withdraw
