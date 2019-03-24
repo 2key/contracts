@@ -47,3 +47,7 @@
 
 ##### sign/index.ts
 * Change link structure (switch to version 1)
+
+
+##### contracts_deployed-{branch}.json
+* Added interface to interact with ERC20 token
