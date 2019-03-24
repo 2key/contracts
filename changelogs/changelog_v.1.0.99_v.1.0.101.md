@@ -33,3 +33,17 @@
 * function updateOrSetPrivateMetaHash(string _privateMetaHash) public onlyContractor {
 
 
+##### 2key-protocol
+
+##### acquisition/index.ts:
+
+* public getInventoryStatus(campaign:any) : Promise<IInventoryStatus> -> Function to return object containing inventory status for campaign
+* setPrivateMetaHash -> This function now does both actions of hashing data, uploading to ipfs, and saving the ipfs hash to the contract
+* getPrivateMetaHash -> This function now get and decrypt private meta hash
+
+##### acquisition/interfaces.ts
+* added interface IInventoryStatus to describe inventory status object
+* setPrivateMetaHash: (campaign: any, privateMetaHash: string, from:string) => Promise<string>, -> now accepts data:object instead of privateMetahash:string
+
+##### sign/index.ts
+* Change link structure (switch to version 1)
