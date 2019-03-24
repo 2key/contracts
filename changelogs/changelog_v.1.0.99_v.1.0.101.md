@@ -1,6 +1,7 @@
-### Changelog
+### Changelog between v.1.0.99 and v.1.0.101
 
 ##### TwoKeyAcquisitionLogicHandler.sol
+
 ###### Deleted:
 * string public publicMetaHash; // Ipfs hash of json campaign object
 * string privateMetaHash; // Ipfs hash of json sensitive (contractor) information
@@ -18,6 +19,7 @@
 
 
 ##### TwoKeyAcquisitionCampaignERC20.sol
+
 ###### Deleted:
 * function getReferrersBalancesAndTotalEarnings(address[] _referrerPlasmaList) public view returns (uint256[], uint256[])
 * function getReferrerBalanceAndTotalEarningsAndNumberOfConversions(address _referrer, bytes signature, uint[] conversionIds) public view returns (uint,uint,uint,uint[])
