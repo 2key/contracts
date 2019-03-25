@@ -35,16 +35,13 @@ export default class DonationCampaign implements IDonationCampaign {
      */
     async _getCampaignInstance(campaign: any, skipCache?: boolean): Promise<any> {
         const address = campaign.address || campaign;
-        this.base._log('Requesting TwoKeyDonationCampaign at', address);
         if (skipCache) {
             const campaignInstance = await this.helpers._createAndValidate(donationContracts.TwoKeyDonationCampaign.abi, campaign);
             return campaignInstance;
         }
         if (this.DonationCampaign && this.DonationCampaign.address === address) {
-            this.base._log('Return from cache TwoKeyDonationCampaign at', this.DonationCampaign.address);
             return this.DonationCampaign;
         }
-        this.base._log('Instantiate new TwoKeyDonationCampaign at', address, this.DonationCampaign);
         if (campaign.address) {
             this.DonationCampaign = campaign;
         } else {
@@ -182,8 +179,6 @@ export default class DonationCampaign implements IDonationCampaign {
                 const signedMessage = await this.sign.sign_message(this.base.plasmaWeb3, msg, plasmaAddress, { plasma: true });
                 const private_key = this.base.web3.sha3(signedMessage).slice(2, 2 + 32 * 2);
                 const public_address = this.sign.privateToPublic(Buffer.from(private_key, 'hex'));
-                this.base._log('Signature', signedMessage);
-                this.base._log(campaignAddress, from, plasmaAddress, safeCut);
                 let new_message;
                 let contractor;
                 let dao;
@@ -196,7 +191,6 @@ export default class DonationCampaign implements IDonationCampaign {
                         const contractorAddress = await promisify(campaignInstance.contractor, []);
                         const plasmaAddress = this.base.plasmaAddress;
                         const sig = this.sign.free_take(plasmaAddress, f_address, f_secret, p_message);
-                        console.log('twoKeyPlasmaEvents.joinCampaign join', campaignInstance.address, contractorAddress, sig, plasmaAddress);
                         const txHash = await this.helpers._awaitPlasmaMethod(promisify(this.base.twoKeyPlasmaEvents.joinCampaign, [campaignInstance.address, contractorAddress, sig, { from: plasmaAddress, gasPrice: 0 }]));
                         await this.utils.getTransactionReceiptMined(txHash, { web3: this.base.plasmaWeb3 });
                     } catch (e) {
@@ -273,7 +267,6 @@ export default class DonationCampaign implements IDonationCampaign {
             try {
                 const campaignInstance = await this._getCampaignInstance(campaign);
                 const ipfsHash = await promisify(campaignInstance.publicMetaHash, []);
-                console.log('Public meta hash: ' + ipfsHash);
                 const meta = JSON.parse((await promisify(this.base.ipfsR.cat, [ipfsHash])).toString());
                 resolve({meta});
             } catch (e) {
@@ -324,8 +317,6 @@ export default class DonationCampaign implements IDonationCampaign {
                 let encryptedString = await this.sign.encrypt(this.base.web3, from, dataString, {plasma:false});
 
                 const hash = await this.utils.ipfsAdd(encryptedString);
-
-                console.log('Hash sent to contract is: ' + hash);
 
                 const donationCampaignInstance = await this._getCampaignInstance(campaign);
                 let txHash: string = await promisify(donationCampaignInstance.updateOrSetPrivateMetaHash,[hash,{from}]);
@@ -437,19 +428,16 @@ export default class DonationCampaign implements IDonationCampaign {
                 const campaignInstance = await this._getCampaignInstance(campaignAddress);
                 const contractor = await promisify(campaignInstance.contractor, []);
                 const joinedFrom = await promisify(this.base.twoKeyPlasmaEvents.joined_from, [campaignInstance.address, contractor, plasmaAddress]);
-                this.base._log('contractor', contractor, plasmaAddress);
                 const txHash: string = await promisify(this.base.twoKeyPlasmaEvents.visited, [
                     campaignInstance.address,
                     contractor,
                     sig,
                     {from: plasmaAddress, gasPrice: 0}
                 ]);
-                this.base._log('visit txHash', txHash);
                 if (!parseInt(joinedFrom, 16)) {
                     await this.utils.getTransactionReceiptMined(txHash, {web3: this.base.plasmaWeb3});
                     const note = await this.sign.encrypt(this.base.plasmaWeb3, plasmaAddress, f_secret, {plasma: true});
                     const noteTxHash = await promisify(this.base.twoKeyPlasmaEvents.setNoteByUser, [campaignInstance.address, note, {from: plasmaAddress}]);
-                    this.base._log('note txHash', noteTxHash);
                 }
                 resolve(txHash);
             } catch (e) {
@@ -481,33 +469,26 @@ export default class DonationCampaign implements IDonationCampaign {
                 const nonce = await this.helpers._getNonce(from);
                 let txHash;
                 if (!parseInt(prevChain, 16)) {
-                    this.base._log('No ARCS call Free Join');
                     const plasmaAddress = this.base.plasmaAddress;
                     const signature = this.sign.free_take(plasmaAddress, f_address, f_secret, p_message);
 
                     const cuts = this.sign.validate_join(null, null, null, signature, plasmaAddress);
-                    console.log('CUTS', cuts);
-                    console.log('Sig we want to buy with is: ' + signature);
-                    console.log(`Plasma of ${from} is`, await promisify(this.base.twoKeyReg.getEthereumToPlasma, [from]));
+
                     txHash = await promisify(campaignInstance.joinAndDonate, [signature, {
                         from,
                         gasPrice,
                         value,
                         nonce,
                     }]);
-                    this.base._log('joinAndConvert txHash', txHash);
 
                     try {
                         const contractor = await promisify(campaignInstance.contractor, []);
-
-                        console.log('twoKeyPlasmaEvents.joinCampaign convert', campaignInstance.address, contractor, signature, plasmaAddress);
                         await this.helpers._awaitPlasmaMethod(promisify(this.base.twoKeyPlasmaEvents.joinCampaign, [campaignInstance.address, contractor, signature, { from: plasmaAddress, gasPrice: 0 }]));
                     } catch (e) {
                         console.log('Plasma joinCampaign error', e);
                     }
                     resolve(txHash);
                 } else {
-                    this.base._log('Previous referrer', prevChain, value);
                     const txHash: string = await promisify(campaignInstance.convert, [false,{
                         from,
                         gasPrice,
@@ -565,6 +546,32 @@ export default class DonationCampaign implements IDonationCampaign {
             }
         })
     }
+
+    /**
+     *
+     * @param {string} campaignAddress
+     * @param {string} converter
+     * @param {string} from
+     * @returns {Promise<string[]>}
+     */
+    public getRefferrersToConverter(campaignAddress: string, converter: string, from: string) : Promise<string[]> {
+        return new Promise<string[]>(async(resolve,reject) => {
+            try {
+                let campaignInstance = await this._getCampaignInstance(campaignAddress);
+                let referrers = await promisify(campaignInstance.getReferrers,[converter,{from}]);
+                let balances = [];
+                for(let i=0; i<referrers.length; i++) {
+                    let balance = await promisify(campaignInstance.getReferrerBalance,[referrers[i]]);
+                    balances.push(parseFloat(this.utils.fromWei(balance,'ether').toString()));
+                }
+                console.log(balances);
+                resolve(referrers);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
 
     /**
      *

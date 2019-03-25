@@ -13,6 +13,7 @@ export interface IDonationCampaign {
     joinAndConvert: (campaign: any, value: string | number | BigNumber, publicLink: string, from: string, opts?: IConvertOpts) => Promise<string>,
     getPrivateMetaHash: (campaign: any, from: string) => Promise<string>,
     setPrivateMetaHash: (campaign: any, data: any, from:string) => Promise<string>,
+    getRefferrersToConverter: (campaignAddress: string, converter: string, from: string) => Promise<string[]>,
 }
 
 /**
