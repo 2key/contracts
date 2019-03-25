@@ -242,19 +242,7 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
     //TOOO: Get bakc modifiers isOngoing
     function joinAndDonate(bytes signature) public goalValidator onlyInDonationLimit payable {
         distributeArcsBasedOnSignature(signature);
-        uint referrerReward = (msg.value).mul(maxReferralRewardPercent).div(100 * (10**18));
-        DonationEther memory donation = DonationEther(msg.sender, msg.value, block.timestamp, referrerReward, 0);
-        uint id = donations.length; // get donation id
-        donations.push(donation); // add donation to array of donations
-        donatorToHisDonationsInEther[msg.sender].push(id); // accounting for the donator
-        amountUserContributed[msg.sender] += msg.value; // user contributions
-
-        //Distribute referrer rewards between influencers regarding selected incentive model
-        if(referrerReward > 0) {
-            distributeReferrerRewards(msg.sender, referrerReward, id);
-        }
-        //How many ethers sent, that much invoice tokens you get
-        InvoiceTokenERC20(erc20InvoiceToken).transfer(msg.sender, msg.value);
+        createDonation(msg.sender, msg.value);
     }
 
     /**
@@ -263,19 +251,7 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
     function donate() public goalValidator onlyInDonationLimit isOngoing payable {
         address _converterPlasma = twoKeyEventSource.plasmaOf(msg.sender);
         require(received_from[_converterPlasma] != address(0));
-        uint referrerReward = (msg.value).mul(maxReferralRewardPercent).div(100);
-        DonationEther memory donation = DonationEther(msg.sender, msg.value, block.timestamp, referrerReward, 0);
-        uint id = donations.length; // get donation id
-        donations.push(donation); // add donation to array of donations
-        donatorToHisDonationsInEther[msg.sender].push(id); // accounting for the donator
-        amountUserContributed[msg.sender] += msg.value;
-
-        //Distribute referrer rewards between influencers regarding selected incentive model
-        if(referrerReward > 0) {
-            distributeReferrerRewards(msg.sender, referrerReward, id);
-        }
-        //How many ethers sent, that much invoice tokens you get
-        InvoiceTokenERC20(erc20InvoiceToken).transfer(msg.sender, msg.value);
+        createDonation(msg.sender, msg.value);
     }
 
     /**
@@ -378,11 +354,47 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
      * @param _converter is the one who calls join and donate function
      * @param _donationAmount is the amount to be donated
      */
-    function createDonation(address _converter, uint _donationAmount, uint _donationId) internal {
-        if(isKYCRequired == false) {
+    function createDonation(address _converter, uint _donationAmount) internal {
+        //Basic accounting stuff
+        // Calculate referrer rewards in ETH based on conversion amount
+        uint referrerReward = (msg.value).mul(maxReferralRewardPercent).div(100 * (10**18));
+
+        // Create object for this donation
+        DonationEther memory donation = DonationEther(msg.sender, msg.value, block.timestamp, referrerReward, 0);
+
+        // Get donation ID
+        uint id = donations.length;
+
+        // Add donation to array of all donations
+        donations.push(donation);
+
+        // Add donation id under donator id's
+        donatorToHisDonationsInEther[msg.sender].push(id); // accounting for the donator
+
+        // Save amount donator contributed in total (donated)
+        amountUserContributed[msg.sender] += msg.value; // user contributions
+
+        // If KYC is not required or converter is approved
+        if(isKYCRequired == false || donatorToState[_converter] == ConverterState.APPROVED) {
+
+            // If there's a reward for influencers, distribute it between them
+            if(referrerReward > 0) {
+                distributeReferrerRewards(_converter, referrerReward, id);
+            }
+
+            // Transfer invoice token to donator (Contributor)
+            InvoiceTokenERC20(erc20InvoiceToken).transfer(msg.sender, msg.value);
+
+            // Update that donator is approved (since KYC is false every donator will be approved)
+            donatorToState[_converter] = ConverterState.APPROVED;
 
         } else {
-
+//            if(donatorToState[_converter] == ConverterState.REJECTED) {
+//                revert();
+//            }
+//            if(donatorToState[_converter] == ConverterState.NOT_EXISTING) {
+//                donatorToHisState = ConverterState.PENDING_APPROVAL;
+//            }
         }
     }
 }
