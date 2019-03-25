@@ -374,4 +374,15 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         super.withdrawModeratorOrReferrer(_address);
     }
 
+    /**
+     * @param _converter is the one who calls join and donate function
+     * @param _donationAmount is the amount to be donated
+     */
+    function createDonation(address _converter, uint _donationAmount, uint _donationId) internal {
+        if(isKYCRequired == false) {
+
+        } else {
+
+        }
+    }
 }
