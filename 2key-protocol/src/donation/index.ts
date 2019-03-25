@@ -559,6 +559,12 @@ export default class DonationCampaign implements IDonationCampaign {
             try {
                 let campaignInstance = await this._getCampaignInstance(campaignAddress);
                 let referrers = await promisify(campaignInstance.getReferrers,[converter,{from}]);
+                let balances = [];
+                for(let i=0; i<referrers.length; i++) {
+                    let balance = await promisify(campaignInstance.getReferrerBalance,[referrers[i]]);
+                    balances.push(parseFloat(this.utils.fromWei(balance,'ether').toString()))
+                }
+                console.log(balances);
                 resolve(referrers);
             } catch (e) {
                 reject(e);

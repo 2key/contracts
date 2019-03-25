@@ -298,6 +298,10 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         return amountUserContributed[_donator];
     }
 
+    function getReferrerBalance(address _referrer) public view returns (uint) {
+        return referrerPlasma2Balances2key[_referrer];
+    }
+
     /**
     * @notice Function to fetch for the referrer his balance, his total earnings, and how many conversions he participated in
     * @dev only referrer by himself, moderator, or contractor can call this

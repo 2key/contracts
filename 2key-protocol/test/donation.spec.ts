@@ -53,7 +53,7 @@ let campaignGoal = 10000;
 let conversionQuota = 1;
 let isKYCRequired = false;
 let shouldConvertToRefer = false;
-let incentiveModel = 1;
+let incentiveModel = 2;
 
 let campaignAddress: string;
 
@@ -201,9 +201,54 @@ describe('TwoKeyDonationCampaign', () => {
            cut: 2,
            referralLink: links.deployer
        });
-       console.log('2) gmail offchain REFLINK', hash);
+       console.log('Gmail offchain REFLINK', hash);
        links.gmail = hash;
    }).timeout(60000);
+
+   it('should join from gmail', async() => {
+       const {web3, address} = web3switcher.renata();
+       from = address;
+       twoKeyProtocol.setWeb3({
+           web3,
+           networks: {
+               mainNetId,
+               syncTwoKeyNetId,
+           },
+           eventsNetUrl,
+           plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_RENATA).privateKey,
+       });
+       console.log('Renata plasma', await promisify(twoKeyProtocol.plasmaWeb3.eth.getAccounts, []));
+       let txHash = await twoKeyProtocol.DonationCampaign.visit(campaignAddress, links.gmail);
+       const hash = await twoKeyProtocol.AcquisitionCampaign.join(campaignAddress, from, {
+           cut: 2,
+           referralLink: links.gmail
+       });
+       console.log('Renata offchain REFLINK', hash);
+       links.renata = hash;
+   }).timeout(60000);
+
+   it('should join from renata', async() => {
+       const {web3, address} = web3switcher.uport();
+       from = address;
+       twoKeyProtocol.setWeb3({
+           web3,
+           networks: {
+               mainNetId,
+               syncTwoKeyNetId,
+           },
+           eventsNetUrl,
+           plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_UPORT).privateKey,
+       });
+       console.log('Uport plasma', await promisify(twoKeyProtocol.plasmaWeb3.eth.getAccounts, []));
+       let txHash = await twoKeyProtocol.DonationCampaign.visit(campaignAddress, links.renata);
+       const hash = await twoKeyProtocol.AcquisitionCampaign.join(campaignAddress, from, {
+           cut: 2,
+           referralLink: links.renata
+       });
+       console.log('Uport offchain REFLINK', hash);
+       links.uport = hash;
+   }).timeout(60000);
+
 
    it('should visit before donate', async() => {
        const {web3, address} = web3switcher.test4();
@@ -217,15 +262,18 @@ describe('TwoKeyDonationCampaign', () => {
            eventsNetUrl,
            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_TEST4).privateKey,
        });
-       let txHash = await twoKeyProtocol.DonationCampaign.visit(campaignAddress, links.gmail);
+       let txHash = await twoKeyProtocol.DonationCampaign.visit(campaignAddress, links.uport);
+       console.log(txHash);
    }).timeout(60000);
 
+
    it('should join and donate', async () => {
-       let txHash = await twoKeyProtocol.DonationCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(10*minDonationAmount, 'ether'), links.gmail, from);
+       let txHash = await twoKeyProtocol.DonationCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(10*minDonationAmount, 'ether'), links.uport, from);
        console.log(txHash);
        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
        expect(txHash).to.be.a('string');
    }).timeout(60000);
+
 
    it('should get donation', async() => {
        let donation = await twoKeyProtocol.DonationCampaign.getDonation(campaignAddress,0,from);
