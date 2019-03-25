@@ -38,6 +38,8 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
     mapping(address => uint256) internal referrerPlasmaAddressToCounterOfConversions; // [referrer][conversionId]
     mapping(address => mapping(uint256 => uint256)) internal referrerPlasma2EarningsPerConversion;
 
+
+
     DonationEther[] donations;
 
 
@@ -63,8 +65,8 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         address donator; //donator -> address who donated
         uint amount; //donation amount ETH
         uint donationTimestamp; //When was donation created
-        uint referrerRewardsEthWei;
-        uint totalBounty2key;
+        uint totalBountyEthWei; //Rewards amount in ether
+        uint totalBounty2keyWei; //Rewards distributed between referrers for this campaign in 2key-tokens
     }
 
     constructor(
@@ -195,24 +197,24 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
 
         // Update donation object (directly in the storage)
         DonationEther d = donations[donationId];
-        d.totalBounty2key = totalBountyTokens;
+        d.totalBounty2keyWei = totalBountyTokens;
 
         //Distribute rewards based on model selected
         if(rewardsModel == IncentiveModel.AVERAGE) {
-            uint reward = IncentiveModels.averageModelRewards(totalBountyForConversion, numberOfReferrers);
+            uint reward = IncentiveModels.averageModelRewards(totalBountyTokens, numberOfReferrers);
             for(uint i=0; i<numberOfReferrers; i++) {
                 updateReferrerMappings(referrers[i], reward, donationId);
             }
         } else if(rewardsModel == IncentiveModel.AVERAGE_LAST_3X) {
             uint rewardPerReferrer;
             uint rewardForLast;
-            (rewardPerReferrer, rewardForLast)= IncentiveModels.averageLast3xRewards(totalBountyForConversion, numberOfReferrers);
+            (rewardPerReferrer, rewardForLast)= IncentiveModels.averageLast3xRewards(totalBountyTokens, numberOfReferrers);
             for(i=0; i<numberOfReferrers - 1; i++) {
                 updateReferrerMappings(referrers[i], rewardPerReferrer, donationId);
             }
             updateReferrerMappings(referrers[numberOfReferrers-1], rewardForLast, donationId);
         } else if(rewardsModel == IncentiveModel.POWER_LAW) {
-            uint[] memory rewards = IncentiveModels.powerLawRewards(totalBountyForConversion, numberOfReferrers, powerLawFactor);
+            uint[] memory rewards = IncentiveModels.powerLawRewards(totalBountyTokens, numberOfReferrers, powerLawFactor);
             for(i=0; i<numberOfReferrers; i++) {
                 updateReferrerMappings(referrers[i], rewards[i], donationId);
             }
@@ -331,8 +333,8 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
             donation.donator,
             donation.amount,
             donation.donationTimestamp,
-            donation.referrerRewardsEthWei,
-            donation.totalBounty2key
+            donation.totalBountyEthWei,
+            donation.totalBounty2keyWei
         );
     }
 
