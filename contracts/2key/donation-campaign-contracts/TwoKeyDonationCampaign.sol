@@ -12,7 +12,7 @@ import "../TwoKeyConverterStates.sol";
  * @author Nikola Madjarevic
  * Created at 2/19/19
  */
-contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels {
+contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels, TwoKeyConverterStates {
 
     event InvoiceTokenCreated(address token, string tokenName, string tokenSymbol);
     address public erc20InvoiceToken; // ERC20 token which will be issued as an invoice
@@ -38,7 +38,11 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
     mapping(address => uint256) internal referrerPlasmaAddressToCounterOfConversions; // [referrer][conversionId]
     mapping(address => mapping(uint256 => uint256)) internal referrerPlasma2EarningsPerConversion;
 
+    //State to all converters in that state
+    mapping(bytes32 => address[]) stateToDonator;
 
+    //Converter to his state
+    mapping(address => ConverterState) donatorToState;
 
     DonationEther[] donations;
 
@@ -369,4 +373,5 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         require(msg.sender == _address);
         super.withdrawModeratorOrReferrer(_address);
     }
+
 }

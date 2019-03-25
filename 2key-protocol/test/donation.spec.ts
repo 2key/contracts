@@ -283,6 +283,4 @@ describe('TwoKeyDonationCampaign', () => {
        console.log(referrers);
    }).timeout(60000);
 
-
-
 });
