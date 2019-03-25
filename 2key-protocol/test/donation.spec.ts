@@ -266,14 +266,12 @@ describe('TwoKeyDonationCampaign', () => {
        console.log(txHash);
    }).timeout(60000);
 
-
    it('should join and donate', async () => {
        let txHash = await twoKeyProtocol.DonationCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(10*minDonationAmount, 'ether'), links.uport, from);
        console.log(txHash);
        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
        expect(txHash).to.be.a('string');
    }).timeout(60000);
-
 
    it('should get donation', async() => {
        let donation = await twoKeyProtocol.DonationCampaign.getDonation(campaignAddress,0,from);
@@ -283,6 +281,8 @@ describe('TwoKeyDonationCampaign', () => {
    it('should get referrers to converter', async() => {
        let referrers = await twoKeyProtocol.DonationCampaign.getRefferrersToConverter(campaignAddress, env.TEST4_ADDRESS, from);
        console.log(referrers);
-   })
+   }).timeout(60000);
+
+
 
 });
