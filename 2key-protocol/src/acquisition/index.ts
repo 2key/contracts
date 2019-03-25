@@ -376,8 +376,9 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     contractor: from,
                     campaignAddress,
                     conversionHandlerAddress,
+                    twoKeyAcquisitionLogicHandlerAddress,
                     campaignPublicLinkKey,
-                    ephemeralContractsVersion: this.nonSingletonsHash,
+                    ephemeralContractsVersion: this.nonSingletonsHash
                 });
             } catch (err) {
                 reject(err);

@@ -44,6 +44,8 @@
 ##### acquisition/interfaces.ts
 * added interface IInventoryStatus to describe inventory status object
 * setPrivateMetaHash: (campaign: any, privateMetaHash: string, from:string) => Promise<string>, -> now accepts data:object instead of privateMetahash:string
+* IAcquisitionCampaignMeta -> added twoKeyAcquisitionLogicHandlerAddress as an field to the object
 
 ##### sign/index.ts
 * Change link structure (switch to version 1)
+

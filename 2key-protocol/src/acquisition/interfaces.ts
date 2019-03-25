@@ -14,6 +14,7 @@ export interface IAcquisitionCampaignMeta {
     contractor: string,
     campaignAddress: string,
     conversionHandlerAddress: string,
+    twoKeyAcquisitionLogicHandlerAddress: string,
     campaignPublicLinkKey: string
     ephemeralContractsVersion: string,
 }
