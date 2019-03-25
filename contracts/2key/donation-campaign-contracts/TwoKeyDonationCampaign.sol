@@ -85,6 +85,12 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
 
         moderator = _moderator;
         campaignName = _campaignName;
+
+        if(values[0] == 0) {
+            rewardsModel = IncentiveModel.NO_REWARDS;
+        } else {
+            rewardsModel = _rewardsModel;
+        }
         maxReferralRewardPercent = values[0];
         campaignStartTime = values[1];
         campaignEndTime = values[2];
@@ -97,7 +103,6 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         isKYCRequired = _isKYCRequired;
 
         twoKeySingletonesRegistry = _twoKeySingletonesRegistry;
-        rewardsModel = _rewardsModel;
         contractor = msg.sender;
         twoKeyEventSource = TwoKeyEventSource(ITwoKeySingletoneRegistryFetchAddress(_twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyEventSource"));
         ownerPlasma = twoKeyEventSource.plasmaOf(msg.sender);
@@ -239,7 +244,9 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         amountUserContributed[msg.sender] += msg.value; // user contributions
 
         //Distribute referrer rewards between influencers regarding selected incentive model
-        distributeReferrerRewards(msg.sender, referrerReward, id);
+        if(referrerReward > 0) {
+            distributeReferrerRewards(msg.sender, referrerReward, id);
+        }
         //How many ethers sent, that much invoice tokens you get
         InvoiceTokenERC20(erc20InvoiceToken).transfer(msg.sender, msg.value);
     }
@@ -258,8 +265,9 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         amountUserContributed[msg.sender] += msg.value;
 
         //Distribute referrer rewards between influencers regarding selected incentive model
-        distributeReferrerRewards(msg.sender, referrerReward, id);
-
+        if(referrerReward > 0) {
+            distributeReferrerRewards(msg.sender, referrerReward, id);
+        }
         //How many ethers sent, that much invoice tokens you get
         InvoiceTokenERC20(erc20InvoiceToken).transfer(msg.sender, msg.value);
     }

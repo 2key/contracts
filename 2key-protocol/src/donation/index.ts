@@ -575,7 +575,7 @@ export default class DonationCampaign implements IDonationCampaign {
         return new Promise<string>(async(resolve,reject) => {
             try {
                 let campaignInstance = await this._getCampaignInstance(campaignAddress);
-                let models = ["AVERAGE", "AVERAGE_LAST_3X", "POWER_LAW", "MANUAL"];
+                let models = ["NO_REWARDS","AVERAGE", "AVERAGE_LAST_3X", "POWER_LAW", "MANUAL"];
                 let incentiveModel = await promisify(campaignInstance.getIncentiveModel,[]);
                 resolve(models[incentiveModel]);
             } catch (e) {
