@@ -31,7 +31,7 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
     IncentiveModel rewardsModel; //Incentive model for rewards
 
     mapping(address => uint) amountUserContributed; //If amount user contributed is > 0 means he's a converter
-    mapping(address => uint[]) donatorToHisDonationsInEther;
+    mapping(address => uint[]) converterToConversionIDs;
 
     //Referral accounting stuff
     mapping(address => uint256) internal referrerPlasma2TotalEarnings2key; // Total earnings for referrers
@@ -39,10 +39,10 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
     mapping(address => mapping(uint256 => uint256)) internal referrerPlasma2EarningsPerConversion;
 
     //State to all converters in that state
-    mapping(bytes32 => address[]) stateToDonator;
+    mapping(bytes32 => address[]) stateToConverters;
 
     //Converter to his state
-    mapping(address => ConverterState) donatorToState;
+    mapping(address => ConverterState) converterToState;
 
     DonationEther[] donations;
 
@@ -191,16 +191,16 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
     /**
      * @notice Function to distribute referrer rewards depending on selected model
      * @param converter is the address of the converter
-     * @param totalBountyForConversion is total bounty for the conversion
      */
-    function distributeReferrerRewards(address converter, uint totalBountyForConversion, uint donationId) internal {
+    function distributeReferrerRewards(address converter, uint referrer_rewards, uint donationId) internal {
         address[] memory referrers = getReferrers(converter);
         uint numberOfReferrers = referrers.length;
 
-        uint totalBountyTokens = buyTokensFromUpgradableExchange(totalBountyForConversion, address(this));
+        //Buy amount of 2key tokens for rewards
+        uint totalBountyTokens = buyTokensFromUpgradableExchange(referrer_rewards, address(this));
 
-        // Update donation object (directly in the storage)
         DonationEther d = donations[donationId];
+        // Update donation object (directly in the storage)
         d.totalBounty2keyWei = totalBountyTokens;
 
         //Distribute rewards based on model selected
@@ -251,6 +251,7 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
     function donate() public goalValidator onlyInDonationLimit isOngoing payable {
         address _converterPlasma = twoKeyEventSource.plasmaOf(msg.sender);
         require(received_from[_converterPlasma] != address(0));
+
         createDonation(msg.sender, msg.value);
     }
 
@@ -259,6 +260,7 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
      */
     function updatePowerLawFactor(uint _newPowerLawFactor) public onlyContractor {
         require(_newPowerLawFactor> 0);
+
         powerLawFactor = _newPowerLawFactor;
     }
 
@@ -275,6 +277,7 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
             msg.sender == _donator ||
             twoKeyEventSource.isAddressMaintainer(msg.sender)
         );
+
         return amountUserContributed[_donator];
     }
 
@@ -299,11 +302,14 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
                 keccak256(abi.encodePacked("GET_REFERRER_REWARDS"))));
             _referrer = Call.recoverHash(hash, signature, 0);
         }
+
         uint length = donationIds.length;
         uint[] memory earnings = new uint[](length);
+
         for(uint i=0; i<length; i++) {
             earnings[i] = referrerPlasma2EarningsPerConversion[_referrer][donationIds[i]];
         }
+
         return (referrerPlasma2Balances2key[_referrer], referrerPlasma2TotalEarnings2key[_referrer], referrerPlasmaAddressToCounterOfConversions[_referrer], earnings);
     }
 
@@ -313,6 +319,7 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
      */
     function getDonation(uint donationId) public view returns (bytes) {
         DonationEther memory donation = donations[donationId];
+
         return abi.encodePacked(
             donation.donator,
             donation.amount,
@@ -328,6 +335,7 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
     function withdrawContractor() public onlyContractor {
         require(this.balance >= campaignGoal); //Making sure goal is reached
         require(block.timestamp > campaignEndTime); //Making sure time has expired
+
         super.withdrawContractor();
     }
 
@@ -347,6 +355,7 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         require(this.balance >= campaignGoal); //Making sure goal is reached
         require(block.timestamp > campaignEndTime); //Making sure time has expired
         require(msg.sender == _address);
+
         super.withdrawModeratorOrReferrer(_address);
     }
 
@@ -369,13 +378,13 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         donations.push(donation);
 
         // Add donation id under donator id's
-        donatorToHisDonationsInEther[msg.sender].push(id); // accounting for the donator
+        converterToConversionIDs[msg.sender].push(id); // accounting for the donator
 
         // Save amount donator contributed in total (donated)
         amountUserContributed[msg.sender] += msg.value; // user contributions
 
         // If KYC is not required or converter is approved
-        if(isKYCRequired == false || donatorToState[_converter] == ConverterState.APPROVED) {
+        if(isKYCRequired == false || converterToState[_converter] == ConverterState.APPROVED) {
 
             // If there's a reward for influencers, distribute it between them
             if(referrerReward > 0) {
@@ -386,15 +395,24 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
             InvoiceTokenERC20(erc20InvoiceToken).transfer(msg.sender, msg.value);
 
             // Update that donator is approved (since KYC is false every donator will be approved)
-            donatorToState[_converter] = ConverterState.APPROVED;
+            converterToState[_converter] = ConverterState.APPROVED;
 
         } else {
-//            if(donatorToState[_converter] == ConverterState.REJECTED) {
-//                revert();
-//            }
-//            if(donatorToState[_converter] == ConverterState.NOT_EXISTING) {
-//                donatorToHisState = ConverterState.PENDING_APPROVAL;
-//            }
+            if(converterToState[_converter] == ConverterState.REJECTED) {
+                revert();
+            }
+            if(converterToState[_converter] == ConverterState.NOT_EXISTING) {
+                converterToState[_converter] = ConverterState.PENDING_APPROVAL;
+            }
+        }
+    }
+
+
+    function approveConverter(address _converter) public onlyContractor {
+        require(converterToState[_converter] == ConverterState.PENDING_APPROVAL);
+        uint[] memory conversionIds = converterToConversionIDs[_converter];
+        for(uint i=0; i<conversionIds.length; i++) {
+//            distributeReferrerRewards(_converter, conversionIds[i]);
         }
     }
 }
