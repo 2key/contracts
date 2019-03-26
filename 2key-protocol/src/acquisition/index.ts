@@ -1995,13 +1995,15 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         return new Promise<number>(async(resolve,reject) => {
             try {
                 const conversionHandlerInstance = await this._getConversionHandlerInstance(campaign);
-                let numberOfConv = await promisify(conversionHandlerInstance.getNumberOfExecutedConversions,[]);
-                resolve(numberOfConv);
+                let [numberOfConversions,] = await promisify(conversionHandlerInstance.getNumberOfExecutedConversionsAndUniqueExecutedConverters,[]);
+                resolve(numberOfConversions);
             } catch (e) {
                 reject(e);
             }
         })
     }
+
+
 
     public testRecover(campaign:string) : Promise<string> {
         return new Promise<string>(async(resolve,reject) => {

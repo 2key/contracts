@@ -27,6 +27,7 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
     uint numberOfConversions;
     uint totalBounty;
     uint numberOfExecutedConversions;
+    uint numberOfUniqueConvertersForExecutedConversions;
 
     uint256 expiryConversionInHours; // How long converter can be pending before it will be automatically rejected and funds will be returned to convertor (hours)
 
@@ -168,7 +169,7 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
         uint256 baseTokensForConverterUnits,
         uint256 bonusTokensForConverterUnits,
         bool isConversionFiat
-        ) public {
+    ) public {
         require(msg.sender == twoKeyAcquisitionCampaignERC20);
         require(converterToState[_converterAddress] != ConverterState.REJECTED); // If converter is rejected then can't create conversion
 
@@ -237,6 +238,10 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
             ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateContractorProceeds(conversion.contractorProceedsETHWei);
             raisedFundsEthWei = raisedFundsEthWei + conversion.conversionAmount;
 
+        }
+
+        if(converterToLockupContracts[conversion.converter].length == 0) {
+            numberOfUniqueConvertersForExecutedConversions++;
         }
 
         conversion.maxReferralReward2key = totalReward2keys;
@@ -481,7 +486,7 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
      * @notice Function to get number of executed functions
      * @return number of executed conversions on this contract
      */
-    function getNumberOfExecutedConversions() public view returns (uint) {
-        return numberOfExecutedConversions;
+    function getNumberOfExecutedConversionsAndUniqueExecutedConverters() public view returns (uint,uint) {
+        return (numberOfExecutedConversions, numberOfUniqueConvertersForExecutedConversions);
     }
 }
