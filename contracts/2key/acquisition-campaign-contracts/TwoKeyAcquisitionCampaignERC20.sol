@@ -260,6 +260,7 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
      */
     function sendBackEthWhenConversionCancelled(address _cancelledConverter, uint _conversionAmount) public onlyTwoKeyConversionHandler {
         _cancelledConverter.transfer(_conversionAmount);
+        amountConverterSpentEthWEI[_cancelledConverter] = amountConverterSpentEthWEI[_cancelledConverter].sub(_conversionAmount);
     }
 
     /**
