@@ -281,7 +281,6 @@ describe('TwoKeyDonationCampaign', () => {
 
     it('should get referrers to converter for conversions', async() => {
         let referrersForTest4 = await twoKeyProtocol.DonationCampaign.getRefferrersToConverter(campaignAddress, env.TEST4_ADDRESS, from);
-
         console.log(referrersForTest4);
     }).timeout(60000);
 

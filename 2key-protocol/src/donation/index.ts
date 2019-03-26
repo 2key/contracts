@@ -525,6 +525,7 @@ export default class DonationCampaign implements IDonationCampaign {
                  bountyEthWei: number,
                  bounty2key: number
                  */
+
                 let states = ["PENDING_APPROVAL", "APPROVED", "EXECUTED", "REJECTED", "CANCELLED_BY_CONVERTER"];
 
                 let donator = data.slice(0,42);
@@ -534,8 +535,6 @@ export default class DonationCampaign implements IDonationCampaign {
                 let bountyEthWei = parseInt(data.slice(42+64+64+64,42+64+64+64+64),16);
                 let bounty2key = parseInt(data.slice(42+64+64+64+64,42+64+64+64+64+64), 16);
                 let state = states[parseInt(data.slice(42+64+64+64+64+64),16)];
-
-                console.log(state);
 
                 let obj: IDonation = {
                     donator,
