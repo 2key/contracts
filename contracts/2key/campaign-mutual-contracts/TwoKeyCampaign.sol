@@ -60,17 +60,12 @@ contract TwoKeyCampaign is ArcERC20 {
 		require(_from != address(0));
 		require(_to != address(0));
 
-		//Addresses are already plasma, don't see the point of next 2 lines!
-//		_from = twoKeyEventSource.plasmaOf(_from);
-//		_to = twoKeyEventSource.plasmaOf(_to);
-
 		require(balances[_from] > 0);
 		balances[_from] = balances[_from].sub(1);
 		balances[_to] = balances[_to].add(conversionQuota);
 		totalSupply_ = totalSupply_.add(conversionQuota.sub(1));
 
 		if (received_from[_to] == 0) {
-			// inform the 2key admin contract, once, that an influencer has joined
 			twoKeyEventSource.joined(this, _from, _to);
 		}
 		received_from[_to] = _from;

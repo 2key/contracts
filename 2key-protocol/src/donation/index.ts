@@ -525,21 +525,27 @@ export default class DonationCampaign implements IDonationCampaign {
                  bountyEthWei: number,
                  bounty2key: number
                  */
+                let states = ["PENDING_APPROVAL", "APPROVED", "EXECUTED", "REJECTED", "CANCELLED_BY_CONVERTER"];
 
                 let donator = data.slice(0,42);
                 let donationAmount = parseInt(data.slice(42,42+64),16);
-                let donationTime = parseInt(data.slice(42+64,42+64+64),16);
-                let bountyEthWei = parseInt(data.slice(42+64+64,42+64+64+64),16);
-                let bounty2key = parseInt(data.slice(42+64+64+64),16);
+                let contractorProceeds = parseInt(data.slice(42+64,42+64+64),16);
+                let donationTime = parseInt(data.slice(42+64+64,42+64+64+64),16);
+                let bountyEthWei = parseInt(data.slice(42+64+64+64,42+64+64+64+64),16);
+                let bounty2key = parseInt(data.slice(42+64+64+64+64,42+64+64+64+64+64), 16);
+                let state = states[parseInt(data.slice(42+64+64+64+64+64),16)];
+
+                console.log(state);
 
                 let obj: IDonation = {
                     donator,
                     'donationAmount' : parseFloat(this.utils.fromWei(donationAmount,'ether').toString()),
+                    'contractorProceeds' : parseFloat(this.utils.fromWei(contractorProceeds, 'ether').toString()),
                     donationTime,
                     'bountyEthWei' : parseFloat(this.utils.fromWei(bountyEthWei,'ether').toString()),
-                    'bounty2key' : parseFloat(this.utils.fromWei(bounty2key,'ether').toString())
+                    'bounty2key' : parseFloat(this.utils.fromWei(bounty2key,'ether').toString()),
+                    state
                 };
-
                 resolve(obj);
             } catch (e) {
                 reject(e);

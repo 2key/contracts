@@ -46,10 +46,12 @@ export interface InvoiceERC20 {
 
 export interface IDonation {
     donator: string,
-    donationAmount: number
+    donationAmount: number,
+    contractorProceeds: number,
     donationTime: number,
     bountyEthWei: number,
-    bounty2key: number
+    bounty2key: number,
+    state: string
 }
 
 export interface ICampaignData {

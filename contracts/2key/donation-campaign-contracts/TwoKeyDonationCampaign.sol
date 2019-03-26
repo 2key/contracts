@@ -7,12 +7,13 @@ import "../campaign-mutual-contracts/TwoKeyCampaignIncentiveModels.sol";
 
 import "../libraries/IncentiveModels.sol";
 import "../TwoKeyConverterStates.sol";
+import "../TwoKeyConversionStates.sol";
 
 /**
  * @author Nikola Madjarevic
  * Created at 2/19/19
  */
-contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels, TwoKeyConverterStates {
+contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels, TwoKeyConverterStates, TwoKeyConversionStates {
 
     event InvoiceTokenCreated(address token, string tokenName, string tokenSymbol);
     address public erc20InvoiceToken; // ERC20 token which will be issued as an invoice
@@ -27,7 +28,7 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
     uint maxReferralRewardPercent; // Percent per conversion which goes to referrers
     uint campaignGoal; // Goal of the campaign, how many funds to raise
     bool shouldConvertToRefer; // If yes, means that referrer must be converter in order to be referrer
-    bool isKYCRequired;
+    bool isKYCRequired; // Will determine if KYC is required or not
     IncentiveModel rewardsModel; //Incentive model for rewards
 
     mapping(address => uint) amountUserContributed; //If amount user contributed is > 0 means he's a converter
@@ -38,8 +39,6 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
     mapping(address => uint256) internal referrerPlasmaAddressToCounterOfConversions; // [referrer][conversionId]
     mapping(address => mapping(uint256 => uint256)) internal referrerPlasma2EarningsPerConversion;
 
-    //State to all converters in that state
-    mapping(bytes32 => address[]) stateToConverters;
 
     //Converter to his state
     mapping(address => ConverterState) converterToState;
@@ -48,18 +47,18 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
 
 
     modifier isOngoing {
-        require(now >= campaignStartTime && now <= campaignEndTime, "Campaign expired or not started yet");
+        require(now >= campaignStartTime && now <= campaignEndTime);
         _;
     }
 
     modifier onlyInDonationLimit {
-        require(msg.value >= minDonationAmountWei && msg.value <= maxDonationAmountWei, "Wrong contribution amount");
+        require(msg.value >= minDonationAmountWei && msg.value <= maxDonationAmountWei);
         _;
     }
 
     modifier goalValidator {
         if(campaignGoal != 0) {
-            require(this.balance.add(msg.value) <= campaignGoal,"Goal reached");
+            require(this.balance.add(msg.value) <= campaignGoal);
         }
         _;
     }
@@ -68,9 +67,11 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
     struct DonationEther {
         address donator; //donator -> address who donated
         uint amount; //donation amount ETH
-        uint donationTimestamp; //When was donation created
-        uint totalBountyEthWei; //Rewards amount in ether
-        uint totalBounty2keyWei; //Rewards distributed between referrers for this campaign in 2key-tokens
+        uint contractorProceeds; // Amount which can be taken by contractor
+        uint donationTimestamp; // When was donation created
+        uint totalBountyEthWei; // Rewards amount in ether
+        uint totalBounty2keyWei; // Rewards distributed between referrers for this campaign in 2key-tokens
+        ConversionState state;
     }
 
     constructor(
@@ -192,16 +193,12 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
      * @notice Function to distribute referrer rewards depending on selected model
      * @param converter is the address of the converter
      */
-    function distributeReferrerRewards(address converter, uint referrer_rewards, uint donationId) internal {
+    function distributeReferrerRewards(address converter, uint referrer_rewards, uint donationId) internal returns (uint) {
         address[] memory referrers = getReferrers(converter);
         uint numberOfReferrers = referrers.length;
 
         //Buy amount of 2key tokens for rewards
         uint totalBountyTokens = buyTokensFromUpgradableExchange(referrer_rewards, address(this));
-
-        DonationEther d = donations[donationId];
-        // Update donation object (directly in the storage)
-        d.totalBounty2keyWei = totalBountyTokens;
 
         //Distribute rewards based on model selected
         if(rewardsModel == IncentiveModel.AVERAGE) {
@@ -223,6 +220,8 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
                 updateReferrerMappings(referrers[i], rewards[i], donationId);
             }
         }
+
+        return totalBountyTokens;
     }
 
     /**
@@ -323,9 +322,11 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         return abi.encodePacked(
             donation.donator,
             donation.amount,
+            donation.contractorProceeds,
             donation.donationTimestamp,
             donation.totalBountyEthWei,
-            donation.totalBounty2keyWei
+            donation.totalBounty2keyWei,
+            donation.state
         );
     }
 
@@ -366,43 +367,59 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
     function createDonation(address _converter, uint _donationAmount) internal {
         //Basic accounting stuff
         // Calculate referrer rewards in ETH based on conversion amount
-        uint referrerReward = (msg.value).mul(maxReferralRewardPercent).div(100 * (10**18));
+        uint referrerReward = (_donationAmount).mul(maxReferralRewardPercent).div(100 * (10**18));
+
+        uint contractorProceeds = _donationAmount - referrerReward;
 
         // Create object for this donation
-        DonationEther memory donation = DonationEther(msg.sender, msg.value, block.timestamp, referrerReward, 0);
+        DonationEther memory donation = DonationEther(_converter, _donationAmount, contractorProceeds, block.timestamp, referrerReward, 0, ConversionState.PENDING_APPROVAL);
 
         // Get donation ID
         uint id = donations.length;
 
-        // Add donation to array of all donations
-        donations.push(donation);
+        // Save amount donator contributed in total (donated)
+        amountUserContributed[_converter] += _donationAmount; // user contributions
 
         // Add donation id under donator id's
-        converterToConversionIDs[msg.sender].push(id); // accounting for the donator
-
-        // Save amount donator contributed in total (donated)
-        amountUserContributed[msg.sender] += msg.value; // user contributions
+        converterToConversionIDs[_converter].push(id); // accounting for the donator
 
         // If KYC is not required or converter is approved
         if(isKYCRequired == false || converterToState[_converter] == ConverterState.APPROVED) {
 
             // If there's a reward for influencers, distribute it between them
             if(referrerReward > 0) {
-                distributeReferrerRewards(_converter, referrerReward, id);
+                uint totalBountyTokens = distributeReferrerRewards(_converter, referrerReward, id);
+                donation.totalBounty2keyWei = totalBountyTokens;
             }
 
+            donation.state = ConversionState.EXECUTED;
+
+            // Add donation to array of all donations
+            donations.push(donation);
+
             // Transfer invoice token to donator (Contributor)
-            InvoiceTokenERC20(erc20InvoiceToken).transfer(msg.sender, msg.value);
+            InvoiceTokenERC20(erc20InvoiceToken).transfer(_converter, _donationAmount);
 
             // Update that donator is approved (since KYC is false every donator will be approved)
             converterToState[_converter] = ConverterState.APPROVED;
 
+            // Contractor balance is automatically updated
+            contractorBalance = contractorBalance.add(contractorProceeds);
         } else {
+
             if(converterToState[_converter] == ConverterState.REJECTED) {
                 revert();
             }
+
             if(converterToState[_converter] == ConverterState.NOT_EXISTING) {
+                // Handle converter to wait for approval
                 converterToState[_converter] = ConverterState.PENDING_APPROVAL;
+
+                // Add donation to array of all donations
+                donations.push(donation);
+
+                // Add donation id under donator id's
+                converterToConversionIDs[msg.sender].push(id); // accounting for the donator
             }
         }
     }
@@ -410,9 +427,36 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
 
     function approveConverter(address _converter) public onlyContractor {
         require(converterToState[_converter] == ConverterState.PENDING_APPROVAL);
+
         uint[] memory conversionIds = converterToConversionIDs[_converter];
+
         for(uint i=0; i<conversionIds.length; i++) {
-//            distributeReferrerRewards(_converter, conversionIds[i]);
+            DonationEther storage don = donations[conversionIds[i]];
+            if(don.state == ConversionState.PENDING_APPROVAL) {
+                distributeReferrerRewards(_converter, don.totalBountyEthWei, conversionIds[i]);
+                contractorBalance = contractorBalance.add(don.contractorProceeds);
+                don.state = ConversionState.EXECUTED;
+            }
+        }
+        converterToState[_converter] = ConverterState.APPROVED;
+    }
+
+    function rejectConverter(address _converter) public onlyContractor {
+        require(converterToState[_converter] == ConverterState.PENDING_APPROVAL);
+
+        uint[] memory conversionIds = converterToConversionIDs[_converter];
+        uint refundAmount = 0;
+
+        for(uint i=0; i<conversionIds.length; i++) {
+            DonationEther storage d = donations[conversionIds[i]];
+            if(d.state == ConversionState.PENDING_APPROVAL) {
+                refundAmount = refundAmount.add(d.amount);
+                d.state = ConversionState.REJECTED;
+            }
+        }
+
+        if(refundAmount > 0) {
+            _converter.transfer(refundAmount);
         }
     }
 }

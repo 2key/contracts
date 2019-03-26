@@ -55,7 +55,6 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
     uint bonusTokensVestingStartShiftInDaysFromDistributionDate; // 180 days
 
 
-//TODO: Add totalReferralReward2keys
     /// Structure which will represent conversion
     struct Conversion {
         address contractor; // Contractor (creator) of campaign
