@@ -49,7 +49,7 @@ let campaignStartTime = 12345;
 let campaignEndTime = 1234567;
 let minDonationAmount = 0.001;
 let maxDonationAmount = 1000;
-let campaignGoal = 10000;
+let campaignGoal = 1000000000;
 let conversionQuota = 1;
 let isKYCRequired = false;
 let shouldConvertToRefer = false;
@@ -273,14 +273,16 @@ describe('TwoKeyDonationCampaign', () => {
        expect(txHash).to.be.a('string');
    }).timeout(60000);
 
-   it('should get donation', async() => {
-       let donation = await twoKeyProtocol.DonationCampaign.getDonation(campaignAddress,0,from);
-       console.log(donation);
-   }).timeout(60000);
 
-   it('should get referrers to converter', async() => {
-       let referrers = await twoKeyProtocol.DonationCampaign.getRefferrersToConverter(campaignAddress, env.TEST4_ADDRESS, from);
-       console.log(referrers);
-   }).timeout(60000);
+    it('should get donation', async() => {
+        let donation = await twoKeyProtocol.DonationCampaign.getDonation(campaignAddress,0,from);
+        console.log(donation);
+    }).timeout(60000);
+
+    it('should get referrers to converter for conversions', async() => {
+        let referrersForTest4 = await twoKeyProtocol.DonationCampaign.getRefferrersToConverter(campaignAddress, env.TEST4_ADDRESS, from);
+
+        console.log(referrersForTest4);
+    }).timeout(60000);
 
 });
