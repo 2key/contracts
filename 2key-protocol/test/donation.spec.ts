@@ -50,10 +50,10 @@ let campaignEndTime = 1234567;
 let minDonationAmount = 0.001;
 let maxDonationAmount = 1000;
 let campaignGoal = 1000000000;
-let conversionQuota = 1;
+let conversionQuota = 5;
 let isKYCRequired = false;
 let shouldConvertToRefer = false;
-let incentiveModel = 3;
+let incentiveModel = 2;
 
 let campaignAddress: string;
 
@@ -272,6 +272,30 @@ describe('TwoKeyDonationCampaign', () => {
        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
        expect(txHash).to.be.a('string');
    }).timeout(60000);
+
+
+    it('should visit before donate', async() => {
+        const {web3, address} = web3switcher.aydnep();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+        });
+        let txHash = await twoKeyProtocol.DonationCampaign.visit(campaignAddress, links.uport);
+        console.log(txHash);
+    }).timeout(60000);
+
+    it('should join and donate', async () => {
+        let txHash = await twoKeyProtocol.DonationCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(10*minDonationAmount, 'ether'), links.uport, from);
+        console.log(txHash);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        expect(txHash).to.be.a('string');
+    }).timeout(60000);
 
 
     it('should get donation', async() => {

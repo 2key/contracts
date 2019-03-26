@@ -1724,9 +1724,18 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 const acquisitionCampaignInstance = await this._getCampaignInstance(campaign);
                 let ipfsHash: string = await promisify(acquisitionCampaignInstance.privateMetaHash,[{from}]);
                 console.log('Hash taken from contract is: ' + ipfsHash);
+
+                let contractor: string = await promisify(acquisitionCampaignInstance.contractor,[]);
+
+                //Validate that the sender is contractor
+                if(from != contractor) {
+                    reject('This can be decrypted only by contractor');
+                }
+
                 let privateHashEncrypted = await promisify(this.base.ipfsR.cat, [ipfsHash]);
                 privateHashEncrypted = privateHashEncrypted.toString();
                 console.log(privateHashEncrypted);
+
                 let privateMetaHashDecrypted = await this.sign.decrypt(this.base.web3,from,privateHashEncrypted,{plasma : false});
                 resolve(privateMetaHashDecrypted.slice(2)); //remove 0x from the beginning
             } catch (e) {
