@@ -320,8 +320,8 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     if (progressCallback) {
                         progressCallback('TwoKeyAcquisitionLogicHandler', true, twoKeyAcquisitionLogicHandlerAddress);
                     }
-
                 }
+
                 txHash = await this.helpers._createContract(acquisitionContracts.TwoKeyAcquisitionCampaignERC20, from, {
                     gasPrice,
                     params: [

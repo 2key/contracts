@@ -53,7 +53,7 @@ let campaignGoal = 1000000000;
 let conversionQuota = 1;
 let isKYCRequired = false;
 let shouldConvertToRefer = false;
-let incentiveModel = 2;
+let incentiveModel = 3;
 
 let campaignAddress: string;
 
