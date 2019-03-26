@@ -529,6 +529,7 @@ async function deploy() {
     await archiveBuild();
     await commitAndPushContractsFolder(`Contracts deployed to ${network} ${now.format('lll')}`);
     console.log('Changes commited');
+    await restoreFromArchive();
     await buildSubmodules(contracts);
     if (!local) {
       await runProcess(path.join(__dirname, 'node_modules/.bin/webpack'));

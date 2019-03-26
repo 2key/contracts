@@ -58,13 +58,27 @@ module.exports = function deploy(deployer) {
     let initialCongressMembers = [
         '0x4216909456e770FFC737d987c273a0B8cE19C13e', // Eitan
         '0x5e2B2b278445AaA649a6b734B0945Bd9177F4F03', // Kiki
-
     ];
+
+    let initialCongressMemberNames = [
+        '0x456974616e000000000000000000000000000000000000000000000000000000', //Eitan hexed
+        '0x4b696b6900000000000000000000000000000000000000000000000000000000', //Kiki hexed
+    ];
+
     let deployerAddress = '0x18e1d5ca01141E3a0834101574E5A1e94F0F8F6a';
     let maintainerAddresses = [];
     let votingPowers = [1, 1];
 
-
+// else if ((deployer.network.startsWith('private.test') || deployer.network.startsWith('dd')) && !deployer.network.endsWith('k8s-hdwallet')) {
+//         /**
+//          * Network configuration for plasma
+//          */
+//         maintainerAddresses = [
+//             '0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f',
+//             '0x098a12404fd3f5a06cfb016eb7669b1c41419705',
+//             '0x1d55762a320e6826cf00c4f2121b7e53d23f6822',
+//         ];
+//     }
 
     if(deployer.network.startsWith('public.test')) {
         /**
@@ -82,23 +96,21 @@ module.exports = function deploy(deployer) {
             '0x52e87d01b1c610424951281ebd1b00a3bcf3b681',
             '0x5be04cc75b52c6ae5bb4858d58fd57dd15f354e3'
         ];
-    } else if ((deployer.network.startsWith('private.test') || deployer.network.startsWith('azure')) && !deployer.network.endsWith('k8s-hdwallet')) {
-        /**
-         * Network configuration for plasma
-         */
-        maintainerAddresses = [
-            '0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f',
-            '0x098a12404fd3f5a06cfb016eb7669b1c41419705',
-            '0x1d55762a320e6826cf00c4f2121b7e53d23f6822',
-        ];
-    } else {
+    }  else {
         /**
          * Network configuration for the dev-local testing purposes and plasma testing purposes
          */
         maintainerAddresses = [
             '0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f',
-            '0x098a12404fd3f5a06cfb016eb7669b1c41419705' ,
+            '0x098a12404fd3f5a06cfb016eb7669b1c41419705',
             '0x1d55762a320e6826cf00c4f2121b7e53d23f6822',
+            '0xbddd873d7945f67d1689fd7870649b81744badd6',
+            '0xbf31911c8b9be1b5632fe52022e553fc7fe48a5d',
+            '0x7a6ea86e08d20bc56885a30c379f6e12aafede26',
+            '0xde205f05f5a50d5690959864dc3df4c1a6ac938c',
+            '0xd128786ef2372cbd2629908226ddd0b712c540e7',
+            '0x52e87d01b1c610424951281ebd1b00a3bcf3b681',
+            '0x5be04cc75b52c6ae5bb4858d58fd57dd15f354e3',
             '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7'
         ];
 
@@ -106,6 +118,12 @@ module.exports = function deploy(deployer) {
             '0xb3fa520368f2df7bed4df5185101f303f6c7decc',
             '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7',
             '0xf3c7641096bc9dc50d94c572bb455e56efc85412'
+        ];
+
+        initialCongressMemberNames = [
+            '0x456974616e000000000000000000000000000000000000000000000000000000', //Eitan hexed
+            '0x4b696b6900000000000000000000000000000000000000000000000000000000', //Kiki hexed
+            '0x4b696b6900000000000000000000000000000000000000000000000000000000' // Kiki
         ];
 
         votingPowers = [1,1,1];
@@ -118,7 +136,7 @@ module.exports = function deploy(deployer) {
     deployer.deploy(Call);
     deployer.deploy(IncentiveModels);
     if (deployer.network.startsWith('dev') || deployer.network.startsWith('public.') || deployer.network.startsWith('rinkeby') || deployer.network.startsWith('ropsten')) {
-        deployer.deploy(TwoKeyCongress, 24*60, initialCongressMembers, votingPowers)
+        deployer.deploy(TwoKeyCongress, 24*60, initialCongressMembers, initialCongressMemberNames, votingPowers)
             .then(() => TwoKeyCongress.deployed())
             .then(() => deployer.deploy(TwoKeyCampaignValidator))
             .then(() => TwoKeyCampaignValidator.deployed())
@@ -429,6 +447,35 @@ module.exports = function deploy(deployer) {
             .then(() => deployer.deploy(TwoKeyEconomy,proxyAddressTwoKeyAdmin, TwoKeySingletonesRegistry.address))
             .then(() => TwoKeyEconomy.deployed())
             .then(async () => {
+                /**
+                 * Here we will add congress contract to the registry
+                 */
+                await new Promise(async (resolve,reject) => {
+                    try {
+
+                        console.log('Adding non-upgradable contracts to the registry');
+                        console.log('Adding TwoKeyCongress to the registry as non-upgradable contract');
+                        let txHash = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address)
+                            .addNonUpgradableContractToAddress('TwoKeyCongress', TwoKeyCongress.address);
+                        resolve(txHash);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
+                /**
+                 * Here we will add economy contract to the registry
+                 */
+                await new Promise(async (resolve,reject) => {
+                    try {
+                        console.log('Adding TwoKeyEconomy to the registry as non-upgradable contract');
+                        let txHash = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address)
+                            .addNonUpgradableContractToAddress('TwoKeyEconomy', TwoKeyEconomy.address);
+                        resolve(txHash);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
+
                 await new Promise(async (resolve, reject) => {
                     console.log('... Setting Initial params in all singletone proxy contracts');
                     try {

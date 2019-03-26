@@ -25,7 +25,7 @@ contract TwoKeyLockupContract {
     address assetContractERC20;
     address twoKeyEventSource;
 
-    bool changed = false;
+    bool changed;
 
 
     event TokensWithdrawn(

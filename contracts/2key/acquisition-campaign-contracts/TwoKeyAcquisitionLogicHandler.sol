@@ -1,12 +1,15 @@
 pragma solidity ^0.4.24;
 import "../interfaces/ITwoKeyExchangeRateContract.sol";
 import "../interfaces/IERC20.sol";
+import "../interfaces/ITwoKeyConversionHandler.sol";
 import "../interfaces/ITwoKeyAcquisitionCampaignERC20.sol";
 import "../interfaces/ITwoKeyReg.sol";
 import "../interfaces/ITwoKeyAcquisitionARC.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyConversionHandlerGetConverterState.sol";
+import "../interfaces/ITwoKeyEventSource.sol";
 import "../libraries/SafeMath.sol";
+import "../libraries/Call.sol";
 
 /**
  * @author Nikola Madjarevic
@@ -18,25 +21,34 @@ contract TwoKeyAcquisitionLogicHandler {
 
     address public twoKeySingletoneRegistry;
     address public twoKeyAcquisitionCampaign;
+    address public twoKeyConversionHandler;
+    address twoKeyRegistry;
+    address public ownerPlasma;
 
+    address twoKeyEventSource;
+    address assetContractERC20;
     address contractor;
     address moderator;
 
-    address public ownerPlasma;
 
-    uint256 campaignStartTime; // Time when campaign start
-    uint256 campaignEndTime; // Time when campaign ends
+    bool isFixedInvestmentAmount; // This means that minimal contribution is equal maximal contribution
+    bool isAcceptingFiatOnly; // Means that only fiat conversions will be able to execute -> no referral rewards at all
 
-    uint minContributionETHorFiatCurrency;
-    uint maxContributionETHorFiatCurrency;
-    uint256 pricePerUnitInETHWeiOrUSD; // There's single price for the unit ERC20 (Should be in WEI)
+    uint campaignStartTime; // Time when campaign start
+    uint campaignEndTime; // Time when campaign ends
+    uint minContributionETHorFiatCurrency; //Minimal contribution
+    uint maxContributionETHorFiatCurrency; //Maximal contribution
+    uint pricePerUnitInETHWeiOrUSD; // There's single price for the unit ERC20 (Should be in WEI)
     uint unit_decimals; // ERC20 selling data
-
-    string public publicMetaHash; // Ipfs hash of json campaign object
-    string privateMetaHash; // Ipfs hash of json sensitive (contractor) information
-
     uint maxConverterBonusPercent; // Maximal bonus percent per converter
+
     string public currency; // Currency campaign is currently in
+
+    //Referral accounting stuff
+    mapping(address => uint256) internal referrerPlasma2TotalEarnings2key; // Total earnings for referrers
+    mapping(address => uint256) internal referrerPlasmaAddressToCounterOfConversions; // [referrer][conversionId]
+    mapping(address => mapping(uint256 => uint256)) internal referrerPlasma2EarningsPerConversion;
+
 
     modifier onlyContractor {
         require(msg.sender == contractor);
@@ -58,6 +70,11 @@ contract TwoKeyAcquisitionLogicHandler {
         require(_maxContribution >= _minContribution, "max contribution criteria not satisfied");
         require(_campaignEndTime > _campaignStartTime, "campaign start time can't be greater than end time");
         require(_maxConverterBonusPercent > 0, "max converter bonus percent should be 0");
+
+        if(_minContribution == _maxContribution) {
+            isFixedInvestmentAmount = true;
+        }
+
         contractor = msg.sender;
         minContributionETHorFiatCurrency = _minContribution;
         maxContributionETHorFiatCurrency = _maxContribution;
@@ -67,6 +84,7 @@ contract TwoKeyAcquisitionLogicHandler {
         maxConverterBonusPercent = _maxConverterBonusPercent;
         currency = _currency;
         moderator = _moderator;
+        assetContractERC20 = _assetContractERC20;
         unit_decimals = IERC20(_assetContractERC20).decimals();
     }
 
@@ -81,12 +99,33 @@ contract TwoKeyAcquisitionLogicHandler {
         return false;
     }
 
-    function setTwoKeyAcquisitionCampaignContract(address _acquisitionCampaignAddress, address _twoKeySingletoneRegistry) public {
+
+
+    function setTwoKeyAcquisitionCampaignContract(
+        address _acquisitionCampaignAddress,
+        address _twoKeySingletoneRegistry,
+        address _twoKeyConversionHandler
+    ) public {
         require(twoKeyAcquisitionCampaign == address(0)); // Means it can be set only once
         twoKeyAcquisitionCampaign = _acquisitionCampaignAddress;
         twoKeySingletoneRegistry = _twoKeySingletoneRegistry;
+        twoKeyEventSource = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry)
+            .getContractProxyAddress("TwoKeyEventSource");
+        twoKeyRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyRegistry");
+
         ownerPlasma = plasmaOf(contractor);
+        twoKeyConversionHandler = _twoKeyConversionHandler;
     }
+
+
+    /**
+     * @notice Function to get investment rules
+     * @return tuple containing if investment amount is fixed, and lower/upper bound of the same if not (if yes lower = upper)
+     */
+    function getInvestmentRules() public view returns (bool,uint,uint) {
+        return (isFixedInvestmentAmount, minContributionETHorFiatCurrency, maxContributionETHorFiatCurrency);
+    }
+
 
     /**
      * @notice internal function to validate the request is proper
@@ -94,6 +133,7 @@ contract TwoKeyAcquisitionLogicHandler {
      * @dev validates if msg.Value is in interval of [minContribution, maxContribution]
      */
     function requirementForMsgValue(uint msgValue) public view returns (bool) {
+        //TODO: Add timestamp validation -> conversions
         if(keccak256(currency) == keccak256('ETH')) {
             require(msgValue >= minContributionETHorFiatCurrency);
             require(msgValue <= maxContributionETHorFiatCurrency);
@@ -165,35 +205,6 @@ contract TwoKeyAcquisitionLogicHandler {
     }
 
     /**
-     * @notice Function to update /set publicMetaHash
-     * @dev only Contractor can call this function, otherwise it will revert - emits Event when set/updated
-     * @param value is the value for the publicMetaHash
-     */
-    function updateOrSetIpfsHashPublicMeta(string value) public onlyContractor {
-        publicMetaHash = value;
-        //        twoKeyEventSource.updatedPublicMetaHash(block.timestamp, value);
-    }
-
-
-    /**
-     * @notice Setter for privateMetaHash
-     * @dev only Contractor can call this method, otherwise function will revert
-     * @param _privateMetaHash is string representation of private metadata hash
-     */
-    function setPrivateMetaHash(string _privateMetaHash) public onlyContractor {
-        privateMetaHash = _privateMetaHash;
-    }
-
-    /**
-     * @notice Getter for privateMetaHash
-     * @dev only Contractor can call this method, otherwise function will revert
-     * @return string representation of private metadata hash
-     */
-    function getPrivateMetaHash() public view onlyContractor returns (string) {
-        return privateMetaHash;
-    }
-
-    /**
      * @notice Get all constants from the contract
      * @return all constants from the contract
      */
@@ -207,6 +218,18 @@ contract TwoKeyAcquisitionLogicHandler {
         pricePerUnitInETHWeiOrUSD,
         maxConverterBonusPercent);
     }
+
+
+    /**
+    * @notice Function to check balance of the ERC20 inventory (view - no gas needed to call this function)
+    * @dev we're using Utils contract and fetching the balance of this contract address
+    * @return balance value as uint
+    */
+    function getInventoryBalance() public view returns (uint) {
+        uint balance = IERC20(assetContractERC20).balanceOf(twoKeyAcquisitionCampaign);
+        return balance;
+    }
+
 
     /**
      * @notice Function to check if the msg.sender has already joined
@@ -226,44 +249,65 @@ contract TwoKeyAcquisitionLogicHandler {
     }
 
 
-    function getAddressStatistic(address _address, bool plasma) public view returns (bytes) {
-        address eth_address = _address;
-        address plasma_address = _address;
+
+    /**
+     * @notice Function to fetch stats for the address
+     */
+    function getAddressStatistic(address _address, bool plasma, bool flag, address referrer) internal view returns (bytes) {
         bytes32 state; // NOT-EXISTING AS CONVERTER DEFAULT STATE
-        if (plasma) {
-            eth_address = ethereumOf(_address);
-        } else {
-            plasma_address = plasmaOf(_address);
-        }
+
+        address eth_address = ethereumOf(_address);
+        address plasma_address = plasmaOf(_address);
+
         if(_address == contractor) {
             abi.encodePacked(0, 0, 0, false, false);
         } else {
             bool isConverter;
             bool isReferrer;
             uint unitsConverterBought;
-            uint referrerBalance;
+            uint referrerTotalBalance;
             uint amountConverterSpent;
-            (amountConverterSpent, referrerBalance, unitsConverterBought) = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getStatistics(eth_address, plasma_address);
+            (amountConverterSpent, referrerTotalBalance, unitsConverterBought) = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getStatistics(eth_address, plasma_address);
             if(unitsConverterBought> 0) {
                 isConverter = true;
-                address conversionHandlerContract = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).conversionHandler();
-                state = ITwoKeyConversionHandlerGetConverterState(conversionHandlerContract).getStateForConverter(eth_address);
+                state = ITwoKeyConversionHandlerGetConverterState(twoKeyConversionHandler).getStateForConverter(eth_address);
             }
-            if(referrerBalance > 0) {
+            if(referrerTotalBalance > 0) {
                 isReferrer = true;
             }
 
-            return abi.encodePacked(amountConverterSpent,referrerBalance, unitsConverterBought, isConverter, isReferrer, state);
+            if(flag == false) {
+                //referrer is address in signature
+                //plasma_address is plasma address of the address requested in method
+                referrerTotalBalance  = getTotalReferrerEarnings(referrer, eth_address);
+            }
+
+            return abi.encodePacked(
+                amountConverterSpent,
+                referrerTotalBalance,
+                unitsConverterBought,
+                isConverter,
+                isReferrer,
+                state
+            );
         }
     }
 
-    /**
-     * @notice Function to get suepr statistics
-     */
-    function getSuperStatistics(address _user, bool plasma) public view returns (bytes, bool, bytes, address) {
-        address eth_address = _user;
+    function recover(bytes signature) public view returns (address) {
+        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding referrer to plasma")),
+            keccak256(abi.encodePacked("GET_REFERRER_REWARDS"))));
+        address x = Call.recoverHash(hash, signature, 0);
+        return x;
+    }
 
-        address twoKeyRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyRegistry");
+    /**
+     * @notice Function to get super statistics
+     * @param _user is the user address we want stats for
+     * @param plasma is if that address is plasma or not
+     * @param signature in case we're calling this from referrer who doesn't have yet opened wallet
+     */
+    function getSuperStatistics(address _user, bool plasma, bytes signature) public view returns (bytes) {
+        address eth_address = _user;
 
         if (plasma) {
             (eth_address) = ITwoKeyReg(twoKeyRegistry).getPlasmaToEthereum(_user);
@@ -272,13 +316,32 @@ contract TwoKeyAcquisitionLogicHandler {
         bytes memory userData = ITwoKeyReg(twoKeyRegistry).getUserData(eth_address);
 
         bool isJoined = getAddressJoinedStatus(_user);
-        bytes memory stats = getAddressStatistic(_user, plasma);
-        return (userData, isJoined, stats, eth_address);
+        bool flag;
+
+        address _address;
+
+        if(msg.sender == contractor || msg.sender == eth_address) {
+            flag = true;
+        } else {
+            _address = recover(signature);
+            if(_address == ownerPlasma) {
+                flag = true;
+            }
+        }
+        bytes memory stats = getAddressStatistic(_user, plasma, flag, _address);
+        return abi.encodePacked(userData, isJoined, eth_address, stats);
     }
 
+    /**
+     * @notice Function to return referrers participated in the referral chain
+     * @param customer is the one who converted (bought tokens)
+     * @param acquisitionCampaignContract is the acquisition campaign address
+     * @return array of referrer addresses
+     */
     function getReferrers(address customer, address acquisitionCampaignContract) public view returns (address[]) {
         address influencer = plasmaOf(customer);
         uint n_influencers = 0;
+
         while (true) {
             influencer = plasmaOf(ITwoKeyAcquisitionARC(acquisitionCampaignContract).getReceivedFrom(influencer));
             if (influencer == plasmaOf(contractor)) {
@@ -286,14 +349,129 @@ contract TwoKeyAcquisitionLogicHandler {
             }
             n_influencers++;
         }
+
         address[] memory influencers = new address[](n_influencers);
         influencer = plasmaOf(customer);
+
         while (n_influencers > 0) {
             influencer = plasmaOf(ITwoKeyAcquisitionARC(acquisitionCampaignContract).getReceivedFrom(influencer));
             n_influencers--;
             influencers[n_influencers] = influencer;
         }
-        return influencers; //reverse ordered array
+
+        return influencers;
+    }
+
+    /**
+     * @notice Update refferal chain with rewards (update state variables)
+     * @param _maxReferralRewardETHWei is the max referral reward set
+     * @param _converter is the address of the converter
+     * @dev This function can only be called by TwoKeyConversionHandler contract
+     */
+    function updateRefchainRewards(uint256 _maxReferralRewardETHWei, address _converter, uint _conversionId, uint totalBounty2keys) public {
+        require(msg.sender == twoKeyAcquisitionCampaign);
+        address[] memory influencers = getReferrers(_converter,twoKeyAcquisitionCampaign);
+        uint numberOfInfluencers = influencers.length;
+
+        for (uint i = 0; i < numberOfInfluencers; i++) {
+            uint256 b;
+
+            if (i == influencers.length - 1) {  // if its the last influencer then all the bounty goes to it.
+                b = totalBounty2keys;
+            }
+            else {
+                uint256 cut = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getReferrerCut(influencers[i]);
+                if (cut > 0 && cut <= 101) {
+                    b = totalBounty2keys.mul(cut.sub(1)).div(100);
+                } else {// cut == 0 or 255 indicates equal particine of the bounty
+                    b = totalBounty2keys.div(influencers.length - i);
+                }
+            }
+
+            //Update referrer current balance stored on Acquisition contract
+            ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).updateReferrerPlasmaBalance(influencers[i],b);
+
+            //All mappings are now stated to plasma addresses
+            //Update values for accounting purpose
+            referrerPlasma2EarningsPerConversion[influencers[i]][_conversionId] = b;
+            referrerPlasma2TotalEarnings2key[influencers[i]] = referrerPlasma2TotalEarnings2key[influencers[i]].add(b);
+            referrerPlasmaAddressToCounterOfConversions[influencers[i]]++;
+
+            //Decrease bounty for distributed
+            totalBounty2keys = totalBounty2keys.sub(b);
+        }
+    }
+
+
+    /**
+     * @notice Helper function to get how much _referrer address earned for all conversions for eth_address
+     * @param _referrer is the address we're checking the earnings
+     * @param eth_address is the converter address we're getting all conversion ids for
+     * @return sum of all earnings
+     */
+    function getTotalReferrerEarnings(address _referrer, address eth_address) internal view returns (uint) {
+        uint[] memory conversionIds = ITwoKeyConversionHandler(twoKeyConversionHandler).getConverterConversionIds(eth_address);
+        uint sum = 0;
+        for(uint i=0; i<conversionIds.length; i++) {
+            sum += referrerPlasma2EarningsPerConversion[_referrer][conversionIds[i]];
+        }
+        return sum;
+    }
+
+
+    /**
+     * @notice Function to get balance and total earnings for all referrer addresses passed in arg
+     * @param _referrerPlasmaList is the array of plasma addresses of referrer
+     * @return two arrays. 1st contains current plasma balance and 2nd contains total plasma balances
+     */
+    function getReferrersBalancesAndTotalEarnings(address[] _referrerPlasmaList) public view returns (uint256[], uint256[]) {
+        require(ITwoKeyReg(twoKeyRegistry).isMaintainer(msg.sender));
+
+        uint numberOfAddresses = _referrerPlasmaList.length;
+        uint256[] memory referrersPendingPlasmaBalance = new uint256[](numberOfAddresses);
+        uint256[] memory referrersTotalEarningsPlasmaBalance = new uint256[](numberOfAddresses);
+
+        for (uint i=0; i<numberOfAddresses; i++){
+            referrersPendingPlasmaBalance[i] = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getReferrerPlasmaBalance(_referrerPlasmaList[i]);
+            referrersTotalEarningsPlasmaBalance[i] = referrerPlasma2TotalEarnings2key[_referrerPlasmaList[i]];
+        }
+
+        return (referrersPendingPlasmaBalance, referrersTotalEarningsPlasmaBalance);
+    }
+
+
+    /**
+     * @notice Function to fetch for the referrer his balance, his total earnings, and how many conversions he participated in
+     * @dev only referrer by himself, moderator, or contractor can call this
+     * @param _referrer is the address of referrer we're checking for
+     * @param signature is the signature if calling functions from FE without ETH address
+     * @param conversionIds are the ids of conversions this referrer participated in
+     * @return tuple containing this 3 information
+     */
+    function getReferrerBalanceAndTotalEarningsAndNumberOfConversions(address _referrer, bytes signature, uint[] conversionIds) public view returns (uint,uint,uint,uint[]) {
+        if(_referrer != address(0)) {
+            require(msg.sender == _referrer || msg.sender == contractor || ITwoKeyReg(twoKeyRegistry).isMaintainer(msg.sender));
+            _referrer = plasmaOf(_referrer);
+        } else {
+            bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding referrer to plasma")),
+                keccak256(abi.encodePacked("GET_REFERRER_REWARDS"))));
+            _referrer = Call.recoverHash(hash, signature, 0);
+        }
+
+        uint[] memory earnings = new uint[](conversionIds.length);
+
+        for(uint i=0; i<conversionIds.length; i++) {
+            earnings[i] = referrerPlasma2EarningsPerConversion[_referrer][conversionIds[i]];
+        }
+
+        uint referrerBalance = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getReferrerPlasmaBalance(_referrer);
+        return (referrerBalance, referrerPlasma2TotalEarnings2key[_referrer], referrerPlasmaAddressToCounterOfConversions[_referrer], earnings);
+    }
+
+
+    function getReferrerPlasmaTotalEarnings(address _referrer) public view returns (uint) {
+        require(msg.sender == twoKeyAcquisitionCampaign);
+        return referrerPlasma2TotalEarnings2key[_referrer];
     }
 
     /**
@@ -302,10 +480,6 @@ contract TwoKeyAcquisitionLogicHandler {
      * @return an address
      */
     function plasmaOf(address me) public view returns (address) {
-        address twoKeyRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyRegistry");
-        if (twoKeyRegistry == address(0)) {
-            me;
-        }
         address plasma = ITwoKeyReg(twoKeyRegistry).getEthereumToPlasma(me);
         if (plasma != address(0)) {
             return plasma;
@@ -319,10 +493,6 @@ contract TwoKeyAcquisitionLogicHandler {
      * @return ethereum address
      */
     function ethereumOf(address me) public view returns (address) {
-        address twoKeyRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyRegistry");
-        if (twoKeyRegistry == address(0)) {
-            return me;
-        }
         address ethereum = ITwoKeyReg(twoKeyRegistry).getPlasmaToEthereum(me);
         if (ethereum != address(0)) {
             return ethereum;

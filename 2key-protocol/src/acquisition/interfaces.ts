@@ -14,6 +14,7 @@ export interface IAcquisitionCampaignMeta {
     contractor: string,
     campaignAddress: string,
     conversionHandlerAddress: string,
+    twoKeyAcquisitionLogicHandlerAddress: string,
     campaignPublicLinkKey: string
     ephemeralContractsVersion: string,
 }
@@ -81,7 +82,7 @@ export interface ITwoKeyAcquisitionCampaign {
     estimateCreation: (data: IAcquisitionCampaign, from: string) => Promise<number>,
     create: (data: IAcquisitionCampaign, from: string, opts?: ICreateOpts) => Promise<IAcquisitionCampaignMeta>,
     updateOrSetIpfsHashPublicMeta: (campaign: any, hash: string, from: string, gasPrice?: number) => Promise<string>,
-    setPrivateMetaHash: (campaign: any, privateMetaHash: string, from:string) => Promise<string>,
+    setPrivateMetaHash: (campaign: any, data: any, from:string) => Promise<string>,
     getPrivateMetaHash: (campaign: any, from: string) => Promise<string>,
     getPublicMeta: (campaign: any, from?: string) => Promise<any>,
     checkInventoryBalance: (campaign: any, from: string) => Promise<number | string | BigNumber>,
@@ -103,7 +104,7 @@ export interface ITwoKeyAcquisitionCampaign {
     joinAndShareARC: (campaign: any, from: string, referralLink: string, recipient: string, opts?: IPublicLinkOpts) => Promise<string>,
     joinAndConvert: (campaign: any, value: string | number | BigNumber, publicLink: string, from: string, opts?: IConvertOpts) => Promise<string>,
     convert: (campaign: any, value: string | number | BigNumber, from: string, opts?: IConvertOpts) => Promise<string>
-    convertOffline: (campaign: any, from: string, conversionAmountFiat: number, opts?: IConvertOpts) => Promise<string>
+    convertOffline: (campaign: any,  _converter: string, from: string, conversionAmountFiat: number, opts?: IConvertOpts) => Promise<string>
     getEstimatedTokenAmount: (campaign: any, isPaymentFiat: boolean, value: string | number | BigNumber) => Promise<ITokenAmount>,
     getTwoKeyConversionHandlerAddress: (campaign: any, skipCache?: boolean) => Promise<string>,
     approveConverter: (campaign: any, converter: string, from: string, gasPrice? :number) => Promise<string>,
@@ -116,7 +117,7 @@ export interface ITwoKeyAcquisitionCampaign {
     isAddressContractor: (campaign:any, from:string) => Promise<boolean>,
     getAmountOfEthAddressSentToAcquisition: (campaign: any, from: string) => Promise<number>,
     contractorWithdraw: (campaign:any, from: string, gasPrice?: number) => Promise<string>,
-    getContractorBalance: (campaign:any, from:string) => Promise<number>,
+    getContractorBalance: (campaign:any, from:string) => Promise<IContractorBalance>,
     getModeratorBalance: (campaign:any, from:string) => Promise<number>,
     moderatorAndReferrerWithdraw: (campaign: any, from: string, gasPrice? : number) => Promise<string>,
     getModeratorAddress: (campaign: any, from: string) => Promise<string>,
@@ -125,14 +126,21 @@ export interface ITwoKeyAcquisitionCampaign {
     getReferrerBalanceAndTotalEarningsAndNumberOfConversions: (campaign:any, signature, skipCache?: boolean) => Promise<IReferrerSummary>,
     getReferrerRewardsPerConversion: (campaign:any, signature: string, conversionIds: number[], skipCache?: boolean) => Promise<number[]>,
     getCurrentAvailableAmountOfTokens: (campaign:any, from:string) => Promise<number>,
-    getAddressStatistic: (campaign: any, address: string, plasma?: boolean) => Promise<IAddressStats>,
+    getAddressStatistic: (campaign: any, address: string, signature: string, opts?: IGetStatsOpts) => Promise<IAddressStats>,
     getCampaignSummary: (campaign: any, from: string) => Promise<IConversionStats>,
     getLockupContractAddress: (campaign:any, conversionId: number, from:string) => Promise<string>,
     withdrawTokens: (twoKeyLockup: string, part: number, from:string) => Promise<string>,
     changeTokenDistributionDate: (twoKeyLockup: string, newDate: number, from: string) => Promise<string>,
     getLockupInformations: (twoKeyLockup: string, from:string) => Promise<ILockupInformation>,
     getNonSingletonsHash: () => string,
+    getInventoryStatus: (campaign:any) => Promise<IInventoryStatus>,
     getNumberOfExecutedConversions: (campaign: string) => Promise<number>,
+    testRecover: (campaign:string) => Promise<string>
+}
+
+export interface IGetStatsOpts {
+    from?: string,
+    plasma?: boolean
 }
 
 export interface IPublicLinkOpts {
@@ -150,12 +158,14 @@ export interface IConversionObject {
     'state' : string,
     'conversionAmount' : number,
     'maxReferralRewardEthWei' : number,
+    'maxReferralReward2key' : number,
     'moderatorFeeETHWei' : number,
     'baseTokenUnits' : number,
     'bonusTokenUnits' : number,
     'conversionCreatedAt' : number,
-    'conversionExpiresAt' : number
-    'isConversionFiat' : boolean
+    'conversionExpiresAt' : number,
+    'isConversionFiat' : boolean,
+    'lockupContractAddress': string,
 }
 
 export interface IConvertOpts {
@@ -188,6 +198,7 @@ export interface IReferrerSummary {
     totalEarnings: number,
     numberOfConversionsParticipatedIn : number,
     campaignAddress: string,
+    rewardsPerConversions: number[],
 }
 
 export interface IConversionStats {
@@ -201,7 +212,7 @@ export interface IConversionStats {
 
 export interface IAddressStats {
     amountConverterSpentETH: number,
-    rewards: number,
+    referrerRewards: number,
     tokensBought: number,
     isConverter: boolean,
     isReferrer: boolean,
@@ -211,4 +222,15 @@ export interface IAddressStats {
     email: string
     ethereumOf: string,
     converterState: string,
+}
+
+export interface IInventoryStatus {
+    totalBalance : number,
+    reservedForConverters: number,
+    reservedForReferrerRewards: number
+}
+
+export interface IContractorBalance {
+    available: number,
+    total: number,
 }

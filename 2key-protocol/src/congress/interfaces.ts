@@ -18,5 +18,5 @@ export interface IMemberInfo {
     memberAddress: string,
     memberName: string,
     memberVotingPower: number,
-    memberSince: number
+    memberSince: Date
 }

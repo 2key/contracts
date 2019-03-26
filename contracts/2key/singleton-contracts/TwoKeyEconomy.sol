@@ -1,10 +1,9 @@
 pragma solidity ^0.4.24;
 import "./StandardTokenModified.sol";
-import "../../openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 
 
-contract TwoKeyEconomy is StandardTokenModified, Ownable {
+contract TwoKeyEconomy is StandardTokenModified {
     string public name = 'TwoKeyEconomy';
     string public symbol= '2KEY';
     uint8 public decimals= 18;
@@ -12,16 +11,17 @@ contract TwoKeyEconomy is StandardTokenModified, Ownable {
     address public twoKeyAdmin;
     address public twoKeySingletonRegistry;
 
-    modifier onlyTwoKeyAdmin { //TODO: Nikola why not use only the twoKeySingletoneRegistry to get all required singletons like the admin?
+    modifier onlyTwoKeyAdmin {
         require(msg.sender == twoKeyAdmin);
-        require(address(twoKeyAdmin) != 0);
         _;
     }
 
-    constructor (address _twoKeyAdmin, address _twoKeySingletonRegistry) Ownable() public {
+    constructor (address _twoKeyAdmin, address _twoKeySingletonRegistry) public {
         require(_twoKeyAdmin != address(0));
-        twoKeyAdmin = _twoKeyAdmin;
         twoKeySingletonRegistry = _twoKeySingletonRegistry;
+
+        twoKeyAdmin = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonRegistry).
+        getContractProxyAddress("TwoKeyAdmin");
 
         address twoKeyUpgradableExchange = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonRegistry).
             getContractProxyAddress("TwoKeyUpgradableExchange");
@@ -38,7 +38,7 @@ contract TwoKeyEconomy is StandardTokenModified, Ownable {
         balances[_twoKeyAdmin] = totalSupply_.mul(35).div(100);
     }
 
-    function changeAdmin(address _newAdmin) public onlyTwoKeyAdmin { //TODO Nikola this is probably no longer required since we have the proxy address maintaining the singleton address changes
+    function changeAdmin(address _newAdmin) public onlyTwoKeyAdmin {
         require(_newAdmin != address(0));
         twoKeyAdmin = _newAdmin;
     }

@@ -5,8 +5,6 @@ pragma solidity ^0.4.24;
  */
 contract ArcERC20  {
 
-    event Transfer(address indexed from, address indexed to, uint256 value);
-
     uint256 internal totalSupply_ = 1000000;
 
     mapping(address => uint256) internal balances;

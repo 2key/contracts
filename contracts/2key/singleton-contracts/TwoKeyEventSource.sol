@@ -1,13 +1,12 @@
 pragma solidity ^0.4.24;
 
-import '../TwoKeyTypes.sol';
 import "../Upgradeable.sol";
 import "../MaintainingPattern.sol";
 import "../interfaces/ITwoKeyReg.sol";
 import "../interfaces/ITwoKeyAdmin.sol";
 import "../interfaces/ITwoKeyCampaignValidator.sol";
 
-contract TwoKeyEventSource is Upgradeable, MaintainingPattern, TwoKeyTypes {
+contract TwoKeyEventSource is Upgradeable, MaintainingPattern {
 
     /**
      * Address of TwoKeyRegistry contract
@@ -16,39 +15,38 @@ contract TwoKeyEventSource is Upgradeable, MaintainingPattern, TwoKeyTypes {
     address twoKeyCampaignValidator;
 
     event Created(
-        address indexed _campaign,
-        address indexed _owner,
-        address indexed _moderator
+        address _campaign,
+        address _owner,
+        address _moderator
     );
 
     event Joined(
-        address indexed _campaign,
-        address indexed _from,
-        address indexed _to
+        address _campaign,
+        address _from,
+        address _to
     );
 
     event Converted(
-        address indexed _campaign,
-        address indexed _converter,
+        address _campaign,
+        address _converter,
         uint256 _amount
     );
 
     event Rewarded(
-        address indexed _campaign,
-        address indexed _to,
+        address _campaign,
+        address _to,
         uint256 _amount
     );
 
     event Cancelled(
-        address indexed _campaign,
-        address indexed _converter,
-        uint256 _indexOrAmount,
-        CampaignType _type
+        address _campaign,
+        address _converter,
+        uint256 _indexOrAmount
     );
 
     event Rejected(
-        address indexed _campaign,
-        address indexed _converter
+        address _campaign,
+        address _converter
     );
 
     event UpdatedPublicMetaHash(
@@ -79,6 +77,7 @@ contract TwoKeyEventSource is Upgradeable, MaintainingPattern, TwoKeyTypes {
         require(msg.sender == twoKeyCampaignValidator);
         _;
     }
+
     /**
      * @notice Function to set initial params in the contract
      * @param _twoKeyAdmin is the address of twoKeyAdmin contract
@@ -148,41 +147,12 @@ contract TwoKeyEventSource is Upgradeable, MaintainingPattern, TwoKeyTypes {
      * @param _campaign is the address of the cancelled campaign
      * @param _converter is the address of the converter
      * @param _indexOrAmount is the amount of campaign
-     * @param _type is the campaign type
      */
-    function cancelled(address  _campaign, address _converter, uint256 _indexOrAmount, CampaignType _type) external onlyAllowedContracts{
-        emit Cancelled(_campaign, _converter, _indexOrAmount, _type);
+    function cancelled(address  _campaign, address _converter, uint256 _indexOrAmount) external onlyAllowedContracts {
+        emit Cancelled(_campaign, _converter, _indexOrAmount);
     }
 
-    /**
-     * @notice Function which will emit updated public meta hash event
-     * @param timestamp is the moment of execution
-     * @param value is the new value of public meta hash (in this case it's ipfs hash bytes32)
-     */
-    function updatedPublicMetaHash(uint timestamp, string value) external onlyAllowedContracts {
-        emit UpdatedPublicMetaHash(timestamp, value);
-    }
-
-    /**
-     * @notice Function which will emit updated data event
-     * @param timestamp is the moment of execution
-     * @param value is the new value
-     * @param action is the string describing action what was updated exactly
-     */
-    function updatedData(uint timestamp, uint value, string action) external onlyAllowedContracts {
-        emit UpdatedData(timestamp, value, action);
-    }
-
-
-    /**
-     * @notice Function to determine plasma address of ethereum address
-     * @param me is the address (ethereum) of the user
-     * @return an address
-     */
     function plasmaOf(address me) public view returns (address) {
-        if (twoKeyRegistry == address(0)) {
-            me;
-        }
         address plasma = ITwoKeyReg(twoKeyRegistry).getEthereumToPlasma(me);
         if (plasma != address(0)) {
             return plasma;
@@ -196,9 +166,6 @@ contract TwoKeyEventSource is Upgradeable, MaintainingPattern, TwoKeyTypes {
      * @return ethereum address
      */
     function ethereumOf(address me) public view returns (address) {
-        if (twoKeyRegistry == address(0)) {
-            return me;
-        }
         address ethereum = ITwoKeyReg(twoKeyRegistry).getPlasmaToEthereum(me);
         if (ethereum != address(0)) {
             return ethereum;

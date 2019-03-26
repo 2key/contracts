@@ -22,11 +22,11 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
     using SafeMath for uint256;
 
     event ConversionCreated(uint conversionId);
-    uint tokensSold = 0;
-    uint raisedFundsEthWei = 0;
-    uint numberOfConversions = 0;
+    uint tokensSold;
+    uint raisedFundsEthWei;
+    uint numberOfConversions;
     uint totalBounty;
-    uint numberOfExecutedConversions = 0;
+    uint numberOfExecutedConversions;
 
     uint256 expiryConversionInHours; // How long converter can be pending before it will be automatically rejected and funds will be returned to convertor (hours)
 
@@ -55,7 +55,6 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
     uint bonusTokensVestingStartShiftInDaysFromDistributionDate; // 180 days
 
 
-
     /// Structure which will represent conversion
     struct Conversion {
         address contractor; // Contractor (creator) of campaign
@@ -63,7 +62,8 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
         address converter; // Converter is one who's buying tokens -> plasma address
         ConversionState state;
         uint256 conversionAmount; // Amount for conversion (In ETH)
-        uint256 maxReferralRewardETHWei;
+        uint256 maxReferralRewardETHWei; // Total referral reward for the conversion
+        uint256 maxReferralReward2key;
         uint256 moderatorFeeETHWei;
         uint256 baseTokenUnits;
         uint256 bonusTokenUnits;
@@ -183,7 +183,7 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
         }
 
         Conversion memory c = Conversion(_contractor, _contractorProceeds, _converterAddress,
-            state ,_conversionAmount, _maxReferralRewardETHWei, _moderatorFeeETHWei, baseTokensForConverterUnits,
+            state ,_conversionAmount, _maxReferralRewardETHWei, 0, _moderatorFeeETHWei, baseTokensForConverterUnits,
             bonusTokensForConverterUnits,
             now, now + expiryConversionInHours * (1 hours), isConversionFiat);
 
@@ -192,7 +192,6 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
         emit ConversionCreated(numberOfConversions);
         numberOfConversions++;
 
-        ITwoKeyBaseReputationRegistry(twoKeyBaseReputationRegistry).updateOnConversionCreatedEvent(_converterAddress, contractor, twoKeyAcquisitionCampaignERC20);
         if(converterToState[_converterAddress] == ConverterState.NOT_EXISTING) {
             converterToState[_converterAddress] = ConverterState.PENDING_APPROVAL;
             stateToConverter[bytes32("PENDING_APPROVAL")].push(_converterAddress);
@@ -203,7 +202,6 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
      * @notice Function to perform all the logic which has to be done when we're performing conversion
      * @param _conversionId is the id
      */
-
     function executeConversion(uint _conversionId) public {
         Conversion memory conversion = conversions[_conversionId];
         uint totalUnits = conversion.baseTokenUnits + conversion.bonusTokenUnits;
@@ -226,24 +224,28 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
         conversionId2LockupAddress[_conversionId] = address(lockupContract);
         ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).moveFungibleAsset(address(lockupContract), totalUnits);
 
+
+        uint totalReward2keys = 0;
+        //Update total raised funds
+        if(conversion.isConversionFiat == false) {
+            ITwoKeyBaseReputationRegistry(twoKeyBaseReputationRegistry).updateOnConversionExecutedEvent(conversion.converter, contractor, twoKeyAcquisitionCampaignERC20);
+            totalReward2keys = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).buyTokensAndDistributeReferrerRewards(conversion.maxReferralRewardETHWei, conversion.converter, _conversionId);
+            totalBounty = totalBounty.add(totalReward2keys);
+            // update moderator balances
+            ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateModeratorBalanceETHWei(conversion.moderatorFeeETHWei);
+            ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateReservedAmountOfTokensIfConversionRejectedOrExecuted(totalUnits);
+            ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateContractorProceeds(conversion.contractorProceedsETHWei);
+            raisedFundsEthWei = raisedFundsEthWei + conversion.conversionAmount;
+
+        }
+
+        conversion.maxReferralReward2key = totalReward2keys;
         conversion.state = ConversionState.EXECUTED;
         conversions[_conversionId] = conversion;
         converterToLockupContracts[conversion.converter].push(lockupContract);
 
-
-        //Update total raised funds
-        if(conversion.isConversionFiat == false) {
-            ITwoKeyBaseReputationRegistry(twoKeyBaseReputationRegistry).updateOnConversionExecutedEvent(conversion.converter, contractor, twoKeyAcquisitionCampaignERC20);
-            ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateRefchainRewards(conversion.maxReferralRewardETHWei, conversion.converter, _conversionId);
-            totalBounty = totalBounty.add(conversion.maxReferralRewardETHWei);
-            // update moderator balances
-            ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateModeratorBalanceETHWei(conversion.moderatorFeeETHWei);
-            raisedFundsEthWei = raisedFundsEthWei + conversion.contractorProceedsETHWei + conversion.moderatorFeeETHWei + conversion.maxReferralRewardETHWei;
-            ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateReservedAmountOfTokensIfConversionRejectedOrExecuted(totalUnits);
-            ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaignERC20).updateContractorProceeds(conversion.contractorProceedsETHWei);
-        }
         numberOfExecutedConversions++;
-        tokensSold = tokensSold + conversion.baseTokenUnits + conversion.bonusTokenUnits; //update sold tokens once conversion is executed
+        tokensSold = tokensSold + totalUnits; //update sold tokens once conversion is executed
     }
 
     /**
@@ -254,6 +256,7 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
         uint conversionId
     ) external view returns (bytes) {
         Conversion memory conversion = conversions[conversionId];
+        address lockup = conversionId2LockupAddress[conversionId];
         address empty = address(0);
         if(isConverterAnonymous[conversion.converter] == false) {
             empty = conversion.converter;
@@ -265,16 +268,23 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
             conversion.state,
             conversion.conversionAmount,
             conversion.maxReferralRewardETHWei,
+            conversion.maxReferralReward2key,
             conversion.moderatorFeeETHWei,
             conversion.baseTokenUnits,
             conversion.bonusTokenUnits,
             conversion.conversionCreatedAt,
             conversion.conversionExpiresAt,
-            conversion.isConversionFiat
+            conversion.isConversionFiat,
+            lockup
         );
     }
 
 
+    /**
+     * @notice Function where converter can say if he want's to be "anonymous" (not shown in the UI)
+     * @param _converter is the converter address
+     * @param _isAnonymous is his decision true/false
+     */
     function setAnonymous(address _converter, bool _isAnonymous) external onlyTwoKeyAcquisitionCampaign {
         isConverterAnonymous[_converter] = _isAnonymous;
     }
@@ -355,10 +365,10 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
     /// @dev only maintainer or contractor can call this method
     /// @param _converter is the address of converter
     function approveConverter(address _converter) public onlyContractorOrMaintainer {
-        uint numberOfConversions = converterToHisConversions[_converter].length;
-        require(numberOfConversions > 0);
+        uint len = converterToHisConversions[_converter].length;
+        require(len> 0);
         require(converterToState[_converter] == ConverterState.PENDING_APPROVAL || converterToState[_converter] == ConverterState.REJECTED);
-        for(uint i=0; i<numberOfConversions; i++) {
+        for(uint i=0; i<len; i++) {
             uint conversionId = converterToHisConversions[_converter][i];
             Conversion memory c = conversions[conversionId];
             if(c.state == ConversionState.PENDING_APPROVAL && c.isConversionFiat == false) {
@@ -373,7 +383,7 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
     /// @notice Function where we can reject converter
     /// @dev only maintainer or contractor can call this function
     /// @param _converter is the address of converter
-    function rejectConverter(address _converter) public onlyContractorOrMaintainer  {
+    function rejectConverter(address _converter) public onlyContractorOrMaintainer {
         require(converterToState[_converter] == ConverterState.PENDING_APPROVAL);
         moveFromPendingToRejectedState(_converter);
         uint reservedAmount = 0;
@@ -402,8 +412,8 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
      * @return array of conversion ids
      * @dev can only be called by converter itself or maintainer/contractor
      */
-    function getConverterConversionIds(address _converter) external view returns (uint[]) {
-        require(msg.sender == contractor || ITwoKeyEventSource(twoKeyEventSource).isAddressMaintainer(msg.sender) || msg.sender == _converter);
+    function getConverterConversionIds(address _converter) public view returns (uint[]) {
+//        require(msg.sender == contractor || ITwoKeyEventSource(twoKeyEventSource).isAddressMaintainer(msg.sender) || msg.sender == _converter);
         return converterToHisConversions[_converter];
     }
 

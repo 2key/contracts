@@ -224,6 +224,15 @@ module.exports = {
         network_id: 11112222,
         gas: 8000000,
         gasPrice: '0x0',
-    }
+    },
+    compilers : {
+        solc: {
+            optimizer: {
+                enabled: true,
+                runs: 200
+            }
+        },
+    },
+
   }
 };

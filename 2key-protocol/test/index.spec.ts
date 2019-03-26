@@ -320,21 +320,7 @@ describe('TwoKeyProtocol', () => {
                 console.log(adminBalance);
                 let numberOfProposals = await twoKeyProtocol.Congress.getNumberOfProposals();
                 console.log('Number of proposals is: ' + numberOfProposals);
-                if (numberOfProposals == 0) {
-                    console.log('Contractor does not have enough 2key tokens. Submitting a proposal to transfer');
-                    const admin = twoKeyProtocol.twoKeyAdmin;
-                    let transactionBytecode =
-                        "0x9ffe94d9e31c0ffa000000000000000000000000b3fa520368f2df7bed4df5185101f303f6c7decc000000000000000000000000000000000000000000000000002386f26fc10000";
-                    let txHash = twoKeyProtocol.Congress.newProposal(
-                        twoKeyProtocol.twoKeyAdmin.address,
-                        "Send some tokens to contractor",
-                        transactionBytecode,
-                        from);
-
-                    resolve(txHash);
-                } else {
-                    resolve(balance['2KEY']);
-                }
+                resolve(balance['2KEY']);
             } catch (err) {
                 reject(err);
             }
@@ -462,7 +448,7 @@ describe('TwoKeyProtocol', () => {
     }).timeout(60000);
 
     it('should set eth-dolar rate', async() => {
-        txHash = await twoKeyProtocol.TwoKeyExchangeContract.setValue('USD', true, 91287027178099998720, from);
+        txHash = await twoKeyProtocol.TwoKeyExchangeContract.setValue('USD', true, 100000000000000000000, from);
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         let value = await twoKeyProtocol.TwoKeyExchangeContract.getRatesETHFiat('USD', from);
         console.log(value);
@@ -566,6 +552,19 @@ describe('TwoKeyProtocol', () => {
         console.log("Moderator: " + addressesWhereUserIsModerator);
     }).timeout(60000);
 
+    it('should save contractor link as the private meta hash', async() => {
+        console.log(links.deployer);
+        let txHash = await twoKeyProtocol.AcquisitionCampaign.setPrivateMetaHash(campaignAddress, links.deployer, from);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+    }).timeout(60000);
+
+    it('should get and decrypt ipfs hash', async() => {
+        let data = await twoKeyProtocol.AcquisitionCampaign.getPrivateMetaHash(campaignAddress, from);
+        console.log(data);
+        expect(data).to.be.equal(links.deployer);
+    }).timeout(60000);
+
+
     it('should visit campaign as guest', async () => {
         const {web3, address} = web3switcher.guest();
         from = address;
@@ -607,6 +606,7 @@ describe('TwoKeyProtocol', () => {
         links.gmail = hash;
         expect(hash).to.be.a('string');
     }).timeout(60000);
+
 
     it('should show maximum referral reward after ONE referrer', async() => {
         const {web3, address} = web3switcher.test4();
@@ -1031,21 +1031,26 @@ describe('TwoKeyProtocol', () => {
         }).balance);
 
         const contractorBalance = await twoKeyProtocol.AcquisitionCampaign.getContractorBalance(campaignAddress,from);
-        console.log('Contractor balance: ' + contractorBalance);
+        console.log('Contractor balance: ' + contractorBalance.available);
         const moderatorBalance = await twoKeyProtocol.AcquisitionCampaign.getModeratorBalance(campaignAddress,from);
         console.log('Moderator balance: ' + moderatorBalance);
         const hash = await twoKeyProtocol.AcquisitionCampaign.contractorWithdraw(campaignAddress,from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(hash);
     }).timeout(60000);
 
-    it('==> should show referrer stats per request with signature', async() => {
-
-    }).timeout(60000);
-
     it('==> should get address statistics', async() => {
-        let hexedValues = await twoKeyProtocol.AcquisitionCampaign.getAddressStatistic(campaignAddress, env.TEST4_ADDRESS);
-        console.log(hexedValues);
-        hexedValues = await twoKeyProtocol.AcquisitionCampaign.getAddressStatistic(campaignAddress, env.TEST4_ADDRESS, true);
+        const {web3, address} = web3switcher.aydnep();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+        });
+        let hexedValues = await twoKeyProtocol.AcquisitionCampaign.getAddressStatistic(campaignAddress, env.TEST4_ADDRESS,'0x0000000000000000000000000000000000000000',{from});
         console.log(hexedValues);
     }).timeout(60000);
 
@@ -1054,7 +1059,7 @@ describe('TwoKeyProtocol', () => {
         console.log("Moderator address is: " + moderatorAddress);
         expect(moderatorAddress).to.be.equal('0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7');
     }).timeout(60000);
-    
+
     it('==> should moderator withdraw his balances in 2key-tokens', async() => {
         const txHash = await twoKeyProtocol.AcquisitionCampaign.moderatorAndReferrerWithdraw(campaignAddress,from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
@@ -1133,8 +1138,24 @@ describe('TwoKeyProtocol', () => {
         console.log('Moderator total earnings: '+ totalEarnings);
     }).timeout(60000);
 
+    it('should test recover', async() => {
+        let a = await twoKeyProtocol.AcquisitionCampaign.testRecover(campaignAddress);
+        console.log(a);
+    }).timeout(30000);
+
     it('should get statistics for the address from the contract', async() => {
-        let stats = await twoKeyProtocol.AcquisitionCampaign.getAddressStatistic(campaignAddress,env.RENATA_ADDRESS);
+        const {web3, address} = web3switcher.renata();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+        });
+        let stats = await twoKeyProtocol.AcquisitionCampaign.getAddressStatistic(campaignAddress,env.RENATA_ADDRESS, '0x0000000000000000000000000000000000000000',{from});
         console.log(stats);
     }).timeout(60000);
 
@@ -1162,7 +1183,7 @@ describe('TwoKeyProtocol', () => {
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
         });
         console.log('Trying to perform offline conversion from gmail2');
-        let txHash = await twoKeyProtocol.AcquisitionCampaign.convertOffline(campaignAddress, from, 50);
+        let txHash = await twoKeyProtocol.AcquisitionCampaign.convertOffline(campaignAddress, from, from, 50);
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(60000);
 
@@ -1171,10 +1192,29 @@ describe('TwoKeyProtocol', () => {
         console.log('Conversion ids for the Gmail 2 are: ' + conversionIds);
     }).timeout(60000);
 
+
     it('should check conversion object for the created fiat conversion', async() => {
+        console.log("Fiat conversion is this: ");
         let conversion = await twoKeyProtocol.AcquisitionCampaign.getConversion(campaignAddress,4,from);
         console.log(conversion);
     }).timeout(60000);
+
+    it('should check conversion object', async() => {
+        const {web3, address} = web3switcher.test4();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+        });
+        console.log('Regular executed conversion is: ');
+        let conversion = await twoKeyProtocol.AcquisitionCampaign.getConversion(campaignAddress,0,from);
+        console.log(conversion);
+    })
 
     it('should execute conversion from contractor', async() => {
         const {web3, address} = web3switcher.aydnep();
@@ -1205,6 +1245,24 @@ describe('TwoKeyProtocol', () => {
         console.log('Number of forwarders stored on plasma: ' + numberOfForwarders);
     }).timeout(60000);
 
+    it('should create an offline(fiat) conversion from maintainer address', async() => {
+        const {web3, address} = web3switcher.aydnep();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+        });
+        console.log('Trying to perform offline conversion from gmail2');
+        let txHash = await twoKeyProtocol.AcquisitionCampaign.convertOffline(campaignAddress,env.TEST4_ADDRESS, from, 50);
+        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+    }).timeout(60000);
+
+
     it('should check reputation points for a couple of addresses', async() => {
         console.log('Checking stats for Renata');
         let renataStats = await twoKeyProtocol.BaseReputation.getReputationPointsForAllRolesPerAddress(env.RENATA_ADDRESS);
@@ -1224,4 +1282,189 @@ describe('TwoKeyProtocol', () => {
 
 
     }).timeout(60000);
+
+
+    it('should get inventory stats', async() => {
+        let stats = await twoKeyProtocol.AcquisitionCampaign.getInventoryStatus(campaignAddress);
+        console.log(stats);
+    }).timeout(60000);
+
+
+
+    it('should build refgraph', async() => {
+        const {web3, address} = web3switcher.gmail();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+        });
+        const getReferralLeaves = async (contract, owner) => {
+            const maxDepth = 99999;
+            let depth = 0;
+            const referrals = {};
+            let currentReferral;
+            // console.clear();
+            const firstAddress = twoKeyProtocol.plasmaAddress;
+
+            async function getAddressReferrals(address, contractAddress, contractorAddress, from, plasma, timestamp) {
+                if (from !== currentReferral && !referrals[from]) {
+                    console.log('New Referral', from, currentReferral);
+                    currentReferral = from;
+                    referrals[from] = true;
+                    depth += 1;
+                }
+                console.log('DEPTH', depth, address);
+                const leaf: any = {
+                    depth,
+                    maxDepth,
+                    _collapsed: depth >= maxDepth,
+                    contractorAddress,
+                    contractAddress,
+                    address,
+                    timestamp,
+                };
+                if (from === address) {
+                    return null;
+                }
+                let hasTokensOrRewards = false;
+                console.log('GET STATISTICS', plasma);
+                const signature = await twoKeyProtocol.PlasmaEvents.signReferrerToGetRewards();
+                const statistics = await twoKeyProtocol.AcquisitionCampaign.getAddressStatistic(contractAddress, address, signature, {plasma});
+                /*
+                try {
+                  leaf.userData = await fetchAPI('plasma/user', {
+                    params: {
+                      plasma_address: address,
+                      campaign_web3_address: contractAddress,
+                    },
+                  });
+                } catch (e) {
+                  console.log(e);
+                }
+                */
+                if (statistics.isJoined && from) {
+                    // const joined_from = await promisify(twoKeyPlasmaEvents.getJoinedFrom, [contractAddress, contractorAddress, address]);
+                    const joined_from = await twoKeyProtocol.PlasmaEvents.getJoinedFrom(contractAddress, contractorAddress, address);
+                    // const visited_from = await getVisitedFrom(contractAddress, contractorAddress, address);
+                    /*
+                    if (joined_from === contractorAddress) {
+                      console.log('CONTRACTOR call plasmaOf');
+                      joined_from = await promisify(twoKeyPlasmaEvents.plasmaOf, [joined_from]);
+                    }
+                    */
+                    // const plasmaOf = await promisify(twoKeyPlasmaEvents.plasmaOf, [visited_from]);
+                    console.log('\r\n');
+                    console.log('VISITED FROM');
+                    console.log('CURRENT ADDRESS', address);
+                    // console.log('VISITED_FROM', visited_from);
+                    console.log('JOINED_FROM', joined_from);
+                    // console.log('PLASMA_OF', plasmaOf);
+                    console.log('FROM', from);
+                    console.log('STATS', statistics);
+                    console.log('\r\n');
+                    /*
+                    */
+                    if (parseInt(joined_from, 16) && joined_from !== from) {
+                        return null;
+                    }
+                }
+                hasTokensOrRewards = Object.values(statistics)
+                    .reduce((prev, current) => (prev || current.rewards
+                        || current.amountConverterSpentETH || current.tokensBought), hasTokensOrRewards);
+                leaf.statistics = statistics;
+                console.log(address, statistics);
+                leaf.name = statistics.username || address.replace(/^(0x.{5}).{31}/, '$1...');
+                leaf.from = from;
+                leaf.hover = from && {
+                    name: statistics.username,
+                    address,
+                    rewards: statistics.referrerRewards,
+                    tokensBought: statistics.tokensBought,
+                    amountConverterSpentETH: statistics.amountConverterSpentETH,
+                    timestamp: timestamp || Date.now(),
+                };
+                leaf.linkClassName =
+                    (owner === address && 'leaf-contract')
+                    || (statistics.isReferrer && 'leaf-referrer')
+                    || (statistics.isConverter && 'leaf-converter')
+                    || (statistics.isJoined && 'leaf-joined')
+                    || (statistics.username && 'leaf-plasma');
+                leaf.nodeSvgShape = {
+                    shape: 'circle',
+                    shapeProps: {
+                        r: 10,
+                        strokeWidth: 3,
+                        stroke: (owner === address && '#f00')
+                        || (statistics.isReferrer && (statistics.isConverter ? 'magenta' : 'darkviolet'))
+                        || (statistics.isConverter && '#1a936f')
+                        || (hasTokensOrRewards && '#1a936f')
+                        || (statistics.isJoined && 'steelblue')
+                        || (statistics.username && 'orange')
+                        || '#999',
+                    },
+                    links: {
+                        display: 'none',
+                    },
+                };
+                if (leaf.hover && statistics.fullName) {
+                    leaf.hover.fullname = statistics.fullName;
+                }
+                if (leaf.hover && statistics.email) {
+                    leaf.hover.email = statistics.email;
+                }
+                const referralsObject = {};
+                // console.log('GET CHILDREN FOR', address);
+                if (depth <= maxDepth) {
+                    const { visits, timestamps } = await twoKeyProtocol.PlasmaEvents.getVisitsList(contractAddress, contractorAddress, address);
+                    console.log('CHILDREN FOR', address, visits);
+                    if (visits.length) {
+                        // console.log('CHILDREN FOR', address, referrals);
+                        for (let i = 0, l = visits.length; i < l; i += 1) {
+                            if (from !== visits[i]) {
+                                referralsObject[visits[i]] = timestamps[i];
+                                // processed[visits[i]] = true;
+                            }
+                        }
+                        const leavePromises = [];
+                        Object.keys(referralsObject).forEach(key => {
+                            leavePromises.push(getAddressReferrals(
+                                key,
+                                contractAddress,
+                                contractorAddress,
+                                address,
+                                true,
+                                referralsObject[key]
+                            ));
+                        });
+                        leaf.children = await Promise.all(leavePromises);
+                    }
+                }
+                return { ...leaf, ...statistics, isJoined: statistics.isJoined };
+            }
+            // const tree = await getAddressReferrals(firstAddress, contract, owner, this.address !== owner);
+            const tree = await getAddressReferrals(firstAddress, contract, owner, null, true, null);
+            console.log(tree);
+            const removeDeadLeaves = node => {
+                const result = { ...node };
+                if (node.children) {
+                    result.children = node.children.filter(leaf => !!leaf).map(leaf => removeDeadLeaves(leaf));
+                }
+                return result;
+            };
+            const normalTree = removeDeadLeaves(tree);
+            console.log('TREE WITHOUT DEAD LEAVES', normalTree);
+            return { normalTree, isContractor: this.address === owner };
+        };
+
+        let x = await getReferralLeaves(campaignAddress,from);
+
+        console.log(x);
+    }).timeout(120000);
 });
+
+

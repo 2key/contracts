@@ -1,4 +1,4 @@
-import ipfsAPI from 'ipfs-http-client';
+import ipfsClient from 'ipfs-http-client';
 import Web3 from 'web3';
 import ProviderEngine from 'web3-provider-engine';
 import RpcSubprovider from 'web3-provider-engine/subproviders/rpc';
@@ -7,7 +7,6 @@ import NonceSubprovider from 'web3-provider-engine/subproviders/nonce-tracker';
 import WalletSubprovider from 'ethereumjs-wallet/provider-engine';
 import * as eth_wallet from 'ethereumjs-wallet';
 import {BigNumber} from "bignumber.js";
-// import ethers from 'ethers';
 import singletons from './contracts/singletons';
 import {
     BalanceMeta,
@@ -27,7 +26,8 @@ import {
     IUpgradableExchange,
     ITwoKeyBaseReputationRegistry,
     ITwoKeyCampaignValidator,
-    IDonationCampaign
+    IDonationCampaign,
+    IIPFS,
 } from './interfaces';
 import { promisify } from './utils/promisify';
 import Index from './utils';
@@ -37,28 +37,29 @@ import ERC20 from './erc20';
 import TwoKeyCongress from "./congress";
 import DecentralizedNation from "./decentralizedNation";
 import TwoKerRegistry from './registry';
-import TwoKeyBaseReputationRegistry from "./reputationRegistry";
+import TwoKeyBaseReputationRegistry from './reputationRegistry';
 import PlasmaEvents from './plasma';
 import UpgradableExchange from './upgradableExchange';
 import TwoKeyExchangeContract from './exchangeETHUSD';
 import {IPlasmaEvents} from './plasma/interfaces';
 import Sign from './sign';
-import TwoKeyCampaignValidator from "./campaignValidator";
-import DonationCampaign from "./donation";
+import TwoKeyCampaignValidator from './campaignValidator';
+import DonationCampaign from './donation';
 // const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 
 const TwoKeyDefaults = {
-    // ipfsRIp: 'ipfs.io',
-    // ipfsRPort: '443',
-    // ipfsRProtocol: 'https',
-    ipfsRIp: 'ipfs.infura.io',
-    ipfsRPort: '5001',
-    ipfsRProtocol: 'https',
-    ipfsWIp: 'ipfs.infura.io',
-    ipfsWPort: '5001',
-    ipfsWProtocol: 'https',
+    ipfsAPI: {
+        host: 'ipfs.infura.io',
+        port: '5001',
+        protocol: 'https',
+    },
+    ipfsGW: {
+        host: 'ipfs.infura.io',
+        port: '5001',
+        protocol: 'https',
+    },
     mainNetId: 3,
-    syncTwoKeyNetId: 98052,
+    syncTwoKeyNetId: 11112222,
     // twoKeySyncUrl: 'https://test.plasma.2key.network/',
     twoKeySyncUrl: 'https://rpc.private.test.k8s.2key.net',
     twoKeyMainUrl: 'https://rpc.public.test.k8s.2key.net',
@@ -126,12 +127,8 @@ export class TwoKeyProtocol {
             web3,
             rpcUrl,
             eventsNetUrl = TwoKeyDefaults.twoKeySyncUrl,
-            ipfsRIp = TwoKeyDefaults.ipfsRIp,
-            ipfsRPort = TwoKeyDefaults.ipfsRPort,
-            ipfsRProtocol = TwoKeyDefaults.ipfsRProtocol,
-            ipfsWIp = TwoKeyDefaults.ipfsWIp,
-            ipfsWPort = TwoKeyDefaults.ipfsWPort,
-            ipfsWProtocol = TwoKeyDefaults.ipfsWProtocol,
+            ipfsAPI = TwoKeyDefaults.ipfsAPI,
+            ipfsGW = TwoKeyDefaults.ipfsGW,
             contracts,
             networks,
             plasmaPK,
@@ -196,11 +193,8 @@ export class TwoKeyProtocol {
         this.twoKeyBaseReputationRegistry = this.web3.eth.contract(singletons.TwoKeyBaseReputationRegistry.abi).at(getDeployedAddress('TwoKeyBaseReputationRegistry', this.networks.mainNetId));
         this.twoKeyCampaignValidator = this.web3.eth.contract(singletons.TwoKeyCampaignValidator.abi).at(getDeployedAddress('TwoKeyCampaignValidator', this.networks.mainNetId));
 
-        this.ipfsR = ipfsAPI(ipfsRIp, ipfsRPort, {protocol: ipfsRProtocol});
-        this.ipfsW = ipfsAPI(ipfsWIp, ipfsWPort, {protocol: ipfsWProtocol});
-
-        console.log('IPFS Read', `${ipfsRProtocol}://${ipfsRIp}:${ipfsRPort}`);
-        console.log('IPFS Write', `${ipfsWProtocol}://${ipfsWIp}:${ipfsWPort}`);
+        this.ipfsR = ipfsClient(ipfsGW);
+        this.ipfsW = ipfsClient(ipfsAPI);
 
         this.twoKeyBase = {
             web3: this.web3,
