@@ -208,6 +208,7 @@ export interface IConversionStats {
     totalETHRaised: number,
     tokensSold: number,
     totalBounty: number,
+    numberOfUniqueConvertersForExecutedConversions: number
 }
 
 export interface IAddressStats {

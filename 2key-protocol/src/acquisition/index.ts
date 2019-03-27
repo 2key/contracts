@@ -1754,7 +1754,15 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         return new Promise<IConversionStats>(async(resolve,reject) => {
             try {
                 const conversionHandlerInstance = await this._getConversionHandlerInstance(campaign);
-                const [pending,approved,rejected,totalRaised,tokensSold,totalBounty] = await promisify(conversionHandlerInstance.getCampaignSummary,[{from}]);
+                const [
+                    pending,
+                    approved,
+                    rejected,
+                    totalRaised,
+                    tokensSold,
+                    totalBounty,
+                    numberOfUniqueConvertersForExecutedConversions
+                ] = await promisify(conversionHandlerInstance.getCampaignSummary,[{from}]);
                 resolve(
                     {
                         pendingConverters:  pending.toNumber(),
@@ -1762,7 +1770,8 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                         rejectedConverters:  rejected.toNumber(),
                         totalETHRaised: parseFloat(this.utils.fromWei(totalRaised, 'ether').toString()),
                         tokensSold: parseFloat(this.utils.fromWei(tokensSold,'ether').toString()),
-                        totalBounty: parseFloat(this.utils.fromWei(totalBounty, 'ether').toString())
+                        totalBounty: parseFloat(this.utils.fromWei(totalBounty, 'ether').toString()),
+                        numberOfUniqueConvertersForExecutedConversions: numberOfUniqueConvertersForExecutedConversions.toNumber(),
                     }
                 )
             } catch (e) {
@@ -1995,7 +2004,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         return new Promise<number>(async(resolve,reject) => {
             try {
                 const conversionHandlerInstance = await this._getConversionHandlerInstance(campaign);
-                let [numberOfConversions,] = await promisify(conversionHandlerInstance.getNumberOfExecutedConversionsAndUniqueExecutedConverters,[]);
+                let numberOfConversions= await promisify(conversionHandlerInstance.getNumberOfExecutedConversions,[]);
                 resolve(numberOfConversions);
             } catch (e) {
                 reject(e);

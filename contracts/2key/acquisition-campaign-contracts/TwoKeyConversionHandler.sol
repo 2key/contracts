@@ -451,7 +451,7 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
      * @notice Get's number of converters per type, and returns tuple, as well as total raised funds
      getCampaignSummary
      */
-    function getCampaignSummary() public view returns (uint,uint,uint,uint,uint,uint) {
+    function getCampaignSummary() public view returns (uint,uint,uint,uint,uint,uint,uint) {
         bytes32 pending = convertConverterStateToBytes(ConverterState.PENDING_APPROVAL);
         bytes32 approved = convertConverterStateToBytes(ConverterState.APPROVED);
         bytes32 rejected = convertConverterStateToBytes(ConverterState.REJECTED);
@@ -460,7 +460,15 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
         uint numberOfApproved = stateToConverter[approved].length;
         uint numberOfRejected = stateToConverter[rejected].length;
 
-        return (numberOfPending,numberOfApproved,numberOfRejected,raisedFundsEthWei, tokensSold, totalBounty);
+        return (
+            numberOfPending,
+            numberOfApproved,
+            numberOfRejected,
+            raisedFundsEthWei,
+            tokensSold,
+            totalBounty,
+            numberOfUniqueConvertersForExecutedConversions
+        );
     }
 
     /**
@@ -486,7 +494,7 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
      * @notice Function to get number of executed functions
      * @return number of executed conversions on this contract
      */
-    function getNumberOfExecutedConversionsAndUniqueExecutedConverters() public view returns (uint,uint) {
-        return (numberOfExecutedConversions, numberOfUniqueConvertersForExecutedConversions);
+    function getNumberOfExecutedConversions() public view returns (uint) {
+        return (numberOfExecutedConversions);
     }
 }
