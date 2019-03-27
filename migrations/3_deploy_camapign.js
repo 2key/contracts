@@ -1,8 +1,5 @@
 const TwoKeyAcquisitionCampaignERC20 = artifacts.require('TwoKeyAcquisitionCampaignERC20');
-const EventSource = artifacts.require('TwoKeyEventSource');
 const TwoKeyConversionHandler = artifacts.require('TwoKeyConversionHandler');
-const ERC20TokenMock = artifacts.require('ERC20TokenMock');
-const TwoKeyHackEventSource = artifacts.require('TwoKeyHackEventSource');
 const TwoKeyExchangeRateContract = artifacts.require('TwoKeyExchangeRateContract');
 const TwoKeyUpgradableExchange = artifacts.require('TwoKeyUpgradableExchange');
 const TwoKeyAcquisitionLogicHandler = artifacts.require('TwoKeyAcquisitionLogicHandler');
@@ -10,6 +7,7 @@ const TwoKeyRegistry = artifacts.require('TwoKeyRegistry');
 const TwoKeySingletonesRegistry = artifacts.require('TwoKeySingletonesRegistry');
 const TwoKeyCampaignValidator = artifacts.require('TwoKeyCampaignValidator');
 const TwoKeyDonationCampaign = artifacts.require('TwoKeyDonationCampaign');
+const TwoKeyEconomy = artifacts.require('TwoKeyEconomy');
 
 const Call = artifacts.require('Call');
 const IncentiveModels = artifacts.require('IncentiveModels');
@@ -28,18 +26,17 @@ module.exports = function deploy(deployer) {
         deployer.deploy(TwoKeyConversionHandler,
             12345, 1012019, 180, 6, 180)
             .then(() => TwoKeyConversionHandler.deployed())
-            .then(() => deployer.deploy(ERC20TokenMock))
             .then(() => deployer.link(Call, TwoKeyAcquisitionLogicHandler))
             .then(() => deployer.link(Call, TwoKeyAcquisitionCampaignERC20))
             .then(() => deployer.deploy(TwoKeyAcquisitionLogicHandler,
                 12, 15, 1, 12345, 15345, 5, 'USD',
-                ERC20TokenMock.address, json.TwoKeyAdmin[network_id].Proxy))
+                TwoKeyEconomy.address, json.TwoKeyAdmin[network_id].Proxy))
             .then(() => deployer.deploy(TwoKeyAcquisitionCampaignERC20,
                 TwoKeySingletonesRegistry.address,
                 TwoKeyAcquisitionLogicHandler.address,
                 TwoKeyConversionHandler.address,
                 json.TwoKeyAdmin[network_id].Proxy,
-                ERC20TokenMock.address,
+                TwoKeyEconomy.address,
                 [5, 1],
                 )
             )
