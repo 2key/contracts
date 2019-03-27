@@ -200,15 +200,31 @@ export interface IReferrerSummary {
     rewardsPerConversions: number[],
 }
 
+// pendingConverters:  pending.toNumber(),
+//     approvedConverters:  approved.toNumber(),
+//     rejectedConverters:  rejected.toNumber(),
+//     pendingConversions,
+//     approvedConversions,
+//     rejectedConversions,
+//     executedConversions,
+//     cancelledConversions,
+//     uniqueConverters,
+//     raisedFundsEthWei,
+//     tokensSold,
+//     totalBounty
 export interface IConversionStats {
     pendingConverters: number,
     approvedConverters: number,
     rejectedConverters: number,
-    totalETHRaised: number,
+    pendingConversions: number,
+    approvedConversions: number,
+    rejectedConversions: number,
+    executedConversions: number,
+    cancelledConversions: number,
+    uniqueConverters: number,
+    raisedFundsEthWei: number,
     tokensSold: number,
-    totalBounty: number,
-    numberOfUniqueConvertersForExecutedConversions: number,
-    numberOfExecutedConversions: number
+    totalBounty: number
 }
 
 export interface IAddressStats {

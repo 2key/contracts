@@ -1754,26 +1754,40 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         return new Promise<IConversionStats>(async(resolve,reject) => {
             try {
                 const conversionHandlerInstance = await this._getConversionHandlerInstance(campaign);
+
                 const [
                     pending,
                     approved,
                     rejected,
-                    totalRaised,
-                    tokensSold,
-                    totalBounty,
-                    numberOfUniqueConvertersForExecutedConversions,
-                    numberOfExecutedConversions
+                    counters
                 ] = await promisify(conversionHandlerInstance.getCampaignSummary,[{from}]);
+
+                let pendingConversions = counters[0].toNumber();
+                let approvedConversions = counters[1].toNumber();
+                let rejectedConversions = counters[2].toNumber();
+                let executedConversions = counters[3].toNumber();
+                let cancelledConversions = counters[4].toNumber();
+
+                let uniqueConverters = counters[5].toNumber();
+
+                let raisedFundsEthWei = parseFloat(this.utils.fromWei(counters[6], 'ether').toString());
+                let tokensSold = parseFloat(this.utils.fromWei(counters[7], 'ether').toString());
+                let totalBounty = parseFloat(this.utils.fromWei(counters[8], 'ether').toString());
+
                 resolve(
                     {
                         pendingConverters:  pending.toNumber(),
                         approvedConverters:  approved.toNumber(),
                         rejectedConverters:  rejected.toNumber(),
-                        totalETHRaised: parseFloat(this.utils.fromWei(totalRaised, 'ether').toString()),
-                        tokensSold: parseFloat(this.utils.fromWei(tokensSold,'ether').toString()),
-                        totalBounty: parseFloat(this.utils.fromWei(totalBounty, 'ether').toString()),
-                        numberOfUniqueConvertersForExecutedConversions: numberOfUniqueConvertersForExecutedConversions.toNumber(),
-                        numberOfExecutedConversions: numberOfExecutedConversions.toNumber()
+                        pendingConversions,
+                        approvedConversions,
+                        rejectedConversions,
+                        executedConversions,
+                        cancelledConversions,
+                        uniqueConverters,
+                        raisedFundsEthWei,
+                        tokensSold,
+                        totalBounty
                     }
                 )
             } catch (e) {
