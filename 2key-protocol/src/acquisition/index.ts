@@ -1761,7 +1761,8 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     totalRaised,
                     tokensSold,
                     totalBounty,
-                    numberOfUniqueConvertersForExecutedConversions
+                    numberOfUniqueConvertersForExecutedConversions,
+                    numberOfExecutedConversions
                 ] = await promisify(conversionHandlerInstance.getCampaignSummary,[{from}]);
                 resolve(
                     {
@@ -1772,6 +1773,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                         tokensSold: parseFloat(this.utils.fromWei(tokensSold,'ether').toString()),
                         totalBounty: parseFloat(this.utils.fromWei(totalBounty, 'ether').toString()),
                         numberOfUniqueConvertersForExecutedConversions: numberOfUniqueConvertersForExecutedConversions.toNumber(),
+                        numberOfExecutedConversions: numberOfExecutedConversions.toNumber()
                     }
                 )
             } catch (e) {
@@ -1989,23 +1991,6 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 const twoKeyLockupInstance = await this._getLockupContractInstance(twoKeyLockup);
                 let txHash = await promisify(twoKeyLockupInstance.changeTokenDistributionDate,[newDate,{from}]);
                 resolve(txHash);
-            } catch (e) {
-                reject(e);
-            }
-        })
-    }
-
-    /**
-     * Get number of conversions executed on the contract
-     * @param {string} campaign
-     * @returns {Promise<number>}
-     */
-    public getNumberOfExecutedConversions(campaign: string) : Promise<number> {
-        return new Promise<number>(async(resolve,reject) => {
-            try {
-                const conversionHandlerInstance = await this._getConversionHandlerInstance(campaign);
-                let numberOfConversions= await promisify(conversionHandlerInstance.getNumberOfExecutedConversions,[]);
-                resolve(numberOfConversions);
             } catch (e) {
                 reject(e);
             }

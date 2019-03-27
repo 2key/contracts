@@ -26,8 +26,10 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
     uint raisedFundsEthWei;
     uint numberOfConversions;
     uint totalBounty;
-    uint numberOfExecutedConversions;
-    uint numberOfUniqueConvertersForExecutedConversions;
+
+    //PENDING_CONVERSIONS,UNIQUE_CONVERTERS,EXECUTED_CONVERSIONS,NOT_EXECUTED
+    // Key will be the name of action counted and value will be actual counter
+    mapping(string => uint) nameToCounter;
 
     uint256 expiryConversionInHours; // How long converter can be pending before it will be automatically rejected and funds will be returned to convertor (hours)
 
@@ -197,6 +199,8 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
             converterToState[_converterAddress] = ConverterState.PENDING_APPROVAL;
             stateToConverter[bytes32("PENDING_APPROVAL")].push(_converterAddress);
         }
+
+        nameToCounter["PENDING_CONVERSIONS"]++;
     }
 
     /**
@@ -241,7 +245,7 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
         }
 
         if(converterToLockupContracts[conversion.converter].length == 0) {
-            numberOfUniqueConvertersForExecutedConversions++;
+            nameToCounter["UNIQUE_CONVERTERS"]++;
         }
 
         conversion.maxReferralReward2key = totalReward2keys;
@@ -249,7 +253,9 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
         conversions[_conversionId] = conversion;
         converterToLockupContracts[conversion.converter].push(lockupContract);
 
-        numberOfExecutedConversions++;
+        nameToCounter["EXECUTED_CONVERSIONS"]++;
+        nameToCounter["NOT_EXECUTED"]--;
+
         tokensSold = tokensSold + totalUnits; //update sold tokens once conversion is executed
     }
 
@@ -451,7 +457,7 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
      * @notice Get's number of converters per type, and returns tuple, as well as total raised funds
      getCampaignSummary
      */
-    function getCampaignSummary() public view returns (uint,uint,uint,uint,uint,uint,uint) {
+    function getCampaignSummary() public view returns (uint,uint,uint,uint,uint,uint,uint,uint) {
         bytes32 pending = convertConverterStateToBytes(ConverterState.PENDING_APPROVAL);
         bytes32 approved = convertConverterStateToBytes(ConverterState.APPROVED);
         bytes32 rejected = convertConverterStateToBytes(ConverterState.REJECTED);
@@ -467,7 +473,8 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
             raisedFundsEthWei,
             tokensSold,
             totalBounty,
-            numberOfUniqueConvertersForExecutedConversions
+            nameToCounter["UNIQUE_CONVERTERS"],
+            nameToCounter["EXECUTED_CONVERSIONS"]
         );
     }
 
@@ -490,11 +497,4 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
         return convertConverterStateToBytes(converterToState[_converter]);
     }
 
-    /**
-     * @notice Function to get number of executed functions
-     * @return number of executed conversions on this contract
-     */
-    function getNumberOfExecutedConversions() public view returns (uint) {
-        return (numberOfExecutedConversions);
-    }
 }

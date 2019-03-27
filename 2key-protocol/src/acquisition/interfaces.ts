@@ -134,7 +134,6 @@ export interface ITwoKeyAcquisitionCampaign {
     getLockupInformations: (twoKeyLockup: string, from:string) => Promise<ILockupInformation>,
     getNonSingletonsHash: () => string,
     getInventoryStatus: (campaign:any) => Promise<IInventoryStatus>,
-    getNumberOfExecutedConversions: (campaign: string) => Promise<number>,
     testRecover: (campaign:string) => Promise<string>
 }
 
@@ -208,7 +207,8 @@ export interface IConversionStats {
     totalETHRaised: number,
     tokensSold: number,
     totalBounty: number,
-    numberOfUniqueConvertersForExecutedConversions: number
+    numberOfUniqueConvertersForExecutedConversions: number,
+    numberOfExecutedConversions: number
 }
 
 export interface IAddressStats {
