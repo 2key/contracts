@@ -274,30 +274,6 @@ describe('TwoKeyDonationCampaign', () => {
    }).timeout(60000);
 
 
-    it('should visit before donate', async() => {
-        const {web3, address} = web3switcher.aydnep();
-        from = address;
-        twoKeyProtocol.setWeb3({
-            web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
-        });
-        let txHash = await twoKeyProtocol.DonationCampaign.visit(campaignAddress, links.uport);
-        console.log(txHash);
-    }).timeout(60000);
-
-    it('should join and donate', async () => {
-        let txHash = await twoKeyProtocol.DonationCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(10*minDonationAmount, 'ether'), links.uport, from);
-        console.log(txHash);
-        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-        expect(txHash).to.be.a('string');
-    }).timeout(60000);
-
-
     it('should get donation', async() => {
         let donation = await twoKeyProtocol.DonationCampaign.getDonation(campaignAddress,0,from);
         console.log(donation);
