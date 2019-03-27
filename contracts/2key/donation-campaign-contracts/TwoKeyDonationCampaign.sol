@@ -27,8 +27,11 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
     uint maxDonationAmountWei; // Maximal donation amount
     uint maxReferralRewardPercent; // Percent per conversion which goes to referrers
     uint campaignGoal; // Goal of the campaign, how many funds to raise
+
     bool shouldConvertToRefer; // If yes, means that referrer must be converter in order to be referrer
     bool isKYCRequired; // Will determine if KYC is required or not
+    bool acceptsFiat;
+
     IncentiveModel rewardsModel; //Incentive model for rewards
 
     mapping(address => uint) amountUserContributed; //If amount user contributed is > 0 means he's a converter
@@ -82,6 +85,7 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         uint [] values,
         bool _shouldConvertToReffer,
         bool _isKYCRequired,
+        bool _acceptsFiat,
         address _twoKeySingletonesRegistry,
         IncentiveModel _rewardsModel
     ) public {
@@ -100,6 +104,9 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         } else {
             rewardsModel = _rewardsModel;
         }
+
+        acceptsFiat = _acceptsFiat;
+
         maxReferralRewardPercent = values[0];
         campaignStartTime = values[1];
         campaignEndTime = values[2];
@@ -107,6 +114,7 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         maxDonationAmountWei = values[4];
         campaignGoal = values[5];
         conversionQuota = values[6];
+
 
         shouldConvertToRefer = _shouldConvertToReffer;
         isKYCRequired = _isKYCRequired;

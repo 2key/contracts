@@ -53,6 +53,7 @@ let campaignGoal = 1000000000;
 let conversionQuota = 5;
 let isKYCRequired = true;
 let shouldConvertToRefer = false;
+let acceptsFiat = false;
 let incentiveModel = 2;
 
 let campaignAddress: string;
@@ -81,6 +82,7 @@ let campaign: ICreateCampaign = {
     conversionQuota,
     isKYCRequired,
     shouldConvertToRefer,
+    acceptsFiat,
     incentiveModel
 };
 

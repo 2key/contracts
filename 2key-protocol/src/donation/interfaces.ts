@@ -33,6 +33,7 @@ export interface ICreateCampaign {
     conversionQuota: number,
     shouldConvertToRefer: boolean,
     isKYCRequired: boolean,
+    acceptsFiat: boolean,
     incentiveModel: number
 }
 

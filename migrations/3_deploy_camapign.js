@@ -58,6 +58,7 @@ module.exports = function deploy(deployer) {
                 5],
                 false,
                 false,
+                false,
                 TwoKeySingletonesRegistry.address,
                 0
                 ))
