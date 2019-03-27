@@ -134,7 +134,6 @@ export interface ITwoKeyAcquisitionCampaign {
     getLockupInformations: (twoKeyLockup: string, from:string) => Promise<ILockupInformation>,
     getNonSingletonsHash: () => string,
     getInventoryStatus: (campaign:any) => Promise<IInventoryStatus>,
-    getNumberOfExecutedConversions: (campaign: string) => Promise<number>,
     testRecover: (campaign:string) => Promise<string>
 }
 
@@ -201,13 +200,31 @@ export interface IReferrerSummary {
     rewardsPerConversions: number[],
 }
 
+// pendingConverters:  pending.toNumber(),
+//     approvedConverters:  approved.toNumber(),
+//     rejectedConverters:  rejected.toNumber(),
+//     pendingConversions,
+//     approvedConversions,
+//     rejectedConversions,
+//     executedConversions,
+//     cancelledConversions,
+//     uniqueConverters,
+//     raisedFundsEthWei,
+//     tokensSold,
+//     totalBounty
 export interface IConversionStats {
     pendingConverters: number,
     approvedConverters: number,
     rejectedConverters: number,
-    totalETHRaised: number,
+    pendingConversions: number,
+    approvedConversions: number,
+    rejectedConversions: number,
+    executedConversions: number,
+    cancelledConversions: number,
+    uniqueConverters: number,
+    raisedFundsEthWei: number,
     tokensSold: number,
-    totalBounty: number,
+    totalBounty: number
 }
 
 export interface IAddressStats {

@@ -1235,11 +1235,6 @@ describe('TwoKeyProtocol', () => {
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(60000);
 
-    it('should return number of executed conversions', async() => {
-        let number = await twoKeyProtocol.AcquisitionCampaign.getNumberOfExecutedConversions(campaignAddress);
-        console.log('Number of executed conversions: ' + number);
-    }).timeout(60000);
-
     it('should return number of forwarders for the campaign', async() => {
         let numberOfForwarders = await twoKeyProtocol.PlasmaEvents.getForwardersPerCampaign(campaignAddress);
         console.log('Number of forwarders stored on plasma: ' + numberOfForwarders);

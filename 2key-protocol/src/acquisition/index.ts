@@ -1724,11 +1724,20 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 const acquisitionCampaignInstance = await this._getCampaignInstance(campaign);
                 let ipfsHash: string = await promisify(acquisitionCampaignInstance.privateMetaHash,[{from}]);
                 console.log('Hash taken from contract is: ' + ipfsHash);
-                let privateHashEncrypted = await promisify(this.base.ipfsR.cat, [ipfsHash]);
-                privateHashEncrypted = privateHashEncrypted.toString();
-                console.log(privateHashEncrypted);
-                let privateMetaHashDecrypted = await this.sign.decrypt(this.base.web3,from,privateHashEncrypted,{plasma : false});
-                resolve(privateMetaHashDecrypted.slice(2)); //remove 0x from the beginning
+
+                let contractor: string = await promisify(acquisitionCampaignInstance.contractor,[]);
+
+                //Validate that the sender is contractor
+                if(from != contractor) {
+                    reject('This can be decrypted only by contractor');
+                } else {
+                    let privateHashEncrypted = await promisify(this.base.ipfsR.cat, [ipfsHash]);
+                    privateHashEncrypted = privateHashEncrypted.toString();
+                    console.log(privateHashEncrypted);
+
+                    let privateMetaHashDecrypted = await this.sign.decrypt(this.base.web3,from,privateHashEncrypted,{plasma : false});
+                    resolve(privateMetaHashDecrypted.slice(2)); //remove 0x from the beginning
+                }
             } catch (e) {
                 reject(e);
             }
@@ -1745,15 +1754,40 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         return new Promise<IConversionStats>(async(resolve,reject) => {
             try {
                 const conversionHandlerInstance = await this._getConversionHandlerInstance(campaign);
-                const [pending,approved,rejected,totalRaised,tokensSold,totalBounty] = await promisify(conversionHandlerInstance.getCampaignSummary,[{from}]);
+
+                const [
+                    pending,
+                    approved,
+                    rejected,
+                    counters
+                ] = await promisify(conversionHandlerInstance.getCampaignSummary,[{from}]);
+
+                let pendingConversions = counters[0].toNumber();
+                let approvedConversions = counters[1].toNumber();
+                let rejectedConversions = counters[2].toNumber();
+                let executedConversions = counters[3].toNumber();
+                let cancelledConversions = counters[4].toNumber();
+
+                let uniqueConverters = counters[5].toNumber();
+
+                let raisedFundsEthWei = parseFloat(this.utils.fromWei(counters[6], 'ether').toString());
+                let tokensSold = parseFloat(this.utils.fromWei(counters[7], 'ether').toString());
+                let totalBounty = parseFloat(this.utils.fromWei(counters[8], 'ether').toString());
+
                 resolve(
                     {
                         pendingConverters:  pending.toNumber(),
                         approvedConverters:  approved.toNumber(),
                         rejectedConverters:  rejected.toNumber(),
-                        totalETHRaised: parseFloat(this.utils.fromWei(totalRaised, 'ether').toString()),
-                        tokensSold: parseFloat(this.utils.fromWei(tokensSold,'ether').toString()),
-                        totalBounty: parseFloat(this.utils.fromWei(totalBounty, 'ether').toString())
+                        pendingConversions,
+                        approvedConversions,
+                        rejectedConversions,
+                        executedConversions,
+                        cancelledConversions,
+                        uniqueConverters,
+                        raisedFundsEthWei,
+                        tokensSold,
+                        totalBounty
                     }
                 )
             } catch (e) {
@@ -1977,22 +2011,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         })
     }
 
-    /**
-     * Get number of conversions executed on the contract
-     * @param {string} campaign
-     * @returns {Promise<number>}
-     */
-    public getNumberOfExecutedConversions(campaign: string) : Promise<number> {
-        return new Promise<number>(async(resolve,reject) => {
-            try {
-                const conversionHandlerInstance = await this._getConversionHandlerInstance(campaign);
-                let numberOfConv = await promisify(conversionHandlerInstance.getNumberOfExecutedConversions,[]);
-                resolve(numberOfConv);
-            } catch (e) {
-                reject(e);
-            }
-        })
-    }
+
 
     public testRecover(campaign:string) : Promise<string> {
         return new Promise<string>(async(resolve,reject) => {

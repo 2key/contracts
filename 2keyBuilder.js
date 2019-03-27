@@ -534,7 +534,7 @@ async function deploy() {
     if (!local) {
       await runProcess(path.join(__dirname, 'node_modules/.bin/webpack'));
     }
-
+    await archiveBuild();
     contractsStatus = await contractsGit.status();
     twoKeyProtocolStatus = await twoKeyProtocolLibGit.status();
     console.log(commit, tag);
