@@ -85,11 +85,13 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         address _twoKeySingletonesRegistry,
         IncentiveModel _rewardsModel
     ) public {
+        // Deploy an ERC20 token which will be used as the Invoice
         erc20InvoiceToken = new InvoiceTokenERC20(tokenName,tokenSymbol,address(this));
 
-        //Emit an event with deployed token address, name, and symbol
+        // Emit an event with deployed token address, name, and symbol
         emit InvoiceTokenCreated(erc20InvoiceToken, tokenName, tokenSymbol);
 
+        // Moderator address
         moderator = _moderator;
         campaignName = _campaignName;
 
@@ -417,9 +419,6 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
 
                 // Add donation to array of all donations
                 donations.push(donation);
-
-                // Add donation id under donator id's
-                converterToConversionIDs[msg.sender].push(id); // accounting for the donator
             }
         }
     }
@@ -433,7 +432,7 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         for(uint i=0; i<conversionIds.length; i++) {
             DonationEther storage don = donations[conversionIds[i]];
             if(don.state == ConversionState.PENDING_APPROVAL) {
-                distributeReferrerRewards(_converter, don.totalBountyEthWei, conversionIds[i]);
+                don.totalBounty2keyWei = distributeReferrerRewards(_converter, don.totalBountyEthWei, conversionIds[i]);
                 contractorBalance = contractorBalance.add(don.contractorProceeds);
                 don.state = ConversionState.EXECUTED;
             }

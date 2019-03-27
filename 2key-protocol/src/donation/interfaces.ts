@@ -4,13 +4,14 @@ import {BigNumber} from "bignumber.js";
 
 export interface IDonationCampaign {
     create: (data: ICreateCampaign, from: string, opts?: ICreateOpts) => Promise<any>,
-    getDonation: (campaignAddress: string, donationId: number, from: string) => Promise<IDonation>,
-    getPublicLinkKey: (campaign: any, from: string) => Promise<string>,
     getIncentiveModel: (campaignAddress: string) => Promise<string>,
     visit: (campaignAddress: string, referralLink: string)=> Promise<string>,
     updateOrSetIpfsHashPublicMeta: (campaign: any, hash: string, from: string, gasPrice?: number) => Promise<string>,
-    getPublicMeta: (campaign: any, from?: string) => Promise<any>,
     joinAndConvert: (campaign: any, value: string | number | BigNumber, publicLink: string, from: string, opts?: IConvertOpts) => Promise<string>,
+    approveConverter: (campaignAddress: string, converter: string, from:string) => Promise<string>,
+    getDonation: (campaignAddress: string, donationId: number, from: string) => Promise<IDonation>,
+    getPublicLinkKey: (campaign: any, from: string) => Promise<string>,
+    getPublicMeta: (campaign: any, from?: string) => Promise<any>,
     getPrivateMetaHash: (campaign: any, from: string) => Promise<string>,
     setPrivateMetaHash: (campaign: any, data: any, from:string) => Promise<string>,
     getRefferrersToConverter: (campaignAddress: string, converter: string, from: string) => Promise<string[]>,

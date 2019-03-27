@@ -557,6 +557,26 @@ export default class DonationCampaign implements IDonationCampaign {
      * @param {string} campaignAddress
      * @param {string} converter
      * @param {string} from
+     * @returns {Promise<string>}
+     */
+    public approveConverter(campaignAddress: string, converter: string, from:string) : Promise<string> {
+        return new Promise(async(resolve,reject) => {
+            try {
+                let campaignInstance = await this._getCampaignInstance(campaignAddress);
+                //Bear in mind this can only be done by Contractor
+                let txHash = await promisify(campaignInstance.approveConverter,[converter,{from}]);
+                resolve(txHash);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+    /**
+     *
+     * @param {string} campaignAddress
+     * @param {string} converter
+     * @param {string} from
      * @returns {Promise<string[]>}
      */
     public getRefferrersToConverter(campaignAddress: string, converter: string, from: string) : Promise<string[]> {
