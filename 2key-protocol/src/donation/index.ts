@@ -60,7 +60,7 @@ export default class DonationCampaign implements IDonationCampaign {
     async _getDonationConversionHandlerInstance(campaign: any): Promise<any> {
         const donationInstance = await this._getCampaignInstance(campaign);
         const donationConversionHandlerInstance = await promisify(donationInstance.twoKeyDonationConversionHandler, []);
-        return this.base.web3.eth.contract(acquisitionContracts.TwoKeyConversionHandler.abi).at(donationConversionHandlerInstance);
+        return this.base.web3.eth.contract(donationContracts.TwoKeyDonationConversionHandler.abi).at(donationConversionHandlerInstance);
     }
 
     /**

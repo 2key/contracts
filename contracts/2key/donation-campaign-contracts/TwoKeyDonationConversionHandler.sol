@@ -169,6 +169,26 @@ contract TwoKeyDonationConversionHandler is TwoKeyConversionStates, TwoKeyConver
         converterToState[_converter] = ConverterState.APPROVED;
     }
 
+
+    function rejectConverter(address _converter) public onlyContractor {
+        require(converterToState[_converter] == ConverterState.PENDING_APPROVAL);
+
+        uint[] memory conversionIds = converterToConversionIDs[_converter];
+        uint refundAmount = 0;
+
+        for(uint i=0; i<conversionIds.length; i++) {
+            DonationEther storage d = donations[conversionIds[i]];
+            if(d.state == ConversionState.PENDING_APPROVAL) {
+                refundAmount = refundAmount.add(d.amount);
+                d.state = ConversionState.REJECTED;
+            }
+        }
+
+        if(refundAmount > 0) {
+            _converter.transfer(refundAmount);
+        }
+    }
+
     /**
      * @notice Function to read donation
      * @param donationId is the id of donation

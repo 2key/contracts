@@ -226,6 +226,10 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         ITwoKeyDonationConversionHandler(twoKeyDonationConversionHandler).createDonation(msg.sender, msg.value);
     }
 
+    function convertFiat() public goalValidator onlyInDonationLimit {
+
+    }
+
     /**
      * @notice Fallback function to handle input payments -> no referrer rewards in this case
      */
@@ -346,23 +350,4 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         super.withdrawModeratorOrReferrer(_address);
     }
 
-//
-//    function rejectConverter(address _converter) public onlyContractor {
-//        require(converterToState[_converter] == ConverterState.PENDING_APPROVAL);
-//
-//        uint[] memory conversionIds = converterToConversionIDs[_converter];
-//        uint refundAmount = 0;
-//
-//        for(uint i=0; i<conversionIds.length; i++) {
-//            DonationEther storage d = donations[conversionIds[i]];
-//            if(d.state == ConversionState.PENDING_APPROVAL) {
-//                refundAmount = refundAmount.add(d.amount);
-//                d.state = ConversionState.REJECTED;
-//            }
-//        }
-//
-//        if(refundAmount > 0) {
-//            _converter.transfer(refundAmount);
-//        }
-//    }
 }
