@@ -36,7 +36,7 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
      * counters[7] = TOKENS_SOLD
      * counters[8] = TOTAL_BOUNTY
      */
-    uint [] counters;
+    uint [] public counters;
 
     uint256 expiryConversionInHours; // How long converter can be pending before it will be automatically rejected and funds will be returned to convertor (hours)
 

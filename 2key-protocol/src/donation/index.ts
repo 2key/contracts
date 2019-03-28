@@ -53,6 +53,18 @@ export default class DonationCampaign implements IDonationCampaign {
 
     /**
      *
+     * @param campaign
+     * @returns {Promise<any>}
+     * @private
+     */
+    async _getDonationConversionHandlerInstance(campaign: any): Promise<any> {
+        const donationInstance = await this._getCampaignInstance(campaign);
+        const donationConversionHandlerInstance = await promisify(donationInstance.twoKeyDonationConversionHandler, []);
+        return this.base.web3.eth.contract(acquisitionContracts.TwoKeyConversionHandler.abi).at(donationConversionHandlerInstance);
+    }
+
+    /**
+     *
      * @param {ICreateCampaign} data
      * @param {string} from
      * @param {ICreateCampaignProgress} progressCallback
@@ -64,13 +76,39 @@ export default class DonationCampaign implements IDonationCampaign {
     public create(data: ICreateCampaign, from: string, {progressCallback, gasPrice, interval, timeout = 60000}: ICreateOpts = {}): Promise<any> {
         return new Promise<any>(async(resolve,reject) => {
             try {
-                let txHash: string = await this.helpers._createContract(donationContracts.TwoKeyDonationCampaign, from, {
+
+                let txHash= await this.helpers._createContract(donationContracts.TwoKeyDonationConversionHandler, from, {
+                    gasPrice,
+                    params: [
+                        data.invoiceToken.tokenName,
+                        data.invoiceToken.tokenSymbol
+                    ],
+                    progressCallback
+                });
+
+                const donationConversionHandlerReceipt = await this.utils.getTransactionReceiptMined(txHash, {
+                    web3: this.base.web3,
+                    interval,
+                    timeout
+                });
+                if (donationConversionHandlerReceipt.status !== '0x1') {
+                    reject(donationConversionHandlerReceipt);
+                    return;
+                }
+                const donationConversionHandlerAddress = donationConversionHandlerReceipt && donationConversionHandlerReceipt.contractAddress;
+                if (progressCallback) {
+                    progressCallback('TwoKeyDonationConversionHandler', true, donationConversionHandlerAddress);
+                }
+                console.log('Conversion Handler for Donation Campaign created', donationConversionHandlerAddress);
+
+
+
+
+                txHash = await this.helpers._createContract(donationContracts.TwoKeyDonationCampaign, from, {
                     gasPrice,
                     params: [
                         data.moderator,
                         data.campaignName,
-                        data.invoiceToken.tokenName,
-                        data.invoiceToken.tokenSymbol,
                         [
                             this.utils.toWei(data.maxReferralRewardPercent),
                             data.campaignStartTime,
@@ -84,6 +122,7 @@ export default class DonationCampaign implements IDonationCampaign {
                         data.isKYCRequired,
                         data.acceptsFiat,
                         this.base.twoKeySingletonesRegistry.address,
+                        donationConversionHandlerAddress,
                         data.incentiveModel
                     ],
                     progressCallback,
@@ -119,10 +158,11 @@ export default class DonationCampaign implements IDonationCampaign {
                     progressCallback('SetPublicLinkKey', true, campaignPublicLinkKey);
                 }
 
-                txHash = await promisify(this.base.twoKeyCampaignValidator.validateDonationCampaign,[campaignAddress,this.nonSingletonsHash,{from}]);
+                txHash = await promisify(this.base.twoKeyCampaignValidator.validateDonationCampaign,[campaignAddress, donationConversionHandlerAddress, this.nonSingletonsHash,{from}]);
                 if (progressCallback) {
                     progressCallback('ValidateCampaign', false, txHash);
                 }
+
                 await this.utils.getTransactionReceiptMined(txHash, {
                     web3: this.base.web3,
                     interval,
@@ -517,15 +557,8 @@ export default class DonationCampaign implements IDonationCampaign {
     public getDonation(campaignAddress: string, donationId: number, from: string) : Promise<IDonation> {
         return new Promise<IDonation>(async(resolve,reject) => {
             try {
-                let donationCampaignInstance = await this._getCampaignInstance(campaignAddress);
-                let data = await promisify(donationCampaignInstance.getDonation,[donationId,{from}]);
-                /**
-                 donator: string,
-                 donationAmount: number
-                 donationTime: number,
-                 bountyEthWei: number,
-                 bounty2key: number
-                 */
+                let donationCampaignConversionHandlerInstance = await this._getDonationConversionHandlerInstance(campaignAddress);
+                let data = await promisify(donationCampaignConversionHandlerInstance.getDonation,[donationId,{from}]);
 
                 let states = ["PENDING_APPROVAL", "APPROVED", "EXECUTED", "REJECTED", "CANCELLED_BY_CONVERTER"];
 
@@ -563,9 +596,9 @@ export default class DonationCampaign implements IDonationCampaign {
     public approveConverter(campaignAddress: string, converter: string, from:string) : Promise<string> {
         return new Promise(async(resolve,reject) => {
             try {
-                let campaignInstance = await this._getCampaignInstance(campaignAddress);
+                let donationCampaignConversionHandlerInstance = await this._getDonationConversionHandlerInstance(campaignAddress);
                 //Bear in mind this can only be done by Contractor
-                let txHash = await promisify(campaignInstance.approveConverter,[converter,{from}]);
+                let txHash = await promisify(donationCampaignConversionHandlerInstance.approveConverter,[converter,{from}]);
                 resolve(txHash);
             } catch (e) {
                 reject(e);

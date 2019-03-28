@@ -6,8 +6,9 @@ const TwoKeyAcquisitionLogicHandler = artifacts.require('TwoKeyAcquisitionLogicH
 const TwoKeyRegistry = artifacts.require('TwoKeyRegistry');
 const TwoKeySingletonesRegistry = artifacts.require('TwoKeySingletonesRegistry');
 const TwoKeyCampaignValidator = artifacts.require('TwoKeyCampaignValidator');
-const TwoKeyDonationCampaign = artifacts.require('TwoKeyDonationCampaign');
 const TwoKeyEconomy = artifacts.require('TwoKeyEconomy');
+const TwoKeyDonationCampaign = artifacts.require('TwoKeyDonationCampaign');
+const TwoKeyDonationConversionHandler = artifacts.require('TwoKeyDonationConversionHandler');
 
 const Call = artifacts.require('Call');
 const IncentiveModels = artifacts.require('IncentiveModels');
@@ -42,24 +43,29 @@ module.exports = function deploy(deployer) {
             )
             .then(() => TwoKeyAcquisitionCampaignERC20.deployed())
             .then(() => true)
+            .then(() => deployer.deploy(TwoKeyDonationConversionHandler,
+                'Nikoloken',
+                'NTKN',
+                ))
             .then(() => deployer.link(IncentiveModels, TwoKeyDonationCampaign))
             .then(() => deployer.link(Call, TwoKeyDonationCampaign))
             .then(() => deployer.deploy(TwoKeyDonationCampaign,
                 json.TwoKeyAdmin[network_id].Proxy,
                 'Donation for Something',
-                'Nikoloken',
-                'NTKN',
-                [5,
-                12345,
-                1231112,
-                10000,
-                100000000,
-                10000000000000,
-                5],
+                [
+                    5,
+                    12345,
+                    1231112,
+                    10000,
+                    100000000,
+                    10000000000000,
+                    5
+                ],
                 false,
                 false,
                 false,
                 TwoKeySingletonesRegistry.address,
+                TwoKeyDonationConversionHandler.address,
                 0
                 ))
             .then(async () => {
@@ -73,12 +79,14 @@ module.exports = function deploy(deployer) {
                                     TwoKeyConversionHandler.address,
                                     TwoKeyAcquisitionLogicHandler.address,
                                     TwoKeyDonationCampaign.address,
+                                    TwoKeyDonationConversionHandler.address
                                 ],
                                 [
-                                    '0x54574f5f4b45595f4143515549534954494f4e5f43414d504149474e00000000',
-                                    '0x54574f5f4b45595f434f4e56455253494f4e5f48414e444c4552000000000000',
-                                    '0x54574f5f4b45595f4143515549534954494f4e5f4c4f4749435f48414e444c45',
-                                    '0x54776f4b6579446f6e6174696f6e43616d706169676e00000000000000000000',
+                                    '0x54776f4b65794163717569736974696f6e43616d706169676e00000000000000', //TwoKeyAcquisitionCampaign
+                                    '0x54776f4b6579436f6e76657273696f6e48616e646c6572000000000000000000', //TwoKeyConversionHandler
+                                    '0x54776f4b65794163717569736974696f6e4c6f67696348616e646c6572000000', //TwoKeyAcquisitionLogicHandler
+                                    '0x54776f4b6579446f6e6174696f6e43616d706169676e00000000000000000000', //TwoKeyDonationCampaign
+                                    '0x54776f4b6579446f6e6174696f6e436f6e76657273696f6e48616e646c657200'  //TwoKeyDonationConversionHandler
                                 ]
                             );
                         resolve(txHash);

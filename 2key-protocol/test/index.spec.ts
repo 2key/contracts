@@ -870,7 +870,7 @@ describe('TwoKeyProtocol', () => {
     }).timeout(60000);
 
     it('should approve converter', async () => {
-        console.log('Test where contractor / moderator can approve converter to execute lockup');
+        console.log('Test where contractor can approve converter to execute lockup');
         const {web3, address} = web3switcher.aydnep();
         from = address;
         twoKeyProtocol.setWeb3({
