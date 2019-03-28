@@ -226,8 +226,11 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         ITwoKeyDonationConversionHandler(twoKeyDonationConversionHandler).createDonation(msg.sender, msg.value);
     }
 
-    function convertFiat() public goalValidator onlyInDonationLimit {
-
+    function convertFiat(address _converter, uint _fiatAmount) public goalValidator onlyInDonationLimit {
+        require(acceptsFiat == true); //Validate that campaign accepts fiat conversions
+        //In case fiat conversion we don't support referral rewards
+        // Validate that the sender is either _converter or trusted maintainer
+        require(msg.sender == _converter || twoKeyEventSource.isAddressMaintainer(msg.sender));
     }
 
     /**

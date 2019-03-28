@@ -226,7 +226,7 @@ export class TwoKeyProtocol {
         };
 
         this.Helpers = new Helpers(this.twoKeyBase);
-        this.ERC20 = new ERC20(this.twoKeyBase, this.Helpers);
+        this.ERC20 = new ERC20(this.twoKeyBase, this.Helpers, this.Utils);
         this.Utils = new Index(this.twoKeyBase, this.Helpers);
         this.PlasmaEvents = new PlasmaEvents(this.twoKeyBase, this.Helpers, this.Utils);
         this.TwoKeyExchangeContract = new TwoKeyExchangeContract(this.twoKeyBase, this.Helpers, this.Utils);
