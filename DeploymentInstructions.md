@@ -5,6 +5,7 @@ This is readme file to describe necessary actions in order to redeploy
 
 To disallow deploying not working code, in order to deploy our tests must pass.
 
+
 In order to deploy contracts make sure you have in the root directory 
 file named `accountsConfig.json`. If not, create one with the following:
 ```
@@ -16,11 +17,13 @@ file named `accountsConfig.json`. If not, create one with the following:
 }
 ```
 
-Second:
+If you're deploying with Ledger, the config file will be just used for the testing on dev-local and plasma deployment.
+
+After this is done, run this sequence of commands:
 ```
 yarn run geth:reset (Will run docker instance)
-yarn run deploy --migrate dev-local,plasma-azure --reset
 yarn run test:one 2key-protocol/test/sendEth.spec.ts
+yarn run deploy --migrate dev-local,plasma-azure --reset
 yarn run test:one 2key-protocol/test/congressVote.spec.ts
 yarn run test
 ```
@@ -29,6 +32,12 @@ After all tests pass you'll have to run one of deploy commands depending of
 deployment type and network deploying to.
 
 Network names can be found in truffle.js file inside root of the repository.
+The ones we use most often are:
+* `public.test.k8s-hdwallet` - deploying to ropsten network with hdwallet
+* `public.test.k8s` - deploying to ropsten network with ledger
+* `plasma-azure` - Plasma azure network
+* `dev-local` - Docker container used as development environment
+
 
 ##### Soft redeploy
 If there have been only changes in 2key-protocol, or in the non-singleton contracts,
@@ -48,7 +57,7 @@ If there have been changes in core singleton contracts, we should hard redeploy 
 which means all the storage will be lost and will require db wipe on the backend side.
 
 ```
-yarn run deploy <network1>,<network2>
+yarn run deploy <network1>,<network2> --reset
 ```
 
 
