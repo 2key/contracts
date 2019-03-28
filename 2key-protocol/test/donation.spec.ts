@@ -51,8 +51,9 @@ let minDonationAmount = 0.001;
 let maxDonationAmount = 1000;
 let campaignGoal = 1000000000;
 let conversionQuota = 5;
-let isKYCRequired = false;
+let isKYCRequired = true;
 let shouldConvertToRefer = false;
+let acceptsFiat = false;
 let incentiveModel = 2;
 
 let campaignAddress: string;
@@ -81,6 +82,7 @@ let campaign: ICreateCampaign = {
     conversionQuota,
     isKYCRequired,
     shouldConvertToRefer,
+    acceptsFiat,
     incentiveModel
 };
 
@@ -274,38 +276,36 @@ describe('TwoKeyDonationCampaign', () => {
    }).timeout(60000);
 
 
-    it('should visit before donate', async() => {
-        const {web3, address} = web3switcher.aydnep();
+    it('should approve converter if KYC is required', async() => {
+        const {web3, address} = web3switcher.deployer();
         from = address;
-        twoKeyProtocol.setWeb3({
+        twoKeyProtocol = new TwoKeyProtocol({
             web3,
             networks: {
                 mainNetId,
                 syncTwoKeyNetId,
             },
             eventsNetUrl,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
         });
-        let txHash = await twoKeyProtocol.DonationCampaign.visit(campaignAddress, links.uport);
-        console.log(txHash);
-    }).timeout(60000);
 
-    it('should join and donate', async () => {
-        let txHash = await twoKeyProtocol.DonationCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(10*minDonationAmount, 'ether'), links.uport, from);
-        console.log(txHash);
-        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-        expect(txHash).to.be.a('string');
-    }).timeout(60000);
-
-
-    it('should get donation', async() => {
-        let donation = await twoKeyProtocol.DonationCampaign.getDonation(campaignAddress,0,from);
-        console.log(donation);
+        if(isKYCRequired == false) {
+            console.log('KYC is not required for this campaign. All converters are approved automatically');
+        } else {
+            let txHash = await twoKeyProtocol.DonationCampaign.approveConverter(campaignAddress, env.TEST4_ADDRESS,from);
+            await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+            console.log('Converter is approved with transaction: ' + txHash);
+        }
     }).timeout(60000);
 
     it('should get referrers to converter for conversions', async() => {
         let referrersForTest4 = await twoKeyProtocol.DonationCampaign.getRefferrersToConverter(campaignAddress, env.TEST4_ADDRESS, from);
         console.log(referrersForTest4);
+    }).timeout(60000);
+
+    it('should get donation', async() => {
+        let donation = await twoKeyProtocol.DonationCampaign.getDonation(campaignAddress,0,from);
+        console.log(donation);
     }).timeout(60000);
 
 });

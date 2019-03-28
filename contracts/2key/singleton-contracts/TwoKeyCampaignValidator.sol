@@ -8,6 +8,8 @@ import "../interfaces/ITwoKeyAcquisitionCampaignStateVariables.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyEventSourceEvents.sol";
 import "../interfaces/ITwoKeyCampaignPublicAddresses.sol";
+import "../interfaces/ITwoKeyDonationCampaign.sol";
+import "../interfaces/ITwoKeyDonationCampaignFetchAddresses.sol";
 
 
 /*******************************************************************************************************************
@@ -19,6 +21,8 @@ import "../interfaces/ITwoKeyCampaignPublicAddresses.sol";
  *            *  - TwoKeyAcquisitionCampaign          *
  *            *  - TwoKeyAcquisitionLogicHandler      *
  *            *  - TwoKeyConversionHandler            *
+              *  - TwoKeyDonationCampaign             *
+              *  - TwoKeyDonationConversionHandler    *
  *            *****************************************
  *                               |
  *                               |
@@ -111,21 +115,29 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
      * @param campaign is the campaign address
      * @dev Validates all the required stuff, if the campaign is not validated, it can't update our singletones
      */
-    function validateDonationCampaign(address campaign, string nonSingletonHash) public {
+    function validateDonationCampaign(address campaign, address donationConversionHandler, string nonSingletonHash) public {
         address contractor = ITwoKeyCampaignPublicAddresses(campaign).contractor();
         address moderator = ITwoKeyCampaignPublicAddresses(campaign).moderator();
 
         require(isCampaignValidated[campaign] == false);
         bytes memory donationCampaignCode = GetCode.at(campaign);
+        bytes memory donationConversionHandlerCode = GetCode.at(donationConversionHandler);
 
         //Validate that this bytecode is validated and added
         require(isCodeValid[donationCampaignCode] == true);
+        require(isCodeValid[donationConversionHandlerCode] == true);
+
+        require(
+            ITwoKeyDonationCampaignFetchAddresses(donationConversionHandler).twoKeyDonationCampaign() == campaign &&
+            ITwoKeyDonationCampaignFetchAddresses(campaign).twoKeyDonationConversionHandler() == donationConversionHandler
+        );
 
         //Validate that public link key is set
         require(ITwoKeyCampaignPublicAddresses(campaign).publicLinkKeyOf(contractor) != address(0));
         campaign2nonSingletonHash[campaign] = nonSingletonHash;
 
         isCampaignValidated[campaign] = true;
+
         //Get the event source
         address twoKeyEventSource = ITwoKeySingletoneRegistryFetchAddress
         (twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyEventSource");
@@ -165,7 +177,7 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
     function isConversionHandlerCodeValid(address _conversionHandler) public view returns (bool) {
         bytes memory contractCode = GetCode.at(_conversionHandler);
         require(isCodeValid[contractCode]);
-        bytes32 name = stringToBytes32("TWO_KEY_CONVERSION_HANDLER");
+        bytes32 name = stringToBytes32("TwoKeyConversionHandler");
         require(contractCodeToName[contractCode] == name);
         return true;
     }
