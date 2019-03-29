@@ -10,12 +10,13 @@ import "../interfaces/ITwoKeyConversionHandlerGetConverterState.sol";
 import "../interfaces/ITwoKeyEventSource.sol";
 import "../libraries/SafeMath.sol";
 import "../libraries/Call.sol";
+import "../Upgradeable.sol";
 
 /**
  * @author Nikola Madjarevic
  * Created at 1/15/19
  */
-contract TwoKeyAcquisitionLogicHandler {
+contract TwoKeyAcquisitionLogicHandler is Upgradeable {
 
     using SafeMath for uint256;
 
@@ -55,37 +56,46 @@ contract TwoKeyAcquisitionLogicHandler {
         _;
     }
 
-    constructor(
-        uint _minContribution,
-        uint _maxContribution,
-        uint _pricePerUnitInETHWeiOrUSD,
-        uint _campaignStartTime,
-        uint _campaignEndTime,
-        uint _maxConverterBonusPercent,
+    function setInitialParamsLogicHandler(
+        uint [] values,
         string _currency,
         address _assetContractERC20,
-        address _moderator
+        address _moderator,
+        address _contractor,
+        address _acquisitionCampaignAddress,
+        address _twoKeySingletoneRegistry,
+        address _twoKeyConversionHandler
     ) public {
-        require(_minContribution > 0,"min contribution criteria not satisfied");
-        require(_maxContribution >= _minContribution, "max contribution criteria not satisfied");
-        require(_campaignEndTime > _campaignStartTime, "campaign start time can't be greater than end time");
-        require(_maxConverterBonusPercent > 0, "max converter bonus percent should be 0");
+//        require(values[0] > 0,"min contribution criteria not satisfied");
+//        require(values[1] >= values[0], "max contribution criteria not satisfied");
+//        require(values[4] > values[3], "campaign start time can't be greater than end time");
+//        require(values[5] > 0, "max converter bonus percent should be 0");
 
-        if(_minContribution == _maxContribution) {
+        if(values[0] == values[1]) {
             isFixedInvestmentAmount = true;
         }
 
-        contractor = msg.sender;
-        minContributionETHorFiatCurrency = _minContribution;
-        maxContributionETHorFiatCurrency = _maxContribution;
-        pricePerUnitInETHWeiOrUSD = _pricePerUnitInETHWeiOrUSD;
-        campaignStartTime = _campaignStartTime;
-        campaignEndTime = _campaignEndTime;
-        maxConverterBonusPercent = _maxConverterBonusPercent;
+        minContributionETHorFiatCurrency = values[0];
+        maxContributionETHorFiatCurrency = values[1];
+        pricePerUnitInETHWeiOrUSD = values[2];
+        campaignStartTime = values[3];
+        campaignEndTime = values[4];
+        maxConverterBonusPercent = values[5];
+
         currency = _currency;
-        moderator = _moderator;
         assetContractERC20 = _assetContractERC20;
+        moderator = _moderator;
+        contractor = _contractor;
         unit_decimals = IERC20(_assetContractERC20).decimals();
+
+        twoKeyAcquisitionCampaign = _acquisitionCampaignAddress;
+        twoKeySingletoneRegistry = _twoKeySingletoneRegistry;
+        twoKeyEventSource = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry)
+        .getContractProxyAddress("TwoKeyEventSource");
+        twoKeyRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyRegistry");
+
+        ownerPlasma = plasmaOf(contractor);
+        twoKeyConversionHandler = _twoKeyConversionHandler;
     }
 
 
@@ -97,24 +107,6 @@ contract TwoKeyAcquisitionLogicHandler {
             return true;
         }
         return false;
-    }
-
-
-
-    function setTwoKeyAcquisitionCampaignContract(
-        address _acquisitionCampaignAddress,
-        address _twoKeySingletoneRegistry,
-        address _twoKeyConversionHandler
-    ) public {
-        require(twoKeyAcquisitionCampaign == address(0)); // Means it can be set only once
-        twoKeyAcquisitionCampaign = _acquisitionCampaignAddress;
-        twoKeySingletoneRegistry = _twoKeySingletoneRegistry;
-        twoKeyEventSource = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry)
-            .getContractProxyAddress("TwoKeyEventSource");
-        twoKeyRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyRegistry");
-
-        ownerPlasma = plasmaOf(contractor);
-        twoKeyConversionHandler = _twoKeyConversionHandler;
     }
 
 

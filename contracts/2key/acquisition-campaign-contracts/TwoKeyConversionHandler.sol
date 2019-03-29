@@ -11,13 +11,14 @@ import "../interfaces/IUpgradableExchange.sol";
 import "../interfaces/ITwoKeyEventSource.sol";
 import "../interfaces/ITwoKeyBaseReputationRegistry.sol";
 import "../libraries/SafeMath.sol";
+import "../Upgradeable.sol";
 
 /**
  * @notice Contract to handle logic related for Acquisition
  * @dev There will be 1 conversion handler per Acquisition Campaign
  * @author Nikola Madjarevic
  */
-contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterStates {
+contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyConverterStates {
 
     using SafeMath for uint256;
 
@@ -36,22 +37,21 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
      * counters[7] = TOKENS_SOLD
      * counters[8] = TOTAL_BOUNTY
      */
-    uint [] public counters;
+    uint [] counters;
 
     uint256 expiryConversionInHours; // How long converter can be pending before it will be automatically rejected and funds will be returned to convertor (hours)
 
     Conversion[] conversions;
+
+
+    mapping(bytes32 => address[]) stateToConverter; //State to all converters in that state
     mapping(address => uint[]) converterToHisConversions;
 
-    //State to all converters in that state
-    mapping(bytes32 => address[]) stateToConverter;
-
-    //Converter to his state
-    mapping(address => ConverterState) converterToState;
+    mapping(address => ConverterState) converterToState; //Converter to his state
     mapping(address => bool) isConverterAnonymous;
     mapping(address => address[]) converterToLockupContracts;
-
     mapping(uint => address) conversionId2LockupAddress;
+
 
     address twoKeyEventSource;
     address twoKeyAcquisitionCampaignERC20;
@@ -82,11 +82,13 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
         bool isConversionFiat;
     }
 
+
     /// @notice Modifier which allows only TwoKeyAcquisitionCampaign to issue calls
     modifier onlyTwoKeyAcquisitionCampaign() {
         require(msg.sender == address(twoKeyAcquisitionCampaignERC20));
         _;
     }
+
 
     modifier onlyContractorOrMaintainer {
         require(msg.sender == address(contractor) || ITwoKeyEventSource(twoKeyEventSource).isAddressMaintainer(msg.sender));
@@ -100,46 +102,28 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
     }
 
 
-    /**
-     * @notice Contstructor of the conversion handler contract
-     * @param _tokenDistributionDate is the date of token distribution
-     * @param _maxDistributionDateShiftInDays is the maximum distribution shift in days
-     * @param _bonusTokensVestingMonths is the number of bonus token vesting months
-     * @param _bonusTokensVestingStartShiftInDaysFromDistributionDate is
-     */
-    constructor(
-        uint _expiryConversionInHours,
-        uint _tokenDistributionDate, // January 1st 2019
-        uint _maxDistributionDateShiftInDays, // 180 days
-        uint _bonusTokensVestingMonths, // 6 months
-        uint _bonusTokensVestingStartShiftInDaysFromDistributionDate
-    ) public {
-        counters = new uint[](9);
-        expiryConversionInHours = _expiryConversionInHours;
-        tokenDistributionDate = _tokenDistributionDate;
-        maxDistributionDateShiftInDays = _maxDistributionDateShiftInDays;
-        bonusTokensVestingMonths = _bonusTokensVestingMonths;
-        bonusTokensVestingStartShiftInDaysFromDistributionDate = _bonusTokensVestingStartShiftInDaysFromDistributionDate;
-    }
-
-    /// @notice Method which will be called inside constructor of TwoKeyAcquisitionCampaignERC20
-    /// @param _twoKeyAcquisitionCampaignERC20 is the address of TwoKeyAcquisitionCampaignERC20 contract
-    /// @param _contractor is the address of the contractor
-    function setTwoKeyAcquisitionCampaignERC20(
+    function setInitialParamsConversionHandler(
+        uint [] values,
         address _twoKeyAcquisitionCampaignERC20,
         address _contractor,
         address _assetContractERC20,
         address _twoKeyEventSource,
-        address _twoKeyBaseReputationRegistry) public {
-        require(twoKeyAcquisitionCampaignERC20 == address(0));
+        address _twoKeyBaseReputationRegistry
+    ) public {
+        counters = new uint[](9);
+
+        expiryConversionInHours = values[0];
+        tokenDistributionDate = values[1];
+        maxDistributionDateShiftInDays = values[2];
+        bonusTokensVestingMonths = values[3];
+        bonusTokensVestingStartShiftInDaysFromDistributionDate = values[4];
+
         twoKeyAcquisitionCampaignERC20 = _twoKeyAcquisitionCampaignERC20;
         contractor = _contractor;
         assetContractERC20 =_assetContractERC20;
         twoKeyEventSource = _twoKeyEventSource;
         twoKeyBaseReputationRegistry = _twoKeyBaseReputationRegistry;
-
     }
-
 
     /**
      * given the total payout, calculates the moderator fee
@@ -150,6 +134,7 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
         uint256 fee = _conversionAmountETHWei.mul(ITwoKeyEventSource(twoKeyEventSource).getTwoKeyDefaultIntegratorFeeFromAdmin()).div(100);
         return fee;
     }
+
 
     /// @notice Support function to create conversion
     /// @dev This function can only be called from TwoKeyAcquisitionCampaign contract address
@@ -206,6 +191,7 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
         }
     }
 
+
     /**
      * @notice Function to perform all the logic which has to be done when we're performing conversion
      * @param _conversionId is the id
@@ -261,6 +247,7 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
         counters[7] = counters[7].add(totalUnits); //update sold tokens once conversion is executed
     }
 
+
     /**
      * @notice Function to get conversion details by id
      * @param conversionId is the id of conversion
@@ -302,12 +289,14 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
         isConverterAnonymous[_converter] = _isAnonymous;
     }
 
+
     /// @notice Function to get all pending converters
     /// @dev view function - no gas cost & only Contractor or Moderator can call this function - otherwise will revert
     /// @return array of pending converter addresses
     function getAllPendingConverters() public view onlyContractorOrMaintainer returns (address[]) {
         return (stateToConverter[bytes32("PENDING_APPROVAL")]);
     }
+
 
     /// @notice Function to get all rejected converters
     /// @dev view function - no gas cost & only Contractor or Moderator can call this function - otherwise will revert
@@ -364,6 +353,7 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
         converterToState[_converter] = ConverterState.APPROVED;
     }
 
+
     /// @notice Function where we're going to move state of conversion from pending to rejected
     /// @dev private function, will be executed in another one
     /// @param _converter is the address of converter
@@ -379,8 +369,8 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
     /// @param _converter is the address of converter
     function approveConverter(address _converter) public onlyContractorOrMaintainer {
         uint len = converterToHisConversions[_converter].length;
-        require(len> 0);
-        require(converterToState[_converter] == ConverterState.PENDING_APPROVAL || converterToState[_converter] == ConverterState.REJECTED);
+//        require(>len 0);
+        require(converterToState[_converter] == ConverterState.PENDING_APPROVAL);
         for(uint i=0; i<len; i++) {
             uint conversionId = converterToHisConversions[_converter][i];
             Conversion memory c = conversions[conversionId];
@@ -423,6 +413,7 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
         }
     }
 
+
     /**
      * @notice Function to get all conversion ids for the converter
      * @param _converter is the address of the converter
@@ -433,6 +424,7 @@ contract TwoKeyConversionHandler is TwoKeyConversionStates, TwoKeyConverterState
 //        require(msg.sender == contractor || ITwoKeyEventSource(twoKeyEventSource).isAddressMaintainer(msg.sender) || msg.sender == _converter);
         return converterToHisConversions[_converter];
     }
+
 
     /**
      * @notice Function to get number of conversions

@@ -463,11 +463,11 @@ describe('TwoKeyProtocol', () => {
 
     let campaignData;
 
-    it('should check a user info', async () => {
-        const isAddressRegistered = await twoKeyProtocol.Registry.checkIfAddressIsRegistered(from);
-        console.log(`Address ${from} ${isAddressRegistered ? 'REGISTERED' : 'NOT REGISTERED'} in TwoKeyReg`);
-        expect(isAddressRegistered).to.true;
-    }).timeout(60000);
+    // it('should check a user info', async () => {
+    //     const isAddressRegistered = await twoKeyProtocol.Registry.checkIfAddressIsRegistered(from);
+    //     console.log(`Address ${from} ${isAddressRegistered ? 'REGISTERED' : 'NOT REGISTERED'} in TwoKeyReg`);
+    //     expect(isAddressRegistered).to.true;
+    // }).timeout(60000);
 
 
     it('should create a new campaign Acquisition Contract', async () => {

@@ -11,6 +11,12 @@ interface ITwoKeySingletonesRegistry {
     */
     event ProxyCreated(address proxy);
 
+    event ProxyForCampaign(
+        address proxyLogicHandler,
+        address proxyConversionHandler,
+        address proxyAcquisitionCampaign
+    );
+
     /**
     * @dev This event will be emitted every time a new implementation is registered
     * @param version representing the version name of the registered implementation

@@ -24,21 +24,23 @@ module.exports = function deploy(deployer) {
         const { network_id } = deployer;
         let x = 1;
         let json = JSON.parse(fs.readFileSync(proxyFile, {encoding: 'utf-8'}));
-        deployer.deploy(TwoKeyConversionHandler,
-            12345, 1012019, 180, 6, 180)
+        deployer.deploy(TwoKeyConversionHandler
+            // [12345, 1012019, 180, 6, 180]
+        )
             .then(() => TwoKeyConversionHandler.deployed())
             .then(() => deployer.link(Call, TwoKeyAcquisitionLogicHandler))
             .then(() => deployer.link(Call, TwoKeyAcquisitionCampaignERC20))
-            .then(() => deployer.deploy(TwoKeyAcquisitionLogicHandler,
-                12, 15, 1, 12345, 15345, 5, 'USD',
-                TwoKeyEconomy.address, json.TwoKeyAdmin[network_id].Proxy))
-            .then(() => deployer.deploy(TwoKeyAcquisitionCampaignERC20,
-                TwoKeySingletonesRegistry.address,
-                TwoKeyAcquisitionLogicHandler.address,
-                TwoKeyConversionHandler.address,
-                json.TwoKeyAdmin[network_id].Proxy,
-                TwoKeyEconomy.address,
-                [5, 1],
+            .then(() => deployer.deploy(TwoKeyAcquisitionLogicHandler
+                // [12, 15, 1, 12345, 15345, 5], 'USD',
+                // TwoKeyEconomy.address, json.TwoKeyAdmin[network_id].Proxy
+                ))
+            .then(() => deployer.deploy(TwoKeyAcquisitionCampaignERC20
+                // TwoKeySingletonesRegistry.address,
+                // TwoKeyAcquisitionLogicHandler.address,
+                // TwoKeyConversionHandler.address,
+                // json.TwoKeyAdmin[network_id].Proxy,
+                // TwoKeyEconomy.address,
+                // [5, 1],
                 )
             )
             .then(() => TwoKeyAcquisitionCampaignERC20.deployed())
@@ -68,6 +70,25 @@ module.exports = function deploy(deployer) {
                 TwoKeyDonationConversionHandler.address,
                 0
                 ))
+            .then(async () => {
+                console.log("... Adding implementation versions of Acquisition campaigns");
+                await new Promise(async(resolve,reject) => {
+                    try {
+                        let txHash = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address)
+                            .addVersion('TwoKeyAcquisitionLogicHandler', '1.0', TwoKeyAcquisitionLogicHandler.address);
+
+                        txHash = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address)
+                            .addVersion('TwoKeyConversionHandler', '1.0', TwoKeyConversionHandler.address);
+
+                        txHash = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address)
+                            .addVersion('TwoKeyAcquisitionCampaignERC20', '1.0', TwoKeyAcquisitionCampaignERC20.address);
+
+                        resolve(txHash);
+                    } catch (e) {
+                        reject(e);
+                    }
+                })
+            })
             .then(async () => {
                 console.log("... Adding TwoKeyAcquisitionCampaign bytecodes to be valid in the TwoKeyValidator contract");
                 await new Promise(async (resolve, reject) => {

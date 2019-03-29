@@ -1,9 +1,13 @@
 pragma solidity ^0.4.24;
 
-import '../interfaces/ITwoKeySingletonesRegistry.sol';
 import '../Upgradeable.sol';
 import "../UpgradabilityProxy.sol";
 import "../MaintainingPattern.sol";
+
+import '../interfaces/ITwoKeySingletonesRegistry.sol';
+import "../interfaces/IHandleCampaignDeployment.sol";
+import "../interfaces/ITwoKeyCampaignValidator.sol";
+
 
 /**
  * @author Nikola Madjarevic
@@ -19,6 +23,14 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
     mapping (string => address) nonUpgradableContractToAddress;
 
     address[] allVerified2keyContracts;
+
+    struct UserCampaigns{
+        address [] acquisitionCampaigns;
+        address [] acquisitionLogicHandlers;
+        address [] acquisitionConversionHandlers;
+    }
+
+    mapping(address => UserCampaigns) user2campaigns;
 
     /**
      * @notice Calling super constructor from maintaining pattern
@@ -47,7 +59,8 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
      * @param implementation representing the address of the new implementation to be registered
      */
     function addVersion(string contractName, string version, address implementation) public onlyMaintainer {
-        require(versions[contractName][version] == 0x0);
+//        require(versions[contractName][version] == 0x0);
+        //TODO: Uncomment this line once we're done
         versions[contractName][version] = implementation;
         contractNameToLatestVersionName[contractName] = version;
         emit VersionAdded(version, implementation);
@@ -97,6 +110,63 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
         emit ProxyCreated(proxy);
         return proxy;
     }
+
+    function createProxiesForAcquisitions(
+        address[] addresses,
+        uint[] values_conversion,
+        uint[] values_logic_handler,
+        uint[] values,
+        string _currency
+    ) public payable {
+        // Deploy proxies for all 3 contracts
+        UpgradeabilityProxy proxyAcquisition = new UpgradeabilityProxy("TwoKeyAcquisitionCampaignERC20", "1.0");
+        Upgradeable(proxyAcquisition).initialize.value(msg.value)(msg.sender);
+
+
+        UpgradeabilityProxy proxyConversions = new UpgradeabilityProxy("TwoKeyConversionHandler", "1.0");
+        Upgradeable(proxyConversions).initialize.value(msg.value)(msg.sender);
+
+
+        UpgradeabilityProxy proxyLogicHandler = new UpgradeabilityProxy("TwoKeyAcquisitionLogicHandler", "1.0");
+        Upgradeable(proxyLogicHandler).initialize.value(msg.value)(msg.sender);
+
+
+        IHandleCampaignDeployment(proxyConversions).setInitialParamsConversionHandler(
+            values_conversion,
+            proxyAcquisition,
+            msg.sender,
+            addresses[0], //ERC20 address
+            getContractProxyAddress("TwoKeyEventSource"),
+            getContractProxyAddress("TwoKeyBaseReputationRegistry")
+        );
+
+        IHandleCampaignDeployment(proxyLogicHandler).setInitialParamsLogicHandler(
+            values_logic_handler,
+            _currency,
+            addresses[0], //asset contract erc20
+            addresses[1], // moderator
+            msg.sender,
+            proxyAcquisition,
+            address(this),
+            proxyConversions
+        );
+
+        IHandleCampaignDeployment(proxyAcquisition).setInitialParamsCampaign(
+            address(this),
+            address(proxyLogicHandler),
+            address(proxyConversions),
+            addresses[1], //moderator
+            addresses[0], //asset contract
+            msg.sender, //contractor
+            values
+        );
+
+        ITwoKeyCampaignValidator(getContractProxyAddress("TwoKeyCampaignValidator"))
+            .validateAcquisitionCampaign(proxyAcquisition, "non-singleton-hash");
+
+        emit ProxyForCampaign(proxyLogicHandler, proxyConversions, proxyAcquisition);
+    }
+
 
     /**
      * @notice Function to return all 2key running contract addresses

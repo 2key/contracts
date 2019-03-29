@@ -45,6 +45,8 @@ import {IPlasmaEvents} from './plasma/interfaces';
 import Sign from './sign';
 import TwoKeyCampaignValidator from './campaignValidator';
 import DonationCampaign from './donation';
+import {ITwoKeySingletonRegistry} from "./singletonRegistry/interfaces";
+import TwoKeySingletonRegistry from "./singletonRegistry";
 // const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 
 const TwoKeyDefaults = {
@@ -111,6 +113,7 @@ export class TwoKeyProtocol {
     public PlasmaEvents: IPlasmaEvents;
     public BaseReputation: ITwoKeyBaseReputationRegistry;
     public CampaignValidator: ITwoKeyCampaignValidator;
+    public SingletonRegistry: ITwoKeySingletonRegistry;
     private AcquisitionSubmodule: any;
     private DonationSubmodule: any;
     private _log: any;
@@ -192,7 +195,6 @@ export class TwoKeyProtocol {
         this.twoKeyIncentiveModel = this.web3.eth.contract(singletons.IncentiveModels.abi).at(getDeployedAddress('IncentiveModels', this.networks.mainNetId));
         this.twoKeyBaseReputationRegistry = this.web3.eth.contract(singletons.TwoKeyBaseReputationRegistry.abi).at(getDeployedAddress('TwoKeyBaseReputationRegistry', this.networks.mainNetId));
         this.twoKeyCampaignValidator = this.web3.eth.contract(singletons.TwoKeyCampaignValidator.abi).at(getDeployedAddress('TwoKeyCampaignValidator', this.networks.mainNetId));
-
         this.ipfsR = ipfsClient(ipfsGW);
         this.ipfsW = ipfsClient(ipfsAPI);
 
@@ -235,11 +237,12 @@ export class TwoKeyProtocol {
         this.Registry = new TwoKerRegistry(this.twoKeyBase, this.Helpers, this.Utils);
         this.BaseReputation = new TwoKeyBaseReputationRegistry(this.twoKeyBase, this.Helpers, this.Utils);
         this.CampaignValidator = new TwoKeyCampaignValidator(this.twoKeyBase, this.Helpers, this.Utils);
+        this.SingletonRegistry = new TwoKeySingletonRegistry(this.twoKeyBase, this.Helpers, this.Utils);
         // TODO: Add here replace AcquisitionSubmodule mechanism
 
         this.AcquisitionCampaign = this.AcquisitionSubmodule
-            ? new this.AcquisitionSubmodule(this.twoKeyBase, this.Helpers, this.Utils, this.ERC20, Sign)
-            : new AcquisitionCampaign(this.twoKeyBase, this.Helpers, this.Utils, this.ERC20, Sign);
+            ? new this.AcquisitionSubmodule(this.twoKeyBase, this.Helpers, this.Utils, this.ERC20, this.SingletonRegistry, Sign)
+            : new AcquisitionCampaign(this.twoKeyBase, this.Helpers, this.Utils, this.ERC20, this.SingletonRegistry, Sign);
 
         this.DonationCampaign = this.DonationSubmodule
             ? new this.DonationSubmodule(this.twoKeyBase, this.Helpers, this.Utils, this.ERC20, Sign)
@@ -262,7 +265,7 @@ export class TwoKeyProtocol {
      */
     public setLatestAcquisition() {
         this.AcquisitionSubmodule = AcquisitionCampaign;
-        this.AcquisitionCampaign = new AcquisitionCampaign(this.twoKeyBase, this.Helpers, this.Utils, this.ERC20, Sign);
+        this.AcquisitionCampaign = new AcquisitionCampaign(this.twoKeyBase, this.Helpers, this.Utils, this.ERC20, this.SingletonRegistry, Sign);
     }
 
     /**

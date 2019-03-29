@@ -5,18 +5,19 @@ import "../campaign-mutual-contracts/TwoKeyCampaign.sol";
 
 import "../interfaces/ITwoKeyConversionHandler.sol";
 import "../interfaces/ITwoKeyAcquisitionLogicHandler.sol";
+import "../Upgradeable.sol";
+
 
 /**
  * @author Nikola Madjarevic
  * @notice Campaign which will sell ERC20 tokens
  */
-contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
+contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
 
     address public conversionHandler;
     address public twoKeyAcquisitionLogicHandler;
 
     address assetContractERC20; // Asset contract is address of ERC20 inventory
-
     mapping(address => uint256) private amountConverterSpentFiatWei;
     mapping(address => uint256) private amountConverterSpentEthWEI; // Amount converter put to the contract in Ether
     mapping(address => uint256) private unitsConverterBought; // Number of units (ERC20 tokens) bought
@@ -24,20 +25,25 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
 
     uint reservedAmountOfTokens;
 
-    constructor(
+    function setInitialParamsCampaign(
         address _twoKeySingletonesRegistry,
         address _twoKeyAcquisitionLogicHandler,
         address _conversionHandler,
         address _moderator,
         address _assetContractERC20,
+        address _contractor,
         uint [] values
     ) public {
-        contractor = msg.sender;
+        contractor = _contractor;
         moderator = _moderator;
+
+
         twoKeyEventSource = TwoKeyEventSource(ITwoKeySingletoneRegistryFetchAddress(_twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyEventSource"));
         twoKeyEconomy = ITwoKeySingletoneRegistryFetchAddress(_twoKeySingletonesRegistry).getNonUpgradableContractAddress("TwoKeyEconomy");
-        ownerPlasma = twoKeyEventSource.plasmaOf(msg.sender);
+
+        ownerPlasma = twoKeyEventSource.plasmaOf(contractor);
         received_from[ownerPlasma] = ownerPlasma;
+        totalSupply_ = 1000000;
         balances[ownerPlasma] = totalSupply_;
         conversionQuota = values[1];
 
@@ -47,21 +53,6 @@ contract TwoKeyAcquisitionCampaignERC20 is TwoKeyCampaign {
         assetContractERC20 = _assetContractERC20;
 
         maxReferralRewardPercent = values[0];
-
-        ITwoKeyConversionHandler(conversionHandler).setTwoKeyAcquisitionCampaignERC20(
-            address(this),
-            contractor,
-            _assetContractERC20,
-            address(twoKeyEventSource),
-            ITwoKeySingletoneRegistryFetchAddress(_twoKeySingletonesRegistry)
-                .getContractProxyAddress("TwoKeyBaseReputationRegistry")
-        );
-
-        ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).setTwoKeyAcquisitionCampaignContract(
-            address(this),
-            _twoKeySingletonesRegistry,
-            conversionHandler
-        );
     }
 
     /**

@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24; 
+pragma solidity ^0.4.24;
 
 import './TwoKeyEconomy.sol';
 import './TwoKeyUpgradableExchange.sol';
@@ -23,7 +23,7 @@ contract TwoKeyAdmin is Upgradeable {
 	uint twoKeyIntegratorDefaultFeePercent; // 2% is default value for this
 	uint twoKeyNetworkTaxPercent;
 
-    bool private initialized = false;
+    bool initialized = false;
 
     /// @notice Modifier will revert if calling address is not a member of electorateAdmins
 	modifier onlyTwoKeyCongress {
@@ -130,23 +130,23 @@ contract TwoKeyAdmin is Upgradeable {
 		return completed;
 	}
 
-	
+
 	/// View function - doesn't cost any gas to be executed
-	/// @notice Function to fetch twoKeyEconomy contract address 
-	/// @return _economy is address of twoKeyEconomy contract 
+	/// @notice Function to fetch twoKeyEconomy contract address
+	/// @return _economy is address of twoKeyEconomy contract
     function getTwoKeyEconomy() external view returns(address)  {
     	return address(twoKeyEconomy);
     }
-	
+
 	/// View function - doesn't cost any gas to be executed
-	/// @notice Function to fetch twoKeyReg contract address 
+	/// @notice Function to fetch twoKeyReg contract address
 	/// @return _address is address of twoKeyReg contract
     function getTwoKeyReg() external view returns(address)  {
     	return address(twoKeyReg);
     }
 
     /// View function - doesn't cost any gas to be executed
-	/// @notice Function to fetch twoKeyUpgradableExchange contract address 
+	/// @notice Function to fetch twoKeyUpgradableExchange contract address
 	/// @return _address is address of twoKeyUpgradableExchange contract
     function getTwoKeyUpgradableExchange() external view returns(address)  {
     	return address(twoKeyUpgradableExchange);
@@ -182,4 +182,4 @@ contract TwoKeyAdmin is Upgradeable {
 		return twoKeyNetworkTaxPercent;
 	}
 
-} 
+}
