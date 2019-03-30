@@ -68,11 +68,9 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
         emit VersionAdded(version, implementation);
     }
 
-//    function addCampaignVersion(string campaignContractName, string version, address implementation) public onlyMaintainer {
-//        campaignVersions[campaignContractName][version] = implementation;
-//        contractNameToLatestVersionName = implementation;
-//    }
 
+    //TODO: Create separate method and storage to handle acquisition campaign deployments , versions, etc
+    // Because we can't mess up with versions especially since they're going to be maybe upgradable upon a handshake
     /**
      * @dev Tells the address of the implementation for a given version
      * @param version to query the implementation of
