@@ -14,19 +14,30 @@ import "../Upgradeable.sol";
  */
 contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
 
-    bool isCampaignInitialized;
+    bool isCampaignInitialized; // Once this is set to true can't be modified
 
-    address public conversionHandler;
-    address public twoKeyAcquisitionLogicHandler;
+    address public conversionHandler; // Address of conversion handler contract
+    address public twoKeyAcquisitionLogicHandler; // Address of logic handler contract
 
     address assetContractERC20; // Asset contract is address of ERC20 inventory
-    mapping(address => uint256) private amountConverterSpentFiatWei;
+    mapping(address => uint256) private amountConverterSpentFiatWei; // Amount converter spent for Fiat conversions
     mapping(address => uint256) private amountConverterSpentEthWEI; // Amount converter put to the contract in Ether
     mapping(address => uint256) private unitsConverterBought; // Number of units (ERC20 tokens) bought
     mapping(address => uint256) private referrerPlasma2cut; // Mapping representing how much are cuts in percent(0-100) for referrer address
 
-    uint reservedAmountOfTokens;
+    uint reservedAmountOfTokens; // Reserved amount of tokens for the converters who are pending approval
 
+
+    /**
+     * @notice This function is simulation for the constructor, since we're relying on proxies
+     * @param _twoKeySingletonesRegistry is the address of TwoKeySingletonsRegistry contract
+     * @param _twoKeyAcquisitionLogicHandler is the address of TwoKeyAcquisitionLogicHandler contract
+     * @param _conversionHandler is the address of TwoKeyConversionHandler contract
+     * @param _moderator is the moderator address
+     * @param _assetContractERC20 is the ERC20 contract being sold inside campaign
+     * @param _contractor is the contractor of the campaign
+     * @param values is the array containing values [maxReferralRewardPercent (in weis), conversionQuota]
+     */
     function setInitialParamsCampaign(
         address _twoKeySingletonesRegistry,
         address _twoKeyAcquisitionLogicHandler,
@@ -49,8 +60,9 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
         received_from[ownerPlasma] = ownerPlasma;
         totalSupply_ = 1000000;
         balances[ownerPlasma] = totalSupply_;
-        conversionQuota = values[1];
+
         maxReferralRewardPercent = values[0];
+        conversionQuota = values[1];
 
         twoKeySingletonesRegistry = _twoKeySingletonesRegistry;
         twoKeyAcquisitionLogicHandler = _twoKeyAcquisitionLogicHandler;
@@ -140,16 +152,6 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
         transferFrom(twoKeyEventSource.plasmaOf(msg.sender), twoKeyEventSource.plasmaOf(receiver), 1);
     }
 
-    /**
-     * @notice Method to add fungible asset to our contract
-     * @dev When user calls this method, he just says the actual amount of ERC20 he'd like to transfer to us
-     * @param _amount is the amount of ERC20 contract he'd like to give us
-     * @return true if successful, otherwise transaction will revert
-     */
-    function addUnitsToInventory(uint256 _amount) public returns (bool) {
-        require(IERC20(assetContractERC20).transferFrom(msg.sender, address(this), _amount));
-        return true;
-    }
 
     /**
      * @notice Function where converter can join and convert

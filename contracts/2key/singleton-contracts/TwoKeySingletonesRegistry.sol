@@ -137,6 +137,7 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
         Upgradeable(proxyLogicHandler).initialize.value(msg.value)(msg.sender);
 
 
+        // Set initial arguments inside Conversion Handler contract
         IHandleCampaignDeployment(proxyConversions).setInitialParamsConversionHandler(
             values_conversion,
             proxyAcquisition,
@@ -146,6 +147,7 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
             getContractProxyAddress("TwoKeyBaseReputationRegistry")
         );
 
+        // Set initial arguments inside Logic Handler contract
         IHandleCampaignDeployment(proxyLogicHandler).setInitialParamsLogicHandler(
             values_logic_handler,
             _currency,
@@ -157,6 +159,7 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
             proxyConversions
         );
 
+        // Set initial arguments inside AcquisitionCampaign contract
         IHandleCampaignDeployment(proxyAcquisition).setInitialParamsCampaign(
             address(this),
             address(proxyLogicHandler),

@@ -56,11 +56,10 @@ export default class TwoKeySingletonRegistry implements ITwoKeySingletonRegistry
                         }
                     ]);
                 let receipt = await this.utils.getTransactionReceiptMined(txHash);
-                console.log(receipt.logs[0].data);
 
-                let proxyLogic = '0x' + receipt.logs[0].data.slice(26,66);
-                let proxyConversion = '0x' + receipt.logs[0].data.slice(66+24, 66+24+40);
-                let proxyAcquisition = '0x' + receipt.logs[0].data.slice(66+24+40+24);
+                let proxyLogic = '0x' + receipt.logs[1].data.slice(26,66);
+                let proxyConversion = '0x' + receipt.logs[1].data.slice(66+24, 66+24+40);
+                let proxyAcquisition = '0x' + receipt.logs[1].data.slice(66+24+40+24);
                 // let { proxyLogic, proxyConversion, proxyAcquisition } = logs.find(l => l.event === 'ProxyForCampaign').args
                 resolve({
                     'campaignAddress': proxyAcquisition,

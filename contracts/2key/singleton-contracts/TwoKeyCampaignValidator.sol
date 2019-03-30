@@ -110,7 +110,7 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
         address twoKeyEventSource = ITwoKeySingletoneRegistryFetchAddress
                                     (twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyEventSource");
 
-//        ITwoKeyEventSourceEvents(twoKeyEventSource).created(campaign,contractor,moderator);
+        ITwoKeyEventSourceEvents(twoKeyEventSource).created(campaign,contractor,moderator);
     }
 
     /**

@@ -298,139 +298,13 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                         from
                     );
 
-                console.log('Succesfully deployed and set data!!');
-                console.log(campaignAddress, conversionHandlerAddress, twoKeyAcquisitionLogicHandlerAddress);
-                //
-                //
-                // /**
-                //  * Creating and deploying conversion handler contract
-                //  */
-                // let conversionHandlerAddress = data.conversionHandlerAddress;
-                // if (!conversionHandlerAddress) {
-                //     this.base._log([data.tokenDistributionDate, data.maxDistributionDateShiftInDays, data.bonusTokensVestingMonths, data.bonusTokensVestingStartShiftInDaysFromDistributionDate], gasPrice);
-                //     txHash = await this.helpers._createContract(acquisitionContracts.TwoKeyConversionHandler, from, {
-                //         gasPrice,
-                //         params: [
-                //             [
-                //                 data.expiryConversion,
-                //                 data.tokenDistributionDate,
-                //                 data.maxDistributionDateShiftInDays,
-                //                 data.bonusTokensVestingMonths,
-                //                 data.bonusTokensVestingStartShiftInDaysFromDistributionDate,
-                //             ]
-                //         ],
-                //         progressCallback
-                //     });
-                //     const predeployReceipt = await this.utils.getTransactionReceiptMined(txHash, {
-                //         web3: this.base.web3,
-                //         interval,
-                //         timeout
-                //     });
-                //     if (predeployReceipt.status !== '0x1') {
-                //         reject(predeployReceipt);
-                //         return;
-                //     }
-                //     conversionHandlerAddress = predeployReceipt && predeployReceipt.contractAddress;
-                //     if (progressCallback) {
-                //         progressCallback('TwoKeyConversionHandler', true, conversionHandlerAddress);
-                //     }
-                // }
-                // /**
-                //  * Creating and deploying logic handler contract
-                //  */
-                // let twoKeyAcquisitionLogicHandlerAddress = data.twoKeyAcquisitionLogicHandler;
-                // if(!twoKeyAcquisitionLogicHandlerAddress) {
-                //     txHash = await this.helpers._createContract(acquisitionContracts.TwoKeyAcquisitionLogicHandler, from, {
-                //         gasPrice,
-                //         params: [
-                //             [
-                //                 data.minContributionETHWei,
-                //                 data.maxContributionETHWei,
-                //                 data.pricePerUnitInETHWei,
-                //                 data.campaignStartTime,
-                //                 data.campaignEndTime,
-                //                 data.maxConverterBonusPercentWei,
-                //             ],
-                //             data.currency,
-                //             data.assetContractERC20,
-                //             data.moderator
-                //         ],
-                //         progressCallback,
-                //         link: [
-                //             {
-                //                 name: 'Call',
-                //                 address: this.base.twoKeyCall.address,
-                //             },
-                //         ]
-                //     });
-                //     const predeployReceipt = await this.utils.getTransactionReceiptMined(txHash, {
-                //         web3: this.base.web3,
-                //         interval,
-                //         timeout
-                //     });
-                //     if (predeployReceipt.status !== '0x1') {
-                //         reject(predeployReceipt);
-                //         return;
-                //     }
-                //     twoKeyAcquisitionLogicHandlerAddress = predeployReceipt && predeployReceipt.contractAddress;
-                //     if (progressCallback) {
-                //         progressCallback('TwoKeyAcquisitionLogicHandler', true, twoKeyAcquisitionLogicHandlerAddress);
-                //     }
-                // }
-                //
-                // txHash = await this.helpers._createContract(acquisitionContracts.TwoKeyAcquisitionCampaignERC20, from, {
-                //     gasPrice,
-                //     params: [
-                //         this.base.twoKeySingletonesRegistry.address,
-                //         twoKeyAcquisitionLogicHandlerAddress,
-                //         conversionHandlerAddress,
-                //         data.moderator || from,
-                //         data.assetContractERC20,
-                //         [data.maxReferralRewardPercentWei, data.referrerQuota || 5],
-                //         ],
-                //     progressCallback,
-                //     link: [
-                //             {
-                //                 name: 'Call',
-                //                 address: this.base.twoKeyCall.address,
-                //             },
-                //         ]
-                // });
-                // const campaignReceipt = await this.utils.getTransactionReceiptMined(txHash, {
-                //     web3: this.base.web3,
-                //     interval,
-                //     timeout
-                // });
-                // if (campaignReceipt.status !== '0x1') {
-                //     reject(campaignReceipt);
-                //     return;
-                // }
-                // const campaignAddress = campaignReceipt && campaignReceipt.contractAddress;
-                // if (progressCallback) {
-                //     progressCallback('TwoKeyAcquisitionCampaignERC20', true, campaignAddress);
-                // }
-
 
                 const campaignPublicLinkKey = await this.join(campaignAddress, from, {gasPrice, progressCallback, interval, timeout});
+
                 if (progressCallback) {
                     progressCallback('SetPublicLinkKey', true, campaignPublicLinkKey);
                 }
 
-                // //Here I need also a hash of non singletone at the moment
-                // txHash = await promisify(this.base.twoKeyCampaignValidator.validateAcquisitionCampaign,[campaignAddress,this.nonSingletonsHash,{from}]);
-                // if (progressCallback) {
-                //     progressCallback('ValidateCampaign', false, txHash);
-                // }
-                //
-                // await this.utils.getTransactionReceiptMined(txHash, {
-                //     web3: this.base.web3,
-                //     interval,
-                //     timeout
-                // });
-                //
-                // if (progressCallback) {
-                //     progressCallback('ValidateCampaign', true, txHash);
-                // }
 
                 resolve({
                     contractor: from,
@@ -489,6 +363,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
             }
         });
     }
+
 
     /**
      *
@@ -675,6 +550,71 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         });
     }
 
+    /**
+     * Function in charge to add public link key and public and private metadata to contract
+     * @param campaign
+     * @param {string} publicMetaHash
+     * @param {string} privateMetaHash
+     * @param {string} publicLink
+     * @param {string} from
+     * @returns {Promise<any>}
+     */
+    public addKeysAndMetadataToContract(campaign: any, publicMetaHash: string, private_data: any, publicLink:string, from: string) : Promise<string> {
+        return new Promise<any>(async(resolve,reject) => {
+            try {
+                //Create private meta hash
+                let privateMetaHash:string = await this.createPrivateMetaHash(private_data, from);
+
+                //Validate in any case the arguments are all properly set
+                if(publicMetaHash.length == 46 && privateMetaHash.length == 46 && publicLink.length == 42) {
+                    const campaignInstance = await this._getCampaignInstance(campaign);
+                    let txHash = await promisify(campaignInstance.startCampaignWithInitialParams, [
+                            publicMetaHash,
+                            privateMetaHash,
+                            publicLink,
+                        {
+                            from
+                        }
+                    ]);
+                    resolve(txHash);
+                } else {
+                    reject("Some of the arguments are not in goot format");
+                    return;
+                }
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+    /**
+     * Function to stringify data and upload it to IPFS
+     * @param campaign
+     * @param data
+     * @param {string} from
+     * @returns {Promise}
+     */
+    public createPrivateMetaHash(data: any, from:string) : Promise<string> {
+        return new Promise<string>(async(resolve,reject) => {
+            try {
+                //Convert data to string
+                const dataString = typeof data === 'string' ? data : JSON.stringify(data);
+
+                //Encrypt the string
+                let encryptedString = await this.sign.encrypt(this.base.web3, from, dataString, {plasma:false});
+
+                const hash = await this.utils.ipfsAdd(encryptedString);
+
+                console.log('Hash sent to contract is: ' + hash);
+                resolve(hash);
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+
+
     // Set Public Link
     /**
      *
@@ -701,14 +641,12 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 const nonce = await this.helpers._getNonce(from);
                 const contractor = await promisify(campaignInstance.contractor, [{from}]);
                 console.log('Contractor',contractor);
-                console.log("HERE I AM AT PLASMA");
                 console.log(publicLink);
                 const txHash = await promisify(campaignInstance.setPublicLinkKey, [
                     publicLink,
                     { from, nonce ,gasPrice }
                 ]);
 
-                console.log('DID IT');
 
                 let plasmaTxHash;
                 try {
@@ -828,7 +766,6 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     }
                     new_message = this.sign.free_join(plasmaAddress, public_address, f_address, f_secret, p_message, safeCut, cutSign);
                 } else {
-                    console.log('HERE');
                     const {contractor: campaignContractor} = await this.setPublicLinkKey(campaign, from, `0x${public_address}`, {
                         cut: safeCut,
                         gasPrice,
@@ -1417,30 +1354,6 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
         });
     }
 
-    /**
-     *
-     * @param campaign
-     * @param {number} amount
-     * @param {string} from
-     * @param {number} gasPrice
-     * @returns {Promise<string>}
-     */
-    public addFungibleAssetsToInventoryOfCampaign(campaign: any, amount: number, from: string, gasPrice: number = this.base._getGasPrice()): Promise<string> {
-        return new Promise(async (resolve, reject) => {
-            try {
-                const campaignInstance = await this._getCampaignInstance(campaign);
-                const nonce = await this.helpers._getNonce(from);
-                const txHash: string = await promisify(campaignInstance.addUnitsToInventory, [amount, {
-                    from,
-                    gasPrice,
-                    nonce
-                }]);
-                resolve(txHash);
-            } catch (e) {
-                reject(e);
-            }
-        })
-    }
 
     /**
      *

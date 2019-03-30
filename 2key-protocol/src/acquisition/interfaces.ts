@@ -98,6 +98,7 @@ export interface ITwoKeyAcquisitionCampaign {
     isAddressJoined: (campaign: any, from: string) => Promise<boolean>,
     getBalanceOfArcs: (campaign: any, from: string) => Promise<number>,
     getEstimatedMaximumReferralReward: (campaign: any, from: string, referralLink: string) => Promise<number>,
+    addKeysAndMetadataToContract: (campaign: any, publicMetaHash: string, privateMetaHash: string, publicLink:string, from: string) => Promise<string>,
     setPublicLinkKey: (campaign: any, from: string, publicLink: string, opts?: IPublicLinkOpts) => Promise<IPublicLinkKey>,
     join: (campaign: any, from: string, opts?: IJoinLinkOpts) => Promise<string>,
     joinAndSetPublicLinkWithCut: (campaign: any, from: string, referralLink: string, opts?: IPublicLinkOpts) => Promise<string>,
@@ -112,7 +113,6 @@ export interface ITwoKeyAcquisitionCampaign {
     visit: (campaignAddress: string, referralLink: string) => Promise<string>,
     executeConversion: (campaign: any, conversion_id: number, from: string, gasPrice? :number) => Promise<string>,
     getLockupContractsForConverter: (campaign: any, converter: string, from: string, skipCache?: boolean) => Promise<string[]>,
-    addFungibleAssetsToInventoryOfCampaign: (campaign: any, amount: number, from: string, gasPrice? :number) => Promise<string>,
     cancel: (campaign: any, from: string, gasPrice?: number) => Promise<string>,
     isAddressContractor: (campaign:any, from:string) => Promise<boolean>,
     getAmountOfEthAddressSentToAcquisition: (campaign: any, from: string) => Promise<number>,
@@ -200,18 +200,6 @@ export interface IReferrerSummary {
     rewardsPerConversions: number[],
 }
 
-// pendingConverters:  pending.toNumber(),
-//     approvedConverters:  approved.toNumber(),
-//     rejectedConverters:  rejected.toNumber(),
-//     pendingConversions,
-//     approvedConversions,
-//     rejectedConversions,
-//     executedConversions,
-//     cancelledConversions,
-//     uniqueConverters,
-//     raisedFundsEthWei,
-//     tokensSold,
-//     totalBounty
 export interface IConversionStats {
     pendingConverters: number,
     approvedConverters: number,

@@ -32,6 +32,7 @@ contract TwoKeyEconomy is StandardTokenModified {
 
         totalSupply_= 1000000000000000000000000000; // 1B tokens total minted supply
 
+        // Updating balances
         balances[twoKeyUpgradableExchange] = totalSupply_.mul(5).div(100);
         balances[twoKeyCommunityTokenPool] = totalSupply_.mul(20).div(100);
         balances[twoKeyLongTermTokenPool] = totalSupply_.mul(40).div(100);

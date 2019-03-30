@@ -68,6 +68,7 @@ contract TwoKeyCampaign is ArcERC20 {
 		if (received_from[_to] == 0) {
 			twoKeyEventSource.joined(this, _from, _to);
 		}
+
 		received_from[_to] = _from;
 		return true;
 	}
@@ -148,6 +149,14 @@ contract TwoKeyCampaign is ArcERC20 {
     }
 
 
+	function updateOrSetPublicMetaHash(string _publicMetaHash) onlyContractor {
+		publicMetaHash = _publicMetaHash;
+	}
+
+	function updateOrSetPrivateMetaHash(string _privateMetaHash) onlyContractor {
+		privateMetaHash = _privateMetaHash;
+	}
+
 	/**
      * @notice Function to update maxReferralRewardPercent
      * @dev only Contractor can call this method, otherwise it will revert - emits Event when updated
@@ -162,19 +171,13 @@ contract TwoKeyCampaign is ArcERC20 {
      * @param _publicMetaHash is the hash of the campaign
      * @dev Only contractor can call this
      */
-	function updateOrSetPublicMetaHash(string _publicMetaHash) public onlyContractor {
-		require(bytes(_publicMetaHash).length == 46);
+	function startCampaignWithInitialParams(string _publicMetaHash, string _privateMetaHash, address new_public_key) public onlyContractor {
+		//TODO: Handle option to update only one of 3 and other setters
 		publicMetaHash = _publicMetaHash;
+		privateMetaHash = _privateMetaHash;
+		setPublicLinkKeyOf(msg.sender, new_public_key);
 	}
 
-	/**
-     * @notice Function to update or set private meta hash
-     * @param _privateMetaHash is the private meta hash containing contractor public link key
-     */
-	function updateOrSetPrivateMetaHash(string _privateMetaHash) public onlyContractor {
-		require(bytes(_privateMetaHash).length == 46);
-		privateMetaHash = _privateMetaHash;
-	}
 
 	/**
  	 * @notice Private function which will be executed at the withdraw time to buy 2key tokens from upgradable exchange contract
