@@ -18,6 +18,9 @@ import "../interfaces/ITwoKeyCampaignValidator.sol";
 contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegistry {
 
     mapping (string => mapping(string => address)) internal versions;
+    mapping (string => mapping(string => address)) internal campaignVersions;
+
+
     mapping (string => address) contractToProxy;
     mapping (string => string) contractNameToLatestVersionName;
     mapping (string => address) nonUpgradableContractToAddress;
@@ -59,12 +62,16 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
      * @param implementation representing the address of the new implementation to be registered
      */
     function addVersion(string contractName, string version, address implementation) public onlyMaintainer {
-//        require(versions[contractName][version] == 0x0);
-        //TODO: Uncomment this line once we're done
+        require(versions[contractName][version] == 0x0);
         versions[contractName][version] = implementation;
         contractNameToLatestVersionName[contractName] = version;
         emit VersionAdded(version, implementation);
     }
+
+//    function addCampaignVersion(string campaignContractName, string version, address implementation) public onlyMaintainer {
+//        campaignVersions[campaignContractName][version] = implementation;
+//        contractNameToLatestVersionName = implementation;
+//    }
 
     /**
      * @dev Tells the address of the implementation for a given version
@@ -123,10 +130,8 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
         UpgradeabilityProxy proxyAcquisition = new UpgradeabilityProxy("TwoKeyAcquisitionCampaignERC20", "1.0");
         Upgradeable(proxyAcquisition).initialize.value(msg.value)(msg.sender);
 
-
         UpgradeabilityProxy proxyConversions = new UpgradeabilityProxy("TwoKeyConversionHandler", "1.0");
         Upgradeable(proxyConversions).initialize.value(msg.value)(msg.sender);
-
 
         UpgradeabilityProxy proxyLogicHandler = new UpgradeabilityProxy("TwoKeyAcquisitionLogicHandler", "1.0");
         Upgradeable(proxyLogicHandler).initialize.value(msg.value)(msg.sender);
