@@ -116,7 +116,8 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
         uint[] values_conversion,
         uint[] values_logic_handler,
         uint[] values,
-        string _currency
+        string _currency,
+        string _nonSingletonHash
     ) public payable {
         // Deploy proxies for all 3 contracts
         UpgradeabilityProxy proxyAcquisition = new UpgradeabilityProxy("TwoKeyAcquisitionCampaignERC20", "1.0");
@@ -162,7 +163,7 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
         );
 
         ITwoKeyCampaignValidator(getContractProxyAddress("TwoKeyCampaignValidator"))
-            .validateAcquisitionCampaign(proxyAcquisition, "non-singleton-hash");
+            .validateAcquisitionCampaign(proxyAcquisition, _nonSingletonHash);
 
         emit ProxyForCampaign(proxyLogicHandler, proxyConversions, proxyAcquisition);
     }

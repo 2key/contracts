@@ -22,6 +22,8 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
 
     using SafeMath for uint256;
 
+    bool isCampaignInitialized;
+
     event ConversionCreated(uint conversionId);
     uint numberOfConversions;
 
@@ -110,6 +112,7 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
         address _twoKeyEventSource,
         address _twoKeyBaseReputationRegistry
     ) public {
+        require(isCampaignInitialized == false);
         counters = new uint[](9);
 
         expiryConversionInHours = values[0];
@@ -123,6 +126,7 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
         assetContractERC20 =_assetContractERC20;
         twoKeyEventSource = _twoKeyEventSource;
         twoKeyBaseReputationRegistry = _twoKeyBaseReputationRegistry;
+        isCampaignInitialized = true;
     }
 
     /**

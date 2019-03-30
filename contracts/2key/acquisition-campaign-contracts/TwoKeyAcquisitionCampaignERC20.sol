@@ -14,6 +14,8 @@ import "../Upgradeable.sol";
  */
 contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
 
+    bool isCampaignInitialized;
+
     address public conversionHandler;
     address public twoKeyAcquisitionLogicHandler;
 
@@ -34,6 +36,8 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
         address _contractor,
         uint [] values
     ) public {
+        require(isCampaignInitialized == false);
+
         contractor = _contractor;
         moderator = _moderator;
 
@@ -46,13 +50,14 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
         totalSupply_ = 1000000;
         balances[ownerPlasma] = totalSupply_;
         conversionQuota = values[1];
+        maxReferralRewardPercent = values[0];
 
         twoKeySingletonesRegistry = _twoKeySingletonesRegistry;
         twoKeyAcquisitionLogicHandler = _twoKeyAcquisitionLogicHandler;
         conversionHandler = _conversionHandler;
         assetContractERC20 = _assetContractERC20;
 
-        maxReferralRewardPercent = values[0];
+        isCampaignInitialized = true;
     }
 
     /**

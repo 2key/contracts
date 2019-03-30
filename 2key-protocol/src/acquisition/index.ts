@@ -294,6 +294,7 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                         logicHandlerData,
                         campaignData,
                         data.currency,
+                        this.nonSingletonsHash,
                         from
                     );
 

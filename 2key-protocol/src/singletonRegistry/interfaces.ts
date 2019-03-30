@@ -5,6 +5,7 @@ export interface ITwoKeySingletonRegistry {
         valuesLogicHandler: any[],
         valuesCampaign: any[],
         currency: string,
+        nonSingletonHash: string,
         from: string
     ) => Promise<any>,
 

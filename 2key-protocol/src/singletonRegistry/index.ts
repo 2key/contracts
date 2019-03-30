@@ -37,6 +37,7 @@ export default class TwoKeySingletonRegistry implements ITwoKeySingletonRegistry
         valuesLogicHandler: any[],
         valuesCampaign: any[],
         currency: string,
+        nonSingletonHash: string,
         from: string
     ) : Promise<any> {
         return new Promise<any>(async(resolve,reject) => {
@@ -49,6 +50,7 @@ export default class TwoKeySingletonRegistry implements ITwoKeySingletonRegistry
                         valuesLogicHandler,
                         valuesCampaign,
                         currency,
+                        nonSingletonHash,
                         {
                             from
                         }
