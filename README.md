@@ -2,6 +2,11 @@
 
 ### 2key.network Smart-Contracts architecture
 
+(Official Smart-Contracts documentation)[https://2key.github.io/contracts] is generated automatically based on description annotations
+above all method & contract implementations by [Solidity-docgen](https://github.com/OpenZeppelin/solidity-docgen) 
+and website generated based on the output of Solidity-docgen using [Docosaurus](https://github.com/facebook/Docusaurus)
+
+
 
 In order to accomplish initial idea, and create a network which handle properly user reputation,
 security of assets and other information, while balancing to handle UX on the other side, which was
