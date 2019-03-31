@@ -404,10 +404,13 @@ const updateIPFSHashes = async(contracts) => {
 
   let existingVersionHandlerFile = {};
   try {
-    existingVersionHandlerFile = JSON.parse(fs.readFileSync(getVersionsPath), { encoding: 'utf8' });
-  } catch (e) {}
+    existingVersionHandlerFile = JSON.parse(fs.readFileSync(getVersionsPath()), { encoding: 'utf8' });
+    console.log('EXISTING VERSIONS', existingVersionHandlerFile);
+  } catch (e) {
+    console.log('VERSIONS ERROR', e);
+  }
 
-  const { currentVersionHandler } = existingVersionHandlerFile;
+  const { TwoKeyVersionHandler: currentVersionHandler } = existingVersionHandlerFile;
 
   if (currentVersionHandler) {
     versionsList = JSON.parse((await ipfsCat(currentVersionHandler)).toString());
