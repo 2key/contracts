@@ -38,7 +38,7 @@ and make starting campaign process lightweight, so we decided to deploy only Pro
 and redirect all calls to Campaign Logic, but will have their own storage.
 
 
-For development instructions, and how to run contracts locally, check [Setup dev-environment instructions](readmes/SetupDevEnv.md;
+For development instructions, and how to run contracts locally, check [Setup dev-environment instructions](readmes/SetupDevEnv.md)
 
 
 ![TwoKeyInfrastructure](2key-infra.png)
