@@ -331,10 +331,10 @@ describe('TwoKeyProtocol', () => {
     let aydnepBalance;
     let txHash;
 
-    it('should return acquisition submodule', async () => {
-        const submoduleJS = await twoKeyProtocol.Utils.getSubmodule('cba508abbecc7f07ea7f5303279b631c418db248257c51800b5beeb0c13663cb', 'acquisition');
-        expect(submoduleJS.length).to.be.gt(0);
-    }).timeout(60000);
+    // it('should return acquisition submodule', async () => {
+    //     const submoduleJS = await twoKeyProtocol.Utils.getSubmodule('cba508abbecc7f07ea7f5303279b631c418db248257c51800b5beeb0c13663cb', 'acquisition');
+    //     expect(submoduleJS.length).to.be.gt(0);
+    // }).timeout(60000);
 
     it('should return a balance for address', async () => {
         const business = twoKeyProtocol.Utils.balanceFromWeiString(await twoKeyProtocol.getBalance(twoKeyAdmin), {
