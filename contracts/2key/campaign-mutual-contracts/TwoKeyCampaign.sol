@@ -19,11 +19,12 @@ contract TwoKeyCampaign is ArcERC20 {
 	using Call for *;
 
 	TwoKeyEventSource twoKeyEventSource; // Address of TwoKeyEventSource contract
-	address public twoKeySingletonesRegistry; // Address of Registry of all singleton contracts
-	address public twoKeyEconomy;
+	address twoKeySingletonesRegistry; // Address of Registry of all singleton contracts
+	address twoKeyEconomy; // Address of twoKeyEconomy contract
+	address ownerPlasma; //contractor plasma address
+
 	address public contractor; //contractor address
-    address public moderator; //moderator address
-	address public ownerPlasma; //contractor plasma address
+	address public moderator; //moderator address
 
 
 	uint256 conversionQuota;  // maximal ARC tokens that can be passed in transferFrom
