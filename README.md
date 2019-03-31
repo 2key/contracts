@@ -1,16 +1,18 @@
-# 2key.network 
+## 2key.network 
 
 ### 2key.network Smart-Contracts architecture
 
 
 In order to accomplish initial idea, and create a network which handle properly user reputation,
 security of assets and other information, while balancing to handle UX on the other side, which was
-very challenging task, 2key.network operates with over 30 Smart-Contracts.
+very challenging task, 2key.network operates with over 30 Smart-Contracts and interfaces.
+
+All contracts can be found [here](contracts)
 
 There are 2 types of contracts:
 
-* Contracts deployed by 2key  (Singleton contracts)
-* Contracts deployed by contractors (Non-Singleton contracts - Campaigns)
+* Contracts deployed by 2key  ([Singleton contracts](contracts/2key/singleton-contracts)) 
+* Contracts deployed by contractors ([Non-Singleton contracts - Campaigns](contracts/2key/acquisition-campaign-contracts))
 
 
 ##### Singleton contracts
@@ -34,5 +36,7 @@ Since we wanted to have full accounting on the contract side, with auth verifica
 there was a need to use a couple of contracts to handle Campaign logic, so, to save a gas user have to pay, 
 and make starting campaign process lightweight, so we decided to deploy only Proxies, which will be owned by contractors, 
 and redirect all calls to Campaign Logic, but will have their own storage.
+
+
 
 ![TwoKeyInfrastructure](2key-infra.png)
