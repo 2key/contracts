@@ -8,7 +8,6 @@ const rhd = require('node-humanhash');
 const IPFS = require('ipfs-http-client');
 const LZString = require('lz-string');
 const { networks: truffleNetworks } = require('./truffle');
-const { TwoKeyVersionHandler } = require('./2key-protocol/src/versions');
 
 
 // const compressor = require('node-minify');
@@ -28,7 +27,7 @@ const twoKeyProtocolSubmodulesDir = path.join(__dirname, '2key-protocol', 'dist'
 
 const deploymentHistoryPath = path.join(__dirname, 'history{branch}.json');
 const buildArchPath = path.join(twoKeyProtocolDir, 'contracts{branch}.tar.gz');
-let deployment = false;
+let deployment = process.env.FORCE_DEPLOYMENT || false;
 const deployedTo = {};
 
 let contractsStatus;
@@ -62,6 +61,17 @@ const getContractsDeployedDistPath = () => {
     }
     return result;
 };
+
+const getVersionsPath = (branch = true) => {
+  const result = path.join(twoKeyProtocolDir,'versions{branch}.json');
+  if (branch) {
+    if(contractsStatus && contractsStatus.current) {
+        return result.replace('{branch}',`-${contractsStatus.current}`);
+    }
+    return result;
+  }
+  return result.replace('{branch}', '');
+}
 
 
 const contractsGit = simpleGit();
@@ -391,8 +401,16 @@ const updateIPFSHashes = async(contracts) => {
 
 
   let versionsList = {};
-  if (TwoKeyVersionHandler) {
-    versionsList = JSON.parse((await ipfsCat(TwoKeyVersionHandler)).toString());
+
+  let versions = {};
+  try {
+    versions = JSON.parse(fs.readFileSync(getVersionsPath), { encoding: 'utf8' });
+  } catch (e) {}
+
+  const { currentVersionHandler } = versions;
+
+  if (currentVersionHandler) {
+    versionsList = JSON.parse((await ipfsCat(currentVersionHandler)).toString());
     console.log('VERSION LIST', versionsList);
   }
   versionsList[nonSingletonHash] = {};
@@ -410,7 +428,8 @@ const updateIPFSHashes = async(contracts) => {
   }
   console.log(versionsList);
   const [{ hash: newTwoKeyVersionHandler }] = await ipfsAdd(JSON.stringify(versionsList));
-  fs.writeFileSync(path.join(twoKeyProtocolDir, 'versions.json'), JSON.stringify({ TwoKeyVersionHandler: newTwoKeyVersionHandler }, null, 4));
+  fs.writeFileSync(getVersionsPath(), JSON.stringify({ TwoKeyVersionHandler: newTwoKeyVersionHandler }, null, 4));
+  fs.writeFileSync(getVersionsPath(false), JSON.stringify({ TwoKeyVersionHandler: newTwoKeyVersionHandler }, null, 4));
   console.log('TwoKeyVersionHandler', newTwoKeyVersionHandler);
 };
 
@@ -710,9 +729,6 @@ async function main() {
     case '--submodules':
       const contracts = await generateSOLInterface();
       await buildSubmodules(contracts);
-      // deployment = true;
-      // const [{ hash: newTwoKeyVersionHandler }] = await ipfsAdd(`{"253dcdcca641a8a4d597befa7c775e716aa6cfd6749e19968b67133f44eef042":{"acquisition":"QmdqGiATMYprikeDF2Lf4mkgjgRiEupoqq7okrnkSJJcYn","dao":"QmQCf4t9smx7mzXWYgi7u1dr1B4EqwpdwsVXBwfgYG24Yy"},"cba508abbecc7f07ea7f5303279b631c418db248257c51800b5beeb0c13663cb":{"acquisition":"QmXnYtpaN5JfSLZuQtMNhpsk7SK34Ut54wPQbBrxFirH8R","dao":"QmSA5fwUWQpZsFEvaz5XMnfgiUpaDS7pD6Vxv2f45ikCDW"},"54395b0f794d6079335aacea55d7db03dec4285dc681e78fcdc8d51dc8aa8152":{"acquisition":"QmNazkNa3Qo4pZebUmn9yjzaaHFRbFqMXFu6Wf9PVF4UNz","dao":"QmXDQVWwkm8LvJqNKgDtiK1VxLcamPbAgo5AEZ25GTbeWZ"},"dd576626cd5d3ca4898890331bb9733c495148186a2467f8e52db182087c83a9":{"acquisition":"QmPt6HwXmUdqK69w6o5bmcQsPbMHY23b32SztZvuGcmsF3","dao":"QmTCWFW67APiKHgWKFtytC1Kvv48CFmgnX8WmqzcGL9Z5s"},"b95db734153601ebd91c3fc5d041447e040bb771bd20d6b80213e08b9e238515":{"acquisition":"Qmchw5SNHs6YYDPARLembn6YwK9jvhvpsSahKV1PyHoHfx","dao":"QmbDtG6YYHJrjLwBesFofZXH6SJe6CDVHu9d8Mdt3Aik7F"},"1a2af7b02748e7462959923c220529bba6e4ee1a56b00203e34a3ef5a7d23056":{"acquisition":"Qmds9mTGGmRUHa6YZrY1RFV4vzRYw5pajDKhUCVQkcSWYv","dao":"QmQW2oY3FDJG5QAjKXyVMSdnoKwRgQaPcGAsvPtE5tyQNo"},"1d9af579862171c413319789a12c40874d98d5a04f159c462902c65d02beec2c":{"acquisition":"QmPyT9nS1Avo8vAEfemMPZhSC4Eqg6gDd4TvYD4AC5w3yQ","dao":"QmQW2oY3FDJG5QAjKXyVMSdnoKwRgQaPcGAsvPtE5tyQNo"},"09a048aac4a7e364da1d608b3112f384edb9973d46397b8da91b276db1281b47":{"acquisition":"QmNzwvVttTEQEQd4BZP98TjuQ3QVhnk1dXUi6mGk7ogRir","dao":"QmQW2oY3FDJG5QAjKXyVMSdnoKwRgQaPcGAsvPtE5tyQNo"},"94bfe4f3afd5c27ed106589026e5091bba8b93fb0d716064c81754be07bff863":{"acquisition":"QmSyxA6N49k4Upog8KFmtZj5BHx6vi9oeGwMqPHZCvJNAf","dao":"QmQW2oY3FDJG5QAjKXyVMSdnoKwRgQaPcGAsvPtE5tyQNo"},"4a40eaa21b8f96ade30d7d10e468451a5840bc0aa98c19f4e2c5f0bd5e6c6e25":{"acquisition":"QmS6uGCJujCiSu2wPWZXV89ZMJJmNjwnJNvK1W5gAxkbqs","dao":"QmQW2oY3FDJG5QAjKXyVMSdnoKwRgQaPcGAsvPtE5tyQNo"},"8534ef61c401a6d492835759454771f2977b838d639516414364163e4277912e":{"acquisition":"QmZoAb8a8QgSvcS3zEMHjUDyTh7nXqfW7vs8BYgqasnYgP","dao":"QmQW2oY3FDJG5QAjKXyVMSdnoKwRgQaPcGAsvPtE5tyQNo"},"f98da2d5421c49b035df7509ef30703bda26abd7e267a670261eb80c7253be43":{"acquisition":"QmdkWFw8j6LQc98To6r9B9GnEWiMEr4Pi3JB6RWpkPwBKJ","dao":"QmQW2oY3FDJG5QAjKXyVMSdnoKwRgQaPcGAsvPtE5tyQNo","donation":"QmeMgNFTSaSA4SY46rH1fG7ui6Kc2PZAvEvHkeMYmPuDGZ"},"196e35e0239ab0caf73ca1f1ec1dfa63adeb0ca4e38047c0a7115bf870539c00":{"acquisition":"QmUqmnrKURaGga4UZ52pNUJbi7uzwtBM43EBD3EmwAATUs","dao":"QmQW2oY3FDJG5QAjKXyVMSdnoKwRgQaPcGAsvPtE5tyQNo","donation":"QmeFYKBynXuVBpXjnw9fdyKb12EZwF2xBPWjG7Ko5yRatj"},"f02330650bc7e75a21e0d040a111393532f1f719c7ba6e39497c42f89cfd693a":{"acquisition":"QmQbwKi84seQ9u2ukNc8cMD85FscNXVk8VSSE9wXdF7nQx","dao":"QmQW2oY3FDJG5QAjKXyVMSdnoKwRgQaPcGAsvPtE5tyQNo","donation":"QmbQpbwJL1XscbWAsH4mJNiJENjTttjjAFtiTxeCByBAVb"},"419c0caf45d62fe18f8852b4f4e0c8b7236c98a4c3ade562372ea4e83ff4f93a":{"acquisition":"Qmeer38qM8VRvJGQV1cpdQ9QbibU9USU6GMWSCyWSc55pB","dao":"QmQW2oY3FDJG5QAjKXyVMSdnoKwRgQaPcGAsvPtE5tyQNo","donation":"QmeA8azoLKo5znGomUgGGDPYC2AxLgd1MmFnERDwWGxtkY"},"d378403afd8d64ed0252034383e27151158a99731676bb79dc1c2c3567b07d57":{"acquisition":"QmVvJKT3SQtp5at58ARWx88ePyCTGBNNmd1xunLRZCnfgK","dao":"QmQW2oY3FDJG5QAjKXyVMSdnoKwRgQaPcGAsvPtE5tyQNo","donation":"QmNTuWehSAU2JVnjrkdQBxqbp2x568KY1NHVDX3NydHuQm"},"ad0bcaee066aa38f2234d88ca45d363b6ed44f6388ce24347e96feb1c563c08b":{"acquisition":"QmSEiKnxcnxBAdGBDTtaBBXU51SfaB6P2cMBzhosqTneCL","dao":"QmQW2oY3FDJG5QAjKXyVMSdnoKwRgQaPcGAsvPtE5tyQNo","donation":"QmakDEdxyqkFsnkH3omf45Q2Fz8TFzzkqtfgRimK5GM5aH"},"99aade4037aa6ae9e75837098c7f44298b7ce568868e83453220e3c1960b4535":{"acquisition":"Qmb6GUz9ZHtKyV8axLCT5ujgCayRcRST5CsFXJbgsZPUtE","dao":"QmQW2oY3FDJG5QAjKXyVMSdnoKwRgQaPcGAsvPtE5tyQNo","donation":"Qmc5dm7wFEuBZs5cMYsMgaGHZsr4zjghfHBz65R73nbjhm"},"0575ca2596b98fc49bdaf2d0e7d054ad82543cea6c89d95855cace8cd260489d":{"acquisition":"QmU3UAjrzGsHFBZeotvaxdM52N3hvtCRCmCmyAg4q4z3Rm","dao":"QmQW2oY3FDJG5QAjKXyVMSdnoKwRgQaPcGAsvPtE5tyQNo","donation":"QmRi1fDGWvuvH96PpYc7Gb6yFVkKGePKnkE4bscGdkxRu4"},"5dbfb5f696a7bce22dad685be2570f51ac14649f939811ab0c67b1ad968b3900":{"acquisition":"QmPJfesVvysSDoz26PRZuqPuwjZ68v6P7NUR9Hx9PMgmyc","dao":"QmQW2oY3FDJG5QAjKXyVMSdnoKwRgQaPcGAsvPtE5tyQNo","donation":"QmZAPHWiBmob5U7cTMdJCpDm1nN4gzuyzmkkG5e2v9S1vx"},"9b35c55e90ad14e339789174a27b279b7bf94db757642200961ebc7a94178a05":{"acquisition":"QmRGoFDsGBNVdEdjqnFnawA3j72vQRhruwkDZMUKvTfCJZ","dao":"QmQW2oY3FDJG5QAjKXyVMSdnoKwRgQaPcGAsvPtE5tyQNo","donation":"QmS6APo4RHQDpQ7eBEMF5G9c9Z7FzihrWr1dY4EqPcV44K"},"4f72518381943bde1743ba5ac3e10f7277f9b8882b40d741b5cbfb1d8666bdd6":{"acquisition":"QmVE9pvx3zFa9ziWELhiRuAGReR9K12htoDZDxkfHnPGLu","dao":"QmQW2oY3FDJG5QAjKXyVMSdnoKwRgQaPcGAsvPtE5tyQNo","donation":"QmaQBo8HpyHePjuh5uB4hYk8nsZASQyB3CuXxCPWJUtT3A"},"d80439e0b245d5a8f67cbf6d2887b5abfa40ca04b44615d28d2497865ce5b94b":{"acquisition":"QmSRJWaNxUF91ocgxJpDrViTAbTZN6UbLcoLMTRsVSEwjS","dao":"QmQW2oY3FDJG5QAjKXyVMSdnoKwRgQaPcGAsvPtE5tyQNo","donation":"QmQ8edkhMAHkJ3MocejHTZRLuGdwEbxxrpQP3djDeuod9y"},"333893fd3ff5aad87ef81558181a3b1d3c53d8b74cc2ba4318b1e977e31c29c4":{"acquisition":"QmfLVvdaRSVPqhtxyapUdp7tZFXr28yKiq4uLjbAgSxfhC","dao":"QmQW2oY3FDJG5QAjKXyVMSdnoKwRgQaPcGAsvPtE5tyQNo","donation":"QmYZMaddRBijrsySBDmXCU6ckcxEo6w3Cs6zUbFTB67JEq"},"5886d6647d520582733675cab35b17c441c343e99ff5c017e9cb5bccaba02745":{"acquisition":"QmPrMWtWh6JfBf8ayVakcP7LZB6mBU3vVZBgaLB8RZ7QVT","dao":"QmQW2oY3FDJG5QAjKXyVMSdnoKwRgQaPcGAsvPtE5tyQNo","donation":"QmeV6k3yLha1oqFFFAHn48qSvVheQzt8qjJ1UU41FBmVSJ"},"bc1e7c59155dced0419c55c1f60f7b6e476fa58b85281ef269e5404f944f62be":{"acquisition":"QmUMv9pTPW5GhFiuP1kqKy3eQpXVJuf8GJDHG2BRyniH8S","dao":"QmQW2oY3FDJG5QAjKXyVMSdnoKwRgQaPcGAsvPtE5tyQNo","donation":"QmfMPA7iZyQsvehGxfNctEpcKwKNau2N4CksnxDHjuinNK"},"a2579abfa068f21304713bcd2fbc84d022ac4933556110af9eea5085cc610716":{"acquisition":"QmVtbXE9UdRWzMXLk1a8iRpo6fX6L2GStoex1snot9buHD","dao":"QmQW2oY3FDJG5QAjKXyVMSdnoKwRgQaPcGAsvPtE5tyQNo","donation":"QmVBzZ8JBxJN5RK7Xbkdi45EKYb2SycaTjRghY7hzx9BK7"},"85f77a4618134d8c6e31430b0926c21d6056fc6208e81d920d207980aea6a760":{"acquisition":"QmTGChnoVQAM6xgM4sGqngiNXFoBoFPRCAQFGwJ1Pn8We8","dao":"QmQW2oY3FDJG5QAjKXyVMSdnoKwRgQaPcGAsvPtE5tyQNo","donation":"QmTSH48BRjNWiGyTD8hEBFm7jVrMtWDVMzMArFtztpm5bH"},"4afe5473634107d5590e0fb6a58e26524a01e237fb656203620c2dbffb70a431":{"acquisition":"QmVRrTtL12DNLdXKm9J7kxGyXohXiJZ933VHkvCys8QsGY","dao":"QmQW2oY3FDJG5QAjKXyVMSdnoKwRgQaPcGAsvPtE5tyQNo","donation":"QmThRrUocU3eckCxVaHY9Y74yCUwvRdmKgnqepYH2e9FSH"}}`);
-      // fs.writeFileSync(path.join(twoKeyProtocolDir, 'versions.json'), JSON.stringify({ TwoKeyVersionHandler: newTwoKeyVersionHandler }, null, 4));    
       process.exit(0);
       break;
     default:
