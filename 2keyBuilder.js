@@ -402,12 +402,12 @@ const updateIPFSHashes = async(contracts) => {
 
   let versionsList = {};
 
-  let versions = {};
+  let existingVersionHandlerFile = {};
   try {
-    versions = JSON.parse(fs.readFileSync(getVersionsPath), { encoding: 'utf8' });
+    existingVersionHandlerFile = JSON.parse(fs.readFileSync(getVersionsPath), { encoding: 'utf8' });
   } catch (e) {}
 
-  const { currentVersionHandler } = versions;
+  const { currentVersionHandler } = existingVersionHandlerFile;
 
   if (currentVersionHandler) {
     versionsList = JSON.parse((await ipfsCat(currentVersionHandler)).toString());
