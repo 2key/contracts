@@ -27,13 +27,13 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
 
     address[] allVerified2keyContracts;
 
-    struct UserCampaigns{
-        address [] acquisitionCampaigns;
-        address [] acquisitionLogicHandlers;
-        address [] acquisitionConversionHandlers;
-    }
-
-    mapping(address => UserCampaigns) user2campaigns;
+    event ProxyForCampaign(
+        address proxyLogicHandler,
+        address proxyConversionHandler,
+        address proxyAcquisitionCampaign,
+        address contractor,
+        uint timestamp
+    );
 
     /**
      * @notice Calling super constructor from maintaining pattern
@@ -190,7 +190,7 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
         ITwoKeyCampaignValidator(getContractProxyAddress("TwoKeyCampaignValidator"))
             .validateAcquisitionCampaign(proxyAcquisition, _nonSingletonHash);
 
-        emit ProxyForCampaign(proxyLogicHandler, proxyConversions, proxyAcquisition);
+        emit ProxyForCampaign(proxyLogicHandler, proxyConversions, proxyAcquisition, msg.sender, block.timestamp);
     }
 
 
