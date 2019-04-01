@@ -5,6 +5,7 @@ import singletons from '../src/contracts/singletons';
 import createWeb3, { generatePlasmaFromMnemonic } from './_web3';
 import registerUserFromBackend, { IRegistryData } from './_registerUserFromBackend';
 import {promisify} from '../src/utils/promisify';
+import {IPrivateMetaInformation} from "../src/acquisition/interfaces";
 
 const {env} = process;
 
@@ -487,12 +488,13 @@ describe('TwoKeyProtocol', () => {
             bonusTokensVestingMonths: 6,
             bonusTokensVestingStartShiftInDaysFromDistributionDate: 180
         };
-        const campaign = await twoKeyProtocol.AcquisitionCampaign.create(campaignData, from, {
+        const campaign = await twoKeyProtocol.AcquisitionCampaign.create(campaignData, campaignData, {} , from, {
             progressCallback,
             gasPrice: 150000000000,
             interval: 500,
             timeout: 600000
         });
+
         console.log('Campaign address', campaign);
         campaignAddress = campaign.campaignAddress;
         links.deployer = campaign.campaignPublicLinkKey;
@@ -512,17 +514,17 @@ describe('TwoKeyProtocol', () => {
     }).timeout(60000);
 
     it('should save campaign to IPFS', async () => {
-        const hash = await twoKeyProtocol.Utils.ipfsAdd(campaignData);
-        console.log('HASH', hash);
-        txHash = await twoKeyProtocol.AcquisitionCampaign.updateOrSetIpfsHashPublicMeta(campaignAddress, hash, from);
-        console.log(txHash);
-        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-        console.log(`TX ${txHash} mined`);
+        // const hash = await twoKeyProtocol.Utils.ipfsAdd(campaignData);
+        // console.log('HASH', hash);
+        // txHash = await twoKeyProtocol.AcquisitionCampaign.updateOrSetIpfsHashPublicMeta(campaignAddress, hash, from);
+        // console.log(txHash);
+        // await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        // console.log(`TX ${txHash} mined`);
         const campaignMeta = await twoKeyProtocol.AcquisitionCampaign.getPublicMeta(campaignAddress,from);
-        console.log('IPFS:', hash, campaignMeta);
+        console.log(campaignMeta);
         expect(campaignMeta.meta.assetContractERC20).to.be.equal(campaignData.assetContractERC20);
     }).timeout(60000);
-    // it('should print balance after campaign created', printBalances).timeout(15000);
+    it('should print balance after campaign created', printBalances).timeout(15000);
 
     it('should transfer assets to campaign', async () => {
         txHash = await twoKeyProtocol.transfer2KEYTokens(campaignAddress, twoKeyProtocol.Utils.toWei(1234, 'ether'), from);
@@ -552,16 +554,16 @@ describe('TwoKeyProtocol', () => {
         console.log("Moderator: " + addressesWhereUserIsModerator);
     }).timeout(60000);
 
-    it('should save contractor link as the private meta hash', async() => {
-        console.log(links.deployer);
-        let txHash = await twoKeyProtocol.AcquisitionCampaign.setPrivateMetaHash(campaignAddress, links.deployer, from);
-        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-    }).timeout(60000);
+    // it('should save contractor link as the private meta hash', async() => {
+    //     console.log(links.deployer);
+    //     let txHash = await twoKeyProtocol.AcquisitionCampaign.setPrivateMetaHash(campaignAddress, links.deployer, from);
+    //     await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+    // }).timeout(60000);
 
     it('should get and decrypt ipfs hash', async() => {
-        let data = await twoKeyProtocol.AcquisitionCampaign.getPrivateMetaHash(campaignAddress, from);
+        let data: IPrivateMetaInformation = await twoKeyProtocol.AcquisitionCampaign.getPrivateMetaHash(campaignAddress, from);
         console.log(data);
-        expect(data).to.be.equal(links.deployer);
+        expect(data.campaignPublicLinkKey).to.be.equal(links.deployer);
     }).timeout(60000);
 
 

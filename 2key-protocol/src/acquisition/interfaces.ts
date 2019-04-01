@@ -80,10 +80,10 @@ export interface ITwoKeyAcquisitionCampaign {
     _getLogicHandlerInstance: (campaign: any) => Promise<any>,
     _getLockupContractInstance: (lockupContract: any) => Promise<any>,
     estimateCreation: (data: IAcquisitionCampaign, from: string) => Promise<number>,
-    create: (data: IAcquisitionCampaign, from: string, opts?: ICreateOpts) => Promise<IAcquisitionCampaignMeta>,
+    create: (data: IAcquisitionCampaign, publicMeta:any, privateMeta:any, from: string, opts?: ICreateOpts) => Promise<IAcquisitionCampaignMeta>,
     updateOrSetIpfsHashPublicMeta: (campaign: any, hash: string, from: string, gasPrice?: number) => Promise<string>,
     setPrivateMetaHash: (campaign: any, data: any, from:string) => Promise<string>,
-    getPrivateMetaHash: (campaign: any, from: string) => Promise<string>,
+    getPrivateMetaHash: (campaign: any, from: string) => Promise<IPrivateMetaInformation>,
     getPublicMeta: (campaign: any, from?: string) => Promise<any>,
     checkInventoryBalance: (campaign: any, from: string) => Promise<number | string | BigNumber>,
     getInventoryBalance: (campaign: any, from: string) => Promise<number | string | BigNumber>,
@@ -135,6 +135,10 @@ export interface ITwoKeyAcquisitionCampaign {
     getNonSingletonsHash: () => string,
     getInventoryStatus: (campaign:any) => Promise<IInventoryStatus>,
     testRecover: (campaign:string) => Promise<string>
+}
+
+export interface IPrivateMetaInformation {
+    campaignPublicLinkKey: string
 }
 
 export interface IGetStatsOpts {

@@ -11,7 +11,7 @@ import {
     ITwoKeyAcquisitionCampaign,
     ILockupInformation,
     IPublicMeta,
-    IOffchainData, IContractorBalance, IGetStatsOpts, IInventoryStatus,
+    IOffchainData, IContractorBalance, IGetStatsOpts, IInventoryStatus, IPrivateMetaInformation,
 } from './interfaces';
 
 import { BigNumber } from 'bignumber.js/bignumber';
@@ -248,19 +248,21 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @param {number} timeout
      * @returns {Promise<IAcquisitionCampaignMeta>}
      */
-    public create(data: IAcquisitionCampaign, from: string, {progressCallback, gasPrice, interval, timeout = 60000}: ICreateOpts = {}): Promise<IAcquisitionCampaignMeta> {
+    public create(data: IAcquisitionCampaign, publicMeta:any, privateMeta:any, from: string, {progressCallback, gasPrice, interval, timeout = 60000}: ICreateOpts = {}): Promise<IAcquisitionCampaignMeta> {
         return new Promise(async (resolve, reject) => {
             try {
                 if (this.nonSingletonsHash !== this.base.nonSingletonsHash) {
                     reject(new Error('To start new campaign please switch to latest version of AcquisitionSubmodule'));
                     return;
                 }
-                let txHash: string;
                 const symbol = await this.erc20.getERC20Symbol(data.assetContractERC20);
                 if (!symbol) {
                     reject('Invalid ERC20 address');
                     return;
                 }
+
+
+                console.log('Adding public meta to ipfs');
 
 
                 let addresses = [
@@ -299,12 +301,35 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                     );
 
 
-                const campaignPublicLinkKey = await this.join(campaignAddress, from, {gasPrice, progressCallback, interval, timeout});
+                const {link, public_address} = await this.generateContractorPublicLink(campaignAddress, from, progressCallback);
+
+                const campaignPublicLinkKey = link;
+
+                //Creating private meta hash
+                const privateMetaHash = await this.createPrivateMetaHash({...privateMeta, campaignPublicLinkKey}, from);
+
+                //Stringify object and create public meta hash
+                const dataString = typeof data === 'string' ? data : JSON.stringify(publicMeta);
+                const publicMetaHash = await this.utils.ipfsAdd(dataString);
+
+
+                const {txHash, plasmaTxHash} = await this.addKeysAndMetadataToContract(campaignAddress, publicMetaHash, privateMetaHash, public_address, from);
+
+
 
                 if (progressCallback) {
-                    progressCallback('SetPublicLinkKey', true, campaignPublicLinkKey);
+                    progressCallback('SetPublicLinkKeyAndMetaData', false, txHash);
                 }
 
+
+                const promises = [
+                    this.utils.getTransactionReceiptMined(txHash, {web3: this.base.web3, interval, timeout})
+                ];
+                if(plasmaTxHash) {
+                    promises.push(this.utils.getTransactionReceiptMined(plasmaTxHash,{web3: this.base.plasmaWeb3, interval, timeout}));
+                }
+
+                await Promise.all(promises);
 
                 resolve({
                     contractor: from,
@@ -559,15 +584,14 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @param {string} from
      * @returns {Promise<any>}
      */
-    public addKeysAndMetadataToContract(campaign: any, publicMetaHash: string, private_data: any, publicLink:string, from: string) : Promise<string> {
+    public addKeysAndMetadataToContract(campaign: any, publicMetaHash: string, privateMetaHash: string, publicLink:string, from: string) : Promise<any> {
         return new Promise<any>(async(resolve,reject) => {
             try {
-                //Create private meta hash
-                let privateMetaHash:string = await this.createPrivateMetaHash(private_data, from);
 
                 //Validate in any case the arguments are all properly set
-                if(publicMetaHash.length == 46 && privateMetaHash.length == 46 && publicLink.length == 42) {
+                if(publicMetaHash.length == 46 && privateMetaHash.length == 46) {
                     const campaignInstance = await this._getCampaignInstance(campaign);
+                    console.log(publicMetaHash,privateMetaHash, publicLink);
                     let txHash = await promisify(campaignInstance.startCampaignWithInitialParams, [
                             publicMetaHash,
                             privateMetaHash,
@@ -576,7 +600,20 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                             from
                         }
                     ]);
-                    resolve(txHash);
+
+                    let plasmaTxHash;
+                    try {
+                        plasmaTxHash = await this.helpers._awaitPlasmaMethod(promisify(this.base.twoKeyPlasmaEvents.setPublicLinkKey, [
+                            campaignInstance.address,
+                            from,
+                            publicLink,
+                            {from: this.base.plasmaAddress}
+                        ]));
+                    } catch (e) {
+                        this.base._log('Plasma setPublicLinkKey error', e);
+                    }
+
+                    resolve({txHash,plasmaTxHash});
                 } else {
                     reject("Some of the arguments are not in goot format");
                     return;
@@ -601,9 +638,9 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 const dataString = typeof data === 'string' ? data : JSON.stringify(data);
 
                 //Encrypt the string
-                let encryptedString = await this.sign.encrypt(this.base.web3, from, dataString, {plasma:false});
+                let encryptedData = await this.sign.encrypt(this.base.web3, from, dataString, {plasma:false});
 
-                const hash = await this.utils.ipfsAdd(encryptedString);
+                const hash = await this.utils.ipfsAdd(encryptedData);
 
                 console.log('Hash sent to contract is: ' + hash);
                 resolve(hash);
@@ -702,6 +739,40 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 resolve(publicLink);
             } catch (e) {
                 reject(e)
+            }
+        })
+    }
+
+    public generateContractorPublicLink(campaign: any, from: string, progressCallback?: any): Promise<any> {
+        return new Promise<any>(async(resolve,reject) => {
+            try {
+                const campaignAddress = typeof (campaign) === 'string' ? campaign
+                    : (await this._getCampaignInstance(campaign)).address;
+                const i = 1;
+                const plasmaAddress = this.base.plasmaAddress;
+                const msg = `0xdeadbeef${campaignAddress.slice(2)}${plasmaAddress.slice(2)}${i.toString(16)}`;
+                const signedMessage = await this.sign.sign_message(this.base.plasmaWeb3, msg, plasmaAddress, { plasma: true });
+                const private_key = this.base.web3.sha3(signedMessage).slice(2, 2 + 32 * 2);
+                const public_address = '0x'+this.sign.privateToPublic(Buffer.from(private_key, 'hex'));
+
+                const linkObject: IOffchainData = {
+                    campaign: campaignAddress,
+                    campaign_web3_address: campaignAddress,
+                    'contractor': from,
+                    f_address: plasmaAddress,
+                    f_secret: private_key,
+                    ephemeralContractsVersion: this.nonSingletonsHash,
+                    campaign_type: 'acquisition'
+                };
+
+                const link = await this.utils.ipfsAdd(linkObject);
+
+                if (progressCallback) {
+                    progressCallback('Contractor ipfsAdd Link object', true, link);
+                }
+                resolve({link,public_address});
+            } catch (e) {
+                reject(e);
             }
         })
     }
@@ -1696,12 +1767,11 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
      * @param {string} from
      * @returns {Promise<string>}
      */
-    public getPrivateMetaHash(campaign: any, from: string) : Promise<string> {
-        return new Promise<string>(async(resolve,reject) => {
+    public getPrivateMetaHash(campaign: any, from: string) : Promise<IPrivateMetaInformation> {
+        return new Promise<IPrivateMetaInformation>(async(resolve,reject) => {
             try {
                 const acquisitionCampaignInstance = await this._getCampaignInstance(campaign);
                 let ipfsHash: string = await promisify(acquisitionCampaignInstance.privateMetaHash,[{from}]);
-                console.log('Hash taken from contract is: ' + ipfsHash);
 
                 let contractor: string = await promisify(acquisitionCampaignInstance.contractor,[]);
 
@@ -1711,10 +1781,11 @@ export default class AcquisitionCampaign implements ITwoKeyAcquisitionCampaign {
                 } else {
                     let privateHashEncrypted = await promisify(this.base.ipfsR.cat, [ipfsHash]);
                     privateHashEncrypted = privateHashEncrypted.toString();
-                    console.log(privateHashEncrypted);
+
 
                     let privateMetaHashDecrypted = await this.sign.decrypt(this.base.web3,from,privateHashEncrypted,{plasma : false});
-                    resolve(privateMetaHashDecrypted.slice(2)); //remove 0x from the beginning
+
+                    resolve(JSON.parse(privateMetaHashDecrypted.slice(2)));
                 }
             } catch (e) {
                 reject(e);
