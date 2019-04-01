@@ -2,6 +2,7 @@ pragma solidity ^0.4.24;
 
 import '../Upgradeable.sol';
 import "../UpgradabilityProxy.sol";
+import "../UpgradabilityProxyAcquisition.sol";
 import "../MaintainingPattern.sol";
 
 import '../interfaces/ITwoKeySingletonesRegistry.sol';
@@ -18,7 +19,6 @@ import "../interfaces/ITwoKeyCampaignValidator.sol";
 contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegistry {
 
     mapping (string => mapping(string => address)) internal versions;
-    mapping (string => mapping(string => address)) internal campaignVersions;
 
 
     mapping (string => address) contractToProxy;
@@ -68,9 +68,6 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
         emit VersionAdded(version, implementation);
     }
 
-
-    //TODO: Create separate method and storage to handle acquisition campaign deployments , versions, etc
-    // Because we can't mess up with versions especially since they're going to be maybe upgradable upon a handshake
     /**
      * @dev Tells the address of the implementation for a given version
      * @param version to query the implementation of
@@ -79,6 +76,7 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
     function getVersion(string contractName, string version) public view returns (address) {
         return versions[contractName][version];
     }
+
 
     /**
      * @notice Gets the latest contract version
@@ -141,15 +139,15 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
         // Deploy proxies for all 3 contracts
         //TODO: Versions are now hardcoded to 1.0, maybe to get dynamically always the latest version, but store the old ones
         //Deploy proxy for Acquisition contract
-        UpgradeabilityProxy proxyAcquisition = new UpgradeabilityProxy("TwoKeyAcquisitionCampaignERC20", "1.0");
+        UpgradabilityProxyAcquisition proxyAcquisition = new UpgradabilityProxyAcquisition("TwoKeyAcquisitionCampaignERC20", "1.0");
         Upgradeable(proxyAcquisition).initialize.value(msg.value)(msg.sender);
 
         //Deploy proxy for ConversionHandler contract
-        UpgradeabilityProxy proxyConversions = new UpgradeabilityProxy("TwoKeyConversionHandler", "1.0");
+        UpgradabilityProxyAcquisition proxyConversions = new UpgradabilityProxyAcquisition("TwoKeyConversionHandler", "1.0");
         Upgradeable(proxyConversions).initialize.value(msg.value)(msg.sender);
 
         //Deploy proxy for LogicHandlerContract
-        UpgradeabilityProxy proxyLogicHandler = new UpgradeabilityProxy("TwoKeyAcquisitionLogicHandler", "1.0");
+        UpgradabilityProxyAcquisition proxyLogicHandler = new UpgradabilityProxyAcquisition("TwoKeyAcquisitionLogicHandler", "1.0");
         Upgradeable(proxyLogicHandler).initialize.value(msg.value)(msg.sender);
 
 

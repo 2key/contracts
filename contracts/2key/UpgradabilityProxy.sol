@@ -23,8 +23,6 @@ contract UpgradeabilityProxy is Proxy, UpgradeabilityStorage {
     * @param _version representing the version name of the new implementation to be set
     */
     function upgradeTo(string _contractName, string _version) public {
-        //TODO: Create separate funnel if the campaign is acquisition where both sides must agree on upgrade
-        // or disallow upgrading campaigns completely
         _implementation = registry.getVersion(_contractName, _version);
     }
 

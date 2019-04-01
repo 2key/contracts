@@ -25,8 +25,9 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable {
     address public twoKeySingletoneRegistry;
     address public twoKeyAcquisitionCampaign;
     address public twoKeyConversionHandler;
-    address twoKeyRegistry;
     address public ownerPlasma;
+
+    address twoKeyRegistry;
 
     address twoKeyEventSource;
     address assetContractERC20;
@@ -130,6 +131,7 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable {
      * @dev validates if msg.Value is in interval of [minContribution, maxContribution]
      */
     function requirementForMsgValue(uint msgValue) public view returns (bool) {
+        require(isAcceptingFiatOnly == false); //This should throw and user will not be able to convert otherwise
         //TODO: Add timestamp validation -> conversions
         if(keccak256(currency) == keccak256('ETH')) {
             require(msgValue >= minContributionETHorFiatCurrency);

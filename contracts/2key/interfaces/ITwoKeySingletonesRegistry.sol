@@ -5,6 +5,7 @@ pragma solidity ^0.4.24;
  * @dev This contract represents the interface of a registry contract
  */
 interface ITwoKeySingletonesRegistry {
+
     /**
     * @dev This event will be emitted every time a new proxy is created
     * @param proxy representing the address of the proxy created
@@ -28,6 +29,7 @@ interface ITwoKeySingletonesRegistry {
 
     /**
     * @dev Tells the address of the implementation for a given version
+    * @param _contractName is the name of the contract we're querying
     * @param version to query the implementation of
     * @return address of the implementation registered for the given version
     */
