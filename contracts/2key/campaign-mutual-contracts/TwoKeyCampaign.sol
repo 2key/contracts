@@ -26,6 +26,7 @@ contract TwoKeyCampaign is ArcERC20 {
 	address public contractor; //contractor address
 	address public moderator; //moderator address
 
+	unit256 campaignCreationTime; //
 
 	uint256 conversionQuota;  // maximal ARC tokens that can be passed in transferFrom
 	uint256 contractorBalance; // Contractor balance
@@ -255,8 +256,16 @@ contract TwoKeyCampaign is ArcERC20 {
  	 * @param _address is the address we're withdrawing funds to
  	 * @dev It can be called by the address specified in the param or by the one of two key maintainers
  	 */
+
+	function changeRewardsUnfreezingDate(uint _secondsToAddForCurrUnfreezingDate) public onlyMaintainer {
+        require(creationTimeStamp+maxFreezingTimeSeconds > secondTillUnfreeze2keyRewards + _secondsToAddForCurrUnfreezingDate);
+        secondTillUnfreeze2keyRewards += _secondsToAddForCurrUnfreezingDate;
+    }
+
+
 	function referrerWithdraw(address _address) public {
 		require(msg.sender == _address || twoKeyEventSource.isAddressMaintainer(msg.sender));
+		require(.)
 		uint balance;
 		address _referrer = twoKeyEventSource.plasmaOf(_address);
 		if(referrerPlasma2Balances2key[_referrer] != 0) {
