@@ -72,7 +72,6 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable {
         require(values[0] > 0,"min contribution criteria not satisfied");
         require(values[1] >= values[0], "max contribution criteria not satisfied");
         require(values[4] > values[3], "campaign start time can't be greater than end time");
-        require(values[5] > 0, "max converter bonus percent should be 0");
         require(isCampaignInitialized == false);
 
         if(values[0] == values[1]) {

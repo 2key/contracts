@@ -19,7 +19,7 @@ const delay = env.TEST_DELAY;
 // const destinationAddress = env.DESTINATION_ADDRESS  || '0xd9ce6800b997a0f26faffc0d74405c841dfc64b7'
 console.log(mainNetId);
 const addressRegex = /^0x[a-fA-F0-9]{40}$/;
-const maxConverterBonusPercent = 23;
+const maxConverterBonusPercent = 20;
 const pricePerUnitInETHOrUSD = 5;
 const maxReferralRewardPercent = 15;
 const moderatorFeePercentage = 1;
