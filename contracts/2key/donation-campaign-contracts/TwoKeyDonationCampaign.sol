@@ -350,7 +350,7 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         require(block.timestamp > campaignEndTime); //Making sure time has expired
         require(msg.sender == _address);
 
-        super.withdrawModeratorOrReferrer(_address);
+//        super.withdrawModeratorOrReferrer(_address);
     }
 
 }

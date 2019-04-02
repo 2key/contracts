@@ -21,7 +21,7 @@ contract TwoKeyAdmin is Upgradeable {
 	address public newTwoKeyAdminAddress;
 
 	uint twoKeyIntegratorDefaultFeePercent; // 2% is default value for this
-	uint twoKeyNetworkTaxPercent;
+	uint twoKeyNetworkTaxPercent; //2% is default value for this
 
     bool initialized = false;
 

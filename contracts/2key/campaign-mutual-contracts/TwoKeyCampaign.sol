@@ -31,8 +31,7 @@ contract TwoKeyCampaign is ArcERC20 {
 	uint256 contractorBalance; // Contractor balance
 	uint256 contractorTotalProceeds; // Contractor total earnings
 	uint256 maxReferralRewardPercent; // maxReferralRewardPercent is actually bonus percentage in ETH
-    uint256 moderatorBalanceETHWei; //Balance of the moderator which can be withdrawn
-	uint256 moderatorTotalEarningsETHWei; //Total earnings of the moderator all time
+	uint256 moderatorTotalEarnings2key; //Total earnings of the moderator all time
 	uint256 reservedAmount2keyForRewards; //Reserved amount of 2key tokens for rewards distribution
 
 	string public publicMetaHash; // Ipfs hash of json campaign object
@@ -220,9 +219,9 @@ contract TwoKeyCampaign is ArcERC20 {
      * @dev only contractor or moderator are eligible to call this function
      * @return value of his balance in ETH
      */
-    function getModeratorBalanceAndTotalEarnings() public view returns (uint,uint) {
+    function getModeratorTotalEarnings() public view returns (uint) {
         require(msg.sender == contractor);
-        return (moderatorBalanceETHWei,moderatorTotalEarningsETHWei);
+        return (moderatorTotalEarnings2key);
     }
 
     /**
@@ -256,30 +255,17 @@ contract TwoKeyCampaign is ArcERC20 {
  	 * @param _address is the address we're withdrawing funds to
  	 * @dev It can be called by the address specified in the param or by the one of two key maintainers
  	 */
-	function withdrawModeratorOrReferrer(address _address) public {
+	function referrerWithdraw(address _address) public {
 		require(msg.sender == _address || twoKeyEventSource.isAddressMaintainer(msg.sender));
 		uint balance;
-		if(_address == moderator) {
-			address twoKeyDeepFreezeTokenPool =
-				ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry)
-				.getContractProxyAddress("TwoKeyDeepFreezeTokenPool");
-
-			uint integratorFee = twoKeyEventSource.getTwoKeyDefaultIntegratorFeeFromAdmin();
-			balance = moderatorBalanceETHWei.mul(100-integratorFee).div(100);
-			uint networkFee = moderatorBalanceETHWei.mul(integratorFee).div(100);
-			moderatorBalanceETHWei = 0;
-			buyTokensFromUpgradableExchange(balance,_address);
-			buyTokensFromUpgradableExchange(networkFee,twoKeyDeepFreezeTokenPool);
+		address _referrer = twoKeyEventSource.plasmaOf(_address);
+		if(referrerPlasma2Balances2key[_referrer] != 0) {
+			balance = referrerPlasma2Balances2key[_referrer];
+			referrerPlasma2Balances2key[_referrer] = 0;
+			IERC20(twoKeyEconomy).transfer(_address,balance);
+			reservedAmount2keyForRewards -= balance;
 		} else {
-			address _referrer = twoKeyEventSource.plasmaOf(_address);
-			if(referrerPlasma2Balances2key[_referrer] != 0) {
-				balance = referrerPlasma2Balances2key[_referrer];
-				referrerPlasma2Balances2key[_referrer] = 0;
-				IERC20(twoKeyEconomy).transfer(_address,balance);
-				reservedAmount2keyForRewards -= balance;
-			} else {
-				revert();
-			}
+			revert();
 		}
 	}
 

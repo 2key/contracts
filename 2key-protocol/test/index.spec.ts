@@ -992,6 +992,11 @@ describe('TwoKeyProtocol', () => {
         expect(addresses.length).to.be.equal(1);
     }).timeout(60000);
 
+    it('should show moderator earnings', async() => {
+        let moderatorTotalEarnings = await twoKeyProtocol.AcquisitionCampaign.getModeratorTotalEarnings(campaignAddress, from);
+        console.log('Moderator total earnings in 2key-tokens are: ' + moderatorTotalEarnings);
+    }).timeout(60000);
+
     it('should pull down base tokens amount from lockup from maintainer address', async() => {
         const {web3, address} = web3switcher.aydnep();
         from = address;
@@ -1034,8 +1039,7 @@ describe('TwoKeyProtocol', () => {
 
         const contractorBalance = await twoKeyProtocol.AcquisitionCampaign.getContractorBalance(campaignAddress,from);
         console.log('Contractor balance: ' + contractorBalance.available);
-        const moderatorBalance = await twoKeyProtocol.AcquisitionCampaign.getModeratorBalance(campaignAddress,from);
-        console.log('Moderator balance: ' + moderatorBalance);
+
         const hash = await twoKeyProtocol.AcquisitionCampaign.contractorWithdraw(campaignAddress,from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(hash);
     }).timeout(60000);
@@ -1061,13 +1065,6 @@ describe('TwoKeyProtocol', () => {
         console.log("Moderator address is: " + moderatorAddress);
         expect(moderatorAddress).to.be.equal('0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7');
     }).timeout(60000);
-
-    it('==> should moderator withdraw his balances in 2key-tokens', async() => {
-        const txHash = await twoKeyProtocol.AcquisitionCampaign.moderatorAndReferrerWithdraw(campaignAddress,from);
-        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-        console.log(txHash);
-    }).timeout(60000);
-
 
     it('==> should referrer withdraw his balances in 2key-tokens', async() => {
         const {web3, address} = web3switcher.renata();

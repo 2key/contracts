@@ -250,6 +250,24 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
         return totalBounty2keys;
     }
 
+
+    function buyTokensForModeratorRewards(uint moderatorFee) public onlyTwoKeyConversionHandler returns (uint) {
+        //Get deep freeze token pool address
+        address twoKeyDeepFreezeTokenPool =
+        ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry)
+        .getContractProxyAddress("TwoKeyDeepFreezeTokenPool");
+
+        uint networkFee = twoKeyEventSource.getTwoKeyDefaultNetworkTaxPercent();
+
+        // Balance which will go to modrator
+        uint balance = moderatorFee.mul(100-networkFee).div(100);
+
+        uint moderatorEarnings2key = buyTokensFromUpgradableExchange(balance,moderator); // Buy tokens for moderator
+        buyTokensFromUpgradableExchange(moderatorFee - balance, twoKeyDeepFreezeTokenPool); // Buy tokens for deep freeze token pool
+
+        moderatorTotalEarnings2key = moderatorTotalEarnings2key.add(moderatorEarnings2key);
+    }
+
     /**
      * @notice Function to send ether back to converter if his conversion is cancelled
      * @param _cancelledConverter is the address of cancelled converter
@@ -269,15 +287,6 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
      */
     function moveFungibleAsset(address _to, uint256 _amount) public onlyTwoKeyConversionHandler {
         require(IERC20(assetContractERC20).transfer(_to,_amount));
-    }
-
-    /**
-     * @notice Function to update moderator balance and total earnings by conversion handler at the moment of conversion execution
-     * @param _value is the value added
-     */
-    function updateModeratorBalanceETHWei(uint _value) public onlyTwoKeyConversionHandler {
-        moderatorBalanceETHWei = moderatorBalanceETHWei.add(_value);
-        moderatorTotalEarningsETHWei = moderatorTotalEarningsETHWei.add(_value);
     }
 
 

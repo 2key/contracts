@@ -189,4 +189,12 @@ contract TwoKeyEventSource is Upgradeable, MaintainingPattern {
         uint integratorFeePercentage = ITwoKeyAdmin(twoKeyAdmin).getDefaultIntegratorFeePercent();
         return integratorFeePercentage;
     }
+
+    /**
+     * @notice Function to get default network tax percentage
+     */
+    function getTwoKeyDefaultNetworkTaxPercent() public view returns (uint) {
+        uint networkTaxPercent = ITwoKeyAdmin(twoKeyAdmin).getDefaultNetworkTaxPercent();
+        return networkTaxPercent;
+    }
 }
