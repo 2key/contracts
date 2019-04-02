@@ -62,7 +62,8 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
      * @param implementation representing the address of the new implementation to be registered
      */
     function addVersion(string contractName, string version, address implementation) public onlyMaintainer {
-        require(versions[contractName][version] == 0x0);
+//        require(versions[contractName][version] == 0x0);
+        //TODO: Uncomment once we are done with patching
         versions[contractName][version] = implementation;
         contractNameToLatestVersionName[contractName] = version;
         emit VersionAdded(version, implementation);
