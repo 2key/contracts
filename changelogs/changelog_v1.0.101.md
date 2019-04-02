@@ -19,4 +19,13 @@ export interface IAcquisitionCampaignMeta {
 * public addKeysAndMetadataToContract(campaign: any, publicMetaHash: string, privateMetaHash: string, publicLink:string, from: string) : Promise<any>
 * getModeratorBalance - deleted
 * (+) included ERC20 submodule to handle almost all ERC20 functions
+* singletonRegistry/index.ts
+* public createProxiesForAcquisitions(addresses: string[],valuesConversion: number[],valuesLogicHandler: any[],valuesCampaign: any[],currency: string,nonSingletonHash: string,from: string) : Promise<any> 
+```
+resolve({
+'campaignAddress': proxyAcquisition,
+'conversionHandlerAddress': proxyConversion,
+'twoKeyAcquisitionLogicHandlerAddress': proxyLogic
+});
+```
 
