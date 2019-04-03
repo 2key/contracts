@@ -24,6 +24,7 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
 
     bool isCampaignInitialized;
 
+    bool isKYCRequired;
     event ConversionCreated(uint conversionId);
     uint numberOfConversions;
 
@@ -120,6 +121,11 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
         maxDistributionDateShiftInDays = values[2];
         bonusTokensVestingMonths = values[3];
         bonusTokensVestingStartShiftInDaysFromDistributionDate = values[4];
+
+        if(values[5] == 1) {
+            //Since declaration defaults to false, only if values[5] is 1 means we want or don't KYC
+            isKYCRequired = true;
+        }
 
         twoKeyAcquisitionCampaignERC20 = _twoKeyAcquisitionCampaignERC20;
         contractor = _contractor;

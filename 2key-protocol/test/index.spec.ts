@@ -30,6 +30,7 @@ const campaignStartTime = Math.round(new Date(now.valueOf()).setDate(now.getDate
 const campaignEndTime = Math.round(new Date(now.valueOf()).setDate(now.getDate() + 30) / 1000);
 const twoKeyEconomy = singletons.TwoKeyEconomy.networks[mainNetId].address;
 const twoKeyAdmin = singletons.TwoKeyAdmin.networks[mainNetId].address;
+const isKYCRequired = false;
 
 function makeHandle(max: number = 8): string {
     let text = '';
@@ -486,8 +487,10 @@ describe('TwoKeyProtocol', () => {
             tokenDistributionDate: 1,
             maxDistributionDateShiftInDays: 180,
             bonusTokensVestingMonths: 6,
-            bonusTokensVestingStartShiftInDaysFromDistributionDate: 180
+            bonusTokensVestingStartShiftInDaysFromDistributionDate: 180,
+            isKYCRequired
         };
+
         const campaign = await twoKeyProtocol.AcquisitionCampaign.create(campaignData, campaignData, {} , from, {
             progressCallback,
             gasPrice: 150000000000,
