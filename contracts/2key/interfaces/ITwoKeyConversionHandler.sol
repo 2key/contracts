@@ -9,8 +9,12 @@ contract ITwoKeyConversionHandler {
         uint256 baseTokensForConverterUnits,
         uint256 bonusTokensForConverterUnits,
         bool isConversionFiat,
-        bool isAnonymous
-    ) external;
+        bool _isAnonymous,
+        bool _isKYCRequired
+    )
+    public returns (uint);
+
+    function executeConversion(uint _conversionId) public;
 
 
     function setTwoKeyAcquisitionCampaignERC20(

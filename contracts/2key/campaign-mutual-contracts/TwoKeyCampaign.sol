@@ -26,6 +26,7 @@ contract TwoKeyCampaign is ArcERC20 {
 	address public contractor; //contractor address
 	address public moderator; //moderator address
 
+	bool isKYCRequired;
 
 	uint256 conversionQuota;  // maximal ARC tokens that can be passed in transferFrom
 	uint256 contractorBalance; // Contractor balance

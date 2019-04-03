@@ -30,7 +30,7 @@ const campaignStartTime = Math.round(new Date(now.valueOf()).setDate(now.getDate
 const campaignEndTime = Math.round(new Date(now.valueOf()).setDate(now.getDate() + 30) / 1000);
 const twoKeyEconomy = singletons.TwoKeyEconomy.networks[mainNetId].address;
 const twoKeyAdmin = singletons.TwoKeyAdmin.networks[mainNetId].address;
-const isKYCRequired = false;
+const isKYCRequired = true;
 
 function makeHandle(max: number = 8): string {
     let text = '';
@@ -941,10 +941,12 @@ describe('TwoKeyProtocol', () => {
     */
 
     it('should be executed conversion by contractor' ,async() => {
-        let conversionIdsForGmail2 = await twoKeyProtocol.AcquisitionCampaign.getConverterConversionIds(campaignAddress, env.GMAIL2_ADDRESS, from);
-        console.log('Conversion ids for Gmail2:', conversionIdsForGmail2);
-        const txHash = await twoKeyProtocol.AcquisitionCampaign.executeConversion(campaignAddress, conversionIdsForGmail2[0], from);
-        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        if(isKYCRequired) {
+            let conversionIdsForGmail2 = await twoKeyProtocol.AcquisitionCampaign.getConverterConversionIds(campaignAddress, env.GMAIL2_ADDRESS, from);
+            console.log('Conversion ids for Gmail2:', conversionIdsForGmail2);
+            const txHash = await twoKeyProtocol.AcquisitionCampaign.executeConversion(campaignAddress, conversionIdsForGmail2[0], from);
+            await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        }
     }).timeout(60000);
 
     it('should print campaigns where user converter', async() => {
@@ -975,8 +977,10 @@ describe('TwoKeyProtocol', () => {
             eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_TEST4).privateKey,
         });
-        const txHash = await twoKeyProtocol.AcquisitionCampaign.executeConversion(campaignAddress, 0, from);
-        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        if(isKYCRequired) {
+            const txHash = await twoKeyProtocol.AcquisitionCampaign.executeConversion(campaignAddress, 0, from);
+            await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        }
     }).timeout(60000);
 
     it('should show campaign summary', async() => {

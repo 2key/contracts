@@ -22,7 +22,6 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
 
     bool isCampaignInitialized;
 
-    bool isKYCRequired;
     event ConversionCreated(uint conversionId);
     uint numberOfConversions;
 
@@ -106,11 +105,6 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
         bonusTokensVestingMonths = values[3];
         bonusTokensVestingStartShiftInDaysFromDistributionDate = values[4];
 
-        if(values[5] == 1) {
-            //Since declaration defaults to false, only if values[5] is 1 means we want or don't KYC
-            isKYCRequired = true;
-        }
-
         // Instance of interface
         twoKeyAcquisitionCampaignERC20 = ITwoKeyAcquisitionCampaignERC20(_twoKeyAcquisitionCampaignERC20);
 
@@ -145,12 +139,16 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
         uint256 baseTokensForConverterUnits,
         uint256 bonusTokensForConverterUnits,
         bool isConversionFiat,
-        bool _isAnonymous
-    ) public {
+        bool _isAnonymous,
+        bool _isKYCRequired
+    )
+    public
+    returns (uint)
+    {
         require(msg.sender == address(twoKeyAcquisitionCampaignERC20));
 
         //If KYC is required, basic funnel executes and we require that converter is not previously rejected
-        if(isKYCRequired == true) {
+        if(_isKYCRequired == true) {
             require(converterToState[_converterAddress] != ConverterState.REJECTED); // If converter is rejected then can't create conversion
         } else {
             //If this is his 1st time, we immediatelly approve him, otherwise he will always be approved after 1st time
@@ -204,6 +202,8 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
             converterToState[_converterAddress] = ConverterState.PENDING_APPROVAL;
             stateToConverter[bytes32("PENDING_APPROVAL")].push(_converterAddress);
         }
+
+        return numberOfConversions-1;
     }
 
 
@@ -223,7 +223,7 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
             require(conversion.state == ConversionState.PENDING_APPROVAL);
             counters[0]--; //Decrease number of pending conversions
         } else {
-            require(msg.sender == conversion.converter || msg.sender == contractor);
+//            require(msg.sender == conversion.converter || msg.sender == contractor);
             require(conversion.state == ConversionState.APPROVED);
             counters[1]--; //Decrease number of approved conversions
         }
@@ -425,6 +425,10 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
     function getConverterConversionIds(address _converter) public view returns (uint[]) {
 //        require(msg.sender == contractor || ITwoKeyEventSource(twoKeyEventSource).isAddressMaintainer(msg.sender) || msg.sender == _converter);
         return converterToHisConversions[_converter];
+    }
+
+    function getLastConverterConversionId(address _converter) public view returns (uint) {
+        return converterToHisConversions[_converter][converterToHisConversions[_converter].length - 1];
     }
 
 

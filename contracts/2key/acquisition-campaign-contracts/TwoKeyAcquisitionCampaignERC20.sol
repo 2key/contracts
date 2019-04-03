@@ -56,6 +56,11 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
         twoKeyEventSource = TwoKeyEventSource(ITwoKeySingletoneRegistryFetchAddress(_twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyEventSource"));
         twoKeyEconomy = ITwoKeySingletoneRegistryFetchAddress(_twoKeySingletonesRegistry).getNonUpgradableContractAddress("TwoKeyEconomy");
 
+        if(values[2] == 1) {
+            //Since declaration defaults to false, only if values[2] is 1 means we want KYC
+            isKYCRequired = true;
+        }
+
         ownerPlasma = twoKeyEventSource.plasmaOf(contractor);
         received_from[ownerPlasma] = ownerPlasma;
         totalSupply_ = 1000000;
@@ -217,15 +222,21 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
         require(_total_units >= totalTokensForConverterUnits);
 
         unitsConverterBought[converterAddress] = unitsConverterBought[converterAddress].add(totalTokensForConverterUnits);
-        uint256 maxReferralRewardETHWei = 0;
+
+        uint256 maxReferralRewardETHWei;
+
         if(isFiatConversion == false) {
             maxReferralRewardETHWei = conversionAmountETHWeiOrFiat.mul(maxReferralRewardPercent).div(100);
             reservedAmountOfTokens = reservedAmountOfTokens + totalTokensForConverterUnits;
         }
 
-        ITwoKeyConversionHandler(conversionHandler).supportForCreateConversion(contractor, converterAddress,
+        uint id = ITwoKeyConversionHandler(conversionHandler).supportForCreateConversion(contractor, converterAddress,
             conversionAmountETHWeiOrFiat, maxReferralRewardETHWei,
-            baseTokensForConverterUnits,bonusTokensForConverterUnits, isFiatConversion, isAnonymous);
+            baseTokensForConverterUnits,bonusTokensForConverterUnits, isFiatConversion, isAnonymous, isKYCRequired);
+
+        if(isKYCRequired == false && isFiatConversion == false) {
+            ITwoKeyConversionHandler(conversionHandler).executeConversion(id);
+        }
     }
 
     /**
