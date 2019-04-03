@@ -236,18 +236,21 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
         address _converter,
         uint _conversionId
     ) public onlyTwoKeyConversionHandler returns (uint){
-        //Buy tokens from upgradable exchange
-        uint totalBounty2keys = buyTokensFromUpgradableExchange(_maxReferralRewardETHWei, address(this));
-        // Update reserved amount
-        reservedAmount2keyForRewards = reservedAmount2keyForRewards.add(totalBounty2keys);
-        //Handle refchain rewards
-        ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).updateRefchainRewards(
-            _maxReferralRewardETHWei,
-            _converter,
-            _conversionId,
-            totalBounty2keys);
+        if(maxReferralRewardPercent > 0) {
+            //Buy tokens from upgradable exchange
+            uint totalBounty2keys = buyTokensFromUpgradableExchange(_maxReferralRewardETHWei, address(this));
+            // Update reserved amount
+            reservedAmount2keyForRewards = reservedAmount2keyForRewards.add(totalBounty2keys);
+            //Handle refchain rewards
+            ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).updateRefchainRewards(
+                _maxReferralRewardETHWei,
+                _converter,
+                _conversionId,
+                totalBounty2keys);
 
-        return totalBounty2keys;
+            return totalBounty2keys;
+        }
+        return 0;
     }
 
 

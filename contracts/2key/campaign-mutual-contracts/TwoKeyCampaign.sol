@@ -264,8 +264,6 @@ contract TwoKeyCampaign is ArcERC20 {
 			referrerPlasma2Balances2key[_referrer] = 0;
 			IERC20(twoKeyEconomy).transfer(_address,balance);
 			reservedAmount2keyForRewards -= balance;
-		} else {
-			revert();
 		}
 	}
 
