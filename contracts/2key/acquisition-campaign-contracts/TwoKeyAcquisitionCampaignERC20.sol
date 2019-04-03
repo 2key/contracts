@@ -47,7 +47,7 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
         address _contractor,
         uint [] values
     ) public {
-        require(isCampaignInitialized == false);
+        require(isCampaignInitialized == false); // Security layer to make sure the function will act as a constructor
 
         contractor = _contractor;
         moderator = _moderator;

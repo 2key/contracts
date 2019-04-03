@@ -51,7 +51,6 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
     mapping(address => ConverterState) converterToState; //Converter to his state
     mapping(address => bool) isConverterAnonymous;
     mapping(address => address[]) converterToLockupContracts;
-    mapping(uint => address) conversionId2LockupAddress;
 
 
     address twoKeyEventSource;
@@ -81,6 +80,7 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
         uint256 conversionCreatedAt; // When conversion is created
         uint256 conversionExpiresAt; // When conversion expires
         bool isConversionFiat;
+        address lockupAddress;
     }
 
     modifier onlyContractorOrMaintainer {
@@ -148,18 +148,31 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
         bool _isAnonymous
     ) public {
         require(msg.sender == address(twoKeyAcquisitionCampaignERC20));
-        require(converterToState[_converterAddress] != ConverterState.REJECTED); // If converter is rejected then can't create conversion
+
+        //If KYC is required, basic funnel executes and we require that converter is not previously rejected
+        if(isKYCRequired == true) {
+            require(converterToState[_converterAddress] != ConverterState.REJECTED); // If converter is rejected then can't create conversion
+        } else {
+            //If this is his 1st time, we immediatelly approve him, otherwise he will always be approved after 1st time
+            if(converterToState[_converterAddress] == ConverterState.NOT_EXISTING) {
+                converterToState[_converterAddress] = ConverterState.APPROVED;
+                stateToConverter[bytes32("APPROVED")].push(_converterAddress);
+            }
+        }
+
+        // Set if converter want to be anonymous
+        isConverterAnonymous[_converterAddress] = _isAnonymous;
+
 
         uint _moderatorFeeETHWei = 0;
         uint256 _contractorProceeds = _conversionAmount; //In case of fiat conversion, this is going to be fiat value
-        ConversionState state = ConversionState.PENDING_APPROVAL;
 
-        isConverterAnonymous[_converterAddress] = _isAnonymous;
+        ConversionState state;
 
         if(isConversionFiat == false) {
             _moderatorFeeETHWei = calculateModeratorFee(_conversionAmount);
             _contractorProceeds = _conversionAmount - _maxReferralRewardETHWei - _moderatorFeeETHWei;
-            //Determine state
+            //Determine state and increment counters
             if(converterToState[_converterAddress] == ConverterState.APPROVED) {
                 state = ConversionState.APPROVED;
                 counters[1]++; //Increase number of approved conversions
@@ -167,23 +180,26 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
                 state = ConversionState.REJECTED;
                 counters[2]++; //Increase number of rejected conversions
             } else {
-                // Conversion state is still PENDING APPROVAL
+                state = ConversionState.PENDING_APPROVAL;
                 counters[0]++;
             }
         } else {
-            counters[0]++;
+            state = ConversionState.PENDING_APPROVAL;
+            counters[0]++; // If conversion is FIAT it will be always first pending and will have to be approved
         }
 
         Conversion memory c = Conversion(_contractor, _contractorProceeds, _converterAddress,
             state ,_conversionAmount, _maxReferralRewardETHWei, 0, _moderatorFeeETHWei, baseTokensForConverterUnits,
             bonusTokensForConverterUnits,
-            now, now + expiryConversionInHours * (1 hours), isConversionFiat);
+            now, now + expiryConversionInHours * (1 hours), isConversionFiat, 0x0);
 
         conversions.push(c);
+
         converterToHisConversions[_converterAddress].push(numberOfConversions);
         emit ConversionCreated(numberOfConversions);
         numberOfConversions++;
 
+        // Checking the state for converter, if this is his 1st time, he goes initially to PENDING_APPROVAL
         if(converterToState[_converterAddress] == ConverterState.NOT_EXISTING) {
             converterToState[_converterAddress] = ConverterState.PENDING_APPROVAL;
             stateToConverter[bytes32("PENDING_APPROVAL")].push(_converterAddress);
@@ -196,41 +212,59 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
      * @param _conversionId is the id
      */
     function executeConversion(uint _conversionId) public {
-        Conversion memory conversion = conversions[_conversionId];
+        Conversion conversion = conversions[_conversionId];
+
         uint totalUnits = conversion.baseTokenUnits + conversion.bonusTokenUnits;
+
         if(conversion.isConversionFiat == true) {
+            require(msg.sender == contractor); // first check who calls this in order to save gas
             uint availableTokens = twoKeyAcquisitionCampaignERC20.getAvailableAndNonReservedTokensAmount();
             require(totalUnits < availableTokens);
             require(conversion.state == ConversionState.PENDING_APPROVAL);
-            counters[0]--; //Reduce number of pending conversions
-            require(msg.sender == contractor);
+            counters[0]--; //Decrease number of pending conversions
         } else {
+            require(msg.sender == conversion.converter || msg.sender == contractor);
             require(conversion.state == ConversionState.APPROVED);
             counters[1]--; //Decrease number of approved conversions
-            require(msg.sender == conversion.converter || msg.sender == contractor);
         }
 
         /**
-         * For the lockup contracts there's no need to save to plasma address, there we'll save ethereum address
+         * Deploy Lockup contract
          */
         TwoKeyLockupContract lockupContract = new TwoKeyLockupContract(bonusTokensVestingStartShiftInDaysFromDistributionDate, bonusTokensVestingMonths, tokenDistributionDate, maxDistributionDateShiftInDays,
             conversion.baseTokenUnits, conversion.bonusTokenUnits, _conversionId, conversion.converter, conversion.contractor, assetContractERC20, twoKeyEventSource);
 
-        conversionId2LockupAddress[_conversionId] = address(lockupContract);
+
+        //Add lockup address to conversion object
+        conversion.lockupAddress = address(lockupContract);
+
+        // Transfer tokens to lockup contract
         twoKeyAcquisitionCampaignERC20.moveFungibleAsset(address(lockupContract), totalUnits);
 
-
+        // Total rewards for referrers
         uint totalReward2keys = 0;
+
         //Update total raised funds
         if(conversion.isConversionFiat == false) {
+            // Update reputation points in registry for conversion executed event
             ITwoKeyBaseReputationRegistry(twoKeyBaseReputationRegistry).updateOnConversionExecutedEvent(conversion.converter, contractor, twoKeyAcquisitionCampaignERC20);
+
+            // Buy tokens from campaign and distribute rewards between referrers
             totalReward2keys = twoKeyAcquisitionCampaignERC20.buyTokensAndDistributeReferrerRewards(conversion.maxReferralRewardETHWei, conversion.converter, _conversionId);
+
+            // Add totak rewards
             counters[8] = counters[8].add(totalReward2keys);
 
             // update moderator balances
             twoKeyAcquisitionCampaignERC20.buyTokensForModeratorRewards(conversion.moderatorFeeETHWei);
+
+            // update reserved amount of tokens on acquisition contract
             twoKeyAcquisitionCampaignERC20.updateReservedAmountOfTokensIfConversionRejectedOrExecuted(totalUnits);
+
+            // update contractor proceeds
             twoKeyAcquisitionCampaignERC20.updateContractorProceeds(conversion.contractorProceedsETHWei);
+
+            // add conversion amount to counter
             counters[6] = counters[6].add(conversion.conversionAmount);
 
         }
@@ -241,7 +275,6 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
 
         conversion.maxReferralReward2key = totalReward2keys;
         conversion.state = ConversionState.EXECUTED;
-        conversions[_conversionId] = conversion;
         converterToLockupContracts[conversion.converter].push(lockupContract);
         counters[3]++; //Increase number of executed conversions
         counters[7] = counters[7].add(totalUnits); //update sold tokens once conversion is executed
@@ -256,7 +289,6 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
         uint conversionId
     ) external view returns (bytes) {
         Conversion memory conversion = conversions[conversionId];
-        address lockup = conversionId2LockupAddress[conversionId];
         address empty = address(0);
         if(isConverterAnonymous[conversion.converter] == false) {
             empty = conversion.converter;
@@ -275,7 +307,7 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
             conversion.conversionCreatedAt,
             conversion.conversionExpiresAt,
             conversion.isConversionFiat,
-            lockup
+            conversion.lockupAddress
         );
     }
 
@@ -340,16 +372,15 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
     /// @param _converter is the address of converter
     function approveConverter(address _converter) public onlyContractorOrMaintainer {
         uint len = converterToHisConversions[_converter].length;
-//        require(>len 0);
         require(converterToState[_converter] == ConverterState.PENDING_APPROVAL);
         for(uint i=0; i<len; i++) {
             uint conversionId = converterToHisConversions[_converter][i];
-            Conversion memory c = conversions[conversionId];
+            Conversion c = conversions[conversionId];
             if(c.state == ConversionState.PENDING_APPROVAL && c.isConversionFiat == false) {
                 counters[0]--; //Reduce number of pending conversions
                 counters[1]++; //Increase number of approved conversions
                 c.state = ConversionState.APPROVED;
-                conversions[conversionId] = c;
+//                conversions[conversionId] = c;
             }
         }
         moveFromPendingOrRejectedToApprovedState(_converter);
@@ -366,13 +397,13 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
         uint refundAmount = 0;
         for(uint i=0; i<converterToHisConversions[_converter].length; i++) {
             uint conversionId = converterToHisConversions[_converter][i];
-            Conversion memory c = conversions[conversionId];
+            Conversion c = conversions[conversionId];
             if(c.state == ConversionState.PENDING_APPROVAL) {
                 counters[0]--; //Reduce number of pending conversions
                 counters[2]++; //Increase number of rejected conversions
                 ITwoKeyBaseReputationRegistry(twoKeyBaseReputationRegistry).updateOnConversionRejectedEvent(_converter, contractor, twoKeyAcquisitionCampaignERC20);
                 c.state = ConversionState.REJECTED;
-                conversions[conversionId] = c;
+//                conversions[conversionId] = c;
                 reservedAmount += c.baseTokenUnits + c.bonusTokenUnits;
                 refundAmount += c.conversionAmount;
             }
@@ -412,7 +443,7 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
      * @dev returns all the funds to the converter back
      */
     function converterCancelConversion(uint _conversionId) external {
-        Conversion memory conversion = conversions[_conversionId];
+        Conversion conversion = conversions[_conversionId];
 
         require(conversion.conversionCreatedAt + 10*(1 days) < block.timestamp);
         require(msg.sender == conversion.converter);
@@ -422,7 +453,6 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
         counters[4]++; // Increase number of cancelled conversions
         conversion.state = ConversionState.CANCELLED_BY_CONVERTER;
         twoKeyAcquisitionCampaignERC20.sendBackEthWhenConversionCancelled(msg.sender, conversion.conversionAmount);
-        conversions[_conversionId] = conversion;
     }
 
     /**
@@ -453,7 +483,7 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
     function getLockupContractAddress(uint _conversionId) public view returns (address) {
         Conversion memory c = conversions[_conversionId];
         require(msg.sender == contractor || msg.sender == c.converter || ITwoKeyEventSource(twoKeyEventSource).isAddressMaintainer(msg.sender));
-        return conversionId2LockupAddress[_conversionId];
+        return c.lockupAddress;
     }
 
     /**

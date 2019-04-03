@@ -887,21 +887,25 @@ describe('TwoKeyProtocol', () => {
             eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
         });
-        let txHash = await twoKeyProtocol.AcquisitionCampaign.approveConverter(campaignAddress, env.TEST4_ADDRESS, from);
-        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-        txHash = await twoKeyProtocol.AcquisitionCampaign.approveConverter(campaignAddress,env.GMAIL2_ADDRESS, from);
-        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-        /*
-        txHash = await twoKeyProtocol.AcquisitionCampaign.approveConverter(campaignAddress,env.RENATA_ADDRESS, from);
-        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-        */
-        const allApproved = await twoKeyProtocol.AcquisitionCampaign.getApprovedConverters(campaignAddress, from);
-        console.log('Approved addresses: ', allApproved);
 
-        expect(allApproved[0]).to.be.equal(env.TEST4_ADDRESS);
-        const allPendingAfterApproved = await twoKeyProtocol.AcquisitionCampaign.getAllPendingConverters(campaignAddress, from);
-        console.log('All pending after approval: ' + allPendingAfterApproved);
-        expect(allPendingAfterApproved.length).to.be.equal(2);
+        if(isKYCRequired) {
+            let txHash = await twoKeyProtocol.AcquisitionCampaign.approveConverter(campaignAddress, env.TEST4_ADDRESS, from);
+            await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+            txHash = await twoKeyProtocol.AcquisitionCampaign.approveConverter(campaignAddress,env.GMAIL2_ADDRESS, from);
+            await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+            /*
+            txHash = await twoKeyProtocol.AcquisitionCampaign.approveConverter(campaignAddress,env.RENATA_ADDRESS, from);
+            await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+            */
+            const allApproved = await twoKeyProtocol.AcquisitionCampaign.getApprovedConverters(campaignAddress, from);
+            console.log('Approved addresses: ', allApproved);
+
+            expect(allApproved[0]).to.be.equal(env.TEST4_ADDRESS);
+            const allPendingAfterApproved = await twoKeyProtocol.AcquisitionCampaign.getAllPendingConverters(campaignAddress, from);
+            console.log('All pending after approval: ' + allPendingAfterApproved);
+            expect(allPendingAfterApproved.length).to.be.equal(2);
+        }
+
     }).timeout(60000);
 
     it('should get converter conversion ids', async() => {
@@ -912,17 +916,19 @@ describe('TwoKeyProtocol', () => {
 
     it('should reject converter', async () => {
         console.log("Test where contractor / moderator can reject converter to execute lockup");
-        txHash = await twoKeyProtocol.AcquisitionCampaign.rejectConverter(campaignAddress, env.TEST_ADDRESS, from);
-        console.log(txHash);
-        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        if(isKYCRequired) {
+            txHash = await twoKeyProtocol.AcquisitionCampaign.rejectConverter(campaignAddress, env.TEST_ADDRESS, from);
+            console.log(txHash);
+            await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
 
-        const allRejected = await twoKeyProtocol.AcquisitionCampaign.getAllRejectedConverters(campaignAddress, from);
-        console.log("Rejected addresses: ", allRejected);
+            const allRejected = await twoKeyProtocol.AcquisitionCampaign.getAllRejectedConverters(campaignAddress, from);
+            console.log("Rejected addresses: ", allRejected);
 
-        const allPendingAfterRejected = await twoKeyProtocol.AcquisitionCampaign.getAllPendingConverters(campaignAddress, from);
-        console.log('All pending after rejection: ', allPendingAfterRejected);
-        expect(allRejected[0]).to.be.equal(env.TEST_ADDRESS);
-        expect(allPendingAfterRejected.length).to.be.equal(1);
+            const allPendingAfterRejected = await twoKeyProtocol.AcquisitionCampaign.getAllPendingConverters(campaignAddress, from);
+            console.log('All pending after rejection: ', allPendingAfterRejected);
+            expect(allRejected[0]).to.be.equal(env.TEST_ADDRESS);
+            expect(allPendingAfterRejected.length).to.be.equal(1);
+        }
     }).timeout(60000);
 
     /*
