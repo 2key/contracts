@@ -32,4 +32,3 @@ resolve({
 ```
 * (+) public generateContractorPublicLink(campaign: any, from: string, progressCallback?: any): Promise<any>
 * (+) public createPrivateMetaHash(data: any, from:string) : Promise<string>
-
