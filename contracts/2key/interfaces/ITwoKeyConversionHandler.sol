@@ -8,12 +8,10 @@ contract ITwoKeyConversionHandler {
         uint256 _maxReferralRewardETHWei,
         uint256 baseTokensForConverterUnits,
         uint256 bonusTokensForConverterUnits,
-        bool isConversionFiat
+        bool isConversionFiat,
+        bool isAnonymous
     ) external;
 
-
-    function setAnonymous(address _contractor, bool _isAnonymous) external;
-    function cancelAndRejectContract() external;
 
     function setTwoKeyAcquisitionCampaignERC20(
         address _twoKeyAcquisitionCampaignERC20,
@@ -23,6 +21,5 @@ contract ITwoKeyConversionHandler {
         address _twoKeyBaseReputationRegistry
     ) external;
 
-    function getModeratorBalanceAndTotalEarnings() external view returns (uint,uint);
     function getConverterConversionIds(address _converter) external view returns (uint[]);
 }
