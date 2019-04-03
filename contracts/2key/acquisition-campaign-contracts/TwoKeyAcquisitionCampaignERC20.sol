@@ -69,8 +69,6 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
         conversionHandler = _conversionHandler;
         assetContractERC20 = _assetContractERC20;
 
-        campaignCreationTime = now;
-        secondsForUnfreezeWithdraw = 3600;  //Just for example
         isCampaignInitialized = true;
     }
 

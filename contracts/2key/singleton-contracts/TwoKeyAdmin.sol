@@ -23,6 +23,11 @@ contract TwoKeyAdmin is Upgradeable {
 	uint twoKeyIntegratorDefaultFeePercent; // 2% is default value for this
 	uint twoKeyNetworkTaxPercent; //2% is default value for this
 
+	unit maxSecondsTillUnfreezedReferrerReward; //example
+	uint secondTillUnfreeze2keyRewards; //example
+	unit twoKeyAdminCreationTime;
+
+
     bool initialized = false;
 
     /// @notice Modifier will revert if calling address is not a member of electorateAdmins
@@ -62,6 +67,9 @@ contract TwoKeyAdmin is Upgradeable {
         twoKeyEconomy = TwoKeyEconomy(_economy);
         twoKeyEventSource = TwoKeyEventSource(_eventSource);
         initialized = true;
+		maxSecondsTillUnfreezedReferrerReward = 3600; //example
+		secondTillUnfreeze2keyRewards = 500; //example
+		twoKeyAdminCreationTime = now;
     }
 
     /// @notice Function where only elected admin can transfer tokens to an address
@@ -143,6 +151,17 @@ contract TwoKeyAdmin is Upgradeable {
 	/// @return _address is address of twoKeyReg contract
     function getTwoKeyReg() external view returns(address)  {
     	return address(twoKeyReg);
+    }
+
+
+	function getReferrerRewardsUnfreezeDate() external view returns (uint) {
+		return twoKeyAdminCreationTime + secondTillUnlockReferrerRewards;
+	}
+
+
+	function changeRewardsUnfreezingDate(uint _secondsToAddForCurrUnfreezingDate) external onlyTwoKeyCongress {
+		require(twoKeyAdminCreationTime + maxFreezingTimeSeconds > secondTillUnfreeze2keyRewards + _secondsToAddForCurrUnfreezingDate);
+        secondTillUnfreeze2keyRewards += _secondsToAddForCurrUnfreezingDate;
     }
 
     /// View function - doesn't cost any gas to be executed
