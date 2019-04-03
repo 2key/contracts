@@ -23,10 +23,9 @@ contract TwoKeyAdmin is Upgradeable {
 	uint twoKeyIntegratorDefaultFeePercent; // 2% is default value for this
 	uint twoKeyNetworkTaxPercent; //2% is default value for this
 
-	unit maxSecondsTillUnfreezedReferrerReward; //example
+	uint maxSecondsTillUnfreezedReferrerReward; //example
 	uint secondTillUnfreeze2keyRewards; //example
-	unit twoKeyAdminCreationTime;
-
+	uint twoKeyAdminCreationTime;
 
     bool initialized = false;
 
@@ -155,12 +154,12 @@ contract TwoKeyAdmin is Upgradeable {
 
 
 	function getReferrerRewardsUnfreezeDate() external view returns (uint) {
-		return twoKeyAdminCreationTime + secondTillUnlockReferrerRewards;
+		return twoKeyAdminCreationTime + secondTillUnfreeze2keyRewards;
 	}
 
 
 	function changeRewardsUnfreezingDate(uint _secondsToAddForCurrUnfreezingDate) external onlyTwoKeyCongress {
-		require(twoKeyAdminCreationTime + maxFreezingTimeSeconds > secondTillUnfreeze2keyRewards + _secondsToAddForCurrUnfreezingDate);
+		require(twoKeyAdminCreationTime + maxSecondsTillUnfreezedReferrerReward > secondTillUnfreeze2keyRewards + _secondsToAddForCurrUnfreezingDate);
         secondTillUnfreeze2keyRewards += _secondsToAddForCurrUnfreezingDate;
     }
 
