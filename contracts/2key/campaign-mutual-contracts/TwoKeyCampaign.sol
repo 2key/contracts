@@ -26,10 +26,6 @@ contract TwoKeyCampaign is ArcERC20 {
 	address public contractor; //contractor address
 	address public moderator; //moderator address
 
-	unit256 campaignCreationTime; //
-	unit256 secondTillUnfreeze2keyRewards;
-	unit256 maxFreezingTimeSeconds;
-
 	uint256 conversionQuota;  // maximal ARC tokens that can be passed in transferFrom
 	uint256 contractorBalance; // Contractor balance
 	uint256 contractorTotalProceeds; // Contractor total earnings
