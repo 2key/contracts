@@ -24,7 +24,7 @@ const web3switcher = {
     guest: () => createWeb3('mnemonic words should be here bu   t for some reason they are missing', rpcUrl),
 };
 let transactionBytecode =
-    "0x9ffe94d9000000000000000000000000bae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7000000000000000000000000000000000000000000001a218703f6c783200000";
+    "0x9ffe94d9000000000000000000000000bae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7000000000000000000000000000000000000000000084595161401484a000000";
 
 describe('Start and execute voting' , () => {
 

@@ -20,11 +20,11 @@ const delay = env.TEST_DELAY;
 console.log(mainNetId);
 const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 const maxConverterBonusPercent = 15;
-const pricePerUnitInETHOrUSD = 5;
+const pricePerUnitInETHOrUSD = 0.095;
 const maxReferralRewardPercent = 20;
 const moderatorFeePercentage = 1;
 const minContributionETHorUSD = 5;
-const maxContributionETHorUSD = 1000;
+const maxContributionETHorUSD = 1000000;
 const now = new Date();
 const campaignStartTime = Math.round(new Date(now.valueOf()).setDate(now.getDate() - 30) / 1000);
 const campaignEndTime = Math.round(new Date(now.valueOf()).setDate(now.getDate() + 30) / 1000);
@@ -209,7 +209,7 @@ const eventEmited = (error, event) => {
 };
 
 const addresses = [env.AYDNEP_ADDRESS, env.GMAIL_ADDRESS, env.TEST4_ADDRESS, env.RENATA_ADDRESS, env.UPORT_ADDRESS, env.GMAIL2_ADDRESS, env.AYDNEP2_ADDRESS, env.TEST_ADDRESS];
-const acquisitionCurrency = 'ETH';
+const acquisitionCurrency = 'USD';
 let twoKeyProtocol: TwoKeyProtocol;
 
 const printBalances = (done) => {
@@ -534,12 +534,12 @@ describe('TwoKeyProtocol', () => {
     it('should print balance after campaign created', printBalances).timeout(15000);
 
     it('should transfer assets to campaign', async () => {
-        txHash = await twoKeyProtocol.transfer2KEYTokens(campaignAddress, twoKeyProtocol.Utils.toWei(1234, 'ether'), from);
-        console.log(twoKeyProtocol.Utils.toWei(1234, 'ether'));
+        txHash = await twoKeyProtocol.transfer2KEYTokens(campaignAddress, twoKeyProtocol.Utils.toWei(1234000, 'ether'), from);
+        console.log(twoKeyProtocol.Utils.toWei(1234000, 'ether'));
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const balance = twoKeyProtocol.Utils.fromWei(await twoKeyProtocol.AcquisitionCampaign.checkInventoryBalance(campaignAddress, from)).toString();
         console.log('Campaign Balance', balance);
-        expect(parseFloat(balance)).to.be.equal(1234);
+        expect(parseFloat(balance)).to.be.equal(1234000);
     }).timeout(600000);
 
     it('should get user public link', async () => {
@@ -640,7 +640,7 @@ describe('TwoKeyProtocol', () => {
     it('==> should print available amount of tokens before conversion', async() => {
         const availableAmountOfTokens = await twoKeyProtocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(campaignAddress,from);
         console.log('Available amount of tokens before conversion is: ' + availableAmountOfTokens);
-        expect(availableAmountOfTokens).to.be.equal(1234);
+        expect(availableAmountOfTokens).to.be.equal(1234000);
     }).timeout(60000);
 
     it('should buy some tokens', async () => {
@@ -659,7 +659,7 @@ describe('TwoKeyProtocol', () => {
         const availableAmountOfTokens = await twoKeyProtocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(campaignAddress,from);
         const { totalTokens } = await twoKeyProtocol.AcquisitionCampaign.getEstimatedTokenAmount(campaignAddress, false, twoKeyProtocol.Utils.toWei(minContributionETHorUSD, 'ether'));
         console.log('Available amount of tokens before conversion is: ' + availableAmountOfTokens, totalTokens);
-        expect(availableAmountOfTokens).to.be.lte(1234 - totalTokens);
+        expect(availableAmountOfTokens).to.be.lte(1234000 - totalTokens);
     }).timeout(60000);
 
     it('should join as test4', async () => {
