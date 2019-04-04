@@ -32,6 +32,7 @@ const twoKeyEconomy = singletons.TwoKeyEconomy.networks[mainNetId].address;
 const twoKeyAdmin = singletons.TwoKeyAdmin.networks[mainNetId].address;
 let isKYCRequired = true;
 let isFiatConversionAutomaticallyApproved = false;
+let incentiveModel = "MANUAL";
 
 function makeHandle(max: number = 8): string {
     let text = '';
@@ -490,7 +491,8 @@ describe('TwoKeyProtocol', () => {
             bonusTokensVestingMonths: 6,
             bonusTokensVestingStartShiftInDaysFromDistributionDate: 180,
             isKYCRequired,
-            isFiatConversionAutomaticallyApproved
+            isFiatConversionAutomaticallyApproved,
+            incentiveModel
         };
 
         const campaign = await twoKeyProtocol.AcquisitionCampaign.create(campaignData, campaignData, {} , from, {
@@ -1151,11 +1153,6 @@ describe('TwoKeyProtocol', () => {
         const totalEarnings = await twoKeyProtocol.AcquisitionCampaign.getModeratorTotalEarnings(campaignAddress,from);
         console.log('Moderator total earnings: '+ totalEarnings);
     }).timeout(60000);
-
-    it('should test recover', async() => {
-        let a = await twoKeyProtocol.AcquisitionCampaign.testRecover(campaignAddress);
-        console.log(a);
-    }).timeout(30000);
 
     it('should get statistics for the address from the contract', async() => {
         const {web3, address} = web3switcher.renata();

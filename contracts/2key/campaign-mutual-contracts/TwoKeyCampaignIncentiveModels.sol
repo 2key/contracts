@@ -4,5 +4,5 @@ pragma solidity ^0.4.24;
  * Created at 2/25/19
  */
 contract TwoKeyCampaignIncentiveModels {
-    enum IncentiveModel {NO_REWARDS, AVERAGE, AVERAGE_LAST_3X, POWER_LAW, MANUAL}
+    enum IncentiveModel {MANUAL, VANILLA_AVERAGE, VANILLA_AVERAGE_LAST_3X, VANILLA_POWER_LAW, NO_REFERRAL_REWARD}
 }

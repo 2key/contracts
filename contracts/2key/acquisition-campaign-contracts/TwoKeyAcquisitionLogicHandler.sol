@@ -1,4 +1,5 @@
 pragma solidity ^0.4.24;
+//Interfaces
 import "../interfaces/ITwoKeyExchangeRateContract.sol";
 import "../interfaces/IERC20.sol";
 import "../interfaces/ITwoKeyConversionHandler.sol";
@@ -8,15 +9,21 @@ import "../interfaces/ITwoKeyAcquisitionARC.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyConversionHandlerGetConverterState.sol";
 import "../interfaces/ITwoKeyEventSource.sol";
+
+//Libraries
 import "../libraries/SafeMath.sol";
 import "../libraries/Call.sol";
+import "../libraries/IncentiveModels.sol";
+
 import "../Upgradeable.sol";
+
+import "../campaign-mutual-contracts/TwoKeyCampaignIncentiveModels.sol";
 
 /**
  * @author Nikola Madjarevic
  * Created at 1/15/19
  */
-contract TwoKeyAcquisitionLogicHandler is Upgradeable {
+contract TwoKeyAcquisitionLogicHandler is Upgradeable, TwoKeyCampaignIncentiveModels {
 
     using SafeMath for uint256;
 
@@ -47,6 +54,9 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable {
     uint maxConverterBonusPercent; // Maximal bonus percent per converter
 
     string public currency; // Currency campaign is currently in
+
+    // Enumerator representing incentive model selected for the contract
+    IncentiveModel incentiveModel;
 
     //Referral accounting stuff
     mapping(address => uint256) internal referrerPlasma2TotalEarnings2key; // Total earnings for referrers
@@ -86,6 +96,9 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable {
         campaignStartTime = values[3];
         campaignEndTime = values[4];
         maxConverterBonusPercent = values[5];
+
+        //Add as 6th argument incentive model uint
+        incentiveModel = IncentiveModel(values[6]);
 
         currency = _currency;
         assetContractERC20 = _assetContractERC20;
@@ -454,32 +467,34 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable {
         address[] memory influencers = getReferrers(_converter,twoKeyAcquisitionCampaign);
         uint numberOfInfluencers = influencers.length;
 
-        for (uint i = 0; i < numberOfInfluencers; i++) {
-            uint256 b;
+        if(incentiveModel == IncentiveModel.MANUAL) {
+            for (uint i = 0; i < numberOfInfluencers; i++) {
+                uint256 b;
 
-            if (i == influencers.length - 1) {  // if its the last influencer then all the bounty goes to it.
-                b = totalBounty2keys;
-            }
-            else {
-                uint256 cut = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getReferrerCut(influencers[i]);
-                if (cut > 0 && cut <= 101) {
-                    b = totalBounty2keys.mul(cut.sub(1)).div(100);
-                } else {// cut == 0 or 255 indicates equal particine of the bounty
-                    b = totalBounty2keys.div(influencers.length - i);
+                if (i == influencers.length - 1) {  // if its the last influencer then all the bounty goes to it.
+                    b = totalBounty2keys;
                 }
+                else {
+                    uint256 cut = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getReferrerCut(influencers[i]);
+                    if (cut > 0 && cut <= 101) {
+                        b = totalBounty2keys.mul(cut.sub(1)).div(100);
+                    } else {// cut == 0 or 255 indicates equal particine of the bounty
+                        b = totalBounty2keys.div(influencers.length - i);
+                    }
+                }
+
+                //Update referrer current balance stored on Acquisition contract
+                ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).updateReferrerPlasmaBalance(influencers[i],b);
+
+                //All mappings are now stated to plasma addresses
+                //Update values for accounting purpose
+                referrerPlasma2EarningsPerConversion[influencers[i]][_conversionId] = b;
+                referrerPlasma2TotalEarnings2key[influencers[i]] = referrerPlasma2TotalEarnings2key[influencers[i]].add(b);
+                referrerPlasmaAddressToCounterOfConversions[influencers[i]]++;
+
+                //Decrease bounty for distributed
+                totalBounty2keys = totalBounty2keys.sub(b);
             }
-
-            //Update referrer current balance stored on Acquisition contract
-            ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).updateReferrerPlasmaBalance(influencers[i],b);
-
-            //All mappings are now stated to plasma addresses
-            //Update values for accounting purpose
-            referrerPlasma2EarningsPerConversion[influencers[i]][_conversionId] = b;
-            referrerPlasma2TotalEarnings2key[influencers[i]] = referrerPlasma2TotalEarnings2key[influencers[i]].add(b);
-            referrerPlasmaAddressToCounterOfConversions[influencers[i]]++;
-
-            //Decrease bounty for distributed
-            totalBounty2keys = totalBounty2keys.sub(b);
         }
     }
 

@@ -74,12 +74,7 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         moderator = _moderator;
         campaignName = _campaignName;
 
-        if(values[0] == 0) {
-            rewardsModel = IncentiveModel.NO_REWARDS;
-        } else {
-            rewardsModel = _rewardsModel;
-        }
-
+        rewardsModel = _rewardsModel;
         acceptsFiat = _acceptsFiat;
         campaignStartTime = values[1];
         campaignEndTime = values[2];
@@ -174,12 +169,12 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         uint totalBountyTokens = buyTokensFromUpgradableExchange(referrer_rewards, address(this));
 
         //Distribute rewards based on model selected
-        if(rewardsModel == IncentiveModel.AVERAGE) {
+        if(rewardsModel == IncentiveModel.VANILLA_AVERAGE) {
             uint reward = IncentiveModels.averageModelRewards(totalBountyTokens, numberOfReferrers);
             for(uint i=0; i<numberOfReferrers; i++) {
                 updateReferrerMappings(referrers[i], reward, donationId);
             }
-        } else if(rewardsModel == IncentiveModel.AVERAGE_LAST_3X) {
+        } else if(rewardsModel == IncentiveModel.VANILLA_AVERAGE_LAST_3X) {
             uint rewardPerReferrer;
             uint rewardForLast;
             (rewardPerReferrer, rewardForLast)= IncentiveModels.averageLast3xRewards(totalBountyTokens, numberOfReferrers);
@@ -187,7 +182,7 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
                 updateReferrerMappings(referrers[i], rewardPerReferrer, donationId);
             }
             updateReferrerMappings(referrers[numberOfReferrers-1], rewardForLast, donationId);
-        } else if(rewardsModel == IncentiveModel.POWER_LAW) {
+        } else if(rewardsModel == IncentiveModel.VANILLA_POWER_LAW) {
             uint[] memory rewards = IncentiveModels.powerLawRewards(totalBountyTokens, numberOfReferrers, powerLawFactor);
             for(i=0; i<numberOfReferrers; i++) {
                 updateReferrerMappings(referrers[i], rewards[i], donationId);
