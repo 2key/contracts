@@ -97,7 +97,9 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
         address _assetContractERC20,
         address _twoKeyEventSource,
         address _twoKeyBaseReputationRegistry
-    ) public {
+    )
+    public
+    {
         require(isCampaignInitialized == false);
         counters = new uint[](9);
 
@@ -126,7 +128,13 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
      * @param  _conversionAmountETHWei total payout for escrow
      * @return moderator fee
      */
-    function calculateModeratorFee(uint256 _conversionAmountETHWei) private view returns (uint256)  {
+    function calculateModeratorFee(
+        uint256 _conversionAmountETHWei
+    )
+    private
+    view
+    returns (uint256)
+    {
         uint256 fee = _conversionAmountETHWei.mul(ITwoKeyEventSource(twoKeyEventSource).getTwoKeyDefaultIntegratorFeeFromAdmin()).div(100);
         return fee;
     }
@@ -223,7 +231,11 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
      * @notice Function to perform all the logic which has to be done when we're performing conversion
      * @param _conversionId is the id
      */
-    function executeConversion(uint _conversionId) public {
+    function executeConversion(
+        uint _conversionId
+    )
+    public
+    {
         Conversion conversion = conversions[_conversionId];
 
         uint totalUnits = conversion.baseTokenUnits + conversion.bonusTokenUnits;
@@ -270,7 +282,7 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
             // Buy tokens from campaign and distribute rewards between referrers
             totalReward2keys = twoKeyAcquisitionCampaignERC20.buyTokensAndDistributeReferrerRewards(conversion.maxReferralRewardETHWei, conversion.converter, _conversionId);
 
-            // Add totak rewards
+            // Add total rewards
             counters[8] = counters[8].add(totalReward2keys);
 
             // update moderator balances
@@ -305,7 +317,11 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
      */
     function getConversion(
         uint conversionId
-    ) external view returns (bytes) {
+    )
+    external
+    view
+    returns (bytes)
+    {
         Conversion memory conversion = conversions[conversionId];
         address empty = address(0);
         if(isConverterAnonymous[conversion.converter] == false) {
@@ -330,7 +346,14 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
     }
 
 
-    function getAllConvertersPerState(bytes32 state) public view onlyContractorOrMaintainer returns (address[]) {
+    function getAllConvertersPerState(
+        bytes32 state
+    )
+    public
+    view
+    onlyContractorOrMaintainer
+    returns (address[])
+    {
         return stateToConverter[state];
     }
 
@@ -339,7 +362,13 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
     /// @dev only contractor or maintainer can call this function
     /// @param _converter is the address of converter
     /// @return array of addresses
-    function getLockupContractsForConverter(address _converter) public view returns (address[]){
+    function getLockupContractsForConverter(
+        address _converter
+    )
+    public
+    view
+    returns (address[])
+    {
         require(msg.sender == contractor || ITwoKeyEventSource(twoKeyEventSource).isAddressMaintainer(msg.sender) || msg.sender == _converter);
         return converterToLockupContracts[_converter];
     }
@@ -348,7 +377,12 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
     /// @notice Function to move converter address from stateA to stateB
     /// @param _converter is the address of converter
     /// @param destinationState is the state we'd like to move converter to
-    function moveFromStateAToStateB(address _converter, bytes32 destinationState) internal {
+    function moveFromStateAToStateB(
+        address _converter,
+        bytes32 destinationState
+    )
+    internal
+    {
         ConverterState state = converterToState[_converter];
         bytes32 key = convertConverterStateToBytes(state);
         address[] memory pending = stateToConverter[key];
@@ -368,7 +402,11 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
     /// @notice Function where we can change state of converter to Approved
     /// @dev Converter can only be approved if his previous state is pending or rejected
     /// @param _converter is the address of converter
-    function moveFromPendingOrRejectedToApprovedState(address _converter) internal {
+    function moveFromPendingOrRejectedToApprovedState(
+        address _converter
+    )
+    internal
+    {
         bytes32 destination = bytes32("APPROVED");
         moveFromStateAToStateB(_converter, destination);
         converterToState[_converter] = ConverterState.APPROVED;
@@ -378,7 +416,11 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
     /// @notice Function where we're going to move state of conversion from pending to rejected
     /// @dev private function, will be executed in another one
     /// @param _converter is the address of converter
-    function moveFromPendingToRejectedState(address _converter) internal {
+    function moveFromPendingToRejectedState(
+        address _converter
+    )
+    internal
+    {
         bytes32 destination = bytes32("REJECTED");
         moveFromStateAToStateB(_converter, destination);
         converterToState[_converter] = ConverterState.REJECTED;
@@ -388,7 +430,12 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
     /// @notice Function where we are approving converter
     /// @dev only maintainer or contractor can call this method
     /// @param _converter is the address of converter
-    function approveConverter(address _converter) public onlyContractorOrMaintainer {
+    function approveConverter(
+        address _converter
+    )
+    public
+    onlyContractorOrMaintainer
+    {
         uint len = converterToHisConversions[_converter].length;
         require(converterToState[_converter] == ConverterState.PENDING_APPROVAL);
         for(uint i=0; i<len; i++) {
@@ -408,7 +455,12 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
     /// @notice Function where we can reject converter
     /// @dev only maintainer or contractor can call this function
     /// @param _converter is the address of converter
-    function rejectConverter(address _converter) public onlyContractorOrMaintainer {
+    function rejectConverter(
+        address _converter
+    )
+    public
+    onlyContractorOrMaintainer
+    {
         require(converterToState[_converter] == ConverterState.PENDING_APPROVAL);
         moveFromPendingToRejectedState(_converter);
         uint reservedAmount = 0;
@@ -440,12 +492,24 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
      * @return array of conversion ids
      * @dev can only be called by converter itself or maintainer/contractor
      */
-    function getConverterConversionIds(address _converter) public view returns (uint[]) {
+    function getConverterConversionIds(
+        address _converter
+    )
+    public
+    view
+    returns (uint[])
+    {
 //        require(msg.sender == contractor || ITwoKeyEventSource(twoKeyEventSource).isAddressMaintainer(msg.sender) || msg.sender == _converter);
         return converterToHisConversions[_converter];
     }
 
-    function getLastConverterConversionId(address _converter) public view returns (uint) {
+    function getLastConverterConversionId(
+        address _converter
+    )
+    public
+    view
+    returns (uint)
+    {
         return converterToHisConversions[_converter][converterToHisConversions[_converter].length - 1];
     }
 
@@ -454,7 +518,11 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
      * @notice Function to get number of conversions
      * @dev Can only be called by contractor or maintainer
      */
-    function getNumberOfConversions() external view returns (uint) {
+    function getNumberOfConversions()
+    external
+    view
+    returns (uint)
+    {
         return numberOfConversions;
     }
 
@@ -464,7 +532,11 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
      * @param _conversionId is the id of the conversion
      * @dev returns all the funds to the converter back
      */
-    function converterCancelConversion(uint _conversionId) external {
+    function converterCancelConversion(
+        uint _conversionId
+    )
+    external
+    {
         Conversion conversion = conversions[_conversionId];
 
         require(conversion.conversionCreatedAt + 10*(1 days) < block.timestamp);
@@ -481,7 +553,11 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
      * @notice Get's number of converters per type, and returns tuple, as well as total raised funds
      getCampaignSummary
      */
-    function getCampaignSummary() public view returns (uint,uint,uint,uint[]) {
+    function getCampaignSummary()
+    public
+    view
+    returns (uint,uint,uint,uint[])
+    {
         bytes32 pending = convertConverterStateToBytes(ConverterState.PENDING_APPROVAL);
         bytes32 approved = convertConverterStateToBytes(ConverterState.APPROVED);
         bytes32 rejected = convertConverterStateToBytes(ConverterState.REJECTED);
@@ -502,7 +578,13 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
      * @notice Fuunction where contractro/converter or mdoerator can see the lockup address for conversion
      * @param _conversionId is the id of conversion requested
      */
-    function getLockupContractAddress(uint _conversionId) public view returns (address) {
+    function getLockupContractAddress(
+        uint _conversionId
+    )
+    public
+    view
+    returns (address)
+    {
         Conversion memory c = conversions[_conversionId];
         require(msg.sender == contractor || msg.sender == c.converter || ITwoKeyEventSource(twoKeyEventSource).isAddressMaintainer(msg.sender));
         return c.lockupAddress;
@@ -513,7 +595,13 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
      * @param _converter is the address of the requested converter
      * @return hexed string of the state
      */
-    function getStateForConverter(address _converter) external view returns (bytes32) {
+    function getStateForConverter(
+        address _converter
+    )
+    external
+    view
+    returns (bytes32)
+    {
         return convertConverterStateToBytes(converterToState[_converter]);
     }
 

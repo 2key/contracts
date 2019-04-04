@@ -46,7 +46,9 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
         address _assetContractERC20,
         address _contractor,
         uint [] values
-    ) public {
+    )
+    public
+    {
         require(isCampaignInitialized == false); // Security layer to make sure the function will act as a constructor
 
         contractor = _contractor;
@@ -90,7 +92,12 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
      * @param me is the address (ethereum)
      * @param cut is the cut value
      */
-    function setCutOf(address me, uint256 cut) internal {
+    function setCutOf(
+        address me,
+        uint256 cut
+    )
+    internal
+    {
         // what is the percentage of the bounty s/he will receive when acting as an influencer
         // the value 255 is used to signal equal partition with other influencers
         // A sender can set the value only once in a contract
@@ -104,12 +111,25 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
      * @param cut is the cut value
      * @dev Executes internal setCutOf method
      */
-    function setCut(uint256 cut) public {
+    function setCut(
+        uint256 cut
+    )
+    public
+    {
         setCutOf(msg.sender, cut);
     }
 
 
-    function distributeArcsBasedOnSignature(bytes sig) private returns (address[]) {
+    /**
+     * @notice Function to track arcs and make ref tree
+     * @param sig is the signature user joins from
+     */
+    function distributeArcsBasedOnSignature(
+        bytes sig
+    )
+    private
+    returns (address[])
+    {
         address[] memory influencers;
         address[] memory keys;
         uint8[] memory weights;
@@ -152,7 +172,12 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
      * @param signature is the signature
      * @param receiver is the address we're sending ARCs to
      */
-    function joinAndShareARC(bytes signature, address receiver) public {
+    function joinAndShareARC(
+        bytes signature,
+        address receiver
+    )
+    public
+    {
         distributeArcsBasedOnSignature(signature);
         transferFrom(twoKeyEventSource.plasmaOf(msg.sender), twoKeyEventSource.plasmaOf(receiver), 1);
     }
@@ -162,7 +187,13 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
      * @notice Function where converter can join and convert
      * @dev payable function
      */
-    function joinAndConvert(bytes signature, bool _isAnonymous) public payable {
+    function joinAndConvert(
+        bytes signature,
+        bool _isAnonymous
+    )
+    public
+    payable
+    {
         ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).requirementForMsgValue(msg.value);
         distributeArcsBasedOnSignature(signature);
         createConversion(msg.value, msg.sender, false, _isAnonymous);
@@ -175,7 +206,12 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
      * @notice Function where converter can convert
      * @dev payable function
      */
-    function convert(bool _isAnonymous) public payable {
+    function convert(
+        bool _isAnonymous
+    )
+    public
+    payable
+    {
         ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).requirementForMsgValue(msg.value);
         address _converterPlasma = twoKeyEventSource.plasmaOf(msg.sender);
         require(received_from[_converterPlasma] != address(0));
@@ -191,7 +227,13 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
      * @param conversionAmountFiatWei is the amount of conversion converted to wei units
      * @param _isAnonymous if converter chooses to be anonymous
      */
-    function convertFiat(address _converter, uint conversionAmountFiatWei, bool _isAnonymous) public {
+    function convertFiat(
+        address _converter,
+        uint conversionAmountFiatWei,
+        bool _isAnonymous
+    )
+    public
+    {
         // Validate that sender is either _converter or maintainer
         require(msg.sender == _converter || twoKeyEventSource.isAddressMaintainer(msg.sender));
         createConversion(conversionAmountFiatWei, _converter, true, _isAnonymous);
@@ -209,7 +251,8 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
         bool isFiatConversion,
         bool isAnonymous
     )
-    private {
+    private
+    {
         uint baseTokensForConverterUnits;
         uint bonusTokensForConverterUnits;
 
@@ -251,7 +294,11 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
         uint256 _maxReferralRewardETHWei,
         address _converter,
         uint _conversionId
-    ) public onlyTwoKeyConversionHandler returns (uint){
+    )
+    public
+    onlyTwoKeyConversionHandler
+    returns (uint)
+    {
         if(maxReferralRewardPercent > 0) {
             //Buy tokens from upgradable exchange
             uint totalBounty2keys = buyTokensFromUpgradableExchange(_maxReferralRewardETHWei, address(this));
@@ -270,7 +317,13 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
     }
 
 
-    function buyTokensForModeratorRewards(uint moderatorFee) public onlyTwoKeyConversionHandler returns (uint) {
+    function buyTokensForModeratorRewards(
+        uint moderatorFee
+    )
+    public
+    onlyTwoKeyConversionHandler
+    returns (uint)
+    {
         //Get deep freeze token pool address
         address twoKeyDeepFreezeTokenPool =
         ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry)
@@ -293,7 +346,13 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
      * @param _conversionAmount is the amount he sent to the contract
      * @dev This function can be called only by conversion handler
      */
-    function sendBackEthWhenConversionCancelled(address _cancelledConverter, uint _conversionAmount) public onlyTwoKeyConversionHandler {
+    function sendBackEthWhenConversionCancelled(
+        address _cancelledConverter,
+        uint _conversionAmount
+    )
+    public
+    onlyTwoKeyConversionHandler
+    {
         _cancelledConverter.transfer(_conversionAmount);
         amountConverterSpentEthWEI[_cancelledConverter] = amountConverterSpentEthWEI[_cancelledConverter].sub(_conversionAmount);
     }
@@ -304,7 +363,13 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
      * @param _amount is the amount of ERC20's we're going to transfer
      * @return true if successful, otherwise reverts
      */
-    function moveFungibleAsset(address _to, uint256 _amount) public onlyTwoKeyConversionHandler {
+    function moveFungibleAsset(
+        address _to,
+        uint256 _amount
+    )
+    public
+    onlyTwoKeyConversionHandler
+    {
         require(IERC20(assetContractERC20).transfer(_to,_amount));
     }
 
@@ -314,7 +379,12 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
      * @dev can be called only from TwoKeyConversionHandler contract
      * @param value it the value we'd like to add to total contractor proceeds and contractor balance
      */
-    function updateContractorProceeds(uint value) public onlyTwoKeyConversionHandler {
+    function updateContractorProceeds(
+        uint value
+    )
+    public
+    onlyTwoKeyConversionHandler
+    {
         contractorTotalProceeds = contractorTotalProceeds.add(value);
         contractorBalance = contractorBalance.add(value);
     }
@@ -323,7 +393,12 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
      * @notice Function to update amount of the reserved tokens in case conversion is rejected
      * @param value is the amount to reduce from reserved state
      */
-    function updateReservedAmountOfTokensIfConversionRejectedOrExecuted(uint value) public onlyTwoKeyConversionHandler {
+    function updateReservedAmountOfTokensIfConversionRejectedOrExecuted(
+        uint value
+    )
+    public
+    onlyTwoKeyConversionHandler
+    {
         require(reservedAmountOfTokens - value >= 0);
         reservedAmountOfTokens = reservedAmountOfTokens - value;
     }
@@ -333,7 +408,13 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
      * @param _from is the address we'd like to check balance
      * @return amount of ether sent to contract from the specified address
      */
-    function getAmountAddressSent(address _from) public view returns (uint) {
+    function getAmountAddressSent(
+        address _from
+    )
+    public
+    view
+    returns (uint)
+    {
         return amountConverterSpentEthWEI[_from];
     }
 
@@ -342,7 +423,11 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
      * @return current ERC20 balance on inventory address, reserved amount of tokens for converters,
      * and reserved amount of tokens for the rewards
      */
-    function getInventoryStatus() public view returns (uint,uint,uint) {
+    function getInventoryStatus()
+    public
+    view
+    returns (uint,uint,uint)
+    {
         uint inventoryBalance = IERC20(assetContractERC20).balanceOf(address(this));
         return (inventoryBalance, reservedAmountOfTokens, reservedAmount2keyForRewards);
     }
@@ -352,7 +437,13 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
      * @param last_influencer is the last influencer
      * @return array of integers containing cuts respectively
      */
-    function getReferrerCuts(address last_influencer) public view returns (uint256[]) {
+    function getReferrerCuts(
+        address last_influencer
+    )
+    public
+    view
+    returns (uint256[])
+    {
         address[] memory influencers = ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).getReferrers(last_influencer,address(this));
         uint256[] memory cuts = new uint256[](influencers.length + 1);
         for (uint i = 0; i < influencers.length; i++) {
@@ -367,14 +458,24 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
      * @notice Function to get cut for an (ethereum) address
      * @param me is the ethereum address
      */
-    function getReferrerCut(address me) public view returns (uint256) {
+    function getReferrerCut(
+        address me
+    )
+    public
+    view
+    returns (uint256)
+    {
         return referrerPlasma2cut[twoKeyEventSource.plasmaOf(me)];
     }
 
     /**
      * @notice Function to check available amount of the tokens on the contract
      */
-    function getAvailableAndNonReservedTokensAmount() public view returns (uint) {
+    function getAvailableAndNonReservedTokensAmount()
+    public
+    view
+    returns (uint)
+    {
         uint inventoryBalance = IERC20(assetContractERC20).balanceOf(address(this));
         if(assetContractERC20 == twoKeyEconomy) {
             return (inventoryBalance - reservedAmountOfTokens - reservedAmount2keyForRewards);
@@ -387,29 +488,51 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
      * @dev only contractor can call this function, otherwise it will revert
      * @return value of contractor balance in ETH WEI
      */
-    function getContractorBalance() external onlyContractor view returns (uint) {
+    function getContractorBalance()
+    external
+    onlyContractor
+    view
+    returns (uint)
+    {
         return contractorBalance;
     }
 
 
-    function getReferrerPlasmaBalance(address _influencer) public view returns (uint) {
+    function getReferrerPlasmaBalance(
+        address _influencer
+    )
+    public
+    view
+    returns (uint)
+    {
         require(msg.sender == twoKeyAcquisitionLogicHandler);
         return (referrerPlasma2Balances2key[_influencer]);
     }
 
 
-    function updateReferrerPlasmaBalance(address _influencer, uint _balance) public {
+    function updateReferrerPlasmaBalance(
+        address _influencer,
+        uint _balance
+    )
+    public
+    {
         require(msg.sender == twoKeyAcquisitionLogicHandler);
         referrerPlasma2Balances2key[_influencer] = referrerPlasma2Balances2key[_influencer].add(_balance);
     }
-
 
     /**
      * @notice Function to get statistic for the address
      * @param ethereum is the ethereum address we want to get stats for
      * @param plasma is the corresponding plasma address for the passed ethereum address
      */
-    function getStatistics(address ethereum, address plasma) public view returns (uint,uint,uint) {
+    function getStatistics(
+        address ethereum,
+        address plasma
+    )
+    public
+    view
+    returns (uint,uint,uint)
+    {
         require(msg.sender == twoKeyAcquisitionLogicHandler);
         uint referrerTotalEarnings = ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).getReferrerPlasmaTotalEarnings(plasma);
         return (amountConverterSpentEthWEI[ethereum], referrerTotalEarnings,unitsConverterBought[ethereum]);

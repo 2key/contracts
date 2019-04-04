@@ -68,7 +68,9 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable {
         address _acquisitionCampaignAddress,
         address _twoKeySingletoneRegistry,
         address _twoKeyConversionHandler
-    ) public {
+    )
+    public
+    {
         require(values[0] > 0,"min contribution criteria not satisfied");
         require(values[1] >= values[0], "max contribution criteria not satisfied");
         require(values[4] > values[3], "campaign start time can't be greater than end time");
@@ -107,7 +109,11 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable {
     /**
      * @notice Requirement for the checking if the campaign is active or not
      */
-    function requirementIsOnActive() public view returns (bool) {
+    function requirementIsOnActive()
+    public
+    view
+    returns (bool)
+    {
         if(block.timestamp >= campaignStartTime && block.timestamp <= campaignEndTime) {
             return true;
         }
@@ -119,7 +125,11 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable {
      * @notice Function to get investment rules
      * @return tuple containing if investment amount is fixed, and lower/upper bound of the same if not (if yes lower = upper)
      */
-    function getInvestmentRules() public view returns (bool,uint,uint) {
+    function getInvestmentRules()
+    public
+    view
+    returns (bool,uint,uint)
+    {
         return (isFixedInvestmentAmount, minContributionETHorFiatCurrency, maxContributionETHorFiatCurrency);
     }
 
@@ -129,7 +139,13 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable {
      * @param msgValue is the value of the message sent
      * @dev validates if msg.Value is in interval of [minContribution, maxContribution]
      */
-    function requirementForMsgValue(uint msgValue) public view returns (bool) {
+    function requirementForMsgValue(
+        uint msgValue
+    )
+    public
+    view
+    returns (bool)
+    {
         require(isAcceptingFiatOnly == false); //This should throw and user will not be able to convert otherwise
         //TODO: Add timestamp validation -> conversions
         if(keccak256(currency) == keccak256('ETH')) {
@@ -156,7 +172,14 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable {
      * @param conversionAmountETHWeiOrFiat is amount of eth in conversion
      * @return tuple containing (base,bonus)
      */
-    function getEstimatedTokenAmount(uint conversionAmountETHWeiOrFiat, bool isFiatConversion) public view returns (uint, uint) {
+    function getEstimatedTokenAmount(
+        uint conversionAmountETHWeiOrFiat,
+        bool isFiatConversion
+    )
+    public
+    view
+    returns (uint, uint)
+    {
         uint value = pricePerUnitInETHWeiOrUSD;
         uint baseTokensForConverterUnits;
         uint bonusTokensForConverterUnits;
@@ -187,9 +210,13 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable {
      * @dev only Contractor can call this method, otherwise it will revert - emits Event when updated
      * @param value is the new value we are going to set for minContributionETH
      */
-    function updateMinContributionETHOrUSD(uint value) public onlyContractor {
+    function updateMinContributionETHOrUSD(
+        uint value
+    )
+    public
+    onlyContractor
+    {
         minContributionETHorFiatCurrency = value;
-        //        twoKeyEventSource.updatedData(block.timestamp, value, "Updated maxContribution");
     }
 
     /**
@@ -197,24 +224,33 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable {
      * @dev only Contractor can call this method, otherwise it will revert - emits Event when updated
      * @param value is the new maxContribution value
      */
-    function updateMaxContributionETHorUSD(uint value) external onlyContractor {
+    function updateMaxContributionETHorUSD(
+        uint value
+    )
+    external
+    onlyContractor
+    {
         maxContributionETHorFiatCurrency = value;
-        //        twoKeyEventSource.updatedData(block.timestamp, value, "Updated maxContribution");
     }
 
     /**
      * @notice Get all constants from the contract
      * @return all constants from the contract
      */
-    function getConstantInfo() public view returns (uint,uint,uint,uint,uint,uint,uint) {
+    function getConstantInfo()
+    public
+    view
+    returns (uint,uint,uint,uint,uint,uint,uint)
+    {
         return (
-        campaignStartTime,
-        campaignEndTime,
-        minContributionETHorFiatCurrency,
-        maxContributionETHorFiatCurrency,
-        unit_decimals,
-        pricePerUnitInETHWeiOrUSD,
-        maxConverterBonusPercent);
+            campaignStartTime,
+            campaignEndTime,
+            minContributionETHorFiatCurrency,
+            maxContributionETHorFiatCurrency,
+            unit_decimals,
+            pricePerUnitInETHWeiOrUSD,
+            maxConverterBonusPercent
+        );
     }
 
 
@@ -223,7 +259,11 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable {
     * @dev we're using Utils contract and fetching the balance of this contract address
     * @return balance value as uint
     */
-    function getInventoryBalance() public view returns (uint) {
+    function getInventoryBalance()
+    public
+    view
+    returns (uint)
+    {
         uint balance = IERC20(assetContractERC20).balanceOf(twoKeyAcquisitionCampaign);
         return balance;
     }
@@ -233,7 +273,13 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable {
      * @notice Function to check if the msg.sender has already joined
      * @return true/false depending of joined status
      */
-    function getAddressJoinedStatus(address _address) public view returns (bool) {
+    function getAddressJoinedStatus(
+        address _address
+    )
+    public
+    view
+    returns (bool)
+    {
         address plasma = plasmaOf(_address);
         if (_address == address(0)) {
             return false;
@@ -251,7 +297,16 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable {
     /**
      * @notice Function to fetch stats for the address
      */
-    function getAddressStatistic(address _address, bool plasma, bool flag, address referrer) internal view returns (bytes) {
+    function getAddressStatistic(
+        address _address,
+        bool plasma,
+        bool flag,
+        address referrer
+    )
+    internal
+    view
+    returns (bytes)
+    {
         bytes32 state; // NOT-EXISTING AS CONVERTER DEFAULT STATE
 
         address eth_address = ethereumOf(_address);
@@ -291,7 +346,13 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable {
         }
     }
 
-    function recover(bytes signature) public view returns (address) {
+    function recover(
+        bytes signature
+    )
+    internal
+    view
+    returns (address)
+    {
         bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding referrer to plasma")),
             keccak256(abi.encodePacked("GET_REFERRER_REWARDS"))));
         address x = Call.recoverHash(hash, signature, 0);
@@ -304,7 +365,15 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable {
      * @param plasma is if that address is plasma or not
      * @param signature in case we're calling this from referrer who doesn't have yet opened wallet
      */
-    function getSuperStatistics(address _user, bool plasma, bytes signature) public view returns (bytes) {
+    function getSuperStatistics(
+        address _user,
+        bool plasma,
+        bytes signature
+    )
+    public
+    view
+    returns (bytes)
+    {
         address eth_address = _user;
 
         if (plasma) {
@@ -336,7 +405,14 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable {
      * @param acquisitionCampaignContract is the acquisition campaign address
      * @return array of referrer addresses
      */
-    function getReferrers(address customer, address acquisitionCampaignContract) public view returns (address[]) {
+    function getReferrers(
+        address customer,
+        address acquisitionCampaignContract
+    )
+    public
+    view
+    returns (address[])
+    {
         address influencer = plasmaOf(customer);
         uint n_influencers = 0;
 
@@ -366,7 +442,14 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable {
      * @param _converter is the address of the converter
      * @dev This function can only be called by TwoKeyConversionHandler contract
      */
-    function updateRefchainRewards(uint256 _maxReferralRewardETHWei, address _converter, uint _conversionId, uint totalBounty2keys) public {
+    function updateRefchainRewards(
+        uint256 _maxReferralRewardETHWei,
+        address _converter,
+        uint _conversionId,
+        uint totalBounty2keys
+    )
+    public
+    {
         require(msg.sender == twoKeyAcquisitionCampaign);
         address[] memory influencers = getReferrers(_converter,twoKeyAcquisitionCampaign);
         uint numberOfInfluencers = influencers.length;
@@ -407,7 +490,14 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable {
      * @param eth_address is the converter address we're getting all conversion ids for
      * @return sum of all earnings
      */
-    function getTotalReferrerEarnings(address _referrer, address eth_address) internal view returns (uint) {
+    function getTotalReferrerEarnings(
+        address _referrer,
+        address eth_address
+    )
+    internal
+    view
+    returns (uint)
+    {
         uint[] memory conversionIds = ITwoKeyConversionHandler(twoKeyConversionHandler).getConverterConversionIds(eth_address);
         uint sum = 0;
         for(uint i=0; i<conversionIds.length; i++) {
@@ -422,7 +512,13 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable {
      * @param _referrerPlasmaList is the array of plasma addresses of referrer
      * @return two arrays. 1st contains current plasma balance and 2nd contains total plasma balances
      */
-    function getReferrersBalancesAndTotalEarnings(address[] _referrerPlasmaList) public view returns (uint256[], uint256[]) {
+    function getReferrersBalancesAndTotalEarnings(
+        address[] _referrerPlasmaList
+    )
+    public
+    view
+    returns (uint256[], uint256[])
+    {
         require(ITwoKeyReg(twoKeyRegistry).isMaintainer(msg.sender));
 
         uint numberOfAddresses = _referrerPlasmaList.length;
@@ -446,7 +542,15 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable {
      * @param conversionIds are the ids of conversions this referrer participated in
      * @return tuple containing this 3 information
      */
-    function getReferrerBalanceAndTotalEarningsAndNumberOfConversions(address _referrer, bytes signature, uint[] conversionIds) public view returns (uint,uint,uint,uint[]) {
+    function getReferrerBalanceAndTotalEarningsAndNumberOfConversions(
+        address _referrer,
+        bytes signature,
+        uint[] conversionIds
+    )
+    public
+    view
+    returns (uint,uint,uint,uint[])
+    {
         if(_referrer != address(0)) {
             require(msg.sender == _referrer || msg.sender == contractor || ITwoKeyReg(twoKeyRegistry).isMaintainer(msg.sender));
             _referrer = plasmaOf(_referrer);
@@ -467,7 +571,13 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable {
     }
 
 
-    function getReferrerPlasmaTotalEarnings(address _referrer) public view returns (uint) {
+    function getReferrerPlasmaTotalEarnings(
+        address _referrer
+    )
+    public
+    view
+    returns (uint)
+    {
         require(msg.sender == twoKeyAcquisitionCampaign);
         return referrerPlasma2TotalEarnings2key[_referrer];
     }
@@ -477,7 +587,13 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable {
      * @param me is the address (ethereum) of the user
      * @return an address
      */
-    function plasmaOf(address me) public view returns (address) {
+    function plasmaOf(
+        address me
+    )
+    public
+    view
+    returns (address)
+    {
         address plasma = ITwoKeyReg(twoKeyRegistry).getEthereumToPlasma(me);
         if (plasma != address(0)) {
             return plasma;
@@ -490,7 +606,13 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable {
      * @param me is the plasma address of the user
      * @return ethereum address
      */
-    function ethereumOf(address me) public view returns (address) {
+    function ethereumOf(
+        address me
+    )
+    public
+    view
+    returns (address)
+    {
         address ethereum = ITwoKeyReg(twoKeyRegistry).getPlasmaToEthereum(me);
         if (ethereum != address(0)) {
             return ethereum;
