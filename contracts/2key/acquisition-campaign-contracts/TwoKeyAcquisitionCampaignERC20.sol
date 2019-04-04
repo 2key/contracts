@@ -20,7 +20,7 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
     address public twoKeyAcquisitionLogicHandler; // Address of logic handler contract
 
     address assetContractERC20; // Asset contract is address of ERC20 inventory
-    address assetContractERC20FiatConversion;
+
     mapping(address => uint256) private amountConverterSpentFiatWei; // Amount converter spent for Fiat conversions
     mapping(address => uint256) private amountConverterSpentEthWEI; // Amount converter put to the contract in Ether
     mapping(address => uint256) private unitsConverterBought; // Number of units (ERC20 tokens) bought
@@ -45,7 +45,6 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
         address _conversionHandler,
         address _moderator,
         address _assetContractERC20,
-        address _assetContractERC20FiatConversion,
         address _contractor,
         uint [] values
     ) public {
@@ -70,7 +69,6 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
         twoKeyAcquisitionLogicHandler = _twoKeyAcquisitionLogicHandler;
         conversionHandler = _conversionHandler;
         assetContractERC20 = _assetContractERC20;
-        assetContractERC20FiatConversion = _assetContractERC20FiatConversion;
 
         isCampaignInitialized = true;
     }
@@ -295,11 +293,6 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
         require(IERC20(assetContractERC20).transfer(_to,_amount));
     }
 
-    //I can make it more generic if it not brakes the FE
-    function moveFungibleAssetForFiat(address _to, uint256 _amount) public onlyTwoKeyConversionHandler {
-        require(IERC20(assetContractERC20FiatConversion).transfer(_to,_amount));
-    }
-
 
     /**
      * @notice Option to update contractor proceeds
@@ -337,11 +330,6 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
     function getInventoryStatus() public view returns (uint,uint,uint) {
         uint inventoryBalance = IERC20(assetContractERC20).balanceOf(address(this));
         return (inventoryBalance, reservedAmountOfTokens, reservedAmount2keyForRewards);
-    }
-
-
-    function getFiatInventoryStatus() public view returns (uint) {
-        return IERC20(assetContractERC20FiatConversion).balanceOf(address(this));
     }
 
     /**
