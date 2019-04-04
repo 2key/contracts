@@ -22,6 +22,8 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
 
     bool isCampaignInitialized;
 
+    bool public isFiatConversionAutomaticallyApproved;
+
     event ConversionCreated(uint conversionId);
     uint numberOfConversions;
 
@@ -105,6 +107,10 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
         bonusTokensVestingMonths = values[3];
         bonusTokensVestingStartShiftInDaysFromDistributionDate = values[4];
 
+        // 5th argument will represent if FIAT conversion is automatically approved
+        if(values[5] == 1) {
+            isFiatConversionAutomaticallyApproved = true;
+        }
         // Instance of interface
         twoKeyAcquisitionCampaignERC20 = ITwoKeyAcquisitionCampaignERC20(_twoKeyAcquisitionCampaignERC20);
 
@@ -182,8 +188,14 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
                 counters[0]++;
             }
         } else {
-            state = ConversionState.PENDING_APPROVAL;
-            counters[0]++; // If conversion is FIAT it will be always first pending and will have to be approved
+            //This means fiat conversion is automatically approved
+            if(isFiatConversionAutomaticallyApproved) {
+                state = ConversionState.APPROVED;
+                counters[1] ++; // Increase the number of approved conversions
+            } else {
+                state = ConversionState.PENDING_APPROVAL;
+                counters[0]++; // If conversion is FIAT it will be always first pending and will have to be approved
+            }
         }
 
         Conversion memory c = Conversion(_contractor, _contractorProceeds, _converterAddress,
@@ -217,12 +229,18 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
         uint totalUnits = conversion.baseTokenUnits + conversion.bonusTokenUnits;
 
         if(conversion.isConversionFiat == true) {
-            require(msg.sender == contractor); // first check who calls this in order to save gas
-            uint availableTokens = twoKeyAcquisitionCampaignERC20.getAvailableAndNonReservedTokensAmount();
-            require(totalUnits < availableTokens);
-            require(conversion.state == ConversionState.PENDING_APPROVAL);
-            counters[0]--; //Decrease number of pending conversions
+            if(isFiatConversionAutomaticallyApproved) {
+                require(conversion.state == ConversionState.APPROVED);
+                counters[1] --; // Decrease number of approved conversions
+            } else {
+                require(conversion.state == ConversionState.PENDING_APPROVAL);
+                require(msg.sender == contractor); // first check who calls this in order to save gas
+                uint availableTokens = twoKeyAcquisitionCampaignERC20.getAvailableAndNonReservedTokensAmount();
+                require(totalUnits < availableTokens);
+                counters[0]--; //Decrease number of pending conversions
+            }
         } else {
+            //TODO uncomment
 //            require(msg.sender == conversion.converter || msg.sender == contractor);
             require(conversion.state == ConversionState.APPROVED);
             counters[1]--; //Decrease number of approved conversions

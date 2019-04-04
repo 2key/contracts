@@ -234,8 +234,10 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
             conversionAmountETHWeiOrFiat, maxReferralRewardETHWei,
             baseTokensForConverterUnits,bonusTokensForConverterUnits, isFiatConversion, isAnonymous, isKYCRequired);
 
-        if(isKYCRequired == false && isFiatConversion == false) {
-            ITwoKeyConversionHandler(conversionHandler).executeConversion(id);
+        if(isKYCRequired == false) {
+            if(isFiatConversion == false || ITwoKeyConversionHandler(conversionHandler).isFiatConversionAutomaticallyApproved()) {
+                ITwoKeyConversionHandler(conversionHandler).executeConversion(id);
+            }
         }
     }
 

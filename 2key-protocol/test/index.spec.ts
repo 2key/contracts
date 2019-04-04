@@ -19,9 +19,9 @@ const delay = env.TEST_DELAY;
 // const destinationAddress = env.DESTINATION_ADDRESS  || '0xd9ce6800b997a0f26faffc0d74405c841dfc64b7'
 console.log(mainNetId);
 const addressRegex = /^0x[a-fA-F0-9]{40}$/;
-const maxConverterBonusPercent = 0;
+const maxConverterBonusPercent = 15;
 const pricePerUnitInETHOrUSD = 5;
-const maxReferralRewardPercent = 0;
+const maxReferralRewardPercent = 20;
 const moderatorFeePercentage = 1;
 const minContributionETHorUSD = 5;
 const maxContributionETHorUSD = 1000;
@@ -30,7 +30,8 @@ const campaignStartTime = Math.round(new Date(now.valueOf()).setDate(now.getDate
 const campaignEndTime = Math.round(new Date(now.valueOf()).setDate(now.getDate() + 30) / 1000);
 const twoKeyEconomy = singletons.TwoKeyEconomy.networks[mainNetId].address;
 const twoKeyAdmin = singletons.TwoKeyAdmin.networks[mainNetId].address;
-const isKYCRequired = true;
+let isKYCRequired = true;
+let isFiatConversionAutomaticallyApproved = false;
 
 function makeHandle(max: number = 8): string {
     let text = '';
@@ -488,7 +489,8 @@ describe('TwoKeyProtocol', () => {
             maxDistributionDateShiftInDays: 180,
             bonusTokensVestingMonths: 6,
             bonusTokensVestingStartShiftInDaysFromDistributionDate: 180,
-            isKYCRequired
+            isKYCRequired,
+            isFiatConversionAutomaticallyApproved
         };
 
         const campaign = await twoKeyProtocol.AcquisitionCampaign.create(campaignData, campaignData, {} , from, {
@@ -1240,11 +1242,14 @@ describe('TwoKeyProtocol', () => {
             eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
         });
-        console.log('Trying to execute fiat conversion from Contractor');
-        let txHash = await twoKeyProtocol.AcquisitionCampaign.executeConversion(campaignAddress,4,from);
-        let lockupContractAddress = await twoKeyProtocol.AcquisitionCampaign.getLockupContractAddress(campaignAddress,4,from);
-        expect(lockupContractAddress).not.to.be.equal(0);
-        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        if(!(isFiatConversionAutomaticallyApproved == true && isKYCRequired ==false)) {
+            console.log('Trying to execute fiat conversion from Contractor');
+            let txHash = await twoKeyProtocol.AcquisitionCampaign.executeConversion(campaignAddress,4,from);
+            let lockupContractAddress = await twoKeyProtocol.AcquisitionCampaign.getLockupContractAddress(campaignAddress,4,from);
+            expect(lockupContractAddress).not.to.be.equal(0);
+            const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        }
+
     }).timeout(60000);
 
     it('should return number of forwarders for the campaign', async() => {
