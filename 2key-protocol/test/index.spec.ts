@@ -32,7 +32,7 @@ const twoKeyEconomy = singletons.TwoKeyEconomy.networks[mainNetId].address;
 const twoKeyAdmin = singletons.TwoKeyAdmin.networks[mainNetId].address;
 let isKYCRequired = true;
 let isFiatConversionAutomaticallyApproved = false;
-let incentiveModel = "MANUAL";
+let incentiveModel = "VANILLA_AVERAGE";
 
 function makeHandle(max: number = 8): string {
     let text = '';
@@ -1170,6 +1170,23 @@ describe('TwoKeyProtocol', () => {
         console.log(stats);
     }).timeout(60000);
 
+    it('should get stats for 1 more referrer', async() => {
+        const {web3, address} = web3switcher.gmail();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_GMAIL).privateKey,
+        });
+
+        let stats = await twoKeyProtocol.AcquisitionCampaign.getAddressStatistic(campaignAddress, env.GMAIL_ADDRESS, '0x0000000000000000000000000000000000000000',{from});
+        console.log(stats);
+    })
+
     it('should print balance of left ERC20 on the Acquisition contract', async() => {
         let balance = await twoKeyProtocol.ERC20.getERC20Balance(twoKeyEconomy, campaignAddress);
         console.log(balance);
@@ -1300,180 +1317,180 @@ describe('TwoKeyProtocol', () => {
 
 
 
-    it('should build refgraph', async() => {
-        const {web3, address} = web3switcher.gmail();
-        from = address;
-        twoKeyProtocol.setWeb3({
-            web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
-        });
-        const getReferralLeaves = async (contract, owner) => {
-            const maxDepth = 99999;
-            let depth = 0;
-            const referrals = {};
-            let currentReferral;
-            // console.clear();
-            const firstAddress = twoKeyProtocol.plasmaAddress;
-
-            async function getAddressReferrals(address, contractAddress, contractorAddress, from, plasma, timestamp) {
-                if (from !== currentReferral && !referrals[from]) {
-                    console.log('New Referral', from, currentReferral);
-                    currentReferral = from;
-                    referrals[from] = true;
-                    depth += 1;
-                }
-                console.log('DEPTH', depth, address);
-                const leaf: any = {
-                    depth,
-                    maxDepth,
-                    _collapsed: depth >= maxDepth,
-                    contractorAddress,
-                    contractAddress,
-                    address,
-                    timestamp,
-                };
-                if (from === address) {
-                    return null;
-                }
-                let hasTokensOrRewards = false;
-                console.log('GET STATISTICS', plasma);
-                const signature = await twoKeyProtocol.PlasmaEvents.signReferrerToGetRewards();
-                const statistics = await twoKeyProtocol.AcquisitionCampaign.getAddressStatistic(contractAddress, address, signature, {plasma});
-                /*
-                try {
-                  leaf.userData = await fetchAPI('plasma/user', {
-                    params: {
-                      plasma_address: address,
-                      campaign_web3_address: contractAddress,
-                    },
-                  });
-                } catch (e) {
-                  console.log(e);
-                }
-                */
-                if (statistics.isJoined && from) {
-                    // const joined_from = await promisify(twoKeyPlasmaEvents.getJoinedFrom, [contractAddress, contractorAddress, address]);
-                    const joined_from = await twoKeyProtocol.PlasmaEvents.getJoinedFrom(contractAddress, contractorAddress, address);
-                    // const visited_from = await getVisitedFrom(contractAddress, contractorAddress, address);
-                    /*
-                    if (joined_from === contractorAddress) {
-                      console.log('CONTRACTOR call plasmaOf');
-                      joined_from = await promisify(twoKeyPlasmaEvents.plasmaOf, [joined_from]);
-                    }
-                    */
-                    // const plasmaOf = await promisify(twoKeyPlasmaEvents.plasmaOf, [visited_from]);
-                    console.log('\r\n');
-                    console.log('VISITED FROM');
-                    console.log('CURRENT ADDRESS', address);
-                    // console.log('VISITED_FROM', visited_from);
-                    console.log('JOINED_FROM', joined_from);
-                    // console.log('PLASMA_OF', plasmaOf);
-                    console.log('FROM', from);
-                    console.log('STATS', statistics);
-                    console.log('\r\n');
-                    /*
-                    */
-                    if (parseInt(joined_from, 16) && joined_from !== from) {
-                        return null;
-                    }
-                }
-                hasTokensOrRewards = Object.values(statistics)
-                    .reduce((prev, current) => (prev || current.rewards
-                        || current.amountConverterSpentETH || current.tokensBought), hasTokensOrRewards);
-                leaf.statistics = statistics;
-                console.log(address, statistics);
-                leaf.name = statistics.username || address.replace(/^(0x.{5}).{31}/, '$1...');
-                leaf.from = from;
-                leaf.hover = from && {
-                    name: statistics.username,
-                    address,
-                    rewards: statistics.referrerRewards,
-                    tokensBought: statistics.tokensBought,
-                    amountConverterSpentETH: statistics.amountConverterSpentETH,
-                    timestamp: timestamp || Date.now(),
-                };
-                leaf.linkClassName =
-                    (owner === address && 'leaf-contract')
-                    || (statistics.isReferrer && 'leaf-referrer')
-                    || (statistics.isConverter && 'leaf-converter')
-                    || (statistics.isJoined && 'leaf-joined')
-                    || (statistics.username && 'leaf-plasma');
-                leaf.nodeSvgShape = {
-                    shape: 'circle',
-                    shapeProps: {
-                        r: 10,
-                        strokeWidth: 3,
-                        stroke: (owner === address && '#f00')
-                        || (statistics.isReferrer && (statistics.isConverter ? 'magenta' : 'darkviolet'))
-                        || (statistics.isConverter && '#1a936f')
-                        || (hasTokensOrRewards && '#1a936f')
-                        || (statistics.isJoined && 'steelblue')
-                        || (statistics.username && 'orange')
-                        || '#999',
-                    },
-                    links: {
-                        display: 'none',
-                    },
-                };
-                if (leaf.hover && statistics.fullName) {
-                    leaf.hover.fullname = statistics.fullName;
-                }
-                if (leaf.hover && statistics.email) {
-                    leaf.hover.email = statistics.email;
-                }
-                const referralsObject = {};
-                // console.log('GET CHILDREN FOR', address);
-                if (depth <= maxDepth) {
-                    const { visits, timestamps } = await twoKeyProtocol.PlasmaEvents.getVisitsList(contractAddress, contractorAddress, address);
-                    console.log('CHILDREN FOR', address, visits);
-                    if (visits.length) {
-                        // console.log('CHILDREN FOR', address, referrals);
-                        for (let i = 0, l = visits.length; i < l; i += 1) {
-                            if (from !== visits[i]) {
-                                referralsObject[visits[i]] = timestamps[i];
-                                // processed[visits[i]] = true;
-                            }
-                        }
-                        const leavePromises = [];
-                        Object.keys(referralsObject).forEach(key => {
-                            leavePromises.push(getAddressReferrals(
-                                key,
-                                contractAddress,
-                                contractorAddress,
-                                address,
-                                true,
-                                referralsObject[key]
-                            ));
-                        });
-                        leaf.children = await Promise.all(leavePromises);
-                    }
-                }
-                return { ...leaf, ...statistics, isJoined: statistics.isJoined };
-            }
-            // const tree = await getAddressReferrals(firstAddress, contract, owner, this.address !== owner);
-            const tree = await getAddressReferrals(firstAddress, contract, owner, null, true, null);
-            console.log(tree);
-            const removeDeadLeaves = node => {
-                const result = { ...node };
-                if (node.children) {
-                    result.children = node.children.filter(leaf => !!leaf).map(leaf => removeDeadLeaves(leaf));
-                }
-                return result;
-            };
-            const normalTree = removeDeadLeaves(tree);
-            console.log('TREE WITHOUT DEAD LEAVES', normalTree);
-            return { normalTree, isContractor: this.address === owner };
-        };
-
-        let x = await getReferralLeaves(campaignAddress,from);
-
-        console.log(x);
-    }).timeout(120000);
+    // it('should build refgraph', async() => {
+    //     const {web3, address} = web3switcher.gmail();
+    //     from = address;
+    //     twoKeyProtocol.setWeb3({
+    //         web3,
+    //         networks: {
+    //             mainNetId,
+    //             syncTwoKeyNetId,
+    //         },
+    //         eventsNetUrl,
+    //         plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+    //     });
+    //     const getReferralLeaves = async (contract, owner) => {
+    //         const maxDepth = 99999;
+    //         let depth = 0;
+    //         const referrals = {};
+    //         let currentReferral;
+    //         // console.clear();
+    //         const firstAddress = twoKeyProtocol.plasmaAddress;
+    //
+    //         async function getAddressReferrals(address, contractAddress, contractorAddress, from, plasma, timestamp) {
+    //             if (from !== currentReferral && !referrals[from]) {
+    //                 console.log('New Referral', from, currentReferral);
+    //                 currentReferral = from;
+    //                 referrals[from] = true;
+    //                 depth += 1;
+    //             }
+    //             console.log('DEPTH', depth, address);
+    //             const leaf: any = {
+    //                 depth,
+    //                 maxDepth,
+    //                 _collapsed: depth >= maxDepth,
+    //                 contractorAddress,
+    //                 contractAddress,
+    //                 address,
+    //                 timestamp,
+    //             };
+    //             if (from === address) {
+    //                 return null;
+    //             }
+    //             let hasTokensOrRewards = false;
+    //             console.log('GET STATISTICS', plasma);
+    //             const signature = await twoKeyProtocol.PlasmaEvents.signReferrerToGetRewards();
+    //             const statistics = await twoKeyProtocol.AcquisitionCampaign.getAddressStatistic(contractAddress, address, signature, {plasma});
+    //             /*
+    //             try {
+    //               leaf.userData = await fetchAPI('plasma/user', {
+    //                 params: {
+    //                   plasma_address: address,
+    //                   campaign_web3_address: contractAddress,
+    //                 },
+    //               });
+    //             } catch (e) {
+    //               console.log(e);
+    //             }
+    //             */
+    //             if (statistics.isJoined && from) {
+    //                 // const joined_from = await promisify(twoKeyPlasmaEvents.getJoinedFrom, [contractAddress, contractorAddress, address]);
+    //                 const joined_from = await twoKeyProtocol.PlasmaEvents.getJoinedFrom(contractAddress, contractorAddress, address);
+    //                 // const visited_from = await getVisitedFrom(contractAddress, contractorAddress, address);
+    //                 /*
+    //                 if (joined_from === contractorAddress) {
+    //                   console.log('CONTRACTOR call plasmaOf');
+    //                   joined_from = await promisify(twoKeyPlasmaEvents.plasmaOf, [joined_from]);
+    //                 }
+    //                 */
+    //                 // const plasmaOf = await promisify(twoKeyPlasmaEvents.plasmaOf, [visited_from]);
+    //                 console.log('\r\n');
+    //                 console.log('VISITED FROM');
+    //                 console.log('CURRENT ADDRESS', address);
+    //                 // console.log('VISITED_FROM', visited_from);
+    //                 console.log('JOINED_FROM', joined_from);
+    //                 // console.log('PLASMA_OF', plasmaOf);
+    //                 console.log('FROM', from);
+    //                 console.log('STATS', statistics);
+    //                 console.log('\r\n');
+    //                 /*
+    //                 */
+    //                 if (parseInt(joined_from, 16) && joined_from !== from) {
+    //                     return null;
+    //                 }
+    //             }
+    //             hasTokensOrRewards = Object.values(statistics)
+    //                 .reduce((prev, current) => (prev || current.rewards
+    //                     || current.amountConverterSpentETH || current.tokensBought), hasTokensOrRewards);
+    //             leaf.statistics = statistics;
+    //             console.log(address, statistics);
+    //             leaf.name = statistics.username || address.replace(/^(0x.{5}).{31}/, '$1...');
+    //             leaf.from = from;
+    //             leaf.hover = from && {
+    //                 name: statistics.username,
+    //                 address,
+    //                 rewards: statistics.referrerRewards,
+    //                 tokensBought: statistics.tokensBought,
+    //                 amountConverterSpentETH: statistics.amountConverterSpentETH,
+    //                 timestamp: timestamp || Date.now(),
+    //             };
+    //             leaf.linkClassName =
+    //                 (owner === address && 'leaf-contract')
+    //                 || (statistics.isReferrer && 'leaf-referrer')
+    //                 || (statistics.isConverter && 'leaf-converter')
+    //                 || (statistics.isJoined && 'leaf-joined')
+    //                 || (statistics.username && 'leaf-plasma');
+    //             leaf.nodeSvgShape = {
+    //                 shape: 'circle',
+    //                 shapeProps: {
+    //                     r: 10,
+    //                     strokeWidth: 3,
+    //                     stroke: (owner === address && '#f00')
+    //                     || (statistics.isReferrer && (statistics.isConverter ? 'magenta' : 'darkviolet'))
+    //                     || (statistics.isConverter && '#1a936f')
+    //                     || (hasTokensOrRewards && '#1a936f')
+    //                     || (statistics.isJoined && 'steelblue')
+    //                     || (statistics.username && 'orange')
+    //                     || '#999',
+    //                 },
+    //                 links: {
+    //                     display: 'none',
+    //                 },
+    //             };
+    //             if (leaf.hover && statistics.fullName) {
+    //                 leaf.hover.fullname = statistics.fullName;
+    //             }
+    //             if (leaf.hover && statistics.email) {
+    //                 leaf.hover.email = statistics.email;
+    //             }
+    //             const referralsObject = {};
+    //             // console.log('GET CHILDREN FOR', address);
+    //             if (depth <= maxDepth) {
+    //                 const { visits, timestamps } = await twoKeyProtocol.PlasmaEvents.getVisitsList(contractAddress, contractorAddress, address);
+    //                 console.log('CHILDREN FOR', address, visits);
+    //                 if (visits.length) {
+    //                     // console.log('CHILDREN FOR', address, referrals);
+    //                     for (let i = 0, l = visits.length; i < l; i += 1) {
+    //                         if (from !== visits[i]) {
+    //                             referralsObject[visits[i]] = timestamps[i];
+    //                             // processed[visits[i]] = true;
+    //                         }
+    //                     }
+    //                     const leavePromises = [];
+    //                     Object.keys(referralsObject).forEach(key => {
+    //                         leavePromises.push(getAddressReferrals(
+    //                             key,
+    //                             contractAddress,
+    //                             contractorAddress,
+    //                             address,
+    //                             true,
+    //                             referralsObject[key]
+    //                         ));
+    //                     });
+    //                     leaf.children = await Promise.all(leavePromises);
+    //                 }
+    //             }
+    //             return { ...leaf, ...statistics, isJoined: statistics.isJoined };
+    //         }
+    //         // const tree = await getAddressReferrals(firstAddress, contract, owner, this.address !== owner);
+    //         const tree = await getAddressReferrals(firstAddress, contract, owner, null, true, null);
+    //         console.log(tree);
+    //         const removeDeadLeaves = node => {
+    //             const result = { ...node };
+    //             if (node.children) {
+    //                 result.children = node.children.filter(leaf => !!leaf).map(leaf => removeDeadLeaves(leaf));
+    //             }
+    //             return result;
+    //         };
+    //         const normalTree = removeDeadLeaves(tree);
+    //         console.log('TREE WITHOUT DEAD LEAVES', normalTree);
+    //         return { normalTree, isContractor: this.address === owner };
+    //     };
+    //
+    //     let x = await getReferralLeaves(campaignAddress,from);
+    //
+    //     console.log(x);
+    // }).timeout(120000);
 });
 
 

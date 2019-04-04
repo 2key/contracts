@@ -28,7 +28,7 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable, TwoKeyCampaignIncentiveMo
     using SafeMath for uint256;
 
     bool isCampaignInitialized;
-
+    mapping (address => uint[]) public rewardsPerConversion;
     address public twoKeySingletoneRegistry;
     address public twoKeyAcquisitionCampaign;
     address public twoKeyConversionHandler;
@@ -449,6 +449,13 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable, TwoKeyCampaignIncentiveMo
         return influencers;
     }
 
+    function updateReferrerMappings(address referrerPlasma, uint reward, uint conversionId) internal {
+        ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).updateReferrerPlasmaBalance(referrerPlasma,reward);
+        referrerPlasma2TotalEarnings2key[referrerPlasma] = referrerPlasma2TotalEarnings2key[referrerPlasma].add(reward);
+        referrerPlasma2EarningsPerConversion[referrerPlasma][conversionId] = reward;
+        referrerPlasmaAddressToCounterOfConversions[referrerPlasma] += 1;
+    }
+
     /**
      * @notice Update refferal chain with rewards (update state variables)
      * @param _maxReferralRewardETHWei is the max referral reward set
@@ -464,11 +471,22 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable, TwoKeyCampaignIncentiveMo
     public
     {
         require(msg.sender == twoKeyAcquisitionCampaign);
+
+        //Get all the influencers
         address[] memory influencers = getReferrers(_converter,twoKeyAcquisitionCampaign);
+
+        //Get array length
         uint numberOfInfluencers = influencers.length;
 
-        if(incentiveModel == IncentiveModel.MANUAL) {
-            for (uint i = 0; i < numberOfInfluencers; i++) {
+        uint i;
+        if(incentiveModel == IncentiveModel.VANILLA_AVERAGE) {
+            uint reward = IncentiveModels.averageModelRewards(totalBounty2keys, numberOfInfluencers);
+            for(i=0; i<numberOfInfluencers; i++) {
+                updateReferrerMappings(influencers[i], reward, _conversionId);
+                rewardsPerConversion[influencers[i]].push(reward);
+            }
+        } else if(incentiveModel == IncentiveModel.MANUAL) {
+            for (i = 0; i < numberOfInfluencers; i++) {
                 uint256 b;
 
                 if (i == influencers.length - 1) {  // if its the last influencer then all the bounty goes to it.
@@ -483,15 +501,7 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable, TwoKeyCampaignIncentiveMo
                     }
                 }
 
-                //Update referrer current balance stored on Acquisition contract
-                ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).updateReferrerPlasmaBalance(influencers[i],b);
-
-                //All mappings are now stated to plasma addresses
-                //Update values for accounting purpose
-                referrerPlasma2EarningsPerConversion[influencers[i]][_conversionId] = b;
-                referrerPlasma2TotalEarnings2key[influencers[i]] = referrerPlasma2TotalEarnings2key[influencers[i]].add(b);
-                referrerPlasmaAddressToCounterOfConversions[influencers[i]]++;
-
+                updateReferrerMappings(influencers[i], b, _conversionId);
                 //Decrease bounty for distributed
                 totalBounty2keys = totalBounty2keys.sub(b);
             }
