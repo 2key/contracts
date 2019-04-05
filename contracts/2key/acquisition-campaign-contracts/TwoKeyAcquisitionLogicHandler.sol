@@ -27,7 +27,8 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable, TwoKeyCampaignIncentiveMo
     using SafeMath for uint256;
 
     bool isCampaignInitialized;
-    mapping (address => uint[]) public rewardsPerConversion;
+
+
     address public twoKeySingletoneRegistry;
     address public twoKeyAcquisitionCampaign;
     address public twoKeyConversionHandler;
@@ -483,7 +484,7 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable, TwoKeyCampaignIncentiveMo
             reward = IncentiveModels.averageModelRewards(totalBounty2keys, numberOfInfluencers);
             for(i=0; i<numberOfInfluencers; i++) {
                 updateReferrerMappings(influencers[i], reward, _conversionId);
-                rewardsPerConversion[influencers[i]].push(reward);
+
             }
         } else if (incentiveModel == IncentiveModel.VANILLA_AVERAGE_LAST_3X) {
             uint rewardForLast;
@@ -493,7 +494,7 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable, TwoKeyCampaignIncentiveMo
             //Update equal rewards to all influencers but last
             for(i=0; i<numberOfInfluencers - 1; i++) {
                 updateReferrerMappings(influencers[i], reward, _conversionId);
-                rewardsPerConversion[influencers[i]].push(reward);
+
             }
             //Update reward for last
             updateReferrerMappings(influencers[numberOfInfluencers-1], rewardForLast, _conversionId);

@@ -32,7 +32,7 @@ const twoKeyEconomy = singletons.TwoKeyEconomy.networks[mainNetId].address;
 const twoKeyAdmin = singletons.TwoKeyAdmin.networks[mainNetId].address;
 let isKYCRequired = true;
 let isFiatConversionAutomaticallyApproved = false;
-let incentiveModel = "VANILLA_AVERAGE";
+let incentiveModel = "VANILLA_POWER_LAW";
 
 function makeHandle(max: number = 8): string {
     let text = '';
