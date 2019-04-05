@@ -16,7 +16,6 @@ import "../libraries/Call.sol";
 import "../libraries/IncentiveModels.sol";
 
 import "../Upgradeable.sol";
-
 import "../campaign-mutual-contracts/TwoKeyCampaignIncentiveModels.sol";
 
 /**
@@ -479,12 +478,25 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable, TwoKeyCampaignIncentiveMo
         uint numberOfInfluencers = influencers.length;
 
         uint i;
+        uint reward;
         if(incentiveModel == IncentiveModel.VANILLA_AVERAGE) {
-            uint reward = IncentiveModels.averageModelRewards(totalBounty2keys, numberOfInfluencers);
+            reward = IncentiveModels.averageModelRewards(totalBounty2keys, numberOfInfluencers);
             for(i=0; i<numberOfInfluencers; i++) {
                 updateReferrerMappings(influencers[i], reward, _conversionId);
                 rewardsPerConversion[influencers[i]].push(reward);
             }
+        } else if (incentiveModel == IncentiveModel.VANILLA_AVERAGE_LAST_3X) {
+            uint rewardForLast;
+            // Calculate reward for regular ones and for the last
+            (reward, rewardForLast) = IncentiveModels.averageLast3xRewards(totalBounty2keys, numberOfInfluencers);
+
+            //Update equal rewards to all influencers but last
+            for(i=0; i<numberOfInfluencers - 1; i++) {
+                updateReferrerMappings(influencers[i], reward, _conversionId);
+                rewardsPerConversion[influencers[i]].push(reward);
+            }
+            //Update reward for last
+            updateReferrerMappings(influencers[numberOfInfluencers-1], rewardForLast, _conversionId);
         } else if(incentiveModel == IncentiveModel.MANUAL) {
             for (i = 0; i < numberOfInfluencers; i++) {
                 uint256 b;
