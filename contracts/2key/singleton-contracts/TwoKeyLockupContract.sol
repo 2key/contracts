@@ -63,7 +63,9 @@ contract TwoKeyLockupContract {
         address _contractor,
         address _assetContractERC20,
         address _twoKeyEventSource
-    ) public {
+    )
+    public
+    {
         bonusTokensVestingStartShiftInDaysFromDistributionDate = _bonusTokensVestingStartShiftInDaysFromDistributionDate;
         bonusTokensVestingMonths = _bonusTokensVestingMonths;
         tokenDistributionDate = _tokenDistributionDate;
@@ -83,7 +85,11 @@ contract TwoKeyLockupContract {
         }
     }
 
-    function getLockupSummary() public view returns (uint, uint, uint, uint, uint[], bool[]) {
+    function getLockupSummary()
+    public
+    view
+    returns (uint, uint, uint, uint, uint[], bool[])
+    {
         uint[] memory dates = new uint[](bonusTokensVestingMonths+1);
         bool[] memory areTokensWithdrawn = new bool[](bonusTokensVestingMonths+1);
 
@@ -100,7 +106,12 @@ contract TwoKeyLockupContract {
     /// @notice Function to change token distribution date
     /// @dev only contractor can issue calls to this method, and token distribution date can be changed only once
     /// @param _newDate is new token distribution date we'd like to set
-    function changeTokenDistributionDate(uint _newDate) public onlyContractor {
+    function changeTokenDistributionDate(
+        uint _newDate
+    )
+    public
+    onlyContractor
+    {
         require(changed == false);
         require(_newDate - (maxDistributionDateShiftInDays * (1 days)) <= tokenDistributionDate);
         require(now < tokenDistributionDate);
@@ -119,7 +130,12 @@ contract TwoKeyLockupContract {
     /// @notice Function where converter can withdraw his funds
     /// @return true is if transfer was successful, otherwise will revert
     /// onlyConverter
-    function withdrawTokens(uint part) public returns (bool) {
+    function withdrawTokens(
+        uint part
+    )
+    public
+    returns (bool)
+    {
         require(msg.sender == converter || ITwoKeyEventSource(twoKeyEventSource).isAddressMaintainer(msg.sender) == true);
         require(isWithdrawn[part] == false && part < bonusTokensVestingMonths+1 && block.timestamp > tokenUnlockingDate[part]);
         uint amount;

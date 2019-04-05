@@ -40,7 +40,8 @@ contract TwoKeyCampaignAccountant {
         address _proxyLogicHandler,
         address contractor
     )
-    public onlyTwoKeySingletonRegistry
+    public
+    onlyTwoKeySingletonRegistry
     {
         bytes32 campaignVersion = stringToBytes32(_campaignVersion);
         UserCampaign memory userCampaign = UserCampaign(

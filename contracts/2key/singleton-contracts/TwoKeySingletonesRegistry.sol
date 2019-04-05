@@ -38,7 +38,12 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
     /**
      * @notice Calling super constructor from maintaining pattern
      */
-    constructor(address [] _maintainers, address _twoKeyAdmin) public {
+    constructor(
+        address [] _maintainers,
+        address _twoKeyAdmin
+    )
+    public
+    {
         twoKeyAdmin = _twoKeyAdmin;
         isMaintainer[msg.sender] = true; //for truffle deployment
         for(uint i=0; i<_maintainers.length; i++) {
@@ -52,7 +57,13 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
      * @param contractAddress is the contract address
      * @dev only maintainer can issue call to this method
      */
-    function addNonUpgradableContractToAddress(string contractName, address contractAddress) public onlyMaintainer {
+    function addNonUpgradableContractToAddress(
+        string contractName,
+        address contractAddress
+    )
+    public
+    onlyMaintainer
+    {
         nonUpgradableContractToAddress[contractName] = contractAddress;
     }
 
@@ -61,7 +72,14 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
      * @param version representing the version name of the new implementation to be registered
      * @param implementation representing the address of the new implementation to be registered
      */
-    function addVersion(string contractName, string version, address implementation) public onlyMaintainer {
+    function addVersion(
+        string contractName,
+        string version,
+        address implementation
+    )
+    public
+    onlyMaintainer
+    {
 //        require(versions[contractName][version] == 0x0);
         //TODO: Uncomment once we are done with patching
         versions[contractName][version] = implementation;
@@ -74,7 +92,14 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
      * @param version to query the implementation of
      * @return address of the implementation registered for the given version
      */
-    function getVersion(string contractName, string version) public view returns (address) {
+    function getVersion(
+        string contractName,
+        string version
+    )
+    public
+    view
+    returns (address)
+    {
         return versions[contractName][version];
     }
 
@@ -84,12 +109,24 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
      * @param contractName is the name of the contract
      * @return string representation of the last version
      */
-    function getLatestContractVersion(string contractName) public view returns (string) {
+    function getLatestContractVersion(
+        string contractName
+    )
+    public
+    view
+    returns (string)
+    {
         return contractNameToLatestVersionName[contractName];
     }
 
 
-    function getNonUpgradableContractAddress(string contractName) public view returns (address) {
+    function getNonUpgradableContractAddress(
+        string contractName
+    )
+    public
+    view
+    returns (address)
+    {
         return nonUpgradableContractToAddress[contractName];
     }
 
@@ -98,7 +135,13 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
      * @param _contractName is the name of the contract we'd like to get proxy address
      * @return is the address of the proxy for the specific contract
      */
-    function getContractProxyAddress(string _contractName) public view returns (address) {
+    function getContractProxyAddress(
+        string _contractName
+    )
+    public
+    view
+    returns (address)
+    {
         return contractToProxy[_contractName];
     }
 
@@ -107,7 +150,15 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
      * @param version representing the first version to be set for the proxy
      * @return address of the new proxy created
      */
-    function createProxy(string contractName, string version) public onlyMaintainer payable returns (UpgradeabilityProxy) {
+    function createProxy(
+        string contractName,
+        string version
+    )
+    public
+    onlyMaintainer
+    payable
+    returns (UpgradeabilityProxy)
+    {
         UpgradeabilityProxy proxy = new UpgradeabilityProxy(contractName, version);
         Upgradeable(proxy).initialize.value(msg.value)(msg.sender);
         contractToProxy[contractName] = proxy;
@@ -136,7 +187,10 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
         uint[] values,
         string _currency,
         string _nonSingletonHash
-    ) public payable {
+    )
+    public
+    payable
+    {
         // Deploy proxies for all 3 contracts
         //TODO: Versions are now hardcoded to 1.0, maybe to get dynamically always the latest version, but store the old ones
         //Deploy proxy for Acquisition contract
@@ -197,7 +251,11 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
      * @notice Function to return all 2key running contract addresses
      * @return array with all contract addresses
      */
-    function getAll2keyContracts() public view returns (address[]) {
+    function getAll2keyContracts()
+    public
+    view
+    returns (address[])
+    {
         return allVerified2keyContracts;
     }
 }

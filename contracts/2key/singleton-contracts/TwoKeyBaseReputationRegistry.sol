@@ -26,7 +26,12 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, MaintainingPattern {
      * @notice Since using singletone pattern, this is replacement for the constructor
      * @param _twoKeySingletoneRegistry is the address of registry of all singleton contracts
      */
-    function setInitialParams(address _twoKeySingletoneRegistry, address[] _maintainers) {
+    function setInitialParams(
+        address _twoKeySingletoneRegistry,
+        address[] _maintainers
+    )
+    public
+    {
         require(twoKeySingletoneRegistry == address(0));
         twoKeySingletoneRegistry = _twoKeySingletoneRegistry;
         twoKeyAdmin =
@@ -57,7 +62,13 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, MaintainingPattern {
      * @param contractor is the address of the contractor
      * @param acquisitionCampaign is the address of the acquisition campaign so we can get referrers from there
      */
-    function updateOnConversionExecutedEvent(address converter, address contractor, address acquisitionCampaign) public {
+    function updateOnConversionExecutedEvent(
+        address converter,
+        address contractor,
+        address acquisitionCampaign
+    )
+    public
+    {
         validateCall(acquisitionCampaign);
         uint d = 1;
         uint initialRewardWei = 10*(10**18);
@@ -82,7 +93,13 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, MaintainingPattern {
      * @param contractor is the address of the contractor
      * @param acquisitionCampaign is the address of the acquisition campaign so we can get referrers from there
      */
-    function updateOnConversionRejectedEvent(address converter, address contractor, address acquisitionCampaign) public {
+    function updateOnConversionRejectedEvent(
+        address converter,
+        address contractor,
+        address acquisitionCampaign
+    )
+    public
+    {
         validateCall(acquisitionCampaign);
         uint d = 1;
         uint initialPenaltyWei = 5*(10**18);
@@ -100,7 +117,14 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, MaintainingPattern {
      * @param value is value we want to add
      * @param score is the reputation score we want to modify
      */
-    function addToReputationScore(uint value, ReputationScore score) internal view returns (ReputationScore) {
+    function addToReputationScore(
+        uint value,
+        ReputationScore score
+    )
+    internal
+    view
+    returns (ReputationScore)
+    {
         if(score.points == 0) {
             score.points = value;
             score.isPositive = true;
@@ -123,7 +147,14 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, MaintainingPattern {
      * @param value is the value we want to substract
      * @param score is the score we want to modify
      */
-    function subFromReputationScore(uint value, ReputationScore score) internal view returns (ReputationScore) {
+    function subFromReputationScore(
+        uint value,
+        ReputationScore score
+    )
+    internal
+    view
+    returns (ReputationScore)
+    {
         if(score.points == 0) {
             score.points = value;
             score.isPositive = false;
@@ -143,21 +174,37 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, MaintainingPattern {
     /**
      * @notice Internal getter from Acquisition campaign to fetch logic handler address
      */
-    function getLogicHandlerAddress(address acquisitionCampaign) internal view returns (address) {
+    function getLogicHandlerAddress(
+        address acquisitionCampaign
+    )
+    internal
+    view
+    returns (address)
+    {
         return ITwoKeyAcquisitionCampaignStateVariables(acquisitionCampaign).twoKeyAcquisitionLogicHandler();
     }
 
     /**
      * @notice Internal getter from Acquisition campaign to fetch conersion handler address
      */
-    function getConversionHandlerAddress(address acquisitionCampaign) internal view returns (address) {
+    function getConversionHandlerAddress(
+        address acquisitionCampaign
+    )
+    internal
+    view
+    returns (address)
+    {
         return ITwoKeyAcquisitionCampaignStateVariables(acquisitionCampaign).conversionHandler();
     }
 
     /**
      * @notice Function to validate call to method
      */
-    function validateCall(address acquisitionCampaign) internal {
+    function validateCall(
+        address acquisitionCampaign
+    )
+    internal
+    {
         address conversionHandler = getConversionHandlerAddress(acquisitionCampaign);
         require(msg.sender == conversionHandler);
         require(ITwoKeyCampaignValidator(twoKeyCampaignValidator).isCampaignValidated(acquisitionCampaign) == true);
@@ -170,7 +217,14 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, MaintainingPattern {
      * @param acquisitionCampaign is the acquisition campaign contract
      * @return array of addresses (referrers)
      */
-    function getReferrers(address converter, address acquisitionCampaign) public view returns (address[]) {
+    function getReferrers(
+        address converter,
+        address acquisitionCampaign
+    )
+    public
+    view
+    returns (address[])
+    {
         address logicHandlerAddress = getLogicHandlerAddress(acquisitionCampaign);
         return ITwoKeyAcquisitionLogicHandler(logicHandlerAddress).getReferrers(converter, acquisitionCampaign);
     }
@@ -180,7 +234,13 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, MaintainingPattern {
      * @param _address is the address of the user we want to check points for
      * @return encoded values in type bytes, unpackable by slices of 66,2,64,2,64,2 parsed to int / bool
      */
-    function getRewardsByAddress(address _address) public view returns (bytes) {
+    function getRewardsByAddress(
+        address _address
+    )
+    public
+    view
+    returns (bytes)
+    {
         address twoKeyRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyRegistry");
         address plasma = ITwoKeyReg(twoKeyRegistry).getEthereumToPlasma(_address);
 

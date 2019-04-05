@@ -74,7 +74,13 @@ contract TwoKeyCongress {
     /// @notice Function to check if the bytecode of passed method is in the whitelist
     /// @param bytecode is the bytecode of transaction we'd like to execute
     /// @return true if whitelisted otherwise false
-    function onlyAllowedMethods(bytes bytecode) public view returns (bool) {
+    function onlyAllowedMethods(
+        bytes bytecode
+    )
+    public
+    view
+    returns (bool)
+    {
         for(uint i=0; i< allowedMethodSignatures.length; i++) {
             if(compare(allowedMethodSignatures[i], bytecode)) {
                 return true;
@@ -90,7 +96,15 @@ contract TwoKeyCongress {
      * @param votingPowers is the array of unassigned integers containing voting powers respectively
      * @dev initialMembers.length must be equal votingPowers.length
      */
-    constructor(uint256 _minutesForDebate, address[] initialMembers, bytes32[] initialMemberNames, uint[] votingPowers) payable public {
+    constructor(
+        uint256 _minutesForDebate,
+        address[] initialMembers,
+        bytes32[] initialMemberNames,
+        uint[] votingPowers
+    )
+    payable
+    public
+    {
         changeVotingRules(0, _minutesForDebate);
         for(uint i=0; i<initialMembers.length; i++) {
             addMember(initialMembers[i], initialMemberNames[i], votingPowers[i]);
@@ -102,7 +116,9 @@ contract TwoKeyCongress {
 
     /// @notice Function to add initial whitelisted methods during the deployment
     /// @dev Function is internal, it can't be called outside of the contract
-    function addInitialWhitelistedMethods() internal {
+    function addInitialWhitelistedMethods()
+    internal
+    {
         hashAllowedMethods("transferByAdmins(address,uint256)");
         hashAllowedMethods("transferEtherByAdmins(address,uint256)");
         hashAllowedMethods("destroy");
@@ -123,7 +139,14 @@ contract TwoKeyCongress {
     /// @param x is the already validated method name
     /// @param y is the bytecode of the transaction
     /// @return true if same
-    function compare(bytes32 x, bytes y) public pure returns (bool) {
+    function compare(
+        bytes32 x,
+        bytes y
+    )
+    public
+    pure
+    returns (bool)
+    {
         for(uint i=0;i<3;i++) {
             byte a = x[i];
             byte b = y[i];
@@ -139,7 +162,11 @@ contract TwoKeyCongress {
     /// @param nameAndParams is the name of the function and it's params to hash
     /// @dev example: 'functionName(address,string)'
     /// @return hash of allowed methods
-    function hashAllowedMethods(string nameAndParams) internal {
+    function hashAllowedMethods(
+        string nameAndParams
+    )
+    internal
+    {
         bytes32 allowed = keccak256(abi.encodePacked(nameAndParams));
         allowedMethodSignatures.push(allowed);
         methodHashToMethodName[allowed] = nameAndParams;
@@ -149,7 +176,11 @@ contract TwoKeyCongress {
     /// @notice Function where member can replace it's own address
     /// @dev member can change only it's own address
     /// @param _newMemberAddress is the new address we'd like to set for us
-    function replaceMemberAddress(address _newMemberAddress) public {
+    function replaceMemberAddress(
+        address _newMemberAddress
+    )
+    public
+    {
         require(_newMemberAddress != address(0));
         // Update is member in congress state
         isMemberInCongress[_newMemberAddress] = true;
@@ -183,7 +214,13 @@ contract TwoKeyCongress {
      * @param targetMember ethereum address to be added
      * @param memberName public name for that member
      */
-    function addMember(address targetMember, bytes32 memberName, uint _votingPower) public {
+    function addMember(
+        address targetMember,
+        bytes32 memberName,
+        uint _votingPower
+    )
+    public
+    {
         if(initialized == true) {
             require(msg.sender == address(this));
         }
@@ -209,7 +246,11 @@ contract TwoKeyCongress {
      *
      * @param targetMember ethereum address to be removed
      */
-    function removeMember(address targetMember) public {
+    function removeMember(
+        address targetMember
+    )
+    public
+    {
         require(msg.sender == address(this));
         require(isMemberInCongress[targetMember] == true);
 
@@ -255,7 +296,11 @@ contract TwoKeyCongress {
      *  @param functionSignature is the new transaction bytecode we'd like to whitelist
      *  @dev method requires that it's called only by contract
     */
-    function addNewAllowedBytecode(bytes32 functionSignature) public {
+    function addNewAllowedBytecode(
+        bytes32 functionSignature
+    )
+    public
+    {
         require(msg.sender == address(this));
         allowedMethodSignatures.push(bytes32(functionSignature));
     }
@@ -270,7 +315,10 @@ contract TwoKeyCongress {
      */
     function changeVotingRules(
         uint256 minimumQuorumForProposals,
-        uint256 minutesForDebate) internal {
+        uint256 minutesForDebate
+    )
+    internal
+    {
         minimumQuorum = minimumQuorumForProposals;
         debatingPeriodInMinutes = minutesForDebate;
 
@@ -292,7 +340,8 @@ contract TwoKeyCongress {
         uint weiAmount,
         string jobDescription,
         bytes transactionBytecode)
-    onlyMembers public
+    public
+    onlyMembers
     returns (uint proposalID)
     {
         require(onlyAllowedMethods(transactionBytecode)); // security layer
@@ -329,8 +378,10 @@ contract TwoKeyCongress {
         address beneficiary,
         uint etherAmount,
         string jobDescription,
-        bytes transactionBytecode)
-    onlyMembers public
+        bytes transactionBytecode
+    )
+    public
+    onlyMembers
     returns (uint proposalID)
     {
         return newProposal(beneficiary, etherAmount * 1 ether, jobDescription, transactionBytecode);
@@ -348,8 +399,10 @@ contract TwoKeyCongress {
         uint proposalNumber,
         address beneficiary,
         uint weiAmount,
-        bytes transactionBytecode)
-    view public
+        bytes transactionBytecode
+    )
+    public
+    view
     returns (bool codeChecksOut)
     {
         Proposal storage p = proposals[proposalNumber];
@@ -369,7 +422,8 @@ contract TwoKeyCongress {
         uint proposalNumber,
         bool supportsProposal,
         string justificationText)
-    onlyMembers public
+    public
+    onlyMembers
     returns (uint256 voteID)
     {
         Proposal storage p = proposals[proposalNumber]; // Get the proposal
@@ -390,7 +444,14 @@ contract TwoKeyCongress {
         return voteID;
     }
 
-    function getVoteCount(uint256 proposalNumber) onlyMembers public view returns(uint256 numberOfVotes, int256 currentResult, string description) {
+    function getVoteCount(
+        uint256 proposalNumber
+    )
+    onlyMembers
+    public
+    view
+    returns(uint256 numberOfVotes, int256 currentResult, string description)
+    {
         require(proposals[proposalNumber].proposalHash != 0);
         numberOfVotes = proposals[proposalNumber].numberOfVotes;
         currentResult = proposals[proposalNumber].currentResult;
@@ -398,7 +459,11 @@ contract TwoKeyCongress {
     }
 
     /// Basic getter function
-    function getMemberInfo() public view returns (address, bytes32, uint, uint) {
+    function getMemberInfo()
+    public
+    view
+    returns (address, bytes32, uint, uint)
+    {
         Member memory member = address2Member[msg.sender];
         return (member.memberAddress, member.name, member.votingPower, member.memberSince);
     }
@@ -411,7 +476,12 @@ contract TwoKeyCongress {
      * @param proposalNumber proposal number
      * @param transactionBytecode optional: if the transaction contained a bytecode, you need to send it
      */
-    function executeProposal(uint proposalNumber, bytes transactionBytecode) public {
+    function executeProposal(
+        uint proposalNumber,
+        bytes transactionBytecode
+    )
+    public
+    {
         Proposal storage p = proposals[proposalNumber];
 
         require(
@@ -436,14 +506,26 @@ contract TwoKeyCongress {
     /// @notice Function getter for voting power for specific member
     /// @param _memberAddress is the address of the member
     /// @return integer representing voting power
-    function getMemberVotingPower(address _memberAddress) public view returns (uint) {
+    function getMemberVotingPower(
+        address _memberAddress
+    )
+    public
+    view
+    returns (uint)
+    {
         Member memory _member = address2Member[msg.sender];
         return _member.votingPower;
     }
 
     /// @notice to check if an address is member
     /// @param _member is the address we're checking for
-    function checkIsMember(address _member) public view returns (bool) {
+    function checkIsMember(
+        address _member
+    )
+    public
+    view
+    returns (bool)
+    {
         return isMemberInCongress[_member];
     }
 
@@ -454,39 +536,67 @@ contract TwoKeyCongress {
 
     /// @notice Getter for maximum voting power
     /// @return maxVotingPower
-    function getMaxVotingPower() public view returns (uint) {
+    function getMaxVotingPower()
+    public
+    view
+    returns (uint)
+    {
         return maxVotingPower;
     }
 
     /// @notice Getter for length for how many members are currently
     /// @return length of members
-    function getMembersLength() public view returns (uint) {
+    function getMembersLength()
+    public
+    view
+    returns (uint)
+    {
         return allMembers.length;
     }
 
     /// @notice Function / Getter for hashes of allowed methods
     /// @return array of bytes32 hashes
-    function getAllowedMethods() public view returns (bytes32[]){
+    function getAllowedMethods()
+    public
+    view
+    returns (bytes32[])
+    {
         return allowedMethodSignatures;
     }
 
     /// @notice Function to fetch method name from method hash
     /// @return methodname string representation
-    function getMethodNameFromMethodHash(bytes32 _methodHash) public view returns(string) {
+    function getMethodNameFromMethodHash(
+        bytes32 _methodHash
+    )
+    public
+    view
+    returns(string)
+    {
         return methodHashToMethodName[_methodHash];
     }
 
     /// @notice Function to get major proposal data
     /// @param proposalId is the id of proposal
     /// @return tuple containing all the data for proposal
-    function getProposalData(uint proposalId) public view returns (uint,string,uint,bool,uint,int,bytes) {
+    function getProposalData(
+        uint proposalId
+    )
+    public
+    view
+    returns (uint,string,uint,bool,uint,int,bytes)
+    {
         Proposal memory p = proposals[proposalId];
         return (p.amount, p.description, p.minExecutionDate, p.executed, p.numberOfVotes, p.currentResult, p.transactionBytecode);
     }
 
     /// @notice Function to get addresses of all members in congress
     /// @return array of addresses
-    function getAllMemberAddresses() public view returns (address[]) {
+    function getAllMemberAddresses()
+    public
+    view
+    returns (address[])
+    {
         return allMembers;
     }
 

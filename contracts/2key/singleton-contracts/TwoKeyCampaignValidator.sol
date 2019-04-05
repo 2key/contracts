@@ -58,7 +58,12 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
      * @param _twoKeySingletoneRegistry is the address of TwoKeySingletoneRegistry contract
      * @param _maintainers is the array of initial maintainer addresses
      */
-    function setInitialParams(address _twoKeySingletoneRegistry, address [] _maintainers) {
+    function setInitialParams(
+        address _twoKeySingletoneRegistry,
+        address [] _maintainers
+    )
+    public
+    {
         require(twoKeySingletoneRegistry == address(0));
         twoKeySingletoneRegistry = _twoKeySingletoneRegistry;
         twoKeyAdmin =  ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyAdmin");
@@ -74,7 +79,12 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
      * @param campaign is the address of the campaign, in this particular case it's acquisition
      * @dev Validates all the required stuff, if the campaign is not validated, it can't update our singletones
      */
-    function validateAcquisitionCampaign(address campaign, string nonSingletonHash) public {
+    function validateAcquisitionCampaign(
+        address campaign,
+        string nonSingletonHash
+    )
+    public
+    {
         require(isCampaignValidated[campaign] == false);
         require(msg.sender == twoKeySingletoneRegistry); // Only 2key singleton registry can do this
 
@@ -118,7 +128,13 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
      * @param campaign is the campaign address
      * @dev Validates all the required stuff, if the campaign is not validated, it can't update our singletones
      */
-    function validateDonationCampaign(address campaign, address donationConversionHandler, string nonSingletonHash) public {
+    function validateDonationCampaign(
+        address campaign,
+        address donationConversionHandler,
+        string nonSingletonHash
+    )
+    public
+    {
         address contractor = ITwoKeyCampaignPublicAddresses(campaign).contractor();
         address moderator = ITwoKeyCampaignPublicAddresses(campaign).moderator();
 
@@ -155,7 +171,13 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
      * @param names is the array of hexed contract names
      * @dev Only maintainer can issue calls to this function
      */
-    function addValidBytecodes(address[] contracts, bytes32[] names) public onlyMaintainer {
+    function addValidBytecodes(
+        address[] contracts,
+        bytes32[] names
+    )
+    public
+    onlyMaintainer
+    {
         require(contracts.length == names.length);
         uint length = contracts.length;
         for(uint i=0; i<length; i++) {
@@ -168,7 +190,12 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
     /**
      * @notice Function to remove bytecode of the contract from whitelisted ones
      */
-    function removeBytecode(bytes _bytecode) public onlyMaintainer {
+    function removeBytecode(
+        bytes _bytecode
+    )
+    public
+    onlyMaintainer
+    {
         isCodeValid[_bytecode] = false;
     }
 
@@ -177,7 +204,13 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
      * @param _conversionHandler is the address of already deployed conversion handler
      * @return true if code is valid and responds to conversion handler contract
      */
-    function isConversionHandlerCodeValid(address _conversionHandler) public view returns (bool) {
+    function isConversionHandlerCodeValid(
+        address _conversionHandler
+    )
+    public
+    view
+    returns (bool)
+    {
         address implementation = IGetImplementation(_conversionHandler).implementation();
         bytes memory contractCode = GetCode.at(implementation);
         require(isCodeValid[contractCode]);
@@ -186,7 +219,13 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
         return true;
     }
 
-    function isContractCodeAddressValidated(address _contract) public view returns (bool) {
+    function isContractCodeAddressValidated(
+        address _contract
+    )
+    public
+    view
+    returns (bool)
+    {
         address implementation = IGetImplementation(_contract).implementation();
         bytes memory contractCode = GetCode.at(implementation);
         return isCodeValid[contractCode];
@@ -196,7 +235,13 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
      * @notice Pure function to convert input string to hex
      * @param source is the input string
      */
-    function stringToBytes32(string memory source) internal pure returns (bytes32 result) {
+    function stringToBytes32(
+        string memory source
+    )
+    internal
+    pure
+    returns (bytes32 result)
+    {
         bytes memory tempEmptyStringTest = bytes(source);
         if (tempEmptyStringTest.length == 0) {
             return 0x0;

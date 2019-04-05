@@ -77,7 +77,13 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
      * @param _twoKeyAdmin is the address of twoKeyAdmin contract
      * @param _maintainers is the address of initial maintainer
      */
-    function setInitialParams(address _twoKeyEventSource, address _twoKeyAdmin, address [] _maintainers) external {
+    function setInitialParams(
+        address _twoKeyEventSource,
+        address _twoKeyAdmin,
+        address [] _maintainers
+    )
+    external
+    {
         require(twoKeyEventSource == address(0));
         twoKeyEventSource = _twoKeyEventSource;
         twoKeyAdmin = _twoKeyAdmin;
@@ -93,7 +99,13 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
     /// @dev We're requiring the contract address different address 0 because it needs to be deployed
     /// @param _userAddress is address of contractor
     /// @param _contractAddress is address of deployed campaign contract
-    function addWhereContractor(address _userAddress, address _contractAddress) external onlyTwoKeyEventSource {
+    function addWhereContractor(
+        address _userAddress,
+        address _contractAddress
+    )
+    external
+    onlyTwoKeyEventSource
+    {
         require(_contractAddress != address(0));
         userToCampaignsWhereContractor[_userAddress].push(_contractAddress);
     }
@@ -103,7 +115,13 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
     /// @dev We're requiring the contract address different address 0 because it needs to be deployed
     /// @param _userAddress is address of moderator
     /// @param _contractAddress is address of deployed campaign contract
-    function addWhereModerator(address _userAddress, address _contractAddress) external onlyTwoKeyEventSource {
+    function addWhereModerator(
+        address _userAddress,
+        address _contractAddress
+    )
+    external
+    onlyTwoKeyEventSource
+    {
         require(_contractAddress != address(0));
         userToCampaignsWhereModerator[_userAddress].push(_contractAddress);
     }
@@ -113,7 +131,13 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
     /// @dev We're requiring the contract address different address 0 because it needs to be deployed
     /// @param _userAddress is address of refferer
     /// @param _contractAddress is address of deployed campaign contract
-    function addWhereReferrer(address _userAddress, address _contractAddress) external onlyTwoKeyEventSource {
+    function addWhereReferrer(
+        address _userAddress,
+        address _contractAddress
+    )
+    external
+    onlyTwoKeyEventSource
+    {
         require(_contractAddress != address(0));
         userToCampaignsWhereReferrer[_userAddress].push(_contractAddress);
     }
@@ -123,7 +147,13 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
     /// @dev We're requiring the contract address different address 0 because it needs to be deployed
     /// @param _userAddress is address of converter
     /// @param _contractAddress is address of deployed campaign contract
-    function addWhereConverter(address _userAddress, address _contractAddress) external onlyTwoKeyEventSource {
+    function addWhereConverter(
+        address _userAddress,
+        address _contractAddress
+    )
+    external
+    onlyTwoKeyEventSource
+    {
         require(_contractAddress != address(0));
         userToCampaignsWhereConverter[_userAddress].push(_contractAddress);
     }
@@ -132,7 +162,13 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
     /// @notice Function to fetch all campaign contracts where user is contractor
     /// @param _userAddress is address of user
     /// @return array of addresses (campaign contracts)
-    function getContractsWhereUserIsContractor(address _userAddress) external view returns (address[]) {
+    function getContractsWhereUserIsContractor(
+        address _userAddress
+    )
+    external
+    view
+    returns (address[])
+    {
         require(_userAddress != address(0));
         return userToCampaignsWhereContractor[_userAddress];
     }
@@ -141,7 +177,13 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
     /// @notice Function to fetch all campaign contracts where user is moderator
     /// @param _userAddress is address of user
     /// @return array of addresses (campaign contracts)
-    function getContractsWhereUserIsModerator(address _userAddress) external view returns (address[]) {
+    function getContractsWhereUserIsModerator(
+        address _userAddress
+    )
+    external
+    view
+    returns (address[])
+    {
         require(_userAddress != address(0));
         return userToCampaignsWhereModerator[_userAddress];
     }
@@ -150,7 +192,13 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
     /// @notice Function to fetch all campaign contracts where user is refferer
     /// @param _userAddress is address of user
     /// @return array of addresses (campaign contracts)
-    function getContractsWhereUserIsReferrer(address _userAddress) external view returns (address[]) {
+    function getContractsWhereUserIsReferrer(
+        address _userAddress
+    )
+    external
+    view
+    returns (address[])
+    {
         require(_userAddress != address(0));
         return userToCampaignsWhereReferrer[_userAddress];
     }
@@ -159,7 +207,13 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
     /// @notice Function to fetch all campaign contracts where user is converter
     /// @param _userAddress is address of user
     /// @return array of addresses (campaign contracts)
-    function getContractsWhereUserIsConverter(address _userAddress) external view returns (address[]) {
+    function getContractsWhereUserIsConverter(
+        address _userAddress
+    )
+    external
+    view
+    returns (address[])
+    {
         require(_userAddress != address(0));
         return userToCampaignsWhereConverter[_userAddress];
     }
@@ -169,7 +223,12 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
     /// @dev private function
     /// @param _name is name of user
     /// @param _sender is address of user
-    function addNameInternal(string _name, address _sender) internal {
+    function addNameInternal(
+        string _name,
+        address _sender
+    )
+    internal
+    {
         bytes32 name = stringToBytes32(_name);
         // check if name is taken
         if (username2currentAddress[name] != 0) {
@@ -198,7 +257,10 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
         string _username_walletName,
         bytes _signatureName,
         bytes _signatureWalletName
-    ) public onlyMaintainer  {
+    )
+    public
+    onlyMaintainer
+    {
         addName(_name, _sender, _fullName, _email, _signatureName);
         setWalletName(_name, _sender, _username_walletName, _signatureWalletName);
     }
@@ -206,7 +268,15 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
     /// @notice Function where only admin can add a name - address pair
     /// @param _name is name of user
     /// @param _sender is address of user
-    function addName(string _name, address _sender, string _fullName, string _email, bytes signature) public {
+    function addName(
+        string _name,
+        address _sender,
+        string _fullName,
+        string _email,
+        bytes signature
+    )
+    public
+    {
         require(isMaintainer[msg.sender] == true || msg.sender == address(this));
 
         string memory concatenatedValues = strConcat(_name,_fullName,_email);
@@ -225,7 +295,12 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
     /// @notice Add signed name
     /// @param _name is the name
     /// @param external_sig is the external signature
-    function addNameSigned(string _name, bytes external_sig) public {
+    function addNameSigned(
+        string _name,
+        bytes external_sig
+    )
+    public
+    {
         bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to name")),
             keccak256(abi.encodePacked(_name))));
         address eth_address = Call.recoverHash(hash,external_sig,0);
@@ -233,12 +308,21 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
         addNameInternal(_name, eth_address);
     }
 
-    function setNoteInternal(bytes note, address me) private {
+    function setNoteInternal(
+        bytes note,
+        address me
+    )
+    private
+    {
         // note is a message you can store with sig. For example it could be the secret you used encrypted by you
         notes[me] = note;
     }
 
-    function setNoteByUser(bytes note) public {
+    function setNoteByUser(
+        bytes note
+    )
+    public
+    {
         // note is a message you can store with sig. For example it could be the secret you used encrypted by you
         setNoteInternal(note, msg.sender);
     }
@@ -256,7 +340,14 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
     /// @param username is the username of the user we want to update map for
     /// @param _address is the address of the user we want to update map for
     /// @param _username_walletName is the concatenated username + '_' + walletName, since sending from trusted provider no need to validate
-    function setWalletName(string memory username, address _address, string memory _username_walletName, bytes signature) public {
+    function setWalletName(
+        string memory username,
+        address _address,
+        string memory _username_walletName,
+        bytes signature
+    )
+    public
+    {
         require(isMaintainer[msg.sender] == true || msg.sender == address(this));
         require(_address != address(0));
         bytes32 usernameHex = stringToBytes32(username);
@@ -272,7 +363,12 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
         walletTag2address[walletTag] = _address;
     }
 
-    function addPlasma2EthereumInternal(bytes sig, address eth_address) private {
+    function addPlasma2EthereumInternal(
+        bytes sig,
+        address eth_address
+    )
+    private
+    {
         // add an entry connecting msg.sender to the ethereum address that was used to sign sig.
         // see setup_demo.js on how to generate sig
         bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to ethereum address")),keccak256(abi.encodePacked(eth_address))));
@@ -282,11 +378,21 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
         ethereum2plasma[eth_address] = plasma_address;
     }
 
-    function addPlasma2EthereumByUser(bytes sig) public {
+    function addPlasma2EthereumByUser(
+        bytes sig
+    )
+    public
+    {
         addPlasma2EthereumInternal(sig, msg.sender);
     }
 
-    function setPlasma2EthereumAndNoteSigned(bytes sig, bytes note, bytes external_sig) public {
+    function setPlasma2EthereumAndNoteSigned(
+        bytes sig,
+        bytes note,
+        bytes external_sig
+    )
+    public
+    {
         bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to ethereum-plasma")),
             keccak256(abi.encodePacked(sig,note))));
         address eth_address = Call.recoverHash(hash,external_sig,0);
@@ -299,7 +405,13 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
     /// @notice Function to fetch address of the user that corresponds to given name
     /// @param _name is name of user
     /// @return address of the user as type address
-    function getUserName2UserAddress(string _name) external view returns (address) {
+    function getUserName2UserAddress(
+        string _name
+    )
+    external
+    view
+    returns (address)
+    {
         bytes32 name = stringToBytes32(_name);
         return username2currentAddress[name];
     }
@@ -308,7 +420,13 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
     /// @notice Function to fetch name that corresponds to the address
     /// @param _sender is address of user
     /// @return name of the user as type string
-    function getUserAddress2UserName(address _sender) external view returns (string) {
+    function getUserAddress2UserName(
+        address _sender
+    )
+    external
+    view
+    returns (string)
+    {
         return address2username[_sender];
     }
 
@@ -323,7 +441,12 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
 
     /**
      */
-    function deleteUser(string userName) public onlyMaintainer {
+    function deleteUser(
+        string userName
+    )
+    public
+    onlyMaintainer
+    {
         bytes32 userNameHex = stringToBytes32(userName);
         username2AddressHistory[userNameHex] = new address[](0);
         address _ethereumAddress = username2currentAddress[userNameHex];
@@ -378,7 +501,13 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
      * @param plasma is the plasma address we're searching eth address for
      * @return ethereum address if exist otherwise 0x0 (address(0))
      */
-    function getPlasmaToEthereum(address plasma) public view returns (address) {
+    function getPlasmaToEthereum(
+        address plasma
+    )
+    public
+    view
+    returns (address)
+    {
         if(plasma2ethereum[plasma] != address(0)) {
             return plasma2ethereum[plasma];
         }
@@ -390,7 +519,13 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
      * @param ethereum is the ethereum address we're searching plasma address for
      * @return plasma address if exist otherwise 0x0 (address(0))
      */
-    function getEthereumToPlasma(address ethereum) public view returns (address) {
+    function getEthereumToPlasma(
+        address ethereum
+    )
+    public
+    view
+    returns (address)
+    {
         if(ethereum2plasma[ethereum] != address(0)) {
             return ethereum2plasma[ethereum];
         }
@@ -403,7 +538,13 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
      * @param _userAddress is the address of the user
      * @return true if exists otherwise false
      */
-    function checkIfUserExists(address _userAddress) external view returns (bool) {
+    function checkIfUserExists(
+        address _userAddress
+    )
+    external
+    view
+    returns (bool)
+    {
         bytes memory tempEmptyStringTest = bytes(address2username[_userAddress]);
         //notes[_userAddress].length == 0
         if(tempEmptyStringTest.length == 0 || address2walletTag[_userAddress] == 0 || ethereum2plasma[_userAddress] == address(0) || notes[_userAddress].length == 0) {
@@ -413,7 +554,12 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
     }
 
 
-    function stringToBytes32(string memory source) internal pure returns (bytes32 result) {
+    function stringToBytes32(
+        string memory source)
+    internal
+    pure
+    returns (bytes32 result)
+    {
         bytes memory tempEmptyStringTest = bytes(source);
         if (tempEmptyStringTest.length == 0) {
             return 0x0;
@@ -428,7 +574,15 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
      * @dev If you want to handle concatenation of less than 5, then pass first their values and for the left pass empty strings
      * @return string concatenated
      */
-    function strConcat(string _a, string _b, string _c) public pure returns (string){
+    function strConcat(
+        string _a,
+        string _b,
+        string _c
+    )
+    public
+    pure
+    returns (string)
+    {
         bytes memory _ba = bytes(_a);
         bytes memory _bb = bytes(_b);
         bytes memory _bc = bytes(_c);
@@ -442,7 +596,13 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
     }
 
     //TODO: Major change notify backends and FEDS
-    function getUserData(address _user) external view returns (bytes) {
+    function getUserData(
+        address _user
+    )
+    external
+    view
+    returns (bytes)
+    {
         UserData memory data = addressToUserData[_user];
         bytes32 username = stringToBytes32(data.username);
         bytes32 fullName = stringToBytes32(data.fullName);

@@ -30,7 +30,12 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
     /**
      * @notice Event will be fired every time someone buys tokens
      */
-    event TokenSell(address indexed purchaser, address indexed beneficiary, uint256 value, uint256 amount);
+    event TokenSell(
+        address indexed purchaser,
+        address indexed beneficiary,
+        uint256 value,
+        uint256 amount
+    );
 
     /**
      * Event for token purchase logging
@@ -58,7 +63,9 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         address _twoKeyExchangeContract,
         address _twoKeyCampaignValidator,
         address[] _maintainers
-    ) public {
+    )
+    external
+    {
         //Validating that this can be called only once
         require(rate == 0);
         require(_rate != 0);
@@ -115,7 +122,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         address _beneficiary,
         uint256 _tokenAmount
     )
-    private
+    internal
     {
         token.safeTransfer(_beneficiary, _tokenAmount);
     }
@@ -129,7 +136,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         address _beneficiary,
         uint256 _tokenAmount
     )
-    private
+    internal
     {
         _deliverTokens(_beneficiary, _tokenAmount);
     }
@@ -139,8 +146,12 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
      * @param _weiAmount Value in wei to be converted into tokens
      * @return Number of tokens that can be purchased with the specified _weiAmount
      */
-    function _getTokenAmount(uint256 _weiAmount)
-    private view returns (uint256)
+    function _getTokenAmount(
+        uint256 _weiAmount
+    )
+    internal
+    view
+    returns (uint256)
     {
         uint value;
         bool flag;
@@ -151,7 +162,11 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
     /**
      * @dev Determines how ETH is stored/forwarded on purchases.
      */
-    function _forwardFunds(address _twoKeyAdmin) private {
+    function _forwardFunds(
+        address _twoKeyAdmin
+    )
+    internal
+    {
         _twoKeyAdmin.transfer(msg.value);
     }
 
@@ -160,7 +175,14 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
      * @param _beneficiary to get
      * @return amount of tokens bought
      */
-    function buyTokens(address _beneficiary) public payable onlyValidatedContracts returns (uint) {
+    function buyTokens(
+        address _beneficiary
+    )
+    public
+    payable
+    onlyValidatedContracts
+    returns (uint)
+    {
         uint256 weiAmount = msg.value;
         _preValidatePurchase(_beneficiary, weiAmount);
 
@@ -182,7 +204,11 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         return tokens;
     }
 
-    function () public payable onlyValidatedContracts {
+    function ()
+    public
+    payable
+    onlyValidatedContracts
+    {
         buyTokens(msg.sender);
     }
 }

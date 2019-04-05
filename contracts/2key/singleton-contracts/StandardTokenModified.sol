@@ -39,7 +39,8 @@ contract StandardTokenModified is ERC20Basic {
         address _to,
         uint256 _value
     )
-    public onlyIfNotFrozen
+    public
+    onlyIfNotFrozen
     returns (bool)
     {
         require(_value <= balances[_from]);

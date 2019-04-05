@@ -38,7 +38,12 @@ contract MaintainingPattern {
      * @dev only twoKeyAdmin contract is eligible to mutate state of maintainers
      * @param _maintainers is the array of maintainer addresses
      */
-    function addMaintainers(address [] _maintainers) public onlyTwoKeyAdmin {
+    function addMaintainers(
+        address [] _maintainers
+    )
+    public
+    onlyTwoKeyAdmin
+    {
         //If state variable, .balance, or .length is used several times, holding its value in a local variable is more gas efficient.
         uint numberOfMaintainers = _maintainers.length;
         for(uint i=0; i<numberOfMaintainers; i++) {
@@ -51,7 +56,12 @@ contract MaintainingPattern {
      * @dev only twoKeyAdmin contract is eligible to mutate state of maintainers
      * @param _maintainers is the array of maintainer addresses
      */
-    function removeMaintainers(address [] _maintainers) public onlyTwoKeyAdmin {
+    function removeMaintainers(
+        address [] _maintainers
+    )
+    public
+    onlyTwoKeyAdmin
+    {
         //If state variable, .balance, or .length is used several times, holding its value in a local variable is more gas efficient.
         uint numberOfMaintainers = _maintainers.length;
         for(uint i=0; i<numberOfMaintainers; i++) {

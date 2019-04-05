@@ -37,7 +37,12 @@ contract TwoKeyExchangeRateContract is Upgradeable, MaintainingPattern {
      * @param _twoKeyAdmin is the address of TwoKeyAdmin contract
      * @dev Can be called only once
      */
-    function setInitialParams(address [] _maintainers, address _twoKeyAdmin) external {
+    function setInitialParams(
+        address [] _maintainers,
+        address _twoKeyAdmin
+    )
+    external
+    {
         require(_twoKeyAdmin != address(0)); //validation that it can be called only once
         require(twoKeyAdmin == address(0)); //validation that it can be called only once
         twoKeyAdmin = _twoKeyAdmin;
@@ -54,7 +59,14 @@ contract TwoKeyExchangeRateContract is Upgradeable, MaintainingPattern {
      * @param _isETHGreaterThanCurrency true if 1 eth = more than 1 unit of X otherwise false
      * @param _RateFromOneGreaterThanUnitInWeiOfLesserThanUnit 1 (greater than currency) == X (the updated value) in the (lesser than currency in WEI)
      */
-    function setFiatCurrencyDetails(bytes32 _currency, bool _isETHGreaterThanCurrency, uint _RateFromOneGreaterThanUnitInWeiOfLesserThanUnit) public onlyMaintainer {
+    function setFiatCurrencyDetails(
+        bytes32 _currency,
+        bool _isETHGreaterThanCurrency,
+        uint _RateFromOneGreaterThanUnitInWeiOfLesserThanUnit
+    )
+    public
+    onlyMaintainer
+    {
         /**
          * given:  1 ETH == 119.45678 USD ==>
          * then it holds:   1 * 10^18 ETH_WEI ==  119.45678 * 10^18 USD_WEI
@@ -78,7 +90,13 @@ contract TwoKeyExchangeRateContract is Upgradeable, MaintainingPattern {
      * @param _currency is the currency (ex. 'USD', 'EUR', etc.)
      * @return rate between currency and eth wei
      */
-    function getFiatCurrencyDetails(string _currency) public view returns (uint,bool,uint,address) {
+    function getFiatCurrencyDetails(
+        string _currency
+    )
+    public
+    view
+    returns (uint,bool,uint,address)
+    {
         bytes32 key = stringToBytes32(_currency);
         return (
             currencyName2rate[key].rateEth,
@@ -93,7 +111,12 @@ contract TwoKeyExchangeRateContract is Upgradeable, MaintainingPattern {
      * @dev If string.length > 32 then the rest after 32nd char will be deleted
      * @return result
      */
-    function stringToBytes32(string memory source) internal returns (bytes32 result) {
+    function stringToBytes32(
+        string memory source
+    )
+    internal
+    returns (bytes32 result)
+    {
         bytes memory tempEmptyStringTest = bytes(source);
         if (tempEmptyStringTest.length == 0) {
             return 0x0;
