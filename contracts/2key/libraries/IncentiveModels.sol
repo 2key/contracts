@@ -48,7 +48,7 @@ library IncentiveModels {
         uint[] memory rewards = new uint[](numberOfInfluencers);
         uint x = calculateX(totalRewardEthWEI,numberOfInfluencers,factor);
         for(uint i=0; i<numberOfInfluencers;i++) {
-            rewards[numberOfInfluencers-i] = x / (2**i);
+            rewards[numberOfInfluencers-i-1] = x / (2**i);
         }
         return rewards;
     }

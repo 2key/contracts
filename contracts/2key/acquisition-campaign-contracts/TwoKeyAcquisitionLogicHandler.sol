@@ -497,6 +497,13 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable, TwoKeyCampaignIncentiveMo
             }
             //Update reward for last
             updateReferrerMappings(influencers[numberOfInfluencers-1], rewardForLast, _conversionId);
+        } else if(incentiveModel == IncentiveModel.VANILLA_POWER_LAW) {
+            // Get rewards per referrer
+            uint [] memory rewards = IncentiveModels.powerLawRewards(totalBounty2keys, numberOfInfluencers, 2);
+            //Iterate through all referrers and distribute rewards
+            for(i=0; i<numberOfInfluencers; i++) {
+                updateReferrerMappings(influencers[i], rewards[i], _conversionId);
+            }
         } else if(incentiveModel == IncentiveModel.MANUAL) {
             for (i = 0; i < numberOfInfluencers; i++) {
                 uint256 b;
