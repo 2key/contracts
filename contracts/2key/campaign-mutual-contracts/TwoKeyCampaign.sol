@@ -34,6 +34,7 @@ contract TwoKeyCampaign is ArcERC20 {
 	uint256 maxReferralRewardPercent; // maxReferralRewardPercent is actually bonus percentage in ETH
 	uint256 moderatorTotalEarnings2key; //Total earnings of the moderator all time
 	uint256 reservedAmount2keyForRewards; //Reserved amount of 2key tokens for rewards distribution
+    uint256 reservedAmountEthForRewards;
 
 	string public publicMetaHash; // Ipfs hash of json campaign object
 	string public privateMetaHash; // Ipfs hash of json sensitive (contractor) information
@@ -90,6 +91,14 @@ contract TwoKeyCampaign is ArcERC20 {
             require(old_address == new_public_key);
         }
         public_link_key[me] = new_public_key;
+    }
+
+
+    /**
+ 	 * @notice
+ 	 */
+    function addEthWei() public payable {
+        reservedAmountEthForRewards+=msg.value;
     }
 
 	/**

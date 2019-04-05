@@ -20,6 +20,7 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
     address public twoKeyAcquisitionLogicHandler; // Address of logic handler contract
 
     address assetContractERC20; // Asset contract is address of ERC20 inventory
+
     mapping(address => uint256) private amountConverterSpentFiatWei; // Amount converter spent for Fiat conversions
     mapping(address => uint256) private amountConverterSpentEthWEI; // Amount converter put to the contract in Ether
     mapping(address => uint256) private unitsConverterBought; // Number of units (ERC20 tokens) bought
