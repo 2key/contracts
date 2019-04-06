@@ -95,7 +95,7 @@ contract TwoKeyCampaign is ArcERC20 {
 
 
     /**
- 	 * @notice
+ 	 * @notice function to fetch ether!
  	 */
     function addEthWei() public payable {
         reservedAmountEthForRewards+=msg.value;
