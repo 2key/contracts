@@ -229,6 +229,7 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
      * @param _isAnonymous if converter chooses to be anonymous
      */
     function convertFiat(
+//        bytes signature,
         address _converter,
         uint conversionAmountFiatWei,
         bool _isAnonymous
@@ -237,6 +238,7 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
     {
         // Validate that sender is either _converter or maintainer
         require(msg.sender == _converter || twoKeyEventSource.isAddressMaintainer(msg.sender));
+//        distributeArcsBasedOnSignature(signature);
         createConversion(conversionAmountFiatWei, _converter, true, _isAnonymous);
         amountConverterSpentFiatWei[_converter] = amountConverterSpentFiatWei[_converter].add(conversionAmountFiatWei);
     }
