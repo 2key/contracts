@@ -105,7 +105,7 @@ async function start() {
     let volumeInfo;
     try {
       volumeInfo = await volume.inspect();
-    } catch {}
+    } catch(err){console.log(err)}
 
     if (!volumeInfo) {
       volume = await docker.createVolume({ name: volumeName });
@@ -128,7 +128,7 @@ async function reset() {
     let volumeInfo;
     try {
       volumeInfo = await volume.inspect();
-    } catch {}
+    } catch(err){console.log(err)}
     console.log('volumeInfo', volumeInfo);
     if (volumeInfo) {
       await volume.remove({});
