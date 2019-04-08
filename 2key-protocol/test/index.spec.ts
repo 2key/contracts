@@ -33,7 +33,7 @@ const twoKeyAdmin = singletons.TwoKeyAdmin.networks[mainNetId].address;
 let isKYCRequired = true;
 let isFiatConversionAutomaticallyApproved = false;
 let incentiveModel = "VANILLA_POWER_LAW";
-
+let amount = 1000; //1000 tokens fiat inventory
 function makeHandle(max: number = 8): string {
     let text = '';
     let possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -508,6 +508,11 @@ describe('TwoKeyProtocol', () => {
         return expect(addressRegex.test(campaignAddress)).to.be.true;
     }).timeout(1200000);
 
+    it('should reserve amount for fiat conversion rewards', async() => {
+
+        let txHash = await twoKeyProtocol.AcquisitionCampaign.specifyFiatConversionRewards(campaignAddress, amount, from);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+    }).timeout(60000);
 
     it('should proff that campaign is validated and registered properly', async() => {
         let isValidated = await twoKeyProtocol.CampaignValidator.isCampaignValidated(campaignAddress);
@@ -539,7 +544,7 @@ describe('TwoKeyProtocol', () => {
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const balance = twoKeyProtocol.Utils.fromWei(await twoKeyProtocol.AcquisitionCampaign.checkInventoryBalance(campaignAddress, from)).toString();
         console.log('Campaign Balance', balance);
-        expect(parseFloat(balance)).to.be.equal(1234000);
+        expect(parseFloat(balance)).to.be.equal(1234000 - amount);
     }).timeout(600000);
 
     it('should get user public link', async () => {
@@ -640,7 +645,7 @@ describe('TwoKeyProtocol', () => {
     it('==> should print available amount of tokens before conversion', async() => {
         const availableAmountOfTokens = await twoKeyProtocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(campaignAddress,from);
         console.log('Available amount of tokens before conversion is: ' + availableAmountOfTokens);
-        expect(availableAmountOfTokens).to.be.equal(1234000);
+        expect(availableAmountOfTokens).to.be.equal(1234000 - amount);
     }).timeout(60000);
 
     it('should buy some tokens', async () => {
@@ -659,7 +664,7 @@ describe('TwoKeyProtocol', () => {
         const availableAmountOfTokens = await twoKeyProtocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(campaignAddress,from);
         const { totalTokens } = await twoKeyProtocol.AcquisitionCampaign.getEstimatedTokenAmount(campaignAddress, false, twoKeyProtocol.Utils.toWei(minContributionETHorUSD, 'ether'));
         console.log('Available amount of tokens before conversion is: ' + availableAmountOfTokens, totalTokens);
-        expect(availableAmountOfTokens).to.be.lte(1234000 - totalTokens);
+        expect(availableAmountOfTokens).to.be.lte(1234000 - amount - totalTokens);
     }).timeout(60000);
 
     it('should join as test4', async () => {
