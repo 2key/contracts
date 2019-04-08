@@ -38,6 +38,7 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
      * counters[6] = RAISED_FUNDS_ETH_WEI
      * counters[7] = TOKENS_SOLD
      * counters[8] = TOTAL_BOUNTY
+     * counters[9] = RAISED_FUNDS_FIAT_WEI
      */
     uint [] counters;
 
@@ -72,7 +73,7 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
         uint256 contractorProceedsETHWei; // How much contractor will receive for this conversion
         address converter; // Converter is one who's buying tokens -> plasma address
         ConversionState state;
-        uint256 conversionAmount; // Amount for conversion (In ETH)
+        uint256 conversionAmount; // Amount for conversion (In ETH / FIAT)
         uint256 maxReferralRewardETHWei; // Total referral reward for the conversion
         uint256 maxReferralReward2key;
         uint256 moderatorFeeETHWei;
@@ -101,7 +102,7 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
     public
     {
         require(isCampaignInitialized == false);
-        counters = new uint[](9);
+        counters = new uint[](10);
 
         expiryConversionInHours = values[0];
         tokenDistributionDate = values[1];
@@ -251,6 +252,9 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
                 require(totalUnits < availableTokens);
                 counters[0]--; //Decrease number of pending conversions
             }
+
+            //Update raised funds FIAT once the conversion is executed
+            counters[9] = counters[9].add(conversion.conversionAmount);
         } else {
             //TODO uncomment
 //            require(msg.sender == conversion.converter || msg.sender == contractor);
