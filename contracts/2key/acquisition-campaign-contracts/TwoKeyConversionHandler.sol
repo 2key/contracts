@@ -469,7 +469,8 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
         moveFromPendingToRejectedState(_converter);
         uint reservedAmount = 0;
         uint refundAmount = 0;
-        for(uint i=0; i<converterToHisConversions[_converter].length; i++) {
+        uint len = converterToHisConversions[_converter].length;
+        for(uint i=0; i< len; i++) {
             uint conversionId = converterToHisConversions[_converter][i];
             Conversion c = conversions[conversionId];
             if(c.state == ConversionState.PENDING_APPROVAL) {

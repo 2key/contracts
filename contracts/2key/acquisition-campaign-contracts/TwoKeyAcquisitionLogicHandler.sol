@@ -545,7 +545,8 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable, TwoKeyCampaignIncentiveMo
     {
         uint[] memory conversionIds = ITwoKeyConversionHandler(twoKeyConversionHandler).getConverterConversionIds(eth_address);
         uint sum = 0;
-        for(uint i=0; i<conversionIds.length; i++) {
+        uint len = conversionIds.length;
+        for(uint i=0; i<len; i++) {
             sum += referrerPlasma2EarningsPerConversion[_referrer][conversionIds[i]];
         }
         return sum;
@@ -605,9 +606,10 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable, TwoKeyCampaignIncentiveMo
             _referrer = Call.recoverHash(hash, signature, 0);
         }
 
-        uint[] memory earnings = new uint[](conversionIds.length);
+        uint len = conversionIds.length;
+        uint[] memory earnings = new uint[](len);
 
-        for(uint i=0; i<conversionIds.length; i++) {
+        for(uint i=0; i<len; i++) {
             earnings[i] = referrerPlasma2EarningsPerConversion[_referrer][conversionIds[i]];
         }
 

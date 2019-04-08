@@ -447,7 +447,9 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
     {
         address[] memory influencers = ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).getReferrers(last_influencer,address(this));
         uint256[] memory cuts = new uint256[](influencers.length + 1);
-        for (uint i = 0; i < influencers.length; i++) {
+
+        uint numberOfInfluencers = influencers.length;
+        for (uint i = 0; i < numberOfInfluencers; i++) {
             address influencer = influencers[i];
             cuts[i] = getReferrerCut(influencer);
         }
