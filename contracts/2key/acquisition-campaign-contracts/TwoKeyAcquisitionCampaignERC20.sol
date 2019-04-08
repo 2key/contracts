@@ -129,7 +129,6 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
         bytes sig
     )
     private
-    returns (address[])
     {
         address[] memory influencers;
         address[] memory keys;
@@ -325,7 +324,6 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
     )
     public
     onlyTwoKeyConversionHandler
-    returns (uint)
     {
         //Get deep freeze token pool address
         address twoKeyDeepFreezeTokenPool =
