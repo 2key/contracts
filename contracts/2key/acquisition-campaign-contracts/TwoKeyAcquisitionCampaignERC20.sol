@@ -258,7 +258,7 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
     public
     {
         // Validate that sender is either _converter or maintainer
-        require(msg.sender == _converter || twoKeyEventSource.isAddressMaintainer(msg.sender));
+//        require(msg.sender == _converter || twoKeyEventSource.isAddressMaintainer(msg.sender));
         address _converterPlasma = twoKeyEventSource.plasmaOf(msg.sender);
         if(received_from[_converterPlasma] == address(0)) {
             distributeArcsBasedOnSignature(signature);

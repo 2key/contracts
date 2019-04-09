@@ -390,6 +390,13 @@ describe('TwoKeyProtocol', () => {
         // .to.be.equal(twoKeyProtocol.getGasPrice());
     }).timeout(60000);
 
+    it('should get total supply of economy contract' ,async() => {
+        console.log("Check total supply on 2key-economy contract");
+        let totalSup = await twoKeyProtocol.ERC20.getTotalSupply(twoKeyProtocol.twoKeyEconomy.address);
+        console.log(totalSup);
+    }).timeout(60000);
+
+
     it('should save balance to ipfs', () => {
         return twoKeyProtocol.Utils.ipfsAdd(aydnepBalance).then((hash) => {
             console.log('IPFS hash', hash);
