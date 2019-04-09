@@ -278,13 +278,22 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
         // Total rewards for referrers
         uint totalReward2keys = 0;
 
+        // Buy tokens from campaign and distribute rewards between referrers
+        totalReward2keys = twoKeyAcquisitionCampaignERC20.buyTokensAndDistributeReferrerRewards(
+            conversion.maxReferralRewardETHWei,
+            conversion.converter,
+            _conversionId,
+            conversion.isConversionFiat
+        );
+
         //Update total raised funds
         if(conversion.isConversionFiat == false) {
             // Update reputation points in registry for conversion executed event
-            ITwoKeyBaseReputationRegistry(twoKeyBaseReputationRegistry).updateOnConversionExecutedEvent(conversion.converter, contractor, twoKeyAcquisitionCampaignERC20);
-
-            // Buy tokens from campaign and distribute rewards between referrers
-            totalReward2keys = twoKeyAcquisitionCampaignERC20.buyTokensAndDistributeReferrerRewards(conversion.maxReferralRewardETHWei, conversion.converter, _conversionId);
+            ITwoKeyBaseReputationRegistry(twoKeyBaseReputationRegistry).updateOnConversionExecutedEvent(
+                conversion.converter,
+                contractor,
+                twoKeyAcquisitionCampaignERC20
+            );
 
             // Add total rewards
             counters[8] = counters[8].add(totalReward2keys);

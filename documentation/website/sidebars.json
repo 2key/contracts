@@ -17,212 +17,108 @@
     ]
   },
   "docs-api": {
-    "2KEY": [
-      "2key_DecentralizedNation",
-      "2key_ERC20CustomToken",
-      "2key_ERC20TokenMock",
-      "2key_MaintainingPattern",
-      "2key_Migrations",
-      "2key_Ownable",
-      "2key_Proxy",
-      "2key_TwoKeyAirdropCampaign",
-      "2key_TwoKeyConversionStates",
-      "2key_TwoKeyConverterStates",
-      "2key_TwoKeyHackEventSource",
-      "2key_TwoKeyTypes",
-      "2key_TwoKeyVoteToken",
-      "2key_UpgradabilityProxy_UpgradeabilityProxy",
-      "2key_UpgradabilityStorage_UpgradeabilityStorage",
-      "2key_Upgradeable"
+    "CONTRACTS": [
+      "contracts_AddressUtils",
+      "contracts_AutoIncrementing",
+      "contracts_Bounty",
+      "contracts_Bounty_Target",
+      "contracts_ECRecovery",
+      "contracts_LimitBalance",
+      "contracts_MerkleProof",
+      "contracts_ReentrancyGuard"
     ],
-    "2KEY / ACQUISITION-CAMPAIGN-CONTRACTS": [
-      "2key_acquisition-campaign-contracts_TwoKeyAcquisitionCampaignERC20",
-      "2key_acquisition-campaign-contracts_TwoKeyAcquisitionLogicHandler",
-      "2key_acquisition-campaign-contracts_TwoKeyConversionHandler"
+    "CONTRACTS / ACCESS": [
+      "contracts_access_SignatureBouncer",
+      "contracts_access_Whitelist"
     ],
-    "2KEY / CAMPAIGN-MUTUAL-CONTRACTS": [
-      "2key_campaign-mutual-contracts_ArcERC20",
-      "2key_campaign-mutual-contracts_TwoKeyCampaign",
-      "2key_campaign-mutual-contracts_TwoKeyCampaignIncentiveModels"
+    "CONTRACTS / ACCESS / RBAC": [
+      "contracts_access_rbac_RBAC",
+      "contracts_access_rbac_Roles"
     ],
-    "2KEY / DONATION-CAMPAIGN-CONTRACTS": [
-      "2key_donation-campaign-contracts_ERC20",
-      "2key_donation-campaign-contracts_InvoiceTokenERC20",
-      "2key_donation-campaign-contracts_TwoKeyDonationCampaign",
-      "2key_donation-campaign-contracts_TwoKeyDonationCampaignType",
-      "2key_donation-campaign-contracts_TwoKeyDonationConversionHandler"
+    "CONTRACTS / CROWDSALE": [
+      "contracts_crowdsale_Crowdsale"
     ],
-    "2KEY / INTERFACES": [
-      "2key_interfaces_IDecentralizedNation",
-      "2key_interfaces_IERC20",
-      "2key_interfaces_IGetImplementation",
-      "2key_interfaces_IHandleCampaignDeployment",
-      "2key_interfaces_IMaintainingPattern",
-      "2key_interfaces_ITwoKeyAcquisitionARC",
-      "2key_interfaces_ITwoKeyAcquisitionCampaignERC20",
-      "2key_interfaces_ITwoKeyAcquisitionCampaignStateVariables",
-      "2key_interfaces_ITwoKeyAcquisitionLogicHandler",
-      "2key_interfaces_ITwoKeyAdmin",
-      "2key_interfaces_ITwoKeyBaseReputationRegistry",
-      "2key_interfaces_ITwoKeyCampaignPublicAddresses",
-      "2key_interfaces_ITwoKeyCampaignValidator",
-      "2key_interfaces_ITwoKeyConversionHandler",
-      "2key_interfaces_ITwoKeyConversionHandlerGetConverterState",
-      "2key_interfaces_ITwoKeyDonationCampaign",
-      "2key_interfaces_ITwoKeyDonationCampaignFetchAddresses",
-      "2key_interfaces_ITwoKeyDonationConversionHandler",
-      "2key_interfaces_ITwoKeyEventSource",
-      "2key_interfaces_ITwoKeyEventSourceEvents",
-      "2key_interfaces_ITwoKeyExchangeRateContract",
-      "2key_interfaces_ITwoKeyReg",
-      "2key_interfaces_ITwoKeyRegistry",
-      "2key_interfaces_ITwoKeyRegistryEvents",
-      "2key_interfaces_ITwoKeySingletoneAddressStorage",
-      "2key_interfaces_ITwoKeySingletoneRegistryFetchAddress",
-      "2key_interfaces_ITwoKeySingletonesRegistry",
-      "2key_interfaces_ITwoKeyWeightedVoteContract",
-      "2key_interfaces_IUpgradableExchange"
+    "CONTRACTS / CROWDSALE / DISTRIBUTION": [
+      "contracts_crowdsale_distribution_FinalizableCrowdsale",
+      "contracts_crowdsale_distribution_PostDeliveryCrowdsale",
+      "contracts_crowdsale_distribution_RefundableCrowdsale"
     ],
-    "2KEY / LIBRARIES": [
-      "2key_libraries_Call",
-      "2key_libraries_GetCode",
-      "2key_libraries_IncentiveModels",
-      "2key_libraries_SafeERC20",
-      "2key_libraries_SafeMath"
+    "CONTRACTS / CROWDSALE / EMISSION": [
+      "contracts_crowdsale_emission_AllowanceCrowdsale",
+      "contracts_crowdsale_emission_MintedCrowdsale"
     ],
-    "2KEY / SINGLETON-CONTRACTS": [
-      "2key_singleton-contracts_StandardTokenModified",
-      "2key_singleton-contracts_TwoKeyAdmin",
-      "2key_singleton-contracts_TwoKeyBaseReputationRegistry",
-      "2key_singleton-contracts_TwoKeyCampaignAccountant",
-      "2key_singleton-contracts_TwoKeyCampaignValidator",
-      "2key_singleton-contracts_TwoKeyCongress",
-      "2key_singleton-contracts_TwoKeyEconomy",
-      "2key_singleton-contracts_TwoKeyEventSource",
-      "2key_singleton-contracts_TwoKeyExchangeRateContract",
-      "2key_singleton-contracts_TwoKeyFixedRateExchange",
-      "2key_singleton-contracts_TwoKeyFloatingRateExchange",
-      "2key_singleton-contracts_TwoKeyLockupContract",
-      "2key_singleton-contracts_TwoKeyPlasmaEvents",
-      "2key_singleton-contracts_TwoKeyPlasmaSingletoneRegistry",
-      "2key_singleton-contracts_TwoKeyRegistry",
-      "2key_singleton-contracts_TwoKeySingletonesRegistry",
-      "2key_singleton-contracts_TwoKeyUpgradableExchange"
+    "CONTRACTS / CROWDSALE / PRICE": [
+      "contracts_crowdsale_price_IncreasingPriceCrowdsale"
     ],
-    "2KEY / TOKEN-POOLS": [
-      "2key_token-pools_TokenPool",
-      "2key_token-pools_TwoKeyCommunityTokenPool",
-      "2key_token-pools_TwoKeyDeepFreezeTokenPool",
-      "2key_token-pools_TwoKeyLongTermTokenPool"
+    "CONTRACTS / CROWDSALE / VALIDATION": [
+      "contracts_crowdsale_validation_CappedCrowdsale",
+      "contracts_crowdsale_validation_IndividuallyCappedCrowdsale",
+      "contracts_crowdsale_validation_TimedCrowdsale",
+      "contracts_crowdsale_validation_WhitelistedCrowdsale"
     ],
-    "OPENZEPPELIN-SOLIDITY / CONTRACTS": [
-      "openzeppelin-solidity_contracts_AddressUtils",
-      "openzeppelin-solidity_contracts_AutoIncrementing",
-      "openzeppelin-solidity_contracts_Bounty",
-      "openzeppelin-solidity_contracts_Bounty_Target",
-      "openzeppelin-solidity_contracts_ECRecovery",
-      "openzeppelin-solidity_contracts_LimitBalance",
-      "openzeppelin-solidity_contracts_MerkleProof",
-      "openzeppelin-solidity_contracts_ReentrancyGuard"
+    "CONTRACTS / INTROSPECTION": [
+      "contracts_introspection_ERC165",
+      "contracts_introspection_SupportsInterfaceWithLookup"
     ],
-    "OPENZEPPELIN-SOLIDITY / CONTRACTS / ACCESS": [
-      "openzeppelin-solidity_contracts_access_SignatureBouncer",
-      "openzeppelin-solidity_contracts_access_Whitelist"
+    "CONTRACTS / LIFECYCLE": [
+      "contracts_lifecycle_Destructible",
+      "contracts_lifecycle_Pausable",
+      "contracts_lifecycle_TokenDestructible"
     ],
-    "OPENZEPPELIN-SOLIDITY / CONTRACTS / ACCESS / RBAC": [
-      "openzeppelin-solidity_contracts_access_rbac_RBAC",
-      "openzeppelin-solidity_contracts_access_rbac_Roles"
+    "CONTRACTS / MATH": [
+      "contracts_math_Math",
+      "contracts_math_SafeMath"
     ],
-    "OPENZEPPELIN-SOLIDITY / CONTRACTS / CROWDSALE": [
-      "openzeppelin-solidity_contracts_crowdsale_Crowdsale"
+    "CONTRACTS / OWNERSHIP": [
+      "contracts_ownership_CanReclaimToken",
+      "contracts_ownership_Claimable",
+      "contracts_ownership_Contactable",
+      "contracts_ownership_DelayedClaimable",
+      "contracts_ownership_HasNoContracts",
+      "contracts_ownership_HasNoEther",
+      "contracts_ownership_HasNoTokens",
+      "contracts_ownership_Heritable",
+      "contracts_ownership_NoOwner",
+      "contracts_ownership_Ownable",
+      "contracts_ownership_Superuser"
     ],
-    "OPENZEPPELIN-SOLIDITY / CONTRACTS / CROWDSALE / DISTRIBUTION": [
-      "openzeppelin-solidity_contracts_crowdsale_distribution_FinalizableCrowdsale",
-      "openzeppelin-solidity_contracts_crowdsale_distribution_PostDeliveryCrowdsale",
-      "openzeppelin-solidity_contracts_crowdsale_distribution_RefundableCrowdsale"
+    "CONTRACTS / PAYMENT": [
+      "contracts_payment_ConditionalEscrow",
+      "contracts_payment_Escrow",
+      "contracts_payment_PullPayment",
+      "contracts_payment_RefundEscrow",
+      "contracts_payment_SplitPayment"
     ],
-    "OPENZEPPELIN-SOLIDITY / CONTRACTS / CROWDSALE / EMISSION": [
-      "openzeppelin-solidity_contracts_crowdsale_emission_AllowanceCrowdsale",
-      "openzeppelin-solidity_contracts_crowdsale_emission_MintedCrowdsale"
+    "CONTRACTS / PROPOSALS / ERC1046": [
+      "contracts_proposals_ERC1046_TokenMetadata_ERC20TokenMetadata",
+      "contracts_proposals_ERC1046_TokenMetadata_ERC20WithMetadata"
     ],
-    "OPENZEPPELIN-SOLIDITY / CONTRACTS / CROWDSALE / PRICE": [
-      "openzeppelin-solidity_contracts_crowdsale_price_IncreasingPriceCrowdsale"
+    "CONTRACTS / TOKEN / ERC20": [
+      "contracts_token_ERC20_BasicToken",
+      "contracts_token_ERC20_BurnableToken",
+      "contracts_token_ERC20_CappedToken",
+      "contracts_token_ERC20_DetailedERC20",
+      "contracts_token_ERC20_ERC20",
+      "contracts_token_ERC20_ERC20Basic",
+      "contracts_token_ERC20_MintableToken",
+      "contracts_token_ERC20_PausableToken",
+      "contracts_token_ERC20_RBACMintableToken",
+      "contracts_token_ERC20_SafeERC20",
+      "contracts_token_ERC20_StandardBurnableToken",
+      "contracts_token_ERC20_StandardToken",
+      "contracts_token_ERC20_TokenTimelock",
+      "contracts_token_ERC20_TokenVesting"
     ],
-    "OPENZEPPELIN-SOLIDITY / CONTRACTS / CROWDSALE / VALIDATION": [
-      "openzeppelin-solidity_contracts_crowdsale_validation_CappedCrowdsale",
-      "openzeppelin-solidity_contracts_crowdsale_validation_IndividuallyCappedCrowdsale",
-      "openzeppelin-solidity_contracts_crowdsale_validation_TimedCrowdsale",
-      "openzeppelin-solidity_contracts_crowdsale_validation_WhitelistedCrowdsale"
-    ],
-    "OPENZEPPELIN-SOLIDITY / CONTRACTS / INTROSPECTION": [
-      "openzeppelin-solidity_contracts_introspection_ERC165",
-      "openzeppelin-solidity_contracts_introspection_SupportsInterfaceWithLookup"
-    ],
-    "OPENZEPPELIN-SOLIDITY / CONTRACTS / LIFECYCLE": [
-      "openzeppelin-solidity_contracts_lifecycle_Destructible",
-      "openzeppelin-solidity_contracts_lifecycle_Pausable",
-      "openzeppelin-solidity_contracts_lifecycle_TokenDestructible"
-    ],
-    "OPENZEPPELIN-SOLIDITY / CONTRACTS / MATH": [
-      "openzeppelin-solidity_contracts_math_Math",
-      "openzeppelin-solidity_contracts_math_SafeMath"
-    ],
-    "OPENZEPPELIN-SOLIDITY / CONTRACTS / OWNERSHIP": [
-      "openzeppelin-solidity_contracts_ownership_CanReclaimToken",
-      "openzeppelin-solidity_contracts_ownership_Claimable",
-      "openzeppelin-solidity_contracts_ownership_Contactable",
-      "openzeppelin-solidity_contracts_ownership_DelayedClaimable",
-      "openzeppelin-solidity_contracts_ownership_HasNoContracts",
-      "openzeppelin-solidity_contracts_ownership_HasNoEther",
-      "openzeppelin-solidity_contracts_ownership_HasNoTokens",
-      "openzeppelin-solidity_contracts_ownership_Heritable",
-      "openzeppelin-solidity_contracts_ownership_NoOwner",
-      "openzeppelin-solidity_contracts_ownership_Ownable",
-      "openzeppelin-solidity_contracts_ownership_Superuser"
-    ],
-    "OPENZEPPELIN-SOLIDITY / CONTRACTS / PAYMENT": [
-      "openzeppelin-solidity_contracts_payment_ConditionalEscrow",
-      "openzeppelin-solidity_contracts_payment_Escrow",
-      "openzeppelin-solidity_contracts_payment_PullPayment",
-      "openzeppelin-solidity_contracts_payment_RefundEscrow",
-      "openzeppelin-solidity_contracts_payment_SplitPayment"
-    ],
-    "OPENZEPPELIN-SOLIDITY / CONTRACTS / PROPOSALS / ERC1046": [
-      "openzeppelin-solidity_contracts_proposals_ERC1046_TokenMetadata_ERC20TokenMetadata",
-      "openzeppelin-solidity_contracts_proposals_ERC1046_TokenMetadata_ERC20WithMetadata"
-    ],
-    "OPENZEPPELIN-SOLIDITY / CONTRACTS / TOKEN / ERC20": [
-      "openzeppelin-solidity_contracts_token_ERC20_BasicToken",
-      "openzeppelin-solidity_contracts_token_ERC20_BurnableToken",
-      "openzeppelin-solidity_contracts_token_ERC20_CappedToken",
-      "openzeppelin-solidity_contracts_token_ERC20_DetailedERC20",
-      "openzeppelin-solidity_contracts_token_ERC20_ERC20",
-      "openzeppelin-solidity_contracts_token_ERC20_ERC20Basic",
-      "openzeppelin-solidity_contracts_token_ERC20_MintableToken",
-      "openzeppelin-solidity_contracts_token_ERC20_PausableToken",
-      "openzeppelin-solidity_contracts_token_ERC20_RBACMintableToken",
-      "openzeppelin-solidity_contracts_token_ERC20_SafeERC20",
-      "openzeppelin-solidity_contracts_token_ERC20_StandardBurnableToken",
-      "openzeppelin-solidity_contracts_token_ERC20_StandardToken",
-      "openzeppelin-solidity_contracts_token_ERC20_TokenTimelock",
-      "openzeppelin-solidity_contracts_token_ERC20_TokenVesting"
-    ],
-    "OPENZEPPELIN-SOLIDITY / CONTRACTS / TOKEN / ERC721": [
-      "openzeppelin-solidity_contracts_token_ERC721_DeprecatedERC721",
-      "openzeppelin-solidity_contracts_token_ERC721_ERC721",
-      "openzeppelin-solidity_contracts_token_ERC721_ERC721Basic",
-      "openzeppelin-solidity_contracts_token_ERC721_ERC721BasicToken",
-      "openzeppelin-solidity_contracts_token_ERC721_ERC721Holder",
-      "openzeppelin-solidity_contracts_token_ERC721_ERC721Receiver",
-      "openzeppelin-solidity_contracts_token_ERC721_ERC721Token",
-      "openzeppelin-solidity_contracts_token_ERC721_ERC721_ERC721Enumerable",
-      "openzeppelin-solidity_contracts_token_ERC721_ERC721_ERC721Metadata"
-    ],
-    "TEST": [
-      "test_FungibleMockToken"
-    ],
-    "UPGRADABLE-CONTRACTS-TEST": [
-      "upgradable-contracts-test_TwoKeyRegistryV1"
+    "CONTRACTS / TOKEN / ERC721": [
+      "contracts_token_ERC721_DeprecatedERC721",
+      "contracts_token_ERC721_ERC721",
+      "contracts_token_ERC721_ERC721Basic",
+      "contracts_token_ERC721_ERC721BasicToken",
+      "contracts_token_ERC721_ERC721Holder",
+      "contracts_token_ERC721_ERC721Receiver",
+      "contracts_token_ERC721_ERC721Token",
+      "contracts_token_ERC721_ERC721_ERC721Enumerable",
+      "contracts_token_ERC721_ERC721_ERC721Metadata"
     ]
   }
 }

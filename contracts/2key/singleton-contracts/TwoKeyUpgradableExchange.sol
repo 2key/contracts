@@ -149,7 +149,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
     function _getTokenAmount(
         uint256 _weiAmount
     )
-    internal
+    public
     view
     returns (uint256)
     {

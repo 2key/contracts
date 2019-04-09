@@ -30,10 +30,10 @@ const campaignStartTime = Math.round(new Date(now.valueOf()).setDate(now.getDate
 const campaignEndTime = Math.round(new Date(now.valueOf()).setDate(now.getDate() + 30) / 1000);
 const twoKeyEconomy = singletons.TwoKeyEconomy.networks[mainNetId].address;
 const twoKeyAdmin = singletons.TwoKeyAdmin.networks[mainNetId].address;
-let isKYCRequired = true;
-let isFiatConversionAutomaticallyApproved = false;
+let isKYCRequired = false;
+let isFiatConversionAutomaticallyApproved = true;
 let incentiveModel = "VANILLA_POWER_LAW";
-let amount = 1000; //1000 tokens fiat inventory
+let amount = 100000; //1000 tokens fiat inventory
 function makeHandle(max: number = 8): string {
     let text = '';
     let possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -1213,10 +1213,13 @@ describe('TwoKeyProtocol', () => {
                 syncTwoKeyNetId,
             },
             eventsNetUrl,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_GMAIL2).privateKey,
         });
+
+        console.log(twoKeyProtocol.plasmaAddress);
+        let signature = await twoKeyProtocol.AcquisitionCampaign.getSignatureFromLink(links.renata, twoKeyProtocol.plasmaAddress);
         console.log('Trying to perform offline conversion from gmail2');
-        let txHash = await twoKeyProtocol.AcquisitionCampaign.convertOffline(campaignAddress, from, from, 50);
+        let txHash = await twoKeyProtocol.AcquisitionCampaign.convertOffline(campaignAddress, signature, from, from, 50);
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(60000);
 
@@ -1276,22 +1279,22 @@ describe('TwoKeyProtocol', () => {
         console.log('Number of forwarders stored on plasma: ' + numberOfForwarders);
     }).timeout(60000);
 
-    it('should create an offline(fiat) conversion from maintainer address', async() => {
-        const {web3, address} = web3switcher.aydnep();
-        from = address;
-        twoKeyProtocol.setWeb3({
-            web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
-        });
-        console.log('Trying to perform offline conversion from gmail2');
-        let txHash = await twoKeyProtocol.AcquisitionCampaign.convertOffline(campaignAddress,env.TEST4_ADDRESS, from, 50);
-        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-    }).timeout(60000);
+    // it('should create an offline(fiat) conversion from maintainer address', async() => {
+    //     const {web3, address} = web3switcher.aydnep();
+    //     from = address;
+    //     twoKeyProtocol.setWeb3({
+    //         web3,
+    //         networks: {
+    //             mainNetId,
+    //             syncTwoKeyNetId,
+    //         },
+    //         eventsNetUrl,
+    //         plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+    //     });
+    //     console.log('Trying to perform offline conversion from gmail2');
+    //     let txHash = await twoKeyProtocol.AcquisitionCampaign.convertOffline(campaignAddress,env.TEST4_ADDRESS, from, 50);
+    //     const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+    // }).timeout(60000);
 
 
     it('should check reputation points for a couple of addresses', async() => {
