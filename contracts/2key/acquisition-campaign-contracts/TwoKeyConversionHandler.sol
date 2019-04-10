@@ -166,7 +166,7 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
         if(_isKYCRequired == true) {
             require(converterToState[_converterAddress] != ConverterState.REJECTED); // If converter is rejected then can't create conversion
         } else {
-            //If this is his 1st time, we immediatelly approve him, otherwise he will always be approved after 1st time
+            //If KYC is not required converter is automatically approved
             if(converterToState[_converterAddress] == ConverterState.NOT_EXISTING) {
                 converterToState[_converterAddress] = ConverterState.APPROVED;
                 stateToConverter[bytes32("APPROVED")].push(_converterAddress);
@@ -185,24 +185,16 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
         if(isConversionFiat == false) {
             _moderatorFeeETHWei = calculateModeratorFee(_conversionAmount);
             _contractorProceeds = _conversionAmount - _maxReferralRewardETHWei - _moderatorFeeETHWei;
-            //Determine state and increment counters
-            if(converterToState[_converterAddress] == ConverterState.APPROVED) {
-                state = ConversionState.APPROVED;
-                counters[1]++; //Increase number of approved conversions
-            } else if (converterToState[_converterAddress] == ConverterState.REJECTED) {
-                state = ConversionState.REJECTED;
-                counters[2]++; //Increase number of rejected conversions
-            } else {
-                state = ConversionState.PENDING_APPROVAL;
-                counters[0]++;
-            }
+
+            state = ConversionState.APPROVED; // All eth conversions are auto approved
+            counters[1]++;
         } else {
             //This means fiat conversion is automatically approved
             if(isFiatConversionAutomaticallyApproved) {
                 state = ConversionState.APPROVED;
                 counters[1] ++; // Increase the number of approved conversions
             } else {
-                state = ConversionState.PENDING_APPROVAL;
+                state = ConversionState.PENDING_APPROVAL; // Fiat conversion state is PENDING_APPROVAL
                 counters[0]++; // If conversion is FIAT it will be always first pending and will have to be approved
             }
         }
@@ -241,9 +233,12 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
 
         uint totalUnits = conversion.baseTokenUnits + conversion.bonusTokenUnits;
 
+        // Converter must be approved in all cases
+        require(converterToState[conversion.converter] == ConverterState.APPROVED);
+
+        //1 more if kyc required = true -> require(converterState = APPROVED)
         if(conversion.isConversionFiat == true) {
             if(isFiatConversionAutomaticallyApproved) {
-                require(conversion.state == ConversionState.APPROVED);
                 counters[1] --; // Decrease number of approved conversions
             } else {
                 require(conversion.state == ConversionState.PENDING_APPROVAL);
@@ -256,8 +251,6 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
             //Update raised funds FIAT once the conversion is executed
             counters[9] = counters[9].add(conversion.conversionAmount);
         } else {
-            //TODO uncomment
-//            require(msg.sender == conversion.converter || msg.sender == contractor);
             require(conversion.state == ConversionState.APPROVED);
             counters[1]--; //Decrease number of approved conversions
         }
@@ -449,8 +442,8 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
     public
     onlyContractorOrMaintainer
     {
-        uint len = converterToHisConversions[_converter].length;
         require(converterToState[_converter] == ConverterState.PENDING_APPROVAL);
+        uint len = converterToHisConversions[_converter].length;
         for(uint i=0; i<len; i++) {
             uint conversionId = converterToHisConversions[_converter][i];
             Conversion c = conversions[conversionId];

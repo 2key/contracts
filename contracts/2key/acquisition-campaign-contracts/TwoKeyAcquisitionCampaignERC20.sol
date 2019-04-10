@@ -204,24 +204,24 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
         transferFrom(twoKeyEventSource.plasmaOf(msg.sender), twoKeyEventSource.plasmaOf(receiver), 1);
     }
 
-
-    /**
-     * @notice Function where converter can join and convert
-     * @dev payable function
-     */
-    function joinAndConvert(
-        bytes signature,
-        bool _isAnonymous
-    )
-    public
-    payable
-    {
-        ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).requirementForMsgValue(msg.value);
-        distributeArcsBasedOnSignature(signature);
-        createConversion(msg.value, msg.sender, false, _isAnonymous);
-        amountConverterSpentEthWEI[msg.sender] += msg.value;
-        twoKeyEventSource.converted(address(this),msg.sender,msg.value);
-    }
+//
+//    /**
+//     * @notice Function where converter can join and convert
+//     * @dev payable function
+//     */
+//    function joinAndConvert(
+//
+//        bool _isAnonymous
+//    )
+//    public
+//    payable
+//    {
+//        ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).requirementForMsgValue(msg.value);
+//        distributeArcsBasedOnSignature(signature);
+//        createConversion(msg.value, msg.sender, false, _isAnonymous);
+//        amountConverterSpentEthWEI[msg.sender] += msg.value;
+//        twoKeyEventSource.converted(address(this),msg.sender,msg.value);
+//    }
 
 
     /**
@@ -229,6 +229,7 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
      * @dev payable function
      */
     function convert(
+        bytes signature,
         bool _isAnonymous
     )
     public
@@ -236,7 +237,9 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
     {
         ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).requirementForMsgValue(msg.value);
         address _converterPlasma = twoKeyEventSource.plasmaOf(msg.sender);
-        require(received_from[_converterPlasma] != address(0));
+        if(received_from[_converterPlasma] == address(0)) {
+            distributeArcsBasedOnSignature(signature);
+        }
         createConversion(msg.value, msg.sender, false, _isAnonymous);
         amountConverterSpentEthWEI[msg.sender] += msg.value;
         twoKeyEventSource.converted(address(this),msg.sender,msg.value);
