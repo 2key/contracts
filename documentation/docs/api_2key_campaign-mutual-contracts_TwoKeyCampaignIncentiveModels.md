@@ -3,4 +3,4 @@ id: 2key_campaign-mutual-contracts_TwoKeyCampaignIncentiveModels
 title: TwoKeyCampaignIncentiveModels
 ---
 
-<div class="contract-doc"><div class="contract"><h2 class="contract-header"><span class="contract-kind">contract</span> TwoKeyCampaignIncentiveModels</h2><div class="source">Source: <a href="git+https://github.com/2keynet/web3-alpha/blob/v0.0.3/contracts/2key/campaign-mutual-contracts/TwoKeyCampaignIncentiveModels.sol" target="_blank">2key/campaign-mutual-contracts/TwoKeyCampaignIncentiveModels.sol</a></div><div class="author">Author: Nikola Madjarevic Created at 2/25/19</div></div></div>
+<div class="contract-doc"><div class="contract"><h2 class="contract-header"><span class="contract-kind">contract</span> TwoKeyCampaignIncentiveModels</h2><div class="source">Source: <a href="https://github.com/2keynet/web3-alpha/blob/v0.0.3/contracts/2key/campaign-mutual-contracts/TwoKeyCampaignIncentiveModels.sol" target="_blank">contracts/2key/campaign-mutual-contracts/TwoKeyCampaignIncentiveModels.sol</a></div><div class="author">Author: Nikola Madjarevic Created at 2/25/19</div></div></div>
