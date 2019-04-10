@@ -21,7 +21,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
     // The token being sold
     ERC20 public token;
 
-    uint256 public rate;
+    uint256 public rate; //2key to USD rate multiplied by 1000 (initially it's 95)
 
     uint256 public transactionCounter = 0;
 

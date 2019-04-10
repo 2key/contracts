@@ -81,7 +81,6 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable, TwoKeyCampaignIncentiveMo
     )
     public
     {
-        require(values[0] > 0,"min contribution criteria not satisfied");
         require(values[1] >= values[0], "max contribution criteria not satisfied");
         require(values[4] > values[3], "campaign start time can't be greater than end time");
         require(isCampaignInitialized == false);
@@ -99,6 +98,9 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable, TwoKeyCampaignIncentiveMo
 
         //Add as 6th argument incentive model uint
         incentiveModel = IncentiveModel(values[6]);
+        if(values[7] == 1) {
+            isAcceptingFiatOnly = true;
+        }
 
         currency = _currency;
         assetContractERC20 = _assetContractERC20;
