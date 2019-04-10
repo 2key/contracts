@@ -53,6 +53,7 @@ library IncentiveModels {
         return rewards;
     }
 
+
     /**
      * @notice Function to calculate base for all rewards in power law model
      * @param sumWei is the total reward to be splited in Wei

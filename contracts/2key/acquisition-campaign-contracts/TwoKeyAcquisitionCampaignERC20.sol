@@ -27,6 +27,7 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
     mapping(address => uint256) private referrerPlasma2cut; // Mapping representing how much are cuts in percent(0-100) for referrer address
 
     uint reservedAmountOfTokens; // Reserved amount of tokens for the converters who are pending approval
+    uint fiatInventoryAmount; // Reserved amount for FIAT rewards
 
 
     /**
@@ -167,6 +168,27 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
         }
     }
 
+
+    /**
+     * @notice Function to add fiat inventory for rewards
+     * @dev only contractor can add this inventory
+     */
+    function specifyFiatConversionRewards(
+        uint reserveAmountForInfluencerRewards
+    )
+    public
+    onlyContractor
+    payable
+    {
+        //If you send eth, we ignore argument and create your fiat inventory amount with buying tokens
+        if(msg.value > 0) {
+            fiatInventoryAmount = buyTokensFromUpgradableExchange(msg.value, address(this));
+        } else if(assetContractERC20 == twoKeyEconomy) {
+            fiatInventoryAmount+= reserveAmountForInfluencerRewards;
+        }
+    }
+
+
     /**
      * @notice Function to join with signature and share 1 arc to the receiver
      * @param signature is the signature
@@ -184,10 +206,10 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
 
 
     /**
-     * @notice Function where converter can join and convert
+     * @notice Function where converter can convert
      * @dev payable function
      */
-    function joinAndConvert(
+    function convert(
         bytes signature,
         bool _isAnonymous
     )
@@ -195,26 +217,10 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
     payable
     {
         ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).requirementForMsgValue(msg.value);
-        distributeArcsBasedOnSignature(signature);
-        createConversion(msg.value, msg.sender, false, _isAnonymous);
-        amountConverterSpentEthWEI[msg.sender] += msg.value;
-        twoKeyEventSource.converted(address(this),msg.sender,msg.value);
-    }
-
-
-    /**
-     * @notice Function where converter can convert
-     * @dev payable function
-     */
-    function convert(
-        bool _isAnonymous
-    )
-    public
-    payable
-    {
-        ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).requirementForMsgValue(msg.value);
         address _converterPlasma = twoKeyEventSource.plasmaOf(msg.sender);
-        require(received_from[_converterPlasma] != address(0));
+        if(received_from[_converterPlasma] == address(0)) {
+            distributeArcsBasedOnSignature(signature);
+        }
         createConversion(msg.value, msg.sender, false, _isAnonymous);
         amountConverterSpentEthWEI[msg.sender] += msg.value;
         twoKeyEventSource.converted(address(this),msg.sender,msg.value);
@@ -228,7 +234,7 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
      * @param _isAnonymous if converter chooses to be anonymous
      */
     function convertFiat(
-//        bytes signature,
+        bytes signature,
         address _converter,
         uint conversionAmountFiatWei,
         bool _isAnonymous
@@ -237,7 +243,10 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
     {
         // Validate that sender is either _converter or maintainer
         require(msg.sender == _converter || twoKeyEventSource.isAddressMaintainer(msg.sender));
-//        distributeArcsBasedOnSignature(signature);
+        address _converterPlasma = twoKeyEventSource.plasmaOf(msg.sender);
+        if(received_from[_converterPlasma] == address(0)) {
+            distributeArcsBasedOnSignature(signature);
+        }
         createConversion(conversionAmountFiatWei, _converter, true, _isAnonymous);
         amountConverterSpentFiatWei[_converter] = amountConverterSpentFiatWei[_converter].add(conversionAmountFiatWei);
     }
@@ -268,15 +277,14 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
 
         unitsConverterBought[converterAddress] = unitsConverterBought[converterAddress].add(totalTokensForConverterUnits);
 
-        uint256 maxReferralRewardETHWei;
+        uint256 maxReferralRewardFiatOrETHWei = conversionAmountETHWeiOrFiat.mul(maxReferralRewardPercent).div(100);
 
         if(isFiatConversion == false) {
-            maxReferralRewardETHWei = conversionAmountETHWeiOrFiat.mul(maxReferralRewardPercent).div(100);
             reservedAmountOfTokens = reservedAmountOfTokens + totalTokensForConverterUnits;
         }
 
         uint id = ITwoKeyConversionHandler(conversionHandler).supportForCreateConversion(contractor, converterAddress,
-            conversionAmountETHWeiOrFiat, maxReferralRewardETHWei,
+            conversionAmountETHWeiOrFiat, maxReferralRewardFiatOrETHWei,
             baseTokensForConverterUnits,bonusTokensForConverterUnits, isFiatConversion, isAnonymous, isKYCRequired);
 
         if(isKYCRequired == false) {
@@ -295,30 +303,41 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
     function buyTokensAndDistributeReferrerRewards(
         uint256 _maxReferralRewardETHWei,
         address _converter,
-        uint _conversionId
+        uint _conversionId,
+        bool _isConversionFiat
     )
     public
     onlyTwoKeyConversionHandler
     returns (uint)
     {
+        //Fiat rewards = fiatamount * moderatorPercentage / 100  / 0.095
+        uint totalBounty2keys;
+        //If fiat conversion do exactly the same just send different reward and don't buy tokens, take them from contract
         if(maxReferralRewardPercent > 0) {
-            //Buy tokens from upgradable exchange
-            uint totalBounty2keys = buyTokensFromUpgradableExchange(_maxReferralRewardETHWei, address(this));
-            // Update reserved amount
-            reservedAmount2keyForRewards = reservedAmount2keyForRewards.add(totalBounty2keys);
-            //Handle refchain rewards
+            if(_isConversionFiat) {
+                totalBounty2keys = (_maxReferralRewardETHWei / (95) * (1000));
+                fiatInventoryAmount = fiatInventoryAmount - totalBounty2keys;
+            } else {
+                //Buy tokens from upgradable exchange
+                totalBounty2keys = buyTokensFromUpgradableExchange(_maxReferralRewardETHWei, address(this));
+                // Update reserved amount
+                reservedAmount2keyForRewards = reservedAmount2keyForRewards + totalBounty2keys;
+                //Handle refchain rewards
+            }
             ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).updateRefchainRewards(
                 _maxReferralRewardETHWei,
                 _converter,
                 _conversionId,
                 totalBounty2keys);
-
-            return totalBounty2keys;
         }
-        return 0;
+        return totalBounty2keys;
     }
 
 
+    /**
+     * @notice Function which will buy tokens from upgradable exchange for moderator
+     * @param moderatorFee is the fee in tokens moderator earned
+     */
     function buyTokensForModeratorRewards(
         uint moderatorFee
     )
@@ -427,10 +446,10 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
     function getInventoryStatus()
     public
     view
-    returns (uint,uint,uint)
+    returns (uint,uint,uint,uint)
     {
         uint inventoryBalance = IERC20(assetContractERC20).balanceOf(address(this));
-        return (inventoryBalance, reservedAmountOfTokens, reservedAmount2keyForRewards);
+        return (inventoryBalance, reservedAmountOfTokens, reservedAmount2keyForRewards, fiatInventoryAmount);
     }
 
     /**
@@ -471,6 +490,7 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
         return referrerPlasma2cut[twoKeyEventSource.plasmaOf(me)];
     }
 
+
     /**
      * @notice Function to check available amount of the tokens on the contract
      */
@@ -481,7 +501,7 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
     {
         uint inventoryBalance = IERC20(assetContractERC20).balanceOf(address(this));
         if(assetContractERC20 == twoKeyEconomy) {
-            return (inventoryBalance - reservedAmountOfTokens - reservedAmount2keyForRewards);
+            return (inventoryBalance - reservedAmountOfTokens - reservedAmount2keyForRewards - fiatInventoryAmount);
         }
         return (inventoryBalance - reservedAmountOfTokens);
     }
@@ -501,6 +521,11 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
     }
 
 
+    /**
+     * @notice Function to get balance of influencer for his plasma address
+     * @param _influencer is the plasma address of influencer
+     * @return balance in wei's
+     */
     function getReferrerPlasmaBalance(
         address _influencer
     )
@@ -512,7 +537,11 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
         return (referrerPlasma2Balances2key[_influencer]);
     }
 
-
+    /**
+     * @notice Function to update referrer plasma balance
+     * @param _influencer is the plasma address of referrer
+     * @param _balance is the new balance
+     */
     function updateReferrerPlasmaBalance(
         address _influencer,
         uint _balance

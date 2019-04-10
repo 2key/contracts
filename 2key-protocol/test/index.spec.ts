@@ -30,10 +30,10 @@ const campaignStartTime = Math.round(new Date(now.valueOf()).setDate(now.getDate
 const campaignEndTime = Math.round(new Date(now.valueOf()).setDate(now.getDate() + 30) / 1000);
 const twoKeyEconomy = singletons.TwoKeyEconomy.networks[mainNetId].address;
 const twoKeyAdmin = singletons.TwoKeyAdmin.networks[mainNetId].address;
-let isKYCRequired = true;
-let isFiatConversionAutomaticallyApproved = false;
-let incentiveModel = "VANILLA_POWER_LAW";
-
+let isKYCRequired = false;
+let isFiatConversionAutomaticallyApproved = true;
+let incentiveModel = "MANUAL";
+let amount = 100000; //1000 tokens fiat inventory
 function makeHandle(max: number = 8): string {
     let text = '';
     let possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -390,6 +390,13 @@ describe('TwoKeyProtocol', () => {
         // .to.be.equal(twoKeyProtocol.getGasPrice());
     }).timeout(60000);
 
+    it('should get total supply of economy contract' ,async() => {
+        console.log("Check total supply on 2key-economy contract");
+        let totalSup = await twoKeyProtocol.ERC20.getTotalSupply(twoKeyProtocol.twoKeyEconomy.address);
+        console.log(totalSup);
+    }).timeout(60000);
+
+
     it('should save balance to ipfs', () => {
         return twoKeyProtocol.Utils.ipfsAdd(aydnepBalance).then((hash) => {
             console.log('IPFS hash', hash);
@@ -508,6 +515,11 @@ describe('TwoKeyProtocol', () => {
         return expect(addressRegex.test(campaignAddress)).to.be.true;
     }).timeout(1200000);
 
+    it('should reserve amount for fiat conversion rewards', async() => {
+
+        let txHash = await twoKeyProtocol.AcquisitionCampaign.specifyFiatConversionRewards(campaignAddress, amount, from);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+    }).timeout(60000);
 
     it('should proff that campaign is validated and registered properly', async() => {
         let isValidated = await twoKeyProtocol.CampaignValidator.isCampaignValidated(campaignAddress);
@@ -539,7 +551,7 @@ describe('TwoKeyProtocol', () => {
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const balance = twoKeyProtocol.Utils.fromWei(await twoKeyProtocol.AcquisitionCampaign.checkInventoryBalance(campaignAddress, from)).toString();
         console.log('Campaign Balance', balance);
-        expect(parseFloat(balance)).to.be.equal(1234000);
+        expect(parseFloat(balance)).to.be.equal(1234000 - amount);
     }).timeout(600000);
 
     it('should get user public link', async () => {
@@ -640,7 +652,7 @@ describe('TwoKeyProtocol', () => {
     it('==> should print available amount of tokens before conversion', async() => {
         const availableAmountOfTokens = await twoKeyProtocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(campaignAddress,from);
         console.log('Available amount of tokens before conversion is: ' + availableAmountOfTokens);
-        expect(availableAmountOfTokens).to.be.equal(1234000);
+        expect(availableAmountOfTokens).to.be.equal(1234000 - amount);
     }).timeout(60000);
 
     it('should buy some tokens', async () => {
@@ -659,7 +671,7 @@ describe('TwoKeyProtocol', () => {
         const availableAmountOfTokens = await twoKeyProtocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(campaignAddress,from);
         const { totalTokens } = await twoKeyProtocol.AcquisitionCampaign.getEstimatedTokenAmount(campaignAddress, false, twoKeyProtocol.Utils.toWei(minContributionETHorUSD, 'ether'));
         console.log('Available amount of tokens before conversion is: ' + availableAmountOfTokens, totalTokens);
-        expect(availableAmountOfTokens).to.be.lte(1234000 - totalTokens);
+        expect(availableAmountOfTokens).to.be.lte(1234000 - amount - totalTokens);
     }).timeout(60000);
 
     it('should join as test4', async () => {
@@ -1208,10 +1220,13 @@ describe('TwoKeyProtocol', () => {
                 syncTwoKeyNetId,
             },
             eventsNetUrl,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_GMAIL2).privateKey,
         });
+
+        console.log(twoKeyProtocol.plasmaAddress);
+        let signature = await twoKeyProtocol.AcquisitionCampaign.getSignatureFromLink(links.renata, twoKeyProtocol.plasmaAddress);
         console.log('Trying to perform offline conversion from gmail2');
-        let txHash = await twoKeyProtocol.AcquisitionCampaign.convertOffline(campaignAddress, from, from, 50);
+        let txHash = await twoKeyProtocol.AcquisitionCampaign.convertOffline(campaignAddress, signature, from, from, 50);
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(60000);
 
@@ -1271,22 +1286,22 @@ describe('TwoKeyProtocol', () => {
         console.log('Number of forwarders stored on plasma: ' + numberOfForwarders);
     }).timeout(60000);
 
-    it('should create an offline(fiat) conversion from maintainer address', async() => {
-        const {web3, address} = web3switcher.aydnep();
-        from = address;
-        twoKeyProtocol.setWeb3({
-            web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
-        });
-        console.log('Trying to perform offline conversion from gmail2');
-        let txHash = await twoKeyProtocol.AcquisitionCampaign.convertOffline(campaignAddress,env.TEST4_ADDRESS, from, 50);
-        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-    }).timeout(60000);
+    // it('should create an offline(fiat) conversion from maintainer address', async() => {
+    //     const {web3, address} = web3switcher.aydnep();
+    //     from = address;
+    //     twoKeyProtocol.setWeb3({
+    //         web3,
+    //         networks: {
+    //             mainNetId,
+    //             syncTwoKeyNetId,
+    //         },
+    //         eventsNetUrl,
+    //         plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+    //     });
+    //     console.log('Trying to perform offline conversion from gmail2');
+    //     let txHash = await twoKeyProtocol.AcquisitionCampaign.convertOffline(campaignAddress,env.TEST4_ADDRESS, from, 50);
+    //     const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+    // }).timeout(60000);
 
 
     it('should check reputation points for a couple of addresses', async() => {
