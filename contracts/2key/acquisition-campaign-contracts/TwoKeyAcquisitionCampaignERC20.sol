@@ -204,25 +204,6 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
         transferFrom(twoKeyEventSource.plasmaOf(msg.sender), twoKeyEventSource.plasmaOf(receiver), 1);
     }
 
-//
-//    /**
-//     * @notice Function where converter can join and convert
-//     * @dev payable function
-//     */
-//    function joinAndConvert(
-//
-//        bool _isAnonymous
-//    )
-//    public
-//    payable
-//    {
-//        ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).requirementForMsgValue(msg.value);
-//        distributeArcsBasedOnSignature(signature);
-//        createConversion(msg.value, msg.sender, false, _isAnonymous);
-//        amountConverterSpentEthWEI[msg.sender] += msg.value;
-//        twoKeyEventSource.converted(address(this),msg.sender,msg.value);
-//    }
-
 
     /**
      * @notice Function where converter can convert
@@ -261,7 +242,7 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
     public
     {
         // Validate that sender is either _converter or maintainer
-//        require(msg.sender == _converter || twoKeyEventSource.isAddressMaintainer(msg.sender));
+        require(msg.sender == _converter || twoKeyEventSource.isAddressMaintainer(msg.sender));
         address _converterPlasma = twoKeyEventSource.plasmaOf(msg.sender);
         if(received_from[_converterPlasma] == address(0)) {
             distributeArcsBasedOnSignature(signature);
@@ -353,6 +334,10 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
     }
 
 
+    /**
+     * @notice Function which will buy tokens from upgradable exchange for moderator
+     * @param moderatorFee is the fee in tokens moderator earned
+     */
     function buyTokensForModeratorRewards(
         uint moderatorFee
     )
