@@ -130,7 +130,7 @@ contract TwoKeyCongress {
         hashAllowedMethods("unfreezeTransfersInEconomy");
         hashAllowedMethods("addMaintainersToSelectedSingletone(address,address[])");
         hashAllowedMethods("deleteMaintainersFromSelectedSingletone(address,address[])");
-        //TODO: @idan add new method for set rewards created in admin
+        hashAllowedMethods("updateRewardsRelease(uint256)");
     }
 
 
