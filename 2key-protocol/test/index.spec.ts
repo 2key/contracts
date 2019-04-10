@@ -1316,6 +1316,12 @@ describe('TwoKeyProtocol', () => {
     }).timeout(60000);
 
 
+    it('Get release after of 2key tokens date', async() => {
+        let rewardReleaseAfterDate = await twoKeyProtocol.TwoKeyAdmin.getRewardReleaseAfter();
+        console.log('Reward release after: '+ rewardReleaseAfterDate);
+        expect(rewardReleaseAfterDate).to.be.equal(1577836800);  //01/01/2019
+    }).timeout(60000);
+
 
     // it('should build refgraph', async() => {
     //     const {web3, address} = web3switcher.gmail();
