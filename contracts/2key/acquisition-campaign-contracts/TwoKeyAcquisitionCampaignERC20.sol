@@ -247,6 +247,7 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
         if(received_from[_converterPlasma] == address(0)) {
             distributeArcsBasedOnSignature(signature);
         }
+        //TODO: Handle at creation moment if there's enough tokens for referral rewards depending on conversion fiat amount
         createConversion(conversionAmountFiatWei, _converter, true, _isAnonymous);
         amountConverterSpentFiatWei[_converter] = amountConverterSpentFiatWei[_converter].add(conversionAmountFiatWei);
     }
@@ -315,8 +316,10 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
         //If fiat conversion do exactly the same just send different reward and don't buy tokens, take them from contract
         if(maxReferralRewardPercent > 0) {
             if(_isConversionFiat) {
-                totalBounty2keys = (_maxReferralRewardETHWei / (95) * (1000));
-                fiatInventoryAmount = fiatInventoryAmount - totalBounty2keys;
+                address upgradableExchange = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyUpgradableExchange");
+                uint rate = IUpgradableExchange(upgradableExchange).rate();
+                totalBounty2keys = (_maxReferralRewardETHWei / (rate)) * (1000);
+                fiatInventoryAmount = fiatInventoryAmount.sub(totalBounty2keys);
             } else {
                 //Buy tokens from upgradable exchange
                 totalBounty2keys = buyTokensFromUpgradableExchange(_maxReferralRewardETHWei, address(this));

@@ -165,6 +165,11 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
         //If KYC is required, basic funnel executes and we require that converter is not previously rejected
         if(_isKYCRequired == true) {
             require(converterToState[_converterAddress] != ConverterState.REJECTED); // If converter is rejected then can't create conversion
+            // Checking the state for converter, if this is his 1st time, he goes initially to PENDING_APPROVAL
+            if(converterToState[_converterAddress] == ConverterState.NOT_EXISTING) {
+                converterToState[_converterAddress] = ConverterState.PENDING_APPROVAL;
+                stateToConverter[bytes32("PENDING_APPROVAL")].push(_converterAddress);
+            }
         } else {
             //If KYC is not required converter is automatically approved
             if(converterToState[_converterAddress] == ConverterState.NOT_EXISTING) {
@@ -185,7 +190,7 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
         if(isConversionFiat == false) {
             _moderatorFeeETHWei = calculateModeratorFee(_conversionAmount);
             _contractorProceeds = _conversionAmount - _maxReferralRewardETHWei - _moderatorFeeETHWei;
-
+            //TODO: Add accounting for fiat proceeds
             state = ConversionState.APPROVED; // All eth conversions are auto approved
             counters[1]++;
         } else {
@@ -210,12 +215,6 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
         emit ConversionCreated(numberOfConversions);
         numberOfConversions++;
 
-        // Checking the state for converter, if this is his 1st time, he goes initially to PENDING_APPROVAL
-        if(converterToState[_converterAddress] == ConverterState.NOT_EXISTING) {
-            converterToState[_converterAddress] = ConverterState.PENDING_APPROVAL;
-            stateToConverter[bytes32("PENDING_APPROVAL")].push(_converterAddress);
-        }
-
         return numberOfConversions-1;
     }
 
@@ -236,7 +235,6 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
         // Converter must be approved in all cases
         require(converterToState[conversion.converter] == ConverterState.APPROVED);
 
-        //1 more if kyc required = true -> require(converterState = APPROVED)
         if(conversion.isConversionFiat == true) {
             if(isFiatConversionAutomaticallyApproved) {
                 counters[1] --; // Decrease number of approved conversions
@@ -279,30 +277,26 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
             conversion.isConversionFiat
         );
 
+        // Update reputation points in registry for conversion executed event
+        ITwoKeyBaseReputationRegistry(twoKeyBaseReputationRegistry).updateOnConversionExecutedEvent(
+            conversion.converter,
+            contractor,
+            twoKeyAcquisitionCampaignERC20
+        );
+
+        // Add total rewards
+        counters[8] = counters[8].add(totalReward2keys);
+
         //Update total raised funds
         if(conversion.isConversionFiat == false) {
-            // Update reputation points in registry for conversion executed event
-            ITwoKeyBaseReputationRegistry(twoKeyBaseReputationRegistry).updateOnConversionExecutedEvent(
-                conversion.converter,
-                contractor,
-                twoKeyAcquisitionCampaignERC20
-            );
-
-            // Add total rewards
-            counters[8] = counters[8].add(totalReward2keys);
-
             // update moderator balances
             twoKeyAcquisitionCampaignERC20.buyTokensForModeratorRewards(conversion.moderatorFeeETHWei);
-
             // update reserved amount of tokens on acquisition contract
             twoKeyAcquisitionCampaignERC20.updateReservedAmountOfTokensIfConversionRejectedOrExecuted(totalUnits);
-
             // update contractor proceeds
             twoKeyAcquisitionCampaignERC20.updateContractorProceeds(conversion.contractorProceedsETHWei);
-
             // add conversion amount to counter
             counters[6] = counters[6].add(conversion.conversionAmount);
-
         }
 
         if(converterToLockupContracts[conversion.converter].length == 0) {

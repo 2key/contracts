@@ -32,8 +32,10 @@ const twoKeyEconomy = singletons.TwoKeyEconomy.networks[mainNetId].address;
 const twoKeyAdmin = singletons.TwoKeyAdmin.networks[mainNetId].address;
 let isKYCRequired = false;
 let isFiatConversionAutomaticallyApproved = true;
+const isFiatOnly = false;
 let incentiveModel = "MANUAL";
 let amount = 100000; //1000 tokens fiat inventory
+
 function makeHandle(max: number = 8): string {
     let text = '';
     let possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -499,7 +501,8 @@ describe('TwoKeyProtocol', () => {
             bonusTokensVestingStartShiftInDaysFromDistributionDate: 180,
             isKYCRequired,
             isFiatConversionAutomaticallyApproved,
-            incentiveModel
+            incentiveModel,
+            isFiatOnly
         };
 
         const campaign = await twoKeyProtocol.AcquisitionCampaign.create(campaignData, campaignData, {} , from, {
@@ -513,10 +516,9 @@ describe('TwoKeyProtocol', () => {
         campaignAddress = campaign.campaignAddress;
         links.deployer = campaign.campaignPublicLinkKey;
         return expect(addressRegex.test(campaignAddress)).to.be.true;
-    }).timeout(1200000);
+    }).timeout(120000);
 
     it('should reserve amount for fiat conversion rewards', async() => {
-
         let txHash = await twoKeyProtocol.AcquisitionCampaign.specifyFiatConversionRewards(campaignAddress, amount, from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(60000);
