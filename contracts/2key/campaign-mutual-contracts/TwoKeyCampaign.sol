@@ -213,8 +213,8 @@ contract TwoKeyCampaign is ArcERC20 {
     /**
      * @notice Function to return the constants from the contract
      */
-    function getConstantInfo() public view returns (uint,uint) {
-        return (conversionQuota, maxReferralRewardPercent);
+    function getConstantInfo() public view returns (uint,uint,bool) {
+        return (conversionQuota, maxReferralRewardPercent, isKYCRequired);
     }
 
     /**
