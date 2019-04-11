@@ -11,13 +11,13 @@ contract FungibleMockToken is StandardTokenModified {
     string public symbol;
     uint8 public decimals;
 
-    constructor (string _name, string _symbol) public {
+    constructor (string _name, string _symbol, address _owner) public {
         name = _name;
         symbol = _symbol;
 
         decimals = 18;
         totalSupply_= 1000000000000000000000000000; // 1B tokens total minted supply
-        balances[msg.sender]= totalSupply_;
+        balances[_owner]= totalSupply_;
     }
 
 
