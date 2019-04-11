@@ -107,7 +107,8 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         address[] memory influencers;
         address[] memory keys;
         address old_address;
-        (influencers, keys,, old_address) = super.getInfluencersKeysAndWeightsFromSignature(signature);
+        //TODO: Uncomment this hack address(0)
+        (influencers, keys,, old_address) = super.getInfluencersKeysAndWeightsFromSignature(signature,address(0));
         uint i;
         address new_address;
         // move ARCs based on signature information
