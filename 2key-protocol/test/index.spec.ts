@@ -465,7 +465,7 @@ describe('TwoKeyProtocol', () => {
     }).timeout(120000);
 
     it('should reserve amount for fiat conversion rewards', async() => {
-        let txHash = await twoKeyProtocol.AcquisitionCampaign.specifyFiatConversionRewards(campaignAddress, amount, from);
+        let txHash = await twoKeyProtocol.AcquisitionCampaign.specifyFiatConversionRewards(campaignAddress, 0, amount, from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(60000);
 
