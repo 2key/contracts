@@ -183,7 +183,7 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
     {
         //If you send eth, we ignore argument and create your fiat inventory amount with buying tokens
         if(msg.value > 0) {
-            fiatInventoryAmount = buyTokensFromUpgradableExchange(msg.value, address(this));
+            fiatInventoryAmount += buyTokensFromUpgradableExchange(msg.value, address(this));
         } else if(assetContractERC20 == twoKeyEconomy) {
             fiatInventoryAmount+= reserveAmountForInfluencerRewards;
         }
