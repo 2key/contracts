@@ -56,7 +56,14 @@ contract TwoKeyCampaign is ArcERC20 {
      * @param _to address The address which you want to transfer to ALREADY converted to plasma
      * @param _value uint256 the amount of tokens to be transferred
      */
-	function transferFrom(address _from, address _to, uint256 _value) internal returns (bool) {
+	function transferFrom(
+		address _from,
+		address _to,
+		uint256 _value
+	)
+	internal
+	returns (bool)
+	{
 		// _from and _to are assumed to be already converted to plasma address (e.g. using plasmaOf)
 		require(_value == 1);
 		require(_from != address(0));
@@ -81,7 +88,12 @@ contract TwoKeyCampaign is ArcERC20 {
      * @param me is the ethereum address
      * @param new_public_key is the new key user want's to set as his public key
      */
-    function setPublicLinkKeyOf(address me, address new_public_key) internal {
+    function setPublicLinkKeyOf(
+		address me,
+		address new_public_key
+	)
+	internal
+	{
         me = twoKeyEventSource.plasmaOf(me);
         require(balanceOf(me) > 0);
         address old_address = public_link_key[me];
@@ -98,7 +110,13 @@ contract TwoKeyCampaign is ArcERC20 {
  	 * @notice Function which will unpack signature and get referrers, keys, and weights from it
  	 * @param sig is signature
  	 */
-	function getInfluencersKeysAndWeightsFromSignature(bytes sig, address _converter) internal returns (address[],address[],uint8[],address) {
+	function getInfluencersKeysAndWeightsFromSignature(
+		bytes sig,
+		address _converter
+	)
+	internal
+	returns (address[],address[],uint8[],address)
+	{
 		// move ARCs and set public_link keys and weights/cuts based on signature information
 		// returns the last address in the sig
 
@@ -148,16 +166,28 @@ contract TwoKeyCampaign is ArcERC20 {
      * @notice Function to set public link key
      * @param new_public_key is the new public key
      */
-    function setPublicLinkKey(address new_public_key) public {
+    function setPublicLinkKey(
+		address new_public_key
+	)
+	public
+	{
         setPublicLinkKeyOf(msg.sender, new_public_key);
     }
 
 
-	function updateOrSetPublicMetaHash(string _publicMetaHash) onlyContractor {
+	function updateOrSetPublicMetaHash(
+		string _publicMetaHash
+	)
+	onlyContractor
+	{
 		publicMetaHash = _publicMetaHash;
 	}
 
-	function updateOrSetPrivateMetaHash(string _privateMetaHash) onlyContractor {
+	function updateOrSetPrivateMetaHash(
+		string _privateMetaHash
+	)
+	onlyContractor
+	{
 		privateMetaHash = _privateMetaHash;
 	}
 
@@ -166,7 +196,12 @@ contract TwoKeyCampaign is ArcERC20 {
      * @dev only Contractor can call this method, otherwise it will revert - emits Event when updated
      * @param value is the new referral percent value
      */
-	function updateMaxReferralRewardPercent(uint value) public onlyContractor {
+	function updateMaxReferralRewardPercent(
+		uint value
+	)
+	public
+	onlyContractor
+	{
 		maxReferralRewardPercent = value;
 	}
 
@@ -175,7 +210,14 @@ contract TwoKeyCampaign is ArcERC20 {
      * @param _publicMetaHash is the hash of the campaign
      * @dev Only contractor can call this
      */
-	function startCampaignWithInitialParams(string _publicMetaHash, string _privateMetaHash, address new_public_key) public onlyContractor {
+	function startCampaignWithInitialParams(
+		string _publicMetaHash,
+		string _privateMetaHash,
+		address new_public_key
+	)
+	public
+	onlyContractor
+	{
 		//TODO: Handle option to update only one of 3 and other setters
 		publicMetaHash = _publicMetaHash;
 		privateMetaHash = _privateMetaHash;
@@ -188,7 +230,13 @@ contract TwoKeyCampaign is ArcERC20 {
  	 * @param amountOfMoney is the ether balance person has on the contract
  	 * @param receiver is the address of the person who withdraws money
  	 */
-	function buyTokensFromUpgradableExchange(uint amountOfMoney, address receiver) internal returns (uint) {
+	function buyTokensFromUpgradableExchange(
+		uint amountOfMoney,
+		address receiver
+	)
+	internal
+	returns (uint)
+	{
 		address upgradableExchange = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyUpgradableExchange");
 		uint amountBought = IUpgradableExchange(upgradableExchange).buyTokens.value(amountOfMoney)(receiver);
 		return amountBought;
@@ -199,7 +247,12 @@ contract TwoKeyCampaign is ArcERC20 {
      * @notice Getter for the referral chain
      * @param _receiver is address we want to check who he has received link from
      */
-	function getReceivedFrom(address _receiver) public view returns (address) {
+	function getReceivedFrom(
+		address _receiver
+	) public
+	view
+	returns (address)
+	{
 		return received_from[_receiver];
 	}
 
@@ -207,14 +260,24 @@ contract TwoKeyCampaign is ArcERC20 {
      * @notice Function to get public link key of an address
      * @param me is the address we're checking public link key
      */
-	function publicLinkKeyOf(address me) public view returns (address) {
+	function publicLinkKeyOf(
+		address me
+	)
+	public
+	view
+	returns (address)
+	{
 		return public_link_key[twoKeyEventSource.plasmaOf(me)];
 	}
 
     /**
      * @notice Function to return the constants from the contract
      */
-    function getConstantInfo() public view returns (uint,uint,bool) {
+    function getConstantInfo()
+	public
+	view
+	returns (uint,uint,bool)
+	{
         return (conversionQuota, maxReferralRewardPercent, isKYCRequired);
     }
 
@@ -223,7 +286,11 @@ contract TwoKeyCampaign is ArcERC20 {
      * @dev only contractor or moderator are eligible to call this function
      * @return value of his balance in ETH
      */
-    function getModeratorTotalEarnings() public view returns (uint) {
+    function getModeratorTotalEarnings()
+	public
+	view
+	returns (uint)
+	{
         require(msg.sender == contractor);
         return (moderatorTotalEarnings2key);
     }
@@ -233,7 +300,12 @@ contract TwoKeyCampaign is ArcERC20 {
      * @dev only contractor can call this function, otherwise it will revert
      * @return value of contractor balance in ETH WEI
      */
-    function getContractorBalanceAndTotalProceeds() external onlyContractor view returns (uint,uint) {
+    function getContractorBalanceAndTotalProceeds()
+	external
+	onlyContractor
+	view
+	returns (uint,uint)
+	{
         return (contractorBalance, contractorTotalProceeds);
     }
 
@@ -243,7 +315,10 @@ contract TwoKeyCampaign is ArcERC20 {
      * @dev onlyContractor can call this method
      * @return true if successful otherwise will 'revert'
      */
-    function withdrawContractor() public onlyContractor {
+    function withdrawContractor()
+	public
+	onlyContractor
+	{
         uint balance = contractorBalance;
         contractorBalance = 0;
         /**
@@ -259,7 +334,11 @@ contract TwoKeyCampaign is ArcERC20 {
  	 * @param _address is the address we're withdrawing funds to
  	 * @dev It can be called by the address specified in the param or by the one of two key maintainers
  	 */
-	function referrerWithdraw(address _address) public {
+	function referrerWithdraw(
+		address _address
+	)
+	public
+	{
 		require(msg.sender == _address || twoKeyEventSource.isAddressMaintainer(msg.sender));
 		uint balance;
 		address _referrer = twoKeyEventSource.plasmaOf(_address);
