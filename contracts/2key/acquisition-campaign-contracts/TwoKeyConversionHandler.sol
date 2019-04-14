@@ -30,14 +30,6 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
     Conversion[] conversions;
     ITwoKeyAcquisitionCampaignERC20 twoKeyAcquisitionCampaignERC20;
 
-
-    mapping(bytes32 => address[]) stateToConverter; //State to all converters in that state
-    mapping(address => uint[]) converterToHisConversions;
-
-    mapping(address => ConverterState) converterToState; //Converter to his state
-    mapping(address => bool) isConverterAnonymous;
-    mapping(address => address[]) converterToLockupContracts;
-
     /**
      * This array will represent counter values where position will be index (which counter) and value will be actual counter value
      * counters[0] = PENDING_CONVERSIONS
@@ -53,9 +45,19 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
      */
     uint [] counters;
 
+
     uint expiryConversionInHours; // How long converter can be pending before it will be automatically rejected and funds will be returned to convertor (hours)
 
+    mapping(bytes32 => address[]) stateToConverter; //State to all converters in that state
+    mapping(address => uint[]) converterToHisConversions;
+
+    mapping(address => ConverterState) converterToState; //Converter to his state
+    mapping(address => bool) isConverterAnonymous;
+    mapping(address => address[]) converterToLockupContracts;
+
+
     address twoKeyEventSource;
+    ITwoKeyAcquisitionCampaignERC20 twoKeyAcquisitionCampaignERC20;
     address contractor;
     address assetContractERC20;
     address twoKeyBaseReputationRegistry;
