@@ -23,7 +23,7 @@ contract TwoKeyAdmin is Upgradeable {
 	uint twoKeyIntegratorDefaultFeePercent; // 2% is default value for this
 	uint twoKeyNetworkTaxPercent; //2% is default value for this
 
-	uint public rewardReleaseAfter;
+	uint private rewardReleaseAfter;
 
     bool initialized = false;
 
@@ -132,10 +132,10 @@ contract TwoKeyAdmin is Upgradeable {
 
 	/// @notice Function to update reward release date
 	function updateRewardsRelease(uint newRewardReleaseAfter)
-	external
-	onlyTwoKeyCongress
+	//external
+	//onlyTwoKeyCongress
 	{
-		require (newRewardReleaseAfter <= rewardReleaseAfter);
+		require (now <= newRewardReleaseAfter && now <= rewardReleaseAfter);
 		rewardReleaseAfter = newRewardReleaseAfter;
 	}
 
