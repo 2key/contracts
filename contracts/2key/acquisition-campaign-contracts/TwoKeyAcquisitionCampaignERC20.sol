@@ -127,7 +127,8 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
      * @param sig is the signature user joins from
      */
     function distributeArcsBasedOnSignature(
-        bytes sig
+        bytes sig,
+        address _converter
     )
     private
     {
@@ -135,7 +136,7 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
         address[] memory keys;
         uint8[] memory weights;
         address old_address;
-        (influencers, keys, weights, old_address) = super.getInfluencersKeysAndWeightsFromSignature(sig);
+        (influencers, keys, weights, old_address) = super.getInfluencersKeysAndWeightsFromSignature(sig, _converter);
         uint i;
         address new_address;
         // move ARCs based on signature information
@@ -182,7 +183,7 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
     {
         //If you send eth, we ignore argument and create your fiat inventory amount with buying tokens
         if(msg.value > 0) {
-            fiatInventoryAmount = buyTokensFromUpgradableExchange(msg.value, address(this));
+            fiatInventoryAmount += buyTokensFromUpgradableExchange(msg.value, address(this));
         } else if(assetContractERC20 == twoKeyEconomy) {
             fiatInventoryAmount+= reserveAmountForInfluencerRewards;
         }
@@ -200,7 +201,7 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
     )
     public
     {
-        distributeArcsBasedOnSignature(signature);
+        distributeArcsBasedOnSignature(signature, msg.sender);
         transferFrom(twoKeyEventSource.plasmaOf(msg.sender), twoKeyEventSource.plasmaOf(receiver), 1);
     }
 
@@ -219,7 +220,7 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
         ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).requirementForMsgValue(msg.value);
         address _converterPlasma = twoKeyEventSource.plasmaOf(msg.sender);
         if(received_from[_converterPlasma] == address(0)) {
-            distributeArcsBasedOnSignature(signature);
+            distributeArcsBasedOnSignature(signature, msg.sender);
         }
         createConversion(msg.value, msg.sender, false, _isAnonymous);
         amountConverterSpentEthWEI[msg.sender] += msg.value;
@@ -243,9 +244,9 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
     {
         // Validate that sender is either _converter or maintainer
         require(msg.sender == _converter || twoKeyEventSource.isAddressMaintainer(msg.sender));
-        address _converterPlasma = twoKeyEventSource.plasmaOf(msg.sender);
+        address _converterPlasma = twoKeyEventSource.plasmaOf(_converter);
         if(received_from[_converterPlasma] == address(0)) {
-            distributeArcsBasedOnSignature(signature);
+            distributeArcsBasedOnSignature(signature, _converter);
         }
         //TODO: Handle at creation moment if there's enough tokens for referral rewards depending on conversion fiat amount
         createConversion(conversionAmountFiatWei, _converter, true, _isAnonymous);
