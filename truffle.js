@@ -119,15 +119,12 @@ module.exports = {
       gas: 8000000,
       gasPrice: 50000000000,
     },
-<<<<<<< HEAD
       tenderly: {
           host: 'https://rpc.public.test.k8s.2key.net',
           port: 9545,
           network_id: "*",
           gasPrice: 0
     },
-=======
->>>>>>> origin/develop
 
     'private.test.k8s-hdwallet': {
       provider: () => new HDWalletProvider(mnemonic, 'https://rpc.private.test.k8s.2key.net'),
