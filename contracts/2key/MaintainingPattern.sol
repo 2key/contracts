@@ -69,4 +69,17 @@ contract MaintainingPattern {
         }
     }
 
+
+    function checkIfMaintainer(
+        address addressToCheck
+    )
+    public
+    {
+        if(isMaintainer[addressToCheck].isValue){
+            return isMaintainer[addressToCheck];
+        }
+        else{
+            return false;
+        }
+    }
 }
