@@ -42,11 +42,9 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
      */
     uint [] counters;
 
-    ITwoKeyAcquisitionCampaignERC20 twoKeyAcquisitionCampaignERC20;
+    Conversion[] conversions;
 
     uint expiryConversionInHours; // How long converter can be pending before it will be automatically rejected and funds will be returned to convertor (hours)
-
-    Conversion[] conversions;
 
     mapping(bytes32 => address[]) stateToConverter; //State to all converters in that state
     mapping(address => uint[]) converterToHisConversions;
