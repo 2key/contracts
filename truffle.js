@@ -124,7 +124,7 @@ module.exports = {
           port: 9545,
           network_id: "*",
           gasPrice: 0
-      }
+    },
 
     'private.test.k8s-hdwallet': {
       provider: () => new HDWalletProvider(mnemonic, 'https://rpc.private.test.k8s.2key.net'),
