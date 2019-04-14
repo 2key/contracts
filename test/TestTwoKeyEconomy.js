@@ -1,4 +1,4 @@
-const TwoKeyEconomy = artifacts.require("TwoKeyEconomy");
+const TwoKeyEconomy = artifacts.require('TwoKeyEconomy');
 
 contract("TwoKeyEconomy", async (accounts) => {
 
@@ -14,7 +14,7 @@ contract("TwoKeyEconomy", async (accounts) => {
     const decimals = 18;
     const totalSupply = 1000000000000000000000000000;
 
-
+    cosole.log('Testing');
 
     it("Test: Admin and SingletonRegistry contract addresses should be properly set", async () => {
         console.log('CAO');

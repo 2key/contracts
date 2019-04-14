@@ -247,11 +247,11 @@ describe('TwoKeyProtocol', () => {
     const rnd = Math.floor(Math.random() * 8);
     console.log('Random', rnd, addresses[rnd]);
 
-
-    it('should check if address is maintainer', async() => {
-        let isMaintainer = await twoKeyProtocol.DecentralizedNation.check(from, from);
-        console.log(isMaintainer);
-    }).timeout(30000);
+    //
+    // it('should check if address is maintainer', async() => {
+    //     let isMaintainer = await twoKeyProtocol.DecentralizedNation.check(from, from);
+    //     console.log(isMaintainer);
+    // }).timeout(30000);
 
 
     let daoAddress;
@@ -269,9 +269,9 @@ describe('TwoKeyProtocol', () => {
             minimalPercentOfVotersForPetitioningCampaign: 51,
             limitsPerMemberType: [15,15]
         };
-
-        daoAddress = await twoKeyProtocol.DecentralizedNation.create(DAOdata, from, { gasPrice: 5000000000 });
-        console.log(daoAddress);
+        //
+        // daoAddress = await twoKeyProtocol.DecentralizedNation.create(DAOdata, from, { gasPrice: 5000000000 });
+        // console.log(daoAddress);
     }).timeout(300000);
 
     // it('should get all members of DAO', async() => {
@@ -331,91 +331,91 @@ describe('TwoKeyProtocol', () => {
     //
 
     // NVC = National Voting Campaign which executes itself when voting is finished
-    it('should create  new  Campaign', async() => {
-        const campaign : INationalVotingCampaign= {
-            votingReason: 'Because Andrii is not good CSS dev :D',
-            campaignLengthInDays: 1,
-            flag: 0,
-        };
-        referralLink = await twoKeyProtocol.DecentralizedNation.createCampaign(daoAddress,campaign,from, { gasPrice: 15000000000 });
-        console.log('VOTE PUBLIC LINK', referralLink);
-    }).timeout(300000);
-
-    let votingCampaign;
-    it('get all voting campaigns for DAO', async() => {
-        let campaigns = await twoKeyProtocol.DecentralizedNation.getAllCampaigns(daoAddress);
-        console.log(campaigns);
-        votingCampaign = campaigns[0].votingCampaignContractAddress;
-    }).timeout(30000);
-
-    it('it should check role for create voting', async() => {
-        let isAbleToStartVoting = await twoKeyProtocol.DecentralizedNation.isTypeEligibleToCreateAVotingCampaign(daoAddress, 'PRESIDENT');
-        console.log(isAbleToStartVoting);
-    }).timeout(30000);
-
-    it('should join link from gmail', async() => {
-        const {web3, address} = web3switcher.gmail();
-        from = address;
-        twoKeyProtocol.setWeb3({
-            web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_GMAIL).privateKey,
-        });
-        referralLink = await twoKeyProtocol.DecentralizedNation.join(votingCampaign, from, { cut: 50, referralLink });
-        console.log('GMAIL LINK', referralLink);
-    }).timeout(30000);
-
-    it('should join link from test4', async() => {
-        const {web3, address} = web3switcher.test4();
-        from = address;
-        twoKeyProtocol.setWeb3({
-            web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_TEST4).privateKey,
-        });
-        referralLink = await twoKeyProtocol.DecentralizedNation.join(votingCampaign, from, { cut: 100, referralLink });
-        console.log('TEST4 LINK', referralLink);
-    }).timeout(30000);
-
-    it('should calculate vote', async() => {
-        const {web3, address} = web3switcher.deployer();
-        from = address;
-        twoKeyProtocol.setWeb3({
-            web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
-        });
-        const txHash = await twoKeyProtocol.DecentralizedNation.countPlasmaVotes(votingCampaign, from);
-        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-        // referralLink = await twoKeyProtocol.DecentralizedNation.join(votingCampaign, from, { cut: 100, referralLink });
-        console.log('CALCULATED', txHash);
-    }).timeout(300000);
-
-    it('should print voting results', async() => {
-
-        const results = await twoKeyProtocol.DecentralizedNation.getVotingResults(votingCampaign);
-        // referralLink = await twoKeyProtocol.DecentralizedNation.join(votingCampaign, from, { cut: 100, referralLink });
-        console.log('CALCULATED', results);
-    }).timeout(30000);
-
-    it('should get campaign data', async() => {
-        const res = await twoKeyProtocol.DecentralizedNation.getCampaignByVotingContractAddress(daoAddress,votingCampaign);
-        console.log(res);
-    }).timeout(30000)
-    /*
-            '0xb3fa520368f2df7bed4df5185101f303f6c7decc',
-            '0xffcf8fdee72ac11b5c542428b35eef5769c409f0',
-            '0x22d491bde2303f2f43325b2108d26f1eaba1e32b'
-     */
+    // it('should create  new  Campaign', async() => {
+    //     const campaign : INationalVotingCampaign= {
+    //         votingReason: 'Because Andrii is not good CSS dev :D',
+    //         campaignLengthInDays: 1,
+    //         flag: 0,
+    //     };
+    //     referralLink = await twoKeyProtocol.DecentralizedNation.createCampaign(daoAddress,campaign,from, { gasPrice: 15000000000 });
+    //     console.log('VOTE PUBLIC LINK', referralLink);
+    // }).timeout(300000);
+    //
+    // let votingCampaign;
+    // it('get all voting campaigns for DAO', async() => {
+    //     let campaigns = await twoKeyProtocol.DecentralizedNation.getAllCampaigns(daoAddress);
+    //     console.log(campaigns);
+    //     votingCampaign = campaigns[0].votingCampaignContractAddress;
+    // }).timeout(30000);
+    //
+    // it('it should check role for create voting', async() => {
+    //     let isAbleToStartVoting = await twoKeyProtocol.DecentralizedNation.isTypeEligibleToCreateAVotingCampaign(daoAddress, 'PRESIDENT');
+    //     console.log(isAbleToStartVoting);
+    // }).timeout(30000);
+    //
+    // it('should join link from gmail', async() => {
+    //     const {web3, address} = web3switcher.gmail();
+    //     from = address;
+    //     twoKeyProtocol.setWeb3({
+    //         web3,
+    //         networks: {
+    //             mainNetId,
+    //             syncTwoKeyNetId,
+    //         },
+    //         plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_GMAIL).privateKey,
+    //     });
+    //     referralLink = await twoKeyProtocol.DecentralizedNation.join(votingCampaign, from, { cut: 50, referralLink });
+    //     console.log('GMAIL LINK', referralLink);
+    // }).timeout(30000);
+    //
+    // it('should join link from test4', async() => {
+    //     const {web3, address} = web3switcher.test4();
+    //     from = address;
+    //     twoKeyProtocol.setWeb3({
+    //         web3,
+    //         networks: {
+    //             mainNetId,
+    //             syncTwoKeyNetId,
+    //         },
+    //         plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_TEST4).privateKey,
+    //     });
+    //     referralLink = await twoKeyProtocol.DecentralizedNation.join(votingCampaign, from, { cut: 100, referralLink });
+    //     console.log('TEST4 LINK', referralLink);
+    // }).timeout(30000);
+    //
+    // it('should calculate vote', async() => {
+    //     const {web3, address} = web3switcher.deployer();
+    //     from = address;
+    //     twoKeyProtocol.setWeb3({
+    //         web3,
+    //         networks: {
+    //             mainNetId,
+    //             syncTwoKeyNetId,
+    //         },
+    //         plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
+    //     });
+    //     const txHash = await twoKeyProtocol.DecentralizedNation.countPlasmaVotes(votingCampaign, from);
+    //     await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+    //     // referralLink = await twoKeyProtocol.DecentralizedNation.join(votingCampaign, from, { cut: 100, referralLink });
+    //     console.log('CALCULATED', txHash);
+    // }).timeout(300000);
+    //
+    // it('should print voting results', async() => {
+    //
+    //     const results = await twoKeyProtocol.DecentralizedNation.getVotingResults(votingCampaign);
+    //     // referralLink = await twoKeyProtocol.DecentralizedNation.join(votingCampaign, from, { cut: 100, referralLink });
+    //     console.log('CALCULATED', results);
+    // }).timeout(30000);
+    //
+    // it('should get campaign data', async() => {
+    //     const res = await twoKeyProtocol.DecentralizedNation.getCampaignByVotingContractAddress(daoAddress,votingCampaign);
+    //     console.log(res);
+    // }).timeout(30000)
+    // /*
+    //         '0xb3fa520368f2df7bed4df5185101f303f6c7decc',
+    //         '0xffcf8fdee72ac11b5c542428b35eef5769c409f0',
+    //         '0x22d491bde2303f2f43325b2108d26f1eaba1e32b'
+    //  */
 
 
 
