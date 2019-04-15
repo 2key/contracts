@@ -132,8 +132,8 @@ contract TwoKeyAdmin is Upgradeable {
 
 	/// @notice Function to update reward release date
 	function updateRewardsRelease(uint newRewardReleaseAfter)
-	//external
-	//onlyTwoKeyCongress
+	external
+	onlyTwoKeyCongress
 	{
 		require (now <= newRewardReleaseAfter && now <= rewardReleaseAfter);
 		rewardReleaseAfter = newRewardReleaseAfter;
