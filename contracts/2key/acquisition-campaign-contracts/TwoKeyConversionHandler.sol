@@ -252,19 +252,6 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
             counters[1]--; //Decrease number of approved conversions
         }
 
-        /**
-         * Deploy Lockup contract
-         */
-        TwoKeyLockupContract lockupContract = new TwoKeyLockupContract(bonusTokensVestingStartShiftInDaysFromDistributionDate, bonusTokensVestingMonths, tokenDistributionDate, maxDistributionDateShiftInDays,
-            conversion.baseTokenUnits, conversion.bonusTokenUnits, _conversionId, conversion.converter, conversion.contractor, assetContractERC20, twoKeyEventSource);
-
-
-        //Add lockup address to conversion object
-        conversion.lockupAddress = address(lockupContract);
-
-        // Transfer tokens to lockup contract
-        twoKeyAcquisitionCampaignERC20.moveFungibleAsset(address(lockupContract), totalUnits);
-
         // Total rewards for referrers
         uint totalReward2keys = 0;
 
@@ -301,6 +288,19 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
         if(converterToLockupContracts[conversion.converter].length == 0) {
             counters[5]++; // Increase number of unique converters
         }
+
+        /**
+         * Deploy Lockup contract
+         */
+        TwoKeyLockupContract lockupContract = new TwoKeyLockupContract(bonusTokensVestingStartShiftInDaysFromDistributionDate, bonusTokensVestingMonths, tokenDistributionDate, maxDistributionDateShiftInDays,
+            conversion.baseTokenUnits, conversion.bonusTokenUnits, _conversionId, conversion.converter, conversion.contractor, assetContractERC20, twoKeyEventSource);
+
+
+        //Add lockup address to conversion object
+        conversion.lockupAddress = address(lockupContract);
+
+        // Transfer tokens to lockup contract
+        twoKeyAcquisitionCampaignERC20.moveFungibleAsset(address(lockupContract), totalUnits);
 
         conversion.maxReferralReward2key = totalReward2keys;
         conversion.state = ConversionState.EXECUTED;
