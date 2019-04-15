@@ -158,7 +158,7 @@ module.exports = function deploy(deployer) {
             .then(() => TwoKeyDeepFreezeTokenPool.deployed())
             .then(() => deployer.deploy(TwoKeyLongTermTokenPool))
             .then(() => TwoKeyLongTermTokenPool.deployed())
-            .then(() => deployer.deploy(TwoKeySingletonesRegistry, [], '0x0')) //adding empty admin address
+            .then(() => deployer.deploy(TwoKeySingletonesRegistry, maintainerAddresses, '0x0')) //adding empty admin address
             .then(() => TwoKeySingletonesRegistry.deployed().then(async (registry) => {
                 /**
                  * Here we will be adding all contracts to the Registry and create a Proxies for them
