@@ -62,7 +62,8 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
 
     uint tokenDistributionDate; // January 1st 2019
     uint maxDistributionDateShiftInDays; // 180 days
-    uint bonusTokensVestingMonths; // 6 months
+    uint numberOfVestingPortions; // For example 6
+    uint numberOfDaysBetweenPortions; // For example 30 days
     uint bonusTokensVestingStartShiftInDaysFromDistributionDate; // 180 days
 
 
@@ -106,11 +107,12 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
         expiryConversionInHours = values[0];
         tokenDistributionDate = values[1];
         maxDistributionDateShiftInDays = values[2];
-        bonusTokensVestingMonths = values[3];
-        bonusTokensVestingStartShiftInDaysFromDistributionDate = values[4];
+        numberOfVestingPortions = values[3];
+        numberOfDaysBetweenPortions = values[4];
+        bonusTokensVestingStartShiftInDaysFromDistributionDate = values[5];
 
         // 5th argument will represent if FIAT conversion is automatically approved
-        if(values[5] == 1) {
+        if(values[6] == 1) {
             isFiatConversionAutomaticallyApproved = true;
         }
         // Instance of interface
@@ -292,8 +294,20 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
         /**
          * Deploy Lockup contract
          */
-        TwoKeyLockupContract lockupContract = new TwoKeyLockupContract(bonusTokensVestingStartShiftInDaysFromDistributionDate, bonusTokensVestingMonths, tokenDistributionDate, maxDistributionDateShiftInDays,
-            conversion.baseTokenUnits, conversion.bonusTokenUnits, _conversionId, conversion.converter, conversion.contractor, assetContractERC20, twoKeyEventSource);
+        TwoKeyLockupContract lockupContract = new TwoKeyLockupContract(
+            bonusTokensVestingStartShiftInDaysFromDistributionDate,
+            numberOfVestingPortions,
+            numberOfDaysBetweenPortions,
+            tokenDistributionDate,
+            maxDistributionDateShiftInDays,
+            conversion.baseTokenUnits,
+            conversion.bonusTokenUnits,
+            _conversionId,
+            conversion.converter,
+            conversion.contractor,
+            assetContractERC20,
+            twoKeyEventSource
+        );
 
 
         //Add lockup address to conversion object

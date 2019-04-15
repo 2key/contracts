@@ -6,9 +6,11 @@ import "../interfaces/ITwoKeyEventSource.sol";
 contract TwoKeyLockupContract {
 
     uint bonusTokensVestingStartShiftInDaysFromDistributionDate;
-    uint bonusTokensVestingMonths;
     uint tokenDistributionDate;
+    uint numberOfVestingPortions; // For example 6
+    uint numberOfDaysBetweenPortions; // For example 30 days
     uint maxDistributionDateShiftInDays;
+
 
     uint conversionId;
 
@@ -48,7 +50,8 @@ contract TwoKeyLockupContract {
 
     constructor(
         uint _bonusTokensVestingStartShiftInDaysFromDistributionDate,
-        uint _bonusTokensVestingMonths,
+        uint _numberOfVestingPortions,
+        uint _numberOfDaysBetweenPortions,
         uint _tokenDistributionDate,
         uint _maxDistributionDateShiftInDays,
         uint _baseTokens,
@@ -62,7 +65,8 @@ contract TwoKeyLockupContract {
     public
     {
         bonusTokensVestingStartShiftInDaysFromDistributionDate = _bonusTokensVestingStartShiftInDaysFromDistributionDate;
-        bonusTokensVestingMonths = _bonusTokensVestingMonths;
+        numberOfVestingPortions = _numberOfVestingPortions;
+        numberOfDaysBetweenPortions = _numberOfDaysBetweenPortions;
         tokenDistributionDate = _tokenDistributionDate;
         maxDistributionDateShiftInDays = _maxDistributionDateShiftInDays;
         baseTokens = _baseTokens;
@@ -74,8 +78,8 @@ contract TwoKeyLockupContract {
         twoKeyEventSource = _twoKeyEventSource;
         tokenUnlockingDate[0] = tokenDistributionDate; //base tokens
         tokenUnlockingDate[1] = tokenDistributionDate + _bonusTokensVestingStartShiftInDaysFromDistributionDate * (1 days); // first part of bonus in days after tokens
-        for(uint i=2 ;i<bonusTokensVestingMonths + 1; i++) {
-            tokenUnlockingDate[i] = tokenUnlockingDate[1] + (i-1) * (30 days); // All other bonus is month a gap between them
+        for(uint i=2 ;i<numberOfVestingPortions + 1; i++) {
+            tokenUnlockingDate[i] = tokenUnlockingDate[1] + (i-1) * (numberOfDaysBetweenPortions * 1 days); // All other bonus is month a gap between them
         }
     }
 
@@ -84,16 +88,16 @@ contract TwoKeyLockupContract {
     view
     returns (uint, uint, uint, uint, uint[], bool[])
     {
-        uint[] memory dates = new uint[](bonusTokensVestingMonths+1);
-        bool[] memory areTokensWithdrawn = new bool[](bonusTokensVestingMonths+1);
+        uint[] memory dates = new uint[](numberOfVestingPortions+1);
+        bool[] memory areTokensWithdrawn = new bool[](numberOfVestingPortions+1);
 
-        for(uint i=0; i<bonusTokensVestingMonths+1;i++) {
+        for(uint i=0; i<numberOfVestingPortions+1;i++) {
             dates[i] = tokenUnlockingDate[i];
             areTokensWithdrawn[i] = isWithdrawn[i];
         }
         //total = base + bonus
-        // monthly bonus = bonus/bonusTokensVestingMonths
-        return (baseTokens, bonusTokens, bonusTokensVestingMonths, conversionId, dates, areTokensWithdrawn);
+        // monthly bonus = bonus/numberOfVestingPortions
+        return (baseTokens, bonusTokens, numberOfVestingPortions, conversionId, dates, areTokensWithdrawn);
     }
 
 
@@ -112,7 +116,7 @@ contract TwoKeyLockupContract {
 
         uint shift = tokenDistributionDate - _newDate;
         // If the date is changed shifting all tokens unlocking dates for the difference
-        for(uint i=0; i<bonusTokensVestingMonths+1;i++) {
+        for(uint i=0; i<numberOfVestingPortions+1;i++) {
             tokenUnlockingDate[i] = tokenUnlockingDate[i] + shift;
         }
 
@@ -131,12 +135,12 @@ contract TwoKeyLockupContract {
     returns (bool)
     {
         require(msg.sender == converter || ITwoKeyEventSource(twoKeyEventSource).isAddressMaintainer(msg.sender) == true);
-        require(isWithdrawn[part] == false && part < bonusTokensVestingMonths+1 && block.timestamp > tokenUnlockingDate[part]);
+        require(isWithdrawn[part] == false && part < numberOfVestingPortions+1 && block.timestamp > tokenUnlockingDate[part]);
         uint amount;
         if(part == 0) {
             amount = baseTokens;
         } else {
-            amount = bonusTokens / bonusTokensVestingMonths;
+            amount = bonusTokens / numberOfVestingPortions;
         }
         isWithdrawn[part] = true;
         require(IERC20(assetContractERC20).transfer(converter,amount));
