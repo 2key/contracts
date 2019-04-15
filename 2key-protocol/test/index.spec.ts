@@ -34,7 +34,7 @@ let isKYCRequired = false;
 let isFiatConversionAutomaticallyApproved = true;
 const isFiatOnly = false;
 let incentiveModel = "MANUAL";
-let amount = 100000; //1000 tokens fiat inventory
+let amount = 0; //1000 tokens fiat inventory
 
 function makeHandle(max: number = 8): string {
     let text = '';
@@ -46,7 +46,6 @@ function makeHandle(max: number = 8): string {
     return text;
 }
 
-// console.log(makeHandle(4096));
 
 console.log(rpcUrl);
 console.log(mainNetId);
@@ -465,8 +464,10 @@ describe('TwoKeyProtocol', () => {
     }).timeout(120000);
 
     it('should reserve amount for fiat conversion rewards', async() => {
-        let txHash = await twoKeyProtocol.AcquisitionCampaign.specifyFiatConversionRewards(campaignAddress, 0, amount, from);
-        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        // if(amount) {
+        //     let txHash = await twoKeyProtocol.AcquisitionCampaign.specifyFiatConversionRewards(campaignAddress, 0, amount, from);
+        //     await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        // }
     }).timeout(60000);
 
     it('should proff that campaign is validated and registered properly', async() => {

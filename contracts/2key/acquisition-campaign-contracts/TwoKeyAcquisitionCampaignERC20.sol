@@ -174,18 +174,14 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
      * @notice Function to add fiat inventory for rewards
      * @dev only contractor can add this inventory
      */
-    function specifyFiatConversionRewards(
-        uint reserveAmountForInfluencerRewards
-    )
+    function specifyFiatConversionRewards()
     public
     onlyContractor
     payable
     {
         //If you send eth, we ignore argument and create your fiat inventory amount with buying tokens
         if(msg.value > 0) {
-            fiatInventoryAmount += buyTokensFromUpgradableExchange(msg.value, address(this));
-        } else if(assetContractERC20 == twoKeyEconomy) {
-            fiatInventoryAmount+= reserveAmountForInfluencerRewards;
+            buyTokensFromUpgradableExchange(msg.value, address(this));
         }
     }
 
@@ -320,14 +316,14 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
                 address upgradableExchange = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyUpgradableExchange");
                 uint rate = IUpgradableExchange(upgradableExchange).rate();
                 totalBounty2keys = (_maxReferralRewardETHWei / (rate)) * (1000);
-                fiatInventoryAmount = fiatInventoryAmount.sub(totalBounty2keys);
+                //TODO: add require that there's enough tokens at this moment
             } else {
                 //Buy tokens from upgradable exchange
                 totalBounty2keys = buyTokensFromUpgradableExchange(_maxReferralRewardETHWei, address(this));
-                // Update reserved amount
-                reservedAmount2keyForRewards = reservedAmount2keyForRewards + totalBounty2keys;
-                //Handle refchain rewards
             }
+            // Update reserved amount
+            reservedAmount2keyForRewards = reservedAmount2keyForRewards + totalBounty2keys;
+            //Handle refchain rewards
             ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).updateRefchainRewards(
                 _maxReferralRewardETHWei,
                 _converter,
@@ -452,8 +448,12 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
     view
     returns (uint,uint,uint,uint)
     {
-        uint inventoryBalance = IERC20(assetContractERC20).balanceOf(address(this));
-        return (inventoryBalance, reservedAmountOfTokens, reservedAmount2keyForRewards, fiatInventoryAmount);
+        uint inventoryBalance = getTokenBalance(assetContractERC20);
+        if(assetContractERC20 == twoKeyEconomy) {
+            return (inventoryBalance, reservedAmountOfTokens, reservedAmount2keyForRewards, inventoryBalance);
+        } else {
+            return (inventoryBalance, reservedAmountOfTokens, reservedAmount2keyForRewards, getTokenBalance(twoKeyEconomy));
+        }
     }
 
     /**
@@ -503,11 +503,22 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
     view
     returns (uint)
     {
-        uint inventoryBalance = IERC20(assetContractERC20).balanceOf(address(this));
+        uint inventoryBalance = getTokenBalance(assetContractERC20);
         if(assetContractERC20 == twoKeyEconomy) {
-            return (inventoryBalance - reservedAmountOfTokens - reservedAmount2keyForRewards - fiatInventoryAmount);
+            return (inventoryBalance - reservedAmountOfTokens - reservedAmount2keyForRewards);
         }
         return (inventoryBalance - reservedAmountOfTokens);
+    }
+
+
+    function getTokenBalance(
+        address tokenAddress
+    )
+    internal
+    view
+    returns (uint)
+    {
+        return IERC20(twoKeyEconomy).balanceOf(address(this));
     }
 
     /**
