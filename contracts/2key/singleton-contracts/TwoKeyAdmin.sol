@@ -23,7 +23,7 @@ contract TwoKeyAdmin is Upgradeable {
 	uint twoKeyIntegratorDefaultFeePercent; // 2% is default value for this
 	uint twoKeyNetworkTaxPercent; //2% is default value for this
 
-	uint private rewardReleaseAfter;
+	uint rewardReleaseAfter;
 
     bool initialized = false;
 
