@@ -21,7 +21,6 @@ contract TwoKeyLockupContract {
 
     address public converter;
     address contractor;
-    address twoKeyConversionHandler;
     address assetContractERC20;
     address twoKeyEventSource;
 
@@ -46,10 +45,6 @@ contract TwoKeyLockupContract {
         _;
     }
 
-    modifier onlyTwoKeyConversionHandler() {
-        require(msg.sender == twoKeyConversionHandler);
-        _;
-    }
 
     constructor(
         uint _bonusTokensVestingStartShiftInDaysFromDistributionDate,
@@ -75,7 +70,6 @@ contract TwoKeyLockupContract {
         conversionId = _conversionId;
         converter = _converter;
         contractor = _contractor;
-        twoKeyConversionHandler = msg.sender;
         assetContractERC20 = _assetContractERC20;
         twoKeyEventSource = _twoKeyEventSource;
         tokenUnlockingDate[0] = tokenDistributionDate; //base tokens
