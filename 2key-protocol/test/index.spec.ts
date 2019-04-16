@@ -340,18 +340,65 @@ describe('TwoKeyProtocol', () => {
         expect(aydnepBalance).to.exist.to.haveOwnProperty('gasPrice')
     }).timeout(60000);
 
-    it('SingltonsRegistry getters' ,async() => {
-        let nonUpgradableContractName = await twoKeyProtocol.SingletonRegistry.setContractAddressByNonUpgradableContractName('0x15bb774ab9f11a4b08c8ec7b3e51d646e3f64aa8', 'idan');
+
+    it('SingltonsRegistry setters and getters tests' ,async() => {
+        const {web3, address} = web3switcher.deployer();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+        });
+
+        let contractLatestVersion;
+        let contractAddress;
+        let txHash;
+
+        let testObject = {
+            versionName: 'versionName',
+            contractAddress: '0x15bb774ab9f11a4b08c8ec7b3e51d646e3f64aa8', //Just arbitrary address
+            contractName: 'ContractName'
+        };
+
+        //Map testAddress=>testKey
+        txHash = await twoKeyProtocol.SingletonRegistry.setContractAddressByNonUpgradableContractName(testObject.contractAddress, testObject.versionName, from);
+
+        contractAddress = await twoKeyProtocol.SingletonRegistry.getAddressByNonUpgradableContract(testObject.versionName);
+        expect(contractAddress).to.be.equal(testObject.contractAddress);
+        console.log("SingltonsRegistry-Pass NonUpgradableContractNameByAddress");
+
+        txHash = await twoKeyProtocol.SingletonRegistry.setContractImplementationByContractNameAndVersion(testObject.contractName, testObject.versionName, testObject.contractAddress, from);
+
+        contractAddress = await twoKeyProtocol.SingletonRegistry.getImplementationByContractNameAndVersion(testObject.contractName,testObject.versionName);
+        expect(contractAddress).to.be.equal(testObject.contractAddress);
+        console.log("SingltonsRegistry-Pass ImplementationByContractNameAndVersion");
+        contractLatestVersion = await twoKeyProtocol.SingletonRegistry.getLatestVersionByContractName(testObject.contractName);
+        expect(contractLatestVersion).to.be.equal(testObject.versionName);
+        console.log("SingltonsRegistry-Pass LatestVersion");
 
         let proxyAddress = await twoKeyProtocol.SingletonRegistry.getProxyByContract('0x15bb774ab9f11a4b08c8ec7b3e51d646e3f64aa8');
-        let latestVersion = await twoKeyProtocol.SingletonRegistry.getLatestVersionByContractName('0x15bb774ab9f11a4b08c8ec7b3e51d646e3f64aa8');
-        let addressName = await twoKeyProtocol.SingletonRegistry.getAddressByNonUpgradableContract(nonUpgradableContractName);
+
+        console.log(proxyAddress);
+        console.log(proxyAddress);
+
+
+        //
+        // let nonUpgradableContractName = await twoKeyProtocol.SingletonRegistry.setContractAddressByNonUpgradableContractName('0x15bb774ab9f11a4b08c8ec7b3e51d646e3f64aa8', 'idan');
+        //
+        // let proxyAddress = await twoKeyProtocol.SingletonRegistry.getProxyByContract('0x15bb774ab9f11a4b08c8ec7b3e51d646e3f64aa8');
+        // let latestVersion = await twoKeyProtocol.SingletonRegistry.getLatestVersionByContractName('0x15bb774ab9f11a4b08c8ec7b3e51d646e3f64aa8');
+        // let addressName = await twoKeyProtocol.SingletonRegistry.getAddressByNonUpgradableContract(nonUpgradableContractName);
 
 
 
-        // expect(proxyAddress).to.be.equal('0x0000000000000000000000000000000000000000');
-        // expect(latestVersion).to.be.equal('');
-        // expect(proxyAddress).to.be.equal('0x0000000000000000000000000000000000000000');
+
+        expect(proxyAddress).to.be.equal('0x0000000000000000000000000000000000000000');
+        expect(proxyAddress).to.be.equal('');
+        expect(proxyAddress).to.be.equal('0x0000000000000000000000000000000000000000');
     }).timeout(60000);
 
     it('should get total supply of economy contract' ,async() => {

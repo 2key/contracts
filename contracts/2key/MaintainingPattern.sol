@@ -68,18 +68,4 @@ contract MaintainingPattern {
             isMaintainer[_maintainers[i]] = false;
         }
     }
-
-
-    function checkIfMaintainer(
-        address addressToCheck
-    )
-    public
-    {
-        if(isMaintainer[addressToCheck].isValue){
-            return isMaintainer[addressToCheck];
-        }
-        else{
-            return false;
-        }
-    }
 }
