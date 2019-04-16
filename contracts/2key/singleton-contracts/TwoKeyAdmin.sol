@@ -23,6 +23,8 @@ contract TwoKeyAdmin is Upgradeable {
 	uint twoKeyIntegratorDefaultFeePercent; // 2% is default value for this
 	uint twoKeyNetworkTaxPercent; //2% is default value for this
 
+	uint rewardReleaseAfter;
+
     bool initialized = false;
 
     /// @notice Modifier will revert if calling address is not a member of electorateAdmins
@@ -62,6 +64,7 @@ contract TwoKeyAdmin is Upgradeable {
         twoKeyEconomy = TwoKeyEconomy(_economy);
         twoKeyEventSource = TwoKeyEventSource(_eventSource);
         initialized = true;
+		rewardReleaseAfter = 1577836800; //01/01/2020
     }
 
     /// @notice Function where only elected admin can transfer tokens to an address
@@ -125,6 +128,15 @@ contract TwoKeyAdmin is Upgradeable {
 	{
 		require (_exchange != address(0));
 		twoKeyUpgradableExchange = TwoKeyUpgradableExchange(_exchange);
+	}
+
+	/// @notice Function to update reward release date
+	function updateRewardsRelease(uint newRewardReleaseAfter)
+	external
+	onlyTwoKeyCongress
+	{
+		require (now <= newRewardReleaseAfter && now <= rewardReleaseAfter);
+		rewardReleaseAfter = newRewardReleaseAfter;
 	}
 
     /// @notice Function to update twoKeyRegistry contract address
@@ -201,6 +213,15 @@ contract TwoKeyAdmin is Upgradeable {
 	{
     	return address(twoKeyReg);
     }
+
+
+	function getTwoKeyRewardsReleaseDate()
+	external
+	view
+	returns(uint)
+	{
+		return rewardReleaseAfter;
+	}
 
     /// View function - doesn't cost any gas to be executed
 	/// @notice Function to fetch twoKeyUpgradableExchange contract address

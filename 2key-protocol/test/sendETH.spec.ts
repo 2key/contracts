@@ -42,7 +42,7 @@ const sendETH: any = (recipient) => new Promise(async (resolve, reject) => {
 describe('TwoKeyProtocol LOCAL', () => {
     it('LOCAL: should transfer ether', async () => {
         let error = false;
-        const addresses = Object.keys(env).filter(key => key.endsWith('_ADDRESS') && env[key].includes('0x') && env[key].length == 42).map(key => env[key])
+        const addresses = Object.keys(env).filter(key => key.endsWith('_ADDRESS') && env[key].includes('0x') && env[key].length == 42).map(key => env[key]);
         let l = addresses.length;
         await sendETH('0xfab160d5bdebd8139f18b521cf18e876894ea44d');
         for (let i = 0; i < l; i++) {
