@@ -380,25 +380,12 @@ describe('TwoKeyProtocol', () => {
         expect(contractLatestVersion).to.be.equal(testObject.versionName);
         console.log("SingltonsRegistry-Pass LatestVersion");
 
-        let proxyAddress = await twoKeyProtocol.SingletonRegistry.getProxyByContract('0x15bb774ab9f11a4b08c8ec7b3e51d646e3f64aa8');
 
-        console.log(proxyAddress);
-        console.log(proxyAddress);
-
-
-        //
-        // let nonUpgradableContractName = await twoKeyProtocol.SingletonRegistry.setContractAddressByNonUpgradableContractName('0x15bb774ab9f11a4b08c8ec7b3e51d646e3f64aa8', 'idan');
-        //
-        // let proxyAddress = await twoKeyProtocol.SingletonRegistry.getProxyByContract('0x15bb774ab9f11a4b08c8ec7b3e51d646e3f64aa8');
-        // let latestVersion = await twoKeyProtocol.SingletonRegistry.getLatestVersionByContractName('0x15bb774ab9f11a4b08c8ec7b3e51d646e3f64aa8');
-        // let addressName = await twoKeyProtocol.SingletonRegistry.getAddressByNonUpgradableContract(nonUpgradableContractName);
-
-
-
-
-        expect(proxyAddress).to.be.equal('0x0000000000000000000000000000000000000000');
-        expect(proxyAddress).to.be.equal('');
-        expect(proxyAddress).to.be.equal('0x0000000000000000000000000000000000000000');
+        // txHash = await twoKeyProtocol.SingletonRegistry.setProxyByContract(testObject.contractName, testObject.versionName, from);
+        // let proxyAddress = await twoKeyProtocol.SingletonRegistry.getProxyByContract(testObject.contractName);
+        // //expect(proxyAddress).to.be.equal(testObject.versionName);
+        //twoKeyProtocol.UpgradabilityProxy(proxyAddress).getImplmentation()
+        //Add tests for Upgradability.
     }).timeout(60000);
 
     it('should get total supply of economy contract' ,async() => {
