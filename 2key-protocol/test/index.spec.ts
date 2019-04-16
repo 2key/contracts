@@ -388,6 +388,32 @@ describe('TwoKeyProtocol', () => {
         //Add tests for Upgradability.
     }).timeout(60000);
 
+    it('Should check maintainingPattern functionality' ,async() => {
+        let isMaintainer;
+        let currentAdmin;
+
+        const {web3, address} = web3switcher.deployer();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+        });
+
+        expect(currentAdmin).to.be.equal(singletons.TwoKeyAdmin.networks[mainNetId].address);
+        console.log("MaintainingPattern-Pass TwoKeyAdmin get");
+        isMaintainer = await twoKeyProtocol.MaintainingPattern.checkIfMaintainer(from);
+        expect(isMaintainer).to.be.true;
+        isMaintainer = await twoKeyProtocol.MaintainingPattern.checkIfMaintainer('0x15bb774ab9f11a4b08c8ec7b3e51d646e3f64aa8');
+        expect(isMaintainer).not.to.be.true;
+        
+    }).timeout(60000);
+
+
     it('should get total supply of economy contract' ,async() => {
         console.log("Check total supply on 2key-economy contract");
         let totalSup = await twoKeyProtocol.ERC20.getTotalSupply(twoKeyProtocol.twoKeyEconomy.address);
