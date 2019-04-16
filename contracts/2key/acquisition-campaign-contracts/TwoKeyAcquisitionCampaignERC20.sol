@@ -518,7 +518,7 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
     view
     returns (uint)
     {
-        return IERC20(twoKeyEconomy).balanceOf(address(this));
+        return IERC20(tokenAddress).balanceOf(address(this));
     }
 
     /**
