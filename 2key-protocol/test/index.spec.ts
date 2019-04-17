@@ -36,6 +36,15 @@ const isFiatOnly = false;
 let incentiveModel = "MANUAL";
 let amount = 0; //1000 tokens fiat inventory
 
+let testObject = {
+    versionName: 'versionName',
+    contractAddress: '0x15bb774ab9f11a4b08c8ec7b3e51d646e3f64aa8', //Just arbitrary address
+    contractName: 'ContractName',
+    notMaintainerAddress: '0x15bb774ab9f11a4b08c8ec7b3e51d646e3f64aa8',
+    emptyAddress: '0x0000000000000000000000000000000000000000',
+};
+
+
 function makeHandle(max: number = 8): string {
     let text = '';
     let possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -340,7 +349,10 @@ describe('TwoKeyProtocol', () => {
     }).timeout(60000);
 
 
-    it('SingltonsRegistry setters and getters tests' ,async() => {
+    it('SingltonsRegistry NonUpgradableContractNameByAddress' ,async() => {
+        let contractAddress;
+        let txHash;
+
         const {web3, address} = web3switcher.deployer();
         from = address;
         twoKeyProtocol.setWeb3({
@@ -353,42 +365,81 @@ describe('TwoKeyProtocol', () => {
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
         });
 
-        let contractLatestVersion;
-        let contractAddress;
-        let txHash;
-
-        let testObject = {
-            versionName: 'versionName',
-            contractAddress: '0x15bb774ab9f11a4b08c8ec7b3e51d646e3f64aa8', //Just arbitrary address
-            contractName: 'ContractName'
-        };
-
         //Map testAddress=>testKey
         txHash = await twoKeyProtocol.SingletonRegistry.setContractAddressByNonUpgradableContractName(testObject.contractAddress, testObject.versionName, from);
 
+        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+
         contractAddress = await twoKeyProtocol.SingletonRegistry.getAddressByNonUpgradableContract(testObject.versionName);
         expect(contractAddress).to.be.equal(testObject.contractAddress);
-        console.log("SingltonsRegistry-Pass NonUpgradableContractNameByAddress");
+    }).timeout(60000);
+
+
+    it('SingltonsRegistry ImplementationByContractNameAndVersion' ,async() => {
+        let contractAddress;
+        let txHash;
+
+        const {web3, address} = web3switcher.deployer();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+        });
 
         txHash = await twoKeyProtocol.SingletonRegistry.setContractImplementationByContractNameAndVersion(testObject.contractName, testObject.versionName, testObject.contractAddress, from);
+        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
 
         contractAddress = await twoKeyProtocol.SingletonRegistry.getImplementationByContractNameAndVersion(testObject.contractName,testObject.versionName);
         expect(contractAddress).to.be.equal(testObject.contractAddress);
-        console.log("SingltonsRegistry-Pass ImplementationByContractNameAndVersion");
-        contractLatestVersion = await twoKeyProtocol.SingletonRegistry.getLatestVersionByContractName(testObject.contractName);
-        expect(contractLatestVersion).to.be.equal(testObject.versionName);
-        console.log("SingltonsRegistry-Pass LatestVersion");
-
-
-        // txHash = await twoKeyProtocol.SingletonRegistry.setProxyByContract(testObject.contractName, testObject.versionName, from);
-        // let proxyAddress = await twoKeyProtocol.SingletonRegistry.getProxyByContract(testObject.contractName);
-        // //expect(proxyAddress).to.be.equal(testObject.versionName);
-        //twoKeyProtocol.UpgradabilityProxy(proxyAddress).getImplmentation()
-        //Add tests for Upgradability.
     }).timeout(60000);
 
-    it('Should check maintainingPattern functionality' ,async() => {
-        let isMaintainer;
+    it('SingltonsRegistry LatestVersion' ,async() => {
+        let contractLatestVersion;
+        const {web3, address} = web3switcher.deployer();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+        });
+
+        contractLatestVersion = await twoKeyProtocol.SingletonRegistry.getLatestVersionByContractName(testObject.contractName);
+        expect(contractLatestVersion).to.be.equal(testObject.versionName);
+    }).timeout(60000);
+
+    it('SingltonsRegistry NonUpgradableContractNameByAddress' ,async() => {
+        let txHash;
+        const {web3, address} = web3switcher.deployer();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+        });
+
+        txHash = await twoKeyProtocol.SingletonRegistry.setProxyByContract(testObject.contractName, testObject.versionName, from);
+        //TODO: get the event and check.
+
+        // proxyAddress = await twoKeyProtocol.SingletonRegistry.getProxyByContractName(testObject.contractName);
+        // expect(proxyAddress).to.be.equal(setProxyAddress);
+        console.log("SingltonsRegistry-Pass ProxyAddress");
+    }).timeout(60000);
+
+
+    it('Should check maintainingPattern getAdmin() functionality' ,async() => {
         let currentAdmin;
 
         const {web3, address} = web3switcher.deployer();
@@ -403,13 +454,46 @@ describe('TwoKeyProtocol', () => {
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
         });
 
-        expect(currentAdmin).to.be.equal(singletons.TwoKeyAdmin.networks[mainNetId].address);
-        console.log("MaintainingPattern-Pass TwoKeyAdmin get");
+        currentAdmin = await twoKeyProtocol.MaintainingPattern.getAdmin();
+        expect(currentAdmin).to.be.equal(testObject.emptyAddress);
+    }).timeout(60000);
+
+    it('Should MaintainingPattern-Pass check maintainer' ,async() => {
+        let isMaintainer;
+
+        const {web3, address} = web3switcher.deployer();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+        });
+
         isMaintainer = await twoKeyProtocol.MaintainingPattern.checkIfMaintainer(from);
         expect(isMaintainer).to.be.true;
-        isMaintainer = await twoKeyProtocol.MaintainingPattern.checkIfMaintainer('0x15bb774ab9f11a4b08c8ec7b3e51d646e3f64aa8');
+    }).timeout(60000);
+
+    it('Should check MaintainingPattern-Pass check not maintainer.' ,async() => {
+        let isMaintainer;
+
+        const {web3, address} = web3switcher.deployer();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+        });
+
+        isMaintainer = await twoKeyProtocol.MaintainingPattern.checkIfMaintainer(testObject.notMaintainerAddress);
         expect(isMaintainer).not.to.be.true;
-        
     }).timeout(60000);
 
 
