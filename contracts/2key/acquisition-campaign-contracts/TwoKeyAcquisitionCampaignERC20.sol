@@ -89,6 +89,21 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
         _;
     }
 
+
+    /**
+     * @notice Internal function to check the balance of the specific ERC20 on this contract
+     * @param tokenAddress is the ERC20 contract address
+     */
+    function getTokenBalance(
+        address tokenAddress
+    )
+    internal
+    view
+    returns (uint)
+    {
+        return IERC20(tokenAddress).balanceOf(address(this));
+    }
+
     /**
      * @notice Function to set cut of
      * @param me is the address (ethereum)

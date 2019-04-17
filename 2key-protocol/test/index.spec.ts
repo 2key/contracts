@@ -36,6 +36,7 @@ const isFiatOnly = false;
 let incentiveModel = "MANUAL";
 let amount = 0; //1000 tokens fiat inventory
 
+
 let testObject = {
     versionName: 'versionName',
     contractAddress: '0x15bb774ab9f11a4b08c8ec7b3e51d646e3f64aa8', //Just arbitrary address
@@ -43,7 +44,6 @@ let testObject = {
     notMaintainerAddress: '0x15bb774ab9f11a4b08c8ec7b3e51d646e3f64aa8',
     emptyAddress: '0x0000000000000000000000000000000000000000',
 };
-
 
 function makeHandle(max: number = 8): string {
     let text = '';
