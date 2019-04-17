@@ -348,7 +348,7 @@ describe('TwoKeyProtocol', () => {
     }).timeout(60000);
 
 
-    it('SingltonsRegistry NonUpgradableContractNameByAddress' ,async() => {
+    it('Should check SingltonsRegistry NonUpgradableContractNameByAddress' ,async() => {
         let contractAddress;
         let txHash;
 
@@ -374,7 +374,7 @@ describe('TwoKeyProtocol', () => {
     }).timeout(60000);
 
 
-    it('SingltonsRegistry ImplementationByContractNameAndVersion' ,async() => {
+    it('Should check SingltonsRegistry ImplementationByContractNameAndVersion' ,async() => {
         let contractAddress;
         let txHash;
 
@@ -397,7 +397,8 @@ describe('TwoKeyProtocol', () => {
         expect(contractAddress).to.be.equal(testObject.contractAddress);
     }).timeout(60000);
 
-    it('SingltonsRegistry LatestVersion' ,async() => {
+    
+    it('Should check SingltonsRegistry LatestVersion' ,async() => {
         let contractLatestVersion;
         const {web3, address} = web3switcher.deployer();
         from = address;
@@ -415,8 +416,10 @@ describe('TwoKeyProtocol', () => {
         expect(contractLatestVersion).to.be.equal(testObject.versionName);
     }).timeout(60000);
 
-    it('SingltonsRegistry NonUpgradableContractNameByAddress' ,async() => {
-        let txHash;
+
+    it('Should check SingltonsRegistry ProxyAddress' ,async() => {
+        let proxyAddress;
+        let setProxyAddress;
         const {web3, address} = web3switcher.deployer();
         from = address;
         twoKeyProtocol.setWeb3({
@@ -429,12 +432,10 @@ describe('TwoKeyProtocol', () => {
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
         });
 
-        txHash = await twoKeyProtocol.SingletonRegistry.setProxyByContract(testObject.contractName, testObject.versionName, from);
-        //TODO: get the event and check.
+        setProxyAddress = await twoKeyProtocol.SingletonRegistry.setProxyByContract(testObject.contractName, testObject.versionName, from);
+        proxyAddress = await twoKeyProtocol.SingletonRegistry.getProxyByContractName(testObject.contractName);
+        expect(proxyAddress).to.be.equal(setProxyAddress);
 
-        // proxyAddress = await twoKeyProtocol.SingletonRegistry.getProxyByContractName(testObject.contractName);
-        // expect(proxyAddress).to.be.equal(setProxyAddress);
-        console.log("SingltonsRegistry-Pass ProxyAddress");
     }).timeout(60000);
 
 
