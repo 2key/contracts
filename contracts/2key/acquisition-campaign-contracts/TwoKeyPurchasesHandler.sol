@@ -23,11 +23,21 @@ contract TwoKeyPurchasesHandler is Upgradeable{
 
     mapping(uint => mapping(uint => uint)) conversionIdToPortionToUnlockingDate;
     mapping(uint => mapping(uint => bool)) conversionIdToPortionToIsWithdrawn;
+    mapping(uint => address) conversionIdToConverter;
 
-    struct Purchases {
+    event TokensWithdrawn(
+        uint timestamp,
+        address methodCaller,
+        address tokensReceiver,
+        uint portionId,
+        uint portionAmount
+    );
+
+    struct Purchase {
         address converter;
         uint baseTokens;
         uint bonusTokens;
+        uint [] unlockingDates;
     }
 
     function setInitialParamsPurchasesHandler(
@@ -63,6 +73,30 @@ contract TwoKeyPurchasesHandler is Upgradeable{
         address _converter
     ) public {
         require(msg.sender == proxyConversionHandler);
-
+        if(vestingAmount == VestingAmount.BASE_AND_BONUS) {
+            baseAndBonusVesting(_baseTokens, _bonusTokens, _conversionId);
+        } else {
+            bonusVestingOnly(_baseTokens, _bonusTokens, _conversionId);
+        }
+        conversionIdToConverter[_conversionId] = _converter;
     }
+
+    function bonusVestingOnly(uint _baseTokens, uint _bonusTokens, uint _conversionId) internal {
+        conversionIdToPortionToUnlockingDate[_conversionId][0] = tokenDistributionDate;
+        conversionIdToPortionToUnlockingDate[_conversionId][1] = tokenDistributionDate + bonusTokensVestingStartShiftInDaysFromDistributionDate*(1 days);
+        for(uint i=2; i<numberOfVestingPortions; i++) {
+            conversionIdToPortionToUnlockingDate[_conversionId][1] + (i-1) * (numberOfDaysBetweenPortions * (1 days));
+        }
+    }
+
+    function baseAndBonusVesting(uint _baseTokens, uint _bonusTokens, uint _conversionId) internal {
+        uint totalAmount = _baseTokens + _bonusTokens;
+        uint portion = totalAmount / numberOfVestingPortions;
+        conversionIdToPortionToUnlockingDate[_conversionId][0] = tokenDistributionDate;
+        for(uint i=1; i<numberOfVestingPortions; i++) {
+            conversionIdToPortionToUnlockingDate[_conversionId][i] = tokenDistributionDate + i * (numberOfDaysBetweenPortions * (1 days));
+        }
+    }
+
+
 }
