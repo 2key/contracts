@@ -41,12 +41,12 @@ contract TwoKeyPurchasesHandler is Upgradeable{
     {
         require(initialized == false);
 
-        bonusTokensVestingStartShiftInDaysFromDistributionDate = values[1];
-        tokenDistributionDate = values[2];
-        numberOfVestingPortions = values[3];
-        numberOfDaysBetweenPortions = values[4];
-        maxDistributionDateShiftInDays = values[5];
-
+        bonusTokensVestingStartShiftInDaysFromDistributionDate = values[2];
+        tokenDistributionDate = values[3];
+        numberOfVestingPortions = values[4];
+        numberOfDaysBetweenPortions = values[5];
+        maxDistributionDateShiftInDays = values[6];
+        vestingAmount = VestingAmount(values[7]);
         contractor = _contractor;
         assetContractERC20 = _assetContractERC20;
         twoKeyEventSource = _twoKeyEventSource;
@@ -62,6 +62,7 @@ contract TwoKeyPurchasesHandler is Upgradeable{
         uint _conversionId,
         address _converter
     ) public {
+        require(msg.sender == proxyConversionHandler);
 
     }
 }

@@ -105,16 +105,16 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
         counters = new uint[](10);
 
         expiryConversionInHours = values[0];
-        tokenDistributionDate = values[1];
-        maxDistributionDateShiftInDays = values[2];
-        numberOfVestingPortions = values[3];
-        numberOfDaysBetweenPortions = values[4];
-        bonusTokensVestingStartShiftInDaysFromDistributionDate = values[5];
-
-        // 5th argument will represent if FIAT conversion is automatically approved
-        if(values[6] == 1) {
+        if(values[1] == 1) {
             isFiatConversionAutomaticallyApproved = true;
         }
+        tokenDistributionDate = values[2];
+        maxDistributionDateShiftInDays = values[3];
+        numberOfVestingPortions = values[4];
+        numberOfDaysBetweenPortions = values[5];
+        bonusTokensVestingStartShiftInDaysFromDistributionDate = values[6];
+
+        // 5th argument will represent if FIAT conversion is automatically approved
         // Instance of interface
         twoKeyAcquisitionCampaignERC20 = ITwoKeyAcquisitionCampaignERC20(_twoKeyAcquisitionCampaignERC20);
 

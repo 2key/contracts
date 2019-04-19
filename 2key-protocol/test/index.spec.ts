@@ -35,6 +35,7 @@ let isFiatConversionAutomaticallyApproved = true;
 const isFiatOnly = false;
 let incentiveModel = "MANUAL";
 let amount = 0; //1000 tokens fiat inventory
+let vestingAmount = 'BONUS';
 
 let testObject = {
     versionName: 'versionName',
@@ -605,7 +606,8 @@ describe('TwoKeyProtocol', () => {
             isKYCRequired,
             isFiatConversionAutomaticallyApproved,
             incentiveModel,
-            isFiatOnly
+            isFiatOnly,
+            vestingAmount
         };
 
         const campaign = await twoKeyProtocol.AcquisitionCampaign.create(campaignData, campaignData, {} , from, {
