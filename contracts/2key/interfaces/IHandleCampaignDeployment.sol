@@ -54,5 +54,14 @@ contract IHandleCampaignDeployment {
         address _twoKeyBaseReputationRegistry
     ) public;
 
+
+    function setInitialParamsPurchasesHandler(
+        uint[] values,
+        address _contractor,
+        address _assetContractERC20,
+        address _twoKeyEventSource,
+        address _proxyConversionHandler
+    )
+    public;
 }
 

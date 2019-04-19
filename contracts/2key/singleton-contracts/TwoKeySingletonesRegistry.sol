@@ -31,6 +31,7 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
         address proxyLogicHandler,
         address proxyConversionHandler,
         address proxyAcquisitionCampaign,
+        address proxyPurchasesHandler,
         address contractor,
         uint timestamp
     );
@@ -205,6 +206,16 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
         UpgradabilityProxyAcquisition proxyLogicHandler = new UpgradabilityProxyAcquisition("TwoKeyAcquisitionLogicHandler", "1.0");
         Upgradeable(proxyLogicHandler).initialize.value(msg.value)(msg.sender);
 
+        UpgradabilityProxyAcquisition proxyPurchasesHandler = new UpgradabilityProxyAcquisition("TwoKeyPurchasesHandler", "1.0");
+        Upgradeable(proxyPurchasesHandler).initialize.value(msg.value)(msg.sender);
+
+        IHandleCampaignDeployment(proxyPurchasesHandler).setInitialParamsPurchasesHandler(
+            valuesConversion,
+            msg.sender,
+            addresses[0],
+            getContractProxyAddress("TwoKeyEventSource"),
+            proxyConversions
+        );
 
         // Set initial arguments inside Conversion Handler contract
         IHandleCampaignDeployment(proxyConversions).setInitialParamsConversionHandler(
@@ -243,7 +254,7 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
         ITwoKeyCampaignValidator(getContractProxyAddress("TwoKeyCampaignValidator"))
             .validateAcquisitionCampaign(proxyAcquisition, _nonSingletonHash);
 
-        emit ProxyForCampaign(proxyLogicHandler, proxyConversions, proxyAcquisition, msg.sender, block.timestamp);
+        emit ProxyForCampaign(proxyLogicHandler, proxyConversions, proxyAcquisition, proxyPurchasesHandler, msg.sender, block.timestamp);
     }
 
 
