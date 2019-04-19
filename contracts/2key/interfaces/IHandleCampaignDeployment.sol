@@ -48,6 +48,7 @@ contract IHandleCampaignDeployment {
     function setInitialParamsConversionHandler(
         uint [] values,
         address _twoKeyAcquisitionCampaignERC20,
+        address _twoKeyPurchasesHandler,
         address _contractor,
         address _assetContractERC20,
         address _twoKeyEventSource,

@@ -221,6 +221,7 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
         IHandleCampaignDeployment(proxyConversions).setInitialParamsConversionHandler(
             valuesConversion,
             proxyAcquisition,
+            proxyPurchasesHandler,
             msg.sender,
             addresses[0], //ERC20 address
             getContractProxyAddress("TwoKeyEventSource"),

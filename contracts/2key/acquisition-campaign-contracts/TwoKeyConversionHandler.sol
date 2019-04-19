@@ -27,7 +27,6 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
 
     event ConversionCreated(uint conversionId);
     uint numberOfConversions;
-
     Conversion[] conversions;
     ITwoKeyAcquisitionCampaignERC20 twoKeyAcquisitionCampaignERC20;
 
@@ -60,6 +59,7 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
     address contractor;
     address assetContractERC20;
     address twoKeyBaseReputationRegistry;
+    address twoKeyPurchasesHandler;
 
     uint tokenDistributionDate; // January 1st 2019
     uint maxDistributionDateShiftInDays; // 180 days
@@ -95,6 +95,7 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
     function setInitialParamsConversionHandler(
         uint [] values,
         address _twoKeyAcquisitionCampaignERC20,
+        address _twoKeyPurchasesHandler,
         address _contractor,
         address _assetContractERC20,
         address _twoKeyEventSource,
@@ -117,6 +118,7 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
 
         // 5th argument will represent if FIAT conversion is automatically approved
         // Instance of interface
+        twoKeyPurchasesHandler = _twoKeyPurchasesHandler;
         twoKeyAcquisitionCampaignERC20 = ITwoKeyAcquisitionCampaignERC20(_twoKeyAcquisitionCampaignERC20);
 
         contractor = _contractor;
