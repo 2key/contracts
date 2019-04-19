@@ -397,7 +397,7 @@ describe('TwoKeyProtocol', () => {
         expect(contractAddress).to.be.equal(testObject.contractAddress);
     }).timeout(60000);
 
-    
+
     it('Should check SingltonsRegistry LatestVersion' ,async() => {
         let contractLatestVersion;
         const {web3, address} = web3switcher.deployer();
@@ -649,7 +649,7 @@ describe('TwoKeyProtocol', () => {
         const campaignMeta = await twoKeyProtocol.AcquisitionCampaign.getPublicMeta(campaignAddress,from);
         console.log(campaignMeta);
         expect(campaignMeta.meta.assetContractERC20).to.be.equal(campaignData.assetContractERC20);
-    }).timeout(60000);
+    }).timeout(120000);
     it('should print balance after campaign created', printBalances).timeout(15000);
 
     it('should transfer assets to campaign', async () => {
@@ -690,7 +690,7 @@ describe('TwoKeyProtocol', () => {
         let data: IPrivateMetaInformation = await twoKeyProtocol.AcquisitionCampaign.getPrivateMetaHash(campaignAddress, from);
         console.log(data);
         expect(data.campaignPublicLinkKey).to.be.equal(links.deployer);
-    }).timeout(60000);
+    }).timeout(120000);
 
 
     it('should visit campaign as guest', async () => {
