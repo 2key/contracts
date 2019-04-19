@@ -275,12 +275,9 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
             // add conversion amount to counter
             counters[6] = counters[6].add(conversion.conversionAmount);
         }
-            //TODO: Handle unique converters somehow
-//        if(converterToLockupContracts[conversion.converter].length == 0) {
-//            counters[5]++; // Increase number of unique converters
-//        }
+
         if(doesConverterHaveExecutedConversions[conversion.converter] == false) {
-            counters[5]++;
+            counters[5]++; //increase number of unique converters
             doesConverterHaveExecutedConversions[conversion.converter] = true;
         }
 
