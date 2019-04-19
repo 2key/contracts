@@ -18,6 +18,7 @@ contract TwoKeyPurchasesHandler is Upgradeable{
     address contractor;
     address twoKeyEventSource;
 
+    uint numberOfPurchases;
     uint bonusTokensVestingStartShiftInDaysFromDistributionDate;
     uint tokenDistributionDate;
     uint numberOfVestingPortions; // For example 6
@@ -69,7 +70,7 @@ contract TwoKeyPurchasesHandler is Upgradeable{
     }
 
 
-    function createPurchase(
+    function startVesting(
         uint _baseTokens,
         uint _bonusTokens,
         uint _conversionId,
@@ -83,6 +84,7 @@ contract TwoKeyPurchasesHandler is Upgradeable{
         } else {
             bonusVestingOnly(_baseTokens, _bonusTokens, _conversionId, _converter);
         }
+        numberOfPurchases++;
     }
 
     function bonusVestingOnly(

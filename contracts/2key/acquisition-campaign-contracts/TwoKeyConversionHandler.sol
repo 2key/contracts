@@ -3,12 +3,10 @@ pragma solidity ^0.4.24;
 import "../TwoKeyConversionStates.sol";
 import "../TwoKeyConverterStates.sol";
 
-import "../singleton-contracts/TwoKeyLockupContract.sol";
-
-
 import "../interfaces/ITwoKeyAcquisitionCampaignERC20.sol";
 import "../interfaces/ITwoKeyEventSource.sol";
 import "../interfaces/ITwoKeyBaseReputationRegistry.sol";
+import "../interfaces/ITwoKeyPurchasesHandler.sol";
 import "../libraries/SafeMath.sol";
 import "../Upgradeable.sol";
 
@@ -27,6 +25,7 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
 
     event ConversionCreated(uint conversionId);
     uint numberOfConversions;
+
     Conversion[] conversions;
     ITwoKeyAcquisitionCampaignERC20 twoKeyAcquisitionCampaignERC20;
 
@@ -36,8 +35,7 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
 
     mapping(address => ConverterState) converterToState; //Converter to his state
     mapping(address => bool) isConverterAnonymous;
-    mapping(address => address[]) converterToLockupContracts;
-
+    mapping(address => bool) doesConverterHaveExecutedConversions;
     /**
      * This array will represent counter values where position will be index (which counter) and value will be actual counter value
      * counters[0] = PENDING_CONVERSIONS
@@ -61,12 +59,6 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
     address twoKeyBaseReputationRegistry;
     address twoKeyPurchasesHandler;
 
-    uint tokenDistributionDate; // January 1st 2019
-    uint maxDistributionDateShiftInDays; // 180 days
-    uint numberOfVestingPortions; // For example 6
-    uint numberOfDaysBetweenPortions; // For example 30 days
-    uint bonusTokensVestingStartShiftInDaysFromDistributionDate; // 180 days
-
 
     /// Structure which will represent conversion
     struct Conversion {
@@ -83,7 +75,6 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
         uint256 conversionCreatedAt; // When conversion is created
         uint256 conversionExpiresAt; // When conversion expires
         bool isConversionFiat;
-        address lockupAddress;
     }
 
     modifier onlyContractorOrMaintainer {
@@ -107,16 +98,11 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
         counters = new uint[](10);
 
         expiryConversionInHours = values[0];
+
         if(values[1] == 1) {
             isFiatConversionAutomaticallyApproved = true;
         }
-        tokenDistributionDate = values[2];
-        maxDistributionDateShiftInDays = values[3];
-        numberOfVestingPortions = values[4];
-        numberOfDaysBetweenPortions = values[5];
-        bonusTokensVestingStartShiftInDaysFromDistributionDate = values[6];
 
-        // 5th argument will represent if FIAT conversion is automatically approved
         // Instance of interface
         twoKeyPurchasesHandler = _twoKeyPurchasesHandler;
         twoKeyAcquisitionCampaignERC20 = ITwoKeyAcquisitionCampaignERC20(_twoKeyAcquisitionCampaignERC20);
@@ -211,7 +197,7 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
         Conversion memory c = Conversion(_contractor, _contractorProceeds, _converterAddress,
             state ,_conversionAmount, _maxReferralRewardETHWei, 0, _moderatorFeeETHWei, baseTokensForConverterUnits,
             bonusTokensForConverterUnits,
-            now, now + expiryConversionInHours * (1 hours), isConversionFiat, 0x0);
+            now, now + expiryConversionInHours * (1 hours), isConversionFiat);
 
         conversions.push(c);
 
@@ -289,39 +275,27 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
             // add conversion amount to counter
             counters[6] = counters[6].add(conversion.conversionAmount);
         }
-
-        if(converterToLockupContracts[conversion.converter].length == 0) {
-            counters[5]++; // Increase number of unique converters
+            //TODO: Handle unique converters somehow
+//        if(converterToLockupContracts[conversion.converter].length == 0) {
+//            counters[5]++; // Increase number of unique converters
+//        }
+        if(doesConverterHaveExecutedConversions[conversion.converter] == false) {
+            counters[5]++;
+            doesConverterHaveExecutedConversions[conversion.converter] = true;
         }
 
-        /**
-         * Deploy Lockup contract
-         */
-        TwoKeyLockupContract lockupContract = new TwoKeyLockupContract(
-            bonusTokensVestingStartShiftInDaysFromDistributionDate,
-            numberOfVestingPortions,
-            numberOfDaysBetweenPortions,
-            tokenDistributionDate,
-            maxDistributionDateShiftInDays,
+        ITwoKeyPurchasesHandler(twoKeyPurchasesHandler).startVesting(
             conversion.baseTokenUnits,
             conversion.bonusTokenUnits,
             _conversionId,
-            conversion.converter,
-            conversion.contractor,
-            assetContractERC20,
-            twoKeyEventSource
+            conversion.converter
         );
 
-
-        //Add lockup address to conversion object
-        conversion.lockupAddress = address(lockupContract);
-
         // Transfer tokens to lockup contract
-        twoKeyAcquisitionCampaignERC20.moveFungibleAsset(address(lockupContract), totalUnits);
+        twoKeyAcquisitionCampaignERC20.moveFungibleAsset(address(twoKeyPurchasesHandler), totalUnits);
 
         conversion.maxReferralReward2key = totalReward2keys;
         conversion.state = ConversionState.EXECUTED;
-        converterToLockupContracts[conversion.converter].push(lockupContract);
         counters[3]++; //Increase number of executed conversions
         counters[7] = counters[7].add(totalUnits); //update sold tokens once conversion is executed
     }
@@ -356,8 +330,7 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
             conversion.bonusTokenUnits,
             conversion.conversionCreatedAt,
             conversion.conversionExpiresAt,
-            conversion.isConversionFiat,
-            conversion.lockupAddress
+            conversion.isConversionFiat
         );
     }
 
@@ -371,22 +344,6 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
     returns (address[])
     {
         return stateToConverter[state];
-    }
-
-
-    /// @notice Function to get array of lockup contract addresses for converter
-    /// @dev only contractor or maintainer can call this function
-    /// @param _converter is the address of converter
-    /// @return array of addresses
-    function getLockupContractsForConverter(
-        address _converter
-    )
-    public
-    view
-    returns (address[])
-    {
-        require(msg.sender == contractor || ITwoKeyEventSource(twoKeyEventSource).isAddressMaintainer(msg.sender) || msg.sender == _converter);
-        return converterToLockupContracts[_converter];
     }
 
 
@@ -589,22 +546,6 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
             numberOfRejected,
             counters
         );
-    }
-
-    /**
-     * @notice Fuunction where contractro/converter or mdoerator can see the lockup address for conversion
-     * @param _conversionId is the id of conversion requested
-     */
-    function getLockupContractAddress(
-        uint _conversionId
-    )
-    public
-    view
-    returns (address)
-    {
-        Conversion memory c = conversions[_conversionId];
-        require(msg.sender == contractor || msg.sender == c.converter || ITwoKeyEventSource(twoKeyEventSource).isAddressMaintainer(msg.sender));
-        return c.lockupAddress;
     }
 
     /**
