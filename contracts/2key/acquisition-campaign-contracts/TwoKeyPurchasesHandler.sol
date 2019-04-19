@@ -1,6 +1,9 @@
 pragma solidity ^0.4.0;
 
 import "../Upgradeable.sol";
+import "../interfaces/ITwoKeyEventSource.sol";
+import "../interfaces/IERC20.sol";
+
 
 contract TwoKeyPurchasesHandler is Upgradeable{
 
@@ -21,9 +24,7 @@ contract TwoKeyPurchasesHandler is Upgradeable{
     uint numberOfDaysBetweenPortions; // For example 30 days
     uint maxDistributionDateShiftInDays;
 
-    mapping(uint => mapping(uint => uint)) conversionIdToPortionToUnlockingDate;
-    mapping(uint => mapping(uint => bool)) conversionIdToPortionToIsWithdrawn;
-    mapping(uint => address) conversionIdToConverter;
+    mapping(uint => Purchase) conversionIdToPurchase;
 
     event TokensWithdrawn(
         uint timestamp,
@@ -38,6 +39,8 @@ contract TwoKeyPurchasesHandler is Upgradeable{
         uint baseTokens;
         uint bonusTokens;
         uint [] unlockingDates;
+        uint [] portionAmounts;
+        bool [] isPortionWithdrawn;
     }
 
     function setInitialParamsPurchasesHandler(
@@ -71,31 +74,119 @@ contract TwoKeyPurchasesHandler is Upgradeable{
         uint _bonusTokens,
         uint _conversionId,
         address _converter
-    ) public {
+    )
+    public
+    {
         require(msg.sender == proxyConversionHandler);
         if(vestingAmount == VestingAmount.BASE_AND_BONUS) {
-            baseAndBonusVesting(_baseTokens, _bonusTokens, _conversionId);
+            baseAndBonusVesting(_baseTokens, _bonusTokens, _conversionId, _converter);
         } else {
-            bonusVestingOnly(_baseTokens, _bonusTokens, _conversionId);
-        }
-        conversionIdToConverter[_conversionId] = _converter;
-    }
-
-    function bonusVestingOnly(uint _baseTokens, uint _bonusTokens, uint _conversionId) internal {
-        conversionIdToPortionToUnlockingDate[_conversionId][0] = tokenDistributionDate;
-        conversionIdToPortionToUnlockingDate[_conversionId][1] = tokenDistributionDate + bonusTokensVestingStartShiftInDaysFromDistributionDate*(1 days);
-        for(uint i=2; i<numberOfVestingPortions; i++) {
-            conversionIdToPortionToUnlockingDate[_conversionId][1] + (i-1) * (numberOfDaysBetweenPortions * (1 days));
+            bonusVestingOnly(_baseTokens, _bonusTokens, _conversionId, _converter);
         }
     }
 
-    function baseAndBonusVesting(uint _baseTokens, uint _bonusTokens, uint _conversionId) internal {
+    function bonusVestingOnly(
+        uint _baseTokens,
+        uint _bonusTokens,
+        uint _conversionId,
+        address _converter
+    )
+    internal
+    {
+        uint [] memory unlockingDates = new uint[](numberOfVestingPortions+1);
+        uint [] memory portionAmounts = new uint[](numberOfVestingPortions+1);
+        bool [] memory isPortionWithdrawn = new bool[](numberOfVestingPortions+1);
+        unlockingDates[0] = tokenDistributionDate;
+        portionAmounts[0] = _baseTokens;
+
+        uint bonusVestingStartDate = tokenDistributionDate + bonusTokensVestingStartShiftInDaysFromDistributionDate * (1 days);
+        uint bonusPortionAmount = _bonusTokens / numberOfVestingPortions;
+
+        for(uint i=1; i<numberOfVestingPortions + 1; i++) {
+            unlockingDates[i] = bonusVestingStartDate + (i-1) * (numberOfDaysBetweenPortions * (1 days));
+            portionAmounts[i] = bonusPortionAmount;
+        }
+
+        Purchase memory purchase = Purchase(
+            _converter,
+            _baseTokens,
+            _bonusTokens,
+            unlockingDates,
+            portionAmounts,
+            isPortionWithdrawn
+        );
+
+        conversionIdToPurchase[_conversionId] = purchase;
+    }
+
+    function baseAndBonusVesting(
+        uint _baseTokens,
+        uint _bonusTokens,
+        uint _conversionId,
+        address _converter
+    )
+    internal
+    {
+        uint [] memory unlockingDates = new uint[](numberOfVestingPortions);
+        uint [] memory portionAmounts = new uint[](numberOfVestingPortions);
+        bool [] memory isPortionWithdrawn = new bool[](numberOfVestingPortions);
+
         uint totalAmount = _baseTokens + _bonusTokens;
         uint portion = totalAmount / numberOfVestingPortions;
-        conversionIdToPortionToUnlockingDate[_conversionId][0] = tokenDistributionDate;
-        for(uint i=1; i<numberOfVestingPortions; i++) {
-            conversionIdToPortionToUnlockingDate[_conversionId][i] = tokenDistributionDate + i * (numberOfDaysBetweenPortions * (1 days));
+
+        for(uint i=0; i<numberOfVestingPortions; i++) {
+            unlockingDates[i] = tokenDistributionDate + i * numberOfDaysBetweenPortions * (1 days);
+            portionAmounts[i] = portion;
         }
+
+        Purchase memory purchase = Purchase(
+            _converter,
+            _baseTokens,
+            _bonusTokens,
+            unlockingDates,
+            portionAmounts,
+            isPortionWithdrawn
+        );
+
+        conversionIdToPurchase[_conversionId] = purchase;
+    }
+
+
+    function withdrawTokens(
+        uint conversionId,
+        uint portion
+    )
+    public
+    {
+        Purchase p = conversionIdToPurchase[conversionId];
+        //Only converter of maintainer can call this function
+        require(msg.sender == p.converter || ITwoKeyEventSource(twoKeyEventSource).isAddressMaintainer(msg.sender) == true);
+        require(p.isPortionWithdrawn[portion] == false && block.timestamp > p.unlockingDates[portion]);
+
+        require(IERC20(assetContractERC20).transfer(p.converter, p.portionAmounts[portion]));
+        p.isPortionWithdrawn[portion] = true;
+
+        emit TokensWithdrawn (
+            block.timestamp,
+            msg.sender,
+            converter,
+            portion,
+            p.portionAmounts[portion]
+        );
+    }
+
+    function getStaticInfo()
+    public
+    view
+    returns (uint,uint,uint,uint,uint,uint) {
+        return (
+            bonusTokensVestingStartShiftInDaysFromDistributionDate,
+            tokenDistributionDate,
+            numberOfVestingPortions,
+            numberOfDaysBetweenPortions,
+            maxDistributionDateShiftInDays,
+            uint(vestingAmount)
+        );
     }
 
 
