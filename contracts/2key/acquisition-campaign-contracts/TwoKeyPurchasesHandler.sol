@@ -11,6 +11,7 @@ contract TwoKeyPurchasesHandler is Upgradeable{
     VestingAmount vestingAmount;
 
     bool initialized;
+    bool isDistributionDateChanged;
 
     address proxyConversionHandler;
     address assetContractERC20;
@@ -22,7 +23,7 @@ contract TwoKeyPurchasesHandler is Upgradeable{
 
     uint numberOfPurchases;
     uint bonusTokensVestingStartShiftInDaysFromDistributionDate;
-    uint tokenDistributionDate;
+    uint tokenDistributionDate; // Start of token distribution
     uint numberOfVestingPortions; // For example 6
     uint numberOfDaysBetweenPortions; // For example 30 days
     uint maxDistributionDateShiftInDays;
@@ -155,6 +156,26 @@ contract TwoKeyPurchasesHandler is Upgradeable{
         conversionIdToPurchase[_conversionId] = purchase;
     }
 
+    function changeDistributionDate(
+        uint _newDate
+    )
+    public
+    {
+        require(msg.sender == contractor);
+        require(isDistributionDateChanged == false);
+        require(_newDate - (maxDistributionDateShiftInDays * (1 days)) <= tokenDistributionDate);
+        require(now < tokenDistributionDate);
+
+        uint shift = tokenDistributionDate - _newDate;
+        // If the date is changed shifting all tokens unlocking dates for the difference
+        for(uint i=0; i<numberOfVestingPortions+1;i++) {
+            portionToUnlockingDate[i] = portionToUnlockingDate[i] + shift;
+        }
+
+        isDistributionDateChanged = true;
+        tokenDistributionDate = _newDate;
+    }
+
 
     function withdrawTokens(
         uint conversionId,
@@ -166,7 +187,7 @@ contract TwoKeyPurchasesHandler is Upgradeable{
         //Only converter of maintainer can call this function
         require(msg.sender == p.converter || ITwoKeyEventSource(twoKeyEventSource).isAddressMaintainer(msg.sender) == true);
         require(p.isPortionWithdrawn[portion] == false && block.timestamp > portionToUnlockingDate[portion]);
-
+        //Transfer tokens
         require(IERC20(assetContractERC20).transfer(p.converter, p.portionAmounts[portion]));
         p.isPortionWithdrawn[portion] = true;
 
