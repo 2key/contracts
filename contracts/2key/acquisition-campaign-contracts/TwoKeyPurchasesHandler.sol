@@ -18,6 +18,8 @@ contract TwoKeyPurchasesHandler is Upgradeable{
     address contractor;
     address twoKeyEventSource;
 
+    mapping(uint => uint) public portionToUnlockingDate;
+
     uint numberOfPurchases;
     uint bonusTokensVestingStartShiftInDaysFromDistributionDate;
     uint tokenDistributionDate;
@@ -39,7 +41,6 @@ contract TwoKeyPurchasesHandler is Upgradeable{
         address converter;
         uint baseTokens;
         uint bonusTokens;
-        uint [] unlockingDates;
         uint [] portionAmounts;
         bool [] isPortionWithdrawn;
     }
@@ -65,6 +66,14 @@ contract TwoKeyPurchasesHandler is Upgradeable{
         assetContractERC20 = _assetContractERC20;
         twoKeyEventSource = _twoKeyEventSource;
         proxyConversionHandler = _proxyConversionHandler;
+
+        uint bonusVestingStartDate = tokenDistributionDate + bonusTokensVestingStartShiftInDaysFromDistributionDate * (1 days);
+
+        portionToUnlockingDate[0] = tokenDistributionDate;
+
+        for(uint i=1; i<numberOfVestingPortions + 1; i++) {
+            portionToUnlockingDate[i] = bonusVestingStartDate + (i-1) * (numberOfDaysBetweenPortions * (1 days));
+        }
 
         initialized = true;
     }
@@ -95,17 +104,14 @@ contract TwoKeyPurchasesHandler is Upgradeable{
     )
     internal
     {
-        uint [] memory unlockingDates = new uint[](numberOfVestingPortions+1);
         uint [] memory portionAmounts = new uint[](numberOfVestingPortions+1);
         bool [] memory isPortionWithdrawn = new bool[](numberOfVestingPortions+1);
-        unlockingDates[0] = tokenDistributionDate;
         portionAmounts[0] = _baseTokens;
 
         uint bonusVestingStartDate = tokenDistributionDate + bonusTokensVestingStartShiftInDaysFromDistributionDate * (1 days);
         uint bonusPortionAmount = _bonusTokens / numberOfVestingPortions;
 
         for(uint i=1; i<numberOfVestingPortions + 1; i++) {
-            unlockingDates[i] = bonusVestingStartDate + (i-1) * (numberOfDaysBetweenPortions * (1 days));
             portionAmounts[i] = bonusPortionAmount;
         }
 
@@ -113,7 +119,6 @@ contract TwoKeyPurchasesHandler is Upgradeable{
             _converter,
             _baseTokens,
             _bonusTokens,
-            unlockingDates,
             portionAmounts,
             isPortionWithdrawn
         );
@@ -129,7 +134,6 @@ contract TwoKeyPurchasesHandler is Upgradeable{
     )
     internal
     {
-        uint [] memory unlockingDates = new uint[](numberOfVestingPortions);
         uint [] memory portionAmounts = new uint[](numberOfVestingPortions);
         bool [] memory isPortionWithdrawn = new bool[](numberOfVestingPortions);
 
@@ -137,7 +141,6 @@ contract TwoKeyPurchasesHandler is Upgradeable{
         uint portion = totalAmount / numberOfVestingPortions;
 
         for(uint i=0; i<numberOfVestingPortions; i++) {
-            unlockingDates[i] = tokenDistributionDate + i * numberOfDaysBetweenPortions * (1 days);
             portionAmounts[i] = portion;
         }
 
@@ -145,7 +148,6 @@ contract TwoKeyPurchasesHandler is Upgradeable{
             _converter,
             _baseTokens,
             _bonusTokens,
-            unlockingDates,
             portionAmounts,
             isPortionWithdrawn
         );
@@ -163,7 +165,7 @@ contract TwoKeyPurchasesHandler is Upgradeable{
         Purchase p = conversionIdToPurchase[conversionId];
         //Only converter of maintainer can call this function
         require(msg.sender == p.converter || ITwoKeyEventSource(twoKeyEventSource).isAddressMaintainer(msg.sender) == true);
-        require(p.isPortionWithdrawn[portion] == false && block.timestamp > p.unlockingDates[portion]);
+        require(p.isPortionWithdrawn[portion] == false && block.timestamp > portionToUnlockingDate[portion]);
 
         require(IERC20(assetContractERC20).transfer(p.converter, p.portionAmounts[portion]));
         p.isPortionWithdrawn[portion] = true;
