@@ -43,6 +43,7 @@ let testObject = {
     contractName: 'ContractName',
     notMaintainerAddress: '0x15bb774ab9f11a4b08c8ec7b3e51d646e3f64aa8',
     emptyAddress: '0x0000000000000000000000000000000000000000',
+    fiatWei: 150*10**18
 };
 
 function makeHandle(max: number = 8): string {
@@ -662,6 +663,26 @@ describe('TwoKeyProtocol', () => {
         console.log('Campaign Balance', balance);
         expect(parseFloat(balance)).to.be.equal(1234000 - amount);
     }).timeout(600000);
+
+
+    it('Should if enough funds  fiatConversion' ,async() => {
+        //TODO After reserve campaign funds for FiatConversion we can update this test.
+        //Add campaign which has enough twokeys
+        const {web3, address} = web3switcher.deployer();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+        });
+
+        const {isPossible, twoKeys} = await twoKeyProtocol.AcquisitionCampaign.isEnoughRewardsForFiatParticipation(campaignAddress, testObject.fiatWei); //I can add parseInt(rathEth) as a parameter
+        expect(isPossible).to.be.equal(true);
+    }).timeout(60000);
 
     it('should get user public link', async () => {
         try {

@@ -122,12 +122,14 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
     function calculateModeratorFee(
         uint256 _conversionAmountETHWei
     )
-    private
+    public
     view
     returns (uint256)
     {
         uint256 fee = _conversionAmountETHWei.mul(ITwoKeyEventSource(twoKeyEventSource).getTwoKeyDefaultIntegratorFeeFromAdmin()).div(100);
         return fee;
+        //Why we div it with 100?
+        //What is the returned type?
     }
 
 
