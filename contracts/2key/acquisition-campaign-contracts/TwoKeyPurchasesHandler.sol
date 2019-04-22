@@ -206,15 +206,17 @@ contract TwoKeyPurchasesHandler is Upgradeable{
     )
     public
     view
-    returns (address, uint, uint, uint[], bool[])
+    returns (address, uint, uint, uint[], bool[], uint[])
     {
         Purchase memory p = conversionIdToPurchase[_conversionId];
+        uint [] memory unlockingDates = getPortionsUnlockingDates();
         return (
             p.converter,
             p.baseTokens,
             p.bonusTokens,
             p.portionAmounts,
-            p.isPortionWithdrawn
+            p.isPortionWithdrawn,
+            unlockingDates
         );
     }
 
