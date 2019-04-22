@@ -124,7 +124,8 @@ module.exports = function deploy(deployer) {
             "0x774c9fde8dcf97af6f6466f9f89154618641c5a5",
             "0x28c72bb6bdc79e4e363e295c2c7b56bc40fd0274",
             "0x0e252a962210db8de606bd3db852a26d2f6cd0be",
-            "0x77fff2a9631716f985a6e950e97a8c0ca12fc735"
+            "0x77fff2a9631716f985a6e950e97a8c0ca12fc735",
+            "0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7"
         ];
     } else {
         /**
