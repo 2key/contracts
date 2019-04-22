@@ -57,7 +57,7 @@ contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyC
     address contractor;
     address assetContractERC20;
     address twoKeyBaseReputationRegistry;
-    address twoKeyPurchasesHandler;
+    address public twoKeyPurchasesHandler;
 
 
     /// Structure which will represent conversion

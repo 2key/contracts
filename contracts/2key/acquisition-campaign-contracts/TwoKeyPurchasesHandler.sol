@@ -156,6 +156,7 @@ contract TwoKeyPurchasesHandler is Upgradeable{
         conversionIdToPurchase[_conversionId] = purchase;
     }
 
+
     function changeDistributionDate(
         uint _newDate
     )
@@ -200,10 +201,28 @@ contract TwoKeyPurchasesHandler is Upgradeable{
         );
     }
 
+    function getPurchaseInformation(
+        uint _conversionId
+    )
+    public
+    view
+    returns (address, uint, uint, uint[], bool[])
+    {
+        Purchase memory p = conversionIdToPurchase[_conversionId];
+        return (
+            p.converter,
+            p.baseTokens,
+            p.bonusTokens,
+            p.portionAmounts,
+            p.isPortionWithdrawn
+        );
+    }
+
     function getStaticInfo()
     public
     view
-    returns (uint,uint,uint,uint,uint,uint) {
+    returns (uint,uint,uint,uint,uint,uint)
+    {
         return (
             bonusTokensVestingStartShiftInDaysFromDistributionDate,
             tokenDistributionDate,
