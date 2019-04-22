@@ -1405,6 +1405,10 @@ describe('TwoKeyProtocol', () => {
         expect(rewardReleaseAfterDate).to.be.equal(1577836800);  //01/01/2019
     }).timeout(60000);
 
+    it('Should get portions release dates', async() => {
+        let releaseDates = await twoKeyProtocol.AcquisitionCampaign.getBoughtTokensReleaseDates(campaignAddress);
+        console.log(releaseDates);
+    })
 
     // it('should build refgraph', async() => {
     //     const {web3, address} = web3switcher.gmail();

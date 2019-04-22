@@ -57,11 +57,11 @@ contract TwoKeyPurchasesHandler is Upgradeable{
     {
         require(initialized == false);
 
-        bonusTokensVestingStartShiftInDaysFromDistributionDate = values[2];
-        tokenDistributionDate = values[3];
+        tokenDistributionDate = values[2];
+        maxDistributionDateShiftInDays = values[3];
         numberOfVestingPortions = values[4];
         numberOfDaysBetweenPortions = values[5];
-        maxDistributionDateShiftInDays = values[6];
+        bonusTokensVestingStartShiftInDaysFromDistributionDate = values[6];
         vestingAmount = VestingAmount(values[7]);
         contractor = _contractor;
         assetContractERC20 = _assetContractERC20;
@@ -231,6 +231,18 @@ contract TwoKeyPurchasesHandler is Upgradeable{
             maxDistributionDateShiftInDays,
             uint(vestingAmount)
         );
+    }
+
+    function getPortionsUnlockingDates()
+    public
+    view
+    returns (uint[])
+    {
+        uint [] memory dates = new uint[](numberOfVestingPortions+1);
+        for(uint i=0; i< numberOfVestingPortions+1; i++) {
+            dates[i] = portionToUnlockingDate[i];
+        }
+        return dates;
     }
 
 
