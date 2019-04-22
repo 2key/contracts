@@ -43,6 +43,7 @@ let testObject = {
     contractName: 'ContractName',
     notMaintainerAddress: '0x15bb774ab9f11a4b08c8ec7b3e51d646e3f64aa8',
     emptyAddress: '0x0000000000000000000000000000000000000000',
+    fiatWei: 150*10**18
 };
 
 function makeHandle(max: number = 8): string {
@@ -264,6 +265,8 @@ const tryToRegisterUser = async (username, from) => {
     return registerReceipts;
     // console.log('REGISTER RESULT', register);
 };
+
+
 describe('TwoKeyProtocol', () => {
     let from: string;
     before(function () {
@@ -662,6 +665,14 @@ describe('TwoKeyProtocol', () => {
         console.log('Campaign Balance', balance);
         expect(parseFloat(balance)).to.be.equal(1234000 - amount);
     }).timeout(600000);
+
+    it('Should if enough funds  fiatConversion' ,async() => {
+        const {isPossible, twoKeys} = await twoKeyProtocol.AcquisitionCampaign.isEnoughRewardsForFiatParticipation(campaignAddress, testObject.fiatWei);
+        expect(isPossible).to.be.equal(true);
+        console.log("AcquisitionCampaign - Pass isPossible FiatConversion");
+        expect(twoKeys).to.be.gt(340);
+        expect(twoKeys).to.be.lt(350);
+    }).timeout(60000);
 
     it('should get user public link', async () => {
         try {
