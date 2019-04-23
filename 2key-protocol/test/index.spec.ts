@@ -33,7 +33,7 @@ const twoKeyAdmin = singletons.TwoKeyAdmin.networks[mainNetId].address;
 let isKYCRequired = false;
 let isFiatConversionAutomaticallyApproved = true;
 const isFiatOnly = false;
-let incentiveModel = "MANUAL";
+let incentiveModel = "VANILLA_AVERAGE";
 let amount = 0; //1000 tokens fiat inventory
 let vestingAmount = 'BONUS';
 

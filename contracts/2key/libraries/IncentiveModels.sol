@@ -51,14 +51,14 @@ library IncentiveModels {
         uint numberOfInfluencers,
         uint factor
     ) internal pure returns (uint[]) {
+        uint[] memory rewards = new uint[](numberOfInfluencers);
         if(numberOfInfluencers > 0) {
-            uint[] memory rewards = new uint[](numberOfInfluencers);
             uint x = calculateX(totalRewardEthWEI,numberOfInfluencers,factor);
             for(uint i=0; i<numberOfInfluencers;i++) {
                 rewards[numberOfInfluencers-i-1] = x / (2**i);
             }
-            return rewards;
         }
+        return rewards;
     }
 
 
