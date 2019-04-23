@@ -207,6 +207,7 @@ contract TwoKeyCongress {
         );
     }
 
+    //TODO: Security backdoor, handle and close ASAP
     /**
      * Add member
      *
