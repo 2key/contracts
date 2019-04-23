@@ -489,7 +489,8 @@ contract TwoKeyCongress {
 //            block.timestamp > p.minExecutionDate  &&                             // If it is past the voting deadline
              !p.executed                                                         // and it has not already been executed
             && p.proposalHash == keccak256(abi.encodePacked(p.recipient, p.amount, transactionBytecode))  // and the supplied code matches the proposal
-            && p.numberOfVotes >= minimumQuorum // and a minimum quorum has been reached...
+            && p.numberOfVotes >= minimumQuorum.sub(1) // and a minimum quorum has been reached...
+        //TODO: Delete -1 from MINIMUM QUORUM, left because KIKI is OOO
             && uint(p.currentResult) >= maxVotingPower.mul(51).div(100)
             && p.currentResult > 0
         );
