@@ -158,8 +158,6 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
         (influencers, keys, weights, old_address) = super.getInfluencersKeysAndWeightsFromSignature(sig, _converter);
         uint i;
         address new_address;
-        // move ARCs based on signature information
-        // TODO: Handle failing of this function if the referral chain is too big
         uint numberOfInfluencers = influencers.length;
         for (i = 0; i < numberOfInfluencers; i++) {
             new_address = twoKeyEventSource.plasmaOf(influencers[i]);
