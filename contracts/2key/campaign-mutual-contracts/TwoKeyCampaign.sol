@@ -19,6 +19,7 @@ contract TwoKeyCampaign is ArcERC20 {
 	using Call for *;
 
 	TwoKeyEventSource twoKeyEventSource; // Address of TwoKeyEventSource contract
+
 	address twoKeySingletonesRegistry; // Address of Registry of all singleton contracts
 	address twoKeyEconomy; // Address of twoKeyEconomy contract
 	address ownerPlasma; //contractor plasma address
@@ -27,6 +28,7 @@ contract TwoKeyCampaign is ArcERC20 {
 	address public moderator; //moderator address
 
 	bool isKYCRequired;
+    bool mustConvertToReferr;
 
 	uint256 conversionQuota;  // maximal ARC tokens that can be passed in transferFrom
 	uint256 contractorBalance; // Contractor balance
@@ -34,7 +36,7 @@ contract TwoKeyCampaign is ArcERC20 {
 	uint256 maxReferralRewardPercent; // maxReferralRewardPercent is actually bonus percentage in ETH
 	uint256 moderatorTotalEarnings2key; //Total earnings of the moderator all time
 	uint256 reservedAmount2keyForRewards; //Reserved amount of 2key tokens for rewards distribution
-    uint256 reservedAmountEthForRewards;
+
 
 	string public publicMetaHash; // Ipfs hash of json campaign object
 	string public privateMetaHash; // Ipfs hash of json sensitive (contractor) information

@@ -65,6 +65,10 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
             isKYCRequired = true;
         }
 
+        if(values[3] == 1) {
+            mustConvertToReferr = true;
+        }
+
         ownerPlasma = twoKeyEventSource.plasmaOf(contractor);
         received_from[ownerPlasma] = ownerPlasma;
         totalSupply_ = 1000000;

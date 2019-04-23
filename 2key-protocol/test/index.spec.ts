@@ -610,7 +610,8 @@ describe('TwoKeyProtocol', () => {
             isFiatConversionAutomaticallyApproved,
             incentiveModel,
             isFiatOnly,
-            vestingAmount
+            vestingAmount,
+            mustConvertToReferr: false
         };
 
         const campaign = await twoKeyProtocol.AcquisitionCampaign.create(campaignData, campaignData, {} , from, {
