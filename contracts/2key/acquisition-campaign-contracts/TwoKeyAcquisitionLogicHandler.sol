@@ -123,6 +123,7 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable, TwoKeyCampaignIncentiveMo
     function checkHowMuchUserCanSpend(uint alreadySpentETHWei, uint alreadySpentFiatWEI) public view returns (uint) {
         if(keccak256(currency) == keccak256('ETH')) {
             uint leftToSpendInEther = maxContributionETHorFiatCurrency - alreadySpentETHWei;
+            return leftToSpendInEther;
         } else {
             //In order to work with this I have to convert everything to same currency
             address ethUSDExchangeContract = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyExchangeRateContract");
