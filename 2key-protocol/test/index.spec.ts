@@ -374,7 +374,7 @@ describe('TwoKeyProtocol', () => {
     }).timeout(60000);
 
 
-    it('Should check SingltonsRegistry ImplementationByContractNameAndVersion' ,async() => {
+    it('Should check SingltonsRegistry ImplementationByContractNameAndVersarn run teion' ,async() => {
         let contractAddress;
         let txHash;
 
@@ -397,7 +397,7 @@ describe('TwoKeyProtocol', () => {
         expect(contractAddress).to.be.equal(testObject.contractAddress);
     }).timeout(60000);
 
-    
+
     it('Should check SingltonsRegistry LatestVersion' ,async() => {
         let contractLatestVersion;
         const {web3, address} = web3switcher.deployer();
