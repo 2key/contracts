@@ -172,7 +172,8 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable, TwoKeyCampaignIncentiveMo
         uint val;
         (val,,) = ITwoKeyExchangeRateContract(ethUSDExchangeContract).getFiatCurrencyDetails(currency);
         uint amountToBeSpentInFiat = (amountWillingToSpendEthWei*val).div(10**18);
-        if(leftToSpendFiat >= amountToBeSpentInFiat) {
+        //Adding gap of 100 weis
+        if(leftToSpendFiat + 100 >= amountToBeSpentInFiat) {
             return (true,leftToSpendFiat);
         } else {
             return (false,leftToSpendFiat);
