@@ -36,6 +36,14 @@ const isFiatOnly = false;
 let incentiveModel = "MANUAL";
 let amount = 0; //1000 tokens fiat inventory
 
+let testObject = {
+    versionName: 'versionName',
+    contractAddress: '0x15bb774ab9f11a4b08c8ec7b3e51d646e3f64aa8', //Just arbitrary address
+    contractName: 'ContractName',
+    notMaintainerAddress: '0x15bb774ab9f11a4b08c8ec7b3e51d646e3f64aa8',
+    emptyAddress: '0x0000000000000000000000000000000000000000',
+};
+
 function makeHandle(max: number = 8): string {
     let text = '';
     let possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -337,6 +345,155 @@ describe('TwoKeyProtocol', () => {
         console.log('aydnep2 balance', aydnep2.balance);
         console.log('test balance', test.balance);
         expect(aydnepBalance).to.exist.to.haveOwnProperty('gasPrice')
+    }).timeout(60000);
+
+
+    it('Should check SingltonsRegistry NonUpgradableContractNameByAddress' ,async() => {
+        let contractAddress;
+        let txHash;
+
+        const {web3, address} = web3switcher.deployer();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+        });
+
+        //Map testAddress=>testKey
+        txHash = await twoKeyProtocol.SingletonRegistry.setContractAddressByNonUpgradableContractName(testObject.contractAddress, testObject.versionName, from);
+
+        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+
+        contractAddress = await twoKeyProtocol.SingletonRegistry.getAddressByNonUpgradableContract(testObject.versionName);
+        expect(contractAddress).to.be.equal(testObject.contractAddress);
+    }).timeout(60000);
+
+
+    it('Should check SingltonsRegistry ImplementationByContractNameAndVersion' ,async() => {
+        let contractAddress;
+        let txHash;
+
+        const {web3, address} = web3switcher.deployer();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+        });
+
+        txHash = await twoKeyProtocol.SingletonRegistry.setContractImplementationByContractNameAndVersion(testObject.contractName, testObject.versionName, testObject.contractAddress, from);
+        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+
+        contractAddress = await twoKeyProtocol.SingletonRegistry.getImplementationByContractNameAndVersion(testObject.contractName,testObject.versionName);
+        expect(contractAddress).to.be.equal(testObject.contractAddress);
+    }).timeout(60000);
+
+    
+    it('Should check SingltonsRegistry LatestVersion' ,async() => {
+        let contractLatestVersion;
+        const {web3, address} = web3switcher.deployer();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+        });
+
+        contractLatestVersion = await twoKeyProtocol.SingletonRegistry.getLatestVersionByContractName(testObject.contractName);
+        expect(contractLatestVersion).to.be.equal(testObject.versionName);
+    }).timeout(60000);
+
+
+    it('Should check SingltonsRegistry ProxyAddress' ,async() => {
+        let proxyAddress;
+        let setProxyAddress;
+        const {web3, address} = web3switcher.deployer();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+        });
+
+        setProxyAddress = await twoKeyProtocol.SingletonRegistry.setProxyByContract(testObject.contractName, testObject.versionName, from);
+        proxyAddress = await twoKeyProtocol.SingletonRegistry.getProxyByContractName(testObject.contractName);
+        expect(proxyAddress).to.be.equal(setProxyAddress);
+
+    }).timeout(60000);
+
+
+    it('Should check maintainingPattern getAdmin() functionality' ,async() => {
+        let currentAdmin;
+
+        const {web3, address} = web3switcher.deployer();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+        });
+
+        currentAdmin = await twoKeyProtocol.MaintainingPattern.getAdmin();
+        expect(currentAdmin).to.be.equal(testObject.emptyAddress);
+    }).timeout(60000);
+
+    it('Should MaintainingPattern-Pass check maintainer' ,async() => {
+        let isMaintainer;
+
+        const {web3, address} = web3switcher.deployer();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+        });
+
+        isMaintainer = await twoKeyProtocol.MaintainingPattern.checkIfMaintainer(from);
+        expect(isMaintainer).to.be.true;
+    }).timeout(60000);
+
+    it('Should check MaintainingPattern-Pass check not maintainer.' ,async() => {
+        let isMaintainer;
+
+        const {web3, address} = web3switcher.deployer();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+        });
+
+        isMaintainer = await twoKeyProtocol.MaintainingPattern.checkIfMaintainer(testObject.notMaintainerAddress);
+        expect(isMaintainer).not.to.be.true;
     }).timeout(60000);
 
     it('should get total supply of economy contract' ,async() => {

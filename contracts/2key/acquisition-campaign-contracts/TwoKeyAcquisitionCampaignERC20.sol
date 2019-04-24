@@ -89,6 +89,21 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
         _;
     }
 
+
+    /**
+     * @notice Internal function to check the balance of the specific ERC20 on this contract
+     * @param tokenAddress is the ERC20 contract address
+     */
+    function getTokenBalance(
+        address tokenAddress
+    )
+    internal
+    view
+    returns (uint)
+    {
+        return IERC20(tokenAddress).balanceOf(address(this));
+    }
+
     /**
      * @notice Function to set cut of
      * @param me is the address (ethereum)
@@ -213,7 +228,12 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
     public
     payable
     {
-        ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).requirementForMsgValue(msg.value);
+        bool canConvert;
+        (canConvert,) = ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).canMakeETHConversion(
+            msg.sender,
+            msg.value
+        );
+        require(canConvert == true);
         address _converterPlasma = twoKeyEventSource.plasmaOf(msg.sender);
         if(received_from[_converterPlasma] == address(0)) {
             distributeArcsBasedOnSignature(signature, msg.sender);
@@ -240,6 +260,12 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
     {
         // Validate that sender is either _converter or maintainer
         require(msg.sender == _converter || twoKeyEventSource.isAddressMaintainer(msg.sender));
+        bool canConvert;
+        (canConvert,) = ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).canMakeFiatConversion(
+            _converter,
+            conversionAmountFiatWei
+        );
+        require(canConvert == true);
         address _converterPlasma = twoKeyEventSource.plasmaOf(_converter);
         if(received_from[_converterPlasma] == address(0)) {
             distributeArcsBasedOnSignature(signature, _converter);
@@ -424,21 +450,6 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
     }
 
     /**
-     * @notice Function to check how much eth has been sent to contract from address
-     * @param _from is the address we'd like to check balance
-     * @return amount of ether sent to contract from the specified address
-     */
-    function getAmountAddressSent(
-        address _from
-    )
-    public
-    view
-    returns (uint)
-    {
-        return amountConverterSpentEthWEI[_from];
-    }
-
-    /**
      * @notice Function to return status of inventory
      * @return current ERC20 balance on inventory address, reserved amount of tokens for converters,
      * and reserved amount of tokens for the rewards
@@ -510,17 +521,6 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
         return (inventoryBalance - reservedAmountOfTokens);
     }
 
-
-    function getTokenBalance(
-        address tokenAddress
-    )
-    internal
-    view
-    returns (uint)
-    {
-        return IERC20(tokenAddress).balanceOf(address(this));
-    }
-
     /**
      * @notice Function to fetch contractor balance in ETH
      * @dev only contractor can call this function, otherwise it will revert
@@ -578,11 +578,12 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
     )
     public
     view
-    returns (uint,uint,uint)
+    returns (uint,uint,uint,uint)
     {
-        require(msg.sender == twoKeyAcquisitionLogicHandler);
+        //TODO: Uncomment once we fix all issues
+//        require(msg.sender == twoKeyAcquisitionLogicHandler);
         uint referrerTotalEarnings = ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).getReferrerPlasmaTotalEarnings(plasma);
-        return (amountConverterSpentEthWEI[ethereum], referrerTotalEarnings,unitsConverterBought[ethereum]);
+        return (amountConverterSpentEthWEI[ethereum], amountConverterSpentFiatWei[ethereum], referrerTotalEarnings,unitsConverterBought[ethereum]);
     }
 
 }

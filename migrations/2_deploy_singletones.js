@@ -58,16 +58,30 @@ module.exports = function deploy(deployer) {
     let initialCongressMembers = [
         '0x4216909456e770FFC737d987c273a0B8cE19C13e', // Eitan
         '0x5e2B2b278445AaA649a6b734B0945Bd9177F4F03', // Kiki
+        '0x2230ed1a134737d305c0c962f0e75571cc02f585', //TieBrake
     ];
 
+    /**
+     * Initial names of the congress members, hexed values
+     * @type {string[]}
+     */
     let initialCongressMemberNames = [
         '0x456974616e000000000000000000000000000000000000000000000000000000', //Eitan hexed
         '0x4b696b6900000000000000000000000000000000000000000000000000000000', //Kiki hexed
+        '0x5469654272616b65200000000000000000000000000000000000000000000000' // TieBrake hexed
     ];
 
+    /**
+     * Initial voting powers for congress members
+     * @type {number[]}
+     */
+    let votingPowers = [1, 1, 1];
+
+
+
     let deployerAddress = '0x18e1d5ca01141E3a0834101574E5A1e94F0F8F6a';
+
     let maintainerAddresses = [];
-    let votingPowers = [1, 1];
 
 
     if(deployer.network.startsWith('public.test') || deployer.network.startsWith('plasma')) {
