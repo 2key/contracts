@@ -10,6 +10,10 @@ contract TwoKeyWeightedVoteContract is TwoKeySignedPresellContract {
   public
   TwoKeySignedPresellContract(_reg,_eventSource,_name,_symbol,_tSupply,_quota,_cost,_bounty,_ipfs_hash,_erc20_token_sell_contract)
   {
+    link_version = 1;
+  }
+  function setLinkVersion(uint256 _link_version) public onlyOwner {
+    revert("setLinkVersion not allowed in voting contract");
   }
 
   mapping(address => uint)  public voted_weight;

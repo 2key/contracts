@@ -37,6 +37,12 @@ contract TwoKeyContract is StandardToken, Ownable {
   uint256 public quota;  // maximal tokens that can be passed in transferFrom
   uint256 unit_decimals;  // units being sold can be fractional (for example tokens in ERC20)
 
+  // limit the version of signature that can be used in transferSig. By default 0 in voting this is changed in constructor to 1
+  uint256 public link_version;
+  function setLinkVersion(uint256 _link_version) public onlyOwner {
+    link_version = _link_version;
+  }
+
   // Private variables of the token
   // in all mappings the address is always a plasma address
   mapping (address => address) public received_from;

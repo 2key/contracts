@@ -44,6 +44,15 @@ contract TwoKeySignedContract is TwoKeyContract {
     //   * 20 bytes address of influencer (version 0) or 65 bytes of signature of cut using the influencer address to sign
     //   * 20 bytes public key of the last secret
     // In the last step the message can be optional. If it is missing the message used is the address of the sender
+
+    uint8 version;
+    assembly
+    {
+      version := mload(add(sig, 1))
+    }
+    // must use a sig which includes a cut (ie by calling free_join_take in sign.js
+    require(version == link_version, 'bad signature version');
+
     address old_address;
     assembly
     {
