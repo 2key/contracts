@@ -38,7 +38,6 @@ The ones we use most often are:
 * `plasma-azure` - Plasma azure network
 * `dev-local` - Docker container used as development environment
 
-
 ##### Soft redeploy
 If there have been only changes in 2key-protocol, or in the non-singleton contracts,
 will be enough to run soft redeploy.
