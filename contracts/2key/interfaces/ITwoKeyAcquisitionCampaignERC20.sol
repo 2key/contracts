@@ -11,7 +11,7 @@ contract ITwoKeyAcquisitionCampaignERC20 {
     function buyTokensForModeratorRewards(uint moderatorFee) public;
     function updateReservedAmountOfTokensIfConversionRejectedOrExecuted(uint value) public;
     function refundConverterAndRemoveUnits(address _converter, uint amountOfEther, uint amountOfUnits) external;
-    function getStatistics(address ethereum, address plasma) public view returns (uint,uint,uint);
+    function getStatistics(address ethereum, address plasma) public view returns (uint,uint,uint,uint);
     function getAvailableAndNonReservedTokensAmount() external view returns (uint);
     function getTotalReferrerEarnings(address _referrer, address eth_address) public view returns (uint);
     function getReferrerPlasmaBalance(address _influencer) public view returns (uint);
