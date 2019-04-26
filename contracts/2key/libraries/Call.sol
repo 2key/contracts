@@ -151,7 +151,8 @@ library Call {
 
     function recoverSigMemory(bytes sig) private pure returns (address[], address[], uint8[], uint[], uint) {
         uint8 version = loadUint8(sig, 0);
-        uint msg_len = (version == 1) ? 1+65+20 : 1+20+20;
+        require(version <= 2,'illegal link version');
+        uint msg_len = (version == 0) ? 1+20+20 : (version == 1) ? 1+65+20 : 1+20;
         uint n_influencers = (sig.length-21) / (65+msg_len);
         uint8[] memory weights = new uint8[](n_influencers);
         address[] memory keys = new address[](n_influencers);
@@ -166,7 +167,7 @@ library Call {
 
     function recoverSigParts(bytes sig, address last_address) private pure returns (address[], address[], uint8[], uint[]) {
         // sig structure:
-        // 1 byte version 0 or 1
+        // 1 byte version 0, 1 or 2
         // 20 bytes are the address of the contractor or the influencer who created sig.
         //  this is the "anchor" of the link
         //  It must have a public key aleady stored for it in public_link_key
@@ -176,7 +177,7 @@ library Call {
         //   message length depend on version 41 (version 0) or 86 (version 1):
         //   * 1 byte cut (percentage) each influencer takes from the bounty. the cut is stored in influencer2cut or weight for voting
         //   * 20 bytes address of influencer (version 0) or 65 bytes of signature of cut using the influencer address to sign
-        //   * 20 bytes public key of the last secret
+        //   * 20 bytes public key of the last secret (in version 2 this is same as address of influencer)
         // In the last step the message can be optional. If it is missing the message used is the address of the sender
         uint idx = 0;
         uint msg_len;
@@ -200,7 +201,12 @@ library Call {
                 idx++;
 
 
-                if (msg_len == 41)  // 1+20+20 version 0
+                if (msg_len == 21)  // 1+20 version 2
+                {
+                    influencers[count_influencers] = loadAddress(sig, idx);
+                    idx += 20;
+                    keys[count_influencers] = influencers[count_influencers];
+                } else if (msg_len == 41)  // 1+20+20 version 0
                 {
                     influencers[count_influencers] = loadAddress(sig, idx);
                     idx += 20;
@@ -235,6 +241,7 @@ library Call {
         // validate sig AND
         // recover the information from the signature: influencers, public_link_keys, weights/cuts
         // influencers may have one more address than the keys and weights arrays
+        // we need public_link_keys so we can set it in the contract to allow the influencer to later start its own link
         //
         require(old_key != address(0),'no public link key');
 
