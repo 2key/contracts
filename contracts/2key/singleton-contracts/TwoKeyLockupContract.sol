@@ -79,7 +79,7 @@ contract TwoKeyLockupContract {
         tokenUnlockingDate[0] = tokenDistributionDate; //base tokens
         tokenUnlockingDate[1] = tokenDistributionDate + _bonusTokensVestingStartShiftInDaysFromDistributionDate * (1 days); // first part of bonus in days after tokens
         for(uint i=2 ;i<numberOfVestingPortions + 1; i++) {
-            tokenUnlockingDate[i] = tokenUnlockingDate[1] + (i-1) * (numberOfDaysBetweenPortions * 1 days); // All other bonus is month a gap between them
+            tokenUnlockingDate[i] = tokenUnlockingDate[1] + (i-1) * (numberOfDaysBetweenPortions * 1 days);
         }
     }
 

@@ -33,8 +33,9 @@ const twoKeyAdmin = singletons.TwoKeyAdmin.networks[mainNetId].address;
 let isKYCRequired = false;
 let isFiatConversionAutomaticallyApproved = true;
 const isFiatOnly = false;
-let incentiveModel = "MANUAL";
+let incentiveModel = "VANILLA_AVERAGE";
 let amount = 0; //1000 tokens fiat inventory
+let vestingAmount = 'BONUS';
 
 let testObject = {
     versionName: 'versionName',
@@ -42,6 +43,7 @@ let testObject = {
     contractName: 'ContractName',
     notMaintainerAddress: '0x15bb774ab9f11a4b08c8ec7b3e51d646e3f64aa8',
     emptyAddress: '0x0000000000000000000000000000000000000000',
+    fiatWei: 150*10**18
 };
 
 function makeHandle(max: number = 8): string {
@@ -263,6 +265,8 @@ const tryToRegisterUser = async (username, from) => {
     return registerReceipts;
     // console.log('REGISTER RESULT', register);
 };
+
+
 describe('TwoKeyProtocol', () => {
     let from: string;
     before(function () {
@@ -397,7 +401,7 @@ describe('TwoKeyProtocol', () => {
         expect(contractAddress).to.be.equal(testObject.contractAddress);
     }).timeout(60000);
 
-    
+
     it('Should check SingltonsRegistry LatestVersion' ,async() => {
         let contractLatestVersion;
         const {web3, address} = web3switcher.deployer();
@@ -605,7 +609,9 @@ describe('TwoKeyProtocol', () => {
             isKYCRequired,
             isFiatConversionAutomaticallyApproved,
             incentiveModel,
-            isFiatOnly
+            isFiatOnly,
+            vestingAmount,
+            mustConvertToReferr: false
         };
 
         const campaign = await twoKeyProtocol.AcquisitionCampaign.create(campaignData, campaignData, {} , from, {
@@ -649,7 +655,7 @@ describe('TwoKeyProtocol', () => {
         const campaignMeta = await twoKeyProtocol.AcquisitionCampaign.getPublicMeta(campaignAddress,from);
         console.log(campaignMeta);
         expect(campaignMeta.meta.assetContractERC20).to.be.equal(campaignData.assetContractERC20);
-    }).timeout(60000);
+    }).timeout(120000);
     it('should print balance after campaign created', printBalances).timeout(15000);
 
     it('should transfer assets to campaign', async () => {
@@ -660,6 +666,14 @@ describe('TwoKeyProtocol', () => {
         console.log('Campaign Balance', balance);
         expect(parseFloat(balance)).to.be.equal(1234000 - amount);
     }).timeout(600000);
+
+    it('Should if enough funds  fiatConversion' ,async() => {
+        const {isPossible, twoKeys} = await twoKeyProtocol.AcquisitionCampaign.isEnoughRewardsForFiatParticipation(campaignAddress, testObject.fiatWei);
+        expect(isPossible).to.be.equal(true);
+        console.log("AcquisitionCampaign - Pass isPossible FiatConversion");
+        expect(twoKeys).to.be.gt(340);
+        expect(twoKeys).to.be.lt(350);
+    }).timeout(60000);
 
     it('should get user public link', async () => {
         try {
@@ -690,7 +704,7 @@ describe('TwoKeyProtocol', () => {
         let data: IPrivateMetaInformation = await twoKeyProtocol.AcquisitionCampaign.getPrivateMetaHash(campaignAddress, from);
         console.log(data);
         expect(data.campaignPublicLinkKey).to.be.equal(links.deployer);
-    }).timeout(60000);
+    }).timeout(120000);
 
 
     it('should visit campaign as guest', async () => {
@@ -1088,7 +1102,7 @@ describe('TwoKeyProtocol', () => {
         // console.log(campaigns);
     });
 
-    it('should execute conversion and create lockup contract', async () => {
+    it('should execute conversion and create purchase', async () => {
         const {web3, address} = web3switcher.test4();
         from = address;
         twoKeyProtocol.setWeb3({
@@ -1106,26 +1120,14 @@ describe('TwoKeyProtocol', () => {
         }
     }).timeout(60000);
 
+    it('should get purchase information', async() => {
+        let purchase = await twoKeyProtocol.AcquisitionCampaign.getPurchaseInformation(campaignAddress,0,from);
+        console.log(purchase);
+    }).timeout(60000);
+
     it('should show campaign summary', async() => {
         const summary = await twoKeyProtocol.AcquisitionCampaign.getCampaignSummary(campaignAddress, from);
         console.log(summary);
-    }).timeout(60000);
-
-    it('should return addresses of lockup contracts for converter', async () => {
-        const {web3, address} = web3switcher.aydnep();
-        from = address;
-        twoKeyProtocol.setWeb3({
-            web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
-        });
-        const addresses = await twoKeyProtocol.AcquisitionCampaign.getLockupContractsForConverter(campaignAddress, env.TEST4_ADDRESS, from);
-        console.log('Lockup contracts addresses : ' + addresses);
-        expect(addresses.length).to.be.equal(1);
     }).timeout(60000);
 
     it('should show moderator earnings', async() => {
@@ -1133,7 +1135,7 @@ describe('TwoKeyProtocol', () => {
         console.log('Moderator total earnings in 2key-tokens are: ' + moderatorTotalEarnings);
     }).timeout(60000);
 
-    it('should pull down base tokens amount from lockup from maintainer address', async() => {
+    it('should pull down base tokens amount from purchases handler contract', async() => {
         const {web3, address} = web3switcher.aydnep();
         from = address;
         twoKeyProtocol.setWeb3({
@@ -1145,8 +1147,7 @@ describe('TwoKeyProtocol', () => {
             eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
         });
-        const addresses = await twoKeyProtocol.AcquisitionCampaign.getLockupContractsForConverter(campaignAddress, env.TEST4_ADDRESS, from);
-        let txHash = await twoKeyProtocol.AcquisitionCampaign.withdrawTokens(addresses[0],0,from);
+        let txHash = await twoKeyProtocol.AcquisitionCampaign.withdrawTokens(campaignAddress, 0, 0, from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(60000);
 
@@ -1228,27 +1229,6 @@ describe('TwoKeyProtocol', () => {
         }
     }).timeout(60000);
 
-    it('should print balances of ERC20 on lockupContracts', async () => {
-        const {web3, address} = web3switcher.aydnep();
-        from = address;
-        twoKeyProtocol.setWeb3({
-            web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
-        });
-        const addresses = await twoKeyProtocol.AcquisitionCampaign.getLockupContractsForConverter(campaignAddress, env.TEST4_ADDRESS, from);
-        console.log('Lockup contracts addresses : ' + addresses);
-        for (let i = 0; i < addresses.length; i++) {
-            let addressCurrent = addresses[i].toString();
-            let balance = await twoKeyProtocol.ERC20.getERC20Balance(twoKeyEconomy, addressCurrent);
-            console.log("Address: " + addressCurrent + " ----- balance: " + balance);
-        }
-    }).timeout(60000);
-
     it('should get all whitelisted addresses', async() => {
         const addresses = await twoKeyProtocol.Congress.getAllMembersForCongress(from);
         // console.log(addresses);
@@ -1304,7 +1284,7 @@ describe('TwoKeyProtocol', () => {
 
         let stats = await twoKeyProtocol.AcquisitionCampaign.getAddressStatistic(campaignAddress, env.GMAIL_ADDRESS, '0x0000000000000000000000000000000000000000',{from});
         console.log(stats);
-    })
+    }).timeout(60000);
 
     it('should print balance of left ERC20 on the Acquisition contract', async() => {
         let balance = await twoKeyProtocol.ERC20.getERC20Balance(twoKeyEconomy, campaignAddress);
@@ -1364,7 +1344,7 @@ describe('TwoKeyProtocol', () => {
         console.log('Regular executed conversion is: ');
         let conversion = await twoKeyProtocol.AcquisitionCampaign.getConversion(campaignAddress,0,from);
         console.log(conversion);
-    })
+    }).timeout(60000);
 
     it('should execute conversion from contractor', async() => {
         const {web3, address} = web3switcher.aydnep();
@@ -1392,24 +1372,6 @@ describe('TwoKeyProtocol', () => {
         let numberOfForwarders = await twoKeyProtocol.PlasmaEvents.getForwardersPerCampaign(campaignAddress);
         console.log('Number of forwarders stored on plasma: ' + numberOfForwarders);
     }).timeout(60000);
-
-    // it('should create an offline(fiat) conversion from maintainer address', async() => {
-    //     const {web3, address} = web3switcher.aydnep();
-    //     from = address;
-    //     twoKeyProtocol.setWeb3({
-    //         web3,
-    //         networks: {
-    //             mainNetId,
-    //             syncTwoKeyNetId,
-    //         },
-    //         eventsNetUrl,
-    //         plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
-    //     });
-    //     console.log('Trying to perform offline conversion from gmail2');
-    //     let txHash = await twoKeyProtocol.AcquisitionCampaign.convertOffline(campaignAddress,env.TEST4_ADDRESS, from, 50);
-    //     const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-    // }).timeout(60000);
-
 
     it('should check reputation points for a couple of addresses', async() => {
         console.log('Checking stats for Renata');
@@ -1444,6 +1406,10 @@ describe('TwoKeyProtocol', () => {
         expect(rewardReleaseAfterDate).to.be.equal(1577836800);  //01/01/2019
     }).timeout(60000);
 
+    it('Should get portions release dates', async() => {
+        let releaseDates = await twoKeyProtocol.AcquisitionCampaign.getBoughtTokensReleaseDates(campaignAddress);
+        console.log(releaseDates);
+    })
 
     // it('should build refgraph', async() => {
     //     const {web3, address} = web3switcher.gmail();
