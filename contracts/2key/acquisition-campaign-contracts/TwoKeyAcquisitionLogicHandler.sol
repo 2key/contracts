@@ -15,14 +15,14 @@ import "../libraries/SafeMath.sol";
 import "../libraries/Call.sol";
 import "../libraries/IncentiveModels.sol";
 
-import "../Upgradeable.sol";
 import "../campaign-mutual-contracts/TwoKeyCampaignIncentiveModels.sol";
+import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
 
 /**
  * @author Nikola Madjarevic
  * Created at 1/15/19
  */
-contract TwoKeyAcquisitionLogicHandler is Upgradeable, TwoKeyCampaignIncentiveModels {
+contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncentiveModels {
 
     using SafeMath for uint256;
 

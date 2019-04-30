@@ -2,8 +2,12 @@ pragma solidity ^0.4.0;
 
 import "../Upgradeable.sol";
 import "../MaintainingPattern.sol";
+
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
-import "../UpgradabilityProxyAcquisition.sol";
+import "../interfaces/IHandleCampaignDeployment.sol";
+import "../interfaces/ITwoKeyCampaignValidator.sol";
+import "../upgradable-pattern-campaigns/ProxyCampaign.sol";
+
 
 /**
  * @author Nikola Madjarevic
@@ -13,6 +17,15 @@ contract TwoKeyFactory is Upgradeable, MaintainingPattern {
 
     //Address of singleton registry
     ITwoKeySingletoneRegistryFetchAddress public twoKeySingletonRegistry;
+
+    event ProxyForCampaign(
+        address proxyLogicHandler,
+        address proxyConversionHandler,
+        address proxyAcquisitionCampaign,
+        address proxyPurchasesHandler,
+        address contractor,
+        uint timestamp
+    );
 
 
     /**
@@ -28,7 +41,7 @@ contract TwoKeyFactory is Upgradeable, MaintainingPattern {
     )
     public
     {
-        require(twoKeySingletonRegistry != address(0));
+        require(twoKeySingletonRegistry == address(0));
 
         twoKeyAdmin = _twoKeyAdmin;
         for(uint i=0; i<_maintainers.length; i++) {
@@ -36,6 +49,10 @@ contract TwoKeyFactory is Upgradeable, MaintainingPattern {
         }
 
         twoKeySingletonRegistry = ITwoKeySingletoneRegistryFetchAddress(_twoKeySingletonRegistry);
+    }
+
+    function getContractProxyAddress(string contractName) internal view returns (address) {
+        return twoKeySingletonRegistry.getContractProxyAddress(contractName);
     }
 
     /**
@@ -63,60 +80,72 @@ contract TwoKeyFactory is Upgradeable, MaintainingPattern {
     public
     payable
     {
-//        // Deploy proxies for all 3 contracts
-//        //TODO: Versions are now hardcoded to 1.0, maybe to get dynamically always the latest version, but store the old ones
-//        //Deploy proxy for Acquisition contract
-//        UpgradabilityProxyAcquisition proxyAcquisition = new UpgradabilityProxyAcquisition("TwoKeyAcquisitionCampaignERC20", "1.0");
-//        Upgradeable(proxyAcquisition).initialize.value(msg.value)(msg.sender);
-//
-//        //Deploy proxy for ConversionHandler contract
-//        UpgradabilityProxyAcquisition proxyConversions = new UpgradabilityProxyAcquisition("TwoKeyConversionHandler", "1.0");
-//        Upgradeable(proxyConversions).initialize.value(msg.value)(msg.sender);
-//
-//        //Deploy proxy for LogicHandlerContract
-//        UpgradabilityProxyAcquisition proxyLogicHandler = new UpgradabilityProxyAcquisition("TwoKeyAcquisitionLogicHandler", "1.0");
-//        Upgradeable(proxyLogicHandler).initialize.value(msg.value)(msg.sender);
-//
-//
-//        // Set initial arguments inside Conversion Handler contract
-//        IHandleCampaignDeployment(proxyConversions).setInitialParamsConversionHandler(
-//            valuesConversion,
-//            proxyAcquisition,
-//            msg.sender,
-//            addresses[0], //ERC20 address
-//            getContractProxyAddress("TwoKeyEventSource"),
-//            getContractProxyAddress("TwoKeyBaseReputationRegistry")
-//        );
-//
-//        // Set initial arguments inside Logic Handler contract
-//        IHandleCampaignDeployment(proxyLogicHandler).setInitialParamsLogicHandler(
-//            valuesLogicHandler,
-//            _currency,
-//            addresses[0], //asset contract erc20
-//            addresses[1], // moderator
-//            msg.sender,
-//            proxyAcquisition,
-//            address(this),
-//            proxyConversions
-//        );
-//
-//        // Set initial arguments inside AcquisitionCampaign contract
-//        IHandleCampaignDeployment(proxyAcquisition).setInitialParamsCampaign(
-//            address(this),
-//            address(proxyLogicHandler),
-//            address(proxyConversions),
-//            addresses[1], //moderator
-//            addresses[0], //asset contract
-//            msg.sender, //contractor
-//            values
-//        );
-//
-//        // Validate campaign so it will be approved to interact (and write) to/with our singleton contracts
-//        ITwoKeyCampaignValidator(getContractProxyAddress("TwoKeyCampaignValidator"))
-//        .validateAcquisitionCampaign(proxyAcquisition, _nonSingletonHash);
-//
-//        emit ProxyForCampaign(proxyLogicHandler, proxyConversions, proxyAcquisition, msg.sender, block.timestamp);
+        // Deploy proxies for all 3 contracts
+        //TODO: Versions are now hardcoded to 1.0, maybe to get dynamically always the latest version, but store the old ones
+        //Deploy proxy for Acquisition contract
+        ProxyCampaign proxyAcquisition = new ProxyCampaign("TwoKeyAcquisitionCampaignERC20", "1.0", address(twoKeySingletonRegistry));
+//        UpgradeableCampaign(proxyAcquisition).initialize.value(msg.value)(msg.sender);
+
+        //Deploy proxy for ConversionHandler contract
+        ProxyCampaign proxyConversions = new ProxyCampaign("TwoKeyConversionHandler", "1.0", address(twoKeySingletonRegistry));
+//        UpgradeableCampaign(proxyConversions).initialize.value(msg.value)(msg.sender);
+
+        //Deploy proxy for LogicHandlerContract
+        ProxyCampaign proxyLogicHandler = new ProxyCampaign("TwoKeyAcquisitionLogicHandler", "1.0", address(twoKeySingletonRegistry));
+//        UpgradeableCampaign(proxyLogicHandler).initialize.value(msg.value)(msg.sender);
+
+        ProxyCampaign proxyPurchasesHandler = new ProxyCampaign("TwoKeyPurchasesHandler", "1.0", address(twoKeySingletonRegistry));
+//        UpgradeableCampaign(proxyPurchasesHandler).initialize.value(msg.value)(msg.sender);
+
+        IHandleCampaignDeployment(proxyPurchasesHandler).setInitialParamsPurchasesHandler(
+            valuesConversion,
+            msg.sender,
+            addresses[0],
+            getContractProxyAddress("TwoKeyEventSource"),
+            proxyConversions
+        );
+
+        // Set initial arguments inside Conversion Handler contract
+        IHandleCampaignDeployment(proxyConversions).setInitialParamsConversionHandler(
+            valuesConversion,
+            proxyAcquisition,
+            proxyPurchasesHandler,
+            msg.sender,
+            addresses[0], //ERC20 address
+            getContractProxyAddress("TwoKeyEventSource"),
+            getContractProxyAddress("TwoKeyBaseReputationRegistry")
+        );
+
+        // Set initial arguments inside Logic Handler contract
+        IHandleCampaignDeployment(proxyLogicHandler).setInitialParamsLogicHandler(
+            valuesLogicHandler,
+            _currency,
+            addresses[0], //asset contract erc20
+            addresses[1], // moderator
+            msg.sender,
+            proxyAcquisition,
+            address(twoKeySingletonRegistry),
+            proxyConversions
+        );
+
+        // Set initial arguments inside AcquisitionCampaign contract
+        IHandleCampaignDeployment(proxyAcquisition).setInitialParamsCampaign(
+            address(twoKeySingletonRegistry),
+            address(proxyLogicHandler),
+            address(proxyConversions),
+            addresses[1], //moderator
+            addresses[0], //asset contract
+            msg.sender, //contractor
+            values
+        );
+
+        // Validate campaign so it will be approved to interact (and write) to/with our singleton contracts
+        ITwoKeyCampaignValidator(getContractProxyAddress("TwoKeyCampaignValidator"))
+        .validateAcquisitionCampaign(proxyAcquisition, _nonSingletonHash);
+
+        emit ProxyForCampaign(proxyLogicHandler, proxyConversions, proxyAcquisition, proxyPurchasesHandler, msg.sender, block.timestamp);
     }
+
 
 
 
