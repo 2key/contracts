@@ -8,14 +8,14 @@ import "../interfaces/ITwoKeyEventSource.sol";
 import "../interfaces/ITwoKeyBaseReputationRegistry.sol";
 import "../interfaces/ITwoKeyPurchasesHandler.sol";
 import "../libraries/SafeMath.sol";
-import "../Upgradeable.sol";
+import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
 
 /**
  * @notice Contract to handle logic related for Acquisition
  * @dev There will be 1 conversion handler per Acquisition Campaign
  * @author Nikola Madjarevic
  */
-contract TwoKeyConversionHandler is Upgradeable, TwoKeyConversionStates, TwoKeyConverterStates {
+contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyConversionStates, TwoKeyConverterStates {
 
     using SafeMath for uint256;
 

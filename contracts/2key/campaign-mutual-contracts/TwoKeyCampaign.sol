@@ -68,7 +68,6 @@ contract TwoKeyCampaign is ArcERC20 {
 	{
 		// _from and _to are assumed to be already converted to plasma address (e.g. using plasmaOf)
 		require(_value == 1);
-		require(_from != address(0));
 		require(_to != address(0));
 
 		require(balances[_from] > 0);

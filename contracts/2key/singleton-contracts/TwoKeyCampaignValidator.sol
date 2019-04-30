@@ -43,6 +43,8 @@ import "../interfaces/IGetImplementation.sol";
 contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
 
     address public twoKeySingletoneRegistry;
+    address public twoKeyFactory;
+
     mapping(address => string) public campaign2nonSingletonHash;
 
 
@@ -67,6 +69,7 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
         require(twoKeySingletoneRegistry == address(0));
         twoKeySingletoneRegistry = _twoKeySingletoneRegistry;
         twoKeyAdmin =  ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyAdmin");
+        twoKeyFactory = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyFactory");
         isMaintainer[msg.sender] = true;
         for(uint i=0; i<_maintainers.length; i++) {
             isMaintainer[_maintainers[i]] = true;
@@ -86,7 +89,7 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
     public
     {
         require(isCampaignValidated[campaign] == false);
-        require(msg.sender == twoKeySingletoneRegistry); // Only 2key singleton registry can do this
+        require(msg.sender == twoKeyFactory);
 
         address contractor = ITwoKeyAcquisitionCampaignStateVariables(campaign).contractor();
         address moderator = ITwoKeyAcquisitionCampaignStateVariables(campaign).moderator(); //Moderator we'll need for emit eventxw
@@ -107,8 +110,6 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
         require(isCodeValid[codeHandler] == true);
         require(isCodeValid[codeLogicHandler] == true);
 
-//        //Validate that public link key is set
-//        require(ITwoKeyAcquisitionCampaignStateVariables(campaign).publicLinkKeyOf(contractor) != address(0));
 
         //If the campaign passes all this validation steps means it's valid one, and it can be proceeded forward
         isCampaignValidated[campaign] = true;

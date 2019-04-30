@@ -5,14 +5,14 @@ import "../campaign-mutual-contracts/TwoKeyCampaign.sol";
 
 import "../interfaces/ITwoKeyConversionHandler.sol";
 import "../interfaces/ITwoKeyAcquisitionLogicHandler.sol";
-import "../Upgradeable.sol";
+import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
 
 
 /**
  * @author Nikola Madjarevic
  * @notice Campaign which will sell ERC20 tokens
  */
-contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
+contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
 
     bool isCampaignInitialized; // Once this is set to true can't be modified
 
@@ -27,7 +27,6 @@ contract TwoKeyAcquisitionCampaignERC20 is Upgradeable, TwoKeyCampaign {
     mapping(address => uint256) private referrerPlasma2cut; // Mapping representing how much are cuts in percent(0-100) for referrer address
 
     uint reservedAmountOfTokens; // Reserved amount of tokens for the converters who are pending approval
-    uint fiatInventoryAmount; // Reserved amount for FIAT rewards
 
 
     /**
