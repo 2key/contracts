@@ -1078,10 +1078,10 @@ describe('TwoKeyProtocol', () => {
     }).timeout(60000);
     */
 
-    it('Should check that exchangeContract Fiat reserved is 0 before any conversions exceution', async() => {
-        let upgradableExchangeFiatReserve = await twoKeyProtocol.UpgradableExchange.getUsdStableCoinUnitsReserve(from);
-        expect(upgradableExchangeFiatReserve).to.be.equal(0);
-    }).timeout(60000);
+    // it('Should check that exchangeContract Fiat reserved is 0 before any conversions exceution', async() => {
+    //     let upgradableExchangeFiatReserve = await twoKeyProtocol.UpgradableExchange.getUsdStableCoinUnitsReserve(from);
+    //     expect(upgradableExchangeFiatReserve).to.be.equal(0);
+    // }).timeout(60000);
 
     it('should be executed conversion by contractor' ,async() => {
         if(isKYCRequired) {
@@ -1093,10 +1093,10 @@ describe('TwoKeyProtocol', () => {
     }).timeout(60000);
 
 
-    it('Should check that exchangeContract Fiat reserved is not zero after conversion exceution', async() => {
-        let upgradableExchangeFiatReserve = await twoKeyProtocol.UpgradableExchange.getUsdStableCoinUnitsReserve(from);
-        !!expect(upgradableExchangeFiatReserve).not.to.be.equal(0);
-    }).timeout(60000);
+    // it('Should check that exchangeContract Fiat reserved is not zero after conversion exceution', async() => {
+    //     let upgradableExchangeFiatReserve = await twoKeyProtocol.UpgradableExchange.getUsdStableCoinUnitsReserve(from);
+    //     expect(upgradableExchangeFiatReserve).not.to.be.equal(0);
+    // }).timeout(60000);
 
     it('should print campaigns where user converter', async() => {
         const {web3, address} = web3switcher.test4();

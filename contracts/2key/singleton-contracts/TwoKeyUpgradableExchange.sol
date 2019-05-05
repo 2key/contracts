@@ -32,8 +32,8 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
     uint256 public weiRaised = 0;
 
     uint256 public usdStableCoinUnitsReserve = 0;
-    
- 
+
+
 
     address public kyberProxyContractAddress;
     ERC20 constant public daiAddress = ERC20(0xaD6D458402F60fD3Bd25163575031ACDce07538D);
@@ -175,7 +175,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         (value,flag,,) = ITwoKeyExchangeRateContract(twoKeyExchangeContract).getFiatCurrencyDetails("USD");
         return (_weiAmount*value).mul(1000).div(rate).div(10**18);
     }
-    
+
     function _getUsdStableCoinAmountFrom2keyUnits(
         uint256 _2keyAmount,
         uint256 _2keyExchangeRate
@@ -224,7 +224,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         weiRaised = weiRaised.add(weiAmount);
         transactionCounter++;
         _processPurchase(_beneficiary, tokens);
-        
+
         swapEthForStableCoin(msg.value);
 
         emit TokenPurchase(
@@ -250,17 +250,17 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
     }
 
 
-    function buyStableCoinWith2key(uint _twoKeyUnits, address _beneficiary) external returns (uint){
+    function buyStableCoinWith2key(uint _twoKeyUnits, address _beneficiary) external onlyValidatedContracts returns (uint){
         uint usdTetheredStableCoinUnits;
-        
+
         usdTetheredStableCoinUnits = _getUsdStableCoinAmountFrom2keyUnits(_twoKeyUnits, twoKeyToStableCoinExchangeRate);
-        
+
         require(usdStableCoinUnitsReserve - usdTetheredStableCoinUnits > 0);
-        
+
         usdStableCoinUnitsReserve -= usdTetheredStableCoinUnits;
         require(ERC20(daiAddress).transfer(_beneficiary,usdTetheredStableCoinUnits.mul(10**18)));
     }
-    
+
 
     function ()
     public
