@@ -3,8 +3,11 @@ pragma solidity ^0.4.24;
 import "../../openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import "../MaintainingPattern.sol";
 import "../Upgradeable.sol";
+
 import "../interfaces/ITwoKeyExchangeRateContract.sol";
 import "../interfaces/ITwoKeyCampaignValidator.sol";
+import "../interfaces/IKyberNetworkProxy.sol";
+
 import "../libraries/SafeMath.sol";
 import "../libraries/GetCode.sol";
 import "../libraries/SafeERC20.sol";
@@ -22,11 +25,19 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
     ERC20 public token;
 
     uint256 public rate; //2key to USD rate multiplied by 1000 (initially it's 95)
+    uint256 public twoKeyToStableCoinExchangeRate;
 
     uint256 public transactionCounter = 0;
 
     uint256 public weiRaised = 0;
 
+    uint256 public usdStableCoinUnitsReserve = 0;
+    
+ 
+
+    address public kyberProxyContractAddress;
+    ERC20 constant public daiAddress = ERC20(0xaD6D458402F60fD3Bd25163575031ACDce07538D);
+    ERC20 constant internal ETH_TOKEN_ADDRESS = ERC20(0x00eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee);
     /**
      * @notice Event will be fired every time someone buys tokens
      */
@@ -71,6 +82,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         require(_rate != 0);
 
         rate = _rate;
+        twoKeyToStableCoinExchangeRate = rate+5;
         token = _token;
         twoKeyExchangeContract = _twoKeyExchangeContract;
         twoKeyCampaignValidator = _twoKeyCampaignValidator;
@@ -112,6 +124,11 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         require(_beneficiary != address(0),'beneficiary address can not be 0' );
         require(_weiAmount != 0, 'wei ammount can not be 0');
     }
+
+    function changeKyberProxyAddress(address _newProxyAddress) external onlyMaintainerOrTwoKeyAdmin {
+        kyberProxyContractAddress = _newProxyAddress;
+    }
+
 
     /**
      * @dev Source of tokens. Override this method to modify the way in which the crowdsale ultimately gets and sends its tokens.
@@ -158,6 +175,20 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         (value,flag,,) = ITwoKeyExchangeRateContract(twoKeyExchangeContract).getFiatCurrencyDetails("USD");
         return (_weiAmount*value).mul(1000).div(rate).div(10**18);
     }
+    
+    function _getUsdStableCoinAmountFrom2keyUnits(
+        uint256 _2keyAmount,
+        uint256 _2keyExchangeRate
+    )
+    public
+    view
+    returns (uint256)
+    {
+        uint value;
+        bool flag;
+        (value,flag,,) = ITwoKeyExchangeRateContract(twoKeyExchangeContract).getFiatCurrencyDetails("USD");
+        return (_2keyAmount.mul(_2keyExchangeRate).div(1000).div(value));
+    }
 
     /**
      * @dev Determines how ETH is stored/forwarded on purchases.
@@ -193,6 +224,9 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         weiRaised = weiRaised.add(weiAmount);
         transactionCounter++;
         _processPurchase(_beneficiary, tokens);
+        
+        swapEthForStableCoin(msg.value);
+
         emit TokenPurchase(
             msg.sender,
             _beneficiary,
@@ -203,6 +237,30 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         _forwardFunds(twoKeyAdmin);
         return tokens;
     }
+
+
+    function swapEthForStableCoin(uint ethWeiAmount) internal returns (uint){
+        uint256 minConversionRate;
+        uint256 stableCoinUnits;
+        IKyberNetworkProxy proxyContract;
+        proxyContract = IKyberNetworkProxy(kyberProxyContractAddress);
+        (minConversionRate,) = proxyContract.getExpectedRate(ETH_TOKEN_ADDRESS, daiAddress, 100000000000000000);
+        stableCoinUnits = proxyContract.swapEtherToToken.value(ethWeiAmount)(daiAddress,minConversionRate).div(10**18);
+        usdStableCoinUnitsReserve += stableCoinUnits;
+    }
+
+
+    function buyStableCoinWith2key(uint _twoKeyUnits, address _beneficiary) external returns (uint){
+        uint usdTetheredStableCoinUnits;
+        
+        usdTetheredStableCoinUnits = _getUsdStableCoinAmountFrom2keyUnits(_twoKeyUnits, twoKeyToStableCoinExchangeRate);
+        
+        require(usdStableCoinUnitsReserve - usdTetheredStableCoinUnits > 0);
+        
+        usdStableCoinUnitsReserve -= usdTetheredStableCoinUnits;
+        require(ERC20(daiAddress).transfer(_beneficiary,usdTetheredStableCoinUnits.mul(10**18)));
+    }
+    
 
     function ()
     public
