@@ -68,11 +68,14 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
         twoKeyEventSource = _twoKeyEventSource;
         proxyConversionHandler = _proxyConversionHandler;
 
-        uint bonusVestingStartDate = tokenDistributionDate;
-
-        if(vestingAmount == VestingAmount.BONUS) {
+        uint bonusVestingStartDate;
+        // In case vested amounts are both bonus and base, bonusTokensVestingStartShiftInDaysFromDistributionDate is ignored
+        if(vestingAmount == VestingAmount.BASE_AND_BONUS) {
+            bonusVestingStartDate = tokenDistributionDate + numberOfDaysBetweenPortions * (1 days);
+        } else {
             bonusVestingStartDate = tokenDistributionDate + bonusTokensVestingStartShiftInDaysFromDistributionDate * (1 days);
         }
+
 
         portionToUnlockingDate[0] = tokenDistributionDate;
 
