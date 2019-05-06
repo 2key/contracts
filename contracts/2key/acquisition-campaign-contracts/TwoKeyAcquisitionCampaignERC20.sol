@@ -55,8 +55,9 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         contractor = _contractor;
         moderator = _moderator;
 
+        twoKeySingletonesRegistry = _twoKeySingletonesRegistry;
 
-        twoKeyEventSource = TwoKeyEventSource(ITwoKeySingletoneRegistryFetchAddress(_twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyEventSource"));
+        twoKeyEventSource = TwoKeyEventSource(getContractProxyAddress("TwoKeyEventSource"));
         twoKeyEconomy = ITwoKeySingletoneRegistryFetchAddress(_twoKeySingletonesRegistry).getNonUpgradableContractAddress("TwoKeyEconomy");
 
         if(values[2] == 1) {
@@ -76,7 +77,6 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         maxReferralRewardPercent = values[0];
         conversionQuota = values[1];
 
-        twoKeySingletonesRegistry = _twoKeySingletonesRegistry;
         twoKeyAcquisitionLogicHandler = _twoKeyAcquisitionLogicHandler;
         conversionHandler = _conversionHandler;
         assetContractERC20 = _assetContractERC20;
@@ -340,7 +340,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         //If fiat conversion do exactly the same just send different reward and don't buy tokens, take them from contract
         if(maxReferralRewardPercent > 0) {
             if(_isConversionFiat) {
-                address upgradableExchange = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyUpgradableExchange");
+                address upgradableExchange = getContractProxyAddress("TwoKeyUpgradableExchange");
                 uint rate = IUpgradableExchange(upgradableExchange).rate();
                 totalBounty2keys = (_maxReferralRewardETHWei / (rate)) * (1000);
                 //TODO: add require that there's enough tokens at this moment
@@ -372,9 +372,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     onlyTwoKeyConversionHandler
     {
         //Get deep freeze token pool address
-        address twoKeyDeepFreezeTokenPool =
-        ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry)
-        .getContractProxyAddress("TwoKeyDeepFreezeTokenPool");
+        address twoKeyDeepFreezeTokenPool = getContractProxyAddress("TwoKeyDeepFreezeTokenPool");
 
         uint networkFee = twoKeyEventSource.getTwoKeyDefaultNetworkTaxPercent();
 
@@ -417,7 +415,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     public
     onlyTwoKeyConversionHandler
     {
-        require(IERC20(assetContractERC20).transfer(_to,_amount));
+        IERC20(assetContractERC20).transfer(_to, _amount);
     }
 
 
@@ -446,8 +444,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     public
     onlyTwoKeyConversionHandler
     {
-        require(reservedAmountOfTokens - value >= 0);
-        reservedAmountOfTokens = reservedAmountOfTokens - value;
+        reservedAmountOfTokens = reservedAmountOfTokens.sub(value);
     }
 
     /**
