@@ -83,9 +83,14 @@ module.exports = function deploy(deployer) {
 
 
 
-    let deployerAddress = '0x18e1d5ca01141E3a0834101574E5A1e94F0F8F6a';
 
     let maintainerAddresses = [];
+
+    /**
+     * KYBER NETWORK ADDRESS and DAI ADDRESS
+     */
+    const KYBER_NETWORK_PROXY_ADDRESS_ROPSTEN = '0x818E6FECD516Ecc3849DAf6845e3EC868087B755';
+    const DAI_ROPSTEN_ADDRESS = '0xaD6D458402F60fD3Bd25163575031ACDce07538D';
 
 
     if(deployer.network.startsWith('public.test') || deployer.network.startsWith('plasma')) {
@@ -465,7 +470,7 @@ module.exports = function deploy(deployer) {
                             'address': EventSource.address,
                             'Proxy': proxy,
                             'Version': "1.0",
-                            maintainer_address: deployerAddress,
+                            maintainer_address: maintainerAddresses,
                         };
                         fileObject['TwoKeyEventSource'] = twoKeyEventS;
                         proxyAddressTwoKeyEventSource = proxy;
@@ -521,7 +526,7 @@ module.exports = function deploy(deployer) {
                             'address': TwoKeyAdmin.address,
                             'Proxy': proxy,
                             'Version': "1.0",
-                            maintainer_address: deployerAddress
+                            maintainer_address: maintainerAddresses
                         };
 
                         fileObject['TwoKeyAdmin'] = twoKeyAdmin;
@@ -550,7 +555,7 @@ module.exports = function deploy(deployer) {
                             'address' : TwoKeyUpgradableExchange.address,
                             'Proxy' : proxy,
                             'Version' : "1.0",
-                            maintainer_address: deployerAddress
+                            maintainer_address: maintainerAddresses
                         };
 
                         fileObject['TwoKeyUpgradableExchange'] = twoKeyUpgradableExchange;
@@ -655,6 +660,8 @@ module.exports = function deploy(deployer) {
                             TwoKeyEconomy.address,
                             proxyAddressTwoKeyExchange,
                             proxyAddressTwoKeyCampaignValidator,
+                            DAI_ROPSTEN_ADDRESS,
+                            KYBER_NETWORK_PROXY_ADDRESS_ROPSTEN,
                             maintainerAddresses,
                         );
 

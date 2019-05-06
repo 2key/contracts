@@ -36,8 +36,10 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
 
 
     address public kyberProxyContractAddress;
-    ERC20 constant public daiAddress = ERC20(0xaD6D458402F60fD3Bd25163575031ACDce07538D);
-    ERC20 constant internal ETH_TOKEN_ADDRESS = ERC20(0x00eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee);
+    ERC20 public DAI;
+
+    ERC20 ETH_TOKEN_ADDRESS = ERC20(0x00eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee);
+
     /**
      * @notice Event will be fired every time someone buys tokens
      */
@@ -73,6 +75,8 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         ERC20 _token,
         address _twoKeyExchangeContract,
         address _twoKeyCampaignValidator,
+        address _daiAddress,
+        address _kyberNetworkProxy,
         address[] _maintainers
     )
     external
@@ -87,6 +91,10 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         twoKeyExchangeContract = _twoKeyExchangeContract;
         twoKeyCampaignValidator = _twoKeyCampaignValidator;
         twoKeyAdmin = _twoKeyAdmin;
+
+        DAI = ERC20(_daiAddress);
+        kyberProxyContractAddress = _kyberNetworkProxy;
+
         isMaintainer[msg.sender] = true; //for truffle deployment
         for(uint i=0; i<_maintainers.length; i++) {
             isMaintainer[_maintainers[i]] = true;
@@ -242,10 +250,9 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
     function swapEthForStableCoin(uint ethWeiAmount) internal returns (uint){
         uint256 minConversionRate;
         uint256 stableCoinUnits;
-        IKyberNetworkProxy proxyContract;
-        proxyContract = IKyberNetworkProxy(kyberProxyContractAddress);
-        (minConversionRate,) = proxyContract.getExpectedRate(ETH_TOKEN_ADDRESS, daiAddress, 100000000000000000);
-        stableCoinUnits = proxyContract.swapEtherToToken.value(ethWeiAmount)(daiAddress,minConversionRate).div(10**18);
+        IKyberNetworkProxy proxyContract = IKyberNetworkProxy(kyberProxyContractAddress);
+        (minConversionRate,) = proxyContract.getExpectedRate(ETH_TOKEN_ADDRESS, DAI, 100000000000000000);
+        stableCoinUnits = (proxyContract.swapEtherToToken.value(ethWeiAmount)(DAI,minConversionRate)).div(10**18);
         usdStableCoinUnitsReserve += stableCoinUnits;
     }
 
@@ -258,7 +265,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         require(usdStableCoinUnitsReserve - usdTetheredStableCoinUnits > 0);
 
         usdStableCoinUnitsReserve -= usdTetheredStableCoinUnits;
-        require(ERC20(daiAddress).transfer(_beneficiary,usdTetheredStableCoinUnits.mul(10**18)));
+        require(ERC20(DAI).transfer(_beneficiary,usdTetheredStableCoinUnits.mul(10**18)));
     }
 
 
