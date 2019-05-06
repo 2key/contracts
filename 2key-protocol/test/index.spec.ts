@@ -30,7 +30,7 @@ const campaignStartTime = Math.round(new Date(now.valueOf()).setDate(now.getDate
 const campaignEndTime = Math.round(new Date(now.valueOf()).setDate(now.getDate() + 30) / 1000);
 const twoKeyEconomy = singletons.TwoKeyEconomy.networks[mainNetId].address;
 const twoKeyAdmin = singletons.TwoKeyAdmin.networks[mainNetId].address;
-let isKYCRequired = false;
+let isKYCRequired = true;
 let isFiatConversionAutomaticallyApproved = true;
 const isFiatOnly = false;
 let incentiveModel = "VANILLA_AVERAGE";
@@ -1121,6 +1121,7 @@ describe('TwoKeyProtocol', () => {
     }).timeout(60000);
 
     it('should get purchase information', async() => {
+        console.log('Getting purchase information');
         let purchase = await twoKeyProtocol.AcquisitionCampaign.getPurchaseInformation(campaignAddress,0,from);
         console.log(purchase);
     }).timeout(60000);
@@ -1361,8 +1362,6 @@ describe('TwoKeyProtocol', () => {
         if(!(isFiatConversionAutomaticallyApproved == true && isKYCRequired ==false)) {
             console.log('Trying to execute fiat conversion from Contractor');
             let txHash = await twoKeyProtocol.AcquisitionCampaign.executeConversion(campaignAddress,4,from);
-            let lockupContractAddress = await twoKeyProtocol.AcquisitionCampaign.getLockupContractAddress(campaignAddress,4,from);
-            expect(lockupContractAddress).not.to.be.equal(0);
             const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         }
 
