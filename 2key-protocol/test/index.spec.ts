@@ -30,7 +30,7 @@ const campaignStartTime = Math.round(new Date(now.valueOf()).setDate(now.getDate
 const campaignEndTime = Math.round(new Date(now.valueOf()).setDate(now.getDate() + 30) / 1000);
 const twoKeyEconomy = singletons.TwoKeyEconomy.networks[mainNetId].address;
 const twoKeyAdmin = singletons.TwoKeyAdmin.networks[mainNetId].address;
-let isKYCRequired = false;
+let isKYCRequired = true;
 let isFiatConversionAutomaticallyApproved = true;
 const isFiatOnly = false;
 let incentiveModel = "VANILLA_AVERAGE";
@@ -873,6 +873,7 @@ describe('TwoKeyProtocol', () => {
         await tryToRegisterUser('Gmail2', from);
     }).timeout(60000);
 
+
     it('should buy some tokens from uport', async () => {
         const {web3, address} = web3switcher.uport();
         from = address;
@@ -1077,6 +1078,11 @@ describe('TwoKeyProtocol', () => {
     }).timeout(60000);
     */
 
+    // it('Should check that exchangeContract Fiat reserved is 0 before any conversions exceution', async() => {
+    //     let upgradableExchangeFiatReserve = await twoKeyProtocol.UpgradableExchange.getUsdStableCoinUnitsReserve(from);
+    //     expect(upgradableExchangeFiatReserve).to.be.equal(0);
+    // }).timeout(60000);
+
     it('should be executed conversion by contractor' ,async() => {
         if(isKYCRequired) {
             let conversionIdsForGmail2 = await twoKeyProtocol.AcquisitionCampaign.getConverterConversionIds(campaignAddress, env.GMAIL2_ADDRESS, from);
@@ -1085,6 +1091,12 @@ describe('TwoKeyProtocol', () => {
             await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         }
     }).timeout(60000);
+
+
+    // it('Should check that exchangeContract Fiat reserved is not zero after conversion exceution', async() => {
+    //     let upgradableExchangeFiatReserve = await twoKeyProtocol.UpgradableExchange.getUsdStableCoinUnitsReserve(from);
+    //     expect(upgradableExchangeFiatReserve).not.to.be.equal(0);
+    // }).timeout(60000);
 
     it('should print campaigns where user converter', async() => {
         const {web3, address} = web3switcher.test4();
@@ -1121,6 +1133,7 @@ describe('TwoKeyProtocol', () => {
     }).timeout(60000);
 
     it('should get purchase information', async() => {
+        console.log('Getting purchase information');
         let purchase = await twoKeyProtocol.AcquisitionCampaign.getPurchaseInformation(campaignAddress,0,from);
         console.log(purchase);
     }).timeout(60000);
@@ -1361,8 +1374,6 @@ describe('TwoKeyProtocol', () => {
         if(!(isFiatConversionAutomaticallyApproved == true && isKYCRequired ==false)) {
             console.log('Trying to execute fiat conversion from Contractor');
             let txHash = await twoKeyProtocol.AcquisitionCampaign.executeConversion(campaignAddress,4,from);
-            let lockupContractAddress = await twoKeyProtocol.AcquisitionCampaign.getLockupContractAddress(campaignAddress,4,from);
-            expect(lockupContractAddress).not.to.be.equal(0);
             const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         }
 
@@ -1399,12 +1410,6 @@ describe('TwoKeyProtocol', () => {
         console.log(stats);
     }).timeout(60000);
 
-
-    it('Get release after of 2key tokens date', async() => {
-        let rewardReleaseAfterDate = await twoKeyProtocol.TwoKeyAdmin.getRewardReleaseAfter();
-        console.log('Reward release after: '+ rewardReleaseAfterDate);
-        expect(rewardReleaseAfterDate).to.be.equal(1577836800);  //01/01/2019
-    }).timeout(60000);
 
     it('Should get portions release dates', async() => {
         let releaseDates = await twoKeyProtocol.AcquisitionCampaign.getBoughtTokensReleaseDates(campaignAddress);

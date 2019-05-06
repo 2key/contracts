@@ -664,7 +664,8 @@ module.exports = function deploy(deployer) {
                             TwoKeyEconomy.address,
                             proxyAddressTwoKeyUpgradableExchange,
                             proxyAddressTwoKeyRegistry,
-                            proxyAddressTwoKeyEventSource
+                            proxyAddressTwoKeyEventSource,
+                            1 // Rewards release after (we are hacking it now so they'll be released immediately)
                         );
 
                         await TwoKeyFactory.at(proxyAddressTwoKeyFactory).setInitialParams

@@ -53,7 +53,8 @@ contract TwoKeyAdmin is Upgradeable {
         address _economy,
         address _exchange,
         address _twoKeyRegistry,
-        address _eventSource
+        address _eventSource,
+		uint _twoKeyTokenReleaseDate
     ) external {
         require(initialized == false);
         twoKeyIntegratorDefaultFeePercent = 2;
@@ -64,7 +65,7 @@ contract TwoKeyAdmin is Upgradeable {
         twoKeyEconomy = TwoKeyEconomy(_economy);
         twoKeyEventSource = TwoKeyEventSource(_eventSource);
         initialized = true;
-		rewardReleaseAfter = 1577836800; //01/01/2020
+		rewardReleaseAfter = _twoKeyTokenReleaseDate; //01/01/2020
     }
 
     /// @notice Function where only elected admin can transfer tokens to an address
