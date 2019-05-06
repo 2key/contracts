@@ -8,6 +8,5 @@ contract UpgradeableCampaign is UpgradeabilityCampaignStorage {
 //     * @param sender representing the address deploying the initial behavior of the contract
 //     */
 //    function initialize(address sender) public payable {
-//        require(msg.sender == twoKeyFactory);
 //    }
 }

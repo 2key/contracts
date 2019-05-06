@@ -7,6 +7,7 @@ import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/IHandleCampaignDeployment.sol";
 import "../interfaces/ITwoKeyCampaignValidator.sol";
 import "../upgradable-pattern-campaigns/ProxyCampaign.sol";
+import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
 
 
 /**

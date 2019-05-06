@@ -1,11 +1,11 @@
 pragma solidity ^0.4.0;
 
-import "../Upgradeable.sol";
 import "../interfaces/ITwoKeyEventSource.sol";
 import "../interfaces/IERC20.sol";
+import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
 
 
-contract TwoKeyPurchasesHandler is Upgradeable{
+contract TwoKeyPurchasesHandler is UpgradeableCampaign {
 
     enum VestingAmount {BONUS, BASE_AND_BONUS}
     VestingAmount vestingAmount;
@@ -14,7 +14,7 @@ contract TwoKeyPurchasesHandler is Upgradeable{
     bool isDistributionDateChanged;
 
     address proxyConversionHandler;
-    address assetContractERC20;
+    address public assetContractERC20;
     address converter;
     address contractor;
     address twoKeyEventSource;
@@ -68,7 +68,14 @@ contract TwoKeyPurchasesHandler is Upgradeable{
         twoKeyEventSource = _twoKeyEventSource;
         proxyConversionHandler = _proxyConversionHandler;
 
-        uint bonusVestingStartDate = tokenDistributionDate + bonusTokensVestingStartShiftInDaysFromDistributionDate * (1 days);
+        uint bonusVestingStartDate;
+        // In case vested amounts are both bonus and base, bonusTokensVestingStartShiftInDaysFromDistributionDate is ignored
+        if(vestingAmount == VestingAmount.BASE_AND_BONUS) {
+            bonusVestingStartDate = tokenDistributionDate + numberOfDaysBetweenPortions * (1 days);
+        } else {
+            bonusVestingStartDate = tokenDistributionDate + bonusTokensVestingStartShiftInDaysFromDistributionDate * (1 days);
+        }
+
 
         portionToUnlockingDate[0] = tokenDistributionDate;
 
