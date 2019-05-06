@@ -586,5 +586,5 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         uint referrerTotalEarnings = ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).getReferrerPlasmaTotalEarnings(plasma);
         return (amountConverterSpentEthWEI[ethereum], amountConverterSpentFiatWei[ethereum], referrerTotalEarnings,unitsConverterBought[ethereum]);
     }
-
 }
+
