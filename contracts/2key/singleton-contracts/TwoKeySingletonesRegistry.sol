@@ -52,6 +52,7 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
         }
     }
 
+
     /**
      * @notice Function to add non upgradable contract in registry of all contracts
      * @param contractName is the name of the contract
@@ -68,6 +69,9 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
         nonUpgradableContractToAddress[contractName] = contractAddress;
     }
 
+    /**
+     * todo: make sure only admin/deployer can call this function
+     */
     /**
      * @dev Registers a new version with its implementation address
      * @param version representing the version name of the new implementation to be registered

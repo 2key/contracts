@@ -4,23 +4,18 @@ import "./FungibleMockToken.sol";
 
 contract KyberNetworkTestMockContract {
 
-    FungibleMockToken public MOCKDAI;
-
-    //We will deploy a MOCK DAI token for this purpose
     constructor() public
     {
-        MOCKDAI = new FungibleMockToken("DAI_TOKEN", "DAI", address(this));
     }
 
     function swapEtherToToken(
         ERC20 token,
         uint minConversionRate
     )
-    external
+    public
     payable
     returns(uint)
     {
-        MOCKDAI.transfer(msg.sender, 1000);
         return 1000;
     }
 
@@ -30,7 +25,7 @@ contract KyberNetworkTestMockContract {
         ERC20 dest,
         uint srcQty
     )
-    external
+    public
     view
     returns (uint expectedRate, uint slippageRate)
     {

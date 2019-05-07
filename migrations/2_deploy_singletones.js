@@ -14,6 +14,7 @@ const TwoKeyDeepFreezeTokenPool = artifacts.require('TwoKeyDeepFreezeTokenPool')
 const TwoKeyLongTermTokenPool = artifacts.require('TwoKeyLongTermTokenPool');
 const TwoKeyCampaignValidator = artifacts.require('TwoKeyCampaignValidator');
 const TwoKeyFactory = artifacts.require('TwoKeyFactory');
+const KyberNetworkTestMockContract = artifacts.require('KyberNetworkTestMockContract');
 
 
 const Call = artifacts.require('Call');
@@ -83,7 +84,7 @@ module.exports = function deploy(deployer) {
 
 
 
-
+    let kyberAddress;
     let maintainerAddresses = [];
 
     /**
@@ -229,7 +230,7 @@ module.exports = function deploy(deployer) {
      */
     deployer.deploy(Call);
     deployer.deploy(IncentiveModels);
-    if (deployer.network.startsWith('dev') || deployer.network.startsWith('public.') || deployer.network.startsWith('rinkeby') || deployer.network.startsWith('ropsten')) {
+    if (deployer.network.startsWith('dev') || deployer.network.startsWith('public.') || deployer.network.startsWith('ropsten')) {
         deployer.deploy(TwoKeyCongress, 24*60, initialCongressMembers, initialCongressMemberNames, votingPowers)
             .then(() => TwoKeyCongress.deployed())
             .then(() => deployer.deploy(TwoKeyCampaignValidator))
@@ -242,6 +243,8 @@ module.exports = function deploy(deployer) {
             .then(() => deployer.link(Call, TwoKeyRegistry))
             .then(() => deployer.deploy(TwoKeyRegistry)
             .then(() => TwoKeyRegistry.deployed())
+            .then(() => deployer.deploy(KyberNetworkTestMockContract))
+            .then(() => KyberNetworkTestMockContract.deployed())
             .then(() => deployer.deploy(TwoKeyBaseReputationRegistry))
             .then(() => TwoKeyBaseReputationRegistry.deployed())
             .then(() => deployer.deploy(TwoKeyUpgradableExchange))
@@ -599,6 +602,16 @@ module.exports = function deploy(deployer) {
                     }
                 });
 
+                /**
+                 * Determine which network are we using
+                 */
+                if(deployer.network.startsWith('dev')) {
+                    kyberAddress = KyberNetworkTestMockContract.address;
+                } else {
+                    kyberAddress = KYBER_NETWORK_PROXY_ADDRESS_ROPSTEN;
+                }
+
+
                 await new Promise(async (resolve, reject) => {
                     console.log('... Setting Initial params in all singletone proxy contracts');
                     try {
@@ -661,7 +674,7 @@ module.exports = function deploy(deployer) {
                             proxyAddressTwoKeyExchange,
                             proxyAddressTwoKeyCampaignValidator,
                             DAI_ROPSTEN_ADDRESS,
-                            KYBER_NETWORK_PROXY_ADDRESS_ROPSTEN,
+                            kyberAddress,
                             maintainerAddresses,
                         );
 

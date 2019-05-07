@@ -24,14 +24,18 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
     // The token being sold
     ERC20 public token;
 
-    uint256 public rate; //2key to USD rate multiplied by 1000 (initially it's 95)
-    uint256 public twoKeyToStableCoinExchangeRate;
+    uint  public rate; //2key to USD rate multiplied by 1000 (initially it's 95)
+    uint public twoKeyToStableCoinExchangeRate;
 
-    uint256 public transactionCounter = 0;
+    uint public transactionCounter = 0;
 
-    uint256 public weiRaised = 0;
+    uint public weiRaised = 0;
 
-    uint256 public usdStableCoinUnitsReserve = 0;
+    uint public usdStableCoinUnitsReserve = 0;
+
+    /**
+    TODO: Support multiple stable coins
+     */
 
 
 
@@ -233,7 +237,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         transactionCounter++;
         _processPurchase(_beneficiary, tokens);
 
-//        swapEthForStableCoin(msg.value);
+        swapEthForStableCoin();
 
         emit TokenPurchase(
             msg.sender,
@@ -242,21 +246,25 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
             tokens,
             rate
         );
-        _forwardFunds(twoKeyAdmin);
+//        _forwardFunds(twoKeyAdmin);
         return tokens;
     }
 
+    /**
+    TODO handle errors that might happen here (not enough ether, etc..)
+     */
 
-    function swapEthForStableCoin(uint ethWeiAmount) internal returns (uint){
-        uint256 minConversionRate;
-        uint256 stableCoinUnits;
+    function swapEthForStableCoin() internal returns (uint){
+        uint minConversionRate = 0;
         IKyberNetworkProxy proxyContract = IKyberNetworkProxy(kyberProxyContractAddress);
         (minConversionRate,) = proxyContract.getExpectedRate(ETH_TOKEN_ADDRESS, DAI, 100000000000000000);
-        stableCoinUnits = (proxyContract.swapEtherToToken.value(ethWeiAmount)(DAI,minConversionRate)).div(10**18);
+        uint stableCoinUnits = proxyContract.swapEtherToToken.value(msg.value)(DAI,minConversionRate);
         usdStableCoinUnitsReserve += stableCoinUnits;
     }
 
-
+    /**
+     * TODO: Add DAI and TUSD rates with USD in TwoKeyExchangeRateContract
+     */
     function buyStableCoinWith2key(uint _twoKeyUnits, address _beneficiary) external onlyValidatedContracts returns (uint){
         uint usdTetheredStableCoinUnits;
 
