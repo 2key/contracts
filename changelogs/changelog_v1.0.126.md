@@ -208,3 +208,4 @@ There are a couple of more changes and fixes such as:
 - Deployment goes through TwoKeyFactory not through SingletonRegistry anymore
 - sign/index.ts -> When joining extra cut validation
 - Switched IPFS to our 2key nodes
+- All functions for lockup contracts are deprecated and won't be used anymore. Will be probably completely deleted in next release.
