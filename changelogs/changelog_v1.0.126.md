@@ -101,7 +101,111 @@ ERC20 public DAI;
 
 ### Changelog 2key-protocol repository
 
+##### acquisition/index.ts
 
+- Constructor of Acquisition changed
+```
+constructor(
+        twoKeyProtocol: ITwoKeyBase,
+        helpers: ITwoKeyHelpers,
+        utils: ITwoKeyUtils,
+        erc20: IERC20,
+        sign: ISign,
+        twoKeyFactory: ITwoKeyFactory,
+        upgradableExchange: IUpgradableExchange,
+    ) {
+        this.base = twoKeyProtocol;
+        this.helpers = helpers;
+        this.utils = utils;
+        this.erc20 = erc20;
+        this.sign = sign;
+        this.twoKeyFactory = twoKeyFactory;
+        this.nonSingletonsHash = acquisitionContracts.NonSingletonsHash;
+        this.upgradableExchange = upgradableExchange;
+        // console.log('ACQUISITION', this.nonSingletonsHash, this.nonSingletonsHash.length);
+    }
+```
 
+- Added `_getPurchasesHandlerInstance` method
+- Expanded with `twoKeyPurchasesHandler`
+```
+let extraMetaInfo = {
+                    'contractor' : from,
+                    'web3_address' : campaignAddress,
+                    conversionHandlerAddress,
+                    twoKeyAcquisitionLogicHandlerAddress,
+                    twoKeyPurchasesHandler,
+                    ephemeralContractsVersion: this.nonSingletonsHash,
+                };
+```
+- Modified `getConversion` method doesn't return anymore lockup address
+- Added `getPurchaseInformation` method resolves `IPurchaseInformation`
+- Added `getBoughtTokensReleaseDates` method 
+- Modified `public withdrawTokens(campaign: any, conversionId: number, portion: number, from:string) : Promise<string>`
+- Added `getRequiredRewardsInventoryAmount(acceptsFiat: boolean, acceptsEther: boolean, hardCap: number, maxReferralRewardPercent: number) : Promise<number>`
+- Added `public isEnoughRewardsForFiatParticipation(campaign: any, fiatWei: number) : Promise<IPossibleFiatReward>`
+- Modified `IAcquisitionCampaignMeta`
+```
+export interface IAcquisitionCampaignMeta {
+    contractor: string,
+    campaignAddress: string,
+    conversionHandlerAddress: string,
+    twoKeyAcquisitionLogicHandlerAddress: string,
+    twoKeyPurchasesHandler: string,
+    campaignPublicLinkKey: string
+    ephemeralContractsVersion: string,
+    publicMetaHash: string,
+    privateMetaHash: string,
+}
+```
+- Modified `IAcquisitionCampaign` with 2 added params to the bottom
+```
+export interface IAcquisitionCampaign {
+    generatePublicMeta: () => IPublicMeta,
+    moderator?: string, // Address of the moderator - it's a contract that works (operates) as admin of whitelists contracts
+    conversionHandlerAddress?: string,
+    twoKeyAcquisitionLogicHandler?: string,
+    assetContractERC20: string,
+    campaignStartTime: number, // Timestamp
+    campaignEndTime: number, // Timestamp
+    expiryConversion: number, // Timestamp
+    maxReferralRewardPercentWei: number | string | BigNumber,
+    maxConverterBonusPercentWei: number | string | BigNumber,
+    pricePerUnitInETHWei: number | string | BigNumber,
+    minContributionETHWei: number | string | BigNumber,
+    maxContributionETHWei: number | string | BigNumber,
+    referrerQuota?: number,
+    currency: string,
+    twoKeyExchangeContract: string,
+    tokenDistributionDate: number,
+    maxDistributionDateShiftInDays: number,
+    numberOfVestingPortions: number,
+    numberOfDaysBetweenPortions: number,
+    bonusTokensVestingStartShiftInDaysFromDistributionDate: number,
+    isKYCRequired: boolean,
+    isFiatConversionAutomaticallyApproved: boolean,
+    incentiveModel: string,
+    isFiatOnly: boolean,
+    vestingAmount: string,
+    mustConvertToReferr: boolean
+}
+```
 
+- Added interface IPurchaseInformation
+```
+{
+    converter: string,
+    baseTokens: number,
+    bonusTokens: number,
+    portionAmount: number[],
+    isPortionWithdrawn: boolean[],
+    unlockingDays: number[]
+}
+```
 
+##### Other protocol changes
+There are a couple of more changes and fixes such as: 
+- Deployment goes through TwoKeyFactory not through SingletonRegistry anymore
+- sign/index.ts -> When joining extra cut validation
+- Switched IPFS to our 2key nodes
+- All functions for lockup contracts are deprecated and won't be used anymore. Will be probably completely deleted in next release.
