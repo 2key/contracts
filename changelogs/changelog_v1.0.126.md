@@ -203,4 +203,8 @@ export interface IAcquisitionCampaign {
 }
 ```
 
-
+##### Other protocol changes
+There are a couple of more changes and fixes such as: 
+- Deployment goes through TwoKeyFactory not through SingletonRegistry anymore
+- sign/index.ts -> When joining extra cut validation
+- Switched IPFS to our 2key nodes
