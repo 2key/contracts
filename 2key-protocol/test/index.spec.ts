@@ -1414,7 +1414,13 @@ describe('TwoKeyProtocol', () => {
     it('Should get portions release dates', async() => {
         let releaseDates = await twoKeyProtocol.AcquisitionCampaign.getBoughtTokensReleaseDates(campaignAddress);
         console.log(releaseDates);
-    })
+    }).timeout(60000);
+
+    it('should get required rewards inventory', async() => {
+        let hardCap = 95000000; //95M dollars
+        let rewardsNeeded = await twoKeyProtocol.AcquisitionCampaign.getRequiredRewardsInventoryAmount(true, false, hardCap, 25);
+        console.log('Rewards inventory required' , rewardsNeeded);
+    }).timeout(60000);
 
     // it('should build refgraph', async() => {
     //     const {web3, address} = web3switcher.gmail();

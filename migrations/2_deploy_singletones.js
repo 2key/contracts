@@ -82,6 +82,8 @@ module.exports = function deploy(deployer) {
      */
     let votingPowers = [1, 1, 1];
 
+    let rewardsReleaseAfter = 1577836800; //1 January 2020
+
 
 
     let kyberAddress;
@@ -685,7 +687,7 @@ module.exports = function deploy(deployer) {
                             proxyAddressTwoKeyUpgradableExchange,
                             proxyAddressTwoKeyRegistry,
                             proxyAddressTwoKeyEventSource,
-                            1 // Rewards release after (we are hacking it now so they'll be released immediately)
+                            deployer.network.startsWith('dev') ? 1 : rewardsReleaseAfter
                         );
 
                         await TwoKeyFactory.at(proxyAddressTwoKeyFactory).setInitialParams
