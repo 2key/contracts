@@ -139,9 +139,7 @@ let extraMetaInfo = {
                 };
 ```
 - Modified `getConversion` method doesn't return anymore lockup address
-- Added `getPurchaseInformation` method resolves : 
-```
-```
+- Added `getPurchaseInformation` method resolves `IPurchaseInformation`
 - Added `getBoughtTokensReleaseDates` method 
 - Modified `public withdrawTokens(campaign: any, conversionId: number, portion: number, from:string) : Promise<string>`
 - Added `getRequiredRewardsInventoryAmount(acceptsFiat: boolean, acceptsEther: boolean, hardCap: number, maxReferralRewardPercent: number) : Promise<number>`
