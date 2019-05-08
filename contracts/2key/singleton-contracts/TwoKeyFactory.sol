@@ -81,22 +81,39 @@ contract TwoKeyFactory is Upgradeable, MaintainingPattern {
     public
     payable
     {
-        // Deploy proxies for all 3 contracts
-        //TODO: Versions are now hardcoded to 1.0, maybe to get dynamically always the latest version, but store the old ones
         //Deploy proxy for Acquisition contract
-        ProxyCampaign proxyAcquisition = new ProxyCampaign("TwoKeyAcquisitionCampaignERC20", "1.0", address(twoKeySingletonRegistry));
-//        UpgradeableCampaign(proxyAcquisition).initialize.value(msg.value)(msg.sender);
+        ProxyCampaign proxyAcquisition = new ProxyCampaign(
+            "TwoKeyAcquisitionCampaignERC20",
+            twoKeySingletonRegistry.getLatestContractVersion("TwoKeyAcquisitionCampaignERC20"),
+            address(twoKeySingletonRegistry)
+        );
 
         //Deploy proxy for ConversionHandler contract
-        ProxyCampaign proxyConversions = new ProxyCampaign("TwoKeyConversionHandler", "1.0", address(twoKeySingletonRegistry));
-//        UpgradeableCampaign(proxyConversions).initialize.value(msg.value)(msg.sender);
+        ProxyCampaign proxyConversions = new ProxyCampaign(
+            "TwoKeyConversionHandler",
+            twoKeySingletonRegistry.getLatestContractVersion("TwoKeyConversionHandler"),
+            address(twoKeySingletonRegistry)
+        );
 
         //Deploy proxy for LogicHandlerContract
-        ProxyCampaign proxyLogicHandler = new ProxyCampaign("TwoKeyAcquisitionLogicHandler", "1.0", address(twoKeySingletonRegistry));
-//        UpgradeableCampaign(proxyLogicHandler).initialize.value(msg.value)(msg.sender);
+        ProxyCampaign proxyLogicHandler = new ProxyCampaign(
+            "TwoKeyAcquisitionLogicHandler",
+            twoKeySingletonRegistry.getLatestContractVersion("TwoKeyAcquisitionLogicHandler"),
+            address(twoKeySingletonRegistry)
+        );
 
-        ProxyCampaign proxyPurchasesHandler = new ProxyCampaign("TwoKeyPurchasesHandler", "1.0", address(twoKeySingletonRegistry));
-//        UpgradeableCampaign(proxyPurchasesHandler).initialize.value(msg.value)(msg.sender);
+        //Deploy proxy for PurchasesHandler
+        ProxyCampaign proxyPurchasesHandler = new ProxyCampaign(
+            "TwoKeyPurchasesHandler",
+            twoKeySingletonRegistry.getLatestContractVersion("TwoKeyAcquisitionLogicHandler"),
+            address(twoKeySingletonRegistry)
+        );
+
+
+        //        UpgradeableCampaign(proxyPurchasesHandler).initialize.value(msg.value)(msg.sender);
+        //        UpgradeableCampaign(proxyLogicHandler).initialize.value(msg.value)(msg.sender);
+        //        UpgradeableCampaign(proxyConversions).initialize.value(msg.value)(msg.sender);
+        //        UpgradeableCampaign(proxyAcquisition).initialize.value(msg.value)(msg.sender);
 
         IHandleCampaignDeployment(proxyPurchasesHandler).setInitialParamsPurchasesHandler(
             valuesConversion,
