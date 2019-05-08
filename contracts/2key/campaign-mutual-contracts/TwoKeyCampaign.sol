@@ -361,9 +361,8 @@ contract TwoKeyCampaign is ArcERC20 {
 				IERC20(twoKeyEconomy).transfer(_address,balance);
 			}
 			else {
-				//TODO: Approve and then call transferFrom from upgradable exchange
 				//In case 2Key rewards still locked;
-				IERC20(twoKeyEconomy).transfer(twoKeyUpgradableExchangeContract, balance);
+				IERC20(twoKeyEconomy).approve(twoKeyUpgradableExchangeContract, balance);
 				IUpgradableExchange(twoKeyUpgradableExchangeContract).buyStableCoinWith2key(balance, msg.sender);
 			}
 			reservedAmount2keyForRewards -= balance;

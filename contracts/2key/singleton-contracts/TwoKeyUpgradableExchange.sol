@@ -263,11 +263,12 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
     }
 
     /**
-     * TODO: Add DAI and TUSD rates with USD in TwoKeyExchangeRateContract
+     * TODO: Add DAI and TUSD rates with USD in
      */
     function buyStableCoinWith2key(uint _twoKeyUnits, address _beneficiary) external onlyValidatedContracts returns (uint){
         uint usdTetheredStableCoinUnits;
 
+        token.transferFrom(msg.sender, address(this), _twoKeyUnits);
         usdTetheredStableCoinUnits = _getUsdStableCoinAmountFrom2keyUnits(_twoKeyUnits, twoKeyToStableCoinExchangeRate);
 
         require(usdStableCoinUnitsReserve - usdTetheredStableCoinUnits > 0);
