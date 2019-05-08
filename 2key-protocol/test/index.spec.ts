@@ -394,30 +394,30 @@ describe('TwoKeyProtocol', () => {
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
         });
 
-        txHash = await twoKeyProtocol.SingletonRegistry.setContractImplementationByContractNameAndVersion(testObject.contractName, testObject.versionName, testObject.contractAddress, from);
-        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-
-        contractAddress = await twoKeyProtocol.SingletonRegistry.getImplementationByContractNameAndVersion(testObject.contractName,testObject.versionName);
-        expect(contractAddress).to.be.equal(testObject.contractAddress);
+        // txHash = await twoKeyProtocol.SingletonRegistry.setContractImplementationByContractNameAndVersion(testObject.contractName, testObject.versionName, testObject.contractAddress, from);
+        // const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        //
+        // contractAddress = await twoKeyProtocol.SingletonRegistry.getImplementationByContractNameAndVersion(testObject.contractName,testObject.versionName);
+        // expect(contractAddress).to.be.equal(testObject.contractAddress);
     }).timeout(60000);
 
 
     it('Should check SingltonsRegistry LatestVersion' ,async() => {
-        let contractLatestVersion;
-        const {web3, address} = web3switcher.deployer();
-        from = address;
-        twoKeyProtocol.setWeb3({
-            web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
-        });
-
-        contractLatestVersion = await twoKeyProtocol.SingletonRegistry.getLatestVersionByContractName(testObject.contractName);
-        expect(contractLatestVersion).to.be.equal(testObject.versionName);
+        // let contractLatestVersion;
+        // const {web3, address} = web3switcher.deployer();
+        // from = address;
+        // twoKeyProtocol.setWeb3({
+        //     web3,
+        //     networks: {
+        //         mainNetId,
+        //         syncTwoKeyNetId,
+        //     },
+        //     eventsNetUrl,
+        //     plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+        // });
+        //
+        // contractLatestVersion = await twoKeyProtocol.SingletonRegistry.getLatestVersionByContractName(testObject.contractName);
+        // expect(contractLatestVersion).to.be.equal(testObject.versionName);
     }).timeout(60000);
 
 
