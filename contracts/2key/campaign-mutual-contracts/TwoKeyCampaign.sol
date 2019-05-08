@@ -360,9 +360,9 @@ contract TwoKeyCampaign is ArcERC20 {
 			if(now >= ITwoKeyAdmin(twoKeyAdminAddress).getTwoKeyRewardsReleaseDate()){
 				IERC20(twoKeyEconomy).transfer(_address,balance);
 			}
-			else{
+			else {
 				//In case 2Key rewards still locked;
-				IERC20(twoKeyEconomy).transfer(twoKeyUpgradableExchangeContract, balance);
+				IERC20(twoKeyEconomy).approve(twoKeyUpgradableExchangeContract, balance);
 				IUpgradableExchange(twoKeyUpgradableExchangeContract).buyStableCoinWith2key(balance, msg.sender);
 			}
 			reservedAmount2keyForRewards -= balance;

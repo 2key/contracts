@@ -14,6 +14,7 @@ const TwoKeyDeepFreezeTokenPool = artifacts.require('TwoKeyDeepFreezeTokenPool')
 const TwoKeyLongTermTokenPool = artifacts.require('TwoKeyLongTermTokenPool');
 const TwoKeyCampaignValidator = artifacts.require('TwoKeyCampaignValidator');
 const TwoKeyFactory = artifacts.require('TwoKeyFactory');
+const KyberNetworkTestMockContract = artifacts.require('KyberNetworkTestMockContract');
 
 
 const Call = artifacts.require('Call');
@@ -81,11 +82,18 @@ module.exports = function deploy(deployer) {
      */
     let votingPowers = [1, 1, 1];
 
+    let rewardsReleaseAfter = 1577836800; //1 January 2020
 
 
-    let deployerAddress = '0x18e1d5ca01141E3a0834101574E5A1e94F0F8F6a';
 
+    let kyberAddress;
     let maintainerAddresses = [];
+
+    /**
+     * KYBER NETWORK ADDRESS and DAI ADDRESS
+     */
+    const KYBER_NETWORK_PROXY_ADDRESS_ROPSTEN = '0x818E6FECD516Ecc3849DAf6845e3EC868087B755';
+    const DAI_ROPSTEN_ADDRESS = '0xaD6D458402F60fD3Bd25163575031ACDce07538D';
 
 
     if(deployer.network.startsWith('public.test') || deployer.network.startsWith('plasma')) {
@@ -143,7 +151,8 @@ module.exports = function deploy(deployer) {
             "0x28c72bb6bdc79e4e363e295c2c7b56bc40fd0274",
             "0x0e252a962210db8de606bd3db852a26d2f6cd0be",
             "0x77fff2a9631716f985a6e950e97a8c0ca12fc735",
-            "0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7"
+            "0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7",
+            "0xb3fa520368f2df7bed4df5185101f303f6c7decc"
         ];
     } else {
         /**
@@ -200,7 +209,8 @@ module.exports = function deploy(deployer) {
             "0x774c9fde8dcf97af6f6466f9f89154618641c5a5",
             "0x28c72bb6bdc79e4e363e295c2c7b56bc40fd0274",
             "0x0e252a962210db8de606bd3db852a26d2f6cd0be",
-            "0x77fff2a9631716f985a6e950e97a8c0ca12fc735"
+            "0x77fff2a9631716f985a6e950e97a8c0ca12fc735",
+            "0xb3fa520368f2df7bed4df5185101f303f6c7decc"
         ];
 
         initialCongressMembers = [
@@ -224,7 +234,7 @@ module.exports = function deploy(deployer) {
      */
     deployer.deploy(Call);
     deployer.deploy(IncentiveModels);
-    if (deployer.network.startsWith('dev') || deployer.network.startsWith('public.') || deployer.network.startsWith('rinkeby') || deployer.network.startsWith('ropsten')) {
+    if (deployer.network.startsWith('dev') || deployer.network.startsWith('public.') || deployer.network.startsWith('ropsten')) {
         deployer.deploy(TwoKeyCongress, 24*60, initialCongressMembers, initialCongressMemberNames, votingPowers)
             .then(() => TwoKeyCongress.deployed())
             .then(() => deployer.deploy(TwoKeyCampaignValidator))
@@ -237,6 +247,8 @@ module.exports = function deploy(deployer) {
             .then(() => deployer.link(Call, TwoKeyRegistry))
             .then(() => deployer.deploy(TwoKeyRegistry)
             .then(() => TwoKeyRegistry.deployed())
+            .then(() => deployer.deploy(KyberNetworkTestMockContract))
+            .then(() => KyberNetworkTestMockContract.deployed())
             .then(() => deployer.deploy(TwoKeyBaseReputationRegistry))
             .then(() => TwoKeyBaseReputationRegistry.deployed())
             .then(() => deployer.deploy(TwoKeyUpgradableExchange))
@@ -465,7 +477,7 @@ module.exports = function deploy(deployer) {
                             'address': EventSource.address,
                             'Proxy': proxy,
                             'Version': "1.0",
-                            maintainer_address: deployerAddress,
+                            maintainer_address: maintainerAddresses,
                         };
                         fileObject['TwoKeyEventSource'] = twoKeyEventS;
                         proxyAddressTwoKeyEventSource = proxy;
@@ -521,7 +533,7 @@ module.exports = function deploy(deployer) {
                             'address': TwoKeyAdmin.address,
                             'Proxy': proxy,
                             'Version': "1.0",
-                            maintainer_address: deployerAddress
+                            maintainer_address: maintainerAddresses
                         };
 
                         fileObject['TwoKeyAdmin'] = twoKeyAdmin;
@@ -550,7 +562,7 @@ module.exports = function deploy(deployer) {
                             'address' : TwoKeyUpgradableExchange.address,
                             'Proxy' : proxy,
                             'Version' : "1.0",
-                            maintainer_address: deployerAddress
+                            maintainer_address: maintainerAddresses
                         };
 
                         fileObject['TwoKeyUpgradableExchange'] = twoKeyUpgradableExchange;
@@ -593,6 +605,16 @@ module.exports = function deploy(deployer) {
                         reject(e);
                     }
                 });
+
+                /**
+                 * Determine which network are we using
+                 */
+                if(deployer.network.startsWith('dev')) {
+                    kyberAddress = KyberNetworkTestMockContract.address;
+                } else {
+                    kyberAddress = KYBER_NETWORK_PROXY_ADDRESS_ROPSTEN;
+                }
+
 
                 await new Promise(async (resolve, reject) => {
                     console.log('... Setting Initial params in all singletone proxy contracts');
@@ -655,6 +677,8 @@ module.exports = function deploy(deployer) {
                             TwoKeyEconomy.address,
                             proxyAddressTwoKeyExchange,
                             proxyAddressTwoKeyCampaignValidator,
+                            DAI_ROPSTEN_ADDRESS,
+                            kyberAddress,
                             maintainerAddresses,
                         );
 
@@ -665,7 +689,7 @@ module.exports = function deploy(deployer) {
                             proxyAddressTwoKeyUpgradableExchange,
                             proxyAddressTwoKeyRegistry,
                             proxyAddressTwoKeyEventSource,
-                            1 // Rewards release after (we are hacking it now so they'll be released immediately)
+                            deployer.network.startsWith('dev') ? 1 : rewardsReleaseAfter
                         );
 
                         await TwoKeyFactory.at(proxyAddressTwoKeyFactory).setInitialParams

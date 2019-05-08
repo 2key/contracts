@@ -334,12 +334,12 @@ contract TwoKeyPlasmaEvents is Upgradeable {
         return (visits_list[c][contractor][from], visits_list_timestamps[c][contractor][from]);
     }
 
-    function votes(address c, address contractor) public view returns (uint256, uint256, uint256, uint256, uint256, int) {
-        return (
-        voted_yes[c][contractor], weighted_yes[c][contractor], voted_no[c][contractor], weighted_no[c][contractor],
-        voted_yes[c][contractor] + voted_no[c][contractor], int(weighted_yes[c][contractor]) - int(weighted_no[c][contractor])
-        );
-    }
+//    function votes(address c, address contractor) public view returns (uint256, uint256, uint256, uint256, uint256, int) {
+//        return (
+//        voted_yes[c][contractor], weighted_yes[c][contractor], voted_no[c][contractor], weighted_no[c][contractor],
+//        voted_yes[c][contractor] + voted_no[c][contractor], int(weighted_yes[c][contractor]) - int(weighted_no[c][contractor])
+//        );
+//    }
 
     function getNumberOfVisitsAndJoinsPerCampaign(address _campaignAddress) public view returns (uint,uint) {
         return (campaign2numberOfVisits[_campaignAddress], campaign2numberOfJoins[_campaignAddress]);

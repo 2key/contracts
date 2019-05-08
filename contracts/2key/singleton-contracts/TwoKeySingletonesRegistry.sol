@@ -52,6 +52,7 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
         }
     }
 
+
     /**
      * @notice Function to add non upgradable contract in registry of all contracts
      * @param contractName is the name of the contract
@@ -69,6 +70,9 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
     }
 
     /**
+     * todo: make sure only admin/deployer can call this function
+     */
+    /**
      * @dev Registers a new version with its implementation address
      * @param version representing the version name of the new implementation to be registered
      * @param implementation representing the address of the new implementation to be registered
@@ -81,8 +85,7 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
     public
     onlyMaintainer
     {
-//        require(versions[contractName][version] == 0x0);
-//        TODO: Uncomment once we are done with patching
+        require(versions[contractName][version] == 0x0);
         versions[contractName][version] = implementation;
         contractNameToLatestVersionName[contractName] = version;
         emit VersionAdded(version, implementation);

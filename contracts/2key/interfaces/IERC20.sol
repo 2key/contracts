@@ -27,6 +27,16 @@ contract IERC20 {
     returns (bool);
 
 
+
+    function approve(
+        address _spender,
+        uint256 _value
+    )
+    public
+    returns (bool);
+
+
+
     function decimals()
     external
     view
