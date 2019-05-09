@@ -473,63 +473,108 @@ module.exports = function deploy(deployer) {
                     kyberAddress = KYBER_NETWORK_PROXY_ADDRESS_ROPSTEN;
                 }
 
-
-                await new Promise(async (resolve, reject) => {
-                    console.log('... Setting Initial params in all singletone proxy contracts');
+                await new Promise(async(resolve,reject) => {
                     try {
-
-                        await TwoKeyCommunityTokenPool.at(proxyAddressTwoKeyCommunityTokenPool).setInitialParams
-                        (
+                        console.log('Setting initial parameters in contract TwoKeyCommunityTokenPool');
+                        let txHash = await TwoKeyCommunityTokenPool.at(proxyAddressTwoKeyCommunityTokenPool).setInitialParams(
                             proxyAddressTwoKeyAdmin,
                             TwoKeyEconomy.address,
                             maintainerAddresses,
                             proxyAddressTwoKeyRegistry
                         );
+                        resolve(txHash);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
 
-                        await TwoKeyLongTermTokenPool.at(proxyAddressTwoKeyLongTermTokenPool).setInitialParams
-                        (
+                await new Promise(async(resolve,reject) => {
+                    try {
+                        console.log('Setting initial parameters in contract TwoKeyLongTermTokenPool');
+                        let txHash = await TwoKeyLongTermTokenPool.at(proxyAddressTwoKeyLongTermTokenPool).setInitialParams(
                             proxyAddressTwoKeyAdmin,
                             TwoKeyEconomy.address,
                             maintainerAddresses,
                         );
+                        resolve(txHash);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
 
-                        await TwoKeyDeepFreezeTokenPool.at(proxyAddressTwoKeyDeepFreezeTokenPool).setInitialParams
-                        (
+                await new Promise(async(resolve,reject) => {
+                    try {
+                        console.log('Setting initial parameters in contract TwoKeyDeepFreezeTokenPool');
+                        let txHash = await TwoKeyDeepFreezeTokenPool.at(proxyAddressTwoKeyDeepFreezeTokenPool).setInitialParams(
                             proxyAddressTwoKeyAdmin,
                             TwoKeyEconomy.address,
                             maintainerAddresses,
                             proxyAddressTwoKeyCommunityTokenPool
                         );
+                        resolve(txHash);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
 
-                        await TwoKeyCampaignValidator.at(proxyAddressTwoKeyCampaignValidator).setInitialParams
-                        (
+                await new Promise(async(resolve,reject) => {
+                    try {
+                        console.log('Setting initial parameters in contract TwoKeyCampaignValidator');
+                        let txHash = await TwoKeyCampaignValidator.at(proxyAddressTwoKeyCampaignValidator).setInitialParams(
                             TwoKeySingletonesRegistry.address,
                             maintainerAddresses
                         );
+                        resolve(txHash);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
 
-                        await EventSource.at(proxyAddressTwoKeyEventSource).setInitialParams
-                        (
+                await new Promise(async(resolve,reject) => {
+                    try {
+                        console.log('Setting initial parameters in contract EventSource');
+                        let txHash = await EventSource.at(proxyAddressTwoKeyEventSource).setInitialParams(
                             proxyAddressTwoKeyAdmin,
                             maintainerAddresses,
                             proxyAddressTwoKeyRegistry,
                             proxyAddressTwoKeyCampaignValidator
                         );
+                        resolve(txHash);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
 
-                        await TwoKeyBaseReputationRegistry.at(proxyAddressTwoKeyBaseReputationRegistry).setInitialParams
-                        (
+                await new Promise(async(resolve,reject) => {
+                    try {
+                        console.log('Setting initial parameters in contract TwoKeyBaseReputationRegistry');
+                        let txHash = await TwoKeyBaseReputationRegistry.at(proxyAddressTwoKeyBaseReputationRegistry).setInitialParams(
                             TwoKeySingletonesRegistry.address,
                             maintainerAddresses
                         );
+                        resolve(txHash);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
 
-                        await TwoKeyExchangeRateContract.at(proxyAddressTwoKeyExchange).setInitialParams
-                        (
-
+                await new Promise(async(resolve,reject) => {
+                    try {
+                        console.log('Setting initial parameters in contract TwoKeyExchangeRateContract');
+                        let txHash = await TwoKeyExchangeRateContract.at(proxyAddressTwoKeyExchange).setInitialParams(
                             maintainerAddresses,
                             proxyAddressTwoKeyAdmin
                         );
+                        resolve(txHash);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
 
-                        await TwoKeyUpgradableExchange.at(proxyAddressTwoKeyUpgradableExchange).setInitialParams
-                        (
+                await new Promise(async(resolve,reject) => {
+                    try {
+                        console.log('Setting initial parameters in contract TwoKeyUpgradableExchange');
+                        let txHash = await TwoKeyUpgradableExchange.at(proxyAddressTwoKeyUpgradableExchange).setInitialParams(
                             95,
                             proxyAddressTwoKeyAdmin,
                             TwoKeyEconomy.address,
@@ -540,8 +585,16 @@ module.exports = function deploy(deployer) {
                             maintainerAddresses,
                         );
 
-                        await TwoKeyAdmin.at(proxyAddressTwoKeyAdmin).setInitialParams
-                        (
+                        resolve(txHash);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
+
+                await new Promise(async(resolve,reject) => {
+                    try {
+                        console.log('Setting initial parameters in contract TwoKeyAdmin');
+                        let txHash = await TwoKeyAdmin.at(proxyAddressTwoKeyAdmin).setInitialParams(
                             TwoKeyCongress.address,
                             TwoKeyEconomy.address,
                             proxyAddressTwoKeyUpgradableExchange,
@@ -550,19 +603,37 @@ module.exports = function deploy(deployer) {
                             deployer.network.startsWith('dev') ? 1 : rewardsReleaseAfter
                         );
 
-                        await TwoKeyFactory.at(proxyAddressTwoKeyFactory).setInitialParams
-                        (
+                        resolve(txHash);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
+
+                await new Promise(async(resolve,reject) => {
+                    try {
+                        console.log('Setting initial parameters in contract TwoKeyFactory');
+                        let txHash = await TwoKeyFactory.at(proxyAddressTwoKeyFactory).setInitialParams(
                             TwoKeySingletonesRegistry.address,
                             proxyAddressTwoKeyAdmin,
                             maintainerAddresses
                         );
 
+                        resolve(txHash);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
+
+                await new Promise(async(resolve,reject) => {
+                    try {
+                        console.log('Setting initial parameters in contract TwoKeyRegistry');
                         let txHash = await TwoKeyRegistry.at(proxyAddressTwoKeyRegistry).setInitialParams
                         (
                             proxyAddressTwoKeyEventSource,
                             proxyAddressTwoKeyAdmin,
                             maintainerAddresses,
                         );
+
                         resolve(txHash);
                     } catch (e) {
                         reject(e);
