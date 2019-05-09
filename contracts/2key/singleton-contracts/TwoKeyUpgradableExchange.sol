@@ -237,7 +237,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         transactionCounter++;
         _processPurchase(_beneficiary, tokens);
 
-        swapEthForStableCoin();
+//        swapEthForStableCoin();
 
         emit TokenPurchase(
             msg.sender,
