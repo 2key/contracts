@@ -83,9 +83,7 @@ contract TwoKeyExchangeRateContract is Upgradeable, MaintainingPattern {
             currencyHolder = CurrencyType(_ratesArray[i]);
 
             CurrencyInfo memory currencyInfoHolder = CurrencyInfo({rate: rateHolder,decimals: decimalsHolder});
-
-
-
+            
             emit RateUpdated(uint256(currencyHolder), priceByCurrencyType[uint256(currencyHolder)].rate,priceByCurrencyType[uint256(currencyHolder)].decimals, rateHolder,decimalsHolder, msg.sender);
 
             //Set currency->currencyInfo struct
