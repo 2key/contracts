@@ -237,7 +237,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         transactionCounter++;
         _processPurchase(_beneficiary, tokens);
 
-//        swapEthForStableCoin();
+        swapEthForStableCoin();
 
         emit TokenPurchase(
             msg.sender,
@@ -257,7 +257,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
     function swapEthForStableCoin() internal returns (uint){
         uint minConversionRate = 0;
         IKyberNetworkProxy proxyContract = IKyberNetworkProxy(kyberProxyContractAddress);
-        (minConversionRate,) = proxyContract.getExpectedRate(ETH_TOKEN_ADDRESS, DAI, 100000000000000000);
+        (minConversionRate,) = proxyContract.getExpectedRate(ETH_TOKEN_ADDRESS, DAI, msg.value);
         uint stableCoinUnits = proxyContract.swapEtherToToken.value(msg.value)(DAI,minConversionRate);
         usdStableCoinUnitsReserve += stableCoinUnits;
     }
