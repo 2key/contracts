@@ -176,35 +176,20 @@ contract TwoKeyCampaign is ArcERC20 {
     }
 
 
-//	function updateOrSetPublicMetaHash(
-//		string _publicMetaHash
+
+//	/**
+//     * @notice Function to update maxReferralRewardPercent
+//     * @dev only Contractor can call this method, otherwise it will revert - emits Event when updated
+//     * @param value is the new referral percent value
+//     */
+//	function updateMaxReferralRewardPercent(
+//		uint value
 //	)
+//	public
 //	onlyContractor
 //	{
-//		publicMetaHash = _publicMetaHash;
+//		maxReferralRewardPercent = value;
 //	}
-
-//	function updateOrSetPrivateMetaHash(
-//		string _privateMetaHash
-//	)
-//	onlyContractor
-//	{
-//		privateMetaHash = _privateMetaHash;
-//	}
-
-	/**
-     * @notice Function to update maxReferralRewardPercent
-     * @dev only Contractor can call this method, otherwise it will revert - emits Event when updated
-     * @param value is the new referral percent value
-     */
-	function updateMaxReferralRewardPercent(
-		uint value
-	)
-	public
-	onlyContractor
-	{
-		maxReferralRewardPercent = value;
-	}
 
 	/**
      * @notice Function to set or update public meta hash
