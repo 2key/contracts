@@ -63,6 +63,8 @@ contract TwoKeyExchangeRateContract is Upgradeable, MaintainingPattern {
         }
     }
 
+    //input:
+    //[currency1, decimals1, rate1, currency2, decimals2, rate2,..., currency3, decimal3, rate3]
     function updatePrices(uint[] _ratesArray) public /*Add onlyMaintainer*/ {
         require(
         _ratesArray.length % 3 == 0,
