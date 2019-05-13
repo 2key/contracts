@@ -10,17 +10,28 @@ import "../Upgradeable.sol";
  * Will be maintained, and updated by our trusted server and CMC api every 8 hours.
  */
 contract TwoKeyExchangeRateContract is Upgradeable, MaintainingPattern {
-
-
     /**
      * @notice Event will be emitted every time we update the price for the fiat
      */
     event PriceUpdated(bytes32 _currency, uint newRate, uint _timestamp, address _updater);
+    event RateUpdated(uint256 _currency, uint256 oldRate, uint256 oldDecimal, uint256 newRate, uint256 newDecimal, address _updater);
+
+    mapping(uint256 => CurrencyInfo) public priceByCurrencyType;
+
+    struct CurrencyInfo{
+        uint rate;
+        uint decimals;
+    }
+
+    //So'll be synced with the backend
+    enum CurrencyType { USD, TWOKEY, BTC, ETH, DAI, USDT, TUSD, EUR, JPY, GBP}
+    enum RatesArrayRole {CURRENCY, NUMBEROFDECIMALS, RATE}
 
     /**
      * @notice public mapping which will store rate between 1 wei eth and 1 wei fiat currency
      * Will be updated every 8 hours, and it's public
      */
+
     mapping(bytes32 => FiatCurrency) public currencyName2rate;
 
     struct FiatCurrency {
@@ -50,6 +61,64 @@ contract TwoKeyExchangeRateContract is Upgradeable, MaintainingPattern {
         for(uint i=0; i<_maintainers.length; i++) {
             isMaintainer[_maintainers[i]] = true;
         }
+    }
+
+    function updatePrices(uint[] _ratesArray) public /*Add onlyMaintainer*/ {
+        require(
+        _ratesArray.length % 3 == 0,
+        "Array should be % 3 == 0 for currency, decimals, rate."
+        );
+
+        uint rateHolder;
+        uint decimalsHolder;
+        CurrencyType currencyHolder;
+
+        //each currency contains 3 values: [currencyType, numberOfDecimals, Rate] so each loop i+=3
+        for(uint i = 0; i < uint(_ratesArray.length); i=i+3){
+
+            rateHolder = _ratesArray[i + uint(RatesArrayRole.RATE)];
+            decimalsHolder = _ratesArray[i + uint(RatesArrayRole.NUMBEROFDECIMALS)];
+            currencyHolder = CurrencyType(_ratesArray[i]);
+
+            CurrencyInfo memory currencyInfoHolder = CurrencyInfo({rate: rateHolder,decimals: decimalsHolder});
+
+
+
+            emit RateUpdated(uint256(currencyHolder), priceByCurrencyType[uint256(currencyHolder)].rate,priceByCurrencyType[uint256(currencyHolder)].decimals, rateHolder,decimalsHolder, msg.sender);
+
+            //Set currency->currencyInfo struct
+            priceByCurrencyType[uint(currencyHolder)]= currencyInfoHolder;
+        }
+    }
+
+
+    //In case 1 btc equal 7142
+    //output = getRate(usd,btc) output[1]/output[0] = 7142
+    //output = getRate(btc,usd) output[1]/output[0] = 0.00014
+
+    function getRate(uint _from,uint _to) public view returns (uint, uint){
+        CurrencyInfo memory baseCurrency = priceByCurrencyType[_from];
+        CurrencyInfo memory targetCurrency = priceByCurrencyType[_to];
+
+        uint baseDecimals = baseCurrency.decimals;
+        uint targetDecimals = targetCurrency.decimals;
+
+        uint targetRate;
+        uint baseRate;
+
+        if (baseDecimals > targetDecimals){
+            targetRate = (10**(baseDecimals - targetDecimals)) * targetCurrency.rate;
+            baseRate = baseCurrency.rate;
+        }
+        else if(baseDecimals < targetDecimals){
+            baseRate = (10**(targetDecimals - baseDecimals)) * baseCurrency.rate;
+            targetRate = targetCurrency.rate;
+        }
+        else{
+            baseRate = baseCurrency.rate;
+            targetRate = targetCurrency.rate;
+        }
+        return (baseRate, targetRate);
     }
 
     /**
