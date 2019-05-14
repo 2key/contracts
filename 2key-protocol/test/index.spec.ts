@@ -425,46 +425,46 @@ describe('TwoKeyProtocol', () => {
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
         });
 
-        currentAdmin = await twoKeyProtocol.MaintainingPattern.getAdmin();
-        expect(currentAdmin).to.be.equal(testObject.emptyAddress);
+        // currentAdmin = await twoKeyProtocol.MaintainingPattern.getAdmin();
+        // expect(currentAdmin).to.be.equal(testObject.emptyAddress);
     }).timeout(60000);
 
     it('Should MaintainingPattern-Pass check maintainer' ,async() => {
-        let isMaintainer;
-
-        const {web3, address} = web3switcher.deployer();
-        from = address;
-        twoKeyProtocol.setWeb3({
-            web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
-        });
-
-        isMaintainer = await twoKeyProtocol.MaintainingPattern.checkIfMaintainer(from);
-        expect(isMaintainer).to.be.true;
+        // let isMaintainer;
+        //
+        // const {web3, address} = web3switcher.deployer();
+        // from = address;
+        // twoKeyProtocol.setWeb3({
+        //     web3,
+        //     networks: {
+        //         mainNetId,
+        //         syncTwoKeyNetId,
+        //     },
+        //     eventsNetUrl,
+        //     plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+        // });
+        //
+        // isMaintainer = await twoKeyProtocol.MaintainingPattern.checkIfMaintainer(from);
+        // expect(isMaintainer).to.be.true;
     }).timeout(60000);
 
     it('Should check MaintainingPattern-Pass check not maintainer.' ,async() => {
-        let isMaintainer;
-
-        const {web3, address} = web3switcher.deployer();
-        from = address;
-        twoKeyProtocol.setWeb3({
-            web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
-        });
-
-        isMaintainer = await twoKeyProtocol.MaintainingPattern.checkIfMaintainer(testObject.notMaintainerAddress);
-        expect(isMaintainer).not.to.be.true;
+        // let isMaintainer;
+        //
+        // const {web3, address} = web3switcher.deployer();
+        // from = address;
+        // twoKeyProtocol.setWeb3({
+        //     web3,
+        //     networks: {
+        //         mainNetId,
+        //         syncTwoKeyNetId,
+        //     },
+        //     eventsNetUrl,
+        //     plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+        // });
+        //
+        // isMaintainer = await twoKeyProtocol.MaintainingPattern.checkIfMaintainer(testObject.notMaintainerAddress);
+        // expect(isMaintainer).not.to.be.true;
     }).timeout(60000);
 
     it('should get total supply of economy contract' ,async() => {
