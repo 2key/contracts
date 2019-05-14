@@ -303,7 +303,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
             }
         }
 
-        token.transferFrom(msg.sender, address(this), _twoKeyUnits);
+//        token.transferFrom(msg.sender, address(this), _twoKeyUnits);
         usdStableCoinUnitsReserve -= stableCoinUnits;
         require(ERC20(DAI).transfer(_beneficiary, stableCoinUnits));
 
@@ -353,5 +353,9 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
 
     function startHedging() public onlyMaintainer {
         hedgeEther();
+    }
+
+    function takeTokensFromAcquisition(address acquisition, uint _twoKeyUnits) public {
+        token.transferFrom(acquisition, address(this), _twoKeyUnits);
     }
 }
