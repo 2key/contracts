@@ -54,14 +54,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         uint256 amount
     );
 
-    /**
-     * @notice Event will be fired every time some ether is hedged
-     */
-    event StartedHedging(
-        uint amountOfEther,
-        uint stableCoinsAmount,
-        uint timestamp
-    );
 
     /**
      * Event for token purchase logging
@@ -263,23 +255,22 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
     TODO handle errors that might happen here (not enough ether, etc..)
      */
 
-    function hedgeEther() internal {
+    function hedgeEther() internal returns (uint) {
         uint minConversionRate = 0;
         IKyberNetworkProxy proxyContract = IKyberNetworkProxy(kyberProxyContractAddress);
         uint balance = this.balance;
         if(balance == 0) {
-            return;
+            return 0;
         }
         (minConversionRate,) = proxyContract.getExpectedRate(ETH_TOKEN_ADDRESS, DAI, balance);
+        //TODO: minConversionRate must be in some defined percent deviation from our rates
         uint stableCoinUnits = proxyContract.swapEtherToToken.value(balance)(DAI,minConversionRate);
         usdStableCoinUnitsReserve += stableCoinUnits;
 
         emit StartedHedging(balance, stableCoinUnits, block.timestamp);
+        return stableCoinUnits;
     }
 
-    function startHedging() public onlyMaintainer {
-        hedgeEther();
-    }
 
     /**
      * TODO: Add DAI and TUSD rates with USD in
@@ -287,15 +278,46 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
     function buyStableCoinWith2key(uint _twoKeyUnits, address _beneficiary) external onlyValidatedContracts returns (uint) {
         uint stableCoinUnits;
 
-        token.transferFrom(msg.sender, address(this), _twoKeyUnits);
+
         stableCoinUnits = _getUsdStableCoinAmountFrom2keyUnits(_twoKeyUnits, twoKeyToStableCoinExchangeRate);
 
-        if(usdStableCoinUnitsReserve - stableCoinUnits> 0) {
+        uint etherBalanceOnContractBefore = this.balance;
+        uint stableCoinsOnContractBefore = usdStableCoinUnitsReserve;
+
+        if(usdStableCoinUnitsReserve < stableCoinUnits) {
             hedgeEther();
+            if(usdStableCoinUnitsReserve < stableCoinUnits) {
+                emit WithdrawExecuted (
+                    msg.sender,
+                    _beneficiary,
+                    stableCoinsOnContractBefore,
+                    usdStableCoinUnitsReserve,
+                    etherBalanceOnContractBefore,
+                    this.balance,
+                    stableCoinUnits,
+                    _twoKeyUnits,
+                    false
+                );
+
+                return;
+            }
         }
 
+        token.transferFrom(msg.sender, address(this), _twoKeyUnits);
         usdStableCoinUnitsReserve -= stableCoinUnits;
         require(ERC20(DAI).transfer(_beneficiary, stableCoinUnits));
+
+        emit WithdrawExecuted(
+            msg.sender,
+            _beneficiary,
+            stableCoinsOnContractBefore,
+            usdStableCoinUnitsReserve,
+            etherBalanceOnContractBefore,
+            this.balance,
+            stableCoinUnits,
+            _twoKeyUnits,
+            true
+        );
     }
 
 
@@ -305,5 +327,31 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
     onlyValidatedContracts
     {
         buyTokens(msg.sender);
+    }
+
+    /**
+     * @notice Event will be fired every time some ether is hedged
+     */
+    event StartedHedging(
+        uint amountOfEther,
+        uint stableCoinsAmount,
+        uint timestamp
+    );
+
+    event WithdrawExecuted (
+        address caller,
+        address beneficiary,
+        uint stableCoinsReserveBefore,
+        uint stableCoinsReserveAfter,
+        uint etherBalanceBefore,
+        uint etherBalanceAfter,
+        uint stableCoinsToWithdraw,
+        uint twoKeyAmount,
+        bool status
+    );
+
+
+    function startHedging() public onlyMaintainer {
+        hedgeEther();
     }
 }
