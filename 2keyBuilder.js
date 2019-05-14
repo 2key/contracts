@@ -471,7 +471,7 @@ async function deploy() {
     console.log(process.argv);
     const local = process.argv[2].includes('local');
     if (!local && !process.env.SKIP_TEST) {
-      // await test();
+      await test();
     }
 
     // TODO: Add build/contracts backup
