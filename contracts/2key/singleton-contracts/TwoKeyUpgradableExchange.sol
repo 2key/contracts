@@ -55,6 +55,15 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
     );
 
     /**
+     * @notice Event will be fired every time some ether is hedged
+     */
+    event StartedHedging(
+        uint amountOfEther,
+        uint stableCoinsAmount,
+        uint timestamp
+    );
+
+    /**
      * Event for token purchase logging
      * @param purchaser who paid for the tokens
      * @param receiver is who got the tokens
@@ -237,7 +246,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         transactionCounter++;
         _processPurchase(_beneficiary, tokens);
 
-        swapEthForStableCoin();
 
         emit TokenPurchase(
             msg.sender,
@@ -246,7 +254,8 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
             tokens,
             rate
         );
-//        _forwardFunds(twoKeyAdmin);
+
+        //        _forwardFunds(twoKeyAdmin);
         return tokens;
     }
 
@@ -254,27 +263,39 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
     TODO handle errors that might happen here (not enough ether, etc..)
      */
 
-    function swapEthForStableCoin() internal returns (uint){
+    function hedgeEther() internal {
         uint minConversionRate = 0;
         IKyberNetworkProxy proxyContract = IKyberNetworkProxy(kyberProxyContractAddress);
-        (minConversionRate,) = proxyContract.getExpectedRate(ETH_TOKEN_ADDRESS, DAI, msg.value);
-        uint stableCoinUnits = proxyContract.swapEtherToToken.value(msg.value)(DAI,minConversionRate);
+        uint balance = this.balance;
+        if(balance == 0) {
+            return;
+        }
+        (minConversionRate,) = proxyContract.getExpectedRate(ETH_TOKEN_ADDRESS, DAI, balance);
+        uint stableCoinUnits = proxyContract.swapEtherToToken.value(balance)(DAI,minConversionRate);
         usdStableCoinUnitsReserve += stableCoinUnits;
+
+        emit StartedHedging(balance, stableCoinUnits, block.timestamp);
+    }
+
+    function startHedging() public onlyMaintainer {
+        hedgeEther();
     }
 
     /**
      * TODO: Add DAI and TUSD rates with USD in
      */
-    function buyStableCoinWith2key(uint _twoKeyUnits, address _beneficiary) external onlyValidatedContracts returns (uint){
-        uint usdTetheredStableCoinUnits;
+    function buyStableCoinWith2key(uint _twoKeyUnits, address _beneficiary) external onlyValidatedContracts returns (uint) {
+        uint stableCoinUnits;
 
         token.transferFrom(msg.sender, address(this), _twoKeyUnits);
-        usdTetheredStableCoinUnits = _getUsdStableCoinAmountFrom2keyUnits(_twoKeyUnits, twoKeyToStableCoinExchangeRate);
+        stableCoinUnits = _getUsdStableCoinAmountFrom2keyUnits(_twoKeyUnits, twoKeyToStableCoinExchangeRate);
 
-        require(usdStableCoinUnitsReserve - usdTetheredStableCoinUnits > 0);
+        if(usdStableCoinUnitsReserve - stableCoinUnits> 0) {
+            hedgeEther();
+        }
 
-        usdStableCoinUnitsReserve -= usdTetheredStableCoinUnits;
-        require(ERC20(DAI).transfer(_beneficiary,usdTetheredStableCoinUnits.mul(10**18)));
+        usdStableCoinUnitsReserve -= stableCoinUnits;
+        require(ERC20(DAI).transfer(_beneficiary, stableCoinUnits));
     }
 
 
