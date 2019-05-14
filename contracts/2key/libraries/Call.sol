@@ -151,8 +151,8 @@ library Call {
 
     function recoverSigMemory(bytes sig) private pure returns (address[], address[], uint8[], uint[], uint) {
         uint8 version = loadUint8(sig, 0);
-        require(version <= 2,'illegal link version');
-        uint msg_len = (version == 0) ? 1+20+20 : (version == 1) ? 1+65+20 : 1+20;
+        require(version < 2,'illegal link version');
+        uint msg_len = (version == 0) ? 1+20+20 : 1+65+20;
         uint n_influencers = (sig.length-21) / (65+msg_len);
         uint8[] memory weights = new uint8[](n_influencers);
         address[] memory keys = new address[](n_influencers);
@@ -201,12 +201,7 @@ library Call {
                 idx++;
 
 
-                if (msg_len == 21)  // 1+20 version 2
-                {
-                    influencers[count_influencers] = loadAddress(sig, idx);
-                    idx += 20;
-                    keys[count_influencers] = influencers[count_influencers];
-                } else if (msg_len == 41)  // 1+20+20 version 0
+                if (msg_len == 41)  // 1+20+20 version 0
                 {
                     influencers[count_influencers] = loadAddress(sig, idx);
                     idx += 20;
@@ -263,5 +258,41 @@ library Call {
         }
 
         return (influencers, keys, weights);
+    }
+
+    function recoverSig3(bytes sig, address c) public pure returns (address, address[], uint8[]) {
+        // validate sig AND
+        // recover the information from the signature: influencers, weights/cuts
+        //
+        uint8 version = loadUint8(sig, 0);
+        require(version == 3,'illegal link version');
+        require(sig.length >= (20+1) && (sig.length-(20+1)) % (65+1) == 0, 'bad sig length');
+        uint n_influencers = (sig.length-(20+1)) / (65+1);
+        uint8[] memory weights = new uint8[](n_influencers);
+        address[] memory influencers = new address[](n_influencers);
+        uint idx = sig.length;
+        idx -= 20;
+        address old_address = loadAddress(sig,idx);
+
+        // check if we received a valid signature
+        uint i = influencers.length;
+        while(i>0) {
+            i--;
+            influencers[i] = old_address;
+            idx--;
+            uint8 weight = loadUint8(sig, idx);
+            weights[i] = weight;
+            require(weight > 0,'weight not defined (1..255)');  // 255 are used to indicate default (equal part) behaviour
+            idx -= 65;
+            old_address = recoverHash(
+                keccak256(
+                    abi.encodePacked(
+                        keccak256(abi.encodePacked("bytes binding to weight","bytes binding to contract","bytes binding to address")),
+                        keccak256(abi.encodePacked(weight,c,old_address))
+                    )
+                ),sig,idx);
+        }
+
+        return (old_address, influencers, weights);
     }
 }

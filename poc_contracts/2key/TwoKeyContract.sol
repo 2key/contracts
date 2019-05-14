@@ -19,6 +19,7 @@ contract TwoKeyContract is StandardToken, Ownable {
   event Rewarded(address indexed to, uint256 amount);
   event Log1(string s, uint256 units);
   event Log1A(string s, address a);
+  event Log1B32(string s, bytes32 b32);
 
 
   using SafeMath for uint256;

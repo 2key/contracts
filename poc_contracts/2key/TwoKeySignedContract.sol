@@ -54,17 +54,67 @@ contract TwoKeySignedContract is TwoKeyContract {
     require(version == link_version, 'bad signature version');
 
     address old_address;
-    assembly
-    {
-      old_address := mload(add(sig, 21))
+    address old_key;
+    if (version != 3) {
+      assembly
+      {
+        old_address := mload(add(sig, 21))
+      }
+      old_address = plasmaOf(old_address);
+      old_key = public_link_key[old_address];
     }
-    old_address = plasmaOf(old_address);
-    address old_key = public_link_key[old_address];
 
     address[] memory influencers;
     address[] memory keys;
     uint8[] memory weights;
-    (influencers, keys, weights) = Call.recoverSig(sig, old_key, plasmaOf(msg.sender));
+    if (version != 3) {
+      (influencers, keys, weights) = Call.recoverSig(sig, old_key, senderPlasma());
+    } else {
+//      emit Log1A('contract',address(this));
+      (old_address, influencers, weights) = Call.recoverSig3(sig, address(this));
+      // validate sig AND
+      // recover the information from the signature: influencers, weights/cuts
+      //
+//      address c = address(this);
+//      uint n_influencers = (sig.length-(20+1)) / (65+1);
+//      weights = new uint8[](n_influencers);
+//      influencers = new address[](n_influencers);
+
+//      uint idx = sig.length;
+//      idx -= 20;
+//      old_address = Call.loadAddress(sig,idx);
+
+      // check if we received a valid signature
+//      uint ii = influencers.length;
+//      while(ii>0) {
+//        ii--;
+//        influencers[ii] = old_address;
+
+//        idx--;
+//        uint8 weight = Call.loadUint8(sig, idx);
+
+//        weights[ii] = weight;
+//        require(weight > 0,'weight not defined (1..255)');  // 255 are used to indicate default (equal part) behaviour
+
+//        idx -= 65;
+//        bytes32 hash = keccak256(
+//          abi.encodePacked(
+//            keccak256(abi.encodePacked("bytes binding to weight","bytes binding to contract","bytes binding to address")),
+//            keccak256(abi.encodePacked(weight,address(this),old_address))
+//          )
+//        );
+//        emit Log1B32('hash',hash);
+
+//        old_address = Call.recoverHash(hash ,sig,idx);
+//      }
+
+//      emit Log1A('influencers',influencers[0]);
+//      emit Log1A('old_address',old_address);
+//      emit Log1('weights',uint(weights[0]));
+//      if (true) {
+//        return influencers;
+//      }
+    }
 
     // check if we exactly reached the end of the signature. this can only happen if the signature
     // was generated with free_join_take and in this case the last part of the signature must have been
@@ -91,8 +141,10 @@ contract TwoKeySignedContract is TwoKeyContract {
       // TODO a possible solution is change public_link_key to address=>address[]
       // update (only once) the public address used by each influencer
       // we will need this in case one of the influencers will want to start his own off-chain link
-      if (i < keys.length) {
-        setPublicLinkKeyOf(new_address, keys[i]);
+      if (version != 3) {
+        if (i < keys.length) {
+          setPublicLinkKeyOf(new_address, keys[i]);
+        }
       }
 
       // update (only once) the cut used by each influencer
