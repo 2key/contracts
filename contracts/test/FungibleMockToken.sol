@@ -22,3 +22,31 @@ contract FungibleMockToken is StandardTokenModified {
 
 
 }
+
+
+contract TestA {
+    FungibleMockToken public ft;
+    TestB public  tb;
+    
+    function setTestBAndFt(address _tb, address _ft) public {
+        tb = TestB(_tb);
+        ft = FungibleMockToken(_ft);
+    }
+    
+    function x(address contractY) public {
+        ft.approve(contractY, 100);
+        tb.getTokens();
+    }
+}
+
+contract TestB {
+        FungibleMockToken public ft;
+
+    function setTestBAndFt(address _ft) public {
+        ft = FungibleMockToken(_ft);
+    }
+    
+    function getTokens() public {
+        ft.transferFrom(msg.sender, address(this), 100);
+    }
+}

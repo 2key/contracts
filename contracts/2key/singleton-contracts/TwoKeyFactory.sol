@@ -8,6 +8,8 @@ import "../interfaces/IHandleCampaignDeployment.sol";
 import "../interfaces/ITwoKeyCampaignValidator.sol";
 import "../upgradable-pattern-campaigns/ProxyCampaign.sol";
 import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
+import "../acquisition-campaign-contracts/TwoKeyPurchasesHandler.sol";
+import "../acquisition-campaign-contracts/TwoKeyAcquisitionLogicHandler.sol";
 
 
 /**
@@ -95,14 +97,15 @@ contract TwoKeyFactory is Upgradeable, MaintainingPattern {
             address(twoKeySingletonRegistry)
         );
 
-        //Deploy proxy for LogicHandlerContract
+        //Deploy proxy for TwoKeyAcquisitionLogicHandler contract
         ProxyCampaign proxyLogicHandler = new ProxyCampaign(
             "TwoKeyAcquisitionLogicHandler",
             twoKeySingletonRegistry.getLatestContractVersion("TwoKeyAcquisitionLogicHandler"),
             address(twoKeySingletonRegistry)
         );
 
-        //Deploy proxy for PurchasesHandler
+
+        //Deploy proxy for TwoKeyPurchasesHandler contract
         ProxyCampaign proxyPurchasesHandler = new ProxyCampaign(
             "TwoKeyPurchasesHandler",
             twoKeySingletonRegistry.getLatestContractVersion("TwoKeyAcquisitionLogicHandler"),
