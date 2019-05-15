@@ -23,26 +23,20 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
 
     // The token being sold
     ERC20 public token;
-
     uint  public rate; //2key to USD rate multiplied by 1000 (initially it's 95)
     uint public twoKeyToStableCoinExchangeRate;
-
     uint public transactionCounter = 0;
-
     uint public weiRaised = 0;
-
     uint public usdStableCoinUnitsReserve = 0;
 
     /**
     TODO: Support multiple stable coins
      */
 
-
-
     address public kyberProxyContractAddress;
     ERC20 public DAI;
 
-    ERC20 ETH_TOKEN_ADDRESS = ERC20(0x00eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee);
+    ERC20 ETH_TOKEN_ADDRESS = ERC20(0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee);
 
     /**
      * @notice Event will be fired every time someone buys tokens
@@ -70,6 +64,32 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         uint256 tokensBought,
         uint256 rate
     );
+
+
+    /**
+     * @notice Event will be fired every time some ether is hedged
+     */
+    event StartedHedging(
+        uint amountOfEther,
+        uint stableCoinsAmount,
+        uint timestamp
+    );
+
+    /**
+     * @notice This event will be fired every time a withdraw is executed
+     */
+    event WithdrawExecuted (
+        address caller,
+        address beneficiary,
+        uint stableCoinsReserveBefore,
+        uint stableCoinsReserveAfter,
+        uint etherBalanceBefore,
+        uint etherBalanceAfter,
+        uint stableCoinsToWithdraw,
+        uint twoKeyAmount,
+        bool status
+    );
+
 
     /**
      * @notice Constructor of the contract
@@ -197,10 +217,8 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
     view
     returns (uint256)
     {
-        uint value;
-        bool flag;
-        (value,flag,,) = ITwoKeyExchangeRateContract(twoKeyExchangeContract).getFiatCurrencyDetails("USD");
-        return (_2keyAmount.mul(_2keyExchangeRate).div(1000).div(value));
+
+        return (_2keyAmount.mul(_2keyExchangeRate).div(1000));
     }
 
     /**
@@ -251,25 +269,51 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         return tokens;
     }
 
-    /**
-    TODO handle errors that might happen here (not enough ether, etc..)
-     */
 
-    function hedgeEther() internal returns (uint) {
-        uint minConversionRate = 0;
+
+    /**
+     * @notice Function to get expected rate from Kyber contract
+     * @param amount is the amount we'd like to exchange
+     * @return if the value is 0 that means we can't
+     */
+    function getKyberExpectedRate(
+        uint amount
+    )
+    public
+    view
+    returns (uint)
+    {
         IKyberNetworkProxy proxyContract = IKyberNetworkProxy(kyberProxyContractAddress);
-        uint balance = this.balance;
-        if(balance == 0) {
-            return 0;
-        }
-        (minConversionRate,) = proxyContract.getExpectedRate(ETH_TOKEN_ADDRESS, DAI, balance);
-        //TODO: minConversionRate must be in some defined percent deviation from our rates
-        uint stableCoinUnits = proxyContract.swapEtherToToken.value(balance)(DAI,minConversionRate);
+
+        ERC20 eth = ERC20(0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee);
+        uint minConversionRate;
+        (minConversionRate,) = proxyContract.getExpectedRate(eth, DAI, amount);
+
+        return minConversionRate;
+    }
+
+
+    /**
+     * @notice Function to start hedging some ether amount
+     * @param amountToBeHedged is the amount we'd like to hedge
+     * @dev only maintainer can call this function
+     */
+    function startHedging(
+        uint amountToBeHedged
+    )
+    public
+    onlyMaintainer
+    {
+        IKyberNetworkProxy proxyContract = IKyberNetworkProxy(kyberProxyContractAddress);
+
+        uint minConversionRate = getKyberExpectedRate(amountToBeHedged);
+
+        uint stableCoinUnits = proxyContract.swapEtherToToken.value(amountToBeHedged)(DAI,minConversionRate);
         usdStableCoinUnitsReserve += stableCoinUnits;
 
-        emit StartedHedging(balance, stableCoinUnits, block.timestamp);
-        return stableCoinUnits;
+        emit StartedHedging(amountToBeHedged, stableCoinUnits, block.timestamp);
     }
+
 
 
     /**
@@ -278,40 +322,20 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
     function buyStableCoinWith2key(uint _twoKeyUnits, address _beneficiary) external onlyValidatedContracts returns (uint) {
         uint stableCoinUnits;
 
-
         stableCoinUnits = _getUsdStableCoinAmountFrom2keyUnits(_twoKeyUnits, twoKeyToStableCoinExchangeRate);
 
         uint etherBalanceOnContractBefore = this.balance;
-        uint stableCoinsOnContractBefore = usdStableCoinUnitsReserve;
+        uint stableCoinsOnContractBefore = DAI.balanceOf(address(this));
 
-        if(usdStableCoinUnitsReserve < stableCoinUnits) {
-            hedgeEther();
-            if(usdStableCoinUnitsReserve < stableCoinUnits) {
-                emit WithdrawExecuted (
-                    msg.sender,
-                    _beneficiary,
-                    stableCoinsOnContractBefore,
-                    usdStableCoinUnitsReserve,
-                    etherBalanceOnContractBefore,
-                    this.balance,
-                    stableCoinUnits,
-                    _twoKeyUnits,
-                    false
-                );
-
-                return;
-            }
-        }
-
-//        token.transferFrom(msg.sender, address(this), _twoKeyUnits);
-        usdStableCoinUnitsReserve -= stableCoinUnits;
+        token.transferFrom(msg.sender, address(this), _twoKeyUnits);
+        uint stableCoinsAfter = stableCoinsOnContractBefore - stableCoinUnits;
         require(ERC20(DAI).transfer(_beneficiary, stableCoinUnits));
 
         emit WithdrawExecuted(
             msg.sender,
             _beneficiary,
             stableCoinsOnContractBefore,
-            usdStableCoinUnitsReserve,
+            stableCoinsAfter,
             etherBalanceOnContractBefore,
             this.balance,
             stableCoinUnits,
@@ -321,41 +345,8 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
     }
 
 
-    function ()
-    public
-    payable
-    onlyValidatedContracts
-    {
-        buyTokens(msg.sender);
+    function getEthBalanceOnContract() public view returns (uint) {
+        return this.balance;
     }
 
-    /**
-     * @notice Event will be fired every time some ether is hedged
-     */
-    event StartedHedging(
-        uint amountOfEther,
-        uint stableCoinsAmount,
-        uint timestamp
-    );
-
-    event WithdrawExecuted (
-        address caller,
-        address beneficiary,
-        uint stableCoinsReserveBefore,
-        uint stableCoinsReserveAfter,
-        uint etherBalanceBefore,
-        uint etherBalanceAfter,
-        uint stableCoinsToWithdraw,
-        uint twoKeyAmount,
-        bool status
-    );
-
-
-    function startHedging() public onlyMaintainer {
-        hedgeEther();
-    }
-
-    function takeTokensFromAcquisition(address acquisition, uint _twoKeyUnits) public {
-        token.transferFrom(acquisition, address(this), _twoKeyUnits);
-    }
 }

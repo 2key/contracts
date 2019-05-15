@@ -334,6 +334,7 @@ contract TwoKeyCampaign is ArcERC20 {
 		address twoKeyAdminAddress;
 		address twoKeyUpgradableExchangeContract;
 		uint balance;
+
 		address _referrer = twoKeyEventSource.plasmaOf(_address);
 		if(referrerPlasma2Balances2key[_referrer] != 0) {
 			twoKeyAdminAddress =  getContractProxyAddress("TwoKeyAdmin");
@@ -348,7 +349,7 @@ contract TwoKeyCampaign is ArcERC20 {
 			else {
 				//In case 2Key rewards still locked;
 				IERC20(twoKeyEconomy).approve(twoKeyUpgradableExchangeContract, balance);
-				IUpgradableExchange(twoKeyUpgradableExchangeContract).buyStableCoinWith2key(balance, msg.sender);
+				IUpgradableExchange(twoKeyUpgradableExchangeContract).buyStableCoinWith2key(balance, _address);
 			}
 			reservedAmount2keyForRewards -= balance;
 		}
