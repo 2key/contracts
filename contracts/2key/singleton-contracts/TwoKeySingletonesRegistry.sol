@@ -163,7 +163,7 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
     payable
     returns (UpgradeabilityProxy)
     {
-        UpgradeabilityProxy proxy = new UpgradeabilityProxy(contractName, version);
+        UpgradeabilityProxy proxy = new UpgradeabilityProxy(contractName, version, msg.sender);
         Upgradeable(proxy).initialize.value(msg.value)(msg.sender);
         contractToProxy[contractName] = proxy;
         emit ProxyCreated(proxy);
