@@ -8,6 +8,8 @@ import "../interfaces/IHandleCampaignDeployment.sol";
 import "../interfaces/ITwoKeyCampaignValidator.sol";
 import "../upgradable-pattern-campaigns/ProxyCampaign.sol";
 import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
+import "../acquisition-campaign-contracts/TwoKeyPurchasesHandler.sol";
+import "../acquisition-campaign-contracts/TwoKeyAcquisitionLogicHandler.sol";
 
 
 /**
@@ -95,14 +97,15 @@ contract TwoKeyFactory is Upgradeable, MaintainingPattern {
             address(twoKeySingletonRegistry)
         );
 
-        //Deploy proxy for LogicHandlerContract
+        //Deploy proxy for TwoKeyAcquisitionLogicHandler contract
         ProxyCampaign proxyLogicHandler = new ProxyCampaign(
             "TwoKeyAcquisitionLogicHandler",
             twoKeySingletonRegistry.getLatestContractVersion("TwoKeyAcquisitionLogicHandler"),
             address(twoKeySingletonRegistry)
         );
 
-        //Deploy proxy for PurchasesHandler
+
+        //Deploy proxy for TwoKeyPurchasesHandler contract
         ProxyCampaign proxyPurchasesHandler = new ProxyCampaign(
             "TwoKeyPurchasesHandler",
             twoKeySingletonRegistry.getLatestContractVersion("TwoKeyAcquisitionLogicHandler"),
@@ -164,6 +167,29 @@ contract TwoKeyFactory is Upgradeable, MaintainingPattern {
         emit ProxyForCampaign(proxyLogicHandler, proxyConversions, proxyAcquisition, proxyPurchasesHandler, msg.sender, block.timestamp);
     }
 
+
+    /**
+     * @notice Function to deploy proxy contracts for donation campaigns
+     * @param addresses is the array of all addresses we need for starting donation campaign
+     * @param numberValues are all uints we need to start campaign
+     * @param booleanValues are all bools we have to store during campaign creation
+     * @param tokenName is the name of the invoice ERC20 token
+     * @param tokenSymbol is the name symbol of the invoice token
+     * @param campaignName is the name of the campaign
+     */
+    function createProxiesForDonationCampaign(
+        address [] addresses,
+        uint [] numberValues,
+        bool [] booleanValues,
+        string tokenName,
+        string tokenSymbol,
+        string campaignName
+    )
+    public
+    payable
+    {
+
+    }
 
 
 

@@ -260,7 +260,7 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyConversionStates,
             contractor,
             twoKeyAcquisitionCampaignERC20
         );
-
+//
         // Add total rewards
         counters[8] = counters[8].add(totalReward2keys);
 

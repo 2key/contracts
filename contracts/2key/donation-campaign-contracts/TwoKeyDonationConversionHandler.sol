@@ -7,8 +7,9 @@ import "../TwoKeyConverterStates.sol";
 import "../libraries/SafeMath.sol";
 
 import "../interfaces/ITwoKeyDonationCampaign.sol";
+import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
 
-contract TwoKeyDonationConversionHandler is TwoKeyConversionStates, TwoKeyConverterStates {
+contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversionStates, TwoKeyConverterStates {
 
     using SafeMath for uint; // Define lib necessary to handle uint operations
 

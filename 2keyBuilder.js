@@ -471,7 +471,7 @@ async function deploy() {
     console.log(process.argv);
     const local = process.argv[2].includes('local');
     if (!local && !process.env.SKIP_TEST) {
-      // await test();
+      await test();
     }
 
     // TODO: Add build/contracts backup
@@ -504,7 +504,7 @@ async function deploy() {
       /* eslint-disable no-await-in-loop */
       await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--network', networks[i]].concat(process.argv.slice(3)));
       deployedTo[truffleNetworks[networks[i]].network_id.toString()] = truffleNetworks[networks[i]].network_id;
-      // await runMigration3(networks[i]);
+      await runMigration3(networks[i]);
       /* eslint-enable no-await-in-loop */
     }
     const sessionDeployedContracts = await getCurrentDeployedAddresses();

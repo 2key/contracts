@@ -73,7 +73,7 @@ contract TwoKeyPlasmaSingletoneRegistry is MaintainingPattern, ITwoKeySingletone
      * @return address of the new proxy created
      */
     function createProxy(string contractName, string version) public onlyMaintainer payable returns (UpgradeabilityProxy) {
-        UpgradeabilityProxy proxy = new UpgradeabilityProxy(contractName, version);
+        UpgradeabilityProxy proxy = new UpgradeabilityProxy(contractName, version, msg.sender);
         Upgradeable(proxy).initialize.value(msg.value)(msg.sender);
         contractToProxy[contractName] = proxy;
         emit ProxyCreated(proxy);
