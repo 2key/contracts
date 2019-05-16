@@ -582,6 +582,7 @@ module.exports = function deploy(deployer) {
                             proxyAddressTwoKeyCampaignValidator,
                             DAI_ROPSTEN_ADDRESS,
                             kyberAddress,
+                            TwoKeySingletonesRegistry.address,
                             maintainerAddresses,
                         );
 
