@@ -349,4 +349,8 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         return this.balance;
     }
 
+    function () payable {
+
+    }
+
 }
