@@ -4,7 +4,7 @@ import "../../openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import "../MaintainingPattern.sol";
 import "../Upgradeable.sol";
 
-import '../interfaces/ITwoKeySingletonesRegistry.sol';
+import '../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol';
 import "../interfaces/ITwoKeyExchangeRateContract.sol";
 import "../interfaces/ITwoKeyCampaignValidator.sol";
 import "../interfaces/IKyberNetworkProxy.sol";
@@ -316,8 +316,8 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
     public
     onlyMaintainer
     {
-        address memory economy = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyEconomy");
-        emit contractStats(ERC20(economy).balanceOf(address(this)),this.balance,DAI.balanceOf(address(this)),now);
+        address twoKeyEconomy = ITwoKeySingletoneRegistryFetchAddress(twoKeySingltonRegistry).getNonUpgradableContractAddress("TwoKeyEconomy");
+        emit contractStats(ERC20(twoKeyEconomy).balanceOf(address(this)),address(this).balance,DAI.balanceOf(address(this)),now);
         IKyberNetworkProxy proxyContract = IKyberNetworkProxy(kyberProxyContractAddress);
 
         uint minConversionRate = getKyberExpectedRate(amountToBeHedged);
@@ -325,7 +325,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         uint stableCoinUnits = proxyContract.swapEtherToToken.value(amountToBeHedged)(DAI,minConversionRate);
         usdStableCoinUnitsReserve += stableCoinUnits;
 
-        emit contractStats(ERC20(economy).balanceOf(address(this)),this.balance,DAI.balanceOf(address(this)),now);
+        emit contractStats(ERC20(twoKeyEconomy).balanceOf(address(this)),address(this).balance,DAI.balanceOf(address(this)),now);
         emit StartedHedging(amountToBeHedged, stableCoinUnits, block.timestamp);
     }
 
@@ -366,11 +366,10 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
 
 
     function getEthBalanceOnContract() public view returns (uint) {
-        return this.balance;
+        return address(this).balance;
     }
 
-    function () payable {
-
+    function () public payable {
     }
 
 }
