@@ -168,6 +168,15 @@ contract TwoKeyFactory is Upgradeable, MaintainingPattern {
     }
 
 
+    /**
+     * @notice Function to deploy proxy contracts for donation campaigns
+     * @param addresses is the array of all addresses we need for starting donation campaign
+     * @param numberValues are all uints we need to start campaign
+     * @param booleanValues are all bools we have to store during campaign creation
+     * @param tokenName is the name of the invoice ERC20 token
+     * @param tokenSymbol is the name symbol of the invoice token
+     * @param campaignName is the name of the campaign
+     */
     function createProxiesForDonationCampaign(
         address [] addresses,
         uint [] numberValues,
