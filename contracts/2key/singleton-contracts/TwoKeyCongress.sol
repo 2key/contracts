@@ -131,6 +131,7 @@ contract TwoKeyCongress {
         hashAllowedMethods("addMaintainersToSelectedSingletone(address,address[])");
         hashAllowedMethods("deleteMaintainersFromSelectedSingletone(address,address[])");
         hashAllowedMethods("updateRewardsRelease(uint256)");
+        hashAllowedMethods("updateTwoKeyTokenRate(uint256)");
     }
 
 

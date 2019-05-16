@@ -170,25 +170,51 @@ contract TwoKeyFactory is Upgradeable, MaintainingPattern {
 
     /**
      * @notice Function to deploy proxy contracts for donation campaigns
-     * @param addresses is the array of all addresses we need for starting donation campaign
-     * @param numberValues are all uints we need to start campaign
-     * @param booleanValues are all bools we have to store during campaign creation
-     * @param tokenName is the name of the invoice ERC20 token
-     * @param tokenSymbol is the name symbol of the invoice token
-     * @param campaignName is the name of the campaign
      */
     function createProxiesForDonationCampaign(
-        address [] addresses,
+        address _moderator,
+        address _twoKeySingletonRegistry,
         uint [] numberValues,
-        bool [] booleanValues,
+        bool [] booleanValues, //[_shouldConvertToReferr,isKYCRequired, acceptsFiat]
+        string _campaignName,
         string tokenName,
-        string tokenSymbol,
-        string campaignName
+        string tokenSymbol
     )
     public
     payable
     {
+        // Deploying a proxy contract for donations
+        ProxyCampaign proxyDonationCampaign = new ProxyCampaign(
+            "TwoKeyDonationCampaign",
+            twoKeySingletonRegistry.getLatestContractVersion("TwoKeyDonationCampaign"),
+            address(twoKeySingletonRegistry)
+        );
 
+        //Deploying a proxy contract for donation conversion handler
+        ProxyCampaign proxyDonationConversionHandler = new ProxyCampaign(
+            "TwoKeyDonationConversionHandler",
+            twoKeySingletonRegistry.getLatestContractVersion("TwoKeyDonationConversionHandler"),
+            address(twoKeySingletonRegistry)
+        );
+
+        // Set initial parameters under Donation conversion handler
+        IHandleCampaignDeployment(proxyDonationConversionHandler).setInitialParamsDonationConversionHandler(
+            tokenName,
+            tokenSymbol,
+            msg.sender //contractor
+        );
+
+        IHandleCampaignDeployment(proxyDonationCampaign).setInitialParamsDonationCampaign(
+            msg.sender,
+            _moderator,
+            _twoKeySingletonRegistry,
+            proxyDonationConversionHandler,
+            numberValues,
+            booleanValues,
+            _campaignName
+        );
+
+        //TODO: leftover -> set intiial params
     }
 
 

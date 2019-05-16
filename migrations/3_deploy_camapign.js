@@ -40,25 +40,25 @@ module.exports = function deploy(deployer) {
             ))
         .then(() => deployer.link(IncentiveModels, TwoKeyDonationCampaign))
         .then(() => deployer.link(Call, TwoKeyDonationCampaign))
-        .then(() => deployer.deploy(TwoKeyDonationCampaign,
-            json.TwoKeyAdmin[network_id].Proxy,
-            'Donation for Something',
-            [
-                5,
-                12345,
-                1231112,
-                10000,
-                100000000,
-                10000000000000,
-                5
-            ],
-            false,
-            false,
-            false,
-            TwoKeySingletonesRegistry.address,
-            TwoKeyDonationConversionHandler.address,
-            0
-            ))
+        .then(() => deployer.deploy(TwoKeyDonationCampaign))
+            // json.TwoKeyAdmin[network_id].Proxy,
+            // 'Donation for Something',
+            // [
+            //     5,
+            //     12345,
+            //     1231112,
+            //     10000,
+            //     100000000,
+            //     10000000000000,
+            //     5
+            // ],
+            // false,
+            // false,
+            // false,
+            // TwoKeySingletonesRegistry.address,
+            // TwoKeyDonationConversionHandler.address,
+            // 0
+            // ))
         .then(async () => {
             console.log("... Adding implementation versions of Acquisition campaigns");
             await new Promise(async(resolve,reject) => {
@@ -74,6 +74,21 @@ module.exports = function deploy(deployer) {
 
                     txHash = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address)
                         .addVersion('TwoKeyPurchasesHandler', '1.1', TwoKeyPurchasesHandler.address);
+
+                    resolve(txHash);
+                } catch (e) {
+                    reject(e);
+                }
+            })
+        })
+        .then(async () => {
+            console.log('... Adding implementation versions of Donation campaigns');
+            await new Promise(async(resolve,reject) => {
+                try {
+                    let txHash = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address)
+                        .addVersion('TwoKeyDonationCampaign','1.0', TwoKeyDonationCampaign.address);
+                    txHash = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address)
+                        .addVersion('TwoKeyDonationConversionHandler', '1.0', TwoKeyDonationConversionHandler.address);
 
                     resolve(txHash);
                 } catch (e) {

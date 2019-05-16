@@ -329,13 +329,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         emit StartedHedging(amountToBeHedged, stableCoinUnits, block.timestamp);
     }
 
-    event contractStats(
-        uint amountOfTwoKey,
-        uint amountOfEther,
-        uint stableCoinsAmount,
-        uint timestamp
-    );
-
     /**
      * TODO: Add DAI and TUSD rates with USD in
      */

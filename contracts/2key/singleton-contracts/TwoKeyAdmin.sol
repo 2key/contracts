@@ -22,7 +22,7 @@ contract TwoKeyAdmin is Upgradeable {
 
 	uint twoKeyIntegratorDefaultFeePercent; // 2% is default value for this
 	uint twoKeyNetworkTaxPercent; //2% is default value for this
-
+	uint twoKeyTokenRate;
 	uint rewardReleaseAfter;
 
     bool initialized = false;
@@ -59,6 +59,7 @@ contract TwoKeyAdmin is Upgradeable {
         require(initialized == false);
         twoKeyIntegratorDefaultFeePercent = 2;
 		twoKeyNetworkTaxPercent = 2;
+		twoKeyTokenRate = 95; //The actual rate is 95 / 1000 = 0.095$
         twoKeyCongress = _twoKeyCongress;
         twoKeyReg = TwoKeyRegistry(_twoKeyRegistry);
         twoKeyUpgradableExchange = TwoKeyUpgradableExchange(_exchange);
@@ -293,5 +294,22 @@ contract TwoKeyAdmin is Upgradeable {
 	returns (uint)
 	{
 		return twoKeyNetworkTaxPercent;
+	}
+
+	function updateTwoKeyTokenRate(
+		uint newRate
+	)
+	public
+	onlyTwoKeyCongress
+	{
+		twoKeyTokenRate = newRate;
+	}
+
+	function getTwoKeyTokenRate()
+	public
+	view 
+	returns (uint)
+	{
+		return twoKeyTokenRate;
 	}
 }

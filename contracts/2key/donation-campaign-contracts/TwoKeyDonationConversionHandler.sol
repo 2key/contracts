@@ -12,6 +12,7 @@ import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
 contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversionStates, TwoKeyConverterStates {
 
     using SafeMath for uint; // Define lib necessary to handle uint operations
+    bool initialized; //defaults to false
 
     address public twoKeyDonationCampaign;
     address public erc20InvoiceToken; // ERC20 token which will be issued as an invoice
@@ -49,15 +50,20 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
         _;
     }
 
-    constructor(
+    function setInitialParamsDonationConversionHandler(
         string tokenName,
-        string tokenSymbol
-    ) public {
-        contractor = msg.sender;
+        string tokenSymbol,
+        address _contractor
+    )
+    public
+    {
+        require(initialized == false);
+        contractor = _contractor;
         // Deploy an ERC20 token which will be used as the Invoice
         erc20InvoiceToken = new InvoiceTokenERC20(tokenName,tokenSymbol,address(this));
         // Emit an event with deployed token address, name, and symbol
         emit InvoiceTokenCreated(erc20InvoiceToken, tokenName, tokenSymbol);
+        initialized = true;
     }
 
     /**

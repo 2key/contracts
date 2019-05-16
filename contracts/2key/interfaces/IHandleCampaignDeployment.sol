@@ -56,13 +56,48 @@ contract IHandleCampaignDeployment {
     ) public;
 
 
+    /**
+     * @notice Function which will be used as simulation for constructor under TwoKeyPurchasesHandler contract
+     * @dev This is just an interface of the function, the actual logic
+     * is implemented under TwoKeyPurchasesHandler.sol contract
+     * This function can be called only once per proxy address
+     */
     function setInitialParamsPurchasesHandler(
         uint[] values,
         address _contractor,
         address _assetContractERC20,
         address _twoKeyEventSource,
         address _proxyConversionHandler
-    )
-    public;
+    ) public;
+
+
+    /**
+     * @notice Function which will be used as simulation for constructor under TwoKeyDonationCampaign contract
+     * @dev This is just an interface of the function, the actual logic
+     * is implemented under TwoKeyDonationCampaign.sol contract
+     * This function can be called only once per proxy address
+     */
+    function setInitialParamsDonationCampaign(
+        address contractor,
+        address moderator,
+        address twoKeySingletonRegistry,
+        address donationConversionHandler,
+        uint [] numberValues,
+        bool [] booleanValues,
+        string campaignName
+    ) public;
+
+
+    /**
+     * @notice Function which will be used as simulation for constructor under TwoKeyDonationConversionHandler contract
+     * @dev This is just an interface of the function, the actual logic
+     * is implemented under TwoKeyDonationConversionHandler.sol contract
+     * This function can be called only once per proxy address
+     */
+    function setInitialParamsDonationConversionHandler(
+        string tokenName,
+        string tokenSymbol,
+        address _contractor
+    ) public;
 }
 
