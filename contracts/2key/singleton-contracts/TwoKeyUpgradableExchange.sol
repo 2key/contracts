@@ -111,7 +111,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         require(_rate != 0);
 
         rate = _rate;
-        twoKeyToStableCoinExchangeRate = rate+5;
+        twoKeyToStableCoinExchangeRate = rate-5;
         token = _token;
         twoKeyExchangeContract = _twoKeyExchangeContract;
         twoKeyCampaignValidator = _twoKeyCampaignValidator;

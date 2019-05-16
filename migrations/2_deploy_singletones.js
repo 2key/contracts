@@ -575,7 +575,7 @@ module.exports = function deploy(deployer) {
                     try {
                         console.log('Setting initial parameters in contract TwoKeyUpgradableExchange');
                         let txHash = await TwoKeyUpgradableExchange.at(proxyAddressTwoKeyUpgradableExchange).setInitialParams(
-                            95,
+                            100,
                             proxyAddressTwoKeyAdmin,
                             TwoKeyEconomy.address,
                             proxyAddressTwoKeyExchange,
