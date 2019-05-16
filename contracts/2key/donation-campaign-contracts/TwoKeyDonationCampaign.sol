@@ -8,12 +8,13 @@ import "../TwoKeyConverterStates.sol";
 import "../TwoKeyConversionStates.sol";
 
 import "../interfaces/ITwoKeyDonationConversionHandler.sol";
+import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
 
 /**
  * @author Nikola Madjarevic
  * Created at 2/19/19
  */
-contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels, TwoKeyConverterStates, TwoKeyConversionStates {
+contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaignIncentiveModels, TwoKeyConverterStates, TwoKeyConversionStates {
 
     address public twoKeyDonationConversionHandler; // Contract which will handle all donations
 

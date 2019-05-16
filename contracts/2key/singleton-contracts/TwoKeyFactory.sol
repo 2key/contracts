@@ -168,6 +168,20 @@ contract TwoKeyFactory is Upgradeable, MaintainingPattern {
     }
 
 
+    function createProxiesForDonationCampaign(
+        address [] addresses,
+        uint [] numberValues,
+        bool [] booleanValues,
+        string tokenName,
+        string tokenSymbol,
+        string campaignName
+    )
+    public
+    payable
+    {
+
+    }
+
 
 
 }
