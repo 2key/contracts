@@ -67,7 +67,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         uint256 rate
     );
 
-
+    //Add event
     /**
      * @notice Event will be fired every time some ether is hedged
      */
