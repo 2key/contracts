@@ -590,7 +590,7 @@ module.exports = function deploy(deployer) {
                         reject(e);
                     }
                 });
-
+                //TODO: Change proxyAddressTwoKeyExchange to proxyTwoKeyExchangeRate -
                 await new Promise(async(resolve,reject) => {
                     try {
                         console.log('Setting initial parameters in contract TwoKeyAdmin');
