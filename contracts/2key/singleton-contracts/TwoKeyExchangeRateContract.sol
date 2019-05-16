@@ -24,7 +24,7 @@ contract TwoKeyExchangeRateContract is Upgradeable, MaintainingPattern {
     }
 
     //So'll be synced with the backend
-    enum CurrencyType { USD, BTC, ETH, DAI, USDT, TUSD, EUR, JPY, GBP}
+    enum CurrencyType { USD, BTC, ETH, DAI, USDT, TUSD, EUR, JPY, GBP, TWOKEY}
     enum RatesArrayRole {CURRENCY, NUMBEROFDECIMALS, RATE}
 
     /**
@@ -65,10 +65,10 @@ contract TwoKeyExchangeRateContract is Upgradeable, MaintainingPattern {
 
     //input:
     //[currency1, decimals1, rate1, currency2, decimals2, rate2,..., currency3, decimal3, rate3]
-    function updatePrices(uint[] _ratesArray) public /*Add onlyMaintainer*/ {
+    function updatePrices(uint[] _ratesArray) public onlyMaintainer {
         require(
-        _ratesArray.length % 3 == 0,
-        "Array should be % 3 == 0 for currency, decimals, rate."
+            _ratesArray.length % 3 == 0,
+            "Array should be % 3 == 0 for currency, decimals, rate."
         );
 
         uint rateHolder;
@@ -149,7 +149,7 @@ contract TwoKeyExchangeRateContract is Upgradeable, MaintainingPattern {
             isGreater: _isETHGreaterThanCurrency,
             timeUpdated: block.timestamp,
             maintainerWhoUpdated: msg.sender
-        });
+            });
         currencyName2rate[_currency] = f;
         emit PriceUpdated(_currency, _RateFromOneGreaterThanUnitInWeiOfLesserThanUnit, block.timestamp, msg.sender);
     }
@@ -168,10 +168,10 @@ contract TwoKeyExchangeRateContract is Upgradeable, MaintainingPattern {
     {
         bytes32 key = stringToBytes32(_currency);
         return (
-            currencyName2rate[key].rateEth,
-            currencyName2rate[key].isGreater,
-            currencyName2rate[key].timeUpdated,
-            currencyName2rate[key].maintainerWhoUpdated
+        currencyName2rate[key].rateEth,
+        currencyName2rate[key].isGreater,
+        currencyName2rate[key].timeUpdated,
+        currencyName2rate[key].maintainerWhoUpdated
         );
     }
 
