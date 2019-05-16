@@ -4,6 +4,7 @@ import "../../openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import "../MaintainingPattern.sol";
 import "../Upgradeable.sol";
 
+import '../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol';
 import "../interfaces/ITwoKeyExchangeRateContract.sol";
 import "../interfaces/ITwoKeyCampaignValidator.sol";
 import "../interfaces/IKyberNetworkProxy.sol";
@@ -20,6 +21,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
 
     address twoKeyExchangeContract;
     address twoKeyCampaignValidator;
+    address twoKeySingltonRegistry;
 
     // The token being sold
     ERC20 public token;
@@ -75,6 +77,13 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         uint timestamp
     );
 
+    event contractStats(
+        uint amountOfTwoKey,
+        uint amountOfEther,
+        uint stableCoinsAmount,
+        uint timestamp
+    );
+
     /**
      * @notice This event will be fired every time a withdraw is executed
      */
@@ -102,6 +111,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         address _twoKeyCampaignValidator,
         address _daiAddress,
         address _kyberNetworkProxy,
+        address _singltonRegistry,
         address[] _maintainers
     )
     external
@@ -119,6 +129,8 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
 
         DAI = ERC20(_daiAddress);
         kyberProxyContractAddress = _kyberNetworkProxy;
+
+        twoKeySingltonRegistry = _singltonRegistry;
 
         isMaintainer[msg.sender] = true; //for truffle deployment
         for(uint i=0; i<_maintainers.length; i++) {
@@ -304,6 +316,8 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
     public
     onlyMaintainer
     {
+        address twoKeyEconomy = ITwoKeySingletoneRegistryFetchAddress(twoKeySingltonRegistry).getNonUpgradableContractAddress("TwoKeyEconomy");
+        emit contractStats(ERC20(twoKeyEconomy).balanceOf(address(this)),address(this).balance,DAI.balanceOf(address(this)),now);
         IKyberNetworkProxy proxyContract = IKyberNetworkProxy(kyberProxyContractAddress);
 
         uint minConversionRate = getKyberExpectedRate(amountToBeHedged);
@@ -311,10 +325,16 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         uint stableCoinUnits = proxyContract.swapEtherToToken.value(amountToBeHedged)(DAI,minConversionRate);
         usdStableCoinUnitsReserve += stableCoinUnits;
 
+        emit contractStats(ERC20(twoKeyEconomy).balanceOf(address(this)),address(this).balance,DAI.balanceOf(address(this)),now);
         emit StartedHedging(amountToBeHedged, stableCoinUnits, block.timestamp);
     }
 
-
+    event contractStats(
+        uint amountOfTwoKey,
+        uint amountOfEther,
+        uint stableCoinsAmount,
+        uint timestamp
+    );
 
     /**
      * TODO: Add DAI and TUSD rates with USD in
@@ -346,11 +366,10 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
 
 
     function getEthBalanceOnContract() public view returns (uint) {
-        return this.balance;
+        return address(this).balance;
     }
 
-    function () payable {
-
+    function () public payable {
     }
 
 }
