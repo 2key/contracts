@@ -8,7 +8,6 @@ const rhd = require('node-humanhash');
 const IPFS = require('ipfs-http-client');
 const LZString = require('lz-string');
 const { networks: truffleNetworks } = require('./truffle');
-const { TwoKeyVersionHandler } = require('./2key-protocol/src/versions');
 
 
 // const compressor = require('node-minify');
@@ -28,7 +27,7 @@ const twoKeyProtocolSubmodulesDir = path.join(__dirname, '2key-protocol', 'dist'
 
 const deploymentHistoryPath = path.join(__dirname, 'history{branch}.json');
 const buildArchPath = path.join(twoKeyProtocolDir, 'contracts{branch}.tar.gz');
-let deployment = false;
+let deployment = process.env.FORCE_DEPLOYMENT || false;
 const deployedTo = {};
 
 let contractsStatus;
@@ -62,6 +61,17 @@ const getContractsDeployedDistPath = () => {
     }
     return result;
 };
+
+const getVersionsPath = (branch = true) => {
+  const result = path.join(twoKeyProtocolDir,'versions{branch}.json');
+  if (branch) {
+    if(contractsStatus && contractsStatus.current) {
+        return result.replace('{branch}',`-${contractsStatus.current}`);
+    }
+    return result;
+  }
+  return result.replace('{branch}', '');
+}
 
 
 const contractsGit = simpleGit();
@@ -363,33 +373,47 @@ const runMigration3 = (network) => new Promise(async(resolve, reject) => {
   }
 });
 
+const ipfs = new IPFS('ipfs.2key.net', 443, { protocol: 'https' });
+
+const ipfsGet = (hash) => new Promise((resolve, reject) => {
+  ipfs.get(hash, (err, res) => {
+    if (err) {
+      reject(err);
+    } else {
+      resolve(res[0] && res[0].content.toString());
+    }
+  });
+});
+
+const ipfsAdd = (data) => new Promise((resolve, reject) => {
+  ipfs.add(ipfs.types.Buffer.from(data), { pin: deployment }, (err, res) => {
+    if (err) {
+      reject(err);
+    } else {
+      resolve(res);
+    }
+  });
+});
+
 const updateIPFSHashes = async(contracts) => {
-  const ipfs = new IPFS('ipfs.infura.io', 5001, { protocol: 'https' });
   const nonSingletonHash = contracts.contracts.singletons.NonSingletonsHash;
   console.log(nonSingletonHash);
-  const ipfsCat = (hash) => new Promise((resolve, reject) => {
-    ipfs.cat(hash, (err, res) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(res);
-      }
-    });
-  });
 
-  const ipfsAdd = (data) => new Promise((resolve, reject) => {
-    ipfs.add(ipfs.types.Buffer.from(data), { pin: deployment }, (err, res) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(res);
-      }
-    });
-  });
 
   let versionsList = {};
-  if (TwoKeyVersionHandler) {
-    versionsList = JSON.parse((await ipfsCat(TwoKeyVersionHandler)).toString());
+
+  let existingVersionHandlerFile = {};
+  try {
+    existingVersionHandlerFile = JSON.parse(fs.readFileSync(getVersionsPath()), { encoding: 'utf8' });
+    console.log('EXISTING VERSIONS', existingVersionHandlerFile);
+  } catch (e) {
+    console.log('VERSIONS ERROR', e);
+  }
+
+  const { TwoKeyVersionHandler: currentVersionHandler } = existingVersionHandlerFile;
+
+  if (currentVersionHandler) {
+    versionsList = JSON.parse((await ipfsGet(currentVersionHandler)).toString());
     console.log('VERSION LIST', versionsList);
   }
   versionsList[nonSingletonHash] = {};
@@ -407,7 +431,8 @@ const updateIPFSHashes = async(contracts) => {
   }
   console.log(versionsList);
   const [{ hash: newTwoKeyVersionHandler }] = await ipfsAdd(JSON.stringify(versionsList));
-  fs.writeFileSync(path.join(twoKeyProtocolDir, 'versions.json'), JSON.stringify({ TwoKeyVersionHandler: newTwoKeyVersionHandler }, null, 4));
+  fs.writeFileSync(getVersionsPath(), JSON.stringify({ TwoKeyVersionHandler: newTwoKeyVersionHandler }, null, 4));
+  fs.writeFileSync(getVersionsPath(false), JSON.stringify({ TwoKeyVersionHandler: newTwoKeyVersionHandler }, null, 4));
   console.log('TwoKeyVersionHandler', newTwoKeyVersionHandler);
 };
 
@@ -529,11 +554,12 @@ async function deploy() {
     await archiveBuild();
     await commitAndPushContractsFolder(`Contracts deployed to ${network} ${now.format('lll')}`);
     console.log('Changes commited');
+    await restoreFromArchive();
     await buildSubmodules(contracts);
     if (!local) {
       await runProcess(path.join(__dirname, 'node_modules/.bin/webpack'));
     }
-
+    await archiveBuild();
     contractsStatus = await contractsGit.status();
     twoKeyProtocolStatus = await twoKeyProtocolLibGit.status();
     console.log(commit, tag);

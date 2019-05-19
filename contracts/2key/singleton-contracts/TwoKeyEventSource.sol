@@ -84,7 +84,14 @@ contract TwoKeyEventSource is Upgradeable, MaintainingPattern {
      * @param _maintainers is the array containing addresses of maintainers
      * @param _twoKeyRegistry is the address of twoKeyRegistry contract
      */
-    function setInitialParams(address _twoKeyAdmin, address [] _maintainers, address _twoKeyRegistry, address _twoKeyCampaignValidator) external {
+    function setInitialParams(
+        address _twoKeyAdmin,
+        address [] _maintainers,
+        address _twoKeyRegistry,
+        address _twoKeyCampaignValidator
+    )
+    external
+    {
         require(twoKeyAdmin == address(0));
         twoKeyAdmin = _twoKeyAdmin;
         twoKeyRegistry = _twoKeyRegistry;
@@ -102,7 +109,14 @@ contract TwoKeyEventSource is Upgradeable, MaintainingPattern {
      * @param _moderator is the address of the moderator in campaign
      * @dev this function updates values in TwoKeyRegistry contract
      */
-    function created(address _campaign, address _owner, address _moderator) external onlyValidator {
+    function created(
+        address _campaign,
+        address _owner,
+        address _moderator
+    )
+    external
+    onlyValidator
+    {
         ITwoKeyReg(twoKeyRegistry).addWhereContractor(_owner, _campaign);
         ITwoKeyReg(twoKeyRegistry).addWhereModerator(_moderator, _campaign);
         emit Created(_campaign, _owner, _moderator);
@@ -115,7 +129,14 @@ contract TwoKeyEventSource is Upgradeable, MaintainingPattern {
      * @param _to is the address of person who has joined
      * @dev this function updates values in TwoKeyRegistry contract
      */
-    function joined(address _campaign, address _from, address _to) external onlyAllowedContracts {
+    function joined(
+        address _campaign,
+        address _from,
+        address _to
+    )
+    external
+    onlyAllowedContracts
+    {
         ITwoKeyReg(twoKeyRegistry).addWhereReferrer(_campaign, _from);
         emit Joined(_campaign, _from, _to);
     }
@@ -127,7 +148,14 @@ contract TwoKeyEventSource is Upgradeable, MaintainingPattern {
      * @param _amountETHWei is the conversion amount
      * @dev this function updates values in TwoKeyRegistry contract
      */
-    function converted(address _campaign, address _converter, uint256 _amountETHWei) external onlyAllowedContracts {
+    function converted(
+        address _campaign,
+        address _converter,
+        uint256 _amountETHWei
+    )
+    external
+    onlyAllowedContracts
+    {
         ITwoKeyReg(twoKeyRegistry).addWhereConverter(_converter, _campaign);
         emit Converted(_campaign, _converter, _amountETHWei);
     }
@@ -138,7 +166,14 @@ contract TwoKeyEventSource is Upgradeable, MaintainingPattern {
      * @param _to is the reward receiver
      * @param _amount is the reward amount
      */
-    function rewarded(address _campaign, address _to, uint256 _amount) external onlyAllowedContracts {
+    function rewarded(
+        address _campaign,
+        address _to,
+        uint256 _amount
+    )
+    external
+    onlyAllowedContracts
+    {
         emit Rewarded(_campaign, _to, _amount);
     }
 
@@ -148,11 +183,24 @@ contract TwoKeyEventSource is Upgradeable, MaintainingPattern {
      * @param _converter is the address of the converter
      * @param _indexOrAmount is the amount of campaign
      */
-    function cancelled(address  _campaign, address _converter, uint256 _indexOrAmount) external onlyAllowedContracts {
+    function cancelled(
+        address  _campaign,
+        address _converter,
+        uint256 _indexOrAmount
+    )
+    external
+    onlyAllowedContracts
+    {
         emit Cancelled(_campaign, _converter, _indexOrAmount);
     }
 
-    function plasmaOf(address me) public view returns (address) {
+    function plasmaOf(
+        address me
+    )
+    public
+    view
+    returns (address)
+    {
         address plasma = ITwoKeyReg(twoKeyRegistry).getEthereumToPlasma(me);
         if (plasma != address(0)) {
             return plasma;
@@ -165,7 +213,13 @@ contract TwoKeyEventSource is Upgradeable, MaintainingPattern {
      * @param me is the plasma address of the user
      * @return ethereum address
      */
-    function ethereumOf(address me) public view returns (address) {
+    function ethereumOf(
+        address me
+    )
+    public
+    view
+    returns (address)
+    {
         address ethereum = ITwoKeyReg(twoKeyRegistry).getPlasmaToEthereum(me);
         if (ethereum != address(0)) {
             return ethereum;
@@ -177,7 +231,13 @@ contract TwoKeyEventSource is Upgradeable, MaintainingPattern {
      * @notice Address to check if an address is maintainer in registry
      * @param _maintainer is the address we're checking this for
      */
-    function isAddressMaintainer(address _maintainer) public view returns (bool) {
+    function isAddressMaintainer(
+        address _maintainer
+    )
+    public
+    view
+    returns (bool)
+    {
         bool _isMaintainer = ITwoKeyReg(twoKeyRegistry).isMaintainer(_maintainer);
         return _isMaintainer;
     }
@@ -185,8 +245,24 @@ contract TwoKeyEventSource is Upgradeable, MaintainingPattern {
     /**
      * @notice In default TwoKeyAdmin will be moderator and his fee percentage per conversion is predefined
      */
-    function getTwoKeyDefaultIntegratorFeeFromAdmin() public view returns (uint) {
+    function getTwoKeyDefaultIntegratorFeeFromAdmin()
+    public
+    view
+    returns (uint)
+    {
         uint integratorFeePercentage = ITwoKeyAdmin(twoKeyAdmin).getDefaultIntegratorFeePercent();
         return integratorFeePercentage;
+    }
+
+    /**
+     * @notice Function to get default network tax percentage
+     */
+    function getTwoKeyDefaultNetworkTaxPercent()
+    public
+    view
+    returns (uint)
+    {
+        uint networkTaxPercent = ITwoKeyAdmin(twoKeyAdmin).getDefaultNetworkTaxPercent();
+        return networkTaxPercent;
     }
 }

@@ -5,6 +5,7 @@ import singletons from '../src/contracts/singletons';
 import createWeb3, { generatePlasmaFromMnemonic } from './_web3';
 import registerUserFromBackend, { IRegistryData } from './_registerUserFromBackend';
 import {promisify} from '../src/utils/promisify';
+import {IPrivateMetaInformation} from "../src/acquisition/interfaces";
 
 const {env} = process;
 
@@ -18,17 +19,32 @@ const delay = env.TEST_DELAY;
 // const destinationAddress = env.DESTINATION_ADDRESS  || '0xd9ce6800b997a0f26faffc0d74405c841dfc64b7'
 console.log(mainNetId);
 const addressRegex = /^0x[a-fA-F0-9]{40}$/;
-const maxConverterBonusPercent = 23;
-const pricePerUnitInETHOrUSD = 5;
-const maxReferralRewardPercent = 15;
+const maxConverterBonusPercent = 15;
+const pricePerUnitInETHOrUSD = 0.095;
+const maxReferralRewardPercent = 20;
 const moderatorFeePercentage = 1;
 const minContributionETHorUSD = 5;
-const maxContributionETHorUSD = 1000;
+const maxContributionETHorUSD = 1000000;
 const now = new Date();
 const campaignStartTime = Math.round(new Date(now.valueOf()).setDate(now.getDate() - 30) / 1000);
 const campaignEndTime = Math.round(new Date(now.valueOf()).setDate(now.getDate() + 30) / 1000);
 const twoKeyEconomy = singletons.TwoKeyEconomy.networks[mainNetId].address;
 const twoKeyAdmin = singletons.TwoKeyAdmin.networks[mainNetId].address;
+let isKYCRequired = false;
+let isFiatConversionAutomaticallyApproved = true;
+const isFiatOnly = false;
+let incentiveModel = "MANUAL";
+let amount = 0; //1000 tokens fiat inventory
+let vestingAmount = 'BONUS';
+
+let testObject = {
+    versionName: 'versionName',
+    contractAddress: '0x15bb774ab9f11a4b08c8ec7b3e51d646e3f64aa8', //Just arbitrary address
+    contractName: 'ContractName',
+    notMaintainerAddress: '0x15bb774ab9f11a4b08c8ec7b3e51d646e3f64aa8',
+    emptyAddress: '0x0000000000000000000000000000000000000000',
+    fiatWei: 150*10**18
+};
 
 function makeHandle(max: number = 8): string {
     let text = '';
@@ -40,7 +56,6 @@ function makeHandle(max: number = 8): string {
     return text;
 }
 
-// console.log(makeHandle(4096));
 
 console.log(rpcUrl);
 console.log(mainNetId);
@@ -51,46 +66,7 @@ console.log(singletons.TwoKeyEconomy.networks[mainNetId].address);
 const progressCallback = (name: string, mined: boolean, transactionResult: string): void => {
     console.log(`Contract ${name} ${mined ? `deployed with address ${transactionResult}` : `placed to EVM. Hash ${transactionResult}`}`);
 };
-/*
 
-    "0xb3fa520368f2df7bed4df5185101f303f6c7decc": { "balance": "0x1337000000000000000000" },
-    "0xffcf8fdee72ac11b5c542428b35eef5769c409f0": { "balance": "0x1337000000000000000000" },
-    "0x22d491bde2303f2f43325b2108d26f1eaba1e32b": { "balance": "0x1337000000000000000000" },
-    "0xe11ba2b4d45eaed5996cd0823791e0c93114882d": { "balance": "0x1337000000000000000000" },
-    "0xd03ea8624c8c5987235048901fb614fdca89b117": { "balance": "0x1337000000000000000000" },
-    "0x95ced938f7991cd0dfcb48f0a06a40fa1af46ebc": { "balance": "0x1337000000000000000000" },
-    "0x3e5e9111ae8eb78fe1cc3bb8915d5d461f3ef9a9": { "balance": "0x1337000000000000000000" },
-    "0x28a8746e75304c0780e011bed21c72cd78cd535e": { "balance": "0x1337000000000000000000" },
-    "0xaca94ef8bd5ffee41947b4585a84bda5a3d3da6e": { "balance": "0x1337000000000000000000" },
-    "0x1df62f291b2e969fb0849d99d9ce41e2f137006e": { "balance": "0x1337000000000000000000" },
-    "0x610bb1573d1046fcb8a70bbbd395754cd57c2b60": { "balance": "0x1337000000000000000000" },
-
-
-6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1 0xb3fa520368f2df7bed4df5185101f303f6c7decc
-9125720a89c9297cde4a3cfc92f233da5b22f868b44f78171354d4e0f7fe74ec 0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7
-6370fd033278c143179d81c5526140625662b8daa446c22ee2d73db3707e620c 0xffcf8fdee72ac11b5c542428b35eef5769c409f0
-646f1ce2fdad0e6deeeb5c7e8e5543bdde65e86029e2fd9fc169899c440a7913 0x22d491bde2303f2f43325b2108d26f1eaba1e32b
-add53f9a7e588d003326d1cbf9e4a43c061aadd9bc938c843a79e7b4fd2ad743 0xe11ba2b4d45eaed5996cd0823791e0c93114882d
-395df67f0c2d2d9fe1ad08d1bc8b6627011959b79c53d7dd6a3536a33ab8a4fd 0xd03ea8624c8c5987235048901fb614fdca89b117
-e485d098507f54e7733a205420dfddbe58db035fa577fc294ebd14db90767a52 0x95ced938f7991cd0dfcb48f0a06a40fa1af46ebc
-a453611d9419d0e56f499079478fd72c37b251a94bfde4d19872c44cf65386e3 0x3e5e9111ae8eb78fe1cc3bb8915d5d461f3ef9a9
-829e924fdf021ba3dbbc4225edfece9aca04b929d6e75613329ca6f1d31c0bb4 0x28a8746e75304c0780e011bed21c72cd78cd535e
-b0057716d5917badaf911b193b12b910811c1497b5bada8d7711f758981c3773 0x1df62f291b2e969fb0849d99d9ce41e2f137006e
-77c5495fbb039eed474fc940f29955ed0531693cc9212911efd35dff0373153f 0x610bb1573d1046fcb8a70bbbd395754cd57c2b60
-*/
-
-// let web3 = createWeb3(mnemonic, rpcUrl);
-// const web3switcher = {
-//     deployer: () => createWeb3(env.MNEMONIC_DEPLOYER, rpcUrl, '6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1'),
-//     aydnep: () => createWeb3(env.MNEMONIC_AYDNEP, rpcUrl, '9125720a89c9297cde4a3cfc92f233da5b22f868b44f78171354d4e0f7fe74ec'),
-//     gmail: () => createWeb3(env.MNEMONIC_GMAIL, rpcUrl, '6370fd033278c143179d81c5526140625662b8daa446c22ee2d73db3707e620c'),
-//     test4: () => createWeb3(env.MNEMONIC_TEST4, rpcUrl, '646f1ce2fdad0e6deeeb5c7e8e5543bdde65e86029e2fd9fc169899c440a7913'),
-//     renata: () => createWeb3(env.MNEMONIC_RENATA, rpcUrl, 'add53f9a7e588d003326d1cbf9e4a43c061aadd9bc938c843a79e7b4fd2ad743'),
-//     uport: () => createWeb3(env.MNEMONIC_UPORT, rpcUrl, '395df67f0c2d2d9fe1ad08d1bc8b6627011959b79c53d7dd6a3536a33ab8a4fd'),
-//     gmail2: () => createWeb3(env.MNEMONIC_GMAIL2, rpcUrl, 'e485d098507f54e7733a205420dfddbe58db035fa577fc294ebd14db90767a52'),
-//     aydnep2: () => createWeb3(env.MNEMONIC_AYDNEP2, rpcUrl, 'a453611d9419d0e56f499079478fd72c37b251a94bfde4d19872c44cf65386e3'),
-//     test: () => createWeb3(env.MNEMONIC_TEST, rpcUrl, '829e924fdf021ba3dbbc4225edfece9aca04b929d6e75613329ca6f1d31c0bb4'),
-// };
 const web3switcher = {
     deployer: () => createWeb3(env.MNEMONIC_DEPLOYER, rpcUrl),
     aydnep: () => createWeb3(env.MNEMONIC_AYDNEP, rpcUrl),
@@ -191,10 +167,6 @@ const users = {
             walletname: 'test-wallet',
         },
 };
-// console.log('MNEMONICS');
-// Object.keys(env).filter(key => key.includes('MNEMONIC')).forEach((key) => {
-//     console.log(env[key]);
-// });
 
 const eventEmited = (error, event) => {
     if (error) {
@@ -205,7 +177,7 @@ const eventEmited = (error, event) => {
 };
 
 const addresses = [env.AYDNEP_ADDRESS, env.GMAIL_ADDRESS, env.TEST4_ADDRESS, env.RENATA_ADDRESS, env.UPORT_ADDRESS, env.GMAIL2_ADDRESS, env.AYDNEP2_ADDRESS, env.TEST_ADDRESS];
-const acquisitionCurrency = 'ETH';
+const acquisitionCurrency = 'USD';
 let twoKeyProtocol: TwoKeyProtocol;
 
 const printBalances = (done) => {
@@ -293,6 +265,8 @@ const tryToRegisterUser = async (username, from) => {
     return registerReceipts;
     // console.log('REGISTER RESULT', register);
 };
+
+
 describe('TwoKeyProtocol', () => {
     let from: string;
     before(function () {
@@ -311,29 +285,13 @@ describe('TwoKeyProtocol', () => {
                     plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
                 });
 
-                // console.log('JS IPFS', await twoKeyProtocol.Utils.ipfsAdd(`alert('Hello FROM IPFS'); console.log('Hello from IPFS'); window.helloIPFS = 'hello from ipfs';`));
                 await tryToRegisterUser('Deployer', from);
-                // const signature = await twoKeyProtocol.Registry.signUserData2Registry(from, 'DEPLOYER','DEPLOYER','aydnep@2key.network');
-                // console.log('SIGNATURE FOR REGISTRY', signature);
                 const {balance} = twoKeyProtocol.Utils.balanceFromWeiString(await twoKeyProtocol.getBalance(env.AYDNEP_ADDRESS), {inWei: true});
                 const {balance: adminBalance} = twoKeyProtocol.Utils.balanceFromWeiString(await twoKeyProtocol.getBalance(singletons.TwoKeyAdmin.networks[mainNetId].address), {inWei: true});
                 console.log(adminBalance);
                 let numberOfProposals = await twoKeyProtocol.Congress.getNumberOfProposals();
                 console.log('Number of proposals is: ' + numberOfProposals);
-                if (numberOfProposals == 0) {
-                    console.log('Contractor does not have enough 2key tokens. Submitting a proposal to transfer');
-                    let transactionBytecode =
-                        "0x9ffe94d9e31c0ffa000000000000000000000000b3fa520368f2df7bed4df5185101f303f6c7decc000000000000000000000000000000000000000000000000002386f26fc10000";
-                    let txHash = twoKeyProtocol.Congress.newProposal(
-                        twoKeyProtocol.twoKeyAdmin.address,
-                        "Send some tokens to contractor",
-                        transactionBytecode,
-                        from);
-
-                    resolve(txHash);
-                } else {
-                    resolve(balance['2KEY']);
-                }
+                resolve(balance['2KEY']);
             } catch (err) {
                 reject(err);
             }
@@ -343,11 +301,6 @@ describe('TwoKeyProtocol', () => {
     let campaignAddress: string;
     let aydnepBalance;
     let txHash;
-
-    it('should return acquisition submodule', async () => {
-        const submoduleJS = await twoKeyProtocol.Utils.getSubmodule('cba508abbecc7f07ea7f5303279b631c418db248257c51800b5beeb0c13663cb', 'acquisition');
-        expect(submoduleJS.length).to.be.gt(0);
-    }).timeout(60000);
 
     it('should return a balance for address', async () => {
         const business = twoKeyProtocol.Utils.balanceFromWeiString(await twoKeyProtocol.getBalance(twoKeyAdmin), {
@@ -396,8 +349,130 @@ describe('TwoKeyProtocol', () => {
         console.log('aydnep2 balance', aydnep2.balance);
         console.log('test balance', test.balance);
         expect(aydnepBalance).to.exist.to.haveOwnProperty('gasPrice')
-        // .to.be.equal(twoKeyProtocol.getGasPrice());
     }).timeout(60000);
+
+
+    it('Should check SingltonsRegistry NonUpgradableContractNameByAddress' ,async() => {
+        let contractAddress;
+        let txHash;
+
+        const {web3, address} = web3switcher.deployer();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+        });
+
+        // //Map testAddress=>testKey
+        // txHash = await twoKeyProtocol.SingletonRegistry.setContractAddressByNonUpgradableContractName(testObject.contractAddress, testObject.versionName, from);
+        //
+        // const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        //
+        // contractAddress = await twoKeyProtocol.SingletonRegistry.getAddressByNonUpgradableContract(testObject.versionName);
+        // expect(contractAddress).to.be.equal(testObject.contractAddress);
+    }).timeout(60000);
+
+
+    it('Should check SingltonsRegistry ImplementationByContractNameAndVersion' ,async() => {
+        // let contractAddress;
+        // let txHash;
+        //
+        // txHash = await twoKeyProtocol.SingletonRegistry.setContractImplementationByContractNameAndVersion(testObject.contractName, testObject.versionName, testObject.contractAddress, from);
+        // const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        //
+        // contractAddress = await twoKeyProtocol.SingletonRegistry.getImplementationByContractNameAndVersion(testObject.contractName,testObject.versionName);
+        // expect(contractAddress).to.be.equal(testObject.contractAddress);
+    }).timeout(60000);
+
+
+    it('Should check SingltonsRegistry LatestVersion' ,async() => {
+        // let contractLatestVersion;
+        // const {web3, address} = web3switcher.deployer();
+        //
+        // contractLatestVersion = await twoKeyProtocol.SingletonRegistry.getLatestVersionByContractName(testObject.contractName);
+        // expect(contractLatestVersion).to.be.equal(testObject.versionName);
+    }).timeout(60000);
+
+
+    it('Should check SingltonsRegistry ProxyAddress' ,async() => {
+        // let proxyAddress;
+        // let setProxyAddress;
+        //
+        // setProxyAddress = await twoKeyProtocol.SingletonRegistry.setProxyByContract(testObject.contractName, testObject.versionName, from);
+        // proxyAddress = await twoKeyProtocol.SingletonRegistry.getProxyByContractName(testObject.contractName);
+        // expect(proxyAddress).to.be.equal(setProxyAddress);
+
+    }).timeout(60000);
+
+
+    it('Should check maintainingPattern getAdmin() functionality' ,async() => {
+        let currentAdmin;
+
+        const {web3, address} = web3switcher.deployer();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+        });
+
+        // currentAdmin = await twoKeyProtocol.MaintainingPattern.getAdmin();
+        // expect(currentAdmin).to.be.equal(testObject.emptyAddress);
+    }).timeout(60000);
+
+    it('Should MaintainingPattern-Pass check maintainer' ,async() => {
+        // let isMaintainer;
+        //
+        // const {web3, address} = web3switcher.deployer();
+        // from = address;
+        // twoKeyProtocol.setWeb3({
+        //     web3,
+        //     networks: {
+        //         mainNetId,
+        //         syncTwoKeyNetId,
+        //     },
+        //     eventsNetUrl,
+        //     plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+        // });
+        //
+        // isMaintainer = await twoKeyProtocol.MaintainingPattern.checkIfMaintainer(from);
+        // expect(isMaintainer).to.be.true;
+    }).timeout(60000);
+
+    it('Should check MaintainingPattern-Pass check not maintainer.' ,async() => {
+        // let isMaintainer;
+        //
+        // const {web3, address} = web3switcher.deployer();
+        // from = address;
+        // twoKeyProtocol.setWeb3({
+        //     web3,
+        //     networks: {
+        //         mainNetId,
+        //         syncTwoKeyNetId,
+        //     },
+        //     eventsNetUrl,
+        //     plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+        // });
+        //
+        // isMaintainer = await twoKeyProtocol.MaintainingPattern.checkIfMaintainer(testObject.notMaintainerAddress);
+        // expect(isMaintainer).not.to.be.true;
+    }).timeout(60000);
+
+    it('should get total supply of economy contract' ,async() => {
+        console.log("Check total supply on 2key-economy contract");
+        let totalSup = await twoKeyProtocol.ERC20.getTotalSupply(twoKeyProtocol.twoKeyEconomy.address);
+        console.log(totalSup);
+    }).timeout(60000);
+
 
     it('should save balance to ipfs', () => {
         return twoKeyProtocol.Utils.ipfsAdd(aydnepBalance).then((hash) => {
@@ -409,7 +484,6 @@ describe('TwoKeyProtocol', () => {
     it('should read from ipfs', () => {
         return twoKeyProtocol.Utils.getOffchainDataFromIPFSHash('QmTiZzUGHaQz6np6WpFwMv5zKqLLgW3uM6a4ow2tht642j').then((data) => {
             console.log('IPFS data', data);
-            // expect(hash).to.be.a('string');
         });
     }).timeout(60000);
 
@@ -429,7 +503,6 @@ describe('TwoKeyProtocol', () => {
 
     it(`should transfer ether to ${ethDstAddress}`, async () => {
         if (parseInt(mainNetId, 10) > 4) {
-            // const gasLimit = await twoKeyProtocol.getETHTransferGas(twoKeyProtocolAydnep.getAddress(), 1);
             txHash = await twoKeyProtocol.transferEther(ethDstAddress, twoKeyProtocol.Utils.toWei(10, 'ether'), from, 6000000000);
             console.log('Transfer Ether', txHash, typeof txHash);
             const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
@@ -476,11 +549,11 @@ describe('TwoKeyProtocol', () => {
 
     let campaignData;
 
-    it('should check a user info', async () => {
-        const isAddressRegistered = await twoKeyProtocol.Registry.checkIfAddressIsRegistered(from);
-        console.log(`Address ${from} ${isAddressRegistered ? 'REGISTERED' : 'NOT REGISTERED'} in TwoKeyReg`);
-        expect(isAddressRegistered).to.true;
-    }).timeout(60000);
+    // it('should check a user info', async () => {
+    //     const isAddressRegistered = await twoKeyProtocol.Registry.checkIfAddressIsRegistered(from);
+    //     console.log(`Address ${from} ${isAddressRegistered ? 'REGISTERED' : 'NOT REGISTERED'} in TwoKeyReg`);
+    //     expect(isAddressRegistered).to.true;
+    // }).timeout(60000);
 
 
     it('should create a new campaign Acquisition Contract', async () => {
@@ -497,21 +570,36 @@ describe('TwoKeyProtocol', () => {
             currency: acquisitionCurrency,
             tokenDistributionDate: 1,
             maxDistributionDateShiftInDays: 180,
-            bonusTokensVestingMonths: 6,
-            bonusTokensVestingStartShiftInDaysFromDistributionDate: 180
+            numberOfVestingPortions: 6,
+            numberOfDaysBetweenPortions: 30,
+            bonusTokensVestingStartShiftInDaysFromDistributionDate: 180,
+            isKYCRequired,
+            isFiatConversionAutomaticallyApproved,
+            incentiveModel,
+            isFiatOnly,
+            vestingAmount,
+            mustConvertToReferr: false
         };
-        const campaign = await twoKeyProtocol.AcquisitionCampaign.create(campaignData, from, {
+
+        const campaign = await twoKeyProtocol.AcquisitionCampaign.create(campaignData, campaignData, {} , from, {
             progressCallback,
             gasPrice: 150000000000,
             interval: 500,
             timeout: 600000
         });
+
         console.log('Campaign address', campaign);
         campaignAddress = campaign.campaignAddress;
         links.deployer = campaign.campaignPublicLinkKey;
         return expect(addressRegex.test(campaignAddress)).to.be.true;
-    }).timeout(1200000);
+    }).timeout(120000);
 
+    it('should reserve amount for fiat conversion rewards', async() => {
+        // if(amount) {
+        //     let txHash = await twoKeyProtocol.AcquisitionCampaign.specifyFiatConversionRewards(campaignAddress, 0, amount, from);
+        //     await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        // }
+    }).timeout(60000);
 
     it('should proff that campaign is validated and registered properly', async() => {
         let isValidated = await twoKeyProtocol.CampaignValidator.isCampaignValidated(campaignAddress);
@@ -525,25 +613,25 @@ describe('TwoKeyProtocol', () => {
     }).timeout(60000);
 
     it('should save campaign to IPFS', async () => {
-        const hash = await twoKeyProtocol.Utils.ipfsAdd(campaignData);
-        console.log('HASH', hash);
-        txHash = await twoKeyProtocol.AcquisitionCampaign.updateOrSetIpfsHashPublicMeta(campaignAddress, hash, from);
-        console.log(txHash);
-        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-        console.log(`TX ${txHash} mined`);
+        // const hash = await twoKeyProtocol.Utils.ipfsAdd(campaignData);
+        // console.log('HASH', hash);
+        // txHash = await twoKeyProtocol.AcquisitionCampaign.updateOrSetIpfsHashPublicMeta(campaignAddress, hash, from);
+        // console.log(txHash);
+        // await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        // console.log(`TX ${txHash} mined`);
         const campaignMeta = await twoKeyProtocol.AcquisitionCampaign.getPublicMeta(campaignAddress,from);
-        console.log('IPFS:', hash, campaignMeta);
+        console.log(campaignMeta);
         expect(campaignMeta.meta.assetContractERC20).to.be.equal(campaignData.assetContractERC20);
-    }).timeout(60000);
-    // it('should print balance after campaign created', printBalances).timeout(15000);
+    }).timeout(120000);
+    it('should print balance after campaign created', printBalances).timeout(15000);
 
     it('should transfer assets to campaign', async () => {
-        txHash = await twoKeyProtocol.transfer2KEYTokens(campaignAddress, twoKeyProtocol.Utils.toWei(1234, 'ether'), from);
-        console.log(twoKeyProtocol.Utils.toWei(1234, 'ether'));
+        txHash = await twoKeyProtocol.transfer2KEYTokens(campaignAddress, twoKeyProtocol.Utils.toWei(1234000, 'ether'), from);
+        console.log(twoKeyProtocol.Utils.toWei(1234000, 'ether'));
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const balance = twoKeyProtocol.Utils.fromWei(await twoKeyProtocol.AcquisitionCampaign.checkInventoryBalance(campaignAddress, from)).toString();
         console.log('Campaign Balance', balance);
-        expect(parseFloat(balance)).to.be.equal(1234);
+        expect(parseFloat(balance)).to.be.equal(1234000 - amount);
     }).timeout(600000);
 
     it('should get user public link', async () => {
@@ -565,17 +653,17 @@ describe('TwoKeyProtocol', () => {
         console.log("Moderator: " + addressesWhereUserIsModerator);
     }).timeout(60000);
 
-    it('should save contractor link as the private meta hash', async() => {
-        console.log(links.deployer);
-        let txHash = await twoKeyProtocol.AcquisitionCampaign.setPrivateMetaHash(campaignAddress, links.deployer, from);
-        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-    }).timeout(60000);
+    // it('should save contractor link as the private meta hash', async() => {
+    //     console.log(links.deployer);
+    //     let txHash = await twoKeyProtocol.AcquisitionCampaign.setPrivateMetaHash(campaignAddress, links.deployer, from);
+    //     await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+    // }).timeout(60000);
 
     it('should get and decrypt ipfs hash', async() => {
-        let data = await twoKeyProtocol.AcquisitionCampaign.getPrivateMetaHash(campaignAddress, from);
+        let data: IPrivateMetaInformation = await twoKeyProtocol.AcquisitionCampaign.getPrivateMetaHash(campaignAddress, from);
         console.log(data);
-        expect(data).to.be.equal(links.deployer);
-    }).timeout(60000);
+        expect(data.campaignPublicLinkKey).to.be.equal(links.deployer);
+    }).timeout(120000);
 
 
     it('should visit campaign as guest', async () => {
@@ -638,13 +726,13 @@ describe('TwoKeyProtocol', () => {
         // console.log('isUserJoined', await twoKeyProtocol.AcquisitionCampaign.isAddressJoined(campaignAddress, from));
         let maxReward = await twoKeyProtocol.AcquisitionCampaign.getEstimatedMaximumReferralReward(campaignAddress, from, links.gmail);
         console.log(`TEST4, BEFORE JOIN Estimated maximum referral reward: ${maxReward}%`);
-        expect(maxReward).to.be.gte(7.5);
+        // expect(maxReward).to.be.gte(7.5);
     }).timeout(60000);
 
     it('==> should print available amount of tokens before conversion', async() => {
         const availableAmountOfTokens = await twoKeyProtocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(campaignAddress,from);
         console.log('Available amount of tokens before conversion is: ' + availableAmountOfTokens);
-        expect(availableAmountOfTokens).to.be.equal(1234);
+        expect(availableAmountOfTokens).to.be.equal(1234000 - amount);
     }).timeout(60000);
 
     it('should buy some tokens', async () => {
@@ -663,7 +751,7 @@ describe('TwoKeyProtocol', () => {
         const availableAmountOfTokens = await twoKeyProtocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(campaignAddress,from);
         const { totalTokens } = await twoKeyProtocol.AcquisitionCampaign.getEstimatedTokenAmount(campaignAddress, false, twoKeyProtocol.Utils.toWei(minContributionETHorUSD, 'ether'));
         console.log('Available amount of tokens before conversion is: ' + availableAmountOfTokens, totalTokens);
-        expect(availableAmountOfTokens).to.be.lte(1234 - totalTokens);
+        expect(availableAmountOfTokens).to.be.lte(1234000 - amount - totalTokens);
     }).timeout(60000);
 
     it('should join as test4', async () => {
@@ -710,7 +798,7 @@ describe('TwoKeyProtocol', () => {
         const maxReward = await twoKeyProtocol.AcquisitionCampaign.getEstimatedMaximumReferralReward(campaignAddress, from, links.test4);
         console.log(`RENATA, Estimated maximum referral reward: ${maxReward}%`);
 
-        expect(maxReward).to.be.gte(5.025);
+        // expect(maxReward).to.be.gte(5.025);
     }).timeout(60000);
 
     it('should joinOffchain as Renata', async () => {
@@ -743,6 +831,7 @@ describe('TwoKeyProtocol', () => {
         });
         await tryToRegisterUser('Gmail2', from);
     }).timeout(60000);
+
 
     it('should buy some tokens from uport', async () => {
         const {web3, address} = web3switcher.uport();
@@ -883,7 +972,7 @@ describe('TwoKeyProtocol', () => {
     }).timeout(60000);
 
     it('should approve converter', async () => {
-        console.log('Test where contractor / moderator can approve converter to execute lockup');
+        console.log('Test where contractor can approve converter to execute lockup');
         const {web3, address} = web3switcher.aydnep();
         from = address;
         twoKeyProtocol.setWeb3({
@@ -895,21 +984,25 @@ describe('TwoKeyProtocol', () => {
             eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
         });
-        let txHash = await twoKeyProtocol.AcquisitionCampaign.approveConverter(campaignAddress, env.TEST4_ADDRESS, from);
-        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-        txHash = await twoKeyProtocol.AcquisitionCampaign.approveConverter(campaignAddress,env.GMAIL2_ADDRESS, from);
-        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-        /*
-        txHash = await twoKeyProtocol.AcquisitionCampaign.approveConverter(campaignAddress,env.RENATA_ADDRESS, from);
-        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-        */
-        const allApproved = await twoKeyProtocol.AcquisitionCampaign.getApprovedConverters(campaignAddress, from);
-        console.log('Approved addresses: ', allApproved);
 
-        expect(allApproved[0]).to.be.equal(env.TEST4_ADDRESS);
-        const allPendingAfterApproved = await twoKeyProtocol.AcquisitionCampaign.getAllPendingConverters(campaignAddress, from);
-        console.log('All pending after approval: ' + allPendingAfterApproved);
-        expect(allPendingAfterApproved.length).to.be.equal(2);
+        if(isKYCRequired) {
+            let txHash = await twoKeyProtocol.AcquisitionCampaign.approveConverter(campaignAddress, env.TEST4_ADDRESS, from);
+            await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+            txHash = await twoKeyProtocol.AcquisitionCampaign.approveConverter(campaignAddress,env.GMAIL2_ADDRESS, from);
+            await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+            /*
+            txHash = await twoKeyProtocol.AcquisitionCampaign.approveConverter(campaignAddress,env.RENATA_ADDRESS, from);
+            await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+            */
+            const allApproved = await twoKeyProtocol.AcquisitionCampaign.getApprovedConverters(campaignAddress, from);
+            console.log('Approved addresses: ', allApproved);
+
+            expect(allApproved[0]).to.be.equal(env.TEST4_ADDRESS);
+            const allPendingAfterApproved = await twoKeyProtocol.AcquisitionCampaign.getAllPendingConverters(campaignAddress, from);
+            console.log('All pending after approval: ' + allPendingAfterApproved);
+            expect(allPendingAfterApproved.length).to.be.equal(2);
+        }
+
     }).timeout(60000);
 
     it('should get converter conversion ids', async() => {
@@ -920,17 +1013,19 @@ describe('TwoKeyProtocol', () => {
 
     it('should reject converter', async () => {
         console.log("Test where contractor / moderator can reject converter to execute lockup");
-        txHash = await twoKeyProtocol.AcquisitionCampaign.rejectConverter(campaignAddress, env.TEST_ADDRESS, from);
-        console.log(txHash);
-        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        if(isKYCRequired) {
+            txHash = await twoKeyProtocol.AcquisitionCampaign.rejectConverter(campaignAddress, env.TEST_ADDRESS, from);
+            console.log(txHash);
+            await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
 
-        const allRejected = await twoKeyProtocol.AcquisitionCampaign.getAllRejectedConverters(campaignAddress, from);
-        console.log("Rejected addresses: ", allRejected);
+            const allRejected = await twoKeyProtocol.AcquisitionCampaign.getAllRejectedConverters(campaignAddress, from);
+            console.log("Rejected addresses: ", allRejected);
 
-        const allPendingAfterRejected = await twoKeyProtocol.AcquisitionCampaign.getAllPendingConverters(campaignAddress, from);
-        console.log('All pending after rejection: ', allPendingAfterRejected);
-        expect(allRejected[0]).to.be.equal(env.TEST_ADDRESS);
-        expect(allPendingAfterRejected.length).to.be.equal(1);
+            const allPendingAfterRejected = await twoKeyProtocol.AcquisitionCampaign.getAllPendingConverters(campaignAddress, from);
+            console.log('All pending after rejection: ', allPendingAfterRejected);
+            expect(allRejected[0]).to.be.equal(env.TEST_ADDRESS);
+            expect(allPendingAfterRejected.length).to.be.equal(1);
+        }
     }).timeout(60000);
 
     /*
@@ -942,12 +1037,25 @@ describe('TwoKeyProtocol', () => {
     }).timeout(60000);
     */
 
+    // it('Should check that exchangeContract Fiat reserved is 0 before any conversions exceution', async() => {
+    //     let upgradableExchangeFiatReserve = await twoKeyProtocol.UpgradableExchange.getUsdStableCoinUnitsReserve(from);
+    //     expect(upgradableExchangeFiatReserve).to.be.equal(0);
+    // }).timeout(60000);
+
     it('should be executed conversion by contractor' ,async() => {
-        let conversionIdsForGmail2 = await twoKeyProtocol.AcquisitionCampaign.getConverterConversionIds(campaignAddress, env.GMAIL2_ADDRESS, from);
-        console.log('Conversion ids for Gmail2:', conversionIdsForGmail2);
-        const txHash = await twoKeyProtocol.AcquisitionCampaign.executeConversion(campaignAddress, conversionIdsForGmail2[0], from);
-        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        if(isKYCRequired) {
+            let conversionIdsForGmail2 = await twoKeyProtocol.AcquisitionCampaign.getConverterConversionIds(campaignAddress, env.GMAIL2_ADDRESS, from);
+            console.log('Conversion ids for Gmail2:', conversionIdsForGmail2);
+            const txHash = await twoKeyProtocol.AcquisitionCampaign.executeConversion(campaignAddress, conversionIdsForGmail2[0], from);
+            await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        }
     }).timeout(60000);
+
+
+    // it('Should check that exchangeContract Fiat reserved is not zero after conversion exceution', async() => {
+    //     let upgradableExchangeFiatReserve = await twoKeyProtocol.UpgradableExchange.getUsdStableCoinUnitsReserve(from);
+    //     expect(upgradableExchangeFiatReserve).not.to.be.equal(0);
+    // }).timeout(60000);
 
     it('should print campaigns where user converter', async() => {
         const {web3, address} = web3switcher.test4();
@@ -965,7 +1073,7 @@ describe('TwoKeyProtocol', () => {
         // console.log(campaigns);
     });
 
-    it('should execute conversion and create lockup contract', async () => {
+    it('should execute conversion and create purchase', async () => {
         const {web3, address} = web3switcher.test4();
         from = address;
         twoKeyProtocol.setWeb3({
@@ -977,8 +1085,16 @@ describe('TwoKeyProtocol', () => {
             eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_TEST4).privateKey,
         });
-        const txHash = await twoKeyProtocol.AcquisitionCampaign.executeConversion(campaignAddress, 0, from);
-        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        if(isKYCRequired) {
+            const txHash = await twoKeyProtocol.AcquisitionCampaign.executeConversion(campaignAddress, 0, from);
+            await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        }
+    }).timeout(60000);
+
+    it('should get purchase information', async() => {
+        console.log('Getting purchase information');
+        let purchase = await twoKeyProtocol.AcquisitionCampaign.getPurchaseInformation(campaignAddress,0,from);
+        console.log(purchase);
     }).timeout(60000);
 
     it('should show campaign summary', async() => {
@@ -986,24 +1102,12 @@ describe('TwoKeyProtocol', () => {
         console.log(summary);
     }).timeout(60000);
 
-    it('should return addresses of lockup contracts for converter', async () => {
-        const {web3, address} = web3switcher.aydnep();
-        from = address;
-        twoKeyProtocol.setWeb3({
-            web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
-        });
-        const addresses = await twoKeyProtocol.AcquisitionCampaign.getLockupContractsForConverter(campaignAddress, env.TEST4_ADDRESS, from);
-        console.log('Lockup contracts addresses : ' + addresses);
-        expect(addresses.length).to.be.equal(1);
+    it('should show moderator earnings', async() => {
+        let moderatorTotalEarnings = await twoKeyProtocol.AcquisitionCampaign.getModeratorTotalEarnings(campaignAddress, from);
+        console.log('Moderator total earnings in 2key-tokens are: ' + moderatorTotalEarnings);
     }).timeout(60000);
 
-    it('should pull down base tokens amount from lockup from maintainer address', async() => {
+    it('should pull down base tokens amount from purchases handler contract', async() => {
         const {web3, address} = web3switcher.aydnep();
         from = address;
         twoKeyProtocol.setWeb3({
@@ -1015,8 +1119,7 @@ describe('TwoKeyProtocol', () => {
             eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
         });
-        const addresses = await twoKeyProtocol.AcquisitionCampaign.getLockupContractsForConverter(campaignAddress, env.TEST4_ADDRESS, from);
-        let txHash = await twoKeyProtocol.AcquisitionCampaign.withdrawTokens(addresses[0],0,from);
+        let txHash = await twoKeyProtocol.AcquisitionCampaign.withdrawTokens(campaignAddress, 0, 0, from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(60000);
 
@@ -1045,8 +1148,7 @@ describe('TwoKeyProtocol', () => {
 
         const contractorBalance = await twoKeyProtocol.AcquisitionCampaign.getContractorBalance(campaignAddress,from);
         console.log('Contractor balance: ' + contractorBalance.available);
-        const moderatorBalance = await twoKeyProtocol.AcquisitionCampaign.getModeratorBalance(campaignAddress,from);
-        console.log('Moderator balance: ' + moderatorBalance);
+
         const hash = await twoKeyProtocol.AcquisitionCampaign.contractorWithdraw(campaignAddress,from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(hash);
     }).timeout(60000);
@@ -1072,13 +1174,6 @@ describe('TwoKeyProtocol', () => {
         console.log("Moderator address is: " + moderatorAddress);
         expect(moderatorAddress).to.be.equal('0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7');
     }).timeout(60000);
-
-    it('==> should moderator withdraw his balances in 2key-tokens', async() => {
-        const txHash = await twoKeyProtocol.AcquisitionCampaign.moderatorAndReferrerWithdraw(campaignAddress,from);
-        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-        console.log(txHash);
-    }).timeout(60000);
-
 
     it('==> should referrer withdraw his balances in 2key-tokens', async() => {
         const {web3, address} = web3switcher.renata();
@@ -1106,27 +1201,6 @@ describe('TwoKeyProtocol', () => {
         }
     }).timeout(60000);
 
-    it('should print balances of ERC20 on lockupContracts', async () => {
-        const {web3, address} = web3switcher.aydnep();
-        from = address;
-        twoKeyProtocol.setWeb3({
-            web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
-        });
-        const addresses = await twoKeyProtocol.AcquisitionCampaign.getLockupContractsForConverter(campaignAddress, env.TEST4_ADDRESS, from);
-        console.log('Lockup contracts addresses : ' + addresses);
-        for (let i = 0; i < addresses.length; i++) {
-            let addressCurrent = addresses[i].toString();
-            let balance = await twoKeyProtocol.ERC20.getERC20Balance(twoKeyEconomy, addressCurrent);
-            console.log("Address: " + addressCurrent + " ----- balance: " + balance);
-        }
-    }).timeout(60000);
-
     it('should get all whitelisted addresses', async() => {
         const addresses = await twoKeyProtocol.Congress.getAllMembersForCongress(from);
         // console.log(addresses);
@@ -1137,7 +1211,7 @@ describe('TwoKeyProtocol', () => {
         const rate = await twoKeyProtocol.UpgradableExchange.getRate(from);
 
         console.log('Rate is : ' + rate);
-        expect(rate.toString()).to.be.equal("0.095");
+        expect(rate.toString()).to.be.equal("0.1");
     }).timeout(60000);
 
     it('should print currency', async() => {
@@ -1150,11 +1224,6 @@ describe('TwoKeyProtocol', () => {
         const totalEarnings = await twoKeyProtocol.AcquisitionCampaign.getModeratorTotalEarnings(campaignAddress,from);
         console.log('Moderator total earnings: '+ totalEarnings);
     }).timeout(60000);
-
-    it('should test recover', async() => {
-        let a = await twoKeyProtocol.AcquisitionCampaign.testRecover(campaignAddress);
-        console.log(a);
-    }).timeout(30000);
 
     it('should get statistics for the address from the contract', async() => {
         const {web3, address} = web3switcher.renata();
@@ -1169,6 +1238,23 @@ describe('TwoKeyProtocol', () => {
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
         });
         let stats = await twoKeyProtocol.AcquisitionCampaign.getAddressStatistic(campaignAddress,env.RENATA_ADDRESS, '0x0000000000000000000000000000000000000000',{from});
+        console.log(stats);
+    }).timeout(60000);
+
+    it('should get stats for 1 more referrer', async() => {
+        const {web3, address} = web3switcher.gmail();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_GMAIL).privateKey,
+        });
+
+        let stats = await twoKeyProtocol.AcquisitionCampaign.getAddressStatistic(campaignAddress, env.GMAIL_ADDRESS, '0x0000000000000000000000000000000000000000',{from});
         console.log(stats);
     }).timeout(60000);
 
@@ -1193,10 +1279,13 @@ describe('TwoKeyProtocol', () => {
                 syncTwoKeyNetId,
             },
             eventsNetUrl,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_GMAIL2).privateKey,
         });
+
+        console.log(twoKeyProtocol.plasmaAddress);
+        let signature = await twoKeyProtocol.AcquisitionCampaign.getSignatureFromLink(links.renata, twoKeyProtocol.plasmaAddress);
         console.log('Trying to perform offline conversion from gmail2');
-        let txHash = await twoKeyProtocol.AcquisitionCampaign.convertOffline(campaignAddress, from, from, 50);
+        let txHash = await twoKeyProtocol.AcquisitionCampaign.convertOffline(campaignAddress, signature, from, from, 50);
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(60000);
 
@@ -1227,7 +1316,7 @@ describe('TwoKeyProtocol', () => {
         console.log('Regular executed conversion is: ');
         let conversion = await twoKeyProtocol.AcquisitionCampaign.getConversion(campaignAddress,0,from);
         console.log(conversion);
-    })
+    }).timeout(60000);
 
     it('should execute conversion from contractor', async() => {
         const {web3, address} = web3switcher.aydnep();
@@ -1241,40 +1330,18 @@ describe('TwoKeyProtocol', () => {
             eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
         });
-        console.log('Trying to execute fiat conversion from Contractor');
-        let txHash = await twoKeyProtocol.AcquisitionCampaign.executeConversion(campaignAddress,4,from);
-        let lockupContractAddress = await twoKeyProtocol.AcquisitionCampaign.getLockupContractAddress(campaignAddress,4,from);
-        expect(lockupContractAddress).not.to.be.equal(0);
-        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-    }).timeout(60000);
+        if(!(isFiatConversionAutomaticallyApproved == true && isKYCRequired ==false)) {
+            console.log('Trying to execute fiat conversion from Contractor');
+            let txHash = await twoKeyProtocol.AcquisitionCampaign.executeConversion(campaignAddress,4,from);
+            const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        }
 
-    it('should return number of executed conversions', async() => {
-        let number = await twoKeyProtocol.AcquisitionCampaign.getNumberOfExecutedConversions(campaignAddress);
-        console.log('Number of executed conversions: ' + number);
     }).timeout(60000);
 
     it('should return number of forwarders for the campaign', async() => {
         let numberOfForwarders = await twoKeyProtocol.PlasmaEvents.getForwardersPerCampaign(campaignAddress);
         console.log('Number of forwarders stored on plasma: ' + numberOfForwarders);
     }).timeout(60000);
-
-    it('should create an offline(fiat) conversion from maintainer address', async() => {
-        const {web3, address} = web3switcher.aydnep();
-        from = address;
-        twoKeyProtocol.setWeb3({
-            web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
-        });
-        console.log('Trying to perform offline conversion from gmail2');
-        let txHash = await twoKeyProtocol.AcquisitionCampaign.convertOffline(campaignAddress,env.TEST4_ADDRESS, from, 50);
-        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-    }).timeout(60000);
-
 
     it('should check reputation points for a couple of addresses', async() => {
         console.log('Checking stats for Renata');
@@ -1303,181 +1370,191 @@ describe('TwoKeyProtocol', () => {
     }).timeout(60000);
 
 
+    it('Should get portions release dates', async() => {
+        let releaseDates = await twoKeyProtocol.AcquisitionCampaign.getBoughtTokensReleaseDates(campaignAddress);
+        console.log(releaseDates);
+    }).timeout(60000);
 
-    it('should build refgraph', async() => {
-        const {web3, address} = web3switcher.gmail();
-        from = address;
-        twoKeyProtocol.setWeb3({
-            web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
-        });
-        const getReferralLeaves = async (contract, owner) => {
-            const maxDepth = 99999;
-            let depth = 0;
-            const referrals = {};
-            let currentReferral;
-            // console.clear();
-            const firstAddress = twoKeyProtocol.plasmaAddress;
+    it('should get required rewards inventory', async() => {
+        let hardCap = 95000000; //95M dollars
+        let rewardsNeeded = await twoKeyProtocol.AcquisitionCampaign.getRequiredRewardsInventoryAmount(true, false, hardCap, 25);
+        console.log('Rewards inventory required' , rewardsNeeded);
+    }).timeout(60000);
 
-            async function getAddressReferrals(address, contractAddress, contractorAddress, from, plasma, timestamp) {
-                if (from !== currentReferral && !referrals[from]) {
-                    console.log('New Referral', from, currentReferral);
-                    currentReferral = from;
-                    referrals[from] = true;
-                    depth += 1;
-                }
-                console.log('DEPTH', depth, address);
-                const leaf: any = {
-                    depth,
-                    maxDepth,
-                    _collapsed: depth >= maxDepth,
-                    contractorAddress,
-                    contractAddress,
-                    address,
-                    timestamp,
-                };
-                if (from === address) {
-                    return null;
-                }
-                let hasTokensOrRewards = false;
-                console.log('GET STATISTICS', plasma);
-                const signature = await twoKeyProtocol.PlasmaEvents.signReferrerToGetRewards();
-                const statistics = await twoKeyProtocol.AcquisitionCampaign.getAddressStatistic(contractAddress, address, signature, {plasma});
-                /*
-                try {
-                  leaf.userData = await fetchAPI('plasma/user', {
-                    params: {
-                      plasma_address: address,
-                      campaign_web3_address: contractAddress,
-                    },
-                  });
-                } catch (e) {
-                  console.log(e);
-                }
-                */
-                if (statistics.isJoined && from) {
-                    // const joined_from = await promisify(twoKeyPlasmaEvents.getJoinedFrom, [contractAddress, contractorAddress, address]);
-                    const joined_from = await twoKeyProtocol.PlasmaEvents.getJoinedFrom(contractAddress, contractorAddress, address);
-                    // const visited_from = await getVisitedFrom(contractAddress, contractorAddress, address);
-                    /*
-                    if (joined_from === contractorAddress) {
-                      console.log('CONTRACTOR call plasmaOf');
-                      joined_from = await promisify(twoKeyPlasmaEvents.plasmaOf, [joined_from]);
-                    }
-                    */
-                    // const plasmaOf = await promisify(twoKeyPlasmaEvents.plasmaOf, [visited_from]);
-                    console.log('\r\n');
-                    console.log('VISITED FROM');
-                    console.log('CURRENT ADDRESS', address);
-                    // console.log('VISITED_FROM', visited_from);
-                    console.log('JOINED_FROM', joined_from);
-                    // console.log('PLASMA_OF', plasmaOf);
-                    console.log('FROM', from);
-                    console.log('STATS', statistics);
-                    console.log('\r\n');
-                    /*
-                    */
-                    if (parseInt(joined_from, 16) && joined_from !== from) {
-                        return null;
-                    }
-                }
-                hasTokensOrRewards = Object.values(statistics)
-                    .reduce((prev, current) => (prev || current.rewards
-                        || current.amountConverterSpentETH || current.tokensBought), hasTokensOrRewards);
-                leaf.statistics = statistics;
-                console.log(address, statistics);
-                leaf.name = statistics.username || address.replace(/^(0x.{5}).{31}/, '$1...');
-                leaf.from = from;
-                leaf.hover = from && {
-                    name: statistics.username,
-                    address,
-                    rewards: statistics.referrerRewards,
-                    tokensBought: statistics.tokensBought,
-                    amountConverterSpentETH: statistics.amountConverterSpentETH,
-                    timestamp: timestamp || Date.now(),
-                };
-                leaf.linkClassName =
-                    (owner === address && 'leaf-contract')
-                    || (statistics.isReferrer && 'leaf-referrer')
-                    || (statistics.isConverter && 'leaf-converter')
-                    || (statistics.isJoined && 'leaf-joined')
-                    || (statistics.username && 'leaf-plasma');
-                leaf.nodeSvgShape = {
-                    shape: 'circle',
-                    shapeProps: {
-                        r: 10,
-                        strokeWidth: 3,
-                        stroke: (owner === address && '#f00')
-                        || (statistics.isReferrer && (statistics.isConverter ? 'magenta' : 'darkviolet'))
-                        || (statistics.isConverter && '#1a936f')
-                        || (hasTokensOrRewards && '#1a936f')
-                        || (statistics.isJoined && 'steelblue')
-                        || (statistics.username && 'orange')
-                        || '#999',
-                    },
-                    links: {
-                        display: 'none',
-                    },
-                };
-                if (leaf.hover && statistics.fullName) {
-                    leaf.hover.fullname = statistics.fullName;
-                }
-                if (leaf.hover && statistics.email) {
-                    leaf.hover.email = statistics.email;
-                }
-                const referralsObject = {};
-                // console.log('GET CHILDREN FOR', address);
-                if (depth <= maxDepth) {
-                    const { visits, timestamps } = await twoKeyProtocol.PlasmaEvents.getVisitsList(contractAddress, contractorAddress, address);
-                    console.log('CHILDREN FOR', address, visits);
-                    if (visits.length) {
-                        // console.log('CHILDREN FOR', address, referrals);
-                        for (let i = 0, l = visits.length; i < l; i += 1) {
-                            if (from !== visits[i]) {
-                                referralsObject[visits[i]] = timestamps[i];
-                                // processed[visits[i]] = true;
-                            }
-                        }
-                        const leavePromises = [];
-                        Object.keys(referralsObject).forEach(key => {
-                            leavePromises.push(getAddressReferrals(
-                                key,
-                                contractAddress,
-                                contractorAddress,
-                                address,
-                                true,
-                                referralsObject[key]
-                            ));
-                        });
-                        leaf.children = await Promise.all(leavePromises);
-                    }
-                }
-                return { ...leaf, ...statistics, isJoined: statistics.isJoined };
-            }
-            // const tree = await getAddressReferrals(firstAddress, contract, owner, this.address !== owner);
-            const tree = await getAddressReferrals(firstAddress, contract, owner, null, true, null);
-            console.log(tree);
-            const removeDeadLeaves = node => {
-                const result = { ...node };
-                if (node.children) {
-                    result.children = node.children.filter(leaf => !!leaf).map(leaf => removeDeadLeaves(leaf));
-                }
-                return result;
-            };
-            const normalTree = removeDeadLeaves(tree);
-            console.log('TREE WITHOUT DEAD LEAVES', normalTree);
-            return { normalTree, isContractor: this.address === owner };
-        };
-
-        let x = await getReferralLeaves(campaignAddress,from);
-
-        console.log(x);
-    }).timeout(120000);
+    // it('should build refgraph', async() => {
+    //     const {web3, address} = web3switcher.gmail();
+    //     from = address;
+    //     twoKeyProtocol.setWeb3({
+    //         web3,
+    //         networks: {
+    //             mainNetId,
+    //             syncTwoKeyNetId,
+    //         },
+    //         eventsNetUrl,
+    //         plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+    //     });
+    //     const getReferralLeaves = async (contract, owner) => {
+    //         const maxDepth = 99999;
+    //         let depth = 0;
+    //         const referrals = {};
+    //         let currentReferral;
+    //         // console.clear();
+    //         const firstAddress = twoKeyProtocol.plasmaAddress;
+    //
+    //         async function getAddressReferrals(address, contractAddress, contractorAddress, from, plasma, timestamp) {
+    //             if (from !== currentReferral && !referrals[from]) {
+    //                 console.log('New Referral', from, currentReferral);
+    //                 currentReferral = from;
+    //                 referrals[from] = true;
+    //                 depth += 1;
+    //             }
+    //             console.log('DEPTH', depth, address);
+    //             const leaf: any = {
+    //                 depth,
+    //                 maxDepth,
+    //                 _collapsed: depth >= maxDepth,
+    //                 contractorAddress,
+    //                 contractAddress,
+    //                 address,
+    //                 timestamp,
+    //             };
+    //             if (from === address) {
+    //                 return null;
+    //             }
+    //             let hasTokensOrRewards = false;
+    //             console.log('GET STATISTICS', plasma);
+    //             const signature = await twoKeyProtocol.PlasmaEvents.signReferrerToGetRewards();
+    //             const statistics = await twoKeyProtocol.AcquisitionCampaign.getAddressStatistic(contractAddress, address, signature, {plasma});
+    //             /*
+    //             try {
+    //               leaf.userData = await fetchAPI('plasma/user', {
+    //                 params: {
+    //                   plasma_address: address,
+    //                   campaign_web3_address: contractAddress,
+    //                 },
+    //               });
+    //             } catch (e) {
+    //               console.log(e);
+    //             }
+    //             */
+    //             if (statistics.isJoined && from) {
+    //                 // const joined_from = await promisify(twoKeyPlasmaEvents.getJoinedFrom, [contractAddress, contractorAddress, address]);
+    //                 const joined_from = await twoKeyProtocol.PlasmaEvents.getJoinedFrom(contractAddress, contractorAddress, address);
+    //                 // const visited_from = await getVisitedFrom(contractAddress, contractorAddress, address);
+    //                 /*
+    //                 if (joined_from === contractorAddress) {
+    //                   console.log('CONTRACTOR call plasmaOf');
+    //                   joined_from = await promisify(twoKeyPlasmaEvents.plasmaOf, [joined_from]);
+    //                 }
+    //                 */
+    //                 // const plasmaOf = await promisify(twoKeyPlasmaEvents.plasmaOf, [visited_from]);
+    //                 console.log('\r\n');
+    //                 console.log('VISITED FROM');
+    //                 console.log('CURRENT ADDRESS', address);
+    //                 // console.log('VISITED_FROM', visited_from);
+    //                 console.log('JOINED_FROM', joined_from);
+    //                 // console.log('PLASMA_OF', plasmaOf);
+    //                 console.log('FROM', from);
+    //                 console.log('STATS', statistics);
+    //                 console.log('\r\n');
+    //                 /*
+    //                 */
+    //                 if (parseInt(joined_from, 16) && joined_from !== from) {
+    //                     return null;
+    //                 }
+    //             }
+    //             hasTokensOrRewards = Object.values(statistics)
+    //                 .reduce((prev, current) => (prev || current.rewards
+    //                     || current.amountConverterSpentETH || current.tokensBought), hasTokensOrRewards);
+    //             leaf.statistics = statistics;
+    //             console.log(address, statistics);
+    //             leaf.name = statistics.username || address.replace(/^(0x.{5}).{31}/, '$1...');
+    //             leaf.from = from;
+    //             leaf.hover = from && {
+    //                 name: statistics.username,
+    //                 address,
+    //                 rewards: statistics.referrerRewards,
+    //                 tokensBought: statistics.tokensBought,
+    //                 amountConverterSpentETH: statistics.amountConverterSpentETH,
+    //                 timestamp: timestamp || Date.now(),
+    //             };
+    //             leaf.linkClassName =
+    //                 (owner === address && 'leaf-contract')
+    //                 || (statistics.isReferrer && 'leaf-referrer')
+    //                 || (statistics.isConverter && 'leaf-converter')
+    //                 || (statistics.isJoined && 'leaf-joined')
+    //                 || (statistics.username && 'leaf-plasma');
+    //             leaf.nodeSvgShape = {
+    //                 shape: 'circle',
+    //                 shapeProps: {
+    //                     r: 10,
+    //                     strokeWidth: 3,
+    //                     stroke: (owner === address && '#f00')
+    //                     || (statistics.isReferrer && (statistics.isConverter ? 'magenta' : 'darkviolet'))
+    //                     || (statistics.isConverter && '#1a936f')
+    //                     || (hasTokensOrRewards && '#1a936f')
+    //                     || (statistics.isJoined && 'steelblue')
+    //                     || (statistics.username && 'orange')
+    //                     || '#999',
+    //                 },
+    //                 links: {
+    //                     display: 'none',
+    //                 },
+    //             };
+    //             if (leaf.hover && statistics.fullName) {
+    //                 leaf.hover.fullname = statistics.fullName;
+    //             }
+    //             if (leaf.hover && statistics.email) {
+    //                 leaf.hover.email = statistics.email;
+    //             }
+    //             const referralsObject = {};
+    //             // console.log('GET CHILDREN FOR', address);
+    //             if (depth <= maxDepth) {
+    //                 const { visits, timestamps } = await twoKeyProtocol.PlasmaEvents.getVisitsList(contractAddress, contractorAddress, address);
+    //                 console.log('CHILDREN FOR', address, visits);
+    //                 if (visits.length) {
+    //                     // console.log('CHILDREN FOR', address, referrals);
+    //                     for (let i = 0, l = visits.length; i < l; i += 1) {
+    //                         if (from !== visits[i]) {
+    //                             referralsObject[visits[i]] = timestamps[i];
+    //                             // processed[visits[i]] = true;
+    //                         }
+    //                     }
+    //                     const leavePromises = [];
+    //                     Object.keys(referralsObject).forEach(key => {
+    //                         leavePromises.push(getAddressReferrals(
+    //                             key,
+    //                             contractAddress,
+    //                             contractorAddress,
+    //                             address,
+    //                             true,
+    //                             referralsObject[key]
+    //                         ));
+    //                     });
+    //                     leaf.children = await Promise.all(leavePromises);
+    //                 }
+    //             }
+    //             return { ...leaf, ...statistics, isJoined: statistics.isJoined };
+    //         }
+    //         // const tree = await getAddressReferrals(firstAddress, contract, owner, this.address !== owner);
+    //         const tree = await getAddressReferrals(firstAddress, contract, owner, null, true, null);
+    //         console.log(tree);
+    //         const removeDeadLeaves = node => {
+    //             const result = { ...node };
+    //             if (node.children) {
+    //                 result.children = node.children.filter(leaf => !!leaf).map(leaf => removeDeadLeaves(leaf));
+    //             }
+    //             return result;
+    //         };
+    //         const normalTree = removeDeadLeaves(tree);
+    //         console.log('TREE WITHOUT DEAD LEAVES', normalTree);
+    //         return { normalTree, isContractor: this.address === owner };
+    //     };
+    //
+    //     let x = await getReferralLeaves(campaignAddress,from);
+    //
+    //     console.log(x);
+    // }).timeout(120000);
 });
 
 

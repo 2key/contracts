@@ -23,7 +23,14 @@ contract TwoKeyCommunityTokenPool is TokenPool {
 
     uint256 [] annualTransfers;
 
-    function setInitialParams(address _twoKeyAdmin, address _erc20Address, address [] _maintainers, address _twoKeyRegistry) public {
+    function setInitialParams(
+        address _twoKeyAdmin,
+        address _erc20Address,
+        address [] _maintainers,
+        address _twoKeyRegistry
+    )
+    external
+    {
         require(initialized == false);
         setInitialParameters(_twoKeyAdmin, _erc20Address, _maintainers);
         twoKeyRegistry = _twoKeyRegistry;
@@ -37,7 +44,13 @@ contract TwoKeyCommunityTokenPool is TokenPool {
     /**
      * @notice Function to validate if the user is properly registered in TwoKeyRegistry
      */
-    function validateRegistrationOfReceiver(address _receiver) internal view returns (bool) {
+    function validateRegistrationOfReceiver(
+        address _receiver
+    )
+    internal
+    view
+    returns (bool)
+    {
         return ITwoKeyRegistry(twoKeyRegistry).checkIfUserExists(_receiver);
     }
 
@@ -47,7 +60,13 @@ contract TwoKeyCommunityTokenPool is TokenPool {
      * @param _amount is the amount of tokens sent
      * @dev Only TwoKeyAdmin contract can issue this call
      */
-    function transferTokensToAddress(address _receiver, uint _amount) public onlyTwoKeyAdmin {
+    function transferTokensToAddress(
+        address _receiver,
+        uint _amount
+    )
+    public
+    onlyTwoKeyAdmin
+    {
         require(validateRegistrationOfReceiver(_receiver) == true);
         require(_amount > 0);
 
@@ -63,7 +82,11 @@ contract TwoKeyCommunityTokenPool is TokenPool {
         yearToAnnualReport[year] = report;
     }
 
-    function checkInWhichYearIsTheTransfer() public view returns (uint) {
+    function checkInWhichYearIsTheTransfer()
+    public
+    view
+    returns (uint)
+    {
         if(block.timestamp > startingDate && block.timestamp < startingDate + 1 years) {
             return 1;
         } else {
@@ -76,17 +99,5 @@ contract TwoKeyCommunityTokenPool is TokenPool {
             return counter;
         }
     }
-
-
-
-
-
-
-
-
-
-
-
-
 
 }

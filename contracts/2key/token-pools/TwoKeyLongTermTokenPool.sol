@@ -14,9 +14,15 @@ contract TwoKeyLongTermTokenPool is TokenPool {
         _;
     }
 
-    function setInitialParams(address _twoKeyAdmin, address _erc20Address, address [] _maintainers) public {
+    function setInitialParams(
+        address _twoKeyAdmin,
+        address _erc20Address,
+        address [] _maintainers
+    )
+    public
+    {
         require(initialized == false);
-//        setInitialParameters(_twoKeyAdmin, _erc20Address, _maintainers);
+        setInitialParameters(_twoKeyAdmin, _erc20Address, _maintainers);
         releaseDate = block.timestamp + 3 * (1 years);
         initialized = true;
     }
@@ -26,8 +32,13 @@ contract TwoKeyLongTermTokenPool is TokenPool {
      * @param _receiver is the receiver of the tokens
      * @param _amount is the amount of the tokens
      */
-    function transferTokensFromContract(address _receiver, uint _amount) public onlyTwoKeyAdmin onlyAfterReleaseDate {
+    function transferTokensFromContract(
+        address _receiver,
+        uint _amount
+    )
+    public
+    onlyTwoKeyAdmin onlyAfterReleaseDate
+    {
         super.transferTokens(_receiver, _amount);
     }
-
 }

@@ -12,24 +12,40 @@ contract TokenPool is Upgradeable, MaintainingPattern {
     bool initialized = false;
     address public erc20Address;
 
-    function setInitialParameters(address _twoKeyAdmin, address _erc20Address, address [] _maintainers) internal {
+    function setInitialParameters(
+        address _twoKeyAdmin,
+        address _erc20Address,
+        address [] _maintainers
+    )
+    internal
+    {
         twoKeyAdmin = _twoKeyAdmin;
         erc20Address = _erc20Address;
         for(uint i=0; i<_maintainers.length; i++) {
             isMaintainer[_maintainers[i]] = true;
         }
     }
+
     /**
      * @notice Function to retrieve the balance of tokens on the contract
      */
-    function getContractBalance() public view returns (uint) {
+    function getContractBalance()
+    public
+    view
+    returns (uint)
+    {
         return IERC20(erc20Address).balanceOf(address(this));
     }
 
     /**
      * @notice Function to transfer tokens
      */
-    function transferTokens(address receiver, uint amount) internal {
+    function transferTokens(
+        address receiver,
+        uint amount
+    )
+    internal
+    {
         IERC20(erc20Address).transfer(receiver,amount);
     }
 

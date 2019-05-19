@@ -1,6 +1,9 @@
 pragma solidity ^0.4.24;
 
 contract ITwoKeyConversionHandler {
+
+    bool public isFiatConversionAutomaticallyApproved;
+
     function supportForCreateConversion(
         address _contractor,
         address _converterAddress,
@@ -8,21 +11,12 @@ contract ITwoKeyConversionHandler {
         uint256 _maxReferralRewardETHWei,
         uint256 baseTokensForConverterUnits,
         uint256 bonusTokensForConverterUnits,
-        bool isConversionFiat
-    ) external;
+        bool isConversionFiat,
+        bool _isAnonymous,
+        bool _isKYCRequired
+    )
+    public returns (uint);
 
-
-    function setAnonymous(address _contractor, bool _isAnonymous) external;
-    function cancelAndRejectContract() external;
-
-    function setTwoKeyAcquisitionCampaignERC20(
-        address _twoKeyAcquisitionCampaignERC20,
-        address _contractor,
-        address _assetContractERC20,
-        address _twoKeyEventSource,
-        address _twoKeyBaseReputationRegistry
-    ) external;
-
-    function getModeratorBalanceAndTotalEarnings() external view returns (uint,uint);
+    function executeConversion(uint _conversionId) public;
     function getConverterConversionIds(address _converter) external view returns (uint[]);
 }

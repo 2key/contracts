@@ -8,6 +8,9 @@ import "../interfaces/ITwoKeyAcquisitionCampaignStateVariables.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyEventSourceEvents.sol";
 import "../interfaces/ITwoKeyCampaignPublicAddresses.sol";
+import "../interfaces/ITwoKeyDonationCampaign.sol";
+import "../interfaces/ITwoKeyDonationCampaignFetchAddresses.sol";
+import "../interfaces/IGetImplementation.sol";
 
 
 /*******************************************************************************************************************
@@ -19,6 +22,8 @@ import "../interfaces/ITwoKeyCampaignPublicAddresses.sol";
  *            *  - TwoKeyAcquisitionCampaign          *
  *            *  - TwoKeyAcquisitionLogicHandler      *
  *            *  - TwoKeyConversionHandler            *
+              *  - TwoKeyDonationCampaign             *
+              *  - TwoKeyDonationConversionHandler    *
  *            *****************************************
  *                               |
  *                               |
@@ -38,6 +43,8 @@ import "../interfaces/ITwoKeyCampaignPublicAddresses.sol";
 contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
 
     address public twoKeySingletoneRegistry;
+    address public twoKeyFactory;
+
     mapping(address => string) public campaign2nonSingletonHash;
 
 
@@ -53,10 +60,16 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
      * @param _twoKeySingletoneRegistry is the address of TwoKeySingletoneRegistry contract
      * @param _maintainers is the array of initial maintainer addresses
      */
-    function setInitialParams(address _twoKeySingletoneRegistry, address [] _maintainers) {
+    function setInitialParams(
+        address _twoKeySingletoneRegistry,
+        address [] _maintainers
+    )
+    public
+    {
         require(twoKeySingletoneRegistry == address(0));
         twoKeySingletoneRegistry = _twoKeySingletoneRegistry;
         twoKeyAdmin =  ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyAdmin");
+        twoKeyFactory = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyFactory");
         isMaintainer[msg.sender] = true;
         for(uint i=0; i<_maintainers.length; i++) {
             isMaintainer[_maintainers[i]] = true;
@@ -69,29 +82,34 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
      * @param campaign is the address of the campaign, in this particular case it's acquisition
      * @dev Validates all the required stuff, if the campaign is not validated, it can't update our singletones
      */
-    function validateAcquisitionCampaign(address campaign, string nonSingletonHash) public {
+    function validateAcquisitionCampaign(
+        address campaign,
+        string nonSingletonHash
+    )
+    public
+    {
         require(isCampaignValidated[campaign] == false);
-        address contractor = ITwoKeyAcquisitionCampaignStateVariables(campaign).contractor();
-        address moderator = ITwoKeyAcquisitionCampaignStateVariables(campaign).moderator(); //Moderator we'll need for emit event
+        require(msg.sender == twoKeyFactory);
 
-        //Validating that the msg.sender is the contractor of the campaign provided
-        require(msg.sender == contractor);
-        //Validating that the Acquisition campaign holds exactly same TwoKeyLogicHandlerAddress
-        require(twoKeySingletoneRegistry == ITwoKeyAcquisitionCampaignStateVariables(campaign).twoKeySingletonesRegistry());
+        address contractor = ITwoKeyAcquisitionCampaignStateVariables(campaign).contractor();
+        address moderator = ITwoKeyAcquisitionCampaignStateVariables(campaign).moderator(); //Moderator we'll need for emit eventxw
+
         //Validating that the bytecode of the campaign and campaign helper contracts are eligible
         address conversionHandler = ITwoKeyAcquisitionCampaignStateVariables(campaign).conversionHandler();
         address logicHandler = ITwoKeyAcquisitionCampaignStateVariables(campaign).twoKeyAcquisitionLogicHandler();
 
-        bytes memory codeAcquisition = GetCode.at(campaign);
-        bytes memory codeHandler = GetCode.at(conversionHandler);
-        bytes memory codeLogicHandler = GetCode.at(logicHandler);
+        address campaignImplementation = IGetImplementation(campaign).implementation();
+        address conversionHandlerImplementation = IGetImplementation(conversionHandler).implementation();
+        address logicHandlerImplementation = IGetImplementation(logicHandler).implementation();
+
+        bytes memory codeAcquisition = GetCode.at(campaignImplementation);
+        bytes memory codeHandler = GetCode.at(conversionHandlerImplementation);
+        bytes memory codeLogicHandler = GetCode.at(logicHandlerImplementation);
 
         require(isCodeValid[codeAcquisition] == true);
         require(isCodeValid[codeHandler] == true);
         require(isCodeValid[codeLogicHandler] == true);
 
-        //Validate that public link key is set
-        require(ITwoKeyAcquisitionCampaignStateVariables(campaign).publicLinkKeyOf(contractor) != address(0));
 
         //If the campaign passes all this validation steps means it's valid one, and it can be proceeded forward
         isCampaignValidated[campaign] = true;
@@ -111,27 +129,41 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
      * @param campaign is the campaign address
      * @dev Validates all the required stuff, if the campaign is not validated, it can't update our singletones
      */
-    function validateDonationCampaign(address campaign, string nonSingletonHash) public {
+    function validateDonationCampaign(
+        address campaign,
+        address donationConversionHandler,
+        string nonSingletonHash
+    )
+    public
+    {
         address contractor = ITwoKeyCampaignPublicAddresses(campaign).contractor();
         address moderator = ITwoKeyCampaignPublicAddresses(campaign).moderator();
 
         require(isCampaignValidated[campaign] == false);
         bytes memory donationCampaignCode = GetCode.at(campaign);
+        bytes memory donationConversionHandlerCode = GetCode.at(donationConversionHandler);
 
         //Validate that this bytecode is validated and added
         require(isCodeValid[donationCampaignCode] == true);
+        require(isCodeValid[donationConversionHandlerCode] == true);
+
+        require(
+            ITwoKeyDonationCampaignFetchAddresses(donationConversionHandler).twoKeyDonationCampaign() == campaign &&
+            ITwoKeyDonationCampaignFetchAddresses(campaign).twoKeyDonationConversionHandler() == donationConversionHandler
+        );
 
         //Validate that public link key is set
         require(ITwoKeyCampaignPublicAddresses(campaign).publicLinkKeyOf(contractor) != address(0));
         campaign2nonSingletonHash[campaign] = nonSingletonHash;
 
         isCampaignValidated[campaign] = true;
+
         //Get the event source
         address twoKeyEventSource = ITwoKeySingletoneRegistryFetchAddress
         (twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyEventSource");
 
         //Emit the event that campaign is created
-        ITwoKeyEventSourceEvents(twoKeyEventSource).created(campaign,contractor,moderator);
+//        ITwoKeyEventSourceEvents(twoKeyEventSource).created(campaign,contractor,moderator);
     }
 
     /**
@@ -140,7 +172,13 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
      * @param names is the array of hexed contract names
      * @dev Only maintainer can issue calls to this function
      */
-    function addValidBytecodes(address[] contracts, bytes32[] names) public onlyMaintainer {
+    function addValidBytecodes(
+        address[] contracts,
+        bytes32[] names
+    )
+    public
+    onlyMaintainer
+    {
         require(contracts.length == names.length);
         uint length = contracts.length;
         for(uint i=0; i<length; i++) {
@@ -153,7 +191,12 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
     /**
      * @notice Function to remove bytecode of the contract from whitelisted ones
      */
-    function removeBytecode(bytes _bytecode) public onlyMaintainer {
+    function removeBytecode(
+        bytes _bytecode
+    )
+    public
+    onlyMaintainer
+    {
         isCodeValid[_bytecode] = false;
     }
 
@@ -162,16 +205,30 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
      * @param _conversionHandler is the address of already deployed conversion handler
      * @return true if code is valid and responds to conversion handler contract
      */
-    function isConversionHandlerCodeValid(address _conversionHandler) public view returns (bool) {
-        bytes memory contractCode = GetCode.at(_conversionHandler);
+    function isConversionHandlerCodeValid(
+        address _conversionHandler
+    )
+    public
+    view
+    returns (bool)
+    {
+        address implementation = IGetImplementation(_conversionHandler).implementation();
+        bytes memory contractCode = GetCode.at(implementation);
         require(isCodeValid[contractCode]);
-        bytes32 name = stringToBytes32("TWO_KEY_CONVERSION_HANDLER");
+        bytes32 name = stringToBytes32("TwoKeyConversionHandler");
         require(contractCodeToName[contractCode] == name);
         return true;
     }
 
-    function isContractCodeAddressValidated(address _contract) public view returns (bool) {
-        bytes memory contractCode = GetCode.at(_contract);
+    function isContractCodeAddressValidated(
+        address _contract
+    )
+    public
+    view
+    returns (bool)
+    {
+        address implementation = IGetImplementation(_contract).implementation();
+        bytes memory contractCode = GetCode.at(implementation);
         return isCodeValid[contractCode];
     }
 
@@ -179,7 +236,13 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
      * @notice Pure function to convert input string to hex
      * @param source is the input string
      */
-    function stringToBytes32(string memory source) internal pure returns (bytes32 result) {
+    function stringToBytes32(
+        string memory source
+    )
+    internal
+    pure
+    returns (bytes32 result)
+    {
         bytes memory tempEmptyStringTest = bytes(source);
         if (tempEmptyStringTest.length == 0) {
             return 0x0;

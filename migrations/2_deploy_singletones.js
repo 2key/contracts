@@ -13,6 +13,10 @@ const TwoKeyCommunityTokenPool = artifacts.require('TwoKeyCommunityTokenPool');
 const TwoKeyDeepFreezeTokenPool = artifacts.require('TwoKeyDeepFreezeTokenPool');
 const TwoKeyLongTermTokenPool = artifacts.require('TwoKeyLongTermTokenPool');
 const TwoKeyCampaignValidator = artifacts.require('TwoKeyCampaignValidator');
+const TwoKeyFactory = artifacts.require('TwoKeyFactory');
+const KyberNetworkTestMockContract = artifacts.require('KyberNetworkTestMockContract');
+
+
 const Call = artifacts.require('Call');
 const IncentiveModels = artifacts.require('IncentiveModels');
 
@@ -20,6 +24,8 @@ const fs = require('fs');
 const path = require('path');
 
 const proxyFile = path.join(__dirname, '../build/contracts/proxyAddresses.json');
+const deploymentConfigFile = path.join(__dirname, '../deploymentConfig.json');
+
 
 module.exports = function deploy(deployer) {
     const { network_id } = deployer;
@@ -31,6 +37,12 @@ module.exports = function deploy(deployer) {
     if (fs.existsSync(proxyFile)) {
         fileObject = JSON.parse(fs.readFileSync(proxyFile, { encoding: 'utf8' }));
     }
+
+    let deploymentObject = {};
+    if( fs.existsSync(deploymentConfigFile)) {
+        deploymentObject = JSON.parse(fs.readFileSync(deploymentConfigFile, {encoding: 'utf8'}));
+    }
+
 
     /**
      * Define proxyAddress variables for the contracts
@@ -45,89 +57,34 @@ module.exports = function deploy(deployer) {
     let proxyAddressTwoKeyLongTermTokenPool;
     let proxyAddressTwoKeyDeepFreezeTokenPool;
     let proxyAddressTwoKeyCampaignValidator;
-
-    /**
-     * Define proxy address for plasma network
-     */
+    let proxyAddressTwoKeyFactory;
     let proxyAddressTwoKeyPlasmaEvents;
 
 
-    /**
-     * Initial variables we need for contracts initial state
-     */
-    let initialCongressMembers = [
-        '0x4216909456e770FFC737d987c273a0B8cE19C13e', // Eitan
-        '0x5e2B2b278445AaA649a6b734B0945Bd9177F4F03', // Kiki
-    ];
-
-    let initialCongressMemberNames = [
-        '0x456974616e000000000000000000000000000000000000000000000000000000', //Eitan hexed
-        '0x4b696b6900000000000000000000000000000000000000000000000000000000', //Kiki hexed
-    ];
-
-    let deployerAddress = '0x18e1d5ca01141E3a0834101574E5A1e94F0F8F6a';
-    let maintainerAddresses = [];
-    let votingPowers = [1, 1];
-
-// else if ((deployer.network.startsWith('private.test') || deployer.network.startsWith('dd')) && !deployer.network.endsWith('k8s-hdwallet')) {
-//         /**
-//          * Network configuration for plasma
-//          */
-//         maintainerAddresses = [
-//             '0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f',
-//             '0x098a12404fd3f5a06cfb016eb7669b1c41419705',
-//             '0x1d55762a320e6826cf00c4f2121b7e53d23f6822',
-//         ];
-//     }
-
-    if(deployer.network.startsWith('public.test')) {
-        /**
-         * Network configuration for ropsten
-         */
-        maintainerAddresses = [
-            '0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f',
-            '0x098a12404fd3f5a06cfb016eb7669b1c41419705',
-            '0x1d55762a320e6826cf00c4f2121b7e53d23f6822',
-            '0xbddd873d7945f67d1689fd7870649b81744badd6',
-            '0xbf31911c8b9be1b5632fe52022e553fc7fe48a5d',
-            '0x7a6ea86e08d20bc56885a30c379f6e12aafede26',
-            '0xde205f05f5a50d5690959864dc3df4c1a6ac938c',
-            '0xd128786ef2372cbd2629908226ddd0b712c540e7',
-            '0x52e87d01b1c610424951281ebd1b00a3bcf3b681',
-            '0x5be04cc75b52c6ae5bb4858d58fd57dd15f354e3'
-        ];
-    }  else {
-        /**
-         * Network configuration for the dev-local testing purposes and plasma testing purposes
-         */
-        maintainerAddresses = [
-            '0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f',
-            '0x098a12404fd3f5a06cfb016eb7669b1c41419705',
-            '0x1d55762a320e6826cf00c4f2121b7e53d23f6822',
-            '0xbddd873d7945f67d1689fd7870649b81744badd6',
-            '0xbf31911c8b9be1b5632fe52022e553fc7fe48a5d',
-            '0x7a6ea86e08d20bc56885a30c379f6e12aafede26',
-            '0xde205f05f5a50d5690959864dc3df4c1a6ac938c',
-            '0xd128786ef2372cbd2629908226ddd0b712c540e7',
-            '0x52e87d01b1c610424951281ebd1b00a3bcf3b681',
-            '0x5be04cc75b52c6ae5bb4858d58fd57dd15f354e3',
-            '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7'
-        ];
-
-        initialCongressMembers = [
-            '0xb3fa520368f2df7bed4df5185101f303f6c7decc',
-            '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7',
-            '0xf3c7641096bc9dc50d94c572bb455e56efc85412'
-        ];
-
-        initialCongressMemberNames = [
-            '0x456974616e000000000000000000000000000000000000000000000000000000', //Eitan hexed
-            '0x4b696b6900000000000000000000000000000000000000000000000000000000', //Kiki hexed
-            '0x4b696b6900000000000000000000000000000000000000000000000000000000' // Kiki
-        ];
-
-        votingPowers = [1,1,1];
+    let deploymentNetwork;
+    if(deployer.network.startsWith('dev')) {
+        deploymentNetwork = 'dev-local-environment'
+    } else if (deployer.network.startsWith('public') || deployer.network.startsWith('plasma') || deployer.network.startsWith('private')) {
+        deploymentNetwork = 'ropsten-environment';
     }
+
+    /**
+     * Initial voting powers for congress members
+     * @type {number[]}
+     */
+    let votingPowers = deploymentObject[deploymentNetwork].votingPowers;
+    let maintainerAddresses = deploymentObject[deploymentNetwork].maintainers;
+    let rewardsReleaseAfter = deploymentObject[deploymentNetwork].admin2keyReleaseDate; //1 January 2020
+    let initialCongressMembers = deploymentObject[deploymentNetwork].initialCongressMembers;
+    let initialCongressMemberNames = deploymentObject[deploymentNetwork].initialCongressMembersNames;
+
+
+    let kyberAddress;
+    /**
+     * KYBER NETWORK ADDRESS and DAI ADDRESS
+     */
+    const KYBER_NETWORK_PROXY_ADDRESS_ROPSTEN = '0x818E6FECD516Ecc3849DAf6845e3EC868087B755';
+    const DAI_ROPSTEN_ADDRESS = '0xaD6D458402F60fD3Bd25163575031ACDce07538D';
 
 
     /**
@@ -135,7 +92,7 @@ module.exports = function deploy(deployer) {
      */
     deployer.deploy(Call);
     deployer.deploy(IncentiveModels);
-    if (deployer.network.startsWith('dev') || deployer.network.startsWith('public.') || deployer.network.startsWith('rinkeby') || deployer.network.startsWith('ropsten')) {
+    if (deployer.network.startsWith('dev') || deployer.network.startsWith('public.') || deployer.network.startsWith('ropsten')) {
         deployer.deploy(TwoKeyCongress, 24*60, initialCongressMembers, initialCongressMemberNames, votingPowers)
             .then(() => TwoKeyCongress.deployed())
             .then(() => deployer.deploy(TwoKeyCampaignValidator))
@@ -148,6 +105,8 @@ module.exports = function deploy(deployer) {
             .then(() => deployer.link(Call, TwoKeyRegistry))
             .then(() => deployer.deploy(TwoKeyRegistry)
             .then(() => TwoKeyRegistry.deployed())
+            .then(() => deployer.deploy(KyberNetworkTestMockContract))
+            .then(() => KyberNetworkTestMockContract.deployed())
             .then(() => deployer.deploy(TwoKeyBaseReputationRegistry))
             .then(() => TwoKeyBaseReputationRegistry.deployed())
             .then(() => deployer.deploy(TwoKeyUpgradableExchange))
@@ -158,7 +117,9 @@ module.exports = function deploy(deployer) {
             .then(() => TwoKeyDeepFreezeTokenPool.deployed())
             .then(() => deployer.deploy(TwoKeyLongTermTokenPool))
             .then(() => TwoKeyLongTermTokenPool.deployed())
-            .then(() => deployer.deploy(TwoKeySingletonesRegistry, [], '0x0')) //adding empty admin address
+            .then(() => deployer.deploy(TwoKeyFactory))
+            .then(() => TwoKeyFactory.deployed())
+            .then(() => deployer.deploy(TwoKeySingletonesRegistry, maintainerAddresses, '0x0')) //adding empty admin address
             .then(() => TwoKeySingletonesRegistry.deployed().then(async (registry) => {
                 /**
                  * Here we will be adding all contracts to the Registry and create a Proxies for them
@@ -185,6 +146,34 @@ module.exports = function deploy(deployer) {
 
                         fileObject['TwoKeyRegistry'] = twoKeyReg;
                         proxyAddressTwoKeyRegistry = proxy;
+                        resolve(proxy);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
+
+                await new Promise(async (resolve, reject) => {
+                    try {
+                        console.log('... Adding TwoKeyFactory to Proxy registry as valid implementation');
+                        /**
+                         * Adding TwoKeyRegistry to the registry, deploying 1st proxy for that 1.0 version and setting initial params there
+                         */
+                        let txHash = await registry.addVersion("TwoKeyFactory", "1.0", TwoKeyFactory.address);
+                        let { logs } = await registry.createProxy("TwoKeyFactory", "1.0");
+                        let { proxy } = logs.find(l => l.event === 'ProxyCreated').args;
+                        console.log('Proxy address for the TwoKeyFactory is : ' + proxy);
+                        console.log('Network ID', network_id);
+                        const twoKeyFactory = fileObject.TwoKeyFactory || {};
+                        twoKeyFactory[network_id] = {
+                            'address': TwoKeyFactory.address,
+                            'Proxy': proxy,
+                            'Version': "1.0",
+                            maintainer_address: maintainerAddresses,
+                        };
+
+
+                        fileObject['TwoKeyFactory'] = twoKeyFactory;
+                        proxyAddressTwoKeyFactory = proxy;
                         resolve(proxy);
                     } catch (e) {
                         reject(e);
@@ -314,7 +303,6 @@ module.exports = function deploy(deployer) {
                         let { proxy } = logs.find(l => l.event === 'ProxyCreated').args;
                         console.log('Proxy address for the TwoKeyBaseReputationRegistry is : ' + proxy);
                         const twoKeyBaseRepReg = fileObject.TwoKeyBaseReputationRegistry || {};
-                        console.log(maintainerAddresses);
                         twoKeyBaseRepReg[network_id] = {
                             'address': TwoKeyBaseReputationRegistry.address,
                             'Proxy': proxy,
@@ -347,7 +335,7 @@ module.exports = function deploy(deployer) {
                             'address': EventSource.address,
                             'Proxy': proxy,
                             'Version': "1.0",
-                            maintainer_address: deployerAddress,
+                            maintainer_address: maintainerAddresses,
                         };
                         fileObject['TwoKeyEventSource'] = twoKeyEventS;
                         proxyAddressTwoKeyEventSource = proxy;
@@ -403,7 +391,7 @@ module.exports = function deploy(deployer) {
                             'address': TwoKeyAdmin.address,
                             'Proxy': proxy,
                             'Version': "1.0",
-                            maintainer_address: deployerAddress
+                            maintainer_address: maintainerAddresses
                         };
 
                         fileObject['TwoKeyAdmin'] = twoKeyAdmin;
@@ -432,7 +420,7 @@ module.exports = function deploy(deployer) {
                             'address' : TwoKeyUpgradableExchange.address,
                             'Proxy' : proxy,
                             'Version' : "1.0",
-                            maintainer_address: deployerAddress
+                            maintainer_address: maintainerAddresses
                         };
 
                         fileObject['TwoKeyUpgradableExchange'] = twoKeyUpgradableExchange;
@@ -476,84 +464,177 @@ module.exports = function deploy(deployer) {
                     }
                 });
 
-                await new Promise(async (resolve, reject) => {
-                    console.log('... Setting Initial params in all singletone proxy contracts');
+                /**
+                 * Determine which network are we using
+                 */
+                if(deployer.network.startsWith('dev')) {
+                    kyberAddress = KyberNetworkTestMockContract.address;
+                } else {
+                    kyberAddress = KYBER_NETWORK_PROXY_ADDRESS_ROPSTEN;
+                }
+
+                await new Promise(async(resolve,reject) => {
                     try {
-                        await TwoKeyCommunityTokenPool.at(proxyAddressTwoKeyCommunityTokenPool).setInitialParams
-                        (
+                        console.log('Setting initial parameters in contract TwoKeyCommunityTokenPool');
+                        let txHash = await TwoKeyCommunityTokenPool.at(proxyAddressTwoKeyCommunityTokenPool).setInitialParams(
                             proxyAddressTwoKeyAdmin,
                             TwoKeyEconomy.address,
                             maintainerAddresses,
                             proxyAddressTwoKeyRegistry
                         );
+                        resolve(txHash);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
 
-                        await TwoKeyLongTermTokenPool.at(proxyAddressTwoKeyLongTermTokenPool).setInitialParams
-                        (
+                await new Promise(async(resolve,reject) => {
+                    try {
+                        console.log('Setting initial parameters in contract TwoKeyLongTermTokenPool');
+                        let txHash = await TwoKeyLongTermTokenPool.at(proxyAddressTwoKeyLongTermTokenPool).setInitialParams(
                             proxyAddressTwoKeyAdmin,
                             TwoKeyEconomy.address,
                             maintainerAddresses,
                         );
+                        resolve(txHash);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
 
-                        await TwoKeyDeepFreezeTokenPool.at(proxyAddressTwoKeyDeepFreezeTokenPool).setInitialParams
-                        (
+                await new Promise(async(resolve,reject) => {
+                    try {
+                        console.log('Setting initial parameters in contract TwoKeyDeepFreezeTokenPool');
+                        let txHash = await TwoKeyDeepFreezeTokenPool.at(proxyAddressTwoKeyDeepFreezeTokenPool).setInitialParams(
                             proxyAddressTwoKeyAdmin,
                             TwoKeyEconomy.address,
                             maintainerAddresses,
                             proxyAddressTwoKeyCommunityTokenPool
                         );
+                        resolve(txHash);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
 
-                        await TwoKeyCampaignValidator.at(proxyAddressTwoKeyCampaignValidator).setInitialParams
-                        (
+                await new Promise(async(resolve,reject) => {
+                    try {
+                        console.log('Setting initial parameters in contract TwoKeyCampaignValidator');
+                        let txHash = await TwoKeyCampaignValidator.at(proxyAddressTwoKeyCampaignValidator).setInitialParams(
                             TwoKeySingletonesRegistry.address,
                             maintainerAddresses
                         );
+                        resolve(txHash);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
 
-                        await EventSource.at(proxyAddressTwoKeyEventSource).setInitialParams
-                        (
+                await new Promise(async(resolve,reject) => {
+                    try {
+                        console.log('Setting initial parameters in contract EventSource');
+                        let txHash = await EventSource.at(proxyAddressTwoKeyEventSource).setInitialParams(
                             proxyAddressTwoKeyAdmin,
                             maintainerAddresses,
                             proxyAddressTwoKeyRegistry,
                             proxyAddressTwoKeyCampaignValidator
                         );
+                        resolve(txHash);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
 
-                        await TwoKeyBaseReputationRegistry.at(proxyAddressTwoKeyBaseReputationRegistry).setInitialParams
-                        (
+                await new Promise(async(resolve,reject) => {
+                    try {
+                        console.log('Setting initial parameters in contract TwoKeyBaseReputationRegistry');
+                        let txHash = await TwoKeyBaseReputationRegistry.at(proxyAddressTwoKeyBaseReputationRegistry).setInitialParams(
                             TwoKeySingletonesRegistry.address,
                             maintainerAddresses
                         );
+                        resolve(txHash);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
 
-                        await TwoKeyExchangeRateContract.at(proxyAddressTwoKeyExchange).setInitialParams
-                        (
-
+                await new Promise(async(resolve,reject) => {
+                    try {
+                        console.log('Setting initial parameters in contract TwoKeyExchangeRateContract');
+                        let txHash = await TwoKeyExchangeRateContract.at(proxyAddressTwoKeyExchange).setInitialParams(
                             maintainerAddresses,
                             proxyAddressTwoKeyAdmin
                         );
+                        resolve(txHash);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
 
-                        await TwoKeyUpgradableExchange.at(proxyAddressTwoKeyUpgradableExchange).setInitialParams
-                        (
-                            95,
+                await new Promise(async(resolve,reject) => {
+                    try {
+                        console.log('Setting initial parameters in contract TwoKeyUpgradableExchange');
+                        let txHash = await TwoKeyUpgradableExchange.at(proxyAddressTwoKeyUpgradableExchange).setInitialParams(
+                            100,
                             proxyAddressTwoKeyAdmin,
                             TwoKeyEconomy.address,
                             proxyAddressTwoKeyExchange,
                             proxyAddressTwoKeyCampaignValidator,
+                            DAI_ROPSTEN_ADDRESS,
+                            kyberAddress,
+                            TwoKeySingletonesRegistry.address,
                             maintainerAddresses,
                         );
 
-                        await TwoKeyAdmin.at(proxyAddressTwoKeyAdmin).setInitialParams
-                        (
+                        resolve(txHash);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
+                //TODO: Change proxyAddressTwoKeyExchange to proxyTwoKeyExchangeRate -
+                await new Promise(async(resolve,reject) => {
+                    try {
+                        console.log('Setting initial parameters in contract TwoKeyAdmin');
+                        let txHash = await TwoKeyAdmin.at(proxyAddressTwoKeyAdmin).setInitialParams(
                             TwoKeyCongress.address,
                             TwoKeyEconomy.address,
                             proxyAddressTwoKeyUpgradableExchange,
                             proxyAddressTwoKeyRegistry,
-                            proxyAddressTwoKeyEventSource
+                            proxyAddressTwoKeyEventSource,
+                            deployer.network.startsWith('dev') ? 1 : rewardsReleaseAfter
                         );
 
+                        resolve(txHash);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
+
+                await new Promise(async(resolve,reject) => {
+                    try {
+                        console.log('Setting initial parameters in contract TwoKeyFactory');
+                        let txHash = await TwoKeyFactory.at(proxyAddressTwoKeyFactory).setInitialParams(
+                            TwoKeySingletonesRegistry.address,
+                            proxyAddressTwoKeyAdmin,
+                            maintainerAddresses
+                        );
+
+                        resolve(txHash);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
+
+                await new Promise(async(resolve,reject) => {
+                    try {
+                        console.log('Setting initial parameters in contract TwoKeyRegistry');
                         let txHash = await TwoKeyRegistry.at(proxyAddressTwoKeyRegistry).setInitialParams
                         (
                             proxyAddressTwoKeyEventSource,
                             proxyAddressTwoKeyAdmin,
                             maintainerAddresses,
                         );
+
                         resolve(txHash);
                     } catch (e) {
                         reject(e);
@@ -600,7 +681,7 @@ module.exports = function deploy(deployer) {
             .then(async () => {
                 await new Promise(async (resolve,reject) => {
                     try {
-                        console.log('Setting initial params in plasma contract on plasma network', maintainerAddresses);
+                        console.log('Setting initial params in plasma contract on plasma network');
                         let txHash = await TwoKeyPlasmaEvents.at(proxyAddressTwoKeyPlasmaEvents).setInitialParams
                         (
                             maintainerAddresses

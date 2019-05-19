@@ -15,8 +15,11 @@ library IncentiveModels {
         uint totalRewardEthWEI,
         uint numberOfInfluencers
     ) internal pure returns (uint) {
-        uint equalPart = totalRewardEthWEI / numberOfInfluencers;
-        return equalPart;
+        if(numberOfInfluencers > 0) {
+            uint equalPart = totalRewardEthWEI / numberOfInfluencers;
+            return equalPart;
+        }
+        return 0;
     }
 
     /**
@@ -29,9 +32,12 @@ library IncentiveModels {
         uint totalRewardEthWEI,
         uint numberOfInfluencers
     ) internal pure returns (uint,uint) {
-        uint rewardPerReferrer = totalRewardEthWEI / (numberOfInfluencers + 2);
-        uint rewardForLast = rewardPerReferrer*3;
-        return (rewardPerReferrer, rewardForLast);
+        if(numberOfInfluencers> 0) {
+            uint rewardPerReferrer = totalRewardEthWEI / (numberOfInfluencers + 2);
+            uint rewardForLast = rewardPerReferrer*3;
+            return (rewardPerReferrer, rewardForLast);
+        }
+        return (0,0);
     }
 
     /**
@@ -46,12 +52,15 @@ library IncentiveModels {
         uint factor
     ) internal pure returns (uint[]) {
         uint[] memory rewards = new uint[](numberOfInfluencers);
-        uint x = calculateX(totalRewardEthWEI,numberOfInfluencers,factor);
-        for(uint i=0; i<numberOfInfluencers;i++) {
-            rewards[i] = x / (2**i);
+        if(numberOfInfluencers > 0) {
+            uint x = calculateX(totalRewardEthWEI,numberOfInfluencers,factor);
+            for(uint i=0; i<numberOfInfluencers;i++) {
+                rewards[numberOfInfluencers-i-1] = x / (2**i);
+            }
         }
         return rewards;
     }
+
 
     /**
      * @notice Function to calculate base for all rewards in power law model

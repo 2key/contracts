@@ -1,20 +1,20 @@
-const TwoKeyEconomy = artifacts.require("TwoKeyEconomy");
+const TwoKeyEconomy = artifacts.require('TwoKeyEconomy');
 
-contract("TestTwoKeyEconomy", async (accounts) => {
+contract("TwoKeyEconomy", async (accounts) => {
 
 
     let randomActorAddress1 = '0xb3FA520368f2Df7BED4dF5185101f303f6c7decc';
     let randomActorAddress2 = '0xbEde520368f2Df7BED4dF5185101f303f6c7d4cc';
 
     let deployerAdrress = '0xb3FA520368f2Df7BED4dF5185101f303f6c7decc';
-    
+
     let economyContract;
     const tokenName = 'TwoKeyEconomy';
     const symbol = '2KEY';
     const decimals = 18;
     const totalSupply = 1000000000000000000000000000;
 
-    
+    cosole.log('Testing');
 
     it("Test: Admin and SingletonRegistry contract addresses should be properly set", async () => {
         console.log('CAO');
@@ -35,12 +35,12 @@ contract("TestTwoKeyEconomy", async (accounts) => {
 
         let sym = await TwoKeyEconomy.symbol();
         assert.equal(sym, symbol, 'token symbol is not properly set');
-    })
+    });
 
     it('Test: Token decimals should be properly set', async () => {
         let dec = await TwoKeyEconomy.decimals();
         assert.equal(dec, decimals, 'token decimals should be properly set');
-    })
+    });
 
 
 });

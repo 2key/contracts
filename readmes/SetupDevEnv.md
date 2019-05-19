@@ -32,12 +32,14 @@ To run geth in docker please follow next steps:
 Create file named `accountsConfig.json` in the root and fill it with following:
 ```angular2html
 {
-  "address" : "<SOME_ADDRESS>",
-  "mnemonic" : "<MNEMONIC_FOR_THAT_ADDRESS>",
+  "address" : "0xb3fa520368f2df7bed4df5185101f303f6c7decc",
+  "mnemonic" : "laundry version question endless august scatter desert crew memory toy attract cruel",
   "mnemonic_private" : "<EMPTY_FOR_NOW>",
   "infuraApiKey" : "<EMPTY_FOR_NOW>"
 }
 ```
+
+Of course, this address will never have a real ether on mainnet, it's just user as testing address, that's why we expose it.
 
 Make sure you have deployed contracts to local geth.
 Bear in mind every time you reset geth you should deploy contracts again. 
