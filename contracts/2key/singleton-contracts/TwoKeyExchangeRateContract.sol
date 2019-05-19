@@ -21,8 +21,19 @@ contract TwoKeyExchangeRateContract is Upgradeable, MaintainingPattern {
      * @notice public mapping which will store rate between 1 wei eth and 1 wei fiat currency
      * Will be updated every 8 hours, and it's public
      */
+    //TODO:  key methodology --> BASE/TARGET
+    //TODO:  add  ETH/USD
+    //TODO:  add  2KEY/USD  (buy rate)
+    //TODO:  add  DAI/USD
+    //TODO:  add  ETH/DAI
+    //TODO:  add  GPB/USD
+    //TODO:  add  JPY/USD
+    //TODO:  add  other fiats
     mapping(bytes32 => FiatCurrency) public currencyName2rate;
 
+
+    //TODO: change FiatCurrency --> ExchangeRate
+    //TODO: rateEth --> BaseToTargetRate ==> [[1 Base = BaseToTargetRate Targets]]
     struct FiatCurrency {
         uint rateEth; // this is representing rate between eth and some currency where will be 1 unit to X units depending on more valuable curr
         bool isGreater; //Flag which represent if 1 ETH > 1 fiat (ex. 1eth = 120euros) true (1eth = 0.001 X) false
@@ -123,6 +134,7 @@ contract TwoKeyExchangeRateContract is Upgradeable, MaintainingPattern {
      * @param _currency is the currency (ex. 'USD', 'EUR', etc.)
      * @return rate between currency and eth wei
      */
+    //TODO: please change params of this function, to accept BASE/TARGET pair as input, and output the final rate (do all the isGrater than considerations here in this contract, don't require this contract's clients to do that)
     function getFiatCurrencyDetails(
         string _currency
     )
