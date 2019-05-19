@@ -67,6 +67,40 @@ contract TwoKeyExchangeRateContract is Upgradeable, MaintainingPattern {
     public
     onlyMaintainer
     {
+        storeFiatCurrencyDetails(_currency, _isETHGreaterThanCurrency, _RateFromOneGreaterThanUnitInWeiOfLesserThanUnit);
+        emit PriceUpdated(_currency, _RateFromOneGreaterThanUnitInWeiOfLesserThanUnit, block.timestamp, msg.sender);
+    }
+
+    /**
+     * @notice Function to update multiple rates at once
+     * @param _currencies is the array of currencies
+     * @param _isETHGreaterThanCurrencies true if 1 eth = more than 1 unit of X otherwise false
+     * @param _RateFromOneGreaterThanUnitInWeiOfLesserThanUnit 1 (greater than currency) == X (the updated value) in the (lesser than currency in WEI)
+     * @dev Only maintainer can call this
+     */
+    function setMultipleFiatCurrencyDetails(
+        bytes32[] _currencies,
+        bool[] _isETHGreaterThanCurrencies,
+        uint[] _RatesFromOneGreaterThanUnitInWeiOfLesserThanUnit
+    )
+    public
+    onlyMaintainer
+    {
+        uint numberOfFiats = _currencies.length; //either _isETHGreaterThanCurrencies.length
+        //There's no need for validation of input, because only we can call this and that costs gas
+        for(uint i=0; i<numberOfFiats; i++) {
+            storeFiatCurrencyDetails(_currencies[i], _isETHGreaterThanCurrencies[i], _RatesFromOneGreaterThanUnitInWeiOfLesserThanUnit[i]);
+            emit PriceUpdated(_currencies[i], _RatesFromOneGreaterThanUnitInWeiOfLesserThanUnit[i], block.timestamp, msg.sender);
+        }
+    }
+
+    function storeFiatCurrencyDetails(
+        bytes32 _currency,
+        bool _isETHGreaterThanCurrency,
+        uint _RateFromOneGreaterThanUnitInWeiOfLesserThanUnit
+    )
+    internal
+    {
         /**
          * given:  1 ETH == 119.45678 USD ==>
          * then it holds:   1 * 10^18 ETH_WEI ==  119.45678 * 10^18 USD_WEI
@@ -80,9 +114,8 @@ contract TwoKeyExchangeRateContract is Upgradeable, MaintainingPattern {
             isGreater: _isETHGreaterThanCurrency,
             timeUpdated: block.timestamp,
             maintainerWhoUpdated: msg.sender
-        });
+            });
         currencyName2rate[_currency] = f;
-        emit PriceUpdated(_currency, _RateFromOneGreaterThanUnitInWeiOfLesserThanUnit, block.timestamp, msg.sender);
     }
 
     /**

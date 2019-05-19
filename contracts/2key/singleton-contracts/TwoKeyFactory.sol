@@ -204,6 +204,7 @@ contract TwoKeyFactory is Upgradeable, MaintainingPattern {
             msg.sender //contractor
         );
 
+        // Set initial parameters under Donation campaign contract
         IHandleCampaignDeployment(proxyDonationCampaign).setInitialParamsDonationCampaign(
             msg.sender,
             _moderator,
@@ -213,8 +214,6 @@ contract TwoKeyFactory is Upgradeable, MaintainingPattern {
             booleanValues,
             _campaignName
         );
-
-        //TODO: leftover -> set intiial params
     }
 
 
