@@ -84,6 +84,12 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         uint timestamp
     );
 
+
+    //TODO: Change _twoKeyExchangeContract to TwoKeyExchangeRate contract.
+    //TODO: Change the rate to TwoKeyBuyRateUSD and take it from exchange rate contract.
+    //TODO: Add param twoKeySellRateSpreadUSD modifiable by a maintainer initilize at 0.005.
+    //TODO: Compute 2keyToStableCoinExchangeRate == TwoKeyBuyRateUSD + twoKeySellRateSpreadUSD.
+
     /**
      * @notice This event will be fired every time a withdraw is executed
      */
@@ -303,6 +309,10 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
 
         return minConversionRate;
     }
+
+    //TODO Check proposed exchange rate if not very different from actual define precentage -
+    //TODO max Kyber exchange rate deviation - default 3% in case of more than that, event +revert.
+    //TODO only maintainer can change it.
 
 
     /**
