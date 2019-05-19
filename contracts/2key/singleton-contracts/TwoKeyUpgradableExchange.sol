@@ -87,7 +87,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
     /**
      * @notice This event will be fired every time a withdraw is executed
      */
-    event WithdrawExecuted (
+    event WithdrawExecuted(
         address caller,
         address beneficiary,
         uint stableCoinsReserveBefore,

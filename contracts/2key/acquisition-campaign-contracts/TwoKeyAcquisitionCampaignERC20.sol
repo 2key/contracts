@@ -583,5 +583,15 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         uint referrerTotalEarnings = ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).getReferrerPlasmaTotalEarnings(plasma);
         return (amountConverterSpentEthWEI[ethereum], amountConverterSpentFiatWei[ethereum], referrerTotalEarnings,unitsConverterBought[ethereum]);
     }
+
+    /**
+     * @notice Function where contractor can withdraw all unsold tokens from his campaign once time has passed
+     * @dev This function will throw in case the caller is not contractor
+     */
+    function withdrawUnsoldTokens() onlyContractor {
+        //TODO: Add time requirement
+        uint unsoldTokens = getAvailableAndNonReservedTokensAmount();
+        IERC20(assetContractERC20).transfer(contractor, unsoldTokens);
+    }
 }
 

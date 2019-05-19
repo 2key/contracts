@@ -634,14 +634,6 @@ describe('TwoKeyProtocol', () => {
         expect(parseFloat(balance)).to.be.equal(1234000 - amount);
     }).timeout(600000);
 
-    it('Should if enough funds  fiatConversion' ,async() => {
-        const {isPossible, twoKeys} = await twoKeyProtocol.AcquisitionCampaign.isEnoughRewardsForFiatParticipation(campaignAddress, testObject.fiatWei);
-        expect(isPossible).to.be.equal(true);
-        console.log("AcquisitionCampaign - Pass isPossible FiatConversion");
-        expect(twoKeys).to.be.gt(340);
-        expect(twoKeys).to.be.lt(350);
-    }).timeout(60000);
-
     it('should get user public link', async () => {
         try {
             const publicLink = await twoKeyProtocol.AcquisitionCampaign.getPublicLinkKey(campaignAddress, from);
@@ -1219,7 +1211,7 @@ describe('TwoKeyProtocol', () => {
         const rate = await twoKeyProtocol.UpgradableExchange.getRate(from);
 
         console.log('Rate is : ' + rate);
-        expect(rate.toString()).to.be.equal("0.095");
+        expect(rate.toString()).to.be.equal("0.1");
     }).timeout(60000);
 
     it('should print currency', async() => {
