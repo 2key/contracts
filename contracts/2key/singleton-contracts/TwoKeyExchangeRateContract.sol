@@ -29,13 +29,11 @@ contract TwoKeyExchangeRateContract is Upgradeable, MaintainingPattern {
     //TODO:  add  GPB/USD
     //TODO:  add  JPY/USD
     //TODO:  add  other fiats
-    mapping(bytes32 => FiatCurrency) public currencyName2rate;
+    mapping(bytes32 => ExchangeRate) public currencyName2rate;
 
 
-    //TODO: change FiatCurrency --> ExchangeRate
-    //TODO: rateEth --> BaseToTargetRate ==> [[1 Base = BaseToTargetRate Targets]]
-    struct FiatCurrency {
-        uint rateEth; // this is representing rate between eth and some currency where will be 1 unit to X units depending on more valuable curr
+    struct ExchangeRate {
+        uint baseToTargetRate; // this is representing rate between eth and some currency where will be 1 unit to X units depending on more valuable curr
         bool isGreater; //Flag which represent if 1 ETH > 1 fiat (ex. 1eth = 120euros) true (1eth = 0.001 X) false
         uint timeUpdated;
         address maintainerWhoUpdated;
@@ -86,7 +84,7 @@ contract TwoKeyExchangeRateContract is Upgradeable, MaintainingPattern {
      * @notice Function to update multiple rates at once
      * @param _currencies is the array of currencies
      * @param _isETHGreaterThanCurrencies true if 1 eth = more than 1 unit of X otherwise false
-     * @param _RateFromOneGreaterThanUnitInWeiOfLesserThanUnit 1 (greater than currency) == X (the updated value) in the (lesser than currency in WEI)
+     * @param _RatesFromOneGreaterThanUnitInWeiOfLesserThanUnit 1 (greater than currency) == X (the updated value) in the (lesser than currency in WEI)
      * @dev Only maintainer can call this
      */
     function setMultipleFiatCurrencyDetails(
@@ -120,8 +118,8 @@ contract TwoKeyExchangeRateContract is Upgradeable, MaintainingPattern {
          * so in the example above, the backend will send the following request:
          * setFiatCurrencyDetails("USD",true,119456780000000000000)
          */
-        FiatCurrency memory f = FiatCurrency ({
-            rateEth: _RateFromOneGreaterThanUnitInWeiOfLesserThanUnit,
+        ExchangeRate memory f = ExchangeRate({
+            baseToTargetRate: _RateFromOneGreaterThanUnitInWeiOfLesserThanUnit,
             isGreater: _isETHGreaterThanCurrency,
             timeUpdated: block.timestamp,
             maintainerWhoUpdated: msg.sender
@@ -136,15 +134,15 @@ contract TwoKeyExchangeRateContract is Upgradeable, MaintainingPattern {
      */
     //TODO: please change params of this function, to accept BASE/TARGET pair as input, and output the final rate (do all the isGrater than considerations here in this contract, don't require this contract's clients to do that)
     function getFiatCurrencyDetails(
-        string _currency
+        string base_target
     )
     public
     view
     returns (uint,bool,uint,address)
     {
-        bytes32 key = stringToBytes32(_currency);
+        bytes32 key = stringToBytes32(base_target);
         return (
-            currencyName2rate[key].rateEth,
+            currencyName2rate[key].baseToTargetRate,
             currencyName2rate[key].isGreater,
             currencyName2rate[key].timeUpdated,
             currencyName2rate[key].maintainerWhoUpdated

@@ -166,6 +166,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
         uint leftToSpend = checkHowMuchUserCanSpend(alreadySpentETHWei, alreadySpentFIATWEI);
 
         if(keccak256(currency) == keccak256('ETH')) {
+            //Adding a deviation of 1000 weis
             if(leftToSpend + 1000 > amountWillingToSpendEthWei) {
                 return(true, leftToSpend);
             } else {
@@ -213,42 +214,10 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
     }
 
 
-    /**
-     * @notice internal function to validate the request is proper
-     * @param msgValue is the value of the message sent
-     * @dev validates if msg.Value is in interval of [minContribution, maxContribution]
-     */
-    function requirementForMsgValue(
-        uint msgValue
-    )
-    public
-    view
-    returns (bool)
-    {
-        require(isAcceptingFiatOnly == false); //This should throw and user will not be able to convert otherwise
-        //TODO: Add timestamp validation -> conversions
-        if(keccak256(currency) == keccak256('ETH')) {
-            require(msgValue >= minContributionETHorFiatCurrency);
-            require(msgValue <= maxContributionETHorFiatCurrency);
-        } else {
-            address ethUSDExchangeContract = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyExchangeRateContract");
-            uint val;
-            bool flag;
-            (val, flag,,) = ITwoKeyExchangeRateContract(ethUSDExchangeContract).getFiatCurrencyDetails(currency);
-            if(flag) {
-                require((msgValue * val).div(10**18) >= minContributionETHorFiatCurrency); //converting ether to fiat
-                require((msgValue * val).div(10**18) <= maxContributionETHorFiatCurrency); //converting ether to fiat
-            } else {
-                require(msgValue >= (val * minContributionETHorFiatCurrency).div(10**18)); //converting fiat to ether
-                require(msgValue <= (val * maxContributionETHorFiatCurrency).div(10**18)); //converting fiat to ether
-            }
-        }
-        return true;
-    }
-
     function convertEthToFiat(uint valueInEther, uint fiatRate) internal view returns (uint) {
         return (valueInEther*fiatRate).div(10**18);
     }
+
 
     function requirementForFiatConversion(
         uint conversionAmountFiatWei
@@ -262,6 +231,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
 
         }
     }
+
 
     /**
      * @notice Function which will calculate the base amount, bonus amount
