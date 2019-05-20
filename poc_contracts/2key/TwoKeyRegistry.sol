@@ -5,7 +5,7 @@ import './TwoKeyEconomy.sol';
 import './TwoKeyEventSource.sol';
 import '../../contracts/2key/libraries/Call.sol';
 
-contract TwoKeyReg is Ownable {
+contract TwoKeyRegistry is Ownable {
   mapping(address => string) public owner2name;
   mapping(bytes32 => address) public name2owner;
   // plasma address => ethereum address
