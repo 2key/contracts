@@ -222,9 +222,9 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
     returns (uint256)
     {
         // This is the case when we buy 2keys in exchange for stable coins
-        uint rate = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate("USD/DAI");
-        uint dollarWeiWorthTokens = _2keyAmount.mul(buyRate2key).div(1000);
-        uint amountOfDAIs = dollarWeiWorthTokens.mul(rate).div(10**18);
+        uint rate = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate("USD/DAI"); // 1.01
+        uint dollarWeiWorthTokens = _2keyAmount.mul(buyRate2key).div(1000);  // 100*95/1000 = 9.5
+        uint amountOfDAIs = dollarWeiWorthTokens.mul(rate).div(10**18);      // 9.5 * 1.01 =vOK
 
         return amountOfDAIs;
     }
