@@ -540,6 +540,13 @@ describe('TwoKeyProtocol', () => {
         console.log(value);
     }).timeout(60000);
 
+    it('should set dollar dai rate', async() => {
+        txHash = await twoKeyProtocol.TwoKeyExchangeContract.setValue('USD/DAI', 99000000000000000, from);
+        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        let value = await twoKeyProtocol.TwoKeyExchangeContract.getRatesETHFiat('USD/DAI', from);
+        console.log(value);
+    }).timeout(60000);
+
     it('should show token symbol of economy', async () => {
         const tokenSymbol = await twoKeyProtocol.ERC20.getERC20Symbol(twoKeyEconomy);
         console.log(tokenSymbol);

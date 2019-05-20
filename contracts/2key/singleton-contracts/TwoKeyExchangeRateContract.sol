@@ -31,7 +31,6 @@ contract TwoKeyExchangeRateContract is Upgradeable, MaintainingPattern {
     //TODO   "DAI" (ETH/DAI)  260   * 10**18
     mapping(bytes32 => ExchangeRate) public currencyName2rate;
 
-    //TODO add function to serve clients - getExchangeRate("base/target") --> return just a value
 
     struct ExchangeRate {
         uint baseToTargetRate; // this is representing rate between eth and some currency where will be 1 unit to X units depending on more valuable curr
@@ -115,7 +114,6 @@ contract TwoKeyExchangeRateContract is Upgradeable, MaintainingPattern {
      * @notice Function to get price for the selected currency
      * @return rate between currency and eth wei
      */
-    //TODO: please change params of this function, to accept BASE/TARGET pair as input, and output the final rate (do all the isGrater than considerations here in this contract, don't require this contract's clients to do that)
     function getFiatCurrencyDetails(
         string base_target
     )
@@ -141,6 +139,22 @@ contract TwoKeyExchangeRateContract is Upgradeable, MaintainingPattern {
         bytes32 key = stringToBytes32(base_target);
         return currencyName2rate[key].baseToTargetRate;
     }
+
+
+    /**
+     * @notice Function to calculate how many
+     */
+    function exchangeCurrencies(
+        string base_target,
+        uint base_amount
+    )
+    public
+    view
+    returns (uint)
+    {
+        return getBaseToTargetRate(base_target) * base_amount;
+    }
+
 
     /**
      * @notice Helper method to convert string to bytes32

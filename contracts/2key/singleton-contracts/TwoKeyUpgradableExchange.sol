@@ -222,8 +222,11 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
     returns (uint256)
     {
         // This is the case when we buy 2keys in exchange for stable coins
-        //TODO compute exact amount of DAI to give using the current exchange rate from DAI/USD
-        return (_2keyAmount.mul(buyRate2key).div(1000));
+        uint rate = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate("USD/DAI");
+        uint dollarWeiWorthTokens = _2keyAmount.mul(buyRate2key).div(1000);
+        uint amountOfDAIs = dollarWeiWorthTokens.mul(rate).div(10**18);
+
+        return amountOfDAIs;
     }
 
 
@@ -305,11 +308,9 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
      * @dev only maintainer can call this function
      */
     function startHedging(
-        uint amountToBeHedged
+        uint amountToBeHedged,
+        uint approvedMinConversionRate
     )
-    //TODO maintainer to add approvedMinConversionRate as param
-    //TODO require approvedMinConversionRate == minConversionRate
-
     public
     onlyMaintainer
     {
@@ -317,6 +318,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
 
         uint minConversionRate = getKyberExpectedRate(amountToBeHedged);
 
+        require(minConversionRate >= approvedMinConversionRate); //Means our rate can be at most same as their rate, because they're giving the best rate
         uint stableCoinUnits = proxyContract.swapEtherToToken.value(amountToBeHedged)(DAI,minConversionRate);
         usdStableCoinUnitsReserve += stableCoinUnits;
     }
