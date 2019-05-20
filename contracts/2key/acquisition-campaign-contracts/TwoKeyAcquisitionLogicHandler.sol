@@ -127,16 +127,12 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
         } else {
             //In order to work with this I have to convert everything to same currency
             address ethUSDExchangeContract = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyExchangeRateContract");
-            uint val;
-            bool flag;
-            (val, flag,,) = ITwoKeyExchangeRateContract(ethUSDExchangeContract).getFiatCurrencyDetails(currency);
-            if(flag) {
-                //This means that 1 eth = more than 1 fiat unit so we convert ether to fiats
-                uint totalAmountSpentConvertedToFIAT = (alreadySpentETHWei*val).div(10**18) + alreadySpentFiatWEI;
-                uint limit = maxContributionETHorFiatCurrency; // Initially we assume it's fiat currency campaign
-                uint leftToSpendInFiats = limit-totalAmountSpentConvertedToFIAT;
-                return leftToSpendInFiats;
-            }
+            uint rate = ITwoKeyExchangeRateContract(ethUSDExchangeContract).getBaseToTargetRate(currency);
+
+            uint totalAmountSpentConvertedToFIAT = (alreadySpentETHWei*rate).div(10**18) + alreadySpentFiatWEI;
+            uint limit = maxContributionETHorFiatCurrency; // Initially we assume it's fiat currency campaign
+            uint leftToSpendInFiats = limit-totalAmountSpentConvertedToFIAT;
+            return leftToSpendInFiats;
         }
     }
 
@@ -174,9 +170,8 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
             }
         } else {
             address ethUSDExchangeContract = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyExchangeRateContract");
-            uint val;
-            (val,,) = ITwoKeyExchangeRateContract(ethUSDExchangeContract).getFiatCurrencyDetails(currency);
-            uint amountToBeSpentInFiat = (amountWillingToSpendEthWei*val).div(10**18);
+            uint rate = ITwoKeyExchangeRateContract(ethUSDExchangeContract).getBaseToTargetRate(currency);
+            uint amountToBeSpentInFiat = (amountWillingToSpendEthWei*rate).div(10**18);
             //Adding gap of 100 weis
             if(leftToSpend + 1000 >= amountToBeSpentInFiat) {
                 return (true,leftToSpend);
@@ -255,14 +250,9 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
         } else {
             if(keccak256(currency) != keccak256('ETH')) {
                 address ethUSDExchangeContract = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyExchangeRateContract");
-                uint rate;
-                bool flag;
-                (rate,flag,,) = ITwoKeyExchangeRateContract(ethUSDExchangeContract).getFiatCurrencyDetails(currency);
-                if(flag) {
-                    conversionAmountETHWeiOrFiat = (conversionAmountETHWeiOrFiat.mul(rate)).div(10 ** 18); //converting eth to $wei
-                } else {
-                    value = (value.mul(rate)).div(10 ** 18); //converting dollar wei to eth
-                }
+                uint rate = ITwoKeyExchangeRateContract(ethUSDExchangeContract).getBaseToTargetRate(currency);
+
+                conversionAmountETHWeiOrFiat = (conversionAmountETHWeiOrFiat.mul(rate)).div(10 ** 18); //converting eth to $wei
             }
         }
 

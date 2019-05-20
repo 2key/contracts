@@ -534,7 +534,7 @@ describe('TwoKeyProtocol', () => {
     }).timeout(60000);
 
     it('should set eth-dolar rate', async() => {
-        txHash = await twoKeyProtocol.TwoKeyExchangeContract.setValue('USD', true, 100000000000000000000, from);
+        txHash = await twoKeyProtocol.TwoKeyExchangeContract.setValue('USD', 100000000000000000000, from);
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         let value = await twoKeyProtocol.TwoKeyExchangeContract.getRatesETHFiat('USD', from);
         console.log(value);
@@ -548,13 +548,6 @@ describe('TwoKeyProtocol', () => {
 
 
     let campaignData;
-
-    // it('should check a user info', async () => {
-    //     const isAddressRegistered = await twoKeyProtocol.Registry.checkIfAddressIsRegistered(from);
-    //     console.log(`Address ${from} ${isAddressRegistered ? 'REGISTERED' : 'NOT REGISTERED'} in TwoKeyReg`);
-    //     expect(isAddressRegistered).to.true;
-    // }).timeout(60000);
-
 
     it('should create a new campaign Acquisition Contract', async () => {
         campaignData = {
