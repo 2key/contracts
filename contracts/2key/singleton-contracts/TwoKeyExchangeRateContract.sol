@@ -129,7 +129,6 @@ contract TwoKeyExchangeRateContract is Upgradeable, MaintainingPattern {
 
     /**
      * @notice Function to get price for the selected currency
-     * @param _currency is the currency (ex. 'USD', 'EUR', etc.)
      * @return rate between currency and eth wei
      */
     //TODO: please change params of this function, to accept BASE/TARGET pair as input, and output the final rate (do all the isGrater than considerations here in this contract, don't require this contract's clients to do that)

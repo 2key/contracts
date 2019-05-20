@@ -19,26 +19,30 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
     using SafeMath for uint256;
     using SafeERC20 for ERC20;
 
-    address twoKeyExchangeContract;
+    bool initialized;
+
+    address twoKeyExchangeRateContract;
     address twoKeyCampaignValidator;
     address twoKeySingltonRegistry;
 
     // The token being sold
     ERC20 public token;
-    uint  public rate; //2key to USD rate multiplied by 1000 (initially it's 95)
-    uint public twoKeyToStableCoinExchangeRate;
+
+    // When anyone send 2key to contract, 2key in exchange will be calculated on it's buy rate
+    uint public buyRate2key; //2key to USD rate multiplied by 1000 (initially it's 95)
+
+    // When anyone send Ether to contract, 2key in exchange will be calculated on it's sell rate
+    uint public sellRate2key; //2key to USD rate multiplied by 1000 (intitally it's 100)
+
     uint public transactionCounter = 0;
     uint public weiRaised = 0;
     uint public usdStableCoinUnitsReserve = 0;
 
-    /**
-    TODO: Support multiple stable coins
-     */
 
     address public kyberProxyContractAddress;
     ERC20 public DAI;
+    ERC20 ETH_TOKEN_ADDRESS;
 
-    ERC20 ETH_TOKEN_ADDRESS = ERC20(0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee);
 
     /**
      * @notice Event will be fired every time someone buys tokens
@@ -67,23 +71,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         uint256 rate
     );
 
-    //Add event
-    /**
-     * @notice Event will be fired every time some ether is hedged
-     */
-    event StartedHedging(
-        uint amountOfEther,
-        uint stableCoinsAmount,
-        uint timestamp
-    );
-
-
-
-
-    //TODO: Change _twoKeyExchangeContract to TwoKeyExchangeRate contract.
-    //TODO: Change the rate to TwoKeyBuyRateUSD and take it from exchange rate contract.
-    //TODO: Add param twoKeySellRateSpreadUSD modifiable by a maintainer initilize at 0.005.
-    //TODO: Compute 2keyToStableCoinExchangeRate == TwoKeyBuyRateUSD + twoKeySellRateSpreadUSD.
 
     /**
      * @notice This event will be fired every time a withdraw is executed
@@ -105,7 +92,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
      * @notice Constructor of the contract
      */
     function setInitialParams(
-        uint256 _rate,
         address _twoKeyAdmin,
         ERC20 _token,
         address _twoKeyExchangeContract,
@@ -117,27 +103,30 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
     )
     external
     {
-        //Validating that this can be called only once
-        require(rate == 0);
-        require(_rate != 0);
+        require(initialized == false);
 
-        rate = _rate;
-        twoKeyToStableCoinExchangeRate = rate-5;
+        buyRate2key = 95;
+        sellRate2key = 100;
+
         token = _token;
-        twoKeyExchangeContract = _twoKeyExchangeContract;
+        twoKeyExchangeRateContract = _twoKeyExchangeContract;
         twoKeyCampaignValidator = _twoKeyCampaignValidator;
         twoKeyAdmin = _twoKeyAdmin;
 
         DAI = ERC20(_daiAddress);
-        kyberProxyContractAddress = _kyberNetworkProxy;
+        ETH_TOKEN_ADDRESS = ERC20(0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee);
 
+        kyberProxyContractAddress = _kyberNetworkProxy;
         twoKeySingltonRegistry = _singltonRegistry;
 
-        isMaintainer[msg.sender] = true; //for truffle deployment
+        isMaintainer[msg.sender] = true;
         for(uint i=0; i<_maintainers.length; i++) {
             isMaintainer[_maintainers[i]] = true;
         }
+
+        initialized = true;
     }
+
 
     /**
     * @notice Modifier to restrict calling the method to anyone but authorized people
@@ -146,6 +135,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         require(isMaintainer[msg.sender] == true || msg.sender == address(twoKeyAdmin));
         _;
     }
+
 
     /**
      * @notice Modifier which will validate if contract is allowed to buy tokens
@@ -168,11 +158,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
     private
     {
         require(_beneficiary != address(0),'beneficiary address can not be 0' );
-        require(_weiAmount != 0, 'wei ammount can not be 0');
-    }
-
-    function changeKyberProxyAddress(address _newProxyAddress) external onlyMaintainerOrTwoKeyAdmin {
-        kyberProxyContractAddress = _newProxyAddress;
+        require(_weiAmount != 0, 'wei amount can not be 0');
     }
 
 
@@ -190,6 +176,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         token.safeTransfer(_beneficiary, _tokenAmount);
     }
 
+
     /**
      * @dev Executed when a purchase has been validated and is ready to be executed. Not necessarily emits/sends tokens.
      * @param _beneficiary Address receiving the tokens
@@ -204,12 +191,13 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         _deliverTokens(_beneficiary, _tokenAmount);
     }
 
+
     /**
      * @dev Override to extend the way in which ether is converted to tokens.
      * @param _weiAmount Value in wei to be converted into tokens
      * @return Number of tokens that can be purchased with the specified _weiAmount
      */
-    function _getTokenAmount(
+    function _getTokenAmountToBeSold(
         uint256 _weiAmount
     )
     public
@@ -218,21 +206,27 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
     {
         uint value;
         bool flag;
-        (value,flag,,) = ITwoKeyExchangeRateContract(twoKeyExchangeContract).getFiatCurrencyDetails("USD");
-        return (_weiAmount*value).mul(1000).div(rate).div(10**18);
+        (value,flag,,) = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getFiatCurrencyDetails("USD");
+        return (_weiAmount*value).mul(1000).div(sellRate2key).div(10**18);
     }
 
-    function _getUsdStableCoinAmountFrom2keyUnits(
-        uint256 _2keyAmount,
-        uint256 _2keyExchangeRate
+
+    /**
+     * @notice Function to calculate how many stable coins we can get for specific amount of 2keys
+     * @dev This is happening in case we're receiving (buying) 2key
+     * @param _2keyAmount is the amount of 2keys sent to the contract
+     */
+    function _getUSDStableCoinAmountFrom2keyUnits(
+        uint256 _2keyAmount
     )
     public
     view
     returns (uint256)
     {
-
-        return (_2keyAmount.mul(_2keyExchangeRate).div(1000));
+        // This is the case when we buy 2keys in exchange for stable coins
+        return (_2keyAmount.mul(buyRate2key).div(1000));
     }
+
 
     /**
      * @dev Determines how ETH is stored/forwarded on purchases.
@@ -244,6 +238,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
     {
         _twoKeyAdmin.transfer(msg.value);
     }
+
 
     /**
      * @notice Function to buyTokens
@@ -262,7 +257,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         _preValidatePurchase(_beneficiary, weiAmount);
 
         // calculate token amount to be created
-        uint256 tokens = _getTokenAmount(weiAmount);
+        uint256 tokens = _getTokenAmountToBeSold(weiAmount);
 
         // update state
         weiRaised = weiRaised.add(weiAmount);
@@ -275,13 +270,12 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
             _beneficiary,
             weiAmount,
             tokens,
-            rate
+            sellRate2key
         );
 
         //        _forwardFunds(twoKeyAdmin);
         return tokens;
     }
-
 
 
     /**
@@ -317,24 +311,30 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
     public
     onlyMaintainer
     {
-        address twoKeyEconomy = ITwoKeySingletoneRegistryFetchAddress(twoKeySingltonRegistry).getNonUpgradableContractAddress("TwoKeyEconomy");
-        emit contractStats(ERC20(twoKeyEconomy).balanceOf(address(this)),address(this).balance,DAI.balanceOf(address(this)),now);
         IKyberNetworkProxy proxyContract = IKyberNetworkProxy(kyberProxyContractAddress);
 
         uint minConversionRate = getKyberExpectedRate(amountToBeHedged);
 
         uint stableCoinUnits = proxyContract.swapEtherToToken.value(amountToBeHedged)(DAI,minConversionRate);
         usdStableCoinUnitsReserve += stableCoinUnits;
-
-        emit contractStats(ERC20(twoKeyEconomy).balanceOf(address(this)),address(this).balance,DAI.balanceOf(address(this)),now);
-        emit StartedHedging(amountToBeHedged, stableCoinUnits, block.timestamp);
     }
 
-
-    function buyStableCoinWith2key(uint _twoKeyUnits, address _beneficiary) external onlyValidatedContracts returns (uint) {
+    /**
+     * @notice Function which will be called by 2key campaigns if user wants to withdraw his earnings in stableCoins
+     * @param _twoKeyUnits is the amount of 2key tokens which will be taken from campaign
+     * @param _beneficiary is the user who will receive the tokens
+     */
+    function buyStableCoinWith2key(
+        uint _twoKeyUnits,
+        address _beneficiary
+    )
+    external
+    onlyValidatedContracts
+    returns (uint)
+    {
         uint stableCoinUnits;
 
-        stableCoinUnits = _getUsdStableCoinAmountFrom2keyUnits(_twoKeyUnits, twoKeyToStableCoinExchangeRate);
+        stableCoinUnits = _getUSDStableCoinAmountFrom2keyUnits(_twoKeyUnits);
 
         uint etherBalanceOnContractBefore = this.balance;
         uint stableCoinsOnContractBefore = DAI.balanceOf(address(this));
@@ -357,11 +357,71 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
     }
 
 
-    function getEthBalanceOnContract() public view returns (uint) {
+    /**
+     * @notice Function for patch purposes
+     * @dev Will be used to update Kyber network proxy address in case we need it
+     * @param _newProxyAddress is the address of Kyber network proxy
+     */
+    function changeKyberProxyAddress(
+        address _newProxyAddress
+    )
+    external
+    onlyMaintainer
+    {
+        kyberProxyContractAddress = _newProxyAddress;
+    }
+
+
+    /**
+     * @notice Function for patch purposes for sell rate
+     * @param _newSellRate2key is the new sell rate for 2key tokens
+     * @dev Only maintainer can perform this calls
+     */
+    function update2keySellRate(
+        uint _newSellRate2key
+    )
+    public
+    onlyMaintainer
+    {
+        sellRate2key = _newSellRate2key;
+    }
+
+
+    /**
+     * @notice Function to update buy rate
+     * @param _newBuyRate2key is the new buy rate
+     * @dev only Maintainers can call this
+     */
+    function update2keyBuyRate(
+        uint _newBuyRate2key
+    )
+    public
+    onlyMaintainer
+    {
+        buyRate2key = _newBuyRate2key;
+    }
+
+
+    /**
+     * @notice Function needed for test purposes
+     */
+    function getEthBalanceOnContract()
+    public
+    view
+    returns (uint)
+    {
         return address(this).balance;
     }
 
-    function () public payable {
+
+    /**
+     * @notice Fallback function to handle incoming ether
+     */
+    function ()
+    public
+    payable
+    {
+
     }
 
 }
