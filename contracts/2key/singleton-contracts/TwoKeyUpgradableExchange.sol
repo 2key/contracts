@@ -224,6 +224,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
     returns (uint256)
     {
         // This is the case when we buy 2keys in exchange for stable coins
+        //TODO compute exact amount of DAI to give using the current exchange rate from DAI/USD
         return (_2keyAmount.mul(buyRate2key).div(1000));
     }
 
@@ -308,6 +309,9 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
     function startHedging(
         uint amountToBeHedged
     )
+    //TODO maintainer to add approvedMinConversionRate as param
+    //TODO require approvedMinConversionRate == minConversionRate
+
     public
     onlyMaintainer
     {

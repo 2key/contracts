@@ -22,19 +22,20 @@ contract TwoKeyExchangeRateContract is Upgradeable, MaintainingPattern {
      * Will be updated every 8 hours, and it's public
      */
     //TODO:  key methodology --> BASE/TARGET
-    //TODO:  add  ETH/USD
-    //TODO:  add  2KEY/USD  (buy rate)
-    //TODO:  add  DAI/USD
-    //TODO:  add  ETH/DAI
-    //TODO:  add  GPB/USD
-    //TODO:  add  JPY/USD
-    //TODO:  add  other fiats
+    //TODO:  "JPY/USD" 0.002 * 10**18
+    //TODO   "EUR/USD" 1.2   * 10**18
+    //TODO   "GBP/USD" 4.2   * 10**18
+    //TODO   "USD/DAI" 1.001 * 10**18
+    //TODO   "USD" (ETH/USD)  260   * 10**18
+    //TODO   "BTC" (ETH/BTC)  0.03  * 10**18
+    //TODO   "DAI" (ETH/DAI)  260   * 10**18
     mapping(bytes32 => ExchangeRate) public currencyName2rate;
 
+    //TODO add function to serve clients - getExchangeRate("base/target") --> return just a value
 
     struct ExchangeRate {
         uint baseToTargetRate; // this is representing rate between eth and some currency where will be 1 unit to X units depending on more valuable curr
-        bool isGreater; //Flag which represent if 1 ETH > 1 fiat (ex. 1eth = 120euros) true (1eth = 0.001 X) false
+        bool isGreater; //Flag which represent if 1 ETH > 1 fiat (ex. 1eth = 120euros) true (1eth = 0.001 X) false ,  // if isGreater == True, 1 target worth more than 1 base
         uint timeUpdated;
         address maintainerWhoUpdated;
     }
