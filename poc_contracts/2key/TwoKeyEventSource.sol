@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-import './TwoKeyTypes.sol';
+import '../../contracts/2key/TwoKeyTypes.sol';
 import "./TwoKeyAdmin.sol";
 import "../../contracts/2key/libraries/GetCode.sol";
 

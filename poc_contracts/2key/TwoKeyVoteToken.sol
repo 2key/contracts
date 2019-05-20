@@ -6,7 +6,7 @@ import '../../contracts/openzeppelin-solidity/contracts/token/ERC20/ERC20.sol';
 import '../../contracts/openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import '../../contracts/openzeppelin-solidity/contracts/math/SafeMath.sol';
 
-import './TwoKeyReg.sol';
+import './TwoKeyRegistry.sol';
 import "../../contracts/2key/libraries/GetCode.sol";
 
 contract TwoKeyVoteToken is StandardToken, Ownable {
@@ -21,14 +21,14 @@ contract TwoKeyVoteToken is StandardToken, Ownable {
 //    balances[msg.sender] = totalSupply_;
   }
 
-  TwoKeyReg public registry;
+  TwoKeyRegistry public registry;
   mapping(address => bool) private visited;
   ///Mapping contract bytecode to boolean if is allowed to transfer tokens
   mapping(bytes32 => bool) private canEmit;
 
 
   function setRegistry(address _registry) public onlyOwner {
-    registry = TwoKeyReg(_registry);
+    registry = TwoKeyRegistry(_registry);
   }
 
   /// @notice function where admin or any authorized person (will be added if needed) can add more contracts to allow them call methods
