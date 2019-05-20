@@ -77,12 +77,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         uint timestamp
     );
 
-    event contractStats(
-        uint amountOfTwoKey,
-        uint amountOfEther,
-        uint stableCoinsAmount,
-        uint timestamp
-    );
+
 
 
     //TODO: Change _twoKeyExchangeContract to TwoKeyExchangeRate contract.
@@ -310,10 +305,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         return minConversionRate;
     }
 
-    //TODO Check proposed exchange rate if not very different from actual define precentage -
-    //TODO max Kyber exchange rate deviation - default 3% in case of more than that, event +revert.
-    //TODO only maintainer can change it.
-
 
     /**
      * @notice Function to start hedging some ether amount
@@ -339,9 +330,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         emit StartedHedging(amountToBeHedged, stableCoinUnits, block.timestamp);
     }
 
-    /**
-     * TODO: Add DAI and TUSD rates with USD in
-     */
+
     function buyStableCoinWith2key(uint _twoKeyUnits, address _beneficiary) external onlyValidatedContracts returns (uint) {
         uint stableCoinUnits;
 
