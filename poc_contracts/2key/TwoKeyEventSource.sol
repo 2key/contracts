@@ -1,7 +1,6 @@
 pragma solidity ^0.4.24;
 
 import '../../contracts/2key/TwoKeyTypes.sol';
-import "./TwoKeyAdmin.sol";
 import "../../contracts/2key/libraries/GetCode.sol";
 
 contract TwoKeyEventSource is TwoKeyTypes {
@@ -22,7 +21,7 @@ contract TwoKeyEventSource is TwoKeyTypes {
 
 
     ///Address of the contract admin
-    TwoKeyAdmin twoKeyAdmin;
+    address twoKeyAdmin;
 
 
 
@@ -40,13 +39,13 @@ contract TwoKeyEventSource is TwoKeyTypes {
 
     ///@notice Modifier which allows only admin to call a function - can be easily modified if there is going to be more admins
     modifier onlyAdmin {
-        require(msg.sender == address(twoKeyAdmin));
+        require(msg.sender == twoKeyAdmin);
         _;
     }
 
     ///@notice Modifier which allows all modifiers to update canEmit mapping - ever
     modifier onlyAuthorizedSubadmins {
-        require(authorizedSubadmins[msg.sender] == true || msg.sender == address(twoKeyAdmin));
+        require(authorizedSubadmins[msg.sender] == true || msg.sender == twoKeyAdmin);
         _;
     }
 
@@ -63,7 +62,7 @@ contract TwoKeyEventSource is TwoKeyTypes {
     /// @notice Constructor during deployment of contract we need to set an admin address (means TwoKeyAdmin needs to be previously deployed)
     /// @param _twoKeyAdminAddress is the address of TwoKeyAdmin contract previously deployed
     constructor(address _twoKeyAdminAddress) public {
-        twoKeyAdmin = TwoKeyAdmin(_twoKeyAdminAddress);
+        twoKeyAdmin = _twoKeyAdminAddress;
     }
 
     /// @notice function where admin or any authorized person (will be added if needed) can add more contracts to allow them call methods
@@ -122,7 +121,7 @@ contract TwoKeyEventSource is TwoKeyTypes {
     /// @param _newAdminAddress is the address of new admin
     /// @dev think about some security layer here
     function changeAdmin(address _newAdminAddress) public onlyAdmin {
-        twoKeyAdmin = TwoKeyAdmin(_newAdminAddress);
+        twoKeyAdmin = _newAdminAddress;
     }
 
     function checkCanEmit(bytes _contractCode) public view returns (bool) {
@@ -169,7 +168,7 @@ contract TwoKeyEventSource is TwoKeyTypes {
 
 
     function getAdmin() public view returns (address) {
-        return address(twoKeyAdmin);
+        return twoKeyAdmin;
     }
 
     function checkIsAuthorized(address _subAdmin) public view returns (bool) {
