@@ -2,7 +2,6 @@ pragma solidity ^0.4.24;
 
 import '../../contracts/openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import './TwoKeyEconomy.sol';
-import './TwoKeyEventSource.sol';
 import '../../contracts/2key/libraries/Call.sol';
 
 contract TwoKeyRegistry is Ownable {
@@ -17,13 +16,6 @@ contract TwoKeyRegistry is Ownable {
   mapping(address => bytes) public notes;
 
   event UserNameChanged(address owner, string name);
-
-  TwoKeyEventSource eventSource;
-
-  // Initialize all the constants
-  constructor(TwoKeyEventSource _eventSource) public {
-    eventSource = _eventSource;
-  }
 
   function addNameInternal(string _name, address _sender) private {
     // check if name is taken
