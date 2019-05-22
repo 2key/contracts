@@ -97,6 +97,9 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
         ITwoKeyDonationConversionHandler(_twoKeyDonationConversionHandler).
             setTwoKeyDonationCampaign(address(this), booleanValues[1], numberValues[0]);
 
+        //Set incentive model for the campaign
+        rewardsModel = IncentiveModel(numberValues[7]);
+
         shouldConvertToRefer = booleanValues[0];
         isKYCRequired = booleanValues[1];
         acceptsFiat = booleanValues[2];
