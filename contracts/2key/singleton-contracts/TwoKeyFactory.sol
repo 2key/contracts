@@ -26,8 +26,13 @@ contract TwoKeyFactory is Upgradeable, MaintainingPattern {
         address proxyConversionHandler,
         address proxyAcquisitionCampaign,
         address proxyPurchasesHandler,
-        address contractor,
-        uint timestamp
+        address contractor
+    );
+
+    event ProxyForDonationCampaign(
+        address proxyDonationCampaign,
+        address proxyDonationConversionHandler,
+        address contractor
     );
 
 
@@ -164,7 +169,14 @@ contract TwoKeyFactory is Upgradeable, MaintainingPattern {
         ITwoKeyCampaignValidator(getContractProxyAddress("TwoKeyCampaignValidator"))
         .validateAcquisitionCampaign(proxyAcquisition, _nonSingletonHash);
 
-        emit ProxyForCampaign(proxyLogicHandler, proxyConversions, proxyAcquisition, proxyPurchasesHandler, msg.sender, block.timestamp);
+        // Emit an event with proxies for Acquisition campaign
+        emit ProxyForCampaign(
+            proxyLogicHandler,
+            proxyConversions,
+            proxyAcquisition,
+            proxyPurchasesHandler,
+            msg.sender
+        );
     }
 
 
@@ -173,12 +185,12 @@ contract TwoKeyFactory is Upgradeable, MaintainingPattern {
      */
     function createProxiesForDonationCampaign(
         address _moderator,
-        address _twoKeySingletonRegistry,
         uint [] numberValues,
-        bool [] booleanValues, //[_shouldConvertToReferr,isKYCRequired, acceptsFiat]
+        bool [] booleanValues,
         string _campaignName,
         string tokenName,
-        string tokenSymbol
+        string tokenSymbol,
+        string nonSingletonHash
     )
     public
     payable
@@ -208,14 +220,28 @@ contract TwoKeyFactory is Upgradeable, MaintainingPattern {
         IHandleCampaignDeployment(proxyDonationCampaign).setInitialParamsDonationCampaign(
             msg.sender,
             _moderator,
-            _twoKeySingletonRegistry,
+            address(twoKeySingletonRegistry),
             proxyDonationConversionHandler,
             numberValues,
             booleanValues,
             _campaignName
         );
+
+        // Validate campaign
+        ITwoKeyCampaignValidator(getContractProxyAddress("TwoKeyCampaignValidator"))
+        .validateDonationCampaign(
+            proxyDonationCampaign,
+            proxyDonationConversionHandler,
+            nonSingletonHash
+        );
+
+        // Emit an event
+        emit ProxyForDonationCampaign(
+            proxyDonationCampaign,
+            proxyDonationConversionHandler,
+            msg.sender
+        );
+
     }
-
-
 
 }

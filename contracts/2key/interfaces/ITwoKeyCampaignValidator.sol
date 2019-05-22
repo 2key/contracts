@@ -7,4 +7,5 @@ contract ITwoKeyCampaignValidator {
     mapping(address => bool) public isCampaignValidated;
     function isConversionHandlerCodeValid(address conversionHandler) public view returns (bool);
     function validateAcquisitionCampaign(address campaign, string nonSingletonHash) public;
+    function validateDonationCampaign(address campaign, address donationConversionHandler, string nonSingletonHash) public;
 }

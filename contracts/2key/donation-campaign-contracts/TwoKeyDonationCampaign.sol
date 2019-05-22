@@ -107,7 +107,7 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
         twoKeySingletonesRegistry = _twoKeySingletonRegistry;
         contractor = _contractor;
         twoKeyEventSource = TwoKeyEventSource(ITwoKeySingletoneRegistryFetchAddress(_twoKeySingletonRegistry).getContractProxyAddress("TwoKeyEventSource"));
-        ownerPlasma = twoKeyEventSource.plasmaOf(msg.sender);
+        ownerPlasma = twoKeyEventSource.plasmaOf(_contractor);
         received_from[ownerPlasma] = ownerPlasma;
         balances[ownerPlasma] = totalSupply_;
 
