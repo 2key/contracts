@@ -28,8 +28,6 @@ const maxContributionETHorUSD = 1000000;
 const now = new Date();
 const campaignStartTime = 0;
 const campaignEndTime = 9884748832;
-// const campaignStartTime = Math.round(new Date(now.valueOf()).setDate(now.getDate() - 30) / 1000);
-// const campaignEndTime = Math.round(new Date(now.valueOf()).setDate(now.getDate() + 30) / 1000);
 const twoKeyEconomy = singletons.TwoKeyEconomy.networks[mainNetId].address;
 const twoKeyAdmin = singletons.TwoKeyAdmin.networks[mainNetId].address;
 let isKYCRequired = false;
@@ -581,7 +579,7 @@ describe('TwoKeyProtocol', () => {
             isFiatOnly,
             vestingAmount,
             mustConvertToReferr: false,
-            campaignHardCap: 150000
+            campaignHardCapWEI: twoKeyProtocol.Utils.toWei(15000, 'ether'),
         };
 
         const campaign = await twoKeyProtocol.AcquisitionCampaign.create(campaignData, campaignData, {} , from, {

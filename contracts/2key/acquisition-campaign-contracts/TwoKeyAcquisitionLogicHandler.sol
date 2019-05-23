@@ -27,6 +27,8 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
 
     bool isCampaignInitialized;
 
+    bool public IS_CAMPAIGN_ACTIVE;
+
     address public twoKeySingletoneRegistry;
     address public twoKeyAcquisitionCampaign;
     address public twoKeyConversionHandler;
@@ -50,7 +52,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
     uint pricePerUnitInETHWeiOrUSD; // There's single price for the unit ERC20 (Should be in WEI)
     uint unit_decimals; // ERC20 selling data
     uint maxConverterBonusPercent; // Maximal bonus percent per converter
-    uint campaignHardCap; // Hard cap of campaign
+    uint campaignHardCapWei; // Hard cap of campaign
 
     string public currency; // Currency campaign is currently in
 
@@ -101,7 +103,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
             isAcceptingFiatOnly = true;
         }
 
-        campaignHardCap = values[8];
+        campaignHardCapWei = values[8];
 
         currency = _currency;
         assetContractERC20 = _assetContractERC20;
@@ -120,6 +122,19 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
 
         isCampaignInitialized = true;
     }
+
+    /**
+     *
+     */
+    function activateCampaign() public onlyContractor {
+
+        require(IS_CAMPAIGN_ACTIVE == false);
+        uint balanceOfTokenBeingSoldOnAcquisition = getInventoryBalance();
+        //balance is in weis, price is in weis and hardcap is regular number
+        require((balanceOfTokenBeingSoldOnAcquisition * pricePerUnitInETHWeiOrUSD).div(10**18) >= campaignHardCapWei);
+        IS_CAMPAIGN_ACTIVE = true;
+    }
+
 
     function checkHowMuchUserCanSpend(uint alreadySpentETHWei, uint alreadySpentFiatWEI) public view returns (uint) {
         if(keccak256(currency) == keccak256('ETH')) {
@@ -315,7 +330,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
     * @return balance value as uint
     */
     function getInventoryBalance()
-    public
+    internal
     view
     returns (uint)
     {
