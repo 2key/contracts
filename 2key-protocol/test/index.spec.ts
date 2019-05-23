@@ -36,6 +36,8 @@ const isFiatOnly = false;
 let incentiveModel = "MANUAL";
 let amount = 0; //1000 tokens fiat inventory
 let vestingAmount = 'BONUS';
+let campaignInventory = 1234000;
+
 
 let testObject = {
     versionName: 'versionName',
@@ -579,7 +581,7 @@ describe('TwoKeyProtocol', () => {
             isFiatOnly,
             vestingAmount,
             mustConvertToReferr: false,
-            campaignHardCapWEI: twoKeyProtocol.Utils.toWei(15000, 'ether'),
+            campaignHardCapWEI: twoKeyProtocol.Utils.toWei((campaignInventory * pricePerUnitInETHOrUSD), 'ether')
         };
 
         const campaign = await twoKeyProtocol.AcquisitionCampaign.create(campaignData, campaignData, {} , from, {
@@ -627,14 +629,20 @@ describe('TwoKeyProtocol', () => {
     it('should print balance after campaign created', printBalances).timeout(15000);
 
     it('should transfer assets to campaign', async () => {
-        txHash = await twoKeyProtocol.transfer2KEYTokens(campaignAddress, twoKeyProtocol.Utils.toWei(1234000, 'ether'), from);
-        console.log(twoKeyProtocol.Utils.toWei(1234000, 'ether'));
+        txHash = await twoKeyProtocol.transfer2KEYTokens(campaignAddress, twoKeyProtocol.Utils.toWei(campaignInventory, 'ether'), from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const balance = twoKeyProtocol.Utils.fromWei(await twoKeyProtocol.AcquisitionCampaign.checkInventoryBalance(campaignAddress, from)).toString();
         console.log('Campaign Balance', balance);
         expect(parseFloat(balance)).to.be.equal(1234000 - amount);
     }).timeout(600000);
 
+
+    it('should make campaign active', async() => {
+        txHash = await twoKeyProtocol.AcquisitionCampaign.activateCampaign(campaignAddress, from);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        let isActivated = await twoKeyProtocol.AcquisitionCampaign.isCampaignActivated(campaignAddress);
+        expect(isActivated).to.be.equal(true);
+    }).timeout(600000);
     it('should get user public link', async () => {
         try {
             const publicLink = await twoKeyProtocol.AcquisitionCampaign.getPublicLinkKey(campaignAddress, from);
