@@ -25,7 +25,7 @@ contract TwoKeyCampaign is ArcERC20 {
 	address ownerPlasma; //contractor plasma address
 
 	address public contractor; //contractor address
-	address public moderator; //moderator address
+	address moderator; //moderator address
 
 	bool isKYCRequired;
     bool mustConvertToReferr;
@@ -68,9 +68,8 @@ contract TwoKeyCampaign is ArcERC20 {
 	{
 		// _from and _to are assumed to be already converted to plasma address (e.g. using plasmaOf)
 		require(_value == 1);
-		require(_to != address(0));
-
 		require(balances[_from] > 0);
+
 		balances[_from] = balances[_from].sub(1);
 		balances[_to] = balances[_to].add(conversionQuota);
 		totalSupply_ = totalSupply_.add(conversionQuota.sub(1));
@@ -176,21 +175,6 @@ contract TwoKeyCampaign is ArcERC20 {
     }
 
 
-
-//	/**
-//     * @notice Function to update maxReferralRewardPercent
-//     * @dev only Contractor can call this method, otherwise it will revert - emits Event when updated
-//     * @param value is the new referral percent value
-//     */
-//	function updateMaxReferralRewardPercent(
-//		uint value
-//	)
-//	public
-//	onlyContractor
-//	{
-//		maxReferralRewardPercent = value;
-//	}
-
 	/**
      * @notice Function to set or update public meta hash
      * @param _publicMetaHash is the hash of the campaign
@@ -278,7 +262,6 @@ contract TwoKeyCampaign is ArcERC20 {
 	view
 	returns (uint)
 	{
-        require(msg.sender == contractor);
         return (moderatorTotalEarnings2key);
     }
 

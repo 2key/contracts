@@ -61,7 +61,6 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         twoKeyEconomy = ITwoKeySingletoneRegistryFetchAddress(_twoKeySingletonesRegistry).getNonUpgradableContractAddress("TwoKeyEconomy");
 
         if(values[2] == 1) {
-            //Since declaration defaults to false, only if values[2] is 1 means we want KYC
             isKYCRequired = true;
         }
 
@@ -69,9 +68,10 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
             mustConvertToReferr = true;
         }
 
+        totalSupply_ = 1000000;
+
         ownerPlasma = twoKeyEventSource.plasmaOf(contractor);
         received_from[ownerPlasma] = ownerPlasma;
-        totalSupply_ = 1000000;
         balances[ownerPlasma] = totalSupply_;
 
         maxReferralRewardPercent = values[0];
@@ -590,6 +590,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
      */
     function withdrawUnsoldTokens() onlyContractor {
         //TODO: Add time requirement
+        require(ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).checkIsCampaignActive() == false);
         uint unsoldTokens = getAvailableAndNonReservedTokensAmount();
         IERC20(assetContractERC20).transfer(contractor, unsoldTokens);
     }

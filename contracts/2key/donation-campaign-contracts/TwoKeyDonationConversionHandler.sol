@@ -53,33 +53,25 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
     function setInitialParamsDonationConversionHandler(
         string tokenName,
         string tokenSymbol,
-        address _contractor
+        address _contractor,
+        address _twoKeyDonationCampaign,
+        bool _isKYCRequired,
+        uint _maxReferralRewardPercent
     )
     public
     {
         require(initialized == false);
+
+        twoKeyDonationCampaign = _twoKeyDonationCampaign;
+        isKYCRequired = _isKYCRequired;
+        maxReferralRewardPercent = _maxReferralRewardPercent;
+
         contractor = _contractor;
         // Deploy an ERC20 token which will be used as the Invoice
         erc20InvoiceToken = new InvoiceTokenERC20(tokenName,tokenSymbol,address(this));
         // Emit an event with deployed token address, name, and symbol
         emit InvoiceTokenCreated(erc20InvoiceToken, tokenName, tokenSymbol);
         initialized = true;
-    }
-
-    /**
-     * @notice Function to initialize donation campaign, can be called only once
-     * @param _twoKeyDonationCampaign is the address of twoKeyDonationCampaign
-     * @param _isKYCRequired is the flag if KYC is required
-     */
-    function setTwoKeyDonationCampaign(
-        address _twoKeyDonationCampaign,
-        bool _isKYCRequired,
-        uint _maxReferralRewardPercent
-    ) public {
-        require(twoKeyDonationCampaign == address(0));
-        twoKeyDonationCampaign = _twoKeyDonationCampaign;
-        isKYCRequired = _isKYCRequired;
-        maxReferralRewardPercent = _maxReferralRewardPercent;
     }
 
 

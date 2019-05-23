@@ -78,13 +78,13 @@ contract IHandleCampaignDeployment {
      * This function can be called only once per proxy address
      */
     function setInitialParamsDonationCampaign(
-        address contractor,
-        address moderator,
-        address twoKeySingletonRegistry,
-        address donationConversionHandler,
+        address _contractor,
+        address _moderator,
+        address _twoKeySingletonRegistry,
+        address _twoKeyDonationConversionHandler,
         uint [] numberValues,
         bool [] booleanValues,
-        string campaignName
+        string _campaignName
     ) public;
 
 
@@ -97,7 +97,10 @@ contract IHandleCampaignDeployment {
     function setInitialParamsDonationConversionHandler(
         string tokenName,
         string tokenSymbol,
-        address _contractor
+        address _contractor,
+        address _twoKeyDonationCampaign,
+        bool _isKYCRequired,
+        uint _maxReferralRewardPercent
     ) public;
 }
 

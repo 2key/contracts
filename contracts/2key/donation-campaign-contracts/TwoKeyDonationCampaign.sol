@@ -14,7 +14,7 @@ import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
  * @author Nikola Madjarevic
  * Created at 2/19/19
  */
-contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaignIncentiveModels, TwoKeyConverterStates, TwoKeyConversionStates {
+contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaignIncentiveModels {
 
     bool initialized;
     address public twoKeyDonationConversionHandler; // Contract which will handle all donations
@@ -62,28 +62,24 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
 
 
     function setInitialParamsDonationCampaign(
-//        string _campaignName,
-//        uint [] values,
-//        bool _shouldConvertToReffer,
-//        bool _isKYCRequired,
-//        bool _acceptsFiat,
-//        IncentiveModel _rewardsModel
         address _contractor,
         address _moderator,
         address _twoKeySingletonRegistry,
         address _twoKeyDonationConversionHandler,
         uint [] numberValues,
-        bool [] booleanValues, //[_shouldConvertToReferr,isKYCRequired, acceptsFiat]
+        bool [] booleanValues,
         string _campaignName
     )
     public
-
     {
         require(initialized == false);
 
+        contractor = _contractor;
         // Moderator address
         moderator = _moderator;
         campaignName = _campaignName;
+
+        totalSupply_ = 1000000;
 
         rewardsModel = IncentiveModel(numberValues[7]);
         campaignStartTime = numberValues[1];
@@ -94,8 +90,6 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
         conversionQuota = numberValues[6];
 
         twoKeyDonationConversionHandler = _twoKeyDonationConversionHandler;
-        ITwoKeyDonationConversionHandler(_twoKeyDonationConversionHandler).
-            setTwoKeyDonationCampaign(address(this), booleanValues[1], numberValues[0]);
 
         //Set incentive model for the campaign
         rewardsModel = IncentiveModel(numberValues[7]);
@@ -105,11 +99,11 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
         acceptsFiat = booleanValues[2];
 
         twoKeySingletonesRegistry = _twoKeySingletonRegistry;
-        contractor = _contractor;
         twoKeyEventSource = TwoKeyEventSource(ITwoKeySingletoneRegistryFetchAddress(_twoKeySingletonRegistry).getContractProxyAddress("TwoKeyEventSource"));
         ownerPlasma = twoKeyEventSource.plasmaOf(_contractor);
         received_from[ownerPlasma] = ownerPlasma;
         balances[ownerPlasma] = totalSupply_;
+
 
         initialized = true;
     }

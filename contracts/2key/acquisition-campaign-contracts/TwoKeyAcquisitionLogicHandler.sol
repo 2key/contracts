@@ -184,7 +184,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
     /**
      * @notice Requirement for the checking if the campaign is active or not
      */
-    function requirementIsOnActive()
+    function checkIsCampaignActive()
     public
     view
     returns (bool)

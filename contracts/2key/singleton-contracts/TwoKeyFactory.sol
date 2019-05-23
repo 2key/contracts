@@ -35,6 +35,7 @@ contract TwoKeyFactory is Upgradeable, MaintainingPattern {
         address contractor
     );
 
+    address public moderator;
 
     /**
      * @notice Function to set initial parameters for the contract
@@ -193,8 +194,10 @@ contract TwoKeyFactory is Upgradeable, MaintainingPattern {
         string nonSingletonHash
     )
     public
-    payable
     {
+
+        moderator = _moderator;
+
         // Deploying a proxy contract for donations
         ProxyCampaign proxyDonationCampaign = new ProxyCampaign(
             "TwoKeyDonationCampaign",
@@ -213,13 +216,16 @@ contract TwoKeyFactory is Upgradeable, MaintainingPattern {
         IHandleCampaignDeployment(proxyDonationConversionHandler).setInitialParamsDonationConversionHandler(
             tokenName,
             tokenSymbol,
-            msg.sender //contractor
+            msg.sender, //contractor
+            proxyDonationCampaign,
+            booleanValues[1],
+            numberValues[0]
         );
 
         // Set initial parameters under Donation campaign contract
         IHandleCampaignDeployment(proxyDonationCampaign).setInitialParamsDonationCampaign(
-            msg.sender,
-            _moderator,
+            msg.sender, //contractor
+            _moderator, //moderator address
             address(twoKeySingletonRegistry),
             proxyDonationConversionHandler,
             numberValues,
@@ -235,7 +241,7 @@ contract TwoKeyFactory is Upgradeable, MaintainingPattern {
             nonSingletonHash
         );
 
-        // Emit an event
+//         Emit an event
         emit ProxyForDonationCampaign(
             proxyDonationCampaign,
             proxyDonationConversionHandler,

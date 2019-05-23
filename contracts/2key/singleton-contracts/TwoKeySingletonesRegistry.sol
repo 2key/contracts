@@ -85,7 +85,7 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
     public
     onlyMaintainer
     {
-        require(versions[contractName][version] == 0x0);
+//        require(versions[contractName][version] == 0x0);
         versions[contractName][version] = implementation;
         contractNameToLatestVersionName[contractName] = version;
         emit VersionAdded(version, implementation);
