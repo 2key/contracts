@@ -25,7 +25,7 @@ contract TwoKeyCampaign is ArcERC20 {
 	address ownerPlasma; //contractor plasma address
 
 	address public contractor; //contractor address
-	address moderator; //moderator address
+	address public moderator; //moderator address
 
 	bool isKYCRequired;
     bool mustConvertToReferr;

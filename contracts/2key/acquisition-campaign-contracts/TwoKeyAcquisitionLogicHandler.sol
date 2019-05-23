@@ -7,7 +7,6 @@ import "../interfaces/ITwoKeyAcquisitionCampaignERC20.sol";
 import "../interfaces/ITwoKeyReg.sol";
 import "../interfaces/ITwoKeyAcquisitionARC.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
-import "../interfaces/ITwoKeyConversionHandlerGetConverterState.sol";
 import "../interfaces/ITwoKeyEventSource.sol";
 
 //Libraries
@@ -27,7 +26,6 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
     using SafeMath for uint256;
 
     bool isCampaignInitialized;
-
 
     address public twoKeySingletoneRegistry;
     address public twoKeyAcquisitionCampaign;
@@ -136,6 +134,23 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
         }
     }
 
+    function canConversionBeCreated(address converter, uint amountWillingToSpend, bool isFiat) public view returns (bool) {
+        bool canConvert = checkIsCampaignActive();
+
+        if(canConvert == false) {
+            return false;
+        }
+
+        //If we reach this point means we have reached point that campaign is still active
+        if(isFiat) {
+            (canConvert,)= canMakeFiatConversion(converter, amountWillingToSpend);
+        } else {
+            (canConvert,) = canMakeETHConversion(converter, amountWillingToSpend);
+        }
+
+        return canConvert;
+    }
+
     //TODO: HANDLE INSIDE THIS METHODS MIN CONTRIBUTION AMOUNT
 
     function canMakeFiatConversion(address converter, uint amountWillingToSpendFiatWei) public view returns (bool,uint) {
@@ -144,7 +159,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
         if(keccak256(currency) == keccak256('ETH')) {
             return (false, 0);
         } else {
-            (alreadySpentETHWei,alreadySpentFIATWEI,,) = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getStatistics(converter, address(0));
+            (alreadySpentETHWei,alreadySpentFIATWEI,) = ITwoKeyConversionHandler(twoKeyConversionHandler).getConverterPurchasesStats(converter);
 
             uint leftToSpendFiat = checkHowMuchUserCanSpend(alreadySpentETHWei,alreadySpentFIATWEI);
             if(leftToSpendFiat >= amountWillingToSpendFiatWei) {
@@ -158,7 +173,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
     function canMakeETHConversion(address converter, uint amountWillingToSpendEthWei) public view returns (bool,uint) {
         uint alreadySpentETHWei;
         uint alreadySpentFIATWEI;
-        (alreadySpentETHWei,alreadySpentFIATWEI,,) = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getStatistics(converter, address(0));
+        (alreadySpentETHWei,alreadySpentFIATWEI,) = ITwoKeyConversionHandler(twoKeyConversionHandler).getConverterPurchasesStats(converter);
         uint leftToSpend = checkHowMuchUserCanSpend(alreadySpentETHWei, alreadySpentFIATWEI);
 
         if(keccak256(currency) == keccak256('ETH')) {
@@ -374,27 +389,27 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
             bool isConverter;
             bool isReferrer;
             uint unitsConverterBought;
-            uint referrerTotalBalance;
             uint amountConverterSpent;
             uint amountConverterSpentFIAT;
-            (amountConverterSpent,,referrerTotalBalance, unitsConverterBought) = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getStatistics(eth_address, plasma_address);
+
+            (amountConverterSpent,amountConverterSpentFIAT, unitsConverterBought) = ITwoKeyConversionHandler(twoKeyConversionHandler).getConverterPurchasesStats(eth_address);
             if(unitsConverterBought> 0) {
                 isConverter = true;
-                state = ITwoKeyConversionHandlerGetConverterState(twoKeyConversionHandler).getStateForConverter(eth_address);
+                state = ITwoKeyConversionHandler(twoKeyConversionHandler).getStateForConverter(eth_address);
             }
-            if(referrerTotalBalance > 0) {
+            if(referrerPlasma2TotalEarnings2key[plasma_address] > 0) {
                 isReferrer = true;
             }
 
-            if(flag == false) {
-                //referrer is address in signature
-                //plasma_address is plasma address of the address requested in method
-                referrerTotalBalance  = getTotalReferrerEarnings(referrer, eth_address);
-            }
+//            if(flag == false) {
+//                //referrer is address in signature
+//                //plasma_address is plasma address of the address requested in method
+//                referrerTotalBalance  = getTotalReferrerEarnings(referrer, eth_address);
+//            }
 
             return abi.encodePacked(
                 amountConverterSpent,
-                referrerTotalBalance,
+                referrerPlasma2TotalEarnings2key[plasma_address],
                 unitsConverterBought,
                 isConverter,
                 isReferrer,
@@ -573,28 +588,28 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
     }
 
 
-    /**
-     * @notice Helper function to get how much _referrer address earned for all conversions for eth_address
-     * @param _referrer is the address we're checking the earnings
-     * @param eth_address is the converter address we're getting all conversion ids for
-     * @return sum of all earnings
-     */
-    function getTotalReferrerEarnings(
-        address _referrer,
-        address eth_address
-    )
-    internal
-    view
-    returns (uint)
-    {
-        uint[] memory conversionIds = ITwoKeyConversionHandler(twoKeyConversionHandler).getConverterConversionIds(eth_address);
-        uint sum = 0;
-        uint len = conversionIds.length;
-        for(uint i=0; i<len; i++) {
-            sum += referrerPlasma2EarningsPerConversion[_referrer][conversionIds[i]];
-        }
-        return sum;
-    }
+//    /**
+//     * @notice Helper function to get how much _referrer address earned for all conversions for eth_address
+//     * @param _referrer is the address we're checking the earnings
+//     * @param eth_address is the converter address we're getting all conversion ids for
+//     * @return sum of all earnings
+//     */
+//    function getTotalReferrerEarnings(
+//        address _referrer,
+//        address eth_address
+//    )
+//    internal
+//    view
+//    returns (uint)
+//    {
+//        uint[] memory conversionIds = ITwoKeyConversionHandler(twoKeyConversionHandler).getConverterConversionIds(eth_address);
+//        uint sum = 0;
+//        uint len = conversionIds.length;
+//        for(uint i=0; i<len; i++) {
+//            sum += referrerPlasma2EarningsPerConversion[_referrer][conversionIds[i]];
+//        }
+//        return sum;
+//    }
 
 
     /**

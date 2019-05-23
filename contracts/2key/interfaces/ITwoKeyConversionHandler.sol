@@ -15,8 +15,37 @@ contract ITwoKeyConversionHandler {
         bool _isAnonymous,
         bool _isKYCRequired
     )
-    public returns (uint);
+    public
+    returns (uint);
 
-    function executeConversion(uint _conversionId) public;
-    function getConverterConversionIds(address _converter) external view returns (uint[]);
+    function executeConversion(
+        uint _conversionId
+    )
+    public;
+
+
+    function getConverterConversionIds(
+        address _converter
+    )
+    external
+    view
+    returns (uint[]);
+
+
+    function getConverterPurchasesStats(
+        address _converter
+    )
+    public
+    view
+    returns (uint,uint,uint);
+
+
+    function getStateForConverter(
+        address _converter
+    )
+    public
+    view
+    returns (bytes32);
+
+
 }

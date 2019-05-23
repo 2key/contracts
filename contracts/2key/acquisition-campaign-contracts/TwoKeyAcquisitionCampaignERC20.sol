@@ -21,9 +21,6 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
 
     address assetContractERC20; // Asset contract is address of ERC20 inventory
 
-    mapping(address => uint256) private amountConverterSpentFiatWei; // Amount converter spent for Fiat conversions
-    mapping(address => uint256) private amountConverterSpentEthWEI; // Amount converter put to the contract in Ether
-    mapping(address => uint256) private unitsConverterBought; // Number of units (ERC20 tokens) bought
     mapping(address => uint256) private referrerPlasma2cut; // Mapping representing how much are cuts in percent(0-100) for referrer address
 
     uint reservedAmountOfTokens; // Reserved amount of tokens for the converters who are pending approval
@@ -229,10 +226,10 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     public
     payable
     {
-        bool canConvert;
-        (canConvert,) = ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).canMakeETHConversion(
+        bool canConvert = ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).canConversionBeCreated(
             msg.sender,
-            msg.value
+            msg.value,
+            false
         );
         require(canConvert == true);
         address _converterPlasma = twoKeyEventSource.plasmaOf(msg.sender);
@@ -240,7 +237,6 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
             distributeArcsBasedOnSignature(signature, msg.sender);
         }
         createConversion(msg.value, msg.sender, false, _isAnonymous);
-        amountConverterSpentEthWEI[msg.sender] += msg.value;
         twoKeyEventSource.converted(address(this),msg.sender,msg.value);
     }
 
@@ -261,19 +257,17 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     {
         // Validate that sender is either _converter or maintainer
         require(msg.sender == _converter || twoKeyEventSource.isAddressMaintainer(msg.sender));
-        bool canConvert;
-        (canConvert,) = ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).canMakeFiatConversion(
+        bool canConvert = ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).canConversionBeCreated(
             _converter,
-            conversionAmountFiatWei
+            conversionAmountFiatWei,
+            true
         );
         require(canConvert == true);
         address _converterPlasma = twoKeyEventSource.plasmaOf(_converter);
         if(received_from[_converterPlasma] == address(0)) {
             distributeArcsBasedOnSignature(signature, _converter);
         }
-        //TODO: Handle at creation moment if there's enough tokens for referral rewards depending on conversion fiat amount
         createConversion(conversionAmountFiatWei, _converter, true, _isAnonymous);
-        amountConverterSpentFiatWei[_converter] = amountConverterSpentFiatWei[_converter].add(conversionAmountFiatWei);
     }
 
     /*
@@ -300,13 +294,9 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         uint256 _total_units = getAvailableAndNonReservedTokensAmount();
         require(_total_units >= totalTokensForConverterUnits);
 
-        unitsConverterBought[converterAddress] = unitsConverterBought[converterAddress].add(totalTokensForConverterUnits);
-
         uint256 maxReferralRewardFiatOrETHWei = conversionAmountETHWeiOrFiat.mul(maxReferralRewardPercent).div(100);
 
-        if(isFiatConversion == false) {
-            reservedAmountOfTokens = reservedAmountOfTokens + totalTokensForConverterUnits;
-        }
+        reservedAmountOfTokens = reservedAmountOfTokens + totalTokensForConverterUnits;
 
         uint id = ITwoKeyConversionHandler(conversionHandler).supportForCreateConversion(contractor, converterAddress,
             conversionAmountETHWeiOrFiat, maxReferralRewardFiatOrETHWei,
@@ -376,7 +366,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
 
         uint networkFee = twoKeyEventSource.getTwoKeyDefaultNetworkTaxPercent();
 
-        // Balance which will go to modrator
+        // Balance which will go to moderator
         uint balance = moderatorFee.mul(100-networkFee).div(100);
 
         uint moderatorEarnings2key = buyTokensFromUpgradableExchange(balance,moderator); // Buy tokens for moderator
@@ -399,7 +389,6 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     onlyTwoKeyConversionHandler
     {
         _cancelledConverter.transfer(_conversionAmount);
-        amountConverterSpentEthWEI[_cancelledConverter] = amountConverterSpentEthWEI[_cancelledConverter].sub(_conversionAmount);
     }
 
     /**
@@ -565,24 +554,6 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         referrerPlasma2Balances2key[_influencer] = referrerPlasma2Balances2key[_influencer].add(_balance);
     }
 
-    /**
-     * @notice Function to get statistic for the address
-     * @param ethereum is the ethereum address we want to get stats for
-     * @param plasma is the corresponding plasma address for the passed ethereum address
-     */
-    function getStatistics(
-        address ethereum,
-        address plasma
-    )
-    public
-    view
-    returns (uint,uint,uint,uint)
-    {
-        //TODO: Uncomment once we fix all issues
-//        require(msg.sender == twoKeyAcquisitionLogicHandler);
-        uint referrerTotalEarnings = ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).getReferrerPlasmaTotalEarnings(plasma);
-        return (amountConverterSpentEthWEI[ethereum], amountConverterSpentFiatWei[ethereum], referrerTotalEarnings,unitsConverterBought[ethereum]);
-    }
 
     /**
      * @notice Function where contractor can withdraw all unsold tokens from his campaign once time has passed
