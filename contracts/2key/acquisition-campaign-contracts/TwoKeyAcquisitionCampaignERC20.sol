@@ -560,10 +560,16 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
      * @dev This function will throw in case the caller is not contractor
      */
     function withdrawUnsoldTokens() onlyContractor {
-        //TODO: Add time requirement
         require(ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).checkIsCampaignActive() == false);
         uint unsoldTokens = getAvailableAndNonReservedTokensAmount();
         IERC20(assetContractERC20).transfer(contractor, unsoldTokens);
+
+        if(assetContractERC20 != twoKeyEconomy) {
+            address twoKeyUpgradableExchangeContract = getContractProxyAddress("TwoKeyUpgradableExchange");
+            uint rewardsNotSpent = getTokenBalance(twoKeyEconomy) - reservedAmount2keyForRewards;
+            IERC20(twoKeyEconomy).approve(twoKeyUpgradableExchangeContract, rewardsNotSpent);
+            IUpgradableExchange(twoKeyUpgradableExchangeContract).buyStableCoinWith2key(rewardsNotSpent, msg.sender);
+        }
     }
 }
 
