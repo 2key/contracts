@@ -50,6 +50,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
     uint pricePerUnitInETHWeiOrUSD; // There's single price for the unit ERC20 (Should be in WEI)
     uint unit_decimals; // ERC20 selling data
     uint maxConverterBonusPercent; // Maximal bonus percent per converter
+    uint campaignHardCap; // Hard cap of campaign
 
     string public currency; // Currency campaign is currently in
 
@@ -100,6 +101,8 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
             isAcceptingFiatOnly = true;
         }
 
+        campaignHardCap = values[8];
+
         currency = _currency;
         assetContractERC20 = _assetContractERC20;
         moderator = _moderator;
@@ -140,7 +143,6 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
         if(canConvert == false) {
             return false;
         }
-
         //If we reach this point means we have reached point that campaign is still active
         if(isFiat) {
             (canConvert,)= canMakeFiatConversion(converter, amountWillingToSpend);
@@ -153,7 +155,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
 
     //TODO: HANDLE INSIDE THIS METHODS MIN CONTRIBUTION AMOUNT
 
-    function canMakeFiatConversion(address converter, uint amountWillingToSpendFiatWei) public view returns (bool,uint) {
+    function canMakeFiatConversion(address converter, uint amountWillingToSpendFiatWei) internal view returns (bool,uint) {
         uint alreadySpentETHWei;
         uint alreadySpentFIATWEI;
         if(keccak256(currency) == keccak256('ETH')) {
@@ -223,24 +225,6 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
         return (isFixedInvestmentAmount, minContributionETHorFiatCurrency, maxContributionETHorFiatCurrency);
     }
 
-
-    function convertEthToFiat(uint valueInEther, uint fiatRate) internal view returns (uint) {
-        return (valueInEther*fiatRate).div(10**18);
-    }
-
-
-    function requirementForFiatConversion(
-        uint conversionAmountFiatWei
-    )
-    public
-    view
-    returns (bool)
-    {
-        //If currency is fiat
-        if(keccak256(currency) != keccak256('ETH')) {
-
-        }
-    }
 
 
     /**
