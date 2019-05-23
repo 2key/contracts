@@ -4,7 +4,7 @@ import "../../contracts/openzeppelin-solidity/contracts/token/ERC20/BasicToken.s
 import '../../contracts/openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import "../../contracts/openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
 import './TwoKeyEventSource.sol';
-import './TwoKeyRegistry.sol';
+import '../../contracts/2key/singleton-contracts/TwoKeyRegistry.sol';
 import '../../contracts/2key/libraries/Call.sol';
 
 /**
@@ -61,7 +61,7 @@ contract TwoKeyContract is StandardToken, Ownable {
     if (registry == address(0)) {
       return me;
     }
-    address plasma = registry.ethereum2plasma(me);
+    address plasma = registry.getEthereumToPlasma(me);
     require(plasma != address(0),'your plasma address was not found in registry');
 
     return plasma;
@@ -72,7 +72,7 @@ contract TwoKeyContract is StandardToken, Ownable {
     if (registry == address(0)) {
       return plasma;
     }
-    plasma = registry.ethereum2plasma(plasma);
+    plasma = registry.getEthereumToPlasma(plasma);
     if (plasma != address(0)) {
       return plasma;
     }
@@ -85,7 +85,7 @@ contract TwoKeyContract is StandardToken, Ownable {
     if (registry == address(0)) {
       return ethereum;
     }
-    ethereum = registry.plasma2ethereum(ethereum);
+    ethereum = registry.getPlasmaToEthereum(ethereum);
     if (ethereum != address(0)) {
       return ethereum;
     }

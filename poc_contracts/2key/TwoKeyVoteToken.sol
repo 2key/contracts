@@ -6,7 +6,7 @@ import '../../contracts/openzeppelin-solidity/contracts/token/ERC20/ERC20.sol';
 import '../../contracts/openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import '../../contracts/openzeppelin-solidity/contracts/math/SafeMath.sol';
 
-import './TwoKeyRegistry.sol';
+import '../../contracts/2key/singleton-contracts/TwoKeyRegistry.sol';
 import "../../contracts/2key/libraries/GetCode.sol";
 
 contract TwoKeyVoteToken is StandardToken, Ownable {
@@ -66,7 +66,7 @@ contract TwoKeyVoteToken is StandardToken, Ownable {
     }
 
     visited[_owner] = true;
-    bytes memory _name = bytes(registry.owner2name(_owner));
+    bytes memory _name = bytes(registry.getUserAddress2UserName(_owner));
     if (_name.length != 0) {
       balances[_owner] = 1000000000000000000;
     }
@@ -82,7 +82,7 @@ contract TwoKeyVoteToken is StandardToken, Ownable {
     if (visited[_owner] || balances[_owner] > 0) {
       return balances[_owner];
     } else {
-      bytes memory _name = bytes(registry.owner2name(_owner));
+      bytes memory _name = bytes(registry.getUserAddress2UserName(_owner));
       if (_name.length != 0) {
         return 1000000000000000000;
       } else {
