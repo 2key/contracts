@@ -127,7 +127,6 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
      *
      */
     function activateCampaign() public onlyContractor {
-
         require(IS_CAMPAIGN_ACTIVE == false);
         uint balanceOfTokenBeingSoldOnAcquisition = getInventoryBalance();
         //balance is in weis, price is in weis and hardcap is regular number
