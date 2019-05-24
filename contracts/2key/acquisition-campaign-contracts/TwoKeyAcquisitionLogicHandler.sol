@@ -153,7 +153,9 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
 
     function canConversionBeCreated(address converter, uint amountWillingToSpend, bool isFiat) public view returns (bool) {
         bool canConvert = checkIsCampaignActive();
-
+        if(IS_CAMPAIGN_ACTIVE == false) {
+            return false;
+        }
         if(canConvert == false) {
             return false;
         }

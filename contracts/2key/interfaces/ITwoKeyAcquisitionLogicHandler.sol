@@ -5,6 +5,7 @@ pragma solidity ^0.4.24;
  */
 contract ITwoKeyAcquisitionLogicHandler {
     function checkIsCampaignActive() public view returns (bool);
+    bool public IS_CAMPAIGN_ACTIVE;
     function canConversionBeCreated(address converter, uint amountWillingToSpend, bool isFiat) public view returns (bool);
     function getEstimatedTokenAmount(uint conversionAmountETHWei, bool isFiatConversion) public view returns (uint, uint);
 
