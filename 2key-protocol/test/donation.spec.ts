@@ -112,6 +112,8 @@ describe('TwoKeyDonationCampaign', () => {
             timeout: 600000
         });
 
+        console.log(result);
+
         campaignAddress = result.campaignAddress;
         links.deployer = result.campaignPublicLinkKey;
         console.log(links.deployer);
