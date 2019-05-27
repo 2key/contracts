@@ -318,7 +318,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
 
         uint minConversionRate = getKyberExpectedRate(amountToBeHedged);
 
-        require(minConversionRate >= approvedMinConversionRate); //Means our rate can be at most same as their rate, because they're giving the best rate
+        require(minConversionRate >= approvedMinConversionRate.mul(99).div(100)); //Means our rate can be at most same as their rate, because they're giving the best rate
         uint stableCoinUnits = proxyContract.swapEtherToToken.value(amountToBeHedged)(DAI,minConversionRate);
         usdStableCoinUnitsReserve += stableCoinUnits;
     }
