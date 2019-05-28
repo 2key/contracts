@@ -198,11 +198,11 @@ module.exports = function deploy(deployer) {
                                 let v = parseInt(twoKeyUpgradableExchange[network_id].Version.substr(-1)) + 1;
                                 twoKeyUpgradableExchange[network_id].Version = twoKeyUpgradableExchange[network_id].Version.substr(0, twoKeyUpgradableExchange[network_id].Version.length - 1) + v.toString();
                                 console.log('New version : ' + twoKeyUpgradableExchange[network_id].Version);
-                                let txHash = await registry.addVersion("TwoKeyUpgradableExchange", "1.3", TwoKeyUpgradableExchange.address);
+                                let txHash = await registry.addVersion("TwoKeyUpgradableExchange", "1.6", TwoKeyUpgradableExchange.address);
 
                                 console.log('... Upgrading proxy to new version');
                                 // txHash = await Proxy.at(twoKeyUpgradableExchange[network_id].Proxy).upgradeTo("TwoKeyUpgradableExchange", twoKeyUpgradableExchange[network_id].Version);
-                                txHash = await Proxy.at(twoKeyUpgradableExchange[network_id].Proxy).upgradeTo("TwoKeyUpgradableExchange", "1.3");
+                                txHash = await Proxy.at(twoKeyUpgradableExchange[network_id].Proxy).upgradeTo("TwoKeyUpgradableExchange", "1.5");
                                 twoKeyUpgradableExchange[network_id].address = lastTwoKeyUpgradableExchangeContract;
 
                                 fileObject['TwoKeyUpgradableExchange'] = twoKeyUpgradableExchange;
