@@ -129,6 +129,15 @@ module.exports = {
       // gasPrice: 2000000000
     },
 
+    'plasma-test-local': {
+      provider: () => new HDWalletProvider(mnemonic, 'https://rpc.private.test.k8s.2key.net'),
+      network_id: 98052,
+      gas: 8000000,
+      gasPrice: '0x0',
+      // gasPrice: 100000000000,
+      // gasPrice: 2000000000
+    },
+
     'rinkeby-test' : {
         provider: () => new HDWalletProvider(mnemonic, 'https://rinkeby.infura.io/v3/904c762bd6984606bf8ae7f30d7cb28c'),
         network_id: 4,

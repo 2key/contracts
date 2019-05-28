@@ -367,7 +367,7 @@ describe('TwoKeyProtocol', () => {
                 syncTwoKeyNetId,
             },
             eventsNetUrl,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
         });
 
         // //Map testAddress=>testKey
@@ -424,7 +424,7 @@ describe('TwoKeyProtocol', () => {
                 syncTwoKeyNetId,
             },
             eventsNetUrl,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
         });
 
         // currentAdmin = await twoKeyProtocol.MaintainingPattern.getAdmin();
@@ -1194,7 +1194,7 @@ describe('TwoKeyProtocol', () => {
                 syncTwoKeyNetId,
             },
             eventsNetUrl,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_RENATA).privateKey,
         });
         const txHash = await twoKeyProtocol.AcquisitionCampaign.moderatorAndReferrerWithdraw(campaignAddress,from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
@@ -1244,7 +1244,7 @@ describe('TwoKeyProtocol', () => {
                 syncTwoKeyNetId,
             },
             eventsNetUrl,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_RENATA).privateKey,
         });
         let stats = await twoKeyProtocol.AcquisitionCampaign.getAddressStatistic(campaignAddress,env.RENATA_ADDRESS, '0x0000000000000000000000000000000000000000',{from});
         console.log(stats);
@@ -1320,7 +1320,7 @@ describe('TwoKeyProtocol', () => {
                 syncTwoKeyNetId,
             },
             eventsNetUrl,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_TEST4).privateKey,
         });
         console.log('Regular executed conversion is: ');
         let conversion = await twoKeyProtocol.AcquisitionCampaign.getConversion(campaignAddress,0,from);

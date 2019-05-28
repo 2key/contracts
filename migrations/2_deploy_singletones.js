@@ -62,7 +62,7 @@ module.exports = function deploy(deployer) {
 
 
     let deploymentNetwork;
-    if(deployer.network.startsWith('dev')) {
+    if(deployer.network.startsWith('dev') || deployer.network.startsWith('plasma-test')) {
         deploymentNetwork = 'dev-local-environment'
     } else if (deployer.network.startsWith('public') || deployer.network.startsWith('plasma') || deployer.network.startsWith('private')) {
         deploymentNetwork = 'ropsten-environment';

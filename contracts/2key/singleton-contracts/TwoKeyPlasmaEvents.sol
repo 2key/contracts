@@ -80,6 +80,7 @@ contract TwoKeyPlasmaEvents is Upgradeable {
         initialized = true;
         owner = msg.sender;
         //Adding initial maintainers
+        isMaintainer[msg.sender] = true;
         for(uint i=0; i<maintainers.length; i++) {
             isMaintainer[maintainers[i]] = true;
         }
@@ -351,7 +352,7 @@ contract TwoKeyPlasmaEvents is Upgradeable {
      * @param _maintainers is the array of maintainer addresses
      */
     function addMaintainers(address [] _maintainers) public {
-        require(msg.sender == owner);
+        require(msg.sender == owner || isMaintainer[msg.sender] == true);
         for(uint i=0; i<_maintainers.length; i++) {
             isMaintainer[_maintainers[i]] = true;
         }
