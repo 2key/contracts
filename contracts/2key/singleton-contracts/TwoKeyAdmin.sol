@@ -17,6 +17,7 @@ contract TwoKeyAdmin is Upgradeable {
 	TwoKeyEventSource twoKeyEventSource;
 	TwoKeyRegistry twoKeyReg;
 
+
 	address public twoKeyCongress;
 	address public newTwoKeyAdminAddress;
 
@@ -307,7 +308,7 @@ contract TwoKeyAdmin is Upgradeable {
 
 	function getTwoKeyTokenRate()
 	public
-	view 
+	view
 	returns (uint)
 	{
 		return twoKeyTokenRate;
