@@ -40,6 +40,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
 
 
     address public kyberProxyContractAddress;
+
     ERC20 public DAI;
     ERC20 ETH_TOKEN_ADDRESS;
 
@@ -317,8 +318,8 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         IKyberNetworkProxy proxyContract = IKyberNetworkProxy(kyberProxyContractAddress);
 
         uint minConversionRate = getKyberExpectedRate(amountToBeHedged);
-
-        require(minConversionRate >= approvedMinConversionRate.mul(99).div(100)); //Means our rate can be at most same as their rate, because they're giving the best rate
+        emit Status(minConversionRate, approvedMinConversionRate);
+        require(minConversionRate >= approvedMinConversionRate.mul(95).div(100)); //Means our rate can be at most same as their rate, because they're giving the best rate
         uint stableCoinUnits = proxyContract.swapEtherToToken.value(amountToBeHedged)(DAI,minConversionRate);
         usdStableCoinUnitsReserve += stableCoinUnits;
     }
@@ -427,5 +428,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
     {
 
     }
+
+    event Status(uint approvedConversionRate, uint minConversionRate);
 
 }
