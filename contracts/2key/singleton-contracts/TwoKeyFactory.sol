@@ -170,6 +170,7 @@ contract TwoKeyFactory is Upgradeable, MaintainingPattern {
         ITwoKeyCampaignValidator(getContractProxyAddress("TwoKeyCampaignValidator"))
         .validateAcquisitionCampaign(proxyAcquisition, _nonSingletonHash);
 
+        addressToCampaignType[proxyAcquisition] = "TOKEN_SELL";
         // Emit an event with proxies for Acquisition campaign
         emit ProxyForCampaign(
             proxyLogicHandler,
@@ -241,6 +242,7 @@ contract TwoKeyFactory is Upgradeable, MaintainingPattern {
             nonSingletonHash
         );
 
+        addressToCampaignType[proxyDonationCampaign] = "DONATION_CAMPAIGN";
 //         Emit an event
         emit ProxyForDonationCampaign(
             proxyDonationCampaign,
@@ -249,5 +251,8 @@ contract TwoKeyFactory is Upgradeable, MaintainingPattern {
         );
 
     }
+
+    // I left it as a string, even it increases chances for typo, better suits Upgradable pattern than Enums.
+    mapping(address => string) public addressToCampaignType;
 
 }

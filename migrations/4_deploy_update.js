@@ -27,13 +27,13 @@ module.exports = function deploy(deployer) {
     let isTwoKeyCongress = false;
     let isTwoKeyPlasmaEvents = false;
     let isTwoKeyUpgradableExchange = false;
+    let isTwoKeyFactory = false;
 
     /**
      * Determining which contract we want to update
      */
     process.argv.forEach((argument) => {
         if (argument == 'update') {
-            console.log('Works');
             found = true
         }
         else if (argument == 'TwoKeyRegistry') {
@@ -51,18 +51,14 @@ module.exports = function deploy(deployer) {
         else if (argument == 'TwoKeyUpgradableExchange') {
             isTwoKeyUpgradableExchange = true;
         }
+        else if(argument == 'TwoKeyFactory') {
+            isTwoKeyFactory = true;
+        }
         else if (argument == 'TwoKeyPlasmaEvents') {
-            console.log('Works2');
             isTwoKeyPlasmaEvents = true;
         }
     });
 
-    /**
-     * If network is not found or contract is not found return immediately
-     */
-    if(!found) {
-        return;
-    }
 
     if(found) {
         let fileObject = {};
@@ -198,11 +194,11 @@ module.exports = function deploy(deployer) {
                                 let v = parseInt(twoKeyUpgradableExchange[network_id].Version.substr(-1)) + 1;
                                 twoKeyUpgradableExchange[network_id].Version = twoKeyUpgradableExchange[network_id].Version.substr(0, twoKeyUpgradableExchange[network_id].Version.length - 1) + v.toString();
                                 console.log('New version : ' + twoKeyUpgradableExchange[network_id].Version);
-                                let txHash = await registry.addVersion("TwoKeyUpgradableExchange", "1.6", TwoKeyUpgradableExchange.address);
+                                let txHash = await registry.addVersion("TwoKeyUpgradableExchange", "1.7", TwoKeyUpgradableExchange.address);
 
                                 console.log('... Upgrading proxy to new version');
                                 // txHash = await Proxy.at(twoKeyUpgradableExchange[network_id].Proxy).upgradeTo("TwoKeyUpgradableExchange", twoKeyUpgradableExchange[network_id].Version);
-                                txHash = await Proxy.at(twoKeyUpgradableExchange[network_id].Proxy).upgradeTo("TwoKeyUpgradableExchange", "1.5");
+                                txHash = await Proxy.at(twoKeyUpgradableExchange[network_id].Proxy).upgradeTo("TwoKeyUpgradableExchange", "1.7");
                                 twoKeyUpgradableExchange[network_id].address = lastTwoKeyUpgradableExchangeContract;
 
                                 fileObject['TwoKeyUpgradableExchange'] = twoKeyUpgradableExchange;
@@ -249,6 +245,43 @@ module.exports = function deploy(deployer) {
                         })
                     })
                 )
+        }
+        else if(isTwoKeyFactory) {
+            /**
+             * If contract we're updating is TwoKeyFactory (arugment) this 'subscript' will be executed
+             */
+            let lastTwoKeyFactoryAddress;
+            console.log('TwoKeyFactory will be updated now.');
+            deployer.deploy(TwoKeyFactory)
+                .then(() => TwoKeyFactory.deployed()
+                    .then((twoKeyFactoryInstance) => {
+                        lastTwoKeyFactoryAddress = twoKeyFactoryInstance.address;
+                    })
+                    .then(() => TwoKeySingletonesRegistry.deployed())
+                    .then(async(registry) => {
+                        await new Promise(async(resolve,reject) => {
+                            try {
+                                console.log('... Adding new version of TwoKeyFactory contract to the registry contract');
+                                const twoKeyFactory = fileObject.TwoKeyFactory || {};
+                                let v = parseInt(twoKeyFactory[network_id].Version.substr(-1)) + 1;
+                                twoKeyFactory[network_id].Version = twoKeyFactory[network_id].Version.substr(0, twoKeyFactory[network_id].Version.length - 1) + v.toString();
+                                console.log('New version : ' + twoKeyFactory[network_id].Version);
+                                let txHash = await registry.addVersion("TwoKeyFactory", twoKeyFactory[network_id].Version, TwoKeyAdmin.address);
+
+                                console.log('... Upgrading proxy to new version');
+                                txHash = await Proxy.at(twoKeyFactory[network_id].Proxy).upgradeTo("TwoKeyFactory", twoKeyFactory[network_id].Version);
+                                twoKeyFactory[network_id].address = lastTwoKeyFactoryAddress;
+
+                                fileObject['TwoKeyFactory'] = twoKeyFactory;
+                                fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
+                                resolve(txHash);
+                            } catch (e) {
+                                reject(e);
+                            }
+                        })
+                    })
+                )
+
         } else if(isTwoKeyCongress) {
             /**
              * If contract we're updating is TwoKeyCongress (argument) this 'subscript' will be executed
