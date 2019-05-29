@@ -431,44 +431,6 @@ describe('TwoKeyProtocol', () => {
         // expect(currentAdmin).to.be.equal(testObject.emptyAddress);
     }).timeout(60000);
 
-    it('Should MaintainingPattern-Pass check maintainer' ,async() => {
-        // let isMaintainer;
-        //
-        // const {web3, address} = web3switcher.deployer();
-        // from = address;
-        // twoKeyProtocol.setWeb3({
-        //     web3,
-        //     networks: {
-        //         mainNetId,
-        //         syncTwoKeyNetId,
-        //     },
-        //     eventsNetUrl,
-        //     plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
-        // });
-        //
-        // isMaintainer = await twoKeyProtocol.MaintainingPattern.checkIfMaintainer(from);
-        // expect(isMaintainer).to.be.true;
-    }).timeout(60000);
-
-    it('Should check MaintainingPattern-Pass check not maintainer.' ,async() => {
-        // let isMaintainer;
-        //
-        // const {web3, address} = web3switcher.deployer();
-        // from = address;
-        // twoKeyProtocol.setWeb3({
-        //     web3,
-        //     networks: {
-        //         mainNetId,
-        //         syncTwoKeyNetId,
-        //     },
-        //     eventsNetUrl,
-        //     plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
-        // });
-        //
-        // isMaintainer = await twoKeyProtocol.MaintainingPattern.checkIfMaintainer(testObject.notMaintainerAddress);
-        // expect(isMaintainer).not.to.be.true;
-    }).timeout(60000);
-
     it('should get total supply of economy contract' ,async() => {
         console.log("Check total supply on 2key-economy contract");
         let totalSup = await twoKeyProtocol.ERC20.getTotalSupply(twoKeyProtocol.twoKeyEconomy.address);
