@@ -522,7 +522,6 @@ module.exports = function deploy(deployer) {
                         console.log('Setting initial parameters in contract TwoKeyCampaignValidator');
                         let txHash = await TwoKeyCampaignValidator.at(proxyAddressTwoKeyCampaignValidator).setInitialParams(
                             TwoKeySingletonesRegistry.address,
-                            maintainerAddresses
                         );
                         resolve(txHash);
                     } catch (e) {

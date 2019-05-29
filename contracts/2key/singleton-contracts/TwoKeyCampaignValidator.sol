@@ -2,7 +2,7 @@ pragma solidity ^0.4.24;
 
 import "../libraries/GetCode.sol";
 import "../Upgradeable.sol";
-import "../MaintainingPattern.sol";
+import "../TwoKeyMaintainersRegistry.sol";
 
 import "../interfaces/ITwoKeyAcquisitionCampaignStateVariables.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
@@ -11,6 +11,7 @@ import "../interfaces/ITwoKeyCampaignPublicAddresses.sol";
 import "../interfaces/ITwoKeyDonationCampaign.sol";
 import "../interfaces/ITwoKeyDonationCampaignFetchAddresses.sol";
 import "../interfaces/IGetImplementation.sol";
+import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 
 
 /*******************************************************************************************************************
@@ -40,10 +41,13 @@ import "../interfaces/IGetImplementation.sol";
  * @author Nikola Madjarevic
  * Created at 2/12/19
  */
-contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
+contract TwoKeyCampaignValidator is Upgradeable {
+
+    bool initialized;
 
     address public twoKeySingletoneRegistry;
     address public twoKeyFactory;
+    address public twoKeyMaintainersRegistry;
 
     mapping(address => string) public campaign2nonSingletonHash;
 
@@ -66,14 +70,14 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
     )
     public
     {
-        require(twoKeySingletoneRegistry == address(0));
+        require(initialized == false);
+
         twoKeySingletoneRegistry = _twoKeySingletoneRegistry;
         twoKeyAdmin =  ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyAdmin");
         twoKeyFactory = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyFactory");
-        isMaintainer[msg.sender] = true;
-        for(uint i=0; i<_maintainers.length; i++) {
-            isMaintainer[_maintainers[i]] = true;
-        }
+        twoKeyMaintainersRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyMaintainersRegistry");
+
+        initialized = true;
     }
 
     /**
@@ -177,8 +181,8 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
         bytes32[] names
     )
     public
-    onlyMaintainer
     {
+        require(ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender));
         require(contracts.length == names.length);
         uint length = contracts.length;
         for(uint i=0; i<length; i++) {
@@ -195,8 +199,8 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
         bytes _bytecode
     )
     public
-    onlyMaintainer
     {
+        require(ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender));
         isCodeValid[_bytecode] = false;
     }
 
