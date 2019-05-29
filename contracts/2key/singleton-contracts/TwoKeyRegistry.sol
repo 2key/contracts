@@ -1,27 +1,29 @@
 pragma solidity ^0.4.24;
 
 import "../Upgradeable.sol";
-import "../MaintainingPattern.sol";
 import "../libraries/Call.sol";
+import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 
-contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
+
+contract TwoKeyRegistry is Upgradeable {
 
     using Call for *;
 
+    bool initialized;
+
+    /*
+        mapping address to wallet tag
+        wallet tag = username + '_' + walletname
+    */
+    mapping(address => bytes32) public address2walletTag;
+    // reverse mapping from walletTag to address
+    mapping(bytes32 => address) public walletTag2address;
     /// mapping user's address to user's name
     mapping(address => string) public address2username;
     /// mapping user's name to user's address
     mapping(bytes32 => address) public username2currentAddress;
     /// mapping username to array of addresses he is using/used
     mapping(bytes32 => address[]) public username2AddressHistory;
-    /*
-        mapping address to wallet tag
-        wallet tag = username + '_' + walletname
-    */
-    mapping(address => bytes32) public address2walletTag;
-
-    // reverse mapping from walletTag to address
-    mapping(bytes32 => address) public walletTag2address;
 
     // plasma address => ethereum address
     // note that more than one plasma address can point to the same ethereum address so it is not critical to use the same plasma address all the time for the same user
@@ -29,7 +31,6 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
     // the way to know if an address is a plasma address is to look it up in this mapping
     mapping(address => address) plasma2ethereum;
     mapping(address => address) ethereum2plasma;
-
     mapping(address => bytes) public notes;
 
     struct UserData {
@@ -39,26 +40,19 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
     }
 
     mapping(address => UserData) addressToUserData;
-
-    /*
-        Those mappings are for the fetching data about in what contracts user participates in which role
-    */
-
     /// mapping users address to addresses of campaigns where he is contractor
     mapping(address => address[]) public userToCampaignsWhereContractor;
-
     /// mapping users address to addresses of campaigns where he is moderator
     mapping(address => address[]) public userToCampaignsWhereModerator;
-
     /// mapping users address to addresses of campaigns where he is refferer
     mapping(address => address[]) public userToCampaignsWhereReferrer;
-
     /// mapping users address to addresses of campaigns where he is converter
     mapping(address => address[]) public userToCampaignsWhereConverter;
 
+
+    address public twoKeySingletonesRegistry;
     /// Address of 2key event source contract which will have permission to write on this contract
-    /// (Address is enough, there is no need to spend sufficient gas and instantiate whole contract)
-    address public twoKeyEventSource;
+    address twoKeyEventSource;
 
 
     /// @notice Event is emitted when a user's name is changed
@@ -78,19 +72,16 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
      * @param _maintainers is the address of initial maintainer
      */
     function setInitialParams(
-        address _twoKeyEventSource,
-        address _twoKeyAdmin,
-        address [] _maintainers
+        address _twoKeySingletonesRegistry
     )
     external
     {
-        require(twoKeyEventSource == address(0));
-        twoKeyEventSource = _twoKeyEventSource;
-        twoKeyAdmin = _twoKeyAdmin;
+        require(initialized == false);
 
-        for(uint i=0; i<_maintainers.length; i++) {
-            isMaintainer[_maintainers[i]] = true;
-        }
+        twoKeySingletonesRegistry = _twoKeySingletonesRegistry;
+        twoKeyEventSource = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyEventSource");
+
+        initialized = true;
     }
 
 
@@ -327,14 +318,6 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
         setNoteInternal(note, msg.sender);
     }
 
-//    /// @notice Function where user can add name to his address
-//    /// @param _name is name of user
-//    function addNameByUser(string _name) external {
-//        require(utfStringLength(_name) >= 3 && utfStringLength(_name) <=25);
-//        addNameInternal(_name, msg.sender);
-//    }
-
-
 
     /// @notice Function where TwoKeyMaintainer can add walletname to address
     /// @param username is the username of the user we want to update map for
@@ -430,15 +413,6 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
         return address2username[_sender];
     }
 
-    //TODO we'll eventually need to get previous addresses of user, and might need to support multiple "active" addresses per user
-//    /// Get history of changed addresses
-//    /// @return array of addresses sorted
-//    function getHistoryOfChangedAddresses() external view returns (address[]) {
-//        string memory name = address2username[msg.sender];
-//        bytes32 nameHex = stringToBytes32(name);
-//        return username2AddressHistory[nameHex];
-//    }
-
     /**
      */
     function deleteUser(
@@ -471,30 +445,6 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
         notes[_ethereumAddress] = "";
     }
 
-
-//    /// @notice Function to fetch actual length of string
-//    /// @param str is the string we'd like to get length of
-//    /// @return length of the string
-//    function utfStringLength(string str) internal pure returns (uint length) {
-//        uint i=0;
-//        bytes memory string_rep = bytes(str);
-//
-//        while (i<string_rep.length)
-//        {
-//            if (string_rep[i]>>7==0)
-//                i+=1;
-//            else if (string_rep[i]>>5==0x6)
-//                i+=2;
-//            else if (string_rep[i]>>4==0xE)
-//                i+=3;
-//            else if (string_rep[i]>>3==0x1E)
-//                i+=4;
-//            else
-//            //For safety
-//                i+=1;
-//            length++;
-//        }
-//    }
 
     /**
      * @notice Reading from mapping ethereum 2 plasma

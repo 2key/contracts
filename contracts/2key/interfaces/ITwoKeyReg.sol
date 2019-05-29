@@ -2,7 +2,6 @@ pragma solidity ^0.4.24;
 
 
 contract ITwoKeyReg {
-    mapping(address => bool) public isMaintainer;
 
     function addTwoKeyEventSource(address _twoKeyEventSource) public;
     function changeTwoKeyEventSource(address _twoKeyEventSource) public;
