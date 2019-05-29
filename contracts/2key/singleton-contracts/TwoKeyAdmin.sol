@@ -12,21 +12,19 @@ import "../Upgradeable.sol";
 //TODO: Add all the missing functions from other singletones which can be called by TwoKeyAdmin
 contract TwoKeyAdmin is Upgradeable {
 
+	bool initialized = false;
+
 	TwoKeyEconomy twoKeyEconomy;
 	TwoKeyUpgradableExchange twoKeyUpgradableExchange;
 	TwoKeyEventSource twoKeyEventSource;
 	TwoKeyRegistry twoKeyReg;
 
-
 	address public twoKeyCongress;
-	address public newTwoKeyAdminAddress;
 
 	uint twoKeyIntegratorDefaultFeePercent; // 2% is default value for this
 	uint twoKeyNetworkTaxPercent; //2% is default value for this
 	uint twoKeyTokenRate;
 	uint rewardReleaseAfter;
-
-    bool initialized = false;
 
     /// @notice Modifier will revert if calling address is not a member of electorateAdmins
 	modifier onlyTwoKeyCongress {
@@ -81,7 +79,7 @@ contract TwoKeyAdmin is Upgradeable {
 	external
 	onlyTwoKeyCongress
 	{
-		require (_to != address(0) && _tokens > 0);
+		require (_to != address(0));
 		twoKeyEconomy.transfer(_to, _tokens);
 	}
 
@@ -96,7 +94,7 @@ contract TwoKeyAdmin is Upgradeable {
 	external
 	onlyTwoKeyCongress
 	{
-		require(to != address(0)  && amount > 0);
+		require(to != address(0));
 		to.transfer(amount);
 	}
 

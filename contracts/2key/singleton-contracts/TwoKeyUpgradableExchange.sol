@@ -428,7 +428,7 @@ contract TwoKeyUpgradableExchange is Upgradeable {
     event Status(uint approvedConversionRate, uint minConversionRate);
 
     function getSomeAddresses() public view returns (address,address,address) {
-        return (twoKeyExchangeRateContract, twoKeyCampaignValidator, twoKeySingltonRegistry);
+        return (twoKeyExchangeRateContract, twoKeyCampaignValidator, twoKeySingletonesRegistry);
     }
 
 }
