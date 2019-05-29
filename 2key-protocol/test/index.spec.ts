@@ -1390,6 +1390,12 @@ describe('TwoKeyProtocol', () => {
         console.log('Rewards inventory required' , obj);
     }).timeout(60000);
 
+
+    it('should get campaign type by address', async() => {
+        let campaignType = await twoKeyProtocol.TwoKeyFactory.getCampaignTypeByAddress(campaignAddress);
+        expect(campaignType).to.be.equal("TOKEN_SELL");
+    }).timeout(60000);
+
     // it('should build refgraph', async() => {
     //     const {web3, address} = web3switcher.gmail();
     //     from = address;
