@@ -533,10 +533,7 @@ module.exports = function deploy(deployer) {
                     try {
                         console.log('Setting initial parameters in contract EventSource');
                         let txHash = await EventSource.at(proxyAddressTwoKeyEventSource).setInitialParams(
-                            proxyAddressTwoKeyAdmin,
-                            maintainerAddresses,
-                            proxyAddressTwoKeyRegistry,
-                            proxyAddressTwoKeyCampaignValidator
+                            TwoKeySingletonesRegistry.address
                         );
                         resolve(txHash);
                     } catch (e) {

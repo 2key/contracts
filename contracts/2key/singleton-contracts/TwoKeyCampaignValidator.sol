@@ -65,8 +65,7 @@ contract TwoKeyCampaignValidator is Upgradeable {
      * @param _maintainers is the array of initial maintainer addresses
      */
     function setInitialParams(
-        address _twoKeySingletoneRegistry,
-        address [] _maintainers
+        address _twoKeySingletoneRegistry
     )
     public
     {
