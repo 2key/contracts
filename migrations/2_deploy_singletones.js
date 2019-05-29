@@ -59,6 +59,7 @@ module.exports = function deploy(deployer) {
     let proxyAddressTwoKeyCampaignValidator;
     let proxyAddressTwoKeyFactory;
     let proxyAddressTwoKeyPlasmaEvents;
+    let proxyAddressTwoKeyMaintainersRegistry;
 
 
     let deploymentNetwork;
@@ -119,7 +120,9 @@ module.exports = function deploy(deployer) {
             .then(() => TwoKeyLongTermTokenPool.deployed())
             .then(() => deployer.deploy(TwoKeyFactory))
             .then(() => TwoKeyFactory.deployed())
-            .then(() => deployer.deploy(TwoKeySingletonesRegistry, '0x0')) //adding empty admin address
+            .then(() => deployer.deploy(TwoKeyMaintainersRegistry))
+            .then(() => TwoKeyMaintainersRegistry.deployed())
+            .then(() => deployer.deploy(TwoKeySingletonesRegistry)) //adding empty admin address
             .then(() => TwoKeySingletonesRegistry.deployed().then(async (registry) => {
                 /**
                  * Here we will be adding all contracts to the Registry and create a Proxies for them
@@ -146,6 +149,33 @@ module.exports = function deploy(deployer) {
 
                         fileObject['TwoKeyRegistry'] = twoKeyReg;
                         proxyAddressTwoKeyRegistry = proxy;
+                        resolve(proxy);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
+
+                await new Promise(async (resolve, reject) => {
+                    try {
+                        console.log('... Adding TwoKeyMaintainersRegistry to Proxy registry as valid implementation');
+                        /**
+                         * Adding TwoKeyMaintainersRegistry to the registry, deploying 1st proxy for that 1.0 version and setting initial params there
+                         */
+                        let txHash = await registry.addVersion("TwoKeyMaintainersRegistry", "1.0", TwoKeyMaintainersRegistry.address);
+                        let { logs } = await registry.createProxy("TwoKeyMaintainersRegistry", "1.0");
+                        let { proxy } = logs.find(l => l.event === 'ProxyCreated').args;
+                        console.log('Proxy address for the TwoKeyMaintainersRegistry is : ' + proxy);
+                        console.log('Network ID', network_id);
+                        const twoKeyMaintainersRegistry = fileObject.TwoKeyMaintainersRegistry || {};
+                        twoKeyMaintainersRegistry[network_id] = {
+                            'address': TwoKeyMaintainersRegistry.address,
+                            'Proxy': proxy,
+                            'Version': "1.0",
+                            maintainer_address: maintainerAddresses,
+                        };
+
+                        fileObject['TwoKeyMaintainersRegistry'] = twoKeyMaintainersRegistry;
+                        proxyAddressTwoKeyMaintainersRegistry = proxy;
                         resolve(proxy);
                     } catch (e) {
                         reject(e);
@@ -435,6 +465,7 @@ module.exports = function deploy(deployer) {
             .then(() => deployer.deploy(TwoKeyEconomy,proxyAddressTwoKeyAdmin, TwoKeySingletonesRegistry.address))
             .then(() => TwoKeyEconomy.deployed())
             .then(async () => {
+
                 /**
                  * Here we will add congress contract to the registry
                  */
@@ -450,6 +481,7 @@ module.exports = function deploy(deployer) {
                         reject(e);
                     }
                 });
+
                 /**
                  * Here we will add economy contract to the registry
                  */
@@ -473,14 +505,26 @@ module.exports = function deploy(deployer) {
                     kyberAddress = KYBER_NETWORK_PROXY_ADDRESS_ROPSTEN;
                 }
 
+
+                await new Promise(async (resolve,reject) => {
+                    try {
+                        console.log('Setting initial parameters in contract TwoKeyMaintainersRegistry');
+                        let txHash = await TwoKeyMaintainersRegistry.at(proxyAddressTwoKeyMaintainersRegistry).setInitialParams(
+                            proxyAddressTwoKeyAdmin,
+                            maintainerAddresses
+                        )
+                        resolve(txHash);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
+
                 await new Promise(async(resolve,reject) => {
                     try {
                         console.log('Setting initial parameters in contract TwoKeyCommunityTokenPool');
                         let txHash = await TwoKeyCommunityTokenPool.at(proxyAddressTwoKeyCommunityTokenPool).setInitialParams(
-                            proxyAddressTwoKeyAdmin,
+                            TwoKeySingletonesRegistry.address,
                             TwoKeyEconomy.address,
-                            maintainerAddresses,
-                            proxyAddressTwoKeyRegistry
                         );
                         resolve(txHash);
                     } catch (e) {
@@ -492,9 +536,8 @@ module.exports = function deploy(deployer) {
                     try {
                         console.log('Setting initial parameters in contract TwoKeyLongTermTokenPool');
                         let txHash = await TwoKeyLongTermTokenPool.at(proxyAddressTwoKeyLongTermTokenPool).setInitialParams(
-                            proxyAddressTwoKeyAdmin,
+                            TwoKeySingletonesRegistry.address,
                             TwoKeyEconomy.address,
-                            maintainerAddresses,
                         );
                         resolve(txHash);
                     } catch (e) {
@@ -506,9 +549,8 @@ module.exports = function deploy(deployer) {
                     try {
                         console.log('Setting initial parameters in contract TwoKeyDeepFreezeTokenPool');
                         let txHash = await TwoKeyDeepFreezeTokenPool.at(proxyAddressTwoKeyDeepFreezeTokenPool).setInitialParams(
-                            proxyAddressTwoKeyAdmin,
+                            TwoKeySingletonesRegistry.address,
                             TwoKeyEconomy.address,
-                            maintainerAddresses,
                             proxyAddressTwoKeyCommunityTokenPool
                         );
                         resolve(txHash);
@@ -580,7 +622,8 @@ module.exports = function deploy(deployer) {
                         reject(e);
                     }
                 });
-                //TODO: Change proxyAddressTwoKeyExchange to proxyTwoKeyExchangeRate -
+
+
                 await new Promise(async(resolve,reject) => {
                     try {
                         console.log('Setting initial parameters in contract TwoKeyAdmin');
@@ -632,7 +675,7 @@ module.exports = function deploy(deployer) {
     } else if (deployer.network.startsWith('plasma') || deployer.network.startsWith('private')) {
         deployer.link(Call, TwoKeyPlasmaEvents);
         deployer.deploy(TwoKeyPlasmaEvents)
-            .then(() => deployer.deploy(TwoKeyPlasmaSingletoneRegistry, [], '0x0')) //adding empty admin address
+            .then(() => deployer.deploy(TwoKeyPlasmaSingletoneRegistry, maintainerAddresses, '0x0')) //adding empty admin address
             .then(() => TwoKeyPlasmaSingletoneRegistry.deployed().then(async (registry) => {
                 await new Promise(async(resolve,reject) => {
                     try {

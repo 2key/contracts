@@ -1,12 +1,14 @@
 pragma solidity ^0.4.24;
 
+import "./Upgradeable.sol";
+
 /**
  * @author Nikola Madjarevic
  * @notice This is maintaining pattern supporting maintainers and twoKeyAdmin as ``central authority`` which is only eligible
  * to edit maintainers list
  */
 
-contract TwoKeyMaintainersRegistry {
+contract TwoKeyMaintainersRegistry is Upgradeable {
     /**
      * Flag which will make function setInitialParams callable only once
      */
