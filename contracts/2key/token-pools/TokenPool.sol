@@ -1,29 +1,45 @@
 pragma solidity ^0.4.24;
 
 import "../Upgradeable.sol";
-import "../MaintainingPattern.sol";
+import "../interfaces/ITwoKeyMaintainersRegistry.sol";
+import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/IERC20.sol";
 /**
  * @author Nikola Madjarevic
  * Created at 2/5/19
  */
-contract TokenPool is Upgradeable, MaintainingPattern {
+contract TokenPool is Upgradeable {
 
     bool initialized = false;
     address public erc20Address;
+    address public twoKeySingletonesRegistry;
+    address twoKeyMaintainersRegistry;
+    address twoKeyAdmin;
 
     function setInitialParameters(
-        address _twoKeyAdmin,
         address _erc20Address,
-        address [] _maintainers
+        address _twoKeySingletonesRegistry
     )
     internal
     {
-        twoKeyAdmin = _twoKeyAdmin;
         erc20Address = _erc20Address;
-        for(uint i=0; i<_maintainers.length; i++) {
-            isMaintainer[_maintainers[i]] = true;
-        }
+        twoKeySingletonesRegistry = _twoKeySingletonesRegistry;
+
+        twoKeyMaintainersRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).
+            getContractProxyAddress("TwoKeyMaintainersRegistry");
+
+        twoKeyAdmin = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).
+            getContractProxyAddress("TwoKeyAdmin");
+    }
+
+    modifier onlyMaintainer {
+        require(ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender));
+        _;
+    }
+
+    modifier onlyTwoKeyAdmin {
+        require(msg.sender == twoKeyAdmin);
+        _;
     }
 
     /**

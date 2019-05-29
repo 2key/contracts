@@ -1,29 +1,31 @@
 pragma solidity ^0.4.24;
 
 import "../../openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
-import "../MaintainingPattern.sol";
+import "../TwoKeyMaintainersRegistry.sol";
 import "../Upgradeable.sol";
 
 import '../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol';
 import "../interfaces/ITwoKeyExchangeRateContract.sol";
 import "../interfaces/ITwoKeyCampaignValidator.sol";
 import "../interfaces/IKyberNetworkProxy.sol";
+import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 
 import "../libraries/SafeMath.sol";
 import "../libraries/GetCode.sol";
 import "../libraries/SafeERC20.sol";
 
 
-contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
+contract TwoKeyUpgradableExchange is Upgradeable {
 
     using SafeMath for uint256;
     using SafeERC20 for ERC20;
 
     bool initialized;
 
+    address twoKeyMaintainersRegistry;
     address twoKeyExchangeRateContract;
     address twoKeyCampaignValidator;
-    address twoKeySingltonRegistry;
+    address public twoKeySingletonesRegistry;
 
     // The token being sold
     ERC20 public token;
@@ -93,50 +95,38 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
      * @notice Constructor of the contract
      */
     function setInitialParams(
-        address _twoKeyAdmin,
         ERC20 _token,
-        address _twoKeyExchangeContract,
-        address _twoKeyCampaignValidator,
         address _daiAddress,
         address _kyberNetworkProxy,
-        address _singltonRegistry,
-        address[] _maintainers
+        address _twoKeySingletonesRegistry
     )
     external
     {
         require(initialized == false);
 
+        twoKeySingletonesRegistry = _twoKeySingletonesRegistry;
         buyRate2key = 95;
         sellRate2key = 100;
 
         token = _token;
-        twoKeyExchangeRateContract = _twoKeyExchangeContract;
-        twoKeyCampaignValidator = _twoKeyCampaignValidator;
-        twoKeyAdmin = _twoKeyAdmin;
+
+        twoKeyExchangeRateContract = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).
+            getContractProxyAddress("TwoKeyExchangeRateContract");
+
+        twoKeyCampaignValidator = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).
+            getContractProxyAddress("TwoKeyCampaignValidator");
+
+        twoKeyMaintainersRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).
+            getContractProxyAddress("TwoKeyMaintainersRegistry");
 
         DAI = ERC20(_daiAddress);
         ETH_TOKEN_ADDRESS = ERC20(0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee);
 
         kyberProxyContractAddress = _kyberNetworkProxy;
-        twoKeySingltonRegistry = _singltonRegistry;
 
-        isMaintainer[msg.sender] = true;
-        for(uint i=0; i<_maintainers.length; i++) {
-            isMaintainer[_maintainers[i]] = true;
-        }
 
         initialized = true;
     }
-
-
-    /**
-    * @notice Modifier to restrict calling the method to anyone but authorized people
-    */
-    modifier onlyMaintainerOrTwoKeyAdmin {
-        require(isMaintainer[msg.sender] == true || msg.sender == address(twoKeyAdmin));
-        _;
-    }
-
 
     /**
      * @notice Modifier which will validate if contract is allowed to buy tokens
@@ -146,6 +136,10 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         _;
     }
 
+    modifier onlyMaintainer {
+        require(ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender));
+        _;
+    }
 
     /**
      * @dev Validation of an incoming purchase. Use require statements to revert state when conditions are not met. Use `super` in contracts that inherit from Crowdsale to extend their validations.

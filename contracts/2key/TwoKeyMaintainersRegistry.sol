@@ -54,8 +54,7 @@ contract TwoKeyMaintainersRegistry {
      * @notice Function to restrict calling the method to anyone but maintainers
      */
     function onlyMaintainer(address _sender) public view returns (bool) {
-        require(isMaintainer[_sender] == true);
-        return true;
+        return isMaintainer[_sender];
     }
 
     /**

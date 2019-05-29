@@ -15,15 +15,16 @@ contract TwoKeyLongTermTokenPool is TokenPool {
     }
 
     function setInitialParams(
-        address _twoKeyAdmin,
-        address _erc20Address,
-        address [] _maintainers
+        address _twoKeySingletonesRegistry,
+        address _erc20Address
     )
     public
     {
         require(initialized == false);
-        setInitialParameters(_twoKeyAdmin, _erc20Address, _maintainers);
+
+        setInitialParameters(_erc20Address, _twoKeySingletonesRegistry);
         releaseDate = block.timestamp + 3 * (1 years);
+
         initialized = true;
     }
 

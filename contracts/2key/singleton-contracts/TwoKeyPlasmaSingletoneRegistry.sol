@@ -2,7 +2,7 @@ pragma solidity ^0.4.24;
 
 import '../Upgradeable.sol';
 import "../UpgradabilityProxy.sol";
-import "../MaintainingPattern.sol";
+import "../TwoKeyMaintainersRegistry.sol";
 import "../interfaces/ITwoKeySingletonesRegistry.sol";
 
 /**
@@ -11,21 +11,25 @@ import "../interfaces/ITwoKeySingletonesRegistry.sol";
  * @dev This contract works as a registry of versions, it holds the implementations for the registered versions.
  * @notice Will be everything mapped by contract name, so we will easily update and get versions per contract, all stored here
  */
-contract TwoKeyPlasmaSingletoneRegistry is MaintainingPattern, ITwoKeySingletonesRegistry {
+contract TwoKeyPlasmaSingletoneRegistry is ITwoKeySingletonesRegistry {
+
+    mapping(address => bool) public isMaintainer;
 
     mapping (string => mapping(string => address)) internal versions;
     mapping (string => address) contractToProxy;
     mapping (string => string) contractNameToLatestVersionName;
 
-    /**
-     * @notice Calling super constructor from maintaining pattern
-     */
+
     constructor(address [] _maintainers, address _twoKeyAdmin) public {
-        twoKeyAdmin = _twoKeyAdmin;
         isMaintainer[msg.sender] = true; //for truffle deployment
         for(uint i=0; i<_maintainers.length; i++) {
             isMaintainer[_maintainers[i]] = true;
         }
+    }
+
+    modifier onlyMaintainer {
+        require(isMaintainer[msg.sender]);
+        _;
     }
 
     /**
@@ -78,5 +82,36 @@ contract TwoKeyPlasmaSingletoneRegistry is MaintainingPattern, ITwoKeySingletone
         contractToProxy[contractName] = proxy;
         emit ProxyCreated(proxy);
         return proxy;
+    }
+
+    function addMaintainers(
+        address [] _maintainers
+    )
+    public
+    onlyMaintainer
+    {
+        //If state variable, .balance, or .length is used several times, holding its value in a local variable is more gas efficient.
+        uint numberOfMaintainers = _maintainers.length;
+        for(uint i=0; i<numberOfMaintainers; i++) {
+            isMaintainer[_maintainers[i]] = true;
+        }
+    }
+
+    /**
+     * @notice Function which can remove some maintainers, in general it's array because this supports adding multiple addresses in 1 trnx
+     * @dev only twoKeyAdmin contract is eligible to mutate state of maintainers
+     * @param _maintainers is the array of maintainer addresses
+     */
+    function removeMaintainers(
+        address [] _maintainers
+    )
+    public
+    onlyMaintainer
+    {
+        //If state variable, .balance, or .length is used several times, holding its value in a local variable is more gas efficient.
+        uint numberOfMaintainers = _maintainers.length;
+        for(uint i=0; i<numberOfMaintainers; i++) {
+            isMaintainer[_maintainers[i]] = false;
+        }
     }
 }

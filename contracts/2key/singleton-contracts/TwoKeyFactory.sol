@@ -43,8 +43,6 @@ contract TwoKeyFactory is Upgradeable {
     /**
      * @notice Function to set initial parameters for the contract
      * @param _twoKeySingletonRegistry is the address of singleton registry contract
-     * @param _twoKeyAdmin is the address if twoKeyAdmin contract
-     * @param _maintainers is the array of maintainers
      */
     function setInitialParams(
         address _twoKeySingletonRegistry
@@ -54,7 +52,6 @@ contract TwoKeyFactory is Upgradeable {
         require(initialized == false);
 
         twoKeySingletonRegistry = ITwoKeySingletoneRegistryFetchAddress(_twoKeySingletonRegistry);
-        twoKeyAdmin = getContractProxyAddress("TwoKeyAdmin");
         twoKeyMaintainersRegistry = getContractProxyAddress("TwoKeyMaintainersRegistry");
 
         initialized = true;

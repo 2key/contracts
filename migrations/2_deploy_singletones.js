@@ -15,7 +15,7 @@ const TwoKeyLongTermTokenPool = artifacts.require('TwoKeyLongTermTokenPool');
 const TwoKeyCampaignValidator = artifacts.require('TwoKeyCampaignValidator');
 const TwoKeyFactory = artifacts.require('TwoKeyFactory');
 const KyberNetworkTestMockContract = artifacts.require('KyberNetworkTestMockContract');
-
+const TwoKeyMaintainersRegistry = artifacts.require('TwoKeyMaintainersRegistry');
 
 const Call = artifacts.require('Call');
 const IncentiveModels = artifacts.require('IncentiveModels');
@@ -119,7 +119,7 @@ module.exports = function deploy(deployer) {
             .then(() => TwoKeyLongTermTokenPool.deployed())
             .then(() => deployer.deploy(TwoKeyFactory))
             .then(() => TwoKeyFactory.deployed())
-            .then(() => deployer.deploy(TwoKeySingletonesRegistry, maintainerAddresses, '0x0')) //adding empty admin address
+            .then(() => deployer.deploy(TwoKeySingletonesRegistry, '0x0')) //adding empty admin address
             .then(() => TwoKeySingletonesRegistry.deployed().then(async (registry) => {
                 /**
                  * Here we will be adding all contracts to the Registry and create a Proxies for them
@@ -569,14 +569,10 @@ module.exports = function deploy(deployer) {
                     try {
                         console.log('Setting initial parameters in contract TwoKeyUpgradableExchange');
                         let txHash = await TwoKeyUpgradableExchange.at(proxyAddressTwoKeyUpgradableExchange).setInitialParams(
-                            proxyAddressTwoKeyAdmin,
                             TwoKeyEconomy.address,
-                            proxyAddressTwoKeyExchange,
-                            proxyAddressTwoKeyCampaignValidator,
                             DAI_ROPSTEN_ADDRESS,
                             kyberAddress,
                             TwoKeySingletonesRegistry.address,
-                            maintainerAddresses,
                         );
 
                         resolve(txHash);

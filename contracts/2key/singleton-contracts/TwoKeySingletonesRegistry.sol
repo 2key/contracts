@@ -3,11 +3,12 @@ pragma solidity ^0.4.24;
 import '../Upgradeable.sol';
 import "../UpgradabilityProxy.sol";
 import "../UpgradabilityProxyAcquisition.sol";
-import "../MaintainingPattern.sol";
+import "../TwoKeyMaintainersRegistry.sol";
 
 import '../interfaces/ITwoKeySingletonesRegistry.sol';
 import "../interfaces/IHandleCampaignDeployment.sol";
 import "../interfaces/ITwoKeyCampaignValidator.sol";
+import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 
 
 /**
@@ -16,10 +17,10 @@ import "../interfaces/ITwoKeyCampaignValidator.sol";
  * @dev This contract works as a registry of versions, it holds the implementations for the registered versions.
  * @notice Will be everything mapped by contract name, so we will easily update and get versions per contract, all stored here
  */
-contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegistry {
+contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
 
     mapping (string => mapping(string => address)) internal versions;
-
+    address public deployer;
 
     mapping (string => address) contractToProxy;
     mapping (string => string) contractNameToLatestVersionName;
@@ -39,19 +40,17 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
     /**
      * @notice Calling super constructor from maintaining pattern
      */
-    constructor(
-        address [] _maintainers,
-        address _twoKeyAdmin
-    )
+    constructor()
     public
     {
-        twoKeyAdmin = _twoKeyAdmin;
-        isMaintainer[msg.sender] = true; //for truffle deployment
-        for(uint i=0; i<_maintainers.length; i++) {
-            isMaintainer[_maintainers[i]] = true;
-        }
+        deployer = msg.sender;
     }
 
+    modifier onlyMaintainer {
+        address twoKeyMaintainersRegistry = contractToProxy["TwoKeyMaintainersRegistry"];
+        require(msg.sender == deployer || ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender));
+        _;
+    }
 
     /**
      * @notice Function to add non upgradable contract in registry of all contracts
@@ -69,9 +68,7 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
         nonUpgradableContractToAddress[contractName] = contractAddress;
     }
 
-    /**
-     * todo: make sure only admin/deployer can call this function
-     */
+
     /**
      * @dev Registers a new version with its implementation address
      * @param version representing the version name of the new implementation to be registered

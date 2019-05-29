@@ -46,8 +46,6 @@ contract TwoKeyExchangeRateContract is Upgradeable {
 
     /**
      * @notice Function which will be called immediately after contract deployment
-     * @param _maintainers is the array of maintainers addresses
-     * @param _twoKeyAdmin is the address of TwoKeyAdmin contract
      * @dev Can be called only once
      */
     function setInitialParams(

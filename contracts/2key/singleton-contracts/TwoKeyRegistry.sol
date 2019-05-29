@@ -3,6 +3,7 @@ pragma solidity ^0.4.24;
 import "../Upgradeable.sol";
 import "../libraries/Call.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
+import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 
 
 contract TwoKeyRegistry is Upgradeable {
@@ -53,7 +54,7 @@ contract TwoKeyRegistry is Upgradeable {
     address public twoKeySingletonesRegistry;
     /// Address of 2key event source contract which will have permission to write on this contract
     address twoKeyEventSource;
-
+    address twoKeyMaintainersRegistry;
 
     /// @notice Event is emitted when a user's name is changed
     event UserNameChanged(address owner, string name);
@@ -65,11 +66,11 @@ contract TwoKeyRegistry is Upgradeable {
         _;
     }
 
+    function isMaintainer(address x) internal view returns (bool) {
+        return ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(x);
+    }
     /**
      * @notice Function which can be called only once
-     * @param _twoKeyEventSource is the address of twoKeyEventSource contract
-     * @param _twoKeyAdmin is the address of twoKeyAdmin contract
-     * @param _maintainers is the address of initial maintainer
      */
     function setInitialParams(
         address _twoKeySingletonesRegistry
@@ -80,6 +81,7 @@ contract TwoKeyRegistry is Upgradeable {
 
         twoKeySingletonesRegistry = _twoKeySingletonesRegistry;
         twoKeyEventSource = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyEventSource");
+        twoKeyMaintainersRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyMaintainersRegistry");
 
         initialized = true;
     }
@@ -250,8 +252,8 @@ contract TwoKeyRegistry is Upgradeable {
         bytes _signatureWalletName
     )
     public
-    onlyMaintainer
     {
+        require(isMaintainer(msg.sender));
         addName(_name, _sender, _fullName, _email, _signatureName);
         setWalletName(_name, _sender, _username_walletName, _signatureWalletName);
     }
@@ -268,7 +270,7 @@ contract TwoKeyRegistry is Upgradeable {
     )
     public
     {
-        require(isMaintainer[msg.sender] == true || msg.sender == address(this));
+        require(isMaintainer(msg.sender)== true || msg.sender == address(this));
 
         string memory concatenatedValues = strConcat(_name,_fullName,_email);
         bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to name")),
@@ -295,7 +297,7 @@ contract TwoKeyRegistry is Upgradeable {
         bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to name")),
             keccak256(abi.encodePacked(_name))));
         address eth_address = Call.recoverHash(hash,external_sig,0);
-        require (msg.sender == eth_address || isMaintainer[msg.sender] == true, "only maintainer or user can change name");
+        require (msg.sender == eth_address || isMaintainer(msg.sender) == true, "only maintainer or user can change name");
         addNameInternal(_name, eth_address);
     }
 
@@ -331,7 +333,7 @@ contract TwoKeyRegistry is Upgradeable {
     )
     public
     {
-        require(isMaintainer[msg.sender] == true || msg.sender == address(this));
+        require(isMaintainer(msg.sender) == true || msg.sender == address(this));
         require(_address != address(0));
         bytes32 usernameHex = stringToBytes32(username);
         require(username2currentAddress[usernameHex] == _address); // validating that username exists
@@ -379,7 +381,7 @@ contract TwoKeyRegistry is Upgradeable {
         bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to ethereum-plasma")),
             keccak256(abi.encodePacked(sig,note))));
         address eth_address = Call.recoverHash(hash,external_sig,0);
-        require (msg.sender == eth_address || isMaintainer[msg.sender], "only maintainer or user can change ethereum-plasma");
+        require (msg.sender == eth_address || isMaintainer(msg.sender), "only maintainer or user can change ethereum-plasma");
         addPlasma2EthereumInternal(sig, eth_address);
         setNoteInternal(note, eth_address);
     }
@@ -419,8 +421,8 @@ contract TwoKeyRegistry is Upgradeable {
         string userName
     )
     public
-    onlyMaintainer
     {
+        require(isMaintainer(msg.sender));
         bytes32 userNameHex = stringToBytes32(userName);
         username2AddressHistory[userNameHex] = new address[](0);
         address _ethereumAddress = username2currentAddress[userNameHex];

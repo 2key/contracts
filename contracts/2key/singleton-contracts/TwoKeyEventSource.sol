@@ -14,10 +14,11 @@ contract TwoKeyEventSource is Upgradeable {
 
     bool initialized;
 
+    address twoKeyAdmin;
     address twoKeyRegistry;
     address twoKeyCampaignValidator;
     address twoKeyMaintainersRegistry;
-    address twoKeySingletonesRegistry;
+    address public twoKeySingletonesRegistry;
 
     event Created(
         address _campaign,
@@ -85,9 +86,6 @@ contract TwoKeyEventSource is Upgradeable {
 
     /**
      * @notice Function to set initial params in the contract
-     * @param _twoKeyAdmin is the address of twoKeyAdmin contract
-     * @param _maintainers is the array containing addresses of maintainers
-     * @param _twoKeyRegistry is the address of twoKeyRegistry contract
      */
     function setInitialParams(
         address _twoKeySingletonesRegistry
@@ -100,6 +98,7 @@ contract TwoKeyEventSource is Upgradeable {
         twoKeyRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyRegistry");
         twoKeyCampaignValidator = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyCampaignValidator");
         twoKeyMaintainersRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyMaintainersRegistry");
+        twoKeyAdmin = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyAdmin");
 
         initialized = true;
     }

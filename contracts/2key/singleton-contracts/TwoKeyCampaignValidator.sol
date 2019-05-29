@@ -62,7 +62,6 @@ contract TwoKeyCampaignValidator is Upgradeable {
     /**
      * @notice Function to set initial parameters in this contract
      * @param _twoKeySingletoneRegistry is the address of TwoKeySingletoneRegistry contract
-     * @param _maintainers is the array of initial maintainer addresses
      */
     function setInitialParams(
         address _twoKeySingletoneRegistry
@@ -72,7 +71,6 @@ contract TwoKeyCampaignValidator is Upgradeable {
         require(initialized == false);
 
         twoKeySingletonesRegistry = _twoKeySingletoneRegistry;
-        twoKeyAdmin =  ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyAdmin");
         twoKeyFactory = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyFactory");
         twoKeyMaintainersRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyMaintainersRegistry");
 

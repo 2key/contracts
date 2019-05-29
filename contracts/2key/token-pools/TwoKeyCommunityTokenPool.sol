@@ -24,20 +24,23 @@ contract TwoKeyCommunityTokenPool is TokenPool {
     uint256 [] annualTransfers;
 
     function setInitialParams(
-        address _twoKeyAdmin,
-        address _erc20Address,
-        address [] _maintainers,
-        address _twoKeyRegistry
+        address twoKeySingletonesRegistry,
+        address _erc20Address
     )
     external
     {
         require(initialized == false);
-        setInitialParameters(_twoKeyAdmin, _erc20Address, _maintainers);
-        twoKeyRegistry = _twoKeyRegistry;
+
+        setInitialParameters(_erc20Address, twoKeySingletonesRegistry);
+
+        twoKeyRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).
+            getContractProxyAddress("TwoKeyRegistry");
+
         startingDate = block.timestamp;
         for(uint i=1;i<=10;i++) {
             yearToAnnualReport[i] = AnnualReport({startingDate: startingDate + i*(1 years),transferedThisYear: 0});
         }
+
         initialized = true;
     }
 
