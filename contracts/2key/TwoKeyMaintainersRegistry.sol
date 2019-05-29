@@ -62,8 +62,8 @@ contract TwoKeyMaintainersRegistry is Upgradeable {
     /**
      * @notice Modifier to restrict calling the method to anyone but twoKeyAdmin
      */
-    function onlyTwoKeyAdmin() public view returns (bool) {
-        require(msg.sender == address(twoKeyAdmin));
+    function onlyTwoKeyAdmin(address sender) public view returns (bool) {
+        require(sender == address(twoKeyAdmin));
         return true;
     }
 
@@ -77,7 +77,7 @@ contract TwoKeyMaintainersRegistry is Upgradeable {
     )
     public
     {
-        require(onlyTwoKeyAdmin() == true);
+        require(onlyTwoKeyAdmin(msg.sender) == true);
         //If state variable, .balance, or .length is used several times, holding its value in a local variable is more gas efficient.
         uint numberOfMaintainers = _maintainers.length;
         for(uint i=0; i<numberOfMaintainers; i++) {
@@ -95,7 +95,7 @@ contract TwoKeyMaintainersRegistry is Upgradeable {
     )
     public
     {
-        require(onlyTwoKeyAdmin() == true);
+        require(onlyTwoKeyAdmin(msg.sender) == true);
         //If state variable, .balance, or .length is used several times, holding its value in a local variable is more gas efficient.
         uint numberOfMaintainers = _maintainers.length;
         for(uint i=0; i<numberOfMaintainers; i++) {
