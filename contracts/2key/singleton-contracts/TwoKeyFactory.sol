@@ -1,7 +1,7 @@
 pragma solidity ^0.4.0;
 
 import "../Upgradeable.sol";
-import "../MaintainingPattern.sol";
+import "../TwoKeyMaintainersRegistry.sol";
 
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/IHandleCampaignDeployment.sol";
@@ -16,10 +16,13 @@ import "../acquisition-campaign-contracts/TwoKeyAcquisitionLogicHandler.sol";
  * @author Nikola Madjarevic
  * @title Contract used to deploy proxies for other non-singleton contracts
  */
-contract TwoKeyFactory is Upgradeable, MaintainingPattern {
+contract TwoKeyFactory is Upgradeable {
+
+    bool initialized;
 
     //Address of singleton registry
-    ITwoKeySingletoneRegistryFetchAddress public twoKeySingletonRegistry;
+    address public twoKeySingletonRegistry;
+    address twoKeyMaintainersRegistry;
 
     event ProxyForCampaign(
         address proxyLogicHandler,
@@ -44,24 +47,25 @@ contract TwoKeyFactory is Upgradeable, MaintainingPattern {
      * @param _maintainers is the array of maintainers
      */
     function setInitialParams(
-        address _twoKeySingletonRegistry,
-        address _twoKeyAdmin,
-        address [] _maintainers
+        address _twoKeySingletonRegistry
     )
     public
     {
-        require(twoKeySingletonRegistry == address(0));
-
-        twoKeyAdmin = _twoKeyAdmin;
-        for(uint i=0; i<_maintainers.length; i++) {
-            isMaintainer[_maintainers[i]] = true;
-        }
+        require(initialized == false);
 
         twoKeySingletonRegistry = ITwoKeySingletoneRegistryFetchAddress(_twoKeySingletonRegistry);
+        twoKeyAdmin = getContractProxyAddress("TwoKeyAdmin");
+        twoKeyMaintainersRegistry = getContractProxyAddress("TwoKeyMaintainersRegistry");
+
+        initialized = true;
     }
 
     function getContractProxyAddress(string contractName) internal view returns (address) {
-        return twoKeySingletonRegistry.getContractProxyAddress(contractName);
+        return ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonRegistry).getContractProxyAddress(contractName);
+    }
+
+    function getLatestContractVersion(string contractName) internal view returns (string) {
+        return ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonRegistry).getLatestContractVersion(contractName);
     }
 
     /**
@@ -92,21 +96,21 @@ contract TwoKeyFactory is Upgradeable, MaintainingPattern {
         //Deploy proxy for Acquisition contract
         ProxyCampaign proxyAcquisition = new ProxyCampaign(
             "TwoKeyAcquisitionCampaignERC20",
-            twoKeySingletonRegistry.getLatestContractVersion("TwoKeyAcquisitionCampaignERC20"),
+            getLatestContractVersion("TwoKeyAcquisitionCampaignERC20"),
             address(twoKeySingletonRegistry)
         );
 
         //Deploy proxy for ConversionHandler contract
         ProxyCampaign proxyConversions = new ProxyCampaign(
             "TwoKeyConversionHandler",
-            twoKeySingletonRegistry.getLatestContractVersion("TwoKeyConversionHandler"),
+            getLatestContractVersion("TwoKeyConversionHandler"),
             address(twoKeySingletonRegistry)
         );
 
         //Deploy proxy for TwoKeyAcquisitionLogicHandler contract
         ProxyCampaign proxyLogicHandler = new ProxyCampaign(
             "TwoKeyAcquisitionLogicHandler",
-            twoKeySingletonRegistry.getLatestContractVersion("TwoKeyAcquisitionLogicHandler"),
+            getLatestContractVersion("TwoKeyAcquisitionLogicHandler"),
             address(twoKeySingletonRegistry)
         );
 
@@ -114,7 +118,7 @@ contract TwoKeyFactory is Upgradeable, MaintainingPattern {
         //Deploy proxy for TwoKeyPurchasesHandler contract
         ProxyCampaign proxyPurchasesHandler = new ProxyCampaign(
             "TwoKeyPurchasesHandler",
-            twoKeySingletonRegistry.getLatestContractVersion("TwoKeyAcquisitionLogicHandler"),
+            getLatestContractVersion("TwoKeyAcquisitionLogicHandler"),
             address(twoKeySingletonRegistry)
         );
 
@@ -201,14 +205,14 @@ contract TwoKeyFactory is Upgradeable, MaintainingPattern {
         // Deploying a proxy contract for donations
         ProxyCampaign proxyDonationCampaign = new ProxyCampaign(
             "TwoKeyDonationCampaign",
-            twoKeySingletonRegistry.getLatestContractVersion("TwoKeyDonationCampaign"),
+            getLatestContractVersion("TwoKeyDonationCampaign"),
             address(twoKeySingletonRegistry)
         );
 
         //Deploying a proxy contract for donation conversion handler
         ProxyCampaign proxyDonationConversionHandler = new ProxyCampaign(
             "TwoKeyDonationConversionHandler",
-            twoKeySingletonRegistry.getLatestContractVersion("TwoKeyDonationConversionHandler"),
+            getLatestContractVersion("TwoKeyDonationConversionHandler"),
             address(twoKeySingletonRegistry)
         );
 
