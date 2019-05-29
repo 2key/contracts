@@ -217,7 +217,9 @@ contract TwoKeyUpgradableExchange is Upgradeable {
     returns (uint256)
     {
         // This is the case when we buy 2keys in exchange for stable coins
-        uint rate = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate("USD/DAI"); // 1.01
+        uint rate = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate("USD-DAI"); // 1.01
+        uint lowestAcceptedRate = 96;
+        require(rate >= lowestAcceptedRate.mul(10**18).div(100)); // Require that lowest accepted rate is greater than 0.95
         uint dollarWeiWorthTokens = _2keyAmount.mul(buyRate2key).div(1000);  // 100*95/1000 = 9.5
         uint amountOfDAIs = dollarWeiWorthTokens.mul(rate).div(10**18);      // 9.5 * 1.01 =vOK
 
@@ -424,5 +426,9 @@ contract TwoKeyUpgradableExchange is Upgradeable {
     }
 
     event Status(uint approvedConversionRate, uint minConversionRate);
+
+    function getSomeAddresses() public view returns (address,address,address) {
+        return (twoKeyExchangeRateContract, twoKeyCampaignValidator, twoKeySingltonRegistry);
+    }
 
 }
