@@ -2,7 +2,7 @@ pragma solidity ^0.4.24;
 
 
 import "../Upgradeable.sol";
-import "../MaintainingPattern.sol";
+import "../TwoKeyMaintainersRegistry.sol";
 
 import "../interfaces/ITwoKeyReg.sol";
 import "../interfaces/ITwoKeyAcquisitionLogicHandler.sol";
@@ -15,33 +15,33 @@ import "../libraries/SafeMath.sol";
  * @author Nikola Madjarevic
  * Created at 1/31/19
  */
-contract TwoKeyBaseReputationRegistry is Upgradeable, MaintainingPattern {
+contract TwoKeyBaseReputationRegistry is Upgradeable {
 
     using SafeMath for uint;
 
+    bool initialized;
+
     address twoKeySingletoneRegistry;
     address twoKeyCampaignValidator;
-
+    address twoKeyMaintainersRegistry;
     /**
      * @notice Since using singletone pattern, this is replacement for the constructor
      * @param _twoKeySingletoneRegistry is the address of registry of all singleton contracts
      */
     function setInitialParams(
-        address _twoKeySingletoneRegistry,
-        address[] _maintainers
+        address _twoKeySingletoneRegistry
     )
     public
     {
-        require(twoKeySingletoneRegistry == address(0));
+        require(initialized == false);
+
         twoKeySingletoneRegistry = _twoKeySingletoneRegistry;
-        twoKeyAdmin =
-            ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyAdmin");
         twoKeyCampaignValidator =
             ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyCampaignValidator");
-        isMaintainer[msg.sender] = true; //also the deployer will be authorized maintainer
-        for(uint i=0; i<_maintainers.length; i++) {
-            isMaintainer[_maintainers[i]] = true;
-        }
+        twoKeyMaintainersRegistry =
+            ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyMaintainersRegistry");
+
+        initialized = true;
     }
 
     mapping(address => ReputationScore) public address2contractorGlobalReputationScoreWei;

@@ -6,7 +6,7 @@ pragma solidity ^0.4.24;
  * to edit maintainers list
  */
 
-contract MaintainingPattern {
+contract TwoKeyMaintainersRegistry {
     /**
      * Flag which will make function setInitialParams callable only once
      */
@@ -53,8 +53,8 @@ contract MaintainingPattern {
     /**
      * @notice Function to restrict calling the method to anyone but maintainers
      */
-    function onlyMaintainer() public view returns (bool) {
-        require(isMaintainer[msg.sender] == true);
+    function onlyMaintainer(address _sender) public view returns (bool) {
+        require(isMaintainer[_sender] == true);
         return true;
     }
 
