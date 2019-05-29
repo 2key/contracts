@@ -7,6 +7,8 @@ const TwoKeyUpgradableExchange = artifacts.require('TwoKeyUpgradableExchange');
 const TwoKeyCongress = artifacts.require('TwoKeyCongress');
 const Proxy = artifacts.require('UpgradeabilityProxy');
 const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
+const TwoKeyFactory = artifacts.require('TwoKeyFactory');
+
 const TwoKeyPlasmaSingletoneRegistry = artifacts.require('TwoKeyPlasmaSingletoneRegistry');
 const Call = artifacts.require('Call');
 
@@ -266,10 +268,12 @@ module.exports = function deploy(deployer) {
                                 let v = parseInt(twoKeyFactory[network_id].Version.substr(-1)) + 1;
                                 twoKeyFactory[network_id].Version = twoKeyFactory[network_id].Version.substr(0, twoKeyFactory[network_id].Version.length - 1) + v.toString();
                                 console.log('New version : ' + twoKeyFactory[network_id].Version);
-                                let txHash = await registry.addVersion("TwoKeyFactory", twoKeyFactory[network_id].Version, TwoKeyAdmin.address);
+                                // let txHash = await registry.addVersion("TwoKeyFactory", twoKeyFactory[network_id].Version, TwoKeyFactory.address);
+                                let txHash = await registry.addVersion("TwoKeyFactory", "1.2", TwoKeyFactory.address);
 
                                 console.log('... Upgrading proxy to new version');
-                                txHash = await Proxy.at(twoKeyFactory[network_id].Proxy).upgradeTo("TwoKeyFactory", twoKeyFactory[network_id].Version);
+                                // txHash = await Proxy.at(twoKeyFactory[network_id].Proxy).upgradeTo("TwoKeyFactory", twoKeyFactory[network_id].Version);
+                                txHash = await Proxy.at(twoKeyFactory[network_id].Proxy).upgradeTo("TwoKeyFactory", "1.2");
                                 twoKeyFactory[network_id].address = lastTwoKeyFactoryAddress;
 
                                 fileObject['TwoKeyFactory'] = twoKeyFactory;
