@@ -1,7 +1,9 @@
 pragma solidity ^0.4.24;
 
-import "../MaintainingPattern.sol";
+import "../TwoKeyMaintainersRegistry.sol";
 import "../Upgradeable.sol";
+import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
+import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 
 
 /**
@@ -9,9 +11,12 @@ import "../Upgradeable.sol";
  * This is going to be the contract on which we will store exchange rates between USD and ETH
  * Will be maintained, and updated by our trusted server and CMC api every 8 hours.
  */
-contract TwoKeyExchangeRateContract is Upgradeable, MaintainingPattern {
+contract TwoKeyExchangeRateContract is Upgradeable {
 
+    bool initialized;
 
+    address public twoKeySingletonesRegistry;
+    address twoKeyMaintainersRegistry;
     /**
      * @notice Event will be emitted every time we update the price for the fiat
      */
@@ -46,19 +51,18 @@ contract TwoKeyExchangeRateContract is Upgradeable, MaintainingPattern {
      * @dev Can be called only once
      */
     function setInitialParams(
-        address [] _maintainers,
-        address _twoKeyAdmin
+        address _twoKeySingletonesRegistry
     )
     external
     {
-        require(_twoKeyAdmin != address(0)); //validation that it can be called only once
-        require(twoKeyAdmin == address(0)); //validation that it can be called only once
-        twoKeyAdmin = _twoKeyAdmin;
-        isMaintainer[msg.sender] = true; //for truffle deployment
-        for(uint i=0; i<_maintainers.length; i++) {
-            isMaintainer[_maintainers[i]] = true;
-        }
+        require(initialized == false);
+
+        twoKeySingletonesRegistry = _twoKeySingletonesRegistry;
+        twoKeyMaintainersRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyMaintainersRegistry");
+
+        initialized = true;
     }
+
 
     /**
      * @notice Function where our backend will update the state (rate between eth_wei and dollar_wei) every 8 hours
@@ -70,8 +74,8 @@ contract TwoKeyExchangeRateContract is Upgradeable, MaintainingPattern {
         uint baseToTargetRate
     )
     public
-    onlyMaintainer
     {
+        require(ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender));
         storeFiatCurrencyDetails(_currency, baseToTargetRate);
         emit PriceUpdated(_currency, baseToTargetRate, block.timestamp, msg.sender);
     }
@@ -86,8 +90,8 @@ contract TwoKeyExchangeRateContract is Upgradeable, MaintainingPattern {
         uint[] baseToTargetRates
     )
     public
-    onlyMaintainer
     {
+        require(ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender));
         uint numberOfFiats = _currencies.length; //either _isETHGreaterThanCurrencies.length
         //There's no need for validation of input, because only we can call this and that costs gas
         for(uint i=0; i<numberOfFiats; i++) {

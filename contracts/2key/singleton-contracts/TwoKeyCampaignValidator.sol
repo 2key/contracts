@@ -45,7 +45,7 @@ contract TwoKeyCampaignValidator is Upgradeable {
 
     bool initialized;
 
-    address public twoKeySingletoneRegistry;
+    address public twoKeySingletonesRegistry;
     address public twoKeyFactory;
     address public twoKeyMaintainersRegistry;
 
@@ -71,10 +71,10 @@ contract TwoKeyCampaignValidator is Upgradeable {
     {
         require(initialized == false);
 
-        twoKeySingletoneRegistry = _twoKeySingletoneRegistry;
-        twoKeyAdmin =  ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyAdmin");
-        twoKeyFactory = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyFactory");
-        twoKeyMaintainersRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyMaintainersRegistry");
+        twoKeySingletonesRegistry = _twoKeySingletoneRegistry;
+        twoKeyAdmin =  ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyAdmin");
+        twoKeyFactory = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyFactory");
+        twoKeyMaintainersRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyMaintainersRegistry");
 
         initialized = true;
     }
@@ -122,7 +122,7 @@ contract TwoKeyCampaignValidator is Upgradeable {
 
         //Get the event source address
         address twoKeyEventSource = ITwoKeySingletoneRegistryFetchAddress
-                                    (twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyEventSource");
+                                    (twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyEventSource");
 
         ITwoKeyEventSourceEvents(twoKeyEventSource).created(campaign,contractor,moderator);
     }
@@ -163,7 +163,7 @@ contract TwoKeyCampaignValidator is Upgradeable {
 
         //Get the event source
         address twoKeyEventSource = ITwoKeySingletoneRegistryFetchAddress
-        (twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyEventSource");
+        (twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyEventSource");
 
         //Emit the event that campaign is created
         ITwoKeyEventSourceEvents(twoKeyEventSource).created(campaign,contractor,moderator);

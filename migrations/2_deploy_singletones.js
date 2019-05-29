@@ -557,8 +557,7 @@ module.exports = function deploy(deployer) {
                     try {
                         console.log('Setting initial parameters in contract TwoKeyExchangeRateContract');
                         let txHash = await TwoKeyExchangeRateContract.at(proxyAddressTwoKeyExchange).setInitialParams(
-                            maintainerAddresses,
-                            proxyAddressTwoKeyAdmin
+                            TwoKeySingletonesRegistry.address
                         );
                         resolve(txHash);
                     } catch (e) {

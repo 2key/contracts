@@ -17,6 +17,7 @@ contract TwoKeyEventSource is Upgradeable {
     address twoKeyRegistry;
     address twoKeyCampaignValidator;
     address twoKeyMaintainersRegistry;
+    address twoKeySingletonesRegistry;
 
     event Created(
         address _campaign,
@@ -95,10 +96,10 @@ contract TwoKeyEventSource is Upgradeable {
     {
         require(initialized == false);
 
-        twoKeyAdmin = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyAdmin");
-        twoKeyRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyRegistry");
-        twoKeyCampaignValidator = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyCampaignValidator");
-        twoKeyMaintainersRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyMaintainersRegistry");
+        twoKeySingletonesRegistry = _twoKeySingletonesRegistry;
+        twoKeyRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyRegistry");
+        twoKeyCampaignValidator = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyCampaignValidator");
+        twoKeyMaintainersRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyMaintainersRegistry");
 
         initialized = true;
     }
