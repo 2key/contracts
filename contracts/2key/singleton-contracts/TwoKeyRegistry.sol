@@ -4,9 +4,10 @@ import "../Upgradeable.sol";
 import "../libraries/Call.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
+import "../libraries/Utils.sol";
 
 
-contract TwoKeyRegistry is Upgradeable {
+contract TwoKeyRegistry is Upgradeable, Utils {
 
     using Call for *;
 
@@ -505,47 +506,6 @@ contract TwoKeyRegistry is Upgradeable {
         return true;
     }
 
-
-    function stringToBytes32(
-        string memory source)
-    internal
-    pure
-    returns (bytes32 result)
-    {
-        bytes memory tempEmptyStringTest = bytes(source);
-        if (tempEmptyStringTest.length == 0) {
-            return 0x0;
-        }
-        assembly {
-            result := mload(add(source, 32))
-        }
-    }
-
-    /**
-     * @notice Function to concat at most 5 strings
-     * @dev If you want to handle concatenation of less than 5, then pass first their values and for the left pass empty strings
-     * @return string concatenated
-     */
-    function strConcat(
-        string _a,
-        string _b,
-        string _c
-    )
-    public
-    pure
-    returns (string)
-    {
-        bytes memory _ba = bytes(_a);
-        bytes memory _bb = bytes(_b);
-        bytes memory _bc = bytes(_c);
-        string memory abcde = new string(_ba.length + _bb.length + _bc.length);
-        bytes memory babcde = bytes(abcde);
-        uint k = 0;
-        for (uint i = 0; i < _ba.length; i++) babcde[k++] = _ba[i];
-        for (i = 0; i < _bb.length; i++) babcde[k++] = _bb[i];
-        for (i = 0; i < _bc.length; i++) babcde[k++] = _bc[i];
-        return string(babcde);
-    }
 
     function getUserData(
         address _user

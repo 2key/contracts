@@ -74,6 +74,7 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
      * @param version representing the version name of the new implementation to be registered
      * @param implementation representing the address of the new implementation to be registered
      */
+    //TODO: Add event through event source whenever someone calls upgradeTo
     function addVersion(
         string contractName,
         string version,
@@ -82,7 +83,7 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
     public
     onlyMaintainer
     {
-//        require(versions[contractName][version] == 0x0);
+        require(versions[contractName][version] == 0x0);
         versions[contractName][version] = implementation;
         contractNameToLatestVersionName[contractName] = version;
         emit VersionAdded(version, implementation);

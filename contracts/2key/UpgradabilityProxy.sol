@@ -12,6 +12,7 @@ contract UpgradeabilityProxy is Proxy, UpgradeabilityStorage {
 
     address public deployer;
 
+    //TODO: Add event through event source whenever someone calls upgradeTo
     /**
     * @dev Constructor function
     */
@@ -29,7 +30,5 @@ contract UpgradeabilityProxy is Proxy, UpgradeabilityStorage {
         require(msg.sender == deployer);
         _implementation = registry.getVersion(_contractName, _version);
     }
-
-
 
 }
