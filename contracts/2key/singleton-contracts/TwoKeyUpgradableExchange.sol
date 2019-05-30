@@ -38,7 +38,6 @@ contract TwoKeyUpgradableExchange is Upgradeable {
 
     uint public transactionCounter = 0;
     uint public weiRaised = 0;
-    uint public usdStableCoinUnitsReserve = 0;
 
 
     address public kyberProxyContractAddress;
@@ -317,7 +316,6 @@ contract TwoKeyUpgradableExchange is Upgradeable {
         emit Status(minConversionRate, approvedMinConversionRate);
         require(minConversionRate >= approvedMinConversionRate.mul(95).div(100)); //Means our rate can be at most same as their rate, because they're giving the best rate
         uint stableCoinUnits = proxyContract.swapEtherToToken.value(amountToBeHedged)(DAI,minConversionRate);
-        usdStableCoinUnitsReserve += stableCoinUnits;
     }
 
     /**
