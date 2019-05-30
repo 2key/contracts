@@ -1,12 +1,8 @@
 pragma solidity ^0.4.24;
 
-import './TwoKeyEconomy.sol';
-import './TwoKeyUpgradableExchange.sol';
-import "./TwoKeyEventSource.sol";
-import "./TwoKeyRegistry.sol";
 import "../interfaces/ITwoKeyAdmin.sol";
 import "../interfaces/IERC20.sol";
-import "../interfaces/IMaintainingPattern.sol";
+import "../interfaces/ITwoKeyReg.sol";
 import "../Upgradeable.sol";
 
 //TODO: Add all the missing functions from other singletones which can be called by TwoKeyAdmin
@@ -14,10 +10,10 @@ contract TwoKeyAdmin is Upgradeable {
 
 	bool initialized = false;
 
-	TwoKeyEconomy twoKeyEconomy;
-	TwoKeyUpgradableExchange twoKeyUpgradableExchange;
-	TwoKeyEventSource twoKeyEventSource;
-	TwoKeyRegistry twoKeyReg;
+	address twoKeyEconomy;
+	address twoKeyUpgradableExchange;
+	address twoKeyEventSource;
+	address twoKeyReg;
 
 	address public twoKeyCongress;
 
@@ -60,10 +56,10 @@ contract TwoKeyAdmin is Upgradeable {
 		twoKeyNetworkTaxPercent = 2;
 		twoKeyTokenRate = 95; //The actual rate is 95 / 1000 = 0.095$
         twoKeyCongress = _twoKeyCongress;
-        twoKeyReg = TwoKeyRegistry(_twoKeyRegistry);
-        twoKeyUpgradableExchange = TwoKeyUpgradableExchange(_exchange);
-        twoKeyEconomy = TwoKeyEconomy(_economy);
-        twoKeyEventSource = TwoKeyEventSource(_eventSource);
+        twoKeyReg = _twoKeyRegistry;
+        twoKeyUpgradableExchange = _exchange;
+        twoKeyEconomy = _economy;
+        twoKeyEventSource = _eventSource;
         initialized = true;
 		rewardReleaseAfter = _twoKeyTokenReleaseDate; //01/01/2020
     }
@@ -80,7 +76,7 @@ contract TwoKeyAdmin is Upgradeable {
 	onlyTwoKeyCongress
 	{
 		require (_to != address(0));
-		twoKeyEconomy.transfer(_to, _tokens);
+		IERC20(twoKeyEconomy).transfer(_to, _tokens);
 	}
 
     /// @notice Function where only elected admin can transfer ether to an address
@@ -116,7 +112,7 @@ contract TwoKeyAdmin is Upgradeable {
 		string email,
 		bytes signature
 	) external {
-    	twoKeyReg.addName(_name, _addr, fullName, email, signature);
+    	ITwoKeyReg(twoKeyReg).addName(_name, _addr, fullName, email, signature);
     }
 
     /// @notice Function to update twoKeyUpgradableExchange contract address
@@ -128,7 +124,7 @@ contract TwoKeyAdmin is Upgradeable {
 	onlyTwoKeyCongress
 	{
 		require (_exchange != address(0));
-		twoKeyUpgradableExchange = TwoKeyUpgradableExchange(_exchange);
+		twoKeyUpgradableExchange = _exchange;
 	}
 
 	/// @notice Function to update reward release date
@@ -149,7 +145,7 @@ contract TwoKeyAdmin is Upgradeable {
 	onlyTwoKeyCongress
 	{
 		require (_reg != address(0));
-		twoKeyReg = TwoKeyRegistry(_reg);
+		twoKeyReg = _reg;
 	}
 
     /// @notice Function to update twoKeyEventSource contract address
@@ -161,7 +157,7 @@ contract TwoKeyAdmin is Upgradeable {
 	onlyTwoKeyCongress
 	{
 		require (_eventSource != address(0));
-		twoKeyEventSource = TwoKeyEventSource(_eventSource);
+		twoKeyEventSource = _eventSource;
 	}
 
 	/// @notice Function to freeze all transfers for 2KEY token
@@ -188,7 +184,7 @@ contract TwoKeyAdmin is Upgradeable {
 	onlyTwoKeyCongress
 	returns (bool)
 	{
-		bool completed = twoKeyEconomy.transfer(_to, _amount);
+		bool completed = IERC20(twoKeyEconomy).transfer(_to, _amount);
 		return completed;
 	}
 
@@ -201,7 +197,7 @@ contract TwoKeyAdmin is Upgradeable {
 	view
 	returns(address)
 	{
-    	return address(twoKeyEconomy);
+    	return twoKeyEconomy;
     }
 
 	/// View function - doesn't cost any gas to be executed
@@ -212,7 +208,7 @@ contract TwoKeyAdmin is Upgradeable {
 	view
 	returns(address)
 	{
-    	return address(twoKeyReg);
+    	return twoKeyReg;
     }
 
 
@@ -232,7 +228,7 @@ contract TwoKeyAdmin is Upgradeable {
 	view
 	returns(address)
 	{
-    	return address(twoKeyUpgradableExchange);
+    	return twoKeyUpgradableExchange;
     }
 
 	/// @notice Fallback function will transfer payable value to new admin contract if admin contract is replaced else will be stored this the exist admin contract as it's balance
@@ -240,26 +236,6 @@ contract TwoKeyAdmin is Upgradeable {
 	function() external payable {
 
     }
-
-	function addMaintainersToSelectedSingletone(
-		address destinationContract,
-		address [] maintainers
-	)
-	external
-	onlyTwoKeyCongress
-	{
-		IMaintainingPattern(destinationContract).addMaintainers(maintainers);
-	}
-
-	function deleteMaintainersFromSelectedSingletone(
-		address destinationContract,
-		address [] maintainers
-	)
-	external
-	onlyTwoKeyCongress
-	{
-		IMaintainingPattern(destinationContract).removeMaintainers(maintainers);
-	}
 
 	function changeDefaultIntegratorFeePercent(
 		uint newFee
