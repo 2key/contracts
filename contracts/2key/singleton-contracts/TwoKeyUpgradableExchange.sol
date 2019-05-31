@@ -55,6 +55,12 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
         uint256 amount
     );
 
+    event LackOfStableCoinInventory(
+        uint256 stableCoinBalance,
+        uint256 rewardsAmountSent,
+        uint256 stableCoinRequested
+    );
+
 
     /**
      * Event for token purchase logging
@@ -348,6 +354,12 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
 
         token.transferFrom(msg.sender, address(this), _twoKeyUnits);
         uint stableCoinsAfter = stableCoinsOnContractBefore - stableCoinUnits;
+
+        if (ERC20(DAI).balanceOf(this) < stableCoinUnits){
+            emit LackOfStableCoinInventory(stableCoinsOnContractBefore, _twoKeyUnits, stableCoinUnits);
+            revert();
+        }
+
         require(ERC20(DAI).transfer(_beneficiary, stableCoinUnits));
 
         emit WithdrawExecuted(
