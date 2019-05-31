@@ -9,8 +9,8 @@ import "../interfaces/ITwoKeyRegistry.sol";
 contract TwoKeyCommunityTokenPool is TokenPool {
 
     address public twoKeyRegistry;
-    uint public constant totalAmount2keys = 200000000;
-    uint public constant annualTransferAmountLimit = totalAmount2keys / 10;
+    uint public totalAmount2keys;
+    uint public annualTransferAmountLimit;
 
     uint startingDate;
 
@@ -30,6 +30,9 @@ contract TwoKeyCommunityTokenPool is TokenPool {
     external
     {
         require(initialized == false);
+
+        totalAmount2keys = 200000000;
+        annualTransferAmountLimit = totalAmount2keys / 10;
 
         setInitialParameters(_erc20Address, twoKeySingletonesRegistry);
 
