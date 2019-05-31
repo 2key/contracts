@@ -1,9 +1,8 @@
 pragma solidity ^0.4.24;
 
-import "../TwoKeyMaintainersRegistry.sol";
-import "../Upgradeable.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
+import "../upgradability/Upgradeable.sol";
 
 
 /**

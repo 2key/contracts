@@ -1,7 +1,5 @@
 pragma solidity ^0.4.0;
 
-import "../Upgradeable.sol";
-import "../TwoKeyMaintainersRegistry.sol";
 
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/IHandleCampaignDeployment.sol";
@@ -10,6 +8,7 @@ import "../upgradable-pattern-campaigns/ProxyCampaign.sol";
 import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
 import "../acquisition-campaign-contracts/TwoKeyPurchasesHandler.sol";
 import "../acquisition-campaign-contracts/TwoKeyAcquisitionLogicHandler.sol";
+import "../upgradability/Upgradeable.sol";
 
 
 /**

@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-import "./Upgradeable.sol";
+import "../upgradability/Upgradeable.sol";
 
 /**
  * @author Nikola Madjarevic

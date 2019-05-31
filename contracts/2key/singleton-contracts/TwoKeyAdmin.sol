@@ -3,7 +3,7 @@ pragma solidity ^0.4.24;
 import "../interfaces/ITwoKeyAdmin.sol";
 import "../interfaces/IERC20.sol";
 import "../interfaces/ITwoKeyReg.sol";
-import "../Upgradeable.sol";
+import "../upgradability/Upgradeable.sol";
 
 //TODO: Add all the missing functions from other singletones which can be called by TwoKeyAdmin
 contract TwoKeyAdmin is Upgradeable {

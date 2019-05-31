@@ -1,10 +1,10 @@
 pragma solidity ^0.4.24;
 
-import "../Upgradeable.sol";
 import "../libraries/Call.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../libraries/Utils.sol";
+import "../upgradability/Upgradeable.sol";
 
 
 contract TwoKeyRegistry is Upgradeable, Utils {

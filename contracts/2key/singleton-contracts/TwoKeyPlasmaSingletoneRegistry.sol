@@ -1,9 +1,8 @@
 pragma solidity ^0.4.24;
 
-import '../Upgradeable.sol';
-import "../UpgradabilityProxy.sol";
-import "../TwoKeyMaintainersRegistry.sol";
 import "../interfaces/ITwoKeySingletonesRegistry.sol";
+import "../upgradability/UpgradabilityProxy.sol";
+import "../upgradability/Upgradeable.sol";
 
 /**
  * @author Nikola Madjarevic

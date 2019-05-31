@@ -1,8 +1,6 @@
 pragma solidity ^0.4.24;
 
 import "../../openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
-import "../TwoKeyMaintainersRegistry.sol";
-import "../Upgradeable.sol";
 
 import '../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol';
 import "../interfaces/ITwoKeyExchangeRateContract.sol";
@@ -13,6 +11,7 @@ import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../libraries/SafeMath.sol";
 import "../libraries/GetCode.sol";
 import "../libraries/SafeERC20.sol";
+import "../upgradability/Upgradeable.sol";
 
 
 contract TwoKeyUpgradableExchange is Upgradeable {

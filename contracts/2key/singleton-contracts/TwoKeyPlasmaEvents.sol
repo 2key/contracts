@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24; //We have to specify what version of compiler this code will use
 import '../libraries/Call.sol';
-import "../Upgradeable.sol";
+import "../upgradability/Upgradeable.sol";
 
 contract TwoKeyPlasmaEvents is Upgradeable {
 

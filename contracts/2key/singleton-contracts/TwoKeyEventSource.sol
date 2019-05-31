@@ -1,13 +1,11 @@
 pragma solidity ^0.4.24;
 
-import "../Upgradeable.sol";
-import "../TwoKeyMaintainersRegistry.sol";
 import "../interfaces/ITwoKeyReg.sol";
 import "../interfaces/ITwoKeyAdmin.sol";
 import "../interfaces/ITwoKeyCampaignValidator.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
-
+import "../upgradability/Upgradeable.sol";
 
 
 contract TwoKeyEventSource is Upgradeable {

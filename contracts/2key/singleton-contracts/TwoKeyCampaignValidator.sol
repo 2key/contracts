@@ -1,8 +1,6 @@
 pragma solidity ^0.4.24;
 
 import "../libraries/GetCode.sol";
-import "../Upgradeable.sol";
-import "../TwoKeyMaintainersRegistry.sol";
 
 import "../interfaces/ITwoKeyAcquisitionCampaignStateVariables.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
@@ -12,6 +10,7 @@ import "../interfaces/ITwoKeyDonationCampaign.sol";
 import "../interfaces/ITwoKeyDonationCampaignFetchAddresses.sol";
 import "../interfaces/IGetImplementation.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
+import "../upgradability/Upgradeable.sol";
 
 
 /*******************************************************************************************************************
