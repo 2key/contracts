@@ -1,7 +1,7 @@
 import createWeb3, {generatePlasmaFromMnemonic} from "./_web3";
 import {TwoKeyProtocol} from "../src";
 import {expect} from "chai";
-import {ICreateCampaign, InvoiceERC20} from "../src/donation/interfaces";
+import {IConversion, ICreateCampaign, InvoiceERC20} from "../src/donation/interfaces";
 import {promisify} from "../src/utils/promisify";
 import {IPrivateMetaInformation} from "../src/acquisition/interfaces";
 const { env } = process;
@@ -280,4 +280,13 @@ describe('TwoKeyDonationCampaign', () => {
         balance = parseFloat(twoKeyProtocol.Utils.fromWei(balance,'ether').toString());
         expect(balance).to.be.equal(1);
     }).timeout(60000);
+
+    it('should get conversion object', async() => {
+        console.log('--------------------------------------- Test ' + i + ' ----------------------------------------------');
+        i++;
+
+        let conversionId = 0;
+        let conversion: IConversion = await twoKeyProtocol.DonationCampaign.getConversion(campaignAddress, 0, from);
+        console.log(conversion);
+    })
 });

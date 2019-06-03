@@ -361,21 +361,21 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
     returns (bytes)
     {
         Conversion memory conversion = conversions[conversionId];
-        address empty; // Defaults to 0x0
+        address converter; // Defaults to 0x0
 
         if(isConverterAnonymous[conversion.converter] == false) {
-            empty = conversion.converter;
+            converter = conversion.converter;
         }
 
         return abi.encodePacked (
             conversion.contractor,
+            converter,
             conversion.contractorProceedsETHWei,
-            empty,
-            conversion.state,
             conversion.conversionAmount,
             conversion.maxReferralRewardETHWei,
             conversion.maxReferralReward2key,
-            conversion.moderatorFeeETHWei
+            conversion.moderatorFeeETHWei,
+            conversion.state
         );
     }
 
