@@ -1,12 +1,33 @@
 pragma solidity ^0.4.0;
 
 contract StructuredStorage {
+
+    address proxyLogicContract;
+    address deployer;
+
     mapping(bytes32 => uint) uIntStorage;
     mapping(bytes32 => string) stringStorage;
     mapping(bytes32 => address) addressStorage;
     mapping(bytes32 => bytes) bytesStorage;
     mapping(bytes32 => bool) boolStorage;
     mapping(bytes32 => int) intStorage;
+
+    modifier onlyDeployer {
+        require(msg.sender == deployer);
+        _;
+    }
+
+    modifier onlyProxyLogicContract {
+        require(msg.sender == proxyLogicContract);
+        _;
+    }
+
+    constructor(address _proxyLogicContract) public {
+        require(_proxyLogicContract != address(0));
+        deployer = msg.sender;
+        proxyLogicContract = _proxyLogicContract;
+    }
+
 
     // *** Getter Methods ***
     function getUint(bytes32 _key) external view returns(uint) {
