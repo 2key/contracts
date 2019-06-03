@@ -339,9 +339,9 @@ contract TwoKeyCampaign is ArcERC20 {
 				IUpgradableExchange(twoKeyUpgradableExchangeContract).buyStableCoinWith2key(balance, _address);
 			}
 			else{
-				twoKeyRealeaseDate = ITwoKeyAdmin(twoKeyAdminAddress).getTwoKeyRewardsReleaseDate();
-				if (block.timestamp < twoKeyRealeaseDate){
-					emit TokensLocked(twoKeyRealeaseDate, balance);
+				if (block.timestamp < ITwoKeyAdmin(twoKeyAdminAddress).getTwoKeyRewardsReleaseDate()){
+					emit TokensLocked(ITwoKeyAdmin(twoKeyAdminAddress).getTwoKeyRewardsReleaseDate(), balance);
+
 					revert();
 				}
 				else{
