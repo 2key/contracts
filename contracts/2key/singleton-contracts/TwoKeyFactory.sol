@@ -219,8 +219,8 @@ contract TwoKeyFactory is Upgradeable, MaintainingPattern {
             tokenSymbol,
             msg.sender, //contractor
             proxyDonationCampaign,
-            booleanValues[1],
-            numberValues[0]
+            getContractProxyAddress("TwoKeyEventSource"),
+            getContractProxyAddress("TwoKeyBaseReputationRegistry")
         );
 
         // Set initial parameters under Donation campaign contract
