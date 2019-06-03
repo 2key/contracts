@@ -5,7 +5,6 @@ contract ITwoKeyDonationConversionHandler {
         address _converterAddress,
         uint _conversionAmount,
         uint _maxReferralRewardETHWei,
-        bool _isAnonymous,
         bool _isKYCRequired
     )
     public

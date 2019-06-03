@@ -28,7 +28,7 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
     uint minDonationAmountWei; // Minimal donation amount
     uint maxDonationAmountWei; // Maximal donation amount
     uint campaignGoal; // Goal of the campaign, how many funds to raise
-    uint maxReferralRewardPercent;
+
 
     bool shouldConvertToRefer; // If yes, means that referrer must be converter in order to be referrer
     bool isKYCRequired; // Will determine if KYC is required or not
@@ -259,55 +259,58 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
         uint donationId
     )
     public
-    onlyTwoKeyDonationConversionHandler
+//    onlyTwoKeyDonationConversionHandler
     returns (uint)
     {
         address[] memory referrers = getReferrers(converter);
         uint numberOfReferrers = referrers.length;
 
         //Buy amount of 2key tokens for rewards
+
         uint totalBountyTokens = buyTokensFromUpgradableExchange(referrer_rewards, address(this));
 
-        //Distribute rewards based on model selected
-        if(rewardsModel == IncentiveModel.VANILLA_AVERAGE) {
-            uint reward = IncentiveModels.averageModelRewards(totalBountyTokens, numberOfReferrers);
-            for(uint i=0; i<numberOfReferrers; i++) {
-                updateReferrerMappings(referrers[i], reward, donationId);
-            }
-        } else if(rewardsModel == IncentiveModel.VANILLA_AVERAGE_LAST_3X) {
-            uint rewardPerReferrer;
-            uint rewardForLast;
-            (rewardPerReferrer, rewardForLast)= IncentiveModels.averageLast3xRewards(totalBountyTokens, numberOfReferrers);
-            for(i=0; i<numberOfReferrers - 1; i++) {
-                updateReferrerMappings(referrers[i], rewardPerReferrer, donationId);
-            }
-            updateReferrerMappings(referrers[numberOfReferrers-1], rewardForLast, donationId);
-        } else if(rewardsModel == IncentiveModel.VANILLA_POWER_LAW) {
-            uint[] memory rewards = IncentiveModels.powerLawRewards(totalBountyTokens, numberOfReferrers, powerLawFactor);
-            for(i=0; i<numberOfReferrers; i++) {
-                updateReferrerMappings(referrers[i], rewards[i], donationId);
-            }
-        } else if(rewardsModel == IncentiveModel.MANUAL) {
-            uint totalBounty2keys = totalBountyTokens;
-            for (i = 0; i < numberOfReferrers; i++) {
-                uint256 b;
 
-                if (i == referrers.length - 1) {  // if its the last influencer then all the bounty goes to it.
-                    b = totalBounty2keys ;
-                }
-                else {
-                    uint256 cut = getReferrerCut(referrers[i]);
-                    if (cut > 0 && cut <= 101) {
-                        b = totalBounty2keys.mul(cut.sub(1)).div(100);
-                    } else {// cut == 0 or 255 indicates equal particine of the bounty
-                        b = totalBounty2keys.div(referrers.length - i);
-                    }
-                }
-                updateReferrerMappings(referrers[i], b, donationId);
-                //Decrease bounty for distributed
-                totalBounty2keys = totalBounty2keys.sub(b);
-            }
-        }
+
+//        //Distribute rewards based on model selected
+//        if(rewardsModel == IncentiveModel.VANILLA_AVERAGE) {
+//            uint reward = IncentiveModels.averageModelRewards(totalBountyTokens, numberOfReferrers);
+//            for(uint i=0; i<numberOfReferrers; i++) {
+//                updateReferrerMappings(referrers[i], reward, donationId);
+//            }
+//        } else if(rewardsModel == IncentiveModel.VANILLA_AVERAGE_LAST_3X) {
+//            uint rewardPerReferrer;
+//            uint rewardForLast;
+//            (rewardPerReferrer, rewardForLast)= IncentiveModels.averageLast3xRewards(totalBountyTokens, numberOfReferrers);
+//            for(i=0; i<numberOfReferrers - 1; i++) {
+//                updateReferrerMappings(referrers[i], rewardPerReferrer, donationId);
+//            }
+//            updateReferrerMappings(referrers[numberOfReferrers-1], rewardForLast, donationId);
+//        } else if(rewardsModel == IncentiveModel.VANILLA_POWER_LAW) {
+//            uint[] memory rewards = IncentiveModels.powerLawRewards(totalBountyTokens, numberOfReferrers, powerLawFactor);
+//            for(i=0; i<numberOfReferrers; i++) {
+//                updateReferrerMappings(referrers[i], rewards[i], donationId);
+//            }
+//        } else if(rewardsModel == IncentiveModel.MANUAL) {
+//            uint totalBounty2keys = totalBountyTokens;
+//            for (i = 0; i < numberOfReferrers; i++) {
+//                uint256 b;
+//
+//                if (i == referrers.length - 1) {  // if its the last influencer then all the bounty goes to it.
+//                    b = totalBounty2keys ;
+//                }
+//                else {
+//                    uint256 cut = getReferrerCut(referrers[i]);
+//                    if (cut > 0 && cut <= 101) {
+//                        b = totalBounty2keys.mul(cut.sub(1)).div(100);
+//                    } else {// cut == 0 or 255 indicates equal particine of the bounty
+//                        b = totalBounty2keys.div(referrers.length - i);
+//                    }
+//                }
+//                updateReferrerMappings(referrers[i], b, donationId);
+//                //Decrease bounty for distributed
+//                totalBounty2keys = totalBounty2keys.sub(b);
+//            }
+//        }
         return totalBountyTokens;
     }
 
@@ -331,18 +334,18 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
      * @dev payable function
      */
     function convert(
-        bytes signature,
-        bool _isAnonymous
+        bytes signature
     )
     public
     payable
     {
         //TODO: Add validator if conversion can be made
+
         address _converterPlasma = twoKeyEventSource.plasmaOf(msg.sender);
         if(received_from[_converterPlasma] == address(0)) {
             distributeArcsBasedOnSignature(signature, msg.sender);
         }
-        createConversion(msg.value, msg.sender, _isAnonymous);
+        createConversion(msg.value, msg.sender);
         twoKeyEventSource.converted(address(this),msg.sender,msg.value);
     }
 
@@ -353,25 +356,48 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
      */
     function createConversion(
         uint conversionAmountEthWEI,
-        address converterAddress,
-        bool isAnonymous
+        address converterAddress
     )
     private
     {
         //TODO: Add validator for donation goal
-        uint256 maxReferralRewardFiatOrETHWei = conversionAmountEthWEI.mul(maxReferralRewardPercent).div(100);
+        uint256 maxReferralRewardFiatOrETHWei = conversionAmountEthWEI.mul(maxReferralRewardPercent).div(10**18).div(100);
 
         uint id = ITwoKeyDonationConversionHandler(twoKeyDonationConversionHandler).supportForCreateConversion(
             converterAddress,
             conversionAmountEthWEI,
             maxReferralRewardFiatOrETHWei,
-            isAnonymous,
             isKYCRequired
         );
 
         if(isKYCRequired == false) {
             ITwoKeyDonationConversionHandler(twoKeyDonationConversionHandler).executeConversion(id);
+//            uint totalBountyTokens = buyTokensFromUpgradableExchange(conversionAmountEthWEI.div(3), address(this));
         }
+    }
+
+    /**
+     * @notice Function which acts like getter for all cuts in array
+     * @param last_influencer is the last influencer
+     * @return array of integers containing cuts respectively
+     */
+    function getReferrerCuts(
+        address last_influencer
+    )
+    public
+    view
+    returns (uint256[])
+    {
+        address[] memory influencers = getReferrers(last_influencer);
+        uint256[] memory cuts = new uint256[](influencers.length + 1);
+
+        uint numberOfInfluencers = influencers.length;
+        for (uint i = 0; i < numberOfInfluencers; i++) {
+            address influencer = influencers[i];
+            cuts[i] = getReferrerCut(influencer);
+        }
+        cuts[influencers.length] = getReferrerCut(last_influencer);
+        return cuts;
     }
 
     /**
