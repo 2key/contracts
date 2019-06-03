@@ -269,6 +269,8 @@ describe('TwoKeyDonationCampaign', () => {
             await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
 
             console.log('Conversion is succesfully executed');
+        } else {
+            console.log('For this campaign KYC is not required since that -> This test case is not relevant!')
         }
     }).timeout(60000);
 
