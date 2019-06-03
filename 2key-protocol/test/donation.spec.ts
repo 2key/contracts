@@ -52,12 +52,15 @@ let minDonationAmount = 0.001;
 let maxDonationAmount = 1000;
 let campaignGoal = 1000000000;
 let conversionQuota = 5;
-let isKYCRequired = false;
+let isKYCRequired = true;
 let shouldConvertToRefer = false;
 let acceptsFiat = false;
 let incentiveModel = "VANILLA_AVERAGE";
+let conversionAmountEth = 1;
+
 
 let campaignAddress: string;
+let invoiceTokenAddress: string;
 
 //Describe structure of invoice token
 let invoiceToken: InvoiceERC20 = {
@@ -115,11 +118,10 @@ describe('TwoKeyDonationCampaign', () => {
             timeout: 600000
         });
 
-        console.log(result);
 
         campaignAddress = result.campaignAddress;
         links.deployer = result.campaignPublicLinkKey;
-        console.log(links.deployer);
+        invoiceTokenAddress = result.invoiceToken;
    }).timeout(60000);
 
 
@@ -233,11 +235,49 @@ describe('TwoKeyDonationCampaign', () => {
         i++;
         console.log('4) buy from test4 REFLINK', links.gmail);
 
-        let txHash = await twoKeyProtocol.DonationCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(1, 'ether'), links.gmail, from);
+        let txHash = await twoKeyProtocol.DonationCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(conversionAmountEth, 'ether'), links.gmail, from);
         console.log(txHash);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
 
         expect(txHash).to.be.a('string');
     }).timeout(60000);
 
+    it('should approve converter and execute conversion if KYC == TRUE', async() => {
+        console.log('--------------------------------------- Test ' + i + ' ----------------------------------------------');
+        i++;
+
+        const {web3, address} = web3switcher.deployer();
+        from = address;
+        twoKeyProtocol = new TwoKeyProtocol({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
+        });
+
+        if(isKYCRequired == true) {
+            let txHash = await twoKeyProtocol.DonationCampaign.approveConverter(campaignAddress,env.TEST4_ADDRESS,from);
+            await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+
+            console.log('Converter is successfully approved');
+
+            let conversionId = 0;
+            txHash = await twoKeyProtocol.DonationCampaign.executeConversion(campaignAddress, conversionId, from);
+            await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+
+            console.log('Conversion is succesfully executed');
+        }
+    }).timeout(60000);
+
+    it('should proof that the invoice has been issued for executed conversion (Invoice tokens transfered)', async() => {
+        console.log('--------------------------------------- Test ' + i + ' ----------------------------------------------');
+        i++;
+
+        let balance = await twoKeyProtocol.ERC20.getERC20Balance(invoiceTokenAddress, env.TEST4_ADDRESS);
+        balance = parseFloat(twoKeyProtocol.Utils.fromWei(balance,'ether').toString());
+        expect(balance).to.be.equal(1);
+    }).timeout(60000);
 });

@@ -271,46 +271,46 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
 
 
 
-//        //Distribute rewards based on model selected
-//        if(rewardsModel == IncentiveModel.VANILLA_AVERAGE) {
-//            uint reward = IncentiveModels.averageModelRewards(totalBountyTokens, numberOfReferrers);
-//            for(uint i=0; i<numberOfReferrers; i++) {
-//                updateReferrerMappings(referrers[i], reward, donationId);
-//            }
-//        } else if(rewardsModel == IncentiveModel.VANILLA_AVERAGE_LAST_3X) {
-//            uint rewardPerReferrer;
-//            uint rewardForLast;
-//            (rewardPerReferrer, rewardForLast)= IncentiveModels.averageLast3xRewards(totalBountyTokens, numberOfReferrers);
-//            for(i=0; i<numberOfReferrers - 1; i++) {
-//                updateReferrerMappings(referrers[i], rewardPerReferrer, donationId);
-//            }
-//            updateReferrerMappings(referrers[numberOfReferrers-1], rewardForLast, donationId);
-//        } else if(rewardsModel == IncentiveModel.VANILLA_POWER_LAW) {
-//            uint[] memory rewards = IncentiveModels.powerLawRewards(totalBountyTokens, numberOfReferrers, powerLawFactor);
-//            for(i=0; i<numberOfReferrers; i++) {
-//                updateReferrerMappings(referrers[i], rewards[i], donationId);
-//            }
-//        } else if(rewardsModel == IncentiveModel.MANUAL) {
-//            uint totalBounty2keys = totalBountyTokens;
-//            for (i = 0; i < numberOfReferrers; i++) {
-//                uint256 b;
-//
-//                if (i == referrers.length - 1) {  // if its the last influencer then all the bounty goes to it.
-//                    b = totalBounty2keys ;
-//                }
-//                else {
-//                    uint256 cut = getReferrerCut(referrers[i]);
-//                    if (cut > 0 && cut <= 101) {
-//                        b = totalBounty2keys.mul(cut.sub(1)).div(100);
-//                    } else {// cut == 0 or 255 indicates equal particine of the bounty
-//                        b = totalBounty2keys.div(referrers.length - i);
-//                    }
-//                }
-//                updateReferrerMappings(referrers[i], b, donationId);
-//                //Decrease bounty for distributed
-//                totalBounty2keys = totalBounty2keys.sub(b);
-//            }
-//        }
+        //Distribute rewards based on model selected
+        if(rewardsModel == IncentiveModel.VANILLA_AVERAGE) {
+            uint reward = IncentiveModels.averageModelRewards(totalBountyTokens, numberOfReferrers);
+            for(uint i=0; i<numberOfReferrers; i++) {
+                updateReferrerMappings(referrers[i], reward, donationId);
+            }
+        } else if(rewardsModel == IncentiveModel.VANILLA_AVERAGE_LAST_3X) {
+            uint rewardPerReferrer;
+            uint rewardForLast;
+            (rewardPerReferrer, rewardForLast)= IncentiveModels.averageLast3xRewards(totalBountyTokens, numberOfReferrers);
+            for(i=0; i<numberOfReferrers - 1; i++) {
+                updateReferrerMappings(referrers[i], rewardPerReferrer, donationId);
+            }
+            updateReferrerMappings(referrers[numberOfReferrers-1], rewardForLast, donationId);
+        } else if(rewardsModel == IncentiveModel.VANILLA_POWER_LAW) {
+            uint[] memory rewards = IncentiveModels.powerLawRewards(totalBountyTokens, numberOfReferrers, powerLawFactor);
+            for(i=0; i<numberOfReferrers; i++) {
+                updateReferrerMappings(referrers[i], rewards[i], donationId);
+            }
+        } else if(rewardsModel == IncentiveModel.MANUAL) {
+            uint totalBounty2keys = totalBountyTokens;
+            for (i = 0; i < numberOfReferrers; i++) {
+                uint256 b;
+
+                if (i == referrers.length - 1) {  // if its the last influencer then all the bounty goes to it.
+                    b = totalBounty2keys ;
+                }
+                else {
+                    uint256 cut = getReferrerCut(referrers[i]);
+                    if (cut > 0 && cut <= 101) {
+                        b = totalBounty2keys.mul(cut.sub(1)).div(100);
+                    } else {// cut == 0 or 255 indicates equal particine of the bounty
+                        b = totalBounty2keys.div(referrers.length - i);
+                    }
+                }
+                updateReferrerMappings(referrers[i], b, donationId);
+                //Decrease bounty for distributed
+                totalBounty2keys = totalBounty2keys.sub(b);
+            }
+        }
         return totalBountyTokens;
     }
 
@@ -372,7 +372,6 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
 
         if(isKYCRequired == false) {
             ITwoKeyDonationConversionHandler(twoKeyDonationConversionHandler).executeConversion(id);
-//            uint totalBountyTokens = buyTokensFromUpgradableExchange(conversionAmountEthWEI.div(3), address(this));
         }
     }
 

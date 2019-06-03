@@ -20,29 +20,24 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
     using SafeMath for uint256; // Define lib necessary to handle uint operations
     bool isCampaignInitialized; //defaults to false
 
-    uint numberOfConversions;
     Conversion [] public conversions;
-
     InvoiceTokenERC20 public erc20InvoiceToken; // ERC20 token which will be issued as an invoice
+
+    ITwoKeyDonationCampaign twoKeyDonationCampaign;
 
     address twoKeyEventSource;
     address twoKeyBaseReputationRegistry;
-    ITwoKeyDonationCampaign twoKeyDonationCampaign;
     address contractor;
+    uint numberOfConversions;
+    uint [] counters; //Metrics counter
 
 
     mapping(address => uint256) private amountConverterSpentEthWEI; // Amount converter put to the contract in Ether
-
     mapping(bytes32 => address[]) stateToConverter; //State to all converters in that state
     mapping(address => ConverterState) converterToState; // Converter to state
     mapping(address => uint[]) converterToHisConversions;
     mapping(address => bool) isConverterAnonymous;
     mapping(address => bool) doesConverterHaveExecutedConversions;
-
-
-
-    uint [] counters; //Metrics counter
-
 
     //Struct to represent donation in Ether
     struct Conversion {
@@ -185,32 +180,32 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
             _conversionId
         );
 
-//        // Update reputation points in registry for conversion executed event
+        // Update reputation points in registry for conversion executed event
 //        ITwoKeyBaseReputationRegistry(twoKeyBaseReputationRegistry).updateOnConversionExecutedEvent(
 //            conversion.converter,
 //            contractor,
 //            twoKeyDonationCampaign
 //        );
 
-//
-//
-//        counters[8] = counters[8].add(totalReward2keys);
-//        twoKeyDonationCampaign.buyTokensForModeratorRewards(conversion.moderatorFeeETHWei);
-//        twoKeyDonationCampaign.updateContractorBalanceAndConverterDonations;
-//
-//        counters[6] = counters[6].add(conversion.conversionAmount);
-//
-//        if(doesConverterHaveExecutedConversions[conversion.converter] == false) {
-//            counters[5]++; //increase number of unique converters
-//            doesConverterHaveExecutedConversions[conversion.converter] = true;
-//        }
-//
-//        conversion.maxReferralReward2key = totalReward2keys;
-//        conversion.state = ConversionState.EXECUTED;
-//        counters[3]++; //Increase number of executed conversions
-//
-//        //TODO: Add tokens transfer
-//        erc20InvoiceToken.transfer(conversion.converter, conversion.conversionAmount);
+
+
+        counters[8] = counters[8].add(totalReward2keys);
+        twoKeyDonationCampaign.buyTokensForModeratorRewards(conversion.moderatorFeeETHWei);
+        twoKeyDonationCampaign.updateContractorBalanceAndConverterDonations;
+
+        counters[6] = counters[6].add(conversion.conversionAmount);
+
+        if(doesConverterHaveExecutedConversions[conversion.converter] == false) {
+            counters[5]++; //increase number of unique converters
+            doesConverterHaveExecutedConversions[conversion.converter] = true;
+        }
+
+        conversion.maxReferralReward2key = totalReward2keys;
+        conversion.state = ConversionState.EXECUTED;
+        counters[3]++; //Increase number of executed conversions
+
+        //TODO: Add tokens transfer
+        erc20InvoiceToken.transfer(conversion.converter, conversion.conversionAmount);
     }
 
     /// @notice Function to move converter address from stateA to stateB
