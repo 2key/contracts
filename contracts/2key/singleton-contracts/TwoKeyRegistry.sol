@@ -595,7 +595,6 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
         return string(babcde);
     }
 
-    //TODO: Major change notify backends and FEDS
     function getUserData(
         address _user
     )

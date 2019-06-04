@@ -7,7 +7,6 @@ import "../interfaces/ITwoKeyAcquisitionCampaignERC20.sol";
 import "../interfaces/ITwoKeyReg.sol";
 import "../interfaces/ITwoKeyAcquisitionARC.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
-import "../interfaces/ITwoKeyConversionHandlerGetConverterState.sol";
 import "../interfaces/ITwoKeyEventSource.sol";
 
 //Libraries
@@ -15,19 +14,20 @@ import "../libraries/SafeMath.sol";
 import "../libraries/Call.sol";
 import "../libraries/IncentiveModels.sol";
 
-import "../Upgradeable.sol";
 import "../campaign-mutual-contracts/TwoKeyCampaignIncentiveModels.sol";
+import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
 
 /**
  * @author Nikola Madjarevic
  * Created at 1/15/19
  */
-contract TwoKeyAcquisitionLogicHandler is Upgradeable, TwoKeyCampaignIncentiveModels {
+contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncentiveModels {
 
     using SafeMath for uint256;
 
     bool isCampaignInitialized;
 
+    bool public IS_CAMPAIGN_ACTIVE;
 
     address public twoKeySingletoneRegistry;
     address public twoKeyAcquisitionCampaign;
@@ -52,6 +52,7 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable, TwoKeyCampaignIncentiveMo
     uint pricePerUnitInETHWeiOrUSD; // There's single price for the unit ERC20 (Should be in WEI)
     uint unit_decimals; // ERC20 selling data
     uint maxConverterBonusPercent; // Maximal bonus percent per converter
+    uint campaignHardCapWei; // Hard cap of campaign
 
     string public currency; // Currency campaign is currently in
 
@@ -102,6 +103,8 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable, TwoKeyCampaignIncentiveMo
             isAcceptingFiatOnly = true;
         }
 
+        campaignHardCapWei = values[8];
+
         currency = _currency;
         assetContractERC20 = _assetContractERC20;
         moderator = _moderator;
@@ -120,6 +123,18 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable, TwoKeyCampaignIncentiveMo
         isCampaignInitialized = true;
     }
 
+    /**
+     *
+     */
+    function activateCampaign() public onlyContractor {
+        require(IS_CAMPAIGN_ACTIVE == false);
+        uint balanceOfTokenBeingSoldOnAcquisition = getInventoryBalance();
+        //balance is in weis, price is in weis and hardcap is regular number
+        require((balanceOfTokenBeingSoldOnAcquisition * pricePerUnitInETHWeiOrUSD).div(10**18) >= campaignHardCapWei);
+        IS_CAMPAIGN_ACTIVE = true;
+    }
+
+
     function checkHowMuchUserCanSpend(uint alreadySpentETHWei, uint alreadySpentFiatWEI) public view returns (uint) {
         if(keccak256(currency) == keccak256('ETH')) {
             uint leftToSpendInEther = maxContributionETHorFiatCurrency - alreadySpentETHWei;
@@ -127,28 +142,42 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable, TwoKeyCampaignIncentiveMo
         } else {
             //In order to work with this I have to convert everything to same currency
             address ethUSDExchangeContract = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyExchangeRateContract");
-            uint val;
-            bool flag;
-            (val, flag,,) = ITwoKeyExchangeRateContract(ethUSDExchangeContract).getFiatCurrencyDetails(currency);
-            if(flag) {
-                //This means that 1 eth = more than 1 fiat unit so we convert ether to fiats
-                uint totalAmountSpentConvertedToFIAT = (alreadySpentETHWei*val).div(10**18) + alreadySpentFiatWEI;
-                uint limit = maxContributionETHorFiatCurrency; // Initially we assume it's fiat currency campaign
-                uint leftToSpendInFiats = limit-totalAmountSpentConvertedToFIAT;
-                return leftToSpendInFiats;
-            }
+            uint rate = ITwoKeyExchangeRateContract(ethUSDExchangeContract).getBaseToTargetRate(currency);
+
+            uint totalAmountSpentConvertedToFIAT = (alreadySpentETHWei*rate).div(10**18) + alreadySpentFiatWEI;
+            uint limit = maxContributionETHorFiatCurrency; // Initially we assume it's fiat currency campaign
+            uint leftToSpendInFiats = limit-totalAmountSpentConvertedToFIAT;
+            return leftToSpendInFiats;
         }
+    }
+
+    function canConversionBeCreated(address converter, uint amountWillingToSpend, bool isFiat) public view returns (bool) {
+        bool canConvert = checkIsCampaignActive();
+        if(IS_CAMPAIGN_ACTIVE == false) {
+            return false;
+        }
+        if(canConvert == false) {
+            return false;
+        }
+        //If we reach this point means we have reached point that campaign is still active
+        if(isFiat) {
+            (canConvert,)= canMakeFiatConversion(converter, amountWillingToSpend);
+        } else {
+            (canConvert,) = canMakeETHConversion(converter, amountWillingToSpend);
+        }
+
+        return canConvert;
     }
 
     //TODO: HANDLE INSIDE THIS METHODS MIN CONTRIBUTION AMOUNT
 
-    function canMakeFiatConversion(address converter, uint amountWillingToSpendFiatWei) public view returns (bool,uint) {
+    function canMakeFiatConversion(address converter, uint amountWillingToSpendFiatWei) internal view returns (bool,uint) {
         uint alreadySpentETHWei;
         uint alreadySpentFIATWEI;
         if(keccak256(currency) == keccak256('ETH')) {
             return (false, 0);
         } else {
-            (alreadySpentETHWei,alreadySpentFIATWEI,,) = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getStatistics(converter, address(0));
+            (alreadySpentETHWei,alreadySpentFIATWEI,) = ITwoKeyConversionHandler(twoKeyConversionHandler).getConverterPurchasesStats(converter);
 
             uint leftToSpendFiat = checkHowMuchUserCanSpend(alreadySpentETHWei,alreadySpentFIATWEI);
             if(leftToSpendFiat >= amountWillingToSpendFiatWei) {
@@ -162,10 +191,11 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable, TwoKeyCampaignIncentiveMo
     function canMakeETHConversion(address converter, uint amountWillingToSpendEthWei) public view returns (bool,uint) {
         uint alreadySpentETHWei;
         uint alreadySpentFIATWEI;
-        (alreadySpentETHWei,alreadySpentFIATWEI,,) = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getStatistics(converter, address(0));
+        (alreadySpentETHWei,alreadySpentFIATWEI,) = ITwoKeyConversionHandler(twoKeyConversionHandler).getConverterPurchasesStats(converter);
         uint leftToSpend = checkHowMuchUserCanSpend(alreadySpentETHWei, alreadySpentFIATWEI);
 
         if(keccak256(currency) == keccak256('ETH')) {
+            //Adding a deviation of 1000 weis
             if(leftToSpend + 1000 > amountWillingToSpendEthWei) {
                 return(true, leftToSpend);
             } else {
@@ -173,9 +203,8 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable, TwoKeyCampaignIncentiveMo
             }
         } else {
             address ethUSDExchangeContract = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyExchangeRateContract");
-            uint val;
-            (val,,) = ITwoKeyExchangeRateContract(ethUSDExchangeContract).getFiatCurrencyDetails(currency);
-            uint amountToBeSpentInFiat = (amountWillingToSpendEthWei*val).div(10**18);
+            uint rate = ITwoKeyExchangeRateContract(ethUSDExchangeContract).getBaseToTargetRate(currency);
+            uint amountToBeSpentInFiat = (amountWillingToSpendEthWei*rate).div(10**18);
             //Adding gap of 100 weis
             if(leftToSpend + 1000 >= amountToBeSpentInFiat) {
                 return (true,leftToSpend);
@@ -188,7 +217,7 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable, TwoKeyCampaignIncentiveMo
     /**
      * @notice Requirement for the checking if the campaign is active or not
      */
-    function requirementIsOnActive()
+    function checkIsCampaignActive()
     public
     view
     returns (bool)
@@ -213,55 +242,6 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable, TwoKeyCampaignIncentiveMo
     }
 
 
-    /**
-     * @notice internal function to validate the request is proper
-     * @param msgValue is the value of the message sent
-     * @dev validates if msg.Value is in interval of [minContribution, maxContribution]
-     */
-    function requirementForMsgValue(
-        uint msgValue
-    )
-    public
-    view
-    returns (bool)
-    {
-        require(isAcceptingFiatOnly == false); //This should throw and user will not be able to convert otherwise
-        //TODO: Add timestamp validation -> conversions
-        if(keccak256(currency) == keccak256('ETH')) {
-            require(msgValue >= minContributionETHorFiatCurrency);
-            require(msgValue <= maxContributionETHorFiatCurrency);
-        } else {
-            address ethUSDExchangeContract = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyExchangeRateContract");
-            uint val;
-            bool flag;
-            (val, flag,,) = ITwoKeyExchangeRateContract(ethUSDExchangeContract).getFiatCurrencyDetails(currency);
-            if(flag) {
-                require((msgValue * val).div(10**18) >= minContributionETHorFiatCurrency); //converting ether to fiat
-                require((msgValue * val).div(10**18) <= maxContributionETHorFiatCurrency); //converting ether to fiat
-            } else {
-                require(msgValue >= (val * minContributionETHorFiatCurrency).div(10**18)); //converting fiat to ether
-                require(msgValue <= (val * maxContributionETHorFiatCurrency).div(10**18)); //converting fiat to ether
-            }
-        }
-        return true;
-    }
-
-    function convertEthToFiat(uint valueInEther, uint fiatRate) internal view returns (uint) {
-        return (valueInEther*fiatRate).div(10**18);
-    }
-
-    function requirementForFiatConversion(
-        uint conversionAmountFiatWei
-    )
-    public
-    view
-    returns (bool)
-    {
-        //If currency is fiat
-        if(keccak256(currency) != keccak256('ETH')) {
-
-        }
-    }
 
     /**
      * @notice Function which will calculate the base amount, bonus amount
@@ -285,14 +265,9 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable, TwoKeyCampaignIncentiveMo
         } else {
             if(keccak256(currency) != keccak256('ETH')) {
                 address ethUSDExchangeContract = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyExchangeRateContract");
-                uint rate;
-                bool flag;
-                (rate,flag,,) = ITwoKeyExchangeRateContract(ethUSDExchangeContract).getFiatCurrencyDetails(currency);
-                if(flag) {
-                    conversionAmountETHWeiOrFiat = (conversionAmountETHWeiOrFiat.mul(rate)).div(10 ** 18); //converting eth to $wei
-                } else {
-                    value = (value.mul(rate)).div(10 ** 18); //converting dollar wei to eth
-                }
+                uint rate = ITwoKeyExchangeRateContract(ethUSDExchangeContract).getBaseToTargetRate(currency);
+
+                conversionAmountETHWeiOrFiat = (conversionAmountETHWeiOrFiat.mul(rate)).div(10 ** 18); //converting eth to $wei
             }
         }
 
@@ -356,7 +331,7 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable, TwoKeyCampaignIncentiveMo
     * @return balance value as uint
     */
     function getInventoryBalance()
-    public
+    internal
     view
     returns (uint)
     {
@@ -414,27 +389,27 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable, TwoKeyCampaignIncentiveMo
             bool isConverter;
             bool isReferrer;
             uint unitsConverterBought;
-            uint referrerTotalBalance;
             uint amountConverterSpent;
             uint amountConverterSpentFIAT;
-            (amountConverterSpent,,referrerTotalBalance, unitsConverterBought) = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getStatistics(eth_address, plasma_address);
+
+            (amountConverterSpent,amountConverterSpentFIAT, unitsConverterBought) = ITwoKeyConversionHandler(twoKeyConversionHandler).getConverterPurchasesStats(eth_address);
             if(unitsConverterBought> 0) {
                 isConverter = true;
-                state = ITwoKeyConversionHandlerGetConverterState(twoKeyConversionHandler).getStateForConverter(eth_address);
+                state = ITwoKeyConversionHandler(twoKeyConversionHandler).getStateForConverter(eth_address);
             }
-            if(referrerTotalBalance > 0) {
+            if(referrerPlasma2TotalEarnings2key[plasma_address] > 0) {
                 isReferrer = true;
             }
 
-            if(flag == false) {
-                //referrer is address in signature
-                //plasma_address is plasma address of the address requested in method
-                referrerTotalBalance  = getTotalReferrerEarnings(referrer, eth_address);
-            }
+//            if(flag == false) {
+//                //referrer is address in signature
+//                //plasma_address is plasma address of the address requested in method
+//                referrerTotalBalance  = getTotalReferrerEarnings(referrer, eth_address);
+//            }
 
             return abi.encodePacked(
                 amountConverterSpent,
-                referrerTotalBalance,
+                referrerPlasma2TotalEarnings2key[plasma_address],
                 unitsConverterBought,
                 isConverter,
                 isReferrer,
@@ -613,28 +588,28 @@ contract TwoKeyAcquisitionLogicHandler is Upgradeable, TwoKeyCampaignIncentiveMo
     }
 
 
-    /**
-     * @notice Helper function to get how much _referrer address earned for all conversions for eth_address
-     * @param _referrer is the address we're checking the earnings
-     * @param eth_address is the converter address we're getting all conversion ids for
-     * @return sum of all earnings
-     */
-    function getTotalReferrerEarnings(
-        address _referrer,
-        address eth_address
-    )
-    internal
-    view
-    returns (uint)
-    {
-        uint[] memory conversionIds = ITwoKeyConversionHandler(twoKeyConversionHandler).getConverterConversionIds(eth_address);
-        uint sum = 0;
-        uint len = conversionIds.length;
-        for(uint i=0; i<len; i++) {
-            sum += referrerPlasma2EarningsPerConversion[_referrer][conversionIds[i]];
-        }
-        return sum;
-    }
+//    /**
+//     * @notice Helper function to get how much _referrer address earned for all conversions for eth_address
+//     * @param _referrer is the address we're checking the earnings
+//     * @param eth_address is the converter address we're getting all conversion ids for
+//     * @return sum of all earnings
+//     */
+//    function getTotalReferrerEarnings(
+//        address _referrer,
+//        address eth_address
+//    )
+//    internal
+//    view
+//    returns (uint)
+//    {
+//        uint[] memory conversionIds = ITwoKeyConversionHandler(twoKeyConversionHandler).getConverterConversionIds(eth_address);
+//        uint sum = 0;
+//        uint len = conversionIds.length;
+//        for(uint i=0; i<len; i++) {
+//            sum += referrerPlasma2EarningsPerConversion[_referrer][conversionIds[i]];
+//        }
+//        return sum;
+//    }
 
 
     /**

@@ -8,12 +8,15 @@ import "../TwoKeyConverterStates.sol";
 import "../TwoKeyConversionStates.sol";
 
 import "../interfaces/ITwoKeyDonationConversionHandler.sol";
+import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
 
 /**
  * @author Nikola Madjarevic
  * Created at 2/19/19
  */
-contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels, TwoKeyConverterStates, TwoKeyConversionStates {
+contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaignIncentiveModels {
+
+    bool initialized;
 
     address public twoKeyDonationConversionHandler; // Contract which will handle all donations
 
@@ -25,6 +28,7 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
     uint minDonationAmountWei; // Minimal donation amount
     uint maxDonationAmountWei; // Maximal donation amount
     uint campaignGoal; // Goal of the campaign, how many funds to raise
+
 
     bool shouldConvertToRefer; // If yes, means that referrer must be converter in order to be referrer
     bool isKYCRequired; // Will determine if KYC is required or not
@@ -38,89 +42,137 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
     mapping(address => uint256) internal referrerPlasma2TotalEarnings2key; // Total earnings for referrers
     mapping(address => uint256) internal referrerPlasmaAddressToCounterOfConversions; // [referrer][conversionId]
     mapping(address => mapping(uint256 => uint256)) internal referrerPlasma2EarningsPerConversion;
+    mapping(address => uint256) private referrerPlasma2cut; // Mapping representing how much are cuts in percent(0-100) for referrer address
 
-
-    modifier isOngoing {
-        require(now >= campaignStartTime && now <= campaignEndTime);
-        _;
-    }
 
     modifier onlyInDonationLimit {
         require(msg.value >= minDonationAmountWei && msg.value <= maxDonationAmountWei);
         _;
     }
 
-    modifier goalValidator {
-        if(campaignGoal != 0) {
-            require(this.balance.add(msg.value) <= campaignGoal);
-        }
+
+    modifier onlyTwoKeyDonationConversionHandler {
+        require(msg.sender == twoKeyDonationConversionHandler);
         _;
     }
 
 
-
-    constructor(
+    function setInitialParamsDonationCampaign(
+        address _contractor,
         address _moderator,
-        string _campaignName,
-        uint [] values,
-        bool _shouldConvertToReffer,
-        bool _isKYCRequired,
-        bool _acceptsFiat,
-        address _twoKeySingletonesRegistry,
+        address _twoKeySingletonRegistry,
         address _twoKeyDonationConversionHandler,
-        IncentiveModel _rewardsModel
-    ) public {
+        uint [] numberValues,
+        bool [] booleanValues,
+        string _campaignName
+    )
+    public
+    {
+        require(initialized == false);
+
+        contractor = _contractor;
         // Moderator address
         moderator = _moderator;
         campaignName = _campaignName;
 
-        rewardsModel = _rewardsModel;
-        acceptsFiat = _acceptsFiat;
-        campaignStartTime = values[1];
-        campaignEndTime = values[2];
-        minDonationAmountWei = values[3];
-        maxDonationAmountWei = values[4];
-        campaignGoal = values[5];
-        conversionQuota = values[6];
+        totalSupply_ = 1000000;
+
+        rewardsModel = IncentiveModel(numberValues[7]);
+        maxReferralRewardPercent = numberValues[0];
+        campaignStartTime = numberValues[1];
+        campaignEndTime = numberValues[2];
+        minDonationAmountWei = numberValues[3];
+        maxDonationAmountWei = numberValues[4];
+        campaignGoal = numberValues[5];
+        conversionQuota = numberValues[6];
 
         twoKeyDonationConversionHandler = _twoKeyDonationConversionHandler;
-        ITwoKeyDonationConversionHandler(_twoKeyDonationConversionHandler).
-            setTwoKeyDonationCampaign(address(this), _isKYCRequired, values[0]);
 
-        shouldConvertToRefer = _shouldConvertToReffer;
-        isKYCRequired = _isKYCRequired;
+        //Set incentive model for the campaign
+        rewardsModel = IncentiveModel(numberValues[7]);
 
-        twoKeySingletonesRegistry = _twoKeySingletonesRegistry;
-        contractor = msg.sender;
-        twoKeyEventSource = TwoKeyEventSource(ITwoKeySingletoneRegistryFetchAddress(_twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyEventSource"));
-        ownerPlasma = twoKeyEventSource.plasmaOf(msg.sender);
+        shouldConvertToRefer = booleanValues[0];
+        isKYCRequired = booleanValues[1];
+        acceptsFiat = booleanValues[2];
+
+        twoKeySingletonesRegistry = _twoKeySingletonRegistry;
+        twoKeyEventSource = TwoKeyEventSource(getContractProxyAddress("TwoKeyEventSource"));
+        ownerPlasma = twoKeyEventSource.plasmaOf(_contractor);
         received_from[ownerPlasma] = ownerPlasma;
         balances[ownerPlasma] = totalSupply_;
+
+
+        initialized = true;
+    }
+
+    /**
+      * @notice Function to set cut of
+      * @param me is the address (ethereum)
+      * @param cut is the cut value
+      */
+    function setCutOf(
+        address me,
+        uint256 cut
+    )
+    internal
+    {
+        // what is the percentage of the bounty s/he will receive when acting as an influencer
+        // the value 255 is used to signal equal partition with other influencers
+        // A sender can set the value only once in a contract
+        address plasma = twoKeyEventSource.plasmaOf(me);
+        require(referrerPlasma2cut[plasma] == 0 || referrerPlasma2cut[plasma] == cut);
+        referrerPlasma2cut[plasma] = cut;
+    }
+
+    /**
+     * @notice Function to set cut
+     * @param cut is the cut value
+     * @dev Executes internal setCutOf method
+     */
+    function setCut(
+        uint256 cut
+    )
+    public
+    {
+        setCutOf(msg.sender, cut);
     }
 
 
     /**
-     * @notice Function to unpack signature and distribute arcs so we can keep trace on referrals
-     * @param signature is the signature containing the whole refchain up to the user
+     * @notice Function to get cut for an (ethereum) address
+     * @param me is the ethereum address
      */
-    function distributeArcsBasedOnSignature(bytes signature) internal {
+    function getReferrerCut(
+        address me
+    )
+    public
+    view
+    returns (uint256)
+    {
+        return referrerPlasma2cut[twoKeyEventSource.plasmaOf(me)];
+    }
+
+    /**
+     * @notice Function to track arcs and make ref tree
+     * @param sig is the signature user joins from
+     */
+    function distributeArcsBasedOnSignature(
+        bytes sig,
+        address _converter
+    )
+    private
+    {
         address[] memory influencers;
         address[] memory keys;
+        uint8[] memory weights;
         address old_address;
-        //TODO: Uncomment this hack address(0)
-        (influencers, keys,, old_address) = super.getInfluencersKeysAndWeightsFromSignature(signature,address(0));
+        (influencers, keys, weights, old_address) = super.getInfluencersKeysAndWeightsFromSignature(sig, _converter);
         uint i;
         address new_address;
-        // move ARCs based on signature information
-        // TODO: Handle failing of this function if the referral chain is too big
         uint numberOfInfluencers = influencers.length;
         for (i = 0; i < numberOfInfluencers; i++) {
-            //Validate that the user is converter in order to join
-            if(shouldConvertToRefer == true) {
-                address eth_address_influencer = twoKeyEventSource.ethereumOf(influencers[i]);
-                require(amountUserContributed[eth_address_influencer] > 0);
-            }
             new_address = twoKeyEventSource.plasmaOf(influencers[i]);
+
             if (received_from[new_address] == 0) {
                 transferFrom(old_address, new_address, 1);
             } else {
@@ -128,18 +180,59 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
             }
             old_address = new_address;
 
+            // TODO Updating the public key of influencers may not be a good idea because it will require the influencers to use
+            // a deterministic private/public key in the link and this might require user interaction (MetaMask signature)
+            // TODO a possible solution is change public_link_key to address=>address[]
+            // update (only once) the public address used by each influencer
+            // we will need this in case one of the influencers will want to start his own off-chain link
             if (i < keys.length) {
                 setPublicLinkKeyOf(new_address, keys[i]);
             }
+
+            // update (only once) the cut used by each influencer
+            // we will need this in case one of the influencers will want to start his own off-chain link
+            if (i < weights.length) {
+                setCutOf(new_address, uint256(weights[i]));
+            }
         }
     }
+
+
+    /**
+     * @notice Function which will buy tokens from upgradable exchange for moderator
+     * @param moderatorFee is the fee in tokens moderator earned
+     */
+    function buyTokensForModeratorRewards(
+        uint moderatorFee
+    )
+    public
+    onlyTwoKeyDonationConversionHandler
+    {
+        //Get deep freeze token pool address
+        address twoKeyDeepFreezeTokenPool = getContractProxyAddress("TwoKeyDeepFreezeTokenPool");
+
+        uint networkFee = twoKeyEventSource.getTwoKeyDefaultNetworkTaxPercent();
+
+        // Balance which will go to moderator
+        uint balance = moderatorFee.mul(100-networkFee).div(100);
+
+        uint moderatorEarnings2key = buyTokensFromUpgradableExchange(balance,moderator); // Buy tokens for moderator
+        buyTokensFromUpgradableExchange(moderatorFee - balance, twoKeyDeepFreezeTokenPool); // Buy tokens for deep freeze token pool
+
+        moderatorTotalEarnings2key = moderatorTotalEarnings2key.add(moderatorEarnings2key);
+    }
+
 
     function updateContractorBalanceAndConverterDonations(
         address _converter,
         uint earningsContractor,
         uint donationsConverter
-    ) public {
+    )
+    public
+    {
         require(msg.sender == twoKeyDonationConversionHandler);
+
+        contractorTotalProceeds = contractorTotalProceeds.add(earningsContractor);
         contractorBalance = contractorBalance.add(earningsContractor);
         amountUserContributed[_converter] = amountUserContributed[_converter].add(donationsConverter);
     }
@@ -160,14 +253,23 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
      * @notice Function to distribute referrer rewards depending on selected model
      * @param converter is the address of the converter
      */
-    //TODO: Add modifier onlyDonationConversionHandler
-    function distributeReferrerRewards(address converter, uint referrer_rewards, uint donationId) public returns (uint) {
-        require(msg.sender == twoKeyDonationConversionHandler);
+    function distributeReferrerRewards(
+        address converter,
+        uint referrer_rewards,
+        uint donationId
+    )
+    public
+//    onlyTwoKeyDonationConversionHandler
+    returns (uint)
+    {
         address[] memory referrers = getReferrers(converter);
         uint numberOfReferrers = referrers.length;
 
         //Buy amount of 2key tokens for rewards
+
         uint totalBountyTokens = buyTokensFromUpgradableExchange(referrer_rewards, address(this));
+
+
 
         //Distribute rewards based on model selected
         if(rewardsModel == IncentiveModel.VANILLA_AVERAGE) {
@@ -188,52 +290,113 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
             for(i=0; i<numberOfReferrers; i++) {
                 updateReferrerMappings(referrers[i], rewards[i], donationId);
             }
-        }
+        } else if(rewardsModel == IncentiveModel.MANUAL) {
+            uint totalBounty2keys = totalBountyTokens;
+            for (i = 0; i < numberOfReferrers; i++) {
+                uint256 b;
 
+                if (i == referrers.length - 1) {  // if its the last influencer then all the bounty goes to it.
+                    b = totalBounty2keys ;
+                }
+                else {
+                    uint256 cut = getReferrerCut(referrers[i]);
+                    if (cut > 0 && cut <= 101) {
+                        b = totalBounty2keys.mul(cut.sub(1)).div(100);
+                    } else {// cut == 0 or 255 indicates equal particine of the bounty
+                        b = totalBounty2keys.div(referrers.length - i);
+                    }
+                }
+                updateReferrerMappings(referrers[i], b, donationId);
+                //Decrease bounty for distributed
+                totalBounty2keys = totalBounty2keys.sub(b);
+            }
+        }
         return totalBountyTokens;
     }
 
     /**
      * @notice Function to join with signature and share 1 arc to the receiver
-     * @param signature is the signature generatedD
+     * @param signature is the signature
      * @param receiver is the address we're sending ARCs to
      */
-    function joinAndShareARC(bytes signature, address receiver) public {
-        distributeArcsBasedOnSignature(signature);
+    function joinAndShareARC(
+        bytes signature,
+        address receiver
+    )
+    public
+    {
+        distributeArcsBasedOnSignature(signature, msg.sender);
         transferFrom(twoKeyEventSource.plasmaOf(msg.sender), twoKeyEventSource.plasmaOf(receiver), 1);
     }
 
     /**
-     * @notice Function where user can join to campaign and donate funds
-     * @param signature is signature he's joining with
+     * @notice Function where converter can convert
+     * @dev payable function
      */
-    //TOOO: Get back modifiers isOngoing
-    function joinAndDonate(bytes signature) public goalValidator onlyInDonationLimit payable {
-        distributeArcsBasedOnSignature(signature);
-        ITwoKeyDonationConversionHandler(twoKeyDonationConversionHandler).createDonation(msg.sender, msg.value);
-    }
+    function convert(
+        bytes signature
+    )
+    public
+    payable
+    {
+        //TODO: Add validator if conversion can be made
 
-    /**
-     * @notice Function where user has already joined and want to donate
-     */
-    function donate() public goalValidator onlyInDonationLimit isOngoing payable {
         address _converterPlasma = twoKeyEventSource.plasmaOf(msg.sender);
-        require(received_from[_converterPlasma] != address(0));
-        ITwoKeyDonationConversionHandler(twoKeyDonationConversionHandler).createDonation(msg.sender, msg.value);
+        if(received_from[_converterPlasma] == address(0)) {
+            distributeArcsBasedOnSignature(signature, msg.sender);
+        }
+        createConversion(msg.value, msg.sender);
+        twoKeyEventSource.converted(address(this),msg.sender,msg.value);
     }
 
-    function convertFiat(address _converter, uint _fiatAmount) public goalValidator onlyInDonationLimit {
-        require(acceptsFiat == true); //Validate that campaign accepts fiat conversions
-        //In case fiat conversion we don't support referral rewards
-        // Validate that the sender is either _converter or trusted maintainer
-        require(msg.sender == _converter || twoKeyEventSource.isAddressMaintainer(msg.sender));
+    /*
+     * @notice Function which is executed to create conversion
+     * @param conversionAmountETHWeiOrFiat is the amount of the ether sent to the contract
+     * @param converterAddress is the sender of eth to the contract
+     */
+    function createConversion(
+        uint conversionAmountEthWEI,
+        address converterAddress
+    )
+    private
+    {
+        //TODO: Add validator for donation goal
+        uint256 maxReferralRewardFiatOrETHWei = conversionAmountEthWEI.mul(maxReferralRewardPercent).div(10**18).div(100);
+
+        uint id = ITwoKeyDonationConversionHandler(twoKeyDonationConversionHandler).supportForCreateConversion(
+            converterAddress,
+            conversionAmountEthWEI,
+            maxReferralRewardFiatOrETHWei,
+            isKYCRequired
+        );
+
+        if(isKYCRequired == false) {
+            ITwoKeyDonationConversionHandler(twoKeyDonationConversionHandler).executeConversion(id);
+        }
     }
 
     /**
-     * @notice Fallback function to handle input payments -> no referrer rewards in this case
+     * @notice Function which acts like getter for all cuts in array
+     * @param last_influencer is the last influencer
+     * @return array of integers containing cuts respectively
      */
-    function () goalValidator onlyInDonationLimit isOngoing payable {
-        //TODO: What is the requirement just to donate money
+    function getReferrerCuts(
+        address last_influencer
+    )
+    public
+    view
+    returns (uint256[])
+    {
+        address[] memory influencers = getReferrers(last_influencer);
+        uint256[] memory cuts = new uint256[](influencers.length + 1);
+
+        uint numberOfInfluencers = influencers.length;
+        for (uint i = 0; i < numberOfInfluencers; i++) {
+            address influencer = influencers[i];
+            cuts[i] = getReferrerCut(influencer);
+        }
+        cuts[influencers.length] = getReferrerCut(last_influencer);
+        return cuts;
     }
 
     /**
@@ -272,23 +435,23 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
 
     /**
      * @notice Function to get how much has user donated
-     * @param _donator is the one who sent money to the contract
+     * @param _converter is the one who sent money to the contract
      */
-    function getAmountUserDonated(address _donator) public view returns (uint) {
+    function getAmountUserDonated(address _converter) public view returns (uint) {
         require(
             msg.sender == contractor ||
-            msg.sender == _donator ||
+            msg.sender == _converter ||
             twoKeyEventSource.isAddressMaintainer(msg.sender)
         );
 
-        return amountUserContributed[_donator];
+        return amountUserContributed[_converter];
     }
 
     /**
      * @param _referrer we want to check earnings for
      */
     function getReferrerBalance(address _referrer) public view returns (uint) {
-        return referrerPlasma2Balances2key[_referrer];
+        return referrerPlasma2Balances2key[twoKeyEventSource.plasmaOf(_referrer)];
     }
 
     /**
@@ -335,18 +498,6 @@ contract TwoKeyDonationCampaign is TwoKeyCampaign, TwoKeyCampaignIncentiveModels
         require(block.timestamp > campaignEndTime); //Making sure time has expired
 
         super.withdrawContractor();
-    }
-
-    /**
-     * @notice Function interface for moderator or referrer to withdraw their earnings
-     * @param _address is the one who wants to withdraw
-     */
-    function withdrawModeratorOrReferrer(address _address) public {
-        require(this.balance >= campaignGoal); //Making sure goal is reached
-        require(block.timestamp > campaignEndTime); //Making sure time has expired
-        require(msg.sender == _address);
-
-//        super.withdrawModeratorOrReferrer(_address);
     }
 
 }

@@ -131,6 +131,7 @@ contract TwoKeyCongress {
         hashAllowedMethods("addMaintainersToSelectedSingletone(address,address[])");
         hashAllowedMethods("deleteMaintainersFromSelectedSingletone(address,address[])");
         hashAllowedMethods("updateRewardsRelease(uint256)");
+        hashAllowedMethods("updateTwoKeyTokenRate(uint256)");
     }
 
 
@@ -207,6 +208,7 @@ contract TwoKeyCongress {
         );
     }
 
+    //TODO: Security backdoor, handle and close ASAP
     /**
      * Add member
      *

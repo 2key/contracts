@@ -19,6 +19,7 @@ contract TwoKeyCampaign is ArcERC20 {
 	using Call for *;
 
 	TwoKeyEventSource twoKeyEventSource; // Address of TwoKeyEventSource contract
+
 	address twoKeySingletonesRegistry; // Address of Registry of all singleton contracts
 	address twoKeyEconomy; // Address of twoKeyEconomy contract
 	address ownerPlasma; //contractor plasma address
@@ -27,6 +28,7 @@ contract TwoKeyCampaign is ArcERC20 {
 	address public moderator; //moderator address
 
 	bool isKYCRequired;
+    bool mustConvertToReferr;
 
 	uint256 conversionQuota;  // maximal ARC tokens that can be passed in transferFrom
 	uint256 contractorBalance; // Contractor balance
@@ -34,7 +36,7 @@ contract TwoKeyCampaign is ArcERC20 {
 	uint256 maxReferralRewardPercent; // maxReferralRewardPercent is actually bonus percentage in ETH
 	uint256 moderatorTotalEarnings2key; //Total earnings of the moderator all time
 	uint256 reservedAmount2keyForRewards; //Reserved amount of 2key tokens for rewards distribution
-    uint256 reservedAmountEthForRewards;
+
 
 	string public publicMetaHash; // Ipfs hash of json campaign object
 	string public privateMetaHash; // Ipfs hash of json sensitive (contractor) information
@@ -66,10 +68,8 @@ contract TwoKeyCampaign is ArcERC20 {
 	{
 		// _from and _to are assumed to be already converted to plasma address (e.g. using plasmaOf)
 		require(_value == 1);
-		require(_from != address(0));
-		require(_to != address(0));
-
 		require(balances[_from] > 0);
+
 		balances[_from] = balances[_from].sub(1);
 		balances[_to] = balances[_to].add(conversionQuota);
 		totalSupply_ = totalSupply_.add(conversionQuota.sub(1));
@@ -175,36 +175,6 @@ contract TwoKeyCampaign is ArcERC20 {
     }
 
 
-	function updateOrSetPublicMetaHash(
-		string _publicMetaHash
-	)
-	onlyContractor
-	{
-		publicMetaHash = _publicMetaHash;
-	}
-
-	function updateOrSetPrivateMetaHash(
-		string _privateMetaHash
-	)
-	onlyContractor
-	{
-		privateMetaHash = _privateMetaHash;
-	}
-
-	/**
-     * @notice Function to update maxReferralRewardPercent
-     * @dev only Contractor can call this method, otherwise it will revert - emits Event when updated
-     * @param value is the new referral percent value
-     */
-	function updateMaxReferralRewardPercent(
-		uint value
-	)
-	public
-	onlyContractor
-	{
-		maxReferralRewardPercent = value;
-	}
-
 	/**
      * @notice Function to set or update public meta hash
      * @param _publicMetaHash is the hash of the campaign
@@ -237,7 +207,7 @@ contract TwoKeyCampaign is ArcERC20 {
 	internal
 	returns (uint)
 	{
-		address upgradableExchange = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyUpgradableExchange");
+		address upgradableExchange = getContractProxyAddress("TwoKeyUpgradableExchange");
 		uint amountBought = IUpgradableExchange(upgradableExchange).buyTokens.value(amountOfMoney)(receiver);
 		return amountBought;
 	}
@@ -249,7 +219,8 @@ contract TwoKeyCampaign is ArcERC20 {
      */
 	function getReceivedFrom(
 		address _receiver
-	) public
+	)
+	public
 	view
 	returns (address)
 	{
@@ -291,7 +262,6 @@ contract TwoKeyCampaign is ArcERC20 {
 	view
 	returns (uint)
 	{
-        require(msg.sender == contractor);
         return (moderatorTotalEarnings2key);
     }
 
@@ -328,6 +298,10 @@ contract TwoKeyCampaign is ArcERC20 {
         contractor.transfer(balance);
     }
 
+	function getContractProxyAddress(string contractName) internal returns (address) {
+		return ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).getContractProxyAddress(contractName);
+	}
+
 
 	/**
  	 * @notice Function where moderator or referrer can withdraw their available funds
@@ -340,14 +314,27 @@ contract TwoKeyCampaign is ArcERC20 {
 	public
 	{
 		require(msg.sender == _address || twoKeyEventSource.isAddressMaintainer(msg.sender));
+		address twoKeyAdminAddress;
+		address twoKeyUpgradableExchangeContract;
 		uint balance;
+
 		address _referrer = twoKeyEventSource.plasmaOf(_address);
 		if(referrerPlasma2Balances2key[_referrer] != 0) {
+			twoKeyAdminAddress =  getContractProxyAddress("TwoKeyAdmin");
+			twoKeyUpgradableExchangeContract = getContractProxyAddress("TwoKeyUpgradableExchange");
+
 			balance = referrerPlasma2Balances2key[_referrer];
 			referrerPlasma2Balances2key[_referrer] = 0;
-			IERC20(twoKeyEconomy).transfer(_address,balance);
+
+			if(now >= ITwoKeyAdmin(twoKeyAdminAddress).getTwoKeyRewardsReleaseDate()){
+				IERC20(twoKeyEconomy).transfer(_address,balance);
+			}
+			else {
+				//In case 2Key rewards still locked;
+				IERC20(twoKeyEconomy).approve(twoKeyUpgradableExchangeContract, balance);
+				IUpgradableExchange(twoKeyUpgradableExchangeContract).buyStableCoinWith2key(balance, _address);
+			}
 			reservedAmount2keyForRewards -= balance;
 		}
 	}
-
 }

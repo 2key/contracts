@@ -23,7 +23,7 @@ After this is done, run this sequence of commands:
 ```
 yarn run geth:reset (Will run docker instance)
 yarn run test:one 2key-protocol/test/sendEth.spec.ts
-yarn run deploy --migrate dev-local,plasma-azure --reset
+yarn run deploy --migrate dev-local,plasma-test-local --reset
 yarn run test:one 2key-protocol/test/congressVote.spec.ts
 yarn run test
 ```

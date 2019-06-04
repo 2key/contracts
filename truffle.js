@@ -122,14 +122,20 @@ module.exports = {
 
     'private.test.k8s-hdwallet': {
       provider: () => new HDWalletProvider(mnemonic, 'https://rpc.private.test.k8s.2key.net'),
-      // host: 'https://ext.geth.private.test.k8s.2key.net',
-      // port: 8545,
-      // network_id: 98052, // Match any network id
       network_id: 98052,
-      gas: 7000000,
-      // gasPrice: 0,
+      gas: 8000000,
+      gasPrice: '0x0',
       // gasPrice: 100000000000,
-      gasPrice: 2000000000
+      // gasPrice: 2000000000
+    },
+
+    'plasma-test-local': {
+      provider: () => new HDWalletProvider(mnemonic, 'https://rpc.private.test.k8s.2key.net'),
+      network_id: 98052,
+      gas: 8000000,
+      gasPrice: '0x0',
+      // gasPrice: 100000000000,
+      // gasPrice: 2000000000
     },
 
     'rinkeby-test' : {
@@ -229,7 +235,7 @@ module.exports = {
         solc: {
             optimizer: {
                 enabled: true,
-                runs: 200
+                runs: 1000
             }
         },
     },

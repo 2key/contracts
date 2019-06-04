@@ -373,14 +373,14 @@ const runMigration3 = (network) => new Promise(async(resolve, reject) => {
   }
 });
 
-const ipfs = new IPFS('ipfs.infura.io', 5001, { protocol: 'https' });
+const ipfs = new IPFS('ipfs.2key.net', 443, { protocol: 'https' });
 
-const ipfsCat = (hash) => new Promise((resolve, reject) => {
-  ipfs.cat(hash, (err, res) => {
+const ipfsGet = (hash) => new Promise((resolve, reject) => {
+  ipfs.get(hash, (err, res) => {
     if (err) {
       reject(err);
     } else {
-      resolve(res);
+      resolve(res[0] && res[0].content.toString());
     }
   });
 });
@@ -413,7 +413,7 @@ const updateIPFSHashes = async(contracts) => {
   const { TwoKeyVersionHandler: currentVersionHandler } = existingVersionHandlerFile;
 
   if (currentVersionHandler) {
-    versionsList = JSON.parse((await ipfsCat(currentVersionHandler)).toString());
+    versionsList = JSON.parse((await ipfsGet(currentVersionHandler)).toString());
     console.log('VERSION LIST', versionsList);
   }
   versionsList[nonSingletonHash] = {};

@@ -48,11 +48,59 @@ contract IHandleCampaignDeployment {
     function setInitialParamsConversionHandler(
         uint [] values,
         address _twoKeyAcquisitionCampaignERC20,
+        address _twoKeyPurchasesHandler,
         address _contractor,
         address _assetContractERC20,
         address _twoKeyEventSource,
         address _twoKeyBaseReputationRegistry
     ) public;
 
+
+    /**
+     * @notice Function which will be used as simulation for constructor under TwoKeyPurchasesHandler contract
+     * @dev This is just an interface of the function, the actual logic
+     * is implemented under TwoKeyPurchasesHandler.sol contract
+     * This function can be called only once per proxy address
+     */
+    function setInitialParamsPurchasesHandler(
+        uint[] values,
+        address _contractor,
+        address _assetContractERC20,
+        address _twoKeyEventSource,
+        address _proxyConversionHandler
+    ) public;
+
+
+    /**
+     * @notice Function which will be used as simulation for constructor under TwoKeyDonationCampaign contract
+     * @dev This is just an interface of the function, the actual logic
+     * is implemented under TwoKeyDonationCampaign.sol contract
+     * This function can be called only once per proxy address
+     */
+    function setInitialParamsDonationCampaign(
+        address _contractor,
+        address _moderator,
+        address _twoKeySingletonRegistry,
+        address _twoKeyDonationConversionHandler,
+        uint [] numberValues,
+        bool [] booleanValues,
+        string _campaignName
+    ) public;
+
+
+    /**
+     * @notice Function which will be used as simulation for constructor under TwoKeyDonationConversionHandler contract
+     * @dev This is just an interface of the function, the actual logic
+     * is implemented under TwoKeyDonationConversionHandler.sol contract
+     * This function can be called only once per proxy address
+     */
+    function setInitialParamsDonationConversionHandler(
+        string tokenName,
+        string tokenSymbol,
+        address _contractor,
+        address _twoKeyDonationCampaign,
+        address _twoKeyEventSource,
+        address _twoKeyBaseReputationRegistry
+    ) public;
 }
 

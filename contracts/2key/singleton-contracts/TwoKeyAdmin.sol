@@ -17,12 +17,13 @@ contract TwoKeyAdmin is Upgradeable {
 	TwoKeyEventSource twoKeyEventSource;
 	TwoKeyRegistry twoKeyReg;
 
+
 	address public twoKeyCongress;
 	address public newTwoKeyAdminAddress;
 
 	uint twoKeyIntegratorDefaultFeePercent; // 2% is default value for this
 	uint twoKeyNetworkTaxPercent; //2% is default value for this
-
+	uint twoKeyTokenRate;
 	uint rewardReleaseAfter;
 
     bool initialized = false;
@@ -53,18 +54,20 @@ contract TwoKeyAdmin is Upgradeable {
         address _economy,
         address _exchange,
         address _twoKeyRegistry,
-        address _eventSource
+        address _eventSource,
+		uint _twoKeyTokenReleaseDate
     ) external {
         require(initialized == false);
         twoKeyIntegratorDefaultFeePercent = 2;
 		twoKeyNetworkTaxPercent = 2;
+		twoKeyTokenRate = 95; //The actual rate is 95 / 1000 = 0.095$
         twoKeyCongress = _twoKeyCongress;
         twoKeyReg = TwoKeyRegistry(_twoKeyRegistry);
         twoKeyUpgradableExchange = TwoKeyUpgradableExchange(_exchange);
         twoKeyEconomy = TwoKeyEconomy(_economy);
         twoKeyEventSource = TwoKeyEventSource(_eventSource);
         initialized = true;
-		rewardReleaseAfter = 1577836800; //01/01/2020
+		rewardReleaseAfter = _twoKeyTokenReleaseDate; //01/01/2020
     }
 
     /// @notice Function where only elected admin can transfer tokens to an address
@@ -292,5 +295,22 @@ contract TwoKeyAdmin is Upgradeable {
 	returns (uint)
 	{
 		return twoKeyNetworkTaxPercent;
+	}
+
+	function updateTwoKeyTokenRate(
+		uint newRate
+	)
+	public
+	onlyTwoKeyCongress
+	{
+		twoKeyTokenRate = newRate;
+	}
+
+	function getTwoKeyTokenRate()
+	public
+	view
+	returns (uint)
+	{
+		return twoKeyTokenRate;
 	}
 }
