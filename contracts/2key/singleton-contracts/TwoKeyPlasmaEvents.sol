@@ -369,4 +369,21 @@ contract TwoKeyPlasmaEvents is Upgradeable {
             isMaintainer[_maintainers[i]] = false;
         }
     }
+
+    /**
+     * @notice Function to validate if signature is valid
+     * @param signature is the signature
+     */
+    function recover(
+        bytes signature
+    )
+    public
+    view
+    returns (address)
+    {
+        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding referrer to plasma")),
+            keccak256(abi.encodePacked("GET_REFERRER_REWARDS"))));
+        address recoveredAddress = Call.recoverHash(hash, signature, 0);
+        return recoveredAddress;
+    }
 }
