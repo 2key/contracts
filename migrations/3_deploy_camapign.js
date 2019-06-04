@@ -64,16 +64,16 @@ module.exports = function deploy(deployer) {
             await new Promise(async(resolve,reject) => {
                 try {
                     let txHash = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address)
-                        .addVersion('TwoKeyAcquisitionLogicHandler', '1.3', TwoKeyAcquisitionLogicHandler.address);
+                        .addVersion('TwoKeyAcquisitionLogicHandler', '1.4', TwoKeyAcquisitionLogicHandler.address);
 
                     txHash = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address)
-                        .addVersion('TwoKeyConversionHandler', '1.3', TwoKeyConversionHandler.address);
+                        .addVersion('TwoKeyConversionHandler', '1.4', TwoKeyConversionHandler.address);
 
                     txHash = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address)
-                        .addVersion('TwoKeyAcquisitionCampaignERC20', '1.3', TwoKeyAcquisitionCampaignERC20.address);
+                        .addVersion('TwoKeyAcquisitionCampaignERC20', '1.4', TwoKeyAcquisitionCampaignERC20.address);
 
                     txHash = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address)
-                        .addVersion('TwoKeyPurchasesHandler', '1.3', TwoKeyPurchasesHandler.address);
+                        .addVersion('TwoKeyPurchasesHandler', '1.4', TwoKeyPurchasesHandler.address);
 
                     resolve(txHash);
                 } catch (e) {
@@ -86,9 +86,9 @@ module.exports = function deploy(deployer) {
             await new Promise(async(resolve,reject) => {
                 try {
                     let txHash = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address)
-                        .addVersion('TwoKeyDonationCampaign','1.5', TwoKeyDonationCampaign.address);
+                        .addVersion('TwoKeyDonationCampaign','1.6', TwoKeyDonationCampaign.address);
                     txHash = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address)
-                        .addVersion('TwoKeyDonationConversionHandler', '1.5', TwoKeyDonationConversionHandler.address);
+                        .addVersion('TwoKeyDonationConversionHandler', '1.6', TwoKeyDonationConversionHandler.address);
 
                     resolve(txHash);
                 } catch (e) {
