@@ -28,6 +28,9 @@ yarn run test:one 2key-protocol/test/congressVote.spec.ts
 yarn run test
 ```
 
+Make sure everything is synced with branch. (commit/push all submodules (`cd 2key-protocol/src`, `cd 2key-protocol/dist`)) and then
+commit-push `contracts` so all submodules are synced.
+
 After all tests pass you'll have to run one of deploy commands depending of
 deployment type and network deploying to.
 
