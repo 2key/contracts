@@ -55,7 +55,7 @@ let conversionQuota = 5;
 let isKYCRequired = true;
 let shouldConvertToRefer = false;
 let acceptsFiat = false;
-let incentiveModel = "VANILLA_AVERAGE";
+let incentiveModel = "MANUAL";
 let conversionAmountEth = 1;
 
 
@@ -288,7 +288,7 @@ describe('TwoKeyDonationCampaign', () => {
         i++;
 
         let conversionId = 0;
-        let conversion: IConversion = await twoKeyProtocol.DonationCampaign.getConversion(campaignAddress, 0, from);
-        console.log(conversion);
-    })
+        let conversion: IConversion = await twoKeyProtocol.DonationCampaign.getConversion(campaignAddress, conversionId, from);
+        expect(conversion.conversionState).to.be.equal("EXECUTED");
+    }).timeout(60000);
 });

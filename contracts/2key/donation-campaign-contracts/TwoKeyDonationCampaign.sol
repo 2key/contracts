@@ -437,21 +437,21 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
      * @notice Function to get how much has user donated
      * @param _donator is the one who sent money to the contract
      */
-    function getAmountUserDonated(address _donator) public view returns (uint) {
+    function getAmountUserDonated(address _converter) public view returns (uint) {
         require(
             msg.sender == contractor ||
-            msg.sender == _donator ||
+            msg.sender == _converter ||
             twoKeyEventSource.isAddressMaintainer(msg.sender)
         );
 
-        return amountUserContributed[_donator];
+        return amountUserContributed[_converter];
     }
 
     /**
      * @param _referrer we want to check earnings for
      */
     function getReferrerBalance(address _referrer) public view returns (uint) {
-        return referrerPlasma2Balances2key[_referrer];
+        return referrerPlasma2Balances2key[twoKeyEventSource.plasmaOf(_referrer)];
     }
 
     /**
@@ -498,18 +498,6 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
         require(block.timestamp > campaignEndTime); //Making sure time has expired
 
         super.withdrawContractor();
-    }
-
-    /**
-     * @notice Function interface for moderator or referrer to withdraw their earnings
-     * @param _address is the one who wants to withdraw
-     */
-    function withdrawModeratorOrReferrer(address _address) public {
-        require(this.balance >= campaignGoal); //Making sure goal is reached
-        require(block.timestamp > campaignEndTime); //Making sure time has expired
-        require(msg.sender == _address);
-
-//        super.withdrawModeratorOrReferrer(_address);
     }
 
 }
