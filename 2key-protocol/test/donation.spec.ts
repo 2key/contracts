@@ -94,11 +94,16 @@ const progressCallback = (name: string, mined: boolean, transactionResult: strin
     console.log(`Contract ${name} ${mined ? `deployed with address ${transactionResult}` : `placed to EVM. Hash ${transactionResult}`}`);
 };
 
+const printTestNumber = (): void => {
+    console.log('--------------------------------------- Test ' + i + ' ----------------------------------------------');
+    i++;
+};
+
+
 describe('TwoKeyDonationCampaign', () => {
 
    it('should create a donation campaign', async() => {
-       console.log('--------------------------------------- Test ' + i + ' ----------------------------------------------');
-       i++;
+        printTestNumber();
        const {web3, address} = web3switcher.deployer();
        from = address;
        twoKeyProtocol = new TwoKeyProtocol({
@@ -126,30 +131,26 @@ describe('TwoKeyDonationCampaign', () => {
 
 
     it('should proff that campaign is validated and registered properly', async() => {
-        console.log('--------------------------------------- Test ' + i + ' ----------------------------------------------');
-        i++;
+        printTestNumber();
         let isValidated = await twoKeyProtocol.CampaignValidator.isCampaignValidated(campaignAddress);
         expect(isValidated).to.be.equal(true);
         console.log('Campaign is validated');
     }).timeout(60000);
 
     it('should proof that non singleton hash is set for the campaign', async() => {
-        console.log('--------------------------------------- Test ' + i + ' ----------------------------------------------');
-        i++;
+        printTestNumber();
         let nonSingletonHash = await twoKeyProtocol.CampaignValidator.getCampaignNonSingletonsHash(campaignAddress);
         expect(nonSingletonHash).to.be.equal(twoKeyProtocol.DonationCampaign.getNonSingletonsHash());
     }).timeout(60000);
 
     it('should save campaign to IPFS', async () => {
-        console.log('--------------------------------------- Test ' + i + ' ----------------------------------------------');
-        i++;
+        printTestNumber();
         const campaignMeta = await twoKeyProtocol.DonationCampaign.getPublicMeta(campaignAddress,from);
         expect(campaignMeta.meta.campaignName).to.be.equal(campaignData.campaignName);
     }).timeout(120000);
 
     it('should get user public link', async () => {
-        console.log('--------------------------------------- Test ' + i + ' ----------------------------------------------');
-        i++;
+        printTestNumber();
         try {
             const publicLink = await twoKeyProtocol.DonationCampaign.getPublicLinkKey(campaignAddress, from);
             console.log('User Public Link', publicLink);
@@ -160,15 +161,13 @@ describe('TwoKeyDonationCampaign', () => {
     }).timeout(10000);
 
     it('should get and decrypt ipfs hash', async() => {
-        console.log('--------------------------------------- Test ' + i + ' ----------------------------------------------');
-        i++;
+        printTestNumber();
         let data: IPrivateMetaInformation = await twoKeyProtocol.DonationCampaign.getPrivateMetaHash(campaignAddress, from);
         expect(data.campaignPublicLinkKey).to.be.equal(links.deployer);
     }).timeout(120000);
 
     it('should visit campaign as guest', async () => {
-        console.log('--------------------------------------- Test ' + i + ' ----------------------------------------------');
-        i++;
+        printTestNumber();
         const {web3, address} = web3switcher.guest();
         from = address;
         twoKeyProtocol.setWeb3({
@@ -186,8 +185,7 @@ describe('TwoKeyDonationCampaign', () => {
     }).timeout(60000);
 
     it('should create a join link', async () => {
-        console.log('--------------------------------------- Test ' + i + ' ----------------------------------------------');
-        i++;
+        printTestNumber();
         const {web3, address} = web3switcher.gmail();
         from = address;
         twoKeyProtocol.setWeb3({
@@ -210,8 +208,7 @@ describe('TwoKeyDonationCampaign', () => {
     }).timeout(60000);
 
     it('should show maximum referral reward after ONE referrer', async() => {
-        console.log('--------------------------------------- Test ' + i + ' ----------------------------------------------');
-        i++;
+        printTestNumber();
         const {web3, address} = web3switcher.test4();
         from = address;
         twoKeyProtocol.setWeb3({
@@ -231,8 +228,7 @@ describe('TwoKeyDonationCampaign', () => {
     }).timeout(60000);
 
     it('should donate 1 ether to campaign', async () => {
-        console.log('--------------------------------------- Test ' + i + ' ----------------------------------------------');
-        i++;
+        printTestNumber();
         console.log('4) buy from test4 REFLINK', links.gmail);
 
         let txHash = await twoKeyProtocol.DonationCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(conversionAmountEth, 'ether'), links.gmail, from);
@@ -243,8 +239,7 @@ describe('TwoKeyDonationCampaign', () => {
     }).timeout(60000);
 
     it('should approve converter and execute conversion if KYC == TRUE', async() => {
-        console.log('--------------------------------------- Test ' + i + ' ----------------------------------------------');
-        i++;
+        printTestNumber();
 
         const {web3, address} = web3switcher.deployer();
         from = address;
@@ -275,8 +270,7 @@ describe('TwoKeyDonationCampaign', () => {
     }).timeout(60000);
 
     it('should proof that the invoice has been issued for executed conversion (Invoice tokens transfered)', async() => {
-        console.log('--------------------------------------- Test ' + i + ' ----------------------------------------------');
-        i++;
+        printTestNumber();
 
         let balance = await twoKeyProtocol.ERC20.getERC20Balance(invoiceTokenAddress, env.TEST4_ADDRESS);
         balance = parseFloat(twoKeyProtocol.Utils.fromWei(balance,'ether').toString());
@@ -284,11 +278,16 @@ describe('TwoKeyDonationCampaign', () => {
     }).timeout(60000);
 
     it('should get conversion object', async() => {
-        console.log('--------------------------------------- Test ' + i + ' ----------------------------------------------');
-        i++;
+        printTestNumber();
 
         let conversionId = 0;
         let conversion: IConversion = await twoKeyProtocol.DonationCampaign.getConversion(campaignAddress, conversionId, from);
         expect(conversion.conversionState).to.be.equal("EXECUTED");
     }).timeout(60000);
+
+    it('should get referrer earnings', async() => {
+        printTestNumber();
+        let referrerBalance = await twoKeyProtocol.DonationCampaign.getReferrerBalance(campaignAddress, env.GMAIL_ADDRESS, from);
+        console.log(referrerBalance);
+    })
 });

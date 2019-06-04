@@ -435,7 +435,7 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
 
     /**
      * @notice Function to get how much has user donated
-     * @param _donator is the one who sent money to the contract
+     * @param _converter is the one who sent money to the contract
      */
     function getAmountUserDonated(address _converter) public view returns (uint) {
         require(
