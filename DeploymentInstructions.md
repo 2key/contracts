@@ -20,12 +20,26 @@ file named `accountsConfig.json`. If not, create one with the following:
 If you're deploying with Ledger, the config file will be just used for the testing on dev-local and plasma deployment.
 
 After this is done, run this sequence of commands:
-```
-yarn run geth:reset (Will run docker instance)
+```bash
+#start on main path of contracts repo root
+yarn run geth:reset #(Will run docker instance)
 yarn run test:one 2key-protocol/test/sendEth.spec.ts
 yarn run deploy --migrate dev-local,plasma-test-local --reset
 yarn run test:one 2key-protocol/test/congressVote.spec.ts
 yarn run test
+cd 2key-protocol/src 
+Git add . 
+Git commit -m 'message'
+Git push -u
+
+cd ... 
+git status
+Git add . 
+Git commit -m 'sync submodules' 
+Git push -u
+
+yarn run deploy public.test.k8s-hdwallet,private.test.k8s-hdwallet --reset
+
 ```
 
 After all tests pass you'll have to run one of deploy commands depending of
