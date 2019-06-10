@@ -12,7 +12,7 @@ contract InvoiceTokenERC20 is ERC20 {
 
     using SafeMath for uint256;
 
-    uint256 internal totalSupply_ = 10000000000000000;
+    uint256 internal totalSupply_ = 10000000000000000000000000000;
     string public name;
     string public symbol;
     uint8 public decimals = 18;

@@ -291,11 +291,11 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
 
     /**
      * @notice Function to get expected rate from Kyber contract
-     * @param amount is the amount we'd like to exchange
+     * @param amountEthWei is the amount we'd like to exchange
      * @return if the value is 0 that means we can't
      */
     function getKyberExpectedRate(
-        uint amount
+        uint amountEthWei
     )
     public
     view
@@ -305,7 +305,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
 
         ERC20 eth = ERC20(0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee);
         uint minConversionRate;
-        (minConversionRate,) = proxyContract.getExpectedRate(eth, DAI, amount);
+        (minConversionRate,) = proxyContract.getExpectedRate(eth, DAI, amountEthWei);
 
         return minConversionRate;
     }

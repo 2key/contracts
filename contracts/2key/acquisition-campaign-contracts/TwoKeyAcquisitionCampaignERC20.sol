@@ -27,6 +27,14 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
 
 
     /**
+      * @notice Modifier which will enable only twoKeyConversionHandlerContract to execute some functions
+      */
+    modifier onlyTwoKeyConversionHandler() {
+        require(msg.sender == address(conversionHandler));
+        _;
+    }
+
+    /**
      * @notice This function is simulation for the constructor, since we're relying on proxies
      * @param _twoKeySingletonesRegistry is the address of TwoKeySingletonsRegistry contract
      * @param _twoKeyAcquisitionLogicHandler is the address of TwoKeyAcquisitionLogicHandler contract
@@ -81,13 +89,6 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         isCampaignInitialized = true;
     }
 
-    /**
-     * @notice Modifier which will enable only twoKeyConversionHandlerContract to execute some functions
-     */
-    modifier onlyTwoKeyConversionHandler() {
-        require(msg.sender == address(conversionHandler));
-        _;
-    }
 
 
     /**
