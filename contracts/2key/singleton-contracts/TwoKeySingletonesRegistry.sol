@@ -20,22 +20,22 @@ import "../upgradability/Upgradeable.sol";
  */
 contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
 
-    mapping (string => mapping(string => address)) internal versions;
+    mapping (string => mapping(string => address)) internal versionsLogic;
+    mapping (string => mapping(string => address)) internal versionsStorage;
     address public deployer;
 
-    mapping (string => address) contractToProxy;
-    mapping (string => string) contractNameToLatestVersionName;
+    mapping (string => address) contractNameToProxyLogicAddress;
+    mapping (string => address) contractNameToProxyStorageAddress;
+
+    mapping (string => string) contractNameToLatestVersionLogic;
+    mapping (string => string) contractNameToLatestVersionStorage;
+
     mapping (string => address) nonUpgradableContractToAddress;
 
-    address[] allVerified2keyContracts;
 
-    event ProxyForCampaign(
-        address proxyLogicHandler,
-        address proxyConversionHandler,
-        address proxyAcquisitionCampaign,
-        address proxyPurchasesHandler,
-        address contractor,
-        uint timestamp
+    event ProxiesDeployed(
+        address logicProxy,
+        address storageProxy
     );
 
     /**
@@ -48,10 +48,50 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
     }
 
     modifier onlyMaintainer {
-        address twoKeyMaintainersRegistry = contractToProxy["TwoKeyMaintainersRegistry"];
+        address twoKeyMaintainersRegistry = contractNameToProxyLogicAddress["TwoKeyMaintainersRegistry"];
         require(msg.sender == deployer || ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender));
         _;
     }
+
+
+    function deployProxy(
+        string contractName,
+        string version
+    )
+    internal
+    returns (address)
+    {
+        UpgradeabilityProxy proxy = new UpgradeabilityProxy(contractName, version, msg.sender);
+        emit ProxyCreated(proxy);
+        return address(proxy);
+    }
+
+
+    function deployProxyLogic(
+        string contractName,
+        string version
+    )
+    internal
+    returns (address)
+    {
+        address proxy = deployProxy(contractName, version);
+        contractNameToProxyLogicAddress[contractName] = proxy;
+        return proxy;
+    }
+
+
+    function deployProxyStorage(
+        string contractName,
+        string version
+    )
+    internal
+    returns (address)
+    {
+        address proxy = deployProxy(contractName, version);
+        contractNameToProxyStorageAddress[contractName] = proxy;
+        return proxy;
+    }
+
 
     /**
      * @notice Function to add non upgradable contract in registry of all contracts
@@ -84,9 +124,28 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
     public
     onlyMaintainer
     {
-        require(versions[contractName][version] == 0x0);
-        versions[contractName][version] = implementation;
-        contractNameToLatestVersionName[contractName] = version;
+        require(versionsLogic[contractName][version] == 0x0);
+        versionsLogic[contractName][version] = implementation;
+        contractNameToLatestVersionLogic[contractName] = version;
+        emit VersionAdded(version, implementation);
+    }
+
+    /**
+     * @dev Registers a new version with its implementation address
+     * @param version representing the version name of the new implementation to be registered
+     * @param implementation representing the address of the new implementation to be registered
+     */
+    function addStorageVersion(
+        string contractName,
+        string version,
+        address implementation
+    )
+    public
+    onlyMaintainer
+    {
+        require(versionsStorage[contractName][version] == 0x0);
+        versionsStorage[contractName][version] = implementation;
+        contractNameToLatestVersionStorage[contractName] = version;
         emit VersionAdded(version, implementation);
     }
 
@@ -103,7 +162,23 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
     view
     returns (address)
     {
-        return versions[contractName][version];
+        return versionsLogic[contractName][version];
+    }
+
+    /**
+     * @dev Tells the address of the implementation for a given version
+     * @param version to query the implementation of
+     * @return address of the implementation registered for the given version
+     */
+    function getVersionStorage(
+        string contractName,
+        string version
+    )
+    public
+    view
+    returns (address)
+    {
+        return versionsStorage[contractName][version];
     }
 
 
@@ -119,7 +194,22 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
     view
     returns (string)
     {
-        return contractNameToLatestVersionName[contractName];
+        return contractNameToLatestVersionLogic[contractName];
+    }
+
+    /**
+     * @notice Gets the latest contract version
+     * @param contractName is the name of the contract
+     * @return string representation of the last version
+     */
+    function getLatestContractStorageVersion(
+        string contractName
+    )
+    public
+    view
+    returns (string)
+    {
+        return contractNameToLatestVersionStorage[contractName];
     }
 
 
@@ -145,13 +235,27 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
     view
     returns (address)
     {
-        return contractToProxy[_contractName];
+        return contractNameToProxyLogicAddress[_contractName];
     }
 
     /**
-     * @dev Creates an upgradeable proxy
+     * @notice Function to return address of storage proxy for specific contract
+     * @param _contractName is the name of the contract we'd like to get proxy address
+     * @return is the address of the proxy for the specific contract
+     */
+    function getContractProxyStorageAddress(
+        string _contractName
+    )
+    public
+    view
+    returns (address)
+    {
+        return contractNameToProxyStorageAddress[_contractName];
+    }
+
+    /**
+     * @dev Creates an upgradeable proxy for both Storage and Logic
      * @param version representing the first version to be set for the proxy
-     * @return address of the new proxy created
      */
     function createProxy(
         string contractName,
@@ -159,25 +263,46 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
     )
     public
     onlyMaintainer
-    payable
-    returns (UpgradeabilityProxy)
     {
-        UpgradeabilityProxy proxy = new UpgradeabilityProxy(contractName, version, msg.sender);
-        Upgradeable(proxy).initialize.value(msg.value)(msg.sender);
-        contractToProxy[contractName] = proxy;
-        emit ProxyCreated(proxy);
-        return proxy;
+        address logicProxy = deployProxyLogic(contractName, version);
+        address storageProxy = deployProxyStorage(contractName, version);
+
+        emit ProxiesDeployed(logicProxy, storageProxy);
     }
 
     /**
-     * @notice Function to return all 2key running contract addresses
-     * @return array with all contract addresses
+     * @notice Function to create new proxy for logic contract
+     * @param contractName is the name of the contract we're creating new proxy
      */
-    function getAll2keyContracts()
+    function createProxyLogic(
+        string contractName,
+        string version
+    )
     public
-    view
-    returns (address[])
+    onlyMaintainer
+    returns (address)
     {
-        return allVerified2keyContracts;
+        return deployProxyLogic(contractName, version);
     }
+
+
+    /**
+     * @notice Function to create new proxy for storage contract
+     * @param contractName is the name of the contract we're creating new proxy
+     */
+    function createProxyStorage(
+        string contractName,
+        string version
+    )
+    public
+    onlyMaintainer
+    returns (address)
+    {
+        return deployProxyStorage(contractName, version);
+    }
+
+
+
+
+
 }

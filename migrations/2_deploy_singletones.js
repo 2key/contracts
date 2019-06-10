@@ -30,7 +30,7 @@ const deploymentConfigFile = path.join(__dirname, '../deploymentConfig.json');
 module.exports = function deploy(deployer) {
     const { network_id } = deployer;
     /**
-     * Read the proxy file into fileObject
+     * Read the logicProxy file into fileObject
      * @type {{}}
      */
     let fileObject = {};
@@ -131,25 +131,27 @@ module.exports = function deploy(deployer) {
                     try {
                         console.log('... Adding TwoKeyRegistry to Proxy registry as valid implementation');
                         /**
-                         * Adding TwoKeyRegistry to the registry, deploying 1st proxy for that 1.0 version and setting initial params there
+                         * Adding TwoKeyRegistry to the registry, deploying 1st logicProxy for that 1.0 version and setting initial params there
                          */
                         let txHash = await registry.addVersion("TwoKeyRegistry", "1.0", TwoKeyRegistry.address);
                         let { logs } = await registry.createProxy("TwoKeyRegistry", "1.0");
-                        let { proxy } = logs.find(l => l.event === 'ProxyCreated').args;
-                        console.log('Proxy address for the TwoKeyRegistry is : ' + proxy);
+                        let { logicProxy, storageProxy } = logs.find(l => l.event === 'ProxiesDeployed').args;
+
+                        console.log('logs',logicProxy, storageProxy);
+                        console.log('Proxy address for the TwoKeyRegistry is : ' + logicProxy);
                         console.log('Network ID', network_id);
                         const twoKeyReg = fileObject.TwoKeyRegistry || {};
                         twoKeyReg[network_id] = {
                             'address': TwoKeyRegistry.address,
-                            'Proxy': proxy,
+                            'Proxy': logicProxy,
                             'Version': "1.0",
                             maintainer_address: maintainerAddresses,
                         };
 
 
                         fileObject['TwoKeyRegistry'] = twoKeyReg;
-                        proxyAddressTwoKeyRegistry = proxy;
-                        resolve(proxy);
+                        proxyAddressTwoKeyRegistry = logicProxy;
+                        resolve(logicProxy);
                     } catch (e) {
                         reject(e);
                     }
@@ -159,24 +161,24 @@ module.exports = function deploy(deployer) {
                     try {
                         console.log('... Adding TwoKeyMaintainersRegistry to Proxy registry as valid implementation');
                         /**
-                         * Adding TwoKeyMaintainersRegistry to the registry, deploying 1st proxy for that 1.0 version and setting initial params there
+                         * Adding TwoKeyMaintainersRegistry to the registry, deploying 1st logicProxy for that 1.0 version and setting initial params there
                          */
                         let txHash = await registry.addVersion("TwoKeyMaintainersRegistry", "1.0", TwoKeyMaintainersRegistry.address);
                         let { logs } = await registry.createProxy("TwoKeyMaintainersRegistry", "1.0");
-                        let { proxy } = logs.find(l => l.event === 'ProxyCreated').args;
-                        console.log('Proxy address for the TwoKeyMaintainersRegistry is : ' + proxy);
+                        let { logicProxy, storageProxy} = logs.find(l => l.event === 'ProxiesDeployed').args;
+                        console.log('Proxy address for the TwoKeyMaintainersRegistry is : ' + logicProxy);
                         console.log('Network ID', network_id);
                         const twoKeyMaintainersRegistry = fileObject.TwoKeyMaintainersRegistry || {};
                         twoKeyMaintainersRegistry[network_id] = {
                             'address': TwoKeyMaintainersRegistry.address,
-                            'Proxy': proxy,
+                            'Proxy': logicProxy,
                             'Version': "1.0",
                             maintainer_address: maintainerAddresses,
                         };
 
                         fileObject['TwoKeyMaintainersRegistry'] = twoKeyMaintainersRegistry;
-                        proxyAddressTwoKeyMaintainersRegistry = proxy;
-                        resolve(proxy);
+                        proxyAddressTwoKeyMaintainersRegistry = logicProxy;
+                        resolve(logicProxy);
                     } catch (e) {
                         reject(e);
                     }
@@ -186,25 +188,25 @@ module.exports = function deploy(deployer) {
                     try {
                         console.log('... Adding TwoKeyFactory to Proxy registry as valid implementation');
                         /**
-                         * Adding TwoKeyRegistry to the registry, deploying 1st proxy for that 1.0 version and setting initial params there
+                         * Adding TwoKeyRegistry to the registry, deploying 1st logicProxy for that 1.0 version and setting initial params there
                          */
                         let txHash = await registry.addVersion("TwoKeyFactory", "1.0", TwoKeyFactory.address);
                         let { logs } = await registry.createProxy("TwoKeyFactory", "1.0");
-                        let { proxy } = logs.find(l => l.event === 'ProxyCreated').args;
-                        console.log('Proxy address for the TwoKeyFactory is : ' + proxy);
+                        let { logicProxy, storageProxy } = logs.find(l => l.event === 'ProxiesDeployed').args;
+                        console.log('Proxy address for the TwoKeyFactory is : ' + logicProxy);
                         console.log('Network ID', network_id);
                         const twoKeyFactory = fileObject.TwoKeyFactory || {};
                         twoKeyFactory[network_id] = {
                             'address': TwoKeyFactory.address,
-                            'Proxy': proxy,
+                            'Proxy': logicProxy,
                             'Version': "1.0",
                             maintainer_address: maintainerAddresses,
                         };
 
 
                         fileObject['TwoKeyFactory'] = twoKeyFactory;
-                        proxyAddressTwoKeyFactory = proxy;
-                        resolve(proxy);
+                        proxyAddressTwoKeyFactory = logicProxy;
+                        resolve(logicProxy);
                     } catch (e) {
                         reject(e);
                     }
@@ -214,24 +216,24 @@ module.exports = function deploy(deployer) {
                     try {
                         console.log('... Adding TwoKeyCampaignValidator to Proxy registry as valid implementation');
                         /**
-                         * Adding TwoKeyCampaignValidator to the registry, deploying 1st proxy for that 1.0 version and setting initial params there
+                         * Adding TwoKeyCampaignValidator to the registry, deploying 1st logicProxy for that 1.0 version and setting initial params there
                          */
                         let txHash = await registry.addVersion("TwoKeyCampaignValidator", "1.0", TwoKeyCampaignValidator.address);
                         let { logs } = await registry.createProxy("TwoKeyCampaignValidator", "1.0");
-                        let { proxy } = logs.find(l => l.event === 'ProxyCreated').args;
-                        console.log('Proxy address for the TwoKeyCampaignValidator is : ' + proxy);
+                        let { logicProxy , storageProxy } = logs.find(l => l.event === 'ProxiesDeployed').args;
+                        console.log('Proxy address for the TwoKeyCampaignValidator is : ' + logicProxy);
                         const twoKeyValidator = fileObject.TwoKeyCampaignValidator || {};
                         twoKeyValidator[network_id] = {
                             'address': TwoKeyCampaignValidator.address,
-                            'Proxy': proxy,
+                            'Proxy': logicProxy,
                             'Version': "1.0",
                             maintainer_address: maintainerAddresses,
                         };
 
 
                         fileObject['TwoKeyCampaignValidator'] = twoKeyValidator;
-                        proxyAddressTwoKeyCampaignValidator = proxy;
-                        resolve(proxy);
+                        proxyAddressTwoKeyCampaignValidator = logicProxy;
+                        resolve(logicProxy);
                     } catch (e) {
                         reject(e);
                     }
@@ -241,24 +243,24 @@ module.exports = function deploy(deployer) {
                     try {
                         console.log('... Adding TwoKeyCommunityTokenPool to Proxy registry as valid implementation');
                         /**
-                         * Adding TwoKeyCommunityTokenPool to the registry, deploying 1st proxy for that 1.0 version and setting initial params there
+                         * Adding TwoKeyCommunityTokenPool to the registry, deploying 1st logicProxy for that 1.0 version and setting initial params there
                          */
                         let txHash = await registry.addVersion("TwoKeyCommunityTokenPool", "1.0", TwoKeyCommunityTokenPool.address);
                         let { logs } = await registry.createProxy("TwoKeyCommunityTokenPool", "1.0");
-                        let { proxy } = logs.find(l => l.event === 'ProxyCreated').args;
-                        console.log('Proxy address for the TwoKeyCommunityTokenPool is : ' + proxy);
+                        let { logicProxy , storageProxy} = logs.find(l => l.event === 'ProxiesDeployed').args;
+                        console.log('Proxy address for the TwoKeyCommunityTokenPool is : ' + logicProxy);
                         const twoKeyCommunityTokenPool = fileObject.TwoKeyCommunityTokenPool || {};
                         twoKeyCommunityTokenPool[network_id] = {
                             'address': TwoKeyCommunityTokenPool.address,
-                            'Proxy': proxy,
+                            'Proxy': logicProxy,
                             'Version': "1.0",
                             maintainer_address: maintainerAddresses,
                         };
 
 
                         fileObject['TwoKeyCommunityTokenPool'] = twoKeyCommunityTokenPool;
-                        proxyAddressTwoKeyCommunityTokenPool = proxy;
-                        resolve(proxy);
+                        proxyAddressTwoKeyCommunityTokenPool = logicProxy;
+                        resolve(logicProxy);
                     } catch (e) {
                         reject(e);
                     }
@@ -268,24 +270,24 @@ module.exports = function deploy(deployer) {
                     try {
                         console.log('... Adding TwoKeyLongTermTokenPool to Proxy registry as valid implementation');
                         /**
-                         * Adding TwoKeyLongTermTokenPool to the registry, deploying 1st proxy for that 1.0 version and setting initial params there
+                         * Adding TwoKeyLongTermTokenPool to the registry, deploying 1st logicProxy for that 1.0 version and setting initial params there
                          */
                         let txHash = await registry.addVersion("TwoKeyLongTermTokenPool", "1.0", TwoKeyLongTermTokenPool.address);
                         let { logs } = await registry.createProxy("TwoKeyLongTermTokenPool", "1.0");
-                        let { proxy } = logs.find(l => l.event === 'ProxyCreated').args;
-                        console.log('Proxy address for the TwoKeyLongTermTokenPool is : ' + proxy);
+                        let { logicProxy, storageProxy } = logs.find(l => l.event === 'ProxiesDeployed').args;
+                        console.log('Proxy address for the TwoKeyLongTermTokenPool is : ' + logicProxy);
                         const twoKeyLongTermTokenPool = fileObject.TwoKeyLongTermTokenPool || {};
                         twoKeyLongTermTokenPool[network_id] = {
                             'address': TwoKeyLongTermTokenPool.address,
-                            'Proxy': proxy,
+                            'Proxy': logicProxy,
                             'Version': "1.0",
                             maintainer_address: maintainerAddresses,
                         };
 
 
                         fileObject['TwoKeyLongTermTokenPool'] = twoKeyLongTermTokenPool;
-                        proxyAddressTwoKeyLongTermTokenPool = proxy;
-                        resolve(proxy);
+                        proxyAddressTwoKeyLongTermTokenPool = logicProxy;
+                        resolve(logicProxy);
                     } catch (e) {
                         reject(e);
                     }
@@ -295,24 +297,24 @@ module.exports = function deploy(deployer) {
                     try {
                         console.log('... Adding TwoKeyDeepFreezeTokenPool to Proxy registry as valid implementation');
                         /**
-                         * Adding TwoKeyLongTermTokenPool to the registry, deploying 1st proxy for that 1.0 version and setting initial params there
+                         * Adding TwoKeyLongTermTokenPool to the registry, deploying 1st logicProxy for that 1.0 version and setting initial params there
                          */
                         let txHash = await registry.addVersion("TwoKeyDeepFreezeTokenPool", "1.0", TwoKeyDeepFreezeTokenPool.address);
                         let { logs } = await registry.createProxy("TwoKeyDeepFreezeTokenPool", "1.0");
-                        let { proxy } = logs.find(l => l.event === 'ProxyCreated').args;
-                        console.log('Proxy address for the TwoKeyDeepFreezeTokenPool is : ' + proxy);
+                        let { logicProxy, storageProxy } = logs.find(l => l.event === 'ProxiesDeployed').args;
+                        console.log('Proxy address for the TwoKeyDeepFreezeTokenPool is : ' + logicProxy);
                         const twoKeyDeepFreezeTokenPool = fileObject.TwoKeyDeepFreezeTokenPool || {};
                         twoKeyDeepFreezeTokenPool[network_id] = {
                             'address': TwoKeyDeepFreezeTokenPool.address,
-                            'Proxy': proxy,
+                            'Proxy': logicProxy,
                             'Version': "1.0",
                             maintainer_address: maintainerAddresses,
                         };
 
 
                         fileObject['TwoKeyDeepFreezeTokenPool'] = twoKeyDeepFreezeTokenPool;
-                        proxyAddressTwoKeyDeepFreezeTokenPool = proxy;
-                        resolve(proxy);
+                        proxyAddressTwoKeyDeepFreezeTokenPool = logicProxy;
+                        resolve(logicProxy);
                     } catch (e) {
                         reject(e);
                     }
@@ -326,23 +328,23 @@ module.exports = function deploy(deployer) {
                     try {
                         console.log('... Adding TwoKeyBaseReputationRegistry to Proxy registry as valid implementation');
                         /**
-                         * Adding TwoKeyBaseReputationRegistry to the registry, deploying 1st proxy for that 1.0 version and setting initial params there
+                         * Adding TwoKeyBaseReputationRegistry to the registry, deploying 1st logicProxy for that 1.0 version and setting initial params there
                          */
                         let txHash = await registry.addVersion("TwoKeyBaseReputationRegistry", "1.0", TwoKeyBaseReputationRegistry.address);
                         let { logs } = await registry.createProxy("TwoKeyBaseReputationRegistry", "1.0");
-                        let { proxy } = logs.find(l => l.event === 'ProxyCreated').args;
-                        console.log('Proxy address for the TwoKeyBaseReputationRegistry is : ' + proxy);
+                        let { logicProxy, storageProxy } = logs.find(l => l.event === 'ProxiesDeployed').args;
+                        console.log('Proxy address for the TwoKeyBaseReputationRegistry is : ' + logicProxy);
                         const twoKeyBaseRepReg = fileObject.TwoKeyBaseReputationRegistry || {};
                         twoKeyBaseRepReg[network_id] = {
                             'address': TwoKeyBaseReputationRegistry.address,
-                            'Proxy': proxy,
+                            'Proxy': logicProxy,
                             'Version': "1.0",
                             // maintainer_address: maintainerAddresses,
                         };
 
                         fileObject['TwoKeyBaseReputationRegistry'] = twoKeyBaseRepReg;
-                        proxyAddressTwoKeyBaseReputationRegistry = proxy;
-                        resolve(proxy);
+                        proxyAddressTwoKeyBaseReputationRegistry = logicProxy;
+                        resolve(logicProxy);
                     } catch (e) {
                         reject(e);
                     }
@@ -352,24 +354,24 @@ module.exports = function deploy(deployer) {
                     try {
                         console.log('... Adding EventSource to Proxy registry as valid implementation');
                         /**
-                         * Adding EventSource to the registry, deploying 1st proxy for that 1.0 version of EventSource and setting initial params there
+                         * Adding EventSource to the registry, deploying 1st logicProxy for that 1.0 version of EventSource and setting initial params there
                          */
                         let txHash = await registry.addVersion("TwoKeyEventSource", "1.0", EventSource.address);
                         let { logs } = await registry.createProxy("TwoKeyEventSource", "1.0");
-                        let { proxy } = logs.find(l => l.event === 'ProxyCreated').args;
-                        console.log('Proxy address for the EventSource is : ' + proxy);
+                        let { logicProxy , storageProxy} = logs.find(l => l.event === 'ProxiesDeployed').args;
+                        console.log('Proxy address for the EventSource is : ' + logicProxy);
 
                         const twoKeyEventS = fileObject.TwoKeyEventSource || {};
 
                         twoKeyEventS[network_id] = {
                             'address': EventSource.address,
-                            'Proxy': proxy,
+                            'Proxy': logicProxy,
                             'Version': "1.0",
                             maintainer_address: maintainerAddresses,
                         };
                         fileObject['TwoKeyEventSource'] = twoKeyEventS;
-                        proxyAddressTwoKeyEventSource = proxy;
-                        resolve(proxy);
+                        proxyAddressTwoKeyEventSource = logicProxy;
+                        resolve(logicProxy);
                     } catch (e) {
                         reject(e);
                     }
@@ -379,25 +381,25 @@ module.exports = function deploy(deployer) {
                     try {
                         console.log('... Adding TwoKeyExchangeRateContract to Proxy registry as valid implementation');
                         /**
-                         * Adding EventSource to the registry, deploying 1st proxy for that 1.0 version of EventSource
+                         * Adding EventSource to the registry, deploying 1st logicProxy for that 1.0 version of EventSource
                          */
                         let txHash = await registry.addVersion("TwoKeyExchangeRateContract", "1.0", TwoKeyExchangeRateContract.address);
                         let { logs } = await registry.createProxy("TwoKeyExchangeRateContract", "1.0");
-                        let { proxy } = logs.find(l => l.event === 'ProxyCreated').args;
-                        console.log('Proxy address for the TwoKeyExchangeRateContract is : ' + proxy);
+                        let { logicProxy , storageProxy} = logs.find(l => l.event === 'ProxiesDeployed').args;
+                        console.log('Proxy address for the TwoKeyExchangeRateContract is : ' + logicProxy);
 
                         const twoKeyExchangeRate = fileObject.TwoKeyExchange || {};
 
                         twoKeyExchangeRate[network_id] = {
                             'address': TwoKeyExchangeRateContract.address,
-                            'Proxy': proxy,
+                            'Proxy': logicProxy,
                             'Version': "1.0",
                             maintainer_address: maintainerAddresses,
                         };
                         fileObject['TwoKeyExchangeRateContract'] = twoKeyExchangeRate;
-                        proxyAddressTwoKeyExchange = proxy;
+                        proxyAddressTwoKeyExchange = logicProxy;
 
-                        resolve(proxy);
+                        resolve(logicProxy);
                     } catch (e) {
                         reject(e);
                     }
@@ -405,29 +407,29 @@ module.exports = function deploy(deployer) {
 
                 await new Promise(async(resolve,reject) => {
                     try {
-                        console.log('... Adding TwoKeyAdmin contract to proxy registry as valid implementation');
+                        console.log('... Adding TwoKeyAdmin contract to logicProxy registry as valid implementation');
                         /**
-                         * Adding TwoKeyAdmin to the registry, deploying 1st proxy for that 1.0 version of TwoKeyAdmin
+                         * Adding TwoKeyAdmin to the registry, deploying 1st logicProxy for that 1.0 version of TwoKeyAdmin
                          */
                         let txHash = await registry.addVersion("TwoKeyAdmin", "1.0", TwoKeyAdmin.address);
                         let { logs } = await registry.createProxy("TwoKeyAdmin", "1.0");
-                        let { proxy } = logs.find(l => l.event === 'ProxyCreated').args;
-                        console.log('Proxy address for the TwoKeyAdmin contract is : ' + proxy);
+                        let { logicProxy , storageProxy} = logs.find(l => l.event === 'ProxiesDeployed').args;
+                        console.log('Proxy address for the TwoKeyAdmin contract is : ' + logicProxy);
 
 
-                        // txHash = await TwoKeyAdmin.at(proxy).transfer2KeyTokens(proxyAddressTwoKeyRegistry, 1000000000000000);
+                        // txHash = await TwoKeyAdmin.at(logicProxy).transfer2KeyTokens(proxyAddressTwoKeyRegistry, 1000000000000000);
                         const twoKeyAdmin = fileObject.TwoKeyAdmin || {};
                         twoKeyAdmin[network_id] = {
                             'address': TwoKeyAdmin.address,
-                            'Proxy': proxy,
+                            'Proxy': logicProxy,
                             'Version': "1.0",
                             maintainer_address: maintainerAddresses
                         };
 
                         fileObject['TwoKeyAdmin'] = twoKeyAdmin;
-                        proxyAddressTwoKeyAdmin = proxy;
+                        proxyAddressTwoKeyAdmin = logicProxy;
 
-                        resolve(proxy);
+                        resolve(logicProxy);
 
                     } catch (e) {
                         reject(e);
@@ -436,27 +438,27 @@ module.exports = function deploy(deployer) {
 
                 await new Promise(async(resolve,reject) => {
                     try {
-                        console.log('... Adding TwoKeyUpgradableExchange contract to proxy registry as valid implementation');
+                        console.log('... Adding TwoKeyUpgradableExchange contract to logicProxy registry as valid implementation');
                         /**
-                         * Adding TwoKeyUpgradableExchange to the registry, deploying 1st proxy for that 1.0 version of TwoKeyUpgradableExchange
+                         * Adding TwoKeyUpgradableExchange to the registry, deploying 1st logicProxy for that 1.0 version of TwoKeyUpgradableExchange
                          */
                         let txHash = await registry.addVersion("TwoKeyUpgradableExchange", "1.0", TwoKeyUpgradableExchange.address);
                         let { logs } = await registry.createProxy("TwoKeyUpgradableExchange", "1.0");
-                        let { proxy } = logs.find(l => l.event === 'ProxyCreated').args;
-                        console.log('Proxy address for the TwoKeyUpgradableExchange contract is : ' + proxy);
+                        let { logicProxy , storageProxy} = logs.find(l => l.event === 'ProxiesDeployed').args;
+                        console.log('Proxy address for the TwoKeyUpgradableExchange contract is : ' + logicProxy);
 
                         const twoKeyUpgradableExchange = fileObject.TwoKeyUpgradableExchange || {};
                         twoKeyUpgradableExchange[network_id] = {
                             'address' : TwoKeyUpgradableExchange.address,
-                            'Proxy' : proxy,
+                            'Proxy' : logicProxy,
                             'Version' : "1.0",
                             maintainer_address: maintainerAddresses
                         };
 
                         fileObject['TwoKeyUpgradableExchange'] = twoKeyUpgradableExchange;
-                        proxyAddressTwoKeyUpgradableExchange = proxy;
+                        proxyAddressTwoKeyUpgradableExchange = logicProxy;
                         fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
-                        resolve(proxy);
+                        resolve(logicProxy);
                     } catch (e) {
                         reject(e);
                     }
@@ -681,25 +683,25 @@ module.exports = function deploy(deployer) {
                     try {
                         console.log('... Adding TwoKeyPlasmaEvents to Plasma Proxy registry as valid implementation');
                         /**
-                         * Adding TwoKeyPlasmaEvents to the registry, deploying 1st proxy for that 1.0 version and setting initial params there
+                         * Adding TwoKeyPlasmaEvents to the registry, deploying 1st logicProxy for that 1.0 version and setting initial params there
                          */
                         let txHash = await registry.addVersion("TwoKeyPlasmaEvents", "1.0", TwoKeyPlasmaEvents.address);
                         let { logs } = await registry.createProxy("TwoKeyPlasmaEvents", "1.0");
-                        let { proxy } = logs.find(l => l.event === 'ProxyCreated').args;
-                        console.log('Proxy address for the TwoKeyPlasmaEvents is : ' + proxy);
+                        let { logicProxy, storageProxy } = logs.find(l => l.event === 'ProxiesDeployed').args;
+                        console.log('Proxy address for the TwoKeyPlasmaEvents is : ' + logicProxy);
                         const twoKeyPlasmaEvents = fileObject.TwoKeyPlasmaEvents || {};
 
                         twoKeyPlasmaEvents[network_id] = {
                             'address': TwoKeyPlasmaEvents.address,
-                            'Proxy': proxy,
+                            'Proxy': logicProxy,
                             'Version': "1.0",
                             maintainer_address: maintainerAddresses,
                         };
                         console.log('TwoKeyPlasmaEvents', network_id);
                         fileObject['TwoKeyPlasmaEvents'] = twoKeyPlasmaEvents;
-                        proxyAddressTwoKeyPlasmaEvents = proxy;
+                        proxyAddressTwoKeyPlasmaEvents = logicProxy;
                         fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
-                        resolve(proxy);
+                        resolve(logicProxy);
                     } catch (e) {
                         reject(e);
                     }

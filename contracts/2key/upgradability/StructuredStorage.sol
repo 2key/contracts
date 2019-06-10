@@ -1,6 +1,8 @@
 pragma solidity ^0.4.0;
 
-contract StructuredStorage {
+import "./Upgradeable.sol";
+
+contract StructuredStorage is Upgradeable {
 
     address proxyLogicContract;
     address deployer;
@@ -22,12 +24,11 @@ contract StructuredStorage {
         _;
     }
 
-    constructor(address _proxyLogicContract) public {
-        require(_proxyLogicContract != address(0));
-        deployer = msg.sender;
+    // *** Setter for Contract which holds all the logic ***
+    function setProxyLogicContractAndDeployer(address _proxyLogicContract, address _deployer) external {
+        deployer = _deployer;
         proxyLogicContract = _proxyLogicContract;
     }
-
 
     // *** Getter Methods ***
     function getUint(bytes32 _key) external view returns(uint) {
