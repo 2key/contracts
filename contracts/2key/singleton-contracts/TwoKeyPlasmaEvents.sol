@@ -346,29 +346,29 @@ contract TwoKeyPlasmaEvents is Upgradeable {
         return (campaign2numberOfVisits[_campaignAddress], campaign2numberOfJoins[_campaignAddress]);
     }
 
-    /**
-     * @notice Function which can add new maintainers, in general it's array because this supports adding multiple addresses in 1 trnx
-     * @dev only owner contract is eligible to mutate state of maintainers
-     * @param _maintainers is the array of maintainer addresses
-     */
-    function addMaintainers(address [] _maintainers) public {
-        require(msg.sender == owner || isMaintainer[msg.sender] == true);
-        for(uint i=0; i<_maintainers.length; i++) {
-            isMaintainer[_maintainers[i]] = true;
-        }
-    }
-
-    /**
-     * @notice Function which can remove some maintainers, in general it's array because this supports adding multiple addresses in 1 trnx
-     * @dev only owner contract is eligible to mutate state of maintainers
-     * @param _maintainers is the array of maintainer addresses
-     */
-    function removeMaintainers(address [] _maintainers) public {
-        require(msg.sender == owner);
-        for(uint i=0; i<_maintainers.length; i++) {
-            isMaintainer[_maintainers[i]] = false;
-        }
-    }
+//    /**
+//     * @notice Function which can add new maintainers, in general it's array because this supports adding multiple addresses in 1 trnx
+//     * @dev only owner contract is eligible to mutate state of maintainers
+//     * @param _maintainers is the array of maintainer addresses
+//     */
+//    function addMaintainers(address [] _maintainers) public {
+//        require(msg.sender == owner || isMaintainer[msg.sender] == true);
+//        for(uint i=0; i<_maintainers.length; i++) {
+//            isMaintainer[_maintainers[i]] = true;
+//        }
+//    }
+//
+//    /**
+//     * @notice Function which can remove some maintainers, in general it's array because this supports adding multiple addresses in 1 trnx
+//     * @dev only owner contract is eligible to mutate state of maintainers
+//     * @param _maintainers is the array of maintainer addresses
+//     */
+//    function removeMaintainers(address [] _maintainers) public {
+//        require(msg.sender == owner);
+//        for(uint i=0; i<_maintainers.length; i++) {
+//            isMaintainer[_maintainers[i]] = false;
+//        }
+//    }
 
     /**
      * @notice Function to validate if signature is valid
