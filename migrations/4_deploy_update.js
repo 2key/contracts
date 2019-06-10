@@ -269,11 +269,11 @@ module.exports = function deploy(deployer) {
                                 twoKeyFactory[network_id].Version = twoKeyFactory[network_id].Version.substr(0, twoKeyFactory[network_id].Version.length - 1) + v.toString();
                                 console.log('New version : ' + twoKeyFactory[network_id].Version);
                                 // let txHash = await registry.addVersion("TwoKeyFactory", twoKeyFactory[network_id].Version, TwoKeyFactory.address);
-                                let txHash = await registry.addVersion("TwoKeyFactory", "1.2", TwoKeyFactory.address);
+                                let txHash = await registry.addVersion("TwoKeyFactory", "1.3", TwoKeyFactory.address);
 
                                 console.log('... Upgrading proxy to new version');
                                 // txHash = await Proxy.at(twoKeyFactory[network_id].Proxy).upgradeTo("TwoKeyFactory", twoKeyFactory[network_id].Version);
-                                txHash = await Proxy.at(twoKeyFactory[network_id].Proxy).upgradeTo("TwoKeyFactory", "1.2");
+                                txHash = await Proxy.at(twoKeyFactory[network_id].Proxy).upgradeTo("TwoKeyFactory", "1.3");
                                 twoKeyFactory[network_id].address = lastTwoKeyFactoryAddress;
 
                                 fileObject['TwoKeyFactory'] = twoKeyFactory;

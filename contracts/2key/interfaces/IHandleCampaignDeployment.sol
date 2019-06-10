@@ -99,8 +99,8 @@ contract IHandleCampaignDeployment {
         string tokenSymbol,
         address _contractor,
         address _twoKeyDonationCampaign,
-        bool _isKYCRequired,
-        uint _maxReferralRewardPercent
+        address _twoKeyEventSource,
+        address _twoKeyBaseReputationRegistry
     ) public;
 }
 
