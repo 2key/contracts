@@ -4,6 +4,8 @@ import "./Upgradeable.sol";
 
 contract StructuredStorage is Upgradeable {
 
+    bool initialized;
+
     address proxyLogicContract;
     address deployer;
 
@@ -13,6 +15,7 @@ contract StructuredStorage is Upgradeable {
     mapping(bytes32 => bytes) bytesStorage;
     mapping(bytes32 => bool) boolStorage;
     mapping(bytes32 => int) intStorage;
+
 
     modifier onlyDeployer {
         require(msg.sender == deployer);
@@ -26,7 +29,15 @@ contract StructuredStorage is Upgradeable {
 
     // *** Setter for Contract which holds all the logic ***
     function setProxyLogicContractAndDeployer(address _proxyLogicContract, address _deployer) external {
+        require(initialized == false);
+
         deployer = _deployer;
+        proxyLogicContract = _proxyLogicContract;
+
+        initialized = true;
+    }
+
+    function setProxyLogicContract(address _proxyLogicContract) external onlyDeployer {
         proxyLogicContract = _proxyLogicContract;
     }
 

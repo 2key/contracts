@@ -407,7 +407,6 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyConversionStates,
     }
 
 
-    //TODO: After new STATE MACHINE MECHANISM WE CAN DELETE ALMOST WHOLE THIS METHOD
     /// @notice Function where we are approving converter
     /// @dev only maintainer or contractor can call this method
     /// @param _converter is the address of converter
@@ -425,6 +424,7 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyConversionStates,
             if(c.state == ConversionState.PENDING_APPROVAL && c.isConversionFiat == false) {
                 counters[0]--; //Reduce number of pending conversions
                 counters[1]++; //Increase number of approved conversions
+                c.state = ConversionState.APPROVED;
 //                conversions[conversionId] = c;
             }
         }

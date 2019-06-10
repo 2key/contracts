@@ -6,6 +6,7 @@ import '../interfaces/ITwoKeySingletonesRegistry.sol';
 import "../interfaces/IHandleCampaignDeployment.sol";
 import "../interfaces/ITwoKeyCampaignValidator.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
+import "../interfaces/IStructuredStorage.sol";
 
 import "../upgradability/UpgradabilityProxy.sol";
 import "../upgradability/Upgradeable.sol";
@@ -267,6 +268,8 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
         address logicProxy = deployProxyLogic(contractName, version);
         address storageProxy = deployProxyStorage(contractName, version);
 
+        IStructuredStorage(storageProxy).setProxyLogicContractAndDeployer(logicProxy, msg.sender);
+
         emit ProxiesDeployed(logicProxy, storageProxy);
     }
 
@@ -300,9 +303,5 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
     {
         return deployProxyStorage(contractName, version);
     }
-
-
-
-
 
 }

@@ -70,6 +70,8 @@ contract TwoKeyRegistry is Upgradeable, Utils {
     function isMaintainer(address x) internal view returns (bool) {
         return ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(x);
     }
+
+
     /**
      * @notice Function which can be called only once
      */

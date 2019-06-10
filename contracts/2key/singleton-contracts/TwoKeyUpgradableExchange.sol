@@ -7,6 +7,8 @@ import "../interfaces/ITwoKeyExchangeRateContract.sol";
 import "../interfaces/ITwoKeyCampaignValidator.sol";
 import "../interfaces/IKyberNetworkProxy.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
+import "../interfaces/storage-contracts/ITwoKeyUpgradableExchangeStorage.sol";
+import "../interfaces/IERC20.sol";
 
 import "../libraries/SafeMath.sol";
 import "../libraries/GetCode.sol";
@@ -21,28 +23,8 @@ contract TwoKeyUpgradableExchange is Upgradeable {
 
     bool initialized;
 
-    address twoKeyMaintainersRegistry;
-    address twoKeyExchangeRateContract;
-    address twoKeyCampaignValidator;
-    address public twoKeySingletonesRegistry;
-
-    // The token being sold
-    ERC20 public token;
-
-    // When anyone send 2key to contract, 2key in exchange will be calculated on it's buy rate
-    uint public buyRate2key; //2key to USD rate multiplied by 1000 (initially it's 95)
-
-    // When anyone send Ether to contract, 2key in exchange will be calculated on it's sell rate
-    uint public sellRate2key; //2key to USD rate multiplied by 1000 (intitally it's 100)
-
-    uint public transactionCounter = 0;
-    uint public weiRaised = 0;
-
-
-    address public kyberProxyContractAddress;
-
-    ERC20 public DAI;
-    ERC20 ETH_TOKEN_ADDRESS;
+    address public PROXY_STORAGE_CONTRACT;
+    address public TWO_KEY_SINGLETON_REGISTRY;
 
 
     /**
@@ -96,45 +78,70 @@ contract TwoKeyUpgradableExchange is Upgradeable {
         ERC20 _token,
         address _daiAddress,
         address _kyberNetworkProxy,
-        address _twoKeySingletonesRegistry
+        address _twoKeySingletonesRegistry,
+        address _proxyStorageContract
     )
     external
     {
         require(initialized == false);
 
-        twoKeySingletonesRegistry = _twoKeySingletonesRegistry;
-        buyRate2key = 95;
-        sellRate2key = 100;
+        TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonesRegistry;
+        PROXY_STORAGE_CONTRACT = _proxyStorageContract;
 
-        token = _token;
+        setUint(("buyRate2key"),95);// When anyone send 2key to contract, 2key in exchange will be calculated on it's buy rate
+        setUint(("sellRate2key"),100);// When anyone send Ether to contract, 2key in exchange will be calculated on it's sell rate
+        setUint(("weiRaised"),0);
+        setUint("transactionCounter",0);
 
-        twoKeyExchangeRateContract = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).
-            getContractProxyAddress("TwoKeyExchangeRateContract");
-
-        twoKeyCampaignValidator = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).
-            getContractProxyAddress("TwoKeyCampaignValidator");
-
-        twoKeyMaintainersRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).
-            getContractProxyAddress("TwoKeyMaintainersRegistry");
-
-        DAI = ERC20(_daiAddress);
-        ETH_TOKEN_ADDRESS = ERC20(0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee);
-
-        kyberProxyContractAddress = _kyberNetworkProxy;
-
+        setAddress(("TOKEN"),address(_token));
+        setAddress(("DAI"), _daiAddress);
+        setAddress(("ETH_TOKEN_ADDRESS"), 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee);
+        setAddress(("KYBER_NETWORK_PROXY"), _kyberNetworkProxy);
 
         initialized = true;
     }
+
+    // Internal wrapper methods
+    function getUint(string key) internal view returns (uint) {
+        return ITwoKeyUpgradableExchangeStorage(PROXY_STORAGE_CONTRACT).
+            getUint(keccak256(key));
+    }
+
+    // Internal wrapper methods
+    function setUint(string key, uint value) internal {
+        ITwoKeyUpgradableExchangeStorage(PROXY_STORAGE_CONTRACT).
+            setUint(keccak256(key), value);
+    }
+
+    // Internal wrapper methods
+    function getAddress(string key) internal view returns (address) {
+        return ITwoKeyUpgradableExchangeStorage(PROXY_STORAGE_CONTRACT).
+        getAddress(keccak256(key));
+    }
+
+    // Internal wrapper methods
+    function setAddress(string key, address value) internal {
+        ITwoKeyUpgradableExchangeStorage(PROXY_STORAGE_CONTRACT).
+        setAddress(keccak256(key), value);
+    }
+
 
     /**
      * @notice Modifier which will validate if contract is allowed to buy tokens
      */
     modifier onlyValidatedContracts {
+        address twoKeyCampaignValidator =
+        ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY)
+            .getContractProxyAddress("TwoKeyCampaignValidator");
+
         require(ITwoKeyCampaignValidator(twoKeyCampaignValidator).isCampaignValidated(msg.sender) == true);
         _;
     }
 
     modifier onlyMaintainer {
+        address twoKeyMaintainersRegistry =
+        ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY)
+            .getContractProxyAddress("TwoKeyMaintainersRegistry");
         require(ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender));
         _;
     }
@@ -166,7 +173,10 @@ contract TwoKeyUpgradableExchange is Upgradeable {
     )
     internal
     {
-        token.safeTransfer(_beneficiary, _tokenAmount);
+        //Take the address of token from storage
+        address tokenAddress = getAddress("TOKEN");
+
+        ERC20(tokenAddress).safeTransfer(_beneficiary, _tokenAmount);
     }
 
 
@@ -197,8 +207,11 @@ contract TwoKeyUpgradableExchange is Upgradeable {
     view
     returns (uint256)
     {
+        address twoKeyExchangeRateContract = ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY).
+                    getContractProxyAddress("TwoKeyExchangeRateContract");
+
         uint rate = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate("USD");
-        return (_weiAmount*rate).mul(1000).div(sellRate2key).div(10**18);
+        return (_weiAmount*rate).mul(1000).div(getUint("sellRate2key")).div(10**18);
     }
 
 
@@ -214,10 +227,17 @@ contract TwoKeyUpgradableExchange is Upgradeable {
     view
     returns (uint256)
     {
+        // Take the address of TwoKeyExchangeRateContract
+        address twoKeyExchangeRateContract = ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY).
+        getContractProxyAddress("TwoKeyExchangeRateContract");
+
         // This is the case when we buy 2keys in exchange for stable coins
         uint rate = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate("USD-DAI"); // 1.01
         uint lowestAcceptedRate = 96;
         require(rate >= lowestAcceptedRate.mul(10**18).div(100)); // Require that lowest accepted rate is greater than 0.95
+
+        uint buyRate2key = getUint("buyRate2key");
+
         uint dollarWeiWorthTokens = _2keyAmount.mul(buyRate2key).div(1000);  // 100*95/1000 = 9.5
         uint amountOfDAIs = dollarWeiWorthTokens.mul(rate).div(10**18);      // 9.5 * 1.01 =vOK
 
@@ -257,8 +277,10 @@ contract TwoKeyUpgradableExchange is Upgradeable {
         uint256 tokens = _getTokenAmountToBeSold(weiAmount);
 
         // update state
-        weiRaised = weiRaised.add(weiAmount);
-        transactionCounter++;
+        uint weiRaised = getUint("weiRaised").add(weiAmount);
+        setUint("weiRaised",weiRaised);
+        setUint("transactionCounter",getUint("transactionCounter")+1);
+
         _processPurchase(_beneficiary, tokens);
 
 
@@ -267,10 +289,9 @@ contract TwoKeyUpgradableExchange is Upgradeable {
             _beneficiary,
             weiAmount,
             tokens,
-            sellRate2key
+            getUint("sellRate2key")
         );
 
-        //        _forwardFunds(twoKeyAdmin);
         return tokens;
     }
 
@@ -287,11 +308,14 @@ contract TwoKeyUpgradableExchange is Upgradeable {
     view
     returns (uint)
     {
-        IKyberNetworkProxy proxyContract = IKyberNetworkProxy(kyberProxyContractAddress);
+        address kyberProxyContract = getAddress("KYBER_NETWORK_PROXY");
+        IKyberNetworkProxy proxyContract = IKyberNetworkProxy(kyberProxyContract);
 
-        ERC20 eth = ERC20(0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee);
+        ERC20 eth = ERC20(getAddress("ETH_TOKEN_ADDRESS"));
+        ERC20 dai = ERC20(getAddress("DAI"));
+
         uint minConversionRate;
-        (minConversionRate,) = proxyContract.getExpectedRate(eth, DAI, amountEthWei);
+        (minConversionRate,) = proxyContract.getExpectedRate(eth, dai, amountEthWei);
 
         return minConversionRate;
     }
@@ -309,12 +333,14 @@ contract TwoKeyUpgradableExchange is Upgradeable {
     public
     onlyMaintainer
     {
-        IKyberNetworkProxy proxyContract = IKyberNetworkProxy(kyberProxyContractAddress);
+        ERC20 dai = ERC20(getAddress("DAI"));
+
+        address kyberProxyContract = getAddress("KYBER_NETWORK_PROXY");
+        IKyberNetworkProxy proxyContract = IKyberNetworkProxy(kyberProxyContract);
 
         uint minConversionRate = getKyberExpectedRate(amountToBeHedged);
-        emit Status(minConversionRate, approvedMinConversionRate);
         require(minConversionRate >= approvedMinConversionRate.mul(95).div(100)); //Means our rate can be at most same as their rate, because they're giving the best rate
-        uint stableCoinUnits = proxyContract.swapEtherToToken.value(amountToBeHedged)(DAI,minConversionRate);
+        uint stableCoinUnits = proxyContract.swapEtherToToken.value(amountToBeHedged)(dai,minConversionRate);
     }
 
     /**
@@ -330,16 +356,17 @@ contract TwoKeyUpgradableExchange is Upgradeable {
     onlyValidatedContracts
     returns (uint)
     {
-        uint stableCoinUnits;
+        IERC20 dai = ERC20(getAddress("DAI"));
+        IERC20 token = ERC20(getAddress("TOKEN"));
 
-        stableCoinUnits = _getUSDStableCoinAmountFrom2keyUnits(_twoKeyUnits);
-
+        uint stableCoinUnits = _getUSDStableCoinAmountFrom2keyUnits(_twoKeyUnits);
         uint etherBalanceOnContractBefore = this.balance;
-        uint stableCoinsOnContractBefore = DAI.balanceOf(address(this));
-
+        uint stableCoinsOnContractBefore = dai.balanceOf(address(this));
         token.transferFrom(msg.sender, address(this), _twoKeyUnits);
+
         uint stableCoinsAfter = stableCoinsOnContractBefore - stableCoinUnits;
-        require(ERC20(DAI).transfer(_beneficiary, stableCoinUnits));
+
+        dai.transfer(_beneficiary, stableCoinUnits);
 
         emit WithdrawExecuted(
             msg.sender,
@@ -355,60 +382,14 @@ contract TwoKeyUpgradableExchange is Upgradeable {
     }
 
 
-    /**
-     * @notice Function for patch purposes
-     * @dev Will be used to update Kyber network proxy address in case we need it
-     * @param _newProxyAddress is the address of Kyber network proxy
-     */
-    function changeKyberProxyAddress(
-        address _newProxyAddress
-    )
-    external
-    onlyMaintainer
-    {
-        kyberProxyContractAddress = _newProxyAddress;
-    }
-
-
-    /**
-     * @notice Function for patch purposes for sell rate
-     * @param _newSellRate2key is the new sell rate for 2key tokens
-     * @dev Only maintainer can perform this calls
-     */
-    function update2keySellRate(
-        uint _newSellRate2key
+    function updateUint(
+        string key,
+        uint value
     )
     public
     onlyMaintainer
     {
-        sellRate2key = _newSellRate2key;
-    }
-
-
-    /**
-     * @notice Function to update buy rate
-     * @param _newBuyRate2key is the new buy rate
-     * @dev only Maintainers can call this
-     */
-    function update2keyBuyRate(
-        uint _newBuyRate2key
-    )
-    public
-    onlyMaintainer
-    {
-        buyRate2key = _newBuyRate2key;
-    }
-
-
-    /**
-     * @notice Function needed for test purposes
-     */
-    function getEthBalanceOnContract()
-    public
-    view
-    returns (uint)
-    {
-        return address(this).balance;
+        setUint(key, value);
     }
 
 
@@ -420,12 +401,6 @@ contract TwoKeyUpgradableExchange is Upgradeable {
     payable
     {
 
-    }
-
-    event Status(uint approvedConversionRate, uint minConversionRate);
-
-    function getSomeAddresses() public view returns (address,address,address) {
-        return (twoKeyExchangeRateContract, twoKeyCampaignValidator, twoKeySingletonesRegistry);
     }
 
 }

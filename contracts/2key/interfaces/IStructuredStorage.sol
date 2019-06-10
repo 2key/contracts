@@ -1,7 +1,9 @@
 pragma solidity ^0.4.0;
 
 contract IStructuredStorage {
+
     function setProxyLogicContractAndDeployer(address _proxyLogicContract, address _deployer) external;
+    function setProxyLogicContract(address _proxyLogicContract) external;
 
     // *** Getter Methods ***
     function getUint(bytes32 _key) external view returns(uint);
