@@ -63,7 +63,7 @@ module.exports = function deploy(deployer) {
             console.log("... Adding implementation versions of Acquisition campaigns");
             await new Promise(async(resolve,reject) => {
                 try {
-                    let version = '1.2';
+                    let version = '1.3';
 
                     let txHash = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address)
                         .addVersion('TwoKeyAcquisitionLogicHandler', version, TwoKeyAcquisitionLogicHandler.address);

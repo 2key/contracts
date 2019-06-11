@@ -204,7 +204,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
 
         counters[8] = counters[8].add(totalReward2keys);
         twoKeyDonationCampaign.buyTokensForModeratorRewards(conversion.moderatorFeeETHWei);
-        twoKeyDonationCampaign.updateContractorBalanceAndConverterDonations;
+        twoKeyDonationCampaign.updateContractorBalanceAndConverterDonations(conversion.converter, conversion.contractorProceedsETHWei, conversion.conversionAmount);
 
         counters[6] = counters[6].add(conversion.conversionAmount);
 
