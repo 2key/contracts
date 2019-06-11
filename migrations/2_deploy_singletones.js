@@ -16,7 +16,7 @@ const TwoKeyCampaignValidator = artifacts.require('TwoKeyCampaignValidator');
 const TwoKeyFactory = artifacts.require('TwoKeyFactory');
 const KyberNetworkTestMockContract = artifacts.require('KyberNetworkTestMockContract');
 const TwoKeyMaintainersRegistry = artifacts.require('TwoKeyMaintainersRegistry');
-
+const TwoKeyUpgradableExchangeStorage = artifacts.require('TwoKeyUpgradableExchangeStorage');
 const Call = artifacts.require('Call');
 const IncentiveModels = artifacts.require('IncentiveModels');
 
@@ -62,6 +62,7 @@ module.exports = function deploy(deployer) {
     let proxyAddressTwoKeyMaintainersRegistry;
 
 
+    let proxyAddressTwoKeyUpgradableExchangeSTORAGE;
     let deploymentNetwork;
     if(deployer.network.startsWith('dev') || deployer.network.startsWith('plasma-test')) {
         deploymentNetwork = 'dev-local-environment'
@@ -137,7 +138,6 @@ module.exports = function deploy(deployer) {
                         let { logs } = await registry.createProxy("TwoKeyRegistry", "1.0");
                         let { logicProxy, storageProxy } = logs.find(l => l.event === 'ProxiesDeployed').args;
 
-                        console.log('logs',logicProxy, storageProxy);
                         console.log('Proxy address for the TwoKeyRegistry is : ' + logicProxy);
                         console.log('Network ID', network_id);
                         const twoKeyReg = fileObject.TwoKeyRegistry || {};
@@ -455,6 +455,12 @@ module.exports = function deploy(deployer) {
                             maintainer_address: maintainerAddresses
                         };
 
+                        txHash = await TwoKeyUpgradableExchangeStorage.at(storageProxy).setProxyLogicContractAndDeployer(
+                            logicProxy
+                        );
+                        proxyAddressTwoKeyUpgradableExchangeSTORAGE = storageProxy;
+
+
                         fileObject['TwoKeyUpgradableExchange'] = twoKeyUpgradableExchange;
                         proxyAddressTwoKeyUpgradableExchange = logicProxy;
                         fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
@@ -617,6 +623,7 @@ module.exports = function deploy(deployer) {
                             DAI_ROPSTEN_ADDRESS,
                             kyberAddress,
                             TwoKeySingletonesRegistry.address,
+                            proxyAddressTwoKeyUpgradableExchangeSTORAGE
                         );
 
                         resolve(txHash);
@@ -687,21 +694,21 @@ module.exports = function deploy(deployer) {
                          */
                         let txHash = await registry.addVersion("TwoKeyPlasmaEvents", "1.0", TwoKeyPlasmaEvents.address);
                         let { logs } = await registry.createProxy("TwoKeyPlasmaEvents", "1.0");
-                        let { logicProxy, storageProxy } = logs.find(l => l.event === 'ProxiesDeployed').args;
-                        console.log('Proxy address for the TwoKeyPlasmaEvents is : ' + logicProxy);
+                        let { proxy } = logs.find(l => l.event === 'ProxyCreated').args;
+                        console.log('Proxy address for the TwoKeyPlasmaEvents is : ' + proxy);
                         const twoKeyPlasmaEvents = fileObject.TwoKeyPlasmaEvents || {};
 
                         twoKeyPlasmaEvents[network_id] = {
                             'address': TwoKeyPlasmaEvents.address,
-                            'Proxy': logicProxy,
+                            'Proxy': proxy,
                             'Version': "1.0",
                             maintainer_address: maintainerAddresses,
                         };
                         console.log('TwoKeyPlasmaEvents', network_id);
                         fileObject['TwoKeyPlasmaEvents'] = twoKeyPlasmaEvents;
-                        proxyAddressTwoKeyPlasmaEvents = logicProxy;
+                        proxyAddressTwoKeyPlasmaEvents = proxy;
                         fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
-                        resolve(logicProxy);
+                        resolve(proxy);
                     } catch (e) {
                         reject(e);
                     }

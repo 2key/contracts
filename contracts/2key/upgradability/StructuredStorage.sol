@@ -28,10 +28,11 @@ contract StructuredStorage is Upgradeable {
     }
 
     // *** Setter for Contract which holds all the logic ***
-    function setProxyLogicContractAndDeployer(address _proxyLogicContract, address _deployer) external {
+    function setProxyLogicContractAndDeployer(address _proxyLogicContract) external {
         require(initialized == false);
 
-        deployer = _deployer;
+        deployer = msg.sender;
+//        deployer = _deployer;
         proxyLogicContract = _proxyLogicContract;
 
         initialized = true;

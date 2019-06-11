@@ -54,21 +54,20 @@ contract TwoKeyUpgradableExchange is Upgradeable {
         uint256 rate
     );
 
-
-    /**
-     * @notice This event will be fired every time a withdraw is executed
-     */
-    event WithdrawExecuted(
-        address caller,
-        address beneficiary,
-        uint stableCoinsReserveBefore,
-        uint stableCoinsReserveAfter,
-        uint etherBalanceBefore,
-        uint etherBalanceAfter,
-        uint stableCoinsToWithdraw,
-        uint twoKeyAmount,
-        bool status
-    );
+//
+//    /**
+//     * @notice This event will be fired every time a withdraw is executed
+//     */
+//    event WithdrawExecuted(
+//        address caller,
+//        address beneficiary,
+//        uint stableCoinsReserveBefore,
+//        uint stableCoinsReserveAfter,
+//        uint etherBalanceBefore,
+//        uint etherBalanceAfter,
+//        uint stableCoinsToWithdraw,
+//        uint twoKeyAmount
+//    );
 
 
     /**
@@ -102,25 +101,25 @@ contract TwoKeyUpgradableExchange is Upgradeable {
     }
 
     // Internal wrapper methods
-    function getUint(string key) internal view returns (uint) {
+    function getUint(string key) public view returns (uint) {
         return ITwoKeyUpgradableExchangeStorage(PROXY_STORAGE_CONTRACT).
             getUint(keccak256(key));
     }
 
     // Internal wrapper methods
-    function setUint(string key, uint value) internal {
+    function setUint(string key, uint value) public {
         ITwoKeyUpgradableExchangeStorage(PROXY_STORAGE_CONTRACT).
             setUint(keccak256(key), value);
     }
 
     // Internal wrapper methods
-    function getAddress(string key) internal view returns (address) {
+    function getAddress(string key) public view returns (address) {
         return ITwoKeyUpgradableExchangeStorage(PROXY_STORAGE_CONTRACT).
         getAddress(keccak256(key));
     }
 
     // Internal wrapper methods
-    function setAddress(string key, address value) internal {
+    function setAddress(string key, address value) public {
         ITwoKeyUpgradableExchangeStorage(PROXY_STORAGE_CONTRACT).
         setAddress(keccak256(key), value);
     }
@@ -356,8 +355,8 @@ contract TwoKeyUpgradableExchange is Upgradeable {
     onlyValidatedContracts
     returns (uint)
     {
-        IERC20 dai = ERC20(getAddress("DAI"));
-        IERC20 token = ERC20(getAddress("TOKEN"));
+        ERC20 dai = ERC20(getAddress("DAI"));
+        ERC20 token = ERC20(getAddress("TOKEN"));
 
         uint stableCoinUnits = _getUSDStableCoinAmountFrom2keyUnits(_twoKeyUnits);
         uint etherBalanceOnContractBefore = this.balance;
@@ -368,17 +367,16 @@ contract TwoKeyUpgradableExchange is Upgradeable {
 
         dai.transfer(_beneficiary, stableCoinUnits);
 
-        emit WithdrawExecuted(
-            msg.sender,
-            _beneficiary,
-            stableCoinsOnContractBefore,
-            stableCoinsAfter,
-            etherBalanceOnContractBefore,
-            this.balance,
-            stableCoinUnits,
-            _twoKeyUnits,
-            true
-        );
+//        emit WithdrawExecuted(
+//            msg.sender,
+//            _beneficiary,
+//            stableCoinsOnContractBefore,
+//            stableCoinsAfter,
+//            etherBalanceOnContractBefore,
+//            this.balance,
+//            stableCoinUnits,
+//            _twoKeyUnits,
+//        );
     }
 
 

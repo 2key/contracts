@@ -268,7 +268,7 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
         address logicProxy = deployProxyLogic(contractName, version);
         address storageProxy = deployProxyStorage(contractName, version);
 
-        IStructuredStorage(storageProxy).setProxyLogicContractAndDeployer(logicProxy, msg.sender);
+//        IStructuredStorage(storageProxy).setProxyLogicContractAndDeployer(logicProxy, msg.sender);
 
         emit ProxiesDeployed(logicProxy, storageProxy);
     }
