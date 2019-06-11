@@ -29,7 +29,6 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
     uint maxDonationAmountWei; // Maximal donation amount
     uint campaignGoal; // Goal of the campaign, how many funds to raise
 
-
     bool shouldConvertToRefer; // If yes, means that referrer must be converter in order to be referrer
     bool isKYCRequired; // Will determine if KYC is required or not
     bool acceptsFiat; // Will determine if fiat conversion can be created or not
@@ -269,7 +268,7 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
 
         uint totalBountyTokens = buyTokensFromUpgradableExchange(referrer_rewards, address(this));
 
-
+        reservedAmount2keyForRewards = reservedAmount2keyForRewards + totalBountyTokens;
 
         //Distribute rewards based on model selected
         if(rewardsModel == IncentiveModel.VANILLA_AVERAGE) {
@@ -498,6 +497,10 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
         require(block.timestamp > campaignEndTime); //Making sure time has expired
 
         super.withdrawContractor();
+    }
+
+    function getReservedAmount2keyForRewards() public view returns (uint) {
+        return reservedAmount2keyForRewards;
     }
 
 }

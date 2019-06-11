@@ -290,4 +290,10 @@ describe('TwoKeyDonationCampaign', () => {
         let referrerBalance = await twoKeyProtocol.DonationCampaign.getReferrerBalance(campaignAddress, env.GMAIL_ADDRESS, from);
         console.log(referrerBalance);
     })
+
+    it('should get reserved amount for referrers', async() => {
+        printTestNumber();
+        let referrerReservedAmount = await twoKeyProtocol.DonationCampaign.getReservedAmount2keyForRewards(campaignAddress);
+        console.log(referrerReservedAmount);
+    })
 });
