@@ -262,6 +262,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
         if(isFiatConversion == true) {
             baseTokensForConverterUnits = conversionAmountETHWeiOrFiat.div(value);
             bonusTokensForConverterUnits = baseTokensForConverterUnits.mul(maxConverterBonusPercent).div(100);
+            return (baseTokensForConverterUnits, bonusTokensForConverterUnits);
         } else {
             if(keccak256(currency) != keccak256('ETH')) {
                 address ethUSDExchangeContract = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyExchangeRateContract");
