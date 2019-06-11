@@ -103,7 +103,7 @@ const printTestNumber = (): void => {
 describe('TwoKeyDonationCampaign', () => {
 
    it('should create a donation campaign', async() => {
-        printTestNumber();
+       printTestNumber();
        const {web3, address} = web3switcher.deployer();
        from = address;
        twoKeyProtocol = new TwoKeyProtocol({
@@ -141,6 +141,12 @@ describe('TwoKeyDonationCampaign', () => {
         printTestNumber();
         let nonSingletonHash = await twoKeyProtocol.CampaignValidator.getCampaignNonSingletonsHash(campaignAddress);
         expect(nonSingletonHash).to.be.equal(twoKeyProtocol.DonationCampaign.getNonSingletonsHash());
+    }).timeout(60000);
+
+    it('should get incentive model', async() => {
+        printTestNumber();
+        const model = await twoKeyProtocol.DonationCampaign.getIncentiveModel(campaignAddress);
+        expect(model).to.be.equal(incentiveModel);
     }).timeout(60000);
 
     it('should save campaign to IPFS', async () => {
@@ -288,6 +294,32 @@ describe('TwoKeyDonationCampaign', () => {
     it('should get referrer earnings', async() => {
         printTestNumber();
         let referrerBalance = await twoKeyProtocol.DonationCampaign.getReferrerBalance(campaignAddress, env.GMAIL_ADDRESS, from);
-        console.log(referrerBalance);
+        expect(referrerBalance).to.be.equal(50);
+    }).timeout(60000);
+
+    it('should get reserved amount for referrers', async() => {
+        printTestNumber();
+        let referrerReservedAmount = await twoKeyProtocol.DonationCampaign.getReservedAmount2keyForRewards(campaignAddress);
+        expect(referrerReservedAmount).to.be.equal(50);
+    }).timeout(60000);
+
+
+    it('should get contractor balance and total earnings', async() => {
+
+        const {web3, address} = web3switcher.deployer();
+        from = address;
+        twoKeyProtocol = new TwoKeyProtocol({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
+        });
+
+        printTestNumber();
+        let earnings = await twoKeyProtocol.DonationCampaign.getContractorBalanceAndTotalProceeds(campaignAddress, from);
+        console.log(earnings);
     })
 });
