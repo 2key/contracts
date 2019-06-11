@@ -29,6 +29,19 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
     address twoKeyBaseReputationRegistry;
     address contractor;
     uint numberOfConversions;
+    /**
+     * This array will represent counter values where position will be index (which counter) and value will be actual counter value
+     * counters[0] = PENDING_CONVERSIONS
+     * counters[1] = APPROVED_CONVERSIONS
+     * counters[2] = REJECTED_CONVERSIONS
+     * counters[3] = EXECUTED_CONVERSIONS
+     * counters[4] = CANCELLED_CONVERSIONS
+     * counters[5] = UNIQUE_CONVERTERS
+     * counters[6] = RAISED_FUNDS_ETH_WEI
+     * counters[7] = TOKENS_SOLD
+     * counters[8] = TOTAL_BOUNTY
+     * counters[9] = RAISED_FUNDS_FIAT_WEI
+     */
     uint [] counters; //Metrics counter
 
 
