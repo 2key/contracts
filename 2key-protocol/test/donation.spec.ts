@@ -143,6 +143,12 @@ describe('TwoKeyDonationCampaign', () => {
         expect(nonSingletonHash).to.be.equal(twoKeyProtocol.DonationCampaign.getNonSingletonsHash());
     }).timeout(60000);
 
+    it('should get incentive model', async() => {
+        printTestNumber();
+        const model = await twoKeyProtocol.DonationCampaign.getIncentiveModel(campaignAddress);
+        expect(model).to.be.equal(incentiveModel);
+    }).timeout(60000);
+
     it('should save campaign to IPFS', async () => {
         printTestNumber();
         const campaignMeta = await twoKeyProtocol.DonationCampaign.getPublicMeta(campaignAddress,from);
