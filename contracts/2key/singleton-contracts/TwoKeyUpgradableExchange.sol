@@ -124,6 +124,12 @@ contract TwoKeyUpgradableExchange is Upgradeable {
         setAddress(keccak256(key), value);
     }
 
+    // Internal function to fetch address from TwoKeyRegistry
+    function getAddressFromTwoKeyRegistry(string contractName) internal view returns (address) {
+        ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY)
+        .getContractProxyAddress(contractName);
+    }
+
 
     /**
      * @notice Modifier which will validate if contract is allowed to buy tokens
