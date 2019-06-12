@@ -321,5 +321,12 @@ describe('TwoKeyDonationCampaign', () => {
         printTestNumber();
         let earnings = await twoKeyProtocol.DonationCampaign.getContractorBalanceAndTotalProceeds(campaignAddress, from);
         console.log(earnings);
+    }).timeout(60000);
+
+
+    it('should test if address is joined', async() => {
+        printTestNumber();
+        let isJoined = await twoKeyProtocol.DonationCampaign.isAddressJoined(campaignAddress,from);
+        console.log(isJoined);
     })
 });

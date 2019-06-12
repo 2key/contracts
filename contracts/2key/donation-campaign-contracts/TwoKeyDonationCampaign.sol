@@ -437,11 +437,11 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
      * @param _converter is the one who sent money to the contract
      */
     function getAmountUserDonated(address _converter) public view returns (uint) {
-        require(
-            msg.sender == contractor ||
-            msg.sender == _converter ||
-            twoKeyEventSource.isAddressMaintainer(msg.sender)
-        );
+//        require(
+//            msg.sender == contractor ||
+//            msg.sender == _converter ||
+//            twoKeyEventSource.isAddressMaintainer(msg.sender)
+//        );
 
         return amountUserContributed[_converter];
     }
@@ -451,6 +451,29 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
      */
     function getReferrerBalance(address _referrer) public view returns (uint) {
         return referrerPlasma2Balances2key[twoKeyEventSource.plasmaOf(_referrer)];
+    }
+
+    /**
+     * @notice Function to check if the msg.sender has already joined
+     * @return true/false depending of joined status
+     */
+    function getAddressJoinedStatus(
+        address _address
+    )
+    public
+    view
+    returns (bool)
+    {
+        address plasma = twoKeyEventSource.plasmaOf(_address);
+        if (_address == address(0)) {
+            return false;
+        }
+        if (plasma == ownerPlasma || _address == address(moderator) ||
+        received_from[plasma] != address(0)
+        || balanceOf(plasma) > 0) {
+            return true;
+        }
+        return false;
     }
 
     /**
