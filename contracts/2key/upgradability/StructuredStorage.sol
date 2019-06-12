@@ -32,7 +32,6 @@ contract StructuredStorage is Upgradeable {
         require(initialized == false);
 
         deployer = msg.sender;
-//        deployer = _deployer;
         proxyLogicContract = _proxyLogicContract;
 
         initialized = true;

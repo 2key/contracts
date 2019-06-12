@@ -2,8 +2,9 @@ pragma solidity ^0.4.24;
 
 contract IUpgradableExchange {
 
-    uint public buyRate2key;
-    uint public sellRate2key;
+    function getUint(string key) public view returns (uint);
+//    uint public buyRate2key;
+//    uint public sellRate2key;
 
     function buyTokens(
         address _beneficiary
