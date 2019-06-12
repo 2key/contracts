@@ -15,6 +15,7 @@ contract StructuredStorage is Upgradeable {
     mapping(bytes32 => bytes) bytesStorage;
     mapping(bytes32 => bool) boolStorage;
     mapping(bytes32 => int) intStorage;
+    //TODO I would add also arrays of everything by default, with default accessors specialising in fetching arrays or subarrays etc..
 
 
     modifier onlyDeployer {
@@ -39,6 +40,7 @@ contract StructuredStorage is Upgradeable {
     }
 
     function setProxyLogicContract(address _proxyLogicContract) external onlyDeployer {
+        //TODO this is done on upgrades of the logic? perhaps it would be better to mark only registry and have the registry do this from a single call to update the logic for a singleton
         proxyLogicContract = _proxyLogicContract;
     }
 
