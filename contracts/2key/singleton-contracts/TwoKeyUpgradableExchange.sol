@@ -100,37 +100,6 @@ contract TwoKeyUpgradableExchange is Upgradeable {
         initialized = true;
     }
 
-    // Internal wrapper methods
-    function getUint(string key) public view returns (uint) {
-        return ITwoKeyUpgradableExchangeStorage(PROXY_STORAGE_CONTRACT).
-            getUint(keccak256(key));
-    }
-
-    // Internal wrapper methods
-    function setUint(string key, uint value) public {
-        ITwoKeyUpgradableExchangeStorage(PROXY_STORAGE_CONTRACT).
-            setUint(keccak256(key), value);
-    }
-
-    // Internal wrapper methods
-    function getAddress(string key) public view returns (address) {
-        return ITwoKeyUpgradableExchangeStorage(PROXY_STORAGE_CONTRACT).
-        getAddress(keccak256(key));
-    }
-
-    // Internal wrapper methods
-    function setAddress(string key, address value) public {
-        ITwoKeyUpgradableExchangeStorage(PROXY_STORAGE_CONTRACT).
-        setAddress(keccak256(key), value);
-    }
-
-    // Internal function to fetch address from TwoKeyRegistry
-    function getAddressFromTwoKeyRegistry(string contractName) internal view returns (address) {
-        ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY)
-        .getContractProxyAddress(contractName);
-    }
-
-
     /**
      * @notice Modifier which will validate if contract is allowed to buy tokens
      */
@@ -383,6 +352,37 @@ contract TwoKeyUpgradableExchange is Upgradeable {
 //            stableCoinUnits,
 //            _twoKeyUnits,
 //        );
+    }
+
+
+    // Internal wrapper methods
+    function getUint(string key) public view returns (uint) {
+        return ITwoKeyUpgradableExchangeStorage(PROXY_STORAGE_CONTRACT).
+        getUint(keccak256(key));
+    }
+
+    // Internal wrapper methods
+    function setUint(string key, uint value) internal {
+        ITwoKeyUpgradableExchangeStorage(PROXY_STORAGE_CONTRACT).
+        setUint(keccak256(key), value);
+    }
+
+    // Internal wrapper methods
+    function getAddress(string key) internal view returns (address) {
+        return ITwoKeyUpgradableExchangeStorage(PROXY_STORAGE_CONTRACT).
+        getAddress(keccak256(key));
+    }
+
+    // Internal wrapper methods
+    function setAddress(string key, address value) internal {
+        ITwoKeyUpgradableExchangeStorage(PROXY_STORAGE_CONTRACT).
+        setAddress(keccak256(key), value);
+    }
+
+    // Internal function to fetch address from TwoKeyRegistry
+    function getAddressFromTwoKeyRegistry(string contractName) internal view returns (address) {
+        ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY)
+        .getContractProxyAddress(contractName);
     }
 
 
