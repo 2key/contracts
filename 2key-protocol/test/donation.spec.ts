@@ -244,9 +244,8 @@ describe('TwoKeyDonationCampaign', () => {
         expect(txHash).to.be.a('string');
     }).timeout(60000);
 
-    it('should approve converter and execute conversion if KYC == TRUE', async() => {
+    it('should get all pending converters in case KYC is required', async() => {
         printTestNumber();
-
         const {web3, address} = web3switcher.deployer();
         from = address;
         twoKeyProtocol = new TwoKeyProtocol({
@@ -258,6 +257,17 @@ describe('TwoKeyDonationCampaign', () => {
             eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
         });
+
+        if(isKYCRequired == true) {
+            let pendingConverters = await twoKeyProtocol.DonationCampaign.getAllPendingConverters(campaignAddress, from);
+            expect(pendingConverters.length).to.be.equal(1);
+        }
+
+    }).timeout(60000);
+
+
+    it('should approve converter and execute conversion if KYC == TRUE', async() => {
+        printTestNumber();
 
         if(isKYCRequired == true) {
             let txHash = await twoKeyProtocol.DonationCampaign.approveConverter(campaignAddress,env.TEST4_ADDRESS,from);
@@ -303,8 +313,8 @@ describe('TwoKeyDonationCampaign', () => {
         expect(referrerReservedAmount).to.be.equal(50);
     }).timeout(60000);
 
-
-    it('should get contractor balance and total earnings', async() => {
+    it('should check is address contractor', async() => {
+        printTestNumber();
 
         const {web3, address} = web3switcher.deployer();
         from = address;
@@ -317,7 +327,11 @@ describe('TwoKeyDonationCampaign', () => {
             eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
         });
+        let isAddressContractor = await twoKeyProtocol.DonationCampaign.isAddressContractor(campaignAddress, from);
+        expect(isAddressContractor).to.be.equal(true);
+    }).timeout(60000);
 
+    it('should get contractor balance and total earnings', async() => {
         printTestNumber();
         let earnings = await twoKeyProtocol.DonationCampaign.getContractorBalanceAndTotalProceeds(campaignAddress, from);
         console.log(earnings);
@@ -329,4 +343,5 @@ describe('TwoKeyDonationCampaign', () => {
         let isJoined = await twoKeyProtocol.DonationCampaign.isAddressJoined(campaignAddress,from);
         console.log(isJoined);
     })
+
 });
