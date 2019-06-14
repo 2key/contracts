@@ -376,6 +376,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
     returns (bytes)
     {
         Conversion memory conversion = conversions[conversionId];
+
         address converter; // Defaults to 0x0
 
         if(isConverterAnonymous[conversion.converter] == false) {
@@ -393,5 +394,51 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
             conversion.state
         );
     }
+
+//    /**
+//     * @notice Function to fetch stats for the address
+//     */
+//    function getAddressStatistic(
+//        address _address,
+//        bool plasma,
+//        bool flag,
+//        address referrer
+//    )
+//    internal
+//    view
+//    returns (bytes)
+//    {
+//        bytes32 state; // NOT-EXISTING AS CONVERTER DEFAULT STATE
+//
+//        address eth_address = ITwoKeyEventSource(twoKeyEventSource).ethereumOf(_address);
+//        address plasma_address = ITwoKeyEventSource(twoKeyEventSource).plasmaOf(_address);
+//
+//        if(_address == contractor) {
+//            abi.encodePacked(0, 0, 0, false, false);
+//        } else {
+//            bool isConverter;
+//            bool isReferrer;
+//            uint unitsConverterBought;
+//            uint amountConverterSpent;
+//            uint amountConverterSpentFIAT;
+//
+//            if(amountConverterSpent > 0) {
+//                isConverter = true;
+//                state = convertConverterStateToBytes(converterToState[eth_address]);
+//            }
+//
+//            if(referrerPlasma2TotalEarnings2key[plasma_address] > 0) {
+//                isReferrer = true;
+//            }
+//
+//            return abi.encodePacked(
+//                amountConverterSpent,
+//                referrerPlasma2TotalEarnings2key[plasma_address],
+//                unitsConverterBought,
+//                isConverter,
+//                isReferrer,
+//                state
+//            );
+//        }
 
 }
