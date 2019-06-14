@@ -23,7 +23,7 @@ contract TwoKeyUpgradableExchange is Upgradeable {
 
     bool initialized;
 
-    address public PROXY_STORAGE_CONTRACT;
+    ITwoKeyUpgradableExchangeStorage public PROXY_STORAGE_CONTRACT;
     address public TWO_KEY_SINGLETON_REGISTRY;
 
 
@@ -85,7 +85,7 @@ contract TwoKeyUpgradableExchange is Upgradeable {
         require(initialized == false);
 
         TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonesRegistry;
-        PROXY_STORAGE_CONTRACT = _proxyStorageContract;
+        PROXY_STORAGE_CONTRACT = ITwoKeyUpgradableExchangeStorage(_proxyStorageContract);
 
         setUint(("buyRate2key"),95);// When anyone send 2key to contract, 2key in exchange will be calculated on it's buy rate
         setUint(("sellRate2key"),100);// When anyone send Ether to contract, 2key in exchange will be calculated on it's sell rate
@@ -357,26 +357,22 @@ contract TwoKeyUpgradableExchange is Upgradeable {
 
     // Internal wrapper methods
     function getUint(string key) public view returns (uint) {
-        return ITwoKeyUpgradableExchangeStorage(PROXY_STORAGE_CONTRACT).
-        getUint(keccak256(key));
+        PROXY_STORAGE_CONTRACT.getUint(keccak256(key));
     }
 
     // Internal wrapper methods
     function setUint(string key, uint value) internal {
-        ITwoKeyUpgradableExchangeStorage(PROXY_STORAGE_CONTRACT).
-        setUint(keccak256(key), value);
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(key), value);
     }
 
     // Internal wrapper methods
     function getAddress(string key) internal view returns (address) {
-        return ITwoKeyUpgradableExchangeStorage(PROXY_STORAGE_CONTRACT).
-        getAddress(keccak256(key));
+        PROXY_STORAGE_CONTRACT.getAddress(keccak256(key));
     }
 
     // Internal wrapper methods
     function setAddress(string key, address value) internal {
-        ITwoKeyUpgradableExchangeStorage(PROXY_STORAGE_CONTRACT).
-        setAddress(keccak256(key), value);
+        PROXY_STORAGE_CONTRACT.setAddress(keccak256(key), value);
     }
 
     // Internal function to fetch address from TwoKeyRegistry

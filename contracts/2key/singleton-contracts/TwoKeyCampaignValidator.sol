@@ -262,9 +262,9 @@ contract TwoKeyCampaignValidator is Upgradeable {
     }
 
     // Internal wrapper methods
-    function getBoolean(string mappingName, string keyName) internal view returns (bool) {
+    function getBoolean(bytes32 key) internal view returns (bool) {
         return ITwoKeyUpgradableExchangeStorage(PROXY_STORAGE_CONTRACT).
-        getBool(keccak256(mappingName,keyName));
+        getBool(key);
     }
 
 
