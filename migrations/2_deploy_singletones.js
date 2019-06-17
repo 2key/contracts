@@ -16,8 +16,12 @@ const TwoKeyCampaignValidator = artifacts.require('TwoKeyCampaignValidator');
 const TwoKeyFactory = artifacts.require('TwoKeyFactory');
 const KyberNetworkTestMockContract = artifacts.require('KyberNetworkTestMockContract');
 const TwoKeyMaintainersRegistry = artifacts.require('TwoKeyMaintainersRegistry');
+
 const TwoKeyUpgradableExchangeStorage = artifacts.require('TwoKeyUpgradableExchangeStorage');
 const TwoKeyCampaignValidatorStorage = artifacts.require('TwoKeyCampaignValidatorStorage');
+const TwoKeyEventSourceStorage = artifacts.require("TwoKeyEventSourceStorage");
+
+
 const Call = artifacts.require('Call');
 const IncentiveModels = artifacts.require('IncentiveModels');
 
@@ -65,6 +69,7 @@ module.exports = function deploy(deployer) {
 
     let proxyAddressTwoKeyUpgradableExchangeSTORAGE;
     let proxyAddressTwoKeyCampaignValidatorSTORAGE;
+    let proxyAddressTwoKeyEventSourceSTORAGE;
 
     let deploymentNetwork;
     if(deployer.network.startsWith('dev') || deployer.network.startsWith('plasma-test')) {
@@ -102,8 +107,6 @@ module.exports = function deploy(deployer) {
             .then(() => TwoKeyCongress.deployed())
             .then(() => deployer.deploy(TwoKeyCampaignValidator))
             .then(() => TwoKeyCampaignValidator.deployed())
-            .then(() => deployer.deploy(TwoKeyCampaignValidatorStorage))
-            .then(() => TwoKeyCampaignValidatorStorage.deployed())
             .then(() => deployer.deploy(TwoKeyAdmin))
             .then(() => TwoKeyAdmin.deployed())
             .then(() => deployer.deploy(TwoKeyExchangeRateContract))
@@ -118,8 +121,6 @@ module.exports = function deploy(deployer) {
             .then(() => TwoKeyBaseReputationRegistry.deployed())
             .then(() => deployer.deploy(TwoKeyUpgradableExchange))
             .then(() => TwoKeyUpgradableExchange.deployed())
-            .then(() => deployer.deploy(TwoKeyUpgradableExchangeStorage))
-            .then(() => TwoKeyUpgradableExchangeStorage.deployed())
             .then(() => deployer.deploy(TwoKeyCommunityTokenPool))
             .then(() => TwoKeyCommunityTokenPool.deployed())
             .then(() => deployer.deploy(TwoKeyDeepFreezeTokenPool))
@@ -369,19 +370,24 @@ module.exports = function deploy(deployer) {
                          * Adding EventSource to the registry, deploying 1st logicProxy for that 1.0 version of EventSource and setting initial params there
                          */
                         let txHash = await registry.addVersion("TwoKeyEventSource", "1.0", EventSource.address);
+                        txHash = await registry.addVersion("TwoKeyEventSourceStorage", "1.0", TwoKeyEventSourceStorage.address);
+
                         let { logs } = await registry.createProxy("TwoKeyEventSource", "TwoKeyEventSourceStorage", "1.0");
                         let { logicProxy , storageProxy} = logs.find(l => l.event === 'ProxiesDeployed').args;
                         console.log('Proxy address for the EventSource is : ' + logicProxy);
 
-                        const twoKeyEventS = fileObject.TwoKeyEventSource || {};
+                        const twoKeyEvents = fileObject.TwoKeyEventSource || {};
 
-                        twoKeyEventS[network_id] = {
+                        twoKeyEvents[network_id] = {
                             'address': EventSource.address,
                             'Proxy': logicProxy,
                             'Version': "1.0",
                             maintainer_address: maintainerAddresses,
                         };
-                        fileObject['TwoKeyEventSource'] = twoKeyEventS;
+
+                        proxyAddressTwoKeyEventSourceSTORAGE = storageProxy;
+
+                        fileObject['TwoKeyEventSource'] = twoKeyEvents;
                         proxyAddressTwoKeyEventSource = logicProxy;
                         resolve(logicProxy);
                     } catch (e) {
@@ -533,7 +539,7 @@ module.exports = function deploy(deployer) {
                         let txHash = await TwoKeyMaintainersRegistry.at(proxyAddressTwoKeyMaintainersRegistry).setInitialParams(
                             proxyAddressTwoKeyAdmin,
                             maintainerAddresses
-                        )
+                        );
                         resolve(txHash);
                     } catch (e) {
                         reject(e);
@@ -597,7 +603,8 @@ module.exports = function deploy(deployer) {
                     try {
                         console.log('Setting initial parameters in contract EventSource');
                         let txHash = await EventSource.at(proxyAddressTwoKeyEventSource).setInitialParams(
-                            TwoKeySingletonesRegistry.address
+                            TwoKeySingletonesRegistry.address,
+                            proxyAddressTwoKeyEventSourceSTORAGE
                         );
                         resolve(txHash);
                     } catch (e) {

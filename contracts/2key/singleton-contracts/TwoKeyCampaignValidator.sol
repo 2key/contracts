@@ -9,7 +9,7 @@ import "../interfaces/ITwoKeyDonationCampaign.sol";
 import "../interfaces/ITwoKeyDonationCampaignFetchAddresses.sol";
 import "../interfaces/IGetImplementation.sol";
 import "../interfaces/IStructuredStorage.sol";
-import "../interfaces/ITwoKeyCampaignValidatorStorage.sol";
+import "../interfaces/storage-contracts/ITwoKeyCampaignValidatorStorage.sol";
 
 import "../upgradability/Upgradeable.sol";
 import "./ITwoKeySingletonUtils.sol";
