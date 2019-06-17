@@ -15,33 +15,18 @@ contract TwoKeyExchangeRateContract is Upgradeable {
     bool initialized;
 
     address public twoKeySingletonesRegistry;
-    address twoKeyMaintainersRegistry;
+
     /**
      * @notice Event will be emitted every time we update the price for the fiat
      */
     event PriceUpdated(bytes32 _currency, uint newRate, uint _timestamp, address _updater);
 
-    /**
-     * @notice public mapping which will store rate between 1 wei eth and 1 wei fiat currency
-     * Will be updated every 8 hours, and it's public
-     */
-    //TODO:  key methodology --> BASE/TARGET
-    //TODO:  "JPY/USD" 0.002 * 10**18
-    //TODO   "EUR/USD" 1.2   * 10**18
-    //TODO   "GBP/USD" 4.2   * 10**18
-    //TODO   "USD/DAI" 1.001 * 10**18
-    //TODO   "USD" (ETH/USD)  260   * 10**18
-    //TODO   "BTC" (ETH/BTC)  0.03  * 10**18
-    //TODO   "DAI" (ETH/DAI)  260   * 10**18
-    mapping(bytes32 => ExchangeRate) public currencyName2rate;
 
-
-    struct ExchangeRate {
-        uint baseToTargetRate; // this is representing rate between eth and some currency where will be 1 unit to X units depending on more valuable curr
-        uint timeUpdated;
-        address maintainerWhoUpdated;
+    modifier onlyMaintainer {
+        address twoKeyMaintainersRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry)
+            .getContractProxyAddress("TwoKeyMaintainersRegistry");
+        require(ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender));
     }
-
 
     /**
      * @notice Function which will be called immediately after contract deployment
@@ -55,7 +40,6 @@ contract TwoKeyExchangeRateContract is Upgradeable {
         require(initialized == false);
 
         twoKeySingletonesRegistry = _twoKeySingletonesRegistry;
-        twoKeyMaintainersRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).getContractProxyAddress("TwoKeyMaintainersRegistry");
 
         initialized = true;
     }
@@ -72,7 +56,6 @@ contract TwoKeyExchangeRateContract is Upgradeable {
     )
     public
     {
-        require(ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender));
         storeFiatCurrencyDetails(_currency, baseToTargetRate);
         emit PriceUpdated(_currency, baseToTargetRate, block.timestamp, msg.sender);
     }
@@ -88,7 +71,6 @@ contract TwoKeyExchangeRateContract is Upgradeable {
     )
     public
     {
-        require(ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender));
         uint numberOfFiats = _currencies.length; //either _isETHGreaterThanCurrencies.length
         //There's no need for validation of input, because only we can call this and that costs gas
         for(uint i=0; i<numberOfFiats; i++) {
@@ -123,11 +105,7 @@ contract TwoKeyExchangeRateContract is Upgradeable {
     returns (uint,uint,address)
     {
         bytes32 key = stringToBytes32(base_target);
-        return (
-            currencyName2rate[key].baseToTargetRate,
-            currencyName2rate[key].timeUpdated,
-            currencyName2rate[key].maintainerWhoUpdated
-        );
+
     }
 
     function getBaseToTargetRate(
