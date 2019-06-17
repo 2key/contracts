@@ -17,6 +17,7 @@ const TwoKeyFactory = artifacts.require('TwoKeyFactory');
 const KyberNetworkTestMockContract = artifacts.require('KyberNetworkTestMockContract');
 const TwoKeyMaintainersRegistry = artifacts.require('TwoKeyMaintainersRegistry');
 const TwoKeyUpgradableExchangeStorage = artifacts.require('TwoKeyUpgradableExchangeStorage');
+const TwoKeyCampaignValidatorStorage = artifacts.require('TwoKeyCampaignValidatorStorage');
 const Call = artifacts.require('Call');
 const IncentiveModels = artifacts.require('IncentiveModels');
 
@@ -63,6 +64,8 @@ module.exports = function deploy(deployer) {
 
 
     let proxyAddressTwoKeyUpgradableExchangeSTORAGE;
+    let proxyAddressTwoKeyCampaignValidatorSTORAGE;
+
     let deploymentNetwork;
     if(deployer.network.startsWith('dev') || deployer.network.startsWith('plasma-test')) {
         deploymentNetwork = 'dev-local-environment'
@@ -99,6 +102,8 @@ module.exports = function deploy(deployer) {
             .then(() => TwoKeyCongress.deployed())
             .then(() => deployer.deploy(TwoKeyCampaignValidator))
             .then(() => TwoKeyCampaignValidator.deployed())
+            .then(() => deployer.deploy(TwoKeyCampaignValidatorStorage))
+            .then(() => TwoKeyCampaignValidatorStorage.deployed())
             .then(() => deployer.deploy(TwoKeyAdmin))
             .then(() => TwoKeyAdmin.deployed())
             .then(() => deployer.deploy(TwoKeyExchangeRateContract))
@@ -113,9 +118,9 @@ module.exports = function deploy(deployer) {
             .then(() => TwoKeyBaseReputationRegistry.deployed())
             .then(() => deployer.deploy(TwoKeyUpgradableExchange))
             .then(() => TwoKeyUpgradableExchange.deployed())
-            .then(() => deployer.deploy(TwoKeyCommunityTokenPool))
             .then(() => deployer.deploy(TwoKeyUpgradableExchangeStorage))
             .then(() => TwoKeyUpgradableExchangeStorage.deployed())
+            .then(() => deployer.deploy(TwoKeyCommunityTokenPool))
             .then(() => TwoKeyCommunityTokenPool.deployed())
             .then(() => deployer.deploy(TwoKeyDeepFreezeTokenPool))
             .then(() => TwoKeyDeepFreezeTokenPool.deployed())
@@ -232,6 +237,7 @@ module.exports = function deploy(deployer) {
                             maintainer_address: maintainerAddresses,
                         };
 
+                        proxyAddressTwoKeyCampaignValidatorSTORAGE = storageProxy;
 
                         fileObject['TwoKeyCampaignValidator'] = twoKeyValidator;
                         proxyAddressTwoKeyCampaignValidator = logicProxy;
@@ -575,6 +581,7 @@ module.exports = function deploy(deployer) {
                         console.log('Setting initial parameters in contract TwoKeyCampaignValidator');
                         let txHash = await TwoKeyCampaignValidator.at(proxyAddressTwoKeyCampaignValidator).setInitialParams(
                             TwoKeySingletonesRegistry.address,
+                            proxyAddressTwoKeyCampaignValidatorSTORAGE
                         );
                         resolve(txHash);
                     } catch (e) {

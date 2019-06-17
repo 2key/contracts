@@ -9,6 +9,7 @@ contract StructuredStorage is Upgradeable {
     address proxyLogicContract;
     address deployer;
 
+    mapping(bytes32 => bytes32) bytes32Storage;
     mapping(bytes32 => uint) uIntStorage;
     mapping(bytes32 => string) stringStorage;
     mapping(bytes32 => address) addressStorage;
@@ -68,6 +69,10 @@ contract StructuredStorage is Upgradeable {
         return intStorage[_key];
     }
 
+    function getBytes32(bytes32 _key) external view returns (bytes32) {
+        return bytes32Storage[_key];
+    }
+
     // *** Setter Methods ***
     function setUint(bytes32 _key, uint _value) external {
         uIntStorage[_key] = _value;
@@ -93,6 +98,10 @@ contract StructuredStorage is Upgradeable {
         intStorage[_key] = _value;
     }
 
+    function setBytes32(bytes32 _key, bytes32 _value) external {
+        bytes32Storage[_key] = _value;
+    }
+
     // *** Delete Methods ***
     function deleteUint(bytes32 _key) external {
         delete uIntStorage[_key];
@@ -116,5 +125,9 @@ contract StructuredStorage is Upgradeable {
 
     function deleteInt(bytes32 _key) external {
         delete intStorage[_key];
+    }
+
+    function deleteBytes32(bytes32 _key) external {
+        delete bytes32Storage[_key];
     }
 }
