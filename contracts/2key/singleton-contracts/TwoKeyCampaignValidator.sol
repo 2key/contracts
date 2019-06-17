@@ -3,17 +3,16 @@ pragma solidity ^0.4.24;
 import "../libraries/GetCode.sol";
 
 import "../interfaces/ITwoKeyAcquisitionCampaignStateVariables.sol";
-import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyEventSourceEvents.sol";
 import "../interfaces/ITwoKeyCampaignPublicAddresses.sol";
 import "../interfaces/ITwoKeyDonationCampaign.sol";
 import "../interfaces/ITwoKeyDonationCampaignFetchAddresses.sol";
 import "../interfaces/IGetImplementation.sol";
-import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../interfaces/IStructuredStorage.sol";
 import "../interfaces/ITwoKeyCampaignValidatorStorage.sol";
 
 import "../upgradability/Upgradeable.sol";
+import "./ITwoKeySingletonUtils.sol";
 
 
 /*******************************************************************************************************************
@@ -44,11 +43,10 @@ import "../upgradability/Upgradeable.sol";
  * @author Nikola Madjarevic
  * Created at 2/12/19
  */
-contract TwoKeyCampaignValidator is Upgradeable {
+contract TwoKeyCampaignValidator is Upgradeable, ITwoKeySingletonUtils {
 
     bool initialized;
 
-    address public TWO_KEY_SINGLETON_REGISTRY;
     ITwoKeyCampaignValidatorStorage public PROXY_STORAGE_CONTRACT;
 
     /**
@@ -68,15 +66,6 @@ contract TwoKeyCampaignValidator is Upgradeable {
 
         initialized = true;
     }
-
-    modifier onlyMaintainer {
-        address twoKeyMaintainersRegistry =
-        ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY)
-        .getContractProxyAddress("TwoKeyMaintainersRegistry");
-        require(ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender));
-        _;
-    }
-
 
     /**
      * @notice Function which is in charge to validate if the campaign contract is ready
@@ -289,19 +278,14 @@ contract TwoKeyCampaignValidator is Upgradeable {
         return getBoolean(hashKey);
     }
 
-    // Internal function to fetch address from TwoKeyRegistry
-    function getAddressFromTwoKeySingletonRegistry(string contractName) public view returns (address) {
-        return ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY)
-        .getContractProxyAddress(contractName);
-    }
+
 
     function emitCreatedEvent(address campaign) internal {
         address contractor = ITwoKeyAcquisitionCampaignStateVariables(campaign).contractor();
         address moderator = ITwoKeyAcquisitionCampaignStateVariables(campaign).moderator();
 
         //Get the event source address
-        address twoKeyEventSource = ITwoKeySingletoneRegistryFetchAddress
-        (TWO_KEY_SINGLETON_REGISTRY).getContractProxyAddress("TwoKeyEventSource");
+        address twoKeyEventSource = getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource");
         // Emit event
         ITwoKeyEventSourceEvents(twoKeyEventSource).created(campaign,contractor,moderator);
     }

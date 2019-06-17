@@ -3,6 +3,7 @@ pragma solidity ^0.4.24;
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../upgradability/Upgradeable.sol";
+import "./ITwoKeySingletonUtils.sol";
 
 
 /**
@@ -10,22 +11,37 @@ import "../upgradability/Upgradeable.sol";
  * This is going to be the contract on which we will store exchange rates between USD and ETH
  * Will be maintained, and updated by our trusted server and CMC api every 8 hours.
  */
-contract TwoKeyExchangeRateContract is Upgradeable {
+contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
 
     bool initialized;
 
-    address public twoKeySingletonesRegistry;
+    address public PROXY_STORAGE_CONTRACT;
 
     /**
      * @notice Event will be emitted every time we update the price for the fiat
      */
     event PriceUpdated(bytes32 _currency, uint newRate, uint _timestamp, address _updater);
+    mapping(bytes32 => ExchangeRate) public currencyName2rate;
 
 
-    modifier onlyMaintainer {
-        address twoKeyMaintainersRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry)
-            .getContractProxyAddress("TwoKeyMaintainersRegistry");
-        require(ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender));
+    struct ExchangeRate {
+        uint baseToTargetRate; // this is representing rate between eth and some currency where will be 1 unit to X units depending on more valuable curr
+        uint timeUpdated;
+        address maintainerWhoUpdated;
+    }
+
+    function getExchangeRate(
+        bytes32 key
+    )
+    public
+    view
+    returns (uint,uint,address)
+    {
+        return (
+        currencyName2rate[key].baseToTargetRate,
+        currencyName2rate[key].timeUpdated,
+        currencyName2rate[key].maintainerWhoUpdated
+        );
     }
 
     /**
@@ -39,7 +55,7 @@ contract TwoKeyExchangeRateContract is Upgradeable {
     {
         require(initialized == false);
 
-        twoKeySingletonesRegistry = _twoKeySingletonesRegistry;
+        TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonesRegistry;
 
         initialized = true;
     }

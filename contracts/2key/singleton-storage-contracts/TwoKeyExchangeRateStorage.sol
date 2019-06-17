@@ -16,27 +16,16 @@ contract TwoKeyExchangeRateStorage is StructuredStorage {
     //TODO   "USD" (ETH/USD)  260   * 10**18
     //TODO   "BTC" (ETH/BTC)  0.03  * 10**18
     //TODO   "DAI" (ETH/DAI)  260   * 10**18
-    mapping(bytes32 => ExchangeRate) public currencyName2rate;
 
 
-    struct ExchangeRate {
-        uint baseToTargetRate; // this is representing rate between eth and some currency where will be 1 unit to X units depending on more valuable curr
-        uint timeUpdated;
-        address maintainerWhoUpdated;
-    }
-
-    function getExchangeRate(
-        bytes32 key
+    function setExchangeRate(
+        bytes32 _currency,
+        uint baseToTargetRate,
+        address maintainer
     )
-    public
-    view
-    returns (uint,uint,address)
+    external
     {
-        return (
-            currencyName2rate[key].baseToTargetRate,
-            currencyName2rate[key].timeUpdated,
-            currencyName2rate[key].maintainerWhoUpdated
-        );
+
     }
 
 }

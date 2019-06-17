@@ -2,11 +2,9 @@ pragma solidity ^0.4.24;
 
 import "../../openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 
-import '../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol';
 import "../interfaces/ITwoKeyExchangeRateContract.sol";
 import "../interfaces/ITwoKeyCampaignValidator.sol";
 import "../interfaces/IKyberNetworkProxy.sol";
-import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../interfaces/storage-contracts/ITwoKeyUpgradableExchangeStorage.sol";
 import "../interfaces/IERC20.sol";
 
@@ -14,9 +12,10 @@ import "../libraries/SafeMath.sol";
 import "../libraries/GetCode.sol";
 import "../libraries/SafeERC20.sol";
 import "../upgradability/Upgradeable.sol";
+import "./ITwoKeySingletonUtils.sol";
 
 
-contract TwoKeyUpgradableExchange is Upgradeable {
+contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
     using SafeMath for uint256;
     using SafeERC20 for ERC20;
@@ -24,7 +23,6 @@ contract TwoKeyUpgradableExchange is Upgradeable {
     bool initialized;
 
     ITwoKeyUpgradableExchangeStorage public PROXY_STORAGE_CONTRACT;
-    address public TWO_KEY_SINGLETON_REGISTRY;
 
 
     /**
@@ -109,11 +107,6 @@ contract TwoKeyUpgradableExchange is Upgradeable {
         _;
     }
 
-    modifier onlyMaintainer {
-        address twoKeyMaintainersRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyMaintainersRegistry");
-        require(ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender));
-        _;
-    }
 
     /**
      * @dev Validation of an incoming purchase. Use require statements to revert state when conditions are not met. Use `super` in contracts that inherit from Crowdsale to extend their validations.
@@ -176,8 +169,7 @@ contract TwoKeyUpgradableExchange is Upgradeable {
     view
     returns (uint256)
     {
-        address twoKeyExchangeRateContract = ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY).
-                    getContractProxyAddress("TwoKeyExchangeRateContract");
+        address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract");
 
         uint rate = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate("USD");
         return (_weiAmount*rate).mul(1000).div(getUint("sellRate2key")).div(10**18);
@@ -197,8 +189,7 @@ contract TwoKeyUpgradableExchange is Upgradeable {
     returns (uint256)
     {
         // Take the address of TwoKeyExchangeRateContract
-        address twoKeyExchangeRateContract = ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY).
-        getContractProxyAddress("TwoKeyExchangeRateContract");
+        address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract");
 
         // This is the case when we buy 2keys in exchange for stable coins
         uint rate = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate("USD-DAI"); // 1.01
@@ -369,13 +360,6 @@ contract TwoKeyUpgradableExchange is Upgradeable {
     function setAddress(string key, address value) internal {
         PROXY_STORAGE_CONTRACT.setAddress(keccak256(key), value);
     }
-
-    // Internal function to fetch address from TwoKeyRegistry
-    function getAddressFromTwoKeySingletonRegistry(string contractName) internal view returns (address) {
-        return ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY)
-        .getContractProxyAddress(contractName);
-    }
-
 
     function updateUint(
         string key,
