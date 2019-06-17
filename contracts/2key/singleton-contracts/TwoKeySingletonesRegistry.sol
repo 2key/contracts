@@ -80,7 +80,7 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
     public
     onlyMaintainer
     {
-        require(versionsLogic[contractName][version] == 0x0);
+//        require(versionsLogic[contractName][version] == 0x0);
         versionsLogic[contractName][version] = implementation;
         contractNameToLatestVersion[contractName] = version;
         emit VersionAdded(version, implementation);

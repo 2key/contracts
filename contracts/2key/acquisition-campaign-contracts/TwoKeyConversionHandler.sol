@@ -264,7 +264,7 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyConversionStates,
             conversion.isConversionFiat
         );
 
-        // Update reputation points in registry for conversion executed event
+//         Update reputation points in registry for conversion executed event
         ITwoKeyBaseReputationRegistry(twoKeyBaseReputationRegistry).updateOnConversionExecutedEvent(
             conversion.converter,
             contractor,

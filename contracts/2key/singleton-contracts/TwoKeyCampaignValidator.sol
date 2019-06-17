@@ -49,16 +49,7 @@ contract TwoKeyCampaignValidator is Upgradeable {
     bool initialized;
 
     address public TWO_KEY_SINGLETON_REGISTRY;
-    address public PROXY_STORAGE_CONTRACT;
-
-
-    mapping(address => string) public campaign2nonSingletonHash;
-    mapping(bytes => bool) isCodeValid;
-    mapping(bytes => bytes32) contractCodeToName;
-
-    // Will store the mapping between campaign address and if it satisfies all the criteria
-    mapping(address => bool) public isCampaignValidated;
-
+    ITwoKeyCampaignValidatorStorage public PROXY_STORAGE_CONTRACT;
 
     /**
      * @notice Function to set initial parameters in this contract
@@ -73,7 +64,7 @@ contract TwoKeyCampaignValidator is Upgradeable {
         require(initialized == false);
 
         TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletoneRegistry;
-        PROXY_STORAGE_CONTRACT = _proxyStorage;
+        PROXY_STORAGE_CONTRACT = ITwoKeyCampaignValidatorStorage(_proxyStorage);
 
         initialized = true;
     }
@@ -192,6 +183,7 @@ contract TwoKeyCampaignValidator is Upgradeable {
         uint length = contracts.length;
         for(uint i=0; i<length; i++) {
             bytes memory contractCode = GetCode.at(contracts[i]);
+
             bytes32 hashIsCodeValid = keccak256("isCodeValid", contractCode);
             bytes32 hashCodeToName = keccak256("contractCodeToName",names[i]);
 
@@ -273,29 +265,33 @@ contract TwoKeyCampaignValidator is Upgradeable {
 
     // Internal wrapper methods
     function getBoolean(bytes32 key) internal view returns (bool) {
-        return ITwoKeyCampaignValidatorStorage(PROXY_STORAGE_CONTRACT).
-        getBool(key);
-    }
-
-    function setBoolean(bytes32 key, bool value) internal {
-        ITwoKeyCampaignValidatorStorage(PROXY_STORAGE_CONTRACT).setBool(key,value);
-    }
-
-    function setString(bytes32 key, string value) internal {
-        ITwoKeyCampaignValidatorStorage(PROXY_STORAGE_CONTRACT).setString(key,value);
-    }
-
-    function setBytes32(bytes32 key, bytes32 value) internal {
-        ITwoKeyCampaignValidatorStorage(PROXY_STORAGE_CONTRACT).setBytes32(key, value);
+        return PROXY_STORAGE_CONTRACT.getBool(key);
     }
 
     function getBytes32(bytes32 key) internal view returns (bytes32) {
-        return ITwoKeyCampaignValidatorStorage(PROXY_STORAGE_CONTRACT).getBytes32(key);
+        return PROXY_STORAGE_CONTRACT.getBytes32(key);
     }
 
-    // Internal function to fetch address from TwoKeySingletonRegistry
-    function getAddressFromTwoKeySingletonRegistry(string contractName) internal view returns (address) {
-        ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY)
+    function setBoolean(bytes32 key, bool value) internal {
+        PROXY_STORAGE_CONTRACT.setBool(key,value);
+    }
+
+    function setString(bytes32 key, string value) internal {
+        PROXY_STORAGE_CONTRACT.setString(key,value);
+    }
+
+    function setBytes32(bytes32 key, bytes32 value) internal {
+        PROXY_STORAGE_CONTRACT.setBytes32(key, value);
+    }
+
+    function isCampaignValidated(address campaign) public view returns (bool) {
+        bytes32 hashKey = keccak256("isCampaignValidated", campaign);
+        return getBoolean(hashKey);
+    }
+
+    // Internal function to fetch address from TwoKeyRegistry
+    function getAddressFromTwoKeySingletonRegistry(string contractName) public view returns (address) {
+        return ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY)
         .getContractProxyAddress(contractName);
     }
 

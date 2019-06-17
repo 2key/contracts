@@ -226,7 +226,9 @@ module.exports = function deploy(deployer) {
                          * Adding TwoKeyCampaignValidator to the registry, deploying 1st logicProxy for that 1.0 version and setting initial params there
                          */
                         let txHash = await registry.addVersion("TwoKeyCampaignValidator", "1.0", TwoKeyCampaignValidator.address);
-                        let { logs } = await registry.createProxy("TwoKeyCampaignValidator", "TwoKeyCampaignValidatorStorage","1.0");
+                        txHash = await registry.addVersion("TwoKeyCampaignValidatorStorage", "1.0", TwoKeyCampaignValidatorStorage.address);
+
+                        let { logs } = await registry.createProxy("TwoKeyCampaignValidator", "TwoKeyCampaignValidatorStorage", "1.0");
                         let { logicProxy , storageProxy } = logs.find(l => l.event === 'ProxiesDeployed').args;
                         console.log('Proxy address for the TwoKeyCampaignValidator is : ' + logicProxy);
                         const twoKeyValidator = fileObject.TwoKeyCampaignValidator || {};
@@ -236,7 +238,9 @@ module.exports = function deploy(deployer) {
                             'Version': "1.0",
                             maintainer_address: maintainerAddresses,
                         };
-
+                        txHash = await TwoKeyCampaignValidatorStorage.at(storageProxy).setProxyLogicContractAndDeployer(
+                            logicProxy
+                        );
                         proxyAddressTwoKeyCampaignValidatorSTORAGE = storageProxy;
 
                         fileObject['TwoKeyCampaignValidator'] = twoKeyValidator;

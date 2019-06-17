@@ -497,11 +497,11 @@ describe('TwoKeyProtocol', () => {
         expect(isValidated).to.be.equal(true);
         console.log('Campaign is validated');
     }).timeout(60000);
-
-    it('should proof that non singleton hash is set for the campaign', async() => {
-        let nonSingletonHash = await twoKeyProtocol.CampaignValidator.getCampaignNonSingletonsHash(campaignAddress);
-        expect(nonSingletonHash).to.be.equal(twoKeyProtocol.AcquisitionCampaign.getNonSingletonsHash());
-    }).timeout(60000);
+    //
+    // it('should proof that non singleton hash is set for the campaign', async() => {
+    //     let nonSingletonHash = await twoKeyProtocol.CampaignValidator.getCampaignNonSingletonsHash(campaignAddress);
+    //     expect(nonSingletonHash).to.be.equal(twoKeyProtocol.AcquisitionCampaign.getNonSingletonsHash());
+    // }).timeout(60000);
 
     it('should save campaign to IPFS', async () => {
         // const hash = await twoKeyProtocol.Utils.ipfsAdd(campaignData);

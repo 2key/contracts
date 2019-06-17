@@ -104,18 +104,13 @@ contract TwoKeyUpgradableExchange is Upgradeable {
      * @notice Modifier which will validate if contract is allowed to buy tokens
      */
     modifier onlyValidatedContracts {
-        address twoKeyCampaignValidator =
-        ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY)
-            .getContractProxyAddress("TwoKeyCampaignValidator");
-
+        address twoKeyCampaignValidator = getAddressFromTwoKeySingletonRegistry("TwoKeyCampaignValidator");
         require(ITwoKeyCampaignValidator(twoKeyCampaignValidator).isCampaignValidated(msg.sender) == true);
         _;
     }
 
     modifier onlyMaintainer {
-        address twoKeyMaintainersRegistry =
-        ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY)
-            .getContractProxyAddress("TwoKeyMaintainersRegistry");
+        address twoKeyMaintainersRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyMaintainersRegistry");
         require(ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender));
         _;
     }
@@ -357,7 +352,7 @@ contract TwoKeyUpgradableExchange is Upgradeable {
 
     // Internal wrapper methods
     function getUint(string key) public view returns (uint) {
-        PROXY_STORAGE_CONTRACT.getUint(keccak256(key));
+        return PROXY_STORAGE_CONTRACT.getUint(keccak256(key));
     }
 
     // Internal wrapper methods
@@ -367,7 +362,7 @@ contract TwoKeyUpgradableExchange is Upgradeable {
 
     // Internal wrapper methods
     function getAddress(string key) internal view returns (address) {
-        PROXY_STORAGE_CONTRACT.getAddress(keccak256(key));
+        return PROXY_STORAGE_CONTRACT.getAddress(keccak256(key));
     }
 
     // Internal wrapper methods
@@ -376,8 +371,8 @@ contract TwoKeyUpgradableExchange is Upgradeable {
     }
 
     // Internal function to fetch address from TwoKeyRegistry
-    function getAddressFromTwoKeyRegistry(string contractName) internal view returns (address) {
-        ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY)
+    function getAddressFromTwoKeySingletonRegistry(string contractName) internal view returns (address) {
+        return ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY)
         .getContractProxyAddress(contractName);
     }
 
