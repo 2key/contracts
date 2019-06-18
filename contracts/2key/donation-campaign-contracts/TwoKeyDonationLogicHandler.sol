@@ -276,10 +276,10 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
     }
 
     /**
- * @notice Function to determine plasma address of ethereum address
- * @param me is the address (ethereum) of the user
- * @return an address
- */
+     * @notice Function to determine plasma address of ethereum address
+     * @param me is the address (ethereum) of the user
+     * @return an address
+     */
     function plasmaOf(
         address me
     )

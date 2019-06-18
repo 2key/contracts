@@ -342,7 +342,7 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
     )
     public
     {
-//        require(msg.sender == twoKeyDonationLogicHandler);
+        require(msg.sender == twoKeyDonationLogicHandler);
         referrerPlasma2Balances2key[_influencer] = referrerPlasma2Balances2key[_influencer].add(_balance);
     }
 
