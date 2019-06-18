@@ -32,6 +32,7 @@ contract TwoKeyFactory is Upgradeable, MaintainingPattern {
     event ProxyForDonationCampaign(
         address proxyDonationCampaign,
         address proxyDonationConversionHandler,
+        address proxyDonationLogicHandler,
         address contractor
     );
 
@@ -119,11 +120,6 @@ contract TwoKeyFactory is Upgradeable, MaintainingPattern {
         );
 
 
-        //        UpgradeableCampaign(proxyPurchasesHandler).initialize.value(msg.value)(msg.sender);
-        //        UpgradeableCampaign(proxyLogicHandler).initialize.value(msg.value)(msg.sender);
-        //        UpgradeableCampaign(proxyConversions).initialize.value(msg.value)(msg.sender);
-        //        UpgradeableCampaign(proxyAcquisition).initialize.value(msg.value)(msg.sender);
-
         IHandleCampaignDeployment(proxyPurchasesHandler).setInitialParamsPurchasesHandler(
             valuesConversion,
             msg.sender,
@@ -181,7 +177,6 @@ contract TwoKeyFactory is Upgradeable, MaintainingPattern {
         );
     }
 
-
     /**
      * @notice Function to deploy proxy contracts for donation campaigns
      */
@@ -189,16 +184,13 @@ contract TwoKeyFactory is Upgradeable, MaintainingPattern {
         address _moderator,
         uint [] numberValues,
         bool [] booleanValues,
-        string _campaignName,
+        string _currency,
         string tokenName,
         string tokenSymbol,
         string nonSingletonHash
     )
     public
     {
-
-        moderator = _moderator;
-
         // Deploying a proxy contract for donations
         ProxyCampaign proxyDonationCampaign = new ProxyCampaign(
             "TwoKeyDonationCampaign",
@@ -213,6 +205,13 @@ contract TwoKeyFactory is Upgradeable, MaintainingPattern {
             address(twoKeySingletonRegistry)
         );
 
+        //Deploying a proxy contract for donation logic handler
+        ProxyCampaign proxyDonationLogicHandler = new ProxyCampaign(
+            "TwoKeyDonationLogicHandler",
+            twoKeySingletonRegistry.getLatestContractVersion("TwoKeyDonationLogicHandler"),
+            address(twoKeySingletonRegistry)
+        );
+
         // Set initial parameters under Donation conversion handler
         IHandleCampaignDeployment(proxyDonationConversionHandler).setInitialParamsDonationConversionHandler(
             tokenName,
@@ -223,15 +222,24 @@ contract TwoKeyFactory is Upgradeable, MaintainingPattern {
             getContractProxyAddress("TwoKeyBaseReputationRegistry")
         );
 
+        IHandleCampaignDeployment(proxyDonationLogicHandler).setInitialParamsDonationLogicHandler(
+            numberValues,
+            _currency,
+            msg.sender,
+            _moderator,
+            address(twoKeySingletonRegistry),
+            proxyDonationCampaign
+        );
+
         // Set initial parameters under Donation campaign contract
         IHandleCampaignDeployment(proxyDonationCampaign).setInitialParamsDonationCampaign(
             msg.sender, //contractor
             _moderator, //moderator address
             address(twoKeySingletonRegistry),
             proxyDonationConversionHandler,
+            proxyDonationLogicHandler,
             numberValues,
-            booleanValues,
-            _campaignName
+            booleanValues
         );
 
         // Validate campaign
@@ -243,13 +251,14 @@ contract TwoKeyFactory is Upgradeable, MaintainingPattern {
         );
 
         addressToCampaignType[proxyDonationCampaign] = "DONATION_CAMPAIGN";
+
 //         Emit an event
         emit ProxyForDonationCampaign(
             proxyDonationCampaign,
             proxyDonationConversionHandler,
+            proxyDonationLogicHandler,
             msg.sender
         );
-
     }
 
     // I left it as a string, even it increases chances for typo, better suits Upgradable pattern than Enums.

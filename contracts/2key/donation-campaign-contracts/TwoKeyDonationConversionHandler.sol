@@ -25,6 +25,8 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
 
     ITwoKeyDonationCampaign twoKeyDonationCampaign;
 
+    mapping(address => uint) amountConverterSpentETHWei;
+
     address twoKeyEventSource;
     address twoKeyBaseReputationRegistry;
     address contractor;
@@ -183,15 +185,15 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
         require(converterToState[conversion.converter] == ConverterState.APPROVED);
         require(conversion.state == ConversionState.APPROVED);
 
-        amountConverterSpentEthWEI[conversion.converter] = amountConverterSpentEthWEI[conversion.converter].add(conversion.conversionAmount);
         counters[1]--; //Decrease number of approved conversions
 
 //         Buy tokens from campaign and distribute rewards between referrers
-        uint totalReward2keys = twoKeyDonationCampaign.distributeReferrerRewards(
-            conversion.converter,
+        uint totalReward2keys = twoKeyDonationCampaign.buyTokensAndDistributeReferrerRewards(
             conversion.maxReferralRewardETHWei,
+            conversion.converter,
             _conversionId
         );
+
 
         // Update reputation points in registry for conversion executed event
 //        ITwoKeyBaseReputationRegistry(twoKeyBaseReputationRegistry).updateOnConversionExecutedEvent(
@@ -201,10 +203,10 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
 //        );
 
 
-
+        amountConverterSpentETHWei[conversion.converter] = amountConverterSpentEthWEI[conversion.converter].add(conversion.conversionAmount);
         counters[8] = counters[8].add(totalReward2keys);
         twoKeyDonationCampaign.buyTokensForModeratorRewards(conversion.moderatorFeeETHWei);
-        twoKeyDonationCampaign.updateContractorBalanceAndConverterDonations(conversion.converter, conversion.contractorProceedsETHWei, conversion.conversionAmount);
+        twoKeyDonationCampaign.updateContractorProceeds(conversion.contractorProceedsETHWei);
 
         counters[6] = counters[6].add(conversion.conversionAmount);
 

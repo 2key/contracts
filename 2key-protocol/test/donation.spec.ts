@@ -55,9 +55,9 @@ let conversionQuota = 5;
 let isKYCRequired = true;
 let shouldConvertToRefer = false;
 let acceptsFiat = false;
-let incentiveModel = "MANUAL";
+let incentiveModel = "VANILLA_AVERAGE";
 let conversionAmountEth = 1;
-
+let currency = "ETH";
 
 let campaignAddress: string;
 let invoiceTokenAddress: string;
@@ -75,7 +75,6 @@ let moderator = env.AYDNEP_ADDRESS;
 
 let campaignData: ICreateCampaign = {
     moderator,
-    campaignName,
     invoiceToken,
     maxReferralRewardPercent,
     campaignStartTime,
@@ -87,7 +86,8 @@ let campaignData: ICreateCampaign = {
     isKYCRequired,
     shouldConvertToRefer,
     acceptsFiat,
-    incentiveModel
+    incentiveModel,
+    currency
 };
 
 const progressCallback = (name: string, mined: boolean, transactionResult: string): void => {
@@ -123,6 +123,8 @@ describe('TwoKeyDonationCampaign', () => {
             timeout: 600000
         });
 
+        console.log(result);
+
 
         campaignAddress = result.campaignAddress;
         links.deployer = result.campaignPublicLinkKey;
@@ -152,7 +154,7 @@ describe('TwoKeyDonationCampaign', () => {
     it('should save campaign to IPFS', async () => {
         printTestNumber();
         const campaignMeta = await twoKeyProtocol.DonationCampaign.getPublicMeta(campaignAddress,from);
-        expect(campaignMeta.meta.campaignName).to.be.equal(campaignData.campaignName);
+        expect(campaignMeta.meta.currency).to.be.equal(campaignData.currency);
     }).timeout(120000);
 
     it('should get user public link', async () => {

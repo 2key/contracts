@@ -10,6 +10,8 @@ const TwoKeyEconomy = artifacts.require('TwoKeyEconomy');
 const TwoKeyDonationCampaign = artifacts.require('TwoKeyDonationCampaign');
 const TwoKeyDonationConversionHandler = artifacts.require('TwoKeyDonationConversionHandler');
 const TwoKeyPurchasesHandler = artifacts.require('TwoKeyPurchasesHandler');
+const TwoKeyDonationLogicHandler = artifacts.require('TwoKeyDonationLogicHandler');
+
 const Call = artifacts.require('Call');
 const IncentiveModels = artifacts.require('IncentiveModels');
 
@@ -34,31 +36,12 @@ module.exports = function deploy(deployer) {
         .then(() => deployer.deploy(TwoKeyAcquisitionCampaignERC20))
         .then(() => TwoKeyAcquisitionCampaignERC20.deployed())
         .then(() => true)
-        .then(() => deployer.deploy(TwoKeyDonationConversionHandler,
-            'Nikoloken',
-            'NTKN',
-            ))
-        .then(() => deployer.link(IncentiveModels, TwoKeyDonationCampaign))
+        .then(() => deployer.deploy(TwoKeyDonationConversionHandler))
+        .then(() => deployer.link(IncentiveModels, TwoKeyDonationLogicHandler))
+        .then(() => deployer.link(Call, TwoKeyDonationLogicHandler))
+        .then(() => deployer.deploy(TwoKeyDonationLogicHandler))
         .then(() => deployer.link(Call, TwoKeyDonationCampaign))
         .then(() => deployer.deploy(TwoKeyDonationCampaign))
-            // json.TwoKeyAdmin[network_id].Proxy,
-            // 'Donation for Something',
-            // [
-            //     5,
-            //     12345,
-            //     1231112,
-            //     10000,
-            //     100000000,
-            //     10000000000000,
-            //     5
-            // ],
-            // false,
-            // false,
-            // false,
-            // TwoKeySingletonesRegistry.address,
-            // TwoKeyDonationConversionHandler.address,
-            // 0
-            // ))
         .then(async () => {
             console.log("... Adding implementation versions of Acquisition campaigns");
             await new Promise(async(resolve,reject) => {
@@ -91,8 +74,13 @@ module.exports = function deploy(deployer) {
 
                     let txHash = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address)
                         .addVersion('TwoKeyDonationCampaign', version, TwoKeyDonationCampaign.address);
+
                     txHash = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address)
                         .addVersion('TwoKeyDonationConversionHandler', version, TwoKeyDonationConversionHandler.address);
+
+                    txHash = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address)
+                        .addVersion('TwoKeyDonationLogicHandler', version, TwoKeyDonationLogicHandler.address);
+
 
                     resolve(txHash);
                 } catch (e) {
@@ -101,7 +89,7 @@ module.exports = function deploy(deployer) {
             })
         })
         .then(async () => {
-            console.log("... Adding TwoKeyAcquisitionCampaign bytecodes to be valid in the TwoKeyValidator contract");
+            console.log("... Adding campaign bytecodes to be valid in the TwoKeyValidator contract");
             await new Promise(async (resolve, reject) => {
                 try {
                     let txHash = await TwoKeyCampaignValidator.at(json.TwoKeyCampaignValidator[network_id].Proxy)
@@ -111,14 +99,16 @@ module.exports = function deploy(deployer) {
                                 TwoKeyConversionHandler.address,
                                 TwoKeyAcquisitionLogicHandler.address,
                                 TwoKeyDonationCampaign.address,
-                                TwoKeyDonationConversionHandler.address
+                                TwoKeyDonationConversionHandler.address,
+                                TwoKeyDonationLogicHandler.address
                             ],
                             [
                                 '0x54776f4b65794163717569736974696f6e43616d706169676e00000000000000', //TwoKeyAcquisitionCampaign
                                 '0x54776f4b6579436f6e76657273696f6e48616e646c6572000000000000000000', //TwoKeyConversionHandler
                                 '0x54776f4b65794163717569736974696f6e4c6f67696348616e646c6572000000', //TwoKeyAcquisitionLogicHandler
                                 '0x54776f4b6579446f6e6174696f6e43616d706169676e00000000000000000000', //TwoKeyDonationCampaign
-                                '0x54776f4b6579446f6e6174696f6e436f6e76657273696f6e48616e646c657200'  //TwoKeyDonationConversionHandler
+                                '0x54776f4b6579446f6e6174696f6e436f6e76657273696f6e48616e646c657200',  //TwoKeyDonationConversionHandler
+                                '0x54776f4b6579446f6e6174696f6e4c6f67696348616e646c6572000000000000' //TwoKeyDonationLogicHandler
                             ]
                         );
                     resolve(txHash);
