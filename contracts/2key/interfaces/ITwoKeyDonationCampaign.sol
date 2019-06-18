@@ -20,4 +20,5 @@ contract ITwoKeyDonationCampaign {
     function getReferrerCut(address me) public view returns (uint256);
     function updateContractorProceeds(uint value) public;
     function getReceivedFrom(address _receiver) public view returns (address);
+    function balanceOf(address _owner) public view returns (uint256);
 }

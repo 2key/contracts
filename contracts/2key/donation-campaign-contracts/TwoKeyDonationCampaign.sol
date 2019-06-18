@@ -347,29 +347,6 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
     }
 
     /**
-     * @notice Function to check if the msg.sender has already joined
-     * @return true/false depending of joined status
-     */
-    function getAddressJoinedStatus(
-        address _address
-    )
-    public
-    view
-    returns (bool)
-    {
-        address plasma = twoKeyEventSource.plasmaOf(_address);
-        if (_address == address(0)) {
-            return false;
-        }
-        if (plasma == ownerPlasma || _address == address(moderator) ||
-        received_from[plasma] != address(0)
-        || balanceOf(plasma) > 0) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
      * @notice Contractor can withdraw funds only if criteria is satisfied
      */
     function withdrawContractor() public onlyContractor {

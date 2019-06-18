@@ -242,6 +242,30 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
         return (referrerBalance, referrerPlasma2TotalEarnings2key[_referrer], referrerPlasmaAddressToCounterOfConversions[_referrer], earnings);
     }
 
+    /**
+     * @notice Function to check if the msg.sender has already joined
+     * @return true/false depending of joined status
+     */
+    function getAddressJoinedStatus(
+        address _address
+    )
+    public
+    view
+    returns (bool)
+    {
+        address plasma = plasmaOf(_address);
+        if (_address == address(0)) {
+            return false;
+        }
+        if (plasma == ownerPlasma || _address == address(moderator) ||
+        ITwoKeyDonationCampaign(twoKeyDonationCampaign).getReceivedFrom(plasma) != address(0)
+        || ITwoKeyDonationCampaign(twoKeyDonationCampaign).balanceOf(plasma) > 0) {
+            return true;
+        }
+        return false;
+    }
+
+
 
     /**
      * @notice Function to get rewards model present in contract for referrers
