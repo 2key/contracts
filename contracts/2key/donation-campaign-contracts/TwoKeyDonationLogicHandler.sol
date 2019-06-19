@@ -296,6 +296,107 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
         return false;
     }
 
+    /**
+     * @notice Function to fetch stats for the address
+     */
+    function getAddressStatistic(
+        address _address,
+        bool plasma,
+        bool flag,
+        address referrer
+    )
+    internal
+    view
+    returns (bytes)
+    {
+        bytes32 state; // NOT-EXISTING AS CONVERTER DEFAULT STATE
+
+        address eth_address = ethereumOf(_address);
+        address plasma_address = plasmaOf(_address);
+
+        if(_address == contractor) {
+            abi.encodePacked(0, 0, 0, false, false);
+        } else {
+            bool isConverter;
+            bool isReferrer;
+
+            uint amountConverterSpent = ITwoKeyDonationConversionHandler(twoKeyDonationConversionHandler).getAmountConverterSpent(eth_address);
+
+            if(amountConverterSpent> 0) {
+                isConverter = true;
+                state = ITwoKeyDonationConversionHandler(twoKeyDonationConversionHandler).getStateForConverter(eth_address);
+            }
+
+            if(referrerPlasma2TotalEarnings2key[plasma_address] > 0) {
+                isReferrer = true;
+            }
+
+            return abi.encodePacked(
+                amountConverterSpent,
+                referrerPlasma2TotalEarnings2key[plasma_address],
+                isConverter,
+                isReferrer,
+                state
+            );
+        }
+    }
+
+
+    /**
+     * @notice Internal helper function
+     */
+    function recover(
+        bytes signature
+    )
+    internal
+    view
+    returns (address)
+    {
+        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding referrer to plasma")),
+            keccak256(abi.encodePacked("GET_REFERRER_REWARDS"))));
+        address x = Call.recoverHash(hash, signature, 0);
+        return x;
+    }
+
+    /**
+     * @notice Function to get super statistics
+     * @param _user is the user address we want stats for
+     * @param plasma is if that address is plasma or not
+     * @param signature in case we're calling this from referrer who doesn't have yet opened wallet
+     */
+    function getSuperStatistics(
+        address _user,
+        bool plasma,
+        bytes signature
+    )
+    public
+    view
+    returns (bytes)
+    {
+        address eth_address = _user;
+
+        if (plasma) {
+            (eth_address) = ITwoKeyReg(twoKeyRegistry).getPlasmaToEthereum(_user);
+        }
+
+        bytes memory userData = ITwoKeyReg(twoKeyRegistry).getUserData(eth_address);
+
+        bool isJoined = getAddressJoinedStatus(_user);
+        bool flag;
+
+        address _address;
+
+        if(msg.sender == contractor || msg.sender == eth_address) {
+            flag = true;
+        } else {
+            _address = recover(signature);
+            if(_address == ownerPlasma) {
+                flag = true;
+            }
+        }
+        bytes memory stats = getAddressStatistic(_user, plasma, flag, _address);
+        return abi.encodePacked(userData, isJoined, eth_address, stats);
+    }
 
 
     /**

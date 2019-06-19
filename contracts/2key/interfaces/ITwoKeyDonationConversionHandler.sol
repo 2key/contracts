@@ -22,4 +22,11 @@ contract ITwoKeyDonationConversionHandler {
     view
     returns (uint);
 
+    function getStateForConverter(
+        address _converter
+    )
+    external
+    view
+    returns (bytes32);
+
 }

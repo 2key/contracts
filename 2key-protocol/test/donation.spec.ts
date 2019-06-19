@@ -363,6 +363,23 @@ describe('TwoKeyDonationCampaign', () => {
         expect(leftToDonate).to.be.equal(maxDonationAmount-conversionAmountEth);
     }).timeout(60000);
 
+    it('should show address statistic', async() => {
+        printTestNumber();
+        const {web3, address} = web3switcher.test4();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_TEST4).privateKey,
+        });
+
+        let stats = await twoKeyProtocol.DonationCampaign.getAddressStatistic(campaignAddress,env.TEST4_ADDRESS, '0x0000000000000000000000000000000000000000',{from});
+        console.log(stats);
+    }).timeout(60000);
 
 
 });
