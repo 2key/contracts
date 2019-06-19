@@ -25,8 +25,6 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
 
     ITwoKeyDonationCampaign twoKeyDonationCampaign;
 
-    mapping(address => uint) amountConverterSpentETHWei;
-
     address twoKeyEventSource;
     address twoKeyBaseReputationRegistry;
     address contractor;
@@ -203,7 +201,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
 //        );
 
 
-        amountConverterSpentETHWei[conversion.converter] = amountConverterSpentEthWEI[conversion.converter].add(conversion.conversionAmount);
+        amountConverterSpentEthWEI[conversion.converter] = amountConverterSpentEthWEI[conversion.converter].add(conversion.conversionAmount);
         counters[8] = counters[8].add(totalReward2keys);
         twoKeyDonationCampaign.buyTokensForModeratorRewards(conversion.moderatorFeeETHWei);
         twoKeyDonationCampaign.updateContractorProceeds(conversion.contractorProceedsETHWei);
@@ -354,6 +352,21 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
         return numberOfConversions;
     }
 
+    /**
+     * @notice Function to get converter state
+     * @param _converter is the address of the requested converter
+     * @return hexed string of the state
+     */
+    function getStateForConverter(
+        address _converter
+    )
+    external
+    view
+    returns (bytes32)
+    {
+        return convertConverterStateToBytes(converterToState[_converter]);
+    }
+
 
     function getAllConvertersPerState(
         bytes32 state
@@ -397,50 +410,13 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
         );
     }
 
-//    /**
-//     * @notice Function to fetch stats for the address
-//     */
-//    function getAddressStatistic(
-//        address _address,
-//        bool plasma,
-//        bool flag,
-//        address referrer
-//    )
-//    internal
-//    view
-//    returns (bytes)
-//    {
-//        bytes32 state; // NOT-EXISTING AS CONVERTER DEFAULT STATE
-//
-//        address eth_address = ITwoKeyEventSource(twoKeyEventSource).ethereumOf(_address);
-//        address plasma_address = ITwoKeyEventSource(twoKeyEventSource).plasmaOf(_address);
-//
-//        if(_address == contractor) {
-//            abi.encodePacked(0, 0, 0, false, false);
-//        } else {
-//            bool isConverter;
-//            bool isReferrer;
-//            uint unitsConverterBought;
-//            uint amountConverterSpent;
-//            uint amountConverterSpentFIAT;
-//
-//            if(amountConverterSpent > 0) {
-//                isConverter = true;
-//                state = convertConverterStateToBytes(converterToState[eth_address]);
-//            }
-//
-//            if(referrerPlasma2TotalEarnings2key[plasma_address] > 0) {
-//                isReferrer = true;
-//            }
-//
-//            return abi.encodePacked(
-//                amountConverterSpent,
-//                referrerPlasma2TotalEarnings2key[plasma_address],
-//                unitsConverterBought,
-//                isConverter,
-//                isReferrer,
-//                state
-//            );
-//        }
+    function getAmountConverterSpent(
+        address converter
+    )
+    public
+    view
+    returns (uint) {
+        return amountConverterSpentEthWEI[converter];
+    }
 
 }

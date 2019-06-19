@@ -157,6 +157,11 @@ describe('TwoKeyDonationCampaign', () => {
         expect(campaignMeta.meta.currency).to.be.equal(campaignData.currency);
     }).timeout(120000);
 
+    it('should make sure all args are properly set', async() => {
+        let obj = await twoKeyProtocol.DonationCampaign.getConstantInfo(campaignAddress);
+        console.log(obj);
+    }).timeout(60000);
+
     it('should get user public link', async () => {
         printTestNumber();
         try {
@@ -343,6 +348,38 @@ describe('TwoKeyDonationCampaign', () => {
         printTestNumber();
         let isJoined = await twoKeyProtocol.DonationCampaign.getAddressJoinedStatus(campaignAddress,from);
         console.log(isJoined);
-    })
+    }).timeout(60000);
+
+    it('should get how much user have spent', async() => {
+        printTestNumber();
+        let amountSpent = await twoKeyProtocol.DonationCampaign.getAmountConverterSpent(campaignAddress, env.TEST4_ADDRESS);
+        expect(amountSpent).to.be.equal(1);
+    }).timeout(60000);
+
+    it('should show how much user can donate', async() => {
+        printTestNumber();
+        let leftToDonate = await twoKeyProtocol.DonationCampaign.howMuchUserCanDonate(campaignAddress, env.TEST4_ADDRESS, from);
+        console.log(leftToDonate);
+        expect(leftToDonate).to.be.equal(maxDonationAmount-conversionAmountEth);
+    }).timeout(60000);
+
+    it('should show address statistic', async() => {
+        printTestNumber();
+        const {web3, address} = web3switcher.test4();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_TEST4).privateKey,
+        });
+
+        let stats = await twoKeyProtocol.DonationCampaign.getAddressStatistic(campaignAddress,env.TEST4_ADDRESS, '0x0000000000000000000000000000000000000000',{from});
+        console.log(stats);
+    }).timeout(60000);
+
 
 });

@@ -1,4 +1,4 @@
-pragma solidity ^0.4.0;
+pragma solidity ^0.4.24;
 
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyDonationCampaign.sol";
@@ -6,6 +6,7 @@ import "../interfaces/ITwoKeyExchangeRateContract.sol";
 import "../interfaces/ITwoKeyReg.sol";
 import "../interfaces/ITwoKeyAcquisitionARC.sol";
 import "../interfaces/ITwoKeyEventSource.sol";
+import "../interfaces/ITwoKeyDonationConversionHandler.sol";
 
 //Libraries
 import "../libraries/SafeMath.sol";
@@ -21,14 +22,15 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
     bool initialized;
 
     IncentiveModel incentiveModel; //Incentive model for rewards
-    address public twoKeySingletoneRegistry;
+    address twoKeySingletoneRegistry;
     address public twoKeyDonationCampaign;
-    address public ownerPlasma;
+    address public twoKeyDonationConversionHandler;
+    address ownerPlasma;
 
-    address public twoKeyRegistry;
-    address public twoKeyEventSource;
-    address public contractor;
-    address public moderator;
+    address twoKeyRegistry;
+    address twoKeyEventSource;
+    address contractor;
+    address moderator;
 
     uint powerLawFactor;
     uint campaignStartTime; // Time when campaign starts
@@ -37,24 +39,29 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
     uint maxDonationAmountWei; // Maximal donation amount
     uint campaignGoal; // Goal of the campaign, how many funds to raise
 
-    string currency;
+    string public currency;
 
     mapping(address => uint256) internal referrerPlasma2TotalEarnings2key; // Total earnings for referrers
     mapping(address => uint256) internal referrerPlasmaAddressToCounterOfConversions; // [referrer][conversionId]
     mapping(address => mapping(uint256 => uint256)) internal referrerPlasma2EarningsPerConversion;
 
+
     function setInitialParamsDonationLogicHandler(
         uint[] numberValues,
-        string currency,
+        string _currency,
         address _contractor,
         address _moderator,
         address twoKeySingletonRegistry,
-        address _twoKeyDonationCampaign
+        address _twoKeyDonationCampaign,
+        address _twoKeyDonationConversionHandler
     )
     public
     {
         require(initialized == false);
+
         twoKeyDonationCampaign = _twoKeyDonationCampaign;
+        twoKeyDonationConversionHandler = _twoKeyDonationConversionHandler;
+
         powerLawFactor = 2;
         campaignStartTime = numberValues[1];
         campaignEndTime = numberValues[2];
@@ -65,7 +72,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
 
         contractor = _contractor;
         moderator = _moderator;
-
+        currency = _currency;
         twoKeySingletoneRegistry = twoKeySingletonRegistry;
         twoKeyEventSource = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry)
         .getContractProxyAddress("TwoKeyEventSource");
@@ -75,10 +82,28 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
     }
 
 
+    function checkHowMuchUserCanSpend(
+        address _converter
+    )
+    public
+    view
+    returns (uint)
+    {
+        uint amountAlreadySpent = ITwoKeyDonationConversionHandler(twoKeyDonationConversionHandler).getAmountConverterSpent(_converter);
+        uint leftToSpend = getHowMuchLeftForUserToSpend(amountAlreadySpent);
+        return leftToSpend;
+    }
+
     /**
      * @notice Function to check for some user how much he can donate
      */
-    function howMuchUserCanDonate(uint alreadyDonatedEthWEI) public view returns (uint) {
+    function getHowMuchLeftForUserToSpend(
+        uint alreadyDonatedEthWEI
+    )
+    internal
+    view
+    returns (uint)
+    {
         if(keccak256(currency) == keccak256('ETH')) {
             uint availableToDonate = maxDonationAmountWei.sub(alreadyDonatedEthWEI);
             return availableToDonate;
@@ -93,7 +118,13 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
         }
     }
 
-    function updateReferrerMappings(address referrerPlasma, uint reward, uint conversionId) internal {
+    function updateReferrerMappings(
+        address referrerPlasma,
+        uint reward,
+        uint conversionId
+    )
+    internal
+    {
         ITwoKeyDonationCampaign(twoKeyDonationCampaign).updateReferrerPlasmaBalance(referrerPlasma,reward);
         referrerPlasma2TotalEarnings2key[referrerPlasma] = referrerPlasma2TotalEarnings2key[referrerPlasma].add(reward);
         referrerPlasma2EarningsPerConversion[referrerPlasma][conversionId] = reward;
@@ -265,6 +296,107 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
         return false;
     }
 
+    /**
+     * @notice Function to fetch stats for the address
+     */
+    function getAddressStatistic(
+        address _address,
+        bool plasma,
+        bool flag,
+        address referrer
+    )
+    internal
+    view
+    returns (bytes)
+    {
+        bytes32 state; // NOT-EXISTING AS CONVERTER DEFAULT STATE
+
+        address eth_address = ethereumOf(_address);
+        address plasma_address = plasmaOf(_address);
+
+        if(_address == contractor) {
+            abi.encodePacked(0, 0, 0, false, false);
+        } else {
+            bool isConverter;
+            bool isReferrer;
+
+            uint amountConverterSpent = ITwoKeyDonationConversionHandler(twoKeyDonationConversionHandler).getAmountConverterSpent(eth_address);
+
+            if(amountConverterSpent> 0) {
+                isConverter = true;
+                state = ITwoKeyDonationConversionHandler(twoKeyDonationConversionHandler).getStateForConverter(eth_address);
+            }
+
+            if(referrerPlasma2TotalEarnings2key[plasma_address] > 0) {
+                isReferrer = true;
+            }
+
+            return abi.encodePacked(
+                amountConverterSpent,
+                referrerPlasma2TotalEarnings2key[plasma_address],
+                isConverter,
+                isReferrer,
+                state
+            );
+        }
+    }
+
+
+    /**
+     * @notice Internal helper function
+     */
+    function recover(
+        bytes signature
+    )
+    internal
+    view
+    returns (address)
+    {
+        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding referrer to plasma")),
+            keccak256(abi.encodePacked("GET_REFERRER_REWARDS"))));
+        address x = Call.recoverHash(hash, signature, 0);
+        return x;
+    }
+
+    /**
+     * @notice Function to get super statistics
+     * @param _user is the user address we want stats for
+     * @param plasma is if that address is plasma or not
+     * @param signature in case we're calling this from referrer who doesn't have yet opened wallet
+     */
+    function getSuperStatistics(
+        address _user,
+        bool plasma,
+        bytes signature
+    )
+    public
+    view
+    returns (bytes)
+    {
+        address eth_address = _user;
+
+        if (plasma) {
+            (eth_address) = ITwoKeyReg(twoKeyRegistry).getPlasmaToEthereum(_user);
+        }
+
+        bytes memory userData = ITwoKeyReg(twoKeyRegistry).getUserData(eth_address);
+
+        bool isJoined = getAddressJoinedStatus(_user);
+        bool flag;
+
+        address _address;
+
+        if(msg.sender == contractor || msg.sender == eth_address) {
+            flag = true;
+        } else {
+            _address = recover(signature);
+            if(_address == ownerPlasma) {
+                flag = true;
+            }
+        }
+        bytes memory stats = getAddressStatistic(_user, plasma, flag, _address);
+        return abi.encodePacked(userData, isJoined, eth_address, stats);
+    }
 
 
     /**
@@ -312,4 +444,13 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
         }
         return me;
     }
+
+    function getConstantInfo()
+    public
+    view
+    returns (uint,uint,uint,uint,uint)
+    {
+        return (campaignStartTime,campaignEndTime, minDonationAmountWei, maxDonationAmountWei, campaignGoal);
+    }
+
 }
