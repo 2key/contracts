@@ -317,9 +317,10 @@ contract TwoKeyCampaign is ArcERC20 {
 		require(msg.sender == _address || twoKeyEventSource.isAddressMaintainer(msg.sender));
 		address twoKeyAdminAddress;
 		address twoKeyUpgradableExchangeContract;
-		uint balance;
 
+		uint balance;
 		address _referrer = twoKeyEventSource.plasmaOf(_address);
+
 		if(referrerPlasma2Balances2key[_referrer] != 0) {
 			twoKeyAdminAddress = getContractProxyAddress("TwoKeyAdmin");
 			twoKeyUpgradableExchangeContract = getContractProxyAddress("TwoKeyUpgradableExchange");
@@ -327,19 +328,19 @@ contract TwoKeyCampaign is ArcERC20 {
 			balance = referrerPlasma2Balances2key[_referrer];
 			referrerPlasma2Balances2key[_referrer] = 0;
 
-			if(_withdrawAsStable == true){
+			if(_withdrawAsStable == true) {
 				IERC20(twoKeyEconomy).approve(twoKeyUpgradableExchangeContract, balance);
 				IUpgradableExchange(twoKeyUpgradableExchangeContract).buyStableCoinWith2key(balance, _address);
 			}
-			else{
-				if (block.timestamp < ITwoKeyAdmin(twoKeyAdminAddress).getTwoKeyRewardsReleaseDate()){
-					revert("RewardsLocked");
-				}
-				else{
-					IERC20(twoKeyEconomy).transfer(_address, balance);
-				}
+			else if (block.timestamp >= ITwoKeyAdmin(twoKeyAdminAddress).getTwoKeyRewardsReleaseDate()) {
+				IERC20(twoKeyEconomy).transfer(_address, balance);
 			}
-			reservedAmount2keyForRewards -= balance;
+			else {
+				revert();
+			}
+
 		}
+        reservedAmount2keyForRewards -= balance;
 	}
 }
+
