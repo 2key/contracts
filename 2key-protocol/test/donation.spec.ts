@@ -346,7 +346,7 @@ describe('TwoKeyDonationCampaign', () => {
 
     it('should test if address is joined', async() => {
         printTestNumber();
-        let isJoined = await twoKeyProtocol.DonationCampaign.getAddressJoinedStatus(campaignAddress,from);
+        let isJoined = await twoKeyProtocol.DonationCampaign.isAddressJoined(campaignAddress,from);
         console.log(isJoined);
     }).timeout(60000);
 
