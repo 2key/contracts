@@ -228,7 +228,8 @@ contract TwoKeyFactory is Upgradeable, MaintainingPattern {
             msg.sender,
             _moderator,
             address(twoKeySingletonRegistry),
-            proxyDonationCampaign
+            proxyDonationCampaign,
+            proxyDonationConversionHandler
         );
 
         // Set initial parameters under Donation campaign contract

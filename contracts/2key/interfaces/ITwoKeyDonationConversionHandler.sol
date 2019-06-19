@@ -14,4 +14,12 @@ contract ITwoKeyDonationConversionHandler {
         uint _conversionId
     )
     public;
+
+    function getAmountConverterSpent(
+        address converter
+    )
+    public
+    view
+    returns (uint);
+
 }
