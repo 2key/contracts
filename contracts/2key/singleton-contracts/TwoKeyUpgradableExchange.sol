@@ -348,11 +348,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, MaintainingPattern {
 
         token.transferFrom(msg.sender, address(this), _twoKeyUnits);
         uint stableCoinsAfter = stableCoinsOnContractBefore - stableCoinUnits;
-
-        if (ERC20(DAI).balanceOf(address(this)) < stableCoinUnits * 10**18){
-            revert("InsufficientStablecoinInventory");
-        }
-
         require(ERC20(DAI).transfer(_beneficiary, stableCoinUnits));
 
         emit WithdrawExecuted(
