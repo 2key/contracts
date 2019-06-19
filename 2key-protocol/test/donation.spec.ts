@@ -358,7 +358,7 @@ describe('TwoKeyDonationCampaign', () => {
 
     it('should show how much user can donate', async() => {
         printTestNumber();
-        let leftToDonate = await twoKeyProtocol.DonationCampaign.howMuchUserCanDonate(campaignAddress, env.TEST4_ADDRESS, from);
+        let leftToDonate = await twoKeyProtocol.DonationCampaign.howMuchUserCanContribute(campaignAddress, env.TEST4_ADDRESS, from);
         console.log(leftToDonate);
         expect(leftToDonate).to.be.equal(maxDonationAmount-conversionAmountEth);
     }).timeout(60000);
