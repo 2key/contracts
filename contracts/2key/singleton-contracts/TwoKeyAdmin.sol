@@ -139,7 +139,6 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		return completed;
 	}
 
-
 	// Public wrapper method
 	function getUint(
 		string key
