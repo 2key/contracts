@@ -326,7 +326,7 @@ contract TwoKeyCampaign is ArcERC20 {
 			balance = referrerPlasma2Balances2key[_referrer];
 			referrerPlasma2Balances2key[_referrer] = 0;
 
-			if(now >= ITwoKeyAdmin(twoKeyAdminAddress).getTwoKeyRewardsReleaseDate()){
+			if(now >= ITwoKeyAdmin(twoKeyAdminAddress).getUint("rewardReleaseAfter")){
 				IERC20(twoKeyEconomy).transfer(_address,balance);
 			}
 			else {
