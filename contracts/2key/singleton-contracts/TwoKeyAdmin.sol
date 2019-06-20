@@ -4,9 +4,10 @@ import "../interfaces/ITwoKeyAdmin.sol";
 import "../interfaces/IERC20.sol";
 import "../interfaces/ITwoKeyReg.sol";
 import "../upgradability/Upgradeable.sol";
+import "./ITwoKeySingletonUtils.sol";
 
 //TODO: Add all the missing functions from other singletones which can be called by TwoKeyAdmin
-contract TwoKeyAdmin is Upgradeable {
+contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 
 	bool initialized = false;
 
