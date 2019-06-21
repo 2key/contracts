@@ -22,6 +22,7 @@ const TwoKeyCampaignValidatorStorage = artifacts.require('TwoKeyCampaignValidato
 const TwoKeyEventSourceStorage = artifacts.require("TwoKeyEventSourceStorage");
 const TwoKeyAdminStorage = artifacts.require('TwoKeyAdminStorage');
 const TwoKeyFactoryStorage = artifacts.require('TwoKeyFactoryStorage');
+const TwoKeyMaintainersRegistryStorage = artifacts.require('TwoKeyMaintainersRegistryStorage');
 
 
 const Call = artifacts.require('Call');
@@ -74,6 +75,7 @@ module.exports = function deploy(deployer) {
     let proxyAddressTwoKeyEventSourceSTORAGE;
     let proxyAddressTwoKeyAdminSTORAGE;
     let proxyAddressTwoKeyFactorySTORAGE;
+    let proxyAddressTwoKeyMaintainersRegistrySTORAGE;
 
     let deploymentNetwork;
     if(deployer.network.startsWith('dev') || deployer.network.startsWith('plasma-test')) {
@@ -176,6 +178,8 @@ module.exports = function deploy(deployer) {
                          * Adding TwoKeyMaintainersRegistry to the registry, deploying 1st logicProxy for that 1.0 version and setting initial params there
                          */
                         let txHash = await registry.addVersion("TwoKeyMaintainersRegistry", "1.0", TwoKeyMaintainersRegistry.address);
+                        txHash = await registry.addVersion("TwoKeyMaintainersRegistryStorage", "1.0", TwoKeyMaintainersRegistryStorage.address);
+
                         let { logs } = await registry.createProxy("TwoKeyMaintainersRegistry", "TwoKeyMaintainersRegistryStorage", "1.0");
                         let { logicProxy, storageProxy} = logs.find(l => l.event === 'ProxiesDeployed').args;
                         console.log('Proxy address for the TwoKeyMaintainersRegistry is : ' + logicProxy);
@@ -186,9 +190,10 @@ module.exports = function deploy(deployer) {
                             'Version': "1.0",
                             maintainer_address: maintainerAddresses,
                         };
+                        proxyAddressTwoKeyMaintainersRegistrySTORAGE = storageProxy;
+                        proxyAddressTwoKeyMaintainersRegistry = logicProxy;
 
                         fileObject['TwoKeyMaintainersRegistry'] = twoKeyMaintainersRegistry;
-                        proxyAddressTwoKeyMaintainersRegistry = logicProxy;
                         resolve(logicProxy);
                     } catch (e) {
                         reject(e);
@@ -550,7 +555,8 @@ module.exports = function deploy(deployer) {
                     try {
                         console.log('Setting initial parameters in contract TwoKeyMaintainersRegistry');
                         let txHash = await TwoKeyMaintainersRegistry.at(proxyAddressTwoKeyMaintainersRegistry).setInitialParams(
-                            proxyAddressTwoKeyAdmin,
+                            TwoKeySingletonesRegistry.address,
+                            proxyAddressTwoKeyMaintainersRegistrySTORAGE,
                             maintainerAddresses
                         );
                         resolve(txHash);

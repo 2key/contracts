@@ -1,5 +1,7 @@
 pragma solidity ^0.4.24;
 
+import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
+import "../interfaces/storage-contracts/ITwoKeyMaintainersRegistryStorage.sol";
 import "../upgradability/Upgradeable.sol";
 
 /**
@@ -14,57 +16,52 @@ contract TwoKeyMaintainersRegistry is Upgradeable {
      */
     bool initialized;
 
-    /**
-     * Mapping which will store maintainers who are eligible to update contract state
-     */
-    mapping(address => bool) public isMaintainer;
+    address public TWO_KEY_SINGLETON_REGISTRY;
 
-    /**
-     * Address of TwoKeyAdmin contract, which will be the only one eligible to manipulate the maintainers
-     */
-    address public twoKeyAdmin;
+    ITwoKeyMaintainersRegistryStorage public PROXY_STORAGE_CONTRACT;
 
     /**
      * @notice Function which can be called only once, and is used as replacement for a constructor
-     * @param _twoKeyAdmin is the address of twoKeyAdmin contract as central authority
      * @param _maintainers is the array of initial maintainers we'll kick off contract with
      */
     function setInitialParams(
-        address _twoKeyAdmin,
+        address _twoKeySingletonRegistry,
+        address _proxyStorage,
         address [] _maintainers
     )
     public
     {
         require(initialized == false);
 
-        //Set TwoKeyAdmin contract
-        twoKeyAdmin = _twoKeyAdmin;
+
+        TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonRegistry;
+
+        PROXY_STORAGE_CONTRACT = ITwoKeyMaintainersRegistryStorage(_proxyStorage);
 
         //Set deployer to be also a maintainer
-        isMaintainer[msg.sender] = true;
+        addMaintainer(msg.sender);
 
         //Set initial maintainers
         for(uint i=0; i<_maintainers.length; i++) {
-            isMaintainer[_maintainers[i]] = true;
+            addMaintainer(_maintainers[i]);
         }
 
         //Once this executes, this function will not be possible to call again.
         initialized = true;
     }
 
-    /**
-     * @notice Function to restrict calling the method to anyone but maintainers
-     */
-    function onlyMaintainer(address _sender) public view returns (bool) {
-        return isMaintainer[_sender];
-    }
 
     /**
      * @notice Modifier to restrict calling the method to anyone but twoKeyAdmin
      */
     function onlyTwoKeyAdmin(address sender) public view returns (bool) {
+        address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
         require(sender == address(twoKeyAdmin));
         return true;
+    }
+
+    function onlyMaintainer(address _sender) public view returns (bool) {
+        return isMaintainer(_sender);
     }
 
     /**
@@ -81,7 +78,7 @@ contract TwoKeyMaintainersRegistry is Upgradeable {
         //If state variable, .balance, or .length is used several times, holding its value in a local variable is more gas efficient.
         uint numberOfMaintainers = _maintainers.length;
         for(uint i=0; i<numberOfMaintainers; i++) {
-            isMaintainer[_maintainers[i]] = true;
+            addMaintainer(_maintainers[i]);
         }
     }
 
@@ -99,8 +96,45 @@ contract TwoKeyMaintainersRegistry is Upgradeable {
         //If state variable, .balance, or .length is used several times, holding its value in a local variable is more gas efficient.
         uint numberOfMaintainers = _maintainers.length;
         for(uint i=0; i<numberOfMaintainers; i++) {
-            isMaintainer[_maintainers[i]] = false;
+
+            removeMaintainer(_maintainers[i]);
         }
+    }
+
+
+    function isMaintainer(
+        address _address
+    )
+    internal
+    view
+    returns (bool)
+    {
+        bytes32 keyHash = keccak256("isMaintainer", _address);
+        return PROXY_STORAGE_CONTRACT.getBool(keyHash);
+    }
+
+    function addMaintainer(
+        address _maintainer
+    )
+    internal
+    {
+        bytes32 keyHash = keccak256("isMaintainer", _maintainer);
+        PROXY_STORAGE_CONTRACT.setBool(keyHash, true);
+    }
+
+    function removeMaintainer(
+        address _maintainer
+    )
+    internal
+    {
+        bytes32 keyHash = keccak256("isMaintainer", _maintainer);
+        PROXY_STORAGE_CONTRACT.setBool(keyHash, false);
+    }
+
+    // Internal function to fetch address from TwoKeyRegistry
+    function getAddressFromTwoKeySingletonRegistry(string contractName) internal view returns (address) {
+        return ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY)
+        .getContractProxyAddress(contractName);
     }
 
 }
