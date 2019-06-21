@@ -4,6 +4,7 @@ import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../upgradability/Upgradeable.sol";
 import "./ITwoKeySingletonUtils.sol";
+import "../interfaces/storage-contracts/ITwoKeyExchangeRateContractStorage.sol";
 
 
 /**
@@ -15,8 +16,7 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
 
     bool initialized;
 
-    address public PROXY_STORAGE_CONTRACT;
-
+    ITwoKeyExchangeRateContractStorage public PROXY_STORAGE_CONTRACT;
     /**
      * @notice Event will be emitted every time we update the price for the fiat
      */
@@ -49,15 +49,15 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
      * @dev Can be called only once
      */
     function setInitialParams(
-        address _twoKeySingletonesRegistry
-//        address _proxyStorage
+        address _twoKeySingletonesRegistry,
+        address _proxyStorage
     )
     external
     {
         require(initialized == false);
 
         TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonesRegistry;
-
+        PROXY_STORAGE_CONTRACT = ITwoKeyExchangeRateContractStorage(_proxyStorage);
         initialized = true;
     }
 

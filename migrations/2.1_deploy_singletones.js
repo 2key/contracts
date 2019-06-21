@@ -23,7 +23,7 @@ const TwoKeyEventSourceStorage = artifacts.require("TwoKeyEventSourceStorage");
 const TwoKeyAdminStorage = artifacts.require('TwoKeyAdminStorage');
 const TwoKeyFactoryStorage = artifacts.require('TwoKeyFactoryStorage');
 const TwoKeyMaintainersRegistryStorage = artifacts.require('TwoKeyMaintainersRegistryStorage');
-
+const TwoKeyExchangeRateStorage = artifacts.require('TwoKeyExchangeRateStorage');
 
 const Call = artifacts.require('Call');
 const IncentiveModels = artifacts.require('IncentiveModels');
@@ -76,6 +76,7 @@ module.exports = function deploy(deployer) {
     let proxyAddressTwoKeyAdminSTORAGE;
     let proxyAddressTwoKeyFactorySTORAGE;
     let proxyAddressTwoKeyMaintainersRegistrySTORAGE;
+    let proxyAddressTwoKeyExchangeRateSTORAGE;
 
     let deploymentNetwork;
     if(deployer.network.startsWith('dev') || deployer.network.startsWith('plasma-test')) {
@@ -414,7 +415,8 @@ module.exports = function deploy(deployer) {
                          * Adding EventSource to the registry, deploying 1st logicProxy for that 1.0 version of EventSource
                          */
                         let txHash = await registry.addVersion("TwoKeyExchangeRateContract", "1.0", TwoKeyExchangeRateContract.address);
-                        let { logs } = await registry.createProxy("TwoKeyExchangeRateContract", "TwoKeyExchangeRateContractStorage", "1.0");
+                        txHash = await registry.addVersion("TwoKeyExchangeRateStorage", "1.0", TwoKeyExchangeRateStorage.address);
+                        let { logs } = await registry.createProxy("TwoKeyExchangeRateContract", "TwoKeyExchangeRateStorage", "1.0");
                         let { logicProxy , storageProxy} = logs.find(l => l.event === 'ProxiesDeployed').args;
                         console.log('Proxy address for the TwoKeyExchangeRateContract is : ' + logicProxy);
 
@@ -426,8 +428,10 @@ module.exports = function deploy(deployer) {
                             'Version': "1.0",
                             maintainer_address: maintainerAddresses,
                         };
-                        fileObject['TwoKeyExchangeRateContract'] = twoKeyExchangeRate;
+
+                        proxyAddressTwoKeyExchangeRateSTORAGE = storageProxy;
                         proxyAddressTwoKeyExchange = logicProxy;
+                        fileObject['TwoKeyExchangeRateContract'] = twoKeyExchangeRate;
 
                         resolve(logicProxy);
                     } catch (e) {
@@ -647,7 +651,8 @@ module.exports = function deploy(deployer) {
                     try {
                         console.log('Setting initial parameters in contract TwoKeyExchangeRateContract');
                         let txHash = await TwoKeyExchangeRateContract.at(proxyAddressTwoKeyExchange).setInitialParams(
-                            TwoKeySingletonesRegistry.address
+                            TwoKeySingletonesRegistry.address,
+                            proxyAddressTwoKeyExchangeRateSTORAGE
                         );
                         resolve(txHash);
                     } catch (e) {
