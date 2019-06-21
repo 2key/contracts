@@ -220,7 +220,7 @@ contract TwoKeyBaseReputationRegistry is Upgradeable {
         address converter,
         address acquisitionCampaign
     )
-    public
+    internal
     view
     returns (address[])
     {

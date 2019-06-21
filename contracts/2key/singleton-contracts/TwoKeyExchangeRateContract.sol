@@ -50,6 +50,7 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
      */
     function setInitialParams(
         address _twoKeySingletonesRegistry
+//        address _proxyStorage
     )
     external
     {
