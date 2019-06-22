@@ -423,19 +423,19 @@ describe('TwoKeyProtocol', () => {
         // .to.be.equal(twoKeyProtocol.getGasPrice());
     }).timeout(60000);
 
-    // it('should set eth-dolar rate', async() => {
-    //     txHash = await twoKeyProtocol.TwoKeyExchangeContract.setValue('USD', 100000000000000000000, from);
-    //     const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-    //     let value = await twoKeyProtocol.TwoKeyExchangeContract.getRatesETHFiat('USD', from);
-    //     console.log(value);
-    // }).timeout(60000);
-    //
-    // it('should set dollar dai rate', async() => {
-    //     txHash = await twoKeyProtocol.TwoKeyExchangeContract.setValue('USD/DAI', 99000000000000000, from);
-    //     const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-    //     let value = await twoKeyProtocol.TwoKeyExchangeContract.getRatesETHFiat('USD/DAI', from);
-    //     console.log(value);
-    // }).timeout(60000);
+    it('should set eth-dolar rate', async() => {
+        txHash = await twoKeyProtocol.TwoKeyExchangeContract.setValue('USD', 100000000000000000000, from);
+        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        let value = await twoKeyProtocol.TwoKeyExchangeContract.getBaseToTargetRate('USD');
+        console.log(value);
+    }).timeout(60000);
+
+    it('should set dollar dai rate', async() => {
+        txHash = await twoKeyProtocol.TwoKeyExchangeContract.setValue('USD/DAI', 99000000000000000, from);
+        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        let value = await twoKeyProtocol.TwoKeyExchangeContract.getBaseToTargetRate('USD/DAI');
+        console.log(value);
+    }).timeout(60000);
 
     it('should show token symbol of economy', async () => {
         const tokenSymbol = await twoKeyProtocol.ERC20.getERC20Symbol(twoKeyEconomy);

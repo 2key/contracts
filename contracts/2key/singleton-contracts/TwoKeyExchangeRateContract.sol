@@ -95,7 +95,7 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
     returns (uint)
     {
         bytes32 key = stringToBytes32(base_target);
-        bytes32 hashKey = keccak256("currencyName2rate", base_target);
+        bytes32 hashKey = keccak256("currencyName2rate", key);
         return PROXY_STORAGE_CONTRACT.getUint(hashKey);
     }
 
