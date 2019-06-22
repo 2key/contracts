@@ -21,28 +21,7 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
      * @notice Event will be emitted every time we update the price for the fiat
      */
     event PriceUpdated(bytes32 _currency, uint newRate, uint _timestamp, address _updater);
-    mapping(bytes32 => ExchangeRate) public currencyName2rate;
 
-
-    struct ExchangeRate {
-        uint baseToTargetRate; // this is representing rate between eth and some currency where will be 1 unit to X units depending on more valuable curr
-        uint timeUpdated;
-        address maintainerWhoUpdated;
-    }
-
-    function getExchangeRate(
-        bytes32 key
-    )
-    public
-    view
-    returns (uint,uint,address)
-    {
-        return (
-        currencyName2rate[key].baseToTargetRate,
-        currencyName2rate[key].timeUpdated,
-        currencyName2rate[key].maintainerWhoUpdated
-        );
-    }
 
     /**
      * @notice Function which will be called immediately after contract deployment
@@ -58,6 +37,7 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
 
         TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonesRegistry;
         PROXY_STORAGE_CONTRACT = ITwoKeyExchangeRateContractStorage(_proxyStorage);
+
         initialized = true;
     }
 
@@ -102,28 +82,10 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
     )
     internal
     {
-        ExchangeRate memory f = ExchangeRate({
-            baseToTargetRate: baseToTargetRate,
-            timeUpdated: block.timestamp,
-            maintainerWhoUpdated: msg.sender
-            });
-        currencyName2rate[_currency] = f;
+        bytes32 hashKey = keccak256("currencyName2rate", _currency);
+        PROXY_STORAGE_CONTRACT.setUint(hashKey, baseToTargetRate);
     }
 
-    /**
-     * @notice Function to get price for the selected currency
-     * @return rate between currency and eth wei
-     */
-    function getFiatCurrencyDetails(
-        string base_target
-    )
-    public
-    view
-    returns (uint,uint,address)
-    {
-        bytes32 key = stringToBytes32(base_target);
-
-    }
 
     function getBaseToTargetRate(
         string base_target
@@ -133,7 +95,8 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
     returns (uint)
     {
         bytes32 key = stringToBytes32(base_target);
-        return currencyName2rate[key].baseToTargetRate;
+        bytes32 hashKey = keccak256("currencyName2rate", base_target);
+        return PROXY_STORAGE_CONTRACT.getUint(hashKey);
     }
 
 
