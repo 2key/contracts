@@ -24,6 +24,8 @@ const TwoKeyAdminStorage = artifacts.require('TwoKeyAdminStorage');
 const TwoKeyFactoryStorage = artifacts.require('TwoKeyFactoryStorage');
 const TwoKeyMaintainersRegistryStorage = artifacts.require('TwoKeyMaintainersRegistryStorage');
 const TwoKeyExchangeRateStorage = artifacts.require('TwoKeyExchangeRateStorage');
+const TwoKeyBaseReputationRegistryStorage = artifacts.require('TwoKeyBaseReputationRegistryStorage');
+
 
 const Call = artifacts.require('Call');
 const IncentiveModels = artifacts.require('IncentiveModels');
@@ -77,6 +79,8 @@ module.exports = function deploy(deployer) {
     let proxyAddressTwoKeyFactorySTORAGE;
     let proxyAddressTwoKeyMaintainersRegistrySTORAGE;
     let proxyAddressTwoKeyExchangeRateSTORAGE;
+    let proxyAddressTwoKeyReputationRegistrySTORAGE;
+
 
     let deploymentNetwork;
     if(deployer.network.startsWith('dev') || deployer.network.startsWith('plasma-test')) {
@@ -357,10 +361,13 @@ module.exports = function deploy(deployer) {
                          * Adding TwoKeyBaseReputationRegistry to the registry, deploying 1st logicProxy for that 1.0 version and setting initial params there
                          */
                         let txHash = await registry.addVersion("TwoKeyBaseReputationRegistry", "1.0", TwoKeyBaseReputationRegistry.address);
+                        txHash = await registry.addVersion("TwoKeyBaseReputationRegistryStorage", "1.0", TwoKeyBaseReputationRegistryStorage.address);
+
                         let { logs } = await registry.createProxy("TwoKeyBaseReputationRegistry","TwoKeyBaseReputationRegistryStorage", "1.0");
                         let { logicProxy, storageProxy } = logs.find(l => l.event === 'ProxiesDeployed').args;
                         console.log('Proxy address for the TwoKeyBaseReputationRegistry is : ' + logicProxy);
                         const twoKeyBaseRepReg = fileObject.TwoKeyBaseReputationRegistry || {};
+
                         twoKeyBaseRepReg[network_id] = {
                             'address': TwoKeyBaseReputationRegistry.address,
                             'Proxy': logicProxy,
@@ -368,8 +375,10 @@ module.exports = function deploy(deployer) {
                             // maintainer_address: maintainerAddresses,
                         };
 
-                        fileObject['TwoKeyBaseReputationRegistry'] = twoKeyBaseRepReg;
+                        proxyAddressTwoKeyReputationRegistrySTORAGE = storageProxy;
                         proxyAddressTwoKeyBaseReputationRegistry = logicProxy;
+
+                        fileObject['TwoKeyBaseReputationRegistry'] = twoKeyBaseRepReg;
                         resolve(logicProxy);
                     } catch (e) {
                         reject(e);

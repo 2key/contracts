@@ -5,6 +5,7 @@ const TwoKeyAdminStorage = artifacts.require('TwoKeyAdminStorage');
 const TwoKeyFactoryStorage = artifacts.require('TwoKeyFactoryStorage');
 const TwoKeyMaintainersRegistryStorage = artifacts.require('TwoKeyMaintainersRegistryStorage');
 const TwoKeyExchangeRateStorage = artifacts.require('TwoKeyExchangeRateStorage');
+const TwoKeyBaseReputationRegistryStorage = artifacts.require('TwoKeyBaseReputationRegistryStorage');
 
 module.exports = function deploy(deployer) {
     deployer.deploy(TwoKeyCampaignValidatorStorage)
@@ -21,5 +22,7 @@ module.exports = function deploy(deployer) {
     .then(() => TwoKeyMaintainersRegistryStorage.deployed())
     .then(() => deployer.deploy(TwoKeyExchangeRateStorage))
     .then(() => TwoKeyExchangeRateStorage.deployed())
+    .then(() => deployer.deploy(TwoKeyBaseReputationRegistryStorage))
+    .then(() => TwoKeyBaseReputationRegistryStorage.deployed())
     .then(() => true);
 };
