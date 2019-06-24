@@ -169,6 +169,7 @@ module.exports = function deploy(deployer) {
                         twoKeyReg[network_id] = {
                             'address': TwoKeyRegistry.address,
                             'Proxy': logicProxy,
+                            'StorageProxy': storageProxy,
                             'Version': "1.0",
                             maintainer_address: maintainerAddresses,
                         };
@@ -198,6 +199,7 @@ module.exports = function deploy(deployer) {
                         twoKeyMaintainersRegistry[network_id] = {
                             'address': TwoKeyMaintainersRegistry.address,
                             'Proxy': logicProxy,
+                            'StorageProxy': storageProxy,
                             'Version': "1.0",
                             maintainer_address: maintainerAddresses,
                         };
@@ -229,6 +231,7 @@ module.exports = function deploy(deployer) {
                         twoKeyFactory[network_id] = {
                             'address': TwoKeyFactory.address,
                             'Proxy': logicProxy,
+                            'StorageProxy': storageProxy,
                             'Version': "1.0",
                             maintainer_address: maintainerAddresses,
                         };
@@ -259,6 +262,7 @@ module.exports = function deploy(deployer) {
                         twoKeyValidator[network_id] = {
                             'address': TwoKeyCampaignValidator.address,
                             'Proxy': logicProxy,
+                            'StorageProxy': storageProxy,
                             'Version': "1.0",
                             maintainer_address: maintainerAddresses,
                         };
@@ -292,6 +296,7 @@ module.exports = function deploy(deployer) {
                         twoKeyCommunityTokenPool[network_id] = {
                             'address': TwoKeyCommunityTokenPool.address,
                             'Proxy': logicProxy,
+                            'StorageProxy': storageProxy,
                             'Version': "1.0",
                             maintainer_address: maintainerAddresses,
                         };
@@ -322,6 +327,7 @@ module.exports = function deploy(deployer) {
                         twoKeyLongTermTokenPool[network_id] = {
                             'address': TwoKeyLongTermTokenPool.address,
                             'Proxy': logicProxy,
+                            'StorageProxy': storageProxy,
                             'Version': "1.0",
                             maintainer_address: maintainerAddresses,
                         };
@@ -353,6 +359,7 @@ module.exports = function deploy(deployer) {
                         twoKeyDeepFreezeTokenPool[network_id] = {
                             'address': TwoKeyDeepFreezeTokenPool.address,
                             'Proxy': logicProxy,
+                            'StorageProxy': storageProxy,
                             'Version': "1.0",
                             maintainer_address: maintainerAddresses,
                         };
@@ -388,6 +395,7 @@ module.exports = function deploy(deployer) {
                         twoKeyBaseRepReg[network_id] = {
                             'address': TwoKeyBaseReputationRegistry.address,
                             'Proxy': logicProxy,
+                            'StorageProxy': storageProxy,
                             'Version': "1.0",
                             // maintainer_address: maintainerAddresses,
                         };
@@ -420,6 +428,7 @@ module.exports = function deploy(deployer) {
                         twoKeyEvents[network_id] = {
                             'address': EventSource.address,
                             'Proxy': logicProxy,
+                            'StorageProxy': storageProxy,
                             'Version': "1.0",
                             maintainer_address: maintainerAddresses,
                         };
@@ -451,6 +460,7 @@ module.exports = function deploy(deployer) {
                         twoKeyExchangeRate[network_id] = {
                             'address': TwoKeyExchangeRateContract.address,
                             'Proxy': logicProxy,
+                            'StorageProxy': storageProxy,
                             'Version': "1.0",
                             maintainer_address: maintainerAddresses,
                         };
@@ -484,6 +494,7 @@ module.exports = function deploy(deployer) {
                         twoKeyAdmin[network_id] = {
                             'address': TwoKeyAdmin.address,
                             'Proxy': logicProxy,
+                            'StorageProxy': storageProxy,
                             'Version': "1.0",
                             maintainer_address: maintainerAddresses
                         };
@@ -519,6 +530,7 @@ module.exports = function deploy(deployer) {
                         twoKeyUpgradableExchange[network_id] = {
                             'address' : TwoKeyUpgradableExchange.address,
                             'Proxy' : logicProxy,
+                            'StorageProxy': storageProxy,
                             'Version' : "1.0",
                             maintainer_address: maintainerAddresses
                         };
