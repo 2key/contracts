@@ -25,6 +25,9 @@ const TwoKeyFactoryStorage = artifacts.require('TwoKeyFactoryStorage');
 const TwoKeyMaintainersRegistryStorage = artifacts.require('TwoKeyMaintainersRegistryStorage');
 const TwoKeyExchangeRateStorage = artifacts.require('TwoKeyExchangeRateStorage');
 const TwoKeyBaseReputationRegistryStorage = artifacts.require('TwoKeyBaseReputationRegistryStorage');
+const TwoKeyCommunityTokenPoolStorage = artifacts.require('TwoKeyCommunityTokenPoolStorage');
+const TwoKeyDeepFreezeTokenPoolStorage = artifacts.require('TwoKeyDeepFreezeTokenPoolStorage');
+const TwoKeyLongTermTokenPoolStorage = artifacts.require('TwoKeyLongTermTokenPoolStorage');
 
 
 const Call = artifacts.require('Call');
@@ -80,6 +83,9 @@ module.exports = function deploy(deployer) {
     let proxyAddressTwoKeyMaintainersRegistrySTORAGE;
     let proxyAddressTwoKeyExchangeRateSTORAGE;
     let proxyAddressTwoKeyReputationRegistrySTORAGE;
+    let proxyAddressTwoKeyCommunityTokenPoolSTORAGE;
+    let proxyAddressTwoKeyDeepFreezeTokenPoolSTORAGE;
+    let proxyAddressTwoKeyLongTermTokenPoolSTORAGE;
 
 
     let deploymentNetwork;
@@ -276,10 +282,13 @@ module.exports = function deploy(deployer) {
                          * Adding TwoKeyCommunityTokenPool to the registry, deploying 1st logicProxy for that 1.0 version and setting initial params there
                          */
                         let txHash = await registry.addVersion("TwoKeyCommunityTokenPool", "1.0", TwoKeyCommunityTokenPool.address);
+                        txHash = await registry.addVersion("TwoKeyCommunityTokenPoolStorage", "1.0", TwoKeyCommunityTokenPoolStorage.address);
+
                         let { logs } = await registry.createProxy("TwoKeyCommunityTokenPool", "TwoKeyCommunityTokenPoolStorage", "1.0");
                         let { logicProxy , storageProxy} = logs.find(l => l.event === 'ProxiesDeployed').args;
                         console.log('Proxy address for the TwoKeyCommunityTokenPool is : ' + logicProxy);
                         const twoKeyCommunityTokenPool = fileObject.TwoKeyCommunityTokenPool || {};
+
                         twoKeyCommunityTokenPool[network_id] = {
                             'address': TwoKeyCommunityTokenPool.address,
                             'Proxy': logicProxy,
@@ -287,9 +296,9 @@ module.exports = function deploy(deployer) {
                             maintainer_address: maintainerAddresses,
                         };
 
-
-                        fileObject['TwoKeyCommunityTokenPool'] = twoKeyCommunityTokenPool;
+                        proxyAddressTwoKeyCommunityTokenPoolSTORAGE = storageProxy;
                         proxyAddressTwoKeyCommunityTokenPool = logicProxy;
+                        fileObject['TwoKeyCommunityTokenPool'] = twoKeyCommunityTokenPool;
                         resolve(logicProxy);
                     } catch (e) {
                         reject(e);
@@ -303,10 +312,13 @@ module.exports = function deploy(deployer) {
                          * Adding TwoKeyLongTermTokenPool to the registry, deploying 1st logicProxy for that 1.0 version and setting initial params there
                          */
                         let txHash = await registry.addVersion("TwoKeyLongTermTokenPool", "1.0", TwoKeyLongTermTokenPool.address);
+                        txHash =  await registry.addVersion("TwoKeyLongTermTokenPoolStorage", "1.0", TwoKeyLongTermTokenPoolStorage.address);
+
                         let { logs } = await registry.createProxy("TwoKeyLongTermTokenPool", "TwoKeyLongTermTokenPoolStorage","1.0");
                         let { logicProxy, storageProxy } = logs.find(l => l.event === 'ProxiesDeployed').args;
                         console.log('Proxy address for the TwoKeyLongTermTokenPool is : ' + logicProxy);
                         const twoKeyLongTermTokenPool = fileObject.TwoKeyLongTermTokenPool || {};
+
                         twoKeyLongTermTokenPool[network_id] = {
                             'address': TwoKeyLongTermTokenPool.address,
                             'Proxy': logicProxy,
@@ -314,9 +326,10 @@ module.exports = function deploy(deployer) {
                             maintainer_address: maintainerAddresses,
                         };
 
+                        proxyAddressTwoKeyLongTermTokenPoolSTORAGE = storageProxy;
+                        proxyAddressTwoKeyLongTermTokenPool = logicProxy;
 
                         fileObject['TwoKeyLongTermTokenPool'] = twoKeyLongTermTokenPool;
-                        proxyAddressTwoKeyLongTermTokenPool = logicProxy;
                         resolve(logicProxy);
                     } catch (e) {
                         reject(e);
@@ -330,9 +343,12 @@ module.exports = function deploy(deployer) {
                          * Adding TwoKeyLongTermTokenPool to the registry, deploying 1st logicProxy for that 1.0 version and setting initial params there
                          */
                         let txHash = await registry.addVersion("TwoKeyDeepFreezeTokenPool", "1.0", TwoKeyDeepFreezeTokenPool.address);
+                        txHash = await registry.addVersion("TwoKeyDeepFreezeTokenPoolStorage", "1.0", TwoKeyDeepFreezeTokenPoolStorage.address);
+
                         let { logs } = await registry.createProxy("TwoKeyDeepFreezeTokenPool","TwoKeyDeepFreezeTokenPoolStorage", "1.0");
                         let { logicProxy, storageProxy } = logs.find(l => l.event === 'ProxiesDeployed').args;
                         console.log('Proxy address for the TwoKeyDeepFreezeTokenPool is : ' + logicProxy);
+
                         const twoKeyDeepFreezeTokenPool = fileObject.TwoKeyDeepFreezeTokenPool || {};
                         twoKeyDeepFreezeTokenPool[network_id] = {
                             'address': TwoKeyDeepFreezeTokenPool.address,
@@ -341,9 +357,10 @@ module.exports = function deploy(deployer) {
                             maintainer_address: maintainerAddresses,
                         };
 
+                        proxyAddressTwoKeyDeepFreezeTokenPoolSTORAGE = storageProxy;
+                        proxyAddressTwoKeyDeepFreezeTokenPool = logicProxy;
 
                         fileObject['TwoKeyDeepFreezeTokenPool'] = twoKeyDeepFreezeTokenPool;
-                        proxyAddressTwoKeyDeepFreezeTokenPool = logicProxy;
                         resolve(logicProxy);
                     } catch (e) {
                         reject(e);
@@ -584,6 +601,7 @@ module.exports = function deploy(deployer) {
                         let txHash = await TwoKeyCommunityTokenPool.at(proxyAddressTwoKeyCommunityTokenPool).setInitialParams(
                             TwoKeySingletonesRegistry.address,
                             TwoKeyEconomy.address,
+                            proxyAddressTwoKeyCommunityTokenPoolSTORAGE
                         );
                         resolve(txHash);
                     } catch (e) {
@@ -597,6 +615,7 @@ module.exports = function deploy(deployer) {
                         let txHash = await TwoKeyLongTermTokenPool.at(proxyAddressTwoKeyLongTermTokenPool).setInitialParams(
                             TwoKeySingletonesRegistry.address,
                             TwoKeyEconomy.address,
+                            proxyAddressTwoKeyLongTermTokenPoolSTORAGE
                         );
                         resolve(txHash);
                     } catch (e) {
@@ -610,7 +629,8 @@ module.exports = function deploy(deployer) {
                         let txHash = await TwoKeyDeepFreezeTokenPool.at(proxyAddressTwoKeyDeepFreezeTokenPool).setInitialParams(
                             TwoKeySingletonesRegistry.address,
                             TwoKeyEconomy.address,
-                            proxyAddressTwoKeyCommunityTokenPool
+                            proxyAddressTwoKeyCommunityTokenPool,
+                            proxyAddressTwoKeyDeepFreezeTokenPoolSTORAGE
                         );
                         resolve(txHash);
                     } catch (e) {

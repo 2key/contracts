@@ -1,29 +1,34 @@
 pragma solidity ^0.4.24;
 
 import "./TokenPool.sol";
+import "../interfaces/storage-contracts/ITwoKeyLongTermTokenPoolStorage.sol";
 /**
  * @author Nikola Madjarevic
  * Created at 2/5/19
  */
 contract TwoKeyLongTermTokenPool is TokenPool {
 
-    uint releaseDate;
+    ITwoKeyLongTermTokenPoolStorage public PROXY_STORAGE_CONTRACT;
 
     modifier onlyAfterReleaseDate {
+        uint releaseDate = PROXY_STORAGE_CONTRACT.getUint(keccak256("releaseDate"));
         require(block.timestamp > releaseDate);
         _;
     }
 
     function setInitialParams(
         address _twoKeySingletonesRegistry,
-        address _erc20Address
+        address _erc20Address,
+        address _proxyStorage
     )
     public
     {
         require(initialized == false);
 
+        PROXY_STORAGE_CONTRACT = ITwoKeyLongTermTokenPoolStorage(_proxyStorage);
+
         setInitialParameters(_erc20Address, _twoKeySingletonesRegistry);
-        releaseDate = block.timestamp + 3 * (1 years);
+        PROXY_STORAGE_CONTRACT.setUint(keccak256("releaseDate"), block.timestamp + 3 * (1 years));
 
         initialized = true;
     }
