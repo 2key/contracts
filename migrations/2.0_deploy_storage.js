@@ -9,6 +9,7 @@ const TwoKeyBaseReputationRegistryStorage = artifacts.require('TwoKeyBaseReputat
 const TwoKeyCommunityTokenPoolStorage = artifacts.require('TwoKeyCommunityTokenPoolStorage');
 const TwoKeyDeepFreezeTokenPoolStorage = artifacts.require('TwoKeyDeepFreezeTokenPoolStorage');
 const TwoKeyLongTermTokenPoolStorage = artifacts.require('TwoKeyLongTermTokenPoolStorage');
+const TwoKeyRegistryStorage = artifacts.require('TwoKeyRegistryStorage');
 
 module.exports = function deploy(deployer) {
     deployer.deploy(TwoKeyCampaignValidatorStorage)
@@ -33,5 +34,7 @@ module.exports = function deploy(deployer) {
     .then(() => TwoKeyDeepFreezeTokenPoolStorage.deployed())
     .then(() => deployer.deploy(TwoKeyLongTermTokenPoolStorage))
     .then(() => TwoKeyLongTermTokenPoolStorage.deployed())
+    .then(() => deployer.deploy(TwoKeyRegistryStorage))
+    .then(() => TwoKeyRegistryStorage.deployed())
     .then(() => true);
 };

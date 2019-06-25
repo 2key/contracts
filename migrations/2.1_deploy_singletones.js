@@ -17,6 +17,10 @@ const TwoKeyFactory = artifacts.require('TwoKeyFactory');
 const KyberNetworkTestMockContract = artifacts.require('KyberNetworkTestMockContract');
 const TwoKeyMaintainersRegistry = artifacts.require('TwoKeyMaintainersRegistry');
 
+
+/**
+ * Upgradable singleton storage contracts
+ */
 const TwoKeyUpgradableExchangeStorage = artifacts.require('TwoKeyUpgradableExchangeStorage');
 const TwoKeyCampaignValidatorStorage = artifacts.require('TwoKeyCampaignValidatorStorage');
 const TwoKeyEventSourceStorage = artifacts.require("TwoKeyEventSourceStorage");
@@ -28,6 +32,7 @@ const TwoKeyBaseReputationRegistryStorage = artifacts.require('TwoKeyBaseReputat
 const TwoKeyCommunityTokenPoolStorage = artifacts.require('TwoKeyCommunityTokenPoolStorage');
 const TwoKeyDeepFreezeTokenPoolStorage = artifacts.require('TwoKeyDeepFreezeTokenPoolStorage');
 const TwoKeyLongTermTokenPoolStorage = artifacts.require('TwoKeyLongTermTokenPoolStorage');
+const TwoKeyRegistryStorage = artifacts.require('TwoKeyRegistryStorage');
 
 
 const Call = artifacts.require('Call');
@@ -86,7 +91,7 @@ module.exports = function deploy(deployer) {
     let proxyAddressTwoKeyCommunityTokenPoolSTORAGE;
     let proxyAddressTwoKeyDeepFreezeTokenPoolSTORAGE;
     let proxyAddressTwoKeyLongTermTokenPoolSTORAGE;
-
+    let proxyAddressTwoKeyRegistrySTORAGE;
 
     let deploymentNetwork;
     if(deployer.network.startsWith('dev') || deployer.network.startsWith('plasma-test')) {
@@ -160,6 +165,7 @@ module.exports = function deploy(deployer) {
                          * Adding TwoKeyRegistry to the registry, deploying 1st logicProxy for that 1.0 version and setting initial params there
                          */
                         let txHash = await registry.addVersion("TwoKeyRegistry", "1.0", TwoKeyRegistry.address);
+                        txHash = await registry.addVersion("TwoKeyRegistryStorage", "1.0", TwoKeyRegistryStorage.address);
                         let { logs } = await registry.createProxy("TwoKeyRegistry", "TwoKeyRegistryStorage", "1.0");
                         let { logicProxy, storageProxy } = logs.find(l => l.event === 'ProxiesDeployed').args;
 
@@ -174,9 +180,9 @@ module.exports = function deploy(deployer) {
                             maintainer_address: maintainerAddresses,
                         };
 
-
-                        fileObject['TwoKeyRegistry'] = twoKeyReg;
+                        proxyAddressTwoKeyRegistrySTORAGE = storageProxy;
                         proxyAddressTwoKeyRegistry = logicProxy;
+                        fileObject['TwoKeyRegistry'] = twoKeyReg;
                         resolve(logicProxy);
                     } catch (e) {
                         reject(e);

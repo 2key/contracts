@@ -5,9 +5,10 @@ import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../libraries/Utils.sol";
 import "../upgradability/Upgradeable.sol";
+import "./ITwoKeySingletonUtils.sol";
 
 
-contract TwoKeyRegistry is Upgradeable, Utils {
+contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
 
     using Call for *;
 
